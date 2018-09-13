@@ -1,3 +1,5 @@
+pub mod semiring;
+
 #[cfg(test)]
 mod tests {
     #[test]
