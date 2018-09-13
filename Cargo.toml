@@ -1,0 +1,6 @@
+[package]
+name = "fst-rs"
+version = "0.1.0"
+authors = ["Alexandre Caulier<alexandre.caulier@protonmail.com>"]
+
+[dependencies]
