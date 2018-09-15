@@ -1,6 +1,6 @@
 use arc::Arc;
 use StateId;
-use semiring::Semiring;
+use semirings::Semiring;
 
 pub trait Fst<W: Semiring> {
     type Arc: Arc<W>;

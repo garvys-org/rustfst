@@ -1,9 +1,4 @@
-pub trait Semiring: Clone {
-    fn plus(&self, rhs: &Self) -> Self;
-    fn times(&self, rhs: &Self) -> Self;
-    fn zero() -> Self;
-    fn one() -> Self;
-}
+use semirings::Semiring;
 
 #[derive(Clone)]
 pub struct ProbabilitySemiring {

@@ -1,6 +1,6 @@
 use Label;
 use StateId;
-use semiring::Semiring;
+use semirings::Semiring;
 
 pub trait Arc<W: Semiring>  {
     fn ilabel(&self) -> Label;
