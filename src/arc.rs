@@ -9,6 +9,7 @@ pub trait Arc<W: Semiring>  {
     fn nextstate(&self) -> StateId;
 }
 
+#[derive(Debug, Clone)]
 pub struct StdArc<W: Semiring> {
 	ilabel: Label,
 	olabel: Label,
