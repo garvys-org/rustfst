@@ -29,5 +29,5 @@ pub trait MutableFst<W: Semiring>: Fst<W> {
 }
 
 pub trait ExpandedFst<W: Semiring>: Fst<W> {
-    fn get_numstates(&self) -> usize;
+    fn num_states(&self) -> usize;
 }

@@ -1,4 +1,4 @@
-use fst::Fst;
+use fst::{Fst, ExpandedFst};
 use StateId;
 use std::collections::HashMap;
 use semirings::Semiring;
@@ -37,6 +37,12 @@ impl<W: Semiring> Fst<W> for VectorFst<W> {
 
     fn num_arcs(&self) -> usize {
         self.states.iter().map(|(_, state)| state.num_arcs()).sum()
+    }
+}
+
+impl<W: Semiring> ExpandedFst<W> for VectorFst<W> {
+    fn num_states(&self) -> usize {
+        self.states.len()
     }
 }
 
