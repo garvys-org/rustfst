@@ -1,17 +1,17 @@
 use semirings::Semiring;
 
 #[derive(Clone)]
-pub struct IntegerSemiring {
+pub struct IntegerWeight {
     value: i32
 }
 
-impl IntegerSemiring {
+impl IntegerWeight {
     pub fn new(value: i32) -> Self {
-        IntegerSemiring {value}
+        IntegerWeight {value}
     }
 }
 
-impl Semiring for IntegerSemiring {
+impl Semiring for IntegerWeight {
     fn plus(&self, rhs: &Self) -> Self {
         Self::new(self.value + rhs.value)
     }

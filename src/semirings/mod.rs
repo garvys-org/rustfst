@@ -5,5 +5,5 @@ pub trait Semiring: Clone {
     fn one() -> Self;
 }
 
-pub mod probability_semiring;
-pub mod integer_semiring;
+pub mod probability_weight;
+pub mod integer_weight;

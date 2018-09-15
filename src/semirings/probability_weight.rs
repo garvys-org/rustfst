@@ -1,17 +1,17 @@
 use semirings::Semiring;
 
 #[derive(Clone)]
-pub struct ProbabilitySemiring {
+pub struct ProbabilityWeight {
     value: f32
 }
 
-impl ProbabilitySemiring {
+impl ProbabilityWeight {
     pub fn new(value: f32) -> Self {
-        ProbabilitySemiring {value}
+        ProbabilityWeight {value}
     }
 }
 
-impl Semiring for ProbabilitySemiring {
+impl Semiring for ProbabilityWeight {
     fn plus(&self, rhs: &Self) -> Self {
         Self::new(self.value + rhs.value)
     }
