@@ -1,5 +1,5 @@
 [package]
-name = "fst-rs"
+name = "rufst"
 version = "0.1.0"
 authors = ["Alexandre Caulier<alexandre.caulier@protonmail.com>"]
 
