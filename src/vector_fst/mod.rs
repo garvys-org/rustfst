@@ -34,6 +34,10 @@ impl<W: Semiring> Fst<W> for VectorFst<W> {
     fn arc_iter(&self, state_id: &StateId) -> Self::Iter {
         VectorArcIterator {state : self.states[state_id].clone(), arcindex: 0}
     }
+
+    fn num_arcs(&self) -> usize {
+        self.states.iter().map(|(_, state)| state.num_arcs()).sum()
+    }
 }
 
 #[derive(Debug, Clone)]
