@@ -1,6 +1,6 @@
 use semirings::Semiring;
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ProbabilityWeight {
     value: f32
 }

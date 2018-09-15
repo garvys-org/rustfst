@@ -75,9 +75,9 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         id
     }
 
-    fn add_arc(&mut self, source: StateId, target: StateId, ilabel: Label, olabel: Label, weight: W) {
+    fn add_arc(&mut self, source: &StateId, target: &StateId, ilabel: Label, olabel: Label, weight: W) {
         if let Some(state) = self.states.get_mut(&source) {
-            state.arcs.push(StdArc::new(ilabel, olabel, weight, target));
+            state.arcs.push(StdArc::new(ilabel, olabel, weight, *target));
         }
         else {
             panic!("State {:?} doesn't exist", source);
@@ -122,5 +122,48 @@ impl<W: Semiring> Iterator for VectorArcIterator<W> {
         };
         self.arcindex += 1;
         res
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use semirings::integer_weight::IntegerWeight;
+    use arc::Arc;
+
+    #[test]
+    fn test_1() {
+        let mut fst = VectorFst::new();
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+        fst.set_start(&s1);
+        fst.add_arc(&s1, &s2, 3, 5, IntegerWeight::new(10));
+        fst.add_arc(&s1, &s2, 5, 7, IntegerWeight::new(18));
+
+        assert_eq!(fst.num_states(), 2);
+        assert_eq!(fst.num_arcs(), 2);
+        assert_eq!(fst.arc_iter(&s1).count(), 2);
+
+        let mut it = fst.arc_iter(&s1);
+
+        let a = it.next();
+        assert!(a.is_some());
+        let a = a.unwrap();
+        assert_eq!(a.ilabel(), 3);
+        assert_eq!(a.olabel(), 5);
+        assert_eq!(a.nextstate(), s2);
+        assert_eq!(a.weight(), IntegerWeight::new(10));
+
+        let b = it.next();
+        assert!(b.is_some());
+        let b = b.unwrap();
+        assert_eq!(b.ilabel(), 5);
+        assert_eq!(b.olabel(), 7);
+        assert_eq!(b.nextstate(), s2);
+        assert_eq!(b.weight(), IntegerWeight::new(18));
+
+        let c = it.next();
+        assert!(c.is_none());
+        // assert!(!it.done());
     }
 }
