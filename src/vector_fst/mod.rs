@@ -3,6 +3,7 @@ use StateId;
 use std::collections::HashMap;
 use semirings::Semiring;
 use arc::StdArc;
+use Label;
 
 #[derive(Debug)]
 pub struct VectorFst<W: Semiring> {
@@ -72,6 +73,15 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         let id = self.states.len();
         self.states.insert(id, VectorFstState::new());
         id
+    }
+
+    fn add_arc(&mut self, source: StateId, target: StateId, ilabel: Label, olabel: Label, weight: W) {
+        if let Some(state) = self.states.get_mut(&source) {
+            state.arcs.push(StdArc::new(ilabel, olabel, weight, target));
+        }
+        else {
+            panic!("State {:?} doesn't exist", source);
+        }
     }
 }
 
