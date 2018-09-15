@@ -18,12 +18,12 @@ pub trait Fst<W: Semiring> {
 
 pub trait MutableFst<W: Semiring>: Fst<W> {
     fn new() -> Self;
-    fn set_start(&mut self, id: StateId);
-    fn add_state(&mut self, finalweight: W) -> StateId;
-    fn del_state(&mut self, StateId);
-    fn del_states<T: IntoIterator<Item=StateId>>(&mut self, states: T);
-    fn add_arc(&mut self, source: StateId, target: StateId, ilabel: Label, olabel: Label, weight: W);
-    fn set_finalweight(&mut self, id: StateId, finalweight: W);
+    fn set_start(&mut self, &StateId);
+    fn add_state(&mut self) -> StateId;
+    // fn del_state(&mut self, StateId);
+    // fn del_states<T: IntoIterator<Item=StateId>>(&mut self, states: T);
+    // fn add_arc(&mut self, source: StateId, target: StateId, ilabel: Label, olabel: Label, weight: W);
+    fn set_final(&mut self, id: &StateId, finalweight: W);
     // fn set_isyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
     // fn set_osyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
 }

@@ -1,4 +1,4 @@
-use fst::{Fst, ExpandedFst};
+use fst::{Fst, ExpandedFst, MutableFst};
 use StateId;
 use std::collections::HashMap;
 use semirings::Semiring;
@@ -46,6 +46,35 @@ impl<W: Semiring> ExpandedFst<W> for VectorFst<W> {
     }
 }
 
+impl<W: Semiring> MutableFst<W> for VectorFst<W> {
+    fn new() -> Self {
+        VectorFst {
+            states: HashMap::new(),
+            start_state: None,
+        }
+    }
+
+    fn set_start(&mut self, state_id: &StateId) {
+        assert!(self.states.get(state_id).is_some());
+        self.start_state = Some(*state_id);
+    }
+
+    fn set_final(&mut self, state_id: &StateId, final_weight: W) {
+        if let Some(state) = self.states.get_mut(state_id) {
+            state.final_weight = Some(final_weight);
+        }
+        else {
+            panic!("Stateid {:?} doesn't exist", state_id);
+        }
+    }
+
+    fn add_state(&mut self) -> StateId {
+        let id = self.states.len();
+        self.states.insert(id, VectorFstState::new());
+        id
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct VectorFstState<W: Semiring> {
     final_weight: Option<W>,
@@ -53,6 +82,13 @@ pub struct VectorFstState<W: Semiring> {
 }
 
 impl<W: Semiring> VectorFstState<W> {
+    pub fn new() -> Self {
+        VectorFstState {
+            final_weight: None,
+            arcs: vec![],
+        }
+    }
+
     pub fn num_arcs(&self) -> usize {
         self.arcs.len()
     }
