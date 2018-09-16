@@ -39,5 +39,5 @@ pub fn connect<W: Semiring, F: ExpandedFst<W> + MutableFst<W>> (fst: &mut F) {
             to_delete.push(i);
         }
     }
-    // fst.del_states(to_delete);
+    fst.del_states(to_delete);
 }
