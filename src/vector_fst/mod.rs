@@ -3,6 +3,7 @@ use StateId;
 use semirings::Semiring;
 use arc::StdArc;
 use Label;
+use arc::Arc;
 
 #[derive(Debug)]
 pub struct VectorFst<W: Semiring> {
@@ -83,9 +84,37 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         }
     }
 
-    // fn del_state(&mut self, state_to_remove: &StateId) {
+    fn del_state(&mut self, state_to_remove: &StateId) {
+        // Remove the state from the vector
+        // Check the arcs for arcs going to this state
 
-    // }
+        assert!(*state_to_remove < self.states.len());
+        self.states.remove(*state_to_remove);
+        for state in self.states.iter_mut() {
+            let mut to_delete = vec![];
+            for (arc_id, arc) in state.arcs.iter_mut().enumerate() {
+                if arc.nextstate() == *state_to_remove {
+                    to_delete.push(arc_id);
+                }
+                else if arc.nextstate() > *state_to_remove {
+                    arc.nextstate -= 1;
+                }
+            }
+
+            for id in to_delete.iter().rev() {
+                state.arcs.remove(*id);
+            }
+        }
+    }
+
+
+    fn del_states<T: IntoIterator<Item=StateId>>(&mut self, states: T) {
+        let mut v: Vec<_> = states.into_iter().collect();
+        v.sort();
+        for j in (0..v.len()).rev() {
+            self.del_state(&v[j]);
+        }
+    }
 }
 
 #[derive(Debug, Clone)]

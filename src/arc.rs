@@ -11,10 +11,10 @@ pub trait Arc<W: Semiring>  {
 
 #[derive(Debug, Clone)]
 pub struct StdArc<W: Semiring> {
-	ilabel: Label,
-	olabel: Label,
-	weight: W,
-	nextstate: StateId,
+	pub ilabel: Label,
+	pub olabel: Label,
+	pub weight: W,
+	pub nextstate: StateId,
 }
 
 impl<W: Semiring> StdArc<W> {

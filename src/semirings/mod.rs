@@ -1,3 +1,4 @@
+
 pub trait Semiring: Clone {
     fn plus(&self, rhs: &Self) -> Self;
     fn times(&self, rhs: &Self) -> Self;

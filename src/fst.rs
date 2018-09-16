@@ -20,8 +20,8 @@ pub trait MutableFst<W: Semiring>: Fst<W> {
     fn new() -> Self;
     fn set_start(&mut self, &StateId);
     fn add_state(&mut self) -> StateId;
-    // fn del_state(&mut self, StateId);
-    // fn del_states<T: IntoIterator<Item=StateId>>(&mut self, states: T);
+    fn del_state(&mut self, &StateId);
+    fn del_states<T: IntoIterator<Item=StateId>>(&mut self, states: T);
     fn add_arc(&mut self, source: &StateId, target: &StateId, ilabel: Label, olabel: Label, weight: W);
     fn set_final(&mut self, id: &StateId, finalweight: W);
     // fn set_isyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
