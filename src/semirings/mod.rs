@@ -1,5 +1,5 @@
 
-pub trait Semiring: Clone {
+pub trait Semiring: Clone + PartialEq {
     fn plus(&self, rhs: &Self) -> Self;
     fn times(&self, rhs: &Self) -> Self;
     fn zero() -> Self;
