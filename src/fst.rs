@@ -4,8 +4,7 @@ use Label;
 use semirings::Semiring;
 
 pub trait Fst<W: Semiring> {
-    type Arc: Arc<W>;
-    type Iter: Iterator<Item=Self::Arc>;
+    type Iter: Iterator<Item=Arc<W>>;
     //type Symtab: IntoIterator<Item=String>;
     fn start(&self) -> Option<StateId>;
     fn final_weight(&self, &StateId) -> Option<W>;

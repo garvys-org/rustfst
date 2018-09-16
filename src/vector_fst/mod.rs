@@ -1,7 +1,6 @@
 use fst::{Fst, ExpandedFst, MutableFst};
 use StateId;
 use semirings::Semiring;
-use arc::StdArc;
 use Label;
 use arc::Arc;
 
@@ -12,7 +11,6 @@ pub struct VectorFst<W: Semiring> {
 }
 
 impl<W: Semiring> Fst<W> for VectorFst<W> {
-    type Arc = StdArc<W>;
     type Iter = VectorArcIterator<W>;
 
     fn start(&self) -> Option<StateId> {
@@ -77,7 +75,7 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
 
     fn add_arc(&mut self, source: &StateId, target: &StateId, ilabel: Label, olabel: Label, weight: W) {
         if let Some(state) = self.states.get_mut(*source) {
-            state.arcs.push(StdArc::new(ilabel, olabel, weight, *target));
+            state.arcs.push(Arc::new(ilabel, olabel, weight, *target));
         }
         else {
             panic!("State {:?} doesn't exist", source);
@@ -93,10 +91,10 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         for state in self.states.iter_mut() {
             let mut to_delete = vec![];
             for (arc_id, arc) in state.arcs.iter_mut().enumerate() {
-                if arc.nextstate() == *state_to_remove {
+                if arc.nextstate == *state_to_remove {
                     to_delete.push(arc_id);
                 }
-                else if arc.nextstate() > *state_to_remove {
+                else if arc.nextstate > *state_to_remove {
                     arc.nextstate -= 1;
                 }
             }
@@ -120,7 +118,7 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
 #[derive(Debug, Clone)]
 pub struct VectorFstState<W: Semiring> {
     final_weight: Option<W>,
-    arcs: Vec<StdArc<W>>,
+    arcs: Vec<Arc<W>>,
 }
 
 impl<W: Semiring> VectorFstState<W> {
@@ -143,7 +141,7 @@ pub struct VectorArcIterator<W: Semiring> {
 }
 
 impl<W: Semiring> Iterator for VectorArcIterator<W> {
-    type Item = StdArc<W>;
+    type Item = Arc<W>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let i = self.arcindex;
@@ -161,7 +159,6 @@ impl<W: Semiring> Iterator for VectorArcIterator<W> {
 mod tests {
     use super::*;
     use semirings::integer_weight::IntegerWeight;
-    use arc::Arc;
 
     #[test]
     fn test_1() {
@@ -181,18 +178,18 @@ mod tests {
         let a = it.next();
         assert!(a.is_some());
         let a = a.unwrap();
-        assert_eq!(a.ilabel(), 3);
-        assert_eq!(a.olabel(), 5);
-        assert_eq!(a.nextstate(), s2);
-        assert_eq!(a.weight(), IntegerWeight::new(10));
+        assert_eq!(a.ilabel, 3);
+        assert_eq!(a.olabel, 5);
+        assert_eq!(a.nextstate, s2);
+        assert_eq!(a.weight, IntegerWeight::new(10));
 
         let b = it.next();
         assert!(b.is_some());
         let b = b.unwrap();
-        assert_eq!(b.ilabel(), 5);
-        assert_eq!(b.olabel(), 7);
-        assert_eq!(b.nextstate(), s2);
-        assert_eq!(b.weight(), IntegerWeight::new(18));
+        assert_eq!(b.ilabel, 5);
+        assert_eq!(b.olabel, 7);
+        assert_eq!(b.nextstate, s2);
+        assert_eq!(b.weight, IntegerWeight::new(18));
 
         let c = it.next();
         assert!(c.is_none());

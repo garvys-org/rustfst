@@ -3,13 +3,12 @@ use fst::{ExpandedFst, MutableFst};
 use std::collections::HashSet;
 use fst::Fst;
 use StateId;
-use arc::Arc;
 
 fn  dfs<W: Semiring, F: Fst<W>>(fst: &F, state_id_cour: &StateId, accessible_states: &mut HashSet<StateId>, coaccessible_states: &mut HashSet<StateId>) {
     accessible_states.insert(*state_id_cour);
     let mut is_coaccessible = fst.is_final(state_id_cour);
     for arc in fst.arc_iter(state_id_cour) {
-        let nextstate = arc.nextstate();
+        let nextstate = arc.nextstate;
 
         if !accessible_states.contains(&nextstate) {
             dfs(fst, &nextstate, accessible_states, coaccessible_states);

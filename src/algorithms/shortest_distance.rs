@@ -1,6 +1,5 @@
 use semirings::Semiring;
 use std::collections::VecDeque;
-use arc::Arc;
 use fst::ExpandedFst;
 
 pub fn shortest_distance<W: Semiring, F: ExpandedFst<W>> (fst: &mut F) -> Vec<W> {
@@ -27,10 +26,10 @@ pub fn shortest_distance<W: Semiring, F: ExpandedFst<W>> (fst: &mut F) -> Vec<W>
 		r[state_cour] = W::zero();
 
 		for arc in fst.arc_iter(&state_cour) {
-			let nextstate = arc.nextstate();
-			if d[nextstate] != d[nextstate].plus(&r2.times(&arc.weight())) {
-				d[nextstate] = d[nextstate].plus(&r2.times(&arc.weight()));
-				r[nextstate] = r[nextstate].plus(&r2.times(&arc.weight()));
+			let nextstate = arc.nextstate;
+			if d[nextstate] != d[nextstate].plus(&r2.times(&arc.weight)) {
+				d[nextstate] = d[nextstate].plus(&r2.times(&arc.weight));
+				r[nextstate] = r[nextstate].plus(&r2.times(&arc.weight));
 				if ! queue.contains(&nextstate) {
 					queue.push_back(nextstate);
 				}
