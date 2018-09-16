@@ -16,6 +16,7 @@ pub fn shortest_distance<W: Semiring, F: ExpandedFst<W>>(fst: &mut F) -> Vec<W> 
     d[start_state] = W::one();
     r[start_state] = W::one();
 
+    // TODO : Move to LinkedHashSet
     let mut queue = VecDeque::new();
     queue.push_back(start_state);
 

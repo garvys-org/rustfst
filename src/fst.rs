@@ -3,7 +3,7 @@ use semirings::Semiring;
 use Label;
 use StateId;
 
-pub trait Fst<W: Semiring> {
+pub trait Fst<W: Semiring> : PartialEq {
     type Iter: Iterator<Item = Arc<W>>;
     //type Symtab: IntoIterator<Item=String>;
     fn start(&self) -> Option<StateId>;

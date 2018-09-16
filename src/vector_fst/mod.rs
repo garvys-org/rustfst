@@ -4,7 +4,7 @@ use semirings::Semiring;
 use Label;
 use StateId;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct VectorFst<W: Semiring> {
     states: Vec<VectorFstState<W>>,
     start_state: Option<StateId>,
@@ -120,7 +120,7 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct VectorFstState<W: Semiring> {
     final_weight: Option<W>,
     arcs: Vec<Arc<W>>,

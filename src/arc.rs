@@ -2,7 +2,7 @@ use semirings::Semiring;
 use Label;
 use StateId;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Arc<W: Semiring> {
     pub ilabel: Label,
     pub olabel: Label,
