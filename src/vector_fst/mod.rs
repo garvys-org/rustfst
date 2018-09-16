@@ -1,13 +1,12 @@
 use fst::{Fst, ExpandedFst, MutableFst};
 use StateId;
-use std::collections::HashMap;
 use semirings::Semiring;
 use arc::StdArc;
 use Label;
 
 #[derive(Debug)]
 pub struct VectorFst<W: Semiring> {
-    states: HashMap<StateId, VectorFstState<W>>,
+    states: Vec<VectorFstState<W>>,
     start_state: Option<StateId>,
 }
 
@@ -20,7 +19,7 @@ impl<W: Semiring> Fst<W> for VectorFst<W> {
     }
 
     fn final_weight(&self, state_id: &StateId) -> Option<W> {
-        if let Some(state) = self.states.get(state_id) {
+        if let Some(state) = self.states.get(*state_id) {
             state.final_weight.clone()
         }
         else {
@@ -33,11 +32,11 @@ impl<W: Semiring> Fst<W> for VectorFst<W> {
     }
 
     fn arc_iter(&self, state_id: &StateId) -> Self::Iter {
-        VectorArcIterator {state : self.states[state_id].clone(), arcindex: 0}
+        VectorArcIterator {state : self.states[*state_id].clone(), arcindex: 0}
     }
 
     fn num_arcs(&self) -> usize {
-        self.states.iter().map(|(_, state)| state.num_arcs()).sum()
+        self.states.iter().map(|state| state.num_arcs()).sum()
     }
 }
 
@@ -50,18 +49,18 @@ impl<W: Semiring> ExpandedFst<W> for VectorFst<W> {
 impl<W: Semiring> MutableFst<W> for VectorFst<W> {
     fn new() -> Self {
         VectorFst {
-            states: HashMap::new(),
+            states: vec![],
             start_state: None,
         }
     }
 
     fn set_start(&mut self, state_id: &StateId) {
-        assert!(self.states.get(state_id).is_some());
+        assert!(self.states.get(*state_id).is_some());
         self.start_state = Some(*state_id);
     }
 
     fn set_final(&mut self, state_id: &StateId, final_weight: W) {
-        if let Some(state) = self.states.get_mut(state_id) {
+        if let Some(state) = self.states.get_mut(*state_id) {
             state.final_weight = Some(final_weight);
         }
         else {
@@ -76,13 +75,17 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
     }
 
     fn add_arc(&mut self, source: &StateId, target: &StateId, ilabel: Label, olabel: Label, weight: W) {
-        if let Some(state) = self.states.get_mut(&source) {
+        if let Some(state) = self.states.get_mut(*source) {
             state.arcs.push(StdArc::new(ilabel, olabel, weight, *target));
         }
         else {
             panic!("State {:?} doesn't exist", source);
         }
     }
+
+    // fn del_state(&mut self, state_to_remove: &StateId) {
+
+    // }
 }
 
 #[derive(Debug, Clone)]
