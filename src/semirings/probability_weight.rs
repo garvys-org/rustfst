@@ -2,12 +2,12 @@ use semirings::Semiring;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ProbabilityWeight {
-    value: f32
+    value: f32,
 }
 
 impl ProbabilityWeight {
     pub fn new(value: f32) -> Self {
-        ProbabilityWeight {value}
+        ProbabilityWeight { value }
     }
 }
 

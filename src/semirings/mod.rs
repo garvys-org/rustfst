@@ -1,4 +1,3 @@
-
 pub trait Semiring: Clone + PartialEq {
     fn plus(&self, rhs: &Self) -> Self;
     fn times(&self, rhs: &Self) -> Self;
@@ -6,5 +5,5 @@ pub trait Semiring: Clone + PartialEq {
     fn one() -> Self;
 }
 
-pub mod probability_weight;
 pub mod integer_weight;
+pub mod probability_weight;

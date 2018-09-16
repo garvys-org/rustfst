@@ -1,10 +1,15 @@
-use semirings::Semiring;
-use fst::{ExpandedFst, MutableFst};
-use std::collections::HashSet;
 use fst::Fst;
+use fst::{ExpandedFst, MutableFst};
+use semirings::Semiring;
+use std::collections::HashSet;
 use StateId;
 
-fn  dfs<W: Semiring, F: Fst<W>>(fst: &F, state_id_cour: &StateId, accessible_states: &mut HashSet<StateId>, coaccessible_states: &mut HashSet<StateId>) {
+fn dfs<W: Semiring, F: Fst<W>>(
+    fst: &F,
+    state_id_cour: &StateId,
+    accessible_states: &mut HashSet<StateId>,
+    coaccessible_states: &mut HashSet<StateId>,
+) {
     accessible_states.insert(*state_id_cour);
     let mut is_coaccessible = fst.is_final(state_id_cour);
     for arc in fst.arc_iter(state_id_cour) {
@@ -24,12 +29,17 @@ fn  dfs<W: Semiring, F: Fst<W>>(fst: &F, state_id_cour: &StateId, accessible_sta
     }
 }
 
-pub fn connect<W: Semiring, F: ExpandedFst<W> + MutableFst<W>> (fst: &mut F) {
+pub fn connect<W: Semiring, F: ExpandedFst<W> + MutableFst<W>>(fst: &mut F) {
     let mut accessible_states = HashSet::new();
     let mut coaccessible_states = HashSet::new();
 
     if let Some(state_id) = fst.start() {
-        dfs(fst, &state_id, &mut accessible_states, &mut coaccessible_states);
+        dfs(
+            fst,
+            &state_id,
+            &mut accessible_states,
+            &mut coaccessible_states,
+        );
     }
 
     let mut to_delete = Vec::new();

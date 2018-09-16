@@ -1,8 +1,8 @@
-use fst::{Fst, ExpandedFst, MutableFst};
-use StateId;
+use arc::Arc;
+use fst::{ExpandedFst, Fst, MutableFst};
 use semirings::Semiring;
 use Label;
-use arc::Arc;
+use StateId;
 
 #[derive(Debug)]
 pub struct VectorFst<W: Semiring> {
@@ -20,8 +20,7 @@ impl<W: Semiring> Fst<W> for VectorFst<W> {
     fn final_weight(&self, state_id: &StateId) -> Option<W> {
         if let Some(state) = self.states.get(*state_id) {
             state.final_weight.clone()
-        }
-        else {
+        } else {
             None
         }
     }
@@ -31,7 +30,10 @@ impl<W: Semiring> Fst<W> for VectorFst<W> {
     }
 
     fn arc_iter(&self, state_id: &StateId) -> Self::Iter {
-        VectorArcIterator {state : self.states[*state_id].clone(), arcindex: 0}
+        VectorArcIterator {
+            state: self.states[*state_id].clone(),
+            arcindex: 0,
+        }
     }
 
     fn num_arcs(&self) -> usize {
@@ -61,8 +63,7 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
     fn set_final(&mut self, state_id: &StateId, final_weight: W) {
         if let Some(state) = self.states.get_mut(*state_id) {
             state.final_weight = Some(final_weight);
-        }
-        else {
+        } else {
             panic!("Stateid {:?} doesn't exist", state_id);
         }
     }
@@ -73,11 +74,17 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         id
     }
 
-    fn add_arc(&mut self, source: &StateId, target: &StateId, ilabel: Label, olabel: Label, weight: W) {
+    fn add_arc(
+        &mut self,
+        source: &StateId,
+        target: &StateId,
+        ilabel: Label,
+        olabel: Label,
+        weight: W,
+    ) {
         if let Some(state) = self.states.get_mut(*source) {
             state.arcs.push(Arc::new(ilabel, olabel, weight, *target));
-        }
-        else {
+        } else {
             panic!("State {:?} doesn't exist", source);
         }
     }
@@ -93,8 +100,7 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
             for (arc_id, arc) in state.arcs.iter_mut().enumerate() {
                 if arc.nextstate == *state_to_remove {
                     to_delete.push(arc_id);
-                }
-                else if arc.nextstate > *state_to_remove {
+                } else if arc.nextstate > *state_to_remove {
                     arc.nextstate -= 1;
                 }
             }
@@ -105,8 +111,7 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         }
     }
 
-
-    fn del_states<T: IntoIterator<Item=StateId>>(&mut self, states: T) {
+    fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) {
         let mut v: Vec<_> = states.into_iter().collect();
         v.sort();
         for j in (0..v.len()).rev() {
