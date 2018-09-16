@@ -1,5 +1,5 @@
 [package]
-name = "rufst"
+name = "rustfst"
 version = "0.1.0"
 authors = ["Alexandre Caulier<alexandre.caulier@protonmail.com>"]
 
