@@ -1,18 +1,18 @@
-use fst::{MutableFst, ExpandedFst};
-use semirings::Semiring;
+// use fst::{MutableFst, ExpandedFst};
+// use semirings::Semiring;
 
-pub fn project<W: Semiring, F: ExpandedFst<W> + MutableFst<W>>(fst: &mut F, project_input: bool) {
-    let N = fst.num_states();
-    for state_id in 0..N {
-        for arc in fst.arcs_iter_mut(&state_id) {
-            // if project_input {
-            //     arc.olabel = arc.ilabel;
-            // } else {
-            //     arc.ilabel = arc.olabel;
-            // }
-        }
-    }
-}
+// pub fn project<W: Semiring, F: ExpandedFst<W> + MutableFst<W>>(fst: &mut F, project_input: bool) {
+//     let N = fst.num_states();
+//     for state_id in 0..N {
+//         for arc in fst.arcs_iter_mut(&state_id) {
+//             // if project_input {
+//             //     arc.olabel = arc.ilabel;
+//             // } else {
+//             //     arc.ilabel = arc.olabel;
+//             // }
+//         }
+//     }
+// }
 
 // #[cfg(test)]
 // mod tests {

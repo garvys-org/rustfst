@@ -3,7 +3,7 @@ use semirings::Semiring;
 use Label;
 use StateId;
 
-pub trait Fst<'a, W: 'a + Semiring> : PartialEq {
+pub trait Fst<W: Semiring> : PartialEq + for<'a> ArcIterator<'a, W> {
     //type Symtab: IntoIterator<Item=String>;
     fn start(&self) -> Option<StateId>;
     fn final_weight(&self, &StateId) -> Option<W>;
@@ -11,12 +11,14 @@ pub trait Fst<'a, W: 'a + Semiring> : PartialEq {
     //fn get_osyms(&self) -> Option<Self::Symtab>;
     fn is_final(&self, &StateId) -> bool;
     fn num_arcs(&self) -> usize;
+}
 
+pub trait ArcIterator<'a, W: 'a + Semiring> {
     type Iter: Iterator<Item = &'a Arc<W>>;
     fn arcs_iter(&'a self, &StateId) -> Self::Iter;
 }
 
-pub trait MutableFst<'a, W: 'a + Semiring>: Fst<'a, W> {
+pub trait MutableFst<W: Semiring>: Fst<W> {
     fn new() -> Self;
     fn set_start(&mut self, &StateId);
     fn add_state(&mut self) -> StateId;
@@ -34,35 +36,35 @@ pub trait MutableFst<'a, W: 'a + Semiring>: Fst<'a, W> {
     // fn set_isyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
     // fn set_osyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
 
-    type IterMut: Iterator<Item = &'a mut Arc<W>>;
-    fn arcs_iter_mut(&'a mut self, &StateId) -> Self::IterMut;
+    // type IterMut: Iterator<Item = &'a mut Arc<W>>;
+    // fn arcs_iter_mut(&'a mut self, &StateId) -> Self::IterMut;
 }
 
-pub trait ExpandedFst<'a, W: 'a + Semiring>: Fst<'a, W> {
+pub trait ExpandedFst<W: Semiring>: Fst<W> {
     fn num_states(&self) -> usize;
 }
 
-use std::cmp;
-pub fn transducer<'a, T: Iterator<Item = Label>, W: 'a + Semiring, F: MutableFst<'a, W>>(labels_input: T, labels_output: T) -> F {
-    let mut vec_labels_input: Vec<_> = labels_input.collect();
-    let mut vec_labels_output: Vec<_> = labels_output.collect();
+// use std::cmp;
+// pub fn transducer<'a, T: Iterator<Item = Label>, W: 'a + Semiring, F: MutableFst<'a, W>>(labels_input: T, labels_output: T) -> F {
+//     let mut vec_labels_input: Vec<_> = labels_input.collect();
+//     let mut vec_labels_output: Vec<_> = labels_output.collect();
 
-    let max_size = cmp::max(vec_labels_input.len(), vec_labels_output.len());
+//     let max_size = cmp::max(vec_labels_input.len(), vec_labels_output.len());
 
-    vec_labels_input.resize(max_size, 0);
-    vec_labels_output.resize(max_size, 0);
+//     vec_labels_input.resize(max_size, 0);
+//     vec_labels_output.resize(max_size, 0);
 
-    let mut fst = F::new();
-    let mut state_cour = fst.add_state();
-    fst.set_start(&state_cour);
+//     let mut fst = F::new();
+//     let mut state_cour = fst.add_state();
+//     fst.set_start(&state_cour);
 
-    for (i, o) in vec_labels_input.iter().zip(vec_labels_output.iter()) {
-        let new_state = fst.add_state();
-        fst.add_arc(&state_cour, &new_state, *i, *o, W::zero());
-        state_cour = new_state;
-    }
+//     for (i, o) in vec_labels_input.iter().zip(vec_labels_output.iter()) {
+//         let new_state = fst.add_state();
+//         fst.add_arc(&state_cour, &new_state, *i, *o, W::zero());
+//         state_cour = new_state;
+//     }
 
-    fst.set_final(&state_cour, W::one());
+//     fst.set_final(&state_cour, W::one());
 
-    fst
-}
+//     fst
+// }
