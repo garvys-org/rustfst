@@ -18,7 +18,7 @@ pub trait ArcIterator<'a, W: 'a + Semiring> {
     fn arcs_iter(&'a self, &StateId) -> Self::Iter;
 }
 
-pub trait MutableFst<W: Semiring>: Fst<W> {
+pub trait MutableFst<W: Semiring>: Fst<W> + for<'a> MutableArcIterator<'a, W> {
     fn new() -> Self;
     fn set_start(&mut self, &StateId);
     fn add_state(&mut self) -> StateId;
@@ -35,9 +35,11 @@ pub trait MutableFst<W: Semiring>: Fst<W> {
     fn set_final(&mut self, id: &StateId, finalweight: W);
     // fn set_isyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
     // fn set_osyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
+}
 
-    // type IterMut: Iterator<Item = &'a mut Arc<W>>;
-    // fn arcs_iter_mut(&'a mut self, &StateId) -> Self::IterMut;
+pub trait MutableArcIterator<'a, W: 'a + Semiring> {
+    type IterMut: Iterator<Item = &'a mut Arc<W>>;
+    fn arcs_iter_mut(&'a mut self, &StateId) -> Self::IterMut;
 }
 
 pub trait ExpandedFst<W: Semiring>: Fst<W> {

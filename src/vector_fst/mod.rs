@@ -1,5 +1,5 @@
 use arc::Arc;
-use fst::{ExpandedFst, Fst, MutableFst, ArcIterator};
+use fst::{ExpandedFst, Fst, MutableFst, ArcIterator, MutableArcIterator};
 use semirings::Semiring;
 use Label;
 use StateId;
@@ -118,11 +118,13 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
             self.del_state(&v[j]);
         }
     }
+}
 
-    // type IterMut = slice::IterMut<'a, Arc<W>>;
-    // fn arcs_iter_mut(&'a mut self, state_id: &StateId) -> Self::IterMut {
-    //     self.states[*state_id].arcs.iter_mut()
-    // }
+impl<'a, W: 'a + Semiring> MutableArcIterator<'a, W> for VectorFst<W> {
+    type IterMut = slice::IterMut<'a, Arc<W>>;
+    fn arcs_iter_mut(&'a mut self, state_id: &StateId) -> Self::IterMut {
+        self.states[*state_id].arcs.iter_mut()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -234,19 +236,19 @@ mod tests {
         // assert!(!it.done());
     }
 
-    // #[test]
-    // fn test_arcs_iter() {
-    //     let mut fst = VectorFst::new();
-    //     let s1 = fst.add_state();
-    //     let s2 = fst.add_state();
-    //     fst.set_start(&s1);
-    //     fst.add_arc(&s1, &s2, 3, 5, IntegerWeight::new(10));
-    //     fst.add_arc(&s1, &s2, 5, 7, IntegerWeight::new(18));
+    #[test]
+    fn test_arcs_iter() {
+        let mut fst = VectorFst::new();
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+        fst.set_start(&s1);
+        fst.add_arc(&s1, &s2, 3, 5, IntegerWeight::new(10));
+        fst.add_arc(&s1, &s2, 5, 7, IntegerWeight::new(18));
 
-    //     for arc in fst.arcs_iter(&s1) {
-    //         println!("{:?}", arc);
-    //     }
-    // }
+        for arc in fst.arcs_iter(&s1) {
+            println!("{:?}", arc);
+        }
+    }
 
     #[test]
     fn test_arcs_iter_mut() {
