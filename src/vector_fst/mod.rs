@@ -3,6 +3,7 @@ use fst::{ExpandedFst, Fst, MutableFst};
 use semirings::Semiring;
 use Label;
 use StateId;
+use std::slice;
 
 #[derive(Debug, PartialEq)]
 pub struct VectorFst<W: Semiring> {
@@ -10,8 +11,7 @@ pub struct VectorFst<W: Semiring> {
     start_state: Option<StateId>,
 }
 
-impl<W: Semiring> Fst<W> for VectorFst<W> {
-    type Iter = VectorArcIterator<W>;
+impl<'a, W: 'a + Semiring> Fst<'a, W> for VectorFst<W> {
 
     fn start(&self) -> Option<StateId> {
         self.start_state
@@ -29,25 +29,23 @@ impl<W: Semiring> Fst<W> for VectorFst<W> {
         self.final_weight(state_id).is_some()
     }
 
-    fn arc_iter(&self, state_id: &StateId) -> Self::Iter {
-        VectorArcIterator {
-            state: self.states[*state_id].clone(),
-            arcindex: 0,
-        }
-    }
-
     fn num_arcs(&self) -> usize {
         self.states.iter().map(|state| state.num_arcs()).sum()
     }
+
+    type Iter = slice::Iter<'a, Arc<W>>;
+    fn arcs_iter(&'a self, state_id: &StateId) -> Self::Iter {
+        self.states[*state_id].arcs.iter()
+    }
 }
 
-impl<W: Semiring> ExpandedFst<W> for VectorFst<W> {
+impl<'a, W: 'a + Semiring> ExpandedFst<'a, W> for VectorFst<W> {
     fn num_states(&self) -> usize {
         self.states.len()
     }
 }
 
-impl<W: Semiring> MutableFst<W> for VectorFst<W> {
+impl<'a, W: 'a + Semiring> MutableFst<'a, W> for VectorFst<W> {
     fn new() -> Self {
         VectorFst {
             states: vec![],
@@ -118,6 +116,11 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
             self.del_state(&v[j]);
         }
     }
+
+    type IterMut = slice::IterMut<'a, Arc<W>>;
+    fn arcs_iter_mut(&'a mut self, state_id: &StateId) -> Self::IterMut {
+        self.states[*state_id].arcs.iter_mut()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -139,26 +142,54 @@ impl<W: Semiring> VectorFstState<W> {
     }
 }
 
-#[derive(Debug)]
-pub struct VectorArcIterator<W: Semiring> {
-    state: VectorFstState<W>,
-    arcindex: usize,
-}
+// #[derive(Debug)]
+// pub struct ArcIter<'a, W: 'a + Semiring> {
+//     state: &'a VectorFstState<W>,
+//     arcindex: usize,
+// }
 
-impl<W: Semiring> Iterator for VectorArcIterator<W> {
-    type Item = Arc<W>;
+// impl<'a, W: 'a + Semiring> Iterator for ArcIter<'a, W> {
+//     type Item = &'a Arc<W>;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        let i = self.arcindex;
-        let res = if i < self.state.num_arcs() {
-            Some(self.state.arcs[i].clone())
-        } else {
-            None
-        };
-        self.arcindex += 1;
-        res
-    }
-}
+//     fn next(&mut self) -> Option<Self::Item> {
+//         let i = self.arcindex;
+//         let res = if i < self.state.num_arcs() {
+//             Some(self.state.arcs.get(i).unwrap())
+//         } else {
+//             None
+//         };
+//         self.arcindex += 1;
+//         res
+//     }
+// }
+
+// #[derive(Debug)]
+// pub struct ArcIterMut<'a, W: 'a + Semiring> {
+//     arcs: &'a mut Vec<Arc<W>>,
+//     arcindex: usize,
+// }
+
+// impl<'a, W: Semiring> ArcIterMut<'a, W> {
+//     fn lol<'b>(&mut self, i: usize) -> &'b mut Arc<W> {
+//         self.state.arcs.get_mut(i).unwrap()
+//     }
+// }
+
+// impl<'a, W: 'a + Semiring> Iterator for ArcIterMut<'a, W> {
+//     type Item = &'a mut Arc<W>;
+
+//     fn next<'b: 'a>(&'b mut self) -> Option<&'b mut Arc<W>> {
+//         let i = self.arcindex;
+//         let res = if i < self.arcs.iter().count() {
+//             Some(self.arcs.get_mut(i).unwrap())
+//             // Some(self.lol<'a>(i))
+//         } else {
+//             None
+//         };
+//         self.arcindex += 1;
+//         res
+//     }
+// }
 
 #[cfg(test)]
 mod tests {
@@ -176,9 +207,9 @@ mod tests {
 
         assert_eq!(fst.num_states(), 2);
         assert_eq!(fst.num_arcs(), 2);
-        assert_eq!(fst.arc_iter(&s1).count(), 2);
+        assert_eq!(fst.arcs_iter(&s1).count(), 2);
 
-        let mut it = fst.arc_iter(&s1);
+        let mut it = fst.arcs_iter(&s1);
 
         let a = it.next();
         assert!(a.is_some());
@@ -199,5 +230,38 @@ mod tests {
         let c = it.next();
         assert!(c.is_none());
         // assert!(!it.done());
+    }
+
+    // #[test]
+    // fn test_arcs_iter() {
+    //     let mut fst = VectorFst::new();
+    //     let s1 = fst.add_state();
+    //     let s2 = fst.add_state();
+    //     fst.set_start(&s1);
+    //     fst.add_arc(&s1, &s2, 3, 5, IntegerWeight::new(10));
+    //     fst.add_arc(&s1, &s2, 5, 7, IntegerWeight::new(18));
+
+    //     for arc in fst.arcs_iter(&s1) {
+    //         println!("{:?}", arc);
+    //     }
+    // }
+
+    #[test]
+    fn test_arcs_iter_mut() {
+        let mut fst = VectorFst::new();
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+        fst.set_start(&s1);
+        fst.add_arc(&s1, &s2, 3, 5, IntegerWeight::new(10));
+        fst.add_arc(&s1, &s2, 5, 7, IntegerWeight::new(18));
+
+        for arc in fst.arcs_iter_mut(&s1) {
+            println!("{:?}", arc);
+            arc.ilabel = 53;
+        }
+
+        for arc in fst.arcs_iter(&s1) {
+            println!("Pouet = {:?}", arc);
+        }
     }
 }

@@ -3,19 +3,20 @@ use semirings::Semiring;
 use Label;
 use StateId;
 
-pub trait Fst<W: Semiring> : PartialEq {
-    type Iter: Iterator<Item = Arc<W>>;
+pub trait Fst<'a, W: 'a + Semiring> : PartialEq {
     //type Symtab: IntoIterator<Item=String>;
     fn start(&self) -> Option<StateId>;
     fn final_weight(&self, &StateId) -> Option<W>;
-    fn arc_iter(&self, &StateId) -> Self::Iter;
     //fn get_isyms(&self) -> Option<Self::Symtab>;
     //fn get_osyms(&self) -> Option<Self::Symtab>;
     fn is_final(&self, &StateId) -> bool;
     fn num_arcs(&self) -> usize;
+
+    type Iter: Iterator<Item = &'a Arc<W>>;
+    fn arcs_iter(&'a self, &StateId) -> Self::Iter;
 }
 
-pub trait MutableFst<W: Semiring>: Fst<W> {
+pub trait MutableFst<'a, W: 'a + Semiring>: Fst<'a, W> {
     fn new() -> Self;
     fn set_start(&mut self, &StateId);
     fn add_state(&mut self) -> StateId;
@@ -32,14 +33,17 @@ pub trait MutableFst<W: Semiring>: Fst<W> {
     fn set_final(&mut self, id: &StateId, finalweight: W);
     // fn set_isyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
     // fn set_osyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
+
+    type IterMut: Iterator<Item = &'a mut Arc<W>>;
+    fn arcs_iter_mut(&'a mut self, &StateId) -> Self::IterMut;
 }
 
-pub trait ExpandedFst<W: Semiring>: Fst<W> {
+pub trait ExpandedFst<'a, W: 'a + Semiring>: Fst<'a, W> {
     fn num_states(&self) -> usize;
 }
 
 use std::cmp;
-pub fn transducer<T: Iterator<Item = Label>, W: Semiring, F: MutableFst<W>>(labels_input: T, labels_output: T) -> F {
+pub fn transducer<'a, T: Iterator<Item = Label>, W: 'a + Semiring, F: MutableFst<'a, W>>(labels_input: T, labels_output: T) -> F {
     let mut vec_labels_input: Vec<_> = labels_input.collect();
     let mut vec_labels_output: Vec<_> = labels_output.collect();
 
