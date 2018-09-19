@@ -1,9 +1,9 @@
 use arc::Arc;
-use fst::{ExpandedFst, Fst, MutableFst, ArcIterator, MutableArcIterator};
+use fst::{ArcIterator, ExpandedFst, Fst, MutableArcIterator, MutableFst};
 use semirings::Semiring;
+use std::slice;
 use Label;
 use StateId;
-use std::slice;
 
 #[derive(Debug, PartialEq)]
 pub struct VectorFst<W: Semiring> {
@@ -12,7 +12,6 @@ pub struct VectorFst<W: Semiring> {
 }
 
 impl<W: 'static + Semiring> Fst<W> for VectorFst<W> {
-
     fn start(&self) -> Option<StateId> {
         self.start_state
     }
@@ -145,55 +144,6 @@ impl<W: Semiring> VectorFstState<W> {
         self.arcs.len()
     }
 }
-
-// #[derive(Debug)]
-// pub struct ArcIter<'a, W: 'a + Semiring> {
-//     state: &'a VectorFstState<W>,
-//     arcindex: usize,
-// }
-
-// impl<'a, W: 'a + Semiring> Iterator for ArcIter<'a, W> {
-//     type Item = &'a Arc<W>;
-
-//     fn next(&mut self) -> Option<Self::Item> {
-//         let i = self.arcindex;
-//         let res = if i < self.state.num_arcs() {
-//             Some(self.state.arcs.get(i).unwrap())
-//         } else {
-//             None
-//         };
-//         self.arcindex += 1;
-//         res
-//     }
-// }
-
-// #[derive(Debug)]
-// pub struct ArcIterMut<'a, W: 'a + Semiring> {
-//     arcs: &'a mut Vec<Arc<W>>,
-//     arcindex: usize,
-// }
-
-// impl<'a, W: Semiring> ArcIterMut<'a, W> {
-//     fn lol<'b>(&mut self, i: usize) -> &'b mut Arc<W> {
-//         self.state.arcs.get_mut(i).unwrap()
-//     }
-// }
-
-// impl<'a, W: 'a + Semiring> Iterator for ArcIterMut<'a, W> {
-//     type Item = &'a mut Arc<W>;
-
-//     fn next<'b: 'a>(&'b mut self) -> Option<&'b mut Arc<W>> {
-//         let i = self.arcindex;
-//         let res = if i < self.arcs.iter().count() {
-//             Some(self.arcs.get_mut(i).unwrap())
-//             // Some(self.lol<'a>(i))
-//         } else {
-//             None
-//         };
-//         self.arcindex += 1;
-//         res
-//     }
-// }
 
 #[cfg(test)]
 mod tests {

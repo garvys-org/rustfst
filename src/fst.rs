@@ -3,7 +3,7 @@ use semirings::Semiring;
 use Label;
 use StateId;
 
-pub trait Fst<W: Semiring> : PartialEq + for<'a> ArcIterator<'a, W> {
+pub trait Fst<W: Semiring>: PartialEq + for<'a> ArcIterator<'a, W> {
     //type Symtab: IntoIterator<Item=String>;
     fn start(&self) -> Option<StateId>;
     fn final_weight(&self, &StateId) -> Option<W>;
@@ -47,7 +47,10 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> {
 }
 
 use std::cmp;
-pub fn transducer<T: Iterator<Item = Label>, W: Semiring, F: MutableFst<W>>(labels_input: T, labels_output: T) -> F {
+pub fn transducer<T: Iterator<Item = Label>, W: Semiring, F: MutableFst<W>>(
+    labels_input: T,
+    labels_output: T,
+) -> F {
     let mut vec_labels_input: Vec<_> = labels_input.collect();
     let mut vec_labels_output: Vec<_> = labels_output.collect();
 

@@ -1,4 +1,4 @@
-use fst::{MutableFst, ExpandedFst};
+use fst::{ExpandedFst, MutableFst};
 use semirings::Semiring;
 
 pub fn project<W: Semiring, F: ExpandedFst<W> + MutableFst<W>>(fst: &mut F, project_input: bool) {
@@ -16,35 +16,35 @@ pub fn project<W: Semiring, F: ExpandedFst<W> + MutableFst<W>>(fst: &mut F, proj
 #[cfg(test)]
 mod tests {
     use super::*;
-    use semirings::integer_weight::IntegerWeight;
     use fst::transducer;
+    use semirings::integer_weight::IntegerWeight;
     use vector_fst::VectorFst;
 
     #[test]
     fn test_projection_input() {
-     let a = vec![1, 2, 3];
-     let b = vec![4, 5, 6];
+        let a = vec![1, 2, 3];
+        let b = vec![4, 5, 6];
 
-     let mut fst : VectorFst<IntegerWeight> = transducer(a.clone().into_iter(), b.clone().into_iter());
-     project(&mut fst, true);
+        let mut fst: VectorFst<IntegerWeight> =
+            transducer(a.clone().into_iter(), b.clone().into_iter());
+        project(&mut fst, true);
 
-     let ref_fst = transducer(a.clone().into_iter(), a.clone().into_iter());
+        let ref_fst = transducer(a.clone().into_iter(), a.clone().into_iter());
 
-     assert_eq!(fst, ref_fst);
-
+        assert_eq!(fst, ref_fst);
     }
 
     #[test]
     fn test_projection_output() {
-     let a = vec![1, 2, 3];
-     let b = vec![4, 5, 6];
+        let a = vec![1, 2, 3];
+        let b = vec![4, 5, 6];
 
-     let mut fst : VectorFst<IntegerWeight> = transducer(a.clone().into_iter(), b.clone().into_iter());
-     project(&mut fst, false);
+        let mut fst: VectorFst<IntegerWeight> =
+            transducer(a.clone().into_iter(), b.clone().into_iter());
+        project(&mut fst, false);
 
-     let ref_fst = transducer(b.clone().into_iter(), b.clone().into_iter());
+        let ref_fst = transducer(b.clone().into_iter(), b.clone().into_iter());
 
-     assert_eq!(fst, ref_fst);
-
+        assert_eq!(fst, ref_fst);
     }
 }

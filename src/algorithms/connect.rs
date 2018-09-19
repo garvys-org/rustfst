@@ -57,7 +57,6 @@ mod tests {
     use semirings::integer_weight::IntegerWeight;
     use vector_fst::VectorFst;
 
-
     #[test]
     fn test_connect() {
         let mut fst = VectorFst::new();
