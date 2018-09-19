@@ -1,6 +1,9 @@
-pub mod composition;
-pub mod connect;
-pub mod determinization;
-pub mod projection;
-pub mod shortest_distance;
-pub mod weight_pushing;
+mod composition;
+mod connect;
+mod determinization;
+mod projection;
+mod shortest_distance;
+mod weight_pushing;
+
+pub use self::connect::connect;
+pub use self::projection::project;
