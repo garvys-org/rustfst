@@ -8,4 +8,4 @@ mod inversion;
 
 pub use self::connect::connect;
 pub use self::projection::project;
-pub use self::inversion::inverse;
+pub use self::inversion::invert;
