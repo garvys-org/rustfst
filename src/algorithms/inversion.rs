@@ -1,12 +1,11 @@
 use fst::{ExpandedFst, MutableFst};
 use semirings::Semiring;
+use std::mem::swap;
 
 pub fn invert<W: Semiring, F: ExpandedFst<W> + MutableFst<W>>(fst: &mut F) {
     for state_id in 0..fst.num_states() {
         for arc in fst.arcs_iter_mut(&state_id) {
-            let old_olabel = arc.olabel;
-            arc.olabel = arc.ilabel;
-            arc.ilabel = old_olabel;
+            swap(&mut arc.ilabel, &mut arc.olabel);
         }
     }
 }
