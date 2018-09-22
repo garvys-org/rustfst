@@ -1,6 +1,6 @@
 use semirings::Semiring;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Default, Hash, Eq)]
 pub struct IntegerWeight {
     value: i32,
 }
@@ -25,5 +25,10 @@ impl Semiring for IntegerWeight {
 
     fn one() -> Self {
         Self::new(1)
+    }
+
+    // FIXME
+    fn inverse(&self) -> Self {
+        self.clone()
     }
 }

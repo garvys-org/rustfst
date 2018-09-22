@@ -1,6 +1,6 @@
 use semirings::Semiring;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct ProbabilityWeight {
     value: f32,
 }
@@ -25,5 +25,10 @@ impl Semiring for ProbabilityWeight {
 
     fn one() -> Self {
         Self::new(1.0)
+    }
+
+    // FIXME
+    fn inverse(&self) -> Self {
+        Self::new(1.0 / self.value)
     }
 }
