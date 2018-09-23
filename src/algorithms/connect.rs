@@ -54,7 +54,7 @@ pub fn connect<W: Semiring, F: ExpandedFst<W> + MutableFst<W>>(fst: &mut F) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use semirings::probability_weight::ProbabilityWeight;
+    use semirings::ProbabilityWeight;
     use vector_fst::VectorFst;
 
     #[test]

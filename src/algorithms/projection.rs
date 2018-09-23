@@ -17,7 +17,7 @@ pub fn project<W: Semiring, F: ExpandedFst<W> + MutableFst<W>>(fst: &mut F, proj
 mod tests {
     use super::*;
     use fst::transducer;
-    use semirings::probability_weight::ProbabilityWeight;
+    use semirings::ProbabilityWeight;
     use vector_fst::VectorFst;
 
     #[test]

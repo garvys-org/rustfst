@@ -148,7 +148,7 @@ impl<W: Semiring> VectorFstState<W> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use semirings::probability_weight::ProbabilityWeight;
+    use semirings::ProbabilityWeight;
 
     #[test]
     fn test_1() {

@@ -14,7 +14,7 @@ pub fn invert<W: Semiring, F: ExpandedFst<W> + MutableFst<W>>(fst: &mut F) {
 mod tests {
     use super::*;
     use fst::transducer;
-    use semirings::probability_weight::ProbabilityWeight;
+    use semirings::ProbabilityWeight;
     use vector_fst::VectorFst;
 
     #[test]

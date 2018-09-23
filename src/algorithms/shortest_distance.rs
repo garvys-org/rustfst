@@ -43,7 +43,7 @@ pub fn shortest_distance<W: Semiring, F: ExpandedFst<W>>(fst: &F) -> Vec<W> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use semirings::probability_weight::ProbabilityWeight;
+    use semirings::ProbabilityWeight;
     use vector_fst::VectorFst;
     use fst::MutableFst;
 
