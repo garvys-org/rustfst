@@ -1,12 +1,10 @@
 
-pub trait Semiring: Clone + PartialEq + Default {
-    fn plus(&self, rhs: &Self) -> Self;
-    fn times(&self, rhs: &Self) -> Self;
-    fn zero() -> Self;
-    fn one() -> Self;
-    fn inverse(&self) -> Self;
-    fn divide(&self, rhs: &Self) -> Self;
-}
 
+mod semiring;
 // pub mod integer_weight;
-pub mod probability_weight;
+mod probability_weight;
+mod tropical_weight;
+
+pub use self::semiring::{Semiring, WeaklyDivisibleSemiring};
+pub use self::probability_weight::ProbabilityWeight;
+pub use self::tropical_weight::TropicalWeight;

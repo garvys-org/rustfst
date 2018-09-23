@@ -1,4 +1,4 @@
-use semirings::Semiring;
+use semirings::{Semiring, WeaklyDivisibleSemiring};
 
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct ProbabilityWeight {
@@ -26,7 +26,9 @@ impl Semiring for ProbabilityWeight {
     fn one() -> Self {
         Self::new(1.0)
     }
+}
 
+impl WeaklyDivisibleSemiring for ProbabilityWeight {
     fn inverse(&self) -> Self {
         // May panic if self.value == 0
         Self::new(1.0 / self.value)
