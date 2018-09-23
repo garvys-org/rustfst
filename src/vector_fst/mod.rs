@@ -4,6 +4,7 @@ use semirings::Semiring;
 use std::slice;
 use Label;
 use StateId;
+use fst::StateIterator;
 
 #[derive(Debug, PartialEq)]
 pub struct VectorFst<W: Semiring> {
@@ -30,6 +31,44 @@ impl<W: 'static + Semiring> Fst<W> for VectorFst<W> {
 
     fn num_arcs(&self) -> usize {
         self.states.iter().map(|state| state.num_arcs()).sum()
+    }
+}
+
+impl<'a, W: 'a + Semiring> StateIterator<'a> for VectorFst<W> {
+    type Iter = VectorStateIterator<'a, W>;
+    // type Iter = Iterator<Item =&'a StateId>;
+    fn states_iter(&'a self) -> Self::Iter {
+        VectorStateIterator::new(self)
+    }
+}
+
+pub struct VectorStateIterator<'a, W: 'a + Semiring> {
+    fst: &'a VectorFst<W>,
+    index: usize,
+}
+
+impl<'a, W: Semiring> VectorStateIterator<'a, W> {
+    pub fn new(fst: &VectorFst<W>) -> VectorStateIterator<W> {
+        VectorStateIterator {
+            fst: fst,
+            index : 0,
+        }
+    }
+}
+
+impl<'a, W: Semiring> Iterator for VectorStateIterator<'a, W> {
+    type Item = StateId;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let res = if self.index < self.fst.states.len() {
+            Some(self.index)
+        }
+
+        else {
+            None
+        };
+        self.index += 1;
+        res
     }
 }
 

@@ -2,8 +2,9 @@ use arc::Arc;
 use semirings::Semiring;
 use Label;
 use StateId;
+use std::collections::HashMap;
 
-pub trait Fst<W: Semiring>: PartialEq + for<'a> ArcIterator<'a, W> {
+pub trait Fst<W: Semiring>: PartialEq + for<'a> ArcIterator<'a, W> + for<'b> StateIterator<'b> {
     //type Symtab: IntoIterator<Item=String>;
     fn start(&self) -> Option<StateId>;
     fn final_weight(&self, &StateId) -> Option<W>;
@@ -11,6 +12,11 @@ pub trait Fst<W: Semiring>: PartialEq + for<'a> ArcIterator<'a, W> {
     //fn get_osyms(&self) -> Option<Self::Symtab>;
     fn is_final(&self, &StateId) -> bool;
     fn num_arcs(&self) -> usize;
+}
+
+pub trait StateIterator<'a> {
+    type Iter: Iterator<Item = StateId>;
+    fn states_iter(&'a self) -> Self::Iter;
 }
 
 pub trait ArcIterator<'a, W: 'a + Semiring> {
