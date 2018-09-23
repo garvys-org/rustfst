@@ -5,6 +5,7 @@ pub trait Semiring: Clone + PartialEq + Default {
     fn zero() -> Self;
     fn one() -> Self;
     fn inverse(&self) -> Self;
+    fn divide(&self, rhs: &Self) -> Self;
 }
 
 // pub mod integer_weight;

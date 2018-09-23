@@ -27,8 +27,13 @@ impl Semiring for ProbabilityWeight {
         Self::new(1.0)
     }
 
-    // FIXME
     fn inverse(&self) -> Self {
+        // May panic if self.value == 0
         Self::new(1.0 / self.value)
+    }
+
+    fn divide(&self, rhs: &Self) -> Self {
+        // May panic if rhs.value == 0.0
+        Self::new(self.value / rhs.value)
     }
 }
