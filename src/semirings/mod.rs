@@ -7,5 +7,5 @@ pub trait Semiring: Clone + PartialEq + Default {
     fn inverse(&self) -> Self;
 }
 
-pub mod integer_weight;
+// pub mod integer_weight;
 pub mod probability_weight;
