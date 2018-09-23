@@ -41,6 +41,32 @@ pub trait MutableFst<W: Semiring>: Fst<W> + for<'a> MutableArcIterator<'a, W> {
     fn set_final(&mut self, id: &StateId, finalweight: W);
     // fn set_isyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
     // fn set_osyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
+
+    fn add_fst<F: ExpandedFst<W>>(&mut self, fst_to_add: &F) -> HashMap<StateId, StateId> {
+        // Map old states id to new ones
+        let mut mapping_states = HashMap::new();
+
+        // First pass to add the necessary states
+        for old_state_id in fst_to_add.states_iter() {
+            let new_state_id = self.add_state();
+            mapping_states.insert(old_state_id, new_state_id);
+        }
+
+        // Second pass to add the arcs
+        for old_state_id in fst_to_add.states_iter() {
+            for old_arc in fst_to_add.arcs_iter(&old_state_id) {
+                self.add_arc(
+                    mapping_states.get(&old_state_id).unwrap(),
+                    mapping_states.get(&old_arc.nextstate).unwrap(),
+                    old_arc.ilabel,
+                    old_arc.olabel,
+                    old_arc.weight.clone(),
+                )
+            }
+        }
+
+        mapping_states
+    }
 }
 
 pub trait MutableArcIterator<'a, W: 'a + Semiring> {
