@@ -14,7 +14,7 @@ pub fn invert<W: Semiring, F: ExpandedFst<W> + MutableFst<W>>(fst: &mut F) {
 mod tests {
     use super::*;
     use fst::transducer;
-    use semirings::integer_weight::IntegerWeight;
+    use semirings::probability_weight::ProbabilityWeight;
     use vector_fst::VectorFst;
 
     #[test]
@@ -22,7 +22,7 @@ mod tests {
         let a = vec![1, 2, 3];
         let b = vec![4, 5, 6];
 
-        let mut fst: VectorFst<IntegerWeight> =
+        let mut fst: VectorFst<ProbabilityWeight> =
             transducer(a.clone().into_iter(), b.clone().into_iter());
         invert(&mut fst);
 

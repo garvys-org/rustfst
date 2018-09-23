@@ -148,7 +148,7 @@ impl<W: Semiring> VectorFstState<W> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use semirings::integer_weight::IntegerWeight;
+    use semirings::probability_weight::ProbabilityWeight;
 
     #[test]
     fn test_1() {
@@ -156,8 +156,8 @@ mod tests {
         let s1 = fst.add_state();
         let s2 = fst.add_state();
         fst.set_start(&s1);
-        fst.add_arc(&s1, &s2, 3, 5, IntegerWeight::new(10));
-        fst.add_arc(&s1, &s2, 5, 7, IntegerWeight::new(18));
+        fst.add_arc(&s1, &s2, 3, 5, ProbabilityWeight::new(10.0));
+        fst.add_arc(&s1, &s2, 5, 7, ProbabilityWeight::new(18.0));
 
         assert_eq!(fst.num_states(), 2);
         assert_eq!(fst.num_arcs(), 2);
@@ -171,7 +171,7 @@ mod tests {
         assert_eq!(a.ilabel, 3);
         assert_eq!(a.olabel, 5);
         assert_eq!(a.nextstate, s2);
-        assert_eq!(a.weight, IntegerWeight::new(10));
+        assert_eq!(a.weight, ProbabilityWeight::new(10.0));
 
         let b = it.next();
         assert!(b.is_some());
@@ -179,7 +179,7 @@ mod tests {
         assert_eq!(b.ilabel, 5);
         assert_eq!(b.olabel, 7);
         assert_eq!(b.nextstate, s2);
-        assert_eq!(b.weight, IntegerWeight::new(18));
+        assert_eq!(b.weight, ProbabilityWeight::new(18.0));
 
         let c = it.next();
         assert!(c.is_none());
@@ -192,8 +192,8 @@ mod tests {
         let s1 = fst.add_state();
         let s2 = fst.add_state();
         fst.set_start(&s1);
-        fst.add_arc(&s1, &s2, 3, 5, IntegerWeight::new(10));
-        fst.add_arc(&s1, &s2, 5, 7, IntegerWeight::new(18));
+        fst.add_arc(&s1, &s2, 3, 5, ProbabilityWeight::new(10.0));
+        fst.add_arc(&s1, &s2, 5, 7, ProbabilityWeight::new(18.0));
 
         for arc in fst.arcs_iter(&s1) {
             println!("{:?}", arc);
@@ -206,8 +206,8 @@ mod tests {
         let s1 = fst.add_state();
         let s2 = fst.add_state();
         fst.set_start(&s1);
-        fst.add_arc(&s1, &s2, 3, 5, IntegerWeight::new(10));
-        fst.add_arc(&s1, &s2, 5, 7, IntegerWeight::new(18));
+        fst.add_arc(&s1, &s2, 3, 5, ProbabilityWeight::new(10.0));
+        fst.add_arc(&s1, &s2, 5, 7, ProbabilityWeight::new(18.0));
 
         for arc in fst.arcs_iter_mut(&s1) {
             println!("{:?}", arc);

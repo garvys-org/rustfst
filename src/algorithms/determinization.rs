@@ -170,32 +170,32 @@ pub fn determinize<W: Semiring + Hash + Eq, F1: ExpandedFst<W>, F2: MutableFst<W
     deminized_fst
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use semirings::integer_weight::IntegerWeight;
-    use vector_fst::VectorFst;
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+//     use semirings::integer_weight::IntegerWeight;
+//     use vector_fst::VectorFst;
 
-    #[test]
-    fn test_determinize() {
-        let mut fst = VectorFst::new();
-        let s0 = fst.add_state();
-        let s1 = fst.add_state();
-        let s2 = fst.add_state();
-        let s3 = fst.add_state();
-        fst.set_start(&s0);
-        fst.set_final(&s3, IntegerWeight::new(1));
+//     #[test]
+//     fn test_determinize() {
+//         let mut fst = VectorFst::new();
+//         let s0 = fst.add_state();
+//         let s1 = fst.add_state();
+//         let s2 = fst.add_state();
+//         let s3 = fst.add_state();
+//         fst.set_start(&s0);
+//         fst.set_final(&s3, IntegerWeight::new(1));
 
-        fst.add_arc(&s0, &s1, 1, 1, IntegerWeight::new(1));
-        fst.add_arc(&s0, &s2, 1, 1, IntegerWeight::new(2));
+//         fst.add_arc(&s0, &s1, 1, 1, IntegerWeight::new(1));
+//         fst.add_arc(&s0, &s2, 1, 1, IntegerWeight::new(2));
 
-        fst.add_arc(&s1, &s1, 2, 2, IntegerWeight::new(3));
-        fst.add_arc(&s2, &s2, 2, 2, IntegerWeight::new(3));
+//         fst.add_arc(&s1, &s1, 2, 2, IntegerWeight::new(3));
+//         fst.add_arc(&s2, &s2, 2, 2, IntegerWeight::new(3));
 
-        fst.add_arc(&s1, &s3, 3, 3, IntegerWeight::new(5));
-        fst.add_arc(&s2, &s3, 4, 4, IntegerWeight::new(6));
+//         fst.add_arc(&s1, &s3, 3, 3, IntegerWeight::new(5));
+//         fst.add_arc(&s2, &s3, 4, 4, IntegerWeight::new(6));
 
-        let determinized_fst : VectorFst<IntegerWeight> = determinize(&fst);
-        println!("{:?}", determinized_fst);
-    }
-}
+//         let determinized_fst : VectorFst<IntegerWeight> = determinize(&fst);
+//         println!("{:?}", determinized_fst);
+//     }
+// }

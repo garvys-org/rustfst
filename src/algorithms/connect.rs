@@ -54,7 +54,7 @@ pub fn connect<W: Semiring, F: ExpandedFst<W> + MutableFst<W>>(fst: &mut F) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use semirings::integer_weight::IntegerWeight;
+    use semirings::probability_weight::ProbabilityWeight;
     use vector_fst::VectorFst;
 
     #[test]
@@ -63,12 +63,12 @@ mod tests {
         let s1 = fst.add_state();
         let s2 = fst.add_state();
         fst.set_start(&s1);
-        fst.add_arc(&s1, &s2, 3, 5, IntegerWeight::new(10));
-        fst.add_arc(&s1, &s2, 5, 7, IntegerWeight::new(18));
-        fst.set_final(&s2, IntegerWeight::new(31));
+        fst.add_arc(&s1, &s2, 3, 5, ProbabilityWeight::new(10.0));
+        fst.add_arc(&s1, &s2, 5, 7, ProbabilityWeight::new(18.0));
+        fst.set_final(&s2, ProbabilityWeight::new(31.0));
         fst.add_state();
         let s4 = fst.add_state();
-        fst.add_arc(&s2, &s4, 5, 7, IntegerWeight::new(18));
+        fst.add_arc(&s2, &s4, 5, 7, ProbabilityWeight::new(18.0));
         assert_eq!(fst.num_states(), 4);
         connect(&mut fst);
         assert_eq!(fst.num_states(), 2);
