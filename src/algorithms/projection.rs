@@ -1,7 +1,6 @@
 use fst::{ExpandedFst, MutableFst};
-use semirings::Semiring;
 
-pub fn project<W: Semiring, F: ExpandedFst<W> + MutableFst<W>>(fst: &mut F, project_input: bool) {
+pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_input: bool) {
     for state_id in 0..fst.num_states() {
         for arc in fst.arcs_iter_mut(&state_id) {
             if project_input {

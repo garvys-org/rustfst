@@ -4,14 +4,19 @@ use Label;
 use StateId;
 use std::collections::HashMap;
 
-pub trait Fst<W: Semiring>: PartialEq + for<'a> ArcIterator<'a, W> + for<'b> StateIterator<'b> {
+pub trait CoreFst {
+    type W : Semiring;
     //type Symtab: IntoIterator<Item=String>;
     fn start(&self) -> Option<StateId>;
-    fn final_weight(&self, &StateId) -> Option<W>;
+    fn final_weight(&self, &StateId) -> Option<<Self as CoreFst>::W>;
     //fn get_isyms(&self) -> Option<Self::Symtab>;
     //fn get_osyms(&self) -> Option<Self::Symtab>;
     fn is_final(&self, &StateId) -> bool;
     fn num_arcs(&self) -> usize;
+}
+
+pub trait Fst: CoreFst + PartialEq + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b> {
+
 }
 
 pub trait StateIterator<'a> {
@@ -19,12 +24,68 @@ pub trait StateIterator<'a> {
     fn states_iter(&'a self) -> Self::Iter;
 }
 
-pub trait ArcIterator<'a, W: 'a + Semiring> {
-    type Iter: Iterator<Item = &'a Arc<W>>;
+pub trait FinalStateIterator<'a> {
+    type Iter: Iterator<Item = StateId>;
+    fn final_states_iter(&'a self) -> Self::Iter;   
+}
+
+impl<'a, F> FinalStateIterator<'a> for F
+where
+    F: 'a + Fst
+{
+    type Iter = StructFinalStateIterator<'a, F>;
+    fn final_states_iter(&'a self) -> Self::Iter {
+        StructFinalStateIterator::new(&self)
+    }
+}
+
+// use std::marker::PhantomData;
+pub struct StructFinalStateIterator<'a, F>
+where 
+    F: 'a + Fst,
+{
+    fst: &'a F,
+    it: <F as StateIterator<'a>>::Iter,
+}
+
+impl<'a, F> StructFinalStateIterator<'a, F>
+where
+    F: 'a + Fst,
+{
+    pub fn new(fst: &'a F) -> StructFinalStateIterator<F> {
+        StructFinalStateIterator {
+            fst: fst,
+            it: fst.states_iter(),
+        }
+    }
+}
+
+impl<'a, F> Iterator for StructFinalStateIterator<'a, F>
+where
+    F: 'a + Fst,
+{
+    type Item = StateId;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(state_id) = self.it.next() {
+            if self.fst.is_final(&state_id) {
+                return Some(state_id)
+            }
+        }
+        None
+    }
+}
+
+pub trait ArcIterator<'a> : CoreFst
+where
+    Self::W: 'a
+{
+    type Iter: Iterator<Item = &'a Arc<Self::W>>;
     fn arcs_iter(&'a self, &StateId) -> Self::Iter;
 }
 
-pub trait MutableFst<W: Semiring>: Fst<W> + for<'a> MutableArcIterator<'a, W> {
+pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
+    // type W: Semiring;
     fn new() -> Self;
     fn set_start(&mut self, &StateId);
     fn add_state(&mut self) -> StateId;
@@ -36,13 +97,13 @@ pub trait MutableFst<W: Semiring>: Fst<W> + for<'a> MutableArcIterator<'a, W> {
         target: &StateId,
         ilabel: Label,
         olabel: Label,
-        weight: W,
+        weight: <Self as CoreFst>::W,
     );
-    fn set_final(&mut self, id: &StateId, finalweight: W);
+    fn set_final(&mut self, id: &StateId, finalweight: <Self as CoreFst>::W);
     // fn set_isyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
     // fn set_osyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
 
-    fn add_fst<F: ExpandedFst<W>>(&mut self, fst_to_add: &F) -> HashMap<StateId, StateId> {
+    fn add_fst<F: ExpandedFst<W=Self::W>>(&mut self, fst_to_add: &F) -> HashMap<StateId, StateId> {
         // Map old states id to new ones
         let mut mapping_states = HashMap::new();
 
@@ -69,17 +130,20 @@ pub trait MutableFst<W: Semiring>: Fst<W> + for<'a> MutableArcIterator<'a, W> {
     }
 }
 
-pub trait MutableArcIterator<'a, W: 'a + Semiring> {
-    type IterMut: Iterator<Item = &'a mut Arc<W>>;
+pub trait MutableArcIterator<'a> : CoreFst
+where
+    Self::W: 'a
+{
+    type IterMut: Iterator<Item = &'a mut Arc<Self::W>>;
     fn arcs_iter_mut(&'a mut self, &StateId) -> Self::IterMut;
 }
 
-pub trait ExpandedFst<W: Semiring>: Fst<W> {
+pub trait ExpandedFst: Fst {
     fn num_states(&self) -> usize;
 }
 
 use std::cmp;
-pub fn transducer<T: Iterator<Item = Label>, W: Semiring, F: MutableFst<W>>(
+pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
     labels_input: T,
     labels_output: T,
 ) -> F {
@@ -97,11 +161,11 @@ pub fn transducer<T: Iterator<Item = Label>, W: Semiring, F: MutableFst<W>>(
 
     for (i, o) in vec_labels_input.iter().zip(vec_labels_output.iter()) {
         let new_state = fst.add_state();
-        fst.add_arc(&state_cour, &new_state, *i, *o, W::zero());
+        fst.add_arc(&state_cour, &new_state, *i, *o, <F as CoreFst>::W::one());
         state_cour = new_state;
     }
 
-    fst.set_final(&state_cour, W::one());
+    fst.set_final(&state_cour, <F as CoreFst>::W::one());
 
     fst
 }

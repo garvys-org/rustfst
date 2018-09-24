@@ -1,5 +1,5 @@
 use arc::Arc;
-use fst::{ArcIterator, ExpandedFst, Fst, MutableArcIterator, MutableFst};
+use fst::{ArcIterator, ExpandedFst, CoreFst, Fst, MutableArcIterator, MutableFst};
 use semirings::Semiring;
 use std::slice;
 use Label;
@@ -12,7 +12,10 @@ pub struct VectorFst<W: Semiring> {
     start_state: Option<StateId>,
 }
 
-impl<W: 'static + Semiring> Fst<W> for VectorFst<W> {
+impl<W: 'static + Semiring> Fst for VectorFst<W> {}
+
+impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
+    type W = W;
     fn start(&self) -> Option<StateId> {
         self.start_state
     }
@@ -72,20 +75,20 @@ impl<'a, W: Semiring> Iterator for VectorStateIterator<'a, W> {
     }
 }
 
-impl<'a, W: 'a + Semiring> ArcIterator<'a, W> for VectorFst<W> {
+impl<'a, W: 'static + Semiring> ArcIterator<'a> for VectorFst<W> {
     type Iter = slice::Iter<'a, Arc<W>>;
     fn arcs_iter(&'a self, state_id: &StateId) -> Self::Iter {
         self.states[*state_id].arcs.iter()
     }
 }
 
-impl<W: 'static + Semiring> ExpandedFst<W> for VectorFst<W> {
+impl<W: 'static + Semiring> ExpandedFst for VectorFst<W> {
     fn num_states(&self) -> usize {
         self.states.len()
     }
 }
 
-impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
+impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
     fn new() -> Self {
         VectorFst {
             states: vec![],
@@ -158,7 +161,7 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
     }
 }
 
-impl<'a, W: 'a + Semiring> MutableArcIterator<'a, W> for VectorFst<W> {
+impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
     type IterMut = slice::IterMut<'a, Arc<W>>;
     fn arcs_iter_mut(&'a mut self, state_id: &StateId) -> Self::IterMut {
         self.states[*state_id].arcs.iter_mut()

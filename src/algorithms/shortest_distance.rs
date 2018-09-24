@@ -1,20 +1,20 @@
-use fst::ExpandedFst;
+use fst::{CoreFst, ExpandedFst};
 use semirings::Semiring;
 use std::collections::VecDeque;
 
-pub fn shortest_distance<W: Semiring, F: ExpandedFst<W>>(fst: &F) -> Vec<W> {
+pub fn shortest_distance<F: ExpandedFst>(fst: &F) -> Vec<<F as CoreFst>::W> {
     let num_states = fst.num_states();
 
     let mut d = vec![];
     let mut r = vec![];
 
-    d.resize(num_states, W::zero());
-    r.resize(num_states, W::zero());
+    d.resize(num_states, <F as CoreFst>::W::zero());
+    r.resize(num_states, <F as CoreFst>::W::zero());
 
     let start_state = fst.start().unwrap();
 
-    d[start_state] = W::one();
-    r[start_state] = W::one();
+    d[start_state] = <F as CoreFst>::W::one();
+    r[start_state] = <F as CoreFst>::W::one();
 
     // TODO : Move to LinkedHashSet
     let mut queue = VecDeque::new();
@@ -23,7 +23,7 @@ pub fn shortest_distance<W: Semiring, F: ExpandedFst<W>>(fst: &F) -> Vec<W> {
     while !queue.is_empty() {
         let state_cour = queue.pop_front().unwrap();
         let r2 = r[state_cour].clone();
-        r[state_cour] = W::zero();
+        r[state_cour] = <F as CoreFst>::W::zero();
 
         for arc in fst.arcs_iter(&state_cour) {
             let nextstate = arc.nextstate;

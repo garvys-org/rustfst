@@ -1,10 +1,9 @@
 use fst::Fst;
 use fst::{ExpandedFst, MutableFst};
-use semirings::Semiring;
 use std::collections::HashSet;
 use StateId;
 
-fn dfs<W: Semiring, F: Fst<W>>(
+fn dfs<F: Fst>(
     fst: &F,
     state_id_cour: StateId,
     accessible_states: &mut HashSet<StateId>,
@@ -29,7 +28,7 @@ fn dfs<W: Semiring, F: Fst<W>>(
     }
 }
 
-pub fn connect<W: Semiring, F: ExpandedFst<W> + MutableFst<W>>(fst: &mut F) {
+pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) {
     let mut accessible_states = HashSet::new();
     let mut coaccessible_states = HashSet::new();
 
