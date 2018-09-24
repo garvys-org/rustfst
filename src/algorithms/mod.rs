@@ -11,5 +11,5 @@ pub use self::connect::connect;
 pub use self::projection::project;
 pub use self::inversion::invert;
 pub use self::shortest_distance::shortest_distance;
-// pub use self::determinization::determinize;
+pub use self::determinization::determinize;
 pub use self::union::union;

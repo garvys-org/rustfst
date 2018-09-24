@@ -1,5 +1,5 @@
-use semirings::Semiring;
-use fst::{MutableFst, ExpandedFst};
+use semirings::{Semiring, WeaklyDivisibleSemiring};
+use fst::{MutableFst, ExpandedFst, CoreFst};
 use std::collections::{VecDeque, HashSet, HashMap};
 use StateId;
 use Label;
@@ -36,7 +36,7 @@ impl<W: Semiring> WeightedSubset<W> {
         self.pairs.push(PairStateWeight::new(state, weight));
     }
 
-    pub fn input_labels<F: ExpandedFst<W>>(&self, fst: &F) -> HashSet<Label> {
+    pub fn input_labels<F: ExpandedFst>(&self, fst: &F) -> HashSet<Label> {
         let mut set = HashSet::new();
         for pair in &self.pairs {
             let state = pair.state;
@@ -47,7 +47,7 @@ impl<W: Semiring> WeightedSubset<W> {
         set
     }
 
-    pub fn nextstates<F: ExpandedFst<W>>(&self, x: &Label, fst: &F) -> HashSet<StateId> {
+    pub fn nextstates<F: ExpandedFst>(&self, x: &Label, fst: &F) -> HashSet<StateId> {
         let mut set = HashSet::new();
         for pair in &self.pairs {
             let state = pair.state;
@@ -61,8 +61,8 @@ impl<W: Semiring> WeightedSubset<W> {
     }
 }
 
-fn compute_weight<W: Semiring, F: ExpandedFst<W>>(
-    x: &Label, weighted_subset: &WeightedSubset<W>, fst: &F) -> W {
+fn compute_weight<F: ExpandedFst>(
+    x: &Label, weighted_subset: &WeightedSubset<<F as CoreFst>::W>, fst: &F) -> <F as CoreFst>::W {
 
     let mut w_prime = None;
 
@@ -75,7 +75,7 @@ fn compute_weight<W: Semiring, F: ExpandedFst<W>>(
 
             if arc.ilabel == *x {
                 let temp = v.times(&w);
-                w_prime = w_prime.map(|value: W| value.plus(&temp)).or(Some(temp)); 
+                w_prime = w_prime.map(|value: <F as CoreFst>::W| value.plus(&temp)).or(Some(temp)); 
            }
         }
     }
@@ -83,12 +83,16 @@ fn compute_weight<W: Semiring, F: ExpandedFst<W>>(
     w_prime.unwrap()
 }
 
-fn compute_new_weighted_subset<W: Semiring, F: ExpandedFst<W>>(
+fn compute_new_weighted_subset<W, F>(
     x: &Label,
     w_prime: &W,
     weighted_subset: &WeightedSubset<W>,
     fst: &F,
-) -> WeightedSubset<W> {
+) -> WeightedSubset<W>
+where 
+    W: WeaklyDivisibleSemiring,
+    F: ExpandedFst<W=W>,
+{
     let mut new_weighted_subset = WeightedSubset::default();
 
     for q in weighted_subset.nextstates(x, fst) {
@@ -112,7 +116,12 @@ fn compute_new_weighted_subset<W: Semiring, F: ExpandedFst<W>>(
 }
 
 use std::collections::hash_map::Entry;
-pub fn determinize<W: Semiring + Hash + Eq, F1: ExpandedFst<W>, F2: MutableFst<W>>(fst_in: &F1) -> F2 {
+pub fn determinize<W, F1, F2>(fst_in: &F1) -> F2
+where
+    W: WeaklyDivisibleSemiring + Hash + Eq,
+    F1: ExpandedFst<W=W>,
+    F2: MutableFst<W=W>,
+{
     let mut deminized_fst = F2::new();
 
     let mut mapping_states = HashMap::new();
@@ -173,7 +182,7 @@ pub fn determinize<W: Semiring + Hash + Eq, F1: ExpandedFst<W>, F2: MutableFst<W
 // #[cfg(test)]
 // mod tests {
 //     use super::*;
-//     use semirings::integer_weight::IntegerWeight;
+//     use semirings::TropicalWeight;
 //     use vector_fst::VectorFst;
 
 //     #[test]
@@ -184,18 +193,18 @@ pub fn determinize<W: Semiring + Hash + Eq, F1: ExpandedFst<W>, F2: MutableFst<W
 //         let s2 = fst.add_state();
 //         let s3 = fst.add_state();
 //         fst.set_start(&s0);
-//         fst.set_final(&s3, IntegerWeight::new(1));
+//         fst.set_final(&s3, TropicalWeight::new(0.0));
 
-//         fst.add_arc(&s0, &s1, 1, 1, IntegerWeight::new(1));
-//         fst.add_arc(&s0, &s2, 1, 1, IntegerWeight::new(2));
+//         fst.add_arc(&s0, &s1, 1, 1, TropicalWeight::new(1.0));
+//         fst.add_arc(&s0, &s2, 1, 1, TropicalWeight::new(2.0));
 
-//         fst.add_arc(&s1, &s1, 2, 2, IntegerWeight::new(3));
-//         fst.add_arc(&s2, &s2, 2, 2, IntegerWeight::new(3));
+//         fst.add_arc(&s1, &s1, 2, 2, TropicalWeight::new(3.0));
+//         fst.add_arc(&s2, &s2, 2, 2, TropicalWeight::new(3.0));
 
-//         fst.add_arc(&s1, &s3, 3, 3, IntegerWeight::new(5));
-//         fst.add_arc(&s2, &s3, 4, 4, IntegerWeight::new(6));
+//         fst.add_arc(&s1, &s3, 3, 3, TropicalWeight::new(5.0));
+//         fst.add_arc(&s2, &s3, 4, 4, TropicalWeight::new(6.0));
 
-//         let determinized_fst : VectorFst<IntegerWeight> = determinize(&fst);
+//         let determinized_fst : VectorFst<TropicalWeight> = determinize(&fst);
 //         println!("{:?}", determinized_fst);
 //     }
 // }
