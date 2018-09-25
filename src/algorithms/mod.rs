@@ -15,3 +15,4 @@ pub use self::inversion::invert;
 pub use self::projection::project;
 pub use self::shortest_distance::shortest_distance;
 pub use self::union::union;
+pub use self::composition::compose;

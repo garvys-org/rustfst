@@ -106,7 +106,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
 
     fn add_state(&mut self) -> StateId {
         let id = self.states.len();
-        self.states.insert(id, VectorFstState::new());
+        self.states.insert(id, VectorFstState::default());
         id
     }
 
@@ -131,7 +131,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
 
         assert!(*state_to_remove < self.states.len());
         self.states.remove(*state_to_remove);
-        for state in self.states.iter_mut() {
+        for state in &mut self.states {
             let mut to_delete = vec![];
             for (arc_id, arc) in state.arcs.iter_mut().enumerate() {
                 if arc.nextstate == *state_to_remove {
@@ -163,20 +163,13 @@ impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct VectorFstState<W: Semiring> {
     final_weight: Option<W>,
     arcs: Vec<Arc<W>>,
 }
 
 impl<W: Semiring> VectorFstState<W> {
-    pub fn new() -> Self {
-        VectorFstState {
-            final_weight: None,
-            arcs: vec![],
-        }
-    }
-
     pub fn num_arcs(&self) -> usize {
         self.arcs.len()
     }

@@ -29,7 +29,7 @@ where
 
     // Final states are final states of the second fst
     for old_final_state in fst_2.final_states_iter() {
-        let final_state = mapping_states_fst_2.get(&old_final_state).unwrap();
+        let final_state = &mapping_states_fst_2[&old_final_state];
         let final_weight = fst_out.final_weight(&old_final_state).unwrap();
         fst_out.set_final(final_state, final_weight);
     }

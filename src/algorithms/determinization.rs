@@ -43,12 +43,12 @@ impl<W: Semiring> WeightedSubset<W> {
         set
     }
 
-    pub fn nextstates<F: ExpandedFst>(&self, x: &Label, fst: &F) -> HashSet<StateId> {
+    pub fn nextstates<F: ExpandedFst>(&self, x: Label, fst: &F) -> HashSet<StateId> {
         let mut set = HashSet::new();
         for pair in &self.pairs {
             let state = pair.state;
             for arc in fst.arcs_iter(&state) {
-                if arc.ilabel == *x {
+                if arc.ilabel == x {
                     set.insert(arc.nextstate);
                 }
             }
@@ -58,7 +58,7 @@ impl<W: Semiring> WeightedSubset<W> {
 }
 
 fn compute_weight<F: ExpandedFst>(
-    x: &Label,
+    x: Label,
     weighted_subset: &WeightedSubset<<F as CoreFst>::W>,
     fst: &F,
 ) -> <F as CoreFst>::W {
@@ -71,7 +71,7 @@ fn compute_weight<F: ExpandedFst>(
         for arc in fst.arcs_iter(&p) {
             let w = &arc.weight;
 
-            if arc.ilabel == *x {
+            if arc.ilabel == x {
                 let temp = v.times(&w);
                 w_prime = w_prime
                     .map(|value: <F as CoreFst>::W| value.plus(&temp))
@@ -84,7 +84,7 @@ fn compute_weight<F: ExpandedFst>(
 }
 
 fn compute_new_weighted_subset<W, F>(
-    x: &Label,
+    x: Label,
     w_prime: &W,
     weighted_subset: &WeightedSubset<W>,
     fst: &F,
@@ -102,7 +102,7 @@ where
             let v = &pair.weight;
 
             for arc in fst.arcs_iter(&p) {
-                if arc.ilabel == *x && arc.nextstate == q {
+                if arc.ilabel == x && arc.nextstate == q {
                     let w = &arc.weight;
                     let temp = w_prime.inverse().times(&v.times(&w));
                     new_weight = new_weight.map(|value: W| value.plus(&temp)).or_else(|| Some(temp));
@@ -143,9 +143,9 @@ where
         let weighted_subset = queue.pop_front().unwrap();
 
         for x in weighted_subset.input_labels(fst_in) {
-            let w_prime = compute_weight(&x, &weighted_subset, fst_in);
+            let w_prime = compute_weight(x, &weighted_subset, fst_in);
             let new_weighted_subset =
-                compute_new_weighted_subset(&x, &w_prime, &weighted_subset, fst_in);
+                compute_new_weighted_subset(x, &w_prime, &weighted_subset, fst_in);
 
             if let Entry::Vacant(lol) = mapping_states.entry(new_weighted_subset.clone()) {
                 let state_id = deminized_fst.add_state();
