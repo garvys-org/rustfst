@@ -1,6 +1,6 @@
-use StateId;
 use arc::Arc;
 use semirings::Semiring;
+use StateId;
 
 pub trait CoreFst {
     type W: Semiring;

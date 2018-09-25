@@ -1,8 +1,7 @@
-use Label;
-use std::cmp;
 use fst_traits::{CoreFst, MutableFst};
 use semirings::Semiring;
-
+use std::cmp;
+use Label;
 
 pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
     labels_input: T,

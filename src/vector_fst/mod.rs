@@ -1,5 +1,7 @@
 use arc::Arc;
-use fst_traits::{ArcIterator, StateIterator, CoreFst, ExpandedFst, Fst, MutableArcIterator, MutableFst};
+use fst_traits::{
+    ArcIterator, CoreFst, ExpandedFst, Fst, MutableArcIterator, MutableFst, StateIterator,
+};
 use semirings::Semiring;
 use std::slice;
 use Label;

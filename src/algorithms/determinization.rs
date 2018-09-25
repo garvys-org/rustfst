@@ -104,7 +104,9 @@ where
                 if arc.ilabel == x && arc.nextstate == q {
                     let w = &arc.weight;
                     let temp = w_prime.inverse().times(&v.times(&w));
-                    new_weight = new_weight.map(|value: W| value.plus(&temp)).or_else(|| Some(temp));
+                    new_weight = new_weight
+                        .map(|value: W| value.plus(&temp))
+                        .or_else(|| Some(temp));
                 }
             }
         }

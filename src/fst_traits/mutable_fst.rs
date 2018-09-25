@@ -1,8 +1,8 @@
-use StateId;
-use Label;
 use arc::Arc;
 use fst_traits::{CoreFst, ExpandedFst};
 use std::collections::HashMap;
+use Label;
+use StateId;
 
 pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
     // type W: Semiring;

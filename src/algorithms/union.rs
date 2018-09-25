@@ -62,8 +62,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use utils::transducer;
     use semirings::BooleanWeight;
+    use utils::transducer;
     use vector_fst::VectorFst;
 
     #[test]

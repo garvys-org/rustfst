@@ -1,5 +1,5 @@
-use StateId;
 use fst_traits::{Fst, StateIterator};
+use StateId;
 
 pub trait FinalStatesIterator<'a> {
     type Iter: Iterator<Item = StateId>;

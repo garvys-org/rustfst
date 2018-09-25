@@ -18,8 +18,7 @@ impl Semiring for TropicalWeight {
     fn plus(&self, rhs: &Self) -> Self {
         if self.value < rhs.value {
             Self::new(self.value)
-        }
-        else {
+        } else {
             Self::new(rhs.value)
         }
     }
