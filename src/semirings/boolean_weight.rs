@@ -53,6 +53,5 @@ mod tests {
         assert_eq!(b_true.times(&b_false), b_false);
         assert_eq!(b_false.times(&b_true), b_false);
         assert_eq!(b_false.times(&b_false), b_false);
-
     }
 }

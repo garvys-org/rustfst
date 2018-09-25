@@ -1,10 +1,10 @@
 use arc::Arc;
-use fst::{ArcIterator, ExpandedFst, CoreFst, Fst, MutableArcIterator, MutableFst};
+use fst::StateIterator;
+use fst::{ArcIterator, CoreFst, ExpandedFst, Fst, MutableArcIterator, MutableFst};
 use semirings::Semiring;
 use std::slice;
 use Label;
 use StateId;
-use fst::StateIterator;
 
 #[derive(Debug, PartialEq)]
 pub struct VectorFst<W: Semiring> {
@@ -52,10 +52,7 @@ pub struct VectorStateIterator<'a, W: 'a + Semiring> {
 
 impl<'a, W: Semiring> VectorStateIterator<'a, W> {
     pub fn new(fst: &VectorFst<W>) -> VectorStateIterator<W> {
-        VectorStateIterator {
-            fst: fst,
-            index : 0,
-        }
+        VectorStateIterator { fst: fst, index: 0 }
     }
 }
 
@@ -65,9 +62,7 @@ impl<'a, W: Semiring> Iterator for VectorStateIterator<'a, W> {
     fn next(&mut self) -> Option<Self::Item> {
         let res = if self.index < self.fst.states.len() {
             Some(self.index)
-        }
-
-        else {
+        } else {
             None
         };
         self.index += 1;

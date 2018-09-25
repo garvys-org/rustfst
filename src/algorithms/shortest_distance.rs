@@ -43,9 +43,9 @@ pub fn shortest_distance<F: ExpandedFst>(fst: &F) -> Vec<<F as CoreFst>::W> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use fst::MutableFst;
     use semirings::ProbabilityWeight;
     use vector_fst::VectorFst;
-    use fst::MutableFst;
 
     #[test]
     fn test_shortest_distance() {

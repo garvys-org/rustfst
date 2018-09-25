@@ -1,10 +1,10 @@
+use fst::{CoreFst, ExpandedFst, MutableFst};
 use semirings::{Semiring, WeaklyDivisibleSemiring};
-use fst::{MutableFst, ExpandedFst, CoreFst};
-use std::collections::{VecDeque, HashSet, HashMap};
-use StateId;
-use Label;
-use std::hash::Hash;
 use std::collections::BTreeMap;
+use std::collections::{HashMap, HashSet, VecDeque};
+use std::hash::Hash;
+use Label;
+use StateId;
 
 #[derive(PartialEq, Eq, Clone, Ord, PartialOrd)]
 struct PairStateWeight<W: Semiring> {
@@ -14,10 +14,7 @@ struct PairStateWeight<W: Semiring> {
 
 impl<W: Semiring> PairStateWeight<W> {
     pub fn new(state: StateId, weight: W) -> Self {
-        PairStateWeight {
-            state,
-            weight,
-        }
+        PairStateWeight { state, weight }
     }
 }
 
@@ -28,9 +25,7 @@ struct WeightedSubset<W: Semiring> {
 
 impl<W: Semiring> WeightedSubset<W> {
     pub fn from_vec(vec: Vec<PairStateWeight<W>>) -> Self {
-        WeightedSubset {
-            pairs: vec
-        }
+        WeightedSubset { pairs: vec }
     }
 
     pub fn add(&mut self, state: StateId, weight: W) {
@@ -63,8 +58,10 @@ impl<W: Semiring> WeightedSubset<W> {
 }
 
 fn compute_weight<F: ExpandedFst>(
-    x: &Label, weighted_subset: &WeightedSubset<<F as CoreFst>::W>, fst: &F) -> <F as CoreFst>::W {
-
+    x: &Label,
+    weighted_subset: &WeightedSubset<<F as CoreFst>::W>,
+    fst: &F,
+) -> <F as CoreFst>::W {
     let mut w_prime = None;
 
     for pair in &weighted_subset.pairs {
@@ -76,8 +73,10 @@ fn compute_weight<F: ExpandedFst>(
 
             if arc.ilabel == *x {
                 let temp = v.times(&w);
-                w_prime = w_prime.map(|value: <F as CoreFst>::W| value.plus(&temp)).or(Some(temp)); 
-           }
+                w_prime = w_prime
+                    .map(|value: <F as CoreFst>::W| value.plus(&temp))
+                    .or(Some(temp));
+            }
         }
     }
 
@@ -90,9 +89,9 @@ fn compute_new_weighted_subset<W, F>(
     weighted_subset: &WeightedSubset<W>,
     fst: &F,
 ) -> WeightedSubset<W>
-where 
+where
     W: WeaklyDivisibleSemiring,
-    F: ExpandedFst<W=W>,
+    F: ExpandedFst<W = W>,
 {
     let mut new_weighted_subset = WeightedSubset::default();
 
@@ -106,7 +105,7 @@ where
                 if arc.ilabel == *x && arc.nextstate == q {
                     let w = &arc.weight;
                     let temp = w_prime.inverse().times(&v.times(&w));
-                    new_weight = new_weight.map(|value: W| value.plus(&temp)).or(Some(temp)); 
+                    new_weight = new_weight.map(|value: W| value.plus(&temp)).or(Some(temp));
                 }
             }
         }
@@ -120,8 +119,8 @@ use std::collections::btree_map::Entry;
 pub fn determinize<W, F1, F2>(fst_in: &F1) -> F2
 where
     W: WeaklyDivisibleSemiring + Ord + Eq,
-    F1: ExpandedFst<W=W>,
-    F2: MutableFst<W=W>,
+    F1: ExpandedFst<W = W>,
+    F2: MutableFst<W = W>,
 {
     let mut deminized_fst = F2::new();
 
@@ -132,19 +131,22 @@ where
     let initial_state = deminized_fst.add_state();
     deminized_fst.set_start(&initial_state);
 
-    let initial_subset = WeightedSubset::from_vec(vec![PairStateWeight::new(fst_in.start().unwrap(), W::one())]);
+    let initial_subset = WeightedSubset::from_vec(vec![PairStateWeight::new(
+        fst_in.start().unwrap(),
+        W::one(),
+    )]);
     mapping_states.insert(initial_subset.clone(), initial_state);
-    
+
     queue.push_back(initial_subset);
 
     while !queue.is_empty() {
         let weighted_subset = queue.pop_front().unwrap();
 
         for x in weighted_subset.input_labels(fst_in) {
-
             let w_prime = compute_weight(&x, &weighted_subset, fst_in);
-            let new_weighted_subset = compute_new_weighted_subset(&x, &w_prime, &weighted_subset, fst_in);
-        
+            let new_weighted_subset =
+                compute_new_weighted_subset(&x, &w_prime, &weighted_subset, fst_in);
+
             if let Entry::Vacant(lol) = mapping_states.entry(new_weighted_subset.clone()) {
                 let state_id = deminized_fst.add_state();
 
@@ -154,7 +156,9 @@ where
                     let v = &pair.weight;
                     if let Some(rho_q) = fst_in.final_weight(q) {
                         let temp = v.times(&rho_q);
-                        final_weight = final_weight.map(|value: W| value.plus(&temp)).or(Some(temp)); 
+                        final_weight = final_weight
+                            .map(|value: W| value.plus(&temp))
+                            .or(Some(temp));
                     }
                 }
 
@@ -171,10 +175,9 @@ where
                 mapping_states.get(&new_weighted_subset).unwrap(),
                 x,
                 x,
-                w_prime
+                w_prime,
             );
         }
-
     }
 
     deminized_fst

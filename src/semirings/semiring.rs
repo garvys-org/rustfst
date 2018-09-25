@@ -13,8 +13,8 @@ pub trait Semiring: Clone + PartialEq + Default {
 
 /// A semiring is said to be divisible if all non-0 elements admit an inverse, that is if S-{0} is a group.
 /// (S, +, *, 0, 1) is said to be weakly divisible if for any x and y in S such that x + y != 0,
-/// there exists at least one z such that x = (x+y)*z 
-pub trait WeaklyDivisibleSemiring : Semiring {
+/// there exists at least one z such that x = (x+y)*z
+pub trait WeaklyDivisibleSemiring: Semiring {
     /// Inverse for the * operation
     fn inverse(&self) -> Self;
     // TODO : Not always commutative

@@ -1,11 +1,11 @@
 use arc::Arc;
 use semirings::Semiring;
+use std::collections::HashMap;
 use Label;
 use StateId;
-use std::collections::HashMap;
 
 pub trait CoreFst {
-    type W : Semiring;
+    type W: Semiring;
     //type Symtab: IntoIterator<Item=String>;
     fn start(&self) -> Option<StateId>;
     fn final_weight(&self, &StateId) -> Option<<Self as CoreFst>::W>;
@@ -15,9 +15,7 @@ pub trait CoreFst {
     fn num_arcs(&self) -> usize;
 }
 
-pub trait Fst: CoreFst + PartialEq + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b> {
-
-}
+pub trait Fst: CoreFst + PartialEq + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b> {}
 
 pub trait StateIterator<'a> {
     type Iter: Iterator<Item = StateId>;
@@ -26,12 +24,12 @@ pub trait StateIterator<'a> {
 
 pub trait FinalStateIterator<'a> {
     type Iter: Iterator<Item = StateId>;
-    fn final_states_iter(&'a self) -> Self::Iter;   
+    fn final_states_iter(&'a self) -> Self::Iter;
 }
 
 impl<'a, F> FinalStateIterator<'a> for F
 where
-    F: 'a + Fst
+    F: 'a + Fst,
 {
     type Iter = StructFinalStateIterator<'a, F>;
     fn final_states_iter(&'a self) -> Self::Iter {
@@ -41,7 +39,7 @@ where
 
 // use std::marker::PhantomData;
 pub struct StructFinalStateIterator<'a, F>
-where 
+where
     F: 'a + Fst,
 {
     fst: &'a F,
@@ -69,16 +67,16 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(state_id) = self.it.next() {
             if self.fst.is_final(&state_id) {
-                return Some(state_id)
+                return Some(state_id);
             }
         }
         None
     }
 }
 
-pub trait ArcIterator<'a> : CoreFst
+pub trait ArcIterator<'a>: CoreFst
 where
-    Self::W: 'a
+    Self::W: 'a,
 {
     type Iter: Iterator<Item = &'a Arc<Self::W>>;
     fn arcs_iter(&'a self, &StateId) -> Self::Iter;
@@ -103,7 +101,10 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
     // fn set_isyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
     // fn set_osyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
 
-    fn add_fst<F: ExpandedFst<W=Self::W>>(&mut self, fst_to_add: &F) -> HashMap<StateId, StateId> {
+    fn add_fst<F: ExpandedFst<W = Self::W>>(
+        &mut self,
+        fst_to_add: &F,
+    ) -> HashMap<StateId, StateId> {
         // Map old states id to new ones
         let mut mapping_states = HashMap::new();
 
@@ -130,9 +131,9 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
     }
 }
 
-pub trait MutableArcIterator<'a> : CoreFst
+pub trait MutableArcIterator<'a>: CoreFst
 where
-    Self::W: 'a
+    Self::W: 'a,
 {
     type IterMut: Iterator<Item = &'a mut Arc<Self::W>>;
     fn arcs_iter_mut(&'a mut self, &StateId) -> Self::IterMut;
