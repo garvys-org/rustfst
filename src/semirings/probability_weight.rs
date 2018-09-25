@@ -12,6 +12,7 @@ impl ProbabilityWeight {
 }
 
 impl Semiring for ProbabilityWeight {
+    type Type = f32;
     fn plus(&self, rhs: &Self) -> Self {
         Self::new(self.value + rhs.value)
     }
@@ -25,6 +26,10 @@ impl Semiring for ProbabilityWeight {
 
     fn one() -> Self {
         Self::new(1.0)
+    }
+
+    fn value(&self) -> Self::Type {
+        self.value
     }
 }
 

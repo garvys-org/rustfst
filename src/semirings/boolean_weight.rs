@@ -12,6 +12,7 @@ impl BooleanWeight {
 }
 
 impl Semiring for BooleanWeight {
+    type Type = bool;
     fn plus(&self, rhs: &Self) -> Self {
         Self::new(self.value | rhs.value)
     }
@@ -25,6 +26,10 @@ impl Semiring for BooleanWeight {
 
     fn one() -> Self {
         Self::new(true)
+    }
+
+    fn value(&self) -> Self::Type {
+        self.value
     }
 }
 

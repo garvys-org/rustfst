@@ -10,9 +10,15 @@ impl TropicalWeight {
     pub fn new(value: f32) -> Self {
         TropicalWeight { value }
     }
+
+    pub fn equals(&self, rhs: &Self) -> bool {
+    	self.value == rhs.value
+    }
 }
 
 impl Semiring for TropicalWeight {
+	type Type = f32;
+
     fn plus(&self, rhs: &Self) -> Self {
         Self::new(match self.value < rhs.value {
         	true => self.value,
@@ -30,6 +36,10 @@ impl Semiring for TropicalWeight {
     fn one() -> Self {
         Self::new(0.0)
     }
+
+    fn value(&self) -> Self::Type {
+    	self.value
+    }
 }
 
 impl WeaklyDivisibleSemiring for TropicalWeight {
@@ -41,4 +51,3 @@ impl WeaklyDivisibleSemiring for TropicalWeight {
         Self::new(self.value - rhs.value)
     }
 }
-

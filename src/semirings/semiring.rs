@@ -3,10 +3,12 @@
 /// (S, *, 1) is a monoid with identity element 1, * distributes over +, 0 is an annihilator for *.
 /// Thus, a semiring is a ring that may lack negation.
 pub trait Semiring: Clone + PartialEq + Default {
+    type Type;
     fn plus(&self, rhs: &Self) -> Self;
     fn times(&self, rhs: &Self) -> Self;
     fn zero() -> Self;
     fn one() -> Self;
+    fn value(&self) -> Self::Type;
 }
 
 /// A semiring is said to be divisible if all non-0 elements admit an inverse, that is if S-{0} is a group.
