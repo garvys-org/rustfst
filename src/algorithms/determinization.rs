@@ -1,7 +1,7 @@
 use fst::{CoreFst, ExpandedFst, MutableFst};
 use semirings::{Semiring, WeaklyDivisibleSemiring};
 use std::collections::BTreeMap;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashSet, VecDeque};
 use std::hash::Hash;
 use Label;
 use StateId;
@@ -75,7 +75,7 @@ fn compute_weight<F: ExpandedFst>(
                 let temp = v.times(&w);
                 w_prime = w_prime
                     .map(|value: <F as CoreFst>::W| value.plus(&temp))
-                    .or(Some(temp));
+                    .or_else(|| Some(temp));
             }
         }
     }
@@ -105,7 +105,7 @@ where
                 if arc.ilabel == *x && arc.nextstate == q {
                     let w = &arc.weight;
                     let temp = w_prime.inverse().times(&v.times(&w));
-                    new_weight = new_weight.map(|value: W| value.plus(&temp)).or(Some(temp));
+                    new_weight = new_weight.map(|value: W| value.plus(&temp)).or_else(|| Some(temp));
                 }
             }
         }
@@ -158,7 +158,7 @@ where
                         let temp = v.times(&rho_q);
                         final_weight = final_weight
                             .map(|value: W| value.plus(&temp))
-                            .or(Some(temp));
+                            .or_else(|| Some(temp));
                     }
                 }
 
@@ -171,8 +171,8 @@ where
             }
 
             deminized_fst.add_arc(
-                mapping_states.get(&weighted_subset).unwrap(),
-                mapping_states.get(&new_weighted_subset).unwrap(),
+                &mapping_states[&weighted_subset],
+                &mapping_states[&new_weighted_subset],
                 x,
                 x,
                 w_prime,

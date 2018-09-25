@@ -11,19 +11,21 @@ impl TropicalWeight {
         TropicalWeight { value }
     }
 
-    pub fn equals(&self, rhs: &Self) -> bool {
-        self.value == rhs.value
-    }
+    // pub fn equals(&self, rhs: &Self) -> bool {
+    //     self.value == rhs.value
+    // }
 }
 
 impl Semiring for TropicalWeight {
     type Type = f32;
 
     fn plus(&self, rhs: &Self) -> Self {
-        Self::new(match self.value < rhs.value {
-            true => self.value,
-            false => rhs.value,
-        })
+        if self.value < rhs.value {
+            Self::new(self.value)
+        }
+        else {
+            Self::new(rhs.value)
+        }
     }
     fn times(&self, rhs: &Self) -> Self {
         Self::new(self.value + rhs.value)

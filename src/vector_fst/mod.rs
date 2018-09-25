@@ -52,7 +52,7 @@ pub struct VectorStateIterator<'a, W: 'a + Semiring> {
 
 impl<'a, W: Semiring> VectorStateIterator<'a, W> {
     pub fn new(fst: &VectorFst<W>) -> VectorStateIterator<W> {
-        VectorStateIterator { fst: fst, index: 0 }
+        VectorStateIterator { fst, index: 0 }
     }
 }
 

@@ -52,7 +52,7 @@ where
 {
     pub fn new(fst: &'a F) -> StructFinalStateIterator<F> {
         StructFinalStateIterator {
-            fst: fst,
+            fst,
             it: fst.states_iter(),
         }
     }
@@ -118,8 +118,8 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
         for old_state_id in fst_to_add.states_iter() {
             for old_arc in fst_to_add.arcs_iter(&old_state_id) {
                 self.add_arc(
-                    mapping_states.get(&old_state_id).unwrap(),
-                    mapping_states.get(&old_arc.nextstate).unwrap(),
+                    &mapping_states[&old_state_id],
+                    &mapping_states[&old_arc.nextstate],
                     old_arc.ilabel,
                     old_arc.olabel,
                     old_arc.weight.clone(),
