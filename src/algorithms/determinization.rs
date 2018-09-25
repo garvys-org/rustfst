@@ -4,8 +4,9 @@ use std::collections::{VecDeque, HashSet, HashMap};
 use StateId;
 use Label;
 use std::hash::Hash;
+use std::collections::BTreeMap;
 
-#[derive(Hash, PartialEq, Eq, Clone)]
+#[derive(PartialEq, Eq, Clone, Ord, PartialOrd)]
 struct PairStateWeight<W: Semiring> {
     state: StateId,
     weight: W,
@@ -20,7 +21,7 @@ impl<W: Semiring> PairStateWeight<W> {
     }
 }
 
-#[derive(Default, Hash, PartialEq, Eq, Clone)]
+#[derive(Default, PartialEq, Eq, Clone, Ord, PartialOrd)]
 struct WeightedSubset<W: Semiring> {
     pairs: Vec<PairStateWeight<W>>,
 }
@@ -115,16 +116,16 @@ where
     new_weighted_subset
 }
 
-use std::collections::hash_map::Entry;
+use std::collections::btree_map::Entry;
 pub fn determinize<W, F1, F2>(fst_in: &F1) -> F2
 where
-    W: WeaklyDivisibleSemiring + Hash + Eq,
+    W: WeaklyDivisibleSemiring + Ord + Eq,
     F1: ExpandedFst<W=W>,
     F2: MutableFst<W=W>,
 {
     let mut deminized_fst = F2::new();
 
-    let mut mapping_states = HashMap::new();
+    let mut mapping_states = BTreeMap::new();
 
     let mut queue = VecDeque::new();
 

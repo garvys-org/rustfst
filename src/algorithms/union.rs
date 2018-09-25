@@ -64,7 +64,6 @@ mod tests {
     use super::*;
     use vector_fst::VectorFst;
     use semirings::BooleanWeight;
-    use fst::FinalStateIterator;
     use fst::transducer;
 
     #[test]
