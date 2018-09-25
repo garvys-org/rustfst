@@ -1,8 +1,7 @@
-use fst::{CoreFst, ExpandedFst, MutableFst};
+use fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use semirings::{Semiring, WeaklyDivisibleSemiring};
 use std::collections::BTreeMap;
 use std::collections::{HashSet, VecDeque};
-use std::hash::Hash;
 use Label;
 use StateId;
 

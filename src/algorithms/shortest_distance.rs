@@ -1,4 +1,4 @@
-use fst::{CoreFst, ExpandedFst};
+use fst_traits::{CoreFst, ExpandedFst};
 use semirings::Semiring;
 use std::collections::VecDeque;
 
@@ -43,7 +43,7 @@ pub fn shortest_distance<F: ExpandedFst>(fst: &F) -> Vec<<F as CoreFst>::W> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use fst::MutableFst;
+    use fst_traits::MutableFst;
     use semirings::ProbabilityWeight;
     use vector_fst::VectorFst;
 

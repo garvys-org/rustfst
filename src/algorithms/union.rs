@@ -1,7 +1,4 @@
-use fst::CoreFst;
-use fst::ExpandedFst;
-use fst::FinalStateIterator;
-use fst::MutableFst;
+use fst_traits::{CoreFst, ExpandedFst, FinalStatesIterator, MutableFst};
 use semirings::Semiring;
 use std::collections::HashMap;
 use StateId;
@@ -65,7 +62,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use fst::transducer;
+    use utils::transducer;
     use semirings::BooleanWeight;
     use vector_fst::VectorFst;
 

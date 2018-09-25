@@ -1,4 +1,4 @@
-use fst::{ExpandedFst, MutableFst};
+use fst_traits::{ExpandedFst, MutableFst};
 
 pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_input: bool) {
     for state_id in 0..fst.num_states() {
@@ -15,7 +15,7 @@ pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_input: bool) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use fst::transducer;
+    use utils::transducer;
     use semirings::ProbabilityWeight;
     use vector_fst::VectorFst;
 

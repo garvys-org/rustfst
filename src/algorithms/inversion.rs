@@ -1,4 +1,4 @@
-use fst::{ExpandedFst, MutableFst};
+use fst_traits::{ExpandedFst, MutableFst};
 use std::mem::swap;
 
 pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) {
@@ -12,7 +12,7 @@ pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use fst::transducer;
+    use utils::transducer;
     use semirings::ProbabilityWeight;
     use vector_fst::VectorFst;
 

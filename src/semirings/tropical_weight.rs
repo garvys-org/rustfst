@@ -10,10 +10,6 @@ impl TropicalWeight {
     pub fn new(value: f32) -> Self {
         TropicalWeight { value }
     }
-
-    // pub fn equals(&self, rhs: &Self) -> bool {
-    //     self.value == rhs.value
-    // }
 }
 
 impl Semiring for TropicalWeight {

@@ -1,6 +1,4 @@
-use fst::ExpandedFst;
-use fst::FinalStateIterator;
-use fst::MutableFst;
+use fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
 use semirings::Semiring;
 
 pub fn concat<W, F1, F2, F3>(fst_1: &F1, fst_2: &F2) -> F3

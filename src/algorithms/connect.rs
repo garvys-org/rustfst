@@ -1,5 +1,4 @@
-use fst::Fst;
-use fst::{ExpandedFst, MutableFst};
+use fst_traits::{Fst, ExpandedFst, MutableFst};
 use std::collections::HashSet;
 use StateId;
 
