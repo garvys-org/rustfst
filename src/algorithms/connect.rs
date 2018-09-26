@@ -53,7 +53,7 @@ pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) {
 mod tests {
     use super::*;
     use semirings::ProbabilityWeight;
-    use vector_fst::VectorFst;
+    use fst_impls::VectorFst;
 
     #[test]
     fn test_connect() {

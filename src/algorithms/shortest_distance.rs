@@ -45,7 +45,7 @@ mod tests {
     use super::*;
     use fst_traits::MutableFst;
     use semirings::ProbabilityWeight;
-    use vector_fst::VectorFst;
+    use fst_impls::VectorFst;
 
     #[test]
     fn test_shortest_distance() {

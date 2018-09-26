@@ -64,7 +64,7 @@ mod tests {
     use super::*;
     use semirings::BooleanWeight;
     use utils::transducer;
-    use vector_fst::VectorFst;
+    use fst_impls::VectorFst;
 
     #[test]
     fn test_union() {

@@ -14,7 +14,7 @@ mod tests {
     use super::*;
     use semirings::ProbabilityWeight;
     use utils::transducer;
-    use vector_fst::VectorFst;
+    use fst_impls::VectorFst;
 
     #[test]
     fn test_invert() {
