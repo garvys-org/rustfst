@@ -29,10 +29,6 @@ impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
         }
     }
 
-    fn is_final(&self, state_id: &StateId) -> bool {
-        self.final_weight(state_id).is_some()
-    }
-
     fn num_arcs(&self) -> usize {
         self.states.iter().map(|state| state.num_arcs()).sum()
     }
