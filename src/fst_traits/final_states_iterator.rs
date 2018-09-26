@@ -1,6 +1,7 @@
 use fst_traits::{Fst, StateIterator};
 use StateId;
 
+/// Trait to iterate over the final states of a wFST
 pub trait FinalStatesIterator<'a> {
     type Iter: Iterator<Item = StateId>;
     fn final_states_iter(&'a self) -> Self::Iter;

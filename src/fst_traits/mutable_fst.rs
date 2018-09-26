@@ -4,9 +4,16 @@ use std::collections::HashMap;
 use Label;
 use StateId;
 
+/// Trait defining the methods to modify a wFST
 pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
-    // type W: Semiring;
+
+    /// Creates an empty wFST
     fn new() -> Self;
+
+    /// The state with identifier passed as parameter is now the start state.
+    /// This method should be called only once as there is only one start state 
+    /// allowed in this implementation.
+    ///
     fn set_start(&mut self, &StateId);
     fn add_state(&mut self) -> StateId;
     fn del_state(&mut self, &StateId);
