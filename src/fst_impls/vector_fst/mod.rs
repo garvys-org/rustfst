@@ -178,39 +178,40 @@ mod tests {
     use semirings::ProbabilityWeight;
 
     #[test]
-    fn test_1() {
+    fn test_num_arcs() {
         let mut fst = VectorFst::new();
         let s1 = fst.add_state();
         let s2 = fst.add_state();
-        fst.set_start(&s1);
+
+        assert_eq!(fst.num_arcs(), 0);
         fst.add_arc(&s1, &s2, 3, 5, ProbabilityWeight::new(10.0));
+        assert_eq!(fst.num_arcs(), 1);
         fst.add_arc(&s1, &s2, 5, 7, ProbabilityWeight::new(18.0));
-
-        assert_eq!(fst.num_states(), 2);
         assert_eq!(fst.num_arcs(), 2);
-        assert_eq!(fst.arcs_iter(&s1).count(), 2);
+        fst.add_arc(&s2, &s1, 10, 17, ProbabilityWeight::new(38.0));
+        assert_eq!(fst.num_arcs(), 3); 
+        fst.add_arc(&s2, &s2, 10, 17, ProbabilityWeight::new(38.0));
+        assert_eq!(fst.num_arcs(), 4);
+        fst.del_state(&s1);
+        assert_eq!(fst.num_arcs(), 1);
+    }
 
-        let mut it = fst.arcs_iter(&s1);
+    #[test]
+    fn test_num_states() {
+        let mut fst = VectorFst::<ProbabilityWeight>::new();
+        assert_eq!(fst.num_states(), 0);
+        
+        let s1 = fst.add_state();
+        assert_eq!(fst.num_states(), 1);
+        
+        fst.add_state();
+        assert_eq!(fst.num_states(), 2);
+        
+        fst.del_state(&s1);
+        assert_eq!(fst.num_states(), 1);
 
-        let a = it.next();
-        assert!(a.is_some());
-        let a = a.unwrap();
-        assert_eq!(a.ilabel, 3);
-        assert_eq!(a.olabel, 5);
-        assert_eq!(a.nextstate, s2);
-        assert_eq!(a.weight, ProbabilityWeight::new(10.0));
-
-        let b = it.next();
-        assert!(b.is_some());
-        let b = b.unwrap();
-        assert_eq!(b.ilabel, 5);
-        assert_eq!(b.olabel, 7);
-        assert_eq!(b.nextstate, s2);
-        assert_eq!(b.weight, ProbabilityWeight::new(18.0));
-
-        let c = it.next();
-        assert!(c.is_none());
-        // assert!(!it.done());
+        fst.add_state();
+        assert_eq!(fst.num_states(), 2);
     }
 
     #[test]
@@ -221,10 +222,33 @@ mod tests {
         fst.set_start(&s1);
         fst.add_arc(&s1, &s2, 3, 5, ProbabilityWeight::new(10.0));
         fst.add_arc(&s1, &s2, 5, 7, ProbabilityWeight::new(18.0));
+        fst.add_arc(&s2, &s1, 10, 17, ProbabilityWeight::new(38.0));
 
-        for arc in fst.arcs_iter(&s1) {
-            println!("{:?}", arc);
-        }
+        let mut arcs_s1 = fst.arcs_iter(&s1);
+
+        let arc = arcs_s1.next().unwrap();
+        assert_eq!(arc.ilabel, 3);
+        assert_eq!(arc.olabel, 5);
+        assert_eq!(arc.weight, ProbabilityWeight::new(10.0));
+        assert_eq!(arc.nextstate, s2);
+
+        let arc = arcs_s1.next().unwrap();
+        assert_eq!(arc.ilabel, 5);
+        assert_eq!(arc.olabel, 7);
+        assert_eq!(arc.weight, ProbabilityWeight::new(18.0));
+        assert_eq!(arc.nextstate, s2);
+
+        assert!(arcs_s1.next().is_none());
+
+        let mut arcs_s2 = fst.arcs_iter(&s2);
+
+        let arc = arcs_s2.next().unwrap();
+        assert_eq!(arc.ilabel, 10);
+        assert_eq!(arc.olabel, 17);
+        assert_eq!(arc.weight, ProbabilityWeight::new(38.0));
+        assert_eq!(arc.nextstate, s1);
+
+        assert!(arcs_s2.next().is_none());
     }
 
     #[test]

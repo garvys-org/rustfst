@@ -11,6 +11,24 @@ pub trait CoreFst {
     type W: Semiring;
 
     /// Returns the ID of the start state of the wFST
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rustfst::fst_traits::MutableFst;
+    /// use rustfst::fst_impls::VectorFst;
+    /// use rustfst::semirings::BooleanWeight;
+    /// use rustfst::fst_traits::CoreFst;
+    ///
+    /// // Create an FST
+    /// let mut fst = VectorFst::<BooleanWeight>::new();
+    /// let s = fst.add_state();
+    /// fst.set_start(&s);
+    /// 
+    /// // Access start state
+    /// let start_state = fst.start();
+    /// assert_eq!(start_state, Some(s));
+    /// ```
     fn start(&self) -> Option<StateId>;
 
     /// Retrieve the final weight of a state (if the state is a final one)
