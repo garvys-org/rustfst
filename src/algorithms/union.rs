@@ -79,11 +79,11 @@ mod tests {
         let v_b_2 = vec![40, 50, 60];
 
         let t_a: VectorFst<BooleanWeight> =
-            transducer(v_a_1.clone().into_iter(), v_a_2.clone().into_iter());
+            transducer(v_a_1.clone().into_iter(), v_a_2.clone().into_iter()).unwrap();
         let t_b: VectorFst<BooleanWeight> =
-            transducer(v_b_1.clone().into_iter(), v_b_2.into_iter());
+            transducer(v_b_1.clone().into_iter(), v_b_2.into_iter()).unwrap();
 
-        let new_fst: VectorFst<_> = union(&t_a, &t_b);
+        let new_fst: VectorFst<_> = union(&t_a, &t_b).unwrap();
 
         println!("{:?}", new_fst);
     }

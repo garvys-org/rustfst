@@ -25,10 +25,10 @@ mod tests {
         let b = vec![4, 5, 6];
 
         let mut fst: VectorFst<ProbabilityWeight> =
-            transducer(a.clone().into_iter(), b.clone().into_iter());
+            transducer(a.clone().into_iter(), b.clone().into_iter()).unwrap();
         project(&mut fst, true);
 
-        let ref_fst = transducer(a.clone().into_iter(), a.clone().into_iter());
+        let ref_fst = transducer(a.clone().into_iter(), a.clone().into_iter()).unwrap();
 
         assert_eq!(fst, ref_fst);
     }
@@ -39,10 +39,10 @@ mod tests {
         let b = vec![4, 5, 6];
 
         let mut fst: VectorFst<ProbabilityWeight> =
-            transducer(a.clone().into_iter(), b.clone().into_iter());
+            transducer(a.clone().into_iter(), b.clone().into_iter()).unwrap();
         project(&mut fst, false);
 
-        let ref_fst = transducer(b.clone().into_iter(), b.clone().into_iter());
+        let ref_fst = transducer(b.clone().into_iter(), b.clone().into_iter()).unwrap();
 
         assert_eq!(fst, ref_fst);
     }
