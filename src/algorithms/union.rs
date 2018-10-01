@@ -3,6 +3,7 @@ use fst_traits::{CoreFst, ExpandedFst, FinalStatesIterator, MutableFst};
 use semirings::Semiring;
 use std::collections::HashMap;
 use StateId;
+use Result;
 
 fn add_epsilon_arc_to_initial_state<F1, F2>(
     fst: &F1,
@@ -38,7 +39,7 @@ where
     }
 }
 
-pub fn union<W, F1, F2, F3>(fst_1: &F1, fst_2: &F2) -> F3
+pub fn union<W, F1, F2, F3>(fst_1: &F1, fst_2: &F2) -> Result<F3>
 where
     W: Semiring,
     F1: ExpandedFst<W = W>,
@@ -48,10 +49,10 @@ where
     let mut fst_out = F3::new();
 
     let start_state = fst_out.add_state();
-    fst_out.set_start(&start_state);
+    fst_out.set_start(&start_state)?;
 
-    let mapping_states_fst_1 = fst_out.add_fst(fst_1);
-    let mapping_states_fst_2 = fst_out.add_fst(fst_2);
+    let mapping_states_fst_1 = fst_out.add_fst(fst_1)?;
+    let mapping_states_fst_2 = fst_out.add_fst(fst_2)?;
 
     add_epsilon_arc_to_initial_state(fst_1, &mapping_states_fst_1, &mut fst_out);
     add_epsilon_arc_to_initial_state(fst_2, &mapping_states_fst_2, &mut fst_out);
@@ -59,7 +60,7 @@ where
     set_new_final_states(fst_1, &mapping_states_fst_1, &mut fst_out);
     set_new_final_states(fst_2, &mapping_states_fst_2, &mut fst_out);
 
-    fst_out
+    Ok(fst_out)
 }
 
 #[cfg(test)]

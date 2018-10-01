@@ -9,17 +9,76 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
     /// Creates an empty wFST
     fn new() -> Self;
 
-    /// The state with identifier passed as parameter is now the start state.
-    /// This method should be called only once as there is only one start state
-    /// allowed in this implementation.
-    fn set_start(&mut self, &StateId) -> Result<()>;
+    /// The state with identifier `state_id` is now the start state.
+    /// Note that only one start state is allowed in this implementation. Calling this function twice
+    /// will mean losing the first start state.
+    /// If the `state_id` doesn't exist an error is raised.
+    ///
+    /// ```
+    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// use rustfst::fst_impls::VectorFst;
+    /// use rustfst::semirings::{BooleanWeight, Semiring};
+    /// use rustfst::arc::Arc;
+    ///
+    /// let mut fst = VectorFst::<BooleanWeight>::new();
+    /// let s1 = fst.add_state();
+    /// let s2 = fst.add_state();
+    ///
+    /// assert_eq!(fst.start(), None);
+    ///
+    /// fst.set_start(&s1);
+    /// assert_eq!(fst.start(), Some(s1));
+    ///
+    /// fst.set_start(&s2);
+    /// assert_eq!(fst.start(), Some(s2));
+    /// ```
+    fn set_start(&mut self, state_id: &StateId) -> Result<()>;
 
     /// Add a new state to the current FST. The identifier of the new state is returned
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// use rustfst::fst_impls::VectorFst;
+    /// use rustfst::semirings::{BooleanWeight, Semiring};
+    ///
+    /// let mut fst = VectorFst::<BooleanWeight>::new();
+    ///
+    /// assert_eq!(fst.num_states(), 0);
+    ///
+    /// fst.add_state();
+    /// assert_eq!(fst.num_states(), 1);
+    ///
+    /// fst.add_state();
+    /// assert_eq!(fst.num_states(), 2);
+    ///
+    /// ```
     fn add_state(&mut self) -> StateId;
 
-    fn del_state(&mut self, &StateId);
-    fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T);
-    fn add_arc(&mut self, source: &StateId, arc: Arc<<Self as CoreFst>::W>);
+    fn del_state(&mut self, &StateId) -> Result<()>;
+    fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) -> Result<()>;
+
+    /// Add an arc to the FST. The arc will start in the state `source`.
+    /// An error is raised if the state `source` doesn't exist.
+    ///
+    /// # Example
+    /// 
+    /// ```
+    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// use rustfst::fst_impls::VectorFst;
+    /// use rustfst::semirings::{BooleanWeight, Semiring};
+    /// use rustfst::arc::Arc;
+    ///
+    /// let mut fst = VectorFst::<BooleanWeight>::new();
+    /// let s1 = fst.add_state();
+    /// let s2 = fst.add_state();
+    ///
+    /// assert_eq!(fst.num_arcs(), 0);
+    /// fst.add_arc(&s1, Arc::new(3, 5, BooleanWeight::new(true), s2));
+    /// assert_eq!(fst.num_arcs(), 1);
+    /// ```
+    fn add_arc(&mut self, source: &StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()>;
     fn set_final(&mut self, id: &StateId, finalweight: <Self as CoreFst>::W);
 
     // fn set_isyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
@@ -28,7 +87,7 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
     fn add_fst<F: ExpandedFst<W = Self::W>>(
         &mut self,
         fst_to_add: &F,
-    ) -> HashMap<StateId, StateId> {
+    ) -> Result<HashMap<StateId, StateId>> {
         // Map old states id to new ones
         let mut mapping_states = HashMap::new();
 
@@ -49,11 +108,11 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
                         old_arc.weight.clone(),
                         mapping_states[&old_arc.nextstate],
                     ),
-                )
+                )?;
             }
         }
 
-        mapping_states
+        Ok(mapping_states)
     }
 }
 

@@ -108,19 +108,20 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         id
     }
 
-    fn add_arc(&mut self, source: &StateId, arc: Arc<<Self as CoreFst>::W>) {
+    fn add_arc(&mut self, source: &StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()> {
         if let Some(state) = self.states.get_mut(*source) {
             state.arcs.push(arc);
+            Ok(())
         } else {
-            panic!("State {:?} doesn't exist", source);
+            bail!("State {:?} doesn't exist", source);
         }
     }
 
-    fn del_state(&mut self, state_to_remove: &StateId) {
+    fn del_state(&mut self, state_to_remove: &StateId) -> Result<()>{
         // Remove the state from the vector
         // Check the arcs for arcs going to this state
 
-        assert!(*state_to_remove < self.states.len());
+        ensure!(*state_to_remove < self.states.len(), "State id {:?} doesn't exist", *state_to_remove);
         self.states.remove(*state_to_remove);
         for state in &mut self.states {
             let mut to_delete = vec![];
@@ -136,14 +137,16 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
                 state.arcs.remove(*id);
             }
         }
+        Ok(())
     }
 
-    fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) {
+    fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) -> Result<()> {
         let mut v: Vec<_> = states.into_iter().collect();
         v.sort();
         for j in (0..v.len()).rev() {
-            self.del_state(&v[j]);
+            self.del_state(&v[j])?;
         }
+        Ok(())
     }
 }
 
