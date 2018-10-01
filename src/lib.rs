@@ -1,3 +1,5 @@
+#[cfg(test)]
+extern crate rand;
 
 /// Type used for the input label and output label of an arc in a wFST
 pub type Label = usize;

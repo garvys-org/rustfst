@@ -4,3 +4,6 @@ version = "0.1.0"
 authors = ["Alexandre Caulier<alexandre.caulier@protonmail.com>"]
 
 [dependencies]
+
+[dev-dependencies]
+rand = "0.5.5"
