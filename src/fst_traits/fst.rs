@@ -10,34 +10,86 @@ pub trait CoreFst {
     /// Weight use in the wFST. This type must implement the Semiring trait
     type W: Semiring;
 
-    /// Returns the ID of the start state of the wFST
+    /// Returns the ID of the start state of the wFST if it exists else none.
     ///
     /// # Example
     ///
     /// ```
-    /// use rustfst::fst_traits::MutableFst;
+    /// use rustfst::fst_traits::{CoreFst, MutableFst};
     /// use rustfst::fst_impls::VectorFst;
     /// use rustfst::semirings::BooleanWeight;
-    /// use rustfst::fst_traits::CoreFst;
     ///
-    /// // Create an FST
+    /// // 1 - Create an FST
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     /// let s = fst.add_state();
     /// fst.set_start(&s);
     ///
-    /// // Access start state
+    /// // 2 - Access the start state
     /// let start_state = fst.start();
     /// assert_eq!(start_state, Some(s));
     /// ```
     fn start(&self) -> Option<StateId>;
 
-    /// Retrieve the final weight of a state (if the state is a final one)
+    /// Retrieves the final weight of a state (if the state is a final one).
+    /// 
+    /// # Example
+    ///
+    /// ```
+    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// use rustfst::fst_impls::VectorFst;
+    /// use rustfst::semirings::{BooleanWeight, Semiring};
+    ///
+    /// // 1 - Create an FST
+    /// let mut fst = VectorFst::<BooleanWeight>::new();
+    /// let s1 = fst.add_state();
+    /// let s2 = fst.add_state();
+    /// fst.set_final(&s2, BooleanWeight::one());
+    ///
+    /// // 2 - Access the final weight of each state
+    /// assert_eq!(fst.final_weight(&s1), None);
+    /// assert_eq!(fst.final_weight(&s2), Some(BooleanWeight::one()));
+    /// ```
     fn final_weight(&self, &StateId) -> Option<<Self as CoreFst>::W>;
 
-    /// Total number of arcs in the wFST. This is the sum of the outgoing arcs of each state
+    /// Total number of arcs in the wFST. This is the sum of the outgoing arcs of each state.
+    ///
+    /// # Example
+    /// 
+    /// ```
+    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// use rustfst::fst_impls::VectorFst;
+    /// use rustfst::semirings::{BooleanWeight, Semiring};
+    /// use rustfst::arc::Arc;
+    ///
+    /// let mut fst = VectorFst::<BooleanWeight>::new();
+    /// let s1 = fst.add_state();
+    /// let s2 = fst.add_state();
+    ///
+    /// assert_eq!(fst.num_arcs(), 0);
+    /// fst.add_arc(&s1, Arc::new(3, 5, BooleanWeight::new(true), s2));
+    /// assert_eq!(fst.num_arcs(), 1);
+    /// ```
     fn num_arcs(&self) -> usize;
 
-    /// Whether the state with identifier passed as parameters is a final state
+    /// Returns whether or not the state with identifier passed as parameters is a final state.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// use rustfst::fst_impls::VectorFst;
+    /// use rustfst::semirings::{BooleanWeight, Semiring};
+    ///
+    /// // 1 - Create an FST
+    /// let mut fst = VectorFst::<BooleanWeight>::new();
+    /// let s1 = fst.add_state();
+    /// let s2 = fst.add_state();
+    /// fst.set_final(&s2, BooleanWeight::one());
+    ///
+    /// // 2 - Test if a state is final
+    /// assert!(!fst.is_final(&s1));
+    /// assert!(fst.is_final(&s2));
+    /// ```
     fn is_final(&self, state_id: &StateId) -> bool {
         self.final_weight(state_id).is_some()
     }
