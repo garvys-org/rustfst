@@ -13,4 +13,4 @@ env:
 script: ./.travis.sh
 matrix:
   allow_failures:
-- rust: nightly
+  - rust: nightly
