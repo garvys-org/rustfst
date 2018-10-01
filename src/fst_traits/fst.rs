@@ -24,7 +24,7 @@ pub trait CoreFst {
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     /// let s = fst.add_state();
     /// fst.set_start(&s);
-    /// 
+    ///
     /// // Access start state
     /// let start_state = fst.start();
     /// assert_eq!(start_state, Some(s));

@@ -1,3 +1,4 @@
+use arc::Arc;
 use fst_traits::{CoreFst, MutableFst};
 use semirings::Semiring;
 use std::cmp;
@@ -21,7 +22,10 @@ pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
 
     for (i, o) in vec_labels_input.iter().zip(vec_labels_output.iter()) {
         let new_state = fst.add_state();
-        fst.add_arc(&state_cour, &new_state, *i, *o, <F as CoreFst>::W::one());
+        fst.add_arc(
+            &state_cour,
+            Arc::new(*i, *o, <F as CoreFst>::W::one(), new_state),
+        );
         state_cour = new_state;
     }
 

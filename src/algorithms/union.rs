@@ -1,3 +1,4 @@
+use arc::Arc;
 use fst_traits::{CoreFst, ExpandedFst, FinalStatesIterator, MutableFst};
 use semirings::Semiring;
 use std::collections::HashMap;
@@ -15,10 +16,12 @@ fn add_epsilon_arc_to_initial_state<F1, F2>(
     if let Some(old_start_state_fst) = fst.start() {
         fst_out.add_arc(
             &start_state,
-            mapping.get(&old_start_state_fst).unwrap(),
-            0,
-            0,
-            <F2 as CoreFst>::W::one(),
+            Arc::new(
+                0,
+                0,
+                <F2 as CoreFst>::W::one(),
+                *mapping.get(&old_start_state_fst).unwrap(),
+            ),
         );
     }
 }
@@ -62,9 +65,9 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use fst_impls::VectorFst;
     use semirings::BooleanWeight;
     use utils::transducer;
-    use fst_impls::VectorFst;
 
     #[test]
     fn test_union() {

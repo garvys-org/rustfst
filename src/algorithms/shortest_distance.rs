@@ -43,9 +43,10 @@ pub fn shortest_distance<F: ExpandedFst>(fst: &F) -> Vec<<F as CoreFst>::W> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use arc::Arc;
+    use fst_impls::VectorFst;
     use fst_traits::MutableFst;
     use semirings::ProbabilityWeight;
-    use fst_impls::VectorFst;
 
     #[test]
     fn test_shortest_distance() {
@@ -54,10 +55,10 @@ mod tests {
         let s2 = fst.add_state();
         let s3 = fst.add_state();
         fst.set_start(&s1);
-        fst.add_arc(&s1, &s2, 3, 5, ProbabilityWeight::new(10.0));
-        fst.add_arc(&s1, &s2, 5, 7, ProbabilityWeight::new(18.0));
-        fst.add_arc(&s2, &s3, 3, 5, ProbabilityWeight::new(3.0));
-        fst.add_arc(&s2, &s3, 5, 7, ProbabilityWeight::new(5.0));
+        fst.add_arc(&s1, Arc::new(3, 5, ProbabilityWeight::new(10.0), s2));
+        fst.add_arc(&s1, Arc::new(5, 7, ProbabilityWeight::new(18.0), s2));
+        fst.add_arc(&s2, Arc::new(3, 5, ProbabilityWeight::new(3.0), s3));
+        fst.add_arc(&s2, Arc::new(5, 7, ProbabilityWeight::new(5.0), s3));
         fst.set_final(&s3, ProbabilityWeight::new(31.0));
 
         println!("{:?}", shortest_distance(&fst));

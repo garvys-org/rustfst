@@ -12,9 +12,9 @@ pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use fst_impls::VectorFst;
     use semirings::ProbabilityWeight;
     use utils::transducer;
-    use fst_impls::VectorFst;
 
     #[test]
     fn test_invert() {

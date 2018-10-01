@@ -4,7 +4,6 @@ use fst_traits::{
 };
 use semirings::Semiring;
 use std::slice;
-use Label;
 use StateId;
 
 #[derive(Debug, PartialEq)]
@@ -107,16 +106,9 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         id
     }
 
-    fn add_arc(
-        &mut self,
-        source: &StateId,
-        target: &StateId,
-        ilabel: Label,
-        olabel: Label,
-        weight: W,
-    ) {
+    fn add_arc(&mut self, source: &StateId, arc: Arc<<Self as CoreFst>::W>) {
         if let Some(state) = self.states.get_mut(*source) {
-            state.arcs.push(Arc::new(ilabel, olabel, weight, *target));
+            state.arcs.push(arc);
         } else {
             panic!("State {:?} doesn't exist", source);
         }
@@ -175,12 +167,11 @@ impl<W: Semiring> VectorFstState<W> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use semirings::ProbabilityWeight;
-    use rand::rngs::StdRng;
-    use rand::SeedableRng;
-    use rand::RngCore;
-    use rand::Rng;
     use fst_traits::FinalStatesIterator;
+    use rand::rngs::StdRng;
+    use rand::Rng;
+    use rand::SeedableRng;
+    use semirings::ProbabilityWeight;
 
     #[test]
     fn test_small_fst() {
@@ -193,9 +184,9 @@ mod tests {
         fst.set_start(&s1);
 
         // Arcs
-        fst.add_arc(&s1, &s2, 3, 5, ProbabilityWeight::new(10.0));
+        fst.add_arc(&s1, Arc::new(3, 5, ProbabilityWeight::new(10.0), s2));
         assert_eq!(fst.num_arcs(), 1);
-        fst.add_arc(&s1, &s2, 5, 7, ProbabilityWeight::new(18.0));
+        fst.add_arc(&s1, Arc::new(5, 7, ProbabilityWeight::new(18.0), s2));
         assert_eq!(fst.num_arcs(), 2);
         assert_eq!(fst.arcs_iter(&s1).count(), 2);
 
@@ -229,13 +220,28 @@ mod tests {
     }
 
     #[test]
+    fn test_mutable_iter_arcs_small() {
+        let mut fst = VectorFst::new();
+
+        // States
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+
+        fst.set_start(&s1);
+
+        // Arcs
+        fst.add_arc(&s1, Arc::new(3, 5, ProbabilityWeight::new(10.0), s2));
+        fst.add_arc(&s1, Arc::new(5, 7, ProbabilityWeight::new(18.0), s2));
+    }
+
+    #[test]
     fn test_start_states() {
         let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         let n_states = 1000;
 
         // Add N states to the FST
-        let states : Vec<_> = (0..n_states).map(|_| fst.add_state()).collect();
+        let states: Vec<_> = (0..n_states).map(|_| fst.add_state()).collect();
 
         // Should be no start state
         assert_eq!(fst.start(), None);
@@ -256,13 +262,15 @@ mod tests {
         let n_states = 1000;
 
         // Add N states to the FST
-        let states : Vec<_> = (0..n_states).map(|_| fst.add_state()).collect();
+        let states: Vec<_> = (0..n_states).map(|_| fst.add_state()).collect();
 
         // Number of final states should be zero
         assert_eq!(fst.final_states_iter().count(), 0);
 
         // Set all states as final
-        states.iter().for_each(|v| fst.set_final(&v, ProbabilityWeight::one()));
+        states
+            .iter()
+            .for_each(|v| fst.set_final(&v, ProbabilityWeight::one()));
 
         // Number of final states should be n_states
         assert_eq!(fst.final_states_iter().count(), n_states);
@@ -276,10 +284,14 @@ mod tests {
         let n_final_states = 300;
 
         // Add N states to the FST
-        let mut states : Vec<_> = (0..n_states).map(|_| fst.add_state()).collect();
+        let mut states: Vec<_> = (0..n_states).map(|_| fst.add_state()).collect();
 
         // Nono the states are final => None final weight
-        assert!(fst.states_iter().map(|state_id| fst.final_weight(&state_id)).all(|v| v.is_none()));
+        assert!(
+            fst.states_iter()
+                .map(|state_id| fst.final_weight(&state_id))
+                .all(|v| v.is_none())
+        );
 
         // Select randomly n_final_states
         let mut rg = StdRng::from_seed([53; 32]);
@@ -287,11 +299,19 @@ mod tests {
         let final_states: Vec<_> = states.into_iter().take(n_final_states).collect();
 
         // Set those as final with a weight equals to its position in the vector
-        final_states.iter().enumerate().for_each(|(idx, state_id)| fst.set_final(state_id, ProbabilityWeight::new(idx as f32)));
+        final_states.iter().enumerate().for_each(|(idx, state_id)| {
+            fst.set_final(state_id, ProbabilityWeight::new(idx as f32))
+        });
 
         // Check they are final with the correct weight
-        assert!(final_states.iter().enumerate().all(|(idx, state_id)| fst.is_final(state_id)));
-        assert!(final_states.iter().enumerate().all(|(idx, state_id)| fst.final_weight(state_id) == Some(ProbabilityWeight::new(idx as f32))));
+        assert!(final_states.iter().all(|state_id| fst.is_final(state_id)));
+        assert!(
+            final_states
+                .iter()
+                .enumerate()
+                .all(|(idx, state_id)| fst.final_weight(state_id)
+                    == Some(ProbabilityWeight::new(idx as f32)))
+        );
     }
 
     #[test]
@@ -302,7 +322,7 @@ mod tests {
         let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         // Add N states to the FST
-        let mut states : Vec<_> = (0..n_states).map(|_| fst.add_state()).collect();
+        let mut states: Vec<_> = (0..n_states).map(|_| fst.add_state()).collect();
 
         // Check those N states do exist
         assert_eq!(fst.num_states(), n_states);
@@ -310,7 +330,7 @@ mod tests {
         // Sample n_states_to_delete to remove from the FST
         let mut rg = StdRng::from_seed([53; 32]);
         rg.shuffle(&mut states);
-        let states_to_delete : Vec<_> = states.into_iter().take(n_states_to_delete).collect();
+        let states_to_delete: Vec<_> = states.into_iter().take(n_states_to_delete).collect();
 
         fst.del_states(states_to_delete);
 

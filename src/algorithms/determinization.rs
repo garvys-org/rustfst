@@ -1,3 +1,4 @@
+use arc::Arc;
 use fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use semirings::{Semiring, WeaklyDivisibleSemiring};
 use std::collections::BTreeMap;
@@ -173,10 +174,7 @@ where
 
             deminized_fst.add_arc(
                 &mapping_states[&weighted_subset],
-                &mapping_states[&new_weighted_subset],
-                x,
-                x,
-                w_prime,
+                Arc::new(x, x, w_prime, mapping_states[&new_weighted_subset]),
             );
         }
     }

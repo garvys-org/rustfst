@@ -15,9 +15,9 @@ pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_input: bool) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use fst_impls::VectorFst;
     use semirings::ProbabilityWeight;
     use utils::transducer;
-    use fst_impls::VectorFst;
 
     #[test]
     fn test_projection_input() {

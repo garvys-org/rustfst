@@ -1,3 +1,4 @@
+use arc::Arc;
 use fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
 use semirings::Semiring;
 
@@ -22,7 +23,7 @@ where
     let start_state_2 = &mapping_states_fst_2[&old_start_state_2];
     for old_final_state_1 in fst_1.final_states_iter() {
         let final_state_1 = &mapping_states_fst_1[&old_final_state_1];
-        fst_out.add_arc(start_state_2, final_state_1, 0, 0, W::one());
+        fst_out.add_arc(start_state_2, Arc::new(0, 0, W::one(), *final_state_1));
     }
 
     // Final states are final states of the second fst
