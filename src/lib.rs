@@ -1,5 +1,9 @@
 #[cfg(test)]
 extern crate rand;
+#[macro_use]
+extern crate failure;
+
+type Result<T> = std::result::Result<T, failure::Error>;
 
 /// Type used for the input label and output label of an arc in a wFST
 pub type Label = usize;

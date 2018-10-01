@@ -2,6 +2,7 @@ use arc::Arc;
 use fst_traits::{CoreFst, ExpandedFst};
 use std::collections::HashMap;
 use StateId;
+use Result;
 
 /// Trait defining the methods to modify a wFST
 pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
@@ -11,7 +12,7 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
     /// The state with identifier passed as parameter is now the start state.
     /// This method should be called only once as there is only one start state
     /// allowed in this implementation.
-    fn set_start(&mut self, &StateId);
+    fn set_start(&mut self, &StateId) -> Result<()>;
 
     /// Add a new state to the current FST. The identifier of the new state is returned
     fn add_state(&mut self) -> StateId;

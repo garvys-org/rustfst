@@ -5,6 +5,7 @@ use fst_traits::{
 use semirings::Semiring;
 use std::slice;
 use StateId;
+use Result;
 
 #[derive(Debug, PartialEq)]
 pub struct VectorFst<W: Semiring> {
@@ -87,9 +88,10 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         }
     }
 
-    fn set_start(&mut self, state_id: &StateId) {
-        assert!(self.states.get(*state_id).is_some());
+    fn set_start(&mut self, state_id: &StateId) -> Result<()> {
+        ensure!(self.states.get(*state_id).is_some(), "The state {:?} doesn't exist", state_id);
         self.start_state = Some(*state_id);
+        Ok(())
     }
 
     fn set_final(&mut self, state_id: &StateId, final_weight: W) {
