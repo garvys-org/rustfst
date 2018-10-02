@@ -1,8 +1,9 @@
 use fst_traits::{ExpandedFst, MutableFst};
+use Result;
 
-pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_input: bool) {
+pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_input: bool) -> Result<()> {
     for state_id in 0..fst.num_states() {
-        for arc in fst.arcs_iter_mut(&state_id) {
+        for arc in fst.arcs_iter_mut(&state_id)? {
             if project_input {
                 arc.olabel = arc.ilabel;
             } else {
@@ -10,6 +11,8 @@ pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_input: bool) {
             }
         }
     }
+
+    Ok(())
 }
 
 #[cfg(test)]
@@ -26,7 +29,7 @@ mod tests {
 
         let mut fst: VectorFst<ProbabilityWeight> =
             transducer(a.clone().into_iter(), b.clone().into_iter()).unwrap();
-        project(&mut fst, true);
+        project(&mut fst, true).unwrap();
 
         let ref_fst = transducer(a.clone().into_iter(), a.clone().into_iter()).unwrap();
 
@@ -40,7 +43,7 @@ mod tests {
 
         let mut fst: VectorFst<ProbabilityWeight> =
             transducer(a.clone().into_iter(), b.clone().into_iter()).unwrap();
-        project(&mut fst, false);
+        project(&mut fst, false).unwrap();
 
         let ref_fst = transducer(b.clone().into_iter(), b.clone().into_iter()).unwrap();
 

@@ -67,7 +67,7 @@ mod tests {
         let new_arc_1 = Arc::new(15, 29, ProbabilityWeight::new(33.0), s2 + 55);
 
         // Modify first arc leaving s1
-        fst.arcs_iter_mut(&s1).next().unwrap().set_value(&new_arc_1);
+        fst.arcs_iter_mut(&s1).unwrap().next().unwrap().set_value(&new_arc_1);
 
         let mut it_s1 = fst.arcs_iter(&s1).unwrap();
 

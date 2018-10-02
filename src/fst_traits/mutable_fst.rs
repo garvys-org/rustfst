@@ -205,5 +205,5 @@ where
     Self::W: 'a,
 {
     type IterMut: Iterator<Item = &'a mut Arc<Self::W>>;
-    fn arcs_iter_mut(&'a mut self, &StateId) -> Self::IterMut;
+    fn arcs_iter_mut(&'a mut self, &StateId) -> Result<Self::IterMut>;
 }
