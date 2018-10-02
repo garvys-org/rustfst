@@ -27,10 +27,10 @@ mod tests {
         let arc_2 = Arc::new(5, 7, ProbabilityWeight::new(18.0), s2);
         fst.add_arc(&s1, arc_2.clone()).unwrap();
         assert_eq!(fst.num_arcs(), 2);
-        assert_eq!(fst.arcs_iter(&s1).count(), 2);
+        assert_eq!(fst.arcs_iter(&s1).unwrap().count(), 2);
 
         // Iterates on arcs leaving s1
-        let mut it_s1 = fst.arcs_iter(&s1);
+        let mut it_s1 = fst.arcs_iter(&s1).unwrap();
 
         let arc = it_s1.next().unwrap();
         assert_eq!(arc_1, *arc);
@@ -42,7 +42,7 @@ mod tests {
         assert!(arc.is_none());
 
         // Iterates on arcs leaving s2
-        let mut it_s2 = fst.arcs_iter(&s2);
+        let mut it_s2 = fst.arcs_iter(&s2).unwrap();
 
         let d = it_s2.next();
         assert!(d.is_none());
@@ -69,7 +69,7 @@ mod tests {
         // Modify first arc leaving s1
         fst.arcs_iter_mut(&s1).next().unwrap().set_value(&new_arc_1);
 
-        let mut it_s1 = fst.arcs_iter(&s1);
+        let mut it_s1 = fst.arcs_iter(&s1).unwrap();
 
         let arc = it_s1.next().unwrap();
         assert_eq!(new_arc_1, *arc);
@@ -172,15 +172,15 @@ mod tests {
         fst.add_arc(&s2, Arc::new(0, 0, ProbabilityWeight::one(), s2)).unwrap();
 
         assert_eq!(fst.num_arcs(), 3);
-        assert_eq!(fst.arcs_iter(&s1).count(), 1);
-        assert_eq!(fst.arcs_iter(&s2).count(), 2);
+        assert_eq!(fst.arcs_iter(&s1).unwrap().count(), 1);
+        assert_eq!(fst.arcs_iter(&s2).unwrap().count(), 2);
 
         fst.del_state(&s1).unwrap();
 
         assert_eq!(fst.num_arcs(), 1);
 
         let only_state = fst.states_iter().next().unwrap();
-        assert_eq!(fst.arcs_iter(&only_state).count(), 1);
+        assert_eq!(fst.arcs_iter(&only_state).unwrap().count(), 1);
     }
 
     #[test]

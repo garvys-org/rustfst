@@ -69,8 +69,9 @@ impl<'a, W: Semiring> Iterator for VectorStateIterator<'a, W> {
 
 impl<'a, W: 'static + Semiring> ArcIterator<'a> for VectorFst<W> {
     type Iter = slice::Iter<'a, Arc<W>>;
-    fn arcs_iter(&'a self, state_id: &StateId) -> Self::Iter {
-        self.states[*state_id].arcs.iter()
+    fn arcs_iter(&'a self, state_id: &StateId) -> Result<Self::Iter> {
+        let state = self.states.get(*state_id).ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
+        Ok(state.arcs.iter())
     }
 }
 

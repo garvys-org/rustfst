@@ -183,7 +183,7 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
 
         // Second pass to add the arcs
         for old_state_id in fst_to_add.states_iter() {
-            for old_arc in fst_to_add.arcs_iter(&old_state_id) {
+            for old_arc in fst_to_add.arcs_iter(&old_state_id)? {
                 self.add_arc(
                     &mapping_states[&old_state_id],
                     Arc::new(

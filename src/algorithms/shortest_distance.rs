@@ -1,8 +1,9 @@
 use fst_traits::{CoreFst, ExpandedFst};
 use semirings::Semiring;
 use std::collections::VecDeque;
+use Result;
 
-pub fn shortest_distance<F: ExpandedFst>(fst: &F) -> Vec<<F as CoreFst>::W> {
+pub fn shortest_distance<F: ExpandedFst>(fst: &F) -> Result<Vec<<F as CoreFst>::W>> {
     let num_states = fst.num_states();
 
     let mut d = vec![];
@@ -25,7 +26,7 @@ pub fn shortest_distance<F: ExpandedFst>(fst: &F) -> Vec<<F as CoreFst>::W> {
         let r2 = r[state_cour].clone();
         r[state_cour] = <F as CoreFst>::W::zero();
 
-        for arc in fst.arcs_iter(&state_cour) {
+        for arc in fst.arcs_iter(&state_cour)? {
             let nextstate = arc.nextstate;
             if d[nextstate] != d[nextstate].plus(&r2.times(&arc.weight)) {
                 d[nextstate] = d[nextstate].plus(&r2.times(&arc.weight));
@@ -37,7 +38,7 @@ pub fn shortest_distance<F: ExpandedFst>(fst: &F) -> Vec<<F as CoreFst>::W> {
         }
     }
 
-    d
+    Ok(d)
 }
 
 #[cfg(test)]

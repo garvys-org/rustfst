@@ -33,28 +33,28 @@ impl<W: Semiring> WeightedSubset<W> {
         self.pairs.push(PairStateWeight::new(state, weight));
     }
 
-    pub fn input_labels<F: ExpandedFst>(&self, fst: &F) -> HashSet<Label> {
+    pub fn input_labels<F: ExpandedFst>(&self, fst: &F) -> Result<HashSet<Label>> {
         let mut set = HashSet::new();
         for pair in &self.pairs {
             let state = pair.state;
-            for arc in fst.arcs_iter(&state) {
+            for arc in fst.arcs_iter(&state)? {
                 set.insert(arc.ilabel);
             }
         }
-        set
+        Ok(set)
     }
 
-    pub fn nextstates<F: ExpandedFst>(&self, x: Label, fst: &F) -> HashSet<StateId> {
+    pub fn nextstates<F: ExpandedFst>(&self, x: Label, fst: &F) -> Result<HashSet<StateId>> {
         let mut set = HashSet::new();
         for pair in &self.pairs {
             let state = pair.state;
-            for arc in fst.arcs_iter(&state) {
+            for arc in fst.arcs_iter(&state)? {
                 if arc.ilabel == x {
                     set.insert(arc.nextstate);
                 }
             }
         }
-        set
+        Ok(set)
     }
 }
 
@@ -62,14 +62,14 @@ fn compute_weight<F: ExpandedFst>(
     x: Label,
     weighted_subset: &WeightedSubset<<F as CoreFst>::W>,
     fst: &F,
-) -> <F as CoreFst>::W {
+) -> Result<<F as CoreFst>::W> {
     let mut w_prime = None;
 
     for pair in &weighted_subset.pairs {
         let p = &pair.state;
         let v = &pair.weight;
 
-        for arc in fst.arcs_iter(&p) {
+        for arc in fst.arcs_iter(&p)? {
             let w = &arc.weight;
 
             if arc.ilabel == x {
@@ -81,7 +81,7 @@ fn compute_weight<F: ExpandedFst>(
         }
     }
 
-    w_prime.unwrap()
+    Ok(w_prime.unwrap())
 }
 
 fn compute_new_weighted_subset<W, F>(
@@ -89,20 +89,20 @@ fn compute_new_weighted_subset<W, F>(
     w_prime: &W,
     weighted_subset: &WeightedSubset<W>,
     fst: &F,
-) -> WeightedSubset<W>
+) -> Result<WeightedSubset<W>>
 where
     W: WeaklyDivisibleSemiring,
     F: ExpandedFst<W = W>,
 {
     let mut new_weighted_subset = WeightedSubset::default();
 
-    for q in weighted_subset.nextstates(x, fst) {
+    for q in weighted_subset.nextstates(x, fst)? {
         let mut new_weight = None;
         for pair in &weighted_subset.pairs {
             let p = &pair.state;
             let v = &pair.weight;
 
-            for arc in fst.arcs_iter(&p) {
+            for arc in fst.arcs_iter(&p)? {
                 if arc.ilabel == x && arc.nextstate == q {
                     let w = &arc.weight;
                     let temp = w_prime.inverse().times(&v.times(&w));
@@ -115,7 +115,7 @@ where
         new_weighted_subset.add(q, new_weight.unwrap());
     }
 
-    new_weighted_subset
+    Ok(new_weighted_subset)
 }
 
 use std::collections::btree_map::Entry;
@@ -145,10 +145,10 @@ where
     while !queue.is_empty() {
         let weighted_subset = queue.pop_front().unwrap();
 
-        for x in weighted_subset.input_labels(fst_in) {
-            let w_prime = compute_weight(x, &weighted_subset, fst_in);
+        for x in weighted_subset.input_labels(fst_in)? {
+            let w_prime = compute_weight(x, &weighted_subset, fst_in)?;
             let new_weighted_subset =
-                compute_new_weighted_subset(x, &w_prime, &weighted_subset, fst_in);
+                compute_new_weighted_subset(x, &w_prime, &weighted_subset, fst_in)?;
 
             if let Entry::Vacant(lol) = mapping_states.entry(new_weighted_subset.clone()) {
                 let state_id = deminized_fst.add_state();

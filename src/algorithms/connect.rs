@@ -8,14 +8,14 @@ fn dfs<F: Fst>(
     state_id_cour: StateId,
     accessible_states: &mut HashSet<StateId>,
     coaccessible_states: &mut HashSet<StateId>,
-) {
+) -> Result<()> {
     accessible_states.insert(state_id_cour);
     let mut is_coaccessible = fst.is_final(&state_id_cour);
-    for arc in fst.arcs_iter(&state_id_cour) {
+    for arc in fst.arcs_iter(&state_id_cour)? {
         let nextstate = arc.nextstate;
 
         if !accessible_states.contains(&nextstate) {
-            dfs(fst, nextstate, accessible_states, coaccessible_states);
+            dfs(fst, nextstate, accessible_states, coaccessible_states)?;
         }
 
         if coaccessible_states.contains(&nextstate) {
@@ -26,6 +26,8 @@ fn dfs<F: Fst>(
     if is_coaccessible {
         coaccessible_states.insert(state_id_cour);
     }
+
+    Ok(())
 }
 
 pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
@@ -38,7 +40,7 @@ pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
             state_id,
             &mut accessible_states,
             &mut coaccessible_states,
-        );
+        )?;
     }
 
     let mut to_delete = Vec::new();
