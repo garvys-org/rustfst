@@ -1,6 +1,8 @@
 use fst_traits::{Fst, StateIterator};
 use StateId;
 
+// TODO : Also return the weight
+
 /// Trait to iterate over the final states of a wFST
 pub trait FinalStatesIterator<'a> {
     type Iter: Iterator<Item = StateId>;

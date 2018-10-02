@@ -3,7 +3,7 @@ use semirings::Semiring;
 use StateId;
 
 /// Trait defining the minimum interface necessary for a wFST
-pub trait Fst: CoreFst + PartialEq + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b> {}
+pub trait Fst: CoreFst + PartialEq + Clone + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b> {}
 
 /// Trait defining necessary methods for a wFST to access start states and final states
 pub trait CoreFst {

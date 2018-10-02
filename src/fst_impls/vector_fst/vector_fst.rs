@@ -7,7 +7,7 @@ use std::slice;
 use StateId;
 use Result;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct VectorFst<W: Semiring> {
     states: Vec<VectorFstState<W>>,
     start_state: Option<StateId>,
@@ -143,6 +143,8 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
 
     fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) -> Result<()> {
         let mut v: Vec<_> = states.into_iter().collect();
+
+        // Necessary : the states that are removed modify the id of all the states that come after
         v.sort();
         for j in (0..v.len()).rev() {
             self.del_state(&v[j])?;
