@@ -61,7 +61,7 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
     /// ```
     fn set_final(&mut self, state_id: &StateId, final_weight: <Self as CoreFst>::W) -> Result<()>;
 
-    /// Add a new state to the current FST. The identifier of the new state is returned
+    /// Adds a new state to the current FST. The identifier of the new state is returned
     ///
     /// # Example
     ///
@@ -83,11 +83,69 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
     /// ```
     fn add_state(&mut self) -> StateId;
 
-    fn del_state(&mut self, &StateId) -> Result<()>;
+    /// Removes a state from an FST. It also removes all the arcs starting from another state and 
+    /// reaching this state. An error is raised if the state `state_id` doesn't exist.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, StateIterator};
+    /// use rustfst::fst_impls::VectorFst;
+    /// use rustfst::semirings::{BooleanWeight, Semiring};
+    ///
+    /// let mut fst = VectorFst::<BooleanWeight>::new();
+    ///
+    /// assert_eq!(fst.states_iter().count(), 0);
+    ///
+    /// let s1 = fst.add_state();
+    ///
+    /// assert_eq!(fst.states_iter().count(), 1);
+    ///
+    /// fst.del_state(&s1);
+    ///
+    /// assert_eq!(fst.states_iter().count(), 0);
+    ///
+    /// ```
+    fn del_state(&mut self, state_id: &StateId) -> Result<()>;
+
+    /// Removes multiple states from an FST. If one of the states doesn't exist, an error is raised.
+    ///
+    /// # Warning
+    ///
+    /// This method modifies the id of the states that are left in the FST. Id that were used before
+    /// calling this function should no longer be used.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, StateIterator};
+    /// use rustfst::fst_impls::VectorFst;
+    /// use rustfst::semirings::{BooleanWeight, Semiring};
+    ///
+    /// let mut fst = VectorFst::<BooleanWeight>::new();
+    ///
+    /// assert_eq!(fst.states_iter().count(), 0);
+    ///
+    /// let s1 = fst.add_state();
+    /// let s2 = fst.add_state();
+    ///
+    /// assert_eq!(fst.states_iter().count(), 2);
+    ///
+    /// let states_to_remove = vec![s1, s2];
+    /// fst.del_states(states_to_remove.into_iter());
+    ///
+    /// assert_eq!(fst.states_iter().count(), 0);
+    ///
+    /// ```
     fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) -> Result<()>;
 
-    /// Add an arc to the FST. The arc will start in the state `source`.
+    /// Adds an arc to the FST. The arc will start in the state `source`.
     /// An error is raised if the state `source` doesn't exist.
+    ///
+    /// # Warning
+    ///
+    /// This method modifies the id of the states that are left in the FST. Id that were used before
+    /// calling this function should no longer be used.
     ///
     /// # Example
     /// 
