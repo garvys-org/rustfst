@@ -34,6 +34,33 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
     /// ```
     fn set_start(&mut self, state_id: &StateId) -> Result<()>;
 
+
+    /// The state with identifier `state_id` is now a final state with a weight `final_weight`.
+    /// If the `state_id` doesn't exist an error is raised.
+    ///
+    /// ```
+    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// use rustfst::fst_impls::VectorFst;
+    /// use rustfst::semirings::{BooleanWeight, Semiring};
+    /// use rustfst::arc::Arc;
+    ///
+    /// let mut fst = VectorFst::<BooleanWeight>::new();
+    /// let s1 = fst.add_state();
+    /// let s2 = fst.add_state();
+    ///
+    /// assert_eq!(fst.final_weight(&s1), None);
+    /// assert_eq!(fst.final_weight(&s2), None);
+    ///
+    /// fst.set_final(&s1, BooleanWeight::one());
+    /// assert_eq!(fst.final_weight(&s1), Some(BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(&s2), None);
+    ///
+    /// fst.set_final(&s2, BooleanWeight::one());
+    /// assert_eq!(fst.final_weight(&s1), Some(BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(&s2), Some(BooleanWeight::one()));
+    /// ```
+    fn set_final(&mut self, state_id: &StateId, final_weight: <Self as CoreFst>::W) -> Result<()>;
+
     /// Add a new state to the current FST. The identifier of the new state is returned
     ///
     /// # Example
@@ -79,7 +106,6 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
     /// assert_eq!(fst.num_arcs(), 1);
     /// ```
     fn add_arc(&mut self, source: &StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()>;
-    fn set_final(&mut self, id: &StateId, finalweight: <Self as CoreFst>::W);
 
     // fn set_isyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
     // fn set_osyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);

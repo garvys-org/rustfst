@@ -16,12 +16,12 @@ mod tests {
         let s1 = fst.add_state();
         let s2 = fst.add_state();
 
-        fst.set_start(&s1);
+        fst.set_start(&s1).unwrap();
 
         // Arcs
-        fst.add_arc(&s1, Arc::new(3, 5, ProbabilityWeight::new(10.0), s2));
+        fst.add_arc(&s1, Arc::new(3, 5, ProbabilityWeight::new(10.0), s2)).unwrap();
         assert_eq!(fst.num_arcs(), 1);
-        fst.add_arc(&s1, Arc::new(5, 7, ProbabilityWeight::new(18.0), s2));
+        fst.add_arc(&s1, Arc::new(5, 7, ProbabilityWeight::new(18.0), s2)).unwrap();
         assert_eq!(fst.num_arcs(), 2);
         assert_eq!(fst.arcs_iter(&s1).count(), 2);
 
@@ -62,11 +62,13 @@ mod tests {
         let s1 = fst.add_state();
         let s2 = fst.add_state();
 
-        fst.set_start(&s1);
+        fst.set_start(&s1).unwrap();
 
         // Arcs
-        fst.add_arc(&s1, Arc::new(3, 5, ProbabilityWeight::new(10.0), s2));
-        fst.add_arc(&s1, Arc::new(5, 7, ProbabilityWeight::new(18.0), s2));
+        fst.add_arc(&s1, Arc::new(3, 5, ProbabilityWeight::new(10.0), s2)).unwrap();
+        fst.add_arc(&s1, Arc::new(5, 7, ProbabilityWeight::new(18.0), s2)).unwrap();
+
+        // TODO : Add assert
     }
 
     #[test]
@@ -82,11 +84,11 @@ mod tests {
         assert_eq!(fst.start(), None);
 
         // New start state
-        fst.set_start(&states[18]);
+        fst.set_start(&states[18]).unwrap();
         assert_eq!(fst.start(), Some(states[18]));
 
         // New start state
-        fst.set_start(&states[32]);
+        fst.set_start(&states[32]).unwrap();
         assert_eq!(fst.start(), Some(states[32]));
     }
 
@@ -105,7 +107,7 @@ mod tests {
         // Set all states as final
         states
             .iter()
-            .for_each(|v| fst.set_final(&v, ProbabilityWeight::one()));
+            .for_each(|v| fst.set_final(&v, ProbabilityWeight::one()).unwrap());
 
         // Number of final states should be n_states
         assert_eq!(fst.final_states_iter().count(), n_states);
@@ -135,7 +137,7 @@ mod tests {
 
         // Set those as final with a weight equals to its position in the vector
         final_states.iter().enumerate().for_each(|(idx, state_id)| {
-            fst.set_final(state_id, ProbabilityWeight::new(idx as f32))
+            fst.set_final(state_id, ProbabilityWeight::new(idx as f32)).unwrap()
         });
 
         // Check they are final with the correct weight
@@ -167,7 +169,7 @@ mod tests {
         rg.shuffle(&mut states);
         let states_to_delete: Vec<_> = states.into_iter().take(n_states_to_delete).collect();
 
-        fst.del_states(states_to_delete);
+        fst.del_states(states_to_delete).unwrap();
 
         // Check they are correctly removed
         assert_eq!(fst.num_states(), n_states - n_states_to_delete);

@@ -94,11 +94,12 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(())
     }
 
-    fn set_final(&mut self, state_id: &StateId, final_weight: W) {
+    fn set_final(&mut self, state_id: &StateId, final_weight: W) -> Result<()> {
         if let Some(state) = self.states.get_mut(*state_id) {
             state.final_weight = Some(final_weight);
+            Ok(())
         } else {
-            panic!("Stateid {:?} doesn't exist", state_id);
+            bail!("Stateid {:?} doesn't exist", state_id);
         }
     }
 

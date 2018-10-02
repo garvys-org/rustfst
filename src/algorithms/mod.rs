@@ -1,4 +1,4 @@
-mod composition;
+// mod composition;
 mod concat;
 mod connect;
 mod determinization;
@@ -8,7 +8,7 @@ mod shortest_distance;
 mod union;
 mod weight_pushing;
 
-pub use self::composition::compose;
+// pub use self::composition::compose;
 pub use self::concat::concat;
 pub use self::connect::connect;
 pub use self::determinization::determinize;

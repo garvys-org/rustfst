@@ -9,7 +9,8 @@ fn add_epsilon_arc_to_initial_state<F1, F2>(
     fst: &F1,
     mapping: &HashMap<StateId, StateId>,
     fst_out: &mut F2,
-) where
+) -> Result<()>
+where
     F1: ExpandedFst,
     F2: MutableFst,
 {
@@ -23,20 +24,24 @@ fn add_epsilon_arc_to_initial_state<F1, F2>(
                 <F2 as CoreFst>::W::one(),
                 *mapping.get(&old_start_state_fst).unwrap(),
             ),
-        );
+        )?;
     }
+    Ok(())
 }
 
-fn set_new_final_states<W, F1, F2>(fst: &F1, mapping: &HashMap<StateId, StateId>, fst_out: &mut F2)
+fn set_new_final_states<W, F1, F2>(fst: &F1, mapping: &HashMap<StateId, StateId>, fst_out: &mut F2) -> Result<()>
 where
     W: Semiring,
     F1: ExpandedFst<W = W>,
     F2: MutableFst<W = W>,
 {
     for old_final_state in fst.final_states_iter() {
-        let final_state = mapping.get(&old_final_state).unwrap();
-        fst_out.set_final(final_state, fst.final_weight(&old_final_state).unwrap());
+        let final_state = mapping.get(&old_final_state).ok_or_else(|| format_err!("Key {:?} doesn't exist in mapping", old_final_state))?;
+        fst_out.set_final(final_state,
+            fst.final_weight(&old_final_state).ok_or_else(|| format_err!("State {:?} is not final", old_final_state))?)?;
     }
+
+    Ok(())
 }
 
 pub fn union<W, F1, F2, F3>(fst_1: &F1, fst_2: &F2) -> Result<F3>
@@ -54,11 +59,11 @@ where
     let mapping_states_fst_1 = fst_out.add_fst(fst_1)?;
     let mapping_states_fst_2 = fst_out.add_fst(fst_2)?;
 
-    add_epsilon_arc_to_initial_state(fst_1, &mapping_states_fst_1, &mut fst_out);
-    add_epsilon_arc_to_initial_state(fst_2, &mapping_states_fst_2, &mut fst_out);
+    add_epsilon_arc_to_initial_state(fst_1, &mapping_states_fst_1, &mut fst_out)?;
+    add_epsilon_arc_to_initial_state(fst_2, &mapping_states_fst_2, &mut fst_out)?;
 
-    set_new_final_states(fst_1, &mapping_states_fst_1, &mut fst_out);
-    set_new_final_states(fst_2, &mapping_states_fst_2, &mut fst_out);
+    set_new_final_states(fst_1, &mapping_states_fst_1, &mut fst_out)?;
+    set_new_final_states(fst_2, &mapping_states_fst_2, &mut fst_out)?;
 
     Ok(fst_out)
 }

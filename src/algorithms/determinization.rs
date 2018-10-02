@@ -5,6 +5,7 @@ use std::collections::BTreeMap;
 use std::collections::{HashSet, VecDeque};
 use Label;
 use StateId;
+use Result;
 
 #[derive(PartialEq, Eq, Clone, Ord, PartialOrd)]
 struct PairStateWeight<W: Semiring> {
@@ -118,7 +119,7 @@ where
 }
 
 use std::collections::btree_map::Entry;
-pub fn determinize<W, F1, F2>(fst_in: &F1) -> F2
+pub fn determinize<W, F1, F2>(fst_in: &F1) -> Result<F2>
 where
     W: WeaklyDivisibleSemiring + Ord + Eq,
     F1: ExpandedFst<W = W>,
@@ -131,7 +132,7 @@ where
     let mut queue = VecDeque::new();
 
     let initial_state = deminized_fst.add_state();
-    deminized_fst.set_start(&initial_state);
+    deminized_fst.set_start(&initial_state)?;
 
     let initial_subset = WeightedSubset::from_vec(vec![PairStateWeight::new(
         fst_in.start().unwrap(),
@@ -165,7 +166,7 @@ where
                 }
 
                 if let Some(pouet) = final_weight {
-                    deminized_fst.set_final(&state_id, pouet);
+                    deminized_fst.set_final(&state_id, pouet)?;
                 }
 
                 // Enqueue
@@ -175,11 +176,11 @@ where
             deminized_fst.add_arc(
                 &mapping_states[&weighted_subset],
                 Arc::new(x, x, w_prime, mapping_states[&new_weighted_subset]),
-            );
+            )?;
         }
     }
 
-    deminized_fst
+    Ok(deminized_fst)
 }
 
 // #[cfg(test)]

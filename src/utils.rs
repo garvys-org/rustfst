@@ -30,7 +30,7 @@ pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
         state_cour = new_state;
     }
 
-    fst.set_final(&state_cour, <F as CoreFst>::W::one());
+    fst.set_final(&state_cour, <F as CoreFst>::W::one())?;
 
     Ok(fst)
 }
