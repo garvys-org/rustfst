@@ -1,8 +1,8 @@
 use arc::Arc;
 use fst_traits::{CoreFst, ExpandedFst};
 use std::collections::HashMap;
-use StateId;
 use Result;
+use StateId;
 
 /// Trait defining the methods to modify a wFST
 pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
@@ -33,7 +33,6 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
     /// assert_eq!(fst.start(), Some(s2));
     /// ```
     fn set_start(&mut self, state_id: &StateId) -> Result<()>;
-
 
     /// The state with identifier `state_id` is now a final state with a weight `final_weight`.
     /// If the `state_id` doesn't exist an error is raised.
@@ -83,7 +82,7 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
     /// ```
     fn add_state(&mut self) -> StateId;
 
-    /// Removes a state from an FST. It also removes all the arcs starting from another state and 
+    /// Removes a state from an FST. It also removes all the arcs starting from another state and
     /// reaching this state. An error is raised if the state `state_id` doesn't exist.
     ///
     /// # Example
@@ -148,7 +147,7 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
     /// calling this function should no longer be used.
     ///
     /// # Example
-    /// 
+    ///
     /// ```
     /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
     /// use rustfst::fst_impls::VectorFst;

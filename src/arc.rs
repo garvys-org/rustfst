@@ -12,7 +12,6 @@ pub struct Arc<W: Semiring> {
 }
 
 impl<W: Semiring> Arc<W> {
-
     /// Creates a new Arc.
     ///
     /// # Example
@@ -20,9 +19,9 @@ impl<W: Semiring> Arc<W> {
     /// ```
     /// use rustfst::arc::Arc;
     /// use rustfst::semirings::{BooleanWeight, Semiring};
-    /// 
+    ///
     /// let arc = Arc::new(0, 1, BooleanWeight::one(), 2);
-    /// 
+    ///
     /// assert_eq!(arc.ilabel, 0);
     /// assert_eq!(arc.olabel, 1);
     /// assert_eq!(arc.weight, BooleanWeight::one());
@@ -45,7 +44,7 @@ impl<W: Semiring> Arc<W> {
     /// ```
     /// use rustfst::arc::Arc;
     /// use rustfst::semirings::{BooleanWeight, Semiring};
-    /// 
+    ///
     /// let mut arc_1 = Arc::new(0, 1, BooleanWeight::one(), 2);
     /// let arc_2 = Arc::new(1, 2, BooleanWeight::zero(), 3);
     ///

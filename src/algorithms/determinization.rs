@@ -4,8 +4,8 @@ use semirings::{Semiring, WeaklyDivisibleSemiring};
 use std::collections::BTreeMap;
 use std::collections::{HashSet, VecDeque};
 use Label;
-use StateId;
 use Result;
+use StateId;
 
 #[derive(PartialEq, Eq, Clone, Ord, PartialOrd)]
 struct PairStateWeight<W: Semiring> {

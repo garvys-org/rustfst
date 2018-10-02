@@ -1,10 +1,13 @@
 use arc::Arc;
 use semirings::Semiring;
-use StateId;
 use Result;
+use StateId;
 
 /// Trait defining the minimum interface necessary for a wFST
-pub trait Fst: CoreFst + PartialEq + Clone + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b> {}
+pub trait Fst:
+    CoreFst + PartialEq + Clone + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b>
+{
+}
 
 /// Trait defining necessary methods for a wFST to access start states and final states
 pub trait CoreFst {
@@ -32,7 +35,7 @@ pub trait CoreFst {
     fn start(&self) -> Option<StateId>;
 
     /// Retrieves the final weight of a state (if the state is a final one).
-    /// 
+    ///
     /// # Example
     ///
     /// ```
@@ -55,7 +58,7 @@ pub trait CoreFst {
     /// Total number of arcs in the wFST. This is the sum of the outgoing arcs of each state.
     ///
     /// # Example
-    /// 
+    ///
     /// ```
     /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
     /// use rustfst::fst_impls::VectorFst;

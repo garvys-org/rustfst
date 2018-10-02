@@ -3,7 +3,8 @@ mod tests {
     use arc::Arc;
     use fst_impls::VectorFst;
     use fst_traits::{
-        ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, MutableFst, StateIterator, MutableArcIterator
+        ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, MutableArcIterator, MutableFst,
+        StateIterator,
     };
     use rand::{rngs::StdRng, Rng, SeedableRng};
     use semirings::{ProbabilityWeight, Semiring};
@@ -67,7 +68,11 @@ mod tests {
         let new_arc_1 = Arc::new(15, 29, ProbabilityWeight::new(33.0), s2 + 55);
 
         // Modify first arc leaving s1
-        fst.arcs_iter_mut(&s1).unwrap().next().unwrap().set_value(&new_arc_1);
+        fst.arcs_iter_mut(&s1)
+            .unwrap()
+            .next()
+            .unwrap()
+            .set_value(&new_arc_1);
 
         let mut it_s1 = fst.arcs_iter(&s1).unwrap();
 
@@ -146,7 +151,8 @@ mod tests {
 
         // Set those as final with a weight equals to its position in the vector
         final_states.iter().enumerate().for_each(|(idx, state_id)| {
-            fst.set_final(state_id, ProbabilityWeight::new(idx as f32)).unwrap()
+            fst.set_final(state_id, ProbabilityWeight::new(idx as f32))
+                .unwrap()
         });
 
         // Check they are final with the correct weight
@@ -167,9 +173,12 @@ mod tests {
         let s1 = fst.add_state();
         let s2 = fst.add_state();
 
-        fst.add_arc(&s1, Arc::new(0, 0, ProbabilityWeight::one(), s2)).unwrap();
-        fst.add_arc(&s2, Arc::new(0, 0, ProbabilityWeight::one(), s1)).unwrap();
-        fst.add_arc(&s2, Arc::new(0, 0, ProbabilityWeight::one(), s2)).unwrap();
+        fst.add_arc(&s1, Arc::new(0, 0, ProbabilityWeight::one(), s2))
+            .unwrap();
+        fst.add_arc(&s2, Arc::new(0, 0, ProbabilityWeight::one(), s1))
+            .unwrap();
+        fst.add_arc(&s2, Arc::new(0, 0, ProbabilityWeight::one(), s2))
+            .unwrap();
 
         assert_eq!(fst.num_arcs(), 3);
         assert_eq!(fst.arcs_iter(&s1).unwrap().count(), 1);
@@ -195,7 +204,6 @@ mod tests {
         assert!(fst1.del_state(&s).is_ok());
         assert!(fst1.del_state(&s).is_err());
 
-
         // Perform test with del_states
         let states_to_remove = vec![s, s];
         assert!(fst2.del_states(states_to_remove.into_iter()).is_err());
@@ -203,7 +211,7 @@ mod tests {
 
     #[test]
     fn test_del_multiple_states() {
-        // Test to check that 
+        // Test to check that
         let mut fst1 = VectorFst::<ProbabilityWeight>::new();
 
         let s1 = fst1.add_state();

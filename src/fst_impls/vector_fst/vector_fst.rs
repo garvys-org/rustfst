@@ -4,8 +4,8 @@ use fst_traits::{
 };
 use semirings::Semiring;
 use std::slice;
-use StateId;
 use Result;
+use StateId;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct VectorFst<W: Semiring> {
@@ -70,7 +70,10 @@ impl<'a, W: Semiring> Iterator for VectorStateIterator<'a, W> {
 impl<'a, W: 'static + Semiring> ArcIterator<'a> for VectorFst<W> {
     type Iter = slice::Iter<'a, Arc<W>>;
     fn arcs_iter(&'a self, state_id: &StateId) -> Result<Self::Iter> {
-        let state = self.states.get(*state_id).ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
+        let state = self
+            .states
+            .get(*state_id)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
         Ok(state.arcs.iter())
     }
 }
@@ -90,7 +93,11 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
     }
 
     fn set_start(&mut self, state_id: &StateId) -> Result<()> {
-        ensure!(self.states.get(*state_id).is_some(), "The state {:?} doesn't exist", state_id);
+        ensure!(
+            self.states.get(*state_id).is_some(),
+            "The state {:?} doesn't exist",
+            state_id
+        );
         self.start_state = Some(*state_id);
         Ok(())
     }
@@ -119,11 +126,15 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         }
     }
 
-    fn del_state(&mut self, state_to_remove: &StateId) -> Result<()>{
+    fn del_state(&mut self, state_to_remove: &StateId) -> Result<()> {
         // Remove the state from the vector
         // Check the arcs for arcs going to this state
 
-        ensure!(*state_to_remove < self.states.len(), "State id {:?} doesn't exist", *state_to_remove);
+        ensure!(
+            *state_to_remove < self.states.len(),
+            "State id {:?} doesn't exist",
+            *state_to_remove
+        );
         self.states.remove(*state_to_remove);
         for state in &mut self.states {
             let mut to_delete = vec![];
@@ -157,7 +168,10 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
 impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
     type IterMut = slice::IterMut<'a, Arc<W>>;
     fn arcs_iter_mut(&'a mut self, state_id: &StateId) -> Result<Self::IterMut> {
-        let state = self.states.get_mut(*state_id).ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
+        let state = self
+            .states
+            .get_mut(*state_id)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
         Ok(state.arcs.iter_mut())
     }
 }

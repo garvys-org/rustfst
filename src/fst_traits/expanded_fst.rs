@@ -1,7 +1,6 @@
 use fst_traits::Fst;
 
 pub trait ExpandedFst: Fst {
-
     /// Returns the number of states that contains the FST. They are all counted even if some states
     /// are not on a successful path (doesn't perform triming).
     ///

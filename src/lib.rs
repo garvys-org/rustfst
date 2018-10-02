@@ -17,4 +17,3 @@ pub mod fst_impls;
 pub mod fst_traits;
 pub mod semirings;
 pub mod utils;
-

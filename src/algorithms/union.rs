@@ -2,8 +2,8 @@ use arc::Arc;
 use fst_traits::{CoreFst, ExpandedFst, FinalStatesIterator, MutableFst};
 use semirings::Semiring;
 use std::collections::HashMap;
-use StateId;
 use Result;
+use StateId;
 
 fn add_epsilon_arc_to_initial_state<F1, F2>(
     fst: &F1,
@@ -29,16 +29,25 @@ where
     Ok(())
 }
 
-fn set_new_final_states<W, F1, F2>(fst: &F1, mapping: &HashMap<StateId, StateId>, fst_out: &mut F2) -> Result<()>
+fn set_new_final_states<W, F1, F2>(
+    fst: &F1,
+    mapping: &HashMap<StateId, StateId>,
+    fst_out: &mut F2,
+) -> Result<()>
 where
     W: Semiring,
     F1: ExpandedFst<W = W>,
     F2: MutableFst<W = W>,
 {
     for old_final_state in fst.final_states_iter() {
-        let final_state = mapping.get(&old_final_state).ok_or_else(|| format_err!("Key {:?} doesn't exist in mapping", old_final_state))?;
-        fst_out.set_final(final_state,
-            fst.final_weight(&old_final_state).ok_or_else(|| format_err!("State {:?} is not final", old_final_state))?)?;
+        let final_state = mapping
+            .get(&old_final_state)
+            .ok_or_else(|| format_err!("Key {:?} doesn't exist in mapping", old_final_state))?;
+        fst_out.set_final(
+            final_state,
+            fst.final_weight(&old_final_state)
+                .ok_or_else(|| format_err!("State {:?} is not final", old_final_state))?,
+        )?;
     }
 
     Ok(())
