@@ -41,12 +41,12 @@ where
 {
     for old_final_state in fst.final_states_iter() {
         let final_state = mapping
-            .get(&old_final_state)
-            .ok_or_else(|| format_err!("Key {:?} doesn't exist in mapping", old_final_state))?;
+            .get(&old_final_state.state_id)
+            .ok_or_else(|| format_err!("Key {:?} doesn't exist in mapping", old_final_state.state_id))?;
         fst_out.set_final(
             final_state,
-            fst.final_weight(&old_final_state)
-                .ok_or_else(|| format_err!("State {:?} is not final", old_final_state))?,
+            fst.final_weight(&old_final_state.state_id)
+                .ok_or_else(|| format_err!("State {:?} is not final", old_final_state.state_id))?,
         )?;
     }
 
