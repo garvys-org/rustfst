@@ -7,7 +7,7 @@ use Result;
 
 /// Turns a list of input labels and output labels to a linear FST.
 ///
-/// # Example 
+/// # Example
 ///
 /// ```
 /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
@@ -72,7 +72,7 @@ pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
 
 /// Turns a list of labels into an acceptor (FST with the same labels for both input and output).
 ///
-/// # Example 
+/// # Example
 ///
 /// ```
 /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
@@ -105,15 +105,13 @@ pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
 /// assert_eq!(fst, fst_ref);
 ///
 //§ ```
-pub fn acceptor<T: Iterator<Item = Label>, F: MutableFst>(
-    labels: T,
-) -> Result<F> {
+pub fn acceptor<T: Iterator<Item = Label>, F: MutableFst>(labels: T) -> Result<F> {
     let vec_labels: Vec<_> = labels.collect();
     let mut fst = F::new();
     let mut state_cour = fst.add_state();
     fst.set_start(&state_cour)?;
 
-    for l in vec_labels.iter() {
+    for l in &vec_labels {
         let new_state = fst.add_state();
         fst.add_arc(
             &state_cour,

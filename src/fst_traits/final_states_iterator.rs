@@ -1,11 +1,11 @@
 use fst_traits::{Fst, StateIterator};
-use StateId;
 use semirings::Semiring;
+use StateId;
 
 pub struct FinalState<W: Semiring> {
     pub state_id: StateId,
     pub final_weight: W,
-} 
+}
 
 /// Trait to iterate over the final states of a wFST
 pub trait FinalStatesIterator<'a> {
@@ -54,7 +54,10 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(state_id) = self.it.next() {
             if let Some(final_weight) = self.fst.final_weight(&state_id) {
-                return Some(FinalState { state_id, final_weight });
+                return Some(FinalState {
+                    state_id,
+                    final_weight,
+                });
             }
         }
         None
