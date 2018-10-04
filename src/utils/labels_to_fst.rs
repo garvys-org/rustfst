@@ -104,7 +104,7 @@ pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
 ///
 /// assert_eq!(fst, fst_ref);
 ///
-//§ ```
+/// ```
 pub fn acceptor<T: Iterator<Item = Label>, F: MutableFst>(labels: T) -> Result<F> {
     let vec_labels: Vec<_> = labels.collect();
     let mut fst = F::new();
