@@ -144,8 +144,7 @@ where
 }
 
 macro_rules! add_or_fst {
-    ($semiring:tt, $fst_type:ty) => (
-
+    ($semiring:tt, $fst_type:ty) => {
         impl<$semiring: 'static + Semiring> Add for $fst_type {
             type Output = Result<$fst_type>;
 
@@ -161,6 +160,5 @@ macro_rules! add_or_fst {
                 union(&self, &rhs)
             }
         }
-
-    )
+    };
 }

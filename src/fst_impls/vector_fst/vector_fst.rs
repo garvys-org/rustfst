@@ -1,13 +1,13 @@
+use algorithms::{concat, union};
 use arc::Arc;
 use fst_traits::{
     ArcIterator, CoreFst, ExpandedFst, Fst, MutableArcIterator, MutableFst, StateIterator,
 };
 use semirings::Semiring;
+use std::ops::{Add, BitOr};
 use std::slice;
 use Result;
 use StateId;
-use std::ops::{Add, BitOr};
-use algorithms::{concat, union};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct VectorFst<W: Semiring> {

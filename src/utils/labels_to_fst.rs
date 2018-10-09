@@ -5,7 +5,8 @@ use std::cmp;
 use Label;
 use Result;
 
-/// Turns a list of input labels and output labels to a linear FST.
+/// Turns a list of input labels and output labels into a linear FST.
+/// The only accepted path in the FST has for input `labels_input` and for output `labels_output`.
 ///
 /// # Example
 ///
@@ -70,7 +71,8 @@ pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
     Ok(fst)
 }
 
-/// Turns a list of labels into an acceptor (FST with the same labels for both input and output).
+/// Turns a list of labels into a linear acceptor (FST with the same labels for both input and output).
+/// The only accepted path in the acceptor will be `labels`.
 ///
 /// # Example
 ///
