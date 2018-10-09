@@ -6,6 +6,8 @@ use semirings::Semiring;
 use std::slice;
 use Result;
 use StateId;
+use std::ops::{Add, BitOr};
+use algorithms::{concat, union};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct VectorFst<W: Semiring> {
@@ -187,3 +189,5 @@ impl<W: Semiring> VectorFstState<W> {
         self.arcs.len()
     }
 }
+
+add_or_fst!(W, VectorFst<W>);

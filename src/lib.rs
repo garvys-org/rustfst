@@ -13,7 +13,8 @@ pub type StateId = usize;
 
 pub mod algorithms;
 pub mod arc;
-pub mod fst_impls;
+#[macro_use]
 pub mod fst_traits;
+pub mod fst_impls;
 pub mod semirings;
 pub mod utils;
