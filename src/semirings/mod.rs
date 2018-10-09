@@ -1,6 +1,7 @@
+#[macro_use]
+mod semiring;
 mod boolean_weight;
 mod probability_weight;
-mod semiring;
 mod tropical_weight;
 
 pub use self::boolean_weight::BooleanWeight;

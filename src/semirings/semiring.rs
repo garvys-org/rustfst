@@ -1,8 +1,10 @@
+use std::ops::{Add, Mul};
+
 /// For some operations, the weight set associated to a wFST must have the structure of a semiring.
 /// (S, +, *, 0, 1) is a semiring if (S, +, 0) is a commutative monoid with identity element 0,
 /// (S, *, 1) is a monoid with identity element 1, * distributes over +, 0 is an annihilator for *.
 /// Thus, a semiring is a ring that may lack negation.
-pub trait Semiring: Clone + PartialEq + Default {
+pub trait Semiring: Clone + PartialEq + Default + Add + Mul {
     type Type;
     fn plus(&self, rhs: &Self) -> Self;
     fn times(&self, rhs: &Self) -> Self;
@@ -19,4 +21,24 @@ pub trait WeaklyDivisibleSemiring: Semiring {
     fn inverse(&self) -> Self;
     // TODO : Not always commutative
     fn divide(&self, rhs: &Self) -> Self;
+}
+
+macro_rules! add_mul_semiring {
+    ($semiring:ty) => {
+        impl Add for $semiring {
+            type Output = $semiring;
+
+            fn add(self, other: $semiring) -> $semiring {
+                self.plus(&other)
+            }
+        }
+
+        impl Mul for $semiring {
+            type Output = $semiring;
+
+            fn mul(self, other: $semiring) -> $semiring {
+                self.times(&other)
+            }
+        }
+    };
 }

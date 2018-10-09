@@ -1,4 +1,5 @@
 use semirings::Semiring;
+use std::ops::{Add, Mul};
 
 #[derive(Clone, Debug, PartialEq, Default, Eq)]
 pub struct BooleanWeight {
@@ -33,6 +34,8 @@ impl Semiring for BooleanWeight {
     }
 }
 
+add_mul_semiring!(BooleanWeight);
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -54,4 +57,14 @@ mod tests {
         assert_eq!(b_false.times(&b_true), b_false);
         assert_eq!(b_false.times(&b_false), b_false);
     }
+
+    #[test]
+    fn test_boolean_weight_sum() {
+        let b_true = BooleanWeight::new(true);
+        let b_false = BooleanWeight::new(false);
+
+        println!("LOL : {:?}", b_true.clone() + b_false.clone());
+        println!("LOL : {:?}", b_true * b_false);
+    }
+
 }

@@ -1,4 +1,5 @@
 use semirings::{Semiring, WeaklyDivisibleSemiring};
+use std::ops::{Add, Mul};
 
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct ProbabilityWeight {
@@ -32,6 +33,8 @@ impl Semiring for ProbabilityWeight {
         self.value
     }
 }
+
+add_mul_semiring!(ProbabilityWeight);
 
 impl WeaklyDivisibleSemiring for ProbabilityWeight {
     fn inverse(&self) -> Self {
