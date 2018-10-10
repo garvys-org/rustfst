@@ -13,6 +13,7 @@ pub type StateId = usize;
 
 pub mod algorithms;
 pub mod arc;
+pub mod path;
 #[macro_use]
 pub mod fst_traits;
 pub mod fst_impls;

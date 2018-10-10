@@ -1,20 +1,19 @@
 use fst_traits::Fst;
 use Result;
-use Label;
+use path::Path;
 
 
-pub fn decode_linear_fst<F: Fst>(fst: &F) -> Result<(Vec<Label>, Vec<Label>)> {
-    let mut res_input = vec![];
-    let mut res_output = vec![];
+pub fn decode_linear_fst<F: Fst>(fst: &F) -> Result<Path<F::W>> {
+    let mut path = Path::default();
 
     let mut state_cour = match fst.start() {
-        None => return Ok((vec![], vec![])),
+        None => return Ok(path),
         Some(x) => x
     };
 
     loop {
         if fst.is_final(&state_cour) {
-            return Ok((res_input, res_output));
+            return Ok(path);
         }
 
         let mut arcs_it = fst.arcs_iter(&state_cour)?;
@@ -28,14 +27,13 @@ pub fn decode_linear_fst<F: Fst>(fst: &F) -> Result<(Vec<Label>, Vec<Label>)> {
 
         match arc {
             None => {
-                return Ok((vec![], vec![]))
+                return Ok(Path::default())
             },
-            Some(x) => {
-                res_input.push(x.ilabel);
-                res_output.push(x.olabel);
+            Some(ref x) => {
+                path.add_to_path(x.ilabel, x.olabel, x.weight.clone());
 
                 if fst.is_final(&state_cour) {
-                    return Ok((res_input, res_output))
+                    return Ok(path)
                 }
 
                 state_cour = x.nextstate;
@@ -58,9 +56,9 @@ mod tests {
         let labels = vec![1, 2, 3];
         let fst : VectorFst<BooleanWeight> = acceptor(labels.clone().into_iter()).unwrap();
 
-        let (res_input, res_output) = decode_linear_fst(&fst).unwrap();
-        assert_eq!(labels, res_input);
-        assert_eq!(labels, res_output);
+        let path = decode_linear_fst(&fst).unwrap();
+        let path_ref = Path::new(labels.clone(), labels, BooleanWeight::one());
+        assert_eq!(path, path_ref);
     }
 
     #[test]
@@ -69,18 +67,18 @@ mod tests {
         let labels_output = vec![43, 22 ,18];
         let fst : VectorFst<BooleanWeight> = transducer(labels_input.clone().into_iter(), labels_output.clone().into_iter()).unwrap();
 
-        let (res_input, res_output) = decode_linear_fst(&fst).unwrap();
-        assert_eq!(labels_input, res_input);
-        assert_eq!(labels_output, res_output);
+        let path = decode_linear_fst(&fst).unwrap();
+        let path_ref = Path::new(labels_input, labels_output, BooleanWeight::one());
+
+        assert_eq!(path, path_ref);
     }
 
     #[test]
     fn test_decode_linear_fst_empty_fst() {
         let fst = VectorFst::<BooleanWeight>::new();
-        let (res_input, res_output) = decode_linear_fst(&fst).unwrap();
+        let path = decode_linear_fst(&fst).unwrap();
 
-        assert_eq!(res_input, vec![]);
-        assert_eq!(res_output, vec![]);
+        assert_eq!(path, Path::default());
     }
 
     #[test]
@@ -90,10 +88,9 @@ mod tests {
         fst.set_start(&s).unwrap();
         fst.set_final(&s, BooleanWeight::one()).unwrap();
 
-        let (res_input, res_output) = decode_linear_fst(&fst).unwrap();
+        let path = decode_linear_fst(&fst).unwrap();
 
-        assert_eq!(res_input, vec![]);
-        assert_eq!(res_output, vec![]);
+        assert_eq!(path, Path::default());
     }
 
     #[test]
