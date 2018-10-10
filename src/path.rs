@@ -1,7 +1,7 @@
 use semirings::Semiring;
 use Label;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone, PartialOrd)]
 pub struct Path<W: Semiring> {
     pub ilabels: Vec<Label>,
     pub olabels: Vec<Label>,
@@ -22,6 +22,7 @@ impl<W: Semiring> Path<W> {
         self.olabels.push(output_label);
         self.weight *= weight
     }
+    // TODO: ADD COST FINAL STATE
 }
 
 impl<W: Semiring> Default for Path<W> {
