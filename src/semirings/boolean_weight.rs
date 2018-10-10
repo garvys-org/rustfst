@@ -1,5 +1,5 @@
 use semirings::Semiring;
-use std::ops::{Add, Mul};
+use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 #[derive(Clone, Debug, PartialEq, Default, Eq)]
 pub struct BooleanWeight {
@@ -31,6 +31,16 @@ impl Semiring for BooleanWeight {
 
     fn value(&self) -> Self::Type {
         self.value
+    }
+
+    fn from_value(value: <Self as Semiring>::Type) -> Self {
+        BooleanWeight {
+            value
+        }
+    }
+
+    fn set_value(&mut self, value: <Self as Semiring>::Type) {
+        self.value = value
     }
 }
 

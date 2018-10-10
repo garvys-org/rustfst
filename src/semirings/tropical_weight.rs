@@ -1,6 +1,6 @@
 use semirings::{Semiring, WeaklyDivisibleSemiring};
 use std::f32;
-use std::ops::{Add, Mul};
+use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct TropicalWeight {
@@ -37,6 +37,16 @@ impl Semiring for TropicalWeight {
 
     fn value(&self) -> Self::Type {
         self.value
+    }
+
+    fn from_value(value: <Self as Semiring>::Type) -> Self {
+        TropicalWeight {
+            value
+        }
+    }
+
+    fn set_value(&mut self, value: <Self as Semiring>::Type) {
+        self.value = value
     }
 }
 
