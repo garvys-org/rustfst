@@ -34,9 +34,7 @@ impl Semiring for ProbabilityWeight {
     }
 
     fn from_value(value: <Self as Semiring>::Type) -> Self {
-        ProbabilityWeight {
-            value
-        }
+        ProbabilityWeight { value }
     }
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {

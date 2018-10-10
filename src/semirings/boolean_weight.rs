@@ -34,9 +34,7 @@ impl Semiring for BooleanWeight {
     }
 
     fn from_value(value: <Self as Semiring>::Type) -> Self {
-        BooleanWeight {
-            value
-        }
+        BooleanWeight { value }
     }
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {

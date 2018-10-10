@@ -40,9 +40,7 @@ impl Semiring for TropicalWeight {
     }
 
     fn from_value(value: <Self as Semiring>::Type) -> Self {
-        TropicalWeight {
-            value
-        }
+        TropicalWeight { value }
     }
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
