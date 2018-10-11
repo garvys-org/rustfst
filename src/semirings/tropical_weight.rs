@@ -39,10 +39,6 @@ impl Semiring for TropicalWeight {
         self.value
     }
 
-    fn from_value(value: <Self as Semiring>::Type) -> Self {
-        TropicalWeight { value }
-    }
-
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
         self.value = value
     }

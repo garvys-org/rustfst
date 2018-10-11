@@ -11,7 +11,6 @@ pub trait Semiring: Clone + PartialEq + Default + Add + AddAssign + Mul + MulAss
     fn zero() -> Self;
     fn one() -> Self;
     fn value(&self) -> Self::Type;
-    fn from_value(Self::Type) -> Self;
     fn set_value(&mut self, Self::Type);
 }
 
