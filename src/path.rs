@@ -1,4 +1,5 @@
 use semirings::Semiring;
+use std::hash::{Hash, Hasher};
 use Label;
 
 #[derive(PartialEq, Debug, Clone, PartialOrd)]
@@ -34,3 +35,13 @@ impl<W: Semiring> Default for Path<W> {
         }
     }
 }
+
+impl<W: Semiring + Hash + Eq> Hash for Path<W> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.ilabels.hash(state);
+        self.olabels.hash(state);
+        self.weight.hash(state);
+    }
+}
+
+impl<W: Semiring + Hash + Eq> Eq for Path<W> {}

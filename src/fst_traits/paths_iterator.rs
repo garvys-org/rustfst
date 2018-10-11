@@ -1,8 +1,8 @@
-use fst_traits::{Fst, StateIterator, ArcIterator};
-use semirings::Semiring;
-use StateId;
+use fst_traits::Fst;
 use path::Path;
+use semirings::Semiring;
 use std::collections::VecDeque;
+use StateId;
 
 /// Trait to iterate over the paths accepted by an FST
 pub trait PathsIterator<'a> {
@@ -12,8 +12,8 @@ pub trait PathsIterator<'a> {
 }
 
 impl<'a, F> PathsIterator<'a> for F
-    where
-        F: 'a + Fst,
+where
+    F: 'a + Fst,
 {
     type W = F::W;
     type Iter = StructPathsIterator<'a, F>;
@@ -23,8 +23,8 @@ impl<'a, F> PathsIterator<'a> for F
 }
 
 pub struct StructPathsIterator<'a, F>
-    where
-        F: 'a + Fst,
+where
+    F: 'a + Fst,
 {
     fst: &'a F,
     queue: VecDeque<(StateId, Path<F::W>)>,
@@ -32,7 +32,7 @@ pub struct StructPathsIterator<'a, F>
 
 impl<'a, F> StructPathsIterator<'a, F>
 where
-    F : 'a + Fst
+    F: 'a + Fst,
 {
     pub fn new(fst: &'a F) -> Self {
         let mut queue = VecDeque::new();
@@ -41,21 +41,18 @@ where
             queue.push_back((state_start, Path::default()));
         }
 
-        StructPathsIterator{
-            fst, queue
-        }
+        StructPathsIterator { fst, queue }
     }
 }
 
 impl<'a, F> Iterator for StructPathsIterator<'a, F>
-    where
-        F: 'a + Fst,
+where
+    F: 'a + Fst,
 {
     type Item = Path<F::W>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        while ! self.queue.is_empty() {
-
+        while !self.queue.is_empty() {
             let (state_id, path) = self.queue.pop_front().unwrap();
 
             for arc in self.fst.arcs_iter(&state_id).unwrap() {
@@ -65,7 +62,7 @@ impl<'a, F> Iterator for StructPathsIterator<'a, F>
             }
 
             if self.fst.is_final(&state_id) {
-                return Some(path)
+                return Some(path);
             }
         }
 
@@ -78,31 +75,30 @@ mod tests {
     use super::*;
     use arc::Arc;
     use fst_impls::VectorFst;
-    use fst_traits::{
-        ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, MutableArcIterator, MutableFst,
-        StateIterator,
-    };
-    use rand::{rngs::StdRng, Rng, SeedableRng};
-    use semirings::{ProbabilityWeight, Semiring};
+    use fst_traits::MutableFst;
+    use semirings::{IntegerWeight, Semiring};
+    use std::collections::HashSet;
     use utils::acceptor;
-    use std::collections::BTreeSet;
 
     #[test]
     fn test_paths_iterator_linear_fst() {
         let labels = vec![153, 45, 96];
 
-        let fst: VectorFst<ProbabilityWeight> = acceptor(labels.clone().into_iter()).unwrap();
+        let fst: VectorFst<IntegerWeight> = acceptor(labels.clone().into_iter()).unwrap();
 
         assert_eq!(fst.paths_iter().count(), 1);
 
         for path in fst.paths_iter() {
-            assert_eq!(path, Path::new(labels.clone(), labels.clone(), ProbabilityWeight::one()));
+            assert_eq!(
+                path,
+                Path::new(labels.clone(), labels.clone(), IntegerWeight::one())
+            );
         }
     }
 
     #[test]
-    fn test_paths_iterator_small_fst() {
-        let mut fst: VectorFst<ProbabilityWeight> = VectorFst::new();
+    fn test_paths_iterator_small_fst_one_final_state() {
+        let mut fst: VectorFst<IntegerWeight> = VectorFst::new();
 
         let s1 = fst.add_state();
         let s2 = fst.add_state();
@@ -110,28 +106,69 @@ mod tests {
         let s4 = fst.add_state();
 
         fst.set_start(&s1).unwrap();
-        fst.set_final(&s4, ProbabilityWeight::one()).unwrap();
+        fst.set_final(&s4, IntegerWeight::one()).unwrap();
 
-        fst.add_arc(&s1, Arc::new(1, 1, ProbabilityWeight::new(1.0), s2)).unwrap();
-        fst.add_arc(&s1, Arc::new(2, 2, ProbabilityWeight::new(2.0), s3)).unwrap();
-        fst.add_arc(&s1, Arc::new(3, 3, ProbabilityWeight::new(3.0), s4)).unwrap();
-        fst.add_arc(&s2, Arc::new(4, 4, ProbabilityWeight::new(4.0), s4)).unwrap();
-        fst.add_arc(&s3, Arc::new(5, 5, ProbabilityWeight::new(5.0), s4)).unwrap();
+        fst.add_arc(&s1, Arc::new(1, 1, IntegerWeight::new(1), s2))
+            .unwrap();
+        fst.add_arc(&s1, Arc::new(2, 2, IntegerWeight::new(2), s3))
+            .unwrap();
+        fst.add_arc(&s1, Arc::new(3, 3, IntegerWeight::new(3), s4))
+            .unwrap();
+        fst.add_arc(&s2, Arc::new(4, 4, IntegerWeight::new(4), s4))
+            .unwrap();
+        fst.add_arc(&s3, Arc::new(5, 5, IntegerWeight::new(5), s4))
+            .unwrap();
 
         assert_eq!(fst.paths_iter().count(), 3);
 
-        // TODO: ADD ASSERT
+        let mut paths_ref = HashSet::new();
+        paths_ref.insert(Path::new(vec![1, 4], vec![1, 4], IntegerWeight::new(4)));
+        paths_ref.insert(Path::new(vec![2, 5], vec![2, 5], IntegerWeight::new(10)));
+        paths_ref.insert(Path::new(vec![3], vec![3], IntegerWeight::new(3)));
 
-//        let mut paths_ref = BTreeSet::new();
-//        paths_ref.insert(Path::new(vec![1, 4], vec![1, 4], ProbabilityWeight::new(4.0)));
-//        paths_ref.insert(Path::new(vec![2, 5], vec![2, 5], ProbabilityWeight::new(10.0)));
-//        paths_ref.insert(Path::new(vec![3], vec![3], ProbabilityWeight::new(3.0)));
-//
-//        let paths : BTreeSet<_> = fst.paths_iter().collect();
+        let paths: HashSet<_> = fst.paths_iter().collect();
 
+        assert_eq!(paths_ref, paths);
+    }
 
-//        for path in fst.paths_iter() {
-//            println!("{:?}", path);
-//        }
+    #[test]
+    fn test_paths_iterator_small_fst_multiple_final_states() {
+        let mut fst: VectorFst<IntegerWeight> = VectorFst::new();
+
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+        let s3 = fst.add_state();
+        let s4 = fst.add_state();
+
+        fst.set_start(&s1).unwrap();
+        fst.set_final(&s1, IntegerWeight::one()).unwrap();
+        fst.set_final(&s2, IntegerWeight::one()).unwrap();
+        fst.set_final(&s3, IntegerWeight::one()).unwrap();
+        fst.set_final(&s4, IntegerWeight::one()).unwrap();
+
+        fst.add_arc(&s1, Arc::new(1, 1, IntegerWeight::new(1), s2))
+            .unwrap();
+        fst.add_arc(&s1, Arc::new(2, 2, IntegerWeight::new(2), s3))
+            .unwrap();
+        fst.add_arc(&s1, Arc::new(3, 3, IntegerWeight::new(3), s4))
+            .unwrap();
+        fst.add_arc(&s2, Arc::new(4, 4, IntegerWeight::new(4), s4))
+            .unwrap();
+        fst.add_arc(&s3, Arc::new(5, 5, IntegerWeight::new(5), s4))
+            .unwrap();
+
+        assert_eq!(fst.paths_iter().count(), 6);
+
+        let mut paths_ref = HashSet::new();
+        paths_ref.insert(Path::default());
+        paths_ref.insert(Path::new(vec![1], vec![1], IntegerWeight::new(1)));
+        paths_ref.insert(Path::new(vec![2], vec![2], IntegerWeight::new(2)));
+        paths_ref.insert(Path::new(vec![1, 4], vec![1, 4], IntegerWeight::new(4)));
+        paths_ref.insert(Path::new(vec![2, 5], vec![2, 5], IntegerWeight::new(10)));
+        paths_ref.insert(Path::new(vec![3], vec![3], IntegerWeight::new(3)));
+
+        let paths: HashSet<_> = fst.paths_iter().collect();
+
+        assert_eq!(paths_ref, paths);
     }
 }

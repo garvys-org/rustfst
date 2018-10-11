@@ -1,8 +1,8 @@
-use semirings::{Semiring, WeaklyDivisibleSemiring};
+use semirings::Semiring;
 use std::i32;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
-#[derive(Clone, Debug, PartialEq, Default)]
+#[derive(Clone, Debug, PartialEq, Default, Hash, Eq)]
 pub struct IntegerWeight {
     value: i32,
 }
