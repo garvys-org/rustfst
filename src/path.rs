@@ -23,7 +23,10 @@ impl<W: Semiring> Path<W> {
         self.olabels.push(output_label);
         self.weight *= weight
     }
-    // TODO: ADD COST FINAL STATE
+
+    pub fn add_weight(&mut self, weight: W) {
+        self.weight *= weight
+    }
 }
 
 impl<W: Semiring> Default for Path<W> {

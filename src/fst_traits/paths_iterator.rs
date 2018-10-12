@@ -53,7 +53,7 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         while !self.queue.is_empty() {
-            let (state_id, path) = self.queue.pop_front().unwrap();
+            let (state_id, mut path) = self.queue.pop_front().unwrap();
 
             for arc in self.fst.arcs_iter(&state_id).unwrap() {
                 let mut new_path = path.clone();
@@ -61,7 +61,8 @@ where
                 self.queue.push_back((arc.nextstate, new_path));
             }
 
-            if self.fst.is_final(&state_id) {
+            if let Some(final_weight) = self.fst.final_weight(&state_id) {
+                path.add_weight(final_weight);
                 return Some(path);
             }
         }
@@ -106,7 +107,7 @@ mod tests {
         let s4 = fst.add_state();
 
         fst.set_start(&s1).unwrap();
-        fst.set_final(&s4, IntegerWeight::one()).unwrap();
+        fst.set_final(&s4, IntegerWeight::new(18)).unwrap();
 
         fst.add_arc(&s1, Arc::new(1, 1, IntegerWeight::new(1), s2))
             .unwrap();
@@ -122,9 +123,9 @@ mod tests {
         assert_eq!(fst.paths_iter().count(), 3);
 
         let mut paths_ref = HashSet::new();
-        paths_ref.insert(Path::new(vec![1, 4], vec![1, 4], IntegerWeight::new(4)));
-        paths_ref.insert(Path::new(vec![2, 5], vec![2, 5], IntegerWeight::new(10)));
-        paths_ref.insert(Path::new(vec![3], vec![3], IntegerWeight::new(3)));
+        paths_ref.insert(Path::new(vec![1, 4], vec![1, 4], IntegerWeight::new(4 * 18)));
+        paths_ref.insert(Path::new(vec![2, 5], vec![2, 5], IntegerWeight::new(10 * 18)));
+        paths_ref.insert(Path::new(vec![3], vec![3], IntegerWeight::new(3 * 18)));
 
         let paths: HashSet<_> = fst.paths_iter().collect();
 
@@ -141,10 +142,10 @@ mod tests {
         let s4 = fst.add_state();
 
         fst.set_start(&s1).unwrap();
-        fst.set_final(&s1, IntegerWeight::one()).unwrap();
-        fst.set_final(&s2, IntegerWeight::one()).unwrap();
-        fst.set_final(&s3, IntegerWeight::one()).unwrap();
-        fst.set_final(&s4, IntegerWeight::one()).unwrap();
+        fst.set_final(&s1, IntegerWeight::new(38)).unwrap();
+        fst.set_final(&s2, IntegerWeight::new(41)).unwrap();
+        fst.set_final(&s3, IntegerWeight::new(53)).unwrap();
+        fst.set_final(&s4, IntegerWeight::new(185)).unwrap();
 
         fst.add_arc(&s1, Arc::new(1, 1, IntegerWeight::new(1), s2))
             .unwrap();
@@ -160,12 +161,12 @@ mod tests {
         assert_eq!(fst.paths_iter().count(), 6);
 
         let mut paths_ref = HashSet::new();
-        paths_ref.insert(Path::default());
-        paths_ref.insert(Path::new(vec![1], vec![1], IntegerWeight::new(1)));
-        paths_ref.insert(Path::new(vec![2], vec![2], IntegerWeight::new(2)));
-        paths_ref.insert(Path::new(vec![1, 4], vec![1, 4], IntegerWeight::new(4)));
-        paths_ref.insert(Path::new(vec![2, 5], vec![2, 5], IntegerWeight::new(10)));
-        paths_ref.insert(Path::new(vec![3], vec![3], IntegerWeight::new(3)));
+        paths_ref.insert(Path::new(vec![], vec![], IntegerWeight::new(38)));
+        paths_ref.insert(Path::new(vec![1], vec![1], IntegerWeight::new(1 * 41)));
+        paths_ref.insert(Path::new(vec![2], vec![2], IntegerWeight::new(2 * 53)));
+        paths_ref.insert(Path::new(vec![1, 4], vec![1, 4], IntegerWeight::new(4 * 185)));
+        paths_ref.insert(Path::new(vec![2, 5], vec![2, 5], IntegerWeight::new(10 * 185)));
+        paths_ref.insert(Path::new(vec![3], vec![3], IntegerWeight::new(3 * 185)));
 
         let paths: HashSet<_> = fst.paths_iter().collect();
 
