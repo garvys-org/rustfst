@@ -1,6 +1,7 @@
 use fst_traits::Fst;
 use path::Path;
 use Result;
+use fst_traits::PathsIterator;
 
 /// Decode a linear FST to retrieves the only path recognized by it. A path is composed of the
 /// input symbols, the output symbols and the weight (multiplication of the weights of the arcs
@@ -26,40 +27,12 @@ use Result;
 /// assert_eq!(path, Path::new(labels_input, labels_output, BooleanWeight::one()));
 /// ```
 pub fn decode_linear_fst<F: Fst>(fst: &F) -> Result<Path<F::W>> {
-    let mut path = Path::default();
-
-    let mut state_cour = match fst.start() {
-        None => return Ok(path),
-        Some(x) => x,
-    };
-
-    loop {
-        if fst.is_final(&state_cour) {
-            return Ok(path);
-        }
-
-        let mut arcs_it = fst.arcs_iter(&state_cour)?;
-
-        let arc = arcs_it.next();
-
-        // FST is not linear => Error
-        if arcs_it.next().is_some() {
-            bail!("The state {:?} has more than one outgoing arcs. The FST must be linear")
-        }
-
-        match arc {
-            None => return Ok(Path::default()),
-            Some(ref x) => {
-                path.add_to_path(x.ilabel, x.olabel, x.weight.clone());
-
-                if fst.is_final(&state_cour) {
-                    return Ok(path);
-                }
-
-                state_cour = x.nextstate;
-            }
-        }
+    let mut it_path = fst.paths_iter();
+    let path = it_path.next().unwrap_or(Path::default());
+    if it_path.next().is_some() {
+        bail!("The FST is not linear !")
     }
+    Ok(path)
 }
 
 #[cfg(test)]
