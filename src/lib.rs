@@ -21,4 +21,5 @@ pub mod path;
 pub mod fst_traits;
 pub mod fst_impls;
 pub mod semirings;
+pub(crate) mod test_data;
 pub mod utils;
