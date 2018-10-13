@@ -85,33 +85,14 @@ mod tests {
     use super::*;
     use fst_impls::VectorFst;
     use fst_traits::PathsIterator;
-    use semirings::{BooleanWeight, IntegerWeight};
-    use std::collections::HashSet;
-    use test_data::vector_fst::get_vector_fsts;
-    use utils::transducer;
     use itertools::Itertools;
-
-    #[test]
-    fn test_union() {
-        let v_a_1 = vec![1, 2, 3];
-        let v_a_2 = vec![4, 5, 6];
-
-        let v_b_1 = vec![10, 20, 30];
-        let v_b_2 = vec![40, 50, 60];
-
-        let t_a: VectorFst<BooleanWeight> =
-            transducer(v_a_1.clone().into_iter(), v_a_2.clone().into_iter()).unwrap();
-        let t_b: VectorFst<BooleanWeight> =
-            transducer(v_b_1.clone().into_iter(), v_b_2.into_iter()).unwrap();
-
-        let new_fst: VectorFst<_> = union(&t_a, &t_b).unwrap();
-
-        println!("{:?}", new_fst);
-    }
+    use semirings::IntegerWeight;
+    use std::collections::HashSet;
+    use test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
     fn test_union_generic() {
-        for data in get_vector_fsts().combinations(2) {
+        for data in get_vector_fsts_for_tests().combinations(2) {
             let fst_1 = &data[0].fst;
             let fst_2 = &data[1].fst;
 
@@ -122,11 +103,9 @@ mod tests {
             let paths: HashSet<_> = union_fst.paths_iter().collect();
 
             assert_eq!(
-                paths,
-                paths_ref,
+                paths, paths_ref,
                 "Test failing for union between {:?} and {:?}",
-                &data[0].name,
-                &data[1].name
+                &data[0].name, &data[1].name
             );
         }
     }

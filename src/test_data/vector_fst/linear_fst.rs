@@ -3,13 +3,13 @@ use fst_impls::VectorFst;
 #[cfg(test)]
 use semirings::IntegerWeight;
 #[cfg(test)]
+use std::vec::IntoIter;
+#[cfg(test)]
 use test_data::TestFst;
 #[cfg(test)]
 use test_data::TestFstData;
 #[cfg(test)]
 use utils::{acceptor, transducer};
-#[cfg(test)]
-use std::vec::IntoIter;
 
 #[cfg(test)]
 pub(crate) fn get_linear_fsts() -> IntoIter<TestFstData<VectorFst<IntegerWeight>>> {
