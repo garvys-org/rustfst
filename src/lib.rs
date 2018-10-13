@@ -2,6 +2,8 @@
 extern crate rand;
 #[macro_use]
 extern crate failure;
+#[cfg(test)]
+extern crate itertools;
 
 type Result<T> = std::result::Result<T, failure::Error>;
 
@@ -21,5 +23,6 @@ pub mod path;
 pub mod fst_traits;
 pub mod fst_impls;
 pub mod semirings;
+#[cfg(test)]
 pub(crate) mod test_data;
 pub mod utils;

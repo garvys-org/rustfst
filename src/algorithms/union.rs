@@ -87,9 +87,9 @@ mod tests {
     use fst_traits::PathsIterator;
     use semirings::{BooleanWeight, IntegerWeight};
     use std::collections::HashSet;
-    use test_data::test_fst_trait::TestFst;
-    use test_data::vector_fst::linear_fst::{LinearAcceptorEmpty, LinearAcceptorOneLabel};
+    use test_data::vector_fst::get_vector_fsts;
     use utils::transducer;
+    use itertools::Itertools;
 
     #[test]
     fn test_union() {
@@ -111,21 +111,23 @@ mod tests {
 
     #[test]
     fn test_union_generic() {
-        let fst_1 = LinearAcceptorEmpty::get_fst();
-        let fst_2 = LinearAcceptorOneLabel::get_fst();
+        for data in get_vector_fsts().combinations(2) {
+            let fst_1 = &data[0].fst;
+            let fst_2 = &data[1].fst;
 
-        let mut paths_ref: HashSet<_> = fst_1.paths_iter().collect();
-        paths_ref.extend(fst_2.paths_iter());
+            let mut paths_ref: HashSet<_> = fst_1.paths_iter().collect();
+            paths_ref.extend(fst_2.paths_iter());
 
-        let union_fst: VectorFst<IntegerWeight> = union(&fst_1, &fst_2).unwrap();
-        let paths: HashSet<_> = union_fst.paths_iter().collect();
+            let union_fst: VectorFst<IntegerWeight> = union(fst_1, fst_2).unwrap();
+            let paths: HashSet<_> = union_fst.paths_iter().collect();
 
-        assert_eq!(
-            paths,
-            paths_ref,
-            "Test failing for union between {:?} and {:?}",
-            LinearAcceptorEmpty::get_name(),
-            LinearAcceptorOneLabel::get_name()
-        );
+            assert_eq!(
+                paths,
+                paths_ref,
+                "Test failing for union between {:?} and {:?}",
+                &data[0].name,
+                &data[1].name
+            );
+        }
     }
 }
