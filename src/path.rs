@@ -1,6 +1,7 @@
 use semirings::Semiring;
 use std::hash::{Hash, Hasher};
 use Label;
+use EPS_LABEL;
 
 #[derive(PartialEq, Debug, Clone, PartialOrd)]
 pub struct Path<W: Semiring> {
@@ -18,14 +19,26 @@ impl<W: Semiring> Path<W> {
         }
     }
 
-    pub fn add_to_path(&mut self, input_label: Label, output_label: Label, weight: W) {
-        self.ilabels.push(input_label);
-        self.olabels.push(output_label);
+    pub fn add_to_path(&mut self, ilabel: Label, olabel: Label, weight: W) {
+        if ilabel != EPS_LABEL {
+            self.ilabels.push(ilabel);
+        }
+
+        if olabel != EPS_LABEL {
+            self.olabels.push(olabel);
+        }
+
         self.weight *= weight
     }
 
     pub fn add_weight(&mut self, weight: W) {
         self.weight *= weight
+    }
+
+    pub fn concat(&mut self, other: Path<W>) {
+        self.ilabels.extend(other.ilabels);
+        self.olabels.extend(other.olabels);
+        self.weight *= other.weight;
     }
 }
 

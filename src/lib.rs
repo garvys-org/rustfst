@@ -11,6 +11,9 @@ pub type Label = usize;
 /// Type used to identify a state in a wFST
 pub type StateId = usize;
 
+/// Epsilon label representing the epsilon transition (empty transition)
+pub static EPS_LABEL: Label = 0;
+
 pub mod algorithms;
 pub mod arc;
 pub mod path;
