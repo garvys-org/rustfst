@@ -84,7 +84,11 @@ where
 mod tests {
     use super::*;
     use fst_impls::VectorFst;
-    use semirings::BooleanWeight;
+    use fst_traits::PathsIterator;
+    use semirings::{BooleanWeight, IntegerWeight};
+    use std::collections::HashSet;
+    use test_data::test_fst_trait::TestFst;
+    use test_data::vector_fst::linear_fst::{LinearAcceptorEmpty, LinearAcceptorOneLabel};
     use utils::transducer;
 
     #[test]
@@ -105,4 +109,23 @@ mod tests {
         println!("{:?}", new_fst);
     }
 
+    #[test]
+    fn test_union_generic() {
+        let fst_1 = LinearAcceptorEmpty::get_fst();
+        let fst_2 = LinearAcceptorOneLabel::get_fst();
+
+        let mut paths_ref: HashSet<_> = fst_1.paths_iter().collect();
+        paths_ref.extend(fst_2.paths_iter());
+
+        let union_fst: VectorFst<IntegerWeight> = union(&fst_1, &fst_2).unwrap();
+        let paths: HashSet<_> = union_fst.paths_iter().collect();
+
+        assert_eq!(
+            paths,
+            paths_ref,
+            "Test failing for union between {:?} and {:?}",
+            LinearAcceptorEmpty::get_name(),
+            LinearAcceptorOneLabel::get_name()
+        );
+    }
 }

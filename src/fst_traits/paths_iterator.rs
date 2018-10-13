@@ -123,8 +123,16 @@ mod tests {
         assert_eq!(fst.paths_iter().count(), 3);
 
         let mut paths_ref = HashSet::new();
-        paths_ref.insert(Path::new(vec![1, 4], vec![1, 4], IntegerWeight::new(4 * 18)));
-        paths_ref.insert(Path::new(vec![2, 5], vec![2, 5], IntegerWeight::new(10 * 18)));
+        paths_ref.insert(Path::new(
+            vec![1, 4],
+            vec![1, 4],
+            IntegerWeight::new(4 * 18),
+        ));
+        paths_ref.insert(Path::new(
+            vec![2, 5],
+            vec![2, 5],
+            IntegerWeight::new(10 * 18),
+        ));
         paths_ref.insert(Path::new(vec![3], vec![3], IntegerWeight::new(3 * 18)));
 
         let paths: HashSet<_> = fst.paths_iter().collect();
@@ -164,8 +172,16 @@ mod tests {
         paths_ref.insert(Path::new(vec![], vec![], IntegerWeight::new(38)));
         paths_ref.insert(Path::new(vec![1], vec![1], IntegerWeight::new(1 * 41)));
         paths_ref.insert(Path::new(vec![2], vec![2], IntegerWeight::new(2 * 53)));
-        paths_ref.insert(Path::new(vec![1, 4], vec![1, 4], IntegerWeight::new(4 * 185)));
-        paths_ref.insert(Path::new(vec![2, 5], vec![2, 5], IntegerWeight::new(10 * 185)));
+        paths_ref.insert(Path::new(
+            vec![1, 4],
+            vec![1, 4],
+            IntegerWeight::new(4 * 185),
+        ));
+        paths_ref.insert(Path::new(
+            vec![2, 5],
+            vec![2, 5],
+            IntegerWeight::new(10 * 185),
+        ));
         paths_ref.insert(Path::new(vec![3], vec![3], IntegerWeight::new(3 * 185)));
 
         let paths: HashSet<_> = fst.paths_iter().collect();
