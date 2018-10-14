@@ -164,31 +164,44 @@ macro_rules! add_or_fst {
     };
 }
 
+macro_rules! display_single_state {
+    ($fst:expr, $state_id:expr, $f: expr) => {
+        for arc in $fst.arcs_iter($state_id).unwrap() {
+            write!(
+                $f,
+                "{}\t{}\t{}\t{}\t{}\n",
+                $state_id, &arc.nextstate, &arc.ilabel, &arc.olabel, &arc.weight
+            )?;
+        }
+    };
+}
+
 macro_rules! display_fst {
     ($semiring:tt, $fst_type:ty) => {
-        use std::fmt;
-        use fst_traits::FinalStatesIterator;
         impl<$semiring: 'static + Semiring> fmt::Display for $fst_type
         where
             $semiring::Type: fmt::Display,
         {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            write!(f, "{:?}\n", self.start());
-                for state_id in self.states_iter() {
-                    for arc in self.arcs_iter(&state_id).unwrap() {
+                if let Some(start_state) = self.start() {
+                    // Firstly print the arcs leaving the start state
+                    display_single_state!(self, &start_state, f);
+
+                    // Secondly, print the arcs leaving all the other states
+                    for state_id in self.states_iter() {
+                        if state_id != start_state {
+                            display_single_state!(self, &state_id, f);
+                        }
+                    }
+
+                    // Finally, print the final states with their weight
+                    for final_state in self.final_states_iter() {
                         write!(
                             f,
-                            "{}\t{}\t{}\t{}\t{}\n",
-                            &state_id,
-                            &arc.nextstate,
-                            &arc.ilabel,
-                            &arc.ilabel,
-                            &arc.weight.value()
-                        )?;
+                            "{}\t{}\n",
+                            &final_state.state_id, &final_state.final_weight
+                        );
                     }
-                }
-                for final_state in self.final_states_iter() {
-                    write!(f, "{}\t{}\n", &final_state.state_id, &final_state.final_weight.value());
                 }
                 Ok(())
             }

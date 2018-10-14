@@ -39,6 +39,7 @@ impl Semiring for ProbabilityWeight {
 }
 
 add_mul_semiring!(ProbabilityWeight);
+display_semiring!(ProbabilityWeight);
 
 impl WeaklyDivisibleSemiring for ProbabilityWeight {
     fn inverse(&self) -> Self {

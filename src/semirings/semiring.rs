@@ -1,12 +1,14 @@
-use std::ops::{Add, AddAssign, Mul, MulAssign};
-use std::fmt::Display;
 use std::fmt::Debug;
+use std::fmt::Display;
+use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 /// For some operations, the weight set associated to a wFST must have the structure of a semiring.
 /// (S, +, *, 0, 1) is a semiring if (S, +, 0) is a commutative monoid with identity element 0,
 /// (S, *, 1) is a monoid with identity element 1, * distributes over +, 0 is an annihilator for *.
 /// Thus, a semiring is a ring that may lack negation.
-pub trait Semiring: Clone + PartialEq + Debug + Default + Add + AddAssign + Mul + MulAssign {
+pub trait Semiring:
+    Clone + PartialEq + Debug + Default + Add + AddAssign + Mul + MulAssign + Display
+{
     type Type: Display;
     fn plus(&self, rhs: &Self) -> Self;
     fn times(&self, rhs: &Self) -> Self;
@@ -55,6 +57,18 @@ macro_rules! add_mul_semiring {
             fn mul_assign(&mut self, other: $semiring) {
                 let new_value = self.times(&other).value();
                 self.set_value(new_value)
+            }
+        }
+    };
+}
+
+macro_rules! display_semiring {
+    ($semiring:tt) => {
+        use std::fmt;
+        impl fmt::Display for $semiring {
+            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                write!(f, "{}", self.value());
+                Ok(())
             }
         }
     };

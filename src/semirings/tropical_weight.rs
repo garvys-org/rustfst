@@ -45,6 +45,7 @@ impl Semiring for TropicalWeight {
 }
 
 add_mul_semiring!(TropicalWeight);
+display_semiring!(TropicalWeight);
 
 impl WeaklyDivisibleSemiring for TropicalWeight {
     fn inverse(&self) -> Self {

@@ -41,3 +41,4 @@ impl Semiring for IntegerWeight {
 }
 
 add_mul_semiring!(IntegerWeight);
+display_semiring!(IntegerWeight);

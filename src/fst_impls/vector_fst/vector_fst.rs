@@ -1,9 +1,11 @@
 use algorithms::{concat, union};
 use arc::Arc;
 use fst_traits::{
-    ArcIterator, CoreFst, ExpandedFst, Fst, MutableArcIterator, MutableFst, StateIterator,
+    ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableArcIterator, MutableFst,
+    StateIterator,
 };
 use semirings::Semiring;
+use std::fmt;
 use std::ops::{Add, BitOr};
 use std::slice;
 use Result;

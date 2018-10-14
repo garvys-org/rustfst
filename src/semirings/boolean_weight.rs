@@ -39,6 +39,7 @@ impl Semiring for BooleanWeight {
 }
 
 add_mul_semiring!(BooleanWeight);
+display_semiring!(BooleanWeight);
 
 #[cfg(test)]
 mod tests {
