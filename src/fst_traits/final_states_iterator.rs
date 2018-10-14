@@ -2,6 +2,7 @@ use fst_traits::{Fst, StateIterator};
 use semirings::Semiring;
 use StateId;
 
+#[derive(Debug)]
 pub struct FinalState<W: Semiring> {
     pub state_id: StateId,
     pub final_weight: W,

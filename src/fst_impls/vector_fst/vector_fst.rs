@@ -191,3 +191,4 @@ impl<W: Semiring> VectorFstState<W> {
 }
 
 add_or_fst!(W, VectorFst<W>);
+display_fst!(W, VectorFst<W>);

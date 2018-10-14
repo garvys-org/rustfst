@@ -1,11 +1,12 @@
 use arc::Arc;
 use semirings::Semiring;
+use std::fmt::Display;
 use Result;
 use StateId;
 
 /// Trait defining the minimum interface necessary for a wFST
 pub trait Fst:
-    CoreFst + PartialEq + Clone + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b>
+    CoreFst + PartialEq + Clone + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b> + Display
 {
 }
 
@@ -158,6 +159,38 @@ macro_rules! add_or_fst {
 
             fn bitor(self, rhs: $fst_type) -> Self::Output {
                 union(&self, &rhs)
+            }
+        }
+    };
+}
+
+macro_rules! display_fst {
+    ($semiring:tt, $fst_type:ty) => {
+        use std::fmt;
+        use fst_traits::FinalStatesIterator;
+        impl<$semiring: 'static + Semiring> fmt::Display for $fst_type
+        where
+            $semiring::Type: fmt::Display,
+        {
+            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f, "{:?}\n", self.start());
+                for state_id in self.states_iter() {
+                    for arc in self.arcs_iter(&state_id).unwrap() {
+                        write!(
+                            f,
+                            "{}\t{}\t{}\t{}\t{}\n",
+                            &state_id,
+                            &arc.nextstate,
+                            &arc.ilabel,
+                            &arc.ilabel,
+                            &arc.weight.value()
+                        )?;
+                    }
+                }
+                for final_state in self.final_states_iter() {
+                    write!(f, "{}\t{}\n", &final_state.state_id, &final_state.final_weight.value());
+                }
+                Ok(())
             }
         }
     };
