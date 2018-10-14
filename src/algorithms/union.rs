@@ -46,11 +46,7 @@ where
                 old_final_state.state_id
             )
         })?;
-        fst_out.set_final(
-            final_state,
-            fst.final_weight(&old_final_state.state_id)
-                .ok_or_else(|| format_err!("State {:?} is not final", old_final_state.state_id))?,
-        )?;
+        fst_out.set_final(final_state, old_final_state.final_weight)?;
     }
 
     Ok(())
@@ -83,6 +79,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use failure::ResultExt;
     use fst_impls::VectorFst;
     use fst_traits::PathsIterator;
     use itertools::Itertools;
@@ -99,7 +96,14 @@ mod tests {
             let mut paths_ref: HashSet<_> = fst_1.paths_iter().collect();
             paths_ref.extend(fst_2.paths_iter());
 
-            let union_fst: VectorFst<IntegerWeight> = union(fst_1, fst_2).unwrap();
+            let union_fst: VectorFst<IntegerWeight> = union(fst_1, fst_2)
+                .with_context(|_| {
+                    format_err!(
+                        "Error when performing union operation between {:?} and {:?}",
+                        &data[0].name,
+                        &data[1].name
+                    )
+                }).unwrap();
             let paths: HashSet<_> = union_fst.paths_iter().collect();
 
             assert_eq!(

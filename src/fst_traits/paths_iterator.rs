@@ -82,6 +82,29 @@ mod tests {
     use utils::acceptor;
 
     #[test]
+    fn test_paths_iterator_empty_fst() {
+        let fst = VectorFst::<IntegerWeight>::new();
+
+        assert_eq!(fst.paths_iter().count(), 0);
+    }
+
+    #[test]
+    fn test_paths_iterator_single_state_start_and_final() {
+        let mut fst = VectorFst::<IntegerWeight>::new();
+
+        let s = fst.add_state();
+        fst.set_start(&s).unwrap();
+        fst.set_final(&s, IntegerWeight::one()).unwrap();
+
+        let paths: HashSet<Path<IntegerWeight>> = fst.paths_iter().collect();
+
+        let mut paths_ref: HashSet<Path<IntegerWeight>> = HashSet::new();
+        paths_ref.insert(Path::default());
+
+        assert_eq!(paths, paths_ref);
+    }
+
+    #[test]
     fn test_paths_iterator_linear_fst() {
         let labels = vec![153, 45, 96];
 

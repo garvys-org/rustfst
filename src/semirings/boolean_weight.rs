@@ -67,8 +67,8 @@ mod tests {
         let b_true = BooleanWeight::new(true);
         let b_false = BooleanWeight::new(false);
 
-        println!("LOL : {:?}", b_true.clone() + b_false.clone());
-        println!("LOL : {:?}", b_true * b_false);
+        assert_eq!(b_true.plus(&b_false), b_true.clone() + b_false.clone());
+        assert_eq!(b_true.times(&b_false), b_true * b_false);
     }
 
 }

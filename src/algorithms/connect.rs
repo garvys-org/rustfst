@@ -58,7 +58,9 @@ mod tests {
     use super::*;
     use arc::Arc;
     use fst_impls::VectorFst;
+    use fst_traits::PathsIterator;
     use semirings::ProbabilityWeight;
+    use test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
     fn test_connect() {
@@ -78,5 +80,25 @@ mod tests {
         assert_eq!(fst.num_states(), 4);
         connect(&mut fst).unwrap();
         assert_eq!(fst.num_states(), 2);
+    }
+
+    #[test]
+    fn test_connect_generic() {
+        for data in get_vector_fsts_for_tests() {
+            let fst = &data.fst;
+
+            let paths_ref: HashSet<_> = fst.paths_iter().collect();
+
+            let mut connect_fst = fst.clone();
+            connect(&mut connect_fst).unwrap();
+
+            let paths: HashSet<_> = connect_fst.paths_iter().collect();
+
+            assert_eq!(
+                paths_ref, paths,
+                "Connect operation doesn't preserver paths for fst : {:?}",
+                &data.name
+            );
+        }
     }
 }
