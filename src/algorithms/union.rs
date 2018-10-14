@@ -52,6 +52,32 @@ where
     Ok(())
 }
 
+/// Performs the union of two wFSTs.  If A transduces string x to y with weight a
+/// and B transduces string w to v with weight b, then their union transduces x to y
+/// with weight a and w to v with weight b.
+///
+/// # Example
+/// ```
+/// use rustfst::utils::transducer;
+/// use rustfst::semirings::{Semiring, IntegerWeight};
+/// use rustfst::fst_impls::VectorFst;
+/// use rustfst::fst_traits::PathsIterator;
+/// use rustfst::path::Path;
+/// use rustfst::algorithms::union;
+/// use std::collections::HashSet;
+///
+/// let fst_a : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
+/// let fst_b : VectorFst<IntegerWeight> = transducer(vec![6].into_iter(), vec![5].into_iter()).unwrap();
+///
+/// let fst_res : VectorFst<IntegerWeight> = union(&fst_a, &fst_b).unwrap();
+/// let paths : HashSet<_> = fst_res.paths_iter().collect();
+///
+/// let mut paths_ref = HashSet::new();
+/// paths_ref.insert(Path::new(vec![2], vec![3], IntegerWeight::one()));
+/// paths_ref.insert(Path::new(vec![6], vec![5], IntegerWeight::one()));
+///
+/// assert_eq!(paths, paths_ref);
+/// ```
 pub fn union<W, F1, F2, F3>(fst_1: &F1, fst_2: &F2) -> Result<F3>
 where
     W: Semiring,
@@ -103,7 +129,8 @@ mod tests {
                         &data[0].name,
                         &data[1].name
                     )
-                }).unwrap();
+                })
+                .unwrap();
             let paths: HashSet<_> = union_fst.paths_iter().collect();
 
             assert_eq!(
