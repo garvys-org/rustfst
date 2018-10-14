@@ -14,3 +14,6 @@ pub(crate) fn get_vector_fsts_for_tests() -> IntoIter<TestFstData<VectorFst<Inte
     let res = linear_fst::get_linear_fsts();
     res
 }
+
+// TODO : Add empty FST
+// TODO : Add not connected FST

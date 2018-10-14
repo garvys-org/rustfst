@@ -2,6 +2,7 @@ use arc::Arc;
 use fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
 use semirings::Semiring;
 use Result;
+use EPS_LABEL;
 
 pub fn concat<W, F1, F2, F3>(fst_1: &F1, fst_2: &F2) -> Result<F3>
 where
@@ -16,31 +17,76 @@ where
     let mapping_states_fst_2 = fst_out.add_fst(fst_2)?;
 
     // Start state is the start state of the first fst
-    let old_start_state = fst_1
-        .start()
-        .ok_or_else(|| format_err!("Fst doesn't have a start state"))?;
-    fst_out.set_start(&mapping_states_fst_1[&old_start_state])?;
+    if let Some(old_start_state) = fst_1.start() {
+        fst_out.set_start(&mapping_states_fst_1[&old_start_state])?;
+    }
 
-    // Final states of the first epsilon are connected to the start state of the second one
-    let old_start_state_2 = fst_2
-        .start()
-        .ok_or_else(|| format_err!("Fst doesn't have a start state"))?;
-    let start_state_2 = &mapping_states_fst_2[&old_start_state_2];
-    for old_final_state_1 in fst_1.final_states_iter() {
-        let final_state_1 = &mapping_states_fst_1[&old_final_state_1.state_id];
-        fst_out.add_arc(start_state_2, Arc::new(0, 0, W::one(), *final_state_1))?;
+    // Final states of the first fst are connected to the start state of the second fst with an
+    // epsilon transition
+    if let Some(old_start_state_2) = fst_2.start() {
+        let start_state_2 = &mapping_states_fst_2[&old_start_state_2];
+        for old_final_state_1 in fst_1.final_states_iter() {
+            let final_state_1 = &mapping_states_fst_1[&old_final_state_1.state_id];
+            fst_out.add_arc(
+                final_state_1,
+                Arc::new(EPS_LABEL, EPS_LABEL, W::one(), *start_state_2),
+            )?;
+        }
     }
 
     // Final states are final states of the second fst
     for old_final_state in fst_2.final_states_iter() {
         let final_state = &mapping_states_fst_2[&old_final_state.state_id];
-        let final_weight = fst_out
-            .final_weight(&old_final_state.state_id)
-            .ok_or_else(|| format_err!("State {:?} is not final", old_final_state.state_id))?;
-        fst_out.set_final(final_state, final_weight)?;
+        fst_out.set_final(final_state, old_final_state.final_weight)?;
     }
 
     // FINISH
 
     Ok(fst_out)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use failure::ResultExt;
+    use fst_impls::VectorFst;
+    use fst_traits::PathsIterator;
+    use itertools::Itertools;
+    use semirings::IntegerWeight;
+    use std::collections::HashSet;
+    use test_data::vector_fst::get_vector_fsts_for_tests;
+
+    #[test]
+    fn test_concat_generic() {
+        for data in get_vector_fsts_for_tests().combinations(2) {
+            let fst_1 = &data[0].fst;
+            let fst_2 = &data[1].fst;
+
+            let mut paths_ref = HashSet::new();
+            for path_fst_1 in fst_1.paths_iter() {
+                for path_fst_2 in fst_2.paths_iter() {
+                    let mut new_path = path_fst_1.clone();
+                    new_path.concat(path_fst_2);
+                    paths_ref.insert(new_path);
+                }
+            }
+
+            let concat_fst: VectorFst<IntegerWeight> = concat(fst_1, fst_2)
+                .with_context(|_| {
+                    format_err!(
+                        "Error when performing concat operation of {:?} and {:?}",
+                        &data[0].name,
+                        &data[1].name
+                    )
+                }).unwrap();
+
+            let paths: HashSet<_> = concat_fst.paths_iter().collect();
+
+            assert_eq!(
+                paths, paths_ref,
+                "Test failing for concat between {:?} and {:?}",
+                &data[0].name, &data[1].name
+            );
+        }
+    }
 }

@@ -14,7 +14,7 @@ use utils::{acceptor, transducer};
 #[cfg(test)]
 pub(crate) fn get_linear_fsts() -> IntoIter<TestFstData<VectorFst<IntegerWeight>>> {
     let mut vec = vec![];
-    vec.push(LinearAcceptorEmpty::new().into());
+    vec.push(LinearAcceptor0Label::new().into());
     vec.push(LinearAcceptor1Label::new().into());
     vec.push(LinearAcceptor3Labels::new().into());
     vec.push(LinearAcceptor1000Labels::new().into());
@@ -25,14 +25,14 @@ pub(crate) fn get_linear_fsts() -> IntoIter<TestFstData<VectorFst<IntegerWeight>
 }
 
 #[cfg(test)]
-pub(crate) struct LinearAcceptorEmpty {}
+pub(crate) struct LinearAcceptor0Label {}
 gen_test_fst!(
-    LinearAcceptorEmpty,
+    LinearAcceptor0Label,
     {
         let labels = vec![];
         acceptor(labels.into_iter()).unwrap()
     },
-    "linear_acceptor_empty"
+    "linear_acceptor_zero_label"
 );
 
 #[cfg(test)]
