@@ -1,6 +1,8 @@
 #[cfg(test)]
 use fst_impls::VectorFst;
 #[cfg(test)]
+use fst_traits::MutableFst;
+#[cfg(test)]
 use semirings::IntegerWeight;
 #[cfg(test)]
 use std::vec::IntoIter;
@@ -14,6 +16,7 @@ use utils::{acceptor, transducer};
 #[cfg(test)]
 pub(crate) fn get_linear_fsts() -> IntoIter<TestFstData<VectorFst<IntegerWeight>>> {
     let mut vec = vec![];
+    vec.push(EmptyFst::new().into());
     vec.push(LinearAcceptor0Label::new().into());
     vec.push(LinearAcceptor1Label::new().into());
     vec.push(LinearAcceptor3Labels::new().into());
@@ -23,6 +26,10 @@ pub(crate) fn get_linear_fsts() -> IntoIter<TestFstData<VectorFst<IntegerWeight>
     vec.push(LinearTransducer1000to1300Labels::new().into());
     vec.into_iter()
 }
+
+#[cfg(test)]
+pub(crate) struct EmptyFst {}
+gen_test_fst!(EmptyFst, { Self::F::new() }, "empty_fst");
 
 #[cfg(test)]
 pub(crate) struct LinearAcceptor0Label {}

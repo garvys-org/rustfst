@@ -10,9 +10,11 @@ use std::vec::IntoIter;
 use test_data::TestFstData;
 
 #[cfg(test)]
-pub(crate) fn get_vector_fsts_for_tests() -> IntoIter<TestFstData<VectorFst<IntegerWeight>>> {
+pub(crate) fn get_vector_fsts_for_tests(
+) -> Box<Iterator<Item = TestFstData<VectorFst<IntegerWeight>>>> {
     let res = linear_fst::get_linear_fsts();
-    res
+    let res = res.chain(linear_fst::get_linear_fsts());
+    Box::new(res)
 }
 
 // TODO : Add empty FST
