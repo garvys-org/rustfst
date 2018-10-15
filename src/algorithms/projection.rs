@@ -30,7 +30,8 @@ use Result;
 /// assert_eq!(fst, acceptor(vec![3].into_iter()).unwrap());
 /// ```
 pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_input: bool) -> Result<()> {
-    for state_id in 0..fst.num_states() {
+    let states: Vec<_> = fst.states_iter().collect();
+    for state_id in states {
         for arc in fst.arcs_iter_mut(&state_id)? {
             if project_input {
                 arc.olabel = arc.ilabel;
@@ -84,35 +85,57 @@ pub fn project_output<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use fst_impls::VectorFst;
-    use semirings::ProbabilityWeight;
-    use utils::transducer;
+    use fst_traits::PathsIterator;
+    use test_data::vector_fst::get_vector_fsts_for_tests;
+    use counter::Counter;
 
     #[test]
-    fn test_projection_input() {
-        let a = vec![1, 2, 3];
-        let b = vec![4, 5, 6];
+    fn test_projection_input_generic() {
+        for data in get_vector_fsts_for_tests() {
+            let fst = &data.fst;
+            
+            let paths_ref: Counter<_> = fst
+                .paths_iter()
+                .map(|mut p| {
+                    p.olabels = p.ilabels.clone();
+                    p
+                }).collect();
 
-        let mut fst: VectorFst<ProbabilityWeight> =
-            transducer(a.clone().into_iter(), b.clone().into_iter()).unwrap();
-        project(&mut fst, true).unwrap();
+            let mut projected_fst = fst.clone();
 
-        let ref_fst = transducer(a.clone().into_iter(), a.clone().into_iter()).unwrap();
+            project_input(&mut projected_fst).unwrap();
+            let paths: Counter<_> = projected_fst.paths_iter().collect();
 
-        assert_eq!(fst, ref_fst);
+            assert_eq!(
+                paths, paths_ref,
+                "Test failing for project_input on wFST {:?}",
+                &data.name
+            )
+        }
     }
 
     #[test]
-    fn test_projection_output() {
-        let a = vec![1, 2, 3];
-        let b = vec![4, 5, 6];
+    fn test_projection_output_generic() {
+        for data in get_vector_fsts_for_tests() {
+            let fst = &data.fst;
 
-        let mut fst: VectorFst<ProbabilityWeight> =
-            transducer(a.clone().into_iter(), b.clone().into_iter()).unwrap();
-        project(&mut fst, false).unwrap();
+            let paths_ref: Counter<_> = fst
+                .paths_iter()
+                .map(|mut p| {
+                    p.ilabels = p.olabels.clone();
+                    p
+                }).collect();
 
-        let ref_fst = transducer(b.clone().into_iter(), b.clone().into_iter()).unwrap();
+            let mut projected_fst = fst.clone();
 
-        assert_eq!(fst, ref_fst);
+            project_output(&mut projected_fst).unwrap();
+            let paths: Counter<_> = projected_fst.paths_iter().collect();
+
+            assert_eq!(
+                paths, paths_ref,
+                "Test failing for project_output on wFST {:?}",
+                &data.name
+            )
+        }
     }
 }

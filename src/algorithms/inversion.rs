@@ -2,8 +2,23 @@ use fst_traits::{ExpandedFst, MutableFst};
 use std::mem::swap;
 use Result;
 
+/// This operation inverts the transduction corresponding to an FST by exchanging the FST's input and output labels.
+///
+/// # Example
+/// ```
+/// use rustfst::utils::{acceptor, transducer};
+/// use rustfst::semirings::{Semiring, IntegerWeight};
+/// use rustfst::fst_impls::VectorFst;
+/// use rustfst::algorithms::invert;
+///
+/// let mut fst : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
+/// invert(&mut fst).unwrap();
+///
+/// assert_eq!(fst, transducer(vec![3].into_iter(), vec![2].into_iter()).unwrap());
+/// ```
 pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
-    for state_id in 0..fst.num_states() {
+    let states: Vec<_> = fst.states_iter().collect();
+    for state_id in states {
         for arc in fst.arcs_iter_mut(&state_id)? {
             swap(&mut arc.ilabel, &mut arc.olabel);
         }
@@ -14,21 +29,32 @@ pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use fst_impls::VectorFst;
-    use semirings::ProbabilityWeight;
-    use utils::transducer;
+    use test_data::vector_fst::get_vector_fsts_for_tests;
+    use counter::Counter;
+    use fst_traits::PathsIterator;
 
     #[test]
-    fn test_invert() {
-        let a = vec![1, 2, 3];
-        let b = vec![4, 5, 6];
+    fn test_invert_generic() {
+        for data in get_vector_fsts_for_tests() {
+            let fst = &data.fst;
 
-        let mut fst: VectorFst<ProbabilityWeight> =
-            transducer(a.clone().into_iter(), b.clone().into_iter()).unwrap();
-        invert(&mut fst).unwrap();
+            let paths_ref: Counter<_> = fst
+                .paths_iter()
+                .map(|mut p| {
+                    swap(&mut p.ilabels, &mut p.olabels);
+                    p
+                }).collect();
 
-        let ref_fst = transducer(b.clone().into_iter(), a.clone().into_iter()).unwrap();
+            let mut projected_fst = fst.clone();
 
-        assert_eq!(fst, ref_fst);
+            invert(&mut projected_fst).unwrap();
+            let paths: Counter<_> = projected_fst.paths_iter().collect();
+
+            assert_eq!(
+                paths, paths_ref,
+                "Test failing for invert on wFST {:?}",
+                &data.name
+            )
+        }
     }
 }

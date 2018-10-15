@@ -110,8 +110,8 @@ mod tests {
     use fst_traits::PathsIterator;
     use itertools::Itertools;
     use semirings::IntegerWeight;
-    use std::collections::HashSet;
     use test_data::vector_fst::get_vector_fsts_for_tests;
+    use counter::Counter;
 
     #[test]
     fn test_union_generic() {
@@ -119,8 +119,8 @@ mod tests {
             let fst_1 = &data[0].fst;
             let fst_2 = &data[1].fst;
 
-            let mut paths_ref: HashSet<_> = fst_1.paths_iter().collect();
-            paths_ref.extend(fst_2.paths_iter());
+            let mut paths_ref: Counter<_> = fst_1.paths_iter().collect();
+            paths_ref.update(fst_2.paths_iter());
 
             let union_fst: VectorFst<IntegerWeight> = union(fst_1, fst_2)
                 .with_context(|_| {
@@ -130,7 +130,7 @@ mod tests {
                         &data[1].name
                     )
                 }).unwrap();
-            let paths: HashSet<_> = union_fst.paths_iter().collect();
+            let paths: Counter<_> = union_fst.paths_iter().collect();
 
             assert_eq!(
                 paths, paths_ref,

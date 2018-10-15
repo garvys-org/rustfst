@@ -78,7 +78,7 @@ mod tests {
     use fst_traits::PathsIterator;
     use itertools::Itertools;
     use semirings::IntegerWeight;
-    use std::collections::HashSet;
+    use counter::Counter;
     use test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
@@ -87,12 +87,12 @@ mod tests {
             let fst_1 = &data[0].fst;
             let fst_2 = &data[1].fst;
 
-            let mut paths_ref = HashSet::new();
+            let mut paths_ref = Counter::new();
             for path_fst_1 in fst_1.paths_iter() {
                 for path_fst_2 in fst_2.paths_iter() {
                     let mut new_path = path_fst_1.clone();
                     new_path.concat(path_fst_2);
-                    paths_ref.insert(new_path);
+                    paths_ref.update(vec![new_path]);
                 }
             }
 
@@ -105,7 +105,7 @@ mod tests {
                     )
                 }).unwrap();
 
-            let paths: HashSet<_> = concat_fst.paths_iter().collect();
+            let paths: Counter<_> = concat_fst.paths_iter().collect();
 
             assert_eq!(
                 paths, paths_ref,

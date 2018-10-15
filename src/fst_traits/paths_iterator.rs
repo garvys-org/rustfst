@@ -78,7 +78,7 @@ mod tests {
     use fst_impls::VectorFst;
     use fst_traits::MutableFst;
     use semirings::{IntegerWeight, Semiring};
-    use std::collections::HashSet;
+    use counter::Counter;
     use utils::acceptor;
 
     #[test]
@@ -96,10 +96,10 @@ mod tests {
         fst.set_start(&s).unwrap();
         fst.set_final(&s, IntegerWeight::one()).unwrap();
 
-        let paths: HashSet<Path<IntegerWeight>> = fst.paths_iter().collect();
+        let paths: Counter<_> = fst.paths_iter().collect();
 
-        let mut paths_ref: HashSet<Path<IntegerWeight>> = HashSet::new();
-        paths_ref.insert(Path::default());
+        let mut paths_ref: Counter<_> = Counter::new();
+        paths_ref.update(vec![Path::default()]);
 
         assert_eq!(paths, paths_ref);
     }
@@ -145,20 +145,20 @@ mod tests {
 
         assert_eq!(fst.paths_iter().count(), 3);
 
-        let mut paths_ref = HashSet::new();
-        paths_ref.insert(Path::new(
+        let mut paths_ref = Counter::new();
+        paths_ref.update(vec![Path::new(
             vec![1, 4],
             vec![1, 4],
             IntegerWeight::new(4 * 18),
-        ));
-        paths_ref.insert(Path::new(
+        )]);
+        paths_ref.update(vec![Path::new(
             vec![2, 5],
             vec![2, 5],
             IntegerWeight::new(10 * 18),
-        ));
-        paths_ref.insert(Path::new(vec![3], vec![3], IntegerWeight::new(3 * 18)));
+        )]);
+        paths_ref.update(vec![Path::new(vec![3], vec![3], IntegerWeight::new(3 * 18))]);
 
-        let paths: HashSet<_> = fst.paths_iter().collect();
+        let paths: Counter<_> = fst.paths_iter().collect();
 
         assert_eq!(paths_ref, paths);
     }
@@ -191,23 +191,23 @@ mod tests {
 
         assert_eq!(fst.paths_iter().count(), 6);
 
-        let mut paths_ref = HashSet::new();
-        paths_ref.insert(Path::new(vec![], vec![], IntegerWeight::new(38)));
-        paths_ref.insert(Path::new(vec![1], vec![1], IntegerWeight::new(1 * 41)));
-        paths_ref.insert(Path::new(vec![2], vec![2], IntegerWeight::new(2 * 53)));
-        paths_ref.insert(Path::new(
+        let mut paths_ref = Counter::new();
+        paths_ref.update(vec![Path::new(vec![], vec![], IntegerWeight::new(38))]);
+        paths_ref.update(vec![Path::new(vec![1], vec![1], IntegerWeight::new(1 * 41))]);
+        paths_ref.update(vec![Path::new(vec![2], vec![2], IntegerWeight::new(2 * 53))]);
+        paths_ref.update(vec![Path::new(
             vec![1, 4],
             vec![1, 4],
             IntegerWeight::new(4 * 185),
-        ));
-        paths_ref.insert(Path::new(
+        )]);
+        paths_ref.update(vec![Path::new(
             vec![2, 5],
             vec![2, 5],
             IntegerWeight::new(10 * 185),
-        ));
-        paths_ref.insert(Path::new(vec![3], vec![3], IntegerWeight::new(3 * 185)));
+        )]);
+        paths_ref.update(vec![Path::new(vec![3], vec![3], IntegerWeight::new(3 * 185))]);
 
-        let paths: HashSet<_> = fst.paths_iter().collect();
+        let paths: Counter<_> = fst.paths_iter().collect();
 
         assert_eq!(paths_ref, paths);
     }
