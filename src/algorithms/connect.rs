@@ -30,6 +30,27 @@ fn dfs<F: Fst>(
     Ok(())
 }
 
+/// This operation trims an FST, removing states and arcs that are not on successful paths.
+///
+/// # Example
+/// ```
+/// use rustfst::utils::transducer;
+/// use rustfst::semirings::{Semiring, IntegerWeight};
+/// use rustfst::fst_impls::VectorFst;
+/// use rustfst::algorithms::connect;
+/// use rustfst::fst_traits::MutableFst;
+///
+/// let fst : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
+///
+/// // Add a state not on a successful path
+/// let mut no_connected_fst = fst.clone();
+/// no_connected_fst.add_state();
+///
+/// let mut connected_fst = no_connected_fst.clone();
+/// connect(&mut connected_fst);
+///
+/// assert_eq!(connected_fst, fst);
+/// ```
 pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
     let mut accessible_states = HashSet::new();
     let mut coaccessible_states = HashSet::new();
@@ -56,47 +77,19 @@ pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use arc::Arc;
-    use fst_impls::VectorFst;
-    use fst_traits::PathsIterator;
-    use semirings::ProbabilityWeight;
     use test_data::vector_fst::get_vector_fsts_for_tests;
-
-    #[test]
-    fn test_connect() {
-        let mut fst = VectorFst::new();
-        let s1 = fst.add_state();
-        let s2 = fst.add_state();
-        fst.set_start(&s1).unwrap();
-        fst.add_arc(&s1, Arc::new(3, 5, ProbabilityWeight::new(10.0), s2))
-            .unwrap();
-        fst.add_arc(&s1, Arc::new(5, 7, ProbabilityWeight::new(18.0), s2))
-            .unwrap();
-        fst.set_final(&s2, ProbabilityWeight::new(31.0)).unwrap();
-        fst.add_state();
-        let s4 = fst.add_state();
-        fst.add_arc(&s2, Arc::new(5, 7, ProbabilityWeight::new(18.0), s4))
-            .unwrap();
-        assert_eq!(fst.num_states(), 4);
-        connect(&mut fst).unwrap();
-        assert_eq!(fst.num_states(), 2);
-    }
 
     #[test]
     fn test_connect_generic() {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
 
-            let paths_ref: HashSet<_> = fst.paths_iter().collect();
-
             let mut connect_fst = fst.clone();
             connect(&mut connect_fst).unwrap();
 
-            let paths: HashSet<_> = connect_fst.paths_iter().collect();
-
             assert_eq!(
-                paths_ref, paths,
-                "Connect operation doesn't preserver paths for fst : {:?}",
+                connect_fst, data.connected_fst,
+                "Connect test fail for fst : {:?}",
                 &data.name
             );
         }

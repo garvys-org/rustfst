@@ -6,6 +6,7 @@ pub(crate) trait TestFst {
     type F: Fst;
     fn get_fst() -> Self::F;
     fn get_name() -> String;
+    fn get_connected_fst() -> Self::F;
 }
 
 #[cfg(test)]
@@ -13,27 +14,15 @@ pub(crate) trait TestFst {
 pub(crate) struct TestFstData<F: Fst> {
     pub(crate) fst: F,
     pub(crate) name: String,
+    pub(crate) connected_fst: F,
 }
 
 macro_rules! gen_test_fst {
-    ($struct_name: ty, $fst_code:block, $name: expr) => {
+    ($struct_name: ty) => {
         #[cfg(test)]
         impl $struct_name {
             pub(crate) fn new() -> Self {
                 Self {}
-            }
-        }
-
-        #[cfg(test)]
-        impl TestFst for $struct_name {
-            type F = VectorFst<IntegerWeight>;
-
-            fn get_fst() -> <Self as TestFst>::F {
-                $fst_code
-            }
-
-            fn get_name() -> String {
-                String::from($name)
             }
         }
 
@@ -43,6 +32,7 @@ macro_rules! gen_test_fst {
                 TestFstData {
                     fst: Self::get_fst(),
                     name: Self::get_name(),
+                    connected_fst: Self::get_connected_fst(),
                 }
             }
         }

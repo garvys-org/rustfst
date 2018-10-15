@@ -103,8 +103,7 @@ mod tests {
                         &data[0].name,
                         &data[1].name
                     )
-                })
-                .unwrap();
+                }).unwrap();
 
             let paths: HashSet<_> = concat_fst.paths_iter().collect();
 

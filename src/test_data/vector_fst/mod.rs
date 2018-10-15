@@ -1,4 +1,13 @@
-pub(crate) mod linear_fst;
+pub(crate) mod fst_001_empty;
+pub(crate) mod fst_002_linear_acceptor_0_label;
+pub(crate) mod fst_003_linear_acceptor_1_label;
+pub(crate) mod fst_004_linear_acceptor_3_labels;
+pub(crate) mod fst_005_linear_acceptor_1000_labels;
+pub(crate) mod fst_006_linear_transducer_1_label;
+pub(crate) mod fst_007_linear_transducer_3_to_2_labels;
+pub(crate) mod fst_008_linear_transducer_1000_to_1300_labels;
+pub(crate) mod fst_009;
+//pub(crate) mod fst_001;
 
 #[cfg(test)]
 use fst_impls::VectorFst;
@@ -10,12 +19,27 @@ use std::vec::IntoIter;
 use test_data::TestFstData;
 
 #[cfg(test)]
-pub(crate) fn get_vector_fsts_for_tests(
-) -> Box<Iterator<Item = TestFstData<VectorFst<IntegerWeight>>>> {
-    let res = linear_fst::get_linear_fsts();
-    let res = res.chain(linear_fst::get_linear_fsts());
-    Box::new(res)
+pub(crate) fn get_linear_fsts() -> Vec<TestFstData<VectorFst<IntegerWeight>>> {
+    let mut vec = vec![];
+    vec.push(fst_001_empty::EmptyFst::new().into());
+    vec.push(fst_002_linear_acceptor_0_label::LinearAcceptor0Label::new().into());
+    vec.push(fst_003_linear_acceptor_1_label::LinearAcceptor1Label::new().into());
+    vec.push(fst_004_linear_acceptor_3_labels::LinearAcceptor3Labels::new().into());
+    vec.push(fst_005_linear_acceptor_1000_labels::LinearAcceptor1000Labels::new().into());
+    vec.push(fst_006_linear_transducer_1_label::LinearTransducerOneLabel::new().into());
+    vec.push(fst_007_linear_transducer_3_to_2_labels::LinearTransducer3to2Labels::new().into());
+    vec.push(
+        fst_008_linear_transducer_1000_to_1300_labels::LinearTransducer1000to1300Labels::new()
+            .into(),
+    );
+    vec
 }
 
-// TODO : Add empty FST
+#[cfg(test)]
+pub(crate) fn get_vector_fsts_for_tests() -> IntoIter<TestFstData<VectorFst<IntegerWeight>>> {
+    let mut res = get_linear_fsts();
+    res.push(fst_009::VectorFst009::new().into());
+    res.into_iter()
+}
+
 // TODO : Add not connected FST
