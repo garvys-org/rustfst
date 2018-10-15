@@ -3,24 +3,35 @@ use std::f32;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 #[derive(Clone, Debug, PartialEq, Default)]
-pub struct TropicalWeight {
+pub struct LogWeight {
     value: f32,
 }
 
-impl TropicalWeight {
+impl LogWeight {
     pub fn new(value: f32) -> Self {
-        TropicalWeight { value }
+        LogWeight { value }
     }
 }
 
-impl Semiring for TropicalWeight {
+fn ln_pos_exp(x: f32) -> f32 {
+    ((-x).exp()).ln_1p()
+}
+
+
+impl Semiring for LogWeight {
     type Type = f32;
 
     fn plus(&self, rhs: &Self) -> Self {
-        if self.value < rhs.value {
-            Self::new(self.value)
+        let f1 = self.value();
+        let f2 = rhs.value();
+        if f1 == f32::INFINITY {
+            return rhs.clone();
+        } else if f2 == f32::INFINITY {
+            return self.clone();
+        } else if f1 > f2 {
+            return Self::new(f2 - ln_pos_exp(f1 - f2));
         } else {
-            Self::new(rhs.value)
+            return Self::new(f1 - ln_pos_exp(f2 - f1));
         }
     }
 
@@ -31,8 +42,9 @@ impl Semiring for TropicalWeight {
             return self.clone();
         } else if f2 == f32::INFINITY {
             return rhs.clone();
-        } else {
-            return Self::new(f1 + f2);
+        }
+        else {
+            return Self::new(f1 + f2)
         }
     }
 
@@ -53,10 +65,10 @@ impl Semiring for TropicalWeight {
     }
 }
 
-add_mul_semiring!(TropicalWeight);
-display_semiring!(TropicalWeight);
+add_mul_semiring!(LogWeight);
+display_semiring!(LogWeight);
 
-impl WeaklyDivisibleSemiring for TropicalWeight {
+impl WeaklyDivisibleSemiring for LogWeight {
     fn inverse(&self) -> Self {
         Self::new(-self.value)
     }

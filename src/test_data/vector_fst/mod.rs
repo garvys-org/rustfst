@@ -7,7 +7,7 @@ pub(crate) mod fst_006_linear_transducer_1_label;
 pub(crate) mod fst_007_linear_transducer_3_to_2_labels;
 pub(crate) mod fst_008_linear_transducer_1000_to_1300_labels;
 pub(crate) mod fst_009;
-//pub(crate) mod fst_001;
+pub(crate) mod fst_010;
 
 #[cfg(test)]
 use fst_impls::VectorFst;
@@ -39,6 +39,7 @@ pub(crate) fn get_linear_fsts() -> Vec<TestFstData<VectorFst<IntegerWeight>>> {
 pub(crate) fn get_vector_fsts_for_tests() -> IntoIter<TestFstData<VectorFst<IntegerWeight>>> {
     let mut res = get_linear_fsts();
     res.push(fst_009::VectorFst009::new().into());
+    res.push(fst_010::VectorFst010::new().into());
     res.into_iter()
 }
 

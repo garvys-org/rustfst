@@ -54,7 +54,12 @@ where
             let final_state_1 = &mapping_states_fst_1[&old_final_state_1.state_id];
             fst_out.add_arc(
                 final_state_1,
-                Arc::new(EPS_LABEL, EPS_LABEL, W::one(), *start_state_2),
+                Arc::new(
+                    EPS_LABEL,
+                    EPS_LABEL,
+                    old_final_state_1.final_weight,
+                    *start_state_2,
+                ),
             )?;
         }
     }
@@ -73,12 +78,12 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use counter::Counter;
     use failure::ResultExt;
     use fst_impls::VectorFst;
     use fst_traits::PathsIterator;
     use itertools::Itertools;
     use semirings::IntegerWeight;
-    use counter::Counter;
     use test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]

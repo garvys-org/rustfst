@@ -75,10 +75,10 @@ where
 mod tests {
     use super::*;
     use arc::Arc;
+    use counter::Counter;
     use fst_impls::VectorFst;
     use fst_traits::MutableFst;
     use semirings::{IntegerWeight, Semiring};
-    use counter::Counter;
     use utils::acceptor;
 
     #[test]
@@ -156,7 +156,11 @@ mod tests {
             vec![2, 5],
             IntegerWeight::new(10 * 18),
         )]);
-        paths_ref.update(vec![Path::new(vec![3], vec![3], IntegerWeight::new(3 * 18))]);
+        paths_ref.update(vec![Path::new(
+            vec![3],
+            vec![3],
+            IntegerWeight::new(3 * 18),
+        )]);
 
         let paths: Counter<_> = fst.paths_iter().collect();
 
@@ -193,8 +197,16 @@ mod tests {
 
         let mut paths_ref = Counter::new();
         paths_ref.update(vec![Path::new(vec![], vec![], IntegerWeight::new(38))]);
-        paths_ref.update(vec![Path::new(vec![1], vec![1], IntegerWeight::new(1 * 41))]);
-        paths_ref.update(vec![Path::new(vec![2], vec![2], IntegerWeight::new(2 * 53))]);
+        paths_ref.update(vec![Path::new(
+            vec![1],
+            vec![1],
+            IntegerWeight::new(1 * 41),
+        )]);
+        paths_ref.update(vec![Path::new(
+            vec![2],
+            vec![2],
+            IntegerWeight::new(2 * 53),
+        )]);
         paths_ref.update(vec![Path::new(
             vec![1, 4],
             vec![1, 4],
@@ -205,7 +217,11 @@ mod tests {
             vec![2, 5],
             IntegerWeight::new(10 * 185),
         )]);
-        paths_ref.update(vec![Path::new(vec![3], vec![3], IntegerWeight::new(3 * 185))]);
+        paths_ref.update(vec![Path::new(
+            vec![3],
+            vec![3],
+            IntegerWeight::new(3 * 185),
+        )]);
 
         let paths: Counter<_> = fst.paths_iter().collect();
 

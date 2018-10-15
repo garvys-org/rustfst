@@ -85,15 +85,15 @@ pub fn project_output<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use counter::Counter;
     use fst_traits::PathsIterator;
     use test_data::vector_fst::get_vector_fsts_for_tests;
-    use counter::Counter;
 
     #[test]
     fn test_projection_input_generic() {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
-            
+
             let paths_ref: Counter<_> = fst
                 .paths_iter()
                 .map(|mut p| {

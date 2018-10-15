@@ -29,9 +29,9 @@ pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use test_data::vector_fst::get_vector_fsts_for_tests;
     use counter::Counter;
     use fst_traits::PathsIterator;
+    use test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
     fn test_invert_generic() {
