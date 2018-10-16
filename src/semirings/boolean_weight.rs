@@ -1,4 +1,4 @@
-use semirings::Semiring;
+use semirings::{Semiring, CompleteSemiring, StarSemiring};
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 #[derive(Clone, Debug, PartialEq, Default, Eq)]
@@ -40,6 +40,14 @@ impl Semiring for BooleanWeight {
 
 add_mul_semiring!(BooleanWeight);
 display_semiring!(BooleanWeight);
+
+impl CompleteSemiring for BooleanWeight {}
+
+impl StarSemiring for BooleanWeight {
+    fn closure(&self) -> Self {
+        Self::new(true)
+    }
+}
 
 #[cfg(test)]
 mod tests {

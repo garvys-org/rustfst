@@ -1,4 +1,4 @@
-use semirings::{Semiring, WeaklyDivisibleSemiring};
+use semirings::{Semiring, WeaklyDivisibleSemiring, CompleteSemiring, StarSemiring};
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 #[derive(Clone, Debug, PartialEq, Default)]
@@ -14,9 +14,11 @@ impl ProbabilityWeight {
 
 impl Semiring for ProbabilityWeight {
     type Type = f32;
+
     fn plus(&self, rhs: &Self) -> Self {
         Self::new(self.value + rhs.value)
     }
+
     fn times(&self, rhs: &Self) -> Self {
         Self::new(self.value * rhs.value)
     }
@@ -40,6 +42,14 @@ impl Semiring for ProbabilityWeight {
 
 add_mul_semiring!(ProbabilityWeight);
 display_semiring!(ProbabilityWeight);
+
+impl CompleteSemiring for ProbabilityWeight {}
+
+impl StarSemiring for ProbabilityWeight {
+    fn closure(&self) -> Self {
+        Self::new(1.0 / (1.0 - self.value))
+    }
+}
 
 impl WeaklyDivisibleSemiring for ProbabilityWeight {
     fn inverse(&self) -> Self {

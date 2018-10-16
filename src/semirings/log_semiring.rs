@@ -1,4 +1,4 @@
-use semirings::{Semiring, WeaklyDivisibleSemiring};
+use semirings::{Semiring, WeaklyDivisibleSemiring, CompleteSemiring, StarSemiring};
 use std::f32;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
@@ -67,6 +67,19 @@ impl Semiring for LogWeight {
 
 add_mul_semiring!(LogWeight);
 display_semiring!(LogWeight);
+
+impl CompleteSemiring for LogWeight {}
+
+impl StarSemiring for LogWeight {
+    fn closure(&self) -> Self {
+        if self.value >= 0.0 && self.value < 1.0 {
+            Self::new((1.0 - self.value).ln())
+        }
+        else {
+            Self::new(f32::NEG_INFINITY)
+        }
+    }
+}
 
 impl WeaklyDivisibleSemiring for LogWeight {
     fn inverse(&self) -> Self {

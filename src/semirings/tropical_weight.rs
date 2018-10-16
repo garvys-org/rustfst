@@ -1,4 +1,4 @@
-use semirings::{Semiring, WeaklyDivisibleSemiring};
+use semirings::{Semiring, WeaklyDivisibleSemiring, CompleteSemiring, StarSemiring};
 use std::f32;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
@@ -55,6 +55,19 @@ impl Semiring for TropicalWeight {
 
 add_mul_semiring!(TropicalWeight);
 display_semiring!(TropicalWeight);
+
+impl CompleteSemiring for TropicalWeight {}
+
+impl StarSemiring for TropicalWeight {
+    fn closure(&self) -> Self {
+        if self.value.is_sign_positive() && self.value.is_finite() {
+            Self::new(0.0)
+        }
+        else {
+            Self::new(f32::NEG_INFINITY)
+        }
+    }
+}
 
 impl WeaklyDivisibleSemiring for TropicalWeight {
     fn inverse(&self) -> Self {
