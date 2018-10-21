@@ -1,4 +1,6 @@
+use semirings::CompleteSemiring;
 use semirings::Semiring;
+use semirings::StarSemiring;
 use std::i32;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
@@ -42,3 +44,14 @@ impl Semiring for IntegerWeight {
 
 add_mul_semiring!(IntegerWeight);
 display_semiring!(IntegerWeight);
+
+impl CompleteSemiring for IntegerWeight {}
+
+impl StarSemiring for IntegerWeight {
+    fn closure(&self) -> Self {
+        if self.value == 0 {
+            return Self::new(1);
+        }
+        return Self::new(i32::max_value());
+    }
+}

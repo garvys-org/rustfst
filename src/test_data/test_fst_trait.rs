@@ -1,4 +1,6 @@
 #[cfg(test)]
+use fst_traits::CoreFst;
+#[cfg(test)]
 use fst_traits::Fst;
 
 #[cfg(test)]
@@ -7,6 +9,7 @@ pub(crate) trait TestFst {
     fn get_fst() -> Self::F;
     fn get_name() -> String;
     fn get_connected_fst() -> Self::F;
+    fn get_all_distances() -> Vec<Vec<<Self::F as CoreFst>::W>>;
 }
 
 #[cfg(test)]
@@ -15,6 +18,7 @@ pub(crate) struct TestFstData<F: Fst> {
     pub(crate) fst: F,
     pub(crate) name: String,
     pub(crate) connected_fst: F,
+    pub(crate) all_distances: Vec<Vec<<F as CoreFst>::W>>,
 }
 
 macro_rules! gen_test_fst {
@@ -33,6 +37,7 @@ macro_rules! gen_test_fst {
                     fst: Self::get_fst(),
                     name: Self::get_name(),
                     connected_fst: Self::get_connected_fst(),
+                    all_distances: Self::get_all_distances(),
                 }
             }
         }

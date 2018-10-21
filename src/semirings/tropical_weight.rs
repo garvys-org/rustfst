@@ -1,4 +1,4 @@
-use semirings::{Semiring, WeaklyDivisibleSemiring, CompleteSemiring, StarSemiring};
+use semirings::{CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring};
 use std::f32;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
@@ -62,8 +62,7 @@ impl StarSemiring for TropicalWeight {
     fn closure(&self) -> Self {
         if self.value.is_sign_positive() && self.value.is_finite() {
             Self::new(0.0)
-        }
-        else {
+        } else {
             Self::new(f32::NEG_INFINITY)
         }
     }

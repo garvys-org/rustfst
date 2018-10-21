@@ -1,4 +1,4 @@
-use semirings::{Semiring, WeaklyDivisibleSemiring, CompleteSemiring, StarSemiring};
+use semirings::{CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring};
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 #[derive(Clone, Debug, PartialEq, Default)]

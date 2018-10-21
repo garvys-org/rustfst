@@ -1,6 +1,8 @@
 #[cfg(test)]
 use fst_impls::VectorFst;
 #[cfg(test)]
+use fst_traits::CoreFst;
+#[cfg(test)]
 use fst_traits::MutableFst;
 #[cfg(test)]
 use semirings::IntegerWeight;
@@ -27,5 +29,9 @@ impl TestFst for EmptyFst {
 
     fn get_connected_fst() -> Self::F {
         Self::F::new()
+    }
+
+    fn get_all_distances() -> Vec<Vec<<<Self as TestFst>::F as CoreFst>::W>> {
+        vec![]
     }
 }

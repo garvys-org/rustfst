@@ -1,4 +1,4 @@
-use semirings::{Semiring, WeaklyDivisibleSemiring, CompleteSemiring, StarSemiring};
+use semirings::{CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring};
 use std::f32;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
@@ -16,7 +16,6 @@ impl LogWeight {
 fn ln_pos_exp(x: f32) -> f32 {
     ((-x).exp()).ln_1p()
 }
-
 
 impl Semiring for LogWeight {
     type Type = f32;
@@ -42,9 +41,8 @@ impl Semiring for LogWeight {
             return self.clone();
         } else if f2 == f32::INFINITY {
             return rhs.clone();
-        }
-        else {
-            return Self::new(f1 + f2)
+        } else {
+            return Self::new(f1 + f2);
         }
     }
 
@@ -74,8 +72,7 @@ impl StarSemiring for LogWeight {
     fn closure(&self) -> Self {
         if self.value >= 0.0 && self.value < 1.0 {
             Self::new((1.0 - self.value).ln())
-        }
-        else {
+        } else {
             Self::new(f32::NEG_INFINITY)
         }
     }
