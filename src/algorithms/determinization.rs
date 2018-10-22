@@ -7,6 +7,8 @@ use Label;
 use Result;
 use StateId;
 
+// TODO : WIP
+
 #[derive(PartialEq, Eq, Clone, Ord, PartialOrd)]
 struct PairStateWeight<W: Semiring> {
     state: StateId,

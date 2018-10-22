@@ -6,6 +6,35 @@ use std::collections::HashMap;
 use std::collections::VecDeque;
 use Result;
 
+/// This operation computes the composition of two transducers.
+/// If `A` transduces string `x` to `y` with weight `a` and `B` transduces `y` to `z`
+/// with weight `b`, then their composition transduces string `x` to `z` with weight `a ⊗ b`.
+///
+/// # Example
+/// ```
+/// use rustfst::utils::transducer;
+/// use rustfst::semirings::{Semiring, IntegerWeight};
+/// use rustfst::fst_impls::VectorFst;
+/// use rustfst::algorithms::compose;
+///
+/// let fst_1 : VectorFst<IntegerWeight> = transducer(
+///     vec![1, 2].into_iter(),
+///     vec![2, 3].into_iter()
+/// ).unwrap();
+///
+/// let fst_2 : VectorFst<IntegerWeight> = transducer(
+///     vec![2, 3].into_iter(),
+///     vec![3, 4].into_iter()
+/// ).unwrap();
+///
+/// let fst_ref : VectorFst<IntegerWeight> = transducer(
+///     vec![1, 2].into_iter(),
+///     vec![3, 4].into_iter()
+/// ).unwrap();
+///
+/// let composed_fst : VectorFst<_> = compose(&fst_1, &fst_2).unwrap();
+/// assert_eq!(composed_fst, fst_ref);
+/// ```
 pub fn compose<W, F1, F2, F3>(fst_1: &F1, fst_2: &F2) -> Result<F3>
 where
     W: Semiring,

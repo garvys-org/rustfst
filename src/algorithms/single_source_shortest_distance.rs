@@ -4,8 +4,9 @@ use std::collections::VecDeque;
 use Result;
 use StateId;
 
-/// This operation computes the shortest distance from the the state `state_id` to every state.
-/// The shortest distance from p to q is the ⊕-sum of the weights of all the paths between p and q.
+/// This operation computes the shortest distance from the state `state_id` to every state.
+/// The shortest distance from `p` to `q` is the ⊕-sum of the weights
+/// of all the paths between `p` and `q`.
 ///
 /// # Example
 /// ```
@@ -76,7 +77,8 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
 }
 
 /// This operation computes the shortest distance from the initial state to every state.
-/// The shortest distance from p to q is the ⊕-sum of the weights of all the paths between p and q.
+/// The shortest distance from `p` to `q` is the ⊕-sum of the weights
+/// of all the paths between `p` and `q`.
 ///
 /// # Example
 /// ```

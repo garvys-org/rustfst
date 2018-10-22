@@ -4,9 +4,9 @@ use semirings::Semiring;
 use Result;
 use EPS_LABEL;
 
-/// Performs the concatenation of two wFSTs. If A transduces string x to y with weight a
-/// and B transduces string w to v with weight b, then their concatenation
-/// transduces string xw to yv with weight a ⊗ b.
+/// Performs the concatenation of two wFSTs. If `A` transduces string `x` to `y` with weight `a`
+/// and `B` transduces string `w` to `v` with weight `b`, then their concatenation
+/// transduces string `xw` to `yv` with weight `a ⊗ b`.
 ///
 /// # Example
 /// ```

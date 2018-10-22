@@ -4,6 +4,10 @@ use semirings::Semiring;
 use Result;
 use EPS_LABEL;
 
+/// This operation computes the concatenative closure.
+/// If A transduces string `x` to `y` with weight `a`,
+/// then the closure transduces `x` to `y` with weight `a`,
+/// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
 pub fn closure_plus<F>(fst: &mut F) -> Result<()>
 where
     F: ExpandedFst + MutableFst,

@@ -5,56 +5,9 @@ use std::collections::HashMap;
 use Result;
 use StateId;
 
-fn add_epsilon_arc_to_initial_state<F1, F2>(
-    fst: &F1,
-    mapping: &HashMap<StateId, StateId>,
-    fst_out: &mut F2,
-) -> Result<()>
-where
-    F1: ExpandedFst,
-    F2: MutableFst,
-{
-    let start_state = fst_out.start().unwrap();
-    if let Some(old_start_state_fst) = fst.start() {
-        fst_out.add_arc(
-            &start_state,
-            Arc::new(
-                0,
-                0,
-                <F2 as CoreFst>::W::one(),
-                *mapping.get(&old_start_state_fst).unwrap(),
-            ),
-        )?;
-    }
-    Ok(())
-}
-
-fn set_new_final_states<W, F1, F2>(
-    fst: &F1,
-    mapping: &HashMap<StateId, StateId>,
-    fst_out: &mut F2,
-) -> Result<()>
-where
-    W: Semiring,
-    F1: ExpandedFst<W = W>,
-    F2: MutableFst<W = W>,
-{
-    for old_final_state in fst.final_states_iter() {
-        let final_state = mapping.get(&old_final_state.state_id).ok_or_else(|| {
-            format_err!(
-                "Key {:?} doesn't exist in mapping",
-                old_final_state.state_id
-            )
-        })?;
-        fst_out.set_final(final_state, old_final_state.final_weight)?;
-    }
-
-    Ok(())
-}
-
-/// Performs the union of two wFSTs.  If A transduces string x to y with weight a
-/// and B transduces string w to v with weight b, then their union transduces x to y
-/// with weight a and w to v with weight b.
+/// Performs the union of two wFSTs. If A transduces string `x` to `y` with weight `a`
+/// and `B` transduces string `w` to `v` with weight `b`, then their union transduces `x` to `y`
+/// with weight `a` and `w` to `v` with weight `b`.
 ///
 /// # Example
 /// ```
@@ -100,6 +53,53 @@ where
     set_new_final_states(fst_2, &mapping_states_fst_2, &mut fst_out)?;
 
     Ok(fst_out)
+}
+
+fn add_epsilon_arc_to_initial_state<F1, F2>(
+    fst: &F1,
+    mapping: &HashMap<StateId, StateId>,
+    fst_out: &mut F2,
+) -> Result<()>
+where
+    F1: ExpandedFst,
+    F2: MutableFst,
+{
+    let start_state = fst_out.start().unwrap();
+    if let Some(old_start_state_fst) = fst.start() {
+        fst_out.add_arc(
+            &start_state,
+            Arc::new(
+                0,
+                0,
+                <F2 as CoreFst>::W::one(),
+                *mapping.get(&old_start_state_fst).unwrap(),
+            ),
+        )?;
+    }
+    Ok(())
+}
+
+fn set_new_final_states<W, F1, F2>(
+    fst: &F1,
+    mapping: &HashMap<StateId, StateId>,
+    fst_out: &mut F2,
+) -> Result<()>
+where
+    W: Semiring,
+    F1: ExpandedFst<W = W>,
+    F2: MutableFst<W = W>,
+{
+    for old_final_state in fst.final_states_iter() {
+        let final_state = mapping.get(&old_final_state.state_id).ok_or_else(|| {
+            format_err!(
+                "Key {:?} doesn't exist in mapping",
+                old_final_state.state_id
+            )
+        })?;
+        fst_out.set_final(final_state, old_final_state.final_weight)?;
+    }
+
+    Ok(())
 }
 
 #[cfg(test)]
