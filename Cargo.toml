@@ -1,6 +1,6 @@
 [package]
 name = "rustfst"
-version = "0.1.4"
+version = "0.1.5-alpha.0"
 authors = ["Alexandre Caulier<alexandre.caulier@protonmail.com>"]
 description = "Library for Weighted Finite States Transducers as decribed by Mohri and Allauzen"
 license = "MIT/Apache-2.0"
