@@ -2,6 +2,9 @@
 name = "rustfst"
 version = "0.1.0"
 authors = ["Alexandre Caulier<alexandre.caulier@protonmail.com>"]
+description = "Library for Weighted Finite States Transducers as decribed by Mohri and Allauzen"
+license = "MIT/Apache-2.0"
+keywords = ["FST", "wFST"]
 
 [dependencies]
 failure = "0.1"
