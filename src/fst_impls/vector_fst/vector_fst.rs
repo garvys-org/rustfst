@@ -46,6 +46,7 @@ impl<'a, W: 'a + Semiring> StateIterator<'a> for VectorFst<W> {
     }
 }
 
+#[derive(Clone)]
 pub struct VectorStateIterator<'a, W: 'a + Semiring> {
     fst: &'a VectorFst<W>,
     index: usize,

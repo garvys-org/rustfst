@@ -2,7 +2,7 @@
 extern crate counter;
 #[macro_use]
 extern crate failure;
-#[cfg(test)]
+#[macro_use]
 extern crate itertools;
 #[cfg(test)]
 extern crate rand;

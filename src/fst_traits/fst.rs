@@ -107,7 +107,7 @@ pub trait CoreFst {
 /// Trait to iterate over the states of a wFST
 pub trait StateIterator<'a> {
     /// Iterator used to iterate over the `state_id` of the states of an FST.
-    type Iter: Iterator<Item = StateId>;
+    type Iter: Iterator<Item = StateId> + Clone;
 
     /// Creates an iterator over the `state_id` of the states of an FST.
     ///
@@ -139,7 +139,7 @@ where
     Self::W: 'a,
 {
     /// Iterator used to iterate over the arcs leaving a state of an FST.
-    type Iter: Iterator<Item = &'a Arc<Self::W>>;
+    type Iter: Iterator<Item = &'a Arc<Self::W>> + Clone;
 
     fn arcs_iter(&'a self, &StateId) -> Result<Self::Iter>;
 }
