@@ -15,6 +15,11 @@ rustfst = { git = "https://github.com/Garvys/rustfst", branch = "master" }
 
 Add `extern crate rustst` to your crate root and you are good to go!
 
+## Documentation
+
+The documentation of the last released version is available here :
+https://garvys.github.io/rustfst/rustfst/
+
 ## License
    
 Licensed under either of
