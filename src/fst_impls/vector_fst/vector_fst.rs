@@ -10,6 +10,7 @@ use std::ops::{Add, BitOr};
 use std::slice;
 use Result;
 use StateId;
+use failure::{bail, ensure, format_err};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct VectorFst<W: Semiring> {

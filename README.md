@@ -1,6 +1,9 @@
 # rustfst
 
 [![Build Status](https://travis-ci.com/Garvys/rustfst.svg?branch=master)](https://travis-ci.com/Garvys/rustfst)
+[![Current version](https://meritbadge.herokuapp.com/rustfst)](https://crates.io/crates/rustfst)
+[![Documentation](https://docs.rs/rustfst/badge.svg)](https://docs.rs/rustfst)
+[![License: MIT/Apache-2.0](https://img.shields.io/crates/l/rustfst.svg)](#license)
 
 Library for Weighted Finite States Transducers as decribed by Mohri and Allauzen
 
@@ -18,7 +21,7 @@ Add `extern crate rustst` to your crate root and you are good to go!
 ## Documentation
 
 The documentation of the last released version is available here :
-https://garvys.github.io/rustfst/rustfst/
+https://docs.rs/rustfst
 
 ## License
    

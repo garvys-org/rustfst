@@ -2,6 +2,7 @@ use fst_traits::Fst;
 use fst_traits::PathsIterator;
 use path::Path;
 use Result;
+use failure::bail;
 
 /// Decode a linear FST to retrieves the only path recognized by it. A path is composed of the
 /// input symbols, the output symbols and the weight (multiplication of the weights of the arcs

@@ -85,6 +85,7 @@ mod tests {
     use itertools::Itertools;
     use semirings::IntegerWeight;
     use test_data::vector_fst::get_vector_fsts_for_tests;
+    use failure::format_err;
 
     #[test]
     fn test_concat_generic() {

@@ -4,6 +4,7 @@ use semirings::Semiring;
 use std::collections::HashMap;
 use Result;
 use StateId;
+use failure::format_err;
 
 /// Performs the union of two wFSTs. If A transduces string `x` to `y` with weight `a`
 /// and `B` transduces string `w` to `v` with weight `b`, then their union transduces `x` to `y`

@@ -11,9 +11,7 @@ use semirings::IntegerWeight;
 #[cfg(test)]
 use semirings::Semiring;
 #[cfg(test)]
-use test_data::TestFst;
-#[cfg(test)]
-use test_data::TestFstData;
+use test_data::{TestFst, TestFstData};
 
 #[cfg(test)]
 pub(crate) struct VectorFst010 {}

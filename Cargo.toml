@@ -5,7 +5,7 @@ authors = ["Alexandre Caulier<alexandre.caulier@protonmail.com>"]
 description = "Library for Weighted Finite States Transducers as decribed by Mohri and Allauzen"
 license = "MIT/Apache-2.0"
 keywords = ["FST", "wFST"]
-documentation = "https://garvys.github.io/rustfst/rustfst/"
+documentation = "https://docs.rs/rustfst"
 repository = "https://github.com/Garvys/rustfst"
 readme = "README.md"
 
@@ -16,6 +16,3 @@ itertools = "0.7"
 [dev-dependencies]
 counter = "0.4"
 rand = "0.5.5"
-
-[badges]
-travis-ci = { repository = "Garvys/rustfst", branch = "master" }

@@ -153,6 +153,7 @@ mod tests {
     use fst_traits::PathsIterator;
     use semirings::IntegerWeight;
     use test_data::vector_fst::get_vector_fsts_for_tests;
+    use failure::format_err;
 
     // TODO: Add test with epsilon arcs
 

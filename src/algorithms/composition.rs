@@ -5,6 +5,7 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::collections::VecDeque;
 use Result;
+use itertools::iproduct;
 
 /// This operation computes the composition of two transducers.
 /// If `A` transduces string `x` to `y` with weight `a` and `B` transduces `y` to `z`
