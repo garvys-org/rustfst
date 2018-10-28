@@ -33,10 +33,6 @@ Implementation heavily inspired from Mehryar Mohri's, Cyril Alluzen's and Michae
  - [OpenFst: A general and efficient weighted finite-state transducer library](https://link.springer.com/chapter/10.1007%2F978-3-540-76336-9_3)
  - [Weighted finite-state transducers in speech recognition](https://repository.upenn.edu/cgi/viewcontent.cgi?article=1010&context=cis_papers)
 
-## Status
-
-Not all the algorithms are (yet) implemented. This is work in progress.
-
 ## Installation
 
 Add it to your Cargo.toml:
@@ -94,6 +90,10 @@ fn main() {
 
 The documentation of the last released version is available here :
 https://docs.rs/rustfst
+
+## Status
+
+Not all the algorithms are (yet) implemented. This is work in progress.
 
 ## License
    
