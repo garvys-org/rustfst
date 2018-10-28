@@ -35,11 +35,11 @@ Implementation heavily inspired from Mehryar Mohri's, Cyril Alluzen's and Michae
 
 ## Installation
 
-Add it to your Cargo.toml:
+Add it to your `Cargo.toml`:
 
 ```
 [dependencies]
-rustfst = { git = "https://github.com/Garvys/rustfst", branch = "master" }
+rustfst = "0.1"
 ```
 
 Add `extern crate rustfst` to your crate root and you are good to go!
