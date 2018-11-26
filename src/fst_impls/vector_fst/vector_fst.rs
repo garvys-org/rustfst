@@ -1,5 +1,6 @@
 use algorithms::{concat, union};
 use arc::Arc;
+use failure::{bail, ensure, format_err};
 use fst_traits::{
     ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableArcIterator, MutableFst,
     StateIterator,
@@ -10,7 +11,6 @@ use std::ops::{Add, BitOr};
 use std::slice;
 use Result;
 use StateId;
-use failure::{bail, ensure, format_err};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct VectorFst<W: Semiring> {
