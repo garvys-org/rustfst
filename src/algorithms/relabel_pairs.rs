@@ -21,6 +21,24 @@ where
     Ok(map_labels)
 }
 
+/// Replaces input and/or output labels using pairs of labels.
+///
+/// This operation destructively relabels the input and/or output labels of the
+/// FST using pairs of the form (old_ID, new_ID); omitted indices are
+/// identity-mapped.
+///
+/// # Example
+/// ```
+/// use rustfst::utils::transducer;
+/// use rustfst::semirings::{Semiring, IntegerWeight};
+/// use rustfst::fst_impls::VectorFst;
+/// use rustfst::algorithms::relabel_pairs;
+///
+/// let mut fst : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
+/// relabel_pairs(&mut fst, vec![(2,5)], vec![(3,4)]).unwrap();
+///
+/// assert_eq!(fst, transducer(vec![5].into_iter(), vec![4].into_iter()).unwrap());
+/// ```
 pub fn relabel_pairs<F, I, J>(fst: &mut F, ipairs: I, opairs: J) -> Result<()>
 where
     F: ExpandedFst + MutableFst,
