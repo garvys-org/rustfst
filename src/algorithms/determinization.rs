@@ -121,6 +121,8 @@ where
 }
 
 use std::collections::btree_map::Entry;
+
+#[allow(unused)]
 pub fn determinize<W, F1, F2>(fst_in: &F1) -> Result<F2>
 where
     W: WeaklyDivisibleSemiring + Ord + Eq,

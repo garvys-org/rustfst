@@ -18,7 +18,7 @@ pub use self::closure_star::closure_star;
 pub use self::composition::compose;
 pub use self::concat::concat;
 pub use self::connect::connect;
-pub use self::determinization::determinize;
+//pub use self::determinization::determinize;
 pub use self::epsilon_removal::rm_epsilon;
 pub use self::inversion::invert;
 pub use self::projection::{project, project_input, project_output};
