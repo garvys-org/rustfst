@@ -1,5 +1,5 @@
 use arc::Arc;
-use fst_traits::{CoreFst, ExpandedFst, FinalStatesIterator, MutableFst};
+use fst_traits::{CoreFst, FinalStatesIterator, MutableFst};
 use semirings::Semiring;
 use Result;
 use EPS_LABEL;
@@ -10,7 +10,7 @@ use EPS_LABEL;
 /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
 pub fn closure_plus<F>(fst: &mut F) -> Result<()>
 where
-    F: ExpandedFst + MutableFst,
+    F: MutableFst,
 {
     // Add an epsilon arc from each final states to the start state
     if let Some(start_state) = fst.start() {

@@ -1,11 +1,12 @@
+use algorithms;
 use arc::Arc;
-use fst_traits::{CoreFst, ExpandedFst};
+use fst_traits::{CoreFst, ExpandedFst, Fst};
 use std::collections::HashMap;
 use Result;
 use StateId;
 
 /// Trait defining the methods to modify a wFST
-pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
+pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// Creates an empty wFST
     fn new() -> Self;
 
@@ -164,9 +165,6 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
     /// ```
     fn add_arc(&mut self, source: &StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()>;
 
-    // fn set_isyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
-    // fn set_osyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
-
     fn add_fst<F: ExpandedFst<W = Self::W>>(
         &mut self,
         fst_to_add: &F,
@@ -196,6 +194,23 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
         }
 
         Ok(mapping_states)
+    }
+
+    /// This operation computes the concatenative closure.
+    /// If A transduces string `x` to `y` with weight `a`,
+    /// then the closure transduces `x` to `y` with weight `a`,
+    /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
+    fn closure_plus(&mut self) -> Result<()> {
+        algorithms::closure_plus(self)
+    }
+
+    /// This operation computes the concatenative closure.
+    /// If A transduces string `x` to `y` with weight `a`,
+    /// then the closure transduces `x` to `y` with weight `a`,
+    /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
+    /// The empty string is transduced to itself with weight `1` as well.
+    fn closure_star(&mut self) -> Result<()> {
+        algorithms::closure_star(self)
     }
 }
 
