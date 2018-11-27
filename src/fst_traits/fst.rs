@@ -145,6 +145,7 @@ pub trait Fst:
 {
     /// Returns the number of arcs with epsilon input labels leaving a state.
     ///
+    /// # Example :
     /// ```
     /// use rustfst::fst_traits::{MutableFst, Fst};
     /// use rustfst::fst_impls::VectorFst;
@@ -162,13 +163,43 @@ pub trait Fst:
     /// fst.add_arc(&s0, Arc::new(45, 18, IntegerWeight::one(), s0));
     /// fst.add_arc(&s1, Arc::new(76, 18, IntegerWeight::one(), s1));
     ///
-    /// assert_eq!(fst.num_input_epsilon(s0).unwrap(), 2);
-    /// assert_eq!(fst.num_input_epsilon(s1).unwrap(), 0);
+    /// assert_eq!(fst.num_input_epsilons(s0).unwrap(), 2);
+    /// assert_eq!(fst.num_input_epsilons(s1).unwrap(), 0);
     /// ```
-    fn num_input_epsilon(&self, state: StateId) -> Result<usize> {
+    fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
         Ok(self
             .arcs_iter(&state)?
             .filter(|v| v.ilabel == EPS_LABEL)
+            .count())
+    }
+
+    /// Returns the number of arcs with epsilon output labels leaving a state.
+    ///
+    /// # Example :
+    /// ```
+    /// use rustfst::fst_traits::{MutableFst, Fst};
+    /// use rustfst::fst_impls::VectorFst;
+    /// use rustfst::semirings::{Semiring, IntegerWeight};
+    /// use rustfst::EPS_LABEL;
+    /// use rustfst::arc::Arc;
+    ///
+    /// let mut fst = VectorFst::new();
+    /// let s0 = fst.add_state();
+    /// let s1 = fst.add_state();
+    ///
+    /// fst.add_arc(&s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_arc(&s0, Arc::new(76, EPS_LABEL, IntegerWeight::one(), s1));
+    /// fst.add_arc(&s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_arc(&s0, Arc::new(45, 18, IntegerWeight::one(), s0));
+    /// fst.add_arc(&s1, Arc::new(76, 18, IntegerWeight::one(), s1));
+    ///
+    /// assert_eq!(fst.num_output_epsilons(s0).unwrap(), 1);
+    /// assert_eq!(fst.num_output_epsilons(s1).unwrap(), 0);
+    /// ```
+    fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
+        Ok(self
+            .arcs_iter(&state)?
+            .filter(|v| v.olabel == EPS_LABEL)
             .count())
     }
 }
