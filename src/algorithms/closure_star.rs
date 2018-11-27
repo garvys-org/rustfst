@@ -1,6 +1,6 @@
 use algorithms::closure_plus;
 use arc::Arc;
-use fst_traits::{CoreFst, ExpandedFst, MutableFst};
+use fst_traits::{CoreFst, MutableFst};
 use semirings::Semiring;
 use Result;
 use EPS_LABEL;
@@ -12,7 +12,7 @@ use EPS_LABEL;
 /// The empty string is transduced to itself with weight `1` as well.
 pub fn closure_star<F>(fst: &mut F) -> Result<()>
 where
-    F: ExpandedFst + MutableFst,
+    F: MutableFst,
 {
     closure_plus(fst)?;
 
