@@ -164,9 +164,6 @@ pub trait MutableFst: CoreFst + for<'a> MutableArcIterator<'a> {
     /// ```
     fn add_arc(&mut self, source: &StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()>;
 
-    // fn set_isyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
-    // fn set_osyms<T: IntoIterator<Item=String>>(&mut self, symtab: T);
-
     fn add_fst<F: ExpandedFst<W = Self::W>>(
         &mut self,
         fst_to_add: &F,
