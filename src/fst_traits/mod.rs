@@ -1,6 +1,7 @@
+#[macro_use]
+mod macros;
 mod expanded_fst;
 mod final_states_iterator;
-#[macro_use]
 mod fst;
 mod mutable_fst;
 mod paths_iterator;

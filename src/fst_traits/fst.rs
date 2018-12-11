@@ -4,6 +4,10 @@ use std::fmt::Display;
 use Result;
 use StateId;
 use EPS_LABEL;
+use std::fs::File;
+use std::io::{Write, LineWriter};
+use fst_traits::final_states_iterator::FinalStatesIterator;
+use std::path::Path;
 
 /// Trait defining necessary methods for a wFST to access start states and final states
 pub trait CoreFst {
@@ -202,69 +206,13 @@ pub trait Fst:
             .filter(|v| v.olabel == EPS_LABEL)
             .count())
     }
-}
 
-macro_rules! add_or_fst {
-    ($semiring:tt, $fst_type:ty) => {
-        impl<$semiring: 'static + Semiring> Add for $fst_type {
-            type Output = Result<$fst_type>;
+    /// Serializes the FST as a text file in a format compatible with OpenFST.
+    fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Result<()> {
+        let buffer = File::create(path_output.as_ref())?;
+        let mut line_writer = LineWriter::new(buffer);
+        write_fst!(self, line_writer);
+        Ok(())
+    }
 
-            fn add(self, rhs: $fst_type) -> Self::Output {
-                concat(&self, &rhs)
-            }
-        }
-
-        impl<$semiring: 'static + Semiring> BitOr for $fst_type {
-            type Output = Result<$fst_type>;
-
-            fn bitor(self, rhs: $fst_type) -> Self::Output {
-                union(&self, &rhs)
-            }
-        }
-    };
-}
-
-macro_rules! display_single_state {
-    ($fst:expr, $state_id:expr, $f: expr) => {
-        for arc in $fst.arcs_iter($state_id).unwrap() {
-            write!(
-                $f,
-                "{}\t{}\t{}\t{}\t{}\n",
-                $state_id, &arc.nextstate, &arc.ilabel, &arc.olabel, &arc.weight
-            )?;
-        }
-    };
-}
-
-macro_rules! display_fst {
-    ($semiring:tt, $fst_type:ty) => {
-        impl<$semiring: 'static + Semiring> fmt::Display for $fst_type
-        where
-            $semiring::Type: fmt::Display,
-        {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                if let Some(start_state) = self.start() {
-                    // Firstly print the arcs leaving the start state
-                    display_single_state!(self, &start_state, f);
-
-                    // Secondly, print the arcs leaving all the other states
-                    for state_id in self.states_iter() {
-                        if state_id != start_state {
-                            display_single_state!(self, &state_id, f);
-                        }
-                    }
-
-                    // Finally, print the final states with their weight
-                    for final_state in self.final_states_iter() {
-                        write!(
-                            f,
-                            "{}\t{}\n",
-                            &final_state.state_id, &final_state.final_weight
-                        );
-                    }
-                }
-                Ok(())
-            }
-        }
-    };
 }
