@@ -99,7 +99,8 @@ mod tests {
                 .map(|mut p| {
                     p.olabels = p.ilabels.clone();
                     p
-                }).collect();
+                })
+                .collect();
 
             let mut projected_fst = fst.clone();
 
@@ -124,7 +125,8 @@ mod tests {
                 .map(|mut p| {
                     p.ilabels = p.olabels.clone();
                     p
-                }).collect();
+                })
+                .collect();
 
             let mut projected_fst = fst.clone();
 

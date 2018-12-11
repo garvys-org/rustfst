@@ -1,13 +1,13 @@
 use arc::Arc;
+use fst_traits::final_states_iterator::FinalStatesIterator;
 use semirings::Semiring;
 use std::fmt::Display;
+use std::fs::File;
+use std::io::{LineWriter, Write};
+use std::path::Path;
 use Result;
 use StateId;
 use EPS_LABEL;
-use std::fs::File;
-use std::io::{Write, LineWriter};
-use fst_traits::final_states_iterator::FinalStatesIterator;
-use std::path::Path;
 
 /// Trait defining necessary methods for a wFST to access start states and final states
 pub trait CoreFst {
@@ -214,5 +214,4 @@ pub trait Fst:
         write_fst!(self, line_writer);
         Ok(())
     }
-
 }

@@ -31,7 +31,7 @@ macro_rules! display_single_state {
 }
 
 macro_rules! write_fst {
-   ($fst:expr, $f:expr) => {
+    ($fst:expr, $f:expr) => {
         if let Some(start_state) = $fst.start() {
             // Firstly print the arcs leaving the start state
             display_single_state!($fst, &start_state, $f);
@@ -52,7 +52,7 @@ macro_rules! write_fst {
                 )?;
             }
         }
-   }
+    };
 }
 
 macro_rules! display_fst_trait {

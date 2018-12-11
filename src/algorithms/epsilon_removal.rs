@@ -170,7 +170,8 @@ mod tests {
                         "Error when performing epsilon removal operation for wFST {:?}",
                         &data.name,
                     )
-                }).unwrap();
+                })
+                .unwrap();
             let paths: Counter<_> = epsilon_removed_fst.paths_iter().collect();
 
             assert_eq!(

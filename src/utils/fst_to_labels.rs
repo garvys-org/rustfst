@@ -62,7 +62,8 @@ mod tests {
         let fst: VectorFst<BooleanWeight> = transducer(
             labels_input.clone().into_iter(),
             labels_output.clone().into_iter(),
-        ).unwrap();
+        )
+        .unwrap();
 
         let path = decode_linear_fst(&fst).unwrap();
         let path_ref = Path::new(labels_input, labels_output, BooleanWeight::one());

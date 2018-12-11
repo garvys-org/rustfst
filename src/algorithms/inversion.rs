@@ -43,7 +43,8 @@ mod tests {
                 .map(|mut p| {
                     swap(&mut p.ilabels, &mut p.olabels);
                     p
-                }).collect();
+                })
+                .collect();
 
             let mut projected_fst = fst.clone();
 
