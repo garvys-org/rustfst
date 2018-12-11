@@ -88,7 +88,7 @@ macro_rules! display_semiring {
         use std::fmt;
         impl fmt::Display for $semiring {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                write!(f, "{}", self.value());
+                write!(f, "{}", self.value())?;
                 Ok(())
             }
         }

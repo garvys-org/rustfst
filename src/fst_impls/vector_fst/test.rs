@@ -138,11 +138,10 @@ mod tests {
         let mut states: Vec<_> = (0..n_states).map(|_| fst.add_state()).collect();
 
         // None of the states are final => None final weight
-        assert!(
-            fst.states_iter()
-                .map(|state_id| fst.final_weight(&state_id))
-                .all(|v| v.is_none())
-        );
+        assert!(fst
+            .states_iter()
+            .map(|state_id| fst.final_weight(&state_id))
+            .all(|v| v.is_none()));
 
         // Select randomly n_final_states
         let mut rg = StdRng::from_seed([53; 32]);
@@ -157,13 +156,11 @@ mod tests {
 
         // Check they are final with the correct weight
         assert!(final_states.iter().all(|state_id| fst.is_final(state_id)));
-        assert!(
-            final_states
-                .iter()
-                .enumerate()
-                .all(|(idx, state_id)| fst.final_weight(state_id)
-                    == Some(ProbabilityWeight::new(idx as f32)))
-        );
+        assert!(final_states
+            .iter()
+            .enumerate()
+            .all(|(idx, state_id)| fst.final_weight(state_id)
+                == Some(ProbabilityWeight::new(idx as f32))));
     }
 
     #[test]
