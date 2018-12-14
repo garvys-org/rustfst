@@ -18,6 +18,12 @@ pub trait Semiring:
     fn one() -> Self;
     fn value(&self) -> Self::Type;
     fn set_value(&mut self, Self::Type);
+    fn is_one(&self) -> bool {
+        *self == Self::one()
+    }
+    fn is_zero(&self) -> bool {
+        *self == Self::zero()
+    }
 }
 
 /// A semiring is said to be divisible if all non-0 elements admit an inverse,
