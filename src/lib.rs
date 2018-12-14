@@ -90,6 +90,9 @@ pub type StateId = usize;
 /// Epsilon label representing the epsilon transition (empty transition).
 pub static EPS_LABEL: Label = 0;
 
+mod drawing_config;
+pub use drawing_config::DrawingConfig;
+
 /// Provides algorithms that are generic for all wFST.
 pub mod algorithms;
 /// Implementation of the transitions inside a wFST.
