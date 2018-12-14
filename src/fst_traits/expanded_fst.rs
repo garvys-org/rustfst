@@ -1,4 +1,11 @@
+use fst_traits::final_states_iterator::FinalStatesIterator;
 use fst_traits::Fst;
+use semirings::Semiring;
+use std::fs::File;
+use std::io::{LineWriter, Write};
+use std::path::Path;
+use DrawingConfig;
+use Result;
 
 pub trait ExpandedFst: Fst {
     /// Returns the number of states that contains the FST. They are all counted even if some states
@@ -23,4 +30,52 @@ pub trait ExpandedFst: Fst {
     ///
     /// ```
     fn num_states(&self) -> usize;
+
+    /// Serializes the FST as a text file in a format compatible with OpenFST.
+    fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Result<()> {
+        let buffer = File::create(path_output.as_ref())?;
+        let mut line_writer = LineWriter::new(buffer);
+        write_fst!(self, line_writer);
+        Ok(())
+    }
+
+    fn draw<P: AsRef<Path>>(&self, path_output: P, config: &DrawingConfig) -> Result<()> {
+        let buffer = File::create(path_output.as_ref())?;
+        let mut f = LineWriter::new(buffer);
+
+        if let Some(start_state) = self.start() {
+            writeln!(f, "digraph FST {{")?;
+
+            if config.vertical {
+                writeln!(f, "rankdir = BT;")?;
+            } else {
+                writeln!(f, "rankdir = LR;")?;
+            }
+
+            writeln!(f, "size = \"{},{}\";", config.width, config.height)?;
+            writeln!(f, "label = {};", config.title)?;
+            writeln!(f, "center = 1;")?;
+
+            if config.portrait {
+                writeln!(f, "orientation = Portrait;")?;
+            } else {
+                writeln!(f, "orientation = Landscape;")?;
+            }
+
+            writeln!(f, "ranksep = {}", config.ranksep)?;
+            writeln!(f, "nodesep = {}", config.nodesep)?;
+
+            // Start state first
+            draw_single_state!(self, &start_state, f, config);
+
+            for state in self.states_iter() {
+                if state != start_state {
+                    draw_single_state!(self, &state, f, config);
+                }
+            }
+
+            writeln!(f, "}}")?;
+        }
+        Ok(())
+    }
 }
