@@ -1,10 +1,6 @@
 use arc::Arc;
-use fst_traits::final_states_iterator::FinalStatesIterator;
 use semirings::Semiring;
 use std::fmt::Display;
-use std::fs::File;
-use std::io::{LineWriter, Write};
-use std::path::Path;
 use Result;
 use StateId;
 use EPS_LABEL;
@@ -96,6 +92,10 @@ pub trait CoreFst {
     /// ```
     fn is_final(&self, state_id: &StateId) -> bool {
         self.final_weight(state_id).is_some()
+    }
+
+    fn is_start(&self, state_id: &StateId) -> bool {
+        Some(*state_id) == self.start()
     }
 
     //type Symtab: IntoIterator<Item=String>;
@@ -205,13 +205,5 @@ pub trait Fst:
             .arcs_iter(&state)?
             .filter(|v| v.olabel == EPS_LABEL)
             .count())
-    }
-
-    /// Serializes the FST as a text file in a format compatible with OpenFST.
-    fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Result<()> {
-        let buffer = File::create(path_output.as_ref())?;
-        let mut line_writer = LineWriter::new(buffer);
-        write_fst!(self, line_writer);
-        Ok(())
     }
 }
