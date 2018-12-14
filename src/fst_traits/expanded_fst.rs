@@ -39,6 +39,7 @@ pub trait ExpandedFst: Fst {
         Ok(())
     }
 
+    /// Serializes the FST as a DOT file compatible with GraphViz binaries
     fn draw<P: AsRef<Path>>(&self, path_output: P, config: &DrawingConfig) -> Result<()> {
         let buffer = File::create(path_output.as_ref())?;
         let mut f = LineWriter::new(buffer);

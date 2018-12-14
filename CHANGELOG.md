@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement `num_input_epsilons`, `num_output_expilons` and `relabel_pairs`.
 - `closure_plus` and `closure_star` are now also available as provided methods on a `MutabeFst`.
 - Add `is_one` and `is_zero` to `Semiring` API.
-- Asd `is_start` to `Fst` API.
+- Add `is_start` to `Fst` API.
 
 ### Changed
 
