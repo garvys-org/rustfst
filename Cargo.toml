@@ -12,7 +12,8 @@ readme = "README.md"
 [dependencies]
 failure = "0.1"
 itertools = "0.7"
+nom = "4.1"
 
 [dev-dependencies]
 counter = "0.4"
-rand = "0.5.5"
+rand = "0.5"
