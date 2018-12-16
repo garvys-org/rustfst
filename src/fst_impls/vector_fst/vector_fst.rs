@@ -3,9 +3,11 @@ use arc::Arc;
 use failure::{bail, ensure, format_err};
 use fst_traits::{
     ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableArcIterator, MutableFst,
-    StateIterator,
+    StateIterator, TextParser,
 };
+use parsers::text::ParsedTextFst;
 use semirings::Semiring;
+use semirings::TropicalWeight;
 use std::fmt;
 use std::ops::{Add, BitOr};
 use std::slice;
@@ -16,6 +18,50 @@ use StateId;
 pub struct VectorFst<W: Semiring> {
     states: Vec<VectorFstState<W>>,
     start_state: Option<StateId>,
+}
+
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct VectorFstState<W: Semiring> {
+    final_weight: Option<W>,
+    arcs: Vec<Arc<W>>,
+}
+
+impl TextParser for VectorFst<TropicalWeight> {
+    fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst) -> Result<Self> {
+        let start_state = parsed_fst_text.start();
+        let num_states = parsed_fst_text.num_states();
+
+        let states = vec![VectorFstState::<TropicalWeight>::default(); num_states];
+
+        let mut fst = VectorFst {
+            states,
+            start_state,
+        };
+
+        for transition in parsed_fst_text.transitions.into_iter() {
+            let weight = transition
+                .weight
+                .map(|v| TropicalWeight::new(v))
+                .unwrap_or(TropicalWeight::one());
+            let arc = Arc::new(
+                transition.ilabel,
+                transition.olabel,
+                weight,
+                transition.nextstate,
+            );
+            fst.add_arc(&transition.state, arc)?;
+        }
+
+        for final_state in parsed_fst_text.final_states.into_iter() {
+            let weight = final_state
+                .weight
+                .map(|v| TropicalWeight::new(v))
+                .unwrap_or(TropicalWeight::one());
+            fst.set_final(&final_state.state, weight);
+        }
+
+        Ok(fst)
+    }
 }
 
 impl<W: 'static + Semiring> Fst for VectorFst<W> {}
@@ -180,12 +226,6 @@ impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
         Ok(state.arcs.iter_mut())
     }
-}
-
-#[derive(Debug, Clone, PartialEq, Default)]
-pub struct VectorFstState<W: Semiring> {
-    final_weight: Option<W>,
-    arcs: Vec<Arc<W>>,
 }
 
 impl<W: Semiring> VectorFstState<W> {
