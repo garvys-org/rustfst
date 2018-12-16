@@ -1,7 +1,6 @@
 use failure::format_err;
 use nom::types::CompleteStr;
 use parsers::text::nom_parser::parse_text_fst;
-use std::collections::HashSet;
 use std::fs::read_to_string;
 use std::path::Path;
 use Label;

@@ -26,11 +26,11 @@ impl Semiring for TropicalWeight {
         let f1 = self.value();
         let f2 = rhs.value();
         if f1 == f32::INFINITY {
-            return self.clone();
+            self.clone()
         } else if f2 == f32::INFINITY {
-            return rhs.clone();
+            rhs.clone()
         } else {
-            return Self::new(f1 + f2);
+            Self::new(f1 + f2)
         }
     }
 

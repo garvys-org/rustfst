@@ -22,13 +22,13 @@ impl Semiring for LogWeight {
         let f1 = self.value();
         let f2 = rhs.value();
         if f1 == f32::INFINITY {
-            return rhs.clone();
+            rhs.clone()
         } else if f2 == f32::INFINITY {
-            return self.clone();
+            self.clone()
         } else if f1 > f2 {
-            return Self::new(f2 - ln_pos_exp(f1 - f2));
+            Self::new(f2 - ln_pos_exp(f1 - f2))
         } else {
-            return Self::new(f1 - ln_pos_exp(f2 - f1));
+            Self::new(f1 - ln_pos_exp(f2 - f1))
         }
     }
 
@@ -36,11 +36,11 @@ impl Semiring for LogWeight {
         let f1 = self.value();
         let f2 = rhs.value();
         if f1 == f32::INFINITY {
-            return self.clone();
+            self.clone()
         } else if f2 == f32::INFINITY {
-            return rhs.clone();
+            rhs.clone()
         } else {
-            return Self::new(f1 + f2);
+            Self::new(f1 + f2)
         }
     }
 

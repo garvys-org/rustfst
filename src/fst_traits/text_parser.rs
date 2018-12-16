@@ -1,4 +1,3 @@
-use fst_traits::CoreFst;
 use fst_traits::ExpandedFst;
 use parsers::text::ParsedTextFst;
 use semirings::TropicalWeight;

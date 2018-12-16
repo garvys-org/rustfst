@@ -111,7 +111,7 @@ pub fn shortest_distance<F: ExpandedFst>(fst: &F) -> Result<Vec<<F as CoreFst>::
     if let Some(start_state) = fst.start() {
         return single_source_shortest_distance(fst, start_state);
     }
-    return Ok(vec![<F as CoreFst>::W::zero(); fst.num_states()]);
+    Ok(vec![<F as CoreFst>::W::zero(); fst.num_states()])
 }
 
 #[cfg(test)]

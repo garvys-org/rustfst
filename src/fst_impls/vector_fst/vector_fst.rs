@@ -41,8 +41,8 @@ impl TextParser for VectorFst<TropicalWeight> {
         for transition in parsed_fst_text.transitions.into_iter() {
             let weight = transition
                 .weight
-                .map(|v| TropicalWeight::new(v))
-                .unwrap_or(TropicalWeight::one());
+                .map(TropicalWeight::new)
+                .unwrap_or_else(TropicalWeight::one);
             let arc = Arc::new(
                 transition.ilabel,
                 transition.olabel,
@@ -55,9 +55,9 @@ impl TextParser for VectorFst<TropicalWeight> {
         for final_state in parsed_fst_text.final_states.into_iter() {
             let weight = final_state
                 .weight
-                .map(|v| TropicalWeight::new(v))
-                .unwrap_or(TropicalWeight::one());
-            fst.set_final(&final_state.state, weight);
+                .map(TropicalWeight::new)
+                .unwrap_or_else(TropicalWeight::one);
+            fst.set_final(&final_state.state, weight)?;
         }
 
         Ok(fst)
