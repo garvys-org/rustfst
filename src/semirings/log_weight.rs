@@ -7,18 +7,16 @@ pub struct LogWeight {
     value: f32,
 }
 
-impl LogWeight {
-    pub fn new(value: f32) -> Self {
-        LogWeight { value }
-    }
-}
-
 fn ln_pos_exp(x: f32) -> f32 {
     ((-x).exp()).ln_1p()
 }
 
 impl Semiring for LogWeight {
     type Type = f32;
+
+    fn new(value: <Self as Semiring>::Type) -> Self {
+        LogWeight { value }
+    }
 
     fn plus(&self, rhs: &Self) -> Self {
         let f1 = self.value();

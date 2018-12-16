@@ -9,14 +9,12 @@ pub struct IntegerWeight {
     value: i32,
 }
 
-impl IntegerWeight {
-    pub fn new(value: i32) -> Self {
-        IntegerWeight { value }
-    }
-}
-
 impl Semiring for IntegerWeight {
     type Type = i32;
+
+    fn new(value: <Self as Semiring>::Type) -> Self {
+        IntegerWeight { value }
+    }
 
     fn plus(&self, rhs: &Self) -> Self {
         Self::new(self.value + rhs.value)

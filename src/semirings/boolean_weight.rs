@@ -6,14 +6,13 @@ pub struct BooleanWeight {
     value: bool,
 }
 
-impl BooleanWeight {
-    pub fn new(value: bool) -> Self {
-        BooleanWeight { value }
-    }
-}
-
 impl Semiring for BooleanWeight {
     type Type = bool;
+
+    fn new(value: <Self as Semiring>::Type) -> Self {
+        BooleanWeight { value }
+    }
+
     fn plus(&self, rhs: &Self) -> Self {
         Self::new(self.value | rhs.value)
     }

@@ -7,14 +7,12 @@ pub struct TropicalWeight {
     value: f32,
 }
 
-impl TropicalWeight {
-    pub fn new(value: f32) -> Self {
-        TropicalWeight { value }
-    }
-}
-
 impl Semiring for TropicalWeight {
     type Type = f32;
+
+    fn new(value: <Self as Semiring>::Type) -> Self {
+        TropicalWeight { value }
+    }
 
     fn plus(&self, rhs: &Self) -> Self {
         if self.value < rhs.value {
