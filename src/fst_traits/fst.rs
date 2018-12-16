@@ -97,10 +97,6 @@ pub trait CoreFst {
     fn is_start(&self, state_id: &StateId) -> bool {
         Some(*state_id) == self.start()
     }
-
-    //type Symtab: IntoIterator<Item=String>;
-    //fn get_isyms(&self) -> Option<Self::Symtab>;
-    //fn get_osyms(&self) -> Option<Self::Symtab>;
 }
 
 /// Trait to iterate over the states of a wFST
