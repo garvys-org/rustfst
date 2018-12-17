@@ -191,7 +191,7 @@ where
 // mod tests {
 //     use super::*;
 //     use semirings::TropicalWeight;
-//     use vector_fst::VectorFst;
+//     use vector::VectorFst;
 
 //     #[test]
 //     fn test_determinize() {

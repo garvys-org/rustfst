@@ -7,7 +7,6 @@ use fst_traits::{
 };
 use parsers::text::ParsedTextFst;
 use semirings::Semiring;
-use semirings::{LogWeight, ProbabilityWeight, TropicalWeight};
 use std::fmt;
 use std::ops::{Add, BitOr};
 use std::slice;
@@ -16,14 +15,14 @@ use StateId;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct VectorFst<W: Semiring> {
-    states: Vec<VectorFstState<W>>,
-    start_state: Option<StateId>,
+    pub(crate) states: Vec<VectorFstState<W>>,
+    pub(crate) start_state: Option<StateId>,
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct VectorFstState<W: Semiring> {
-    final_weight: Option<W>,
-    arcs: Vec<Arc<W>>,
+    pub(crate) final_weight: Option<W>,
+    pub(crate) arcs: Vec<Arc<W>>,
 }
 
 impl<W: 'static + Semiring> Fst for VectorFst<W> {}

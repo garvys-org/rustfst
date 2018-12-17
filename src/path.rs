@@ -52,6 +52,7 @@ impl<W: Semiring> Default for Path<W> {
     }
 }
 
+#[allow(clippy::derive_hash_xor_eq)]
 impl<W: Semiring + Hash + Eq> Hash for Path<W> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.ilabels.hash(state);

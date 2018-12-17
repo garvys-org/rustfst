@@ -71,7 +71,7 @@ mod tests {
     use super::*;
     use arc::Arc;
     use fst_impls::VectorFst;
-    use semirings::IntegerWeight;
+    use semirings::{IntegerWeight, Semiring};
 
     #[test]
     fn test_projection_input_generic() {
