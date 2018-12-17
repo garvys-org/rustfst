@@ -7,7 +7,7 @@ use fst_traits::{
 };
 use parsers::text::ParsedTextFst;
 use semirings::Semiring;
-use semirings::TropicalWeight;
+use semirings::{LogWeight, ProbabilityWeight, TropicalWeight};
 use std::fmt;
 use std::ops::{Add, BitOr};
 use std::slice;
@@ -24,44 +24,6 @@ pub struct VectorFst<W: Semiring> {
 pub struct VectorFstState<W: Semiring> {
     final_weight: Option<W>,
     arcs: Vec<Arc<W>>,
-}
-
-impl TextParser for VectorFst<TropicalWeight> {
-    fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst) -> Result<Self> {
-        let start_state = parsed_fst_text.start();
-        let num_states = parsed_fst_text.num_states();
-
-        let states = vec![VectorFstState::<TropicalWeight>::default(); num_states];
-
-        let mut fst = VectorFst {
-            states,
-            start_state,
-        };
-
-        for transition in parsed_fst_text.transitions.into_iter() {
-            let weight = transition
-                .weight
-                .map(TropicalWeight::new)
-                .unwrap_or_else(TropicalWeight::one);
-            let arc = Arc::new(
-                transition.ilabel,
-                transition.olabel,
-                weight,
-                transition.nextstate,
-            );
-            fst.add_arc(&transition.state, arc)?;
-        }
-
-        for final_state in parsed_fst_text.final_states.into_iter() {
-            let weight = final_state
-                .weight
-                .map(TropicalWeight::new)
-                .unwrap_or_else(TropicalWeight::one);
-            fst.set_final(&final_state.state, weight)?;
-        }
-
-        Ok(fst)
-    }
 }
 
 impl<W: 'static + Semiring> Fst for VectorFst<W> {}
@@ -231,6 +193,38 @@ impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
 impl<W: Semiring> VectorFstState<W> {
     pub fn num_arcs(&self) -> usize {
         self.arcs.len()
+    }
+}
+
+impl<W: 'static + Semiring<Type = f32>> TextParser for VectorFst<W> {
+    fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst) -> Result<Self> {
+        let start_state = parsed_fst_text.start();
+        let num_states = parsed_fst_text.num_states();
+
+        let states = vec![VectorFstState::<W>::default(); num_states];
+
+        let mut fst = VectorFst {
+            states,
+            start_state,
+        };
+
+        for transition in parsed_fst_text.transitions.into_iter() {
+            let weight = transition.weight.map(W::new).unwrap_or_else(W::one);
+            let arc = Arc::new(
+                transition.ilabel,
+                transition.olabel,
+                weight,
+                transition.nextstate,
+            );
+            fst.add_arc(&transition.state, arc)?;
+        }
+
+        for final_state in parsed_fst_text.final_states.into_iter() {
+            let weight = final_state.weight.map(W::new).unwrap_or_else(W::one);
+            fst.set_final(&final_state.state, weight)?;
+        }
+
+        Ok(fst)
     }
 }
 
