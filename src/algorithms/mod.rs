@@ -28,3 +28,4 @@ pub use self::single_source_shortest_distance::{
     shortest_distance, single_source_shortest_distance,
 };
 pub use self::union::union;
+pub use self::weight_pushing::push_weights;
