@@ -13,11 +13,11 @@ named!(optional_weight <CompleteStr, Option<f32>>, opt!(preceded!(tag!("\t"), fl
 named!(transition <CompleteStr, Transition>, do_parse!(
     state: num >>
     tag!("\t") >>
+    nextstate: num >>
+    tag!("\t") >>
     ilabel: num >>
     tag!("\t") >>
     olabel: num >>
-    tag!("\t") >>
-    nextstate: num >>
     weight: optional_weight >>
     (Transition {
         state, ilabel, olabel, weight, nextstate})

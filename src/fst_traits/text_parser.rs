@@ -1,13 +1,16 @@
 use fst_traits::ExpandedFst;
 use parsers::text::ParsedTextFst;
-use semirings::TropicalWeight;
+use semirings::Semiring;
 use std::path::Path;
 use Result;
 
-pub trait TextParser: ExpandedFst<W = TropicalWeight> {
+pub trait TextParser: ExpandedFst
+where
+    Self::W: Semiring<Type = f32>,
+{
     fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst) -> Result<Self>;
 
-    fn from_text_string(fst_string: String) -> Result<Self> {
+    fn from_text_string(fst_string: &str) -> Result<Self> {
         let parsed_text_fst = ParsedTextFst::from_string(fst_string)?;
         Self::from_parsed_fst_text(parsed_text_fst)
     }

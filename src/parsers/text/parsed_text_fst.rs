@@ -58,7 +58,7 @@ impl ParsedTextFst {
     /// All the values are separated by a tabulation (`\t`).
     ///
     /// ## Example:
-    /// ```
+    /// ```text
     /// 0	1	32	32
     /// 1	2	45	45
     /// 2	3	18	18	0.25
@@ -66,8 +66,8 @@ impl ParsedTextFst {
     /// 4	5	5	5	0.31
     /// 3	0.67
     /// ```
-    pub fn from_string(fst_string: String) -> ResultRustfst<Self> {
-        let complete_fst_str = CompleteStr(&fst_string);
+    pub fn from_string(fst_string: &str) -> ResultRustfst<Self> {
+        let complete_fst_str = CompleteStr(fst_string);
         let (_, parsed_fst) = parse_text_fst(complete_fst_str)
             .map_err(|_| format_err!("Error while parsing text fst"))?;
         Ok(parsed_fst)
@@ -87,7 +87,7 @@ impl ParsedTextFst {
     /// All the values are separated by a tabulation (`\t`).
     ///
     /// ## Example:
-    /// ```
+    /// ```text
     /// 0	1	32	32
     /// 1	2	45	45
     /// 2	3	18	18	0.25
@@ -97,7 +97,7 @@ impl ParsedTextFst {
     /// ```
     pub fn from_path<P: AsRef<Path>>(path_fst_text: P) -> ResultRustfst<Self> {
         let fst_string = read_to_string(path_fst_text)?;
-        Self::from_string(fst_string)
+        Self::from_string(&fst_string)
     }
 
     pub fn start(&self) -> Option<StateId> {
@@ -112,27 +112,46 @@ impl ParsedTextFst {
     }
 }
 
+impl Transition {
+    pub fn new(
+        state: StateId,
+        ilabel: Label,
+        olabel: Label,
+        weight: Option<f32>,
+        nextstate: StateId,
+    ) -> Self {
+        Self {
+            state,
+            ilabel,
+            olabel,
+            weight,
+            nextstate,
+        }
+    }
+}
+
+impl FinalState {
+    pub fn new(state: StateId, weight: Option<f32>) -> Self {
+        Self { state, weight }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use test_data::text_fst::get_test_data_for_text_parser;
 
     #[test]
-    fn test_parse_text_fst_001() {
-        let path_text = String::from(
-            "/Users/alexandrecaulier/Perso/rustfst/src/test_data/text_fst/text_fst_001.txt",
-        );
-        let text_fst = ParsedTextFst::from_path(path_text).unwrap();
-
-        println!("{:?}", text_fst);
+    fn test_parse_text_fst() {
+        for data in get_test_data_for_text_parser() {
+            let parsed_fst = ParsedTextFst::from_path(data.path).unwrap();
+            let parsed_fst_ref = data.parsed_text_fst;
+            assert_eq!(
+                parsed_fst, parsed_fst_ref,
+                "Tests failing for parse text fst for wFST : {}",
+                data.name
+            );
+        }
     }
 
-    #[test]
-    fn test_parse_text_fst_002() {
-        let path_text = String::from(
-            "/Users/alexandrecaulier/Perso/rustfst/src/test_data/text_fst/text_fst_002.txt",
-        );
-        let text_fst = ParsedTextFst::from_path(path_text).unwrap();
-
-        println!("{:?}", text_fst);
-    }
 }
