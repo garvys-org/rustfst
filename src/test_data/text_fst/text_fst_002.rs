@@ -1,10 +1,10 @@
-use test_data::text_fst::TextParserTest;
-use semirings::{Semiring, ProbabilityWeight};
-use fst_impls::vector::vector_fst::VectorFstState;
 use arc::Arc;
-use parsers::text::{Transition, FinalState, ParsedTextFst};
+use fst_impls::vector::vector_fst::VectorFstState;
 use fst_impls::VectorFst;
+use parsers::text::{FinalState, ParsedTextFst, Transition};
+use semirings::{ProbabilityWeight, Semiring};
 use std::path::PathBuf;
+use test_data::text_fst::TextParserTest;
 
 #[cfg(test)]
 pub(crate) fn text_fst_002() -> TextParserTest {

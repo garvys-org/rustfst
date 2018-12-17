@@ -261,7 +261,11 @@ mod tests {
             let vector_fst =
                 VectorFst::<ProbabilityWeight>::read_text(path_serialized_fst).unwrap();
 
-            assert_eq!(vector_fst, vector_fst_ref, "Test failing for test parse text for wFST : {}", name);
+            assert_eq!(
+                vector_fst, vector_fst_ref,
+                "Test failing for test parse text for wFST : {}",
+                name
+            );
         }
     }
 
@@ -275,7 +279,11 @@ mod tests {
 
             let vector_fst = VectorFst::<ProbabilityWeight>::from_text_string(&text).unwrap();
 
-            assert_eq!(vector_fst, vector_fst_ref, "Test failing for test write read text for wFST : {}", name);
+            assert_eq!(
+                vector_fst, vector_fst_ref,
+                "Test failing for test write read text for wFST : {}",
+                name
+            );
         }
     }
 }
