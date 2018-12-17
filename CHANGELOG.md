@@ -6,15 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- `write-text` function to serialize an `ExpandedFst` into text format (compatible with OpenFST).
+- `write_text` function to serialize an `ExpandedFst` into text format (compatible with OpenFST).
 - `draw` to generate a file representing an `ExpandedFst` in dot format that can be displayed with GraphViz.
 - Implement `num_input_epsilons`, `num_output_expilons` and `relabel_pairs`.
 - `closure_plus` and `closure_star` are now also available as provided methods on a `MutabeFst`.
 - Add `is_one` and `is_zero` to `Semiring` API.
 - Add `is_start` to `Fst` API.
+- Add `text` method to write the text representation of an fst into a string.
+- Add `read_text` and `from_text_string` methods to parse a text representation of an FST.
 
 ### Changed
-
+- `new` method now present in the `Semiring` trait.
 
 ### Removed
 - `determinize` no longer public as the implementation is not satisfactory.

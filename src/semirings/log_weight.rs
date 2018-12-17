@@ -7,12 +7,6 @@ pub struct LogWeight {
     value: f32,
 }
 
-impl LogWeight {
-    pub fn new(value: f32) -> Self {
-        LogWeight { value }
-    }
-}
-
 fn ln_pos_exp(x: f32) -> f32 {
     ((-x).exp()).ln_1p()
 }
@@ -20,17 +14,21 @@ fn ln_pos_exp(x: f32) -> f32 {
 impl Semiring for LogWeight {
     type Type = f32;
 
+    fn new(value: <Self as Semiring>::Type) -> Self {
+        LogWeight { value }
+    }
+
     fn plus(&self, rhs: &Self) -> Self {
         let f1 = self.value();
         let f2 = rhs.value();
         if f1 == f32::INFINITY {
-            return rhs.clone();
+            rhs.clone()
         } else if f2 == f32::INFINITY {
-            return self.clone();
+            self.clone()
         } else if f1 > f2 {
-            return Self::new(f2 - ln_pos_exp(f1 - f2));
+            Self::new(f2 - ln_pos_exp(f1 - f2))
         } else {
-            return Self::new(f1 - ln_pos_exp(f2 - f1));
+            Self::new(f1 - ln_pos_exp(f2 - f1))
         }
     }
 
@@ -38,11 +36,11 @@ impl Semiring for LogWeight {
         let f1 = self.value();
         let f2 = rhs.value();
         if f1 == f32::INFINITY {
-            return self.clone();
+            self.clone()
         } else if f2 == f32::INFINITY {
-            return rhs.clone();
+            rhs.clone()
         } else {
-            return Self::new(f1 + f2);
+            Self::new(f1 + f2)
         }
     }
 

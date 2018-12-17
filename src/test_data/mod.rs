@@ -1,5 +1,6 @@
 #[macro_use]
 pub(crate) mod test_fst_trait;
+pub(crate) mod text_fst;
 pub(crate) mod vector_fst;
 
 #[cfg(test)]

@@ -29,7 +29,7 @@ use Result;
 /// ```
 pub fn decode_linear_fst<F: Fst>(fst: &F) -> Result<Path<F::W>> {
     let mut it_path = fst.paths_iter();
-    let path = it_path.next().unwrap_or(Path::default());
+    let path = it_path.next().unwrap_or_default();
     if it_path.next().is_some() {
         bail!("The FST is not linear !")
     }

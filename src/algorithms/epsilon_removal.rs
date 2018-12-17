@@ -29,7 +29,7 @@ where
         for old_arc in fst.arcs_iter(&old_state_id)? {
             let a = keep_only_epsilon && old_arc.ilabel == EPS_LABEL && old_arc.olabel == EPS_LABEL;
             let b =
-                !keep_only_epsilon && !(old_arc.ilabel == EPS_LABEL && old_arc.olabel == EPS_LABEL);
+                !(old_arc.ilabel == EPS_LABEL && old_arc.olabel == EPS_LABEL || keep_only_epsilon);
 
             if a || b {
                 fst_epsilon.add_arc(

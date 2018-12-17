@@ -6,14 +6,12 @@ pub struct ProbabilityWeight {
     value: f32,
 }
 
-impl ProbabilityWeight {
-    pub fn new(value: f32) -> Self {
-        ProbabilityWeight { value }
-    }
-}
-
 impl Semiring for ProbabilityWeight {
     type Type = f32;
+
+    fn new(value: <Self as Semiring>::Type) -> Self {
+        ProbabilityWeight { value }
+    }
 
     fn plus(&self, rhs: &Self) -> Self {
         Self::new(self.value + rhs.value)

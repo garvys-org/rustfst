@@ -1,4 +1,3 @@
-
 /// Struct to configure how the FST will be displayed
 #[derive(Debug, Clone, PartialEq)]
 pub struct DrawingConfig {

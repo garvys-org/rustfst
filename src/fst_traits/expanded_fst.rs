@@ -39,7 +39,15 @@ pub trait ExpandedFst: Fst {
         Ok(())
     }
 
-    /// Serializes the FST as a DOT file compatible with GraphViz binaries
+    /// Writes the text representation of the FST into a String.
+    fn text(&self) -> Result<String> {
+        let buffer = Vec::<u8>::new();
+        let mut line_writer = LineWriter::new(buffer);
+        write_fst!(self, line_writer);
+        Ok(String::from_utf8(line_writer.into_inner()?)?)
+    }
+
+    /// Serializes the FST as a DOT file compatible with GraphViz binaries.
     fn draw<P: AsRef<Path>>(&self, path_output: P, config: &DrawingConfig) -> Result<()> {
         let buffer = File::create(path_output.as_ref())?;
         let mut f = LineWriter::new(buffer);

@@ -7,14 +7,12 @@ pub struct TropicalWeight {
     value: f32,
 }
 
-impl TropicalWeight {
-    pub fn new(value: f32) -> Self {
-        TropicalWeight { value }
-    }
-}
-
 impl Semiring for TropicalWeight {
     type Type = f32;
+
+    fn new(value: <Self as Semiring>::Type) -> Self {
+        TropicalWeight { value }
+    }
 
     fn plus(&self, rhs: &Self) -> Self {
         if self.value < rhs.value {
@@ -28,11 +26,11 @@ impl Semiring for TropicalWeight {
         let f1 = self.value();
         let f2 = rhs.value();
         if f1 == f32::INFINITY {
-            return self.clone();
+            self.clone()
         } else if f2 == f32::INFINITY {
-            return rhs.clone();
+            rhs.clone()
         } else {
-            return Self::new(f1 + f2);
+            Self::new(f1 + f2)
         }
     }
 

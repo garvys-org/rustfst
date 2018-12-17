@@ -76,6 +76,8 @@
 extern crate counter;
 extern crate failure;
 extern crate itertools;
+#[macro_use]
+extern crate nom;
 #[cfg(test)]
 extern crate rand;
 
@@ -92,6 +94,8 @@ pub static EPS_LABEL: Label = 0;
 
 mod drawing_config;
 pub use drawing_config::DrawingConfig;
+
+pub mod parsers;
 
 /// Provides algorithms that are generic for all wFST.
 pub mod algorithms;
