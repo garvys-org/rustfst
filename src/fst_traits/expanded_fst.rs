@@ -35,7 +35,7 @@ pub trait ExpandedFst: Fst {
     fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Result<()> {
         let buffer = File::create(path_output.as_ref())?;
         let mut line_writer = LineWriter::new(buffer);
-        write_fst!(self, line_writer);
+        write_fst!(self, line_writer, true);
         Ok(())
     }
 
@@ -43,7 +43,7 @@ pub trait ExpandedFst: Fst {
     fn text(&self) -> Result<String> {
         let buffer = Vec::<u8>::new();
         let mut line_writer = LineWriter::new(buffer);
-        write_fst!(self, line_writer);
+        write_fst!(self, line_writer, true);
         Ok(String::from_utf8(line_writer.into_inner()?)?)
     }
 
