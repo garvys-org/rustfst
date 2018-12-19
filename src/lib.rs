@@ -85,24 +85,20 @@ type Result<T> = std::result::Result<T, failure::Error>;
 
 /// Type used for the input label and output label of an arc in a wFST.
 pub type Label = usize;
+pub type Symbol = String;
 
 /// Type used to identify a state in a wFST.
 pub type StateId = usize;
 
 /// Epsilon label representing the epsilon transition (empty transition).
 pub static EPS_LABEL: Label = 0;
-
-mod drawing_config;
-pub use drawing_config::DrawingConfig;
-
-pub mod parsers;
+/// Epsilon symbol representing the epsilon transition (empty transition).
+pub const EPS_SYMBOL: &str = "<eps>";
 
 /// Provides algorithms that are generic for all wFST.
 pub mod algorithms;
 /// Implementation of the transitions inside a wFST.
 pub mod arc;
-/// Implementation of a successful path inside a wFST.
-pub mod path;
 #[macro_use]
 /// Provides trait that must be implemented to be able to use generic algorithms.
 pub mod fst_traits;
@@ -114,3 +110,15 @@ pub mod semirings;
 pub(crate) mod test_data;
 /// A few utilities to manipulate wFSTs.
 pub mod utils;
+
+mod drawing_config;
+pub use drawing_config::DrawingConfig;
+
+/// Implementation of a successful path inside a wFST.
+mod path;
+pub use path::Path;
+
+mod symbol_table;
+pub use symbol_table::SymbolTable;
+
+mod parsers;
