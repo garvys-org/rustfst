@@ -16,7 +16,7 @@ use StateId;
 /// use rustfst::semirings::{Semiring, IntegerWeight};
 /// use rustfst::fst_impls::VectorFst;
 /// use rustfst::fst_traits::PathsIterator;
-/// use rustfst::path::Path;
+/// use rustfst::Path;
 /// use rustfst::algorithms::union;
 /// use std::collections::HashSet;
 ///

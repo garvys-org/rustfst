@@ -16,7 +16,7 @@ use Result;
 /// use rustfst::semirings::{BooleanWeight, Semiring};
 /// use rustfst::utils::{transducer, decode_linear_fst};
 /// use rustfst::arc::Arc;
-/// use rustfst::path::Path;
+/// use rustfst::Path;
 ///
 /// let labels_input = vec![32, 43, 21];
 /// let labels_output = vec![53, 18, 89];

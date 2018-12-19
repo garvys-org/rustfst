@@ -27,8 +27,7 @@ macro_rules! display_single_state {
                     "{}\t{}\t{}\t{}",
                     $state_id, &arc.nextstate, &arc.ilabel, &arc.olabel
                 )?;
-            }
-            else {
+            } else {
                 writeln!(
                     $f,
                     "{}\t{}\t{}\t{}\t{}",
@@ -55,13 +54,8 @@ macro_rules! write_fst {
             // Finally, print the final states with their weight
             for final_state in $fst.final_states_iter() {
                 if final_state.final_weight.is_one() && !$show_weight_one {
-                    writeln!(
-                        $f,
-                        "{}",
-                        &final_state.state_id
-                    )?;
-                }
-                else {
+                    writeln!($f, "{}", &final_state.state_id)?;
+                } else {
                     writeln!(
                         $f,
                         "{}\t{}",
@@ -80,7 +74,7 @@ macro_rules! display_fst_trait {
             $semiring::Type: fmt::Display,
         {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                write_fst!(self, f, false);
+                write_fst!(self, f, true);
                 Ok(())
             }
         }

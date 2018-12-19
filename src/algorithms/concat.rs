@@ -10,14 +10,13 @@ use EPS_LABEL;
 ///
 /// # Example
 /// ```
-/// use rustfst::utils::transducer;
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::fst_traits::PathsIterator;
-/// use rustfst::path::Path;
-/// use rustfst::algorithms::concat;
-/// use std::collections::HashSet;
-///
+/// # use rustfst::utils::transducer;
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::fst_traits::PathsIterator;
+/// # use rustfst::Path;
+/// # use rustfst::algorithms::concat;
+/// # use std::collections::HashSet;
 /// let fst_a : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
 /// let fst_b : VectorFst<IntegerWeight> = transducer(vec![6].into_iter(), vec![5].into_iter()).unwrap();
 ///
