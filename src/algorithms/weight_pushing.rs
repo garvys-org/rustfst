@@ -1,4 +1,4 @@
-use algorithms::shortest_distance;
+use algorithms::{reverse, shortest_distance};
 use failure::format_err;
 use fst_traits::{ExpandedFst, FinalStatesIterator, Fst, MutableFst};
 use semirings::{Semiring, WeaklyDivisibleSemiring};
@@ -17,10 +17,10 @@ where
     F: Fst + ExpandedFst + MutableFst,
     F::W: WeaklyDivisibleSemiring,
 {
-    let dist = shortest_distance(fst)?;
-    println!("{:?}", dist);
+    let fst_reversed: F = reverse(fst)?;
+    let dist = shortest_distance(&fst_reversed)?;
 
-    let num_states = dist.len();
+    let num_states = fst.num_states();
 
     for state in 0..num_states {
         let d_s = state_to_dist!(state, dist);
@@ -39,10 +39,17 @@ where
     for final_state in final_states {
         let d_s = state_to_dist!(final_state.state_id, dist);
         if d_s.is_zero() {
-            continue
+            continue;
         }
         let new_weight = d_s.inverse().times(&final_state.final_weight);
         fst.set_final(&final_state.state_id, new_weight)?;
+    }
+
+    if let Some(start_state) = fst.start() {
+        let d_s = state_to_dist!(start_state, dist);
+        for arc in fst.arcs_iter_mut(&start_state)? {
+            arc.weight = arc.weight.times(d_s);
+        }
     }
 
     Ok(())
