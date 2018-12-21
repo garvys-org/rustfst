@@ -1,9 +1,7 @@
-use arc::Arc;
-use semirings::Semiring;
+use crate::arc::Arc;
+use crate::semirings::Semiring;
+use crate::{Result, StateId, EPS_LABEL};
 use std::fmt::Display;
-use Result;
-use StateId;
-use EPS_LABEL;
 
 /// Trait defining necessary methods for a wFST to access start states and final states
 pub trait CoreFst {
@@ -22,7 +20,7 @@ pub trait CoreFst {
     /// // 1 - Create an FST
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     /// let s = fst.add_state();
-    /// fst.set_start(&s);
+    /// fst.set_start(s);
     ///
     /// // 2 - Access the start state
     /// let start_state = fst.start();
@@ -43,13 +41,13 @@ pub trait CoreFst {
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
-    /// fst.set_final(&s2, BooleanWeight::one());
+    /// fst.set_final(s2, BooleanWeight::one());
     ///
     /// // 2 - Access the final weight of each state
-    /// assert_eq!(fst.final_weight(&s1), None);
-    /// assert_eq!(fst.final_weight(&s2), Some(BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s1), None);
+    /// assert_eq!(fst.final_weight(s2), Some(BooleanWeight::one()));
     /// ```
-    fn final_weight(&self, &StateId) -> Option<<Self as CoreFst>::W>;
+    fn final_weight(&self, state_id: StateId) -> Option<<Self as CoreFst>::W>;
 
     /// Total number of arcs in the wFST. This is the sum of the outgoing arcs of each state.
     ///
@@ -66,7 +64,7 @@ pub trait CoreFst {
     /// let s2 = fst.add_state();
     ///
     /// assert_eq!(fst.num_arcs(), 0);
-    /// fst.add_arc(&s1, Arc::new(3, 5, BooleanWeight::new(true), s2));
+    /// fst.add_arc(s1, Arc::new(3, 5, BooleanWeight::new(true), s2));
     /// assert_eq!(fst.num_arcs(), 1);
     /// ```
     fn num_arcs(&self) -> usize;
@@ -84,18 +82,18 @@ pub trait CoreFst {
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
-    /// fst.set_final(&s2, BooleanWeight::one());
+    /// fst.set_final(s2, BooleanWeight::one());
     ///
     /// // 2 - Test if a state is final
-    /// assert!(!fst.is_final(&s1));
-    /// assert!(fst.is_final(&s2));
+    /// assert!(!fst.is_final(s1));
+    /// assert!(fst.is_final(s2));
     /// ```
-    fn is_final(&self, state_id: &StateId) -> bool {
+    fn is_final(&self, state_id: StateId) -> bool {
         self.final_weight(state_id).is_some()
     }
 
-    fn is_start(&self, state_id: &StateId) -> bool {
-        Some(*state_id) == self.start()
+    fn is_start(&self, state_id: StateId) -> bool {
+        Some(state_id) == self.start()
     }
 }
 
@@ -136,7 +134,7 @@ where
     /// Iterator used to iterate over the arcs leaving a state of an FST.
     type Iter: Iterator<Item = &'a Arc<Self::W>> + Clone;
 
-    fn arcs_iter(&'a self, &StateId) -> Result<Self::Iter>;
+    fn arcs_iter(&'a self, state_id: StateId) -> Result<Self::Iter>;
 }
 
 /// Trait defining the minimum interface necessary for a wFST
@@ -157,18 +155,18 @@ pub trait Fst:
     /// let s0 = fst.add_state();
     /// let s1 = fst.add_state();
     ///
-    /// fst.add_arc(&s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
-    /// fst.add_arc(&s0, Arc::new(76, EPS_LABEL, IntegerWeight::one(), s1));
-    /// fst.add_arc(&s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
-    /// fst.add_arc(&s0, Arc::new(45, 18, IntegerWeight::one(), s0));
-    /// fst.add_arc(&s1, Arc::new(76, 18, IntegerWeight::one(), s1));
+    /// fst.add_arc(s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_arc(s0, Arc::new(76, EPS_LABEL, IntegerWeight::one(), s1));
+    /// fst.add_arc(s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_arc(s0, Arc::new(45, 18, IntegerWeight::one(), s0));
+    /// fst.add_arc(s1, Arc::new(76, 18, IntegerWeight::one(), s1));
     ///
     /// assert_eq!(fst.num_input_epsilons(s0).unwrap(), 2);
     /// assert_eq!(fst.num_input_epsilons(s1).unwrap(), 0);
     /// ```
     fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
         Ok(self
-            .arcs_iter(&state)?
+            .arcs_iter(state)?
             .filter(|v| v.ilabel == EPS_LABEL)
             .count())
     }
@@ -187,18 +185,18 @@ pub trait Fst:
     /// let s0 = fst.add_state();
     /// let s1 = fst.add_state();
     ///
-    /// fst.add_arc(&s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
-    /// fst.add_arc(&s0, Arc::new(76, EPS_LABEL, IntegerWeight::one(), s1));
-    /// fst.add_arc(&s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
-    /// fst.add_arc(&s0, Arc::new(45, 18, IntegerWeight::one(), s0));
-    /// fst.add_arc(&s1, Arc::new(76, 18, IntegerWeight::one(), s1));
+    /// fst.add_arc(s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_arc(s0, Arc::new(76, EPS_LABEL, IntegerWeight::one(), s1));
+    /// fst.add_arc(s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_arc(s0, Arc::new(45, 18, IntegerWeight::one(), s0));
+    /// fst.add_arc(s1, Arc::new(76, 18, IntegerWeight::one(), s1));
     ///
     /// assert_eq!(fst.num_output_epsilons(s0).unwrap(), 1);
     /// assert_eq!(fst.num_output_epsilons(s1).unwrap(), 0);
     /// ```
     fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
         Ok(self
-            .arcs_iter(&state)?
+            .arcs_iter(state)?
             .filter(|v| v.olabel == EPS_LABEL)
             .count())
     }
