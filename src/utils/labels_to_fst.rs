@@ -111,18 +111,41 @@ pub fn acceptor<T: Iterator<Item = Label>, F: MutableFst>(labels: T) -> Result<F
     let vec_labels: Vec<_> = labels.collect();
     let mut fst = F::new();
     let mut state_cour = fst.add_state();
-    fst.set_start(&state_cour)?;
+    fst.set_start(state_cour)?;
 
     for l in &vec_labels {
         let new_state = fst.add_state();
         fst.add_arc(
-            &state_cour,
+            state_cour,
             Arc::new(*l, *l, <F as CoreFst>::W::one(), new_state),
         )?;
         state_cour = new_state;
     }
 
-    fst.set_final(&state_cour, <F as CoreFst>::W::one())?;
+    fst.set_final(state_cour, <F as CoreFst>::W::one())?;
 
     Ok(fst)
+}
+
+/// Creates an acceptor of its arguments.
+///
+/// ```
+/// # #[macro_use] extern crate rustfst; fn main() {
+/// # use rustfst::utils;
+/// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::semirings::{ProbabilityWeight, Semiring};
+/// # use rustfst::utils::acceptor;
+/// # use rustfst::arc::Arc;
+/// let fst : VectorFst<ProbabilityWeight> = acceptor![1,2,3];
+/// # }
+/// ```
+#[macro_export]
+macro_rules! acceptor {
+    ( $( $x:expr ),* ) => {
+        {
+            let mut temp_vec = vec![$($x),*];
+            acceptor(temp_vec.clone().into_iter()).unwrap()
+        }
+    };
 }
