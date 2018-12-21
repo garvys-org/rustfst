@@ -9,13 +9,13 @@ pub(crate) mod fst_009;
 pub(crate) mod fst_010;
 
 #[cfg(test)]
-use fst_impls::VectorFst;
+use crate::fst_impls::VectorFst;
 #[cfg(test)]
-use semirings::IntegerWeight;
+use crate::semirings::IntegerWeight;
+#[cfg(test)]
+use crate::test_data::TestFstData;
 #[cfg(test)]
 use std::vec::IntoIter;
-#[cfg(test)]
-use test_data::TestFstData;
 
 #[cfg(test)]
 pub(crate) fn get_linear_fsts() -> Vec<TestFstData<VectorFst<IntegerWeight>>> {

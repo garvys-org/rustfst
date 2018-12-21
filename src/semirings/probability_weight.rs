@@ -1,4 +1,4 @@
-use semirings::{CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring};
+use crate::semirings::{CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring};
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 #[derive(Clone, Debug, PartialEq, Default)]

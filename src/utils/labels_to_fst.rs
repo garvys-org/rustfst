@@ -1,9 +1,9 @@
-use arc::Arc;
-use fst_traits::{CoreFst, MutableFst};
-use semirings::Semiring;
+use crate::arc::Arc;
+use crate::fst_traits::{CoreFst, MutableFst};
+use crate::semirings::Semiring;
+use crate::{Label, Result};
+
 use std::cmp;
-use Label;
-use Result;
 
 /// Turns a list of input labels and output labels into a linear FST.
 /// The only accepted path in the FST has for input `labels_input` and for output `labels_output`.
@@ -32,12 +32,12 @@ use Result;
 /// let s3 = fst_ref.add_state();
 /// let s4 = fst_ref.add_state();
 ///
-/// fst_ref.set_start(&s1).unwrap();
-/// fst_ref.set_final(&s4, ProbabilityWeight::one()).unwrap();
+/// fst_ref.set_start(s1).unwrap();
+/// fst_ref.set_final(s4, ProbabilityWeight::one()).unwrap();
 ///
-/// fst_ref.add_arc(&s1, Arc::new(labels_input[0], labels_output[0], ProbabilityWeight::one(), s2)).unwrap();
-/// fst_ref.add_arc(&s2, Arc::new(labels_input[1], labels_output[1], ProbabilityWeight::one(), s3)).unwrap();
-/// fst_ref.add_arc(&s3, Arc::new(labels_input[2], labels_output[2], ProbabilityWeight::one(), s4)).unwrap();
+/// fst_ref.add_arc(s1, Arc::new(labels_input[0], labels_output[0], ProbabilityWeight::one(), s2)).unwrap();
+/// fst_ref.add_arc(s2, Arc::new(labels_input[1], labels_output[1], ProbabilityWeight::one(), s3)).unwrap();
+/// fst_ref.add_arc(s3, Arc::new(labels_input[2], labels_output[2], ProbabilityWeight::one(), s4)).unwrap();
 ///
 /// assert_eq!(fst, fst_ref);
 /// ```
@@ -55,18 +55,18 @@ pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
 
     let mut fst = F::new();
     let mut state_cour = fst.add_state();
-    fst.set_start(&state_cour)?;
+    fst.set_start(state_cour)?;
 
     for (i, o) in vec_labels_input.iter().zip(vec_labels_output.iter()) {
         let new_state = fst.add_state();
         fst.add_arc(
-            &state_cour,
+            state_cour,
             Arc::new(*i, *o, <F as CoreFst>::W::one(), new_state),
         )?;
         state_cour = new_state;
     }
 
-    fst.set_final(&state_cour, <F as CoreFst>::W::one())?;
+    fst.set_final(state_cour, <F as CoreFst>::W::one())?;
 
     Ok(fst)
 }
@@ -97,12 +97,12 @@ pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
 /// let s3 = fst_ref.add_state();
 /// let s4 = fst_ref.add_state();
 ///
-/// fst_ref.set_start(&s1).unwrap();
-/// fst_ref.set_final(&s4, ProbabilityWeight::one()).unwrap();
+/// fst_ref.set_start(s1).unwrap();
+/// fst_ref.set_final(s4, ProbabilityWeight::one()).unwrap();
 ///
-/// fst_ref.add_arc(&s1, Arc::new(labels[0], labels[0], ProbabilityWeight::one(), s2)).unwrap();
-/// fst_ref.add_arc(&s2, Arc::new(labels[1], labels[1], ProbabilityWeight::one(), s3)).unwrap();
-/// fst_ref.add_arc(&s3, Arc::new(labels[2], labels[2], ProbabilityWeight::one(), s4)).unwrap();
+/// fst_ref.add_arc(s1, Arc::new(labels[0], labels[0], ProbabilityWeight::one(), s2)).unwrap();
+/// fst_ref.add_arc(s2, Arc::new(labels[1], labels[1], ProbabilityWeight::one(), s3)).unwrap();
+/// fst_ref.add_arc(s3, Arc::new(labels[2], labels[2], ProbabilityWeight::one(), s4)).unwrap();
 ///
 /// assert_eq!(fst, fst_ref);
 ///

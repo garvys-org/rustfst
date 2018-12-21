@@ -1,8 +1,7 @@
-use arc::Arc;
-use fst_traits::{CoreFst, FinalStatesIterator, MutableFst};
-use semirings::Semiring;
-use Result;
-use EPS_LABEL;
+use crate::arc::Arc;
+use crate::fst_traits::{CoreFst, FinalStatesIterator, MutableFst};
+use crate::semirings::Semiring;
+use crate::{Result, EPS_LABEL};
 
 /// This operation computes the concatenative closure.
 /// If A transduces string `x` to `y` with weight `a`,
@@ -17,7 +16,7 @@ where
         let final_states_id: Vec<_> = fst.final_states_iter().map(|u| u.state_id).collect();
         for final_state_id in final_states_id {
             fst.add_arc(
-                &final_state_id,
+                final_state_id,
                 Arc::new(EPS_LABEL, EPS_LABEL, <F as CoreFst>::W::one(), start_state),
             )?;
         }

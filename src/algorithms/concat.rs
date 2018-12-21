@@ -1,8 +1,7 @@
-use arc::Arc;
-use fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
-use semirings::Semiring;
-use Result;
-use EPS_LABEL;
+use crate::arc::Arc;
+use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
+use crate::semirings::Semiring;
+use crate::{Result, EPS_LABEL};
 
 /// Performs the concatenation of two wFSTs. If `A` transduces string `x` to `y` with weight `a`
 /// and `B` transduces string `w` to `v` with weight `b`, then their concatenation
@@ -42,7 +41,7 @@ where
 
     // Start state is the start state of the first fst
     if let Some(old_start_state) = fst_1.start() {
-        fst_out.set_start(&mapping_states_fst_1[&old_start_state])?;
+        fst_out.set_start(mapping_states_fst_1[&old_start_state])?;
     }
 
     // Final states of the first fst are connected to the start state of the second fst with an
@@ -50,7 +49,7 @@ where
     if let Some(old_start_state_2) = fst_2.start() {
         let start_state_2 = &mapping_states_fst_2[&old_start_state_2];
         for old_final_state_1 in fst_1.final_states_iter() {
-            let final_state_1 = &mapping_states_fst_1[&old_final_state_1.state_id];
+            let final_state_1 = mapping_states_fst_1[&old_final_state_1.state_id];
             fst_out.add_arc(
                 final_state_1,
                 Arc::new(
@@ -65,7 +64,7 @@ where
 
     // Final states are final states of the second fst
     for old_final_state in fst_2.final_states_iter() {
-        let final_state = &mapping_states_fst_2[&old_final_state.state_id];
+        let final_state = mapping_states_fst_2[&old_final_state.state_id];
         fst_out.set_final(final_state, old_final_state.final_weight)?;
     }
 
@@ -80,11 +79,12 @@ mod tests {
     use counter::Counter;
     use failure::format_err;
     use failure::ResultExt;
-    use fst_impls::VectorFst;
-    use fst_traits::PathsIterator;
     use itertools::Itertools;
-    use semirings::IntegerWeight;
-    use test_data::vector_fst::get_vector_fsts_for_tests;
+
+    use crate::fst_impls::VectorFst;
+    use crate::fst_traits::PathsIterator;
+    use crate::semirings::IntegerWeight;
+    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
     fn test_concat_generic() {

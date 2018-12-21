@@ -1,17 +1,18 @@
-use algorithms::{concat, union};
-use arc::Arc;
-use failure::{bail, ensure, format_err};
-use fst_traits::{
-    ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableArcIterator, MutableFst,
-    StateIterator, TextParser,
-};
-use parsers::text::ParsedTextFst;
-use semirings::Semiring;
 use std::fmt;
 use std::ops::{Add, BitOr};
 use std::slice;
-use Result;
-use StateId;
+
+use failure::{bail, ensure, format_err};
+
+use crate::algorithms::{concat, union};
+use crate::arc::Arc;
+use crate::fst_traits::{
+    ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableArcIterator, MutableFst,
+    StateIterator, TextParser,
+};
+use crate::parsers::text::ParsedTextFst;
+use crate::semirings::Semiring;
+use crate::{Result, StateId};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct VectorFst<W: Semiring> {
@@ -33,8 +34,8 @@ impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
         self.start_state
     }
 
-    fn final_weight(&self, state_id: &StateId) -> Option<W> {
-        if let Some(state) = self.states.get(*state_id) {
+    fn final_weight(&self, state_id: StateId) -> Option<W> {
+        if let Some(state) = self.states.get(state_id) {
             state.final_weight.clone()
         } else {
             None
@@ -82,10 +83,10 @@ impl<'a, W: Semiring> Iterator for VectorStateIterator<'a, W> {
 
 impl<'a, W: 'static + Semiring> ArcIterator<'a> for VectorFst<W> {
     type Iter = slice::Iter<'a, Arc<W>>;
-    fn arcs_iter(&'a self, state_id: &StateId) -> Result<Self::Iter> {
+    fn arcs_iter(&'a self, state_id: StateId) -> Result<Self::Iter> {
         let state = self
             .states
-            .get(*state_id)
+            .get(state_id)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
         Ok(state.arcs.iter())
     }
@@ -105,18 +106,18 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         }
     }
 
-    fn set_start(&mut self, state_id: &StateId) -> Result<()> {
+    fn set_start(&mut self, state_id: StateId) -> Result<()> {
         ensure!(
-            self.states.get(*state_id).is_some(),
+            self.states.get(state_id).is_some(),
             "The state {:?} doesn't exist",
             state_id
         );
-        self.start_state = Some(*state_id);
+        self.start_state = Some(state_id);
         Ok(())
     }
 
-    fn set_final(&mut self, state_id: &StateId, final_weight: W) -> Result<()> {
-        if let Some(state) = self.states.get_mut(*state_id) {
+    fn set_final(&mut self, state_id: StateId, final_weight: W) -> Result<()> {
+        if let Some(state) = self.states.get_mut(state_id) {
             state.final_weight = Some(final_weight);
             Ok(())
         } else {
@@ -130,8 +131,8 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         id
     }
 
-    fn add_arc(&mut self, source: &StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()> {
-        if let Some(state) = self.states.get_mut(*source) {
+    fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()> {
+        if let Some(state) = self.states.get_mut(source) {
             state.arcs.push(arc);
             Ok(())
         } else {
@@ -139,22 +140,22 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         }
     }
 
-    fn del_state(&mut self, state_to_remove: &StateId) -> Result<()> {
+    fn del_state(&mut self, state_to_remove: StateId) -> Result<()> {
         // Remove the state from the vector
         // Check the arcs for arcs going to this state
 
         ensure!(
-            *state_to_remove < self.states.len(),
+            state_to_remove < self.states.len(),
             "State id {:?} doesn't exist",
-            *state_to_remove
+            state_to_remove
         );
-        self.states.remove(*state_to_remove);
+        self.states.remove(state_to_remove);
         for state in &mut self.states {
             let mut to_delete = vec![];
             for (arc_id, arc) in state.arcs.iter_mut().enumerate() {
-                if arc.nextstate == *state_to_remove {
+                if arc.nextstate == state_to_remove {
                     to_delete.push(arc_id);
-                } else if arc.nextstate > *state_to_remove {
+                } else if arc.nextstate > state_to_remove {
                     arc.nextstate -= 1;
                 }
             }
@@ -172,7 +173,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         // Necessary : the states that are removed modify the id of all the states that come after
         v.sort();
         for j in (0..v.len()).rev() {
-            self.del_state(&v[j])?;
+            self.del_state(v[j])?;
         }
         Ok(())
     }
@@ -180,10 +181,10 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
 
 impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
     type IterMut = slice::IterMut<'a, Arc<W>>;
-    fn arcs_iter_mut(&'a mut self, state_id: &StateId) -> Result<Self::IterMut> {
+    fn arcs_iter_mut(&'a mut self, state_id: StateId) -> Result<Self::IterMut> {
         let state = self
             .states
-            .get_mut(*state_id)
+            .get_mut(state_id)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
         Ok(state.arcs.iter_mut())
     }
@@ -215,12 +216,12 @@ impl<W: 'static + Semiring<Type = f32>> TextParser for VectorFst<W> {
                 weight,
                 transition.nextstate,
             );
-            fst.add_arc(&transition.state, arc)?;
+            fst.add_arc(transition.state, arc)?;
         }
 
         for final_state in parsed_fst_text.final_states.into_iter() {
             let weight = final_state.weight.map(W::new).unwrap_or_else(W::one);
-            fst.set_final(&final_state.state, weight)?;
+            fst.set_final(final_state.state, weight)?;
         }
 
         Ok(fst)

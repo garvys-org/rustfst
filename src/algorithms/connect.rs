@@ -1,7 +1,6 @@
-use fst_traits::{ExpandedFst, Fst, MutableFst};
+use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
+use crate::{Result, StateId};
 use std::collections::HashSet;
-use Result;
-use StateId;
 
 fn dfs<F: Fst>(
     fst: &F,
@@ -10,8 +9,8 @@ fn dfs<F: Fst>(
     coaccessible_states: &mut HashSet<StateId>,
 ) -> Result<()> {
     accessible_states.insert(state_id_cour);
-    let mut is_coaccessible = fst.is_final(&state_id_cour);
-    for arc in fst.arcs_iter(&state_id_cour)? {
+    let mut is_coaccessible = fst.is_final(state_id_cour);
+    for arc in fst.arcs_iter(state_id_cour)? {
         let nextstate = arc.nextstate;
 
         if !accessible_states.contains(&nextstate) {
@@ -77,7 +76,7 @@ pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use test_data::vector_fst::get_vector_fsts_for_tests;
+    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
     fn test_connect_generic() {

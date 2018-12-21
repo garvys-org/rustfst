@@ -1,19 +1,31 @@
 [package]
-name = "rustfst"
-version = "0.1.8-alpha.0"
-authors = ["Alexandre Caulier<alexandre.caulier@protonmail.com>"]
-description = "Library for Weighted Finite States Transducers as decribed by Mohri and Allauzen"
-license = "MIT/Apache-2.0"
-keywords = ["FST", "wFST"]
-documentation = "https://docs.rs/rustfst"
-repository = "https://github.com/Garvys/rustfst"
-readme = "README.md"
+name = 'rustfst'
+version = '0.1.8-alpha.0'
+authors = ['Alexandre Caulier<alexandre.caulier@protonmail.com>']
+description = 'Library for Weighted Finite States Transducers as decribed by Mohri and Allauzen'
+documentation = 'https://docs.rs/rustfst'
+readme = 'README.md'
+keywords = [
+    'FST',
+    'wFST',
+    'graph',
+    'automata',
+    'transducer',
+    'acceptor',
+    'path',
+    'shortest-path',
+    'data-structures',
+    'finite-states-transducer',
+]
+license = 'MIT/Apache-2.0'
+repository = 'https://github.com/Garvys/rustfst'
+edition = '2018'
 
 [dependencies]
-failure = "0.1"
-itertools = "0.7"
-nom = "4.1"
+failure = '0.1'
+itertools = '0.7'
+nom = '4.1'
 
 [dev-dependencies]
-counter = "0.4"
-rand = "0.5"
+counter = '0.4'
+rand = '0.5'

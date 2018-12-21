@@ -1,8 +1,8 @@
 use failure::bail;
-use fst_traits::Fst;
-use fst_traits::PathsIterator;
-use path::Path;
-use Result;
+
+use crate::fst_traits::{Fst, PathsIterator};
+use crate::path::Path;
+use crate::Result;
 
 /// Decode a linear FST to retrieves the only path recognized by it. A path is composed of the
 /// input symbols, the output symbols and the weight (multiplication of the weights of the arcs
@@ -39,11 +39,11 @@ pub fn decode_linear_fst<F: Fst>(fst: &F) -> Result<Path<F::W>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use arc::Arc;
-    use fst_impls::VectorFst;
-    use fst_traits::MutableFst;
-    use semirings::{BooleanWeight, Semiring};
-    use utils::{acceptor, transducer};
+    use crate::arc::Arc;
+    use crate::fst_impls::VectorFst;
+    use crate::fst_traits::MutableFst;
+    use crate::semirings::{BooleanWeight, Semiring};
+    use crate::utils::{acceptor, transducer};
 
     #[test]
     fn test_decode_linear_fst_acceptor() {
@@ -83,8 +83,8 @@ mod tests {
     fn test_decode_linear_fst_state_start_and_final() {
         let mut fst = VectorFst::<BooleanWeight>::new();
         let s = fst.add_state();
-        fst.set_start(&s).unwrap();
-        fst.set_final(&s, BooleanWeight::one()).unwrap();
+        fst.set_start(s).unwrap();
+        fst.set_final(s, BooleanWeight::one()).unwrap();
 
         let path = decode_linear_fst(&fst).unwrap();
 
@@ -96,11 +96,11 @@ mod tests {
         let mut fst = VectorFst::<BooleanWeight>::new();
         let s1 = fst.add_state();
         let s2 = fst.add_state();
-        fst.set_start(&s1).unwrap();
-        fst.set_final(&s2, BooleanWeight::one()).unwrap();
-        fst.add_arc(&s1, Arc::new(10, 10, BooleanWeight::one(), s2))
+        fst.set_start(s1).unwrap();
+        fst.set_final(s2, BooleanWeight::one()).unwrap();
+        fst.add_arc(s1, Arc::new(10, 10, BooleanWeight::one(), s2))
             .unwrap();
-        fst.add_arc(&s1, Arc::new(10, 10, BooleanWeight::one(), s2))
+        fst.add_arc(s1, Arc::new(10, 10, BooleanWeight::one(), s2))
             .unwrap();
 
         assert!(decode_linear_fst(&fst).is_err())

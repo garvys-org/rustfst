@@ -1,19 +1,19 @@
 #[cfg(test)]
-use arc::Arc;
+use crate::arc::Arc;
 #[cfg(test)]
-use fst_impls::VectorFst;
+use crate::fst_impls::VectorFst;
 #[cfg(test)]
-use fst_traits::MutableFst;
+use crate::fst_traits::MutableFst;
 #[cfg(test)]
-use fst_traits::{CoreFst, ExpandedFst};
+use crate::fst_traits::{CoreFst, ExpandedFst};
 #[cfg(test)]
-use semirings::IntegerWeight;
+use crate::semirings::IntegerWeight;
 #[cfg(test)]
-use semirings::Semiring;
+use crate::semirings::Semiring;
 #[cfg(test)]
-use test_data::TestFst;
+use crate::test_data::TestFst;
 #[cfg(test)]
-use test_data::TestFstData;
+use crate::test_data::TestFstData;
 
 #[cfg(test)]
 pub(crate) struct VectorFst009 {}
@@ -27,15 +27,15 @@ impl TestFst for VectorFst009 {
         let mut fst = VectorFst::new();
         let s0 = fst.add_state();
         let s1 = fst.add_state();
-        fst.set_start(&s0).unwrap();
-        fst.add_arc(&s0, Arc::new(3, 5, IntegerWeight::new(10), s1))
+        fst.set_start(s0).unwrap();
+        fst.add_arc(s0, Arc::new(3, 5, IntegerWeight::new(10), s1))
             .unwrap();
-        fst.add_arc(&s0, Arc::new(5, 7, IntegerWeight::new(18), s1))
+        fst.add_arc(s0, Arc::new(5, 7, IntegerWeight::new(18), s1))
             .unwrap();
-        fst.set_final(&s1, IntegerWeight::new(31)).unwrap();
+        fst.set_final(s1, IntegerWeight::new(31)).unwrap();
         fst.add_state();
         let s3 = fst.add_state();
-        fst.add_arc(&s1, Arc::new(5, 7, IntegerWeight::new(18), s3))
+        fst.add_arc(s1, Arc::new(5, 7, IntegerWeight::new(18), s3))
             .unwrap();
         fst
     }
@@ -48,12 +48,12 @@ impl TestFst for VectorFst009 {
         let mut fst = VectorFst::new();
         let s1 = fst.add_state();
         let s2 = fst.add_state();
-        fst.set_start(&s1).unwrap();
-        fst.add_arc(&s1, Arc::new(3, 5, IntegerWeight::new(10), s2))
+        fst.set_start(s1).unwrap();
+        fst.add_arc(s1, Arc::new(3, 5, IntegerWeight::new(10), s2))
             .unwrap();
-        fst.add_arc(&s1, Arc::new(5, 7, IntegerWeight::new(18), s2))
+        fst.add_arc(s1, Arc::new(5, 7, IntegerWeight::new(18), s2))
             .unwrap();
-        fst.set_final(&s2, IntegerWeight::new(31)).unwrap();
+        fst.set_final(s2, IntegerWeight::new(31)).unwrap();
         fst
     }
 

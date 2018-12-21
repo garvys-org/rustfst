@@ -1,7 +1,7 @@
-use semirings::Semiring;
 use std::hash::{Hash, Hasher};
-use Label;
-use EPS_LABEL;
+
+use crate::semirings::Semiring;
+use crate::{Label, EPS_LABEL};
 
 #[derive(PartialEq, Debug, Clone, PartialOrd)]
 pub struct Path<W: Semiring> {

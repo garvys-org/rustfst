@@ -1,17 +1,17 @@
 #[cfg(test)]
-use fst_impls::VectorFst;
+use crate::fst_impls::VectorFst;
 #[cfg(test)]
-use fst_traits::{CoreFst, ExpandedFst};
+use crate::fst_traits::{CoreFst, ExpandedFst};
 #[cfg(test)]
-use semirings::IntegerWeight;
+use crate::semirings::IntegerWeight;
 #[cfg(test)]
-use semirings::Semiring;
+use crate::semirings::Semiring;
 #[cfg(test)]
-use test_data::TestFst;
+use crate::test_data::TestFst;
 #[cfg(test)]
-use test_data::TestFstData;
+use crate::test_data::TestFstData;
 #[cfg(test)]
-use utils::acceptor;
+use crate::utils::acceptor;
 
 #[cfg(test)]
 pub(crate) struct LinearAcceptor1Label {}

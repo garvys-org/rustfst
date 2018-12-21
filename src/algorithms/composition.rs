@@ -1,11 +1,11 @@
-use arc::Arc;
-use fst_traits::{ExpandedFst, MutableFst};
-use itertools::iproduct;
-use semirings::Semiring;
+use crate::arc::Arc;
+use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::itertools::iproduct;
+use crate::semirings::Semiring;
+use crate::Result;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::collections::VecDeque;
-use Result;
 
 /// This operation computes the composition of two transducers.
 /// If `A` transduces string `x` to `y` with weight `a` and `B` transduces `y` to `z`
@@ -51,19 +51,19 @@ where
     if let (Some(state_state_1), Some(start_state_2)) = (fst_1.start(), fst_2.start()) {
         let start_state = composed_fst.add_state();
         mapping_states.insert((state_state_1, start_state_2), start_state);
-        composed_fst.set_start(&start_state)?;
+        composed_fst.set_start(start_state)?;
         queue.push_back((state_state_1, start_state_2, start_state));
     }
 
     while !queue.is_empty() {
         let (q1, q2, q) = queue.pop_front().unwrap();
 
-        if let (Some(rho_1), Some(rho_2)) = (fst_1.final_weight(&q1), fst_2.final_weight(&q2)) {
-            composed_fst.set_final(&q, rho_1.times(&rho_2))?;
+        if let (Some(rho_1), Some(rho_2)) = (fst_1.final_weight(q1), fst_2.final_weight(q2)) {
+            composed_fst.set_final(q, rho_1.times(&rho_2))?;
         }
 
-        let arcs_it1 = fst_1.arcs_iter(&q1)?;
-        let arcs_it2 = fst_2.arcs_iter(&q2)?;
+        let arcs_it1 = fst_1.arcs_iter(q1)?;
+        let arcs_it2 = fst_2.arcs_iter(q2)?;
 
         for (arc_1, arc_2) in iproduct!(arcs_it1, arcs_it2) {
             if arc_1.olabel == arc_2.ilabel {
@@ -81,7 +81,7 @@ where
                 };
 
                 composed_fst.add_arc(
-                    &q,
+                    q,
                     Arc::new(
                         arc_1.ilabel,
                         arc_2.olabel,

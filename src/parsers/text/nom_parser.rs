@@ -1,6 +1,7 @@
 use nom::types::CompleteStr;
 use nom::{digit1, float};
-use parsers::text::parsed_text_fst::{FinalState, ParsedTextFst, Transition};
+
+use crate::parsers::text::parsed_text_fst::{FinalState, ParsedTextFst, Transition};
 
 fn str_to_usize(input: CompleteStr) -> Result<usize, std::num::ParseIntError> {
     (*input).parse()

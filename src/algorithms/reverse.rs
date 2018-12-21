@@ -1,8 +1,7 @@
-use arc::Arc;
-use fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
-use semirings::Semiring;
-use Result;
-use EPS_LABEL;
+use crate::arc::Arc;
+use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
+use crate::semirings::Semiring;
+use crate::{Result, EPS_LABEL};
 
 pub fn reverse<W, F1, F2>(fst: &F1) -> Result<F2>
 where
@@ -20,9 +19,9 @@ where
 
     // Reverse all the transitions
     for state in 0..num_states {
-        for arc in fst.arcs_iter(&state)? {
+        for arc in fst.arcs_iter(state)? {
             fst_reversed.add_arc(
-                &arc.nextstate,
+                arc.nextstate,
                 Arc::new(arc.ilabel, arc.olabel, arc.weight.clone(), state),
             )?;
         }
@@ -30,12 +29,12 @@ where
 
     // Creates the initial state
     let super_initial_state = fst_reversed.add_state();
-    fst_reversed.set_start(&super_initial_state)?;
+    fst_reversed.set_start(super_initial_state)?;
 
     // Add epsilon arc from the initial state to the former final states
     for final_state in fst.final_states_iter() {
         fst_reversed.add_arc(
-            &super_initial_state,
+            super_initial_state,
             Arc::new(
                 EPS_LABEL,
                 EPS_LABEL,
@@ -47,7 +46,7 @@ where
 
     // Forme initial states are now final
     if let Some(state_state_in) = fst.start() {
-        fst_reversed.set_final(&state_state_in, W::one())?;
+        fst_reversed.set_final(state_state_in, W::one())?;
     }
 
     Ok(fst_reversed)

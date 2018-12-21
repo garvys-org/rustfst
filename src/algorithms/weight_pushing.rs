@@ -1,8 +1,9 @@
-use algorithms::{reverse, shortest_distance};
 use failure::format_err;
-use fst_traits::{ExpandedFst, FinalStatesIterator, Fst, MutableFst};
-use semirings::{Semiring, WeaklyDivisibleSemiring};
-use Result;
+
+use crate::algorithms::{reverse, shortest_distance};
+use crate::fst_traits::{ExpandedFst, FinalStatesIterator, Fst, MutableFst};
+use crate::semirings::{Semiring, WeaklyDivisibleSemiring};
+use crate::Result;
 
 macro_rules! state_to_dist {
     ($state: expr, $dist: expr) => {
@@ -28,7 +29,7 @@ where
         if d_s.is_zero() {
             continue;
         }
-        for arc in fst.arcs_iter_mut(&state)? {
+        for arc in fst.arcs_iter_mut(state)? {
             let d_ns = state_to_dist!(arc.nextstate, dist);
             arc.weight = d_s.inverse().times(&arc.weight.times(d_ns));
         }
@@ -42,12 +43,12 @@ where
             continue;
         }
         let new_weight = d_s.inverse().times(&final_state.final_weight);
-        fst.set_final(&final_state.state_id, new_weight)?;
+        fst.set_final(final_state.state_id, new_weight)?;
     }
 
     if let Some(start_state) = fst.start() {
         let d_s = state_to_dist!(start_state, dist);
-        for arc in fst.arcs_iter_mut(&start_state)? {
+        for arc in fst.arcs_iter_mut(start_state)? {
             arc.weight = arc.weight.times(d_s);
         }
     }
@@ -58,7 +59,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use test_data::text_fst::get_test_data_for_text_parser;
+    use crate::test_data::text_fst::get_test_data_for_text_parser;
 
     #[test]
     fn test_push_weights() {

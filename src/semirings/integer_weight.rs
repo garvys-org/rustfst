@@ -1,8 +1,9 @@
-use semirings::CompleteSemiring;
-use semirings::Semiring;
-use semirings::StarSemiring;
 use std::i32;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
+
+use crate::semirings::CompleteSemiring;
+use crate::semirings::Semiring;
+use crate::semirings::StarSemiring;
 
 #[derive(Clone, Debug, PartialEq, Default, Hash, Eq)]
 pub struct IntegerWeight {

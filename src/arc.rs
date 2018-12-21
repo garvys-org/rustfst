@@ -1,6 +1,5 @@
-use semirings::Semiring;
-use Label;
-use StateId;
+use crate::semirings::Semiring;
+use crate::{Label, StateId};
 
 /// Arc structure.
 #[derive(Debug, Clone, PartialEq)]

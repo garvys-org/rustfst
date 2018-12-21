@@ -1,6 +1,6 @@
-use fst_traits::{ExpandedFst, MutableFst};
+use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::Result;
 use std::mem::swap;
-use Result;
 
 /// This operation inverts the transduction corresponding to an FST by exchanging the FST's input and output labels.
 ///
@@ -19,7 +19,7 @@ use Result;
 pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
     let states: Vec<_> = fst.states_iter().collect();
     for state_id in states {
-        for arc in fst.arcs_iter_mut(&state_id)? {
+        for arc in fst.arcs_iter_mut(state_id)? {
             swap(&mut arc.ilabel, &mut arc.olabel);
         }
     }
@@ -29,9 +29,9 @@ pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::fst_traits::PathsIterator;
+    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
     use counter::Counter;
-    use fst_traits::PathsIterator;
-    use test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
     fn test_invert_generic() {

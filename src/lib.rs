@@ -22,7 +22,7 @@
 //!
 //! ## References
 //!
-//! Implementation heavily inspired from Mehryar Mohri's, Cyril Alluzen's and Michael Riley's work :
+//! Implementation heavily inspired from Mehryar Mohri's, Cyril Allauzen's and Michael Riley's work :
 //! - [Weighted automata algorithms](https://cs.nyu.edu/~mohri/pub/hwa.pdf)
 //! - [The design principles of a weighted finite-state transducer library](https://core.ac.uk/download/pdf/82101846.pdf)
 //! - [OpenFst: A general and efficient weighted finite-state transducer library](https://link.springer.com/chapter/10.1007%2F978-3-540-76336-9_3)
@@ -46,19 +46,19 @@
 //! let s2 = fst.add_state();
 //!
 //! // Set s0 as the start state
-//! fst.set_start(&s0).unwrap();
+//! fst.set_start(s0).unwrap();
 //!
 //! // Add an arc from s0 to s1
-//! fst.add_arc(&s0, Arc::new(3, 5, IntegerWeight::new(10), s1))
+//! fst.add_arc(s0, Arc::new(3, 5, IntegerWeight::new(10), s1))
 //!     .unwrap();
 //!
 //! // Add an arc from s0 to s2
-//! fst.add_arc(&s0, Arc::new(5, 7, IntegerWeight::new(18), s2))
+//! fst.add_arc(s0, Arc::new(5, 7, IntegerWeight::new(18), s2))
 //!     .unwrap();
 //!
 //! // Set s1 and s2 as final states
-//! fst.set_final(&s1, IntegerWeight::new(31)).unwrap();
-//! fst.set_final(&s2, IntegerWeight::new(45)).unwrap();
+//! fst.set_final(s1, IntegerWeight::new(31)).unwrap();
+//! fst.set_final(s2, IntegerWeight::new(45)).unwrap();
 //!
 //! // Iter over all the paths in the wFST
 //! for p in fst.paths_iter() {
@@ -91,7 +91,7 @@ pub type Symbol = String;
 pub type StateId = usize;
 
 /// Epsilon label representing the epsilon transition (empty transition).
-pub static EPS_LABEL: Label = 0;
+pub const EPS_LABEL: Label = 0;
 /// Epsilon symbol representing the epsilon transition (empty transition).
 pub const EPS_SYMBOL: &str = "<eps>";
 
@@ -112,13 +112,13 @@ pub(crate) mod test_data;
 pub mod utils;
 
 mod drawing_config;
-pub use drawing_config::DrawingConfig;
+pub use crate::drawing_config::DrawingConfig;
 
 /// Implementation of a successful path inside a wFST.
 mod path;
-pub use path::Path;
+pub use crate::path::Path;
 
 mod symbol_table;
-pub use symbol_table::SymbolTable;
+pub use crate::symbol_table::SymbolTable;
 
 mod parsers;

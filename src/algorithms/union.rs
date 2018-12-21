@@ -1,10 +1,11 @@
-use arc::Arc;
-use failure::format_err;
-use fst_traits::{CoreFst, ExpandedFst, FinalStatesIterator, MutableFst};
-use semirings::Semiring;
 use std::collections::HashMap;
-use Result;
-use StateId;
+
+use failure::format_err;
+
+use crate::arc::Arc;
+use crate::fst_traits::{CoreFst, ExpandedFst, FinalStatesIterator, MutableFst};
+use crate::semirings::Semiring;
+use crate::{Result, StateId};
 
 /// Performs the union of two wFSTs. If A transduces string `x` to `y` with weight `a`
 /// and `B` transduces string `w` to `v` with weight `b`, then their union transduces `x` to `y`
@@ -42,7 +43,7 @@ where
     let mut fst_out = F3::new();
 
     let start_state = fst_out.add_state();
-    fst_out.set_start(&start_state)?;
+    fst_out.set_start(start_state)?;
 
     let mapping_states_fst_1 = fst_out.add_fst(fst_1)?;
     let mapping_states_fst_2 = fst_out.add_fst(fst_2)?;
@@ -68,7 +69,7 @@ where
     let start_state = fst_out.start().unwrap();
     if let Some(old_start_state_fst) = fst.start() {
         fst_out.add_arc(
-            &start_state,
+            start_state,
             Arc::new(
                 0,
                 0,
@@ -97,7 +98,7 @@ where
                 old_final_state.state_id
             )
         })?;
-        fst_out.set_final(final_state, old_final_state.final_weight)?;
+        fst_out.set_final(*final_state, old_final_state.final_weight)?;
     }
 
     Ok(())
@@ -108,11 +109,12 @@ mod tests {
     use super::*;
     use counter::Counter;
     use failure::ResultExt;
-    use fst_impls::VectorFst;
-    use fst_traits::PathsIterator;
     use itertools::Itertools;
-    use semirings::IntegerWeight;
-    use test_data::vector_fst::get_vector_fsts_for_tests;
+
+    use crate::fst_impls::VectorFst;
+    use crate::fst_traits::PathsIterator;
+    use crate::semirings::IntegerWeight;
+    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
     fn test_union_generic() {

@@ -1,5 +1,5 @@
-use fst_traits::{ExpandedFst, MutableFst};
-use Result;
+use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::Result;
 
 /// This operation projects an FST onto its domain or range by either copying
 /// each arc's input label to its output label or vice versa.
@@ -32,7 +32,7 @@ use Result;
 pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_input: bool) -> Result<()> {
     let states: Vec<_> = fst.states_iter().collect();
     for state_id in states {
-        for arc in fst.arcs_iter_mut(&state_id)? {
+        for arc in fst.arcs_iter_mut(state_id)? {
             if project_input {
                 arc.olabel = arc.ilabel;
             } else {
@@ -85,9 +85,9 @@ pub fn project_output<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::fst_traits::PathsIterator;
+    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
     use counter::Counter;
-    use fst_traits::PathsIterator;
-    use test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
     fn test_projection_input_generic() {

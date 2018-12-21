@@ -1,11 +1,10 @@
+use crate::parsers::text::nom_parser::parse_text_fst;
+use crate::Result as ResultRustfst;
+use crate::{Label, StateId};
 use failure::format_err;
 use nom::types::CompleteStr;
-use parsers::text::nom_parser::parse_text_fst;
 use std::fs::read_to_string;
 use std::path::Path;
-use Label;
-use Result as ResultRustfst;
-use StateId;
 
 /// Struct representing a parsed fst in text format. It contains a vector of transitions
 /// and a vector final states. The first state in the vector of transition is the start state.
@@ -139,7 +138,7 @@ impl FinalState {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use test_data::text_fst::get_test_data_for_text_parser;
+    use crate::test_data::text_fst::get_test_data_for_text_parser;
 
     #[test]
     fn test_parse_text_fst() {

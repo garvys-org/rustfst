@@ -1,6 +1,7 @@
-use semirings::{CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring};
 use std::f32;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
+
+use crate::semirings::{CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring};
 
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct LogWeight {

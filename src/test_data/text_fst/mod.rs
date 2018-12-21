@@ -3,11 +3,12 @@ mod macros;
 mod text_fst_001;
 mod text_fst_002;
 
-use fst_impls::vector::vector_fst::VectorFst;
-use parsers::text::ParsedTextFst;
-use semirings::ProbabilityWeight;
 use std::path::PathBuf;
 use std::vec::IntoIter;
+
+use crate::fst_impls::vector::vector_fst::VectorFst;
+use crate::parsers::text::ParsedTextFst;
+use crate::semirings::ProbabilityWeight;
 
 #[cfg(test)]
 pub(crate) struct TextParserTest {
