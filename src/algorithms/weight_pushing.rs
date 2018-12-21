@@ -1,5 +1,3 @@
-use failure::format_err;
-
 use crate::algorithms::{reverse, shortest_distance};
 use crate::fst_traits::{ExpandedFst, FinalStatesIterator, Fst, MutableFst};
 use crate::semirings::{Semiring, WeaklyDivisibleSemiring};

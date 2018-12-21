@@ -74,6 +74,7 @@
 
 #[cfg(test)]
 extern crate counter;
+#[macro_use]
 extern crate failure;
 extern crate itertools;
 #[macro_use]

@@ -1,6 +1,12 @@
-use crate::{Label, Symbol, EPS_SYMBOL};
 use std::collections::hash_map::{Iter, Keys};
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::{LineWriter, Write};
+use std::path::Path;
+use std::fmt;
+
+use crate::{Label, Result, Symbol, EPS_SYMBOL};
+use itertools::Itertools;
 
 /// A symbol table stores a bidirectional mapping between arc labels and "symbols" (strings).
 #[derive(PartialEq, Debug, Clone, Default)]
@@ -196,6 +202,42 @@ impl SymbolTable {
     }
 }
 
+macro_rules! write_symt_text {
+    ($symt:expr, $f:expr) => {
+        for (label, symbol) in $symt.iter().sorted_by_key(|k| k.0) {
+            writeln!($f, "{}\t{}", symbol, label)?;
+        }
+    };
+}
+
+impl SymbolTable {
+    pub fn read_text(&self) {}
+
+    pub fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Result<()> {
+        let buffer = File::create(path_output.as_ref())?;
+        let mut line_writer = LineWriter::new(buffer);
+
+        write_symt_text!(self, line_writer);
+
+        Ok(())
+    }
+
+    /// Writes the text_fst representation of the symbol table into a String.
+    pub fn text(&self) -> Result<String> {
+        let buffer = Vec::<u8>::new();
+        let mut line_writer = LineWriter::new(buffer);
+        write_symt_text!(self, line_writer);
+        Ok(String::from_utf8(line_writer.into_inner()?)?)
+    }
+}
+
+impl fmt::Display for SymbolTable {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write_symt_text!(self, f);
+        Ok(())
+    }
+}
+
 /// Creates a `SymbolTable` containing the arguments.
 /// ```
 /// # #[macro_use] extern crate rustfst; fn main() {
@@ -215,4 +257,17 @@ macro_rules! symt {
             temp_vec
         }
     };
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_symt_write() -> Result<()> {
+        let s = symt!("a", "b");
+        //        s.write_text("a/symt.txt")?;
+        println!("symt = \n{}", s);
+        Ok(())
+    }
 }
