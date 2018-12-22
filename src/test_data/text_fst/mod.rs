@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use std::vec::IntoIter;
 
 use crate::fst_impls::vector::vector_fst::VectorFst;
-use crate::parsers::text::ParsedTextFst;
+use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::ProbabilityWeight;
 
 #[cfg(test)]

@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use crate::arc::Arc;
 use crate::fst_impls::vector::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
-use crate::parsers::text::{FinalState, ParsedTextFst, Transition};
+use crate::parsers::text_fst::{FinalState, ParsedTextFst, Transition};
 use crate::semirings::{ProbabilityWeight, Semiring};
 use crate::test_data::text_fst::TextParserTest;
 

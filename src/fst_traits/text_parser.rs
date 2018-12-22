@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use crate::fst_traits::ExpandedFst;
-use crate::parsers::text::ParsedTextFst;
+use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::Semiring;
 use crate::Result;
 

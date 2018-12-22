@@ -1,12 +1,14 @@
 use std::collections::hash_map::{Iter, Keys};
 use std::collections::HashMap;
+use std::fmt;
 use std::fs::File;
 use std::io::{LineWriter, Write};
 use std::path::Path;
-use std::fmt;
 
-use crate::{Label, Result, Symbol, EPS_SYMBOL};
 use itertools::Itertools;
+
+use crate::parsers::text_symt::parsed_text_symt::ParsedTextSymt;
+use crate::{Label, Result, Symbol, EPS_SYMBOL};
 
 /// A symbol table stores a bidirectional mapping between arc labels and "symbols" (strings).
 #[derive(PartialEq, Debug, Clone, Default)]
@@ -14,6 +16,14 @@ pub struct SymbolTable {
     label_to_symbol: HashMap<Label, Symbol>,
     symbol_to_label: HashMap<Symbol, Label>,
     num_symbols: usize,
+}
+
+macro_rules! write_symt_text {
+    ($symt:expr, $f:expr) => {
+        for (label, symbol) in $symt.iter().sorted_by_key(|k| k.0) {
+            writeln!($f, "{}\t{}", symbol, label)?;
+        }
+    };
 }
 
 impl SymbolTable {
@@ -200,18 +210,32 @@ impl SymbolTable {
             self.add_symbol(symbol.as_str());
         }
     }
-}
 
-macro_rules! write_symt_text {
-    ($symt:expr, $f:expr) => {
-        for (label, symbol) in $symt.iter().sorted_by_key(|k| k.0) {
-            writeln!($f, "{}\t{}", symbol, label)?;
+    fn from_parsed_symt_text(parsed_symt_text: ParsedTextSymt) -> Result<Self> {
+        let num_symbols = parsed_symt_text.pairs.len();
+        let mut label_to_symbol: HashMap<Label, Symbol> = HashMap::new();
+        let mut symbol_to_label: HashMap<Symbol, Label> = HashMap::new();
+        for (symbol, label) in parsed_symt_text.pairs.into_iter() {
+            label_to_symbol.insert(label, symbol.clone());
+            symbol_to_label.insert(symbol, label);
         }
-    };
-}
 
-impl SymbolTable {
-    pub fn read_text(&self) {}
+        Ok(SymbolTable {
+            num_symbols,
+            symbol_to_label,
+            label_to_symbol,
+        })
+    }
+
+    pub fn from_text_string(symt_string: &str) -> Result<Self> {
+        let parsed_symt = ParsedTextSymt::from_string(symt_string)?;
+        Self::from_parsed_symt_text(parsed_symt)
+    }
+
+    pub fn read_text<P: AsRef<Path>>(&self, path_text_symt: P) -> Result<Self> {
+        let parsed_symt = ParsedTextSymt::from_path(path_text_symt)?;
+        Self::from_parsed_symt_text(parsed_symt)
+    }
 
     pub fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Result<()> {
         let buffer = File::create(path_output.as_ref())?;

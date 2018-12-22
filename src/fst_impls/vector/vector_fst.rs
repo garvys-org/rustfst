@@ -10,7 +10,7 @@ use crate::fst_traits::{
     ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableArcIterator, MutableFst,
     StateIterator, TextParser,
 };
-use crate::parsers::text::ParsedTextFst;
+use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::Semiring;
 use crate::{Result, StateId};
 

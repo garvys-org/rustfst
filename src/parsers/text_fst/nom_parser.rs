@@ -1,13 +1,8 @@
+use nom::float;
 use nom::types::CompleteStr;
-use nom::{digit1, float};
 
-use crate::parsers::text::parsed_text_fst::{FinalState, ParsedTextFst, Transition};
-
-fn str_to_usize(input: CompleteStr) -> Result<usize, std::num::ParseIntError> {
-    (*input).parse()
-}
-
-named!(num <CompleteStr, usize>, map_res!(digit1, str_to_usize));
+use crate::parsers::nom_utils::num;
+use crate::parsers::text_fst::parsed_text_fst::{FinalState, ParsedTextFst, Transition};
 
 named!(optional_weight <CompleteStr, Option<f32>>, opt!(preceded!(tag!("\t"), float)));
 

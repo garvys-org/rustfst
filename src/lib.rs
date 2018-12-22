@@ -84,6 +84,9 @@ extern crate rand;
 
 type Result<T> = std::result::Result<T, failure::Error>;
 
+mod symbol_table;
+pub use crate::symbol_table::SymbolTable;
+
 /// Type used for the input label and output label of an arc in a wFST.
 pub type Label = usize;
 pub type Symbol = String;
@@ -118,8 +121,5 @@ pub use crate::drawing_config::DrawingConfig;
 /// Implementation of a successful path inside a wFST.
 mod path;
 pub use crate::path::Path;
-
-mod symbol_table;
-pub use crate::symbol_table::SymbolTable;
 
 mod parsers;
