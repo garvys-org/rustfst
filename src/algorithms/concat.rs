@@ -87,7 +87,7 @@ mod tests {
     use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
-    fn test_concat_generic() {
+    fn test_concat_generic() -> Result<()> {
         for data in get_vector_fsts_for_tests().combinations(2) {
             let fst_1 = &data[0].fst;
             let fst_2 = &data[1].fst;
@@ -101,15 +101,13 @@ mod tests {
                 }
             }
 
-            let concat_fst: VectorFst<IntegerWeight> = concat(fst_1, fst_2)
-                .with_context(|_| {
-                    format_err!(
-                        "Error when performing concat operation of {:?} and {:?}",
-                        &data[0].name,
-                        &data[1].name
-                    )
-                })
-                .unwrap();
+            let concat_fst: VectorFst<IntegerWeight> = concat(fst_1, fst_2).with_context(|_| {
+                format_err!(
+                    "Error when performing concat operation of {:?} and {:?}",
+                    &data[0].name,
+                    &data[1].name
+                )
+            })?;
 
             let paths: Counter<_> = concat_fst.paths_iter().collect();
 
@@ -119,5 +117,6 @@ mod tests {
                 &data[0].name, &data[1].name
             );
         }
+        Ok(())
     }
 }

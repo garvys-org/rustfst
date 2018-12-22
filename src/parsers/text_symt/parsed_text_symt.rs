@@ -32,12 +32,13 @@ mod tests {
     use crate::symbol_table::SymbolTable;
 
     #[test]
-    fn test_parse_text_symt() {
+    fn test_parse_text_symt() -> ResultRustFst<()> {
         let mut symt = SymbolTable::new();
         symt.add_symbol("a");
         symt.add_symbol("b");
-        let s = symt.text().unwrap();
+        let s = symt.text()?;
         println!("{:?}", ParsedTextSymt::from_string(&s));
+        Ok(())
     }
 
 }

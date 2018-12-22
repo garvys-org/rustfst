@@ -78,12 +78,12 @@ mod test {
     use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
-    fn test_all_pairs_distance_generic() {
+    fn test_all_pairs_distance_generic() -> Result<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = data.fst;
             let d_ref = data.all_distances;
 
-            let d = all_pairs_shortest_distance(&fst).unwrap();
+            let d = all_pairs_shortest_distance(&fst)?;
 
             assert_eq!(
                 d, d_ref,
@@ -91,5 +91,6 @@ mod test {
                 data.name
             );
         }
+        Ok(())
     }
 }

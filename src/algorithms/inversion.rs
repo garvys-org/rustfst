@@ -34,7 +34,7 @@ mod tests {
     use counter::Counter;
 
     #[test]
-    fn test_invert_generic() {
+    fn test_invert_generic() -> Result<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
 
@@ -48,7 +48,7 @@ mod tests {
 
             let mut projected_fst = fst.clone();
 
-            invert(&mut projected_fst).unwrap();
+            invert(&mut projected_fst)?;
             let paths: Counter<_> = projected_fst.paths_iter().collect();
 
             assert_eq!(
@@ -57,5 +57,6 @@ mod tests {
                 &data.name
             )
         }
+        Ok(())
     }
 }

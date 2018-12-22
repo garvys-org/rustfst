@@ -79,12 +79,12 @@ mod tests {
     use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
-    fn test_connect_generic() {
+    fn test_connect_generic() -> Result<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
 
             let mut connect_fst = fst.clone();
-            connect(&mut connect_fst).unwrap();
+            connect(&mut connect_fst)?;
 
             assert_eq!(
                 connect_fst, data.connected_fst,
@@ -92,5 +92,6 @@ mod tests {
                 &data.name
             );
         }
+        Ok(())
     }
 }

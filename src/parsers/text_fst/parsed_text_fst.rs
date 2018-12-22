@@ -142,9 +142,9 @@ mod tests {
     use crate::test_data::text_fst::get_test_data_for_text_parser;
 
     #[test]
-    fn test_parse_text_fst() {
+    fn test_parse_text_fst() -> ResultRustfst<()> {
         for data in get_test_data_for_text_parser() {
-            let parsed_fst = ParsedTextFst::from_path(data.path).unwrap();
+            let parsed_fst = ParsedTextFst::from_path(data.path)?;
             let parsed_fst_ref = data.parsed_text_fst;
             assert_eq!(
                 parsed_fst, parsed_fst_ref,
@@ -152,6 +152,7 @@ mod tests {
                 data.name
             );
         }
+        Ok(())
     }
 
 }

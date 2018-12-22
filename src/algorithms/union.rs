@@ -117,7 +117,7 @@ mod tests {
     use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
-    fn test_union_generic() {
+    fn test_union_generic() -> Result<()> {
         for data in get_vector_fsts_for_tests().combinations(2) {
             let fst_1 = &data[0].fst;
             let fst_2 = &data[1].fst;
@@ -125,15 +125,13 @@ mod tests {
             let mut paths_ref: Counter<_> = fst_1.paths_iter().collect();
             paths_ref.update(fst_2.paths_iter());
 
-            let union_fst: VectorFst<IntegerWeight> = union(fst_1, fst_2)
-                .with_context(|_| {
-                    format_err!(
-                        "Error when performing union operation between {:?} and {:?}",
-                        &data[0].name,
-                        &data[1].name
-                    )
-                })
-                .unwrap();
+            let union_fst: VectorFst<IntegerWeight> = union(fst_1, fst_2).with_context(|_| {
+                format_err!(
+                    "Error when performing union operation between {:?} and {:?}",
+                    &data[0].name,
+                    &data[1].name
+                )
+            })?;
             let paths: Counter<_> = union_fst.paths_iter().collect();
 
             assert_eq!(
@@ -142,5 +140,6 @@ mod tests {
                 &data[0].name, &data[1].name
             );
         }
+        Ok(())
     }
 }

@@ -46,64 +46,68 @@ mod tests {
     use crate::utils::{acceptor, transducer};
 
     #[test]
-    fn test_decode_linear_fst_acceptor() {
+    fn test_decode_linear_fst_acceptor() -> Result<()> {
         let labels = vec![1, 2, 3];
-        let fst: VectorFst<BooleanWeight> = acceptor(labels.clone().into_iter()).unwrap();
+        let fst: VectorFst<BooleanWeight> = acceptor(labels.clone().into_iter())?;
 
-        let path = decode_linear_fst(&fst).unwrap();
+        let path = decode_linear_fst(&fst)?;
         let path_ref = Path::new(labels.clone(), labels, BooleanWeight::one());
         assert_eq!(path, path_ref);
+        Ok(())
     }
 
     #[test]
-    fn test_decode_linear_fst_transducer() {
+    fn test_decode_linear_fst_transducer() -> Result<()> {
         let labels_input = vec![1, 2, 3];
         let labels_output = vec![43, 22, 18];
         let fst: VectorFst<BooleanWeight> = transducer(
             labels_input.clone().into_iter(),
             labels_output.clone().into_iter(),
-        )
-        .unwrap();
+        )?;
 
-        let path = decode_linear_fst(&fst).unwrap();
+        let path = decode_linear_fst(&fst)?;
         let path_ref = Path::new(labels_input, labels_output, BooleanWeight::one());
 
         assert_eq!(path, path_ref);
+        Ok(())
     }
 
     #[test]
-    fn test_decode_linear_fst_empty_fst() {
+    fn test_decode_linear_fst_empty_fst() -> Result<()> {
         let fst = VectorFst::<BooleanWeight>::new();
-        let path = decode_linear_fst(&fst).unwrap();
+        let path = decode_linear_fst(&fst)?;
 
         assert_eq!(path, Path::default());
+
+        Ok(())
     }
 
     #[test]
-    fn test_decode_linear_fst_state_start_and_final() {
+    fn test_decode_linear_fst_state_start_and_final() -> Result<()> {
         let mut fst = VectorFst::<BooleanWeight>::new();
         let s = fst.add_state();
-        fst.set_start(s).unwrap();
-        fst.set_final(s, BooleanWeight::one()).unwrap();
+        fst.set_start(s)?;
+        fst.set_final(s, BooleanWeight::one())?;
 
-        let path = decode_linear_fst(&fst).unwrap();
+        let path = decode_linear_fst(&fst)?;
 
         assert_eq!(path, Path::default());
+
+        Ok(())
     }
 
     #[test]
-    fn test_decode_linear_fst_fst_not_linear() {
+    fn test_decode_linear_fst_fst_not_linear() -> Result<()> {
         let mut fst = VectorFst::<BooleanWeight>::new();
         let s1 = fst.add_state();
         let s2 = fst.add_state();
-        fst.set_start(s1).unwrap();
-        fst.set_final(s2, BooleanWeight::one()).unwrap();
-        fst.add_arc(s1, Arc::new(10, 10, BooleanWeight::one(), s2))
-            .unwrap();
-        fst.add_arc(s1, Arc::new(10, 10, BooleanWeight::one(), s2))
-            .unwrap();
+        fst.set_start(s1)?;
+        fst.set_final(s2, BooleanWeight::one())?;
+        fst.add_arc(s1, Arc::new(10, 10, BooleanWeight::one(), s2))?;
+        fst.add_arc(s1, Arc::new(10, 10, BooleanWeight::one(), s2))?;
 
-        assert!(decode_linear_fst(&fst).is_err())
+        assert!(decode_linear_fst(&fst).is_err());
+        Ok(())
     }
 
 }

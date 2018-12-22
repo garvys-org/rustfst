@@ -60,13 +60,14 @@ mod tests {
     use crate::test_data::text_fst::get_test_data_for_text_parser;
 
     #[test]
-    fn test_push_weights() {
+    fn test_push_weights() -> Result<()> {
         for data in get_test_data_for_text_parser() {
             let mut fst = data.vector_fst;
             println!("AAA");
             println!("{}", fst);
-            push_weights(&mut fst).unwrap();
+            push_weights(&mut fst)?;
             println!("{}", fst);
         }
+        Ok(())
     }
 }

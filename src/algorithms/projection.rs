@@ -90,7 +90,7 @@ mod tests {
     use counter::Counter;
 
     #[test]
-    fn test_projection_input_generic() {
+    fn test_projection_input_generic() -> Result<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
 
@@ -104,7 +104,7 @@ mod tests {
 
             let mut projected_fst = fst.clone();
 
-            project_input(&mut projected_fst).unwrap();
+            project_input(&mut projected_fst)?;
             let paths: Counter<_> = projected_fst.paths_iter().collect();
 
             assert_eq!(
@@ -113,10 +113,11 @@ mod tests {
                 &data.name
             )
         }
+        Ok(())
     }
 
     #[test]
-    fn test_projection_output_generic() {
+    fn test_projection_output_generic() -> Result<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
 
@@ -130,7 +131,7 @@ mod tests {
 
             let mut projected_fst = fst.clone();
 
-            project_output(&mut projected_fst).unwrap();
+            project_output(&mut projected_fst)?;
             let paths: Counter<_> = projected_fst.paths_iter().collect();
 
             assert_eq!(
@@ -139,5 +140,6 @@ mod tests {
                 &data.name
             )
         }
+        Ok(())
     }
 }

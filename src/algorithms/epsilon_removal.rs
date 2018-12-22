@@ -157,20 +157,19 @@ mod tests {
     // TODO: Add test with epsilon arcs
 
     #[test]
-    fn test_epsilon_removal_generic() {
+    fn test_epsilon_removal_generic() -> Result<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
 
             let paths_ref: Counter<_> = fst.paths_iter().collect();
 
-            let epsilon_removed_fst: VectorFst<IntegerWeight> = rm_epsilon(fst)
-                .with_context(|_| {
+            let epsilon_removed_fst: VectorFst<IntegerWeight> =
+                rm_epsilon(fst).with_context(|_| {
                     format_err!(
                         "Error when performing epsilon removal operation for wFST {:?}",
                         &data.name,
                     )
-                })
-                .unwrap();
+                })?;
             let paths: Counter<_> = epsilon_removed_fst.paths_iter().collect();
 
             assert_eq!(
@@ -179,5 +178,6 @@ mod tests {
                 &data.name
             );
         }
+        Ok(())
     }
 }

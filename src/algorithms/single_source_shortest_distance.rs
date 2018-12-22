@@ -122,13 +122,13 @@ mod tests {
     use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
-    fn test_single_source_shortest_distance_generic() {
+    fn test_single_source_shortest_distance_generic() -> Result<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = data.fst;
             let d_ref = data.all_distances;
 
             for state in fst.states_iter() {
-                let d = single_source_shortest_distance(&fst, state).unwrap();
+                let d = single_source_shortest_distance(&fst, state)?;
                 assert_eq!(
                     d, d_ref[state],
                     "Test failing for single source shortest distance on wFST {:?} at state {:?}",
@@ -136,7 +136,7 @@ mod tests {
                 );
             }
 
-            let d = single_source_shortest_distance(&fst, fst.num_states()).unwrap();
+            let d = single_source_shortest_distance(&fst, fst.num_states())?;
             assert_eq!(
                 d,
                 vec![IntegerWeight::zero(); fst.num_states()],
@@ -145,14 +145,15 @@ mod tests {
                 fst.num_states()
             );
         }
+        Ok(())
     }
 
     #[test]
-    fn test_shortest_distance_generic() {
+    fn test_shortest_distance_generic() -> Result<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = data.fst;
             let d_ref = data.all_distances;
-            let d = shortest_distance(&fst).unwrap();
+            let d = shortest_distance(&fst)?;
 
             if let Some(start_state) = fst.start() {
                 assert_eq!(
@@ -169,5 +170,6 @@ mod tests {
                 );
             }
         }
+        Ok(())
     }
 }
