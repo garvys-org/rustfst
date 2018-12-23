@@ -5,8 +5,8 @@ use std::collections::VecDeque;
 use crate::arc::Arc;
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::itertools::iproduct;
-use crate::Result;
 use crate::semirings::Semiring;
+use crate::Result;
 
 /// This operation computes the composition of two transducers.
 /// If `A` transduces string `x` to `y` with weight `a` and `B` transduces `y` to `z`

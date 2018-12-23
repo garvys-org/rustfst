@@ -193,7 +193,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// If A transduces string `x` to `y` with weight `a`,
     /// then the closure transduces `x` to `y` with weight `a`,
     /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
-    fn closure_plus(&mut self) -> Result<()> {
+    fn closure_plus(&mut self) {
         algorithms::closure_plus(self)
     }
 
@@ -202,7 +202,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// then the closure transduces `x` to `y` with weight `a`,
     /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
     /// The empty string is transduced to itself with weight `1` as well.
-    fn closure_star(&mut self) -> Result<()> {
+    fn closure_star(&mut self) {
         algorithms::closure_star(self)
     }
 }

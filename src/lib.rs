@@ -81,6 +81,7 @@ extern crate nom;
 #[cfg(test)]
 extern crate rand;
 
+/// A type alias for dealing with errors returned by this crate.
 pub type Result<T> = std::result::Result<T, failure::Error>;
 
 mod symbol_table;
@@ -100,6 +101,11 @@ pub const EPS_SYMBOL: &str = "<eps>";
 
 /// Provides algorithms that are generic for all wFST.
 pub mod algorithms;
+pub use self::algorithms::{
+    all_pairs_shortest_distance, closure_plus, closure_star, compose, concat, connect, invert,
+    project, project_input, project_output, push_weights, relabel_pairs, rm_epsilon,
+    shortest_distance, single_source_shortest_distance, union, reverse
+};
 
 /// Implementation of the transitions inside a wFST.
 mod arc;

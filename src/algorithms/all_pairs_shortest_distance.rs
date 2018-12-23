@@ -1,8 +1,8 @@
 use crate::fst_traits::CoreFst;
 use crate::fst_traits::ExpandedFst;
 use crate::fst_traits::Fst;
-use crate::Result;
 use crate::semirings::{Semiring, StarSemiring};
+use crate::Result;
 
 /// This operation computes the shortest distance from each state to every other states.
 /// The shortest distance from `p` to `q `is the ⊕-sum of the weights

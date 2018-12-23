@@ -65,7 +65,8 @@ pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
         fst.add_arc(
             state_cour,
             Arc::new(*i, *o, <F as CoreFst>::W::ONE, new_state),
-        ).unwrap();
+        )
+        .unwrap();
 
         state_cour = new_state;
     }
@@ -127,7 +128,8 @@ pub fn acceptor<T: Iterator<Item = Label>, F: MutableFst>(labels: T) -> F {
         fst.add_arc(
             state_cour,
             Arc::new(*l, *l, <F as CoreFst>::W::ONE, new_state),
-        ).unwrap();
+        )
+        .unwrap();
         state_cour = new_state;
     }
 
