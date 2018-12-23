@@ -5,8 +5,8 @@ use std::collections::VecDeque;
 use crate::arc::Arc;
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::itertools::iproduct;
-use crate::semirings::Semiring;
 use crate::Result;
+use crate::semirings::Semiring;
 
 /// This operation computes the composition of two transducers.
 /// If `A` transduces string `x` to `y` with weight `a` and `B` transduces `y` to `z`
@@ -21,20 +21,11 @@ use crate::Result;
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::compose;
 /// # fn main() -> Result<()> {
-/// let fst_1 : VectorFst<IntegerWeight> = transducer(
-///     vec![1, 2].into_iter(),
-///     vec![2, 3].into_iter()
-/// )?;
+/// let fst_1 : VectorFst<IntegerWeight> = transducer![1,2 => 2,3];
 ///
-/// let fst_2 : VectorFst<IntegerWeight> = transducer(
-///     vec![2, 3].into_iter(),
-///     vec![3, 4].into_iter()
-/// )?;
+/// let fst_2 : VectorFst<IntegerWeight> = transducer![2,3 => 3,4];
 ///
-/// let fst_ref : VectorFst<IntegerWeight> = transducer(
-///     vec![1, 2].into_iter(),
-///     vec![3, 4].into_iter()
-/// )?;
+/// let fst_ref : VectorFst<IntegerWeight> = transducer![1,2 => 3,4];
 ///
 /// let composed_fst : VectorFst<_> = compose(&fst_1, &fst_2)?;
 /// assert_eq!(composed_fst, fst_ref);

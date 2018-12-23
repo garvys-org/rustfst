@@ -23,7 +23,7 @@ impl TestFst for LinearAcceptor0Label {
 
     fn get_fst() -> <Self as TestFst>::F {
         let labels = vec![];
-        acceptor(labels.into_iter()).unwrap()
+        acceptor(labels.into_iter())
     }
 
     fn get_name() -> String {

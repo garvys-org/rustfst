@@ -1,8 +1,8 @@
 use crate::fst_traits::CoreFst;
 use crate::fst_traits::ExpandedFst;
 use crate::fst_traits::Fst;
-use crate::semirings::{Semiring, StarSemiring};
 use crate::Result;
+use crate::semirings::{Semiring, StarSemiring};
 
 /// This operation computes the shortest distance from each state to every other states.
 /// The shortest distance from `p` to `q `is the ⊕-sum of the weights
@@ -10,11 +10,14 @@ use crate::Result;
 ///
 /// # Example
 /// ```
+/// # #[macro_use] extern crate rustfst;
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::fst_traits::MutableFst;
 /// # use rustfst::algorithms::all_pairs_shortest_distance;
 /// # use rustfst::Arc;
+/// # use rustfst::Result;
+/// # fn main() -> Result<()> {
 /// let mut fst = VectorFst::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
@@ -24,14 +27,15 @@ use crate::Result;
 /// fst.add_arc(s0, Arc::new(32, 23, IntegerWeight::new(21), s2));
 /// fst.add_arc(s1, Arc::new(32, 23, IntegerWeight::new(55), s2));
 ///
-/// let dists = all_pairs_shortest_distance(&fst).unwrap();
+/// let dists = all_pairs_shortest_distance(&fst)?;
 ///
 /// assert_eq!(dists, vec![
 ///     vec![IntegerWeight::ONE, IntegerWeight::new(18), IntegerWeight::new(18*55 + 21)],
 ///     vec![IntegerWeight::ZERO, IntegerWeight::ONE, IntegerWeight::new(55)],
 ///     vec![IntegerWeight::ZERO, IntegerWeight::ZERO, IntegerWeight::ONE],
 /// ]);
-///
+/// # Ok(())
+/// # }
 /// ```
 pub fn all_pairs_shortest_distance<F>(fst: &F) -> Result<(Vec<Vec<F::W>>)>
 where

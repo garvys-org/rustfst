@@ -47,7 +47,7 @@ mod tests {
     #[test]
     fn test_decode_linear_fst_acceptor() -> Result<()> {
         let labels = vec![1, 2, 3];
-        let fst: VectorFst<BooleanWeight> = acceptor(labels.clone().into_iter())?;
+        let fst: VectorFst<BooleanWeight> = acceptor(labels.clone().into_iter());
 
         let path = decode_linear_fst(&fst)?;
         let path_ref = Path::new(labels.clone(), labels, BooleanWeight::ONE);

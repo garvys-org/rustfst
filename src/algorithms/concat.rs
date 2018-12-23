@@ -9,23 +9,28 @@ use crate::{Result, EPS_LABEL};
 ///
 /// # Example
 /// ```
+/// # #[macro_use] extern crate rustfst;
 /// # use rustfst::utils::transducer;
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::fst_traits::PathsIterator;
 /// # use rustfst::Path;
 /// # use rustfst::algorithms::concat;
+/// # use rustfst::Result;
 /// # use std::collections::HashSet;
-/// let fst_a : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
-/// let fst_b : VectorFst<IntegerWeight> = transducer(vec![6].into_iter(), vec![5].into_iter()).unwrap();
+/// # fn main() -> Result<()> {
+/// let fst_a : VectorFst<IntegerWeight> = transducer![2 => 3];
+/// let fst_b : VectorFst<IntegerWeight> = transducer![6 => 5];
 ///
-/// let fst_res : VectorFst<IntegerWeight> = concat(&fst_a, &fst_b).unwrap();
+/// let fst_res : VectorFst<IntegerWeight> = concat(&fst_a, &fst_b)?;
 /// let paths : HashSet<_> = fst_res.paths_iter().collect();
 ///
 /// let mut paths_ref = HashSet::new();
 /// paths_ref.insert(Path::new(vec![2, 6], vec![3, 5], IntegerWeight::ONE));
 ///
 /// assert_eq!(paths, paths_ref);
+/// # Ok(())
+/// # }
 /// ```
 pub fn concat<W, F1, F2, F3>(fst_1: &F1, fst_2: &F2) -> Result<F3>
 where

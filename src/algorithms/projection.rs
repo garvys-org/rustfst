@@ -6,26 +6,36 @@ use crate::Result;
 ///
 /// # Example : Project input
 /// ```
+/// # #[macro_use] extern crate rustfst;
+/// # use rustfst::Result;
 /// # use rustfst::utils::{acceptor, transducer};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::project;
-/// let mut fst : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
-/// project(&mut fst, true).unwrap();
+/// # fn main() -> Result<()> {
+/// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
+/// project(&mut fst, true)?;
 ///
-/// assert_eq!(fst, acceptor(vec![2].into_iter()).unwrap());
+/// assert_eq!(fst, acceptor![2]);
+/// # Ok(())
+/// # }
 /// ```
 ///
 /// # Example : Project output
 /// ```
+/// # #[macro_use] extern crate rustfst;
+/// # use rustfst::Result;
 /// # use rustfst::utils::{acceptor, transducer};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::project;
-/// let mut fst : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
-/// project(&mut fst, false).unwrap();
+/// # fn main() -> Result<()> {
+/// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
+/// project(&mut fst, false)?;
 ///
-/// assert_eq!(fst, acceptor(vec![3].into_iter()).unwrap());
+/// assert_eq!(fst, acceptor(vec![3].into_iter()));
+/// # Ok(())
+/// # }
 /// ```
 pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_input: bool) -> Result<()> {
     let states: Vec<_> = fst.states_iter().collect();
@@ -47,15 +57,19 @@ pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_input: bool) ->
 ///
 /// # Example
 /// ```
-/// use rustfst::utils::{acceptor, transducer};
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::algorithms::project;
+/// # #[macro_use] extern crate rustfst;
+/// # use rustfst::Result;
+/// # use rustfst::utils::{acceptor, transducer};
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::algorithms::project_input;
+/// # fn main() -> Result<()> {
+/// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
+/// project_input(&mut fst)?;
 ///
-/// let mut fst : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
-/// project(&mut fst, true).unwrap();
-///
-/// assert_eq!(fst, acceptor(vec![2].into_iter()).unwrap());
+/// assert_eq!(fst, acceptor![2]);
+/// # Ok(())
+/// # }
 /// ```
 pub fn project_input<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
     project(fst, true)
@@ -66,15 +80,19 @@ pub fn project_input<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
 ///
 /// # Example
 /// ```
-/// use rustfst::utils::{acceptor, transducer};
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::algorithms::project;
+/// # #[macro_use] extern crate rustfst;
+/// # use rustfst::Result;
+/// # use rustfst::utils::{acceptor, transducer};
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::algorithms::project_output;
+/// # fn main() -> Result<()> {
+/// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
+/// project_output(&mut fst)?;
 ///
-/// let mut fst : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
-/// project(&mut fst, false).unwrap();
-///
-/// assert_eq!(fst, acceptor(vec![3].into_iter()).unwrap());
+/// assert_eq!(fst, acceptor![3]);
+/// # Ok(())
+/// # }
 /// ```
 pub fn project_output<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
     project(fst, false)

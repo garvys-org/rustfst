@@ -84,7 +84,7 @@ pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
 ///
 /// let labels = vec![32, 43, 21];
 ///
-/// let fst : VectorFst<ProbabilityWeight> = acceptor(labels.clone().into_iter()).unwrap();
+/// let fst : VectorFst<ProbabilityWeight> = acceptor(labels.clone().into_iter());
 ///
 /// assert_eq!(fst.num_states(), 4);
 ///
@@ -106,24 +106,29 @@ pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
 /// assert_eq!(fst, fst_ref);
 ///
 /// ```
-pub fn acceptor<T: Iterator<Item = Label>, F: MutableFst>(labels: T) -> Result<F> {
+pub fn acceptor<T: Iterator<Item = Label>, F: MutableFst>(labels: T) -> F {
     let vec_labels: Vec<_> = labels.collect();
     let mut fst = F::new();
     let mut state_cour = fst.add_state();
-    fst.set_start(state_cour)?;
+
+    // Can't fail as the state has just been added
+    fst.set_start(state_cour).unwrap();
 
     for l in &vec_labels {
         let new_state = fst.add_state();
+
+        // Can't fail as the state has just been added
         fst.add_arc(
             state_cour,
             Arc::new(*l, *l, <F as CoreFst>::W::ONE, new_state),
-        )?;
+        ).unwrap();
         state_cour = new_state;
     }
 
-    fst.set_final(state_cour, <F as CoreFst>::W::ONE)?;
+    // Can't fail as the state has just been added
+    fst.set_final(state_cour, <F as CoreFst>::W::ONE).unwrap();
 
-    Ok(fst)
+    fst
 }
 
 /// Creates an acceptor of its arguments.
@@ -144,7 +149,34 @@ macro_rules! acceptor {
     ( $( $x:expr ),* ) => {
         {
             let mut temp_vec = vec![$($x),*];
-            acceptor(temp_vec.clone().into_iter()).unwrap()
+            acceptor(temp_vec.clone().into_iter())
+        }
+    };
+}
+
+/// Creates a transducer of its arguments.
+///
+/// ```
+/// # #[macro_use] extern crate rustfst; fn main() {
+/// # use rustfst::utils;
+/// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::semirings::{ProbabilityWeight, Semiring};
+/// # use rustfst::utils::transducer;
+/// # use rustfst::Arc;
+/// let fst : VectorFst<ProbabilityWeight> = transducer![1,2,3 => 1,2,4];
+/// # }
+/// ```
+#[macro_export]
+macro_rules! transducer {
+    ( $( $x:expr ),* => $( $y:expr ),* ) => {
+        {
+            let mut temp_vec_input = vec![$($x),*];
+            let mut temp_vec_output = vec![$($y),*];
+            transducer(
+                temp_vec_input.clone().into_iter(),
+                temp_vec_output.clone().into_iter()
+            ).unwrap()
         }
     };
 }
