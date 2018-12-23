@@ -209,7 +209,7 @@ impl<W: 'static + Semiring<Type = f32>> TextParser for VectorFst<W> {
         };
 
         for transition in parsed_fst_text.transitions.into_iter() {
-            let weight = transition.weight.map(W::new).unwrap_or_else(W::one);
+            let weight = transition.weight.map(W::new).unwrap_or(W::ONE);
             let arc = Arc::new(
                 transition.ilabel,
                 transition.olabel,
@@ -220,7 +220,7 @@ impl<W: 'static + Semiring<Type = f32>> TextParser for VectorFst<W> {
         }
 
         for final_state in parsed_fst_text.final_states.into_iter() {
-            let weight = final_state.weight.map(W::new).unwrap_or_else(W::one);
+            let weight = final_state.weight.map(W::new).unwrap_or(W::ONE);
             fst.set_final(final_state.state, weight)?;
         }
 

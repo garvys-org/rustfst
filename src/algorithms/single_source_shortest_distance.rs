@@ -10,12 +10,11 @@ use crate::{Result, StateId};
 ///
 /// # Example
 /// ```
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::fst_traits::MutableFst;
-/// use rustfst::algorithms::single_source_shortest_distance;
-/// use rustfst::arc::Arc;
-///
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::fst_traits::MutableFst;
+/// # use rustfst::algorithms::single_source_shortest_distance;
+/// # use rustfst::Arc;
 /// let mut fst = VectorFst::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
@@ -29,8 +28,8 @@ use crate::{Result, StateId};
 /// let dists = single_source_shortest_distance(&fst, s1).unwrap();
 ///
 /// assert_eq!(dists, vec![
-///     IntegerWeight::zero(),
-///     IntegerWeight::one(),
+///     IntegerWeight::ZERO,
+///     IntegerWeight::ONE,
 ///     IntegerWeight::new(55),
 /// ]);
 ///
@@ -44,13 +43,13 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
     let mut d = vec![];
     let mut r = vec![];
 
-    d.resize(num_states, <F as CoreFst>::W::zero());
-    r.resize(num_states, <F as CoreFst>::W::zero());
+    d.resize(num_states, <F as CoreFst>::W::ZERO);
+    r.resize(num_states, <F as CoreFst>::W::ZERO);
 
     // Check whether the wFST contains the state
     if state_id < fst.num_states() {
-        d[state_id] = <F as CoreFst>::W::one();
-        r[state_id] = <F as CoreFst>::W::one();
+        d[state_id] = <F as CoreFst>::W::ONE;
+        r[state_id] = <F as CoreFst>::W::ONE;
 
         let mut queue = VecDeque::new();
         queue.push_back(state_id);
@@ -58,7 +57,7 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
         while !queue.is_empty() {
             let state_cour = queue.pop_front().unwrap();
             let r2 = r[state_cour].clone();
-            r[state_cour] = <F as CoreFst>::W::zero();
+            r[state_cour] = <F as CoreFst>::W::ZERO;
 
             for arc in fst.arcs_iter(state_cour)? {
                 let nextstate = arc.nextstate;
@@ -82,12 +81,11 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
 ///
 /// # Example
 /// ```
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::fst_traits::MutableFst;
-/// use rustfst::algorithms::shortest_distance;
-/// use rustfst::arc::Arc;
-///
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::fst_traits::MutableFst;
+/// # use rustfst::algorithms::shortest_distance;
+/// # use rustfst::Arc;
 /// let mut fst = VectorFst::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
@@ -101,7 +99,7 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
 /// let dists = shortest_distance(&fst).unwrap();
 ///
 /// assert_eq!(dists, vec![
-///     IntegerWeight::one(),
+///     IntegerWeight::ONE,
 ///     IntegerWeight::new(18),
 ///     IntegerWeight::new(21 + 18*55),
 /// ]);
@@ -111,7 +109,7 @@ pub fn shortest_distance<F: ExpandedFst>(fst: &F) -> Result<Vec<<F as CoreFst>::
     if let Some(start_state) = fst.start() {
         return single_source_shortest_distance(fst, start_state);
     }
-    Ok(vec![<F as CoreFst>::W::zero(); fst.num_states()])
+    Ok(vec![<F as CoreFst>::W::ZERO; fst.num_states()])
 }
 
 #[cfg(test)]
@@ -139,7 +137,7 @@ mod tests {
             let d = single_source_shortest_distance(&fst, fst.num_states())?;
             assert_eq!(
                 d,
-                vec![IntegerWeight::zero(); fst.num_states()],
+                vec![IntegerWeight::ZERO; fst.num_states()],
                 "Test failing for single source shortest distance on wFST {:?} at state {:?}",
                 data.name,
                 fst.num_states()
@@ -164,7 +162,7 @@ mod tests {
             } else {
                 assert_eq!(
                     d,
-                    vec![IntegerWeight::zero(); fst.num_states()],
+                    vec![IntegerWeight::ZERO; fst.num_states()],
                     "Test failing for all shortest distance on wFST : {:?}",
                     data.name
                 );

@@ -23,7 +23,7 @@ use crate::{Result, EPS_LABEL};
 /// let paths : HashSet<_> = fst_res.paths_iter().collect();
 ///
 /// let mut paths_ref = HashSet::new();
-/// paths_ref.insert(Path::new(vec![2, 6], vec![3, 5], IntegerWeight::one()));
+/// paths_ref.insert(Path::new(vec![2, 6], vec![3, 5], IntegerWeight::ONE));
 ///
 /// assert_eq!(paths, paths_ref);
 /// ```

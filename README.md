@@ -53,7 +53,7 @@ use rustfst::utils::transducer;
 use rustfst::semirings::{Semiring, IntegerWeight};
 use rustfst::fst_impls::VectorFst;
 use rustfst::fst_traits::{MutableFst, PathsIterator};
-use rustfst::arc::Arc;
+use rustfst::Arc;
 
 fn main() {
     // Creates a empty wFST

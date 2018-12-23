@@ -10,12 +10,11 @@ use crate::Result;
 ///
 /// # Example
 /// ```
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::fst_traits::MutableFst;
-/// use rustfst::algorithms::all_pairs_shortest_distance;
-/// use rustfst::arc::Arc;
-///
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::fst_traits::MutableFst;
+/// # use rustfst::algorithms::all_pairs_shortest_distance;
+/// # use rustfst::Arc;
 /// let mut fst = VectorFst::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
@@ -28,9 +27,9 @@ use crate::Result;
 /// let dists = all_pairs_shortest_distance(&fst).unwrap();
 ///
 /// assert_eq!(dists, vec![
-///     vec![IntegerWeight::one(), IntegerWeight::new(18), IntegerWeight::new(18*55 + 21)],
-///     vec![IntegerWeight::zero(), IntegerWeight::one(), IntegerWeight::new(55)],
-///     vec![IntegerWeight::zero(), IntegerWeight::zero(), IntegerWeight::one()],
+///     vec![IntegerWeight::ONE, IntegerWeight::new(18), IntegerWeight::new(18*55 + 21)],
+///     vec![IntegerWeight::ZERO, IntegerWeight::ONE, IntegerWeight::new(55)],
+///     vec![IntegerWeight::ZERO, IntegerWeight::ZERO, IntegerWeight::ONE],
 /// ]);
 ///
 /// ```
@@ -42,7 +41,7 @@ where
     let num_states = fst.num_states();
 
     // Distance between all states are initialized to zero
-    let mut d = vec![vec![<F as CoreFst>::W::zero(); num_states]; num_states];
+    let mut d = vec![vec![<F as CoreFst>::W::ZERO; num_states]; num_states];
 
     // Iterator over the wFST to add the weight of the arcs
     for state_id in fst.states_iter() {
@@ -74,8 +73,9 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use crate::test_data::vector_fst::get_vector_fsts_for_tests;
+
+    use super::*;
 
     #[test]
     fn test_all_pairs_distance_generic() -> Result<()> {

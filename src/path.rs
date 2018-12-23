@@ -47,7 +47,7 @@ impl<W: Semiring> Default for Path<W> {
         Path {
             ilabels: vec![],
             olabels: vec![],
-            weight: W::one(),
+            weight: W::ONE,
         }
     }
 }

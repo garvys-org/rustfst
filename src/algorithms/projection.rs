@@ -6,11 +6,10 @@ use crate::Result;
 ///
 /// # Example : Project input
 /// ```
-/// use rustfst::utils::{acceptor, transducer};
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::algorithms::project;
-///
+/// # use rustfst::utils::{acceptor, transducer};
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::algorithms::project;
 /// let mut fst : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
 /// project(&mut fst, true).unwrap();
 ///
@@ -19,11 +18,10 @@ use crate::Result;
 ///
 /// # Example : Project output
 /// ```
-/// use rustfst::utils::{acceptor, transducer};
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::algorithms::project;
-///
+/// # use rustfst::utils::{acceptor, transducer};
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::algorithms::project;
 /// let mut fst : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
 /// project(&mut fst, false).unwrap();
 ///

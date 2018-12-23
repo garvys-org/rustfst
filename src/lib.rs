@@ -31,12 +31,11 @@
 //! ## Example
 //!
 //! ```
-//! use rustfst::utils::transducer;
-//! use rustfst::semirings::{Semiring, IntegerWeight};
-//! use rustfst::fst_impls::VectorFst;
-//! use rustfst::fst_traits::{MutableFst, PathsIterator};
-//! use rustfst::arc::Arc;
-//!
+//! # use rustfst::utils::transducer;
+//! # use rustfst::semirings::{Semiring, IntegerWeight};
+//! # use rustfst::fst_impls::VectorFst;
+//! # use rustfst::fst_traits::{MutableFst, PathsIterator};
+//! # use rustfst::Arc;
 //! // Creates a empty wFST
 //! let mut fst = VectorFst::new();
 //!
@@ -82,7 +81,7 @@ extern crate nom;
 #[cfg(test)]
 extern crate rand;
 
-type Result<T> = std::result::Result<T, failure::Error>;
+pub type Result<T> = std::result::Result<T, failure::Error>;
 
 mod symbol_table;
 pub use crate::symbol_table::SymbolTable;
@@ -101,8 +100,11 @@ pub const EPS_SYMBOL: &str = "<eps>";
 
 /// Provides algorithms that are generic for all wFST.
 pub mod algorithms;
+
 /// Implementation of the transitions inside a wFST.
-pub mod arc;
+mod arc;
+pub use self::arc::Arc;
+
 #[macro_use]
 /// Provides trait that must be implemented to be able to use generic algorithms.
 pub mod fst_traits;

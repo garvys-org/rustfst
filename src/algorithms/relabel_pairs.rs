@@ -30,11 +30,10 @@ where
 ///
 /// # Example
 /// ```
-/// use rustfst::utils::transducer;
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::algorithms::relabel_pairs;
-///
+/// # use rustfst::utils::transducer;
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::algorithms::relabel_pairs;
 /// let mut fst : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
 /// relabel_pairs(&mut fst, vec![(2,5)], vec![(3,4)]).unwrap();
 ///

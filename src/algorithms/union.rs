@@ -13,14 +13,13 @@ use crate::{Result, StateId};
 ///
 /// # Example
 /// ```
-/// use rustfst::utils::transducer;
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::fst_traits::PathsIterator;
-/// use rustfst::Path;
-/// use rustfst::algorithms::union;
-/// use std::collections::HashSet;
-///
+/// # use rustfst::utils::transducer;
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::fst_traits::PathsIterator;
+/// # use rustfst::Path;
+/// # use rustfst::algorithms::union;
+/// # use std::collections::HashSet;
 /// let fst_a : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
 /// let fst_b : VectorFst<IntegerWeight> = transducer(vec![6].into_iter(), vec![5].into_iter()).unwrap();
 ///
@@ -28,8 +27,8 @@ use crate::{Result, StateId};
 /// let paths : HashSet<_> = fst_res.paths_iter().collect();
 ///
 /// let mut paths_ref = HashSet::new();
-/// paths_ref.insert(Path::new(vec![2], vec![3], IntegerWeight::one()));
-/// paths_ref.insert(Path::new(vec![6], vec![5], IntegerWeight::one()));
+/// paths_ref.insert(Path::new(vec![2], vec![3], IntegerWeight::ONE));
+/// paths_ref.insert(Path::new(vec![6], vec![5], IntegerWeight::ONE));
 ///
 /// assert_eq!(paths, paths_ref);
 /// ```
@@ -73,7 +72,7 @@ where
             Arc::new(
                 0,
                 0,
-                <F2 as CoreFst>::W::one(),
+                <F2 as CoreFst>::W::ONE,
                 *mapping.get(&old_start_state_fst).unwrap(),
             ),
         )?;

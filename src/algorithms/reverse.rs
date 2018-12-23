@@ -46,7 +46,7 @@ where
 
     // Forme initial states are now final
     if let Some(state_state_in) = fst.start() {
-        fst_reversed.set_final(state_state_in, W::one())?;
+        fst_reversed.set_final(state_state_in, W::ONE)?;
     }
 
     Ok(fst_reversed)

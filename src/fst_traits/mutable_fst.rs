@@ -15,11 +15,10 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// If the `state_id` doesn't exist an error is raised.
     ///
     /// ```
-    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
-    /// use rustfst::fst_impls::VectorFst;
-    /// use rustfst::semirings::{BooleanWeight, Semiring};
-    /// use rustfst::arc::Arc;
-    ///
+    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::{BooleanWeight, Semiring};
+    /// # use rustfst::Arc;
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
@@ -38,11 +37,10 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// If the `state_id` doesn't exist an error is raised.
     ///
     /// ```
-    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
-    /// use rustfst::fst_impls::VectorFst;
-    /// use rustfst::semirings::{BooleanWeight, Semiring};
-    /// use rustfst::arc::Arc;
-    ///
+    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::{BooleanWeight, Semiring};
+    /// # use rustfst::Arc;
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
@@ -50,13 +48,13 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// assert_eq!(fst.final_weight(s1), None);
     /// assert_eq!(fst.final_weight(s2), None);
     ///
-    /// fst.set_final(s1, BooleanWeight::one());
-    /// assert_eq!(fst.final_weight(s1), Some(BooleanWeight::one()));
+    /// fst.set_final(s1, BooleanWeight::ONE);
+    /// assert_eq!(fst.final_weight(s1), Some(BooleanWeight::ONE));
     /// assert_eq!(fst.final_weight(s2), None);
     ///
-    /// fst.set_final(s2, BooleanWeight::one());
-    /// assert_eq!(fst.final_weight(s1), Some(BooleanWeight::one()));
-    /// assert_eq!(fst.final_weight(s2), Some(BooleanWeight::one()));
+    /// fst.set_final(s2, BooleanWeight::ONE);
+    /// assert_eq!(fst.final_weight(s1), Some(BooleanWeight::ONE));
+    /// assert_eq!(fst.final_weight(s2), Some(BooleanWeight::ONE));
     /// ```
     fn set_final(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W) -> Result<()>;
 
@@ -65,10 +63,9 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// # Example
     ///
     /// ```
-    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
-    /// use rustfst::fst_impls::VectorFst;
-    /// use rustfst::semirings::{BooleanWeight, Semiring};
-    ///
+    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::{BooleanWeight, Semiring};
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     ///
     /// assert_eq!(fst.num_states(), 0);
@@ -88,10 +85,9 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// # Example
     ///
     /// ```
-    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, StateIterator};
-    /// use rustfst::fst_impls::VectorFst;
-    /// use rustfst::semirings::{BooleanWeight, Semiring};
-    ///
+    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, StateIterator};
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::{BooleanWeight, Semiring};
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     ///
     /// assert_eq!(fst.states_iter().count(), 0);
@@ -117,10 +113,9 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// # Example
     ///
     /// ```
-    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, StateIterator};
-    /// use rustfst::fst_impls::VectorFst;
-    /// use rustfst::semirings::{BooleanWeight, Semiring};
-    ///
+    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, StateIterator};
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::{BooleanWeight, Semiring};
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     ///
     /// assert_eq!(fst.states_iter().count(), 0);
@@ -149,11 +144,10 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// # Example
     ///
     /// ```
-    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
-    /// use rustfst::fst_impls::VectorFst;
-    /// use rustfst::semirings::{BooleanWeight, Semiring};
-    /// use rustfst::arc::Arc;
-    ///
+    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::{BooleanWeight, Semiring};
+    /// # use rustfst::Arc;
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();

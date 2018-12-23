@@ -15,6 +15,11 @@ fn ln_pos_exp(x: f32) -> f32 {
 impl Semiring for LogWeight {
     type Type = f32;
 
+    const ZERO: Self = Self {
+        value: f32::INFINITY,
+    };
+    const ONE: Self = Self { value: 0.0 };
+
     fn new(value: <Self as Semiring>::Type) -> Self {
         LogWeight { value }
     }
@@ -43,14 +48,6 @@ impl Semiring for LogWeight {
         } else {
             Self::new(f1 + f2)
         }
-    }
-
-    fn zero() -> Self {
-        Self::new(f32::INFINITY)
-    }
-
-    fn one() -> Self {
-        Self::new(0.0)
     }
 
     fn value(&self) -> Self::Type {

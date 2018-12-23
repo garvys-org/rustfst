@@ -137,10 +137,8 @@ where
     let initial_state = deminized_fst.add_state();
     deminized_fst.set_start(initial_state)?;
 
-    let initial_subset = WeightedSubset::from_vec(vec![PairStateWeight::new(
-        fst_in.start().unwrap(),
-        W::one(),
-    )]);
+    let initial_subset =
+        WeightedSubset::from_vec(vec![PairStateWeight::new(fst_in.start().unwrap(), W::ONE)]);
     mapping_states.insert(initial_subset.clone(), initial_state);
 
     queue.push_back(initial_subset);

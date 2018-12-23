@@ -6,11 +6,10 @@ use std::mem::swap;
 ///
 /// # Example
 /// ```
-/// use rustfst::utils::{acceptor, transducer};
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::algorithms::invert;
-///
+/// # use rustfst::utils::{acceptor, transducer};
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::algorithms::invert;
 /// let mut fst : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
 /// invert(&mut fst).unwrap();
 ///

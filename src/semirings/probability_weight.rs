@@ -9,6 +9,9 @@ pub struct ProbabilityWeight {
 impl Semiring for ProbabilityWeight {
     type Type = f32;
 
+    const ZERO: Self = Self { value: 0.0 };
+    const ONE: Self = Self { value: 1.0 };
+
     fn new(value: <Self as Semiring>::Type) -> Self {
         ProbabilityWeight { value }
     }
@@ -19,14 +22,6 @@ impl Semiring for ProbabilityWeight {
 
     fn times(&self, rhs: &Self) -> Self {
         Self::new(self.value * rhs.value)
-    }
-
-    fn zero() -> Self {
-        Self::new(0.0)
-    }
-
-    fn one() -> Self {
-        Self::new(1.0)
     }
 
     fn value(&self) -> Self::Type {

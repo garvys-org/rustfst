@@ -12,18 +12,20 @@ pub trait Semiring:
     Clone + PartialEq + Debug + Default + Add + AddAssign + Mul + MulAssign + Display
 {
     type Type: Display;
+
+    const ONE: Self;
+    const ZERO: Self;
+
     fn new(value: Self::Type) -> Self;
     fn plus(&self, rhs: &Self) -> Self;
     fn times(&self, rhs: &Self) -> Self;
-    fn zero() -> Self;
-    fn one() -> Self;
     fn value(&self) -> Self::Type;
     fn set_value(&mut self, value: Self::Type);
     fn is_one(&self) -> bool {
-        *self == Self::one()
+        *self == Self::ONE
     }
     fn is_zero(&self) -> bool {
-        *self == Self::zero()
+        *self == Self::ZERO
     }
 }
 

@@ -33,12 +33,11 @@ fn dfs<F: Fst>(
 ///
 /// # Example
 /// ```
-/// use rustfst::utils::transducer;
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::algorithms::connect;
-/// use rustfst::fst_traits::MutableFst;
-///
+/// # use rustfst::utils::transducer;
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::algorithms::connect;
+/// # use rustfst::fst_traits::MutableFst;
 /// let fst : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
 ///
 /// // Add a state not on a successful path

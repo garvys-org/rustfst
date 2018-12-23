@@ -97,7 +97,7 @@ mod tests {
 
         let s = fst.add_state();
         fst.set_start(s).unwrap();
-        fst.set_final(s, IntegerWeight::one()).unwrap();
+        fst.set_final(s, IntegerWeight::ONE).unwrap();
 
         let paths: Counter<_> = fst.paths_iter().collect();
 
@@ -118,7 +118,7 @@ mod tests {
         for path in fst.paths_iter() {
             assert_eq!(
                 path,
-                Path::new(labels.clone(), labels.clone(), IntegerWeight::one())
+                Path::new(labels.clone(), labels.clone(), IntegerWeight::ONE)
             );
         }
     }

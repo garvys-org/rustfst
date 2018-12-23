@@ -9,6 +9,9 @@ pub struct BooleanWeight {
 impl Semiring for BooleanWeight {
     type Type = bool;
 
+    const ZERO: Self = Self { value: false };
+    const ONE: Self = Self { value: true };
+
     fn new(value: <Self as Semiring>::Type) -> Self {
         BooleanWeight { value }
     }
@@ -18,14 +21,6 @@ impl Semiring for BooleanWeight {
     }
     fn times(&self, rhs: &Self) -> Self {
         Self::new(self.value & rhs.value)
-    }
-
-    fn zero() -> Self {
-        Self::new(false)
-    }
-
-    fn one() -> Self {
-        Self::new(true)
     }
 
     fn value(&self) -> Self::Type {

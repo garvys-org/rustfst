@@ -11,13 +11,12 @@ use crate::Result;
 /// # Example
 ///
 /// ```
-/// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::semirings::{BooleanWeight, Semiring};
-/// use rustfst::utils::{transducer, decode_linear_fst};
-/// use rustfst::arc::Arc;
-/// use rustfst::Path;
-///
+/// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::semirings::{BooleanWeight, Semiring};
+/// # use rustfst::utils::{transducer, decode_linear_fst};
+/// # use rustfst::Arc;
+/// # use rustfst::Path;
 /// let labels_input = vec![32, 43, 21];
 /// let labels_output = vec![53, 18, 89];
 ///
@@ -25,7 +24,7 @@ use crate::Result;
 ///
 /// let path = decode_linear_fst(&fst).unwrap();
 ///
-/// assert_eq!(path, Path::new(labels_input, labels_output, BooleanWeight::one()));
+/// assert_eq!(path, Path::new(labels_input, labels_output, BooleanWeight::ONE));
 /// ```
 pub fn decode_linear_fst<F: Fst>(fst: &F) -> Result<Path<F::W>> {
     let mut it_path = fst.paths_iter();
@@ -51,7 +50,7 @@ mod tests {
         let fst: VectorFst<BooleanWeight> = acceptor(labels.clone().into_iter())?;
 
         let path = decode_linear_fst(&fst)?;
-        let path_ref = Path::new(labels.clone(), labels, BooleanWeight::one());
+        let path_ref = Path::new(labels.clone(), labels, BooleanWeight::ONE);
         assert_eq!(path, path_ref);
         Ok(())
     }
@@ -66,7 +65,7 @@ mod tests {
         )?;
 
         let path = decode_linear_fst(&fst)?;
-        let path_ref = Path::new(labels_input, labels_output, BooleanWeight::one());
+        let path_ref = Path::new(labels_input, labels_output, BooleanWeight::ONE);
 
         assert_eq!(path, path_ref);
         Ok(())
@@ -87,7 +86,7 @@ mod tests {
         let mut fst = VectorFst::<BooleanWeight>::new();
         let s = fst.add_state();
         fst.set_start(s)?;
-        fst.set_final(s, BooleanWeight::one())?;
+        fst.set_final(s, BooleanWeight::ONE)?;
 
         let path = decode_linear_fst(&fst)?;
 
@@ -102,9 +101,9 @@ mod tests {
         let s1 = fst.add_state();
         let s2 = fst.add_state();
         fst.set_start(s1)?;
-        fst.set_final(s2, BooleanWeight::one())?;
-        fst.add_arc(s1, Arc::new(10, 10, BooleanWeight::one(), s2))?;
-        fst.add_arc(s1, Arc::new(10, 10, BooleanWeight::one(), s2))?;
+        fst.set_final(s2, BooleanWeight::ONE)?;
+        fst.add_arc(s1, Arc::new(10, 10, BooleanWeight::ONE, s2))?;
+        fst.add_arc(s1, Arc::new(10, 10, BooleanWeight::ONE, s2))?;
 
         assert!(decode_linear_fst(&fst).is_err());
         Ok(())

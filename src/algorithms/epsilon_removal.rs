@@ -63,13 +63,12 @@ where
 ///
 /// # Example
 /// ```
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::fst_traits::MutableFst;
-/// use rustfst::algorithms::rm_epsilon;
-/// use rustfst::arc::Arc;
-/// use rustfst::EPS_LABEL;
-///
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::fst_traits::MutableFst;
+/// # use rustfst::algorithms::rm_epsilon;
+/// # use rustfst::Arc;
+/// # use rustfst::EPS_LABEL;
 /// let mut fst = VectorFst::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
@@ -104,7 +103,7 @@ where
 
     for p in fst_epsilon.states_iter() {
         for q in fst_epsilon.states_iter() {
-            if p != q && dists_fst_epsilon[p][q] != W::zero() {
+            if p != q && dists_fst_epsilon[p][q] != W::ZERO {
                 eps_closures[p].push((q, &dists_fst_epsilon[p][q]));
             }
         }
@@ -130,7 +129,7 @@ where
 
             if fst_no_epsilon.is_final(*q) {
                 if !fst_no_epsilon.is_final(p) {
-                    output_fst.set_final(p, W::zero())?;
+                    output_fst.set_final(p, W::ZERO)?;
                 }
                 let rho_prime_p = output_fst.final_weight(p).unwrap();
                 let rho_q = fst_no_epsilon.final_weight(*q).unwrap();
