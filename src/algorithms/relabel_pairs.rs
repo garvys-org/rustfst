@@ -40,7 +40,7 @@ where
 /// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
 /// relabel_pairs(&mut fst, vec![(2,5)], vec![(3,4)])?;
 ///
-/// assert_eq!(fst, transducer(vec![5].into_iter(), vec![4].into_iter()).unwrap());
+/// assert_eq!(fst, transducer![5 => 4]);
 /// # Ok(())
 /// # }
 /// ```

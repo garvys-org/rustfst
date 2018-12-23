@@ -1,7 +1,7 @@
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Label, Result};
+use crate::Label;
 
 use std::cmp;
 
@@ -19,7 +19,7 @@ use std::cmp;
 /// let labels_input = vec![32, 43, 21];
 /// let labels_output = vec![53, 18, 89];
 ///
-/// let fst : VectorFst<ProbabilityWeight> = transducer(labels_input.clone().into_iter(), labels_output.clone().into_iter()).unwrap();
+/// let fst : VectorFst<ProbabilityWeight> = transducer(labels_input.clone().into_iter(), labels_output.clone().into_iter());
 ///
 /// assert_eq!(fst.num_states(), 4);
 ///
@@ -43,7 +43,7 @@ use std::cmp;
 pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
     labels_input: T,
     labels_output: T,
-) -> Result<F> {
+) -> F {
     let mut vec_labels_input: Vec<_> = labels_input.collect();
     let mut vec_labels_output: Vec<_> = labels_output.collect();
 
@@ -54,20 +54,26 @@ pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
 
     let mut fst = F::new();
     let mut state_cour = fst.add_state();
-    fst.set_start(state_cour)?;
+
+    // Can't fail as the state has just been added
+    fst.set_start(state_cour).unwrap();
 
     for (i, o) in vec_labels_input.iter().zip(vec_labels_output.iter()) {
         let new_state = fst.add_state();
+
+        // Can't fail as the state has just been added
         fst.add_arc(
             state_cour,
             Arc::new(*i, *o, <F as CoreFst>::W::ONE, new_state),
-        )?;
+        ).unwrap();
+
         state_cour = new_state;
     }
 
-    fst.set_final(state_cour, <F as CoreFst>::W::ONE)?;
+    // Can't fail as the state has just been added
+    fst.set_final(state_cour, <F as CoreFst>::W::ONE).unwrap();
 
-    Ok(fst)
+    fst
 }
 
 /// Turns a list of labels into a linear acceptor (FST with the same labels for both input and output).
@@ -176,7 +182,7 @@ macro_rules! transducer {
             transducer(
                 temp_vec_input.clone().into_iter(),
                 temp_vec_output.clone().into_iter()
-            ).unwrap()
+            )
         }
     };
 }

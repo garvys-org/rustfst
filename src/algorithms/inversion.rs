@@ -6,14 +6,15 @@ use std::mem::swap;
 ///
 /// # Example
 /// ```
+/// # #[macro_use] extern crate rustfst;
 /// # use rustfst::utils::{acceptor, transducer};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::invert;
-/// let mut fst : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
+/// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
 /// invert(&mut fst).unwrap();
 ///
-/// assert_eq!(fst, transducer(vec![3].into_iter(), vec![2].into_iter()).unwrap());
+/// assert_eq!(fst, transducer![3 => 2]);
 /// ```
 pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
     let states: Vec<_> = fst.states_iter().collect();
