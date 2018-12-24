@@ -2,11 +2,11 @@ use nom::float;
 use nom::types::CompleteStr;
 
 use crate::parsers::nom_utils::num;
-use crate::parsers::text_fst::parsed_text_fst::{FinalState, ParsedTextFst, Transition};
+use crate::parsers::text_fst::parsed_text_fst::{FinalState, ParsedTextFst, RowParsed, Transition};
 
 named!(optional_weight <CompleteStr, Option<f32>>, opt!(preceded!(tag!("\t"), float)));
 
-named!(transition <CompleteStr, Transition>, do_parse!(
+named!(transition <CompleteStr, RowParsed>, do_parse!(
     state: num >>
     tag!("\t") >>
     nextstate: num >>
@@ -15,26 +15,18 @@ named!(transition <CompleteStr, Transition>, do_parse!(
     tag!("\t") >>
     olabel: num >>
     weight: optional_weight >>
-    (Transition {
-        state, ilabel, olabel, weight, nextstate})
+    (RowParsed::Transition(Transition {
+        state, ilabel, olabel, weight, nextstate}))
 ));
 
-named!(vec_transitions <CompleteStr, Vec<Transition>>,
-    many0!(terminated!(transition, tag!("\n")))
-);
-
-named!(final_state <CompleteStr, FinalState>, do_parse!(
+named!(final_state <CompleteStr, RowParsed>, do_parse!(
     state: num >>
     weight: optional_weight >>
-    (FinalState {state, weight})
+    (RowParsed::FinalState(FinalState {state, weight}))
 ));
 
-named!(vec_final_states <CompleteStr, Vec<FinalState>>,
-    many0!(terminated!(final_state, tag!("\n")))
-);
+named!(row_parsed <CompleteStr, RowParsed>, alt!(transition | final_state));
 
-named!(pub parse_text_fst <CompleteStr, ParsedTextFst>, do_parse!(
-    transitions: vec_transitions >>
-    final_states: vec_final_states >>
-    (ParsedTextFst{transitions, final_states: final_states}))
+named!(pub vec_rows_parsed <CompleteStr, Vec<RowParsed>>,
+    many0!(terminated!(row_parsed, tag!("\n")))
 );

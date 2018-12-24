@@ -3,14 +3,20 @@ use std::path::Path;
 
 use nom::types::CompleteStr;
 
-use crate::parsers::text_fst::nom_parser::parse_text_fst;
+use crate::parsers::text_fst::nom_parser::vec_rows_parsed;
 use crate::Result as ResultRustfst;
 use crate::{Label, StateId};
+
+#[derive(Debug, PartialEq)]
+pub enum RowParsed {
+    Transition(Transition),
+    FinalState(FinalState),
+}
 
 /// Struct representing a parsed fst in text format. It contains a vector of transitions
 /// and a vector final states. The first state in the vector of transition is the start state.
 /// This container doesn't depend on any Semiring.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Default)]
 pub struct ParsedTextFst {
     pub transitions: Vec<Transition>,
     pub final_states: Vec<FinalState>,
@@ -42,6 +48,22 @@ pub struct FinalState {
     pub weight: Option<f32>,
 }
 
+/// Removes the enum
+impl Into<ParsedTextFst> for Vec<RowParsed> {
+    fn into(self) -> ParsedTextFst {
+        let mut parsed_fst = ParsedTextFst::default();
+
+        for row_parsed in self.into_iter() {
+            match row_parsed {
+                RowParsed::Transition(t) => parsed_fst.transitions.push(t),
+                RowParsed::FinalState(f) => parsed_fst.final_states.push(f),
+            };
+        }
+
+        parsed_fst
+    }
+}
+
 impl ParsedTextFst {
     /// Loads an FST from a loaded string in text format usually called `At&T FSM format`.
     ///
@@ -68,9 +90,10 @@ impl ParsedTextFst {
     /// ```
     pub fn from_string(fst_string: &str) -> ResultRustfst<Self> {
         let complete_fst_str = CompleteStr(fst_string);
-        let (_, parsed_fst) = parse_text_fst(complete_fst_str)
+        let (_, vec_rows_parsed) = vec_rows_parsed(complete_fst_str)
             .map_err(|_| format_err!("Error while parsing text fst"))?;
-        Ok(parsed_fst)
+
+        Ok(vec_rows_parsed.into())
     }
 
     /// Loads an FST from a serialized file in text format usually called `At&T FSM format`.
@@ -152,6 +175,28 @@ mod tests {
                 data.name
             );
         }
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_text_fst_not_contiguous() -> ResultRustfst<()> {
+        // Check that parsingg transitions, then final states then transition is working
+        let parsed_fst = ParsedTextFst::from_string("0\t2\t0\t0\n1\n2\t1\t12\t25\n")?;
+
+        let mut transitions = vec![];
+        transitions.push(Transition::new(0, 0, 0, None, 2));
+        transitions.push(Transition::new(2, 12, 25, None, 1));
+
+        let mut final_states = vec![];
+        final_states.push(FinalState::new(1, None));
+
+        let parsed_fst_ref = ParsedTextFst {
+            transitions,
+            final_states,
+        };
+
+        assert_eq!(parsed_fst, parsed_fst_ref);
+
         Ok(())
     }
 
