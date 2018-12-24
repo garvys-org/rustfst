@@ -26,11 +26,11 @@ mod tests {
         let arc_1 = Arc::new(3, 5, ProbabilityWeight::new(10.0), s2);
         fst.add_arc(s1, arc_1.clone())?;
 
-        assert_eq!(fst.num_arcs(), 1);
+        assert_eq!(fst.num_arcs(s1).unwrap(), 1);
 
         let arc_2 = Arc::new(5, 7, ProbabilityWeight::new(18.0), s2);
         fst.add_arc(s1, arc_2.clone())?;
-        assert_eq!(fst.num_arcs(), 2);
+        assert_eq!(fst.num_arcs(s1).unwrap(), 2);
         assert_eq!(fst.arcs_iter(s1)?.count(), 2);
 
         // Iterates on arcs leaving s1
@@ -183,13 +183,14 @@ mod tests {
         fst.add_arc(s2, Arc::new(0, 0, ProbabilityWeight::ONE, s1))?;
         fst.add_arc(s2, Arc::new(0, 0, ProbabilityWeight::ONE, s2))?;
 
-        assert_eq!(fst.num_arcs(), 3);
+        assert_eq!(fst.num_arcs(s1).unwrap(), 1);
+        assert_eq!(fst.num_arcs(s2).unwrap(), 2);
         assert_eq!(fst.arcs_iter(s1)?.count(), 1);
         assert_eq!(fst.arcs_iter(s2)?.count(), 2);
 
         fst.del_state(s1)?;
 
-        assert_eq!(fst.num_arcs(), 1);
+        assert_eq!(fst.num_arcs(s2).unwrap(), 1);
 
         let only_state = fst.states_iter().next().unwrap();
         assert_eq!(fst.arcs_iter(only_state)?.count(), 1);

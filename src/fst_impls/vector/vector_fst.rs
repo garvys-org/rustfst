@@ -42,8 +42,14 @@ impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
         }
     }
 
-    fn num_arcs(&self) -> usize {
-        self.states.iter().map(|state| state.num_arcs()).sum()
+    fn num_arcs(&self, s: StateId) -> Result<usize> {
+        if let Some(vector_fst_state) = self.states.get(s) {
+            Ok(vector_fst_state.num_arcs())
+        }
+        else {
+            bail!("State {:?} doesn't exist", s);
+        }
+
     }
 }
 

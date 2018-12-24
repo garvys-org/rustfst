@@ -47,7 +47,7 @@ pub trait CoreFst {
     /// ```
     fn final_weight(&self, state_id: StateId) -> Option<<Self as CoreFst>::W>;
 
-    /// Total number of arcs in the wFST. This is the sum of the outgoing arcs of each state.
+    /// Number of arcs leaving a specific state in the wFST
     ///
     /// # Example
     ///
@@ -60,11 +60,11 @@ pub trait CoreFst {
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
     ///
-    /// assert_eq!(fst.num_arcs(), 0);
+    /// assert_eq!(fst.num_arcs(s1).unwrap(), 0);
     /// fst.add_arc(s1, Arc::new(3, 5, BooleanWeight::new(true), s2));
-    /// assert_eq!(fst.num_arcs(), 1);
+    /// assert_eq!(fst.num_arcs(s1).unwrap(), 1);
     /// ```
-    fn num_arcs(&self) -> usize;
+    fn num_arcs(&self, s: StateId) -> Result<usize>;
 
     /// Returns whether or not the state with identifier passed as parameters is a final state.
     ///
