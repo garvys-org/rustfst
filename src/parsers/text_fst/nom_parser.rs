@@ -28,5 +28,5 @@ named!(final_state <CompleteStr, RowParsed>, do_parse!(
 named!(row_parsed <CompleteStr, RowParsed>, alt!(transition | final_state));
 
 named!(pub vec_rows_parsed <CompleteStr, Vec<RowParsed>>,
-    many0!(terminated!(row_parsed, tag!("\n")))
+ separated_list!(tag!("\n"), row_parsed)
 );

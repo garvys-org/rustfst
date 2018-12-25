@@ -180,12 +180,33 @@ mod tests {
 
     #[test]
     fn test_parse_text_fst_not_contiguous() -> ResultRustfst<()> {
-        // Check that parsingg transitions, then final states then transition is working
+        // Check that parsing transitions, then final states then transition is working
         let parsed_fst = ParsedTextFst::from_string("0\t2\t0\t0\n1\n2\t1\t12\t25\n")?;
 
         let mut transitions = vec![];
         transitions.push(Transition::new(0, 0, 0, None, 2));
         transitions.push(Transition::new(2, 12, 25, None, 1));
+
+        let mut final_states = vec![];
+        final_states.push(FinalState::new(1, None));
+
+        let parsed_fst_ref = ParsedTextFst {
+            transitions,
+            final_states,
+        };
+
+        assert_eq!(parsed_fst, parsed_fst_ref);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_text_fst_not_finishing_with_eol() -> ResultRustfst<()> {
+        // Check that parsing transitions, then final states then transition is working
+        let parsed_fst = ParsedTextFst::from_string("0\t1\t0\t0\n1")?;
+
+        let mut transitions = vec![];
+        transitions.push(Transition::new(0, 0, 0, None, 1));
 
         let mut final_states = vec![];
         final_states.push(FinalState::new(1, None));
