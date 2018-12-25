@@ -99,12 +99,15 @@ pub const EPS_LABEL: Label = 0;
 /// Epsilon symbol representing the epsilon transition (empty transition).
 pub const EPS_SYMBOL: &str = "<eps>";
 
+/// A few utilities to manipulate wFSTs.
+pub mod utils;
+
 /// Provides algorithms that are generic for all wFST.
 pub mod algorithms;
 pub use self::algorithms::{
     all_pairs_shortest_distance, closure_plus, closure_star, compose, concat, connect, invert,
-    project, project_input, project_output, push_weights, relabel_pairs, rm_epsilon,
-    shortest_distance, single_source_shortest_distance, union, reverse
+    isomorphic, project, project_input, project_output, push_weights, relabel_pairs, reverse,
+    rm_epsilon, shortest_distance, single_source_shortest_distance, union,
 };
 
 /// Implementation of the transitions inside a wFST.
@@ -120,8 +123,6 @@ pub mod fst_impls;
 pub mod semirings;
 #[cfg(test)]
 pub(crate) mod test_data;
-/// A few utilities to manipulate wFSTs.
-pub mod utils;
 
 mod drawing_config;
 pub use crate::drawing_config::DrawingConfig;
