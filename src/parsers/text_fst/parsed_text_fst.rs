@@ -11,6 +11,7 @@ use crate::{Label, StateId};
 pub enum RowParsed {
     Transition(Transition),
     FinalState(FinalState),
+    InfinityFinalState(StateId),
 }
 
 /// Struct representing a parsed fst in text format. It contains a vector of transitions
@@ -57,6 +58,7 @@ impl Into<ParsedTextFst> for Vec<RowParsed> {
             match row_parsed {
                 RowParsed::Transition(t) => parsed_fst.transitions.push(t),
                 RowParsed::FinalState(f) => parsed_fst.final_states.push(f),
+                RowParsed::InfinityFinalState(_) => {}
             };
         }
 
@@ -210,6 +212,26 @@ mod tests {
 
         let mut final_states = vec![];
         final_states.push(FinalState::new(1, None));
+
+        let parsed_fst_ref = ParsedTextFst {
+            transitions,
+            final_states,
+        };
+
+        assert_eq!(parsed_fst, parsed_fst_ref);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_text_fst_infinity_final_states() -> ResultRustfst<()> {
+        let parsed_fst = ParsedTextFst::from_string("0\t1\t12\t25\t0.3\n1\tInfinity\n0\t0\n")?;
+
+        let mut transitions = vec![];
+        transitions.push(Transition::new(0, 12, 25, Some(0.3), 1));
+
+        let mut final_states = vec![];
+        final_states.push(FinalState::new(0, Some(0.0)));
 
         let parsed_fst_ref = ParsedTextFst {
             transitions,
