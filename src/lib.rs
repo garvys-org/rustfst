@@ -71,6 +71,7 @@
 //! Not all algorithms are (yet) implemented, this is still work in progress.
 //!
 
+#[warn(missing_docs)]
 #[cfg(test)]
 extern crate counter;
 #[macro_use]

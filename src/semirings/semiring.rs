@@ -9,7 +9,7 @@ use std::ops::{Add, AddAssign, Mul, MulAssign};
 /// Thus, a semiring is a ring that may lack negation.
 /// For more information : https://cs.nyu.edu/~mohri/pub/hwa.pdf
 pub trait Semiring:
-    Clone + PartialEq + Debug + Default + Add + AddAssign + Mul + MulAssign + Display
+    Clone + PartialEq + PartialOrd + Debug + Default + Add + AddAssign + Mul + MulAssign + Display
 {
     type Type: Display;
 

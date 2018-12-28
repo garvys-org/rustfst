@@ -18,7 +18,8 @@ where
             fst.add_arc(
                 final_state_id,
                 Arc::new(EPS_LABEL, EPS_LABEL, <F as CoreFst>::W::ONE, start_state),
-            ).unwrap();
+            )
+            .unwrap();
         }
     }
 }

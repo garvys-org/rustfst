@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 use std::collections::VecDeque;
 
-use crate::fst_traits::{ExpandedFst, Fst};
+use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Arc, Result, StateId};
 
@@ -29,6 +29,12 @@ fn arc_compare<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> Ordering {
         return Ordering::Less;
     }
     if arc_1.weight > arc_2.weight {
+        return Ordering::Greater;
+    }
+    if arc_1.nextstate < arc_2.nextstate {
+        return Ordering::Less;
+    }
+    if arc_1.nextstate > arc_2.nextstate {
         return Ordering::Greater;
     }
     return Ordering::Equal;
@@ -159,7 +165,6 @@ mod test {
         let mut fst_2 = fst_1.clone();
         assert!(isomorphic(&fst_1, &fst_2)?);
 
-        let s = fst_2.add_state();
         fst_2.add_arc(0, Arc::new(33, 45, LogWeight::new(0.3), 1))?;
         assert!(!isomorphic(&fst_1, &fst_2)?);
 

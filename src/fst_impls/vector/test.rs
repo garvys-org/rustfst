@@ -183,14 +183,14 @@ mod tests {
         fst.add_arc(s2, Arc::new(0, 0, ProbabilityWeight::ONE, s1))?;
         fst.add_arc(s2, Arc::new(0, 0, ProbabilityWeight::ONE, s2))?;
 
-        assert_eq!(fst.num_arcs(s1).unwrap(), 1);
-        assert_eq!(fst.num_arcs(s2).unwrap(), 2);
+        assert_eq!(fst.num_arcs(s1)?, 1);
+        assert_eq!(fst.num_arcs(s2)?, 2);
         assert_eq!(fst.arcs_iter(s1)?.count(), 1);
         assert_eq!(fst.arcs_iter(s2)?.count(), 2);
 
         fst.del_state(s1)?;
 
-        assert_eq!(fst.num_arcs(s2).unwrap(), 1);
+        assert_eq!(fst.num_arcs(0)?, 1);
 
         let only_state = fst.states_iter().next().unwrap();
         assert_eq!(fst.arcs_iter(only_state)?.count(), 1);

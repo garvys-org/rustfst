@@ -5,7 +5,7 @@ use crate::semirings::CompleteSemiring;
 use crate::semirings::Semiring;
 use crate::semirings::StarSemiring;
 
-#[derive(Clone, Debug, PartialEq, Default, Hash, Eq)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Default, Hash, Eq)]
 pub struct IntegerWeight {
     value: i32,
 }

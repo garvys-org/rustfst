@@ -152,9 +152,9 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
     ///
-    /// assert_eq!(fst.num_arcs(), 0);
+    /// assert_eq!(fst.num_arcs(s1).unwrap(), 0);
     /// fst.add_arc(s1, Arc::new(3, 5, BooleanWeight::new(true), s2));
-    /// assert_eq!(fst.num_arcs(), 1);
+    /// assert_eq!(fst.num_arcs(s1).unwrap(), 1);
     /// ```
     fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()>;
 
