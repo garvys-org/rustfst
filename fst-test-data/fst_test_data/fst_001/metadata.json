@@ -1,0 +1,37 @@
+{
+    "shortest_distance": {
+        "result": [
+            0.0, 
+            0.0
+        ]
+    }, 
+    "rmepsilon": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
+    "name": "fst_001", 
+    "invert": {
+        "result": "0\t1\t25\t12\n1\n"
+    }, 
+    "weight_type": "tropical", 
+    "raw": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
+    "project_output": {
+        "result": "0\t1\t25\t25\n1\n"
+    }, 
+    "connect": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
+    "weight_pushing_initial": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
+    "weight_pushing_final": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
+    "project_input": {
+        "result": "0\t1\t12\t12\n1\n"
+    }, 
+    "reverse": {
+        "result": "0\t2\t0\t0\n1\n2\t1\t12\t25\n"
+    }
+}
