@@ -1,0 +1,34 @@
+{
+    "shortest_distance": {
+        "result": []
+    }, 
+    "rmepsilon": {
+        "result": ""
+    }, 
+    "name": "fst_000", 
+    "invert": {
+        "result": ""
+    }, 
+    "weight_type": "tropical", 
+    "raw": {
+        "result": ""
+    }, 
+    "project_output": {
+        "result": ""
+    }, 
+    "connect": {
+        "result": ""
+    }, 
+    "weight_pushing_initial": {
+        "result": ""
+    }, 
+    "weight_pushing_final": {
+        "result": ""
+    }, 
+    "project_input": {
+        "result": ""
+    }, 
+    "reverse": {
+        "result": "0\tInfinity\n"
+    }
+}

@@ -170,6 +170,12 @@ mod test {
     }
 
     #[test]
+    fn test_pynini_fst_000() -> Result<()> {
+        run_test_pynini!("fst_000");
+        Ok(())
+    }
+
+    #[test]
     fn test_pynini_fst_001() -> Result<()> {
         run_test_pynini!("fst_001");
         Ok(())

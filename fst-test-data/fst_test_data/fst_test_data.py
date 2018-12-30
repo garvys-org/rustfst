@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import io
 import os
 import json
+import subprocess
 
 import pynini as p
 
@@ -50,6 +51,14 @@ class FstTestData(object):
         self.add_data_to_config("raw", self.raw_fst.text())
         self.config["weight_type"] = self.raw_fst.weight_type()
         self.config["name"] = self.name
+
+        path_dot = os.path.join(self.path_dir, "fst_raw.dot")
+        path_ps = os.path.join(self.path_dir, "fst_raw.ps")
+
+        self.raw_fst.draw(path_dot)
+        cmd = "dot -Tps %s > %s" % (path_dot, path_ps)
+        subprocess.check_call(cmd, shell=True)
+        os.remove(path_dot)
 
         print("Invert")
         self.compute_fst_invert()
