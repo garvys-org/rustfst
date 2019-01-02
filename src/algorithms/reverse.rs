@@ -3,6 +3,16 @@ use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Result, EPS_LABEL};
 
+/// Reverses an FST. The reversed result is written to an output mutable FST.
+/// If A transduces string x to y with weight a, then the reverse of A
+/// transduces the reverse of x to the reverse of y with weight a.Reverse().
+///
+/// Typically, a = a.Reverse() and an arc is its own reverse (e.g., for
+/// TropicalWeight or LogWeight). In general, e.g., when the weights only form a
+/// left or right semiring, the output arc type must match the input arc type
+/// except having the reversed Weight type.
+///
+/// A superinitial state is always created.
 pub fn reverse<W, F1, F2>(fst: &F1) -> Result<F2>
 where
     W: Semiring,
