@@ -37,7 +37,7 @@ fn arc_compare<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> Ordering {
     if arc_1.nextstate > arc_2.nextstate {
         return Ordering::Greater;
     }
-    return Ordering::Equal;
+    Ordering::Equal
 }
 
 impl<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> Isomorphism<'a, W, F1, F2> {
@@ -102,7 +102,7 @@ impl<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> Isomorphis
                 }
             }
         }
-        return Ok(true);
+        Ok(true)
     }
 
     fn isomorphic(&mut self) -> Result<bool> {

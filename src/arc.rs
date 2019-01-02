@@ -56,7 +56,7 @@ impl<W: Semiring> Arc<W> {
     pub fn set_value(&mut self, arc: &Arc<W>) {
         self.ilabel = arc.ilabel;
         self.olabel = arc.olabel;
-        self.weight = arc.weight.clone();
+        self.weight = arc.weight;
         self.nextstate = arc.nextstate;
     }
 }

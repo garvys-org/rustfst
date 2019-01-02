@@ -29,6 +29,9 @@ where
         }
         for arc in fst.arcs_iter_mut(state)? {
             let d_ns = state_to_dist!(arc.nextstate, dist);
+            if d_ns.is_zero() {
+                continue;
+            }
             arc.weight = d_s.inverse().times(&arc.weight.times(d_ns));
         }
     }

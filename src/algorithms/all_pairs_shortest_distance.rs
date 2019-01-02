@@ -53,7 +53,7 @@ where
             let nextstate = arc.nextstate;
             let weight = &arc.weight;
 
-            d[state_id][nextstate] += weight.clone();
+            d[state_id][nextstate] += *weight;
         }
     }
 

@@ -56,7 +56,7 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
 
         while !queue.is_empty() {
             let state_cour = queue.pop_front().unwrap();
-            let r2 = r[state_cour].clone();
+            let r2 = r[state_cour];
             r[state_cour] = <F as CoreFst>::W::ZERO;
 
             for arc in fst.arcs_iter(state_cour)? {

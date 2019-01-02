@@ -22,7 +22,7 @@ where
         for arc in fst.arcs_iter(state)? {
             fst_reversed.add_arc(
                 arc.nextstate,
-                Arc::new(arc.ilabel, arc.olabel, arc.weight.clone(), state),
+                Arc::new(arc.ilabel, arc.olabel, arc.weight, state),
             )?;
         }
     }

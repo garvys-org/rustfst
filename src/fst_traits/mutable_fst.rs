@@ -179,7 +179,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
                     Arc::new(
                         old_arc.ilabel,
                         old_arc.olabel,
-                        old_arc.weight.clone(),
+                        old_arc.weight,
                         mapping_states[&old_arc.nextstate],
                     ),
                 )?;

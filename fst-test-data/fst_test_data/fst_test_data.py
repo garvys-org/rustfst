@@ -97,38 +97,26 @@ class FstTestData(object):
 
     def compute_fst_project_input(self):
         fst_out = self.raw_fst.copy().project(project_output=False)
-        filename = "fst_project_input.txt"
-        # self.write_text_fst(fst_out, filename)
         self.add_data_to_config("project_input", fst_out.text())
 
     def compute_fst_project_output(self):
         fst_out = self.raw_fst.copy().project(project_output=True)
-        filename = "fst_project_output.txt"
-        # self.write_text_fst(fst_out, filename)
         self.add_data_to_config("project_output", fst_out.text())
 
     def compute_fst_invert(self):
         fst_out = self.raw_fst.copy().invert()
-        filename = "fst_invert.txt"
-        # self.write_text_fst(fst_out, filename)
         self.add_data_to_config("invert", fst_out.text())
 
     def compute_fst_reverse(self):
         fst_out = p.reverse(self.raw_fst.copy())
-        filename = "fst_reverse.txt"
-        # self.write_text_fst(fst_out, filename)
         self.add_data_to_config("reverse", fst_out.text())
 
     def compute_fst_rmepsilon(self):
         fst_out = p.rmepsilon(self.raw_fst.copy(), connect=False)
-        filename = "fst_rmepsilon.txt"
-        # self.write_text_fst(fst_out, filename)
         self.add_data_to_config("rmepsilon", fst_out.text())
 
     def compute_fst_connect(self):
         fst_out = self.raw_fst.copy().connect()
-        filename = "fst_connect.txt"
-        # self.write_text_fst(fst_out, filename)
         self.add_data_to_config("connect", fst_out.text())
 
     def compute_fst_shortest_distance(self):
@@ -138,12 +126,8 @@ class FstTestData(object):
 
     def compute_weight_pushing_initial(self):
         fst_out = self.raw_fst.copy().push(to_final=False)
-        filename = "fst_weight_pushing_initial.txt"
-        # self.write_text_fst(fst_out, filename)
         self.add_data_to_config("weight_pushing_initial", fst_out.text())
 
     def compute_weight_pushing_final(self):
         fst_out = self.raw_fst.copy().push(to_final=True)
-        filename = "fst_weight_pushing_final.txt"
-        # self.write_text_fst(fst_out, filename)
         self.add_data_to_config("weight_pushing_final", fst_out.text())

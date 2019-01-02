@@ -36,7 +36,7 @@ impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
 
     fn final_weight(&self, state_id: StateId) -> Option<W> {
         if let Some(state) = self.states.get(state_id) {
-            state.final_weight.clone()
+            state.final_weight
         } else {
             None
         }
