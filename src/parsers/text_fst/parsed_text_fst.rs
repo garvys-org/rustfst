@@ -21,6 +21,7 @@ pub enum RowParsed {
 pub struct ParsedTextFst {
     pub transitions: Vec<Transition>,
     pub final_states: Vec<FinalState>,
+    pub start_state: Option<StateId>,
 }
 
 /// A transition is a five-tuple. There is one for each arc in the graph.
@@ -53,6 +54,12 @@ pub struct FinalState {
 impl Into<ParsedTextFst> for Vec<RowParsed> {
     fn into(self) -> ParsedTextFst {
         let mut parsed_fst = ParsedTextFst::default();
+
+        parsed_fst.start_state = self.first().map(|v| match v {
+            RowParsed::Transition(t) => t.state,
+            RowParsed::FinalState(f) => f.state,
+            RowParsed::InfinityFinalState(g) => *g,
+        });
 
         for row_parsed in self.into_iter() {
             match row_parsed {
@@ -126,13 +133,19 @@ impl ParsedTextFst {
     }
 
     pub fn start(&self) -> Option<StateId> {
-        self.transitions.first().map(|t| t.state)
+        self.start_state
     }
 
     pub fn num_states(&self) -> usize {
         let it_states = self.transitions.iter().map(|t| t.state);
         let it_nextstates = self.transitions.iter().map(|t| t.nextstate);
-        let max_state = it_states.chain(it_nextstates).max();
+        let it_final_states = self.final_states.iter().map(|f| f.state);
+        let it_start_state = self.start_state.iter().cloned();
+        let max_state = it_states
+            .chain(it_nextstates)
+            .chain(it_final_states)
+            .chain(it_start_state)
+            .max();
         max_state.map(|n| n + 1).unwrap_or(0)
     }
 }
@@ -193,6 +206,7 @@ mod tests {
         final_states.push(FinalState::new(1, None));
 
         let parsed_fst_ref = ParsedTextFst {
+            start_state: Some(0),
             transitions,
             final_states,
         };
@@ -214,6 +228,7 @@ mod tests {
         final_states.push(FinalState::new(1, None));
 
         let parsed_fst_ref = ParsedTextFst {
+            start_state: Some(0),
             transitions,
             final_states,
         };
@@ -234,6 +249,7 @@ mod tests {
         final_states.push(FinalState::new(0, Some(0.0)));
 
         let parsed_fst_ref = ParsedTextFst {
+            start_state: Some(0),
             transitions,
             final_states,
         };
@@ -242,5 +258,4 @@ mod tests {
 
         Ok(())
     }
-
 }

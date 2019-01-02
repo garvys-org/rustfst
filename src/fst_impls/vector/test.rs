@@ -295,4 +295,18 @@ mod tests {
         }
         Ok(())
     }
+
+    #[test]
+    fn test_parse_single_final_state() -> Result<()> {
+        let parsed_fst = VectorFst::<ProbabilityWeight>::from_text_string("0\tInfinity\n")?;
+
+        let mut fst_ref: VectorFst<ProbabilityWeight> = VectorFst::new();
+
+        fst_ref.add_state();
+        fst_ref.set_start(0)?;
+
+        assert_eq!(parsed_fst, fst_ref);
+
+        Ok(())
+    }
 }

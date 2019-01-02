@@ -60,6 +60,7 @@ pub(crate) fn text_fst_002() -> TextParserTest {
         name: "test_fst_002".to_string(),
         path: rel_to_abs_path!("text_fst_002.txt"),
         parsed_text_fst: ParsedTextFst {
+            start_state: Some(0),
             transitions,
             final_states,
         },
