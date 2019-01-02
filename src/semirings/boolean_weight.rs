@@ -1,7 +1,7 @@
 use crate::semirings::{CompleteSemiring, Semiring, StarSemiring};
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Default, Eq)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Default, Eq, Copy)]
 pub struct BooleanWeight {
     value: bool,
 }

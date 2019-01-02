@@ -140,3 +140,6 @@ mod path;
 pub use crate::path::Path;
 
 mod parsers;
+
+/// A representable float near .001. (Used in Quantize)
+pub(crate) const KDELTA: f32 = 1.0f32 / 1024.0f32;

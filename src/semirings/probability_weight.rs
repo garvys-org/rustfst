@@ -1,7 +1,11 @@
-use crate::semirings::{CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring};
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Default)]
+use crate::semirings::{
+    CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
+};
+use crate::KDELTA;
+
+#[derive(Clone, Debug, PartialOrd, Default, Copy)]
 pub struct ProbabilityWeight {
     value: f32,
 }
@@ -55,3 +59,7 @@ impl WeaklyDivisibleSemiring for ProbabilityWeight {
         Self::new(self.value / rhs.value)
     }
 }
+
+impl WeightQuantize for ProbabilityWeight {}
+
+partial_eq_f32!(ProbabilityWeight);

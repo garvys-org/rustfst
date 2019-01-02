@@ -1,9 +1,12 @@
 use std::f32;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
-use crate::semirings::{CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring};
+use crate::semirings::{
+    CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
+};
+use crate::KDELTA;
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Default)]
+#[derive(Clone, Debug, PartialOrd, Default, Copy)]
 pub struct TropicalWeight {
     value: f32,
 }
@@ -32,9 +35,9 @@ impl Semiring for TropicalWeight {
         let f1 = self.value();
         let f2 = rhs.value();
         if f1 == f32::INFINITY {
-            self.clone()
+            *self
         } else if f2 == f32::INFINITY {
-            rhs.clone()
+            *rhs
         } else {
             Self::new(f1 + f2)
         }
@@ -73,3 +76,7 @@ impl WeaklyDivisibleSemiring for TropicalWeight {
         Self::new(self.value - rhs.value)
     }
 }
+
+impl WeightQuantize for TropicalWeight {}
+
+partial_eq_f32!(TropicalWeight);
