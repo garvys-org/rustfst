@@ -4,7 +4,6 @@ use std::slice;
 
 use failure::{bail, ensure, format_err};
 
-use crate::algorithms::{concat, union};
 use crate::arc::Arc;
 use crate::fst_traits::{
     ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableArcIterator, MutableFst,
@@ -12,6 +11,7 @@ use crate::fst_traits::{
 };
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::Semiring;
+use crate::{concat, union};
 use crate::{Result, StateId};
 
 #[derive(Debug, PartialEq, Clone)]

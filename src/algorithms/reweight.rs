@@ -2,6 +2,11 @@ use crate::fst_traits::{ExpandedFst, FinalStatesIterator, Fst, MutableFst};
 use crate::semirings::{Semiring, WeaklyDivisibleSemiring};
 use crate::Result;
 
+pub enum ReweightType {
+    ReweightToInitial,
+    ReweightToFinal,
+}
+
 macro_rules! state_to_dist {
     ($state: expr, $dist: expr) => {
         $dist

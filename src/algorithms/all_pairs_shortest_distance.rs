@@ -14,7 +14,7 @@ use crate::Result;
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::fst_traits::MutableFst;
-/// # use rustfst::algorithms::all_pairs_shortest_distance;
+/// # use rustfst::all_pairs_shortest_distance;
 /// # use rustfst::Arc;
 /// # use rustfst::Result;
 /// # fn main() -> Result<()> {

@@ -111,11 +111,24 @@ pub const EPS_SYMBOL: &str = "<eps>";
 pub mod utils;
 
 /// Provides algorithms that are generic for all wFST.
-pub mod algorithms;
+mod algorithms;
 pub use self::algorithms::{
-    all_pairs_shortest_distance, closure_plus, closure_star, compose, concat, connect, invert,
-    isomorphic, project, project_input, project_output, push_weights, relabel_pairs, reverse,
-    rm_epsilon, shortest_distance, single_source_shortest_distance, union,
+    all_pairs_shortest_distance::all_pairs_shortest_distance,
+    closure_plus::closure_plus,
+    closure_star::closure_star,
+    composition::compose,
+    concat::concat,
+    connect::connect,
+    epsilon_removal::rm_epsilon,
+    inversion::invert,
+    isomorphic::isomorphic,
+    projection::{project, project_input, project_output},
+    relabel_pairs::relabel_pairs,
+    reverse::reverse,
+    reweight::{reweight, ReweightType},
+    single_source_shortest_distance::{shortest_distance, single_source_shortest_distance},
+    union::union,
+    weight_pushing::push_weights,
 };
 
 /// Implementation of the transitions inside a wFST.

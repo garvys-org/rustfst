@@ -11,7 +11,7 @@ use crate::fst_traits::{ExpandedFst, MutableFst};
 /// # use rustfst::utils::{acceptor, transducer};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::algorithms::invert;
+/// # use rustfst::invert;
 /// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
 /// invert(&mut fst);
 ///

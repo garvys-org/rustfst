@@ -1,4 +1,4 @@
-use crate::algorithms::all_pairs_shortest_distance;
+use crate::all_pairs_shortest_distance;
 use crate::arc::Arc;
 use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
 use crate::semirings::{Semiring, StarSemiring};
@@ -66,7 +66,7 @@ where
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::fst_traits::MutableFst;
-/// # use rustfst::algorithms::rm_epsilon;
+/// # use rustfst::rm_epsilon;
 /// # use rustfst::Arc;
 /// # use rustfst::EPS_LABEL;
 /// let mut fst = VectorFst::new();

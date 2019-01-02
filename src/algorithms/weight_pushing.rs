@@ -1,8 +1,7 @@
-use crate::algorithms::reweight;
-use crate::algorithms::{reverse, shortest_distance};
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::Result;
+use crate::{reverse, reweight, shortest_distance};
 
 /// Pushes the weights in FST in the direction defined by TYPE. If
 /// pushing towards the initial state, the sum of the weight of the
