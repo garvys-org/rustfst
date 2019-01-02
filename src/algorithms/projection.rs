@@ -1,5 +1,10 @@
 use crate::fst_traits::{ExpandedFst, MutableFst};
 
+pub enum ProjectType {
+    ProjectInput,
+    ProjectOutput,
+}
+
 /// This operation projects an FST onto its domain or range by either copying
 /// each arc's input label to its output label or vice versa.
 ///
@@ -10,10 +15,10 @@ use crate::fst_traits::{ExpandedFst, MutableFst};
 /// # use rustfst::utils::{acceptor, transducer};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::project;
+/// # use rustfst::{project, ProjectType};
 /// # fn main() -> Result<()> {
 /// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
-/// project(&mut fst, true);
+/// project(&mut fst, ProjectType::ProjectInput);
 ///
 /// assert_eq!(fst, acceptor![2]);
 /// # Ok(())
@@ -27,73 +32,26 @@ use crate::fst_traits::{ExpandedFst, MutableFst};
 /// # use rustfst::utils::{acceptor, transducer};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::project;
+/// # use rustfst::{project, ProjectType};
 /// # fn main() -> Result<()> {
 /// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
-/// project(&mut fst, false);
+/// project(&mut fst, ProjectType::ProjectOutput);
 ///
 /// assert_eq!(fst, acceptor(vec![3].into_iter()));
 /// # Ok(())
 /// # }
 /// ```
-pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_input: bool) {
+pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_type: ProjectType) {
     let states: Vec<_> = fst.states_iter().collect();
     for state_id in states {
         // Can't fail
         for arc in fst.arcs_iter_mut(state_id).unwrap() {
-            if project_input {
-                arc.olabel = arc.ilabel;
-            } else {
-                arc.ilabel = arc.olabel;
-            }
+            match project_type {
+                ProjectType::ProjectInput => arc.olabel = arc.ilabel,
+                ProjectType::ProjectOutput => arc.ilabel = arc.olabel,
+            };
         }
     }
-}
-
-/// This operation projects an FST onto its domain or range by copying
-/// each arc's input label to its output label.
-///
-/// # Example
-/// ```
-/// # #[macro_use] extern crate rustfst;
-/// # use rustfst::Result;
-/// # use rustfst::utils::{acceptor, transducer};
-/// # use rustfst::semirings::{Semiring, IntegerWeight};
-/// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::project_input;
-/// # fn main() -> Result<()> {
-/// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
-/// project_input(&mut fst);
-///
-/// assert_eq!(fst, acceptor![2]);
-/// # Ok(())
-/// # }
-/// ```
-pub fn project_input<F: ExpandedFst + MutableFst>(fst: &mut F) {
-    project(fst, true)
-}
-
-/// This operation projects an FST onto its domain or range by copying
-/// each arc's output label to its input label.
-///
-/// # Example
-/// ```
-/// # #[macro_use] extern crate rustfst;
-/// # use rustfst::Result;
-/// # use rustfst::utils::{acceptor, transducer};
-/// # use rustfst::semirings::{Semiring, IntegerWeight};
-/// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::project_output;
-/// # fn main() -> Result<()> {
-/// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
-/// project_output(&mut fst);
-///
-/// assert_eq!(fst, acceptor![3]);
-/// # Ok(())
-/// # }
-/// ```
-pub fn project_output<F: ExpandedFst + MutableFst>(fst: &mut F) {
-    project(fst, false)
 }
 
 #[cfg(test)]
@@ -121,7 +79,7 @@ mod tests {
 
             let mut projected_fst = fst.clone();
 
-            project_input(&mut projected_fst);
+            project(&mut projected_fst, ProjectType::ProjectInput);
             let paths: Counter<_> = projected_fst.paths_iter().collect();
 
             assert_eq!(
@@ -148,7 +106,7 @@ mod tests {
 
             let mut projected_fst = fst.clone();
 
-            project_output(&mut projected_fst);
+            project(&mut projected_fst, ProjectType::ProjectOutput);
             let paths: Counter<_> = projected_fst.paths_iter().collect();
 
             assert_eq!(

@@ -122,7 +122,7 @@ pub use self::algorithms::{
     epsilon_removal::rm_epsilon,
     inversion::invert,
     isomorphic::isomorphic,
-    projection::{project, project_input, project_output},
+    projection::{project, ProjectType},
     relabel_pairs::relabel_pairs,
     reverse::reverse,
     reweight::{reweight, ReweightType},

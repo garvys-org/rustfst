@@ -9,8 +9,7 @@ mod test {
     use crate::semirings::{Semiring, TropicalWeight};
     use crate::Result;
     use crate::{
-        connect, invert, isomorphic, project_input, project_output, push_weights, reverse,
-        rm_epsilon,
+        connect, invert, isomorphic, project, push_weights, reverse, rm_epsilon, ProjectType,
     };
 
     #[derive(Serialize, Deserialize, Debug)]
@@ -113,7 +112,7 @@ mod test {
 
             // Project output
             let mut fst_project_output = test_data.raw.clone();
-            project_output(&mut fst_project_output);
+            project(&mut fst_project_output, ProjectType::ProjectOutput);
             assert_eq!(
                 test_data.project_output,
                 fst_project_output,
@@ -127,7 +126,7 @@ mod test {
 
             // Project input
             let mut fst_project_input = test_data.raw.clone();
-            project_input(&mut fst_project_input);
+            project(&mut fst_project_input, ProjectType::ProjectInput);
             assert_eq!(
                 test_data.project_input,
                 fst_project_input,
