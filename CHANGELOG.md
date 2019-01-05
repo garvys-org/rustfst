@@ -14,12 +14,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `is_start` to `Fst` API.
 - Add `text` method to write the text representation of an fst into a string.
 - Add `read_text` and `from_text_string` methods to parse a text representation of an FST.
+- Implement weight pushing algorithms to either start state or final states (function `push_weights`).
+- Implement `reverse` operation of an FST.
+- Implement `reweight` operation to modify the weights of an FST according to some potentials.
+- Implement `isomorphic` operation to compare two FSTs without depending on the ordering of the states or the arcs.
+- Implement a `SymbolTable` data structure to handle the mapping symbol (string) / label (int) in a FST.
+- Add `symt!` macro to quickly create a `SymbolTable` from a list of strings.
+- Add `acceptor!` macro to quickly create an acceptor from a list of labels.
+- Add `transducer!` macro to quickly create an transducer from two list of labels.
+- Migrate to edition 2018 of Rust.
+- Add integration tests to compare the output of this crate directly with OpenFST (by using the pynini python wrapper).
+- Add weight quantization for f32 Semiring and use it in the PartialEq trait.
 
 ### Changed
 - `new` method now present in the `Semiring` trait.
+- In all the APIs, `StateId` are now passed by value instead of reference as it is more optimized.
+- `acceptor`, `transducer`, `inverse`, `project`, `closure_plus`, `closure_star` functions can't fail anymore (no Result in API).
+- Fix multiple issues when parsing an FST in text format.
+- The `num_arcs` function in the `Fst` trait now computes the number of arcs leaving a specific state instead of the number of arcs in the graph.
+- `algorithm` mod is now private, all the operations are exported to the root.
 
 ### Removed
 - `determinize` no longer public as the implementation is not satisfactory.
+- In the `Semiring` trait, `one` and `zero` functions have been removed in favor of `ONE` and `ZERO` which are defined as associated constants.
+- Removed `project_input` and `project_output` functions in favor of `project` with a type parameters.
 
 ## [0.1.7] - 2018-10-23
 ### Added
