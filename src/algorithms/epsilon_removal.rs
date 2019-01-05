@@ -1,10 +1,9 @@
-use algorithms::all_pairs_shortest_distance;
-use arc::Arc;
-use fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
-use semirings::{Semiring, StarSemiring};
+use crate::all_pairs_shortest_distance;
+use crate::arc::Arc;
+use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
+use crate::semirings::{Semiring, StarSemiring};
+use crate::{Result, EPS_LABEL};
 use std::collections::HashMap;
-use Result;
-use EPS_LABEL;
 
 // Compute the wFST derived from "fst" by keeping only the epsilon transitions
 fn compute_fst_epsilon<W, F1, F2>(fst: &F1, keep_only_epsilon: bool) -> Result<F2>
@@ -26,18 +25,18 @@ where
 
     // Second pass to add the arcs
     for old_state_id in fst.states_iter() {
-        for old_arc in fst.arcs_iter(&old_state_id)? {
+        for old_arc in fst.arcs_iter(old_state_id)? {
             let a = keep_only_epsilon && old_arc.ilabel == EPS_LABEL && old_arc.olabel == EPS_LABEL;
             let b =
                 !(old_arc.ilabel == EPS_LABEL && old_arc.olabel == EPS_LABEL || keep_only_epsilon);
 
             if a || b {
                 fst_epsilon.add_arc(
-                    &mapping_states[&old_state_id],
+                    mapping_states[&old_state_id],
                     Arc::new(
                         old_arc.ilabel,
                         old_arc.olabel,
-                        old_arc.weight.clone(),
+                        old_arc.weight,
                         mapping_states[&old_arc.nextstate],
                     ),
                 )?;
@@ -46,12 +45,12 @@ where
     }
 
     if let Some(start_state) = fst.start() {
-        fst_epsilon.set_start(&mapping_states[&start_state])?;
+        fst_epsilon.set_start(mapping_states[&start_state])?;
     }
 
     for old_final_state in fst.final_states_iter() {
         fst_epsilon.set_final(
-            &mapping_states[&old_final_state.state_id],
+            mapping_states[&old_final_state.state_id],
             old_final_state.final_weight,
         )?;
     }
@@ -64,31 +63,30 @@ where
 ///
 /// # Example
 /// ```
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::fst_traits::MutableFst;
-/// use rustfst::algorithms::rm_epsilon;
-/// use rustfst::arc::Arc;
-/// use rustfst::EPS_LABEL;
-///
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::fst_traits::MutableFst;
+/// # use rustfst::rm_epsilon;
+/// # use rustfst::Arc;
+/// # use rustfst::EPS_LABEL;
 /// let mut fst = VectorFst::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
-/// fst.add_arc(&s0, Arc::new(32, 25, IntegerWeight::new(78), s1));
-/// fst.add_arc(&s1, Arc::new(EPS_LABEL, EPS_LABEL, IntegerWeight::new(13), s0));
-/// fst.set_start(&s0).unwrap();
-/// fst.set_final(&s0, IntegerWeight::new(5));
+/// fst.add_arc(s0, Arc::new(32, 25, IntegerWeight::new(78), s1));
+/// fst.add_arc(s1, Arc::new(EPS_LABEL, EPS_LABEL, IntegerWeight::new(13), s0));
+/// fst.set_start(s0).unwrap();
+/// fst.set_final(s0, IntegerWeight::new(5));
 ///
 /// let fst_no_epsilon : VectorFst<_> = rm_epsilon(&fst).unwrap();
 ///
 /// let mut fst_no_epsilon_ref = VectorFst::new();
 /// let s0 = fst_no_epsilon_ref.add_state();
 /// let s1 = fst_no_epsilon_ref.add_state();
-/// fst_no_epsilon_ref.add_arc(&s0, Arc::new(32, 25, IntegerWeight::new(78), s1));
-/// fst_no_epsilon_ref.add_arc(&s1, Arc::new(32, 25, IntegerWeight::new(78 * 13), s1));
-/// fst_no_epsilon_ref.set_start(&s0).unwrap();
-/// fst_no_epsilon_ref.set_final(&s0, IntegerWeight::new(5));
-/// fst_no_epsilon_ref.set_final(&s1, IntegerWeight::new(5 * 13));
+/// fst_no_epsilon_ref.add_arc(s0, Arc::new(32, 25, IntegerWeight::new(78), s1));
+/// fst_no_epsilon_ref.add_arc(s1, Arc::new(32, 25, IntegerWeight::new(78 * 13), s1));
+/// fst_no_epsilon_ref.set_start(s0).unwrap();
+/// fst_no_epsilon_ref.set_final(s0, IntegerWeight::new(5));
+/// fst_no_epsilon_ref.set_final(s1, IntegerWeight::new(5 * 13));
 ///
 /// assert_eq!(fst_no_epsilon, fst_no_epsilon_ref);
 /// ```
@@ -105,7 +103,7 @@ where
 
     for p in fst_epsilon.states_iter() {
         for q in fst_epsilon.states_iter() {
-            if p != q && dists_fst_epsilon[p][q] != W::zero() {
+            if p != q && dists_fst_epsilon[p][q] != W::ZERO {
                 eps_closures[p].push((q, &dists_fst_epsilon[p][q]));
             }
         }
@@ -117,9 +115,9 @@ where
 
     for p in fst_no_epsilon.states_iter() {
         for (q, w_prime) in &eps_closures[p] {
-            for arc in fst_no_epsilon.arcs_iter(q)? {
+            for arc in fst_no_epsilon.arcs_iter(*q)? {
                 output_fst.add_arc(
-                    &p,
+                    p,
                     Arc::new(
                         arc.ilabel,
                         arc.olabel,
@@ -129,14 +127,14 @@ where
                 )?;
             }
 
-            if fst_no_epsilon.is_final(q) {
-                if !fst_no_epsilon.is_final(&p) {
-                    output_fst.set_final(&p, W::zero())?;
+            if fst_no_epsilon.is_final(*q) {
+                if !fst_no_epsilon.is_final(p) {
+                    output_fst.set_final(p, W::ZERO)?;
                 }
-                let rho_prime_p = output_fst.final_weight(&p).unwrap();
-                let rho_q = fst_no_epsilon.final_weight(&q).unwrap();
+                let rho_prime_p = output_fst.final_weight(p).unwrap();
+                let rho_q = fst_no_epsilon.final_weight(*q).unwrap();
                 let new_weight = rho_prime_p.plus(&w_prime.times(&rho_q));
-                output_fst.set_final(&p, new_weight)?;
+                output_fst.set_final(p, new_weight)?;
             }
         }
     }
@@ -147,31 +145,30 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::fst_impls::VectorFst;
+    use crate::fst_traits::PathsIterator;
+    use crate::semirings::IntegerWeight;
+    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
     use counter::Counter;
     use failure::format_err;
     use failure::ResultExt;
-    use fst_impls::VectorFst;
-    use fst_traits::PathsIterator;
-    use semirings::IntegerWeight;
-    use test_data::vector_fst::get_vector_fsts_for_tests;
 
     // TODO: Add test with epsilon arcs
 
     #[test]
-    fn test_epsilon_removal_generic() {
+    fn test_epsilon_removal_generic() -> Result<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
 
-            let mut paths_ref: Counter<_> = fst.paths_iter().collect();
+            let paths_ref: Counter<_> = fst.paths_iter().collect();
 
-            let epsilon_removed_fst: VectorFst<IntegerWeight> = rm_epsilon(fst)
-                .with_context(|_| {
+            let epsilon_removed_fst: VectorFst<IntegerWeight> =
+                rm_epsilon(fst).with_context(|_| {
                     format_err!(
                         "Error when performing epsilon removal operation for wFST {:?}",
                         &data.name,
                     )
-                })
-                .unwrap();
+                })?;
             let paths: Counter<_> = epsilon_removed_fst.paths_iter().collect();
 
             assert_eq!(
@@ -180,5 +177,6 @@ mod tests {
                 &data.name
             );
         }
+        Ok(())
     }
 }

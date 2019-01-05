@@ -1,9 +1,10 @@
-use failure::{bail, format_err, ResultExt};
-use fst_traits::{ExpandedFst, MutableFst};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use Result;
-use StateId;
+
+use failure::{bail, format_err, ResultExt};
+
+use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::{Result, StateId};
 
 fn iterator_to_hashmap<I>(pairs: I) -> Result<HashMap<StateId, StateId>>
 where
@@ -29,15 +30,19 @@ where
 ///
 /// # Example
 /// ```
-/// use rustfst::utils::transducer;
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::algorithms::relabel_pairs;
+/// #[macro_use] extern crate rustfst;
+/// # use rustfst::utils::transducer;
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::relabel_pairs;
+/// # use rustfst::Result;
+/// # fn main() -> Result<()> {
+/// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
+/// relabel_pairs(&mut fst, vec![(2,5)], vec![(3,4)])?;
 ///
-/// let mut fst : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
-/// relabel_pairs(&mut fst, vec![(2,5)], vec![(3,4)]).unwrap();
-///
-/// assert_eq!(fst, transducer(vec![5].into_iter(), vec![4].into_iter()).unwrap());
+/// assert_eq!(fst, transducer![5 => 4]);
+/// # Ok(())
+/// # }
 /// ```
 pub fn relabel_pairs<F, I, J>(fst: &mut F, ipairs: I, opairs: J) -> Result<()>
 where
@@ -53,7 +58,7 @@ where
 
     let states: Vec<_> = fst.states_iter().collect();
     for state_id in states {
-        for arc in fst.arcs_iter_mut(&state_id)? {
+        for arc in fst.arcs_iter_mut(state_id)? {
             if let Some(v) = map_ilabels.get(&arc.ilabel) {
                 arc.ilabel = *v;
             }
@@ -69,29 +74,25 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use arc::Arc;
-    use fst_impls::VectorFst;
-    use semirings::{IntegerWeight, Semiring};
+    use crate::arc::Arc;
+    use crate::fst_impls::VectorFst;
+    use crate::semirings::{IntegerWeight, Semiring};
 
     #[test]
-    fn test_projection_input_generic() {
+    fn test_projection_input_generic() -> Result<()> {
         // Initial FST
         let mut fst = VectorFst::new();
         let s0 = fst.add_state();
         let s1 = fst.add_state();
         let s2 = fst.add_state();
-        fst.set_start(&s0).unwrap();
+        fst.set_start(s0)?;
 
-        fst.add_arc(&s0, Arc::new(3, 18, IntegerWeight::new(10), s1))
-            .unwrap();
-        fst.add_arc(&s0, Arc::new(2, 5, IntegerWeight::new(10), s1))
-            .unwrap();
-        fst.add_arc(&s0, Arc::new(5, 9, IntegerWeight::new(18), s2))
-            .unwrap();
-        fst.add_arc(&s0, Arc::new(5, 7, IntegerWeight::new(18), s2))
-            .unwrap();
-        fst.set_final(&s1, IntegerWeight::new(31)).unwrap();
-        fst.set_final(&s2, IntegerWeight::new(45)).unwrap();
+        fst.add_arc(s0, Arc::new(3, 18, IntegerWeight::new(10), s1))?;
+        fst.add_arc(s0, Arc::new(2, 5, IntegerWeight::new(10), s1))?;
+        fst.add_arc(s0, Arc::new(5, 9, IntegerWeight::new(18), s2))?;
+        fst.add_arc(s0, Arc::new(5, 7, IntegerWeight::new(18), s2))?;
+        fst.set_final(s1, IntegerWeight::new(31))?;
+        fst.set_final(s2, IntegerWeight::new(45))?;
 
         // Expected FST
         // Initial FST
@@ -99,27 +100,21 @@ mod tests {
         let s0 = expected_fst.add_state();
         let s1 = expected_fst.add_state();
         let s2 = expected_fst.add_state();
-        expected_fst.set_start(&s0).unwrap();
+        expected_fst.set_start(s0)?;
 
-        expected_fst
-            .add_arc(&s0, Arc::new(45, 51, IntegerWeight::new(10), s1))
-            .unwrap();
-        expected_fst
-            .add_arc(&s0, Arc::new(2, 75, IntegerWeight::new(10), s1))
-            .unwrap();
-        expected_fst
-            .add_arc(&s0, Arc::new(75, 9, IntegerWeight::new(18), s2))
-            .unwrap();
-        expected_fst
-            .add_arc(&s0, Arc::new(75, 85, IntegerWeight::new(18), s2))
-            .unwrap();
-        expected_fst.set_final(&s1, IntegerWeight::new(31)).unwrap();
-        expected_fst.set_final(&s2, IntegerWeight::new(45)).unwrap();
+        expected_fst.add_arc(s0, Arc::new(45, 51, IntegerWeight::new(10), s1))?;
+        expected_fst.add_arc(s0, Arc::new(2, 75, IntegerWeight::new(10), s1))?;
+        expected_fst.add_arc(s0, Arc::new(75, 9, IntegerWeight::new(18), s2))?;
+        expected_fst.add_arc(s0, Arc::new(75, 85, IntegerWeight::new(18), s2))?;
+        expected_fst.set_final(s1, IntegerWeight::new(31))?;
+        expected_fst.set_final(s2, IntegerWeight::new(45))?;
 
         let ipairs = vec![(3, 45), (5, 75)];
         let opairs = vec![(18, 51), (5, 75), (7, 85)];
 
-        relabel_pairs(&mut fst, ipairs, opairs).unwrap();
-        assert_eq!(fst, expected_fst)
+        relabel_pairs(&mut fst, ipairs, opairs)?;
+        assert_eq!(fst, expected_fst);
+
+        Ok(())
     }
 }

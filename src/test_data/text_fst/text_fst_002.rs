@@ -1,10 +1,11 @@
-use arc::Arc;
-use fst_impls::vector::vector_fst::VectorFstState;
-use fst_impls::VectorFst;
-use parsers::text::{FinalState, ParsedTextFst, Transition};
-use semirings::{ProbabilityWeight, Semiring};
 use std::path::PathBuf;
-use test_data::text_fst::TextParserTest;
+
+use crate::arc::Arc;
+use crate::fst_impls::vector::vector_fst::VectorFstState;
+use crate::fst_impls::VectorFst;
+use crate::parsers::text_fst::{FinalState, ParsedTextFst, Transition};
+use crate::semirings::{ProbabilityWeight, Semiring};
+use crate::test_data::text_fst::TextParserTest;
 
 #[cfg(test)]
 pub(crate) fn text_fst_002() -> TextParserTest {
@@ -22,12 +23,12 @@ pub(crate) fn text_fst_002() -> TextParserTest {
 
     let s0 = VectorFstState {
         final_weight: None,
-        arcs: vec![Arc::new(32, 32, ProbabilityWeight::one(), 1)],
+        arcs: vec![Arc::new(32, 32, ProbabilityWeight::ONE, 1)],
     };
 
     let s1 = VectorFstState {
         final_weight: None,
-        arcs: vec![Arc::new(45, 45, ProbabilityWeight::one(), 2)],
+        arcs: vec![Arc::new(45, 45, ProbabilityWeight::ONE, 2)],
     };
 
     let s2 = VectorFstState {
@@ -37,16 +38,16 @@ pub(crate) fn text_fst_002() -> TextParserTest {
 
     let s3 = VectorFstState {
         final_weight: Some(ProbabilityWeight::new(0.67)),
-        arcs: vec![Arc::new(45, 45, ProbabilityWeight::one(), 4)],
+        arcs: vec![Arc::new(45, 45, ProbabilityWeight::ONE, 4)],
     };
 
     let s4 = VectorFstState {
-        final_weight: Some(ProbabilityWeight::one()),
+        final_weight: Some(ProbabilityWeight::ONE),
         arcs: vec![Arc::new(5, 5, ProbabilityWeight::new(0.31), 5)],
     };
 
     let s5 = VectorFstState {
-        final_weight: Some(ProbabilityWeight::one()),
+        final_weight: Some(ProbabilityWeight::ONE),
         arcs: vec![],
     };
 
@@ -59,6 +60,7 @@ pub(crate) fn text_fst_002() -> TextParserTest {
         name: "test_fst_002".to_string(),
         path: rel_to_abs_path!("text_fst_002.txt"),
         parsed_text_fst: ParsedTextFst {
+            start_state: Some(0),
             transitions,
             final_states,
         },

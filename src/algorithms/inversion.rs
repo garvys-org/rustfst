@@ -1,40 +1,42 @@
-use fst_traits::{ExpandedFst, MutableFst};
 use std::mem::swap;
-use Result;
 
-/// This operation inverts the transduction corresponding to an FST by exchanging the FST's input and output labels.
+use crate::fst_traits::{ExpandedFst, MutableFst};
+
+/// This operation inverts the transduction corresponding to an FST
+/// by exchanging the FST's input and output labels.
 ///
 /// # Example
 /// ```
-/// use rustfst::utils::{acceptor, transducer};
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::algorithms::invert;
+/// # #[macro_use] extern crate rustfst;
+/// # use rustfst::utils::{acceptor, transducer};
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::invert;
+/// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
+/// invert(&mut fst);
 ///
-/// let mut fst : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
-/// invert(&mut fst).unwrap();
-///
-/// assert_eq!(fst, transducer(vec![3].into_iter(), vec![2].into_iter()).unwrap());
+/// assert_eq!(fst, transducer![3 => 2]);
 /// ```
-pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
+pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) {
     let states: Vec<_> = fst.states_iter().collect();
     for state_id in states {
-        for arc in fst.arcs_iter_mut(&state_id)? {
+        // Can't fail
+        for arc in fst.arcs_iter_mut(state_id).unwrap() {
             swap(&mut arc.ilabel, &mut arc.olabel);
         }
     }
-    Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::fst_traits::PathsIterator;
+    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
+    use crate::Result;
     use counter::Counter;
-    use fst_traits::PathsIterator;
-    use test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
-    fn test_invert_generic() {
+    fn test_invert_generic() -> Result<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
 
@@ -48,7 +50,7 @@ mod tests {
 
             let mut projected_fst = fst.clone();
 
-            invert(&mut projected_fst).unwrap();
+            invert(&mut projected_fst);
             let paths: Counter<_> = projected_fst.paths_iter().collect();
 
             assert_eq!(
@@ -57,5 +59,6 @@ mod tests {
                 &data.name
             )
         }
+        Ok(())
     }
 }

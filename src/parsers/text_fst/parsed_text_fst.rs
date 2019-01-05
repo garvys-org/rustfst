@@ -1,19 +1,27 @@
-use failure::format_err;
-use nom::types::CompleteStr;
-use parsers::text::nom_parser::parse_text_fst;
 use std::fs::read_to_string;
 use std::path::Path;
-use Label;
-use Result as ResultRustfst;
-use StateId;
+
+use nom::types::CompleteStr;
+
+use crate::parsers::text_fst::nom_parser::vec_rows_parsed;
+use crate::Result as ResultRustfst;
+use crate::{Label, StateId};
+
+#[derive(Debug, PartialEq)]
+pub enum RowParsed {
+    Transition(Transition),
+    FinalState(FinalState),
+    InfinityFinalState(StateId),
+}
 
 /// Struct representing a parsed fst in text format. It contains a vector of transitions
 /// and a vector final states. The first state in the vector of transition is the start state.
 /// This container doesn't depend on any Semiring.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Default)]
 pub struct ParsedTextFst {
     pub transitions: Vec<Transition>,
     pub final_states: Vec<FinalState>,
+    pub start_state: Option<StateId>,
 }
 
 /// A transition is a five-tuple. There is one for each arc in the graph.
@@ -42,6 +50,29 @@ pub struct FinalState {
     pub weight: Option<f32>,
 }
 
+/// Removes the enum
+impl Into<ParsedTextFst> for Vec<RowParsed> {
+    fn into(self) -> ParsedTextFst {
+        let mut parsed_fst = ParsedTextFst::default();
+
+        parsed_fst.start_state = self.first().map(|v| match v {
+            RowParsed::Transition(t) => t.state,
+            RowParsed::FinalState(f) => f.state,
+            RowParsed::InfinityFinalState(g) => *g,
+        });
+
+        for row_parsed in self.into_iter() {
+            match row_parsed {
+                RowParsed::Transition(t) => parsed_fst.transitions.push(t),
+                RowParsed::FinalState(f) => parsed_fst.final_states.push(f),
+                RowParsed::InfinityFinalState(_) => {}
+            };
+        }
+
+        parsed_fst
+    }
+}
+
 impl ParsedTextFst {
     /// Loads an FST from a loaded string in text format usually called `At&T FSM format`.
     ///
@@ -68,9 +99,10 @@ impl ParsedTextFst {
     /// ```
     pub fn from_string(fst_string: &str) -> ResultRustfst<Self> {
         let complete_fst_str = CompleteStr(fst_string);
-        let (_, parsed_fst) = parse_text_fst(complete_fst_str)
+        let (_, vec_rows_parsed) = vec_rows_parsed(complete_fst_str)
             .map_err(|_| format_err!("Error while parsing text fst"))?;
-        Ok(parsed_fst)
+
+        Ok(vec_rows_parsed.into())
     }
 
     /// Loads an FST from a serialized file in text format usually called `At&T FSM format`.
@@ -101,13 +133,19 @@ impl ParsedTextFst {
     }
 
     pub fn start(&self) -> Option<StateId> {
-        self.transitions.first().map(|t| t.state)
+        self.start_state
     }
 
     pub fn num_states(&self) -> usize {
         let it_states = self.transitions.iter().map(|t| t.state);
         let it_nextstates = self.transitions.iter().map(|t| t.nextstate);
-        let max_state = it_states.chain(it_nextstates).max();
+        let it_final_states = self.final_states.iter().map(|f| f.state);
+        let it_start_state = self.start_state.iter().cloned();
+        let max_state = it_states
+            .chain(it_nextstates)
+            .chain(it_final_states)
+            .chain(it_start_state)
+            .max();
         max_state.map(|n| n + 1).unwrap_or(0)
     }
 }
@@ -139,12 +177,12 @@ impl FinalState {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use test_data::text_fst::get_test_data_for_text_parser;
+    use crate::test_data::text_fst::get_test_data_for_text_parser;
 
     #[test]
-    fn test_parse_text_fst() {
+    fn test_parse_text_fst() -> ResultRustfst<()> {
         for data in get_test_data_for_text_parser() {
-            let parsed_fst = ParsedTextFst::from_path(data.path).unwrap();
+            let parsed_fst = ParsedTextFst::from_path(data.path)?;
             let parsed_fst_ref = data.parsed_text_fst;
             assert_eq!(
                 parsed_fst, parsed_fst_ref,
@@ -152,6 +190,72 @@ mod tests {
                 data.name
             );
         }
+        Ok(())
     }
 
+    #[test]
+    fn test_parse_text_fst_not_contiguous() -> ResultRustfst<()> {
+        // Check that parsing transitions, then final states then transition is working
+        let parsed_fst = ParsedTextFst::from_string("0\t2\t0\t0\n1\n2\t1\t12\t25\n")?;
+
+        let mut transitions = vec![];
+        transitions.push(Transition::new(0, 0, 0, None, 2));
+        transitions.push(Transition::new(2, 12, 25, None, 1));
+
+        let mut final_states = vec![];
+        final_states.push(FinalState::new(1, None));
+
+        let parsed_fst_ref = ParsedTextFst {
+            start_state: Some(0),
+            transitions,
+            final_states,
+        };
+
+        assert_eq!(parsed_fst, parsed_fst_ref);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_text_fst_not_finishing_with_eol() -> ResultRustfst<()> {
+        // Check that parsing transitions, then final states then transition is working
+        let parsed_fst = ParsedTextFst::from_string("0\t1\t0\t0\n1")?;
+
+        let mut transitions = vec![];
+        transitions.push(Transition::new(0, 0, 0, None, 1));
+
+        let mut final_states = vec![];
+        final_states.push(FinalState::new(1, None));
+
+        let parsed_fst_ref = ParsedTextFst {
+            start_state: Some(0),
+            transitions,
+            final_states,
+        };
+
+        assert_eq!(parsed_fst, parsed_fst_ref);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_text_fst_infinity_final_states() -> ResultRustfst<()> {
+        let parsed_fst = ParsedTextFst::from_string("0\t1\t12\t25\t0.3\n1\tInfinity\n0\t0\n")?;
+
+        let mut transitions = vec![];
+        transitions.push(Transition::new(0, 12, 25, Some(0.3), 1));
+
+        let mut final_states = vec![];
+        final_states.push(FinalState::new(0, Some(0.0)));
+
+        let parsed_fst_ref = ParsedTextFst {
+            start_state: Some(0),
+            transitions,
+            final_states,
+        };
+
+        assert_eq!(parsed_fst, parsed_fst_ref);
+
+        Ok(())
+    }
 }

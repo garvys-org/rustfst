@@ -1,11 +1,10 @@
-use arc::Arc;
-use fst_traits::{CoreFst, ExpandedFst, MutableFst};
-use semirings::{Semiring, WeaklyDivisibleSemiring};
 use std::collections::BTreeMap;
 use std::collections::{HashSet, VecDeque};
-use Label;
-use Result;
-use StateId;
+
+use crate::arc::Arc;
+use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
+use crate::semirings::{Semiring, WeaklyDivisibleSemiring};
+use crate::{Label, Result, StateId};
 
 // TODO : WIP
 
@@ -39,7 +38,7 @@ impl<W: Semiring> WeightedSubset<W> {
         let mut set = HashSet::new();
         for pair in &self.pairs {
             let state = pair.state;
-            for arc in fst.arcs_iter(&state)? {
+            for arc in fst.arcs_iter(state)? {
                 set.insert(arc.ilabel);
             }
         }
@@ -50,7 +49,7 @@ impl<W: Semiring> WeightedSubset<W> {
         let mut set = HashSet::new();
         for pair in &self.pairs {
             let state = pair.state;
-            for arc in fst.arcs_iter(&state)? {
+            for arc in fst.arcs_iter(state)? {
                 if arc.ilabel == x {
                     set.insert(arc.nextstate);
                 }
@@ -71,7 +70,7 @@ fn compute_weight<F: ExpandedFst>(
         let p = &pair.state;
         let v = &pair.weight;
 
-        for arc in fst.arcs_iter(&p)? {
+        for arc in fst.arcs_iter(*p)? {
             let w = &arc.weight;
 
             if arc.ilabel == x {
@@ -104,7 +103,7 @@ where
             let p = &pair.state;
             let v = &pair.weight;
 
-            for arc in fst.arcs_iter(&p)? {
+            for arc in fst.arcs_iter(*p)? {
                 if arc.ilabel == x && arc.nextstate == q {
                     let w = &arc.weight;
                     let temp = w_prime.inverse().times(&v.times(&w));
@@ -136,12 +135,10 @@ where
     let mut queue = VecDeque::new();
 
     let initial_state = deminized_fst.add_state();
-    deminized_fst.set_start(&initial_state)?;
+    deminized_fst.set_start(initial_state)?;
 
-    let initial_subset = WeightedSubset::from_vec(vec![PairStateWeight::new(
-        fst_in.start().unwrap(),
-        W::one(),
-    )]);
+    let initial_subset =
+        WeightedSubset::from_vec(vec![PairStateWeight::new(fst_in.start().unwrap(), W::ONE)]);
     mapping_states.insert(initial_subset.clone(), initial_state);
 
     queue.push_back(initial_subset);
@@ -161,7 +158,7 @@ where
                 for pair in &new_weighted_subset.pairs {
                     let q = &pair.state;
                     let v = &pair.weight;
-                    if let Some(rho_q) = fst_in.final_weight(q) {
+                    if let Some(rho_q) = fst_in.final_weight(*q) {
                         let temp = v.times(&rho_q);
                         final_weight = final_weight
                             .map(|value: W| value.plus(&temp))
@@ -170,7 +167,7 @@ where
                 }
 
                 if let Some(pouet) = final_weight {
-                    deminized_fst.set_final(&state_id, pouet)?;
+                    deminized_fst.set_final(state_id, pouet)?;
                 }
 
                 // Enqueue
@@ -178,7 +175,7 @@ where
             }
 
             deminized_fst.add_arc(
-                &mapping_states[&weighted_subset],
+                mapping_states[&weighted_subset],
                 Arc::new(x, x, w_prime, mapping_states[&new_weighted_subset]),
             )?;
         }

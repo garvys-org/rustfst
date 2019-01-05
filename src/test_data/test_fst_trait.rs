@@ -1,7 +1,7 @@
 #[cfg(test)]
-use fst_traits::CoreFst;
+use crate::fst_traits::CoreFst;
 #[cfg(test)]
-use fst_traits::Fst;
+use crate::fst_traits::Fst;
 
 #[cfg(test)]
 pub(crate) trait TestFst {

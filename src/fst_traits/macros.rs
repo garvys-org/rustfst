@@ -19,37 +19,49 @@ macro_rules! add_or_fst {
 }
 
 macro_rules! display_single_state {
-    ($fst:expr, $state_id:expr, $f: expr) => {
+    ($fst:expr, $state_id:expr, $f: expr, $show_weight_one: expr) => {
         for arc in $fst.arcs_iter($state_id).unwrap() {
-            write!(
-                $f,
-                "{}\t{}\t{}\t{}\t{}\n",
-                $state_id, &arc.nextstate, &arc.ilabel, &arc.olabel, &arc.weight
-            )?;
+            if arc.weight.is_one() && !$show_weight_one {
+                writeln!(
+                    $f,
+                    "{}\t{}\t{}\t{}",
+                    $state_id, &arc.nextstate, &arc.ilabel, &arc.olabel
+                )?;
+            } else {
+                writeln!(
+                    $f,
+                    "{}\t{}\t{}\t{}\t{}",
+                    $state_id, &arc.nextstate, &arc.ilabel, &arc.olabel, &arc.weight
+                )?;
+            }
         }
     };
 }
 
 macro_rules! write_fst {
-    ($fst:expr, $f:expr) => {
+    ($fst:expr, $f:expr, $show_weight_one: expr) => {
         if let Some(start_state) = $fst.start() {
             // Firstly print the arcs leaving the start state
-            display_single_state!($fst, &start_state, $f);
+            display_single_state!($fst, start_state, $f, $show_weight_one);
 
             // Secondly, print the arcs leaving all the other states
             for state_id in $fst.states_iter() {
                 if state_id != start_state {
-                    display_single_state!($fst, &state_id, $f);
+                    display_single_state!($fst, state_id, $f, $show_weight_one);
                 }
             }
 
             // Finally, print the final states with their weight
             for final_state in $fst.final_states_iter() {
-                write!(
-                    $f,
-                    "{}\t{}\n",
-                    &final_state.state_id, &final_state.final_weight
-                )?;
+                if final_state.final_weight.is_one() && !$show_weight_one {
+                    writeln!($f, "{}", &final_state.state_id)?;
+                } else {
+                    writeln!(
+                        $f,
+                        "{}\t{}",
+                        &final_state.state_id, &final_state.final_weight
+                    )?;
+                }
             }
         }
     };
@@ -62,7 +74,7 @@ macro_rules! display_fst_trait {
             $semiring::Type: fmt::Display,
         {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                write_fst!(self, f);
+                write_fst!(self, f, true);
                 Ok(())
             }
         }

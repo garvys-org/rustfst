@@ -1,6 +1,6 @@
-use fst_traits::{Fst, StateIterator};
-use semirings::Semiring;
-use StateId;
+use crate::fst_traits::{Fst, StateIterator};
+use crate::semirings::Semiring;
+use crate::StateId;
 
 #[derive(Debug)]
 pub struct FinalState<W: Semiring> {
@@ -54,7 +54,7 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(state_id) = self.it.next() {
-            if let Some(final_weight) = self.fst.final_weight(&state_id) {
+            if let Some(final_weight) = self.fst.final_weight(state_id) {
                 return Some(FinalState {
                     state_id,
                     final_weight,

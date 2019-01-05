@@ -1,17 +1,17 @@
 #[cfg(test)]
-use fst_impls::VectorFst;
+use crate::fst_impls::VectorFst;
 #[cfg(test)]
-use fst_traits::{CoreFst, ExpandedFst};
+use crate::fst_traits::{CoreFst, ExpandedFst};
 #[cfg(test)]
-use semirings::IntegerWeight;
+use crate::semirings::IntegerWeight;
 #[cfg(test)]
-use semirings::Semiring;
+use crate::semirings::Semiring;
 #[cfg(test)]
-use test_data::TestFst;
+use crate::test_data::TestFst;
 #[cfg(test)]
-use test_data::TestFstData;
+use crate::test_data::TestFstData;
 #[cfg(test)]
-use utils::acceptor;
+use crate::utils::acceptor;
 
 #[cfg(test)]
 pub(crate) struct LinearAcceptor3Labels {}
@@ -23,7 +23,7 @@ impl TestFst for LinearAcceptor3Labels {
 
     fn get_fst() -> <Self as TestFst>::F {
         let labels = vec![45, 58, 31];
-        acceptor(labels.into_iter()).unwrap()
+        acceptor(labels.into_iter())
     }
 
     fn get_name() -> String {
@@ -36,27 +36,27 @@ impl TestFst for LinearAcceptor3Labels {
 
     fn get_all_distances() -> Vec<Vec<<<Self as TestFst>::F as CoreFst>::W>> {
         let fst = Self::get_fst();
-        let mut d = vec![vec![IntegerWeight::zero(); fst.num_states()]; fst.num_states()];
+        let mut d = vec![vec![IntegerWeight::ZERO; fst.num_states()]; fst.num_states()];
 
-        d[0][0] = IntegerWeight::one();
-        d[0][1] = IntegerWeight::one();
-        d[0][2] = IntegerWeight::one();
-        d[0][3] = IntegerWeight::one();
+        d[0][0] = IntegerWeight::ONE;
+        d[0][1] = IntegerWeight::ONE;
+        d[0][2] = IntegerWeight::ONE;
+        d[0][3] = IntegerWeight::ONE;
 
-        d[1][0] = IntegerWeight::zero();
-        d[1][1] = IntegerWeight::one();
-        d[1][2] = IntegerWeight::one();
-        d[1][3] = IntegerWeight::one();
+        d[1][0] = IntegerWeight::ZERO;
+        d[1][1] = IntegerWeight::ONE;
+        d[1][2] = IntegerWeight::ONE;
+        d[1][3] = IntegerWeight::ONE;
 
-        d[2][0] = IntegerWeight::zero();
-        d[2][1] = IntegerWeight::zero();
-        d[2][2] = IntegerWeight::one();
-        d[2][3] = IntegerWeight::one();
+        d[2][0] = IntegerWeight::ZERO;
+        d[2][1] = IntegerWeight::ZERO;
+        d[2][2] = IntegerWeight::ONE;
+        d[2][3] = IntegerWeight::ONE;
 
-        d[3][0] = IntegerWeight::zero();
-        d[3][1] = IntegerWeight::zero();
-        d[3][2] = IntegerWeight::zero();
-        d[3][3] = IntegerWeight::one();
+        d[3][0] = IntegerWeight::ZERO;
+        d[3][1] = IntegerWeight::ZERO;
+        d[3][2] = IntegerWeight::ZERO;
+        d[3][3] = IntegerWeight::ONE;
 
         d
     }

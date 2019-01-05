@@ -1,11 +1,10 @@
-use fst_traits::final_states_iterator::FinalStatesIterator;
-use fst_traits::Fst;
-use semirings::Semiring;
+use crate::fst_traits::final_states_iterator::FinalStatesIterator;
+use crate::fst_traits::Fst;
+use crate::semirings::Semiring;
+use crate::{DrawingConfig, Result};
 use std::fs::File;
 use std::io::{LineWriter, Write};
 use std::path::Path;
-use DrawingConfig;
-use Result;
 
 pub trait ExpandedFst: Fst {
     /// Returns the number of states that contains the FST. They are all counted even if some states
@@ -35,7 +34,7 @@ pub trait ExpandedFst: Fst {
     fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Result<()> {
         let buffer = File::create(path_output.as_ref())?;
         let mut line_writer = LineWriter::new(buffer);
-        write_fst!(self, line_writer);
+        write_fst!(self, line_writer, true);
         Ok(())
     }
 
@@ -43,7 +42,7 @@ pub trait ExpandedFst: Fst {
     fn text(&self) -> Result<String> {
         let buffer = Vec::<u8>::new();
         let mut line_writer = LineWriter::new(buffer);
-        write_fst!(self, line_writer);
+        write_fst!(self, line_writer, true);
         Ok(String::from_utf8(line_writer.into_inner()?)?)
     }
 
@@ -75,11 +74,11 @@ pub trait ExpandedFst: Fst {
             writeln!(f, "nodesep = {}", config.nodesep)?;
 
             // Start state first
-            draw_single_state!(self, &start_state, f, config);
+            draw_single_state!(self, start_state, f, config);
 
             for state in self.states_iter() {
                 if state != start_state {
-                    draw_single_state!(self, &state, f, config);
+                    draw_single_state!(self, state, f, config);
                 }
             }
 

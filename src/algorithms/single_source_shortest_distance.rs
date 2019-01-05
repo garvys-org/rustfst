@@ -1,8 +1,8 @@
-use fst_traits::{CoreFst, ExpandedFst};
-use semirings::Semiring;
 use std::collections::VecDeque;
-use Result;
-use StateId;
+
+use crate::fst_traits::{CoreFst, ExpandedFst};
+use crate::semirings::Semiring;
+use crate::{Result, StateId};
 
 /// This operation computes the shortest distance from the state `state_id` to every state.
 /// The shortest distance from `p` to `q` is the ⊕-sum of the weights
@@ -10,27 +10,26 @@ use StateId;
 ///
 /// # Example
 /// ```
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::fst_traits::MutableFst;
-/// use rustfst::algorithms::single_source_shortest_distance;
-/// use rustfst::arc::Arc;
-///
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::fst_traits::MutableFst;
+/// # use rustfst::single_source_shortest_distance;
+/// # use rustfst::Arc;
 /// let mut fst = VectorFst::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
 /// let s2 = fst.add_state();
 ///
-/// fst.set_start(&s0).unwrap();
-/// fst.add_arc(&s0, Arc::new(32, 23, IntegerWeight::new(18), s1));
-/// fst.add_arc(&s0, Arc::new(32, 23, IntegerWeight::new(21), s2));
-/// fst.add_arc(&s1, Arc::new(32, 23, IntegerWeight::new(55), s2));
+/// fst.set_start(s0).unwrap();
+/// fst.add_arc(s0, Arc::new(32, 23, IntegerWeight::new(18), s1));
+/// fst.add_arc(s0, Arc::new(32, 23, IntegerWeight::new(21), s2));
+/// fst.add_arc(s1, Arc::new(32, 23, IntegerWeight::new(55), s2));
 ///
 /// let dists = single_source_shortest_distance(&fst, s1).unwrap();
 ///
 /// assert_eq!(dists, vec![
-///     IntegerWeight::zero(),
-///     IntegerWeight::one(),
+///     IntegerWeight::ZERO,
+///     IntegerWeight::ONE,
 ///     IntegerWeight::new(55),
 /// ]);
 ///
@@ -44,23 +43,23 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
     let mut d = vec![];
     let mut r = vec![];
 
-    d.resize(num_states, <F as CoreFst>::W::zero());
-    r.resize(num_states, <F as CoreFst>::W::zero());
+    d.resize(num_states, <F as CoreFst>::W::ZERO);
+    r.resize(num_states, <F as CoreFst>::W::ZERO);
 
     // Check whether the wFST contains the state
     if state_id < fst.num_states() {
-        d[state_id] = <F as CoreFst>::W::one();
-        r[state_id] = <F as CoreFst>::W::one();
+        d[state_id] = <F as CoreFst>::W::ONE;
+        r[state_id] = <F as CoreFst>::W::ONE;
 
         let mut queue = VecDeque::new();
         queue.push_back(state_id);
 
         while !queue.is_empty() {
             let state_cour = queue.pop_front().unwrap();
-            let r2 = r[state_cour].clone();
-            r[state_cour] = <F as CoreFst>::W::zero();
+            let r2 = r[state_cour];
+            r[state_cour] = <F as CoreFst>::W::ZERO;
 
-            for arc in fst.arcs_iter(&state_cour)? {
+            for arc in fst.arcs_iter(state_cour)? {
                 let nextstate = arc.nextstate;
                 if d[nextstate] != d[nextstate].plus(&r2.times(&arc.weight)) {
                     d[nextstate] = d[nextstate].plus(&r2.times(&arc.weight));
@@ -82,26 +81,25 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
 ///
 /// # Example
 /// ```
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::fst_traits::MutableFst;
-/// use rustfst::algorithms::shortest_distance;
-/// use rustfst::arc::Arc;
-///
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::fst_traits::MutableFst;
+/// # use rustfst::shortest_distance;
+/// # use rustfst::Arc;
 /// let mut fst = VectorFst::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
 /// let s2 = fst.add_state();
 ///
-/// fst.set_start(&s0).unwrap();
-/// fst.add_arc(&s0, Arc::new(32, 23, IntegerWeight::new(18), s1));
-/// fst.add_arc(&s0, Arc::new(32, 23, IntegerWeight::new(21), s2));
-/// fst.add_arc(&s1, Arc::new(32, 23, IntegerWeight::new(55), s2));
+/// fst.set_start(s0).unwrap();
+/// fst.add_arc(s0, Arc::new(32, 23, IntegerWeight::new(18), s1));
+/// fst.add_arc(s0, Arc::new(32, 23, IntegerWeight::new(21), s2));
+/// fst.add_arc(s1, Arc::new(32, 23, IntegerWeight::new(55), s2));
 ///
 /// let dists = shortest_distance(&fst).unwrap();
 ///
 /// assert_eq!(dists, vec![
-///     IntegerWeight::one(),
+///     IntegerWeight::ONE,
 ///     IntegerWeight::new(18),
 ///     IntegerWeight::new(21 + 18*55),
 /// ]);
@@ -111,24 +109,24 @@ pub fn shortest_distance<F: ExpandedFst>(fst: &F) -> Result<Vec<<F as CoreFst>::
     if let Some(start_state) = fst.start() {
         return single_source_shortest_distance(fst, start_state);
     }
-    Ok(vec![<F as CoreFst>::W::zero(); fst.num_states()])
+    Ok(vec![<F as CoreFst>::W::ZERO; fst.num_states()])
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use fst_traits::StateIterator;
-    use semirings::{IntegerWeight, Semiring};
-    use test_data::vector_fst::get_vector_fsts_for_tests;
+    use crate::fst_traits::StateIterator;
+    use crate::semirings::{IntegerWeight, Semiring};
+    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
-    fn test_single_source_shortest_distance_generic() {
+    fn test_single_source_shortest_distance_generic() -> Result<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = data.fst;
             let d_ref = data.all_distances;
 
             for state in fst.states_iter() {
-                let d = single_source_shortest_distance(&fst, state).unwrap();
+                let d = single_source_shortest_distance(&fst, state)?;
                 assert_eq!(
                     d, d_ref[state],
                     "Test failing for single source shortest distance on wFST {:?} at state {:?}",
@@ -136,23 +134,24 @@ mod tests {
                 );
             }
 
-            let d = single_source_shortest_distance(&fst, fst.num_states()).unwrap();
+            let d = single_source_shortest_distance(&fst, fst.num_states())?;
             assert_eq!(
                 d,
-                vec![IntegerWeight::zero(); fst.num_states()],
+                vec![IntegerWeight::ZERO; fst.num_states()],
                 "Test failing for single source shortest distance on wFST {:?} at state {:?}",
                 data.name,
                 fst.num_states()
             );
         }
+        Ok(())
     }
 
     #[test]
-    fn test_shortest_distance_generic() {
+    fn test_shortest_distance_generic() -> Result<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = data.fst;
             let d_ref = data.all_distances;
-            let d = shortest_distance(&fst).unwrap();
+            let d = shortest_distance(&fst)?;
 
             if let Some(start_state) = fst.start() {
                 assert_eq!(
@@ -163,11 +162,12 @@ mod tests {
             } else {
                 assert_eq!(
                     d,
-                    vec![IntegerWeight::zero(); fst.num_states()],
+                    vec![IntegerWeight::ZERO; fst.num_states()],
                     "Test failing for all shortest distance on wFST : {:?}",
                     data.name
                 );
             }
         }
+        Ok(())
     }
 }

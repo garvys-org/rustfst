@@ -1,8 +1,9 @@
-use fst_traits::ExpandedFst;
-use parsers::text::ParsedTextFst;
-use semirings::Semiring;
 use std::path::Path;
-use Result;
+
+use crate::fst_traits::ExpandedFst;
+use crate::parsers::text_fst::ParsedTextFst;
+use crate::semirings::Semiring;
+use crate::Result;
 
 pub trait TextParser: ExpandedFst
 where

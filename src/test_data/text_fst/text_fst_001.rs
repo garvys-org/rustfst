@@ -1,10 +1,11 @@
-use arc::Arc;
-use fst_impls::vector::vector_fst::VectorFstState;
-use fst_impls::VectorFst;
-use parsers::text::{FinalState, ParsedTextFst, Transition};
-use semirings::{ProbabilityWeight, Semiring};
 use std::path::PathBuf;
-use test_data::text_fst::TextParserTest;
+
+use crate::arc::Arc;
+use crate::fst_impls::vector::vector_fst::VectorFstState;
+use crate::fst_impls::VectorFst;
+use crate::parsers::text_fst::{FinalState, ParsedTextFst, Transition};
+use crate::semirings::{ProbabilityWeight, Semiring};
+use crate::test_data::text_fst::TextParserTest;
 
 #[cfg(test)]
 pub(crate) fn text_fst_001() -> TextParserTest {
@@ -57,6 +58,7 @@ pub(crate) fn text_fst_001() -> TextParserTest {
         name: "test_fst_001".to_string(),
         path: rel_to_abs_path!("text_fst_001.txt"),
         parsed_text_fst: ParsedTextFst {
+            start_state: Some(0),
             transitions,
             final_states,
         },

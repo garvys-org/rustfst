@@ -53,7 +53,7 @@ use rustfst::utils::transducer;
 use rustfst::semirings::{Semiring, IntegerWeight};
 use rustfst::fst_impls::VectorFst;
 use rustfst::fst_traits::{MutableFst, PathsIterator};
-use rustfst::arc::Arc;
+use rustfst::Arc;
 
 fn main() {
     // Creates a empty wFST
@@ -65,19 +65,19 @@ fn main() {
     let s2 = fst.add_state();
     
     // Set s0 as the start state
-    fst.set_start(&s0).unwrap();
+    fst.set_start(s0).unwrap();
     
     // Add an arc from s0 to s1
-    fst.add_arc(&s0, Arc::new(3, 5, IntegerWeight::new(10), s1))
+    fst.add_arc(s0, Arc::new(3, 5, IntegerWeight::new(10), s1))
          .unwrap();
     
     // Add an arc from s0 to s2
-    fst.add_arc(&s0, Arc::new(5, 7, IntegerWeight::new(18), s2))
+    fst.add_arc(s0, Arc::new(5, 7, IntegerWeight::new(18), s2))
          .unwrap();
     
     // Set s1 and s2 as final states
-    fst.set_final(&s1, IntegerWeight::new(31)).unwrap();
-    fst.set_final(&s2, IntegerWeight::new(45)).unwrap();
+    fst.set_final(s1, IntegerWeight::new(31)).unwrap();
+    fst.set_final(s2, IntegerWeight::new(45)).unwrap();
     
     // Iter over all the paths in the wFST
     for p in fst.paths_iter() {

@@ -1,3 +1,4 @@
+use std::f32;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
@@ -9,21 +10,33 @@ use std::ops::{Add, AddAssign, Mul, MulAssign};
 /// Thus, a semiring is a ring that may lack negation.
 /// For more information : https://cs.nyu.edu/~mohri/pub/hwa.pdf
 pub trait Semiring:
-    Clone + PartialEq + Debug + Default + Add + AddAssign + Mul + MulAssign + Display
+    Clone
+    + PartialEq
+    + PartialOrd
+    + Debug
+    + Default
+    + Add
+    + AddAssign
+    + Mul
+    + MulAssign
+    + Display
+    + Copy
 {
     type Type: Display;
+
+    const ZERO: Self;
+    const ONE: Self;
+
     fn new(value: Self::Type) -> Self;
     fn plus(&self, rhs: &Self) -> Self;
     fn times(&self, rhs: &Self) -> Self;
-    fn zero() -> Self;
-    fn one() -> Self;
     fn value(&self) -> Self::Type;
     fn set_value(&mut self, value: Self::Type);
     fn is_one(&self) -> bool {
-        *self == Self::one()
+        *self == Self::ONE
     }
     fn is_zero(&self) -> bool {
-        *self == Self::zero()
+        *self == Self::ZERO
     }
 }
 
@@ -54,6 +67,16 @@ pub trait CompleteSemiring: Semiring {}
 /// For more information : `https://cs.nyu.edu/~mohri/pub/hwa.pdf`
 pub trait StarSemiring: Semiring {
     fn closure(&self) -> Self;
+}
+
+pub trait WeightQuantize: Semiring<Type = f32> {
+    fn quantize(&self, delta: f32) -> Self {
+        let v = self.value();
+        if v == f32::INFINITY || v == f32::NEG_INFINITY {
+            return *self;
+        }
+        Self::new(((v / delta) + 0.5).floor() * delta)
+    }
 }
 
 macro_rules! add_mul_semiring {
@@ -97,6 +120,16 @@ macro_rules! display_semiring {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                 write!(f, "{}", self.value())?;
                 Ok(())
+            }
+        }
+    };
+}
+
+macro_rules! partial_eq_f32 {
+    ($semiring:tt) => {
+        impl PartialEq for $semiring {
+            fn eq(&self, other: &Self) -> bool {
+                self.quantize(KDELTA).value() == other.quantize(KDELTA).value()
             }
         }
     };

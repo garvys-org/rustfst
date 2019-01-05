@@ -1,7 +1,6 @@
-use fst_traits::{ExpandedFst, Fst, MutableFst};
+use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
+use crate::{Result, StateId};
 use std::collections::HashSet;
-use Result;
-use StateId;
 
 fn dfs<F: Fst>(
     fst: &F,
@@ -10,8 +9,8 @@ fn dfs<F: Fst>(
     coaccessible_states: &mut HashSet<StateId>,
 ) -> Result<()> {
     accessible_states.insert(state_id_cour);
-    let mut is_coaccessible = fst.is_final(&state_id_cour);
-    for arc in fst.arcs_iter(&state_id_cour)? {
+    let mut is_coaccessible = fst.is_final(state_id_cour);
+    for arc in fst.arcs_iter(state_id_cour)? {
         let nextstate = arc.nextstate;
 
         if !accessible_states.contains(&nextstate) {
@@ -34,13 +33,13 @@ fn dfs<F: Fst>(
 ///
 /// # Example
 /// ```
-/// use rustfst::utils::transducer;
-/// use rustfst::semirings::{Semiring, IntegerWeight};
-/// use rustfst::fst_impls::VectorFst;
-/// use rustfst::algorithms::connect;
-/// use rustfst::fst_traits::MutableFst;
-///
-/// let fst : VectorFst<IntegerWeight> = transducer(vec![2].into_iter(), vec![3].into_iter()).unwrap();
+/// # #[macro_use] extern crate rustfst;
+/// # use rustfst::utils::transducer;
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::connect;
+/// # use rustfst::fst_traits::MutableFst;
+/// let fst : VectorFst<IntegerWeight> = transducer![2 => 3];
 ///
 /// // Add a state not on a successful path
 /// let mut no_connected_fst = fst.clone();
@@ -77,15 +76,15 @@ pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use test_data::vector_fst::get_vector_fsts_for_tests;
+    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
-    fn test_connect_generic() {
+    fn test_connect_generic() -> Result<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
 
             let mut connect_fst = fst.clone();
-            connect(&mut connect_fst).unwrap();
+            connect(&mut connect_fst)?;
 
             assert_eq!(
                 connect_fst, data.connected_fst,
@@ -93,5 +92,6 @@ mod tests {
                 &data.name
             );
         }
+        Ok(())
     }
 }

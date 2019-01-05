@@ -1,17 +1,17 @@
 #[cfg(test)]
-use arc::Arc;
+use crate::arc::Arc;
 #[cfg(test)]
-use fst_impls::VectorFst;
+use crate::fst_impls::VectorFst;
 #[cfg(test)]
-use fst_traits::MutableFst;
+use crate::fst_traits::MutableFst;
 #[cfg(test)]
-use fst_traits::{CoreFst, ExpandedFst};
+use crate::fst_traits::{CoreFst, ExpandedFst};
 #[cfg(test)]
-use semirings::IntegerWeight;
+use crate::semirings::IntegerWeight;
 #[cfg(test)]
-use semirings::Semiring;
+use crate::semirings::Semiring;
 #[cfg(test)]
-use test_data::{TestFst, TestFstData};
+use crate::test_data::{TestFst, TestFstData};
 
 #[cfg(test)]
 pub(crate) struct VectorFst010 {}
@@ -26,14 +26,14 @@ impl TestFst for VectorFst010 {
         let s0 = fst.add_state();
         let s1 = fst.add_state();
         let s2 = fst.add_state();
-        fst.set_start(&s0).unwrap();
+        fst.set_start(s0).unwrap();
 
-        fst.add_arc(&s0, Arc::new(3, 5, IntegerWeight::new(10), s1))
+        fst.add_arc(s0, Arc::new(3, 5, IntegerWeight::new(10), s1))
             .unwrap();
-        fst.add_arc(&s0, Arc::new(5, 7, IntegerWeight::new(18), s2))
+        fst.add_arc(s0, Arc::new(5, 7, IntegerWeight::new(18), s2))
             .unwrap();
-        fst.set_final(&s1, IntegerWeight::new(31)).unwrap();
-        fst.set_final(&s2, IntegerWeight::new(45)).unwrap();
+        fst.set_final(s1, IntegerWeight::new(31)).unwrap();
+        fst.set_final(s2, IntegerWeight::new(45)).unwrap();
         fst
     }
 
@@ -47,19 +47,19 @@ impl TestFst for VectorFst010 {
 
     fn get_all_distances() -> Vec<Vec<<<Self as TestFst>::F as CoreFst>::W>> {
         let fst = Self::get_fst();
-        let mut d = vec![vec![IntegerWeight::zero(); fst.num_states()]; fst.num_states()];
+        let mut d = vec![vec![IntegerWeight::ZERO; fst.num_states()]; fst.num_states()];
 
-        d[0][0] = IntegerWeight::one();
+        d[0][0] = IntegerWeight::ONE;
         d[0][1] = IntegerWeight::new(10);
         d[0][2] = IntegerWeight::new(18);
 
-        d[1][0] = IntegerWeight::zero();
-        d[1][1] = IntegerWeight::one();
-        d[1][2] = IntegerWeight::zero();
+        d[1][0] = IntegerWeight::ZERO;
+        d[1][1] = IntegerWeight::ONE;
+        d[1][2] = IntegerWeight::ZERO;
 
-        d[2][0] = IntegerWeight::zero();
-        d[2][1] = IntegerWeight::zero();
-        d[2][2] = IntegerWeight::one();
+        d[2][0] = IntegerWeight::ZERO;
+        d[2][1] = IntegerWeight::ZERO;
+        d[2][2] = IntegerWeight::ONE;
 
         d
     }

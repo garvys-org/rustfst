@@ -1,16 +1,20 @@
-use semirings::CompleteSemiring;
-use semirings::Semiring;
-use semirings::StarSemiring;
 use std::i32;
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 
-#[derive(Clone, Debug, PartialEq, Default, Hash, Eq)]
+use crate::semirings::CompleteSemiring;
+use crate::semirings::Semiring;
+use crate::semirings::StarSemiring;
+
+#[derive(Clone, Debug, PartialEq, PartialOrd, Default, Hash, Eq, Copy)]
 pub struct IntegerWeight {
     value: i32,
 }
 
 impl Semiring for IntegerWeight {
     type Type = i32;
+
+    const ZERO: Self = Self { value: 0 };
+    const ONE: Self = Self { value: 1 };
 
     fn new(value: <Self as Semiring>::Type) -> Self {
         IntegerWeight { value }
@@ -21,14 +25,6 @@ impl Semiring for IntegerWeight {
     }
     fn times(&self, rhs: &Self) -> Self {
         Self::new(self.value * rhs.value)
-    }
-
-    fn zero() -> Self {
-        Self::new(0)
-    }
-
-    fn one() -> Self {
-        Self::new(1)
     }
 
     fn value(&self) -> Self::Type {

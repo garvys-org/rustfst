@@ -1,9 +1,7 @@
-use algorithms;
-use arc::Arc;
-use fst_traits::{CoreFst, ExpandedFst, Fst};
+use crate::arc::Arc;
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
+use crate::{Result, StateId};
 use std::collections::HashMap;
-use Result;
-use StateId;
 
 /// Trait defining the methods to modify a wFST
 pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
@@ -16,60 +14,57 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// If the `state_id` doesn't exist an error is raised.
     ///
     /// ```
-    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
-    /// use rustfst::fst_impls::VectorFst;
-    /// use rustfst::semirings::{BooleanWeight, Semiring};
-    /// use rustfst::arc::Arc;
-    ///
+    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::{BooleanWeight, Semiring};
+    /// # use rustfst::Arc;
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
     ///
     /// assert_eq!(fst.start(), None);
     ///
-    /// fst.set_start(&s1);
+    /// fst.set_start(s1);
     /// assert_eq!(fst.start(), Some(s1));
     ///
-    /// fst.set_start(&s2);
+    /// fst.set_start(s2);
     /// assert_eq!(fst.start(), Some(s2));
     /// ```
-    fn set_start(&mut self, state_id: &StateId) -> Result<()>;
+    fn set_start(&mut self, state_id: StateId) -> Result<()>;
 
     /// The state with identifier `state_id` is now a final state with a weight `final_weight`.
     /// If the `state_id` doesn't exist an error is raised.
     ///
     /// ```
-    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
-    /// use rustfst::fst_impls::VectorFst;
-    /// use rustfst::semirings::{BooleanWeight, Semiring};
-    /// use rustfst::arc::Arc;
-    ///
+    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::{BooleanWeight, Semiring};
+    /// # use rustfst::Arc;
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
     ///
-    /// assert_eq!(fst.final_weight(&s1), None);
-    /// assert_eq!(fst.final_weight(&s2), None);
+    /// assert_eq!(fst.final_weight(s1), None);
+    /// assert_eq!(fst.final_weight(s2), None);
     ///
-    /// fst.set_final(&s1, BooleanWeight::one());
-    /// assert_eq!(fst.final_weight(&s1), Some(BooleanWeight::one()));
-    /// assert_eq!(fst.final_weight(&s2), None);
+    /// fst.set_final(s1, BooleanWeight::ONE);
+    /// assert_eq!(fst.final_weight(s1), Some(BooleanWeight::ONE));
+    /// assert_eq!(fst.final_weight(s2), None);
     ///
-    /// fst.set_final(&s2, BooleanWeight::one());
-    /// assert_eq!(fst.final_weight(&s1), Some(BooleanWeight::one()));
-    /// assert_eq!(fst.final_weight(&s2), Some(BooleanWeight::one()));
+    /// fst.set_final(s2, BooleanWeight::ONE);
+    /// assert_eq!(fst.final_weight(s1), Some(BooleanWeight::ONE));
+    /// assert_eq!(fst.final_weight(s2), Some(BooleanWeight::ONE));
     /// ```
-    fn set_final(&mut self, state_id: &StateId, final_weight: <Self as CoreFst>::W) -> Result<()>;
+    fn set_final(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W) -> Result<()>;
 
     /// Adds a new state to the current FST. The identifier of the new state is returned
     ///
     /// # Example
     ///
     /// ```
-    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
-    /// use rustfst::fst_impls::VectorFst;
-    /// use rustfst::semirings::{BooleanWeight, Semiring};
-    ///
+    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::{BooleanWeight, Semiring};
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     ///
     /// assert_eq!(fst.num_states(), 0);
@@ -89,10 +84,9 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// # Example
     ///
     /// ```
-    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, StateIterator};
-    /// use rustfst::fst_impls::VectorFst;
-    /// use rustfst::semirings::{BooleanWeight, Semiring};
-    ///
+    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, StateIterator};
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::{BooleanWeight, Semiring};
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     ///
     /// assert_eq!(fst.states_iter().count(), 0);
@@ -101,12 +95,12 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     ///
     /// assert_eq!(fst.states_iter().count(), 1);
     ///
-    /// fst.del_state(&s1);
+    /// fst.del_state(s1);
     ///
     /// assert_eq!(fst.states_iter().count(), 0);
     ///
     /// ```
-    fn del_state(&mut self, state_id: &StateId) -> Result<()>;
+    fn del_state(&mut self, state_id: StateId) -> Result<()>;
 
     /// Removes multiple states from an FST. If one of the states doesn't exist, an error is raised.
     ///
@@ -118,10 +112,9 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// # Example
     ///
     /// ```
-    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, StateIterator};
-    /// use rustfst::fst_impls::VectorFst;
-    /// use rustfst::semirings::{BooleanWeight, Semiring};
-    ///
+    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, StateIterator};
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::{BooleanWeight, Semiring};
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     ///
     /// assert_eq!(fst.states_iter().count(), 0);
@@ -150,20 +143,19 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// # Example
     ///
     /// ```
-    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
-    /// use rustfst::fst_impls::VectorFst;
-    /// use rustfst::semirings::{BooleanWeight, Semiring};
-    /// use rustfst::arc::Arc;
-    ///
+    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::{BooleanWeight, Semiring};
+    /// # use rustfst::Arc;
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
     ///
-    /// assert_eq!(fst.num_arcs(), 0);
-    /// fst.add_arc(&s1, Arc::new(3, 5, BooleanWeight::new(true), s2));
-    /// assert_eq!(fst.num_arcs(), 1);
+    /// assert_eq!(fst.num_arcs(s1).unwrap(), 0);
+    /// fst.add_arc(s1, Arc::new(3, 5, BooleanWeight::new(true), s2));
+    /// assert_eq!(fst.num_arcs(s1).unwrap(), 1);
     /// ```
-    fn add_arc(&mut self, source: &StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()>;
+    fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()>;
 
     fn add_fst<F: ExpandedFst<W = Self::W>>(
         &mut self,
@@ -180,13 +172,13 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
 
         // Second pass to add the arcs
         for old_state_id in fst_to_add.states_iter() {
-            for old_arc in fst_to_add.arcs_iter(&old_state_id)? {
+            for old_arc in fst_to_add.arcs_iter(old_state_id)? {
                 self.add_arc(
-                    &mapping_states[&old_state_id],
+                    mapping_states[&old_state_id],
                     Arc::new(
                         old_arc.ilabel,
                         old_arc.olabel,
-                        old_arc.weight.clone(),
+                        old_arc.weight,
                         mapping_states[&old_arc.nextstate],
                     ),
                 )?;
@@ -200,8 +192,8 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// If A transduces string `x` to `y` with weight `a`,
     /// then the closure transduces `x` to `y` with weight `a`,
     /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
-    fn closure_plus(&mut self) -> Result<()> {
-        algorithms::closure_plus(self)
+    fn closure_plus(&mut self) {
+        crate::closure_plus(self)
     }
 
     /// This operation computes the concatenative closure.
@@ -209,8 +201,8 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// then the closure transduces `x` to `y` with weight `a`,
     /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
     /// The empty string is transduced to itself with weight `1` as well.
-    fn closure_star(&mut self) -> Result<()> {
-        algorithms::closure_star(self)
+    fn closure_star(&mut self) {
+        crate::closure_star(self)
     }
 }
 
@@ -219,5 +211,5 @@ where
     Self::W: 'a,
 {
     type IterMut: Iterator<Item = &'a mut Arc<Self::W>>;
-    fn arcs_iter_mut(&'a mut self, &StateId) -> Result<Self::IterMut>;
+    fn arcs_iter_mut(&'a mut self, state_id: StateId) -> Result<Self::IterMut>;
 }
