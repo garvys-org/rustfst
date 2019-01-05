@@ -10,6 +10,7 @@ mod test {
     use crate::Result;
     use crate::{
         connect, invert, isomorphic, project, push_weights, reverse, rm_epsilon, ProjectType,
+        ReweightType,
     };
 
     #[derive(Serialize, Deserialize, Debug)]
@@ -154,7 +155,10 @@ mod test {
 
             // Weight pushing initial
             let mut fst_weight_push_initial = test_data.raw.clone();
-            push_weights(&mut fst_weight_push_initial)?;
+            push_weights(
+                &mut fst_weight_push_initial,
+                ReweightType::ReweightToInitial,
+            )?;
             assert_eq!(
                 test_data.weight_pushing_initial,
                 fst_weight_push_initial,
@@ -163,6 +167,20 @@ mod test {
                     test_data.weight_pushing_initial,
                     fst_weight_push_initial,
                     "Weight Pushing initial"
+                )
+            );
+
+            // Weight pushing final
+            let mut fst_weight_push_final = test_data.raw.clone();
+            push_weights(&mut fst_weight_push_final, ReweightType::ReweightToFinal)?;
+            assert_eq!(
+                test_data.weight_pushing_final,
+                fst_weight_push_final,
+                "{}",
+                error_message_fst!(
+                    test_data.weight_pushing_final,
+                    fst_weight_push_final,
+                    "Weight Pushing final"
                 )
             );
         };
