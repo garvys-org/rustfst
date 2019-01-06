@@ -1,7 +1,10 @@
 use crate::fst_traits::{ExpandedFst, MutableFst};
 
+/// Different types of labels projection in a FST.
 pub enum ProjectType {
+    /// Input projection : output labels are replaced with input ones.
     ProjectInput,
+    /// Output projection : input labels are replaced with output ones.
     ProjectOutput,
 }
 

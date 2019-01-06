@@ -282,16 +282,3 @@ macro_rules! symt {
         }
     };
 }
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn test_symt_write() -> Result<()> {
-        let s = symt!("a", "b");
-        //        s.write_text("a/symt.txt")?;
-        println!("symt = \n{}", s);
-        Ok(())
-    }
-}

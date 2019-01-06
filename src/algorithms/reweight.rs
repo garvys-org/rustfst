@@ -2,8 +2,11 @@ use crate::fst_traits::{ExpandedFst, FinalStatesIterator, Fst, MutableFst};
 use crate::semirings::{Semiring, WeaklyDivisibleSemiring};
 use crate::Result;
 
+/// Different types of reweighting.
 pub enum ReweightType {
+    /// Reweight toward initial state.
     ReweightToInitial,
+    /// Reweight toward final states.
     ReweightToFinal,
 }
 

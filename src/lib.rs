@@ -95,16 +95,17 @@ pub type Result<T> = std::result::Result<T, failure::Error>;
 mod symbol_table;
 pub use crate::symbol_table::SymbolTable;
 
-/// Type used for the input label and output label of an arc in a wFST.
+/// Type used for the input label and output label of an arc in a wFST -> usize
 pub type Label = usize;
+/// Symbol to map in the Symbol Table -> String
 pub type Symbol = String;
 
-/// Type used to identify a state in a wFST.
+/// Type used to identify a state in a wFST -> usize
 pub type StateId = usize;
 
-/// Epsilon label representing the epsilon transition (empty transition).
+/// Epsilon label representing the epsilon transition (empty transition) = `0`.
 pub const EPS_LABEL: Label = 0;
-/// Epsilon symbol representing the epsilon transition (empty transition).
+/// Epsilon symbol representing the epsilon transition (empty transition) = `<eps>`.
 pub const EPS_SYMBOL: &str = "<eps>";
 
 /// A few utilities to manipulate wFSTs.
@@ -112,24 +113,6 @@ pub mod utils;
 
 /// Provides algorithms that are generic for all wFST.
 mod algorithms;
-pub use self::algorithms::{
-    all_pairs_shortest_distance::all_pairs_shortest_distance,
-    closure_plus::closure_plus,
-    closure_star::closure_star,
-    composition::compose,
-    concat::concat,
-    connect::connect,
-    epsilon_removal::rm_epsilon,
-    inversion::invert,
-    isomorphic::isomorphic,
-    projection::{project, ProjectType},
-    relabel_pairs::relabel_pairs,
-    reverse::reverse,
-    reweight::{reweight, ReweightType},
-    single_source_shortest_distance::{shortest_distance, single_source_shortest_distance},
-    union::union,
-    weight_pushing::push_weights,
-};
 
 /// Implementation of the transitions inside a wFST.
 mod arc;
