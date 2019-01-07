@@ -4,14 +4,14 @@ mod test {
     use std::fs::read_to_string;
     use std::string::String;
 
-    use crate::fst_impls::VectorFst;
-    use crate::fst_traits::TextParser;
-    use crate::semirings::{Semiring, TropicalWeight};
-    use crate::Result;
     use crate::algorithms::{
         connect, invert, isomorphic, project, push_weights, reverse, rm_epsilon, ProjectType,
         ReweightType,
     };
+    use crate::fst_impls::VectorFst;
+    use crate::fst_traits::TextParser;
+    use crate::semirings::{Semiring, TropicalWeight};
+    use crate::Result;
 
     #[derive(Serialize, Deserialize, Debug)]
     struct OperationResult {

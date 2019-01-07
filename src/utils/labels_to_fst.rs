@@ -43,9 +43,8 @@ use std::cmp;
 pub fn transducer<F: MutableFst>(
     labels_input: &[Label],
     labels_output: &[Label],
-    weight: F::W
+    weight: F::W,
 ) -> F {
-
     let max_size = cmp::max(labels_input.len(), labels_output.len());
 
     let mut fst = F::new();

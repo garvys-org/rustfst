@@ -1,7 +1,7 @@
 use failure::bail;
 
-use crate::fst_traits::{Fst, PathsIterator};
 use crate::fst_path::FstPath;
+use crate::fst_traits::{Fst, PathsIterator};
 use crate::Result;
 
 /// Decode a linear FST to retrieves the only path recognized by it. A path is composed of the
@@ -59,11 +59,8 @@ mod tests {
     fn test_decode_linear_fst_transducer() -> Result<()> {
         let labels_input = vec![1, 2, 3];
         let labels_output = vec![43, 22, 18];
-        let fst: VectorFst<BooleanWeight> = transducer(
-            &labels_input,
-            &labels_output,
-            BooleanWeight::ONE
-        );
+        let fst: VectorFst<BooleanWeight> =
+            transducer(&labels_input, &labels_output, BooleanWeight::ONE);
 
         let path = decode_linear_fst(&fst)?;
         let path_ref = FstPath::new(labels_input, labels_output, BooleanWeight::ONE);

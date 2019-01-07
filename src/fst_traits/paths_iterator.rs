@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
-use crate::fst_traits::Fst;
 use crate::fst_path::FstPath;
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::StateId;
 

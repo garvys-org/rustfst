@@ -16,7 +16,6 @@ pub struct FstPath<W: Semiring> {
 }
 
 impl<W: Semiring> FstPath<W> {
-
     /// Creates a new Path.
     pub fn new(ilabels: Vec<Label>, olabels: Vec<Label>, weight: W) -> Self {
         FstPath {
@@ -55,7 +54,6 @@ impl<W: Semiring> FstPath<W> {
 }
 
 impl<W: Semiring> Default for FstPath<W> {
-
     /// Creates an empty path with a weight one.
     fn default() -> Self {
         FstPath {
