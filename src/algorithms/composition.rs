@@ -21,11 +21,11 @@ use crate::Result;
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::compose;
 /// # fn main() -> Result<()> {
-/// let fst_1 : VectorFst<IntegerWeight> = transducer![1,2 => 2,3];
+/// let fst_1 : VectorFst<IntegerWeight> = fst![1,2 => 2,3];
 ///
-/// let fst_2 : VectorFst<IntegerWeight> = transducer![2,3 => 3,4];
+/// let fst_2 : VectorFst<IntegerWeight> = fst![2,3 => 3,4];
 ///
-/// let fst_ref : VectorFst<IntegerWeight> = transducer![1,2 => 3,4];
+/// let fst_ref : VectorFst<IntegerWeight> = fst![1,2 => 3,4];
 ///
 /// let composed_fst : VectorFst<_> = compose(&fst_1, &fst_2)?;
 /// assert_eq!(composed_fst, fst_ref);

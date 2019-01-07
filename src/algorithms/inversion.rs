@@ -12,10 +12,10 @@ use crate::fst_traits::{ExpandedFst, MutableFst};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::invert;
-/// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
+/// let mut fst : VectorFst<IntegerWeight> = fst![2 => 3];
 /// invert(&mut fst);
 ///
-/// assert_eq!(fst, transducer![3 => 2]);
+/// assert_eq!(fst, fst![3 => 2]);
 /// ```
 pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) {
     let states: Vec<_> = fst.states_iter().collect();

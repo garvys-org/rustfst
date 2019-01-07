@@ -19,14 +19,14 @@ use crate::{Result, EPS_LABEL};
 /// # use rustfst::Result;
 /// # use std::collections::HashSet;
 /// # fn main() -> Result<()> {
-/// let fst_a : VectorFst<IntegerWeight> = transducer![2 => 3];
-/// let fst_b : VectorFst<IntegerWeight> = transducer![6 => 5];
+/// let fst_a : VectorFst<IntegerWeight> = fst![2 => 3];
+/// let fst_b : VectorFst<IntegerWeight> = fst![6 => 5];
 ///
 /// let fst_res : VectorFst<IntegerWeight> = concat(&fst_a, &fst_b)?;
 /// let paths : HashSet<_> = fst_res.paths_iter().collect();
 ///
-/// let mut paths_ref = HashSet::new();
-/// paths_ref.insert(Path::new(vec![2, 6], vec![3, 5], IntegerWeight::ONE));
+/// let mut paths_ref = HashSet::<Path<IntegerWeight>>::new();
+/// paths_ref.insert(fst_path![2,6 => 3,5]);
 ///
 /// assert_eq!(paths, paths_ref);
 /// # Ok(())

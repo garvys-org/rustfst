@@ -139,61 +139,6 @@ pub fn acceptor<T: Iterator<Item = Label>, F: MutableFst>(labels: T) -> F {
     fst
 }
 
-/// Easily creates an acceptor from a list of labels.
-///
-/// This will return a linear FST with one arc for each label given
-/// (same input and output, weight one).
-///
-/// ```
-/// # #[macro_use] extern crate rustfst; fn main() {
-/// # use rustfst::utils;
-/// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
-/// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::semirings::{ProbabilityWeight, Semiring};
-/// # use rustfst::utils::acceptor;
-/// # use rustfst::Arc;
-/// let fst : VectorFst<ProbabilityWeight> = acceptor![1,2,3];
-/// # }
-/// ```
-#[macro_export]
-macro_rules! acceptor {
-    ( $( $x:expr ),* ) => {
-        {
-            let mut temp_vec = vec![$($x),*];
-            acceptor(temp_vec.clone().into_iter())
-        }
-    };
-}
-
-/// Easily creates a transducer from two lists of labels.
-///
-/// This will return a linear FST. The only accepted path in the FST has for input the first
-/// of labels and for output the second list of labels.
-/// ```
-/// # #[macro_use] extern crate rustfst; fn main() {
-/// # use rustfst::utils;
-/// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
-/// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::semirings::{ProbabilityWeight, Semiring};
-/// # use rustfst::utils::transducer;
-/// # use rustfst::Arc;
-/// let fst : VectorFst<ProbabilityWeight> = transducer![1,2,3 => 1,2,4];
-/// # }
-/// ```
-#[macro_export]
-macro_rules! transducer {
-    ( $( $x:expr ),* => $( $y:expr ),* ) => {
-        {
-            let mut temp_vec_input = vec![$($x),*];
-            let mut temp_vec_output = vec![$($y),*];
-            transducer(
-                temp_vec_input.clone().into_iter(),
-                temp_vec_output.clone().into_iter()
-            )
-        }
-    };
-}
-
 /// Creates a Path containing the arguments.
 ///
 /// There are multiple forms to this macro :
