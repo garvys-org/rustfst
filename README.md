@@ -39,7 +39,7 @@ Add it to your `Cargo.toml`:
 
 ```
 [dependencies]
-rustfst = "0.1"
+rustfst = "*"
 ```
 
 Add `extern crate rustfst` to your crate root and you are good to go!
