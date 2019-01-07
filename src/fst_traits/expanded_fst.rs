@@ -6,6 +6,8 @@ use std::fs::File;
 use std::io::{LineWriter, Write};
 use std::path::Path;
 
+/// Trait defining the necessary methods that should implement an ExpandedFST e.g
+/// a FST where all the states are already computed and not computed on the fly.
 pub trait ExpandedFst: Fst {
     /// Returns the number of states that contains the FST. They are all counted even if some states
     /// are not on a successful path (doesn't perform triming).
@@ -13,10 +15,9 @@ pub trait ExpandedFst: Fst {
     /// # Example
     ///
     /// ```
-    /// use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
-    /// use rustfst::fst_impls::VectorFst;
-    /// use rustfst::semirings::{BooleanWeight, Semiring};
-    ///
+    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::{BooleanWeight, Semiring};
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     ///
     /// assert_eq!(fst.num_states(), 0);

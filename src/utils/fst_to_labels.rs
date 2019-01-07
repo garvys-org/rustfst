@@ -20,7 +20,7 @@ use crate::Result;
 /// let labels_input = vec![32, 43, 21];
 /// let labels_output = vec![53, 18, 89];
 ///
-/// let fst : VectorFst<BooleanWeight> = transducer(&labels_input, &labels_output);
+/// let fst : VectorFst<BooleanWeight> = transducer(&labels_input, &labels_output, BooleanWeight::ONE);
 ///
 /// let path = decode_linear_fst(&fst).unwrap();
 ///
@@ -47,7 +47,7 @@ mod tests {
     #[test]
     fn test_decode_linear_fst_acceptor() -> Result<()> {
         let labels = vec![1, 2, 3];
-        let fst: VectorFst<BooleanWeight> = acceptor(&labels);
+        let fst: VectorFst<BooleanWeight> = acceptor(&labels, BooleanWeight::ONE);
 
         let path = decode_linear_fst(&fst)?;
         let path_ref = FstPath::new(labels.clone(), labels, BooleanWeight::ONE);
@@ -62,6 +62,7 @@ mod tests {
         let fst: VectorFst<BooleanWeight> = transducer(
             &labels_input,
             &labels_output,
+            BooleanWeight::ONE
         );
 
         let path = decode_linear_fst(&fst)?;

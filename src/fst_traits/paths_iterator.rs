@@ -5,7 +5,7 @@ use crate::fst_path::FstPath;
 use crate::semirings::Semiring;
 use crate::StateId;
 
-/// Trait to iterate over the paths accepted by an FST
+/// Trait to iterate over the paths accepted by an FST.
 pub trait PathsIterator<'a> {
     type W: Semiring;
     type Iter: Iterator<Item = FstPath<Self::W>>;
@@ -111,7 +111,7 @@ mod tests {
     fn test_paths_iterator_linear_fst() {
         let labels = vec![153, 45, 96];
 
-        let fst: VectorFst<IntegerWeight> = acceptor(&labels);
+        let fst: VectorFst<IntegerWeight> = acceptor(&labels, IntegerWeight::ONE);
 
         assert_eq!(fst.paths_iter().count(), 1);
 

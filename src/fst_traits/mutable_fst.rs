@@ -3,9 +3,9 @@ use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::{Result, StateId};
 use std::collections::HashMap;
 
-/// Trait defining the methods to modify a wFST
+/// Trait defining the methods to modify a wFST.
 pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
-    /// Creates an empty wFST
+    /// Creates an empty wFST.
     fn new() -> Self;
 
     /// The state with identifier `state_id` is now the start state.
@@ -206,6 +206,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     }
 }
 
+/// Iterate over mutable arcs in a wFST.
 pub trait MutableArcIterator<'a>: CoreFst
 where
     Self::W: 'a,

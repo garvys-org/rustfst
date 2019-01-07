@@ -19,7 +19,7 @@ use std::cmp;
 /// let labels_input = vec![32, 43, 21];
 /// let labels_output = vec![53, 18, 89];
 ///
-/// let fst : VectorFst<ProbabilityWeight> = transducer(&labels_input, &labels_output);
+/// let fst : VectorFst<ProbabilityWeight> = transducer(&labels_input, &labels_output, ProbabilityWeight::ONE);
 ///
 /// assert_eq!(fst.num_states(), 4);
 ///
@@ -43,6 +43,7 @@ use std::cmp;
 pub fn transducer<F: MutableFst>(
     labels_input: &[Label],
     labels_output: &[Label],
+    weight: F::W
 ) -> F {
 
     let max_size = cmp::max(labels_input.len(), labels_output.len());
@@ -70,7 +71,7 @@ pub fn transducer<F: MutableFst>(
     }
 
     // Can't fail as the state has just been added
-    fst.set_final(state_cour, <F as CoreFst>::W::ONE).unwrap();
+    fst.set_final(state_cour, weight).unwrap();
 
     fst
 }
@@ -89,7 +90,7 @@ pub fn transducer<F: MutableFst>(
 ///
 /// let labels = vec![32, 43, 21];
 ///
-/// let fst : VectorFst<ProbabilityWeight> = acceptor(&labels);
+/// let fst : VectorFst<ProbabilityWeight> = acceptor(&labels, ProbabilityWeight::ONE);
 ///
 /// assert_eq!(fst.num_states(), 4);
 ///
@@ -111,7 +112,7 @@ pub fn transducer<F: MutableFst>(
 /// assert_eq!(fst, fst_ref);
 ///
 /// ```
-pub fn acceptor<F: MutableFst>(labels: &[Label]) -> F {
+pub fn acceptor<F: MutableFst>(labels: &[Label], weight: F::W) -> F {
     let mut fst = F::new();
     let mut state_cour = fst.add_state();
 
@@ -131,7 +132,7 @@ pub fn acceptor<F: MutableFst>(labels: &[Label]) -> F {
     }
 
     // Can't fail as the state has just been added
-    fst.set_final(state_cour, <F as CoreFst>::W::ONE).unwrap();
+    fst.set_final(state_cour, weight).unwrap();
 
     fst
 }
@@ -178,18 +179,77 @@ pub fn acceptor<F: MutableFst>(labels: &[Label]) -> F {
 /// # }
 /// ```
 ///
+/// - Create a weighted linear acceptor :
+///
+/// This will return a linear FST with one arc for each label given
+/// (same input and output, weight one).
+///
+/// ```
+/// # #[macro_use] extern crate rustfst; fn main() {
+/// # use rustfst::utils;
+/// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, PathsIterator};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::semirings::{ProbabilityWeight, Semiring};
+/// # use rustfst::utils::acceptor;
+/// # use rustfst::{Arc, FstPath};
+/// let fst : VectorFst<ProbabilityWeight> = fst![1,2,3; 0.2];
+/// assert_eq!(fst.paths_iter().count(), 1);
+/// assert_eq!(fst.paths_iter().next().unwrap(), fst_path![1,2,3; 0.2]);
+/// # }
+/// ```
+///
+/// - Create a weighted linear transducer from two list of labels and a weight :
+///
+/// The only accepted path in the FST has for input the first
+/// list of labels and for output the second list of labels.
+///
+/// ```
+/// # #[macro_use] extern crate rustfst; fn main() {
+/// # use rustfst::utils;
+/// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, PathsIterator};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::semirings::{ProbabilityWeight, Semiring};
+/// # use rustfst::utils::transducer;
+/// # use rustfst::{Arc, FstPath};
+/// let fst : VectorFst<ProbabilityWeight> = fst![1,2,3 => 1,2,4; 0.2];
+/// assert_eq!(fst.paths_iter().count(), 1);
+/// assert_eq!(fst.paths_iter().next().unwrap(), fst_path![1,2,3 => 1,2,4; 0.2]);
+/// # }
+/// ```
+///
 #[macro_export]
 macro_rules! fst {
     ( $( $x:expr ),* ) => {
         {
-            acceptor(&vec![$($x),*])
+            acceptor(
+                &vec![$($x),*],
+                Semiring::ONE
+            )
         }
     };
     ( $( $x:expr ),* => $( $y:expr ),* ) => {
         {
             transducer(
                 &vec![$($x),*],
-                &vec![$($y),*]
+                &vec![$($y),*],
+                Semiring::ONE
+            )
+        }
+    };
+    ( $( $x:expr ),* ; $weight:expr ) => {
+        {
+            acceptor(
+                &vec![$($x),*],
+                Semiring::new($weight)
+            )
+        }
+    };
+    ( $( $x:expr ),* => $( $y:expr ),* ; $weight:expr ) => {
+        {
+            transducer(
+                &vec![$($x),*],
+                &vec![$($y),*],
+                Semiring::new($weight)
             )
         }
     };

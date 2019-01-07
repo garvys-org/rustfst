@@ -24,7 +24,7 @@ impl TestFst for LinearTransducerOneLabel {
     fn get_fst() -> <Self as TestFst>::F {
         let ilabels = vec![32];
         let olabels = vec![45];
-        transducer(&ilabels, &olabels)
+        transducer(&ilabels, &olabels, IntegerWeight::ONE)
     }
 
     fn get_name() -> String {

@@ -8,7 +8,7 @@ pub struct FinalState<W: Semiring> {
     pub final_weight: W,
 }
 
-/// Trait to iterate over the final states of a wFST
+/// Trait to iterate over the final states of a wFST.
 pub trait FinalStatesIterator<'a> {
     type W: Semiring;
     type Iter: Iterator<Item = FinalState<Self::W>>;
