@@ -62,3 +62,99 @@ impl<W: Semiring + Hash + Eq> Hash for Path<W> {
 }
 
 impl<W: Semiring + Hash + Eq> Eq for Path<W> {}
+
+/// Creates a Path containing the arguments.
+///
+/// There are multiple forms to this macro :
+///
+/// - Create an unweighted acceptor path :
+///
+/// ```
+/// # #[macro_use] extern crate rustfst; fn main() {
+/// # use rustfst::semirings::{IntegerWeight, Semiring};
+/// # use rustfst::Path;
+/// let path : Path<IntegerWeight> = fst_path![1,2,3];
+/// assert_eq!(path.ilabels, vec![1,2,3]);
+/// assert_eq!(path.olabels, vec![1,2,3]);
+/// assert_eq!(path.weight, IntegerWeight::ONE);
+/// # }
+/// ```
+///
+/// - Create an unweighted transducer path :
+///
+/// ```
+/// # #[macro_use] extern crate rustfst; fn main() {
+/// # use rustfst::semirings::{IntegerWeight, Semiring};
+/// # use rustfst::Path;
+/// let path : Path<IntegerWeight> = fst_path![1,2,3 => 1,2,4];
+/// assert_eq!(path.ilabels, vec![1,2,3]);
+/// assert_eq!(path.olabels, vec![1,2,4]);
+/// assert_eq!(path.weight, IntegerWeight::ONE);
+/// # }
+/// ```
+///
+/// - Create a weighted acceptor path :
+///
+/// ```
+/// # #[macro_use] extern crate rustfst; fn main() {
+/// # use rustfst::semirings::{IntegerWeight, Semiring};
+/// # use rustfst::Path;
+/// let path : Path<IntegerWeight> = fst_path![1,2,3; 18];
+/// assert_eq!(path.ilabels, vec![1,2,3]);
+/// assert_eq!(path.olabels, vec![1,2,3]);
+/// assert_eq!(path.weight, IntegerWeight::new(18));
+/// # }
+/// ```
+///
+/// - Create a weighted transducer path :
+///
+/// ```
+/// # #[macro_use] extern crate rustfst; fn main() {
+/// # use rustfst::semirings::{IntegerWeight, Semiring};
+/// # use rustfst::Path;
+/// let path : Path<IntegerWeight> = fst_path![1,2,3 => 1,2,4; 18];
+/// assert_eq!(path.ilabels, vec![1,2,3]);
+/// assert_eq!(path.olabels, vec![1,2,4]);
+/// assert_eq!(path.weight, IntegerWeight::new(18));
+/// # }
+/// ```
+///
+#[macro_export]
+macro_rules! fst_path {
+    ( $( $x:expr ),*) => {
+        {
+            Path::new(
+                vec![$($x),*],
+                vec![$($x),*],
+                Semiring::ONE
+            )
+        }
+    };
+    ( $( $x:expr ),* => $( $y:expr ),* ) => {
+        {
+            Path::new(
+                vec![$($x),*],
+                vec![$($y),*],
+                Semiring::ONE
+            )
+        }
+    };
+    ( $( $x:expr ),* ; $weight:expr) => {
+        {
+            Path::new(
+                vec![$($x),*],
+                vec![$($x),*],
+                Semiring::new($weight)
+            )
+        }
+    };
+    ( $( $x:expr ),* => $( $y:expr ),* ; $weight:expr) => {
+        {
+            Path::new(
+                vec![$($x),*],
+                vec![$($y),*],
+                Semiring::new($weight)
+            )
+        }
+    };
+}
