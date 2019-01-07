@@ -6,7 +6,7 @@ use crate::{Label, EPS_LABEL};
 /// Structure representing a path in a FST
 /// (list of input labels, list of output labels and total weight).
 #[derive(PartialEq, Debug, Clone, PartialOrd)]
-pub struct Path<W: Semiring> {
+pub struct FstPath<W: Semiring> {
     /// List of input labels.
     pub ilabels: Vec<Label>,
     /// List of output labels.
@@ -15,11 +15,11 @@ pub struct Path<W: Semiring> {
     pub weight: W,
 }
 
-impl<W: Semiring> Path<W> {
+impl<W: Semiring> FstPath<W> {
 
     /// Creates a new Path.
     pub fn new(ilabels: Vec<Label>, olabels: Vec<Label>, weight: W) -> Self {
-        Path {
+        FstPath {
             ilabels,
             olabels,
             weight,
@@ -47,18 +47,18 @@ impl<W: Semiring> Path<W> {
     }
 
     /// Append a Path to the current Path. Labels are appended and weights multiplied.
-    pub fn concat(&mut self, other: Path<W>) {
+    pub fn concat(&mut self, other: FstPath<W>) {
         self.ilabels.extend(other.ilabels);
         self.olabels.extend(other.olabels);
         self.weight *= other.weight;
     }
 }
 
-impl<W: Semiring> Default for Path<W> {
+impl<W: Semiring> Default for FstPath<W> {
 
     /// Creates an empty path with a weight one.
     fn default() -> Self {
-        Path {
+        FstPath {
             ilabels: vec![],
             olabels: vec![],
             weight: W::ONE,
@@ -67,7 +67,7 @@ impl<W: Semiring> Default for Path<W> {
 }
 
 #[allow(clippy::derive_hash_xor_eq)]
-impl<W: Semiring + Hash + Eq> Hash for Path<W> {
+impl<W: Semiring + Hash + Eq> Hash for FstPath<W> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.ilabels.hash(state);
         self.olabels.hash(state);
@@ -75,7 +75,7 @@ impl<W: Semiring + Hash + Eq> Hash for Path<W> {
     }
 }
 
-impl<W: Semiring + Hash + Eq> Eq for Path<W> {}
+impl<W: Semiring + Hash + Eq> Eq for FstPath<W> {}
 
 /// Creates a Path containing the arguments.
 ///
@@ -86,8 +86,8 @@ impl<W: Semiring + Hash + Eq> Eq for Path<W> {}
 /// ```
 /// # #[macro_use] extern crate rustfst; fn main() {
 /// # use rustfst::semirings::{IntegerWeight, Semiring};
-/// # use rustfst::Path;
-/// let path : Path<IntegerWeight> = fst_path![1,2,3];
+/// # use rustfst::FstPath;
+/// let path : FstPath<IntegerWeight> = fst_path![1,2,3];
 /// assert_eq!(path.ilabels, vec![1,2,3]);
 /// assert_eq!(path.olabels, vec![1,2,3]);
 /// assert_eq!(path.weight, IntegerWeight::ONE);
@@ -99,8 +99,8 @@ impl<W: Semiring + Hash + Eq> Eq for Path<W> {}
 /// ```
 /// # #[macro_use] extern crate rustfst; fn main() {
 /// # use rustfst::semirings::{IntegerWeight, Semiring};
-/// # use rustfst::Path;
-/// let path : Path<IntegerWeight> = fst_path![1,2,3 => 1,2,4];
+/// # use rustfst::FstPath;
+/// let path : FstPath<IntegerWeight> = fst_path![1,2,3 => 1,2,4];
 /// assert_eq!(path.ilabels, vec![1,2,3]);
 /// assert_eq!(path.olabels, vec![1,2,4]);
 /// assert_eq!(path.weight, IntegerWeight::ONE);
@@ -112,8 +112,8 @@ impl<W: Semiring + Hash + Eq> Eq for Path<W> {}
 /// ```
 /// # #[macro_use] extern crate rustfst; fn main() {
 /// # use rustfst::semirings::{IntegerWeight, Semiring};
-/// # use rustfst::Path;
-/// let path : Path<IntegerWeight> = fst_path![1,2,3; 18];
+/// # use rustfst::FstPath;
+/// let path : FstPath<IntegerWeight> = fst_path![1,2,3; 18];
 /// assert_eq!(path.ilabels, vec![1,2,3]);
 /// assert_eq!(path.olabels, vec![1,2,3]);
 /// assert_eq!(path.weight, IntegerWeight::new(18));
@@ -125,8 +125,8 @@ impl<W: Semiring + Hash + Eq> Eq for Path<W> {}
 /// ```
 /// # #[macro_use] extern crate rustfst; fn main() {
 /// # use rustfst::semirings::{IntegerWeight, Semiring};
-/// # use rustfst::Path;
-/// let path : Path<IntegerWeight> = fst_path![1,2,3 => 1,2,4; 18];
+/// # use rustfst::FstPath;
+/// let path : FstPath<IntegerWeight> = fst_path![1,2,3 => 1,2,4; 18];
 /// assert_eq!(path.ilabels, vec![1,2,3]);
 /// assert_eq!(path.olabels, vec![1,2,4]);
 /// assert_eq!(path.weight, IntegerWeight::new(18));
@@ -137,7 +137,7 @@ impl<W: Semiring + Hash + Eq> Eq for Path<W> {}
 macro_rules! fst_path {
     ( $( $x:expr ),*) => {
         {
-            Path::new(
+            FstPath::new(
                 vec![$($x),*],
                 vec![$($x),*],
                 Semiring::ONE
@@ -146,7 +146,7 @@ macro_rules! fst_path {
     };
     ( $( $x:expr ),* => $( $y:expr ),* ) => {
         {
-            Path::new(
+            FstPath::new(
                 vec![$($x),*],
                 vec![$($y),*],
                 Semiring::ONE
@@ -155,7 +155,7 @@ macro_rules! fst_path {
     };
     ( $( $x:expr ),* ; $weight:expr) => {
         {
-            Path::new(
+            FstPath::new(
                 vec![$($x),*],
                 vec![$($x),*],
                 Semiring::new($weight)
@@ -164,7 +164,7 @@ macro_rules! fst_path {
     };
     ( $( $x:expr ),* => $( $y:expr ),* ; $weight:expr) => {
         {
-            Path::new(
+            FstPath::new(
                 vec![$($x),*],
                 vec![$($y),*],
                 Semiring::new($weight)

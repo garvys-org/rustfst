@@ -155,7 +155,7 @@ pub fn acceptor<T: Iterator<Item = Label>, F: MutableFst>(labels: T) -> F {
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::semirings::{ProbabilityWeight, Semiring};
 /// # use rustfst::utils::acceptor;
-/// # use rustfst::{Arc, Path};
+/// # use rustfst::{Arc, FstPath};
 /// let fst : VectorFst<ProbabilityWeight> = fst![1,2,3];
 /// assert_eq!(fst.paths_iter().count(), 1);
 /// assert_eq!(fst.paths_iter().next().unwrap(), fst_path![1,2,3]);
@@ -174,7 +174,7 @@ pub fn acceptor<T: Iterator<Item = Label>, F: MutableFst>(labels: T) -> F {
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::semirings::{ProbabilityWeight, Semiring};
 /// # use rustfst::utils::transducer;
-/// # use rustfst::{Arc, Path};
+/// # use rustfst::{Arc, FstPath};
 /// let fst : VectorFst<ProbabilityWeight> = fst![1,2,3 => 1,2,4];
 /// assert_eq!(fst.paths_iter().count(), 1);
 /// assert_eq!(fst.paths_iter().next().unwrap(), fst_path![1,2,3 => 1,2,4]);

@@ -132,8 +132,8 @@ mod drawing_config;
 pub use crate::drawing_config::DrawingConfig;
 
 /// Implementation of a successful path inside a wFST.
-mod path;
-pub use crate::path::Path;
+mod fst_path;
+pub use crate::fst_path::FstPath;
 
 mod parsers;
 

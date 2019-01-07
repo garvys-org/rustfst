@@ -19,7 +19,7 @@ use crate::{Result, StateId};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::fst_traits::PathsIterator;
-/// # use rustfst::Path;
+/// # use rustfst::FstPath;
 /// # use rustfst::algorithms::union;
 /// # use std::collections::HashSet;
 /// # fn main() -> Result<()> {
@@ -29,7 +29,7 @@ use crate::{Result, StateId};
 /// let fst_res : VectorFst<IntegerWeight> = union(&fst_a, &fst_b)?;
 /// let paths : HashSet<_> = fst_res.paths_iter().collect();
 ///
-/// let mut paths_ref = HashSet::<Path<IntegerWeight>>::new();
+/// let mut paths_ref = HashSet::<FstPath<IntegerWeight>>::new();
 /// paths_ref.insert(fst_path![2 => 3]);
 /// paths_ref.insert(fst_path![6 => 5]);
 ///
