@@ -19,7 +19,7 @@ use std::cmp;
 /// let labels_input = vec![32, 43, 21];
 /// let labels_output = vec![53, 18, 89];
 ///
-/// let fst : VectorFst<ProbabilityWeight> = transducer(labels_input.clone().into_iter(), labels_output.clone().into_iter());
+/// let fst : VectorFst<ProbabilityWeight> = transducer(&labels_input, &labels_output);
 ///
 /// assert_eq!(fst.num_states(), 4);
 ///
@@ -40,17 +40,12 @@ use std::cmp;
 ///
 /// assert_eq!(fst, fst_ref);
 /// ```
-pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
-    labels_input: T,
-    labels_output: T,
+pub fn transducer<F: MutableFst>(
+    labels_input: &[Label],
+    labels_output: &[Label],
 ) -> F {
-    let mut vec_labels_input: Vec<_> = labels_input.collect();
-    let mut vec_labels_output: Vec<_> = labels_output.collect();
 
-    let max_size = cmp::max(vec_labels_input.len(), vec_labels_output.len());
-
-    vec_labels_input.resize(max_size, 0);
-    vec_labels_output.resize(max_size, 0);
+    let max_size = cmp::max(labels_input.len(), labels_output.len());
 
     let mut fst = F::new();
     let mut state_cour = fst.add_state();
@@ -58,7 +53,10 @@ pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
     // Can't fail as the state has just been added
     fst.set_start(state_cour).unwrap();
 
-    for (i, o) in vec_labels_input.iter().zip(vec_labels_output.iter()) {
+    for idx in 0..max_size {
+        let i = labels_input.get(idx).unwrap_or(&0);
+        let o = labels_output.get(idx).unwrap_or(&0);
+
         let new_state = fst.add_state();
 
         // Can't fail as the state has just been added
@@ -91,7 +89,7 @@ pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
 ///
 /// let labels = vec![32, 43, 21];
 ///
-/// let fst : VectorFst<ProbabilityWeight> = acceptor(labels.clone().into_iter());
+/// let fst : VectorFst<ProbabilityWeight> = acceptor(&labels);
 ///
 /// assert_eq!(fst.num_states(), 4);
 ///
@@ -113,15 +111,14 @@ pub fn transducer<T: Iterator<Item = Label>, F: MutableFst>(
 /// assert_eq!(fst, fst_ref);
 ///
 /// ```
-pub fn acceptor<T: Iterator<Item = Label>, F: MutableFst>(labels: T) -> F {
-    let vec_labels: Vec<_> = labels.collect();
+pub fn acceptor<F: MutableFst>(labels: &[Label]) -> F {
     let mut fst = F::new();
     let mut state_cour = fst.add_state();
 
     // Can't fail as the state has just been added
     fst.set_start(state_cour).unwrap();
 
-    for l in &vec_labels {
+    for l in labels {
         let new_state = fst.add_state();
 
         // Can't fail as the state has just been added
@@ -139,7 +136,7 @@ pub fn acceptor<T: Iterator<Item = Label>, F: MutableFst>(labels: T) -> F {
     fst
 }
 
-/// Creates a Path containing the arguments.
+/// Creates a linear Fst containing the arguments.
 ///
 /// There are multiple forms to this macro :
 ///
@@ -185,17 +182,14 @@ pub fn acceptor<T: Iterator<Item = Label>, F: MutableFst>(labels: T) -> F {
 macro_rules! fst {
     ( $( $x:expr ),* ) => {
         {
-            let mut temp_vec = vec![$($x),*];
-            acceptor(temp_vec.clone().into_iter())
+            acceptor(&vec![$($x),*])
         }
     };
     ( $( $x:expr ),* => $( $y:expr ),* ) => {
         {
-            let mut temp_vec_input = vec![$($x),*];
-            let mut temp_vec_output = vec![$($y),*];
             transducer(
-                temp_vec_input.clone().into_iter(),
-                temp_vec_output.clone().into_iter()
+                &vec![$($x),*],
+                &vec![$($y),*]
             )
         }
     };

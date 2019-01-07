@@ -111,7 +111,7 @@ mod tests {
     fn test_paths_iterator_linear_fst() {
         let labels = vec![153, 45, 96];
 
-        let fst: VectorFst<IntegerWeight> = acceptor(labels.clone().into_iter());
+        let fst: VectorFst<IntegerWeight> = acceptor(&labels);
 
         assert_eq!(fst.paths_iter().count(), 1);
 
