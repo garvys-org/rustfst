@@ -7,14 +7,9 @@ documentation = 'https://docs.rs/rustfst'
 readme = 'README.md'
 keywords = [
     'FST',
-    'wFST',
     'graph',
-    'automata',
     'transducer',
     'acceptor',
-    'path',
-    'shortest-path',
-    'data-structures',
     'finite-states-transducer',
 ]
 license = 'MIT/Apache-2.0'
