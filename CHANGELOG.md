@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Added
+
+### Changed
+
+### Removed
+
+## [0.2.0] - 2019-01-07
 ### Added
 - `write_text` function to serialize an `ExpandedFst` into text format (compatible with OpenFST).
 - `draw` to generate a file representing an `ExpandedFst` in dot format that can be displayed with GraphViz.
@@ -44,5 +52,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - First released version of rustfst
 
-[Unreleased]: https://github.com/garvys/rustfst/compare/0.1.7...HEAD
+[Unreleased]: https://github.com/garvys/rustfst/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/garvys/rustfst/compare/0.1.7...0.2.0
 [0.1.7]: https://github.com/garvys/rustfst/compare/0.1.2...0.1.7
