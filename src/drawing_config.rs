@@ -1,25 +1,25 @@
-/// Struct to configure how the FST will be displayed
+/// Struct to configure how the FST should be drawn.
 #[derive(Debug, Clone, PartialEq)]
 pub struct DrawingConfig {
-    /// Draw bottom-to-top instead of left-to-right
+    /// Draw bottom-to-top instead of left-to-right.
     pub vertical: bool,
-    /// Set width
+    /// Set width.
     pub width: f32,
-    /// Set height
+    /// Set height.
     pub height: f32,
-    /// Set figure title
+    /// Set figure title.
     pub title: String,
-    /// Portrait mode (def: landscape)
+    /// Portrait mode (def: landscape).
     pub portrait: bool,
-    /// Set minimum separation between ranks (see dot documentation)
+    /// Set minimum separation between ranks (see dot documentation).
     pub ranksep: f32,
-    /// Set minimum separation between nodes (see dot documentation)
+    /// Set minimum separation between nodes (see dot documentation).
     pub nodesep: f32,
-    /// Set fontsize
+    /// Set fontsize.
     pub fontsize: u32,
-    /// Input in acceptor format
+    /// Input in acceptor format.
     pub acceptor: bool,
-    /// Print/draw arc weights and final weights equal to Weight::One()
+    /// Print/draw arc weights and final weights equal to Weight::ONE.
     pub show_weight_one: bool,
 }
 

@@ -20,7 +20,7 @@ use crate::{Result, StateId};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::fst_traits::PathsIterator;
 /// # use rustfst::Path;
-/// # use rustfst::union;
+/// # use rustfst::algorithms::union;
 /// # use std::collections::HashSet;
 /// # fn main() -> Result<()> {
 /// let fst_a : VectorFst<IntegerWeight> = transducer![2 => 3];

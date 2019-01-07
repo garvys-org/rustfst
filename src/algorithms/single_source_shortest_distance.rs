@@ -13,7 +13,7 @@ use crate::{Result, StateId};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::fst_traits::MutableFst;
-/// # use rustfst::single_source_shortest_distance;
+/// # use rustfst::algorithms::single_source_shortest_distance;
 /// # use rustfst::Arc;
 /// let mut fst = VectorFst::new();
 /// let s0 = fst.add_state();
@@ -84,7 +84,7 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::fst_traits::MutableFst;
-/// # use rustfst::shortest_distance;
+/// # use rustfst::algorithms::shortest_distance;
 /// # use rustfst::Arc;
 /// let mut fst = VectorFst::new();
 /// let s0 = fst.add_state();

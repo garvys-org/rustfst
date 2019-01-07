@@ -8,7 +8,7 @@ mod test {
     use crate::fst_traits::TextParser;
     use crate::semirings::{Semiring, TropicalWeight};
     use crate::Result;
-    use crate::{
+    use crate::algorithms::{
         connect, invert, isomorphic, project, push_weights, reverse, rm_epsilon, ProjectType,
         ReweightType,
     };

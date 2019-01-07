@@ -139,7 +139,10 @@ pub fn acceptor<T: Iterator<Item = Label>, F: MutableFst>(labels: T) -> F {
     fst
 }
 
-/// Creates an acceptor of its arguments.
+/// Easily creates an acceptor from a list of labels.
+///
+/// This will return a linear FST with one arc for each label given
+/// (same input and output, weight one).
 ///
 /// ```
 /// # #[macro_use] extern crate rustfst; fn main() {
@@ -162,8 +165,10 @@ macro_rules! acceptor {
     };
 }
 
-/// Creates a transducer of its arguments.
+/// Easily creates a transducer from two lists of labels.
 ///
+/// This will return a linear FST. The only accepted path in the FST has for input the first
+/// of labels and for output the second list of labels.
 /// ```
 /// # #[macro_use] extern crate rustfst; fn main() {
 /// # use rustfst::utils;
@@ -177,6 +182,68 @@ macro_rules! acceptor {
 /// ```
 #[macro_export]
 macro_rules! transducer {
+    ( $( $x:expr ),* => $( $y:expr ),* ) => {
+        {
+            let mut temp_vec_input = vec![$($x),*];
+            let mut temp_vec_output = vec![$($y),*];
+            transducer(
+                temp_vec_input.clone().into_iter(),
+                temp_vec_output.clone().into_iter()
+            )
+        }
+    };
+}
+
+/// Creates a Path containing the arguments.
+///
+/// There are multiple forms to this macro :
+///
+/// - Create an unweighted linear acceptor :
+///
+/// This will return a linear FST with one arc for each label given
+/// (same input and output, weight one).
+///
+/// ```
+/// # #[macro_use] extern crate rustfst; fn main() {
+/// # use rustfst::utils;
+/// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, PathsIterator};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::semirings::{ProbabilityWeight, Semiring};
+/// # use rustfst::utils::acceptor;
+/// # use rustfst::{Arc, Path};
+/// let fst : VectorFst<ProbabilityWeight> = fst![1,2,3];
+/// assert_eq!(fst.paths_iter().count(), 1);
+/// assert_eq!(fst.paths_iter().next().unwrap(), fst_path![1,2,3]);
+/// # }
+/// ```
+///
+/// - Create an unweighted linear transducer from two list of labels :
+///
+/// The only accepted path in the FST has for input the first
+/// list of labels and for output the second list of labels.
+///
+/// ```
+/// # #[macro_use] extern crate rustfst; fn main() {
+/// # use rustfst::utils;
+/// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, PathsIterator};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::semirings::{ProbabilityWeight, Semiring};
+/// # use rustfst::utils::transducer;
+/// # use rustfst::{Arc, Path};
+/// let fst : VectorFst<ProbabilityWeight> = fst![1,2,3 => 1,2,4];
+/// assert_eq!(fst.paths_iter().count(), 1);
+/// assert_eq!(fst.paths_iter().next().unwrap(), fst_path![1,2,3 => 1,2,4]);
+/// # }
+/// ```
+///
+#[macro_export]
+macro_rules! fst {
+    ( $( $x:expr ),* ) => {
+        {
+            let mut temp_vec = vec![$($x),*];
+            acceptor(temp_vec.clone().into_iter())
+        }
+    };
     ( $( $x:expr ),* => $( $y:expr ),* ) => {
         {
             let mut temp_vec_input = vec![$($x),*];

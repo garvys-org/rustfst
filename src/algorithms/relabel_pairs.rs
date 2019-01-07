@@ -34,7 +34,7 @@ where
 /// # use rustfst::utils::transducer;
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::relabel_pairs;
+/// # use rustfst::algorithms::relabel_pairs;
 /// # use rustfst::Result;
 /// # fn main() -> Result<()> {
 /// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];

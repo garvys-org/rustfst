@@ -11,7 +11,7 @@ use crate::fst_traits::{
 };
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::Semiring;
-use crate::{concat, union};
+use crate::algorithms::{concat, union};
 use crate::{Result, StateId};
 
 #[derive(Debug, PartialEq, Clone)]

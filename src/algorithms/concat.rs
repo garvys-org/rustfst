@@ -15,7 +15,7 @@ use crate::{Result, EPS_LABEL};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::fst_traits::PathsIterator;
 /// # use rustfst::Path;
-/// # use rustfst::concat;
+/// # use rustfst::algorithms::concat;
 /// # use rustfst::Result;
 /// # use std::collections::HashSet;
 /// # fn main() -> Result<()> {

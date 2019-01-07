@@ -18,7 +18,7 @@ pub enum ProjectType {
 /// # use rustfst::utils::{acceptor, transducer};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::{project, ProjectType};
+/// # use rustfst::algorithms::{project, ProjectType};
 /// # fn main() -> Result<()> {
 /// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
 /// project(&mut fst, ProjectType::ProjectInput);
@@ -35,7 +35,7 @@ pub enum ProjectType {
 /// # use rustfst::utils::{acceptor, transducer};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::{project, ProjectType};
+/// # use rustfst::algorithms::{project, ProjectType};
 /// # fn main() -> Result<()> {
 /// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
 /// project(&mut fst, ProjectType::ProjectOutput);

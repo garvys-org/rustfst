@@ -265,9 +265,12 @@ impl fmt::Display for SymbolTable {
 /// Creates a `SymbolTable` containing the arguments.
 /// ```
 /// # #[macro_use] extern crate rustfst; fn main() {
-/// # use rustfst::SymbolTable;
+/// # use rustfst::{SymbolTable, EPS_SYMBOL};
 /// let symt = symt!["a", "b"];
 /// assert_eq!(symt.len(), 3);
+/// assert_eq!(symt.get_symbol(0).unwrap(), EPS_SYMBOL);
+/// assert_eq!(symt.get_symbol(1).unwrap(), "a");
+/// assert_eq!(symt.get_symbol(2).unwrap(), "b");
 /// # }
 /// ```
 #[macro_export]

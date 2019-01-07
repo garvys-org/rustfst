@@ -111,17 +111,17 @@ pub const EPS_SYMBOL: &str = "<eps>";
 /// A few utilities to manipulate wFSTs.
 pub mod utils;
 
-/// Provides algorithms that are generic for all wFST.
-mod algorithms;
+/// Provides algorithms that are generic to all wFST.
+pub mod algorithms;
 
 /// Implementation of the transitions inside a wFST.
 mod arc;
 pub use self::arc::Arc;
 
 #[macro_use]
-/// Provides trait that must be implemented to be able to use generic algorithms.
+/// Provides traits that must be implemented to be able to use generic algorithms.
 pub mod fst_traits;
-/// Implementation of the wFST traits with different data structure.
+/// Implementation of the wFST traits with different data structures.
 pub mod fst_impls;
 /// Provides a trait that shall be implemented for all weights stored inside a wFST.
 pub mod semirings;

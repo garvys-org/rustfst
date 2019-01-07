@@ -5,7 +5,7 @@ use crate::semirings::{Semiring, StarSemiring};
 use crate::Result;
 
 /// This operation computes the shortest distance from each state to every other states.
-/// The shortest distance from `p` to `q `is the ⊕-sum of the weights
+/// The shortest distance from `p` to `q` is the ⊕-sum of the weights
 /// of all the paths between `p` and `q`.
 ///
 /// # Example
@@ -14,7 +14,7 @@ use crate::Result;
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::fst_traits::MutableFst;
-/// # use rustfst::all_pairs_shortest_distance;
+/// # use rustfst::algorithms::all_pairs_shortest_distance;
 /// # use rustfst::Arc;
 /// # use rustfst::Result;
 /// # fn main() -> Result<()> {

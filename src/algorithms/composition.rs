@@ -19,7 +19,7 @@ use crate::Result;
 /// # use rustfst::utils::transducer;
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::compose;
+/// # use rustfst::algorithms::compose;
 /// # fn main() -> Result<()> {
 /// let fst_1 : VectorFst<IntegerWeight> = transducer![1,2 => 2,3];
 ///

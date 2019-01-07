@@ -3,14 +3,21 @@ use std::hash::{Hash, Hasher};
 use crate::semirings::Semiring;
 use crate::{Label, EPS_LABEL};
 
+/// Structure representing a path in a FST
+/// (list of input labels, list of output labels and total weight).
 #[derive(PartialEq, Debug, Clone, PartialOrd)]
 pub struct Path<W: Semiring> {
+    /// List of input labels.
     pub ilabels: Vec<Label>,
+    /// List of output labels.
     pub olabels: Vec<Label>,
+    /// Total weight of the path computed by multiplying the weight of each transition.
     pub weight: W,
 }
 
 impl<W: Semiring> Path<W> {
+
+    /// Creates a new Path.
     pub fn new(ilabels: Vec<Label>, olabels: Vec<Label>, weight: W) -> Self {
         Path {
             ilabels,
@@ -19,6 +26,9 @@ impl<W: Semiring> Path<W> {
         }
     }
 
+    /// Adds the content of an FST transition to the Path.
+    /// Labels are added at the end of the corresponding vectors and the weight
+    /// is multiplied by the total weight already stored in the Path.
     pub fn add_to_path(&mut self, ilabel: Label, olabel: Label, weight: W) {
         if ilabel != EPS_LABEL {
             self.ilabels.push(ilabel);
@@ -31,10 +41,12 @@ impl<W: Semiring> Path<W> {
         self.weight *= weight
     }
 
+    /// Add a single weight to the Path by multiplying the weight by the total weight of the path.
     pub fn add_weight(&mut self, weight: W) {
         self.weight *= weight
     }
 
+    /// Append a Path to the current Path. Labels are appended and weights multiplied.
     pub fn concat(&mut self, other: Path<W>) {
         self.ilabels.extend(other.ilabels);
         self.olabels.extend(other.olabels);
@@ -43,6 +55,8 @@ impl<W: Semiring> Path<W> {
 }
 
 impl<W: Semiring> Default for Path<W> {
+
+    /// Creates an empty path with a weight one.
     fn default() -> Self {
         Path {
             ilabels: vec![],
