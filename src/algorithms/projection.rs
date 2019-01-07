@@ -1,7 +1,10 @@
 use crate::fst_traits::{ExpandedFst, MutableFst};
 
+/// Different types of labels projection in a FST.
 pub enum ProjectType {
+    /// Input projection : output labels are replaced with input ones.
     ProjectInput,
+    /// Output projection : input labels are replaced with output ones.
     ProjectOutput,
 }
 
@@ -15,12 +18,12 @@ pub enum ProjectType {
 /// # use rustfst::utils::{acceptor, transducer};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::{project, ProjectType};
+/// # use rustfst::algorithms::{project, ProjectType};
 /// # fn main() -> Result<()> {
-/// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
+/// let mut fst : VectorFst<IntegerWeight> = fst![2 => 3];
 /// project(&mut fst, ProjectType::ProjectInput);
 ///
-/// assert_eq!(fst, acceptor![2]);
+/// assert_eq!(fst, fst![2]);
 /// # Ok(())
 /// # }
 /// ```
@@ -32,12 +35,12 @@ pub enum ProjectType {
 /// # use rustfst::utils::{acceptor, transducer};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::{project, ProjectType};
+/// # use rustfst::algorithms::{project, ProjectType};
 /// # fn main() -> Result<()> {
-/// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
+/// let mut fst : VectorFst<IntegerWeight> = fst![2 => 3];
 /// project(&mut fst, ProjectType::ProjectOutput);
 ///
-/// assert_eq!(fst, acceptor(vec![3].into_iter()));
+/// assert_eq!(fst, fst![3]);
 /// # Ok(())
 /// # }
 /// ```

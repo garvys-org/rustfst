@@ -20,11 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement `isomorphic` operation to compare two FSTs without depending on the ordering of the states or the arcs.
 - Implement a `SymbolTable` data structure to handle the mapping symbol (string) / label (int) in a FST.
 - Add `symt!` macro to quickly create a `SymbolTable` from a list of strings.
-- Add `acceptor!` macro to quickly create an acceptor from a list of labels.
-- Add `transducer!` macro to quickly create an transducer from two list of labels.
+- Add `fst!` macro to quickly create an acceptor or a transducer from a list of labels.
 - Migrate to edition 2018 of Rust.
 - Add integration tests to compare the output of this crate directly with OpenFST (by using the pynini python wrapper).
 - Add weight quantization for f32 Semiring and use it in the PartialEq trait.
+- Add `fst_path!` macro to easily create a FstPath object.
 
 ### Changed
 - `new` method now present in the `Semiring` trait.
@@ -32,7 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `acceptor`, `transducer`, `inverse`, `project`, `closure_plus`, `closure_star` functions can't fail anymore (no Result in API).
 - Fix multiple issues when parsing an FST in text format.
 - The `num_arcs` function in the `Fst` trait now computes the number of arcs leaving a specific state instead of the number of arcs in the graph.
-- `algorithm` mod is now private, all the operations are exported to the root.
+- `acceptor` and `transducer` methods now take slices and weight instead of only iterator of labels.
+- Rename `Path` object to `FstPath` to avoid conflicts with the one from the standard library.
 
 ### Removed
 - `determinize` no longer public as the implementation is not satisfactory.

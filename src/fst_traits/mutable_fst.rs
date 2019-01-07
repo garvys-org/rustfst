@@ -3,9 +3,9 @@ use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::{Result, StateId};
 use std::collections::HashMap;
 
-/// Trait defining the methods to modify a wFST
+/// Trait defining the methods to modify a wFST.
 pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
-    /// Creates an empty wFST
+    /// Creates an empty wFST.
     fn new() -> Self;
 
     /// The state with identifier `state_id` is now the start state.
@@ -193,7 +193,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// then the closure transduces `x` to `y` with weight `a`,
     /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
     fn closure_plus(&mut self) {
-        crate::closure_plus(self)
+        crate::algorithms::closure_plus(self)
     }
 
     /// This operation computes the concatenative closure.
@@ -202,10 +202,11 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
     /// The empty string is transduced to itself with weight `1` as well.
     fn closure_star(&mut self) {
-        crate::closure_star(self)
+        crate::algorithms::closure_star(self)
     }
 }
 
+/// Iterate over mutable arcs in a wFST.
 pub trait MutableArcIterator<'a>: CoreFst
 where
     Self::W: 'a,

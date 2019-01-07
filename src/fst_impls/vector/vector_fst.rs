@@ -4,6 +4,7 @@ use std::slice;
 
 use failure::{bail, ensure, format_err};
 
+use crate::algorithms::{concat, union};
 use crate::arc::Arc;
 use crate::fst_traits::{
     ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableArcIterator, MutableFst,
@@ -11,9 +12,12 @@ use crate::fst_traits::{
 };
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::Semiring;
-use crate::{concat, union};
 use crate::{Result, StateId};
 
+/// Simple concrete, mutable FST whose states and arcs are stored in standard vectors.
+///
+/// All states are stored in a vector of states.
+/// In each state, there is a vector of arcs containing the outgoing transitions.
 #[derive(Debug, PartialEq, Clone)]
 pub struct VectorFst<W: Semiring> {
     pub(crate) states: Vec<VectorFstState<W>>,

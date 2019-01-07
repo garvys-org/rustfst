@@ -34,13 +34,13 @@ where
 /// # use rustfst::utils::transducer;
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::relabel_pairs;
+/// # use rustfst::algorithms::relabel_pairs;
 /// # use rustfst::Result;
 /// # fn main() -> Result<()> {
-/// let mut fst : VectorFst<IntegerWeight> = transducer![2 => 3];
+/// let mut fst : VectorFst<IntegerWeight> = fst![2 => 3];
 /// relabel_pairs(&mut fst, vec![(2,5)], vec![(3,4)])?;
 ///
-/// assert_eq!(fst, transducer![5 => 4]);
+/// assert_eq!(fst, fst![5 => 4]);
 /// # Ok(())
 /// # }
 /// ```

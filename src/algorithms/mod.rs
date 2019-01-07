@@ -1,17 +1,36 @@
-pub mod all_pairs_shortest_distance;
-pub mod closure_plus;
-pub mod closure_star;
-pub mod composition;
-pub mod concat;
-pub mod connect;
-pub mod determinization;
-pub mod epsilon_removal;
-pub mod inversion;
-pub mod isomorphic;
-pub mod projection;
-pub mod relabel_pairs;
-pub mod reverse;
-pub mod reweight;
-pub mod single_source_shortest_distance;
-pub mod union;
-pub mod weight_pushing;
+mod all_pairs_shortest_distance;
+mod closure_plus;
+mod closure_star;
+mod composition;
+mod concat;
+mod connect;
+mod determinization;
+mod epsilon_removal;
+mod inversion;
+mod isomorphic;
+mod projection;
+mod relabel_pairs;
+mod reverse;
+mod reweight;
+mod single_source_shortest_distance;
+mod union;
+mod weight_pushing;
+
+pub use self::{
+    all_pairs_shortest_distance::all_pairs_shortest_distance,
+    closure_plus::closure_plus,
+    closure_star::closure_star,
+    composition::compose,
+    concat::concat,
+    connect::connect,
+    epsilon_removal::rm_epsilon,
+    inversion::invert,
+    isomorphic::isomorphic,
+    projection::{project, ProjectType},
+    relabel_pairs::relabel_pairs,
+    reverse::reverse,
+    reweight::{reweight, ReweightType},
+    single_source_shortest_distance::{shortest_distance, single_source_shortest_distance},
+    union::union,
+    weight_pushing::push_weights,
+};

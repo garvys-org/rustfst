@@ -1,14 +1,14 @@
 use std::collections::VecDeque;
 
+use crate::fst_path::FstPath;
 use crate::fst_traits::Fst;
-use crate::path::Path;
 use crate::semirings::Semiring;
 use crate::StateId;
 
-/// Trait to iterate over the paths accepted by an FST
+/// Trait to iterate over the paths accepted by an FST.
 pub trait PathsIterator<'a> {
     type W: Semiring;
-    type Iter: Iterator<Item = Path<Self::W>>;
+    type Iter: Iterator<Item = FstPath<Self::W>>;
     fn paths_iter(&'a self) -> Self::Iter;
 }
 
@@ -28,7 +28,7 @@ where
     F: 'a + Fst,
 {
     fst: &'a F,
-    queue: VecDeque<(StateId, Path<F::W>)>,
+    queue: VecDeque<(StateId, FstPath<F::W>)>,
 }
 
 impl<'a, F> StructPathsIterator<'a, F>
@@ -39,7 +39,7 @@ where
         let mut queue = VecDeque::new();
 
         if let Some(state_start) = fst.start() {
-            queue.push_back((state_start, Path::default()));
+            queue.push_back((state_start, FstPath::default()));
         }
 
         StructPathsIterator { fst, queue }
@@ -50,7 +50,7 @@ impl<'a, F> Iterator for StructPathsIterator<'a, F>
 where
     F: 'a + Fst,
 {
-    type Item = Path<F::W>;
+    type Item = FstPath<F::W>;
 
     fn next(&mut self) -> Option<Self::Item> {
         while !self.queue.is_empty() {
@@ -102,7 +102,7 @@ mod tests {
         let paths: Counter<_> = fst.paths_iter().collect();
 
         let mut paths_ref: Counter<_> = Counter::new();
-        paths_ref.update(vec![Path::default()]);
+        paths_ref.update(vec![FstPath::default()]);
 
         assert_eq!(paths, paths_ref);
     }
@@ -111,14 +111,14 @@ mod tests {
     fn test_paths_iterator_linear_fst() {
         let labels = vec![153, 45, 96];
 
-        let fst: VectorFst<IntegerWeight> = acceptor(labels.clone().into_iter());
+        let fst: VectorFst<IntegerWeight> = acceptor(&labels, IntegerWeight::ONE);
 
         assert_eq!(fst.paths_iter().count(), 1);
 
         for path in fst.paths_iter() {
             assert_eq!(
                 path,
-                Path::new(labels.clone(), labels.clone(), IntegerWeight::ONE)
+                FstPath::new(labels.clone(), labels.clone(), IntegerWeight::ONE)
             );
         }
     }
@@ -149,17 +149,17 @@ mod tests {
         assert_eq!(fst.paths_iter().count(), 3);
 
         let mut paths_ref = Counter::new();
-        paths_ref.update(vec![Path::new(
+        paths_ref.update(vec![FstPath::new(
             vec![1, 4],
             vec![1, 4],
             IntegerWeight::new(4 * 18),
         )]);
-        paths_ref.update(vec![Path::new(
+        paths_ref.update(vec![FstPath::new(
             vec![2, 5],
             vec![2, 5],
             IntegerWeight::new(10 * 18),
         )]);
-        paths_ref.update(vec![Path::new(
+        paths_ref.update(vec![FstPath::new(
             vec![3],
             vec![3],
             IntegerWeight::new(3 * 18),
@@ -199,28 +199,28 @@ mod tests {
         assert_eq!(fst.paths_iter().count(), 6);
 
         let mut paths_ref = Counter::new();
-        paths_ref.update(vec![Path::new(vec![], vec![], IntegerWeight::new(38))]);
-        paths_ref.update(vec![Path::new(
+        paths_ref.update(vec![FstPath::new(vec![], vec![], IntegerWeight::new(38))]);
+        paths_ref.update(vec![FstPath::new(
             vec![1],
             vec![1],
             IntegerWeight::new(1 * 41),
         )]);
-        paths_ref.update(vec![Path::new(
+        paths_ref.update(vec![FstPath::new(
             vec![2],
             vec![2],
             IntegerWeight::new(2 * 53),
         )]);
-        paths_ref.update(vec![Path::new(
+        paths_ref.update(vec![FstPath::new(
             vec![1, 4],
             vec![1, 4],
             IntegerWeight::new(4 * 185),
         )]);
-        paths_ref.update(vec![Path::new(
+        paths_ref.update(vec![FstPath::new(
             vec![2, 5],
             vec![2, 5],
             IntegerWeight::new(10 * 185),
         )]);
-        paths_ref.update(vec![Path::new(
+        paths_ref.update(vec![FstPath::new(
             vec![3],
             vec![3],
             IntegerWeight::new(3 * 185),

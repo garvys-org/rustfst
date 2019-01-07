@@ -3,9 +3,9 @@ use crate::semirings::Semiring;
 use crate::{Result, StateId, EPS_LABEL};
 use std::fmt::Display;
 
-/// Trait defining necessary methods for a wFST to access start states and final states
+/// Trait defining necessary methods for a wFST to access start states and final states.
 pub trait CoreFst {
-    /// Weight use in the wFST. This type must implement the Semiring trait
+    /// Weight use in the wFST. This type must implement the Semiring trait.
     type W: Semiring;
 
     /// Returns the ID of the start state of the wFST if it exists else none.
@@ -47,7 +47,7 @@ pub trait CoreFst {
     /// ```
     fn final_weight(&self, state_id: StateId) -> Option<<Self as CoreFst>::W>;
 
-    /// Number of arcs leaving a specific state in the wFST
+    /// Number of arcs leaving a specific state in the wFST.
     ///
     /// # Example
     ///
@@ -88,12 +88,13 @@ pub trait CoreFst {
         self.final_weight(state_id).is_some()
     }
 
+    /// Check whether a state is the start state or not.
     fn is_start(&self, state_id: StateId) -> bool {
         Some(state_id) == self.start()
     }
 }
 
-/// Trait to iterate over the states of a wFST
+/// Trait to iterate over the states of a wFST.
 pub trait StateIterator<'a> {
     /// Iterator used to iterate over the `state_id` of the states of an FST.
     type Iter: Iterator<Item = StateId> + Clone;
@@ -121,7 +122,7 @@ pub trait StateIterator<'a> {
     fn states_iter(&'a self) -> Self::Iter;
 }
 
-/// Trait to iterate over the outgoing arcs of a partical state in a wFST
+/// Trait to iterate over the outgoing arcs of a particular state in a wFST
 pub trait ArcIterator<'a>: CoreFst
 where
     Self::W: 'a,
@@ -132,7 +133,7 @@ where
     fn arcs_iter(&'a self, state_id: StateId) -> Result<Self::Iter>;
 }
 
-/// Trait defining the minimum interface necessary for a wFST
+/// Trait defining the minimum interface necessary for a wFST.
 pub trait Fst:
     CoreFst + PartialEq + Clone + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b> + Display
 {

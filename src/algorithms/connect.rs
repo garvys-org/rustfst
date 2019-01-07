@@ -37,9 +37,9 @@ fn dfs<F: Fst>(
 /// # use rustfst::utils::transducer;
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::connect;
+/// # use rustfst::algorithms::connect;
 /// # use rustfst::fst_traits::MutableFst;
-/// let fst : VectorFst<IntegerWeight> = transducer![2 => 3];
+/// let fst : VectorFst<IntegerWeight> = fst![2 => 3];
 ///
 /// // Add a state not on a successful path
 /// let mut no_connected_fst = fst.clone();

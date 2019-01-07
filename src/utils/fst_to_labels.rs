@@ -1,7 +1,7 @@
 use failure::bail;
 
+use crate::fst_path::FstPath;
 use crate::fst_traits::{Fst, PathsIterator};
-use crate::path::Path;
 use crate::Result;
 
 /// Decode a linear FST to retrieves the only path recognized by it. A path is composed of the
@@ -16,17 +16,17 @@ use crate::Result;
 /// # use rustfst::semirings::{BooleanWeight, Semiring};
 /// # use rustfst::utils::{transducer, decode_linear_fst};
 /// # use rustfst::Arc;
-/// # use rustfst::Path;
+/// # use rustfst::FstPath;
 /// let labels_input = vec![32, 43, 21];
 /// let labels_output = vec![53, 18, 89];
 ///
-/// let fst : VectorFst<BooleanWeight> = transducer(labels_input.clone().into_iter(), labels_output.clone().into_iter());
+/// let fst : VectorFst<BooleanWeight> = transducer(&labels_input, &labels_output, BooleanWeight::ONE);
 ///
 /// let path = decode_linear_fst(&fst).unwrap();
 ///
-/// assert_eq!(path, Path::new(labels_input, labels_output, BooleanWeight::ONE));
+/// assert_eq!(path, FstPath::new(labels_input, labels_output, BooleanWeight::ONE));
 /// ```
-pub fn decode_linear_fst<F: Fst>(fst: &F) -> Result<Path<F::W>> {
+pub fn decode_linear_fst<F: Fst>(fst: &F) -> Result<FstPath<F::W>> {
     let mut it_path = fst.paths_iter();
     let path = it_path.next().unwrap_or_default();
     if it_path.next().is_some() {
@@ -47,10 +47,10 @@ mod tests {
     #[test]
     fn test_decode_linear_fst_acceptor() -> Result<()> {
         let labels = vec![1, 2, 3];
-        let fst: VectorFst<BooleanWeight> = acceptor(labels.clone().into_iter());
+        let fst: VectorFst<BooleanWeight> = acceptor(&labels, BooleanWeight::ONE);
 
         let path = decode_linear_fst(&fst)?;
-        let path_ref = Path::new(labels.clone(), labels, BooleanWeight::ONE);
+        let path_ref = FstPath::new(labels.clone(), labels, BooleanWeight::ONE);
         assert_eq!(path, path_ref);
         Ok(())
     }
@@ -59,13 +59,11 @@ mod tests {
     fn test_decode_linear_fst_transducer() -> Result<()> {
         let labels_input = vec![1, 2, 3];
         let labels_output = vec![43, 22, 18];
-        let fst: VectorFst<BooleanWeight> = transducer(
-            labels_input.clone().into_iter(),
-            labels_output.clone().into_iter(),
-        );
+        let fst: VectorFst<BooleanWeight> =
+            transducer(&labels_input, &labels_output, BooleanWeight::ONE);
 
         let path = decode_linear_fst(&fst)?;
-        let path_ref = Path::new(labels_input, labels_output, BooleanWeight::ONE);
+        let path_ref = FstPath::new(labels_input, labels_output, BooleanWeight::ONE);
 
         assert_eq!(path, path_ref);
         Ok(())
@@ -76,7 +74,7 @@ mod tests {
         let fst = VectorFst::<BooleanWeight>::new();
         let path = decode_linear_fst(&fst)?;
 
-        assert_eq!(path, Path::default());
+        assert_eq!(path, FstPath::default());
 
         Ok(())
     }
@@ -90,7 +88,7 @@ mod tests {
 
         let path = decode_linear_fst(&fst)?;
 
-        assert_eq!(path, Path::default());
+        assert_eq!(path, FstPath::default());
 
         Ok(())
     }

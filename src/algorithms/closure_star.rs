@@ -1,5 +1,5 @@
+use crate::algorithms::closure_plus;
 use crate::arc::Arc;
-use crate::closure_plus;
 use crate::fst_traits::{CoreFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::EPS_LABEL;

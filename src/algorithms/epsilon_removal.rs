@@ -1,9 +1,10 @@
-use crate::all_pairs_shortest_distance;
+use std::collections::HashMap;
+
+use crate::algorithms::all_pairs_shortest_distance;
 use crate::arc::Arc;
 use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
 use crate::semirings::{Semiring, StarSemiring};
 use crate::{Result, EPS_LABEL};
-use std::collections::HashMap;
 
 // Compute the wFST derived from "fst" by keeping only the epsilon transitions
 fn compute_fst_epsilon<W, F1, F2>(fst: &F1, keep_only_epsilon: bool) -> Result<F2>
@@ -66,7 +67,7 @@ where
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::fst_traits::MutableFst;
-/// # use rustfst::rm_epsilon;
+/// # use rustfst::algorithms::rm_epsilon;
 /// # use rustfst::Arc;
 /// # use rustfst::EPS_LABEL;
 /// let mut fst = VectorFst::new();
