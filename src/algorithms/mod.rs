@@ -1,6 +1,5 @@
 mod all_pairs_shortest_distance;
-mod closure_plus;
-mod closure_star;
+mod closure;
 mod composition;
 mod concat;
 mod connect;
@@ -18,8 +17,7 @@ mod weight_pushing;
 
 pub use self::{
     all_pairs_shortest_distance::all_pairs_shortest_distance,
-    closure_plus::closure_plus,
-    closure_star::closure_star,
+    closure::{closure_plus, closure_star},
     composition::compose,
     concat::concat,
     connect::connect,
