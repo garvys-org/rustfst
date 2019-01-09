@@ -107,6 +107,14 @@ impl<W: 'static + Semiring> ExpandedFst for VectorFst<W> {
 }
 
 impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
+    fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut W> {
+        if let Some(state) = self.states.get_mut(state_id) {
+            state.final_weight.as_mut()
+        } else {
+            None
+        }
+    }
+
     fn new() -> Self {
         VectorFst {
             states: vec![],
@@ -137,15 +145,6 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         let id = self.states.len();
         self.states.insert(id, VectorFstState::default());
         id
-    }
-
-    fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()> {
-        if let Some(state) = self.states.get_mut(source) {
-            state.arcs.push(arc);
-            Ok(())
-        } else {
-            bail!("State {:?} doesn't exist", source);
-        }
     }
 
     fn del_state(&mut self, state_to_remove: StateId) -> Result<()> {
@@ -184,6 +183,15 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
             self.del_state(v[j])?;
         }
         Ok(())
+    }
+
+    fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()> {
+        if let Some(state) = self.states.get_mut(source) {
+            state.arcs.push(arc);
+            Ok(())
+        } else {
+            bail!("State {:?} doesn't exist", source);
+        }
     }
 }
 

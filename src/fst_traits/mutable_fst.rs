@@ -5,6 +5,8 @@ use std::collections::HashMap;
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
+    fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut <Self as CoreFst>::W>;
+
     /// Creates an empty wFST.
     fn new() -> Self;
 
