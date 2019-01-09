@@ -30,8 +30,8 @@ where
 /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
 /// The empty string is transduced to itself with weight `1` as well.
 pub fn closure_star<F>(fst: &mut F)
-    where
-        F: MutableFst,
+where
+    F: MutableFst,
 {
     closure_plus(fst);
 
@@ -44,7 +44,6 @@ pub fn closure_star<F>(fst: &mut F)
             new_start_state_id,
             Arc::new(EPS_LABEL, EPS_LABEL, <F as CoreFst>::W::ONE, start_state_id),
         )
-            .unwrap();
+        .unwrap();
     }
 }
-

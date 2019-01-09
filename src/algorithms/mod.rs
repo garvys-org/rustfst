@@ -1,4 +1,5 @@
 mod all_pairs_shortest_distance;
+mod arc_map;
 mod closure;
 mod composition;
 mod concat;
@@ -17,6 +18,7 @@ mod weight_pushing;
 
 pub use self::{
     all_pairs_shortest_distance::all_pairs_shortest_distance,
+    arc_map::{arc_map, arc_map_inplace, ArcMapper},
     closure::{closure_plus, closure_star},
     composition::compose,
     concat::concat,
