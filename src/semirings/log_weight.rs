@@ -18,38 +18,41 @@ fn ln_pos_exp(x: f32) -> f32 {
 impl Semiring for LogWeight {
     type Type = f32;
 
-    const ZERO: Self = Self {
-        value: f32::INFINITY,
-    };
-    const ONE: Self = Self { value: 0.0 };
+    fn zero() -> Self {
+        Self {
+            value: f32::INFINITY,
+        }
+    }
+    fn one() -> Self {
+        Self { value: 0.0 }
+    }
 
     fn new(value: <Self as Semiring>::Type) -> Self {
         LogWeight { value }
     }
 
-    fn plus(&self, rhs: &Self) -> Self {
+    fn plus_mut(&mut self, rhs: &Self) {
         let f1 = self.value();
         let f2 = rhs.value();
-        if f1 == f32::INFINITY {
-            *rhs
+        self.value = if f1 == f32::INFINITY {
+            f2
         } else if f2 == f32::INFINITY {
-            *self
+            f1
         } else if f1 > f2 {
-            Self::new(f2 - ln_pos_exp(f1 - f2))
+            f2 - ln_pos_exp(f1 - f2)
         } else {
-            Self::new(f1 - ln_pos_exp(f2 - f1))
+            f1 - ln_pos_exp(f2 - f1)
         }
     }
 
-    fn times(&self, rhs: &Self) -> Self {
+    fn times_mut(&mut self, rhs: &Self) {
         let f1 = self.value();
         let f2 = rhs.value();
         if f1 == f32::INFINITY {
-            *self
         } else if f2 == f32::INFINITY {
-            *rhs
+            self.value = rhs.value;
         } else {
-            Self::new(f1 + f2)
+            self.value += rhs.value;
         }
     }
 
@@ -78,8 +81,8 @@ impl StarSemiring for LogWeight {
 }
 
 impl WeaklyDivisibleSemiring for LogWeight {
-    fn inverse(&self) -> Self {
-        Self::new(-self.value)
+    fn inverse_mut(&mut self) {
+        self.value = -self.value;
     }
 
     fn divide(&self, rhs: &Self) -> Self {

@@ -14,32 +14,34 @@ pub struct TropicalWeight {
 impl Semiring for TropicalWeight {
     type Type = f32;
 
-    const ZERO: Self = Self {
-        value: f32::INFINITY,
-    };
-    const ONE: Self = Self { value: 0.0 };
+    fn zero() -> Self {
+        Self {
+            value: f32::INFINITY,
+        }
+    }
+
+    fn one() -> Self {
+        Self { value: 0.0 }
+    }
 
     fn new(value: <Self as Semiring>::Type) -> Self {
         TropicalWeight { value }
     }
 
-    fn plus(&self, rhs: &Self) -> Self {
-        if self.value < rhs.value {
-            Self::new(self.value)
-        } else {
-            Self::new(rhs.value)
+    fn plus_mut(&mut self, rhs: &Self) {
+        if rhs.value < self.value {
+            self.value = rhs.value;
         }
     }
 
-    fn times(&self, rhs: &Self) -> Self {
+    fn times_mut(&mut self, rhs: &Self) {
         let f1 = self.value();
         let f2 = rhs.value();
         if f1 == f32::INFINITY {
-            *self
         } else if f2 == f32::INFINITY {
-            *rhs
+            self.value = f2;
         } else {
-            Self::new(f1 + f2)
+            self.value += f2;
         }
     }
 
@@ -68,8 +70,8 @@ impl StarSemiring for TropicalWeight {
 }
 
 impl WeaklyDivisibleSemiring for TropicalWeight {
-    fn inverse(&self) -> Self {
-        Self::new(-self.value)
+    fn inverse_mut(&mut self) {
+        self.value = -self.value;
     }
 
     fn divide(&self, rhs: &Self) -> Self {

@@ -13,18 +13,22 @@ pub struct IntegerWeight {
 impl Semiring for IntegerWeight {
     type Type = i32;
 
-    const ZERO: Self = Self { value: 0 };
-    const ONE: Self = Self { value: 1 };
+    fn zero() -> Self {
+        Self { value: 0 }
+    }
+    fn one() -> Self {
+        Self { value: 1 }
+    }
 
     fn new(value: <Self as Semiring>::Type) -> Self {
         IntegerWeight { value }
     }
 
-    fn plus(&self, rhs: &Self) -> Self {
-        Self::new(self.value + rhs.value)
+    fn plus_mut(&mut self, rhs: &Self) {
+        self.value += rhs.value;
     }
-    fn times(&self, rhs: &Self) -> Self {
-        Self::new(self.value * rhs.value)
+    fn times_mut(&mut self, rhs: &Self) {
+        self.value *= rhs.value;
     }
 
     fn value(&self) -> Self::Type {

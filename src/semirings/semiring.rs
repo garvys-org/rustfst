@@ -10,33 +10,33 @@ use std::ops::{Add, AddAssign, Mul, MulAssign};
 /// Thus, a semiring is a ring that may lack negation.
 /// For more information : https://cs.nyu.edu/~mohri/pub/hwa.pdf
 pub trait Semiring:
-    Clone
-    + PartialEq
-    + PartialOrd
-    + Debug
-    + Default
-    + Add
-    + AddAssign
-    + Mul
-    + MulAssign
-    + Display
-    + Copy
+    Clone + PartialEq + PartialOrd + Debug + Default + Add + AddAssign + Mul + MulAssign + Display
 {
     type Type: Display;
 
-    const ZERO: Self;
-    const ONE: Self;
+    fn zero() -> Self;
+    fn one() -> Self;
 
     fn new(value: Self::Type) -> Self;
-    fn plus(&self, rhs: &Self) -> Self;
-    fn times(&self, rhs: &Self) -> Self;
+    fn plus(&self, rhs: &Self) -> Self {
+        let mut w = self.clone();
+        w.plus_mut(rhs);
+        w
+    }
+    fn plus_mut(&mut self, rhs: &Self);
+    fn times(&self, rhs: &Self) -> Self {
+        let mut w = self.clone();
+        w.times_mut(rhs);
+        w
+    }
+    fn times_mut(&mut self, rhs: &Self);
     fn value(&self) -> Self::Type;
     fn set_value(&mut self, value: Self::Type);
     fn is_one(&self) -> bool {
-        *self == Self::ONE
+        *self == Self::one()
     }
     fn is_zero(&self) -> bool {
-        *self == Self::ZERO
+        *self == Self::zero()
     }
 }
 
@@ -48,7 +48,12 @@ pub trait Semiring:
 /// For more information : `https://cs.nyu.edu/~mohri/pub/hwa.pdf`
 pub trait WeaklyDivisibleSemiring: Semiring {
     /// Inverse for the * operation
-    fn inverse(&self) -> Self;
+    fn inverse(&self) -> Self {
+        let mut w = self.clone();
+        w.inverse_mut();
+        w
+    }
+    fn inverse_mut(&mut self);
     // TODO : Not always commutative
     fn divide(&self, rhs: &Self) -> Self;
 }
@@ -73,7 +78,7 @@ pub trait WeightQuantize: Semiring<Type = f32> {
     fn quantize(&self, delta: f32) -> Self {
         let v = self.value();
         if v == f32::INFINITY || v == f32::NEG_INFINITY {
-            return *self;
+            return self.clone();
         }
         Self::new(((v / delta) + 0.5).floor() * delta)
     }

@@ -13,19 +13,23 @@ pub struct ProbabilityWeight {
 impl Semiring for ProbabilityWeight {
     type Type = f32;
 
-    const ZERO: Self = Self { value: 0.0 };
-    const ONE: Self = Self { value: 1.0 };
+    fn zero() -> Self {
+        Self { value: 0.0 }
+    }
+    fn one() -> Self {
+        Self { value: 1.0 }
+    }
 
     fn new(value: <Self as Semiring>::Type) -> Self {
         ProbabilityWeight { value }
     }
 
-    fn plus(&self, rhs: &Self) -> Self {
-        Self::new(self.value + rhs.value)
+    fn plus_mut(&mut self, rhs: &Self) {
+        self.value += rhs.value;
     }
 
-    fn times(&self, rhs: &Self) -> Self {
-        Self::new(self.value * rhs.value)
+    fn times_mut(&mut self, rhs: &Self) {
+        self.value *= rhs.value;
     }
 
     fn value(&self) -> Self::Type {
@@ -49,9 +53,9 @@ impl StarSemiring for ProbabilityWeight {
 }
 
 impl WeaklyDivisibleSemiring for ProbabilityWeight {
-    fn inverse(&self) -> Self {
+    fn inverse_mut(&mut self) {
         // May panic if self.value == 0
-        Self::new(1.0 / self.value)
+        self.value = 1.0 / self.value;
     }
 
     fn divide(&self, rhs: &Self) -> Self {
