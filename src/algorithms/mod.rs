@@ -16,9 +16,11 @@ mod single_source_shortest_distance;
 mod union;
 mod weight_pushing;
 
+pub mod arc_mappers;
+
 pub use self::{
     all_pairs_shortest_distance::all_pairs_shortest_distance,
-    arc_map::{arc_map, arc_map_inplace, ArcMapper},
+    arc_map::{arc_map, arc_map_mut, convert_weights, ArcMapper, ArcMapperMut},
     closure::{closure_plus, closure_star},
     composition::compose,
     concat::concat,
