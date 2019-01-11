@@ -44,7 +44,7 @@ where
                 ReweightType::ReweightToInitial => {}
                 ReweightType::ReweightToFinal => {
                     if let Some(final_weight) = fst.final_weight(state) {
-                        let new_weight = F::W::ZERO.times(&final_weight);
+                        let new_weight = F::W::zero().times(&final_weight);
                         fst.set_final(state, new_weight)?;
                     }
                 }
@@ -101,7 +101,7 @@ where
                 arc.weight = match reweight_type {
                     ReweightType::ReweightToInitial => d_s.times(&arc.weight),
                     ReweightType::ReweightToFinal => {
-                        (F::W::ONE.times(&d_s.inverse())).times(&arc.weight)
+                        (F::W::one().times(&d_s.inverse())).times(&arc.weight)
                     }
                 };
             }
@@ -110,7 +110,7 @@ where
                 let new_weight = match reweight_type {
                     ReweightType::ReweightToInitial => d_s.times(&final_weight),
                     ReweightType::ReweightToFinal => {
-                        (F::W::ONE.times(&d_s.inverse())).times(&final_weight)
+                        (F::W::one().times(&d_s.inverse())).times(&final_weight)
                     }
                 };
 

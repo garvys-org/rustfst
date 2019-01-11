@@ -77,7 +77,7 @@ where
             Arc::new(
                 0,
                 0,
-                <F2 as CoreFst>::W::ONE,
+                <F2 as CoreFst>::W::one(),
                 *mapping.get(&old_start_state_fst).unwrap(),
             ),
         )?;

@@ -59,7 +59,7 @@ impl<W: Semiring> Default for FstPath<W> {
         FstPath {
             ilabels: vec![],
             olabels: vec![],
-            weight: W::ONE,
+            weight: W::one(),
         }
     }
 }
@@ -88,7 +88,7 @@ impl<W: Semiring + Hash + Eq> Eq for FstPath<W> {}
 /// let path : FstPath<IntegerWeight> = fst_path![1,2,3];
 /// assert_eq!(path.ilabels, vec![1,2,3]);
 /// assert_eq!(path.olabels, vec![1,2,3]);
-/// assert_eq!(path.weight, IntegerWeight::ONE);
+/// assert_eq!(path.weight, IntegerWeight::one());
 /// # }
 /// ```
 ///
@@ -101,7 +101,7 @@ impl<W: Semiring + Hash + Eq> Eq for FstPath<W> {}
 /// let path : FstPath<IntegerWeight> = fst_path![1,2,3 => 1,2,4];
 /// assert_eq!(path.ilabels, vec![1,2,3]);
 /// assert_eq!(path.olabels, vec![1,2,4]);
-/// assert_eq!(path.weight, IntegerWeight::ONE);
+/// assert_eq!(path.weight, IntegerWeight::one());
 /// # }
 /// ```
 ///
@@ -135,37 +135,49 @@ impl<W: Semiring + Hash + Eq> Eq for FstPath<W> {}
 macro_rules! fst_path {
     ( $( $x:expr ),*) => {
         {
+            fn semiring_one<W: Semiring>() -> W {
+                W::one()
+            }
             FstPath::new(
                 vec![$($x),*],
                 vec![$($x),*],
-                Semiring::ONE
+                semiring_one()
             )
         }
     };
     ( $( $x:expr ),* => $( $y:expr ),* ) => {
         {
+            fn semiring_one<W: Semiring>() -> W {
+                W::one()
+            }
             FstPath::new(
                 vec![$($x),*],
                 vec![$($y),*],
-                Semiring::ONE
+                semiring_one()
             )
         }
     };
     ( $( $x:expr ),* ; $weight:expr) => {
         {
+            fn semiring_new<W: Semiring>(v: W::Type) -> W {
+                W::new(v)
+            }
             FstPath::new(
                 vec![$($x),*],
                 vec![$($x),*],
-                Semiring::new($weight)
+                semiring_new($weight)
             )
         }
     };
     ( $( $x:expr ),* => $( $y:expr ),* ; $weight:expr) => {
         {
+            fn semiring_new<W: Semiring>(v: W::Type) -> W {
+                W::new(v)
+            }
             FstPath::new(
                 vec![$($x),*],
                 vec![$($y),*],
-                Semiring::new($weight)
+                semiring_new($weight)
             )
         }
     };

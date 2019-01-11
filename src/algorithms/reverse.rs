@@ -32,7 +32,7 @@ where
         for arc in fst.arcs_iter(state)? {
             fst_reversed.add_arc(
                 arc.nextstate,
-                Arc::new(arc.ilabel, arc.olabel, arc.weight, state),
+                Arc::new(arc.ilabel, arc.olabel, arc.weight.clone(), state),
             )?;
         }
     }
@@ -56,7 +56,7 @@ where
 
     // Forme initial states are now final
     if let Some(state_state_in) = fst.start() {
-        fst_reversed.set_final(state_state_in, W::ONE)?;
+        fst_reversed.set_final(state_state_in, W::one())?;
     }
 
     Ok(fst_reversed)

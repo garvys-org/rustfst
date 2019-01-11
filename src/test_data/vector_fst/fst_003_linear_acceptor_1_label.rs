@@ -23,7 +23,7 @@ impl TestFst for LinearAcceptor1Label {
 
     fn get_fst() -> <Self as TestFst>::F {
         let labels = vec![32];
-        acceptor(&labels, IntegerWeight::ONE)
+        acceptor(&labels, IntegerWeight::one())
     }
 
     fn get_name() -> String {
@@ -36,13 +36,13 @@ impl TestFst for LinearAcceptor1Label {
 
     fn get_all_distances() -> Vec<Vec<<<Self as TestFst>::F as CoreFst>::W>> {
         let fst = Self::get_fst();
-        let mut d = vec![vec![IntegerWeight::ZERO; fst.num_states()]; fst.num_states()];
+        let mut d = vec![vec![IntegerWeight::zero(); fst.num_states()]; fst.num_states()];
 
-        d[0][0] = IntegerWeight::ONE;
-        d[0][1] = IntegerWeight::ONE;
+        d[0][0] = IntegerWeight::one();
+        d[0][1] = IntegerWeight::one();
 
-        d[1][0] = IntegerWeight::ZERO;
-        d[1][1] = IntegerWeight::ONE;
+        d[1][0] = IntegerWeight::zero();
+        d[1][1] = IntegerWeight::one();
 
         d
     }

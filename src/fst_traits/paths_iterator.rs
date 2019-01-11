@@ -58,7 +58,7 @@ where
 
             for arc in self.fst.arcs_iter(state_id).unwrap() {
                 let mut new_path = path.clone();
-                new_path.add_to_path(arc.ilabel, arc.olabel, arc.weight);
+                new_path.add_to_path(arc.ilabel, arc.olabel, arc.weight.clone());
                 self.queue.push_back((arc.nextstate, new_path));
             }
 
@@ -97,7 +97,7 @@ mod tests {
 
         let s = fst.add_state();
         fst.set_start(s).unwrap();
-        fst.set_final(s, IntegerWeight::ONE).unwrap();
+        fst.set_final(s, IntegerWeight::one()).unwrap();
 
         let paths: Counter<_> = fst.paths_iter().collect();
 
@@ -111,14 +111,14 @@ mod tests {
     fn test_paths_iterator_linear_fst() {
         let labels = vec![153, 45, 96];
 
-        let fst: VectorFst<IntegerWeight> = acceptor(&labels, IntegerWeight::ONE);
+        let fst: VectorFst<IntegerWeight> = acceptor(&labels, IntegerWeight::one());
 
         assert_eq!(fst.paths_iter().count(), 1);
 
         for path in fst.paths_iter() {
             assert_eq!(
                 path,
-                FstPath::new(labels.clone(), labels.clone(), IntegerWeight::ONE)
+                FstPath::new(labels.clone(), labels.clone(), IntegerWeight::one())
             );
         }
     }

@@ -39,11 +39,11 @@ pub trait CoreFst {
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
-    /// fst.set_final(s2, BooleanWeight::ONE);
+    /// fst.set_final(s2, BooleanWeight::one());
     ///
     /// // 2 - Access the final weight of each state
     /// assert_eq!(fst.final_weight(s1), None);
-    /// assert_eq!(fst.final_weight(s2), Some(BooleanWeight::ONE));
+    /// assert_eq!(fst.final_weight(s2), Some(BooleanWeight::one()));
     /// ```
     fn final_weight(&self, state_id: StateId) -> Option<<Self as CoreFst>::W>;
 
@@ -78,7 +78,7 @@ pub trait CoreFst {
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
-    /// fst.set_final(s2, BooleanWeight::ONE);
+    /// fst.set_final(s2, BooleanWeight::one());
     ///
     /// // 2 - Test if a state is final
     /// assert!(!fst.is_final(s1));
@@ -150,11 +150,11 @@ pub trait Fst:
     /// let s0 = fst.add_state();
     /// let s1 = fst.add_state();
     ///
-    /// fst.add_arc(s0, Arc::new(EPS_LABEL, 18, IntegerWeight::ONE, s1));
-    /// fst.add_arc(s0, Arc::new(76, EPS_LABEL, IntegerWeight::ONE, s1));
-    /// fst.add_arc(s0, Arc::new(EPS_LABEL, 18, IntegerWeight::ONE, s1));
-    /// fst.add_arc(s0, Arc::new(45, 18, IntegerWeight::ONE, s0));
-    /// fst.add_arc(s1, Arc::new(76, 18, IntegerWeight::ONE, s1));
+    /// fst.add_arc(s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_arc(s0, Arc::new(76, EPS_LABEL, IntegerWeight::one(), s1));
+    /// fst.add_arc(s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_arc(s0, Arc::new(45, 18, IntegerWeight::one(), s0));
+    /// fst.add_arc(s1, Arc::new(76, 18, IntegerWeight::one(), s1));
     ///
     /// assert_eq!(fst.num_input_epsilons(s0).unwrap(), 2);
     /// assert_eq!(fst.num_input_epsilons(s1).unwrap(), 0);
@@ -179,11 +179,11 @@ pub trait Fst:
     /// let s0 = fst.add_state();
     /// let s1 = fst.add_state();
     ///
-    /// fst.add_arc(s0, Arc::new(EPS_LABEL, 18, IntegerWeight::ONE, s1));
-    /// fst.add_arc(s0, Arc::new(76, EPS_LABEL, IntegerWeight::ONE, s1));
-    /// fst.add_arc(s0, Arc::new(EPS_LABEL, 18, IntegerWeight::ONE, s1));
-    /// fst.add_arc(s0, Arc::new(45, 18, IntegerWeight::ONE, s0));
-    /// fst.add_arc(s1, Arc::new(76, 18, IntegerWeight::ONE, s1));
+    /// fst.add_arc(s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_arc(s0, Arc::new(76, EPS_LABEL, IntegerWeight::one(), s1));
+    /// fst.add_arc(s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_arc(s0, Arc::new(45, 18, IntegerWeight::one(), s0));
+    /// fst.add_arc(s1, Arc::new(76, 18, IntegerWeight::one(), s1));
     ///
     /// assert_eq!(fst.num_output_epsilons(s0).unwrap(), 1);
     /// assert_eq!(fst.num_output_epsilons(s1).unwrap(), 0);

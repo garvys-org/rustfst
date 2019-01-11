@@ -45,7 +45,7 @@ where
     let num_states = fst.num_states();
 
     // Distance between all states are initialized to zero
-    let mut d = vec![vec![<F as CoreFst>::W::ZERO; num_states]; num_states];
+    let mut d = vec![vec![<F as CoreFst>::W::zero(); num_states]; num_states];
 
     // Iterator over the wFST to add the weight of the arcs
     for state_id in fst.states_iter() {
@@ -53,7 +53,7 @@ where
             let nextstate = arc.nextstate;
             let weight = &arc.weight;
 
-            d[state_id][nextstate] += *weight;
+            d[state_id][nextstate] += weight.clone();
         }
     }
 
