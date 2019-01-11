@@ -24,11 +24,11 @@ impl<S: Semiring> ArcMapper<S> for RmWeightMapper {
 }
 
 impl<S: Semiring> ArcMapperMut<S> for RmWeightMapper {
-    fn arc_map_inplace(&mut self, arc: &mut Arc<S>) {
-        self.weight_map_inplace(&mut arc.weight);
+    fn arc_map_mut(&mut self, arc: &mut Arc<S>) {
+        self.weight_map_mut(&mut arc.weight);
     }
 
-    fn weight_map_inplace(&mut self, weight: &mut S) {
+    fn weight_map_mut(&mut self, weight: &mut S) {
         if !weight.is_zero() {
             weight.set_value(S::one().value())
         }

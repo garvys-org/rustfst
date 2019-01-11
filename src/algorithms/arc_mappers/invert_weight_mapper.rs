@@ -20,11 +20,11 @@ impl<S: WeaklyDivisibleSemiring> ArcMapper<S> for InvertWeightMapper {
 }
 
 impl<S: WeaklyDivisibleSemiring> ArcMapperMut<S> for InvertWeightMapper {
-    fn arc_map_inplace(&mut self, arc: &mut Arc<S>) {
-        self.weight_map_inplace(&mut arc.weight);
+    fn arc_map_mut(&mut self, arc: &mut Arc<S>) {
+        self.weight_map_mut(&mut arc.weight);
     }
 
-    fn weight_map_inplace(&mut self, weight: &mut S) {
+    fn weight_map_mut(&mut self, weight: &mut S) {
         weight.inverse_mut();
     }
 }

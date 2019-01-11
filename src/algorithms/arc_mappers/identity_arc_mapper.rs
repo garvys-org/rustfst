@@ -20,7 +20,7 @@ impl<S: Semiring> ArcMapper<S> for IdentityArcMapper {
 }
 
 impl<S: Semiring> ArcMapperMut<S> for IdentityArcMapper {
-    fn arc_map_inplace(&mut self, _arc: &mut Arc<S>) {}
+    fn arc_map_mut(&mut self, _arc: &mut Arc<S>) {}
 
-    fn weight_map_inplace(&mut self, _weight: &mut S) {}
+    fn weight_map_mut(&mut self, _weight: &mut S) {}
 }

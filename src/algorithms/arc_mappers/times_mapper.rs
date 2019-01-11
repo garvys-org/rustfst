@@ -22,11 +22,11 @@ impl<S: Semiring> ArcMapper<S> for TimesMapper<S> {
 }
 
 impl<S: Semiring> ArcMapperMut<S> for TimesMapper<S> {
-    fn arc_map_inplace(&mut self, arc: &mut Arc<S>) {
-        self.weight_map_inplace(&mut arc.weight);
+    fn arc_map_mut(&mut self, arc: &mut Arc<S>) {
+        self.weight_map_mut(&mut arc.weight);
     }
 
-    fn weight_map_inplace(&mut self, weight: &mut S) {
+    fn weight_map_mut(&mut self, weight: &mut S) {
         weight.times_mut(&self.to_multiply);
     }
 }
