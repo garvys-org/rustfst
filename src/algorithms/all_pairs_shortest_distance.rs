@@ -30,9 +30,9 @@ use crate::Result;
 /// let dists = all_pairs_shortest_distance(&fst)?;
 ///
 /// assert_eq!(dists, vec![
-///     vec![IntegerWeight::ONE, IntegerWeight::new(18), IntegerWeight::new(18*55 + 21)],
-///     vec![IntegerWeight::ZERO, IntegerWeight::ONE, IntegerWeight::new(55)],
-///     vec![IntegerWeight::ZERO, IntegerWeight::ZERO, IntegerWeight::ONE],
+///     vec![IntegerWeight::one(), IntegerWeight::new(18), IntegerWeight::new(18*55 + 21)],
+///     vec![IntegerWeight::zero(), IntegerWeight::one(), IntegerWeight::new(55)],
+///     vec![IntegerWeight::zero(), IntegerWeight::zero(), IntegerWeight::one()],
 /// ]);
 /// # Ok(())
 /// # }
