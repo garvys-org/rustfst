@@ -5,9 +5,9 @@ extern crate serde_derive;
 use std::fs::read_to_string;
 use std::string::String;
 
-use rustfst::algorithms::arc_mappers::{IdentityArcMapper, InvertWeightMapper, RmWeightMapper};
+use rustfst::algorithms::arc_mappers::{IdentityArcMapper, InvertWeightMapper, RmWeightMapper, InputEpsilonMapper, OutputEpsilonMapper};
 use rustfst::algorithms::{
-    arc_map, connect, invert, isomorphic, project, push_weights, reverse, rm_epsilon, ProjectType,
+    connect, invert, isomorphic, project, push_weights, reverse, rm_epsilon, ProjectType,
     ReweightType,
 };
 use rustfst::fst_impls::VectorFst;
@@ -42,6 +42,8 @@ struct ParsedTestData {
     arc_map_identity: OperationResult,
     arc_map_rmweight: OperationResult,
     arc_map_invert: OperationResult,
+    arc_map_input_epsilon: OperationResult,
+    arc_map_output_epsilon: OperationResult,
 }
 
 struct TestData<W: Semiring<Type = f32>, F: TextParser<W = W>> {
@@ -59,6 +61,8 @@ struct TestData<W: Semiring<Type = f32>, F: TextParser<W = W>> {
     arc_map_identity: F,
     arc_map_rmweight: F,
     arc_map_invert: F,
+    arc_map_input_epsilon: F,
+    arc_map_output_epsilon: F
 }
 
 impl<W: Semiring<Type = f32>, F: TextParser<W = W>> TestData<W, F> {
@@ -77,6 +81,8 @@ impl<W: Semiring<Type = f32>, F: TextParser<W = W>> TestData<W, F> {
             arc_map_identity: data.arc_map_identity.parse(),
             arc_map_rmweight: data.arc_map_rmweight.parse(),
             arc_map_invert: data.arc_map_invert.parse(),
+            arc_map_input_epsilon: data.arc_map_input_epsilon.parse(),
+            arc_map_output_epsilon: data.arc_map_output_epsilon.parse(),
         }
     }
 }
@@ -122,7 +128,11 @@ fn run_test_pynini(test_name: &str) -> Result<()> {
 
     test_arc_map_rmweight(&test_data)?;
 
-    test_arc_map_invert(test_data)?;
+    test_arc_map_invert(&test_data)?;
+
+    test_arc_map_input_epsilon(&test_data)?;
+
+    test_arc_map_output_epsilon(&test_data)?;
 
     Ok(())
 }
@@ -291,7 +301,7 @@ fn test_arc_map_rmweight(
 }
 
 fn test_arc_map_invert(
-    test_data: TestData<TropicalWeight, VectorFst<TropicalWeight>>,
+    test_data: &TestData<TropicalWeight, VectorFst<TropicalWeight>>,
 ) -> Result<()> {
     // ArcMap InvertWeightMapper
     let mut fst_arc_map_invert = test_data.raw.clone();
@@ -305,6 +315,46 @@ fn test_arc_map_invert(
             test_data.arc_map_invert,
             fst_arc_map_invert,
             "ArcMap InvertWeight"
+        )
+    );
+    Ok(())
+}
+
+fn test_arc_map_input_epsilon(
+    test_data: &TestData<TropicalWeight, VectorFst<TropicalWeight>>,
+) -> Result<()> {
+    // ArcMap InputEpsilonMapper
+    let mut fst_arc_map = test_data.raw.clone();
+    let mut mapper = InputEpsilonMapper {};
+    fst_arc_map.arc_map(&mut mapper);
+    assert_eq!(
+        test_data.arc_map_input_epsilon,
+        fst_arc_map,
+        "{}",
+        error_message_fst!(
+            test_data.arc_map_input_epsilon,
+            fst_arc_map,
+            "ArcMap InputEpsilonMapper"
+        )
+    );
+    Ok(())
+}
+
+fn test_arc_map_output_epsilon(
+    test_data: &TestData<TropicalWeight, VectorFst<TropicalWeight>>,
+) -> Result<()> {
+    // ArcMap InputEpsilonMapper
+    let mut fst_arc_map = test_data.raw.clone();
+    let mut mapper = OutputEpsilonMapper {};
+    fst_arc_map.arc_map(&mut mapper);
+    assert_eq!(
+        test_data.arc_map_output_epsilon,
+        fst_arc_map,
+        "{}",
+        error_message_fst!(
+            test_data.arc_map_output_epsilon,
+            fst_arc_map,
+            "ArcMap OutputEpsilonMapper"
         )
     );
     Ok(())

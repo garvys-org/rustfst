@@ -88,7 +88,7 @@ class FstTestData(object):
         self.compute_weight_pushing_final()
 
         print("Arc Map")
-        for map_type in ["identity", "rmweight", "invert"]:
+        for map_type in ["identity", "rmweight", "invert", "input_epsilon", "output_epsilon"]:
             self.compute_arc_map_identity(map_type)
 
         dump_json(self.config, os.path.join(self.path_dir, "metadata.json"))
