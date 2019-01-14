@@ -20,7 +20,7 @@ pub mod arc_mappers;
 
 pub use self::{
     all_pairs_shortest_distance::all_pairs_shortest_distance,
-    arc_map::{arc_map, arc_map_mut, convert_weights, ArcMapper, ArcMapperMut},
+    arc_map::{arc_map, convert_weights, ArcMapper},
     closure::{closure_plus, closure_star},
     composition::compose,
     concat::concat,
