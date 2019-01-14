@@ -87,6 +87,10 @@ class FstTestData(object):
         print("Weight pushing final")
         self.compute_weight_pushing_final()
 
+        print("Arc Map")
+        for map_type in ["identity", "rmweight", "invert"]:
+            self.compute_arc_map_identity(map_type)
+
         dump_json(self.config, os.path.join(self.path_dir, "metadata.json"))
 
         print("Done\n")
@@ -131,3 +135,7 @@ class FstTestData(object):
     def compute_weight_pushing_final(self):
         fst_out = self.raw_fst.copy().push(to_final=True)
         self.add_data_to_config("weight_pushing_final", fst_out.text())
+
+    def compute_arc_map_identity(self, map_type):
+        fst_out = p.arcmap(self.raw_fst.copy(), map_type=map_type)
+        self.add_data_to_config("arc_map_" + map_type, fst_out.text())
