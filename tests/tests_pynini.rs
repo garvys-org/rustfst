@@ -5,7 +5,10 @@ extern crate serde_derive;
 use std::fs::read_to_string;
 use std::string::String;
 
-use rustfst::algorithms::arc_mappers::{IdentityArcMapper, InvertWeightMapper, RmWeightMapper, InputEpsilonMapper, OutputEpsilonMapper};
+use rustfst::algorithms::arc_mappers::{
+    IdentityArcMapper, InputEpsilonMapper, InvertWeightMapper, OutputEpsilonMapper, PlusMapper,
+    RmWeightMapper, TimesMapper,
+};
 use rustfst::algorithms::{
     connect, invert, isomorphic, project, push_weights, reverse, rm_epsilon, ProjectType,
     ReweightType,
@@ -44,6 +47,8 @@ struct ParsedTestData {
     arc_map_invert: OperationResult,
     arc_map_input_epsilon: OperationResult,
     arc_map_output_epsilon: OperationResult,
+    arc_map_plus: OperationResult,
+    arc_map_times: OperationResult,
 }
 
 struct TestData<W: Semiring<Type = f32>, F: TextParser<W = W>> {
@@ -62,7 +67,9 @@ struct TestData<W: Semiring<Type = f32>, F: TextParser<W = W>> {
     arc_map_rmweight: F,
     arc_map_invert: F,
     arc_map_input_epsilon: F,
-    arc_map_output_epsilon: F
+    arc_map_output_epsilon: F,
+    arc_map_plus: F,
+    arc_map_times: F,
 }
 
 impl<W: Semiring<Type = f32>, F: TextParser<W = W>> TestData<W, F> {
@@ -83,6 +90,8 @@ impl<W: Semiring<Type = f32>, F: TextParser<W = W>> TestData<W, F> {
             arc_map_invert: data.arc_map_invert.parse(),
             arc_map_input_epsilon: data.arc_map_input_epsilon.parse(),
             arc_map_output_epsilon: data.arc_map_output_epsilon.parse(),
+            arc_map_plus: data.arc_map_plus.parse(),
+            arc_map_times: data.arc_map_times.parse(),
         }
     }
 }
@@ -133,6 +142,10 @@ fn run_test_pynini(test_name: &str) -> Result<()> {
     test_arc_map_input_epsilon(&test_data)?;
 
     test_arc_map_output_epsilon(&test_data)?;
+
+    test_arc_map_plus(&test_data)?;
+
+    test_arc_map_times(&test_data)?;
 
     Ok(())
 }
@@ -323,7 +336,6 @@ fn test_arc_map_invert(
 fn test_arc_map_input_epsilon(
     test_data: &TestData<TropicalWeight, VectorFst<TropicalWeight>>,
 ) -> Result<()> {
-    // ArcMap InputEpsilonMapper
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = InputEpsilonMapper {};
     fst_arc_map.arc_map(&mut mapper);
@@ -343,7 +355,6 @@ fn test_arc_map_input_epsilon(
 fn test_arc_map_output_epsilon(
     test_data: &TestData<TropicalWeight, VectorFst<TropicalWeight>>,
 ) -> Result<()> {
-    // ArcMap InputEpsilonMapper
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = OutputEpsilonMapper {};
     fst_arc_map.arc_map(&mut mapper);
@@ -355,6 +366,44 @@ fn test_arc_map_output_epsilon(
             test_data.arc_map_output_epsilon,
             fst_arc_map,
             "ArcMap OutputEpsilonMapper"
+        )
+    );
+    Ok(())
+}
+
+fn test_arc_map_plus(
+    test_data: &TestData<TropicalWeight, VectorFst<TropicalWeight>>,
+) -> Result<()> {
+    let mut fst_arc_map = test_data.raw.clone();
+    let mut mapper = PlusMapper::new(1.5);
+    fst_arc_map.arc_map(&mut mapper);
+    assert_eq!(
+        test_data.arc_map_plus,
+        fst_arc_map,
+        "{}",
+        error_message_fst!(
+            test_data.arc_map_plus,
+            fst_arc_map,
+            "ArcMap PlusMapper (1.5)"
+        )
+    );
+    Ok(())
+}
+
+fn test_arc_map_times(
+    test_data: &TestData<TropicalWeight, VectorFst<TropicalWeight>>,
+) -> Result<()> {
+    let mut fst_arc_map = test_data.raw.clone();
+    let mut mapper = TimesMapper::new(1.5);
+    fst_arc_map.arc_map(&mut mapper);
+    assert_eq!(
+        test_data.arc_map_times,
+        fst_arc_map,
+        "{}",
+        error_message_fst!(
+            test_data.arc_map_times,
+            fst_arc_map,
+            "ArcMap TimesMapper (1.5)"
         )
     );
     Ok(())

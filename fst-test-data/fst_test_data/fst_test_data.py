@@ -90,6 +90,8 @@ class FstTestData(object):
         print("Arc Map")
         for map_type in ["identity", "rmweight", "invert", "input_epsilon", "output_epsilon"]:
             self.compute_arc_map_identity(map_type)
+        self.compute_arc_map_identity("plus", weight=1.5)
+        self.compute_arc_map_identity("times", weight=1.5)
 
         dump_json(self.config, os.path.join(self.path_dir, "metadata.json"))
 
@@ -136,6 +138,6 @@ class FstTestData(object):
         fst_out = self.raw_fst.copy().push(to_final=True)
         self.add_data_to_config("weight_pushing_final", fst_out.text())
 
-    def compute_arc_map_identity(self, map_type):
-        fst_out = p.arcmap(self.raw_fst.copy(), map_type=map_type)
+    def compute_arc_map_identity(self, map_type, weight=None):
+        fst_out = p.arcmap(self.raw_fst.copy(), map_type=map_type, weight=weight)
         self.add_data_to_config("arc_map_" + map_type, fst_out.text())

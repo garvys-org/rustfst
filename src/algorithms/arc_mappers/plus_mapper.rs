@@ -7,6 +7,14 @@ pub struct PlusMapper<W: Semiring> {
     to_add: W,
 }
 
+impl<W: Semiring> PlusMapper<W> {
+    pub fn new(value: W::Type) -> Self {
+        PlusMapper {
+            to_add: W::new(value),
+        }
+    }
+}
+
 impl<S: Semiring> ArcMapper<S> for PlusMapper<S> {
     fn arc_map(&mut self, arc: &mut Arc<S>) {
         self.final_weight_map(&mut arc.weight);
