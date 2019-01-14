@@ -7,7 +7,7 @@ use std::string::String;
 
 use rustfst::algorithms::arc_mappers::{
     IdentityArcMapper, InputEpsilonMapper, InvertWeightMapper, OutputEpsilonMapper, PlusMapper,
-    RmWeightMapper, TimesMapper,
+    QuantizeMapper, RmWeightMapper, TimesMapper,
 };
 use rustfst::algorithms::{
     connect, invert, isomorphic, project, push_weights, reverse, rm_epsilon, ProjectType,
@@ -49,6 +49,7 @@ struct ParsedTestData {
     arc_map_output_epsilon: OperationResult,
     arc_map_plus: OperationResult,
     arc_map_times: OperationResult,
+    arc_map_quantize: OperationResult,
 }
 
 struct TestData<W: Semiring<Type = f32>, F: TextParser<W = W>> {
@@ -70,6 +71,7 @@ struct TestData<W: Semiring<Type = f32>, F: TextParser<W = W>> {
     arc_map_output_epsilon: F,
     arc_map_plus: F,
     arc_map_times: F,
+    arc_map_quantize: F,
 }
 
 impl<W: Semiring<Type = f32>, F: TextParser<W = W>> TestData<W, F> {
@@ -92,6 +94,7 @@ impl<W: Semiring<Type = f32>, F: TextParser<W = W>> TestData<W, F> {
             arc_map_output_epsilon: data.arc_map_output_epsilon.parse(),
             arc_map_plus: data.arc_map_plus.parse(),
             arc_map_times: data.arc_map_times.parse(),
+            arc_map_quantize: data.arc_map_quantize.parse(),
         }
     }
 }
@@ -146,6 +149,8 @@ fn run_test_pynini(test_name: &str) -> Result<()> {
     test_arc_map_plus(&test_data)?;
 
     test_arc_map_times(&test_data)?;
+
+    test_arc_map_quantize(&test_data)?;
 
     Ok(())
 }
@@ -404,6 +409,25 @@ fn test_arc_map_times(
             test_data.arc_map_times,
             fst_arc_map,
             "ArcMap TimesMapper (1.5)"
+        )
+    );
+    Ok(())
+}
+
+fn test_arc_map_quantize(
+    test_data: &TestData<TropicalWeight, VectorFst<TropicalWeight>>,
+) -> Result<()> {
+    let mut fst_arc_map = test_data.raw.clone();
+    let mut mapper = QuantizeMapper {};
+    fst_arc_map.arc_map(&mut mapper);
+    assert_eq!(
+        test_data.arc_map_quantize,
+        fst_arc_map,
+        "{}",
+        error_message_fst!(
+            test_data.arc_map_quantize,
+            fst_arc_map,
+            "ArcMap QuantizeMapper"
         )
     );
     Ok(())

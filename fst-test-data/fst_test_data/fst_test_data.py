@@ -88,7 +88,7 @@ class FstTestData(object):
         self.compute_weight_pushing_final()
 
         print("Arc Map")
-        for map_type in ["identity", "rmweight", "invert", "input_epsilon", "output_epsilon"]:
+        for map_type in ["identity", "rmweight", "invert", "input_epsilon", "output_epsilon", "quantize"]:
             self.compute_arc_map_identity(map_type)
         self.compute_arc_map_identity("plus", weight=1.5)
         self.compute_arc_map_identity("times", weight=1.5)
