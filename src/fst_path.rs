@@ -37,19 +37,19 @@ impl<W: Semiring> FstPath<W> {
             self.olabels.push(olabel);
         }
 
-        self.weight *= weight
+        self.weight.times_assign(weight);
     }
 
     /// Add a single weight to the Path by multiplying the weight by the total weight of the path.
     pub fn add_weight(&mut self, weight: W) {
-        self.weight *= weight
+        self.weight.times_assign(weight)
     }
 
     /// Append a Path to the current Path. Labels are appended and weights multiplied.
     pub fn concat(&mut self, other: FstPath<W>) {
         self.ilabels.extend(other.ilabels);
         self.olabels.extend(other.olabels);
-        self.weight *= other.weight;
+        self.weight.times_assign(other.weight);
     }
 }
 

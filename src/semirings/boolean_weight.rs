@@ -1,5 +1,4 @@
 use crate::semirings::{CompleteSemiring, Semiring, StarSemiring};
-use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Default, Eq, Copy)]
 pub struct BooleanWeight {
@@ -20,11 +19,11 @@ impl Semiring for BooleanWeight {
         BooleanWeight { value }
     }
 
-    fn plus_mut(&mut self, rhs: &Self) {
-        self.value |= rhs.value;
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+        self.value |= rhs.as_ref().value;
     }
-    fn times_mut(&mut self, rhs: &Self) {
-        self.value &= rhs.value;
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+        self.value &= rhs.as_ref().value;
     }
 
     fn value(&self) -> Self::Type {
@@ -36,7 +35,12 @@ impl Semiring for BooleanWeight {
     }
 }
 
-add_mul_semiring!(BooleanWeight);
+impl AsRef<BooleanWeight> for BooleanWeight {
+    fn as_ref(&self) -> &BooleanWeight {
+        &self
+    }
+}
+
 display_semiring!(BooleanWeight);
 
 impl CompleteSemiring for BooleanWeight {}
@@ -68,14 +72,4 @@ mod tests {
         assert_eq!(b_false.times(&b_true), b_false);
         assert_eq!(b_false.times(&b_false), b_false);
     }
-
-    #[test]
-    fn test_boolean_weight_sum() {
-        let b_true = BooleanWeight::new(true);
-        let b_false = BooleanWeight::new(false);
-
-        assert_eq!(b_true.plus(&b_false), b_true.clone() + b_false.clone());
-        assert_eq!(b_true.times(&b_false), b_true * b_false);
-    }
-
 }

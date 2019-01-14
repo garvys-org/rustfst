@@ -1,5 +1,4 @@
 use std::f32;
-use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 use crate::semirings::{
     CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
@@ -31,9 +30,9 @@ impl Semiring for LogWeight {
         LogWeight { value }
     }
 
-    fn plus_mut(&mut self, rhs: &Self) {
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
         let f1 = self.value();
-        let f2 = rhs.value();
+        let f2 = rhs.as_ref().value();
         self.value = if f1 == f32::INFINITY {
             f2
         } else if f2 == f32::INFINITY {
@@ -45,14 +44,14 @@ impl Semiring for LogWeight {
         }
     }
 
-    fn times_mut(&mut self, rhs: &Self) {
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
         let f1 = self.value();
-        let f2 = rhs.value();
+        let f2 = rhs.as_ref().value();
         if f1 == f32::INFINITY {
         } else if f2 == f32::INFINITY {
-            self.value = rhs.value;
+            self.value = f2;
         } else {
-            self.value += rhs.value;
+            self.value += f2;
         }
     }
 
@@ -65,7 +64,12 @@ impl Semiring for LogWeight {
     }
 }
 
-add_mul_semiring!(LogWeight);
+impl AsRef<LogWeight> for LogWeight {
+    fn as_ref(&self) -> &LogWeight {
+        &self
+    }
+}
+
 display_semiring!(LogWeight);
 
 impl CompleteSemiring for LogWeight {}

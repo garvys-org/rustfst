@@ -1,5 +1,3 @@
-use std::ops::{Add, AddAssign, Mul, MulAssign};
-
 use crate::semirings::{
     CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
@@ -24,12 +22,12 @@ impl Semiring for ProbabilityWeight {
         ProbabilityWeight { value }
     }
 
-    fn plus_mut(&mut self, rhs: &Self) {
-        self.value += rhs.value;
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+        self.value += rhs.as_ref().value;
     }
 
-    fn times_mut(&mut self, rhs: &Self) {
-        self.value *= rhs.value;
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+        self.value *= rhs.as_ref().value;
     }
 
     fn value(&self) -> Self::Type {
@@ -41,7 +39,12 @@ impl Semiring for ProbabilityWeight {
     }
 }
 
-add_mul_semiring!(ProbabilityWeight);
+impl AsRef<ProbabilityWeight> for ProbabilityWeight {
+    fn as_ref(&self) -> &ProbabilityWeight {
+        &self
+    }
+}
+
 display_semiring!(ProbabilityWeight);
 
 impl CompleteSemiring for ProbabilityWeight {}

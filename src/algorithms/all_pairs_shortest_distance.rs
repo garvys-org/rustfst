@@ -53,7 +53,7 @@ where
             let nextstate = arc.nextstate;
             let weight = &arc.weight;
 
-            d[state_id][nextstate] += weight.clone();
+            d[state_id][nextstate].plus_assign(weight);
         }
     }
 
@@ -62,7 +62,7 @@ where
         for i in fst.states_iter().filter(|s| *s != k) {
             for j in fst.states_iter().filter(|s| *s != k) {
                 let a = (d[i][k].times(&closure_d_k_k)).times(&d[k][j]);
-                d[i][j] += a;
+                d[i][j].plus_assign(a);
             }
         }
         for i in fst.states_iter().filter(|s| *s != k) {
