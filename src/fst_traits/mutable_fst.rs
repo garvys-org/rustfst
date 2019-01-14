@@ -1,7 +1,9 @@
+use std::collections::HashMap;
+
+use crate::algorithms::ArcMapper;
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::{Result, StateId};
-use std::collections::HashMap;
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
@@ -205,6 +207,10 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// The empty string is transduced to itself with weight `1` as well.
     fn closure_star(&mut self) {
         crate::algorithms::closure_star(self)
+    }
+
+    fn arc_map<M: ArcMapper<Self::W>>(&mut self, mapper: &mut M) {
+        crate::algorithms::arc_map(self, mapper)
     }
 }
 
