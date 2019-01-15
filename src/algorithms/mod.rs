@@ -16,6 +16,7 @@ mod single_source_shortest_distance;
 mod union;
 mod weight_pushing;
 
+/// Modules that provide structures implementing the `ArcMapper` trait.
 pub mod arc_mappers;
 
 pub use self::{

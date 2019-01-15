@@ -6,7 +6,10 @@ use crate::Arc;
 /// This is useful for implementing operations that do not change the number of
 /// arcs.
 pub trait ArcMapper<S: Semiring> {
+    /// How to modify the arcs.
     fn arc_map(&mut self, arc: &mut Arc<S>);
+
+    /// How to mofify the final weights.
     fn final_weight_map(&mut self, weight: &mut S);
 }
 

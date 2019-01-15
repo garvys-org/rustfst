@@ -107,14 +107,6 @@ impl<W: 'static + Semiring> ExpandedFst for VectorFst<W> {
 }
 
 impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
-    fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut W> {
-        if let Some(state) = self.states.get_mut(state_id) {
-            state.final_weight.as_mut()
-        } else {
-            None
-        }
-    }
-
     fn new() -> Self {
         VectorFst {
             states: vec![],
@@ -191,6 +183,14 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
             Ok(())
         } else {
             bail!("State {:?} doesn't exist", source);
+        }
+    }
+
+    fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut W> {
+        if let Some(state) = self.states.get_mut(state_id) {
+            state.final_weight.as_mut()
+        } else {
+            None
         }
     }
 }

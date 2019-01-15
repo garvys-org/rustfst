@@ -52,10 +52,10 @@ pub trait WeaklyDivisibleSemiring: Semiring {
     /// Inverse for the * operation
     fn inverse(&self) -> Self {
         let mut w = self.clone();
-        w.inverse_mut();
+        w.inverse_assign();
         w
     }
-    fn inverse_mut(&mut self);
+    fn inverse_assign(&mut self);
     // TODO : Not always commutative
     fn divide(&self, rhs: &Self) -> Self;
 }

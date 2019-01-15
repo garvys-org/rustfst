@@ -85,7 +85,7 @@ impl StarSemiring for LogWeight {
 }
 
 impl WeaklyDivisibleSemiring for LogWeight {
-    fn inverse_mut(&mut self) {
+    fn inverse_assign(&mut self) {
         self.value = -self.value;
     }
 

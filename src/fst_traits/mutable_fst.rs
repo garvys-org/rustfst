@@ -7,8 +7,6 @@ use crate::{Result, StateId};
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
-    fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut <Self as CoreFst>::W>;
-
     /// Creates an empty wFST.
     fn new() -> Self;
 
@@ -161,6 +159,9 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// ```
     fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()>;
 
+    /// Retrieves a mutable reference to the final weight of a state (if the state is a final one).
+    fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut <Self as CoreFst>::W>;
+
     fn add_fst<F: ExpandedFst<W = Self::W>>(
         &mut self,
         fst_to_add: &F,
@@ -209,6 +210,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
         crate::algorithms::closure_star(self)
     }
 
+    /// Maps an arc using a mapper function object. This function modifies its Fst input.
     fn arc_map<M: ArcMapper<Self::W>>(&mut self, mapper: &mut M) {
         crate::algorithms::arc_map(self, mapper)
     }

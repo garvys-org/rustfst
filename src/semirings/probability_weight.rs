@@ -56,7 +56,7 @@ impl StarSemiring for ProbabilityWeight {
 }
 
 impl WeaklyDivisibleSemiring for ProbabilityWeight {
-    fn inverse_mut(&mut self) {
+    fn inverse_assign(&mut self) {
         // May panic if self.value == 0
         self.value = 1.0 / self.value;
     }

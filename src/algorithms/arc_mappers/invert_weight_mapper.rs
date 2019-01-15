@@ -11,6 +11,6 @@ impl<S: WeaklyDivisibleSemiring> ArcMapper<S> for InvertWeightMapper {
     }
 
     fn final_weight_map(&mut self, weight: &mut S) {
-        weight.inverse_mut();
+        weight.inverse_assign();
     }
 }
