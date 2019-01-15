@@ -7,10 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Add `arc_map` function to perform modifications that don't modify the number of arcs (and `ArcMapper` to specify how to modify the arcs).
+- Implemented the followingg arc mappers to be used with `arc_map`:
+   - `IdentityMapper`: Mapper that returns its input.
+   - `InputEpsilonMapper`: Mapper that converts all input symbols to epsilon.
+   - `InvertWeightMapper`: Mapper to inverse all non-Zero() weights.
+   - `OutputEpsilonMapper`: Mapper that converts all output symbols to epsilon.
+   - `PlusMapper`: Mapper to add a constant to all weights.
+   - `QuantizeMapper`: Mapper to quantize all weights.
+   - `RmWeightMapper`: Mapper to map all non-Zero() weights to One().
+   - `TimesMapper`: Mapper to (right) multiply a constant to all weights.
+- Add `final_weight_mut` to the `MutableFst` trait to retrieve a mutable reference on the final weight and implemented for `VectorFst`.
+- `arc_map` method has been added to the MutableFst trait as a provided method.
 
 ### Changed
+- In the `Semiring` trait, `ONE` and `ZERO` associated constants have been removed in favor of `one` and `zero` functions.
+- In the Semiring, `plus` and `times` methods now accept a `AsrRef<Self>` parameter.
+- Added `inverse_assign`, `quantize_assign`, `plus_assign` and `times_assign` to the Semiring trait to perform in place operations.
 
 ### Removed
+- Removed `Add`, `AddAssign`, `Mul`, `MulAssign` and `Copy` trait bound for `Semiring`.
 
 ## [0.2.0] - 2019-01-07
 ### Added
