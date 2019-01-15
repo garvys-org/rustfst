@@ -40,7 +40,7 @@ impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
 
     fn final_weight(&self, state_id: StateId) -> Option<W> {
         if let Some(state) = self.states.get(state_id) {
-            state.final_weight
+            state.final_weight.clone()
         } else {
             None
         }
@@ -139,15 +139,6 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         id
     }
 
-    fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()> {
-        if let Some(state) = self.states.get_mut(source) {
-            state.arcs.push(arc);
-            Ok(())
-        } else {
-            bail!("State {:?} doesn't exist", source);
-        }
-    }
-
     fn del_state(&mut self, state_to_remove: StateId) -> Result<()> {
         // Remove the state from the vector
         // Check the arcs for arcs going to this state
@@ -185,6 +176,23 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         }
         Ok(())
     }
+
+    fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()> {
+        if let Some(state) = self.states.get_mut(source) {
+            state.arcs.push(arc);
+            Ok(())
+        } else {
+            bail!("State {:?} doesn't exist", source);
+        }
+    }
+
+    fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut W> {
+        if let Some(state) = self.states.get_mut(state_id) {
+            state.final_weight.as_mut()
+        } else {
+            None
+        }
+    }
 }
 
 impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
@@ -217,7 +225,7 @@ impl<W: 'static + Semiring<Type = f32>> TextParser for VectorFst<W> {
         };
 
         for transition in parsed_fst_text.transitions.into_iter() {
-            let weight = transition.weight.map(W::new).unwrap_or(W::ONE);
+            let weight = transition.weight.map(W::new).unwrap_or_else(W::one);
             let arc = Arc::new(
                 transition.ilabel,
                 transition.olabel,
@@ -228,7 +236,7 @@ impl<W: 'static + Semiring<Type = f32>> TextParser for VectorFst<W> {
         }
 
         for final_state in parsed_fst_text.final_states.into_iter() {
-            let weight = final_state.weight.map(W::new).unwrap_or(W::ONE);
+            let weight = final_state.weight.map(W::new).unwrap_or_else(W::one);
             fst.set_final(final_state.state, weight)?;
         }
 

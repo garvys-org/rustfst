@@ -1,5 +1,3 @@
-use std::ops::{Add, AddAssign, Mul, MulAssign};
-
 use crate::semirings::{
     CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
@@ -13,19 +11,23 @@ pub struct ProbabilityWeight {
 impl Semiring for ProbabilityWeight {
     type Type = f32;
 
-    const ZERO: Self = Self { value: 0.0 };
-    const ONE: Self = Self { value: 1.0 };
+    fn zero() -> Self {
+        Self { value: 0.0 }
+    }
+    fn one() -> Self {
+        Self { value: 1.0 }
+    }
 
     fn new(value: <Self as Semiring>::Type) -> Self {
         ProbabilityWeight { value }
     }
 
-    fn plus(&self, rhs: &Self) -> Self {
-        Self::new(self.value + rhs.value)
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+        self.value += rhs.as_ref().value;
     }
 
-    fn times(&self, rhs: &Self) -> Self {
-        Self::new(self.value * rhs.value)
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+        self.value *= rhs.as_ref().value;
     }
 
     fn value(&self) -> Self::Type {
@@ -37,7 +39,12 @@ impl Semiring for ProbabilityWeight {
     }
 }
 
-add_mul_semiring!(ProbabilityWeight);
+impl AsRef<ProbabilityWeight> for ProbabilityWeight {
+    fn as_ref(&self) -> &ProbabilityWeight {
+        &self
+    }
+}
+
 display_semiring!(ProbabilityWeight);
 
 impl CompleteSemiring for ProbabilityWeight {}
@@ -49,9 +56,9 @@ impl StarSemiring for ProbabilityWeight {
 }
 
 impl WeaklyDivisibleSemiring for ProbabilityWeight {
-    fn inverse(&self) -> Self {
+    fn inverse_assign(&mut self) {
         // May panic if self.value == 0
-        Self::new(1.0 / self.value)
+        self.value = 1.0 / self.value;
     }
 
     fn divide(&self, rhs: &Self) -> Self {

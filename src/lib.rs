@@ -84,8 +84,6 @@ extern crate rand;
 #[cfg(test)]
 extern crate serde;
 #[cfg(test)]
-#[macro_use]
-extern crate serde_derive;
 #[cfg(test)]
 extern crate serde_json;
 

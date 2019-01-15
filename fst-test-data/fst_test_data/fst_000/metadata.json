@@ -1,4 +1,7 @@
 {
+    "arc_map_invert": {
+        "result": ""
+    }, 
     "shortest_distance": {
         "result": []
     }, 
@@ -6,14 +9,26 @@
         "result": ""
     }, 
     "name": "fst_000", 
+    "arc_map_rmweight": {
+        "result": ""
+    }, 
+    "arc_map_identity": {
+        "result": ""
+    }, 
     "invert": {
         "result": ""
     }, 
     "weight_type": "tropical", 
+    "arc_map_times": {
+        "result": ""
+    }, 
     "raw": {
         "result": ""
     }, 
     "project_output": {
+        "result": ""
+    }, 
+    "arc_map_output_epsilon": {
         "result": ""
     }, 
     "connect": {
@@ -25,7 +40,16 @@
     "weight_pushing_final": {
         "result": ""
     }, 
+    "arc_map_quantize": {
+        "result": ""
+    }, 
     "project_input": {
+        "result": ""
+    }, 
+    "arc_map_input_epsilon": {
+        "result": ""
+    }, 
+    "arc_map_plus": {
         "result": ""
     }, 
     "reverse": {

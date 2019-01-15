@@ -1,5 +1,4 @@
 use std::f32;
-use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 use crate::semirings::{
     CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
@@ -14,32 +13,34 @@ pub struct TropicalWeight {
 impl Semiring for TropicalWeight {
     type Type = f32;
 
-    const ZERO: Self = Self {
-        value: f32::INFINITY,
-    };
-    const ONE: Self = Self { value: 0.0 };
+    fn zero() -> Self {
+        Self {
+            value: f32::INFINITY,
+        }
+    }
+
+    fn one() -> Self {
+        Self { value: 0.0 }
+    }
 
     fn new(value: <Self as Semiring>::Type) -> Self {
         TropicalWeight { value }
     }
 
-    fn plus(&self, rhs: &Self) -> Self {
-        if self.value < rhs.value {
-            Self::new(self.value)
-        } else {
-            Self::new(rhs.value)
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+        if rhs.as_ref().value < self.value {
+            self.value = rhs.as_ref().value;
         }
     }
 
-    fn times(&self, rhs: &Self) -> Self {
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
         let f1 = self.value();
-        let f2 = rhs.value();
+        let f2 = rhs.as_ref().value();
         if f1 == f32::INFINITY {
-            *self
         } else if f2 == f32::INFINITY {
-            *rhs
+            self.value = f2;
         } else {
-            Self::new(f1 + f2)
+            self.value += f2;
         }
     }
 
@@ -52,7 +53,12 @@ impl Semiring for TropicalWeight {
     }
 }
 
-add_mul_semiring!(TropicalWeight);
+impl AsRef<TropicalWeight> for TropicalWeight {
+    fn as_ref(&self) -> &TropicalWeight {
+        &self
+    }
+}
+
 display_semiring!(TropicalWeight);
 
 impl CompleteSemiring for TropicalWeight {}
@@ -68,8 +74,8 @@ impl StarSemiring for TropicalWeight {
 }
 
 impl WeaklyDivisibleSemiring for TropicalWeight {
-    fn inverse(&self) -> Self {
-        Self::new(-self.value)
+    fn inverse_assign(&mut self) {
+        self.value = -self.value;
     }
 
     fn divide(&self, rhs: &Self) -> Self {

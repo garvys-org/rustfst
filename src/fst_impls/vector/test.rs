@@ -127,7 +127,7 @@ mod tests {
         // Set all states as final
         states
             .iter()
-            .for_each(|v| fst.set_final(*v, ProbabilityWeight::ONE).unwrap());
+            .for_each(|v| fst.set_final(*v, ProbabilityWeight::one()).unwrap());
 
         // Number of final states should be n_states
         assert_eq!(fst.final_states_iter().count(), n_states);
@@ -179,9 +179,9 @@ mod tests {
         let s1 = fst.add_state();
         let s2 = fst.add_state();
 
-        fst.add_arc(s1, Arc::new(0, 0, ProbabilityWeight::ONE, s2))?;
-        fst.add_arc(s2, Arc::new(0, 0, ProbabilityWeight::ONE, s1))?;
-        fst.add_arc(s2, Arc::new(0, 0, ProbabilityWeight::ONE, s2))?;
+        fst.add_arc(s1, Arc::new(0, 0, ProbabilityWeight::one(), s2))?;
+        fst.add_arc(s2, Arc::new(0, 0, ProbabilityWeight::one(), s1))?;
+        fst.add_arc(s2, Arc::new(0, 0, ProbabilityWeight::one(), s2))?;
 
         assert_eq!(fst.num_arcs(s1)?, 1);
         assert_eq!(fst.num_arcs(s2)?, 2);

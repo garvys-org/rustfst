@@ -37,7 +37,7 @@ where
                     Arc::new(
                         old_arc.ilabel,
                         old_arc.olabel,
-                        old_arc.weight,
+                        old_arc.weight.clone(),
                         mapping_states[&old_arc.nextstate],
                     ),
                 )?;
@@ -104,7 +104,7 @@ where
 
     for p in fst_epsilon.states_iter() {
         for q in fst_epsilon.states_iter() {
-            if p != q && dists_fst_epsilon[p][q] != W::ZERO {
+            if p != q && dists_fst_epsilon[p][q] != W::zero() {
                 eps_closures[p].push((q, &dists_fst_epsilon[p][q]));
             }
         }
@@ -130,7 +130,7 @@ where
 
             if fst_no_epsilon.is_final(*q) {
                 if !fst_no_epsilon.is_final(p) {
-                    output_fst.set_final(p, W::ZERO)?;
+                    output_fst.set_final(p, W::zero())?;
                 }
                 let rho_prime_p = output_fst.final_weight(p).unwrap();
                 let rho_q = fst_no_epsilon.final_weight(*q).unwrap();

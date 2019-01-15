@@ -1,6 +1,6 @@
 mod all_pairs_shortest_distance;
-mod closure_plus;
-mod closure_star;
+mod arc_map;
+mod closure;
 mod composition;
 mod concat;
 mod connect;
@@ -16,10 +16,13 @@ mod single_source_shortest_distance;
 mod union;
 mod weight_pushing;
 
+/// Modules that provide structures implementing the `ArcMapper` trait.
+pub mod arc_mappers;
+
 pub use self::{
     all_pairs_shortest_distance::all_pairs_shortest_distance,
-    closure_plus::closure_plus,
-    closure_star::closure_star,
+    arc_map::{arc_map, ArcMapper},
+    closure::{closure_plus, closure_star},
     composition::compose,
     concat::concat,
     connect::connect,

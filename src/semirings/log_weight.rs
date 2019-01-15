@@ -1,5 +1,4 @@
 use std::f32;
-use std::ops::{Add, AddAssign, Mul, MulAssign};
 
 use crate::semirings::{
     CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
@@ -18,38 +17,41 @@ fn ln_pos_exp(x: f32) -> f32 {
 impl Semiring for LogWeight {
     type Type = f32;
 
-    const ZERO: Self = Self {
-        value: f32::INFINITY,
-    };
-    const ONE: Self = Self { value: 0.0 };
+    fn zero() -> Self {
+        Self {
+            value: f32::INFINITY,
+        }
+    }
+    fn one() -> Self {
+        Self { value: 0.0 }
+    }
 
     fn new(value: <Self as Semiring>::Type) -> Self {
         LogWeight { value }
     }
 
-    fn plus(&self, rhs: &Self) -> Self {
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
         let f1 = self.value();
-        let f2 = rhs.value();
-        if f1 == f32::INFINITY {
-            *rhs
+        let f2 = rhs.as_ref().value();
+        self.value = if f1 == f32::INFINITY {
+            f2
         } else if f2 == f32::INFINITY {
-            *self
+            f1
         } else if f1 > f2 {
-            Self::new(f2 - ln_pos_exp(f1 - f2))
+            f2 - ln_pos_exp(f1 - f2)
         } else {
-            Self::new(f1 - ln_pos_exp(f2 - f1))
+            f1 - ln_pos_exp(f2 - f1)
         }
     }
 
-    fn times(&self, rhs: &Self) -> Self {
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
         let f1 = self.value();
-        let f2 = rhs.value();
+        let f2 = rhs.as_ref().value();
         if f1 == f32::INFINITY {
-            *self
         } else if f2 == f32::INFINITY {
-            *rhs
+            self.value = f2;
         } else {
-            Self::new(f1 + f2)
+            self.value += f2;
         }
     }
 
@@ -62,7 +64,12 @@ impl Semiring for LogWeight {
     }
 }
 
-add_mul_semiring!(LogWeight);
+impl AsRef<LogWeight> for LogWeight {
+    fn as_ref(&self) -> &LogWeight {
+        &self
+    }
+}
+
 display_semiring!(LogWeight);
 
 impl CompleteSemiring for LogWeight {}
@@ -78,8 +85,8 @@ impl StarSemiring for LogWeight {
 }
 
 impl WeaklyDivisibleSemiring for LogWeight {
-    fn inverse(&self) -> Self {
-        Self::new(-self.value)
+    fn inverse_assign(&mut self) {
+        self.value = -self.value;
     }
 
     fn divide(&self, rhs: &Self) -> Self {

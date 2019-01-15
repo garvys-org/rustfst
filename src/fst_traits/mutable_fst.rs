@@ -1,7 +1,9 @@
+use std::collections::HashMap;
+
+use crate::algorithms::ArcMapper;
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::{Result, StateId};
-use std::collections::HashMap;
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
@@ -47,13 +49,13 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// assert_eq!(fst.final_weight(s1), None);
     /// assert_eq!(fst.final_weight(s2), None);
     ///
-    /// fst.set_final(s1, BooleanWeight::ONE);
-    /// assert_eq!(fst.final_weight(s1), Some(BooleanWeight::ONE));
+    /// fst.set_final(s1, BooleanWeight::one());
+    /// assert_eq!(fst.final_weight(s1), Some(BooleanWeight::one()));
     /// assert_eq!(fst.final_weight(s2), None);
     ///
-    /// fst.set_final(s2, BooleanWeight::ONE);
-    /// assert_eq!(fst.final_weight(s1), Some(BooleanWeight::ONE));
-    /// assert_eq!(fst.final_weight(s2), Some(BooleanWeight::ONE));
+    /// fst.set_final(s2, BooleanWeight::one());
+    /// assert_eq!(fst.final_weight(s1), Some(BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s2), Some(BooleanWeight::one()));
     /// ```
     fn set_final(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W) -> Result<()>;
 
@@ -157,6 +159,9 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// ```
     fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()>;
 
+    /// Retrieves a mutable reference to the final weight of a state (if the state is a final one).
+    fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut <Self as CoreFst>::W>;
+
     fn add_fst<F: ExpandedFst<W = Self::W>>(
         &mut self,
         fst_to_add: &F,
@@ -178,7 +183,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
                     Arc::new(
                         old_arc.ilabel,
                         old_arc.olabel,
-                        old_arc.weight,
+                        old_arc.weight.clone(),
                         mapping_states[&old_arc.nextstate],
                     ),
                 )?;
@@ -203,6 +208,11 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// The empty string is transduced to itself with weight `1` as well.
     fn closure_star(&mut self) {
         crate::algorithms::closure_star(self)
+    }
+
+    /// Maps an arc using a mapper function object. This function modifies its Fst input.
+    fn arc_map<M: ArcMapper<Self::W>>(&mut self, mapper: &mut M) {
+        crate::algorithms::arc_map(self, mapper)
     }
 }
 

@@ -19,7 +19,7 @@ use std::cmp;
 /// let labels_input = vec![32, 43, 21];
 /// let labels_output = vec![53, 18, 89];
 ///
-/// let fst : VectorFst<ProbabilityWeight> = transducer(&labels_input, &labels_output, ProbabilityWeight::ONE);
+/// let fst : VectorFst<ProbabilityWeight> = transducer(&labels_input, &labels_output, ProbabilityWeight::one());
 ///
 /// assert_eq!(fst.num_states(), 4);
 ///
@@ -32,11 +32,11 @@ use std::cmp;
 /// let s4 = fst_ref.add_state();
 ///
 /// fst_ref.set_start(s1).unwrap();
-/// fst_ref.set_final(s4, ProbabilityWeight::ONE).unwrap();
+/// fst_ref.set_final(s4, ProbabilityWeight::one()).unwrap();
 ///
-/// fst_ref.add_arc(s1, Arc::new(labels_input[0], labels_output[0], ProbabilityWeight::ONE, s2)).unwrap();
-/// fst_ref.add_arc(s2, Arc::new(labels_input[1], labels_output[1], ProbabilityWeight::ONE, s3)).unwrap();
-/// fst_ref.add_arc(s3, Arc::new(labels_input[2], labels_output[2], ProbabilityWeight::ONE, s4)).unwrap();
+/// fst_ref.add_arc(s1, Arc::new(labels_input[0], labels_output[0], ProbabilityWeight::one(), s2)).unwrap();
+/// fst_ref.add_arc(s2, Arc::new(labels_input[1], labels_output[1], ProbabilityWeight::one(), s3)).unwrap();
+/// fst_ref.add_arc(s3, Arc::new(labels_input[2], labels_output[2], ProbabilityWeight::one(), s4)).unwrap();
 ///
 /// assert_eq!(fst, fst_ref);
 /// ```
@@ -62,7 +62,7 @@ pub fn transducer<F: MutableFst>(
         // Can't fail as the state has just been added
         fst.add_arc(
             state_cour,
-            Arc::new(*i, *o, <F as CoreFst>::W::ONE, new_state),
+            Arc::new(*i, *o, <F as CoreFst>::W::one(), new_state),
         )
         .unwrap();
 
@@ -89,7 +89,7 @@ pub fn transducer<F: MutableFst>(
 ///
 /// let labels = vec![32, 43, 21];
 ///
-/// let fst : VectorFst<ProbabilityWeight> = acceptor(&labels, ProbabilityWeight::ONE);
+/// let fst : VectorFst<ProbabilityWeight> = acceptor(&labels, ProbabilityWeight::one());
 ///
 /// assert_eq!(fst.num_states(), 4);
 ///
@@ -102,11 +102,11 @@ pub fn transducer<F: MutableFst>(
 /// let s4 = fst_ref.add_state();
 ///
 /// fst_ref.set_start(s1).unwrap();
-/// fst_ref.set_final(s4, ProbabilityWeight::ONE).unwrap();
+/// fst_ref.set_final(s4, ProbabilityWeight::one()).unwrap();
 ///
-/// fst_ref.add_arc(s1, Arc::new(labels[0], labels[0], ProbabilityWeight::ONE, s2)).unwrap();
-/// fst_ref.add_arc(s2, Arc::new(labels[1], labels[1], ProbabilityWeight::ONE, s3)).unwrap();
-/// fst_ref.add_arc(s3, Arc::new(labels[2], labels[2], ProbabilityWeight::ONE, s4)).unwrap();
+/// fst_ref.add_arc(s1, Arc::new(labels[0], labels[0], ProbabilityWeight::one(), s2)).unwrap();
+/// fst_ref.add_arc(s2, Arc::new(labels[1], labels[1], ProbabilityWeight::one(), s3)).unwrap();
+/// fst_ref.add_arc(s3, Arc::new(labels[2], labels[2], ProbabilityWeight::one(), s4)).unwrap();
 ///
 /// assert_eq!(fst, fst_ref);
 ///
@@ -124,7 +124,7 @@ pub fn acceptor<F: MutableFst>(labels: &[Label], weight: F::W) -> F {
         // Can't fail as the state has just been added
         fst.add_arc(
             state_cour,
-            Arc::new(*l, *l, <F as CoreFst>::W::ONE, new_state),
+            Arc::new(*l, *l, <F as CoreFst>::W::one(), new_state),
         )
         .unwrap();
         state_cour = new_state;
@@ -220,35 +220,47 @@ pub fn acceptor<F: MutableFst>(labels: &[Label], weight: F::W) -> F {
 macro_rules! fst {
     ( $( $x:expr ),* ) => {
         {
+            fn semiring_one<W: Semiring>() -> W {
+                W::one()
+            }
             acceptor(
                 &vec![$($x),*],
-                Semiring::ONE
+                semiring_one()
             )
         }
     };
     ( $( $x:expr ),* => $( $y:expr ),* ) => {
         {
+            fn semiring_one<W: Semiring>() -> W {
+                W::one()
+            }
             transducer(
                 &vec![$($x),*],
                 &vec![$($y),*],
-                Semiring::ONE
+                semiring_one()
             )
         }
     };
     ( $( $x:expr ),* ; $weight:expr ) => {
         {
+            fn semiring_new<W: Semiring>(v: W::Type) -> W {
+                W::new(v)
+            }
             acceptor(
                 &vec![$($x),*],
-                Semiring::new($weight)
+                semiring_new($weight)
             )
         }
     };
     ( $( $x:expr ),* => $( $y:expr ),* ; $weight:expr ) => {
         {
+            fn semiring_new<W: Semiring>(v: W::Type) -> W {
+                W::new(v)
+            }
             transducer(
                 &vec![$($x),*],
                 &vec![$($y),*],
-                Semiring::new($weight)
+                semiring_new($weight)
             )
         }
     };

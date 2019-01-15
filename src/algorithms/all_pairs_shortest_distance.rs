@@ -30,9 +30,9 @@ use crate::Result;
 /// let dists = all_pairs_shortest_distance(&fst)?;
 ///
 /// assert_eq!(dists, vec![
-///     vec![IntegerWeight::ONE, IntegerWeight::new(18), IntegerWeight::new(18*55 + 21)],
-///     vec![IntegerWeight::ZERO, IntegerWeight::ONE, IntegerWeight::new(55)],
-///     vec![IntegerWeight::ZERO, IntegerWeight::ZERO, IntegerWeight::ONE],
+///     vec![IntegerWeight::one(), IntegerWeight::new(18), IntegerWeight::new(18*55 + 21)],
+///     vec![IntegerWeight::zero(), IntegerWeight::one(), IntegerWeight::new(55)],
+///     vec![IntegerWeight::zero(), IntegerWeight::zero(), IntegerWeight::one()],
 /// ]);
 /// # Ok(())
 /// # }
@@ -45,7 +45,7 @@ where
     let num_states = fst.num_states();
 
     // Distance between all states are initialized to zero
-    let mut d = vec![vec![<F as CoreFst>::W::ZERO; num_states]; num_states];
+    let mut d = vec![vec![<F as CoreFst>::W::zero(); num_states]; num_states];
 
     // Iterator over the wFST to add the weight of the arcs
     for state_id in fst.states_iter() {
@@ -53,7 +53,7 @@ where
             let nextstate = arc.nextstate;
             let weight = &arc.weight;
 
-            d[state_id][nextstate] += *weight;
+            d[state_id][nextstate].plus_assign(weight);
         }
     }
 
@@ -62,7 +62,7 @@ where
         for i in fst.states_iter().filter(|s| *s != k) {
             for j in fst.states_iter().filter(|s| *s != k) {
                 let a = (d[i][k].times(&closure_d_k_k)).times(&d[k][j]);
-                d[i][j] += a;
+                d[i][j].plus_assign(a);
             }
         }
         for i in fst.states_iter().filter(|s| *s != k) {
