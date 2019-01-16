@@ -20,6 +20,8 @@ edition = '2018'
 failure = '0.1'
 itertools = '0.7'
 nom = '4.1'
+num-traits = '0.2'
+ordered-float = "1"
 
 [dev-dependencies]
 counter = '0.4'

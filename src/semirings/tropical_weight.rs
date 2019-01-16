@@ -5,9 +5,11 @@ use crate::semirings::{
 };
 use crate::KDELTA;
 
-#[derive(Clone, Debug, PartialOrd, Default, Copy)]
+use ordered_float::OrderedFloat;
+
+#[derive(Clone, Debug, PartialOrd, Default, Copy, Hash, Eq)]
 pub struct TropicalWeight {
-    value: f32,
+    value: OrderedFloat<f32>,
 }
 
 impl Semiring for TropicalWeight {
@@ -15,16 +17,20 @@ impl Semiring for TropicalWeight {
 
     fn zero() -> Self {
         Self {
-            value: f32::INFINITY,
+            value: OrderedFloat(f32::INFINITY),
         }
     }
 
     fn one() -> Self {
-        Self { value: 0.0 }
+        Self {
+            value: OrderedFloat(0.0),
+        }
     }
 
     fn new(value: <Self as Semiring>::Type) -> Self {
-        TropicalWeight { value }
+        TropicalWeight {
+            value: OrderedFloat(value),
+        }
     }
 
     fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
@@ -38,18 +44,18 @@ impl Semiring for TropicalWeight {
         let f2 = rhs.as_ref().value();
         if f1 == f32::INFINITY {
         } else if f2 == f32::INFINITY {
-            self.value = f2;
+            self.value.0 = f2;
         } else {
-            self.value += f2;
+            self.value.0 += f2;
         }
     }
 
     fn value(&self) -> Self::Type {
-        self.value
+        self.value.0
     }
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
-        self.value = value
+        self.value.0 = value
     }
 }
 
@@ -75,11 +81,11 @@ impl StarSemiring for TropicalWeight {
 
 impl WeaklyDivisibleSemiring for TropicalWeight {
     fn inverse_assign(&mut self) {
-        self.value = -self.value;
+        self.value.0 = -self.value.0;
     }
 
     fn divide(&self, rhs: &Self) -> Self {
-        Self::new(self.value - rhs.value)
+        Self::new(self.value.0 - rhs.value.0)
     }
 }
 
