@@ -5,6 +5,7 @@ mod composition;
 mod concat;
 mod connect;
 mod determinization;
+mod encode;
 mod epsilon_removal;
 mod inversion;
 mod isomorphic;
@@ -26,6 +27,7 @@ pub use self::{
     composition::compose,
     concat::concat,
     connect::connect,
+    encode::encode,
     epsilon_removal::rm_epsilon,
     inversion::invert,
     isomorphic::isomorphic,
