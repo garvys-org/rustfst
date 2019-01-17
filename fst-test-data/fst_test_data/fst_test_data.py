@@ -93,6 +93,9 @@ class FstTestData(object):
         self.compute_arc_map_identity("plus", weight=1.5)
         self.compute_arc_map_identity("times", weight=1.5)
 
+        print("Encode")
+        self.compute_encode()
+
         dump_json(self.config, os.path.join(self.path_dir, "metadata.json"))
 
         print("Done\n")
@@ -141,3 +144,8 @@ class FstTestData(object):
     def compute_arc_map_identity(self, map_type, weight=None):
         fst_out = p.arcmap(self.raw_fst.copy(), map_type=map_type, weight=weight)
         self.add_data_to_config("arc_map_" + map_type, fst_out.text())
+
+    def compute_encode(self):
+        mapper = p.EncodeMapper(encode_labels=True, encode_weights=True)
+        fst_out = self.raw_fst.copy().encode(mapper)
+        self.add_data_to_config("encode", fst_out.text())

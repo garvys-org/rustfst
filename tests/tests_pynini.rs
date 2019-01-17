@@ -10,7 +10,7 @@ use rustfst::algorithms::arc_mappers::{
     QuantizeMapper, RmWeightMapper, TimesMapper,
 };
 use rustfst::algorithms::{
-    connect, invert, isomorphic, project, push_weights, reverse, rm_epsilon, ProjectType,
+    connect, encode, invert, isomorphic, project, push_weights, reverse, rm_epsilon, ProjectType,
     ReweightType,
 };
 use rustfst::fst_impls::VectorFst;
@@ -50,6 +50,7 @@ struct ParsedTestData {
     arc_map_plus: OperationResult,
     arc_map_times: OperationResult,
     arc_map_quantize: OperationResult,
+    encode: OperationResult,
 }
 
 struct TestData<W: Semiring<Type = f32>, F: TextParser<W = W>> {
@@ -72,6 +73,7 @@ struct TestData<W: Semiring<Type = f32>, F: TextParser<W = W>> {
     arc_map_plus: F,
     arc_map_times: F,
     arc_map_quantize: F,
+    encode: F,
 }
 
 impl<W: Semiring<Type = f32>, F: TextParser<W = W>> TestData<W, F> {
@@ -95,6 +97,7 @@ impl<W: Semiring<Type = f32>, F: TextParser<W = W>> TestData<W, F> {
             arc_map_plus: data.arc_map_plus.parse(),
             arc_map_times: data.arc_map_times.parse(),
             arc_map_quantize: data.arc_map_quantize.parse(),
+            encode: data.encode.parse(),
         }
     }
 }
@@ -151,6 +154,8 @@ fn run_test_pynini(test_name: &str) -> Result<()> {
     test_arc_map_times(&test_data)?;
 
     test_arc_map_quantize(&test_data)?;
+
+    test_encode(&test_data)?;
 
     Ok(())
 }
@@ -284,7 +289,7 @@ fn test_arc_map_identity(
     // ArcMap IdentityMapper
     let mut fst_arc_map_identity = test_data.raw.clone();
     let mut identity_mapper = IdentityArcMapper {};
-    fst_arc_map_identity.arc_map(&mut identity_mapper);
+    fst_arc_map_identity.arc_map(&mut identity_mapper)?;
     assert_eq!(
         test_data.arc_map_identity,
         fst_arc_map_identity,
@@ -304,7 +309,7 @@ fn test_arc_map_rmweight(
     // ArcMap RmWeightMapper
     let mut fst_arc_map_rmweight = test_data.raw.clone();
     let mut rmweight_mapper = RmWeightMapper {};
-    fst_arc_map_rmweight.arc_map(&mut rmweight_mapper);
+    fst_arc_map_rmweight.arc_map(&mut rmweight_mapper)?;
     assert_eq!(
         test_data.arc_map_rmweight,
         fst_arc_map_rmweight,
@@ -324,7 +329,7 @@ fn test_arc_map_invert(
     // ArcMap InvertWeightMapper
     let mut fst_arc_map_invert = test_data.raw.clone();
     let mut invertweight_mapper = InvertWeightMapper {};
-    fst_arc_map_invert.arc_map(&mut invertweight_mapper);
+    fst_arc_map_invert.arc_map(&mut invertweight_mapper)?;
     assert_eq!(
         test_data.arc_map_invert,
         fst_arc_map_invert,
@@ -343,7 +348,7 @@ fn test_arc_map_input_epsilon(
 ) -> Result<()> {
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = InputEpsilonMapper {};
-    fst_arc_map.arc_map(&mut mapper);
+    fst_arc_map.arc_map(&mut mapper)?;
     assert_eq!(
         test_data.arc_map_input_epsilon,
         fst_arc_map,
@@ -362,7 +367,7 @@ fn test_arc_map_output_epsilon(
 ) -> Result<()> {
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = OutputEpsilonMapper {};
-    fst_arc_map.arc_map(&mut mapper);
+    fst_arc_map.arc_map(&mut mapper)?;
     assert_eq!(
         test_data.arc_map_output_epsilon,
         fst_arc_map,
@@ -381,7 +386,7 @@ fn test_arc_map_plus(
 ) -> Result<()> {
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = PlusMapper::new(1.5);
-    fst_arc_map.arc_map(&mut mapper);
+    fst_arc_map.arc_map(&mut mapper)?;
     assert_eq!(
         test_data.arc_map_plus,
         fst_arc_map,
@@ -400,7 +405,7 @@ fn test_arc_map_times(
 ) -> Result<()> {
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = TimesMapper::new(1.5);
-    fst_arc_map.arc_map(&mut mapper);
+    fst_arc_map.arc_map(&mut mapper)?;
     assert_eq!(
         test_data.arc_map_times,
         fst_arc_map,
@@ -419,7 +424,7 @@ fn test_arc_map_quantize(
 ) -> Result<()> {
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = QuantizeMapper {};
-    fst_arc_map.arc_map(&mut mapper);
+    fst_arc_map.arc_map(&mut mapper)?;
     assert_eq!(
         test_data.arc_map_quantize,
         fst_arc_map,
@@ -429,6 +434,18 @@ fn test_arc_map_quantize(
             fst_arc_map,
             "ArcMap QuantizeMapper"
         )
+    );
+    Ok(())
+}
+
+fn test_encode(test_data: &TestData<TropicalWeight, VectorFst<TropicalWeight>>) -> Result<()> {
+    let mut fst_encoded = test_data.raw.clone();
+    encode(&mut fst_encoded, true, true)?;
+    assert_eq!(
+        test_data.encode,
+        fst_encoded,
+        "{}",
+        error_message_fst!(test_data.encode, fst_encoded, "Encode")
     );
     Ok(())
 }

@@ -25,6 +25,9 @@
     "arc_map_times": {
         "result": "0\t1\t12\t25\t1.5\n1\t1.5\n"
     }, 
+    "encode": {
+        "result": "0\t1\t1\t1\n1\t2\t2\t2\n2\n"
+    }, 
     "raw": {
         "result": "0\t1\t12\t25\n1\n"
     }, 
