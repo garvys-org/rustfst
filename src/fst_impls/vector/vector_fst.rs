@@ -186,6 +186,15 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         }
     }
 
+    fn delete_final_weight(&mut self, source: usize) -> Result<()> {
+        if let Some(state) = self.states.get_mut(source) {
+            state.final_weight = None;
+        } else {
+            bail!("State {:?} doesn't exist", source);
+        }
+        Ok(())
+    }
+
     fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut W> {
         if let Some(state) = self.states.get_mut(state_id) {
             state.final_weight.as_mut()
