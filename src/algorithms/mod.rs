@@ -22,12 +22,12 @@ pub mod arc_mappers;
 
 pub use self::{
     all_pairs_shortest_distance::all_pairs_shortest_distance,
-    arc_map::{arc_map, ArcMapper},
+    arc_map::{arc_map, ArcMapper, FinalArc, MapFinalAction},
     closure::{closure_plus, closure_star},
     composition::compose,
     concat::concat,
     connect::connect,
-    encode::encode,
+    encode::{decode, encode},
     epsilon_removal::rm_epsilon,
     inversion::invert,
     isomorphic::isomorphic,
