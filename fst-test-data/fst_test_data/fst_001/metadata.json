@@ -1,4 +1,88 @@
 {
+    "arc_map_times": {
+        "result": "0\t1\t12\t25\t1.5\n1\t1.5\n"
+    }, 
+    "raw": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
+    "connect": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
+    "arc_map_input_epsilon": {
+        "result": "0\t1\t0\t25\n1\n"
+    }, 
+    "invert": {
+        "result": "0\t1\t25\t12\n1\n"
+    }, 
+    "encode_decode": [
+        {
+            "encode_labels": true, 
+            "result": "0\t1\t12\t25\n1\n", 
+            "encode_weights": true
+        }, 
+        {
+            "encode_labels": true, 
+            "result": "0\t1\t12\t25\n1\n", 
+            "encode_weights": false
+        }, 
+        {
+            "encode_labels": false, 
+            "result": "0\t1\t12\t25\n1\n", 
+            "encode_weights": true
+        }, 
+        {
+            "encode_labels": false, 
+            "result": "0\t1\t12\t25\n1\n", 
+            "encode_weights": false
+        }
+    ], 
+    "arc_map_rmweight": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
+    "arc_map_output_epsilon": {
+        "result": "0\t1\t12\t0\n1\n"
+    }, 
+    "encode": [
+        {
+            "encode_labels": true, 
+            "result": "0\t1\t1\t1\n1\t2\t2\t2\n2\n", 
+            "encode_weights": true
+        }, 
+        {
+            "encode_labels": true, 
+            "result": "0\t1\t1\t1\n1\n", 
+            "encode_weights": false
+        }, 
+        {
+            "encode_labels": false, 
+            "result": "0\t1\t1\t25\n1\t2\t2\t0\n2\n", 
+            "encode_weights": true
+        }, 
+        {
+            "encode_labels": false, 
+            "result": "0\t1\t1\t25\n1\n", 
+            "encode_weights": false
+        }
+    ], 
+    "arc_map_identity": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
+    "weight_type": "tropical", 
+    "weight_pushing_final": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
+    "project_output": {
+        "result": "0\t1\t25\t25\n1\n"
+    }, 
+    "weight_pushing_initial": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
+    "project_input": {
+        "result": "0\t1\t12\t12\n1\n"
+    }, 
+    "reverse": {
+        "result": "0\t2\t0\t0\n1\n2\t1\t12\t25\n"
+    }, 
     "arc_map_invert": {
         "result": "0\t1\t12\t25\n1\n"
     }, 
@@ -12,50 +96,10 @@
         "result": "0\t1\t12\t25\n1\n"
     }, 
     "name": "fst_001", 
-    "arc_map_rmweight": {
-        "result": "0\t1\t12\t25\n1\n"
-    }, 
-    "arc_map_identity": {
-        "result": "0\t1\t12\t25\n1\n"
-    }, 
-    "invert": {
-        "result": "0\t1\t25\t12\n1\n"
-    }, 
-    "weight_type": "tropical", 
-    "arc_map_times": {
-        "result": "0\t1\t12\t25\t1.5\n1\t1.5\n"
-    }, 
-    "raw": {
-        "result": "0\t1\t12\t25\n1\n"
-    }, 
-    "project_output": {
-        "result": "0\t1\t25\t25\n1\n"
-    }, 
-    "arc_map_output_epsilon": {
-        "result": "0\t1\t12\t0\n1\n"
-    }, 
-    "connect": {
-        "result": "0\t1\t12\t25\n1\n"
-    }, 
-    "weight_pushing_initial": {
-        "result": "0\t1\t12\t25\n1\n"
-    }, 
-    "weight_pushing_final": {
+    "arc_map_plus": {
         "result": "0\t1\t12\t25\n1\n"
     }, 
     "arc_map_quantize": {
         "result": "0\t1\t12\t25\n1\n"
-    }, 
-    "project_input": {
-        "result": "0\t1\t12\t12\n1\n"
-    }, 
-    "arc_map_input_epsilon": {
-        "result": "0\t1\t0\t25\n1\n"
-    }, 
-    "arc_map_plus": {
-        "result": "0\t1\t12\t25\n1\n"
-    }, 
-    "reverse": {
-        "result": "0\t2\t0\t0\n1\n2\t1\t12\t25\n"
     }
 }

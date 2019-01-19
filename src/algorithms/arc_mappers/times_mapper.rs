@@ -1,4 +1,4 @@
-use crate::algorithms::ArcMapper;
+use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction};
 use crate::semirings::Semiring;
 use crate::Arc;
 
@@ -13,14 +13,22 @@ impl<W: Semiring> TimesMapper<W> {
             to_multiply: W::new(value),
         }
     }
+
+    pub fn map_weight(&self, weight: &mut W) {
+        weight.times_assign(&self.to_multiply);
+    }
 }
 
 impl<S: Semiring> ArcMapper<S> for TimesMapper<S> {
     fn arc_map(&mut self, arc: &mut Arc<S>) {
-        self.final_weight_map(&mut arc.weight);
+        self.map_weight(&mut arc.weight);
     }
 
-    fn final_weight_map(&mut self, weight: &mut S) {
-        weight.times_assign(&self.to_multiply);
+    fn final_arc_map(&mut self, final_arc: &mut FinalArc<S>) {
+        self.map_weight(&mut final_arc.weight)
+    }
+
+    fn final_action(&self) -> MapFinalAction {
+        MapFinalAction::MapNoSuperfinal
     }
 }

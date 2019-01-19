@@ -1,7 +1,9 @@
+use failure::Fallible;
+
 use crate::arc::Arc;
 use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Result, EPS_LABEL};
+use crate::EPS_LABEL;
 
 /// Reverses an FST. The reversed result is written to an output mutable FST.
 /// If A transduces string x to y with weight a, then the reverse of A
@@ -13,7 +15,7 @@ use crate::{Result, EPS_LABEL};
 /// except having the reversed Weight type.
 ///
 /// A superinitial state is always created.
-pub fn reverse<W, F1, F2>(fst: &F1) -> Result<F2>
+pub fn reverse<W, F1, F2>(fst: &F1) -> Fallible<F2>
 where
     W: Semiring,
     F1: ExpandedFst<W = W>,

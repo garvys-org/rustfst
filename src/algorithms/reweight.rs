@@ -1,6 +1,7 @@
+use failure::Fallible;
+
 use crate::fst_traits::{ExpandedFst, FinalStatesIterator, Fst, MutableFst};
 use crate::semirings::{Semiring, WeaklyDivisibleSemiring};
-use crate::Result;
 
 /// Different types of reweighting.
 pub enum ReweightType {
@@ -26,7 +27,7 @@ macro_rules! state_to_dist {
 /// of potential q, is reweighted by p^-1 \otimes (w \otimes q) when reweighting
 /// torwards the initial state, and by (p \otimes w) \otimes q^-1 when
 /// reweighting towards the final states.
-pub fn reweight<F>(fst: &mut F, potentials: &[F::W], reweight_type: ReweightType) -> Result<()>
+pub fn reweight<F>(fst: &mut F, potentials: &[F::W], reweight_type: ReweightType) -> Fallible<()>
 where
     F: Fst + ExpandedFst + MutableFst,
     F::W: WeaklyDivisibleSemiring,

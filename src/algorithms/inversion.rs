@@ -1,6 +1,9 @@
 use std::mem::swap;
 
+use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction};
 use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::semirings::Semiring;
+use crate::Arc;
 
 /// This operation inverts the transduction corresponding to an FST
 /// by exchanging the FST's input and output labels.
@@ -18,25 +21,37 @@ use crate::fst_traits::{ExpandedFst, MutableFst};
 /// assert_eq!(fst, fst![3 => 2]);
 /// ```
 pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) {
-    let states: Vec<_> = fst.states_iter().collect();
-    for state_id in states {
-        // Can't fail
-        for arc in fst.arcs_iter_mut(state_id).unwrap() {
-            swap(&mut arc.ilabel, &mut arc.olabel);
-        }
+    let mut mapper = InvertMapper {};
+    fst.arc_map(&mut mapper).unwrap();
+}
+
+struct InvertMapper {}
+
+impl<W: Semiring> ArcMapper<W> for InvertMapper {
+    fn arc_map(&mut self, arc: &mut Arc<W>) {
+        swap(&mut arc.ilabel, &mut arc.olabel);
+    }
+
+    fn final_arc_map(&mut self, _final_arc: &mut FinalArc<W>) {}
+
+    fn final_action(&self) -> MapFinalAction {
+        MapFinalAction::MapNoSuperfinal
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::fst_traits::PathsIterator;
-    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
-    use crate::Result;
+
     use counter::Counter;
 
+    use failure::Fallible;
+
+    use crate::fst_traits::PathsIterator;
+    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
+
     #[test]
-    fn test_invert_generic() -> Result<()> {
+    fn test_invert_generic() -> Fallible<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
 

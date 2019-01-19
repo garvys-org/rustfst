@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
-use failure::format_err;
+use failure::{format_err, Fallible};
 
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, ExpandedFst, FinalStatesIterator, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Result, StateId};
+use crate::StateId;
 
 /// Performs the union of two wFSTs. If A transduces string `x` to `y` with weight `a`
 /// and `B` transduces string `w` to `v` with weight `b`, then their union transduces `x` to `y`
@@ -14,7 +14,7 @@ use crate::{Result, StateId};
 /// # Example
 /// ```
 /// # #[macro_use] extern crate rustfst;
-/// # use rustfst::Result;
+/// # use failure::Fallible;
 /// # use rustfst::utils::transducer;
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
@@ -22,7 +22,7 @@ use crate::{Result, StateId};
 /// # use rustfst::FstPath;
 /// # use rustfst::algorithms::union;
 /// # use std::collections::HashSet;
-/// # fn main() -> Result<()> {
+/// # fn main() -> Fallible<()> {
 /// let fst_a : VectorFst<IntegerWeight> = fst![2 => 3];
 /// let fst_b : VectorFst<IntegerWeight> = fst![6 => 5];
 ///
@@ -37,7 +37,7 @@ use crate::{Result, StateId};
 /// # Ok(())
 /// # }
 /// ```
-pub fn union<W, F1, F2, F3>(fst_1: &F1, fst_2: &F2) -> Result<F3>
+pub fn union<W, F1, F2, F3>(fst_1: &F1, fst_2: &F2) -> Fallible<F3>
 where
     W: Semiring,
     F1: ExpandedFst<W = W>,
@@ -65,7 +65,7 @@ fn add_epsilon_arc_to_initial_state<F1, F2>(
     fst: &F1,
     mapping: &HashMap<StateId, StateId>,
     fst_out: &mut F2,
-) -> Result<()>
+) -> Fallible<()>
 where
     F1: ExpandedFst,
     F2: MutableFst,
@@ -89,7 +89,7 @@ fn set_new_final_states<W, F1, F2>(
     fst: &F1,
     mapping: &HashMap<StateId, StateId>,
     fst_out: &mut F2,
-) -> Result<()>
+) -> Fallible<()>
 where
     W: Semiring,
     F1: ExpandedFst<W = W>,
@@ -121,7 +121,7 @@ mod tests {
     use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
-    fn test_union_generic() -> Result<()> {
+    fn test_union_generic() -> Fallible<()> {
         for data in get_vector_fsts_for_tests().combinations(2) {
             let fst_1 = &data[0].fst;
             let fst_2 = &data[1].fst;

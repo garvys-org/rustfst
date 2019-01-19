@@ -1,10 +1,12 @@
 use std::collections::BTreeMap;
 use std::collections::{HashSet, VecDeque};
 
+use failure::Fallible;
+
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{Semiring, WeaklyDivisibleSemiring};
-use crate::{Label, Result, StateId};
+use crate::{Label, StateId};
 
 // TODO : WIP
 
@@ -34,7 +36,7 @@ impl<W: Semiring> WeightedSubset<W> {
         self.pairs.push(PairStateWeight::new(state, weight));
     }
 
-    pub fn input_labels<F: ExpandedFst>(&self, fst: &F) -> Result<HashSet<Label>> {
+    pub fn input_labels<F: ExpandedFst>(&self, fst: &F) -> Fallible<HashSet<Label>> {
         let mut set = HashSet::new();
         for pair in &self.pairs {
             let state = pair.state;
@@ -45,7 +47,7 @@ impl<W: Semiring> WeightedSubset<W> {
         Ok(set)
     }
 
-    pub fn nextstates<F: ExpandedFst>(&self, x: Label, fst: &F) -> Result<HashSet<StateId>> {
+    pub fn nextstates<F: ExpandedFst>(&self, x: Label, fst: &F) -> Fallible<HashSet<StateId>> {
         let mut set = HashSet::new();
         for pair in &self.pairs {
             let state = pair.state;
@@ -63,7 +65,7 @@ fn compute_weight<F: ExpandedFst>(
     x: Label,
     weighted_subset: &WeightedSubset<<F as CoreFst>::W>,
     fst: &F,
-) -> Result<<F as CoreFst>::W> {
+) -> Fallible<<F as CoreFst>::W> {
     let mut w_prime = None;
 
     for pair in &weighted_subset.pairs {
@@ -90,7 +92,7 @@ fn compute_new_weighted_subset<W, F>(
     w_prime: &W,
     weighted_subset: &WeightedSubset<W>,
     fst: &F,
-) -> Result<WeightedSubset<W>>
+) -> Fallible<WeightedSubset<W>>
 where
     W: WeaklyDivisibleSemiring,
     F: ExpandedFst<W = W>,
@@ -122,7 +124,7 @@ where
 use std::collections::btree_map::Entry;
 
 #[allow(unused)]
-pub fn determinize<W, F1, F2>(fst_in: &F1) -> Result<F2>
+pub fn determinize<W, F1, F2>(fst_in: &F1) -> Fallible<F2>
 where
     W: WeaklyDivisibleSemiring + Ord + Eq,
     F1: ExpandedFst<W = W>,

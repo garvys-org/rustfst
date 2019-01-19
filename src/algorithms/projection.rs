@@ -1,4 +1,7 @@
+use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction};
 use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::semirings::Semiring;
+use crate::Arc;
 
 /// Different types of labels projection in a FST.
 pub enum ProjectType {
@@ -14,12 +17,12 @@ pub enum ProjectType {
 /// # Example : Project input
 /// ```
 /// # #[macro_use] extern crate rustfst;
-/// # use rustfst::Result;
+/// # use failure::Fallible;
 /// # use rustfst::utils::{acceptor, transducer};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::{project, ProjectType};
-/// # fn main() -> Result<()> {
+/// # fn main() -> Fallible<()> {
 /// let mut fst : VectorFst<IntegerWeight> = fst![2 => 3];
 /// project(&mut fst, ProjectType::ProjectInput);
 ///
@@ -31,12 +34,12 @@ pub enum ProjectType {
 /// # Example : Project output
 /// ```
 /// # #[macro_use] extern crate rustfst;
-/// # use rustfst::Result;
+/// # use failure::Fallible;
 /// # use rustfst::utils::{acceptor, transducer};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::{project, ProjectType};
-/// # fn main() -> Result<()> {
+/// # fn main() -> Fallible<()> {
 /// let mut fst : VectorFst<IntegerWeight> = fst![2 => 3];
 /// project(&mut fst, ProjectType::ProjectOutput);
 ///
@@ -45,15 +48,26 @@ pub enum ProjectType {
 /// # }
 /// ```
 pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_type: ProjectType) {
-    let states: Vec<_> = fst.states_iter().collect();
-    for state_id in states {
-        // Can't fail
-        for arc in fst.arcs_iter_mut(state_id).unwrap() {
-            match project_type {
-                ProjectType::ProjectInput => arc.olabel = arc.ilabel,
-                ProjectType::ProjectOutput => arc.ilabel = arc.olabel,
-            };
-        }
+    let mut mapper = ProjectMapper { project_type };
+    fst.arc_map(&mut mapper).unwrap();
+}
+
+struct ProjectMapper {
+    project_type: ProjectType,
+}
+
+impl<W: Semiring> ArcMapper<W> for ProjectMapper {
+    fn arc_map(&mut self, arc: &mut Arc<W>) {
+        match self.project_type {
+            ProjectType::ProjectInput => arc.olabel = arc.ilabel,
+            ProjectType::ProjectOutput => arc.ilabel = arc.olabel,
+        };
+    }
+
+    fn final_arc_map(&mut self, _final_arc: &mut FinalArc<W>) {}
+
+    fn final_action(&self) -> MapFinalAction {
+        MapFinalAction::MapNoSuperfinal
     }
 }
 
@@ -63,12 +77,13 @@ mod tests {
 
     use counter::Counter;
 
+    use failure::Fallible;
+
     use crate::fst_traits::PathsIterator;
     use crate::test_data::vector_fst::get_vector_fsts_for_tests;
-    use crate::Result;
 
     #[test]
-    fn test_projection_input_generic() -> Result<()> {
+    fn test_projection_input_generic() -> Fallible<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
 
@@ -95,7 +110,7 @@ mod tests {
     }
 
     #[test]
-    fn test_projection_output_generic() -> Result<()> {
+    fn test_projection_output_generic() -> Fallible<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
 

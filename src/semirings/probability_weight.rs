@@ -1,41 +1,51 @@
+use std::hash::{Hash, Hasher};
+
+use ordered_float::OrderedFloat;
+
 use crate::semirings::{
     CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::KDELTA;
 
-#[derive(Clone, Debug, PartialOrd, Default, Copy)]
+#[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
 pub struct ProbabilityWeight {
-    value: f32,
+    value: OrderedFloat<f32>,
 }
 
 impl Semiring for ProbabilityWeight {
     type Type = f32;
 
     fn zero() -> Self {
-        Self { value: 0.0 }
+        Self {
+            value: OrderedFloat(0.0),
+        }
     }
     fn one() -> Self {
-        Self { value: 1.0 }
+        Self {
+            value: OrderedFloat(1.0),
+        }
     }
 
     fn new(value: <Self as Semiring>::Type) -> Self {
-        ProbabilityWeight { value }
+        ProbabilityWeight {
+            value: OrderedFloat(value),
+        }
     }
 
     fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
-        self.value += rhs.as_ref().value;
+        self.value.0 += rhs.as_ref().value.0;
     }
 
     fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
-        self.value *= rhs.as_ref().value;
+        self.value.0 *= rhs.as_ref().value.0;
     }
 
     fn value(&self) -> Self::Type {
-        self.value
+        self.value.into_inner()
     }
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
-        self.value = value
+        self.value.0 = value
     }
 }
 
@@ -51,22 +61,22 @@ impl CompleteSemiring for ProbabilityWeight {}
 
 impl StarSemiring for ProbabilityWeight {
     fn closure(&self) -> Self {
-        Self::new(1.0 / (1.0 - self.value))
+        Self::new(1.0 / (1.0 - self.value.0))
     }
 }
 
 impl WeaklyDivisibleSemiring for ProbabilityWeight {
     fn inverse_assign(&mut self) {
         // May panic if self.value == 0
-        self.value = 1.0 / self.value;
+        self.value.0 = 1.0 / self.value.0;
     }
 
     fn divide(&self, rhs: &Self) -> Self {
         // May panic if rhs.value == 0.0
-        Self::new(self.value / rhs.value)
+        Self::new(self.value.0 / rhs.value.0)
     }
 }
 
 impl WeightQuantize for ProbabilityWeight {}
 
-partial_eq_f32!(ProbabilityWeight);
+partial_eq_and_hash_f32!(ProbabilityWeight);

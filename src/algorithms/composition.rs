@@ -2,11 +2,12 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::collections::VecDeque;
 
+use failure::Fallible;
+
 use crate::arc::Arc;
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::itertools::iproduct;
 use crate::semirings::Semiring;
-use crate::Result;
 
 /// This operation computes the composition of two transducers.
 /// If `A` transduces string `x` to `y` with weight `a` and `B` transduces `y` to `z`
@@ -15,12 +16,12 @@ use crate::Result;
 /// # Example
 /// ```
 /// # #[macro_use] extern crate rustfst;
-/// # use rustfst::Result;
+/// # use failure::Fallible;
 /// # use rustfst::utils::transducer;
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::compose;
-/// # fn main() -> Result<()> {
+/// # fn main() -> Fallible<()> {
 /// let fst_1 : VectorFst<IntegerWeight> = fst![1,2 => 2,3];
 ///
 /// let fst_2 : VectorFst<IntegerWeight> = fst![2,3 => 3,4];
@@ -32,7 +33,7 @@ use crate::Result;
 /// # Ok(())
 /// # }
 /// ```
-pub fn compose<W, F1, F2, F3>(fst_1: &F1, fst_2: &F2) -> Result<F3>
+pub fn compose<W, F1, F2, F3>(fst_1: &F1, fst_2: &F2) -> Fallible<F3>
 where
     W: Semiring,
     F1: ExpandedFst<W = W>,

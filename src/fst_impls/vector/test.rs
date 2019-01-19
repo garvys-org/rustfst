@@ -2,6 +2,8 @@
 mod tests {
     use rand::{rngs::StdRng, Rng, SeedableRng};
 
+    use failure::Fallible;
+
     use crate::arc::Arc;
     use crate::fst_impls::VectorFst;
     use crate::fst_traits::{
@@ -10,10 +12,9 @@ mod tests {
     };
     use crate::semirings::{ProbabilityWeight, Semiring};
     use crate::test_data::text_fst::get_test_data_for_text_parser;
-    use crate::Result;
 
     #[test]
-    fn test_small_fst() -> Result<()> {
+    fn test_small_fst() -> Fallible<()> {
         let mut fst = VectorFst::new();
 
         // States
@@ -54,7 +55,7 @@ mod tests {
     }
 
     #[test]
-    fn test_mutable_iter_arcs_small() -> Result<()> {
+    fn test_mutable_iter_arcs_small() -> Fallible<()> {
         let mut fst = VectorFst::new();
 
         // States
@@ -90,7 +91,7 @@ mod tests {
     }
 
     #[test]
-    fn test_start_states() -> Result<()> {
+    fn test_start_states() -> Fallible<()> {
         let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         let n_states = 1000;
@@ -113,7 +114,7 @@ mod tests {
     }
 
     #[test]
-    fn test_only_final_states() -> Result<()> {
+    fn test_only_final_states() -> Fallible<()> {
         let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         let n_states = 1000;
@@ -136,7 +137,7 @@ mod tests {
     }
 
     #[test]
-    fn test_final_weight() -> Result<()> {
+    fn test_final_weight() -> Fallible<()> {
         let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         let n_states = 1000;
@@ -173,7 +174,7 @@ mod tests {
     }
 
     #[test]
-    fn test_del_state_arcs() -> Result<()> {
+    fn test_del_state_arcs() -> Fallible<()> {
         let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         let s1 = fst.add_state();
@@ -198,7 +199,7 @@ mod tests {
     }
 
     #[test]
-    fn test_deleting_twice_same_state() -> Result<()> {
+    fn test_deleting_twice_same_state() -> Fallible<()> {
         let mut fst1 = VectorFst::<ProbabilityWeight>::new();
 
         let s = fst1.add_state();
@@ -235,7 +236,7 @@ mod tests {
     }
 
     #[test]
-    fn test_del_states_big() -> Result<()> {
+    fn test_del_states_big() -> Fallible<()> {
         let n_states = 1000;
         let n_states_to_delete = 300;
 
@@ -260,7 +261,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_text() -> Result<()> {
+    fn test_parse_text() -> Fallible<()> {
         for data in get_test_data_for_text_parser() {
             let name = data.name;
             let path_serialized_fst = data.path;
@@ -278,7 +279,7 @@ mod tests {
     }
 
     #[test]
-    fn test_write_read_text() -> Result<()> {
+    fn test_write_read_text() -> Fallible<()> {
         for data in get_test_data_for_text_parser() {
             let name = data.name;
             let vector_fst_ref = data.vector_fst;
@@ -297,7 +298,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_single_final_state() -> Result<()> {
+    fn test_parse_single_final_state() -> Fallible<()> {
         let parsed_fst = VectorFst::<ProbabilityWeight>::from_text_string("0\tInfinity\n")?;
 
         let mut fst_ref: VectorFst<ProbabilityWeight> = VectorFst::new();

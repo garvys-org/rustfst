@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 
+use failure::Fallible;
+
 use crate::algorithms::ArcMapper;
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
-use crate::{Result, StateId};
+use crate::StateId;
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
@@ -32,7 +34,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// fst.set_start(s2);
     /// assert_eq!(fst.start(), Some(s2));
     /// ```
-    fn set_start(&mut self, state_id: StateId) -> Result<()>;
+    fn set_start(&mut self, state_id: StateId) -> Fallible<()>;
 
     /// The state with identifier `state_id` is now a final state with a weight `final_weight`.
     /// If the `state_id` doesn't exist an error is raised.
@@ -57,7 +59,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// assert_eq!(fst.final_weight(s1), Some(BooleanWeight::one()));
     /// assert_eq!(fst.final_weight(s2), Some(BooleanWeight::one()));
     /// ```
-    fn set_final(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W) -> Result<()>;
+    fn set_final(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W) -> Fallible<()>;
 
     /// Adds a new state to the current FST. The identifier of the new state is returned
     ///
@@ -102,7 +104,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// assert_eq!(fst.states_iter().count(), 0);
     ///
     /// ```
-    fn del_state(&mut self, state_id: StateId) -> Result<()>;
+    fn del_state(&mut self, state_id: StateId) -> Fallible<()>;
 
     /// Removes multiple states from an FST. If one of the states doesn't exist, an error is raised.
     ///
@@ -132,7 +134,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// assert_eq!(fst.states_iter().count(), 0);
     ///
     /// ```
-    fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) -> Result<()>;
+    fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) -> Fallible<()>;
 
     /// Adds an arc to the FST. The arc will start in the state `source`.
     /// An error is raised if the state `source` doesn't exist.
@@ -157,7 +159,13 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// fst.add_arc(s1, Arc::new(3, 5, BooleanWeight::new(true), s2));
     /// assert_eq!(fst.num_arcs(s1).unwrap(), 1);
     /// ```
-    fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()>;
+    fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Fallible<()>;
+
+    /// Remove the final weight of a specific state.
+    fn delete_final_weight(&mut self, source: StateId) -> Fallible<()>;
+
+    /// Deletes all the arcs leaving a state.
+    fn delete_arcs(&mut self, source: StateId) -> Fallible<()>;
 
     /// Retrieves a mutable reference to the final weight of a state (if the state is a final one).
     fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut <Self as CoreFst>::W>;
@@ -165,7 +173,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     fn add_fst<F: ExpandedFst<W = Self::W>>(
         &mut self,
         fst_to_add: &F,
-    ) -> Result<HashMap<StateId, StateId>> {
+    ) -> Fallible<HashMap<StateId, StateId>> {
         // Map old states id to new ones
         let mut mapping_states = HashMap::new();
 
@@ -211,7 +219,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     }
 
     /// Maps an arc using a mapper function object. This function modifies its Fst input.
-    fn arc_map<M: ArcMapper<Self::W>>(&mut self, mapper: &mut M) {
+    fn arc_map<M: ArcMapper<Self::W>>(&mut self, mapper: &mut M) -> Fallible<()> {
         crate::algorithms::arc_map(self, mapper)
     }
 }
@@ -222,5 +230,5 @@ where
     Self::W: 'a,
 {
     type IterMut: Iterator<Item = &'a mut Arc<Self::W>>;
-    fn arcs_iter_mut(&'a mut self, state_id: StateId) -> Result<Self::IterMut>;
+    fn arcs_iter_mut(&'a mut self, state_id: StateId) -> Fallible<Self::IterMut>;
 }

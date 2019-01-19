@@ -19,14 +19,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    - `TimesMapper`: Mapper to (right) multiply a constant to all weights.
 - Add `final_weight_mut` to the `MutableFst` trait to retrieve a mutable reference on the final weight and implemented for `VectorFst`.
 - `arc_map` method has been added to the MutableFst trait as a provided method.
+- Add `num-traits` and `ordered-float` as dependency because hashing float is needed (yeah this is bad).
+- Add struct `FinalArc` to correctly handle final weight when performing arc mapping.
+- Add enum `MapFinalAction` to handle the creation of super final states when performing arc mapping.
+- Implement `encode` and `decode` functions to allow the representation of a weighted transducer as a weighted automaton, an unweighted transducer or an unweighted automaton.
+- Implement `rm_final_epsilon` which removes final states that have epsilon-only input arcs.
+- Add `delete_final_weight` and `delete_arcs` to the MutableFst trait and implement them for `VectorFst`.
 
 ### Changed
 - In the `Semiring` trait, `ONE` and `ZERO` associated constants have been removed in favor of `one` and `zero` functions.
 - In the Semiring, `plus` and `times` methods now accept a `AsrRef<Self>` parameter.
 - Added `inverse_assign`, `quantize_assign`, `plus_assign` and `times_assign` to the Semiring trait to perform in place operations.
+- Changed `ArcMapper` trait to use `FinalArc` and `MapFinalAction`.
+- Implement `invert` and `project` using `arc_map`.
+- Change internal representation of float weights to use the `ordered-float` crate and derive `Hash` and `Eq` for each Semiring.
 
 ### Removed
 - Removed `Add`, `AddAssign`, `Mul`, `MulAssign` and `Copy` trait bound for `Semiring`.
+- Removed custom `Result` type and replace it with `Fallible` from failure. Underneath, it is the same type.
 
 ## [0.2.0] - 2019-01-07
 ### Added

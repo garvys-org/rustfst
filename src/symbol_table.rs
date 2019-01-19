@@ -7,8 +7,10 @@ use std::path::Path;
 
 use itertools::Itertools;
 
+use failure::Fallible;
+
 use crate::parsers::text_symt::parsed_text_symt::ParsedTextSymt;
-use crate::{Label, Result, Symbol, EPS_SYMBOL};
+use crate::{Label, Symbol, EPS_SYMBOL};
 
 /// A symbol table stores a bidirectional mapping between arc labels and "symbols" (strings).
 #[derive(PartialEq, Debug, Clone, Default)]
@@ -211,7 +213,7 @@ impl SymbolTable {
         }
     }
 
-    fn from_parsed_symt_text(parsed_symt_text: ParsedTextSymt) -> Result<Self> {
+    fn from_parsed_symt_text(parsed_symt_text: ParsedTextSymt) -> Fallible<Self> {
         let num_symbols = parsed_symt_text.pairs.len();
         let mut label_to_symbol: HashMap<Label, Symbol> = HashMap::new();
         let mut symbol_to_label: HashMap<Symbol, Label> = HashMap::new();
@@ -227,17 +229,17 @@ impl SymbolTable {
         })
     }
 
-    pub fn from_text_string(symt_string: &str) -> Result<Self> {
+    pub fn from_text_string(symt_string: &str) -> Fallible<Self> {
         let parsed_symt = ParsedTextSymt::from_string(symt_string)?;
         Self::from_parsed_symt_text(parsed_symt)
     }
 
-    pub fn read_text<P: AsRef<Path>>(&self, path_text_symt: P) -> Result<Self> {
+    pub fn read_text<P: AsRef<Path>>(&self, path_text_symt: P) -> Fallible<Self> {
         let parsed_symt = ParsedTextSymt::from_path(path_text_symt)?;
         Self::from_parsed_symt_text(parsed_symt)
     }
 
-    pub fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Result<()> {
+    pub fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Fallible<()> {
         let buffer = File::create(path_output.as_ref())?;
         let mut line_writer = LineWriter::new(buffer);
 
@@ -247,7 +249,7 @@ impl SymbolTable {
     }
 
     /// Writes the text_fst representation of the symbol table into a String.
-    pub fn text(&self) -> Result<String> {
+    pub fn text(&self) -> Fallible<String> {
         let buffer = Vec::<u8>::new();
         let mut line_writer = LineWriter::new(buffer);
         write_symt_text!(self, line_writer);

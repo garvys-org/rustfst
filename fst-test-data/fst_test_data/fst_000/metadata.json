@@ -1,4 +1,88 @@
 {
+    "arc_map_times": {
+        "result": ""
+    }, 
+    "raw": {
+        "result": ""
+    }, 
+    "connect": {
+        "result": ""
+    }, 
+    "arc_map_input_epsilon": {
+        "result": ""
+    }, 
+    "invert": {
+        "result": ""
+    }, 
+    "encode_decode": [
+        {
+            "encode_labels": true, 
+            "result": "", 
+            "encode_weights": true
+        }, 
+        {
+            "encode_labels": true, 
+            "result": "", 
+            "encode_weights": false
+        }, 
+        {
+            "encode_labels": false, 
+            "result": "", 
+            "encode_weights": true
+        }, 
+        {
+            "encode_labels": false, 
+            "result": "", 
+            "encode_weights": false
+        }
+    ], 
+    "arc_map_rmweight": {
+        "result": ""
+    }, 
+    "arc_map_output_epsilon": {
+        "result": ""
+    }, 
+    "encode": [
+        {
+            "encode_labels": true, 
+            "result": "", 
+            "encode_weights": true
+        }, 
+        {
+            "encode_labels": true, 
+            "result": "", 
+            "encode_weights": false
+        }, 
+        {
+            "encode_labels": false, 
+            "result": "", 
+            "encode_weights": true
+        }, 
+        {
+            "encode_labels": false, 
+            "result": "", 
+            "encode_weights": false
+        }
+    ], 
+    "arc_map_identity": {
+        "result": ""
+    }, 
+    "weight_type": "tropical", 
+    "weight_pushing_final": {
+        "result": ""
+    }, 
+    "project_output": {
+        "result": ""
+    }, 
+    "weight_pushing_initial": {
+        "result": ""
+    }, 
+    "project_input": {
+        "result": ""
+    }, 
+    "reverse": {
+        "result": "0\tInfinity\n"
+    }, 
     "arc_map_invert": {
         "result": ""
     }, 
@@ -9,50 +93,10 @@
         "result": ""
     }, 
     "name": "fst_000", 
-    "arc_map_rmweight": {
-        "result": ""
-    }, 
-    "arc_map_identity": {
-        "result": ""
-    }, 
-    "invert": {
-        "result": ""
-    }, 
-    "weight_type": "tropical", 
-    "arc_map_times": {
-        "result": ""
-    }, 
-    "raw": {
-        "result": ""
-    }, 
-    "project_output": {
-        "result": ""
-    }, 
-    "arc_map_output_epsilon": {
-        "result": ""
-    }, 
-    "connect": {
-        "result": ""
-    }, 
-    "weight_pushing_initial": {
-        "result": ""
-    }, 
-    "weight_pushing_final": {
+    "arc_map_plus": {
         "result": ""
     }, 
     "arc_map_quantize": {
         "result": ""
-    }, 
-    "project_input": {
-        "result": ""
-    }, 
-    "arc_map_input_epsilon": {
-        "result": ""
-    }, 
-    "arc_map_plus": {
-        "result": ""
-    }, 
-    "reverse": {
-        "result": "0\tInfinity\n"
     }
 }

@@ -1,6 +1,6 @@
 use crate::semirings::{CompleteSemiring, Semiring, StarSemiring};
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Default, Eq, Copy)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Default, Eq, Copy, Hash)]
 pub struct BooleanWeight {
     value: bool,
 }

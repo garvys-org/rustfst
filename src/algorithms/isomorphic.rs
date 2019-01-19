@@ -1,9 +1,11 @@
 use std::cmp::Ordering;
 use std::collections::VecDeque;
 
+use failure::Fallible;
+
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{Arc, Result, StateId};
+use crate::{Arc, StateId};
 
 struct Isomorphism<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> {
     fst_1: &'a F1,
@@ -62,7 +64,7 @@ impl<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> Isomorphis
         true
     }
 
-    fn ismorphic_state(&mut self, s1: StateId, s2: StateId) -> Result<bool> {
+    fn ismorphic_state(&mut self, s1: StateId, s2: StateId) -> Fallible<bool> {
         if !(self.fst_1.final_weight(s1) == self.fst_2.final_weight(s2)) {
             return Ok(false);
         }
@@ -105,7 +107,7 @@ impl<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> Isomorphis
         Ok(true)
     }
 
-    fn isomorphic(&mut self) -> Result<bool> {
+    fn isomorphic(&mut self) -> Fallible<bool> {
         // Both FSTs don't have a start state => both don't recognize anything
         if self.fst_1.start().is_none() && self.fst_2.start().is_none() {
             return Ok(true);
@@ -135,7 +137,7 @@ impl<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> Isomorphis
 ///
 /// In other words, Isomorphic(A, B) is true if and only if the states of A can
 /// be renumbered and the transitions leaving each state reordered so that Equal(A, B) is true.
-pub fn isomorphic<W, F1, F2>(fst_1: &F1, fst_2: &F2) -> Result<bool>
+pub fn isomorphic<W, F1, F2>(fst_1: &F1, fst_2: &F2) -> Fallible<bool>
 where
     W: Semiring,
     F1: ExpandedFst<W = W>,
@@ -156,7 +158,7 @@ mod test {
     use crate::Arc;
 
     #[test]
-    fn test_isomorphic_1() -> Result<()> {
+    fn test_isomorphic_1() -> Fallible<()> {
         let fst_1: VectorFst<LogWeight> = TextParser::from_text_string(
             "0\t1\t12\t25\n\
              1\n",
@@ -172,7 +174,7 @@ mod test {
     }
 
     #[test]
-    fn test_isomorphic_2() -> Result<()> {
+    fn test_isomorphic_2() -> Fallible<()> {
         let fst_1: VectorFst<LogWeight> = TextParser::from_text_string(
             "0\t1\t12\t25\n\
              1\n",

@@ -1,6 +1,7 @@
 use std::f32;
 use std::fmt::Debug;
 use std::fmt::Display;
+use std::hash::Hash;
 
 /// For some operations, the weight set associated to a wFST must have the structure of a semiring.
 /// `(S, +, *, 0, 1)` is a semiring if `(S, +, 0)` is a commutative monoid with identity element 0,
@@ -9,7 +10,7 @@ use std::fmt::Display;
 /// Thus, a semiring is a ring that may lack negation.
 /// For more information : https://cs.nyu.edu/~mohri/pub/hwa.pdf
 pub trait Semiring:
-    Clone + PartialEq + PartialOrd + Debug + Default + Display + AsRef<Self>
+    Clone + PartialEq + PartialOrd + Debug + Default + Display + AsRef<Self> + Hash + Eq
 {
     type Type: Display;
 
@@ -103,11 +104,17 @@ macro_rules! display_semiring {
     };
 }
 
-macro_rules! partial_eq_f32 {
+macro_rules! partial_eq_and_hash_f32 {
     ($semiring:tt) => {
         impl PartialEq for $semiring {
             fn eq(&self, other: &Self) -> bool {
                 self.quantize(KDELTA).value() == other.quantize(KDELTA).value()
+            }
+        }
+
+        impl Hash for $semiring {
+            fn hash<H: Hasher>(&self, state: &mut H) {
+                self.quantize(KDELTA).value.hash(state);
             }
         }
     };

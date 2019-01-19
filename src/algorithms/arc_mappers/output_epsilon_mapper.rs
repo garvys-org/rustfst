@@ -1,4 +1,4 @@
-use crate::algorithms::ArcMapper;
+use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction};
 use crate::semirings::Semiring;
 use crate::Arc;
 use crate::EPS_LABEL;
@@ -11,5 +11,9 @@ impl<S: Semiring> ArcMapper<S> for OutputEpsilonMapper {
         arc.olabel = EPS_LABEL;
     }
 
-    fn final_weight_map(&mut self, _weight: &mut S) {}
+    fn final_arc_map(&mut self, _final_arc: &mut FinalArc<S>) {}
+
+    fn final_action(&self) -> MapFinalAction {
+        MapFinalAction::MapNoSuperfinal
+    }
 }

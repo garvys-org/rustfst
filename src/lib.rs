@@ -87,9 +87,6 @@ extern crate serde;
 #[cfg(test)]
 extern crate serde_json;
 
-/// A type alias for dealing with errors returned by this crate.
-pub type Result<T> = std::result::Result<T, failure::Error>;
-
 mod symbol_table;
 pub use crate::symbol_table::SymbolTable;
 

@@ -1,13 +1,15 @@
+use failure::Fallible;
+
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
-use crate::{Result, StateId};
+use crate::StateId;
 use std::collections::HashSet;
 
-fn dfs<F: Fst>(
+pub(crate) fn dfs<F: Fst>(
     fst: &F,
     state_id_cour: StateId,
     accessible_states: &mut HashSet<StateId>,
     coaccessible_states: &mut HashSet<StateId>,
-) -> Result<()> {
+) -> Fallible<()> {
     accessible_states.insert(state_id_cour);
     let mut is_coaccessible = fst.is_final(state_id_cour);
     for arc in fst.arcs_iter(state_id_cour)? {
@@ -50,7 +52,7 @@ fn dfs<F: Fst>(
 ///
 /// assert_eq!(connected_fst, fst);
 /// ```
-pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
+pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Fallible<()> {
     let mut accessible_states = HashSet::new();
     let mut coaccessible_states = HashSet::new();
 
@@ -79,7 +81,7 @@ mod tests {
     use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
-    fn test_connect_generic() -> Result<()> {
+    fn test_connect_generic() -> Fallible<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
 

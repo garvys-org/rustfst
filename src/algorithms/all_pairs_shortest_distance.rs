@@ -1,8 +1,9 @@
+use failure::Fallible;
+
 use crate::fst_traits::CoreFst;
 use crate::fst_traits::ExpandedFst;
 use crate::fst_traits::Fst;
 use crate::semirings::{Semiring, StarSemiring};
-use crate::Result;
 
 /// This operation computes the shortest distance from each state to every other states.
 /// The shortest distance from `p` to `q` is the ⊕-sum of the weights
@@ -16,8 +17,8 @@ use crate::Result;
 /// # use rustfst::fst_traits::MutableFst;
 /// # use rustfst::algorithms::all_pairs_shortest_distance;
 /// # use rustfst::Arc;
-/// # use rustfst::Result;
-/// # fn main() -> Result<()> {
+/// # use failure::Fallible;
+/// # fn main() -> Fallible<()> {
 /// let mut fst = VectorFst::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
@@ -37,7 +38,7 @@ use crate::Result;
 /// # Ok(())
 /// # }
 /// ```
-pub fn all_pairs_shortest_distance<F>(fst: &F) -> Result<(Vec<Vec<F::W>>)>
+pub fn all_pairs_shortest_distance<F>(fst: &F) -> Fallible<(Vec<Vec<F::W>>)>
 where
     F: Fst + ExpandedFst,
     F::W: StarSemiring,
@@ -82,7 +83,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_all_pairs_distance_generic() -> Result<()> {
+    fn test_all_pairs_distance_generic() -> Fallible<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = data.fst;
             let d_ref = data.all_distances;

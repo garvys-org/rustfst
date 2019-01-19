@@ -1,7 +1,7 @@
 macro_rules! add_or_fst {
     ($semiring:tt, $fst_type:ty) => {
         impl<$semiring: 'static + Semiring> Add for $fst_type {
-            type Output = Result<$fst_type>;
+            type Output = Fallible<$fst_type>;
 
             fn add(self, rhs: $fst_type) -> Self::Output {
                 concat(&self, &rhs)
@@ -9,7 +9,7 @@ macro_rules! add_or_fst {
         }
 
         impl<$semiring: 'static + Semiring> BitOr for $fst_type {
-            type Output = Result<$fst_type>;
+            type Output = Fallible<$fst_type>;
 
             fn bitor(self, rhs: $fst_type) -> Self::Output {
                 union(&self, &rhs)

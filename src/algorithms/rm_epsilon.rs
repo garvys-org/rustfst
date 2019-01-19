@@ -1,13 +1,15 @@
 use std::collections::HashMap;
 
+use failure::Fallible;
+
 use crate::algorithms::all_pairs_shortest_distance;
 use crate::arc::Arc;
 use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
 use crate::semirings::{Semiring, StarSemiring};
-use crate::{Result, EPS_LABEL};
+use crate::EPS_LABEL;
 
 // Compute the wFST derived from "fst" by keeping only the epsilon transitions
-fn compute_fst_epsilon<W, F1, F2>(fst: &F1, keep_only_epsilon: bool) -> Result<F2>
+fn compute_fst_epsilon<W, F1, F2>(fst: &F1, keep_only_epsilon: bool) -> Fallible<F2>
 where
     W: Semiring,
     F1: ExpandedFst<W = W>,
@@ -91,7 +93,7 @@ where
 ///
 /// assert_eq!(fst_no_epsilon, fst_no_epsilon_ref);
 /// ```
-pub fn rm_epsilon<W, F1, F2>(fst: &F1) -> Result<F2>
+pub fn rm_epsilon<W, F1, F2>(fst: &F1) -> Fallible<F2>
 where
     W: StarSemiring,
     F1: ExpandedFst<W = W>,
@@ -157,7 +159,7 @@ mod tests {
     // TODO: Add test with epsilon arcs
 
     #[test]
-    fn test_epsilon_removal_generic() -> Result<()> {
+    fn test_epsilon_removal_generic() -> Fallible<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
 

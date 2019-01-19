@@ -1,8 +1,10 @@
 use std::collections::VecDeque;
 
+use failure::Fallible;
+
 use crate::fst_traits::{CoreFst, ExpandedFst};
 use crate::semirings::Semiring;
-use crate::{Result, StateId};
+use crate::StateId;
 
 /// This operation computes the shortest distance from the state `state_id` to every state.
 /// The shortest distance from `p` to `q` is the ⊕-sum of the weights
@@ -37,7 +39,7 @@ use crate::{Result, StateId};
 pub fn single_source_shortest_distance<F: ExpandedFst>(
     fst: &F,
     state_id: StateId,
-) -> Result<Vec<<F as CoreFst>::W>> {
+) -> Fallible<Vec<<F as CoreFst>::W>> {
     let num_states = fst.num_states();
 
     let mut d = vec![];
@@ -105,7 +107,7 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
 /// ]);
 ///
 /// ```
-pub fn shortest_distance<F: ExpandedFst>(fst: &F) -> Result<Vec<<F as CoreFst>::W>> {
+pub fn shortest_distance<F: ExpandedFst>(fst: &F) -> Fallible<Vec<<F as CoreFst>::W>> {
     if let Some(start_state) = fst.start() {
         return single_source_shortest_distance(fst, start_state);
     }
@@ -120,7 +122,7 @@ mod tests {
     use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
-    fn test_single_source_shortest_distance_generic() -> Result<()> {
+    fn test_single_source_shortest_distance_generic() -> Fallible<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = data.fst;
             let d_ref = data.all_distances;
@@ -147,7 +149,7 @@ mod tests {
     }
 
     #[test]
-    fn test_shortest_distance_generic() -> Result<()> {
+    fn test_shortest_distance_generic() -> Fallible<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = data.fst;
             let d_ref = data.all_distances;
