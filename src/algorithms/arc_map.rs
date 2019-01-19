@@ -84,9 +84,8 @@ where
 
                     ifst.set_final(state, final_arc.weight).unwrap();
                 }
-                MapFinalAction::MapAllowSuperfinal => unimplemented!(),
-                MapFinalAction::MapRequireSuperfinal => {
-                    if state != superfinal.unwrap() {
+                MapFinalAction::MapAllowSuperfinal => {
+                    if Some(state) != superfinal {
                         let mut final_arc = FinalArc {
                             ilabel: EPS_LABEL,
                             olabel: EPS_LABEL,
@@ -94,7 +93,43 @@ where
                         };
                         mapper.final_arc_map(&mut final_arc);
 
-                        if !final_arc.weight.is_zero() {
+                        if final_arc.ilabel != EPS_LABEL || final_arc.olabel != EPS_LABEL {
+                            if superfinal.is_none() {
+                                let superfinal_id = ifst.add_state();
+                                superfinal = Some(superfinal_id);
+                                ifst.set_final(superfinal_id, F::W::one()).unwrap();
+                            }
+
+                            ifst.add_arc(
+                                state,
+                                Arc::new(
+                                    final_arc.ilabel,
+                                    final_arc.olabel,
+                                    final_arc.weight,
+                                    superfinal.unwrap(),
+                                ),
+                            )
+                            .unwrap();
+
+                            ifst.delete_final_weight(state).unwrap();
+                        } else {
+                            ifst.set_final(state, final_arc.weight).unwrap();
+                        }
+                    }
+                }
+                MapFinalAction::MapRequireSuperfinal => {
+                    if Some(state) != superfinal {
+                        let mut final_arc = FinalArc {
+                            ilabel: EPS_LABEL,
+                            olabel: EPS_LABEL,
+                            weight: w.clone(),
+                        };
+                        mapper.final_arc_map(&mut final_arc);
+
+                        if final_arc.ilabel != EPS_LABEL
+                            || final_arc.olabel != EPS_LABEL
+                            || !final_arc.weight.is_zero()
+                        {
                             ifst.add_arc(
                                 state,
                                 Arc::new(
