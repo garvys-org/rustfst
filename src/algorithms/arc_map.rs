@@ -1,7 +1,9 @@
+use failure::Fallible;
+
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::Arc;
-use crate::{Label, Result, StateId, EPS_LABEL};
+use crate::{Label, StateId, EPS_LABEL};
 
 pub struct FinalArc<W: Semiring> {
     pub ilabel: Label,
@@ -42,7 +44,7 @@ pub trait ArcMapper<S: Semiring> {
 }
 
 /// Maps an arc using a mapper function object. This function modifies its Fst input.
-pub fn arc_map<F, M>(ifst: &mut F, mapper: &mut M) -> Result<()>
+pub fn arc_map<F, M>(ifst: &mut F, mapper: &mut M) -> Fallible<()>
 where
     F: MutableFst,
     M: ArcMapper<F::W>,

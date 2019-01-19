@@ -1,10 +1,11 @@
 use std::fs::read_to_string;
 use std::path::Path;
 
+use failure::Fallible;
+
 use nom::types::CompleteStr;
 
 use crate::parsers::text_fst::nom_parser::vec_rows_parsed;
-use crate::Result as ResultRustfst;
 use crate::{Label, StateId};
 
 #[derive(Debug, PartialEq)]
@@ -97,7 +98,7 @@ impl ParsedTextFst {
     /// 4	5	5	5	0.31
     /// 3	0.67
     /// ```
-    pub fn from_string(fst_string: &str) -> ResultRustfst<Self> {
+    pub fn from_string(fst_string: &str) -> Fallible<Self> {
         let complete_fst_str = CompleteStr(fst_string);
         let (_, vec_rows_parsed) = vec_rows_parsed(complete_fst_str)
             .map_err(|_| format_err!("Error while parsing text fst"))?;
@@ -127,7 +128,7 @@ impl ParsedTextFst {
     /// 4	5	5	5	0.31
     /// 3	0.67
     /// ```
-    pub fn from_path<P: AsRef<Path>>(path_fst_text: P) -> ResultRustfst<Self> {
+    pub fn from_path<P: AsRef<Path>>(path_fst_text: P) -> Fallible<Self> {
         let fst_string = read_to_string(path_fst_text)?;
         Self::from_string(&fst_string)
     }
@@ -180,7 +181,7 @@ mod tests {
     use crate::test_data::text_fst::get_test_data_for_text_parser;
 
     #[test]
-    fn test_parse_text_fst() -> ResultRustfst<()> {
+    fn test_parse_text_fst() -> Fallible<()> {
         for data in get_test_data_for_text_parser() {
             let parsed_fst = ParsedTextFst::from_path(data.path)?;
             let parsed_fst_ref = data.parsed_text_fst;
@@ -194,7 +195,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_text_fst_not_contiguous() -> ResultRustfst<()> {
+    fn test_parse_text_fst_not_contiguous() -> Fallible<()> {
         // Check that parsing transitions, then final states then transition is working
         let parsed_fst = ParsedTextFst::from_string("0\t2\t0\t0\n1\n2\t1\t12\t25\n")?;
 
@@ -217,7 +218,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_text_fst_not_finishing_with_eol() -> ResultRustfst<()> {
+    fn test_parse_text_fst_not_finishing_with_eol() -> Fallible<()> {
         // Check that parsing transitions, then final states then transition is working
         let parsed_fst = ParsedTextFst::from_string("0\t1\t0\t0\n1")?;
 
@@ -239,7 +240,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_text_fst_infinity_final_states() -> ResultRustfst<()> {
+    fn test_parse_text_fst_infinity_final_states() -> Fallible<()> {
         let parsed_fst = ParsedTextFst::from_string("0\t1\t12\t25\t0.3\n1\tInfinity\n0\t0\n")?;
 
         let mut transitions = vec![];

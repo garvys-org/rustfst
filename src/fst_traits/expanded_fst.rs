@@ -1,10 +1,13 @@
-use crate::fst_traits::final_states_iterator::FinalStatesIterator;
-use crate::fst_traits::Fst;
-use crate::semirings::Semiring;
-use crate::{DrawingConfig, Result};
 use std::fs::File;
 use std::io::{LineWriter, Write};
 use std::path::Path;
+
+use failure::Fallible;
+
+use crate::fst_traits::final_states_iterator::FinalStatesIterator;
+use crate::fst_traits::Fst;
+use crate::semirings::Semiring;
+use crate::DrawingConfig;
 
 /// Trait defining the necessary methods that should implement an ExpandedFST e.g
 /// a FST where all the states are already computed and not computed on the fly.
@@ -32,7 +35,7 @@ pub trait ExpandedFst: Fst {
     fn num_states(&self) -> usize;
 
     /// Serializes the FST as a text file in a format compatible with OpenFST.
-    fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Result<()> {
+    fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Fallible<()> {
         let buffer = File::create(path_output.as_ref())?;
         let mut line_writer = LineWriter::new(buffer);
         write_fst!(self, line_writer, true);
@@ -40,7 +43,7 @@ pub trait ExpandedFst: Fst {
     }
 
     /// Writes the text representation of the FST into a String.
-    fn text(&self) -> Result<String> {
+    fn text(&self) -> Fallible<String> {
         let buffer = Vec::<u8>::new();
         let mut line_writer = LineWriter::new(buffer);
         write_fst!(self, line_writer, true);
@@ -48,7 +51,7 @@ pub trait ExpandedFst: Fst {
     }
 
     /// Serializes the FST as a DOT file compatible with GraphViz binaries.
-    fn draw<P: AsRef<Path>>(&self, path_output: P, config: &DrawingConfig) -> Result<()> {
+    fn draw<P: AsRef<Path>>(&self, path_output: P, config: &DrawingConfig) -> Fallible<()> {
         let buffer = File::create(path_output.as_ref())?;
         let mut f = LineWriter::new(buffer);
 

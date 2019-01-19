@@ -1,6 +1,8 @@
+use failure::Fallible;
+
 use crate::arc::Arc;
 use crate::semirings::Semiring;
-use crate::{Result, StateId, EPS_LABEL};
+use crate::{StateId, EPS_LABEL};
 use std::fmt::Display;
 
 /// Trait defining necessary methods for a wFST to access start states and final states.
@@ -64,7 +66,7 @@ pub trait CoreFst {
     /// fst.add_arc(s1, Arc::new(3, 5, BooleanWeight::new(true), s2));
     /// assert_eq!(fst.num_arcs(s1).unwrap(), 1);
     /// ```
-    fn num_arcs(&self, s: StateId) -> Result<usize>;
+    fn num_arcs(&self, s: StateId) -> Fallible<usize>;
 
     /// Returns whether or not the state with identifier passed as parameters is a final state.
     ///
@@ -130,7 +132,7 @@ where
     /// Iterator used to iterate over the arcs leaving a state of an FST.
     type Iter: Iterator<Item = &'a Arc<Self::W>> + Clone;
 
-    fn arcs_iter(&'a self, state_id: StateId) -> Result<Self::Iter>;
+    fn arcs_iter(&'a self, state_id: StateId) -> Fallible<Self::Iter>;
 }
 
 /// Trait defining the minimum interface necessary for a wFST.
@@ -159,7 +161,7 @@ pub trait Fst:
     /// assert_eq!(fst.num_input_epsilons(s0).unwrap(), 2);
     /// assert_eq!(fst.num_input_epsilons(s1).unwrap(), 0);
     /// ```
-    fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
+    fn num_input_epsilons(&self, state: StateId) -> Fallible<usize> {
         Ok(self
             .arcs_iter(state)?
             .filter(|v| v.ilabel == EPS_LABEL)
@@ -188,7 +190,7 @@ pub trait Fst:
     /// assert_eq!(fst.num_output_epsilons(s0).unwrap(), 1);
     /// assert_eq!(fst.num_output_epsilons(s1).unwrap(), 0);
     /// ```
-    fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
+    fn num_output_epsilons(&self, state: StateId) -> Fallible<usize> {
         Ok(self
             .arcs_iter(state)?
             .filter(|v| v.olabel == EPS_LABEL)

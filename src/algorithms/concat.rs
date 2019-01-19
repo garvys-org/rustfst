@@ -1,7 +1,9 @@
+use failure::Fallible;
+
 use crate::arc::Arc;
 use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Result, EPS_LABEL};
+use crate::EPS_LABEL;
 
 /// Performs the concatenation of two wFSTs. If `A` transduces string `x` to `y` with weight `a`
 /// and `B` transduces string `w` to `v` with weight `b`, then their concatenation
@@ -16,9 +18,9 @@ use crate::{Result, EPS_LABEL};
 /// # use rustfst::fst_traits::PathsIterator;
 /// # use rustfst::FstPath;
 /// # use rustfst::algorithms::concat;
-/// # use rustfst::Result;
+/// # use failure::Fallible;
 /// # use std::collections::HashSet;
-/// # fn main() -> Result<()> {
+/// # fn main() -> Fallible<()> {
 /// let fst_a : VectorFst<IntegerWeight> = fst![2 => 3];
 /// let fst_b : VectorFst<IntegerWeight> = fst![6 => 5];
 ///
@@ -32,7 +34,7 @@ use crate::{Result, EPS_LABEL};
 /// # Ok(())
 /// # }
 /// ```
-pub fn concat<W, F1, F2, F3>(fst_1: &F1, fst_2: &F2) -> Result<F3>
+pub fn concat<W, F1, F2, F3>(fst_1: &F1, fst_2: &F2) -> Fallible<F3>
 where
     W: Semiring,
     F1: ExpandedFst<W = W>,
@@ -92,7 +94,7 @@ mod tests {
     use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
     #[test]
-    fn test_concat_generic() -> Result<()> {
+    fn test_concat_generic() -> Fallible<()> {
         for data in get_vector_fsts_for_tests().combinations(2) {
             let fst_1 = &data[0].fst;
             let fst_2 = &data[1].fst;

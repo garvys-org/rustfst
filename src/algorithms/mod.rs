@@ -13,6 +13,7 @@ mod projection;
 mod relabel_pairs;
 mod reverse;
 mod reweight;
+mod rm_final_epsilon;
 mod single_source_shortest_distance;
 mod union;
 mod weight_pushing;
@@ -35,6 +36,7 @@ pub use self::{
     relabel_pairs::relabel_pairs,
     reverse::reverse,
     reweight::{reweight, ReweightType},
+    rm_final_epsilon::rm_final_epsilon,
     single_source_shortest_distance::{shortest_distance, single_source_shortest_distance},
     union::union,
     weight_pushing::push_weights,

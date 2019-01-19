@@ -14,12 +14,12 @@ pub enum ProjectType {
 /// # Example : Project input
 /// ```
 /// # #[macro_use] extern crate rustfst;
-/// # use rustfst::Result;
+/// # use failure::Fallible;
 /// # use rustfst::utils::{acceptor, transducer};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::{project, ProjectType};
-/// # fn main() -> Result<()> {
+/// # fn main() -> Fallible<()> {
 /// let mut fst : VectorFst<IntegerWeight> = fst![2 => 3];
 /// project(&mut fst, ProjectType::ProjectInput);
 ///
@@ -31,12 +31,12 @@ pub enum ProjectType {
 /// # Example : Project output
 /// ```
 /// # #[macro_use] extern crate rustfst;
-/// # use rustfst::Result;
+/// # use failure::Fallible;
 /// # use rustfst::utils::{acceptor, transducer};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::{project, ProjectType};
-/// # fn main() -> Result<()> {
+/// # fn main() -> Fallible<()> {
 /// let mut fst : VectorFst<IntegerWeight> = fst![2 => 3];
 /// project(&mut fst, ProjectType::ProjectOutput);
 ///
@@ -63,12 +63,13 @@ mod tests {
 
     use counter::Counter;
 
+    use failure::Fallible;
+
     use crate::fst_traits::PathsIterator;
     use crate::test_data::vector_fst::get_vector_fsts_for_tests;
-    use crate::Result;
 
     #[test]
-    fn test_projection_input_generic() -> Result<()> {
+    fn test_projection_input_generic() -> Fallible<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
 
@@ -95,7 +96,7 @@ mod tests {
     }
 
     #[test]
-    fn test_projection_output_generic() -> Result<()> {
+    fn test_projection_output_generic() -> Fallible<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
 

@@ -1,12 +1,12 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
-use failure::{bail, format_err, ResultExt};
+use failure::{bail, format_err, Fallible, ResultExt};
 
 use crate::fst_traits::{ExpandedFst, MutableFst};
-use crate::{Result, StateId};
+use crate::StateId;
 
-fn iterator_to_hashmap<I>(pairs: I) -> Result<HashMap<StateId, StateId>>
+fn iterator_to_hashmap<I>(pairs: I) -> Fallible<HashMap<StateId, StateId>>
 where
     I: IntoIterator<Item = (StateId, StateId)>,
 {
@@ -35,8 +35,8 @@ where
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::relabel_pairs;
-/// # use rustfst::Result;
-/// # fn main() -> Result<()> {
+/// # use failure::Fallible;
+/// # fn main() -> Fallible<()> {
 /// let mut fst : VectorFst<IntegerWeight> = fst![2 => 3];
 /// relabel_pairs(&mut fst, vec![(2,5)], vec![(3,4)])?;
 ///
@@ -44,7 +44,7 @@ where
 /// # Ok(())
 /// # }
 /// ```
-pub fn relabel_pairs<F, I, J>(fst: &mut F, ipairs: I, opairs: J) -> Result<()>
+pub fn relabel_pairs<F, I, J>(fst: &mut F, ipairs: I, opairs: J) -> Fallible<()>
 where
     F: ExpandedFst + MutableFst,
     I: IntoIterator<Item = (StateId, StateId)>,
@@ -79,7 +79,7 @@ mod tests {
     use crate::semirings::{IntegerWeight, Semiring};
 
     #[test]
-    fn test_projection_input_generic() -> Result<()> {
+    fn test_projection_input_generic() -> Fallible<()> {
         // Initial FST
         let mut fst = VectorFst::new();
         let s0 = fst.add_state();

@@ -2,7 +2,7 @@ use std::fmt;
 use std::ops::{Add, BitOr};
 use std::slice;
 
-use failure::{bail, ensure, format_err};
+use failure::{bail, ensure, format_err, Fallible};
 
 use crate::algorithms::{concat, union};
 use crate::arc::Arc;
@@ -12,7 +12,7 @@ use crate::fst_traits::{
 };
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::Semiring;
-use crate::{Result, StateId};
+use crate::StateId;
 
 /// Simple concrete, mutable FST whose states and arcs are stored in standard vectors.
 ///
@@ -46,7 +46,7 @@ impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
         }
     }
 
-    fn num_arcs(&self, s: StateId) -> Result<usize> {
+    fn num_arcs(&self, s: StateId) -> Fallible<usize> {
         if let Some(vector_fst_state) = self.states.get(s) {
             Ok(vector_fst_state.num_arcs())
         } else {
@@ -91,7 +91,7 @@ impl<'a, W: Semiring> Iterator for VectorStateIterator<'a, W> {
 
 impl<'a, W: 'static + Semiring> ArcIterator<'a> for VectorFst<W> {
     type Iter = slice::Iter<'a, Arc<W>>;
-    fn arcs_iter(&'a self, state_id: StateId) -> Result<Self::Iter> {
+    fn arcs_iter(&'a self, state_id: StateId) -> Fallible<Self::Iter> {
         let state = self
             .states
             .get(state_id)
@@ -114,7 +114,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         }
     }
 
-    fn set_start(&mut self, state_id: StateId) -> Result<()> {
+    fn set_start(&mut self, state_id: StateId) -> Fallible<()> {
         ensure!(
             self.states.get(state_id).is_some(),
             "The state {:?} doesn't exist",
@@ -124,7 +124,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(())
     }
 
-    fn set_final(&mut self, state_id: StateId, final_weight: W) -> Result<()> {
+    fn set_final(&mut self, state_id: StateId, final_weight: W) -> Fallible<()> {
         if let Some(state) = self.states.get_mut(state_id) {
             state.final_weight = Some(final_weight);
             Ok(())
@@ -139,7 +139,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         id
     }
 
-    fn del_state(&mut self, state_to_remove: StateId) -> Result<()> {
+    fn del_state(&mut self, state_to_remove: StateId) -> Fallible<()> {
         // Remove the state from the vector
         // Check the arcs for arcs going to this state
 
@@ -166,7 +166,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(())
     }
 
-    fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) -> Result<()> {
+    fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) -> Fallible<()> {
         let mut v: Vec<_> = states.into_iter().collect();
 
         // Necessary : the states that are removed modify the id of all the states that come after
@@ -177,7 +177,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(())
     }
 
-    fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()> {
+    fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Fallible<()> {
         if let Some(state) = self.states.get_mut(source) {
             state.arcs.push(arc);
             Ok(())
@@ -186,7 +186,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         }
     }
 
-    fn delete_final_weight(&mut self, source: usize) -> Result<()> {
+    fn delete_final_weight(&mut self, source: usize) -> Fallible<()> {
         if let Some(state) = self.states.get_mut(source) {
             state.final_weight = None;
         } else {
@@ -206,7 +206,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
 
 impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
     type IterMut = slice::IterMut<'a, Arc<W>>;
-    fn arcs_iter_mut(&'a mut self, state_id: StateId) -> Result<Self::IterMut> {
+    fn arcs_iter_mut(&'a mut self, state_id: StateId) -> Fallible<Self::IterMut> {
         let state = self
             .states
             .get_mut(state_id)
@@ -222,7 +222,7 @@ impl<W: Semiring> VectorFstState<W> {
 }
 
 impl<W: 'static + Semiring<Type = f32>> TextParser for VectorFst<W> {
-    fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst) -> Result<Self> {
+    fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst) -> Fallible<Self> {
         let start_state = parsed_fst_text.start();
         let num_states = parsed_fst_text.num_states();
 

@@ -30,13 +30,16 @@ pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::fst_traits::PathsIterator;
-    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
-    use crate::Result;
+
     use counter::Counter;
 
+    use failure::Fallible;
+
+    use crate::fst_traits::PathsIterator;
+    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
+
     #[test]
-    fn test_invert_generic() -> Result<()> {
+    fn test_invert_generic() -> Fallible<()> {
         for data in get_vector_fsts_for_tests() {
             let fst = &data.fst;
 

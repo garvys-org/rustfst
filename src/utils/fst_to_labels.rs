@@ -1,8 +1,7 @@
-use failure::bail;
+use failure::{bail, Fallible};
 
 use crate::fst_path::FstPath;
 use crate::fst_traits::{Fst, PathsIterator};
-use crate::Result;
 
 /// Decode a linear FST to retrieves the only path recognized by it. A path is composed of the
 /// input symbols, the output symbols and the weight (multiplication of the weights of the arcs
@@ -26,7 +25,7 @@ use crate::Result;
 ///
 /// assert_eq!(path, FstPath::new(labels_input, labels_output, BooleanWeight::one()));
 /// ```
-pub fn decode_linear_fst<F: Fst>(fst: &F) -> Result<FstPath<F::W>> {
+pub fn decode_linear_fst<F: Fst>(fst: &F) -> Fallible<FstPath<F::W>> {
     let mut it_path = fst.paths_iter();
     let path = it_path.next().unwrap_or_default();
     if it_path.next().is_some() {
@@ -45,7 +44,7 @@ mod tests {
     use crate::utils::{acceptor, transducer};
 
     #[test]
-    fn test_decode_linear_fst_acceptor() -> Result<()> {
+    fn test_decode_linear_fst_acceptor() -> Fallible<()> {
         let labels = vec![1, 2, 3];
         let fst: VectorFst<BooleanWeight> = acceptor(&labels, BooleanWeight::one());
 
@@ -56,7 +55,7 @@ mod tests {
     }
 
     #[test]
-    fn test_decode_linear_fst_transducer() -> Result<()> {
+    fn test_decode_linear_fst_transducer() -> Fallible<()> {
         let labels_input = vec![1, 2, 3];
         let labels_output = vec![43, 22, 18];
         let fst: VectorFst<BooleanWeight> =
@@ -70,7 +69,7 @@ mod tests {
     }
 
     #[test]
-    fn test_decode_linear_fst_empty_fst() -> Result<()> {
+    fn test_decode_linear_fst_empty_fst() -> Fallible<()> {
         let fst = VectorFst::<BooleanWeight>::new();
         let path = decode_linear_fst(&fst)?;
 
@@ -80,7 +79,7 @@ mod tests {
     }
 
     #[test]
-    fn test_decode_linear_fst_state_start_and_final() -> Result<()> {
+    fn test_decode_linear_fst_state_start_and_final() -> Fallible<()> {
         let mut fst = VectorFst::<BooleanWeight>::new();
         let s = fst.add_state();
         fst.set_start(s)?;
@@ -94,7 +93,7 @@ mod tests {
     }
 
     #[test]
-    fn test_decode_linear_fst_fst_not_linear() -> Result<()> {
+    fn test_decode_linear_fst_fst_not_linear() -> Fallible<()> {
         let mut fst = VectorFst::<BooleanWeight>::new();
         let s1 = fst.add_state();
         let s2 = fst.add_state();
