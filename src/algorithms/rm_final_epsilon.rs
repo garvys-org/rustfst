@@ -7,6 +7,7 @@ use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
 use crate::semirings::Semiring;
 use crate::Arc;
 
+/// Removes final states that have epsilon-only input arcs.
 pub fn rm_final_epsilon<F>(ifst: &mut F) -> Fallible<()>
 where
     F: MutableFst + ExpandedFst,

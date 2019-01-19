@@ -5,9 +5,18 @@ use crate::semirings::Semiring;
 use crate::Arc;
 use crate::{Label, StateId, EPS_LABEL};
 
+/// Struct used to map final weights when performing an arc mapping.
+/// It will always be of the form `(EPS_LABEL, EPS_LABEL, final_weight)`
+/// where `final_weight` is the `final_weight` of the current state.
+///
+/// If the mapper modifies the input label or output one,
+/// a super final state will need to be created.
 pub struct FinalArc<W: Semiring> {
+    /// Input label. Default to `EPS_LABEL`.
     pub ilabel: Label,
+    /// Output label. Default to `EPS_LABEL`.
     pub olabel: Label,
+    /// Weight. Default to the final weight of the current state.
     pub weight: W,
 }
 
@@ -34,12 +43,11 @@ pub trait ArcMapper<S: Semiring> {
     /// How to modify the arcs.
     fn arc_map(&mut self, arc: &mut Arc<S>);
 
-    /// How to modify the arcs.
+    /// The mapper will be passed final weights as arcs of the form
+    /// `FinalArc(EPS_LABEL, EPS_LABEL, weight)`.
     fn final_arc_map(&mut self, final_arc: &mut FinalArc<S>);
 
     /// Specifies final action the mapper requires (see above).
-    ///The mapper will be passed final weights as arcs of the form
-    /// Arc(0, 0, weight, kNoStateId).
     fn final_action(&self) -> MapFinalAction;
 }
 

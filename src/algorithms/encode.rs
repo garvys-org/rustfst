@@ -166,6 +166,14 @@ impl<W: Semiring> ArcMapper<W> for DecodeMapper<W> {
     }
 }
 
+/// The `encode` operation allows the representation of a weighted transducer as a weighted automaton,
+/// an unweighted transducer or an unweighted automaton by considering the pair
+/// (input label, output), the pair (input label, weight) or the triple (input label,
+/// output label, weight) as a single label depending on the value
+/// of the encode flags: `encode_labels` and `encode_weights`.
+///
+/// The encoding of each pair or triple of labels and/or weights as a unique key is stored
+/// in an `EncodeTable` object.
 pub fn encode<F>(
     fst: &mut F,
     encode_labels: bool,
@@ -180,6 +188,8 @@ where
     Ok(encode_mapper.encode_table)
 }
 
+/// The `decode` operation takes as input an encoded FST and the corresponding `EncodeTable` object
+/// and reverts the encoding.
 pub fn decode<F>(fst: &mut F, encode_table: EncodeTable<F::W>) -> Fallible<()>
 where
     F: MutableFst + ExpandedFst,

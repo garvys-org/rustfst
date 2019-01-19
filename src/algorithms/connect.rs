@@ -4,7 +4,7 @@ use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::StateId;
 use std::collections::HashSet;
 
-pub fn dfs<F: Fst>(
+pub(crate) fn dfs<F: Fst>(
     fst: &F,
     state_id_cour: StateId,
     accessible_states: &mut HashSet<StateId>,
