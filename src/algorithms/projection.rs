@@ -1,4 +1,7 @@
+use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction};
 use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::semirings::Semiring;
+use crate::Arc;
 
 /// Different types of labels projection in a FST.
 pub enum ProjectType {
@@ -45,15 +48,26 @@ pub enum ProjectType {
 /// # }
 /// ```
 pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_type: ProjectType) {
-    let states: Vec<_> = fst.states_iter().collect();
-    for state_id in states {
-        // Can't fail
-        for arc in fst.arcs_iter_mut(state_id).unwrap() {
-            match project_type {
-                ProjectType::ProjectInput => arc.olabel = arc.ilabel,
-                ProjectType::ProjectOutput => arc.ilabel = arc.olabel,
-            };
-        }
+    let mut mapper = ProjectMapper { project_type };
+    fst.arc_map(&mut mapper).unwrap();
+}
+
+struct ProjectMapper {
+    project_type: ProjectType,
+}
+
+impl<W: Semiring> ArcMapper<W> for ProjectMapper {
+    fn arc_map(&mut self, arc: &mut Arc<W>) {
+        match self.project_type {
+            ProjectType::ProjectInput => arc.olabel = arc.ilabel,
+            ProjectType::ProjectOutput => arc.ilabel = arc.olabel,
+        };
+    }
+
+    fn final_arc_map(&mut self, _final_arc: &mut FinalArc<W>) {}
+
+    fn final_action(&self) -> MapFinalAction {
+        MapFinalAction::MapNoSuperfinal
     }
 }
 
