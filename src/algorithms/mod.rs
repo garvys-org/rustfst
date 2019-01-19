@@ -6,7 +6,7 @@ mod concat;
 mod connect;
 mod determinization;
 mod encode;
-mod epsilon_removal;
+mod rm_epsilon;
 mod inversion;
 mod isomorphic;
 mod projection;
@@ -29,7 +29,7 @@ pub use self::{
     concat::concat,
     connect::connect,
     encode::{decode, encode},
-    epsilon_removal::rm_epsilon,
+    rm_epsilon::rm_epsilon,
     inversion::invert,
     isomorphic::isomorphic,
     projection::{project, ProjectType},
