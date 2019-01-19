@@ -1,4 +1,88 @@
 {
+    "arc_map_times": {
+        "result": "0\t1\t12\t25\t1.8\n0\t1\t10\t26\t1.9\n1\t3\t4\t5\t1.6\n1\t2.2\n2\tInfinity\n3\tInfinity\n"
+    }, 
+    "raw": {
+        "result": "0\t1\t12\t25\t0.3\n0\t1\t10\t26\t0.4\n1\t3\t4\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
+    }, 
+    "connect": {
+        "result": "0\t1\t12\t25\t0.3\n0\t1\t10\t26\t0.4\n1\t0.7\n"
+    }, 
+    "arc_map_input_epsilon": {
+        "result": "0\t1\t0\t25\t0.3\n0\t1\t0\t26\t0.4\n1\t3\t0\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
+    }, 
+    "invert": {
+        "result": "0\t1\t25\t12\t0.3\n0\t1\t26\t10\t0.4\n1\t3\t5\t4\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
+    }, 
+    "encode_decode": [
+        {
+            "encode_labels": true, 
+            "result": "0\t1\t12\t25\t0.3\n0\t1\t10\t26\t0.4\n1\t0.7\n", 
+            "encode_weights": true
+        }, 
+        {
+            "encode_labels": true, 
+            "result": "0\t1\t12\t25\t0.3\n0\t1\t10\t26\t0.4\n1\t0.7\n", 
+            "encode_weights": false
+        }, 
+        {
+            "encode_labels": false, 
+            "result": "0\t1\t12\t25\t0.3\n0\t1\t10\t26\t0.4\n1\t0.7\n", 
+            "encode_weights": true
+        }, 
+        {
+            "encode_labels": false, 
+            "result": "0\t1\t12\t25\t0.3\n0\t1\t10\t26\t0.4\n1\t0.7\n", 
+            "encode_weights": false
+        }
+    ], 
+    "arc_map_rmweight": {
+        "result": "0\t1\t12\t25\n0\t1\t10\t26\n1\t3\t4\t5\n1\n2\tInfinity\n3\tInfinity\n"
+    }, 
+    "arc_map_output_epsilon": {
+        "result": "0\t1\t12\t0\t0.3\n0\t1\t10\t0\t0.4\n1\t3\t4\t0\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
+    }, 
+    "encode": [
+        {
+            "encode_labels": true, 
+            "result": "0\t1\t1\t1\n0\t1\t2\t2\n1\t3\t3\t3\n1\t4\t4\t4\n2\tInfinity\n3\tInfinity\n4\n", 
+            "encode_weights": true
+        }, 
+        {
+            "encode_labels": true, 
+            "result": "0\t1\t1\t1\t0.3\n0\t1\t2\t2\t0.4\n1\t3\t3\t3\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n", 
+            "encode_weights": false
+        }, 
+        {
+            "encode_labels": false, 
+            "result": "0\t1\t1\t25\n0\t1\t2\t26\n1\t3\t3\t5\n1\t4\t4\t0\n2\tInfinity\n3\tInfinity\n4\n", 
+            "encode_weights": true
+        }, 
+        {
+            "encode_labels": false, 
+            "result": "0\t1\t1\t25\t0.3\n0\t1\t2\t26\t0.4\n1\t3\t3\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n", 
+            "encode_weights": false
+        }
+    ], 
+    "arc_map_identity": {
+        "result": "0\t1\t12\t25\t0.3\n0\t1\t10\t26\t0.4\n1\t3\t4\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
+    }, 
+    "weight_type": "tropical", 
+    "weight_pushing_final": {
+        "result": "0\t1\t12\t25\n0\t1\t10\t26\t0.1\n1\t3\t4\t5\n1\t1\n2\tInfinity\n3\tInfinity\n"
+    }, 
+    "project_output": {
+        "result": "0\t1\t25\t25\t0.3\n0\t1\t26\t26\t0.4\n1\t3\t5\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
+    }, 
+    "weight_pushing_initial": {
+        "result": "0\t1\t12\t25\t1\n0\t1\t10\t26\t1.1\n1\t3\t4\t5\t0.1\n1\n2\tInfinity\n3\tInfinity\n"
+    }, 
+    "project_input": {
+        "result": "0\t1\t12\t12\t0.3\n0\t1\t10\t10\t0.4\n1\t3\t4\t4\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
+    }, 
+    "reverse": {
+        "result": "0\t2\t0\t0\t0.7\n1\n2\t1\t12\t25\t0.3\n2\t1\t10\t26\t0.4\n3\tInfinity\n4\t2\t4\t5\t0.1\n"
+    }, 
     "arc_map_invert": {
         "result": "0\t1\t12\t25\t-0.3\n0\t1\t10\t26\t-0.4\n1\t3\t4\t5\t-0.1\n1\t-0.7\n2\tInfinity\n3\tInfinity\n"
     }, 
@@ -14,53 +98,10 @@
         "result": "0\t1\t10\t26\t0.4\n0\t1\t12\t25\t0.3\n1\t3\t4\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
     }, 
     "name": "fst_004", 
-    "arc_map_rmweight": {
-        "result": "0\t1\t12\t25\n0\t1\t10\t26\n1\t3\t4\t5\n1\n2\tInfinity\n3\tInfinity\n"
-    }, 
-    "arc_map_identity": {
-        "result": "0\t1\t12\t25\t0.3\n0\t1\t10\t26\t0.4\n1\t3\t4\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
-    }, 
-    "invert": {
-        "result": "0\t1\t25\t12\t0.3\n0\t1\t26\t10\t0.4\n1\t3\t5\t4\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
-    }, 
-    "weight_type": "tropical", 
-    "arc_map_times": {
-        "result": "0\t1\t12\t25\t1.8\n0\t1\t10\t26\t1.9\n1\t3\t4\t5\t1.6\n1\t2.2\n2\tInfinity\n3\tInfinity\n"
-    }, 
-    "encode": {
-        "result": "0\t1\t1\t1\n0\t1\t2\t2\n1\t3\t3\t3\n1\t4\t4\t4\n2\tInfinity\n3\tInfinity\n4\n"
-    }, 
-    "raw": {
-        "result": "0\t1\t12\t25\t0.3\n0\t1\t10\t26\t0.4\n1\t3\t4\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
-    }, 
-    "project_output": {
-        "result": "0\t1\t25\t25\t0.3\n0\t1\t26\t26\t0.4\n1\t3\t5\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
-    }, 
-    "arc_map_output_epsilon": {
-        "result": "0\t1\t12\t0\t0.3\n0\t1\t10\t0\t0.4\n1\t3\t4\t0\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
-    }, 
-    "connect": {
-        "result": "0\t1\t12\t25\t0.3\n0\t1\t10\t26\t0.4\n1\t0.7\n"
-    }, 
-    "weight_pushing_initial": {
-        "result": "0\t1\t12\t25\t1\n0\t1\t10\t26\t1.1\n1\t3\t4\t5\t0.1\n1\n2\tInfinity\n3\tInfinity\n"
-    }, 
-    "weight_pushing_final": {
-        "result": "0\t1\t12\t25\n0\t1\t10\t26\t0.1\n1\t3\t4\t5\n1\t1\n2\tInfinity\n3\tInfinity\n"
-    }, 
-    "arc_map_quantize": {
-        "result": "0\t1\t12\t25\t0.299805\n0\t1\t10\t26\t0.400391\n1\t3\t4\t5\t0.0996094\n1\t0.700195\n2\tInfinity\n3\tInfinity\n"
-    }, 
-    "project_input": {
-        "result": "0\t1\t12\t12\t0.3\n0\t1\t10\t10\t0.4\n1\t3\t4\t4\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
-    }, 
-    "arc_map_input_epsilon": {
-        "result": "0\t1\t0\t25\t0.3\n0\t1\t0\t26\t0.4\n1\t3\t0\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
-    }, 
     "arc_map_plus": {
         "result": "0\t1\t12\t25\t0.3\n0\t1\t10\t26\t0.4\n1\t3\t4\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
     }, 
-    "reverse": {
-        "result": "0\t2\t0\t0\t0.7\n1\n2\t1\t12\t25\t0.3\n2\t1\t10\t26\t0.4\n3\tInfinity\n4\t2\t4\t5\t0.1\n"
+    "arc_map_quantize": {
+        "result": "0\t1\t12\t25\t0.299805\n0\t1\t10\t26\t0.400391\n1\t3\t4\t5\t0.0996094\n1\t0.700195\n2\tInfinity\n3\tInfinity\n"
     }
 }

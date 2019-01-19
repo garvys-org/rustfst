@@ -7,6 +7,7 @@ import io
 import os
 import json
 import subprocess
+import itertools
 
 import pynini as p
 
@@ -96,6 +97,9 @@ class FstTestData(object):
         print("Encode")
         self.compute_encode()
 
+        print("Encode / Decode")
+        self.compute_encode_decode()
+
         dump_json(self.config, os.path.join(self.path_dir, "metadata.json"))
 
         print("Done\n")
@@ -146,6 +150,26 @@ class FstTestData(object):
         self.add_data_to_config("arc_map_" + map_type, fst_out.text())
 
     def compute_encode(self):
-        mapper = p.EncodeMapper(encode_labels=True, encode_weights=True)
-        fst_out = self.raw_fst.copy().encode(mapper)
-        self.add_data_to_config("encode", fst_out.text())
+        res = []
+        for (l, w) in itertools.product([True, False], repeat=2):
+            mapper = p.EncodeMapper(encode_labels=l, encode_weights=w)
+            fst_out = self.raw_fst.copy().encode(mapper)
+            res.append({
+                "encode_labels": l,
+                "encode_weights": w,
+                "result": fst_out.text()
+            })
+        self.config["encode"] = res
+
+    def compute_encode_decode(self):
+        res = []
+        for (l, w) in itertools.product([True, False], repeat=2):
+            mapper = p.EncodeMapper(encode_labels=l, encode_weights=w)
+            fst_encoded = self.raw_fst.copy().encode(mapper)
+            fst_decoded= fst_encoded.decode(mapper)
+            res.append({
+                "encode_labels": l,
+                "encode_weights": w,
+                "result": fst_decoded.text()
+            })
+        self.config["encode_decode"] = res
