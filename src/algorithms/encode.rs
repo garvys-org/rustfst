@@ -1,11 +1,12 @@
 use std::collections::hash_map::{Entry, HashMap};
 
-use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction};
-use crate::fst_traits::MutableFst;
+use failure::{Fallible, ResultExt};
+
+use crate::algorithms::{rm_final_epsilon, ArcMapper, FinalArc, MapFinalAction};
+use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::Arc;
 use crate::Label;
-use crate::Result;
 use crate::EPS_LABEL;
 
 #[derive(PartialEq, Eq, Hash, Clone)]
@@ -113,23 +114,25 @@ impl<W: Semiring> ArcMapper<W> for EncodeMapper<W> {
         }
     }
 
+    fn final_arc_map(&mut self, final_arc: &mut FinalArc<W>) {
+        if self.encode_table.encode_weights {
+            let tuple = self.encode_table.final_arc_to_tuple(final_arc);
+            let label = self.encode_table.encode(tuple);
+            final_arc.ilabel = label;
+            if self.encode_table.encode_labels {
+                final_arc.olabel = label;
+            }
+            if self.encode_table.encode_weights {
+                final_arc.weight.set_value(W::one().value());
+            }
+        }
+    }
+
     fn final_action(&self) -> MapFinalAction {
         if self.encode_table.encode_weights {
             MapFinalAction::MapRequireSuperfinal
         } else {
             MapFinalAction::MapNoSuperfinal
-        }
-    }
-
-    fn final_arc_map(&mut self, final_arc: &mut FinalArc<W>) {
-        let tuple = self.encode_table.final_arc_to_tuple(final_arc);
-        let label = self.encode_table.encode(tuple);
-        final_arc.ilabel = label;
-        if self.encode_table.encode_labels {
-            final_arc.olabel = label;
-        }
-        if self.encode_table.encode_weights {
-            final_arc.weight.set_value(W::one().value());
         }
     }
 }
@@ -156,25 +159,10 @@ impl<W: Semiring> ArcMapper<W> for DecodeMapper<W> {
         }
     }
 
+    fn final_arc_map(&mut self, _final_arc: &mut FinalArc<W>) {}
+
     fn final_action(&self) -> MapFinalAction {
         MapFinalAction::MapNoSuperfinal
-    }
-
-    fn final_arc_map(&mut self, final_arc: &mut FinalArc<W>) {
-        let tuple = self.encode_table.decode(final_arc.ilabel).unwrap().clone();
-        final_arc.ilabel = tuple.ilabel;
-        if self.encode_table.encode_labels {
-            if final_arc.ilabel != final_arc.olabel {
-                panic!("EncodeMapper: Label-encoded arc has different input and output labels");
-            }
-            final_arc.olabel = tuple.olabel;
-        }
-        if self.encode_table.encode_weights {
-            if !final_arc.weight.is_one() {
-                panic!("EncodeMapper: Weight-encoded arc has non-trivial weight");
-            }
-            final_arc.weight = tuple.weight;
-        }
     }
 }
 
@@ -182,20 +170,23 @@ pub fn encode<F>(
     fst: &mut F,
     encode_labels: bool,
     encode_weights: bool,
-) -> Result<EncodeTable<F::W>>
+) -> Fallible<EncodeTable<F::W>>
 where
     F: MutableFst,
 {
     let mut encode_mapper = EncodeMapper::new(encode_labels, encode_weights);
-    fst.arc_map(&mut encode_mapper)?;
+    fst.arc_map(&mut encode_mapper)
+        .with_context(|_| format_err!("Error calling ArcMap with EncodeMapper."))?;
     Ok(encode_mapper.encode_table)
 }
 
-pub fn decode<F>(fst: &mut F, encode_table: EncodeTable<F::W>) -> Result<()>
+pub fn decode<F>(fst: &mut F, encode_table: EncodeTable<F::W>) -> Fallible<()>
 where
-    F: MutableFst,
+    F: MutableFst + ExpandedFst,
 {
     let mut decode_mapper = DecodeMapper::new(encode_table);
-    fst.arc_map(&mut decode_mapper)?;
+    fst.arc_map(&mut decode_mapper)
+        .with_context(|_| format_err!("Error calling ArcMap with EncodeMapper."))?;
+    rm_final_epsilon(fst)?;
     Ok(())
 }

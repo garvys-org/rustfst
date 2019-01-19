@@ -67,7 +67,7 @@ where
         }
 
         if arcs.len() < ifst.num_arcs(state).unwrap() {
-            let arcs_owned : Vec<Arc<F::W>> = arcs.into_iter().cloned().collect();
+            let arcs_owned: Vec<Arc<F::W>> = arcs.into_iter().cloned().collect();
             ifst.delete_arcs(state)?;
             if !weight.is_zero() {
                 ifst.set_final(state, weight)?;
