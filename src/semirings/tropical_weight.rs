@@ -1,4 +1,5 @@
 use std::f32;
+use std::hash::{Hash, Hasher};
 
 use crate::semirings::{
     CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
@@ -7,7 +8,7 @@ use crate::KDELTA;
 
 use ordered_float::OrderedFloat;
 
-#[derive(Clone, Debug, PartialOrd, Default, Copy, Hash, Eq)]
+#[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
 pub struct TropicalWeight {
     value: OrderedFloat<f32>,
 }
@@ -91,4 +92,4 @@ impl WeaklyDivisibleSemiring for TropicalWeight {
 
 impl WeightQuantize for TropicalWeight {}
 
-partial_eq_f32!(TropicalWeight);
+partial_eq_and_hash_f32!(TropicalWeight);

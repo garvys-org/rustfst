@@ -1,13 +1,14 @@
 use std::f32;
+use std::hash::{Hash, Hasher};
+
+use ordered_float::OrderedFloat;
 
 use crate::semirings::{
     CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::KDELTA;
 
-use ordered_float::OrderedFloat;
-
-#[derive(Clone, Debug, PartialOrd, Default, Copy, Hash, Eq)]
+#[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
 pub struct LogWeight {
     value: OrderedFloat<f32>,
 }
@@ -102,4 +103,4 @@ impl WeaklyDivisibleSemiring for LogWeight {
 
 impl WeightQuantize for LogWeight {}
 
-partial_eq_f32!(LogWeight);
+partial_eq_and_hash_f32!(LogWeight);

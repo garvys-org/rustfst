@@ -104,11 +104,17 @@ macro_rules! display_semiring {
     };
 }
 
-macro_rules! partial_eq_f32 {
+macro_rules! partial_eq_and_hash_f32 {
     ($semiring:tt) => {
         impl PartialEq for $semiring {
             fn eq(&self, other: &Self) -> bool {
                 self.quantize(KDELTA).value() == other.quantize(KDELTA).value()
+            }
+        }
+
+        impl Hash for $semiring {
+            fn hash<H: Hasher>(&self, state: &mut H) {
+                self.quantize(KDELTA).value.hash(state);
             }
         }
     };
