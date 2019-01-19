@@ -195,6 +195,15 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(())
     }
 
+    fn delete_arcs(&mut self, source: usize) -> Fallible<()> {
+        if let Some(state) = self.states.get_mut(source) {
+            state.arcs.clear();
+        } else {
+            bail!("State {:?} doesn't exist", source);
+        }
+        Ok(())
+    }
+
     fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut W> {
         if let Some(state) = self.states.get_mut(state_id) {
             state.final_weight.as_mut()
