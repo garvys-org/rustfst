@@ -1,8 +1,8 @@
 [package]
 name = 'rustfst'
-version = "0.2.1-alpha.0"
+version = '0.2.1-alpha.0'
 authors = ['Alexandre Caulier<alexandre.caulier@protonmail.com>']
-description = 'Library for Weighted Finite States Transducers as decribed by Mohri and Allauzen'
+description = 'Library for constructing, combining, optimizing, and searching weighted finite-state transducers (FSTs).'
 documentation = 'https://docs.rs/rustfst'
 readme = 'README.md'
 keywords = [
@@ -21,7 +21,7 @@ failure = '0.1'
 itertools = '0.7'
 nom = '4.1'
 num-traits = '0.2'
-ordered-float = "1"
+ordered-float = '1'
 
 [dev-dependencies]
 counter = '0.4'
