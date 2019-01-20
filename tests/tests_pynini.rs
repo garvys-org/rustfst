@@ -1,14 +1,9 @@
-extern crate rustfst;
-#[macro_use]
-extern crate serde_derive;
-
 use std::fs::read_to_string;
 use std::string::String;
 
-use failure::format_err;
-use failure::Fail;
-use failure::Fallible;
-use failure::ResultExt;
+use serde_derive::{Deserialize, Serialize};
+
+use failure::{bail, format_err, Fail, Fallible, ResultExt};
 
 use rustfst::algorithms::arc_mappers::{
     IdentityArcMapper, InputEpsilonMapper, InvertWeightMapper, OutputEpsilonMapper, PlusMapper,
@@ -20,7 +15,9 @@ use rustfst::algorithms::{
 };
 use rustfst::fst_impls::VectorFst;
 use rustfst::fst_traits::{MutableFst, TextParser};
-use rustfst::semirings::{Semiring, TropicalWeight};
+use rustfst::semirings::{
+    Semiring, StarSemiring, TropicalWeight, WeaklyDivisibleSemiring, WeightQuantize,
+};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct OperationResult {
@@ -170,8 +167,23 @@ fn run_test_pynini(test_name: &str) -> Fallible<()> {
 
     let string = read_to_string(absolute_path).unwrap();
     let parsed_test_data: ParsedTestData = serde_json::from_str(&string).unwrap();
-    let test_data: TestData<VectorFst<TropicalWeight>> = TestData::new(&parsed_test_data);
 
+    match parsed_test_data.weight_type.as_str() {
+        "tropical" => {
+            let test_data: TestData<VectorFst<TropicalWeight>> = TestData::new(&parsed_test_data);
+            do_run_test_pynini(&test_data)?;
+        }
+        _ => bail!("Weight type unknown : {:?}", parsed_test_data.weight_type),
+    };
+
+    Ok(())
+}
+
+fn do_run_test_pynini<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: 'static + Semiring<Type = f32> + StarSemiring + WeaklyDivisibleSemiring + WeightQuantize,
+{
     test_rmepsilon(&test_data)?;
 
     test_invert(&test_data)?;
@@ -211,9 +223,13 @@ fn run_test_pynini(test_name: &str) -> Fallible<()> {
     Ok(())
 }
 
-fn test_rmepsilon(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_rmepsilon<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: 'static + Semiring<Type = f32> + WeaklyDivisibleSemiring + StarSemiring,
+{
     // Remove epsilon
-    let fst_rmepsilon: VectorFst<TropicalWeight> = rm_epsilon(&test_data.raw).unwrap();
+    let fst_rmepsilon: VectorFst<_> = rm_epsilon(&test_data.raw).unwrap();
     assert!(
         isomorphic(&fst_rmepsilon, &test_data.rmepsilon)?,
         "{}",
@@ -222,7 +238,11 @@ fn test_rmepsilon(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<(
     Ok(())
 }
 
-fn test_invert(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_invert<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
+{
     // Invert
     let mut fst_invert = test_data.raw.clone();
     invert(&mut fst_invert);
@@ -235,7 +255,11 @@ fn test_invert(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> 
     Ok(())
 }
 
-fn test_project_output(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_project_output<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
+{
     // Project output
     let mut fst_project_output = test_data.raw.clone();
     project(&mut fst_project_output, ProjectType::ProjectOutput);
@@ -252,7 +276,11 @@ fn test_project_output(test_data: &TestData<VectorFst<TropicalWeight>>) -> Falli
     Ok(())
 }
 
-fn test_project_input(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_project_input<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
+{
     // Project input
     let mut fst_project_input = test_data.raw.clone();
     project(&mut fst_project_input, ProjectType::ProjectInput);
@@ -265,9 +293,13 @@ fn test_project_input(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallib
     Ok(())
 }
 
-fn test_reverse(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_reverse<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: 'static + Semiring<Type = f32> + WeaklyDivisibleSemiring,
+{
     // Reverse
-    let fst_reverse: VectorFst<TropicalWeight> = reverse(&test_data.raw).unwrap();
+    let fst_reverse: VectorFst<_> = reverse(&test_data.raw).unwrap();
     assert!(
         isomorphic(&test_data.reverse, &fst_reverse)?,
         "{}",
@@ -276,7 +308,11 @@ fn test_reverse(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()>
     Ok(())
 }
 
-fn test_connect(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_connect<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32>,
+{
     // Connect
     let mut fst_connect = test_data.raw.clone();
     connect(&mut fst_connect)?;
@@ -289,7 +325,11 @@ fn test_connect(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()>
     Ok(())
 }
 
-fn test_weight_pushing_initial(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_weight_pushing_initial<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
+{
     // Weight pushing initial
     let mut fst_weight_push_initial = test_data.raw.clone();
     push_weights(
@@ -309,7 +349,11 @@ fn test_weight_pushing_initial(test_data: &TestData<VectorFst<TropicalWeight>>) 
     Ok(())
 }
 
-fn test_weight_pushing_final(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_weight_pushing_final<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
+{
     // Weight pushing final
     let mut fst_weight_push_final = test_data.raw.clone();
     push_weights(&mut fst_weight_push_final, ReweightType::ReweightToFinal)?;
@@ -326,7 +370,11 @@ fn test_weight_pushing_final(test_data: &TestData<VectorFst<TropicalWeight>>) ->
     Ok(())
 }
 
-fn test_arc_map_identity(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_arc_map_identity<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
+{
     // ArcMap IdentityMapper
     let mut fst_arc_map_identity = test_data.raw.clone();
     let mut identity_mapper = IdentityArcMapper {};
@@ -344,7 +392,11 @@ fn test_arc_map_identity(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fal
     Ok(())
 }
 
-fn test_arc_map_rmweight(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_arc_map_rmweight<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
+{
     // ArcMap RmWeightMapper
     let mut fst_arc_map_rmweight = test_data.raw.clone();
     let mut rmweight_mapper = RmWeightMapper {};
@@ -362,7 +414,11 @@ fn test_arc_map_rmweight(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fal
     Ok(())
 }
 
-fn test_arc_map_invert(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_arc_map_invert<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring,
+{
     // ArcMap InvertWeightMapper
     let mut fst_arc_map_invert = test_data.raw.clone();
     let mut invertweight_mapper = InvertWeightMapper {};
@@ -380,7 +436,11 @@ fn test_arc_map_invert(test_data: &TestData<VectorFst<TropicalWeight>>) -> Falli
     Ok(())
 }
 
-fn test_arc_map_input_epsilon(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_arc_map_input_epsilon<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
+{
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = InputEpsilonMapper {};
     fst_arc_map.arc_map(&mut mapper)?;
@@ -397,7 +457,11 @@ fn test_arc_map_input_epsilon(test_data: &TestData<VectorFst<TropicalWeight>>) -
     Ok(())
 }
 
-fn test_arc_map_output_epsilon(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_arc_map_output_epsilon<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
+{
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = OutputEpsilonMapper {};
     fst_arc_map.arc_map(&mut mapper)?;
@@ -414,7 +478,11 @@ fn test_arc_map_output_epsilon(test_data: &TestData<VectorFst<TropicalWeight>>) 
     Ok(())
 }
 
-fn test_arc_map_plus(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_arc_map_plus<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
+{
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = PlusMapper::new(1.5);
     fst_arc_map.arc_map(&mut mapper)?;
@@ -431,7 +499,11 @@ fn test_arc_map_plus(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallibl
     Ok(())
 }
 
-fn test_arc_map_times(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_arc_map_times<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
+{
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = TimesMapper::new(1.5);
     fst_arc_map.arc_map(&mut mapper)?;
@@ -448,7 +520,11 @@ fn test_arc_map_times(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallib
     Ok(())
 }
 
-fn test_arc_map_quantize(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_arc_map_quantize<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
+{
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = QuantizeMapper {};
     fst_arc_map.arc_map(&mut mapper)?;
@@ -465,7 +541,11 @@ fn test_arc_map_quantize(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fal
     Ok(())
 }
 
-fn test_encode(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_encode<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32>,
+{
     for encode_test_data in &test_data.encode {
         let mut fst_encoded = test_data.raw.clone();
         encode(&mut fst_encoded, encode_test_data.encode_labels, encode_test_data.encode_weights)
@@ -482,7 +562,11 @@ fn test_encode(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> 
     Ok(())
 }
 
-fn test_encode_decode(test_data: &TestData<VectorFst<TropicalWeight>>) -> Fallible<()> {
+fn test_encode_decode<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32>,
+{
     for encode_test_data in &test_data.encode_decode {
         let mut fst_encoded = test_data.raw.clone();
         let encode_table = encode(&mut fst_encoded, encode_test_data.encode_labels, encode_test_data.encode_weights)
