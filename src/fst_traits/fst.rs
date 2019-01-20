@@ -3,7 +3,7 @@ use failure::Fallible;
 use crate::arc::Arc;
 use crate::semirings::Semiring;
 use crate::{StateId, EPS_LABEL};
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 
 /// Trait defining necessary methods for a wFST to access start states and final states.
 pub trait CoreFst {
@@ -137,7 +137,7 @@ where
 
 /// Trait defining the minimum interface necessary for a wFST.
 pub trait Fst:
-    CoreFst + PartialEq + Clone + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b> + Display
+    CoreFst + PartialEq + Clone + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b> + Display + Debug
 {
     /// Returns the number of arcs with epsilon input labels leaving a state.
     ///
