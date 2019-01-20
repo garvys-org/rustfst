@@ -167,6 +167,12 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// Deletes all the arcs leaving a state.
     fn delete_arcs(&mut self, source: StateId) -> Fallible<()>;
 
+    fn pop_arcs(&mut self, source: StateId) -> Fallible<Vec<Arc<Self::W>>>;
+
+    fn reserve_arcs(&mut self, source: StateId, additional: usize) -> Fallible<()>;
+
+    fn reserve_states(&mut self, additional: usize);
+
     /// Retrieves a mutable reference to the final weight of a state (if the state is a final one).
     fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut <Self as CoreFst>::W>;
 

@@ -178,30 +178,53 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
     }
 
     fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Fallible<()> {
-        if let Some(state) = self.states.get_mut(source) {
-            state.arcs.push(arc);
-            Ok(())
-        } else {
-            bail!("State {:?} doesn't exist", source);
-        }
+        self.states
+            .get_mut(source)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
+            .arcs
+            .push(arc);
+        Ok(())
     }
 
     fn delete_final_weight(&mut self, source: usize) -> Fallible<()> {
-        if let Some(state) = self.states.get_mut(source) {
-            state.final_weight = None;
-        } else {
-            bail!("State {:?} doesn't exist", source);
-        }
+        self.states
+            .get_mut(source)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
+            .final_weight = None;
         Ok(())
     }
 
     fn delete_arcs(&mut self, source: usize) -> Fallible<()> {
-        if let Some(state) = self.states.get_mut(source) {
-            state.arcs.clear();
-        } else {
-            bail!("State {:?} doesn't exist", source);
-        }
+        self.states
+            .get_mut(source)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
+            .arcs
+            .clear();
         Ok(())
+    }
+
+    fn pop_arcs(&mut self, source: usize) -> Fallible<Vec<Arc<Self::W>>> {
+        let v = self
+            .states
+            .get_mut(source)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
+            .arcs
+            .drain(..)
+            .collect();
+        Ok(v)
+    }
+
+    fn reserve_arcs(&mut self, source: usize, additional: usize) -> Fallible<()> {
+        self.states
+            .get_mut(source)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
+            .arcs
+            .reserve(additional);
+        Ok(())
+    }
+
+    fn reserve_states(&mut self, additional: usize) {
+        self.states.reserve(additional);
     }
 
     fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut W> {
