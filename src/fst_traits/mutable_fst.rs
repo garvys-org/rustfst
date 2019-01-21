@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use failure::Fallible;
 
-use crate::algorithms::ArcMapper;
+use crate::algorithms::{ArcMapper, StateMapper};
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::StateId;
@@ -227,6 +227,10 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// Maps an arc using a mapper function object. This function modifies its Fst input.
     fn arc_map<M: ArcMapper<Self::W>>(&mut self, mapper: &mut M) -> Fallible<()> {
         crate::algorithms::arc_map(self, mapper)
+    }
+
+    fn state_map<M: StateMapper<Self>>(&mut self, mapper: &mut M) -> Fallible<()> {
+        crate::algorithms::state_map(self, mapper)
     }
 }
 
