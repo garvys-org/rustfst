@@ -17,7 +17,11 @@ impl<F: MutableFst> StateMapper<F> for ArcSumMapper {
             .sorted_by(arc_compare)
             .into_iter()
             .coalesce(|mut x, y| {
-                if x.ilabel == y.ilabel && x.olabel == y.olabel && x.weight == y.weight {
+                if x.ilabel == y.ilabel
+                    && x.olabel == y.olabel
+                    && x.weight == y.weight
+                    && x.nextstate == y.nextstate
+                {
                     x.weight.plus_assign(y.weight);
                     Ok(x)
                 } else {

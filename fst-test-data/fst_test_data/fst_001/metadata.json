@@ -1,4 +1,7 @@
 {
+    "state_map_arc_sum": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
     "arc_map_times": {
         "result": "0\t1\t12\t25\t1.5\n1\t1.5\n"
     }, 
@@ -6,6 +9,9 @@
         "result": "0\t1\t12\t25\n1\n"
     }, 
     "connect": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
+    "state_map_arc_unique": {
         "result": "0\t1\t12\t25\n1\n"
     }, 
     "arc_map_input_epsilon": {

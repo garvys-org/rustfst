@@ -1,4 +1,7 @@
 {
+    "state_map_arc_sum": {
+        "result": "0\t1\t10\t26\t0.4\n0\t1\t12\t25\t0.3\n1\t3\t4\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
+    }, 
     "arc_map_times": {
         "result": "0\t1\t12\t25\t1.8\n0\t1\t10\t26\t1.9\n1\t3\t4\t5\t1.6\n1\t2.2\n2\tInfinity\n3\tInfinity\n"
     }, 
@@ -7,6 +10,9 @@
     }, 
     "connect": {
         "result": "0\t1\t12\t25\t0.3\n0\t1\t10\t26\t0.4\n1\t0.7\n"
+    }, 
+    "state_map_arc_unique": {
+        "result": "0\t1\t10\t26\t0.4\n0\t1\t12\t25\t0.3\n1\t3\t4\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
     }, 
     "arc_map_input_epsilon": {
         "result": "0\t1\t0\t25\t0.3\n0\t1\t0\t26\t0.4\n1\t3\t0\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"

@@ -9,6 +9,7 @@ use rustfst::algorithms::arc_mappers::{
     IdentityArcMapper, InputEpsilonMapper, InvertWeightMapper, OutputEpsilonMapper, PlusMapper,
     QuantizeMapper, RmWeightMapper, TimesMapper,
 };
+use rustfst::algorithms::state_mappers::ArcSumMapper;
 use rustfst::algorithms::{
     connect, decode, encode, invert, isomorphic, project, push_weights, reverse, rm_epsilon,
     ProjectType, ReweightType,
@@ -78,6 +79,8 @@ struct ParsedTestData {
     arc_map_quantize: OperationResult,
     encode: Vec<EncodeOperationResult>,
     encode_decode: Vec<EncodeOperationResult>,
+    state_map_arc_sum: OperationResult,
+    state_map_arc_unique: OperationResult,
 }
 
 struct EncodeTestData<F>
@@ -116,6 +119,8 @@ where
     arc_map_quantize: F,
     encode: Vec<EncodeTestData<F>>,
     encode_decode: Vec<EncodeTestData<F>>,
+    state_map_arc_sum: F,
+    state_map_arc_unique: F,
 }
 
 impl<F> TestData<F>
@@ -145,6 +150,8 @@ where
             arc_map_quantize: data.arc_map_quantize.parse(),
             encode: data.encode.iter().map(|v| v.parse()).collect(),
             encode_decode: data.encode_decode.iter().map(|v| v.parse()).collect(),
+            state_map_arc_sum: data.state_map_arc_sum.parse(),
+            state_map_arc_unique: data.state_map_arc_unique.parse(),
         }
     }
 }
@@ -219,6 +226,8 @@ where
     test_encode(&test_data)?;
 
     test_encode_decode(&test_data)?;
+
+    test_state_map_arc_sum(&test_data)?;
 
     Ok(())
 }
@@ -591,6 +600,29 @@ where
     Ok(())
 }
 
+fn test_state_map_arc_sum<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32>,
+{
+    let mut fst_state_map = test_data.raw.clone();
+    let mut mapper = ArcSumMapper {};
+    fst_state_map.state_map(&mut mapper)?;
+
+    assert_eq!(
+        test_data.state_map_arc_sum,
+        fst_state_map,
+        "{}",
+        error_message_fst!(
+            test_data.state_map_arc_sum,
+            fst_state_map,
+            "StateMap : ArcSum"
+        )
+    );
+
+    Ok(())
+}
+
 pub struct ExitFailure(failure::Error);
 
 /// Prints a list of causes for this Error, along with any backtrace
@@ -619,29 +651,28 @@ impl<T: Into<failure::Error>> From<T> for ExitFailure {
         ExitFailure(t.into())
     }
 }
-use std::result::Result as ResultRust;
 
 #[test]
-fn test_pynini_fst_000() -> ResultRust<(), ExitFailure> {
+fn test_pynini_fst_000() -> Result<(), ExitFailure> {
     run_test_pynini("fst_000").map_err(|v| v.into())
 }
 
 #[test]
-fn test_pynini_fst_001() -> ResultRust<(), ExitFailure> {
+fn test_pynini_fst_001() -> Result<(), ExitFailure> {
     run_test_pynini("fst_001").map_err(|v| v.into())
 }
 
 #[test]
-fn test_pynini_fst_002() -> ResultRust<(), ExitFailure> {
+fn test_pynini_fst_002() -> Result<(), ExitFailure> {
     run_test_pynini("fst_002").map_err(|v| v.into())
 }
 
 #[test]
-fn test_pynini_fst_003() -> ResultRust<(), ExitFailure> {
+fn test_pynini_fst_003() -> Result<(), ExitFailure> {
     run_test_pynini("fst_003").map_err(|v| v.into())
 }
 
 #[test]
-fn test_pynini_fst_004() -> ResultRust<(), ExitFailure> {
+fn test_pynini_fst_004() -> Result<(), ExitFailure> {
     run_test_pynini("fst_004").map_err(|v| v.into())
 }
