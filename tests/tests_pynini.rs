@@ -9,7 +9,7 @@ use rustfst::algorithms::arc_mappers::{
     IdentityArcMapper, InputEpsilonMapper, InvertWeightMapper, OutputEpsilonMapper, PlusMapper,
     QuantizeMapper, RmWeightMapper, TimesMapper,
 };
-use rustfst::algorithms::state_mappers::ArcSumMapper;
+use rustfst::algorithms::state_mappers::{ArcSumMapper, ArcUniqueMapper};
 use rustfst::algorithms::{
     connect, decode, encode, invert, isomorphic, project, push_weights, reverse, rm_epsilon,
     ProjectType, ReweightType,
@@ -232,6 +232,8 @@ where
     test_encode_decode(&test_data)?;
 
     test_state_map_arc_sum(&test_data)?;
+
+    test_state_map_arc_unique(&test_data)?;
 
     Ok(())
 }
@@ -621,6 +623,29 @@ where
             test_data.state_map_arc_sum,
             fst_state_map,
             "StateMap : ArcSum"
+        )
+    );
+
+    Ok(())
+}
+
+fn test_state_map_arc_unique<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32>,
+{
+    let mut fst_state_map = test_data.raw.clone();
+    let mut mapper = ArcUniqueMapper {};
+    fst_state_map.state_map(&mut mapper)?;
+
+    assert_eq!(
+        test_data.state_map_arc_unique,
+        fst_state_map,
+        "{}",
+        error_message_fst!(
+            test_data.state_map_arc_unique,
+            fst_state_map,
+            "StateMap : ArcUnique"
         )
     );
 

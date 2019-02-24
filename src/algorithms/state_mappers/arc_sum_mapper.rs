@@ -9,7 +9,7 @@ use crate::Arc;
 
 pub struct ArcSumMapper {}
 
-fn arc_compare<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> Ordering {
+pub(crate) fn arc_compare<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> Ordering {
     if arc_1.ilabel < arc_2.ilabel {
         return Ordering::Less;
     }
