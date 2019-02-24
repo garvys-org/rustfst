@@ -1,4 +1,4 @@
-use crate::algorithms::{state_map, StateMapper};
+use crate::algorithms::StateMapper;
 use crate::fst_traits::MutableFst;
 
 pub struct IdentityStateMapper {}

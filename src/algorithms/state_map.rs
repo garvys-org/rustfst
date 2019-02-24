@@ -1,7 +1,6 @@
 use failure::Fallible;
 
-use crate::fst_traits::{Fst, MutableFst};
-use crate::semirings::Semiring;
+use crate::fst_traits::MutableFst;
 use crate::StateId;
 
 pub trait StateMapper<F: MutableFst> {

@@ -14,7 +14,7 @@ struct Isomorphism<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = 
     queue: VecDeque<(StateId, StateId)>,
 }
 
-pub(crate) fn arc_compare<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> Ordering {
+fn arc_compare<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> Ordering {
     if arc_1.ilabel < arc_2.ilabel {
         return Ordering::Less;
     }

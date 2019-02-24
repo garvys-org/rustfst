@@ -1,11 +1,35 @@
+use std::cmp::Ordering;
+
 use itertools::Itertools;
 
-use crate::algorithms::isomorphic::arc_compare;
 use crate::algorithms::StateMapper;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
+use crate::Arc;
 
 pub struct ArcSumMapper {}
+
+fn arc_compare<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> Ordering {
+    if arc_1.ilabel < arc_2.ilabel {
+        return Ordering::Less;
+    }
+    if arc_1.ilabel > arc_2.ilabel {
+        return Ordering::Greater;
+    }
+    if arc_1.olabel < arc_2.olabel {
+        return Ordering::Less;
+    }
+    if arc_1.olabel > arc_2.olabel {
+        return Ordering::Greater;
+    }
+    if arc_1.nextstate < arc_2.nextstate {
+        return Ordering::Less;
+    }
+    if arc_1.nextstate > arc_2.nextstate {
+        return Ordering::Greater;
+    }
+    Ordering::Equal
+}
 
 impl<F: MutableFst> StateMapper<F> for ArcSumMapper {
     fn map_final_weight(&self, _weight: Option<&mut F::W>) {}
@@ -17,11 +41,7 @@ impl<F: MutableFst> StateMapper<F> for ArcSumMapper {
             .sorted_by(arc_compare)
             .into_iter()
             .coalesce(|mut x, y| {
-                if x.ilabel == y.ilabel
-                    && x.olabel == y.olabel
-                    && x.weight == y.weight
-                    && x.nextstate == y.nextstate
-                {
+                if x.ilabel == y.ilabel && x.olabel == y.olabel && x.nextstate == y.nextstate {
                     x.weight.plus_assign(y.weight);
                     Ok(x)
                 } else {
