@@ -17,7 +17,7 @@ use rustfst::algorithms::{
 use rustfst::fst_impls::VectorFst;
 use rustfst::fst_traits::{MutableFst, TextParser};
 use rustfst::semirings::{
-    Semiring, StarSemiring, TropicalWeight, WeaklyDivisibleSemiring, WeightQuantize,
+    LogWeight, Semiring, StarSemiring, TropicalWeight, WeaklyDivisibleSemiring, WeightQuantize,
 };
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -178,6 +178,10 @@ fn run_test_pynini(test_name: &str) -> Fallible<()> {
     match parsed_test_data.weight_type.as_str() {
         "tropical" => {
             let test_data: TestData<VectorFst<TropicalWeight>> = TestData::new(&parsed_test_data);
+            do_run_test_pynini(&test_data)?;
+        }
+        "log" => {
+            let test_data: TestData<VectorFst<LogWeight>> = TestData::new(&parsed_test_data);
             do_run_test_pynini(&test_data)?;
         }
         _ => bail!("Weight type unknown : {:?}", parsed_test_data.weight_type),
@@ -675,4 +679,14 @@ fn test_pynini_fst_003() -> Result<(), ExitFailure> {
 #[test]
 fn test_pynini_fst_004() -> Result<(), ExitFailure> {
     run_test_pynini("fst_004").map_err(|v| v.into())
+}
+
+#[test]
+fn test_pynini_fst_005() -> Result<(), ExitFailure> {
+    run_test_pynini("fst_005").map_err(|v| v.into())
+}
+
+#[test]
+fn test_pynini_fst_006() -> Result<(), ExitFailure> {
+    run_test_pynini("fst_006").map_err(|v| v.into())
 }

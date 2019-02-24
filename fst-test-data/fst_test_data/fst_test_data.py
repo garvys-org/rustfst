@@ -158,7 +158,7 @@ class FstTestData(object):
     def compute_encode(self):
         res = []
         for (l, w) in itertools.product([True, False], repeat=2):
-            mapper = p.EncodeMapper(encode_labels=l, encode_weights=w)
+            mapper = p.EncodeMapper(encode_labels=l, encode_weights=w, arc_type=self.raw_fst.arc_type())
             fst_out = self.raw_fst.copy().encode(mapper)
             res.append({
                 "encode_labels": l,
@@ -170,7 +170,7 @@ class FstTestData(object):
     def compute_encode_decode(self):
         res = []
         for (l, w) in itertools.product([True, False], repeat=2):
-            mapper = p.EncodeMapper(encode_labels=l, encode_weights=w)
+            mapper = p.EncodeMapper(encode_labels=l, encode_weights=w, arc_type=self.raw_fst.arc_type())
             fst_encoded = self.raw_fst.copy().encode(mapper)
             fst_decoded= fst_encoded.decode(mapper)
             res.append({
