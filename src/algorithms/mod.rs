@@ -19,6 +19,9 @@ mod state_map;
 mod union;
 mod weight_pushing;
 
+/// Function objects to restrict which arcs are traversed in an FST.
+pub mod arc_filters;
+
 /// Modules that provide structures implementing the `ArcMapper` trait.
 pub mod arc_mappers;
 
