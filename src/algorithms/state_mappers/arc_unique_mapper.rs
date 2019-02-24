@@ -32,3 +32,51 @@ impl<F: MutableFst> StateMapper<F> for ArcUniqueMapper {
             .for_each(|arc| fst.add_arc(state, arc).unwrap());
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::algorithms::state_map;
+    use crate::fst_impls::VectorFst;
+    use crate::fst_traits::MutableFst;
+    use crate::semirings::{ProbabilityWeight, Semiring};
+    use crate::Arc;
+    use failure::Fallible;
+
+    #[test]
+    fn test_arc_map_unique() -> Fallible<()> {
+        let mut fst_in = VectorFst::<ProbabilityWeight>::new();
+
+        let s1 = fst_in.add_state();
+        let s2 = fst_in.add_state();
+
+        fst_in.add_arc(s1, Arc::new(0, 0, ProbabilityWeight::new(0.3), s2))?;
+        fst_in.add_arc(s1, Arc::new(0, 1, ProbabilityWeight::new(0.3), s2))?;
+        fst_in.add_arc(s1, Arc::new(1, 0, ProbabilityWeight::new(0.3), s2))?;
+        fst_in.add_arc(s1, Arc::new(0, 0, ProbabilityWeight::new(0.3), s2))?;
+        fst_in.add_arc(s1, Arc::new(0, 0, ProbabilityWeight::new(0.1), s2))?;
+
+        fst_in.set_start(s1)?;
+        fst_in.set_final(s2, ProbabilityWeight::one())?;
+
+        let mut fst_out = VectorFst::<ProbabilityWeight>::new();
+
+        let s1 = fst_out.add_state();
+        let s2 = fst_out.add_state();
+
+        fst_out.add_arc(s1, Arc::new(0, 0, ProbabilityWeight::new(0.3), s2))?;
+        fst_out.add_arc(s1, Arc::new(0, 0, ProbabilityWeight::new(0.1), s2))?;
+        fst_out.add_arc(s1, Arc::new(0, 1, ProbabilityWeight::new(0.3), s2))?;
+        fst_out.add_arc(s1, Arc::new(1, 0, ProbabilityWeight::new(0.3), s2))?;
+
+        fst_out.set_start(s1)?;
+        fst_out.set_final(s2, ProbabilityWeight::one())?;
+
+        let mut mapper = ArcUniqueMapper {};
+        state_map(&mut fst_in, &mut mapper)?;
+
+        assert_eq!(fst_in, fst_out);
+
+        Ok(())
+    }
+}
