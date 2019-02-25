@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use failure::Fallible;
 
-use crate::algorithms::ArcMapper;
+use crate::algorithms::{ArcMapper, StateMapper};
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::StateId;
@@ -167,6 +167,15 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// Deletes all the arcs leaving a state.
     fn delete_arcs(&mut self, source: StateId) -> Fallible<()>;
 
+    /// Remove all arcs leaving a state and return them.
+    fn pop_arcs(&mut self, source: StateId) -> Fallible<Vec<Arc<Self::W>>>;
+
+    /// Reserve space for storing enough arcs leaving a state.
+    fn reserve_arcs(&mut self, source: StateId, additional: usize) -> Fallible<()>;
+
+    /// Reserve space for storing enough states.
+    fn reserve_states(&mut self, additional: usize);
+
     /// Retrieves a mutable reference to the final weight of a state (if the state is a final one).
     fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut <Self as CoreFst>::W>;
 
@@ -218,9 +227,14 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
         crate::algorithms::closure_star(self)
     }
 
-    /// Maps an arc using a mapper function object. This function modifies its Fst input.
+    /// Maps an arc using a `ArcMapper` object.
     fn arc_map<M: ArcMapper<Self::W>>(&mut self, mapper: &mut M) -> Fallible<()> {
         crate::algorithms::arc_map(self, mapper)
+    }
+
+    /// Maps a state using a `StateMapper` object.
+    fn state_map<M: StateMapper<Self>>(&mut self, mapper: &mut M) -> Fallible<()> {
+        crate::algorithms::state_map(self, mapper)
     }
 }
 

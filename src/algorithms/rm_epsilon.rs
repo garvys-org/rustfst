@@ -2,7 +2,8 @@ use std::collections::HashMap;
 
 use failure::Fallible;
 
-use crate::algorithms::all_pairs_shortest_distance;
+use crate::algorithms::state_mappers::ArcSumMapper;
+use crate::algorithms::{all_pairs_shortest_distance, state_map};
 use crate::arc::Arc;
 use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
 use crate::semirings::{Semiring, StarSemiring};
@@ -141,6 +142,9 @@ where
             }
         }
     }
+
+    let mut arc_sum_mapper = ArcSumMapper {};
+    state_map(&mut output_fst, &mut arc_sum_mapper)?;
 
     Ok(output_fst)
 }

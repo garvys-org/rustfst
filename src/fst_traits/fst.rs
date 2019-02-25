@@ -1,9 +1,11 @@
+use std::fmt::{Debug, Display};
+
 use failure::Fallible;
 
+use crate::algorithms::arc_filters::{ArcFilter, InputEpsilonArcFilter, OutputEpsilonArcFilter};
 use crate::arc::Arc;
 use crate::semirings::Semiring;
-use crate::{StateId, EPS_LABEL};
-use std::fmt::Display;
+use crate::StateId;
 
 /// Trait defining necessary methods for a wFST to access start states and final states.
 pub trait CoreFst {
@@ -137,7 +139,7 @@ where
 
 /// Trait defining the minimum interface necessary for a wFST.
 pub trait Fst:
-    CoreFst + PartialEq + Clone + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b> + Display
+    CoreFst + PartialEq + Clone + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b> + Display + Debug
 {
     /// Returns the number of arcs with epsilon input labels leaving a state.
     ///
@@ -162,10 +164,8 @@ pub trait Fst:
     /// assert_eq!(fst.num_input_epsilons(s1).unwrap(), 0);
     /// ```
     fn num_input_epsilons(&self, state: StateId) -> Fallible<usize> {
-        Ok(self
-            .arcs_iter(state)?
-            .filter(|v| v.ilabel == EPS_LABEL)
-            .count())
+        let filter = InputEpsilonArcFilter {};
+        Ok(self.arcs_iter(state)?.filter(|v| filter.keep(v)).count())
     }
 
     /// Returns the number of arcs with epsilon output labels leaving a state.
@@ -191,9 +191,7 @@ pub trait Fst:
     /// assert_eq!(fst.num_output_epsilons(s1).unwrap(), 0);
     /// ```
     fn num_output_epsilons(&self, state: StateId) -> Fallible<usize> {
-        Ok(self
-            .arcs_iter(state)?
-            .filter(|v| v.olabel == EPS_LABEL)
-            .count())
+        let filter = OutputEpsilonArcFilter {};
+        Ok(self.arcs_iter(state)?.filter(|v| filter.keep(v)).count())
     }
 }

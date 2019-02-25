@@ -100,6 +100,12 @@ class FstTestData(object):
         print("Encode / Decode")
         self.compute_encode_decode()
 
+        print("StateMap : ArcSum")
+        self.compute_state_map_arc_sum()
+
+        print("StateMap : ArcUnique")
+        self.compute_state_map_arc_unique()
+
         dump_json(self.config, os.path.join(self.path_dir, "metadata.json"))
 
         print("Done\n")
@@ -152,7 +158,7 @@ class FstTestData(object):
     def compute_encode(self):
         res = []
         for (l, w) in itertools.product([True, False], repeat=2):
-            mapper = p.EncodeMapper(encode_labels=l, encode_weights=w)
+            mapper = p.EncodeMapper(encode_labels=l, encode_weights=w, arc_type=self.raw_fst.arc_type())
             fst_out = self.raw_fst.copy().encode(mapper)
             res.append({
                 "encode_labels": l,
@@ -164,7 +170,7 @@ class FstTestData(object):
     def compute_encode_decode(self):
         res = []
         for (l, w) in itertools.product([True, False], repeat=2):
-            mapper = p.EncodeMapper(encode_labels=l, encode_weights=w)
+            mapper = p.EncodeMapper(encode_labels=l, encode_weights=w, arc_type=self.raw_fst.arc_type())
             fst_encoded = self.raw_fst.copy().encode(mapper)
             fst_decoded= fst_encoded.decode(mapper)
             res.append({
@@ -173,3 +179,11 @@ class FstTestData(object):
                 "result": fst_decoded.text()
             })
         self.config["encode_decode"] = res
+
+    def compute_state_map_arc_sum(self):
+        fst_out = p.statemap(self.raw_fst.copy(), map_type="arc_sum")
+        self.add_data_to_config("state_map_arc_sum", fst_out.text())
+
+    def compute_state_map_arc_unique(self):
+        fst_out = p.statemap(self.raw_fst.copy(), map_type="arc_unique")
+        self.add_data_to_config("state_map_arc_unique", fst_out.text())

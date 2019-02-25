@@ -1,4 +1,7 @@
 {
+    "state_map_arc_sum": {
+        "result": ""
+    }, 
     "arc_map_times": {
         "result": ""
     }, 
@@ -6,6 +9,9 @@
         "result": ""
     }, 
     "connect": {
+        "result": ""
+    }, 
+    "state_map_arc_unique": {
         "result": ""
     }, 
     "arc_map_input_epsilon": {
