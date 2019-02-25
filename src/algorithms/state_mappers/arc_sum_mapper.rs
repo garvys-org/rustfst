@@ -7,6 +7,8 @@ use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::Arc;
 
+/// Plus-Sum weights of arcs leaving the same state, going to the same state
+/// and with the same input and output labels.
 pub struct ArcSumMapper {}
 
 pub(crate) fn arc_compare<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> Ordering {
@@ -34,6 +36,9 @@ pub(crate) fn arc_compare<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> Orderi
 impl<F: MutableFst> StateMapper<F> for ArcSumMapper {
     fn map_final_weight(&self, _weight: Option<&mut F::W>) {}
 
+    /// First sorts the exiting arcs by input label, output label and destination
+    /// state and then sums weights of arcs with the same input label, output
+    /// label, and destination state.
     fn map_arcs(&self, fst: &mut F, state: usize) {
         let arcs = fst.pop_arcs(state).unwrap();
         let arcs: Vec<_> = arcs

@@ -3,16 +3,17 @@ use failure::Fallible;
 use crate::fst_traits::MutableFst;
 use crate::StateId;
 
+/// StateMapper Interface. The class determines how states are mapped. This is useful for
+/// implementing operations that do not change the number of states.
 pub trait StateMapper<F: MutableFst> {
+    /// Defines how final weight are mapped.
     fn map_final_weight(&self, weight: Option<&mut F::W>);
+    /// Defines how arcs leaving the state `state` are mapped.
     fn map_arcs(&self, fst: &mut F, state: StateId);
 }
 
 /// This operation transforms each state in the input FST.
-/// The transformation is specified by a function object called a state mapper.
-///
-/// For instance, ArcSumMapper doc combines arcs with the same input label,
-/// output label and destination state, ⊕-summing their weights.
+/// The transformation is specified by a function object called a `StateMapper`.
 pub fn state_map<F, M>(ifst: &mut F, mapper: &mut M) -> Fallible<()>
 where
     F: MutableFst,

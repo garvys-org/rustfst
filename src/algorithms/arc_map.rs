@@ -51,7 +51,7 @@ pub trait ArcMapper<S: Semiring> {
     fn final_action(&self) -> MapFinalAction;
 }
 
-/// Maps an arc using a mapper function object. This function modifies its Fst input.
+/// Maps every arc in the FST using an `ArcMapper` object.
 pub fn arc_map<F, M>(ifst: &mut F, mapper: &mut M) -> Fallible<()>
 where
     F: MutableFst,

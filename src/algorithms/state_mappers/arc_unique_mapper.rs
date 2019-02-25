@@ -4,11 +4,15 @@ use crate::algorithms::state_mappers::arc_sum_mapper::arc_compare;
 use crate::algorithms::StateMapper;
 use crate::fst_traits::MutableFst;
 
+/// Remove duplicate arcs leaving the same state, going to the same state
+/// and with the same input and output labels.
 pub struct ArcUniqueMapper {}
 
 impl<F: MutableFst> StateMapper<F> for ArcUniqueMapper {
     fn map_final_weight(&self, _weight: Option<&mut F::W>) {}
 
+    /// First sorts the exiting arcs by input label, output label and destination
+    /// state and then uniques identical arcs.
     fn map_arcs(&self, fst: &mut F, state: usize) {
         let arcs = fst.pop_arcs(state).unwrap();
         let arcs: Vec<_> = arcs

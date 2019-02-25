@@ -1,6 +1,7 @@
 use crate::algorithms::StateMapper;
 use crate::fst_traits::MutableFst;
 
+/// Mapper that returns its input.
 pub struct IdentityStateMapper {}
 
 impl<F: MutableFst> StateMapper<F> for IdentityStateMapper {
