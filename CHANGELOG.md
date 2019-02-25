@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Add `arc_map` function to perform modifications that don't modify the number of arcs (and `ArcMapper` to specify how to modify the arcs).
-- Implemented the followingg arc mappers to be used with `arc_map`:
+- Implemented the following arc mappers to be used with `arc_map`:
    - `IdentityMapper`: Mapper that returns its input.
    - `InputEpsilonMapper`: Mapper that converts all input symbols to epsilon.
    - `InvertWeightMapper`: Mapper to inverse all non-Zero() weights.
@@ -25,6 +25,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement `encode` and `decode` functions to allow the representation of a weighted transducer as a weighted automaton, an unweighted transducer or an unweighted automaton.
 - Implement `rm_final_epsilon` which removes final states that have epsilon-only input arcs.
 - Add `delete_final_weight` and `delete_arcs` to the MutableFst trait and implement them for `VectorFst`.
+- Add `ArcFilter` trait and implement it for `AnyArcFilter`, `EpsilonArcFilter`, `InputEpsilonArcFilter` and `OutputEpsilonArcFilter`.
+- Add `state_map` function to perform state modifications and `StateMapper` to specify the modifications.
+- Implemented the following state mappers :
+    - `ArcSumMapper`: Mapper that Plus-sum the arcs with same nextstate, ilabel and olabel.
+    - `ArcUniqueMapper`: Remove duplicate arcs.
+    - `IdentityStateMapper`: Return its input.
+- Add `pop_arcs`, `reserve_arcs` and `reserve_state` to the `MutableFst` API.
+- `state_map` method has been added to the MutableFst trait as a provided method.
 
 ### Changed
 - In the `Semiring` trait, `ONE` and `ZERO` associated constants have been removed in favor of `one` and `zero` functions.
@@ -33,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed `ArcMapper` trait to use `FinalArc` and `MapFinalAction`.
 - Implement `invert` and `project` using `arc_map`.
 - Change internal representation of float weights to use the `ordered-float` crate and derive `Hash` and `Eq` for each Semiring.
+- `ArcSumMapper` is now called inside `rm_epsilon` function to conform with OpenFST.
 
 ### Removed
 - Removed `Add`, `AddAssign`, `Mul`, `MulAssign` and `Copy` trait bound for `Semiring`.
