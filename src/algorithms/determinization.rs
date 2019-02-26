@@ -1,5 +1,4 @@
-use std::collections::BTreeMap;
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashSet, VecDeque, HashMap};
 
 use failure::Fallible;
 
@@ -8,9 +7,7 @@ use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{Semiring, WeaklyDivisibleSemiring};
 use crate::{Label, StateId};
 
-// TODO : WIP
-
-#[derive(PartialEq, Eq, Clone, Ord, PartialOrd)]
+#[derive(PartialEq, Eq, Clone, Hash, PartialOrd)]
 struct PairStateWeight<W: Semiring> {
     state: StateId,
     weight: W,
@@ -22,7 +19,7 @@ impl<W: Semiring> PairStateWeight<W> {
     }
 }
 
-#[derive(Default, PartialEq, Eq, Clone, Ord, PartialOrd)]
+#[derive(Default, PartialEq, Eq, Clone, Hash, PartialOrd)]
 struct WeightedSubset<W: Semiring> {
     pairs: Vec<PairStateWeight<W>>,
 }
@@ -99,6 +96,7 @@ where
 {
     let mut new_weighted_subset = WeightedSubset::default();
 
+    // Reachable states with input labels x from current weighted subset.
     for q in weighted_subset.nextstates(x, fst)? {
         let mut new_weight = None;
         for pair in &weighted_subset.pairs {
@@ -121,18 +119,18 @@ where
     Ok(new_weighted_subset)
 }
 
-use std::collections::btree_map::Entry;
+use std::collections::hash_map::Entry;
 
 #[allow(unused)]
 pub fn determinize<W, F1, F2>(fst_in: &F1) -> Fallible<F2>
 where
-    W: WeaklyDivisibleSemiring + Ord + Eq,
+    W: WeaklyDivisibleSemiring,
     F1: ExpandedFst<W = W>,
     F2: MutableFst<W = W>,
 {
     let mut deminized_fst = F2::new();
 
-    let mut mapping_states = BTreeMap::new();
+    let mut mapping_states = HashMap::new();
 
     let mut queue = VecDeque::new();
 
@@ -157,6 +155,7 @@ where
 
             if let Entry::Vacant(lol) = mapping_states.entry(new_weighted_subset.clone()) {
                 let state_id = deminized_fst.add_state();
+                queue.push_back(new_weighted_subset.clone());
 
                 let mut final_weight = None;
                 for pair in &new_weighted_subset.pairs {
@@ -188,32 +187,72 @@ where
     Ok(deminized_fst)
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//     use semirings::TropicalWeight;
-//     use vector::VectorFst;
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+     use crate::semirings::TropicalWeight;
+     use crate::fst_impls::VectorFst;
+     use crate::arc::Arc;
 
-//     #[test]
-//     fn test_determinize() {
-//         let mut fst = VectorFst::new();
-//         let s0 = fst.add_state();
-//         let s1 = fst.add_state();
-//         let s2 = fst.add_state();
-//         let s3 = fst.add_state();
-//         fst.set_start(&s0);
-//         fst.set_final(&s3, TropicalWeight::new(0.0));
+     #[test]
+     fn test_determinize() -> Fallible<()>{
+         let mut input_fst = VectorFst::new();
+         let s0 = input_fst.add_state();
+         let s1 = input_fst.add_state();
 
-//         fst.add_arc(&s0, &s1, 1, 1, TropicalWeight::new(1.0));
-//         fst.add_arc(&s0, &s2, 1, 1, TropicalWeight::new(2.0));
+         input_fst.set_start(s0)?;
+         input_fst.set_final(s1, TropicalWeight::one())?;
 
-//         fst.add_arc(&s1, &s1, 2, 2, TropicalWeight::new(3.0));
-//         fst.add_arc(&s2, &s2, 2, 2, TropicalWeight::new(3.0));
+         input_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
+         input_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
+         input_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
 
-//         fst.add_arc(&s1, &s3, 3, 3, TropicalWeight::new(5.0));
-//         fst.add_arc(&s2, &s3, 4, 4, TropicalWeight::new(6.0));
+         let mut ref_fst = VectorFst::new();
+         let s0 = ref_fst.add_state();
+         let s1 = ref_fst.add_state();
 
-//         let determinized_fst : VectorFst<TropicalWeight> = determinize(&fst);
-//         println!("{:?}", determinized_fst);
-//     }
-// }
+         ref_fst.set_start(s0)?;
+         ref_fst.set_final(s1, TropicalWeight::one())?;
+
+         ref_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
+
+         let determinized_fst : VectorFst<TropicalWeight> = determinize(&ref_fst)?;
+
+         assert_eq!(determinized_fst, ref_fst);
+         Ok(())
+     }
+
+     #[test]
+     fn test_determinize_2() -> Fallible<()>{
+         let mut input_fst = VectorFst::new();
+         let s0 = input_fst.add_state();
+         let s1 = input_fst.add_state();
+         let s2 = input_fst.add_state();
+         let s3 = input_fst.add_state();
+
+         input_fst.set_start(s0)?;
+         input_fst.set_final(s3, TropicalWeight::one())?;
+
+         input_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
+         input_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(3.0), s2))?;
+
+         input_fst.add_arc(s1, Arc::new(2, 2, TropicalWeight::new(4.0), s3))?;
+         input_fst.add_arc(s2, Arc::new(2, 2, TropicalWeight::new(3.0), s3))?;
+
+         let mut ref_fst = VectorFst::new();
+         let s0 = ref_fst.add_state();
+         let s1 = ref_fst.add_state();
+         let s2 = ref_fst.add_state();
+
+         ref_fst.set_start(s0)?;
+         ref_fst.set_final(s2, TropicalWeight::one())?;
+
+         ref_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
+         ref_fst.add_arc(s1, Arc::new(2, 2, TropicalWeight::new(4.0), s2))?;
+
+         let determinized_fst : VectorFst<TropicalWeight> = determinize(&ref_fst)?;
+
+         assert_eq!(determinized_fst, ref_fst);
+         Ok(())
+     }
+ }
