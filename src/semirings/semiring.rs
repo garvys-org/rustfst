@@ -12,7 +12,7 @@ use std::hash::Hash;
 pub trait Semiring:
     Clone + PartialEq + PartialOrd + Debug + Default + Display + AsRef<Self> + Hash + Eq
 {
-    type Type: Display;
+    type Type;
 
     fn zero() -> Self;
     fn one() -> Self;
