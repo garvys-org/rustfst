@@ -1,4 +1,4 @@
-use crate::semirings::{Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize};
+use crate::semirings::Semiring;
 
 #[derive(Debug, Eq, PartialOrd, PartialEq, Clone, Default, Hash)]
 pub struct ProductWeight<W1, W2>

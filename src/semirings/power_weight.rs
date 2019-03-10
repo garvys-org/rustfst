@@ -7,7 +7,7 @@ use std::hash::Hasher;
 use generic_array::ArrayLength;
 use generic_array::GenericArray;
 
-use crate::semirings::{Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize};
+use crate::semirings::Semiring;
 
 pub struct PowerWeight<W, N>
 where
