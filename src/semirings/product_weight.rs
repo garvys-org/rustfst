@@ -6,8 +6,8 @@ where
     W1: Semiring,
     W2: Semiring,
 {
-    weight1: W1,
-    weight2: W2,
+    pub weight1: W1,
+    pub weight2: W2,
 }
 
 use std::fmt;

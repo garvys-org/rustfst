@@ -10,10 +10,10 @@ pub enum StringWeightVariant {
 }
 
 impl StringWeightVariant {
-    fn unwrap_labels(&self) -> &Vec<Label> {
+    pub fn unwrap_labels(&self) -> &Vec<Label> {
         match self {
             StringWeightVariant::Infinity => panic!("lol"),
-            StringWeightVariant::Labels(l) => l
+            StringWeightVariant::Labels(l) => l,
         }
     }
 }
@@ -25,27 +25,27 @@ impl Default for StringWeightVariant {
 }
 
 #[derive(Clone, Debug, PartialOrd, Default, PartialEq, Eq, Hash)]
-pub struct RestrictStringWeight {
+pub struct StringWeightRestrict {
     /// If None -> Infinity. If Some([]) -> Epsilon
-    value: StringWeightVariant,
+    pub value: StringWeightVariant,
 }
 
 #[derive(Clone, Debug, PartialOrd, Default, PartialEq, Eq, Hash)]
-pub struct LeftStringWeight {
+pub struct StringWeightLeft {
     /// If None -> Infinity. If Some([]) -> Epsilon
-    value: StringWeightVariant,
+    pub value: StringWeightVariant,
 }
 
 #[derive(Clone, Debug, PartialOrd, Default, PartialEq, Eq, Hash)]
-pub struct RightStringWeight {
+pub struct StringWeightRight {
     /// If None -> Infinity. If Some([]) -> Epsilon
-    value: StringWeightVariant,
+    pub value: StringWeightVariant,
 }
 
 pub enum StringType {
     StringRestrict,
     StringLeft,
-    StringRight
+    StringRight,
 }
 
 macro_rules! string_semiring {
@@ -100,23 +100,39 @@ macro_rules! string_semiring {
                 } else if rhs.as_ref().is_zero() {
                     // Do nothing
                 } else {
-
                     let l1 = self.value.unwrap_labels();
                     let l2 = rhs.as_ref().value.unwrap_labels();
 
                     match $string_type {
                         StringType::StringRestrict => {
                             if self != rhs.as_ref() {
-                                panic!("Unequal arguments : non-functional FST ? w1 = {:?} w2 = {:?}", &self, &rhs.as_ref());
+                                panic!(
+                                    "Unequal arguments : non-functional FST ? w1 = {:?} w2 = {:?}",
+                                    &self,
+                                    &rhs.as_ref()
+                                );
                             }
-                        },
+                        }
                         StringType::StringLeft => {
-                            let new_labels : Vec<_> = l1.iter().zip(l2.iter()).take_while(|(v1, v2)| v1 == v2).map(|(v1, _)| v1).cloned().collect();
+                            let new_labels: Vec<_> = l1
+                                .iter()
+                                .zip(l2.iter())
+                                .take_while(|(v1, v2)| v1 == v2)
+                                .map(|(v1, _)| v1)
+                                .cloned()
+                                .collect();
                             self.value = StringWeightVariant::Labels(new_labels);
-                        },
+                        }
                         StringType::StringRight => {
-                            let new_labels : Vec<_> = l1.iter().rev().zip(l2.iter().rev()).take_while(|(v1, v2)| v1 == v2).map(|(v1, _)| v1).cloned().collect();
-                            let new_labels : Vec<_> = new_labels.into_iter().rev().collect();
+                            let new_labels: Vec<_> = l1
+                                .iter()
+                                .rev()
+                                .zip(l2.iter().rev())
+                                .take_while(|(v1, v2)| v1 == v2)
+                                .map(|(v1, _)| v1)
+                                .cloned()
+                                .collect();
+                            let new_labels: Vec<_> = new_labels.into_iter().rev().collect();
                             self.value = StringWeightVariant::Labels(new_labels);
                         }
                     }
@@ -143,9 +159,17 @@ macro_rules! string_semiring {
             }
         }
 
+        impl $semiring {
+            pub fn len(&self) -> usize {
+                match &self.value {
+                       StringWeightVariant::Infinity => 0,
+                       StringWeightVariant::Labels(l) => l.len()
+                }
+            }
+        }
     };
 }
 
-string_semiring!(RestrictStringWeight, StringType::StringRestrict);
-string_semiring!(LeftStringWeight, StringType::StringLeft);
-string_semiring!(RightStringWeight, StringType::StringRight);
+string_semiring!(StringWeightRestrict, StringType::StringRestrict);
+string_semiring!(StringWeightLeft, StringType::StringLeft);
+string_semiring!(StringWeightRight, StringType::StringRight);
