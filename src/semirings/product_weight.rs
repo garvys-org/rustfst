@@ -1,3 +1,6 @@
+use std::fmt;
+use std::fmt::Debug;
+
 use crate::semirings::Semiring;
 
 #[derive(Debug, Eq, PartialOrd, PartialEq, Clone, Default, Hash)]
@@ -6,19 +9,17 @@ where
     W1: Semiring,
     W2: Semiring,
 {
-    pub weight1: W1,
-    pub weight2: W2,
+    weight1: W1,
+    weight2: W2,
 }
 
-use std::fmt;
-use std::fmt::Debug;
 impl<W1, W2> fmt::Display for ProductWeight<W1, W2>
 where
     W1: Semiring,
     W2: Semiring,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        (&self.weight1, &self.weight2).fmt(f)
+        (&self.value1(), &self.value2()).fmt(f)
     }
 }
 
@@ -71,11 +72,33 @@ where
     }
 
     fn value(&self) -> <Self as Semiring>::Type {
-        (self.weight1.clone(), self.weight2.clone())
+        (self.value1().clone(), self.value2().clone())
     }
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
-        self.weight1 = value.0;
-        self.weight2 = value.1;
+        self.set_value1(value.0);
+        self.set_value2(value.1);
+    }
+}
+
+impl<W1, W2> ProductWeight<W1, W2>
+where
+    W1: Semiring,
+    W2: Semiring,
+{
+    pub fn value1(&self) -> &W1 {
+        &self.weight1
+    }
+
+    pub fn value2(&self) -> &W2 {
+        &self.weight2
+    }
+
+    pub fn set_value1(&mut self, new_weight: W1) {
+        self.weight1 = new_weight;
+    }
+
+    pub fn set_value2(&mut self, new_weight: W2) {
+        self.weight2 = new_weight;
     }
 }

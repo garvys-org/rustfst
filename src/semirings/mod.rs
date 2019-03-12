@@ -13,7 +13,7 @@ mod union_weight;
 
 pub use self::boolean_weight::BooleanWeight;
 pub use self::gallic_weight::{
-    GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, GallicWeightRight, GallicWeight
+    GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, GallicWeightRight,
 };
 pub use self::integer_weight::IntegerWeight;
 pub use self::log_weight::LogWeight;

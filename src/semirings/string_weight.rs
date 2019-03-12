@@ -162,8 +162,8 @@ macro_rules! string_semiring {
         impl $semiring {
             pub fn len(&self) -> usize {
                 match &self.value {
-                       StringWeightVariant::Infinity => 0,
-                       StringWeightVariant::Labels(l) => l.len()
+                    StringWeightVariant::Infinity => 0,
+                    StringWeightVariant::Labels(l) => l.len(),
                 }
             }
         }

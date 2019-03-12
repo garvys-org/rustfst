@@ -143,13 +143,15 @@ gallic_weight!(
 use std::marker::PhantomData;
 #[derive(Debug, Hash, Default, Clone, PartialEq, PartialOrd, Eq)]
 pub struct GallicUnionWeightOption<W> {
-    ghost: PhantomData<W>
+    ghost: PhantomData<W>,
 }
 
-impl<W: Semiring> UnionWeightOption<GallicWeightRestrict<W>> for GallicUnionWeightOption<GallicWeightRestrict<W>> {
+impl<W: Semiring> UnionWeightOption<GallicWeightRestrict<W>>
+    for GallicUnionWeightOption<GallicWeightRestrict<W>>
+{
     fn compare(w1: &GallicWeightRestrict<W>, w2: &GallicWeightRestrict<W>) -> bool {
-        let s1 = &w1.weight.weight1;
-        let s2 = &w2.weight.weight1;
+        let s1 = &w1.weight.value1();
+        let s2 = &w2.weight.value1();
         let n1 = s1.len();
         let n2 = s2.len();
         if n1 < n2 {
@@ -177,13 +179,17 @@ impl<W: Semiring> UnionWeightOption<GallicWeightRestrict<W>> for GallicUnionWeig
         }
     }
 
-    fn merge(w1: &GallicWeightRestrict<W>, w2: &GallicWeightRestrict<W>) -> GallicWeightRestrict<W> {
-        let p = ProductWeight {
-            weight1: w1.weight.weight1.clone(),
-            weight2: w1.weight.weight2.plus(&w2.weight.weight2),
-        };
-        GallicWeightRestrict {weight: p}
+    fn merge(
+        w1: &GallicWeightRestrict<W>,
+        w2: &GallicWeightRestrict<W>,
+    ) -> GallicWeightRestrict<W> {
+        let p = ProductWeight::new((
+            w1.weight.value1().clone(),
+            w1.weight.value2().plus(&w2.weight.value2()),
+        ));
+        GallicWeightRestrict { weight: p }
     }
 }
 
-pub type GallicWeight<W> = UnionWeight<GallicWeightRestrict<W>, GallicUnionWeightOption<GallicWeightRestrict<W>>>;
+pub type GallicWeight<W> =
+    UnionWeight<GallicWeightRestrict<W>, GallicUnionWeightOption<GallicWeightRestrict<W>>>;
