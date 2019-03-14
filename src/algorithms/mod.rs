@@ -17,6 +17,7 @@ mod rm_final_epsilon;
 mod single_source_shortest_distance;
 mod state_map;
 mod union;
+mod weight_convert;
 mod weight_pushing;
 
 /// Function objects to restrict which arcs are traversed in an FST.
@@ -27,6 +28,8 @@ pub mod arc_mappers;
 
 /// Module that provide structures implementing the `StateMapper` trait.
 pub mod state_mappers;
+
+pub mod weight_converters;
 
 pub use self::{
     all_pairs_shortest_distance::all_pairs_shortest_distance,
@@ -47,5 +50,6 @@ pub use self::{
     single_source_shortest_distance::{shortest_distance, single_source_shortest_distance},
     state_map::{state_map, StateMapper},
     union::union,
+    weight_convert::{weight_convert, WeightConverter},
     weight_pushing::push_weights,
 };
