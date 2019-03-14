@@ -9,7 +9,7 @@ pub struct GallicWeightLeft<W>
 where
     W: Semiring,
 {
-    weight: ProductWeight<StringWeightLeft, W>,
+    pub weight: ProductWeight<StringWeightLeft, W>,
 }
 
 #[derive(PartialOrd, PartialEq, Eq, Clone, Default, Hash, Debug)]
@@ -17,7 +17,7 @@ pub struct GallicWeightRight<W>
 where
     W: Semiring,
 {
-    weight: ProductWeight<StringWeightRight, W>,
+    pub weight: ProductWeight<StringWeightRight, W>,
 }
 
 #[derive(PartialOrd, PartialEq, Eq, Clone, Default, Hash, Debug)]
@@ -25,7 +25,7 @@ pub struct GallicWeightRestrict<W>
 where
     W: Semiring,
 {
-    weight: ProductWeight<StringWeightRestrict, W>,
+    pub weight: ProductWeight<StringWeightRestrict, W>,
 }
 
 #[derive(PartialOrd, PartialEq, Eq, Clone, Default, Hash, Debug)]
@@ -33,7 +33,7 @@ pub struct GallicWeightMin<W>
 where
     W: Semiring,
 {
-    weight: ProductWeight<StringWeightRestrict, W>,
+    pub weight: ProductWeight<StringWeightRestrict, W>,
 }
 
 fn natural_less<W: Semiring>(w1: &W, w2: &W) -> bool {
