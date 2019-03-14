@@ -1,4 +1,4 @@
-use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction};
+use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction, WeightConverter};
 use crate::semirings::Semiring;
 use crate::Arc;
 use crate::EPS_LABEL;
@@ -17,3 +17,5 @@ impl<S: Semiring> ArcMapper<S> for OutputEpsilonMapper {
         MapFinalAction::MapNoSuperfinal
     }
 }
+
+arc_mapper_to_weight_convert_mapper!(OutputEpsilonMapper);

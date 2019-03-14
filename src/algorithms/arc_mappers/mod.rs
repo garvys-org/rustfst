@@ -1,3 +1,6 @@
+#[macro_use]
+mod arc_mapper_to_weight_convert_mapper;
+
 mod identity_arc_mapper;
 mod input_epsilon_mapper;
 mod invert_weight_mapper;

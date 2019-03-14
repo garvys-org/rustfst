@@ -1,4 +1,4 @@
-use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction};
+use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction, WeightConverter};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::Arc;
 use crate::KDELTA;
@@ -22,4 +22,11 @@ impl<S: WeightQuantize + Semiring> ArcMapper<S> for QuantizeMapper {
     fn final_action(&self) -> MapFinalAction {
         MapFinalAction::MapNoSuperfinal
     }
+}
+
+impl<S> WeightConverter<S, S> for QuantizeMapper
+where
+    S: WeightQuantize,
+{
+    arc_mapper_to_weight_convert_mapper_methods!(S);
 }

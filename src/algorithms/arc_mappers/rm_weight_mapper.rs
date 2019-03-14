@@ -1,4 +1,4 @@
-use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction};
+use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction, WeightConverter};
 use crate::semirings::Semiring;
 use crate::Arc;
 
@@ -24,3 +24,5 @@ impl<S: Semiring> ArcMapper<S> for RmWeightMapper {
         MapFinalAction::MapNoSuperfinal
     }
 }
+
+arc_mapper_to_weight_convert_mapper!(RmWeightMapper);

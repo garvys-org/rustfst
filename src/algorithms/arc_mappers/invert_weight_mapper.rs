@@ -1,4 +1,4 @@
-use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction};
+use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction, WeightConverter};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::Arc;
 
@@ -21,4 +21,11 @@ impl<S: WeaklyDivisibleSemiring> ArcMapper<S> for InvertWeightMapper {
     fn final_action(&self) -> MapFinalAction {
         MapFinalAction::MapNoSuperfinal
     }
+}
+
+impl<S> WeightConverter<S, S> for InvertWeightMapper
+where
+    S: WeaklyDivisibleSemiring,
+{
+    arc_mapper_to_weight_convert_mapper_methods!(S);
 }
