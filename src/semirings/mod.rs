@@ -23,6 +23,8 @@ pub use self::product_weight::ProductWeight;
 pub use self::semiring::{
     CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
-pub use self::string_weight::{StringWeightLeft, StringWeightRestrict, StringWeightRight, StringWeightVariant};
+pub use self::string_weight::{
+    StringWeightLeft, StringWeightRestrict, StringWeightRight, StringWeightVariant,
+};
 pub use self::tropical_weight::TropicalWeight;
 pub use self::union_weight::{UnionWeight, UnionWeightOption};
