@@ -24,6 +24,12 @@ impl Default for StringWeightVariant {
     }
 }
 
+impl From<Vec<Label>> for StringWeightVariant {
+    fn from(l: Vec<usize>) -> Self {
+        StringWeightVariant::Labels(l)
+    }
+}
+
 #[derive(Clone, Debug, PartialOrd, Default, PartialEq, Eq, Hash)]
 pub struct StringWeightRestrict {
     /// If None -> Infinity. If Some([]) -> Epsilon
@@ -165,6 +171,18 @@ macro_rules! string_semiring {
                     StringWeightVariant::Infinity => 0,
                     StringWeightVariant::Labels(l) => l.len(),
                 }
+            }
+        }
+
+        impl From<Vec<Label>> for $semiring {
+            fn from(l: Vec<usize>) -> Self {
+                Self::new(l.into())
+            }
+        }
+
+        impl From<Label> for $semiring {
+            fn from(l: usize) -> Self {
+                Self::new(vec![l].into())
             }
         }
     };

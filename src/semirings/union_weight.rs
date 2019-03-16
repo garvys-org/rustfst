@@ -147,4 +147,8 @@ impl<W: Semiring, O: UnionWeightOption<W>> UnionWeight<W, O> {
             }
         }
     }
+
+    pub fn len(&self) -> usize {
+        self.list.len()
+    }
 }

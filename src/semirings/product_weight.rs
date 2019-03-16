@@ -102,3 +102,13 @@ where
         self.weight2 = new_weight;
     }
 }
+
+impl<W1, W2> From<(W1, W2)> for ProductWeight<W1, W2>
+where
+    W1: Semiring,
+    W2: Semiring,
+{
+    fn from(t: (W1, W2)) -> Self {
+        Self::new(t)
+    }
+}
