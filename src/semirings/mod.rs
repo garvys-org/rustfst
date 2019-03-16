@@ -21,7 +21,7 @@ pub use self::power_weight::PowerWeight;
 pub use self::probability_weight::ProbabilityWeight;
 pub use self::product_weight::ProductWeight;
 pub use self::semiring::{
-    CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
+    CompleteSemiring, DivideType, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
 pub use self::string_weight::{
     StringWeightLeft, StringWeightRestrict, StringWeightRight, StringWeightVariant,

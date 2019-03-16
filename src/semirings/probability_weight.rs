@@ -3,7 +3,7 @@ use std::hash::{Hash, Hasher};
 use ordered_float::OrderedFloat;
 
 use crate::semirings::{
-    CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
+    CompleteSemiring, DivideType, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::KDELTA;
 
@@ -66,12 +66,7 @@ impl StarSemiring for ProbabilityWeight {
 }
 
 impl WeaklyDivisibleSemiring for ProbabilityWeight {
-    fn inverse_assign(&mut self) {
-        // May panic if self.value == 0
-        self.value.0 = 1.0 / self.value.0;
-    }
-
-    fn divide(&self, rhs: &Self) -> Self {
+    fn divide(&self, rhs: &Self, _divide_type: DivideType) -> Self {
         // May panic if rhs.value == 0.0
         Self::new(self.value.0 / rhs.value.0)
     }

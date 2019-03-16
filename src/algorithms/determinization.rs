@@ -4,7 +4,7 @@ use failure::Fallible;
 
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
-use crate::semirings::{Semiring, WeaklyDivisibleSemiring};
+use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
 use crate::{Label, StateId};
 
 #[derive(PartialEq, Eq, Clone, Hash, PartialOrd)]
@@ -106,7 +106,7 @@ where
             for arc in fst.arcs_iter(*p)? {
                 if arc.ilabel == x && arc.nextstate == q {
                     let w = &arc.weight;
-                    let temp = w_prime.inverse().times(&v.times(&w));
+                    let temp = (&v.times(&w)).divide(w_prime, DivideType::DivideLeft);
                     new_weight = new_weight
                         .map(|value: W| value.plus(&temp))
                         .or_else(|| Some(temp));

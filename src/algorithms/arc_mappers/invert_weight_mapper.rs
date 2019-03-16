@@ -1,12 +1,12 @@
 use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction, WeightConverter};
-use crate::semirings::WeaklyDivisibleSemiring;
+use crate::semirings::{DivideType, WeaklyDivisibleSemiring};
 use crate::Arc;
 
 /// Mapper to reciprocate all non-Zero() weights.
 pub struct InvertWeightMapper {}
 
 pub fn map_weight<W: WeaklyDivisibleSemiring>(weight: &mut W) {
-    weight.inverse_assign();
+    weight.set_value(W::one().divide(weight, DivideType::DivideAny).value());
 }
 
 impl<S: WeaklyDivisibleSemiring> ArcMapper<S> for InvertWeightMapper {

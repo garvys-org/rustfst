@@ -43,6 +43,15 @@ pub trait Semiring:
     }
 }
 
+pub enum DivideType {
+    /// Left division.
+    DivideLeft,
+    /// Right division.
+    DivideRight,
+    /// Division in a commutative semiring.
+    DivideAny,
+}
+
 /// A semiring is said to be divisible if all non-0 elements admit an inverse,
 /// that is if `S-{0}` is a group.
 /// `(S, +, *, 0, 1)` is said to be weakly divisible if
@@ -50,15 +59,7 @@ pub trait Semiring:
 /// there exists at least one `z` such that `x = (x+y)*z`.
 /// For more information : `https://cs.nyu.edu/~mohri/pub/hwa.pdf`
 pub trait WeaklyDivisibleSemiring: Semiring {
-    /// Inverse for the * operation
-    fn inverse(&self) -> Self {
-        let mut w = self.clone();
-        w.inverse_assign();
-        w
-    }
-    fn inverse_assign(&mut self);
-    // TODO : Not always commutative
-    fn divide(&self, rhs: &Self) -> Self;
+    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Self;
 }
 
 /// A semiring `(S, ⊕, ⊗, 0, 1)` is said to be complete if for any index set `I` and any family

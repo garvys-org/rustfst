@@ -4,7 +4,7 @@ use std::hash::{Hash, Hasher};
 use ordered_float::OrderedFloat;
 
 use crate::semirings::{
-    CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
+    CompleteSemiring, DivideType, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::KDELTA;
 
@@ -92,11 +92,7 @@ impl StarSemiring for LogWeight {
 }
 
 impl WeaklyDivisibleSemiring for LogWeight {
-    fn inverse_assign(&mut self) {
-        self.value.0 = -self.value.0;
-    }
-
-    fn divide(&self, rhs: &Self) -> Self {
+    fn divide(&self, rhs: &Self, _divide_type: DivideType) -> Self {
         Self::new(self.value.0 - rhs.value.0)
     }
 }
