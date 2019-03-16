@@ -11,7 +11,7 @@ use crate::{Label, StateId, EPS_LABEL};
 ///
 /// If the mapper modifies the input label or output one,
 /// a super final state will need to be created.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct FinalArc<W: Semiring> {
     /// Input label. Default to `EPS_LABEL`.
     pub ilabel: Label,
