@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::semirings::Semiring;
+use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
 use crate::Label;
 
 #[derive(Clone, Debug, PartialOrd, PartialEq, Eq, Hash)]
@@ -191,3 +191,63 @@ macro_rules! string_semiring {
 string_semiring!(StringWeightRestrict, StringType::StringRestrict);
 string_semiring!(StringWeightLeft, StringType::StringLeft);
 string_semiring!(StringWeightRight, StringType::StringRight);
+
+fn divide_left(w1: &StringWeightVariant, w2: &StringWeightVariant) -> StringWeightVariant {
+    match (w1, w2) {
+        (StringWeightVariant::Infinity, StringWeightVariant::Infinity) => panic!("lol"),
+        (StringWeightVariant::Infinity, StringWeightVariant::Labels(_)) => {
+            StringWeightVariant::Infinity
+        }
+        (StringWeightVariant::Labels(_), StringWeightVariant::Infinity) => panic!("lol"),
+        (StringWeightVariant::Labels(l1), StringWeightVariant::Labels(l2)) => {
+            StringWeightVariant::Labels(l1.iter().skip(l2.len()).cloned().collect())
+        }
+    }
+}
+
+fn divide_right(w1: &StringWeightVariant, w2: &StringWeightVariant) -> StringWeightVariant {
+    match (w1, w2) {
+        (StringWeightVariant::Infinity, StringWeightVariant::Infinity) => panic!("lol"),
+        (StringWeightVariant::Infinity, StringWeightVariant::Labels(_)) => {
+            StringWeightVariant::Infinity
+        }
+        (StringWeightVariant::Labels(_), StringWeightVariant::Infinity) => panic!("lol"),
+        (StringWeightVariant::Labels(l1), StringWeightVariant::Labels(l2)) => {
+            StringWeightVariant::Labels(l1.iter().rev().skip(l2.len()).rev().cloned().collect())
+        }
+    }
+}
+
+impl WeaklyDivisibleSemiring for StringWeightLeft {
+    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Self {
+        if divide_type != DivideType::DivideLeft {
+            panic!("Only left division is defined.");
+        }
+        let s = divide_left(&self.value, &rhs.value);
+        StringWeightLeft::new(s)
+    }
+}
+
+impl WeaklyDivisibleSemiring for StringWeightRight {
+    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Self {
+        if divide_type != DivideType::DivideRight {
+            panic!("Only right division is defined.");
+        }
+        let s = divide_right(&self.value, &rhs.value);
+        StringWeightRight::new(s)
+    }
+}
+
+impl WeaklyDivisibleSemiring for StringWeightRestrict {
+    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Self {
+        match divide_type {
+            DivideType::DivideLeft => {
+                StringWeightRestrict::new(divide_left(&self.value, &rhs.value))
+            }
+            DivideType::DivideRight => {
+                StringWeightRestrict::new(divide_right(&self.value, &rhs.value))
+            }
+            DivideType::DivideAny => panic!("Only explicit left or right division is defined."),
+        }
+    }
+}

@@ -1,7 +1,8 @@
-use crate::semirings::Semiring;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::marker::PhantomData;
+
+use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
 
 pub trait UnionWeightOption<W: Semiring>: Debug + Hash + Default + Clone + PartialOrd + Eq {
     fn compare(w1: &W, w2: &W) -> bool;
@@ -150,5 +151,30 @@ impl<W: Semiring, O: UnionWeightOption<W>> UnionWeight<W, O> {
 
     pub fn len(&self) -> usize {
         self.list.len()
+    }
+}
+
+impl<W, O> WeaklyDivisibleSemiring for UnionWeight<W, O>
+where
+    W: WeaklyDivisibleSemiring,
+    O: UnionWeightOption<W>,
+{
+    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Self {
+        if self.is_zero() || rhs.is_zero() {
+            return Self::zero();
+        }
+        let mut quot = Self::one();
+        if self.len() == 1 {
+            for v in rhs.list.iter().rev() {
+                quot.push_back(self.list[0].divide(v, divide_type), true);
+            }
+        } else if rhs.len() == 1 {
+            for v in self.list.iter() {
+                quot.push_back(rhs.list[0].divide(v, divide_type), true);
+            }
+        } else {
+            panic!("lol");
+        }
+        quot
     }
 }

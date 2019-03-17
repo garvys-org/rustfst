@@ -1,7 +1,7 @@
 use std::fmt;
 use std::fmt::Debug;
 
-use crate::semirings::Semiring;
+use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
 
 #[derive(Debug, Eq, PartialOrd, PartialEq, Clone, Default, Hash)]
 pub struct ProductWeight<W1, W2>
@@ -110,5 +110,19 @@ where
 {
     fn from(t: (W1, W2)) -> Self {
         Self::new(t)
+    }
+}
+
+impl<W1, W2> WeaklyDivisibleSemiring for ProductWeight<W1, W2>
+where
+    W1: WeaklyDivisibleSemiring,
+    W2: WeaklyDivisibleSemiring,
+{
+    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Self {
+        (
+            self.value1().divide(&rhs.value1(), divide_type),
+            self.value2().divide(&rhs.value2(), divide_type),
+        )
+            .into()
     }
 }

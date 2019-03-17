@@ -43,6 +43,7 @@ pub trait Semiring:
     }
 }
 
+#[derive(Copy, Clone, PartialOrd, PartialEq)]
 pub enum DivideType {
     /// Left division.
     DivideLeft,

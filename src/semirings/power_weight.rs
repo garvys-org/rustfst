@@ -7,7 +7,7 @@ use std::hash::Hasher;
 use generic_array::ArrayLength;
 use generic_array::GenericArray;
 
-use crate::semirings::Semiring;
+use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
 
 pub struct PowerWeight<W, N>
 where
@@ -149,5 +149,19 @@ where
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
         self.weights = value;
+    }
+}
+
+impl<W, N> WeaklyDivisibleSemiring for PowerWeight<W, N>
+where
+    W: WeaklyDivisibleSemiring,
+    N: ArrayLength<W>,
+{
+    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Self {
+        let mut mul = self.clone();
+        for i in 0..self.weights.len() {
+            mul.weights[i] = self.weights[i].divide(&rhs.as_ref().weights[i], divide_type);
+        }
+        mul
     }
 }
