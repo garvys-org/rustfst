@@ -7,7 +7,7 @@ use crate::{Arc, Label, EPS_LABEL};
 use failure::Fallible;
 
 pub struct FromGallicConverter {
-    superfinal_label: Label,
+    pub superfinal_label: Label,
 }
 
 macro_rules! impl_extract_gallic_weight {
@@ -17,10 +17,14 @@ macro_rules! impl_extract_gallic_weight {
         match w1.value() {
             StringWeightVariant::Infinity => bail!("Unexpected infinity"),
             StringWeightVariant::Labels(l) => {
-                if l.len() != 1 {
-                    bail!("Expected 1 element");
+                if l.len() > 1 {
+                    bail!("Expected at most 1 element, {:?}", l);
+                } else if l.len() == 1 {
+                    return Ok((w2.clone(), l[0]));
+                } else {
+                    // l.len() == 0
+                    Ok((w2.clone(), 0))
                 }
-                Ok((w2.clone(), l[0]))
             }
         }
     }};
