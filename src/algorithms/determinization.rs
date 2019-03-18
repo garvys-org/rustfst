@@ -1,11 +1,27 @@
+use std::collections::hash_map::Entry;
 use std::collections::{HashMap, HashSet, VecDeque};
 
 use failure::Fallible;
 
+use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
+use crate::algorithms::{weight_convert, WeightConverter};
 use crate::arc::Arc;
+use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
+use crate::semirings::{GallicWeight, GallicWeightMin, GallicWeightRestrict};
+use crate::EPS_LABEL;
 use crate::{Label, StateId};
+
+pub enum DeterminizeType {
+    /// Input transducer is known to be functional (or error).
+    DeterminizeFunctional,
+    /// Input transducer is NOT known to be functional.
+    DeterminizeNonFunctional,
+    /// Input transducer is not known to be functional but only keep the min of
+    /// of ambiguous outputs.
+    DeterminizeDisambiguate,
+}
 
 #[derive(PartialEq, Eq, Clone, Hash, PartialOrd)]
 struct PairStateWeight<W: Semiring> {
@@ -119,10 +135,8 @@ where
     Ok(new_weighted_subset)
 }
 
-use std::collections::hash_map::Entry;
-
 #[allow(unused)]
-pub fn determinize<W, F1, F2>(fst_in: &F1) -> Fallible<F2>
+pub fn determinize_fsa<W, F1, F2>(fst_in: &F1) -> Fallible<F2>
 where
     W: WeaklyDivisibleSemiring,
     F1: ExpandedFst<W = W>,
@@ -187,6 +201,41 @@ where
     Ok(deminized_fst)
 }
 
+#[allow(unused)]
+pub fn determinize_fst<W, F1, F2>(fst_in: &F1) -> Fallible<F2>
+where
+    W: WeaklyDivisibleSemiring + 'static,
+    F1: ExpandedFst<W = W>,
+    F2: MutableFst<W = W>,
+{
+    let determinize_type = DeterminizeType::DeterminizeDisambiguate;
+
+    let mut to_gallic = ToGallicConverter {};
+    let mut from_gallic = FromGallicConverter {
+        superfinal_label: EPS_LABEL,
+    };
+    match determinize_type {
+        DeterminizeType::DeterminizeDisambiguate => {
+            let fsa: VectorFst<GallicWeightMin<W>> = weight_convert(fst_in, &mut to_gallic)?;
+            let determinized_fsa: VectorFst<GallicWeightMin<W>> = determinize_fsa(&fsa)?;
+            let determinized_fst = weight_convert(&determinized_fsa, &mut from_gallic);
+            determinized_fst
+        }
+        DeterminizeType::DeterminizeFunctional => {
+            let fsa: VectorFst<GallicWeightRestrict<W>> = weight_convert(fst_in, &mut to_gallic)?;
+            let determinized_fsa: VectorFst<GallicWeightRestrict<W>> = determinize_fsa(&fsa)?;
+            let determinized_fst = weight_convert(&determinized_fsa, &mut from_gallic);
+            determinized_fst
+        }
+        DeterminizeType::DeterminizeNonFunctional => {
+            let fsa: VectorFst<GallicWeight<W>> = weight_convert(fst_in, &mut to_gallic)?;
+            let determinized_fsa: VectorFst<GallicWeight<W>> = determinize_fsa(&fsa)?;
+            let determinized_fst = weight_convert(&determinized_fsa, &mut from_gallic);
+            determinized_fst
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -216,7 +265,7 @@ mod tests {
 
         ref_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
 
-        let determinized_fst: VectorFst<TropicalWeight> = determinize(&ref_fst)?;
+        let determinized_fst: VectorFst<TropicalWeight> = determinize_fst(&ref_fst)?;
 
         assert_eq!(determinized_fst, ref_fst);
         Ok(())
@@ -250,7 +299,7 @@ mod tests {
         ref_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
         ref_fst.add_arc(s1, Arc::new(2, 2, TropicalWeight::new(4.0), s2))?;
 
-        let determinized_fst: VectorFst<TropicalWeight> = determinize(&ref_fst)?;
+        let determinized_fst: VectorFst<TropicalWeight> = determinize_fst(&ref_fst)?;
 
         assert_eq!(determinized_fst, ref_fst);
         Ok(())
