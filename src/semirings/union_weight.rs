@@ -2,7 +2,7 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::marker::PhantomData;
 
-use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
+use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
 
 pub trait UnionWeightOption<W: Semiring>: Debug + Hash + Default + Clone + PartialOrd + Eq {
     fn compare(w1: &W, w2: &W) -> bool;
@@ -176,5 +176,19 @@ where
             panic!("lol");
         }
         quot
+    }
+}
+
+impl<W, O> WeightQuantize for UnionWeight<W, O>
+where
+    W: WeightQuantize,
+    O: UnionWeightOption<W>,
+{
+    fn quantize_assign(&mut self, delta: f32) {
+        let v: Vec<_> = self.list.drain(..).collect();
+        for mut e in v {
+            e.quantize_assign(delta);
+            self.push_back(e.quantize(delta), true);
+        }
     }
 }

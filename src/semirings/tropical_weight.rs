@@ -86,6 +86,6 @@ impl WeaklyDivisibleSemiring for TropicalWeight {
     }
 }
 
-impl WeightQuantize for TropicalWeight {}
+impl_quantize_f32!(TropicalWeight);
 
 partial_eq_and_hash_f32!(TropicalWeight);

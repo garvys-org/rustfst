@@ -2,7 +2,7 @@ use crate::semirings::ProductWeight;
 use crate::semirings::Semiring;
 use crate::semirings::{
     DivideType, StringWeightLeft, StringWeightRestrict, StringWeightRight, UnionWeight,
-    UnionWeightOption, WeaklyDivisibleSemiring,
+    UnionWeightOption, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::Label;
 
@@ -160,6 +160,15 @@ macro_rules! gallic_weight {
                     self.value2().divide(rhs.value2(), divide_type),
                 )
                     .into()
+            }
+        }
+
+        impl<W> WeightQuantize for $semiring
+        where
+            W: WeightQuantize,
+        {
+            fn quantize_assign(&mut self, delta: f32) {
+                self.0.quantize_assign(delta);
             }
         }
     };
@@ -339,5 +348,14 @@ where
 {
     fn divide(&self, rhs: &Self, divide_type: DivideType) -> Self {
         Self(self.0.divide(&rhs.0, divide_type))
+    }
+}
+
+impl<W> WeightQuantize for GallicWeight<W>
+where
+    W: WeightQuantize,
+{
+    fn quantize_assign(&mut self, delta: f32) {
+        self.0.quantize_assign(delta);
     }
 }

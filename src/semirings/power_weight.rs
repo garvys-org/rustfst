@@ -7,7 +7,7 @@ use std::hash::Hasher;
 use generic_array::ArrayLength;
 use generic_array::GenericArray;
 
-use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
+use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
 
 pub struct PowerWeight<W, N>
 where
@@ -163,5 +163,17 @@ where
             mul.weights[i] = self.weights[i].divide(&rhs.as_ref().weights[i], divide_type);
         }
         mul
+    }
+}
+
+impl<W, N> WeightQuantize for PowerWeight<W, N>
+where
+    W: WeightQuantize,
+    N: ArrayLength<W>,
+{
+    fn quantize_assign(&mut self, delta: f32) {
+        for i in 0..self.weights.len() {
+            unsafe { self.weights.get_unchecked_mut(i).quantize_assign(delta) };
+        }
     }
 }

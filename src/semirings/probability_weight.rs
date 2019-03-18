@@ -1,3 +1,4 @@
+use std::f32;
 use std::hash::{Hash, Hasher};
 
 use ordered_float::OrderedFloat;
@@ -72,6 +73,6 @@ impl WeaklyDivisibleSemiring for ProbabilityWeight {
     }
 }
 
-impl WeightQuantize for ProbabilityWeight {}
+impl_quantize_f32!(ProbabilityWeight);
 
 partial_eq_and_hash_f32!(ProbabilityWeight);

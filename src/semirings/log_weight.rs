@@ -97,6 +97,6 @@ impl WeaklyDivisibleSemiring for LogWeight {
     }
 }
 
-impl WeightQuantize for LogWeight {}
+impl_quantize_f32!(LogWeight);
 
 partial_eq_and_hash_f32!(LogWeight);

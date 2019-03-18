@@ -1,7 +1,7 @@
 use std::fmt;
 use std::fmt::Debug;
 
-use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
+use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
 
 #[derive(Debug, Eq, PartialOrd, PartialEq, Clone, Default, Hash)]
 pub struct ProductWeight<W1, W2>
@@ -124,5 +124,16 @@ where
             self.value2().divide(&rhs.value2(), divide_type),
         )
             .into()
+    }
+}
+
+impl<W1, W2> WeightQuantize for ProductWeight<W1, W2>
+where
+    W1: WeightQuantize,
+    W2: WeightQuantize,
+{
+    fn quantize_assign(&mut self, delta: f32) {
+        self.set_value1(self.value1().quantize(delta));
+        self.set_value2(self.value2().quantize(delta));
     }
 }

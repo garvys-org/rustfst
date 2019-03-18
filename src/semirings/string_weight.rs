@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
+use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::Label;
 
 #[derive(Clone, Debug, PartialOrd, PartialEq, Eq, Hash)]
@@ -183,6 +183,12 @@ macro_rules! string_semiring {
         impl From<Label> for $semiring {
             fn from(l: usize) -> Self {
                 Self::new(vec![l].into())
+            }
+        }
+
+        impl WeightQuantize for $semiring {
+            fn quantize_assign(&mut self, _delta: f32) {
+                // Nothing to do
             }
         }
     };
