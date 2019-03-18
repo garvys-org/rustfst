@@ -236,6 +236,20 @@ where
     }
 }
 
+#[allow(unused)]
+pub fn determinize<W, F1, F2>(fst_in: &F1) -> Fallible<F2>
+where
+    W: WeaklyDivisibleSemiring + 'static,
+    F1: ExpandedFst<W=W>,
+    F2: MutableFst<W=W>
+{
+    if fst_in.is_acceptor() {
+        determinize_fsa(fst_in)
+    } else {
+        determinize_fst(fst_in)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -265,7 +279,7 @@ mod tests {
 
         ref_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
 
-        let determinized_fst: VectorFst<TropicalWeight> = determinize_fst(&ref_fst)?;
+        let determinized_fst: VectorFst<TropicalWeight> = determinize(&ref_fst)?;
 
         assert_eq!(determinized_fst, ref_fst);
         Ok(())
@@ -299,7 +313,7 @@ mod tests {
         ref_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
         ref_fst.add_arc(s1, Arc::new(2, 2, TropicalWeight::new(4.0), s2))?;
 
-        let determinized_fst: VectorFst<TropicalWeight> = determinize_fst(&ref_fst)?;
+        let determinized_fst: VectorFst<TropicalWeight> = determinize(&ref_fst)?;
 
         assert_eq!(determinized_fst, ref_fst);
         Ok(())
