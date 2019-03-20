@@ -80,7 +80,7 @@ macro_rules! gallic_weight {
                     GallicType::GallicRight => self.0.plus_assign(&rhs.as_ref().0),
                     GallicType::GallicRestrict => self.0.plus_assign(&rhs.as_ref().0),
                     GallicType::GallicMin => {
-                        if !natural_less(self, rhs.as_ref()) {
+                        if !natural_less(self.value2(), rhs.as_ref().value2()) {
                             self.set_value(rhs.as_ref().value());
                         }
                     }
