@@ -11,8 +11,8 @@ use rustfst::algorithms::arc_mappers::{
 };
 use rustfst::algorithms::state_mappers::{ArcSumMapper, ArcUniqueMapper};
 use rustfst::algorithms::{
-    connect, decode, encode, invert, isomorphic, project, push_weights, reverse, rm_epsilon,
-    ProjectType, ReweightType,
+    arc_compare, arc_sort, connect, decode, determinize, encode, invert, isomorphic, project,
+    push_weights, reverse, rm_epsilon, DeterminizeType, ProjectType, ReweightType,
 };
 use rustfst::fst_impls::VectorFst;
 use rustfst::fst_traits::{MutableFst, TextParser};
@@ -57,6 +57,33 @@ impl EncodeOperationResult {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+struct DeterminizeOperationResult {
+    det_type: String,
+    result: String,
+}
+
+impl DeterminizeOperationResult {
+    fn parse<F>(&self) -> DeterminizeTestData<F>
+    where
+        F: TextParser,
+        F::W: Semiring<Type = f32>,
+    {
+        DeterminizeTestData {
+            det_type: match self.det_type.as_str() {
+                "functional" => DeterminizeType::DeterminizeFunctional,
+                "nonfunctional" => DeterminizeType::DeterminizeNonFunctional,
+                "disambiguate" => DeterminizeType::DeterminizeDisambiguate,
+                _ => panic!("Unknown determinize type : {:?}", self.det_type),
+            },
+            result: match self.result.as_str() {
+                "error" => Err(format_err!("lol")),
+                _ => F::from_text_string(self.result.as_str()),
+            },
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 struct ParsedTestData {
     rmepsilon: OperationResult,
     name: String,
@@ -81,6 +108,7 @@ struct ParsedTestData {
     encode_decode: Vec<EncodeOperationResult>,
     state_map_arc_sum: OperationResult,
     state_map_arc_unique: OperationResult,
+    determinize: Vec<DeterminizeOperationResult>,
 }
 
 struct EncodeTestData<F>
@@ -91,6 +119,15 @@ where
     encode_labels: bool,
     encode_weights: bool,
     result: F,
+}
+
+struct DeterminizeTestData<F>
+where
+    F: TextParser,
+    F::W: Semiring<Type = f32>,
+{
+    det_type: DeterminizeType,
+    result: Fallible<F>,
 }
 
 struct TestData<F>
@@ -121,6 +158,7 @@ where
     encode_decode: Vec<EncodeTestData<F>>,
     state_map_arc_sum: F,
     state_map_arc_unique: F,
+    determinize: Vec<DeterminizeTestData<F>>,
 }
 
 impl<F> TestData<F>
@@ -152,6 +190,7 @@ where
             encode_decode: data.encode_decode.iter().map(|v| v.parse()).collect(),
             state_map_arc_sum: data.state_map_arc_sum.parse(),
             state_map_arc_unique: data.state_map_arc_unique.parse(),
+            determinize: data.determinize.iter().map(|v| v.parse()).collect(),
         }
     }
 }
@@ -234,6 +273,8 @@ where
     test_state_map_arc_sum(&test_data)?;
 
     test_state_map_arc_unique(&test_data)?;
+
+    test_determinize(&test_data)?;
 
     Ok(())
 }
@@ -649,6 +690,48 @@ where
         )
     );
 
+    Ok(())
+}
+
+fn test_determinize<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + 'static,
+{
+    for determinize_data in &test_data.determinize {
+        println!("det_type = {:?}", determinize_data.det_type);
+        let fst_raw = test_data.raw.clone();
+        let fst_res: Fallible<F> = determinize(&fst_raw, determinize_data.det_type.clone());
+
+        match (&determinize_data.result, fst_res) {
+            (Ok(fst_expected), Ok(ref fst_determinized)) => {
+                let a = isomorphic(fst_expected, fst_determinized)?;
+                assert!(
+                    a,
+                    "{}",
+                    error_message_fst!(
+                        fst_expected,
+                        fst_determinized,
+                        format!(
+                            "Determinize fail for det_type = {:?} ",
+                            determinize_data.det_type
+                        )
+                    )
+                );
+            }
+            (Ok(_fst_expected), Err(_)) => panic!(
+                "Determinize fail for det_type {:?}. Got Ok. Expected Err",
+                determinize_data.det_type
+            ),
+            (Err(_), Ok(_fst_determinized)) => panic!(
+                "Determinize fail for det_type {:?}. Got Err. Expected Ok",
+                determinize_data.det_type
+            ),
+            (Err(_), Err(_)) => {
+                // Ok
+            }
+        };
+    }
     Ok(())
 }
 
