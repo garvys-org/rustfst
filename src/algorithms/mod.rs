@@ -1,5 +1,6 @@
 mod all_pairs_shortest_distance;
 mod arc_map;
+mod arc_sort;
 mod closure;
 mod composition;
 mod concat;
@@ -34,13 +35,15 @@ pub mod weight_converters;
 pub use self::{
     all_pairs_shortest_distance::all_pairs_shortest_distance,
     arc_map::{arc_map, ArcMapper, FinalArc, MapFinalAction},
+    arc_sort::{arc_sort, ilabel_compare, olabel_compare},
     closure::{closure_plus, closure_star},
     composition::compose,
     concat::concat,
     connect::connect,
+    determinization::{determinize, determinize_fsa, determinize_fst, DeterminizeType},
     encode::{decode, encode},
     inversion::invert,
-    isomorphic::isomorphic,
+    isomorphic::{arc_compare, isomorphic},
     projection::{project, ProjectType},
     relabel_pairs::relabel_pairs,
     reverse::reverse,

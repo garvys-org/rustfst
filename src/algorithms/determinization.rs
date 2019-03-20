@@ -3,8 +3,8 @@ use std::collections::{HashMap, HashSet, VecDeque};
 
 use failure::Fallible;
 
+use crate::algorithms::weight_convert;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
-use crate::algorithms::{weight_convert, WeightConverter};
 use crate::arc::Arc;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
@@ -13,6 +13,7 @@ use crate::semirings::{GallicWeight, GallicWeightMin, GallicWeightRestrict};
 use crate::EPS_LABEL;
 use crate::{Label, StateId};
 
+#[derive(Debug, Clone)]
 pub enum DeterminizeType {
     /// Input transducer is known to be functional (or error).
     DeterminizeFunctional,
@@ -23,7 +24,7 @@ pub enum DeterminizeType {
     DeterminizeDisambiguate,
 }
 
-#[derive(PartialEq, Eq, Clone, Hash, PartialOrd)]
+#[derive(PartialEq, Eq, Clone, Hash, PartialOrd, Debug)]
 struct PairStateWeight<W: Semiring> {
     state: StateId,
     weight: W,
@@ -35,7 +36,7 @@ impl<W: Semiring> PairStateWeight<W> {
     }
 }
 
-#[derive(Default, PartialEq, Eq, Clone, Hash, PartialOrd)]
+#[derive(Default, PartialEq, Eq, Clone, Hash, PartialOrd, Debug)]
 struct WeightedSubset<W: Semiring> {
     pairs: Vec<PairStateWeight<W>>,
 }
@@ -91,7 +92,10 @@ fn compute_weight<F: ExpandedFst>(
             if arc.ilabel == x {
                 let temp = v.times(&w);
                 w_prime = w_prime
-                    .map(|value: <F as CoreFst>::W| value.plus(&temp))
+                    .map(|value: <F as CoreFst>::W| {
+                        let a = value.plus(&temp);
+                        a
+                    })
                     .or_else(|| Some(temp));
             }
         }
@@ -135,7 +139,6 @@ where
     Ok(new_weighted_subset)
 }
 
-#[allow(unused)]
 pub fn determinize_fsa<W, F1, F2>(fst_in: &F1) -> Fallible<F2>
 where
     W: WeaklyDivisibleSemiring,
@@ -143,6 +146,10 @@ where
     F2: MutableFst<W = W>,
 {
     let mut deminized_fst = F2::new();
+
+    if fst_in.start().is_none() {
+        return Ok(deminized_fst);
+    }
 
     let mut mapping_states = HashMap::new();
 
@@ -166,7 +173,6 @@ where
             let w_prime = compute_weight(x, &weighted_subset, fst_in)?;
             let new_weighted_subset =
                 compute_new_weighted_subset(x, &w_prime, &weighted_subset, fst_in)?;
-
             if let Entry::Vacant(lol) = mapping_states.entry(new_weighted_subset.clone()) {
                 let state_id = deminized_fst.add_state();
                 queue.push_back(new_weighted_subset.clone());
@@ -201,23 +207,23 @@ where
     Ok(deminized_fst)
 }
 
-#[allow(unused)]
-pub fn determinize_fst<W, F1, F2>(fst_in: &F1) -> Fallible<F2>
+pub fn determinize_fst<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Fallible<F2>
 where
     W: WeaklyDivisibleSemiring + 'static,
     F1: ExpandedFst<W = W>,
     F2: MutableFst<W = W>,
 {
-    let determinize_type = DeterminizeType::DeterminizeDisambiguate;
-
     let mut to_gallic = ToGallicConverter {};
     let mut from_gallic = FromGallicConverter {
         superfinal_label: EPS_LABEL,
     };
-    match determinize_type {
+    match det_type {
         DeterminizeType::DeterminizeDisambiguate => {
+            println!("ToGallic");
             let fsa: VectorFst<GallicWeightMin<W>> = weight_convert(fst_in, &mut to_gallic)?;
+            println!("DeterminizedFSA");
             let determinized_fsa: VectorFst<GallicWeightMin<W>> = determinize_fsa(&fsa)?;
+            println!("FromGallic");
             let determinized_fst = weight_convert(&determinized_fsa, &mut from_gallic);
             determinized_fst
         }
@@ -236,17 +242,16 @@ where
     }
 }
 
-#[allow(unused)]
-pub fn determinize<W, F1, F2>(fst_in: &F1) -> Fallible<F2>
+pub fn determinize<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Fallible<F2>
 where
     W: WeaklyDivisibleSemiring + 'static,
-    F1: ExpandedFst<W=W>,
-    F2: MutableFst<W=W>
+    F1: ExpandedFst<W = W>,
+    F2: MutableFst<W = W>,
 {
     if fst_in.is_acceptor() {
         determinize_fsa(fst_in)
     } else {
-        determinize_fst(fst_in)
+        determinize_fst(fst_in, det_type)
     }
 }
 
@@ -279,7 +284,8 @@ mod tests {
 
         ref_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
 
-        let determinized_fst: VectorFst<TropicalWeight> = determinize(&ref_fst)?;
+        let determinized_fst: VectorFst<TropicalWeight> =
+            determinize(&ref_fst, DeterminizeType::DeterminizeFunctional)?;
 
         assert_eq!(determinized_fst, ref_fst);
         Ok(())
@@ -313,7 +319,8 @@ mod tests {
         ref_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
         ref_fst.add_arc(s1, Arc::new(2, 2, TropicalWeight::new(4.0), s2))?;
 
-        let determinized_fst: VectorFst<TropicalWeight> = determinize(&ref_fst)?;
+        let determinized_fst: VectorFst<TropicalWeight> =
+            determinize(&ref_fst, DeterminizeType::DeterminizeFunctional)?;
 
         assert_eq!(determinized_fst, ref_fst);
         Ok(())
