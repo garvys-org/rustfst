@@ -17,6 +17,20 @@
     "arc_map_input_epsilon": {
         "result": ""
     }, 
+    "determinize": [
+        {
+            "det_type": "functional", 
+            "result": ""
+        }, 
+        {
+            "det_type": "nonfunctional", 
+            "result": ""
+        }, 
+        {
+            "det_type": "disambiguate", 
+            "result": ""
+        }
+    ], 
     "invert": {
         "result": ""
     }, 

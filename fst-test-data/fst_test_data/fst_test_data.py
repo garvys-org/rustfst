@@ -10,6 +10,7 @@ import subprocess
 import itertools
 
 import pynini as p
+from pywrapfst import FstOpError
 
 from abc import ABCMeta, abstractmethod
 
@@ -106,6 +107,9 @@ class FstTestData(object):
         print("StateMap : ArcUnique")
         self.compute_state_map_arc_unique()
 
+        print("Determinization")
+        self.compute_determinization()
+
         dump_json(self.config, os.path.join(self.path_dir, "metadata.json"))
 
         print("Done\n")
@@ -187,3 +191,17 @@ class FstTestData(object):
     def compute_state_map_arc_unique(self):
         fst_out = p.statemap(self.raw_fst.copy(), map_type="arc_unique")
         self.add_data_to_config("state_map_arc_unique", fst_out.text())
+
+    def compute_determinization(self):
+        l_res = []
+        for det_type in ["functional", "nonfunctional", "disambiguate"]:
+            try:
+                fst_out = p.determinize(self.raw_fst.copy(), det_type=det_type)
+                res = fst_out.text()
+            except FstOpError:
+                res = "error"
+            l_res.append({
+                "det_type": det_type,
+                "result": res
+            })
+        self.config["determinize"] = l_res

@@ -17,6 +17,20 @@
     "arc_map_input_epsilon": {
         "result": "0\t1\t0\t25\n1\n"
     }, 
+    "determinize": [
+        {
+            "det_type": "functional", 
+            "result": "0\t1\t12\t25\n1\n"
+        }, 
+        {
+            "det_type": "nonfunctional", 
+            "result": "0\t1\t12\t25\n1\n"
+        }, 
+        {
+            "det_type": "disambiguate", 
+            "result": "0\t1\t12\t25\n1\n"
+        }
+    ], 
     "invert": {
         "result": "0\t1\t25\t12\n1\n"
     }, 

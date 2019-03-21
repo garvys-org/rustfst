@@ -17,6 +17,20 @@
     "arc_map_input_epsilon": {
         "result": "0\t1\t0\t25\t0.3\n0\t1\t0\t26\t0.4\n1\t3\t0\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
     }, 
+    "determinize": [
+        {
+            "det_type": "functional", 
+            "result": "0\t1\t10\t26\t0.4\n0\t1\t12\t25\t0.3\n1\t2\t4\t5\t0.1\n1\t0.7\n2\tInfinity\n"
+        }, 
+        {
+            "det_type": "nonfunctional", 
+            "result": "0\t1\t10\t26\t0.4\n0\t1\t12\t25\t0.3\n1\t2\t4\t5\t0.1\n1\t0.7\n2\tInfinity\n"
+        }, 
+        {
+            "det_type": "disambiguate", 
+            "result": "0\t1\t10\t26\t0.4\n0\t1\t12\t25\t0.3\n1\t2\t4\t5\t0.1\n1\t0.7\n2\tInfinity\n"
+        }
+    ], 
     "invert": {
         "result": "0\t1\t25\t12\t0.3\n0\t1\t26\t10\t0.4\n1\t3\t5\t4\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
     }, 
