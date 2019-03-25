@@ -1,3 +1,5 @@
+use failure::Fallible;
+
 use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction, WeightConverter};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::Arc;
@@ -6,16 +8,16 @@ use crate::KDELTA;
 /// Mapper to quantize all weights.
 pub struct QuantizeMapper {}
 
-pub fn map_weight<W: WeightQuantize>(weight: &mut W) {
-    weight.quantize_assign(KDELTA);
+pub fn map_weight<W: WeightQuantize>(weight: &mut W) -> Fallible<()> {
+    weight.quantize_assign(KDELTA)
 }
 
 impl<S: WeightQuantize + Semiring> ArcMapper<S> for QuantizeMapper {
-    fn arc_map(&mut self, arc: &mut Arc<S>) {
+    fn arc_map(&mut self, arc: &mut Arc<S>) -> Fallible<()> {
         map_weight(&mut arc.weight)
     }
 
-    fn final_arc_map(&mut self, final_arc: &mut FinalArc<S>) {
+    fn final_arc_map(&mut self, final_arc: &mut FinalArc<S>) -> Fallible<()> {
         map_weight(&mut final_arc.weight)
     }
 

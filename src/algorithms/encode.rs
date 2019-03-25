@@ -102,7 +102,7 @@ impl<W: Semiring> EncodeMapper<W> {
 }
 
 impl<W: Semiring> ArcMapper<W> for EncodeMapper<W> {
-    fn arc_map(&mut self, arc: &mut Arc<W>) {
+    fn arc_map(&mut self, arc: &mut Arc<W>) -> Fallible<()> {
         let tuple = self.encode_table.arc_to_tuple(arc);
         let label = self.encode_table.encode(tuple);
         arc.ilabel = label;
@@ -112,9 +112,10 @@ impl<W: Semiring> ArcMapper<W> for EncodeMapper<W> {
         if self.encode_table.encode_weights {
             arc.weight.set_value(W::one().value());
         }
+        Ok(())
     }
 
-    fn final_arc_map(&mut self, final_arc: &mut FinalArc<W>) {
+    fn final_arc_map(&mut self, final_arc: &mut FinalArc<W>) -> Fallible<()> {
         if self.encode_table.encode_weights {
             let tuple = self.encode_table.final_arc_to_tuple(final_arc);
             let label = self.encode_table.encode(tuple);
@@ -126,6 +127,7 @@ impl<W: Semiring> ArcMapper<W> for EncodeMapper<W> {
                 final_arc.weight.set_value(W::one().value());
             }
         }
+        Ok(())
     }
 
     fn final_action(&self) -> MapFinalAction {
@@ -148,7 +150,7 @@ impl<W: Semiring> DecodeMapper<W> {
 }
 
 impl<W: Semiring> ArcMapper<W> for DecodeMapper<W> {
-    fn arc_map(&mut self, arc: &mut Arc<W>) {
+    fn arc_map(&mut self, arc: &mut Arc<W>) -> Fallible<()> {
         let tuple = self.encode_table.decode(arc.ilabel).unwrap().clone();
         arc.ilabel = tuple.ilabel;
         if self.encode_table.encode_labels {
@@ -157,9 +159,12 @@ impl<W: Semiring> ArcMapper<W> for DecodeMapper<W> {
         if self.encode_table.encode_weights {
             arc.weight = tuple.weight;
         }
+        Ok(())
     }
 
-    fn final_arc_map(&mut self, _final_arc: &mut FinalArc<W>) {}
+    fn final_arc_map(&mut self, _final_arc: &mut FinalArc<W>) -> Fallible<()> {
+        Ok(())
+    }
 
     fn final_action(&self) -> MapFinalAction {
         MapFinalAction::MapNoSuperfinal

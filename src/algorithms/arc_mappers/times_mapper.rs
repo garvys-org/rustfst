@@ -1,3 +1,5 @@
+use failure::Fallible;
+
 use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction, WeightConverter};
 use crate::semirings::Semiring;
 use crate::Arc;
@@ -14,17 +16,17 @@ impl<W: Semiring> TimesMapper<W> {
         }
     }
 
-    pub fn map_weight(&self, weight: &mut W) {
-        weight.times_assign(&self.to_multiply);
+    pub fn map_weight(&self, weight: &mut W) -> Fallible<()> {
+        weight.times_assign(&self.to_multiply)
     }
 }
 
 impl<S: Semiring> ArcMapper<S> for TimesMapper<S> {
-    fn arc_map(&mut self, arc: &mut Arc<S>) {
-        self.map_weight(&mut arc.weight);
+    fn arc_map(&mut self, arc: &mut Arc<S>) -> Fallible<()> {
+        self.map_weight(&mut arc.weight)
     }
 
-    fn final_arc_map(&mut self, final_arc: &mut FinalArc<S>) {
+    fn final_arc_map(&mut self, final_arc: &mut FinalArc<S>) -> Fallible<()> {
         self.map_weight(&mut final_arc.weight)
     }
 

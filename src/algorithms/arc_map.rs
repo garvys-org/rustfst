@@ -42,11 +42,11 @@ pub enum MapFinalAction {
 /// arcs.
 pub trait ArcMapper<S: Semiring> {
     /// How to modify the arcs.
-    fn arc_map(&mut self, arc: &mut Arc<S>);
+    fn arc_map(&mut self, arc: &mut Arc<S>) -> Fallible<()>;
 
     /// The mapper will be passed final weights as arcs of the form
     /// `FinalArc(EPS_LABEL, EPS_LABEL, weight)`.
-    fn final_arc_map(&mut self, final_arc: &mut FinalArc<S>);
+    fn final_arc_map(&mut self, final_arc: &mut FinalArc<S>) -> Fallible<()>;
 
     /// Specifies final action the mapper requires (see above).
     fn final_action(&self) -> MapFinalAction;
@@ -74,7 +74,7 @@ where
     let states: Vec<_> = ifst.states_iter().collect();
     for state in states {
         for arc in ifst.arcs_iter_mut(state).unwrap() {
-            mapper.arc_map(arc);
+            mapper.arc_map(arc)?;
         }
 
         if let Some(w) = ifst.final_weight_mut(state) {
@@ -83,7 +83,7 @@ where
                 olabel: EPS_LABEL,
                 weight: w.clone(),
             };
-            mapper.final_arc_map(&mut final_arc);
+            mapper.final_arc_map(&mut final_arc)?;
             match final_action {
                 MapFinalAction::MapNoSuperfinal => {
                     if final_arc.ilabel != EPS_LABEL || final_arc.olabel != EPS_LABEL {

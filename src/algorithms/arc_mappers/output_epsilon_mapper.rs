@@ -1,3 +1,5 @@
+use failure::Fallible;
+
 use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction, WeightConverter};
 use crate::semirings::Semiring;
 use crate::Arc;
@@ -7,11 +9,14 @@ use crate::EPS_LABEL;
 pub struct OutputEpsilonMapper {}
 
 impl<S: Semiring> ArcMapper<S> for OutputEpsilonMapper {
-    fn arc_map(&mut self, arc: &mut Arc<S>) {
+    fn arc_map(&mut self, arc: &mut Arc<S>) -> Fallible<()> {
         arc.olabel = EPS_LABEL;
+        Ok(())
     }
 
-    fn final_arc_map(&mut self, _final_arc: &mut FinalArc<S>) {}
+    fn final_arc_map(&mut self, _final_arc: &mut FinalArc<S>) -> Fallible<()> {
+        Ok(())
+    }
 
     fn final_action(&self) -> MapFinalAction {
         MapFinalAction::MapNoSuperfinal

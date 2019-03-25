@@ -1,3 +1,5 @@
+use failure::Fallible;
+
 use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction};
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
@@ -57,14 +59,17 @@ struct ProjectMapper {
 }
 
 impl<W: Semiring> ArcMapper<W> for ProjectMapper {
-    fn arc_map(&mut self, arc: &mut Arc<W>) {
+    fn arc_map(&mut self, arc: &mut Arc<W>) -> Fallible<()> {
         match self.project_type {
             ProjectType::ProjectInput => arc.olabel = arc.ilabel,
             ProjectType::ProjectOutput => arc.ilabel = arc.olabel,
         };
+        Ok(())
     }
 
-    fn final_arc_map(&mut self, _final_arc: &mut FinalArc<W>) {}
+    fn final_arc_map(&mut self, _final_arc: &mut FinalArc<W>) -> Fallible<()> {
+        Ok(())
+    }
 
     fn final_action(&self) -> MapFinalAction {
         MapFinalAction::MapNoSuperfinal
