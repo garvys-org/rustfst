@@ -1,6 +1,8 @@
 use std::f32;
 use std::hash::{Hash, Hasher};
 
+use failure::Fallible;
+
 use ordered_float::OrderedFloat;
 
 use crate::semirings::{
@@ -33,12 +35,14 @@ impl Semiring for ProbabilityWeight {
         }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         self.value.0 += rhs.as_ref().value.0;
+        Ok(())
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         self.value.0 *= rhs.as_ref().value.0;
+        Ok(())
     }
 
     fn value(&self) -> Self::Type {
@@ -67,9 +71,12 @@ impl StarSemiring for ProbabilityWeight {
 }
 
 impl WeaklyDivisibleSemiring for ProbabilityWeight {
-    fn divide(&self, rhs: &Self, _divide_type: DivideType) -> Self {
+    fn divide(&self, rhs: &Self, _divide_type: DivideType) -> Fallible<Self> {
         // May panic if rhs.value == 0.0
-        Self::new(self.value.0 / rhs.value.0)
+        if rhs.value.0 == 0.0 {
+            bail!("Division bby 0")
+        }
+        Ok(Self::new(self.value.0 / rhs.value.0))
     }
 }
 

@@ -56,7 +56,7 @@ where
         let (q1, q2, q) = queue.pop_front().unwrap();
 
         if let (Some(rho_1), Some(rho_2)) = (fst_1.final_weight(q1), fst_2.final_weight(q2)) {
-            composed_fst.set_final(q, rho_1.times(&rho_2))?;
+            composed_fst.set_final(q, rho_1.times(&rho_2)?)?;
         }
 
         let arcs_it1 = fst_1.arcs_iter(q1)?;
@@ -82,7 +82,7 @@ where
                     Arc::new(
                         arc_1.ilabel,
                         arc_2.olabel,
-                        arc_1.weight.times(&arc_2.weight),
+                        arc_1.weight.times(&arc_2.weight)?,
                         q_prime,
                     ),
                 )?;

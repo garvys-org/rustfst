@@ -1,6 +1,8 @@
 use std::f32;
 use std::hash::{Hash, Hasher};
 
+use failure::Fallible;
+
 use ordered_float::OrderedFloat;
 
 use crate::semirings::{
@@ -37,7 +39,7 @@ impl Semiring for LogWeight {
         }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         let f1 = self.value();
         let f2 = rhs.as_ref().value();
         self.value.0 = if f1 == f32::INFINITY {
@@ -48,10 +50,11 @@ impl Semiring for LogWeight {
             f2 - ln_pos_exp(f1 - f2)
         } else {
             f1 - ln_pos_exp(f2 - f1)
-        }
+        };
+        Ok(())
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         let f1 = self.value();
         let f2 = rhs.as_ref().value();
         if f1 == f32::INFINITY {
@@ -60,6 +63,7 @@ impl Semiring for LogWeight {
         } else {
             self.value.0 += f2;
         }
+        Ok(())
     }
 
     fn value(&self) -> Self::Type {
@@ -92,8 +96,8 @@ impl StarSemiring for LogWeight {
 }
 
 impl WeaklyDivisibleSemiring for LogWeight {
-    fn divide(&self, rhs: &Self, _divide_type: DivideType) -> Self {
-        Self::new(self.value.0 - rhs.value.0)
+    fn divide(&self, rhs: &Self, _divide_type: DivideType) -> Fallible<Self> {
+        Ok(Self::new(self.value.0 - rhs.value.0))
     }
 }
 

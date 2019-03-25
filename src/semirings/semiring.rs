@@ -2,6 +2,8 @@ use std::fmt::Debug;
 use std::fmt::Display;
 use std::hash::Hash;
 
+use failure::Fallible;
+
 /// For some operations, the weight set associated to a wFST must have the structure of a semiring.
 /// `(S, +, *, 0, 1)` is a semiring if `(S, +, 0)` is a commutative monoid with identity element 0,
 /// `(S, *, 1)` is a monoid with identity element `1`, `*` distributes over `+`,
@@ -18,19 +20,19 @@ pub trait Semiring:
 
     fn new(value: Self::Type) -> Self;
 
-    fn plus<P: AsRef<Self>>(&self, rhs: P) -> Self {
+    fn plus<P: AsRef<Self>>(&self, rhs: P) -> Fallible<Self> {
         let mut w = self.clone();
-        w.plus_assign(rhs);
-        w
+        w.plus_assign(rhs)?;
+        Ok(w)
     }
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P);
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()>;
 
-    fn times<P: AsRef<Self>>(&self, rhs: P) -> Self {
+    fn times<P: AsRef<Self>>(&self, rhs: P) -> Fallible<Self> {
         let mut w = self.clone();
-        w.times_assign(rhs);
-        w
+        w.times_assign(rhs)?;
+        Ok(w)
     }
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P);
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()>;
 
     fn value(&self) -> Self::Type;
     fn set_value(&mut self, value: Self::Type);
@@ -59,7 +61,7 @@ pub enum DivideType {
 /// there exists at least one `z` such that `x = (x+y)*z`.
 /// For more information : `https://cs.nyu.edu/~mohri/pub/hwa.pdf`
 pub trait WeaklyDivisibleSemiring: Semiring {
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Self;
+    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self>;
 }
 
 /// A semiring `(S, ⊕, ⊗, 0, 1)` is said to be complete if for any index set `I` and any family
@@ -79,28 +81,24 @@ pub trait StarSemiring: Semiring {
 }
 
 pub trait WeightQuantize: Semiring {
-    fn quantize_assign(&mut self, delta: f32);
-    fn quantize(&self, delta: f32) -> Self {
+    fn quantize_assign(&mut self, delta: f32) -> Fallible<()>;
+    fn quantize(&self, delta: f32) -> Fallible<Self> {
         let mut w = self.clone();
-        w.quantize_assign(delta);
-        w
+        w.quantize_assign(delta)?;
+        Ok(w)
     }
 }
 
 macro_rules! impl_quantize_f32 {
     ($semiring: ident) => {
         impl WeightQuantize for $semiring {
-            fn quantize_assign(&mut self, delta: f32) {
+            fn quantize_assign(&mut self, delta: f32) -> Fallible<()> {
                 let v = self.value();
                 if v == f32::INFINITY || v == f32::NEG_INFINITY {
-                    return;
+                    return Ok(());
                 }
                 self.set_value(((v / delta) + 0.5).floor() * delta);
-            }
-            fn quantize(&self, delta: f32) -> Self {
-                let mut w = self.clone();
-                w.quantize_assign(delta);
-                w
+                Ok(())
             }
         }
     };
@@ -122,13 +120,13 @@ macro_rules! partial_eq_and_hash_f32 {
     ($semiring:tt) => {
         impl PartialEq for $semiring {
             fn eq(&self, other: &Self) -> bool {
-                self.quantize(KDELTA).value() == other.quantize(KDELTA).value()
+                self.quantize(KDELTA).unwrap().value() == other.quantize(KDELTA).unwrap().value()
             }
         }
 
         impl Hash for $semiring {
             fn hash<H: Hasher>(&self, state: &mut H) {
-                self.quantize(KDELTA).value.hash(state);
+                self.quantize(KDELTA).unwrap().value.hash(state);
             }
         }
     };

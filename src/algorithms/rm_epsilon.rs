@@ -125,7 +125,7 @@ where
                     Arc::new(
                         arc.ilabel,
                         arc.olabel,
-                        w_prime.times(&arc.weight),
+                        w_prime.times(&arc.weight)?,
                         arc.nextstate,
                     ),
                 )?;
@@ -137,7 +137,7 @@ where
                 }
                 let rho_prime_p = output_fst.final_weight(p).unwrap();
                 let rho_q = fst_no_epsilon.final_weight(*q).unwrap();
-                let new_weight = rho_prime_p.plus(&w_prime.times(&rho_q));
+                let new_weight = rho_prime_p.plus(&w_prime.times(&rho_q)?)?;
                 output_fst.set_final(p, new_weight)?;
             }
         }

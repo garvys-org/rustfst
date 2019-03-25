@@ -90,12 +90,10 @@ fn compute_weight<F: ExpandedFst>(
             let w = &arc.weight;
 
             if arc.ilabel == x {
-                let temp = v.times(&w);
+                let temp = v.times(&w)?;
                 w_prime = w_prime
-                    .map(|value: <F as CoreFst>::W| {
-                        let a = value.plus(&temp);
-                        a
-                    })
+                    .map(|value: <F as CoreFst>::W| value.plus(&temp))
+                    .transpose()?
                     .or_else(|| Some(temp));
             }
         }
@@ -126,9 +124,10 @@ where
             for arc in fst.arcs_iter(*p)? {
                 if arc.ilabel == x && arc.nextstate == q {
                     let w = &arc.weight;
-                    let temp = (&v.times(&w)).divide(w_prime, DivideType::DivideLeft);
+                    let temp = (&v.times(&w)?).divide(w_prime, DivideType::DivideLeft)?;
                     new_weight = new_weight
                         .map(|value: W| value.plus(&temp))
+                        .transpose()?
                         .or_else(|| Some(temp));
                 }
             }
@@ -182,9 +181,10 @@ where
                     let q = &pair.state;
                     let v = &pair.weight;
                     if let Some(rho_q) = fst_in.final_weight(*q) {
-                        let temp = v.times(&rho_q);
+                        let temp = v.times(&rho_q)?;
                         final_weight = final_weight
                             .map(|value: W| value.plus(&temp))
+                            .transpose()?
                             .or_else(|| Some(temp));
                     }
                 }

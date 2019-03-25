@@ -1,5 +1,7 @@
 use std::fmt;
 
+use failure::Fallible;
+
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::Label;
 
@@ -100,7 +102,7 @@ macro_rules! string_semiring {
                 Self { value }
             }
 
-            fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+            fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
                 if self.is_zero() {
                     self.set_value(rhs.as_ref().value());
                 } else if rhs.as_ref().is_zero() {
@@ -112,7 +114,7 @@ macro_rules! string_semiring {
                     match $string_type {
                         StringType::StringRestrict => {
                             if self != rhs.as_ref() {
-                                panic!(
+                                bail!(
                                     "Unequal arguments : non-functional FST ? w1 = {:?} w2 = {:?}",
                                     &self,
                                     &rhs.as_ref()
@@ -141,10 +143,11 @@ macro_rules! string_semiring {
                             let new_labels: Vec<_> = new_labels.into_iter().rev().collect();
                             self.value = StringWeightVariant::Labels(new_labels);
                         }
-                    }
-                }
+                    };
+                };
+                Ok(())
             }
-            fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+            fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
                 if let StringWeightVariant::Labels(ref mut labels_left) = self.value {
                     if let StringWeightVariant::Labels(ref labels_right) = rhs.as_ref().value {
                         for l in labels_right {
@@ -154,6 +157,7 @@ macro_rules! string_semiring {
                         self.value = StringWeightVariant::Infinity;
                     }
                 }
+                Ok(())
             }
 
             fn value(&self) -> <Self as Semiring>::Type {
@@ -187,8 +191,9 @@ macro_rules! string_semiring {
         }
 
         impl WeightQuantize for $semiring {
-            fn quantize_assign(&mut self, _delta: f32) {
+            fn quantize_assign(&mut self, _delta: f32) -> Fallible<()> {
                 // Nothing to do
+                Ok(())
             }
         }
     };
@@ -225,35 +230,36 @@ fn divide_right(w1: &StringWeightVariant, w2: &StringWeightVariant) -> StringWei
 }
 
 impl WeaklyDivisibleSemiring for StringWeightLeft {
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Self {
+    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
         if divide_type != DivideType::DivideLeft {
-            panic!("Only left division is defined.");
+            bail!("Only left division is defined.");
         }
         let s = divide_left(&self.value, &rhs.value);
-        StringWeightLeft::new(s)
+        Ok(StringWeightLeft::new(s))
     }
 }
 
 impl WeaklyDivisibleSemiring for StringWeightRight {
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Self {
+    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
         if divide_type != DivideType::DivideRight {
-            panic!("Only right division is defined.");
+            bail!("Only right division is defined.");
         }
         let s = divide_right(&self.value, &rhs.value);
-        StringWeightRight::new(s)
+        Ok(StringWeightRight::new(s))
     }
 }
 
 impl WeaklyDivisibleSemiring for StringWeightRestrict {
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Self {
-        match divide_type {
+    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
+        let res = match divide_type {
             DivideType::DivideLeft => {
                 StringWeightRestrict::new(divide_left(&self.value, &rhs.value))
             }
             DivideType::DivideRight => {
                 StringWeightRestrict::new(divide_right(&self.value, &rhs.value))
             }
-            DivideType::DivideAny => panic!("Only explicit left or right division is defined."),
-        }
+            DivideType::DivideAny => bail!("Only explicit left or right division is defined."),
+        };
+        Ok(res)
     }
 }

@@ -1,3 +1,5 @@
+use failure::Fallible;
+
 use crate::semirings::ProductWeight;
 use crate::semirings::Semiring;
 use crate::semirings::{
@@ -25,8 +27,8 @@ where
 pub struct GallicWeightMin<W>(ProductWeight<StringWeightRestrict, W>)
 where
     W: Semiring;
-fn natural_less<W: Semiring>(w1: &W, w2: &W) -> bool {
-    (&w1.plus(w2) == w1) && (w1 != w2)
+fn natural_less<W: Semiring>(w1: &W, w2: &W) -> Fallible<bool> {
+    Ok((&w1.plus(w2)? == w1) && (w1 != w2))
 }
 
 pub enum GallicType {
@@ -74,21 +76,22 @@ macro_rules! gallic_weight {
                 Self(value)
             }
 
-            fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+            fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
                 match $gallic_type {
-                    GallicType::GallicLeft => self.0.plus_assign(&rhs.as_ref().0),
-                    GallicType::GallicRight => self.0.plus_assign(&rhs.as_ref().0),
-                    GallicType::GallicRestrict => self.0.plus_assign(&rhs.as_ref().0),
+                    GallicType::GallicLeft => self.0.plus_assign(&rhs.as_ref().0)?,
+                    GallicType::GallicRight => self.0.plus_assign(&rhs.as_ref().0)?,
+                    GallicType::GallicRestrict => self.0.plus_assign(&rhs.as_ref().0)?,
                     GallicType::GallicMin => {
-                        if !natural_less(self.value2(), rhs.as_ref().value2()) {
+                        if !natural_less(self.value2(), rhs.as_ref().value2())? {
                             self.set_value(rhs.as_ref().value());
                         }
                     }
-                }
+                };
+                Ok(())
             }
 
-            fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
-                self.0.times_assign(&rhs.as_ref().0);
+            fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
+                self.0.times_assign(&rhs.as_ref().0)
             }
 
             fn value(&self) -> Self::Type {
@@ -154,12 +157,12 @@ macro_rules! gallic_weight {
         where
             W: WeaklyDivisibleSemiring,
         {
-            fn divide(&self, rhs: &Self, divide_type: DivideType) -> Self {
-                (
-                    self.value1().divide(rhs.value1(), divide_type),
-                    self.value2().divide(rhs.value2(), divide_type),
-                )
-                    .into()
+            fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
+                let tuple = (
+                    self.value1().divide(rhs.value1(), divide_type)?,
+                    self.value2().divide(rhs.value2(), divide_type)?,
+                );
+                Ok(tuple.into())
             }
         }
 
@@ -167,8 +170,8 @@ macro_rules! gallic_weight {
         where
             W: WeightQuantize,
         {
-            fn quantize_assign(&mut self, delta: f32) {
-                self.0.quantize_assign(delta);
+            fn quantize_assign(&mut self, delta: f32) -> Fallible<()> {
+                self.0.quantize_assign(delta)
             }
         }
     };
@@ -239,9 +242,9 @@ impl<W: Semiring> UnionWeightOption<GallicWeightRestrict<W>>
     fn merge(
         w1: &GallicWeightRestrict<W>,
         w2: &GallicWeightRestrict<W>,
-    ) -> GallicWeightRestrict<W> {
-        let p = ProductWeight::new((w1.0.value1().clone(), w1.0.value2().plus(&w2.0.value2())));
-        GallicWeightRestrict(p)
+    ) -> Fallible<GallicWeightRestrict<W>> {
+        let p = ProductWeight::new((w1.0.value1().clone(), w1.0.value2().plus(&w2.0.value2())?));
+        Ok(GallicWeightRestrict(p))
     }
 }
 
@@ -285,11 +288,11 @@ impl<W: Semiring> Semiring for GallicWeight<W> {
         Self(UnionWeight::new(value))
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         self.0.plus_assign(&rhs.as_ref().0)
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         self.0.times_assign(&rhs.as_ref().0)
     }
 
@@ -346,8 +349,8 @@ impl<W> WeaklyDivisibleSemiring for GallicWeight<W>
 where
     W: WeaklyDivisibleSemiring,
 {
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Self {
-        Self(self.0.divide(&rhs.0, divide_type))
+    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
+        Ok(Self(self.0.divide(&rhs.0, divide_type)?))
     }
 }
 
@@ -355,7 +358,7 @@ impl<W> WeightQuantize for GallicWeight<W>
 where
     W: WeightQuantize,
 {
-    fn quantize_assign(&mut self, delta: f32) {
-        self.0.quantize_assign(delta);
+    fn quantize_assign(&mut self, delta: f32) -> Fallible<()> {
+        self.0.quantize_assign(delta)
     }
 }

@@ -1,6 +1,8 @@
 use std::f32;
 use std::hash::{Hash, Hasher};
 
+use failure::Fallible;
+
 use crate::semirings::{
     CompleteSemiring, DivideType, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
@@ -34,13 +36,14 @@ impl Semiring for TropicalWeight {
         }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         if rhs.as_ref().value < self.value {
             self.value = rhs.as_ref().value;
         }
+        Ok(())
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         let f1 = self.value();
         let f2 = rhs.as_ref().value();
         if f1 == f32::INFINITY {
@@ -49,6 +52,7 @@ impl Semiring for TropicalWeight {
         } else {
             self.value.0 += f2;
         }
+        Ok(())
     }
 
     fn value(&self) -> Self::Type {
@@ -81,8 +85,8 @@ impl StarSemiring for TropicalWeight {
 }
 
 impl WeaklyDivisibleSemiring for TropicalWeight {
-    fn divide(&self, rhs: &Self, _divide_type: DivideType) -> Self {
-        Self::new(self.value.0 - rhs.value.0)
+    fn divide(&self, rhs: &Self, _divide_type: DivideType) -> Fallible<Self> {
+        Ok(Self::new(self.value.0 - rhs.value.0))
     }
 }
 

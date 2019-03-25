@@ -4,6 +4,8 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::hash::Hasher;
 
+use failure::Fallible;
+
 use generic_array::ArrayLength;
 use generic_array::GenericArray;
 
@@ -131,16 +133,18 @@ where
         Self { weights: value }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         for i in 0..self.weights.len() {
-            self.weights[i].plus_assign(&rhs.as_ref().weights[i]);
+            self.weights[i].plus_assign(&rhs.as_ref().weights[i])?;
         }
+        Ok(())
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         for i in 0..self.weights.len() {
-            self.weights[i].times_assign(&rhs.as_ref().weights[i]);
+            self.weights[i].times_assign(&rhs.as_ref().weights[i])?;
         }
+        Ok(())
     }
 
     fn value(&self) -> <Self as Semiring>::Type {
@@ -157,12 +161,12 @@ where
     W: WeaklyDivisibleSemiring,
     N: ArrayLength<W>,
 {
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Self {
+    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
         let mut mul = self.clone();
         for i in 0..self.weights.len() {
-            mul.weights[i] = self.weights[i].divide(&rhs.as_ref().weights[i], divide_type);
+            mul.weights[i] = self.weights[i].divide(&rhs.as_ref().weights[i], divide_type)?;
         }
-        mul
+        Ok(mul)
     }
 }
 
@@ -171,9 +175,10 @@ where
     W: WeightQuantize,
     N: ArrayLength<W>,
 {
-    fn quantize_assign(&mut self, delta: f32) {
+    fn quantize_assign(&mut self, delta: f32) -> Fallible<()> {
         for i in 0..self.weights.len() {
-            unsafe { self.weights.get_unchecked_mut(i).quantize_assign(delta) };
+            unsafe { self.weights.get_unchecked_mut(i).quantize_assign(delta)? };
         }
+        Ok(())
     }
 }

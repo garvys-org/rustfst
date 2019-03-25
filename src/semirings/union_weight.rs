@@ -2,11 +2,13 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::marker::PhantomData;
 
+use failure::Fallible;
+
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
 
 pub trait UnionWeightOption<W: Semiring>: Debug + Hash + Default + Clone + PartialOrd + Eq {
     fn compare(w1: &W, w2: &W) -> bool;
-    fn merge(w1: &W, w2: &W) -> W;
+    fn merge(w1: &W, w2: &W) -> Fallible<W>;
 }
 
 /// Semiring that uses Times() and One() from W and union and the empty set
@@ -62,7 +64,7 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
         }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         if self.is_zero() {
             self.set_value(rhs.as_ref().value());
         } else if rhs.as_ref().is_zero() {
@@ -76,27 +78,28 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
                 let v1 = unsafe { self.list.get_unchecked(i) };
                 let v2 = unsafe { rhs.as_ref().list.get_unchecked(i) };
                 if O::compare(v1, v2) {
-                    sum.push_back(v1.clone(), true);
+                    sum.push_back(v1.clone(), true)?;
                 } else {
-                    sum.push_back(v2.clone(), true);
+                    sum.push_back(v2.clone(), true)?;
                 }
             }
 
             for i in n..n1 {
                 let v1 = unsafe { self.list.get_unchecked(i) };
-                sum.push_back(v1.clone(), true);
+                sum.push_back(v1.clone(), true)?;
             }
 
             for i in n..n2 {
                 let v2 = unsafe { rhs.as_ref().list.get_unchecked(i) };
-                sum.push_back(v2.clone(), true);
+                sum.push_back(v2.clone(), true)?;
             }
             //TODO: Remove this copy and do the modification inplace
             self.set_value(sum.value());
         }
+        Ok(())
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         if self.is_zero() || rhs.as_ref().is_zero() {
             self.set_value(Self::zero().value());
         } else {
@@ -108,12 +111,13 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
                 let mut prod2: UnionWeight<W, O> = UnionWeight::zero();
                 for j in 0..n2 {
                     let v2 = unsafe { rhs.as_ref().list.get_unchecked(j) };
-                    prod2.push_back(v1.times(&v2), true);
+                    prod2.push_back(v1.times(&v2)?, true)?;
                 }
-                prod1.plus_assign(prod2);
+                prod1.plus_assign(prod2)?;
             }
             self.set_value(prod1.value());
         }
+        Ok(())
     }
 
     fn value(&self) -> Self::Type {
@@ -126,7 +130,7 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
 }
 
 impl<W: Semiring, O: UnionWeightOption<W>> UnionWeight<W, O> {
-    fn push_back(&mut self, weight: W, sorted: bool) {
+    fn push_back(&mut self, weight: W, sorted: bool) -> Fallible<()> {
         if self.list.is_empty() {
             self.list.push(weight);
         } else if sorted {
@@ -135,7 +139,7 @@ impl<W: Semiring, O: UnionWeightOption<W>> UnionWeight<W, O> {
             if O::compare(back, &weight) {
                 self.list.push(weight);
             } else {
-                *back = O::merge(back, &weight);
+                *back = O::merge(back, &weight)?;
             }
         } else {
             let first = self.list.get_mut(0).unwrap();
@@ -147,6 +151,7 @@ impl<W: Semiring, O: UnionWeightOption<W>> UnionWeight<W, O> {
                 self.list.push(first_cloned);
             }
         }
+        Ok(())
     }
 
     pub fn len(&self) -> usize {
@@ -159,23 +164,23 @@ where
     W: WeaklyDivisibleSemiring,
     O: UnionWeightOption<W>,
 {
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Self {
+    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
         if self.is_zero() || rhs.is_zero() {
-            return Self::zero();
+            return Ok(Self::zero());
         }
         let mut quot = Self::one();
         if self.len() == 1 {
             for v in rhs.list.iter().rev() {
-                quot.push_back(self.list[0].divide(v, divide_type), true);
+                quot.push_back(self.list[0].divide(v, divide_type)?, true)?;
             }
         } else if rhs.len() == 1 {
             for v in self.list.iter() {
-                quot.push_back(rhs.list[0].divide(v, divide_type), true);
+                quot.push_back(rhs.list[0].divide(v, divide_type)?, true)?;
             }
         } else {
-            panic!("lol");
+            bail!("Expected at least of the two parameters to have a single element");
         }
-        quot
+        Ok(quot)
     }
 }
 
@@ -184,11 +189,12 @@ where
     W: WeightQuantize,
     O: UnionWeightOption<W>,
 {
-    fn quantize_assign(&mut self, delta: f32) {
+    fn quantize_assign(&mut self, delta: f32) -> Fallible<()> {
         let v: Vec<_> = self.list.drain(..).collect();
         for mut e in v {
-            e.quantize_assign(delta);
-            self.push_back(e.quantize(delta), true);
+            e.quantize_assign(delta)?;
+            self.push_back(e.quantize(delta)?, true)?;
         }
+        Ok(())
     }
 }

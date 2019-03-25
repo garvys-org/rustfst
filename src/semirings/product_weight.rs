@@ -1,6 +1,8 @@
 use std::fmt;
 use std::fmt::Debug;
 
+use failure::Fallible;
+
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
 
 #[derive(Debug, Eq, PartialOrd, PartialEq, Clone, Default, Hash)]
@@ -61,14 +63,16 @@ where
         }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
-        self.weight1.plus_assign(&rhs.as_ref().weight1);
-        self.weight2.plus_assign(&rhs.as_ref().weight2);
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
+        self.weight1.plus_assign(&rhs.as_ref().weight1)?;
+        self.weight2.plus_assign(&rhs.as_ref().weight2)?;
+        Ok(())
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
-        self.weight1.times_assign(&rhs.as_ref().weight1);
-        self.weight2.times_assign(&rhs.as_ref().weight2);
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
+        self.weight1.times_assign(&rhs.as_ref().weight1)?;
+        self.weight2.times_assign(&rhs.as_ref().weight2)?;
+        Ok(())
     }
 
     fn value(&self) -> <Self as Semiring>::Type {
@@ -118,12 +122,12 @@ where
     W1: WeaklyDivisibleSemiring,
     W2: WeaklyDivisibleSemiring,
 {
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Self {
-        (
-            self.value1().divide(&rhs.value1(), divide_type),
-            self.value2().divide(&rhs.value2(), divide_type),
-        )
-            .into()
+    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
+        let tuple = (
+            self.value1().divide(&rhs.value1(), divide_type)?,
+            self.value2().divide(&rhs.value2(), divide_type)?,
+        );
+        Ok(tuple.into())
     }
 }
 
@@ -132,8 +136,9 @@ where
     W1: WeightQuantize,
     W2: WeightQuantize,
 {
-    fn quantize_assign(&mut self, delta: f32) {
-        self.set_value1(self.value1().quantize(delta));
-        self.set_value2(self.value2().quantize(delta));
+    fn quantize_assign(&mut self, delta: f32) -> Fallible<()> {
+        self.set_value1(self.value1().quantize(delta)?);
+        self.set_value2(self.value2().quantize(delta)?);
+        Ok(())
     }
 }

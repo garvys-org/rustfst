@@ -1,3 +1,5 @@
+use failure::Fallible;
+
 use crate::semirings::{CompleteSemiring, Semiring, StarSemiring};
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Default, Eq, Copy, Hash)]
@@ -19,11 +21,13 @@ impl Semiring for BooleanWeight {
         BooleanWeight { value }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         self.value |= rhs.as_ref().value;
+        Ok(())
     }
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         self.value &= rhs.as_ref().value;
+        Ok(())
     }
 
     fn value(&self) -> Self::Type {
@@ -56,20 +60,21 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_boolean_weight() {
+    fn test_boolean_weight() -> Fallible<()> {
         let b_true = BooleanWeight::new(true);
         let b_false = BooleanWeight::new(false);
 
         // Test plus
-        assert_eq!(b_true.plus(&b_true), b_true);
-        assert_eq!(b_true.plus(&b_false), b_true);
-        assert_eq!(b_false.plus(&b_true), b_true);
-        assert_eq!(b_false.plus(&b_false), b_false);
+        assert_eq!(b_true.plus(&b_true)?, b_true);
+        assert_eq!(b_true.plus(&b_false)?, b_true);
+        assert_eq!(b_false.plus(&b_true)?, b_true);
+        assert_eq!(b_false.plus(&b_false)?, b_false);
 
         // Test times
-        assert_eq!(b_true.times(&b_true), b_true);
-        assert_eq!(b_true.times(&b_false), b_false);
-        assert_eq!(b_false.times(&b_true), b_false);
-        assert_eq!(b_false.times(&b_false), b_false);
+        assert_eq!(b_true.times(&b_true)?, b_true);
+        assert_eq!(b_true.times(&b_false)?, b_false);
+        assert_eq!(b_false.times(&b_true)?, b_false);
+        assert_eq!(b_false.times(&b_false)?, b_false);
+        Ok(())
     }
 }

@@ -1,5 +1,7 @@
 use std::i32;
 
+use failure::Fallible;
+
 use crate::semirings::CompleteSemiring;
 use crate::semirings::Semiring;
 use crate::semirings::StarSemiring;
@@ -23,12 +25,14 @@ impl Semiring for IntegerWeight {
         IntegerWeight { value }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         self.value += rhs.as_ref().value;
+        Ok(())
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         self.value *= rhs.as_ref().value;
+        Ok(())
     }
 
     fn value(&self) -> Self::Type {
