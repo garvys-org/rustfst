@@ -1,5 +1,7 @@
 use std::hash::{Hash, Hasher};
 
+use failure::Fallible;
+
 use crate::semirings::Semiring;
 use crate::{Label, EPS_LABEL};
 
@@ -28,7 +30,7 @@ impl<W: Semiring> FstPath<W> {
     /// Adds the content of an FST transition to the Path.
     /// Labels are added at the end of the corresponding vectors and the weight
     /// is multiplied by the total weight already stored in the Path.
-    pub fn add_to_path(&mut self, ilabel: Label, olabel: Label, weight: W) {
+    pub fn add_to_path(&mut self, ilabel: Label, olabel: Label, weight: W) -> Fallible<()> {
         if ilabel != EPS_LABEL {
             self.ilabels.push(ilabel);
         }
@@ -37,19 +39,19 @@ impl<W: Semiring> FstPath<W> {
             self.olabels.push(olabel);
         }
 
-        self.weight.times_assign(weight);
+        self.weight.times_assign(weight)
     }
 
     /// Add a single weight to the Path by multiplying the weight by the total weight of the path.
-    pub fn add_weight(&mut self, weight: W) {
+    pub fn add_weight(&mut self, weight: W) -> Fallible<()> {
         self.weight.times_assign(weight)
     }
 
     /// Append a Path to the current Path. Labels are appended and weights multiplied.
-    pub fn concat(&mut self, other: FstPath<W>) {
+    pub fn concat(&mut self, other: FstPath<W>) -> Fallible<()> {
         self.ilabels.extend(other.ilabels);
         self.olabels.extend(other.olabels);
-        self.weight.times_assign(other.weight);
+        self.weight.times_assign(other.weight)
     }
 }
 

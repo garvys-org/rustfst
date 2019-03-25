@@ -1,3 +1,5 @@
+use failure::Fallible;
+
 use itertools::Itertools;
 
 use crate::algorithms::state_mappers::arc_sum_mapper::arc_compare;
@@ -9,11 +11,13 @@ use crate::fst_traits::MutableFst;
 pub struct ArcUniqueMapper {}
 
 impl<F: MutableFst> StateMapper<F> for ArcUniqueMapper {
-    fn map_final_weight(&self, _weight: Option<&mut F::W>) {}
+    fn map_final_weight(&self, _weight: Option<&mut F::W>) -> Fallible<()> {
+        Ok(())
+    }
 
     /// First sorts the exiting arcs by input label, output label and destination
     /// state and then uniques identical arcs.
-    fn map_arcs(&self, fst: &mut F, state: usize) {
+    fn map_arcs(&self, fst: &mut F, state: usize) -> Fallible<()> {
         let arcs = fst.pop_arcs(state).unwrap();
         let arcs: Vec<_> = arcs
             .into_iter()
@@ -34,6 +38,7 @@ impl<F: MutableFst> StateMapper<F> for ArcUniqueMapper {
         fst.reserve_arcs(state, arcs.len()).unwrap();
         arcs.into_iter()
             .for_each(|arc| fst.add_arc(state, arc).unwrap());
+        Ok(())
     }
 }
 

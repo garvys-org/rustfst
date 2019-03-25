@@ -6,7 +6,6 @@ use failure::Fallible;
 use crate::algorithms::{state_map, StateMapper};
 use crate::fst_traits::{CoreFst, MutableFst};
 use crate::semirings::Semiring;
-use crate::semirings::TropicalWeight;
 use crate::Arc;
 
 pub fn ilabel_compare<W: Semiring>(a: &Arc<W>, b: &Arc<W>) -> Ordering {
@@ -27,14 +26,17 @@ where
     FST: MutableFst,
     F: Fn(&Arc<FST::W>, &Arc<FST::W>) -> Ordering,
 {
-    fn map_final_weight(&self, weight: Option<&mut <FST as CoreFst>::W>) {}
+    fn map_final_weight(&self, _weight: Option<&mut <FST as CoreFst>::W>) -> Fallible<()> {
+        Ok(())
+    }
 
-    fn map_arcs(&self, fst: &mut FST, state: usize) {
+    fn map_arcs(&self, fst: &mut FST, state: usize) -> Fallible<()> {
         let mut arcs = fst.pop_arcs(state).unwrap();
         arcs.sort_by(&self.f);
         fst.reserve_arcs(state, arcs.len()).unwrap();
         arcs.into_iter()
             .for_each(|arc| fst.add_arc(state, arc).unwrap());
+        Ok(())
     }
 }
 

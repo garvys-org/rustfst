@@ -1,5 +1,7 @@
 use std::cmp::Ordering;
 
+use failure::Fallible;
+
 use itertools::Itertools;
 
 use crate::algorithms::StateMapper;
@@ -34,12 +36,14 @@ pub(crate) fn arc_compare<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> Orderi
 }
 
 impl<F: MutableFst> StateMapper<F> for ArcSumMapper {
-    fn map_final_weight(&self, _weight: Option<&mut F::W>) {}
+    fn map_final_weight(&self, _weight: Option<&mut F::W>) -> Fallible<()> {
+        Ok(())
+    }
 
     /// First sorts the exiting arcs by input label, output label and destination
     /// state and then sums weights of arcs with the same input label, output
     /// label, and destination state.
-    fn map_arcs(&self, fst: &mut F, state: usize) {
+    fn map_arcs(&self, fst: &mut F, state: usize) -> Fallible<()> {
         let arcs = fst.pop_arcs(state).unwrap();
         let arcs: Vec<_> = arcs
             .into_iter()
@@ -57,5 +61,6 @@ impl<F: MutableFst> StateMapper<F> for ArcSumMapper {
         fst.reserve_arcs(state, arcs.len()).unwrap();
         arcs.into_iter()
             .for_each(|arc| fst.add_arc(state, arc).unwrap());
+        Ok(())
     }
 }
