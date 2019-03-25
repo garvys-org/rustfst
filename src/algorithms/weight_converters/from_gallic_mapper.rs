@@ -62,13 +62,13 @@ fn extract_gallic<W: Semiring>(gw: &GallicWeight<W>) -> Fallible<(W, Label)> {
 macro_rules! impl_weight_converter_gallic {
     ($gallic: ident, $fextract: ident) => {
         impl<W: Semiring> WeightConverter<$gallic<W>, W> for FromGallicConverter {
-            fn arc_map(&mut self, arc: &Arc<$gallic<W>>) -> Arc<W> {
-                let (extracted_w, extracted_l) = $fextract(&arc.weight).expect("Fail");
+            fn arc_map(&mut self, arc: &Arc<$gallic<W>>) -> Fallible<Arc<W>> {
+                let (extracted_w, extracted_l) = $fextract(&arc.weight)?;
                 if arc.ilabel != arc.olabel {
-                    panic!("Unrepresentable weight : {:?}", &arc);
+                    bail!("Unrepresentable weight : {:?}", &arc);
                 }
 
-                if arc.ilabel == EPS_LABEL && extracted_l != EPS_LABEL {
+                let new_arc = if arc.ilabel == EPS_LABEL && extracted_l != EPS_LABEL {
                     Arc {
                         ilabel: self.superfinal_label,
                         olabel: extracted_l,
@@ -82,16 +82,17 @@ macro_rules! impl_weight_converter_gallic {
                         weight: extracted_w,
                         nextstate: arc.nextstate,
                     }
-                }
+                };
+                Ok(new_arc)
             }
 
-            fn final_arc_map(&mut self, final_arc: &FinalArc<$gallic<W>>) -> FinalArc<W> {
+            fn final_arc_map(&mut self, final_arc: &FinalArc<$gallic<W>>) -> Fallible<FinalArc<W>> {
                 let (extracted_w, extracted_l) = $fextract(&final_arc.weight).expect("Fail");
                 if final_arc.ilabel != final_arc.olabel {
                     panic!("Unrepresentable weight : {:?}", &final_arc);
                 }
 
-                if final_arc.ilabel == EPS_LABEL && extracted_l != EPS_LABEL {
+                let new_final_arc = if final_arc.ilabel == EPS_LABEL && extracted_l != EPS_LABEL {
                     FinalArc {
                         ilabel: self.superfinal_label,
                         olabel: extracted_l,
@@ -103,7 +104,8 @@ macro_rules! impl_weight_converter_gallic {
                         olabel: extracted_l,
                         weight: extracted_w,
                     }
-                }
+                };
+                Ok(new_final_arc)
             }
 
             fn final_action(&self) -> MapFinalAction {

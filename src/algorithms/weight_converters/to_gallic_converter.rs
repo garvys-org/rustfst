@@ -1,3 +1,5 @@
+use failure::Fallible;
+
 use crate::algorithms::{FinalArc, MapFinalAction, WeightConverter};
 use crate::semirings::{
     GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, GallicWeightRight,
@@ -14,23 +16,24 @@ macro_rules! impl_to_gallic_converter {
         where
             W: Semiring,
         {
-            fn arc_map(&mut self, arc: &Arc<W>) -> Arc<$gallic<W>> {
-                if arc.olabel == EPS_LABEL {
+            fn arc_map(&mut self, arc: &Arc<W>) -> Fallible<Arc<$gallic<W>>> {
+                let new_arc = if arc.olabel == EPS_LABEL {
                     let w = ($string_weight::one(), arc.weight.clone());
                     Arc::new(arc.ilabel, arc.ilabel, w.into(), arc.nextstate)
                 } else {
                     let w = (arc.olabel, arc.weight.clone());
                     Arc::new(arc.ilabel, arc.ilabel, w.into(), arc.nextstate)
-                }
+                };
+                Ok(new_arc)
             }
 
-            fn final_arc_map(&mut self, final_arc: &FinalArc<W>) -> FinalArc<$gallic<W>> {
+            fn final_arc_map(&mut self, final_arc: &FinalArc<W>) -> Fallible<FinalArc<$gallic<W>>> {
                 let w = ($string_weight::one(), final_arc.weight.clone());
-                FinalArc {
+                Ok(FinalArc {
                     ilabel: EPS_LABEL,
                     olabel: EPS_LABEL,
                     weight: w.into(),
-                }
+                })
             }
 
             fn final_action(&self) -> MapFinalAction {

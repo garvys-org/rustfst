@@ -1,3 +1,5 @@
+use failure::Fallible;
+
 use crate::algorithms::{FinalArc, MapFinalAction, WeightConverter};
 use crate::semirings::Semiring;
 use crate::Arc;
@@ -11,21 +13,21 @@ where
     SI: Semiring,
     SO: Semiring<Type = SI::Type>,
 {
-    fn arc_map(&mut self, arc: &Arc<SI>) -> Arc<SO> {
-        Arc::new(
+    fn arc_map(&mut self, arc: &Arc<SI>) -> Fallible<Arc<SO>> {
+        Ok(Arc::new(
             arc.ilabel,
             arc.olabel,
             SO::new(arc.weight.value()),
             arc.nextstate,
-        )
+        ))
     }
 
-    fn final_arc_map(&mut self, final_arc: &FinalArc<SI>) -> FinalArc<SO> {
-        FinalArc {
+    fn final_arc_map(&mut self, final_arc: &FinalArc<SI>) -> Fallible<FinalArc<SO>> {
+        Ok(FinalArc {
             ilabel: final_arc.ilabel,
             olabel: final_arc.olabel,
             weight: SO::new(final_arc.weight.value()),
-        }
+        })
     }
 
     fn final_action(&self) -> MapFinalAction {

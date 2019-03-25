@@ -6,8 +6,8 @@ use crate::semirings::Semiring;
 use crate::{Arc, EPS_LABEL};
 
 pub trait WeightConverter<SI: Semiring, SO: Semiring> {
-    fn arc_map(&mut self, arc: &Arc<SI>) -> Arc<SO>;
-    fn final_arc_map(&mut self, final_arc: &FinalArc<SI>) -> FinalArc<SO>;
+    fn arc_map(&mut self, arc: &Arc<SI>) -> Fallible<Arc<SO>>;
+    fn final_arc_map(&mut self, final_arc: &FinalArc<SI>) -> Fallible<FinalArc<SO>>;
     fn final_action(&self) -> MapFinalAction;
 }
 
@@ -52,7 +52,7 @@ where
     for state in states {
         fst_out.reserve_arcs(state, fst_in.num_arcs(state)?)?;
         for arc in fst_in.arcs_iter(state)? {
-            fst_out.add_arc(state, mapper.arc_map(arc))?;
+            fst_out.add_arc(state, mapper.arc_map(arc)?)?;
         }
         if let Some(w) = fst_in.final_weight(state) {
             let final_arc = FinalArc {
@@ -60,7 +60,7 @@ where
                 olabel: EPS_LABEL,
                 weight: w.clone(),
             };
-            let mapped_final_arc = mapper.final_arc_map(&final_arc);
+            let mapped_final_arc = mapper.final_arc_map(&final_arc)?;
             match final_action {
                 MapFinalAction::MapNoSuperfinal => {
                     if final_arc.ilabel != EPS_LABEL || final_arc.olabel != EPS_LABEL {
