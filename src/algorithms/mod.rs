@@ -7,6 +7,8 @@ mod concat;
 mod connect;
 mod determinization;
 mod encode;
+#[allow(unused)]
+mod factor_weight;
 mod inversion;
 mod isomorphic;
 mod projection;
