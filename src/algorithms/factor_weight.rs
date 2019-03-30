@@ -12,40 +12,59 @@ use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverte
 use crate::arc::Arc;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
-use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
+use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::semirings::{GallicWeight, GallicWeightMin, GallicWeightRestrict};
-use crate::EPS_LABEL;
 use crate::{Label, StateId};
+use crate::{EPS_LABEL, KDELTA};
 use std::marker::PhantomData;
 use std::slice::Iter as IterSlice;
 use std::slice::IterMut as IterSliceMut;
 
 bitflags! {
-    struct FactorWeightOptions: u32 {
+    struct FactorWeightType: u32 {
         const FACTOR_FINAL_WEIGHTS = 0b01;
         const FACTOR_ARC_WEIGHTS = 0b10;
     }
 }
 
-trait FactorIterator {
-    type Weight: Semiring;
+struct FactorWeightOptions {
+    /// Quantization delta
+    pub delta: f32,
+    /// Factor arc weights and/or final weights
+    pub mode: FactorWeightType,
+    /// Input label of arc when factoring final weights.
+    pub final_ilabel: Label,
+    /// Output label of arc when factoring final weights.
+    pub final_olabel: Label,
+    /// When factoring final w' results in > 1 arcs at state, increments ilabels to make distinct ?
+    pub increment_final_ilabel: bool,
+    /// When factoring final w' results in > 1 arcs at state, increments olabels to make distinct ?
+    pub increment_final_olabel: bool,
+}
 
-    fn new(weight: &Self::Weight) -> Self;
-    fn next(&mut self) -> Option<(Self::Weight, Self::Weight)>;
+trait FactorIterator<W: Semiring>: Iterator<Item = (W, W)> {
+    fn new(weight: &W) -> Self;
+    fn done(&self) -> bool;
 }
 
 pub struct IdentityFactor<W> {
     ghost: PhantomData<W>,
 }
 
-impl<W: Semiring> FactorIterator for IdentityFactor<W> {
-    type Weight = W;
-
-    fn new(weight: &Self::Weight) -> Self {
+impl<W: Semiring> FactorIterator<W> for IdentityFactor<W> {
+    fn new(weight: &W) -> Self {
         Self { ghost: PhantomData }
     }
 
-    fn next(&mut self) -> Option<(Self::Weight, Self::Weight)> {
+    fn done(&self) -> bool {
+        true
+    }
+}
+
+impl<W: Semiring> Iterator for IdentityFactor<W> {
+    type Item = (W, W);
+
+    fn next(&mut self) -> Option<Self::Item> {
         None
     }
 }
@@ -53,7 +72,8 @@ impl<W: Semiring> FactorIterator for IdentityFactor<W> {
 struct CacheState<W: Semiring> {
     arcs: Vec<Arc<W>>,
     final_weight: Option<W>,
-    expanded: bool
+    expanded: bool,
+    has_final: bool,
 }
 
 impl<W: Semiring> CacheState<W> {
@@ -62,7 +82,12 @@ impl<W: Semiring> CacheState<W> {
             arcs: Vec::new(),
             final_weight: None,
             expanded: false,
+            has_final: false,
         }
+    }
+
+    pub fn has_final(&self) -> bool {
+        self.has_final
     }
 
     pub fn expanded(&self) -> bool {
@@ -75,6 +100,7 @@ impl<W: Semiring> CacheState<W> {
 
     pub fn set_final_weight(&mut self, final_weight: Option<W>) {
         self.final_weight = final_weight;
+        self.has_final = true;
     }
 
     pub fn final_weight(&self) -> Option<&W> {
@@ -140,14 +166,15 @@ impl<W: Semiring> VectorCacheState<W> {
     }
 
     pub fn set_final_weight_unchecked(&mut self, state: StateId, final_weight: Option<W>) {
-        self.get_cache_state_unchecked_mut(state).set_final_weight(final_weight);
+        self.get_cache_state_unchecked_mut(state)
+            .set_final_weight(final_weight);
     }
 
     pub fn push_arc(&mut self, state: StateId, arc: Arc<W>) {
         self.get_cache_state_unchecked_mut(state).push_arc(arc)
     }
 
-    pub fn iter_arcs_unchecked(&self, state: StateId) -> IterSlice<Arc<W>> {
+    pub fn arcs_iter_unchecked(&self, state: StateId) -> IterSlice<Arc<W>> {
         self.get_cache_state_unchecked(state).iter_arcs()
     }
 
@@ -163,16 +190,27 @@ impl<W: Semiring> VectorCacheState<W> {
         if state >= self.cache_states.len() {
             return false;
         }
-        return self.get_cache_state_unchecked(state).expanded()
+        return self.get_cache_state_unchecked(state).expanded();
+    }
+
+    pub fn has_final(&self, state: StateId) -> bool {
+        if state >= self.cache_states.len() {
+            return false;
+        }
+        return self.get_cache_state_unchecked(state).has_final()
     }
 
     pub fn final_weight_unchecked(&self, state: StateId) -> Option<&W> {
         self.get_cache_state_unchecked(state).final_weight()
     }
+
+    pub fn num_arcs(&self, state: StateId) -> usize {
+        self.get_cache_state_unchecked(state).num_arcs()
+    }
 }
 
 struct CacheImpl<W: Semiring> {
-    start_computed: bool,
+    has_start: bool,
     cache_start_state: Option<StateId>,
     vector_cache_states: VectorCacheState<W>,
 }
@@ -180,7 +218,7 @@ struct CacheImpl<W: Semiring> {
 impl<W: Semiring> CacheImpl<W> {
     fn new() -> Self {
         Self {
-            start_computed: false,
+            has_start: false,
             cache_start_state: None,
             vector_cache_states: VectorCacheState::new(),
         }
@@ -188,31 +226,29 @@ impl<W: Semiring> CacheImpl<W> {
 
     fn set_start(&mut self, start_state: Option<StateId>) {
         self.cache_start_state = start_state;
-        self.start_computed = true;
+        self.has_start = true;
         if let Some(s) = start_state {
             self.vector_cache_states.resize_if_necessary(s + 1);
         }
     }
 
     fn start(&self) -> Fallible<Option<StateId>> {
-        if !self.start_computed {
+        if !self.has_start {
             bail!("Can't call start() before set_start()");
         }
         Ok(self.cache_start_state)
     }
 
     fn set_final_weight(&mut self, state: StateId, final_weight: Option<W>) -> Fallible<()> {
-        if self.vector_cache_states.expanded(state) {
-            bail!("Can't modify the final weight of a fully expanded state")
-        }
         self.vector_cache_states.resize_if_necessary(state + 1);
-        self.vector_cache_states.set_final_weight_unchecked(state, final_weight);
+        self.vector_cache_states
+            .set_final_weight_unchecked(state, final_weight);
         Ok(())
     }
 
     fn final_weight(&self, state: StateId) -> Fallible<Option<&W>> {
-        if !self.vector_cache_states.expanded(state) {
-            bail!("Can't call final_weight() if the state is not fully expanded")
+        if !self.vector_cache_states.has_final(state) {
+            bail!("Can't call final_weight() before set_final_weight()")
         }
         Ok(self.vector_cache_states.final_weight_unchecked(state))
     }
@@ -226,8 +262,19 @@ impl<W: Semiring> CacheImpl<W> {
         Ok(())
     }
 
+    fn num_arcs(&self, state: StateId) -> Fallible<usize> {
+        if !self.vector_cache_states.expanded(state) {
+            bail!("Can't call num_arcs on a state that is not fully expanded");
+        }
+        Ok(self.vector_cache_states.num_arcs(state))
+    }
+
     fn expanded(&self, state: StateId) -> bool {
         self.vector_cache_states.expanded(state)
+    }
+
+    fn has_final(&self, state: StateId) -> bool {
+        self.vector_cache_states.has_final(state)
     }
 
     fn mark_expanded(&mut self, state: StateId) {
@@ -235,15 +282,15 @@ impl<W: Semiring> CacheImpl<W> {
         self.vector_cache_states.mark_expanded_unchecked(state)
     }
 
-    pub fn iter_arcs(&self, state: StateId) -> Fallible<IterSlice<Arc<W>>> {
+    pub fn arcs_iter(&self, state: StateId) -> Fallible<IterSlice<Arc<W>>> {
         if !self.vector_cache_states.expanded(state) {
             bail!("Can't iterate arcs on a not fully expanded state")
         }
-        Ok(self.vector_cache_states.iter_arcs_unchecked(state))
+        Ok(self.vector_cache_states.arcs_iter_unchecked(state))
     }
 
-    pub fn start_computed(&self) -> bool {
-        self.start_computed
+    pub fn has_start(&self) -> bool {
+        self.has_start
     }
 }
 
@@ -259,18 +306,21 @@ impl<W: Semiring> Element<W> {
     }
 }
 
-//use std::collections::HashMap;
-struct FactorWeightImpl<'a, F: Fst> {
+struct FactorWeightImpl<'a, F: Fst, FI: FactorIterator<F::W>> {
     opts: FactorWeightOptions,
     cache_impl: CacheImpl<F::W>,
     element_map: BiHashMap<StateId, Element<F::W>>,
     fst: &'a F,
-    unfactored: HashMap<StateId, StateId>
+    unfactored: HashMap<StateId, StateId>,
+    ghost: PhantomData<FI>,
 }
 
-impl<'a, F: Fst> FactorWeightImpl<'a, F> {
+impl<'a, F: Fst, FI: FactorIterator<F::W>> FactorWeightImpl<'a, F, FI>
+where
+    F::W: WeightQuantize,
+{
     pub fn new(fst: &'a F, opts: FactorWeightOptions) -> Fallible<Self> {
-        if opts.is_empty() {
+        if opts.mode.is_empty() {
             bail!("Factoring neither arc weights nor final weights");
         }
         Ok(Self {
@@ -279,11 +329,24 @@ impl<'a, F: Fst> FactorWeightImpl<'a, F> {
             element_map: BiHashMap::new(),
             cache_impl: CacheImpl::new(),
             unfactored: HashMap::new(),
+            ghost: PhantomData,
         })
     }
 
+    pub fn factor_arc_weights(&self) -> bool {
+        self.opts
+            .mode
+            .intersects(FactorWeightType::FACTOR_ARC_WEIGHTS)
+    }
+
+    pub fn factor_final_weights(&self) -> bool {
+        self.opts
+            .mode
+            .intersects(FactorWeightType::FACTOR_FINAL_WEIGHTS)
+    }
+
     pub fn find_state(&mut self, elt: &Element<F::W>) -> StateId {
-        if !(self.opts.intersects(FactorWeightOptions::FACTOR_ARC_WEIGHTS)) && elt.weight.is_one() && elt.state.is_some() {
+        if !self.factor_arc_weights() && elt.weight.is_one() && elt.state.is_some() {
             let old_state = elt.state.unwrap();
             if !self.unfactored.contains_key(&elt.state.unwrap()) {
                 let new_state = self.element_map.len();
@@ -301,11 +364,14 @@ impl<'a, F: Fst> FactorWeightImpl<'a, F> {
     }
 
     pub fn start(&mut self) -> Option<StateId> {
-        if !self.cache_impl.start_computed() {
+        if !self.cache_impl.has_start() {
             match self.fst.start() {
                 None => self.cache_impl.set_start(None),
                 Some(s) => {
-                    let new_state = self.find_state(&Element{state: Some(s), weight: F::W::one()});
+                    let new_state = self.find_state(&Element {
+                        state: Some(s),
+                        weight: F::W::one(),
+                    });
                     self.cache_impl.set_start(Some(new_state));
                 }
             };
@@ -314,19 +380,146 @@ impl<'a, F: Fst> FactorWeightImpl<'a, F> {
     }
 
     pub fn final_weight(&mut self, state: StateId) -> Option<&F::W> {
-        if !self.cache_impl.expanded(state) {
-            let elt = self.element_map.get_by_left(&state);
-            unimplemented!()
+        if !self.cache_impl.has_final(state) {
+            let elt = self.element_map.get_by_left(&state).unwrap();
+            let weight = match elt.state {
+                None => elt.weight.clone(),
+                Some(s) => elt
+                    .weight
+                    .times(self.fst.final_weight(s).unwrap_or_else(F::W::one))
+                    .unwrap(),
+            };
+            let mut factor_iterator = FI::new(&weight);
+            if !(self
+                .opts
+                .mode
+                .intersects(FactorWeightType::FACTOR_FINAL_WEIGHTS))
+                || factor_iterator.done()
+            {
+                self.cache_impl.set_final_weight(state, Some(weight));
+            } else {
+                self.cache_impl.set_final_weight(state, None);
+            }
         }
         self.cache_impl.final_weight(state).unwrap()
+    }
+
+    pub fn num_arcs(&mut self, state: StateId) -> Fallible<usize> {
+        if !self.cache_impl.expanded(state) {
+            self.expand(state);
+        }
+        self.cache_impl.num_arcs(state)
+    }
+
+    pub fn arcs_iter(&mut self, state: StateId) -> Fallible<IterSlice<Arc<F::W>>> {
+        if !self.cache_impl.expanded(state) {
+            self.expand(state);
+        }
+        self.cache_impl.arcs_iter(state)
+    }
+
+    pub fn expand(&mut self, state: StateId) {
+        let elt = self.element_map.get_by_left(&state).unwrap().clone();
+        if let Some(old_state) = elt.state {
+            for arc in self.fst.arcs_iter(old_state).unwrap() {
+                let weight = elt.weight.times(&arc.weight).unwrap();
+                let mut factor_it = FI::new(&weight);
+                if !self.factor_arc_weights() && factor_it.done() {
+                    let dest = self.find_state(&Element::new(Some(arc.nextstate), F::W::one()));
+                    self.cache_impl
+                        .push_arc(state, Arc::new(arc.ilabel, arc.olabel, weight, dest));
+                } else {
+                    for (p_f, p_s) in factor_it {
+                        let dest = self.find_state(&Element::new(
+                            Some(arc.nextstate),
+                            p_s.quantize(self.opts.delta).unwrap(),
+                        ));
+                        self.cache_impl
+                            .push_arc(state, Arc::new(arc.ilabel, arc.olabel, p_f, dest));
+                    }
+                }
+            }
+        }
+        if self.factor_final_weights()
+            && (elt.state.is_none() || self.fst.is_final(elt.state.unwrap()))
+        {
+            let weight = match elt.state {
+                None => elt.weight.clone(),
+                Some(s) => elt
+                    .weight
+                    .times(self.fst.final_weight(s).unwrap_or_else(F::W::one))
+                    .unwrap(),
+            };
+            let mut ilabel = self.opts.final_ilabel;
+            let mut olabel = self.opts.final_olabel;
+            let mut factor_it = FI::new(&weight);
+            for (p_f, p_s) in factor_it {
+                let dest =
+                    self.find_state(&Element::new(None, p_s.quantize(self.opts.delta).unwrap()));
+                self.cache_impl
+                    .push_arc(state, Arc::new(ilabel, olabel, p_f, dest));
+                if self.opts.increment_final_ilabel {
+                    ilabel += 1;
+                }
+                if self.opts.increment_final_olabel {
+                    olabel += 1;
+                }
+            }
+        }
+        self.cache_impl.mark_expanded(state);
+    }
+}
+
+
+use std::cell::RefCell;
+use std::rc::Rc;
+use crate::fst_traits::ArcIterator;
+
+struct FactorWeightFst<'a, F: Fst, FI: FactorIterator<F::W>>
+where
+    F::W: WeightQuantize
+{
+    fst_impl: Rc<RefCell<FactorWeightImpl<'a, F, FI>>>
+}
+
+impl<'a, F: Fst, FI: FactorIterator<F::W>> CoreFst for FactorWeightFst<'a, F, FI>
+where
+    F::W: WeightQuantize
+{
+    type W = F::W;
+
+    fn start(&self) -> Option<usize> {
+        self.fst_impl.borrow_mut().start()
+    }
+
+    fn final_weight(&self, state_id: usize) -> Option<Self::W> {
+        self.fst_impl.borrow_mut().final_weight(state_id).cloned()
+    }
+
+    fn num_arcs(&self, state: usize) -> Fallible<usize> {
+        self.fst_impl.borrow_mut().num_arcs(state)
+    }
+}
+
+impl<'a, F: Fst, FI: FactorIterator<F::W>> ArcIterator<'a> for FactorWeightFst<'a, F, FI>
+    where
+        F::W: WeightQuantize
+{
+    type Iter = IterSlice<'a, Arc<F::W>>;
+
+    fn arcs_iter(&'a self, state_id: usize) -> Fallible<Self::Iter> {
+//        self.fst_impl.borrow_mut().arcs_iter(state_id)
+        unimplemented!()
     }
 }
 
 fn factor_weight<F1, F2, FI>(fst_in: &F1) -> Fallible<F2>
 where
     F1: Fst,
-    F2: MutableFst<W = F1::W>,
-    FI: FactorIterator<Weight = F1::W>,
+    F2: MutableFst<W = F1::W> + ExpandedFst<W = F1::W>,
+    FI: FactorIterator<F1::W>,
 {
+    let mut fst_out = F2::new();
+
     unimplemented!()
 }
