@@ -7,7 +7,7 @@ pub struct IdentityFactor<W> {
 }
 
 impl<W: Semiring> FactorIterator<W> for IdentityFactor<W> {
-    fn new(weight: W) -> Self {
+    fn new(_weight: W) -> Self {
         Self { ghost: PhantomData }
     }
 

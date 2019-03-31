@@ -33,8 +33,13 @@ macro_rules! impl_gallic_factor {
             type Item = ($gallic<W>, $gallic<W>);
 
             fn next(&mut self) -> Option<Self::Item> {
+                if self.done() {
+                    return None;
+                }
                 let mut it = $s_factor::new(self.weight.value1().clone());
-                let (p_f, p_s) = it.next().unwrap();
+                let lol = it.next();
+                println!("POUET {:?}", lol);
+                let (p_f, p_s) = lol.unwrap();
                 let g1 = (p_f, self.weight.value2().clone()).into();
                 let g2 = (p_s, W::one()).into();
                 self.done = true;
@@ -67,7 +72,6 @@ impl_gallic_factor!(
 );
 impl_gallic_factor!(GallicWeightMin, GallicFactorMin, StringFactorRestrict);
 
-use std::slice::Iter as IterSlice;
 pub struct GallicFactor<W: Semiring> {
     weight: GallicWeight<W>,
     done: bool,
@@ -78,6 +82,9 @@ impl<W: Semiring> Iterator for GallicFactor<W> {
     type Item = (GallicWeight<W>, GallicWeight<W>);
 
     fn next(&mut self) -> Option<Self::Item> {
+        if self.done() {
+            return None;
+        }
         let w = &self.weight.0.list[self.idx];
         let mut s_it = StringFactorRestrict::new(w.value1().clone());
         let (p_f, p_s) = s_it.next().unwrap();

@@ -1,5 +1,4 @@
-use std::collections::hash_map::Entry;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, VecDeque};
 
 use bimap::BiHashMap;
 
@@ -7,18 +6,12 @@ use bitflags::bitflags;
 
 use failure::Fallible;
 
-use crate::algorithms::weight_convert;
-use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::arc::Arc;
-use crate::fst_impls::VectorFst;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
-use crate::semirings::{GallicWeight, GallicWeightMin, GallicWeightRestrict};
+use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::{Label, StateId};
-use crate::{EPS_LABEL, KDELTA};
 use std::marker::PhantomData;
 use std::slice::Iter as IterSlice;
-use std::slice::IterMut as IterSliceMut;
 
 use crate::algorithms::cache::CacheImpl;
 
@@ -134,63 +127,59 @@ where
         self.cache_impl.start().unwrap()
     }
 
-    pub fn final_weight(&mut self, state: StateId) -> Option<&F::W> {
+    pub fn final_weight(&mut self, state: StateId) -> Fallible<Option<&F::W>> {
         if !self.cache_impl.has_final(state) {
             let elt = self.element_map.get_by_left(&state).unwrap();
             let weight = match elt.state {
                 None => elt.weight.clone(),
                 Some(s) => elt
                     .weight
-                    .times(self.fst.final_weight(s).unwrap_or_else(F::W::one))
+                    .times(self.fst.final_weight(s).unwrap_or_else(F::W::zero))
                     .unwrap(),
             };
-            let mut factor_iterator = FI::new(weight.clone());
-            if !(self
-                .opts
-                .mode
-                .intersects(FactorWeightType::FACTOR_FINAL_WEIGHTS))
-                || factor_iterator.done()
-            {
-                self.cache_impl.set_final_weight(state, Some(weight));
+            let factor_iterator = FI::new(weight.clone());
+            if !weight.is_zero() && (!self.factor_final_weights() || factor_iterator.done()) {
+                self.cache_impl.set_final_weight(state, Some(weight))?;
             } else {
-                self.cache_impl.set_final_weight(state, None);
+                self.cache_impl.set_final_weight(state, None)?;
             }
         }
-        self.cache_impl.final_weight(state).unwrap()
+        self.cache_impl.final_weight(state)
     }
 
+    #[allow(unused)]
     pub fn num_arcs(&mut self, state: StateId) -> Fallible<usize> {
         if !self.cache_impl.expanded(state) {
-            self.expand(state);
+            self.expand(state)?;
         }
         self.cache_impl.num_arcs(state)
     }
 
     pub fn arcs_iter(&mut self, state: StateId) -> Fallible<IterSlice<Arc<F::W>>> {
         if !self.cache_impl.expanded(state) {
-            self.expand(state);
+            self.expand(state)?;
         }
         self.cache_impl.arcs_iter(state)
     }
 
-    pub fn expand(&mut self, state: StateId) {
+    pub fn expand(&mut self, state: StateId) -> Fallible<()> {
         let elt = self.element_map.get_by_left(&state).unwrap().clone();
         if let Some(old_state) = elt.state {
-            for arc in self.fst.arcs_iter(old_state).unwrap() {
+            for arc in self.fst.arcs_iter(old_state)? {
                 let weight = elt.weight.times(&arc.weight).unwrap();
-                let mut factor_it = FI::new(weight.clone());
+                let factor_it = FI::new(weight.clone());
                 if !self.factor_arc_weights() && factor_it.done() {
                     let dest = self.find_state(&Element::new(Some(arc.nextstate), F::W::one()));
                     self.cache_impl
-                        .push_arc(state, Arc::new(arc.ilabel, arc.olabel, weight, dest));
+                        .push_arc(state, Arc::new(arc.ilabel, arc.olabel, weight, dest))?;
                 } else {
                     for (p_f, p_s) in factor_it {
                         let dest = self.find_state(&Element::new(
                             Some(arc.nextstate),
-                            p_s.quantize(self.opts.delta).unwrap(),
+                            p_s.quantize(self.opts.delta)?,
                         ));
                         self.cache_impl
-                            .push_arc(state, Arc::new(arc.ilabel, arc.olabel, p_f, dest));
+                            .push_arc(state, Arc::new(arc.ilabel, arc.olabel, p_f, dest))?;
                     }
                 }
             }
@@ -207,12 +196,11 @@ where
             };
             let mut ilabel = self.opts.final_ilabel;
             let mut olabel = self.opts.final_olabel;
-            let mut factor_it = FI::new(weight);
+            let factor_it = FI::new(weight);
             for (p_f, p_s) in factor_it {
-                let dest =
-                    self.find_state(&Element::new(None, p_s.quantize(self.opts.delta).unwrap()));
+                let dest = self.find_state(&Element::new(None, p_s.quantize(self.opts.delta)?));
                 self.cache_impl
-                    .push_arc(state, Arc::new(ilabel, olabel, p_f, dest));
+                    .push_arc(state, Arc::new(ilabel, olabel, p_f, dest))?;
                 if self.opts.increment_final_ilabel {
                     ilabel += 1;
                 }
@@ -222,6 +210,7 @@ where
             }
         }
         self.cache_impl.mark_expanded(state);
+        Ok(())
     }
 }
 
@@ -239,6 +228,7 @@ where
             return Ok(fst_out);
         }
         let start_state = start_state.unwrap();
+        println!("Start state : {}", start_state);
         for _ in 0..=start_state {
             fst_out.add_state();
         }
@@ -247,7 +237,9 @@ where
         queue.push_back(start_state);
         while !queue.is_empty() {
             let s = queue.pop_front().unwrap();
+            println!("State : {}", s);
             for arc in self.arcs_iter(s)? {
+                println!("Arc : {:?}", arc);
                 queue.push_back(arc.nextstate);
                 let n = fst_out.num_states();
                 for _ in n..=arc.nextstate {
@@ -255,7 +247,7 @@ where
                 }
                 fst_out.add_arc(s, arc.clone())?;
             }
-            if let Some(f_w) = self.final_weight(s) {
+            if let Some(f_w) = self.final_weight(s)? {
                 fst_out.set_final(s, f_w.clone())?;
             }
         }
