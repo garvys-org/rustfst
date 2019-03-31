@@ -16,7 +16,7 @@ pub trait UnionWeightOption<W: Semiring>: Debug + Hash + Default + Clone + Parti
 /// weight options as above.
 #[derive(PartialOrd, PartialEq, Clone, Eq, Debug, Hash, Default)]
 pub struct UnionWeight<W: Semiring, O: UnionWeightOption<W>> {
-    list: Vec<W>,
+    pub(crate) list: Vec<W>,
     ghost: PhantomData<O>,
 }
 

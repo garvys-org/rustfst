@@ -250,7 +250,7 @@ impl<W: Semiring> UnionWeightOption<GallicWeightRestrict<W>>
 
 #[derive(Debug, PartialOrd, PartialEq, Clone, Hash, Default, Eq)]
 pub struct GallicWeight<W>(
-    UnionWeight<GallicWeightRestrict<W>, GallicUnionWeightOption<GallicWeightRestrict<W>>>,
+    pub UnionWeight<GallicWeightRestrict<W>, GallicUnionWeightOption<GallicWeightRestrict<W>>>,
 )
 where
     W: Semiring;
@@ -321,6 +321,15 @@ where
         gw.set_value1(w1);
         gw.set_value2(w2);
         Self::new(vec![gw])
+    }
+}
+
+impl<W> From<GallicWeightRestrict<W>> for GallicWeight<W>
+where
+    W: Semiring,
+{
+    fn from(w: GallicWeightRestrict<W>) -> Self {
+        Self::new(vec![w])
     }
 }
 
