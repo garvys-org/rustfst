@@ -7,6 +7,7 @@ mod log_weight;
 mod power_weight;
 mod probability_weight;
 mod product_weight;
+mod string_variant;
 mod string_weight;
 mod tropical_weight;
 mod union_weight;
@@ -23,8 +24,7 @@ pub use self::product_weight::ProductWeight;
 pub use self::semiring::{
     CompleteSemiring, DivideType, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
-pub use self::string_weight::{
-    StringWeightLeft, StringWeightRestrict, StringWeightRight, StringWeightVariant,
-};
+pub(crate) use self::string_variant::StringWeightVariant;
+pub use self::string_weight::{StringWeightLeft, StringWeightRestrict, StringWeightRight};
 pub use self::tropical_weight::TropicalWeight;
 pub use self::union_weight::{UnionWeight, UnionWeightOption};

@@ -2,35 +2,9 @@ use std::fmt;
 
 use failure::Fallible;
 
+use crate::semirings::string_variant::StringWeightVariant;
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::Label;
-
-#[derive(Clone, Debug, PartialOrd, PartialEq, Eq, Hash)]
-pub enum StringWeightVariant {
-    Infinity,
-    Labels(Vec<Label>),
-}
-
-impl StringWeightVariant {
-    pub fn unwrap_labels(&self) -> &Vec<Label> {
-        match self {
-            StringWeightVariant::Infinity => panic!("lol"),
-            StringWeightVariant::Labels(l) => l,
-        }
-    }
-}
-
-impl Default for StringWeightVariant {
-    fn default() -> Self {
-        StringWeightVariant::Labels(vec![])
-    }
-}
-
-impl From<Vec<Label>> for StringWeightVariant {
-    fn from(l: Vec<usize>) -> Self {
-        StringWeightVariant::Labels(l)
-    }
-}
 
 #[derive(Clone, Debug, PartialOrd, Default, PartialEq, Eq, Hash)]
 pub struct StringWeightRestrict {

@@ -6,6 +6,7 @@ mod composition;
 mod concat;
 mod connect;
 mod determinization;
+mod determinization_2;
 mod encode;
 mod factor_weight;
 mod inversion;
