@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, VecDeque, HashSet};
 
 use bimap::BiHashMap;
 
@@ -228,19 +228,21 @@ where
             return Ok(fst_out);
         }
         let start_state = start_state.unwrap();
-        println!("Start state : {}", start_state);
         for _ in 0..=start_state {
             fst_out.add_state();
         }
         fst_out.set_start(start_state)?;
         let mut queue = VecDeque::new();
+        let mut visited_states = HashSet::new();
+        visited_states.insert(start_state);
         queue.push_back(start_state);
         while !queue.is_empty() {
             let s = queue.pop_front().unwrap();
-            println!("State : {}", s);
             for arc in self.arcs_iter(s)? {
-                println!("Arc : {:?}", arc);
-                queue.push_back(arc.nextstate);
+                if !visited_states.contains(&arc.nextstate) {
+                    queue.push_back(arc.nextstate);
+                    visited_states.insert(arc.nextstate);
+                }
                 let n = fst_out.num_states();
                 for _ in n..=arc.nextstate {
                     fst_out.add_state();

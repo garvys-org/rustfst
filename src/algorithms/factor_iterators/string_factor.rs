@@ -1,5 +1,4 @@
 use crate::algorithms::FactorIterator;
-use crate::semirings::Semiring;
 use crate::semirings::{
     StringWeightLeft, StringWeightRestrict, StringWeightRight, StringWeightVariant,
 };
