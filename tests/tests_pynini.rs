@@ -696,7 +696,7 @@ where
 fn test_determinize<F>(test_data: &TestData<F>) -> Fallible<()>
 where
     F: TextParser + MutableFst,
-    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + 'static,
+    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
     for determinize_data in &test_data.determinize {
         println!("det_type = {:?}", determinize_data.det_type);

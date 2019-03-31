@@ -3,15 +3,16 @@ use std::collections::{HashMap, HashSet, VecDeque};
 
 use failure::Fallible;
 
-use crate::algorithms::weight_convert;
+use crate::algorithms::factor_iterators::{GallicFactor, GallicFactorMin, GallicFactorRestrict};
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
+use crate::algorithms::{factor_weight, weight_convert, FactorWeightOptions, FactorWeightType};
 use crate::arc::Arc;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
-use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
+use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::semirings::{GallicWeight, GallicWeightMin, GallicWeightRestrict};
-use crate::EPS_LABEL;
 use crate::{Label, StateId};
+use crate::{EPS_LABEL, KDELTA};
 
 #[derive(Debug, Clone)]
 pub enum DeterminizeType {
@@ -209,7 +210,7 @@ where
 
 pub fn determinize_fst<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Fallible<F2>
 where
-    W: WeaklyDivisibleSemiring + 'static,
+    W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
     F1: ExpandedFst<W = W>,
     F2: MutableFst<W = W>,
 {
@@ -217,26 +218,39 @@ where
     let mut from_gallic = FromGallicConverter {
         superfinal_label: EPS_LABEL,
     };
+
+    let factor_opts = FactorWeightOptions {
+        delta: KDELTA,
+        mode: FactorWeightType::FACTOR_FINAL_WEIGHTS,
+        final_ilabel: 0,
+        final_olabel: 0,
+        increment_final_ilabel: false,
+        increment_final_olabel: false,
+    };
+
     match det_type {
         DeterminizeType::DeterminizeDisambiguate => {
-            println!("ToGallic");
             let fsa: VectorFst<GallicWeightMin<W>> = weight_convert(fst_in, &mut to_gallic)?;
-            println!("DeterminizedFSA");
             let determinized_fsa: VectorFst<GallicWeightMin<W>> = determinize_fsa(&fsa)?;
-            println!("FromGallic");
-            let determinized_fst = weight_convert(&determinized_fsa, &mut from_gallic);
+            let factored_determinized_fsa: VectorFst<GallicWeightMin<W>> =
+                factor_weight::<_, _, GallicFactorMin<W>>(&determinized_fsa, factor_opts)?;
+            let determinized_fst = weight_convert(&factored_determinized_fsa, &mut from_gallic);
             determinized_fst
         }
         DeterminizeType::DeterminizeFunctional => {
             let fsa: VectorFst<GallicWeightRestrict<W>> = weight_convert(fst_in, &mut to_gallic)?;
             let determinized_fsa: VectorFst<GallicWeightRestrict<W>> = determinize_fsa(&fsa)?;
-            let determinized_fst = weight_convert(&determinized_fsa, &mut from_gallic);
+            let factored_determinized_fsa: VectorFst<GallicWeightRestrict<W>> =
+                factor_weight::<_, _, GallicFactorRestrict<W>>(&determinized_fsa, factor_opts)?;
+            let determinized_fst = weight_convert(&factored_determinized_fsa, &mut from_gallic);
             determinized_fst
         }
         DeterminizeType::DeterminizeNonFunctional => {
             let fsa: VectorFst<GallicWeight<W>> = weight_convert(fst_in, &mut to_gallic)?;
             let determinized_fsa: VectorFst<GallicWeight<W>> = determinize_fsa(&fsa)?;
-            let determinized_fst = weight_convert(&determinized_fsa, &mut from_gallic);
+            let factored_determinized_fsa: VectorFst<GallicWeight<W>> =
+                factor_weight::<_, _, GallicFactor<W>>(&determinized_fsa, factor_opts)?;
+            let determinized_fst = weight_convert(&factored_determinized_fsa, &mut from_gallic);
             determinized_fst
         }
     }
@@ -244,7 +258,7 @@ where
 
 pub fn determinize<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Fallible<F2>
 where
-    W: WeaklyDivisibleSemiring + 'static,
+    W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
     F1: ExpandedFst<W = W>,
     F2: MutableFst<W = W>,
 {

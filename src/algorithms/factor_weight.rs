@@ -244,6 +244,7 @@ where
         }
         fst_out.set_start(start_state)?;
         let mut queue = VecDeque::new();
+        queue.push_back(start_state);
         while !queue.is_empty() {
             let s = queue.pop_front().unwrap();
             for arc in self.arcs_iter(s)? {
