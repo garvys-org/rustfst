@@ -12,7 +12,7 @@ use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverte
 use crate::arc::Arc;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
-use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
+use crate::semirings::{Semiring, WeightQuantize};
 use crate::semirings::{GallicWeight, GallicWeightMin, GallicWeightRestrict};
 use crate::{Label, StateId};
 use crate::{EPS_LABEL, KDELTA};
@@ -21,13 +21,13 @@ use std::slice::Iter as IterSlice;
 use std::slice::IterMut as IterSliceMut;
 
 bitflags! {
-    struct FactorWeightType: u32 {
+    pub struct FactorWeightType: u32 {
         const FACTOR_FINAL_WEIGHTS = 0b01;
         const FACTOR_ARC_WEIGHTS = 0b10;
     }
 }
 
-struct FactorWeightOptions {
+pub struct FactorWeightOptions {
     /// Quantization delta
     pub delta: f32,
     /// Factor arc weights and/or final weights
@@ -42,7 +42,7 @@ struct FactorWeightOptions {
     pub increment_final_olabel: bool,
 }
 
-trait FactorIterator<W: Semiring>: Iterator<Item = (W, W)> {
+pub trait FactorIterator<W: Semiring>: Iterator<Item = (W, W)> {
     fn new(weight: &W) -> Self;
     fn done(&self) -> bool;
 }
@@ -66,6 +66,19 @@ impl<W: Semiring> Iterator for IdentityFactor<W> {
 
     fn next(&mut self) -> Option<Self::Item> {
         None
+    }
+}
+
+#[derive(Clone)]
+struct CacheImplArcIterator<'a, W: Semiring> {
+    arcs: &'a Vec<Arc<W>>
+}
+
+impl<'a, W: Semiring> Iterator for CacheImplArcIterator<'a, W> {
+    type Item = &'a Arc<W>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        unimplemented!()
     }
 }
 
@@ -127,11 +140,11 @@ impl<W: Semiring> CacheState<W> {
         unsafe { self.arcs.get_unchecked_mut(n) }
     }
 
-    pub fn iter_arcs(&self) -> IterSlice<Arc<W>> {
+    pub fn arcs_iter(&self) -> IterSlice<Arc<W>> {
         self.arcs.iter()
     }
 
-    pub fn iter_arcs_mut(&mut self) -> IterSliceMut<Arc<W>> {
+    pub fn arcs_iter_mut(&mut self) -> IterSliceMut<Arc<W>> {
         self.arcs.iter_mut()
     }
 }
@@ -175,7 +188,7 @@ impl<W: Semiring> VectorCacheState<W> {
     }
 
     pub fn arcs_iter_unchecked(&self, state: StateId) -> IterSlice<Arc<W>> {
-        self.get_cache_state_unchecked(state).iter_arcs()
+        self.get_cache_state_unchecked(state).arcs_iter()
     }
 
     pub fn mark_expanded_unchecked(&mut self, state: StateId) {
@@ -470,56 +483,48 @@ where
     }
 }
 
-
-use std::cell::RefCell;
-use std::rc::Rc;
-use crate::fst_traits::ArcIterator;
-
-struct FactorWeightFst<'a, F: Fst, FI: FactorIterator<F::W>>
-where
-    F::W: WeightQuantize
-{
-    fst_impl: Rc<RefCell<FactorWeightImpl<'a, F, FI>>>
-}
-
-impl<'a, F: Fst, FI: FactorIterator<F::W>> CoreFst for FactorWeightFst<'a, F, FI>
-where
-    F::W: WeightQuantize
-{
-    type W = F::W;
-
-    fn start(&self) -> Option<usize> {
-        self.fst_impl.borrow_mut().start()
-    }
-
-    fn final_weight(&self, state_id: usize) -> Option<Self::W> {
-        self.fst_impl.borrow_mut().final_weight(state_id).cloned()
-    }
-
-    fn num_arcs(&self, state: usize) -> Fallible<usize> {
-        self.fst_impl.borrow_mut().num_arcs(state)
-    }
-}
-
-impl<'a, F: Fst, FI: FactorIterator<F::W>> ArcIterator<'a> for FactorWeightFst<'a, F, FI>
+impl<'a, F: Fst, FI: FactorIterator<F::W>> FactorWeightImpl<'a, F, FI>
     where
         F::W: WeightQuantize
 {
-    type Iter = IterSlice<'a, Arc<F::W>>;
-
-    fn arcs_iter(&'a self, state_id: usize) -> Fallible<Self::Iter> {
-//        self.fst_impl.borrow_mut().arcs_iter(state_id)
-        unimplemented!()
+    pub fn compute<F2: MutableFst<W=F::W> + ExpandedFst<W=F::W>>(&mut self) -> Fallible<F2> where F::W: 'static{
+        let start_state = self.start();
+        let mut fst_out = F2::new();
+        if start_state.is_none() {
+            return Ok(fst_out);
+        }
+        let start_state = start_state.unwrap();
+        for _ in 0..=start_state {
+            fst_out.add_state();
+        }
+        fst_out.set_start(start_state)?;
+        let mut queue = VecDeque::new();
+        while !queue.is_empty() {
+            let s = queue.pop_front().unwrap();
+            for arc in self.arcs_iter(s)? {
+                queue.push_back(arc.nextstate);
+                let n = fst_out.num_states();
+                for _ in n..=arc.nextstate{
+                    fst_out.add_state();
+                }
+                fst_out.add_arc(s, arc.clone())?;
+            }
+            if let Some(f_w) = self.final_weight(s) {
+                fst_out.set_final(s, f_w.clone())?;
+            }
+        }
+        Ok(fst_out)
     }
 }
 
-fn factor_weight<F1, F2, FI>(fst_in: &F1) -> Fallible<F2>
+
+pub fn factor_weight<F1, F2, FI>(fst_in: &F1, opts: FactorWeightOptions) -> Fallible<F2>
 where
     F1: Fst,
     F2: MutableFst<W = F1::W> + ExpandedFst<W = F1::W>,
     FI: FactorIterator<F1::W>,
+    F1::W: WeightQuantize + 'static,
 {
-    let mut fst_out = F2::new();
-
-    unimplemented!()
+    let mut factor_weight_impl : FactorWeightImpl<F1, FI> = FactorWeightImpl::new(fst_in, opts)?;
+    factor_weight_impl.compute()
 }

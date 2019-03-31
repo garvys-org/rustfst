@@ -7,7 +7,6 @@ mod concat;
 mod connect;
 mod determinization;
 mod encode;
-#[allow(unused)]
 mod factor_weight;
 mod inversion;
 mod isomorphic;
@@ -44,6 +43,7 @@ pub use self::{
     connect::connect,
     determinization::{determinize, determinize_fsa, determinize_fst, DeterminizeType},
     encode::{decode, encode},
+    factor_weight::{factor_weight, FactorWeightOptions, FactorWeightType, FactorIterator},
     inversion::invert,
     isomorphic::{arc_compare, isomorphic},
     projection::{project, ProjectType},
