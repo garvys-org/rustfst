@@ -12,13 +12,15 @@ use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverte
 use crate::arc::Arc;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
-use crate::semirings::{Semiring, WeightQuantize};
 use crate::semirings::{GallicWeight, GallicWeightMin, GallicWeightRestrict};
+use crate::semirings::{Semiring, WeightQuantize};
 use crate::{Label, StateId};
 use crate::{EPS_LABEL, KDELTA};
 use std::marker::PhantomData;
 use std::slice::Iter as IterSlice;
 use std::slice::IterMut as IterSliceMut;
+
+use crate::algorithms::cache::CacheImpl;
 
 bitflags! {
     pub struct FactorWeightType: u32 {
@@ -66,244 +68,6 @@ impl<W: Semiring> Iterator for IdentityFactor<W> {
 
     fn next(&mut self) -> Option<Self::Item> {
         None
-    }
-}
-
-#[derive(Clone)]
-struct CacheImplArcIterator<'a, W: Semiring> {
-    arcs: &'a Vec<Arc<W>>
-}
-
-impl<'a, W: Semiring> Iterator for CacheImplArcIterator<'a, W> {
-    type Item = &'a Arc<W>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        unimplemented!()
-    }
-}
-
-struct CacheState<W: Semiring> {
-    arcs: Vec<Arc<W>>,
-    final_weight: Option<W>,
-    expanded: bool,
-    has_final: bool,
-}
-
-impl<W: Semiring> CacheState<W> {
-    pub fn new() -> Self {
-        Self {
-            arcs: Vec::new(),
-            final_weight: None,
-            expanded: false,
-            has_final: false,
-        }
-    }
-
-    pub fn has_final(&self) -> bool {
-        self.has_final
-    }
-
-    pub fn expanded(&self) -> bool {
-        self.expanded
-    }
-
-    pub fn mark_expanded(&mut self) {
-        self.expanded = true;
-    }
-
-    pub fn set_final_weight(&mut self, final_weight: Option<W>) {
-        self.final_weight = final_weight;
-        self.has_final = true;
-    }
-
-    pub fn final_weight(&self) -> Option<&W> {
-        self.final_weight.as_ref()
-    }
-
-    pub fn push_arc(&mut self, arc: Arc<W>) {
-        self.arcs.push(arc);
-    }
-
-    pub fn reserve_arcs(&mut self, n: usize) {
-        self.arcs.reserve(n);
-    }
-
-    pub fn num_arcs(&self) -> usize {
-        self.arcs.len()
-    }
-
-    pub fn get_arc_unchecked(&self, n: usize) -> &Arc<W> {
-        unsafe { self.arcs.get_unchecked(n) }
-    }
-
-    pub fn get_arc_unchecked_mut(&mut self, n: usize) -> &mut Arc<W> {
-        unsafe { self.arcs.get_unchecked_mut(n) }
-    }
-
-    pub fn arcs_iter(&self) -> IterSlice<Arc<W>> {
-        self.arcs.iter()
-    }
-
-    pub fn arcs_iter_mut(&mut self) -> IterSliceMut<Arc<W>> {
-        self.arcs.iter_mut()
-    }
-}
-
-struct VectorCacheState<W: Semiring> {
-    cache_states: Vec<CacheState<W>>,
-}
-
-impl<W: Semiring> VectorCacheState<W> {
-    pub fn new() -> Self {
-        Self {
-            cache_states: Vec::new(),
-        }
-    }
-
-    pub fn resize(&mut self, new_len: usize) {
-        self.cache_states.resize_with(new_len, CacheState::new);
-    }
-
-    pub fn resize_if_necessary(&mut self, new_len: usize) {
-        if self.cache_states.len() < new_len {
-            self.resize(new_len)
-        }
-    }
-
-    pub fn get_cache_state_unchecked(&self, state: StateId) -> &CacheState<W> {
-        unsafe { self.cache_states.get_unchecked(state) }
-    }
-
-    pub fn get_cache_state_unchecked_mut(&mut self, state: StateId) -> &mut CacheState<W> {
-        unsafe { self.cache_states.get_unchecked_mut(state) }
-    }
-
-    pub fn set_final_weight_unchecked(&mut self, state: StateId, final_weight: Option<W>) {
-        self.get_cache_state_unchecked_mut(state)
-            .set_final_weight(final_weight);
-    }
-
-    pub fn push_arc(&mut self, state: StateId, arc: Arc<W>) {
-        self.get_cache_state_unchecked_mut(state).push_arc(arc)
-    }
-
-    pub fn arcs_iter_unchecked(&self, state: StateId) -> IterSlice<Arc<W>> {
-        self.get_cache_state_unchecked(state).arcs_iter()
-    }
-
-    pub fn mark_expanded_unchecked(&mut self, state: StateId) {
-        self.get_cache_state_unchecked_mut(state).mark_expanded()
-    }
-
-    pub fn reserve_arcs_unchecked(&mut self, state: StateId, n: usize) {
-        self.get_cache_state_unchecked_mut(state).reserve_arcs(n)
-    }
-
-    pub fn expanded(&self, state: StateId) -> bool {
-        if state >= self.cache_states.len() {
-            return false;
-        }
-        return self.get_cache_state_unchecked(state).expanded();
-    }
-
-    pub fn has_final(&self, state: StateId) -> bool {
-        if state >= self.cache_states.len() {
-            return false;
-        }
-        return self.get_cache_state_unchecked(state).has_final()
-    }
-
-    pub fn final_weight_unchecked(&self, state: StateId) -> Option<&W> {
-        self.get_cache_state_unchecked(state).final_weight()
-    }
-
-    pub fn num_arcs(&self, state: StateId) -> usize {
-        self.get_cache_state_unchecked(state).num_arcs()
-    }
-}
-
-struct CacheImpl<W: Semiring> {
-    has_start: bool,
-    cache_start_state: Option<StateId>,
-    vector_cache_states: VectorCacheState<W>,
-}
-
-impl<W: Semiring> CacheImpl<W> {
-    fn new() -> Self {
-        Self {
-            has_start: false,
-            cache_start_state: None,
-            vector_cache_states: VectorCacheState::new(),
-        }
-    }
-
-    fn set_start(&mut self, start_state: Option<StateId>) {
-        self.cache_start_state = start_state;
-        self.has_start = true;
-        if let Some(s) = start_state {
-            self.vector_cache_states.resize_if_necessary(s + 1);
-        }
-    }
-
-    fn start(&self) -> Fallible<Option<StateId>> {
-        if !self.has_start {
-            bail!("Can't call start() before set_start()");
-        }
-        Ok(self.cache_start_state)
-    }
-
-    fn set_final_weight(&mut self, state: StateId, final_weight: Option<W>) -> Fallible<()> {
-        self.vector_cache_states.resize_if_necessary(state + 1);
-        self.vector_cache_states
-            .set_final_weight_unchecked(state, final_weight);
-        Ok(())
-    }
-
-    fn final_weight(&self, state: StateId) -> Fallible<Option<&W>> {
-        if !self.vector_cache_states.has_final(state) {
-            bail!("Can't call final_weight() before set_final_weight()")
-        }
-        Ok(self.vector_cache_states.final_weight_unchecked(state))
-    }
-
-    fn push_arc(&mut self, state: StateId, arc: Arc<W>) -> Fallible<()> {
-        if self.vector_cache_states.expanded(state) {
-            bail!("Can't add arcs to a fully expanded state")
-        }
-        self.vector_cache_states.resize_if_necessary(state + 1);
-        self.vector_cache_states.push_arc(state, arc);
-        Ok(())
-    }
-
-    fn num_arcs(&self, state: StateId) -> Fallible<usize> {
-        if !self.vector_cache_states.expanded(state) {
-            bail!("Can't call num_arcs on a state that is not fully expanded");
-        }
-        Ok(self.vector_cache_states.num_arcs(state))
-    }
-
-    fn expanded(&self, state: StateId) -> bool {
-        self.vector_cache_states.expanded(state)
-    }
-
-    fn has_final(&self, state: StateId) -> bool {
-        self.vector_cache_states.has_final(state)
-    }
-
-    fn mark_expanded(&mut self, state: StateId) {
-        self.vector_cache_states.resize_if_necessary(state + 1);
-        self.vector_cache_states.mark_expanded_unchecked(state)
-    }
-
-    pub fn arcs_iter(&self, state: StateId) -> Fallible<IterSlice<Arc<W>>> {
-        if !self.vector_cache_states.expanded(state) {
-            bail!("Can't iterate arcs on a not fully expanded state")
-        }
-        Ok(self.vector_cache_states.arcs_iter_unchecked(state))
-    }
-
-    pub fn has_start(&self) -> bool {
-        self.has_start
     }
 }
 
@@ -484,10 +248,13 @@ where
 }
 
 impl<'a, F: Fst, FI: FactorIterator<F::W>> FactorWeightImpl<'a, F, FI>
-    where
-        F::W: WeightQuantize
+where
+    F::W: WeightQuantize,
 {
-    pub fn compute<F2: MutableFst<W=F::W> + ExpandedFst<W=F::W>>(&mut self) -> Fallible<F2> where F::W: 'static{
+    pub fn compute<F2: MutableFst<W = F::W> + ExpandedFst<W = F::W>>(&mut self) -> Fallible<F2>
+    where
+        F::W: 'static,
+    {
         let start_state = self.start();
         let mut fst_out = F2::new();
         if start_state.is_none() {
@@ -504,7 +271,7 @@ impl<'a, F: Fst, FI: FactorIterator<F::W>> FactorWeightImpl<'a, F, FI>
             for arc in self.arcs_iter(s)? {
                 queue.push_back(arc.nextstate);
                 let n = fst_out.num_states();
-                for _ in n..=arc.nextstate{
+                for _ in n..=arc.nextstate {
                     fst_out.add_state();
                 }
                 fst_out.add_arc(s, arc.clone())?;
@@ -517,7 +284,6 @@ impl<'a, F: Fst, FI: FactorIterator<F::W>> FactorWeightImpl<'a, F, FI>
     }
 }
 
-
 pub fn factor_weight<F1, F2, FI>(fst_in: &F1, opts: FactorWeightOptions) -> Fallible<F2>
 where
     F1: Fst,
@@ -525,6 +291,6 @@ where
     FI: FactorIterator<F1::W>,
     F1::W: WeightQuantize + 'static,
 {
-    let mut factor_weight_impl : FactorWeightImpl<F1, FI> = FactorWeightImpl::new(fst_in, opts)?;
+    let mut factor_weight_impl: FactorWeightImpl<F1, FI> = FactorWeightImpl::new(fst_in, opts)?;
     factor_weight_impl.compute()
 }

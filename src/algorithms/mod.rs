@@ -28,6 +28,8 @@ pub mod arc_filters;
 /// Module that provide structures implementing the `ArcMapper` trait.
 pub mod arc_mappers;
 
+pub mod cache;
+
 /// Module that provide structures implementing the `StateMapper` trait.
 pub mod state_mappers;
 
@@ -43,7 +45,7 @@ pub use self::{
     connect::connect,
     determinization::{determinize, determinize_fsa, determinize_fst, DeterminizeType},
     encode::{decode, encode},
-    factor_weight::{factor_weight, FactorWeightOptions, FactorWeightType, FactorIterator},
+    factor_weight::{factor_weight, FactorIterator, FactorWeightOptions, FactorWeightType},
     inversion::invert,
     isomorphic::{arc_compare, isomorphic},
     projection::{project, ProjectType},
