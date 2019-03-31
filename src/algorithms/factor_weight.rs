@@ -45,30 +45,8 @@ pub struct FactorWeightOptions {
 }
 
 pub trait FactorIterator<W: Semiring>: Iterator<Item = (W, W)> {
-    fn new(weight: &W) -> Self;
+    fn new(weight: W) -> Self;
     fn done(&self) -> bool;
-}
-
-pub struct IdentityFactor<W> {
-    ghost: PhantomData<W>,
-}
-
-impl<W: Semiring> FactorIterator<W> for IdentityFactor<W> {
-    fn new(weight: &W) -> Self {
-        Self { ghost: PhantomData }
-    }
-
-    fn done(&self) -> bool {
-        true
-    }
-}
-
-impl<W: Semiring> Iterator for IdentityFactor<W> {
-    type Item = (W, W);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        None
-    }
 }
 
 #[derive(PartialOrd, PartialEq, Hash, Clone, Debug, Eq)]
@@ -166,7 +144,7 @@ where
                     .times(self.fst.final_weight(s).unwrap_or_else(F::W::one))
                     .unwrap(),
             };
-            let mut factor_iterator = FI::new(&weight);
+            let mut factor_iterator = FI::new(weight.clone());
             if !(self
                 .opts
                 .mode
@@ -200,7 +178,7 @@ where
         if let Some(old_state) = elt.state {
             for arc in self.fst.arcs_iter(old_state).unwrap() {
                 let weight = elt.weight.times(&arc.weight).unwrap();
-                let mut factor_it = FI::new(&weight);
+                let mut factor_it = FI::new(weight.clone());
                 if !self.factor_arc_weights() && factor_it.done() {
                     let dest = self.find_state(&Element::new(Some(arc.nextstate), F::W::one()));
                     self.cache_impl
@@ -229,7 +207,7 @@ where
             };
             let mut ilabel = self.opts.final_ilabel;
             let mut olabel = self.opts.final_olabel;
-            let mut factor_it = FI::new(&weight);
+            let mut factor_it = FI::new(weight);
             for (p_f, p_s) in factor_it {
                 let dest =
                     self.find_state(&Element::new(None, p_s.quantize(self.opts.delta).unwrap()));

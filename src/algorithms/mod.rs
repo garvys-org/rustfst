@@ -30,6 +30,8 @@ pub mod arc_mappers;
 
 pub mod cache;
 
+pub mod factor_iterators;
+
 /// Module that provide structures implementing the `StateMapper` trait.
 pub mod state_mappers;
 
