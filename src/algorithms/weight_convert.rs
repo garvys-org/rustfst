@@ -63,14 +63,14 @@ where
             let mapped_final_arc = mapper.final_arc_map(&final_arc)?;
             match final_action {
                 MapFinalAction::MapNoSuperfinal => {
-                    if final_arc.ilabel != EPS_LABEL || final_arc.olabel != EPS_LABEL {
+                    if mapped_final_arc.ilabel != EPS_LABEL || mapped_final_arc.olabel != EPS_LABEL {
                         bail!("ArcMap: Non-zero arc labels for superfinal arc")
                     }
 
                     fst_out.set_final(state, mapped_final_arc.weight).unwrap();
                 }
                 MapFinalAction::MapAllowSuperfinal => {
-                    if final_arc.ilabel != EPS_LABEL || final_arc.olabel != EPS_LABEL {
+                    if mapped_final_arc.ilabel != EPS_LABEL || mapped_final_arc.olabel != EPS_LABEL {
                         if superfinal.is_none() {
                             let superfinal_id = fst_out.add_state();
                             superfinal = Some(superfinal_id);
@@ -95,9 +95,9 @@ where
                     }
                 }
                 MapFinalAction::MapRequireSuperfinal => {
-                    if final_arc.ilabel != EPS_LABEL
-                        || final_arc.olabel != EPS_LABEL
-                        || !final_arc.weight.is_zero()
+                    if mapped_final_arc.ilabel != EPS_LABEL
+                        || mapped_final_arc.olabel != EPS_LABEL
+                        || !mapped_final_arc.weight.is_zero()
                     {
                         fst_out
                             .add_arc(
