@@ -1,5 +1,3 @@
-use failure::Fallible;
-
 use crate::Label;
 
 #[derive(Clone, Debug, PartialOrd, PartialEq, Eq, Hash)]
@@ -9,6 +7,32 @@ pub enum StringWeightVariant {
 }
 
 impl StringWeightVariant {
+    pub fn is_labels(&self) -> bool {
+        match self {
+            StringWeightVariant::Infinity => false,
+            StringWeightVariant::Labels(_) => true,
+        }
+    }
+
+    pub fn is_infinity(&self) -> bool {
+        match self {
+            StringWeightVariant::Infinity => true,
+            StringWeightVariant::Labels(_) => false,
+        }
+    }
+
+    pub fn unwrap_label(&self) -> Label {
+        match self {
+            StringWeightVariant::Infinity => panic!("Infinity"),
+            StringWeightVariant::Labels(l) => {
+                if l.len() == 1 {
+                    return l[0];
+                }
+                panic!("Length of the list should be one : {:?}", l);
+            }
+        }
+    }
+
     pub fn unwrap_labels(&self) -> &Vec<Label> {
         match self {
             StringWeightVariant::Infinity => panic!("lol"),
@@ -79,6 +103,7 @@ impl<'a> Iterator for StringWeightVariantIterator<'a> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use failure::Fallible;
 
     #[test]
     fn test_string_variant_iterator_inf() -> Fallible<()> {

@@ -14,7 +14,7 @@ use crate::semirings::{GallicWeight, GallicWeightMin, GallicWeightRestrict};
 use crate::{Label, StateId};
 use crate::{EPS_LABEL, KDELTA};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum DeterminizeType {
     /// Input transducer is known to be functional (or error).
     DeterminizeFunctional,
@@ -256,18 +256,19 @@ where
     }
 }
 
-pub fn determinize<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Fallible<F2>
-where
-    W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
-    F1: ExpandedFst<W = W>,
-    F2: MutableFst<W = W>,
-{
-    if fst_in.is_acceptor() {
-        determinize_fsa(fst_in)
-    } else {
-        determinize_fst(fst_in, det_type)
-    }
-}
+//pub fn determinize<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Fallible<F2>
+//where
+//    W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
+//    F1: ExpandedFst<W = W>,
+//    F2: MutableFst<W = W>,
+//{
+//    if fst_in.is_acceptor() {
+//        determinize_fsa(fst_in)
+//    } else {
+//        determinize_fst(fst_in, det_type)
+//    }
+//}
+pub use crate::algorithms::determinization_2::determinize;
 
 #[cfg(test)]
 mod tests {

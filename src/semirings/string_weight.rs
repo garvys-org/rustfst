@@ -144,11 +144,15 @@ macro_rules! string_semiring {
         }
 
         impl $semiring {
-            pub fn len(&self) -> usize {
+            pub fn len_labels(&self) -> usize {
                 match &self.value {
                     StringWeightVariant::Infinity => 0,
                     StringWeightVariant::Labels(l) => l.len(),
                 }
+            }
+
+            pub fn iter(&self) -> impl Iterator<Item = StringWeightVariant> + '_ {
+                self.value.iter()
             }
         }
 
@@ -161,6 +165,12 @@ macro_rules! string_semiring {
         impl From<Label> for $semiring {
             fn from(l: usize) -> Self {
                 Self::new(vec![l].into())
+            }
+        }
+
+        impl From<StringWeightVariant> for $semiring {
+            fn from(v: StringWeightVariant) -> Self {
+                Self::new(v)
             }
         }
 

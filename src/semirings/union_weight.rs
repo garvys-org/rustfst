@@ -1,4 +1,5 @@
 use std::fmt::Debug;
+use std::fmt::{Display, Formatter, Result};
 use std::hash::Hash;
 use std::marker::PhantomData;
 
@@ -20,12 +21,12 @@ pub struct UnionWeight<W: Semiring, O: UnionWeightOption<W>> {
     ghost: PhantomData<O>,
 }
 
-impl<W, O> std::fmt::Display for UnionWeight<W, O>
+impl<W, O> Display for UnionWeight<W, O>
 where
     W: Semiring,
     O: UnionWeightOption<W>,
 {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter) -> Result {
         self.list.fmt(f)
     }
 }
@@ -156,6 +157,10 @@ impl<W: Semiring, O: UnionWeightOption<W>> UnionWeight<W, O> {
 
     pub fn len(&self) -> usize {
         self.list.len()
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &W> {
+        self.list.iter()
     }
 }
 
