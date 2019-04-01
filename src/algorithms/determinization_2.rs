@@ -307,25 +307,28 @@ where
             .pairs
             .sort_by(|a, b| a.state.partial_cmp(&b.state).unwrap());
 
+        println!("Det arc sorted = {:#?}", &det_arc);
+
         for dest_elt in det_arc.dest_tuple.subset.pairs.iter() {
             det_arc.weight = CD::common_divisor(&det_arc.weight, &dest_elt.weight)?;
         }
 
-        det_arc.dest_tuple.subset.pairs = det_arc
-            .dest_tuple
-            .subset
-            .pairs
-            .iter()
-            .cloned()
-            .coalesce(|x, mut y| {
-                if x.state == y.state {
-                    y.weight.plus_assign(&x.weight);
-                    Ok(y)
-                } else {
-                    Err((x, y))
+        println!("Det arc common divisor = {:#?}", &det_arc);
+
+        let mut new_pairs = HashMap::new();
+        for x in &mut det_arc.dest_tuple.subset.pairs {
+            match new_pairs.entry(x.state) {
+                Entry::Vacant(mut e) => {
+                    e.insert(x.clone());
+                },
+                Entry::Occupied(mut e) => {
+                    e.get_mut().weight.plus_assign(&x.weight)?;
                 }
-            })
-            .collect();
+            };
+        }
+        det_arc.dest_tuple.subset.pairs = new_pairs.values().cloned().collect();
+
+        println!("Det arc coalesced = {:#?}", &det_arc);
 
         for dest_elt in det_arc.dest_tuple.subset.pairs.iter_mut() {
             dest_elt.weight = dest_elt
