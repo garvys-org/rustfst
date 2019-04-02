@@ -8,10 +8,12 @@ use crate::fst_traits::{CoreFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::Arc;
 
+/// Compare only input label
 pub fn ilabel_compare<W: Semiring>(a: &Arc<W>, b: &Arc<W>) -> Ordering {
     a.ilabel.cmp(&b.ilabel)
 }
 
+/// Compare only output label
 pub fn olabel_compare<W: Semiring>(a: &Arc<W>, b: &Arc<W>) -> Ordering {
     a.olabel.cmp(&b.olabel)
 }

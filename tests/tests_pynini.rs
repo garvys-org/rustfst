@@ -12,8 +12,9 @@ use rustfst::algorithms::arc_mappers::{
 use rustfst::algorithms::state_mappers::{ArcSumMapper, ArcUniqueMapper};
 use rustfst::algorithms::{
     connect, decode, determinize, encode, invert, isomorphic, project, push_weights, reverse,
-    rm_epsilon, DeterminizeType, ProjectType, ReweightType,
+    rm_epsilon, DeterminizeType, ProjectType, ReweightType, arc_sort
 };
+use rustfst::algorithms::arc_compares::{ilabel_compare, olabel_compare};
 use rustfst::fst_impls::VectorFst;
 use rustfst::fst_traits::{MutableFst, TextParser};
 use rustfst::semirings::{
@@ -109,6 +110,8 @@ struct ParsedTestData {
     state_map_arc_sum: OperationResult,
     state_map_arc_unique: OperationResult,
     determinize: Vec<DeterminizeOperationResult>,
+    arcsort_ilabel: OperationResult,
+    arcsort_olabel: OperationResult,
 }
 
 struct EncodeTestData<F>
@@ -159,6 +162,8 @@ where
     state_map_arc_sum: F,
     state_map_arc_unique: F,
     determinize: Vec<DeterminizeTestData<F>>,
+    arcsort_ilabel: F,
+    arcsort_olabel: F
 }
 
 impl<F> TestData<F>
@@ -191,6 +196,8 @@ where
             state_map_arc_sum: data.state_map_arc_sum.parse(),
             state_map_arc_unique: data.state_map_arc_unique.parse(),
             determinize: data.determinize.iter().map(|v| v.parse()).collect(),
+            arcsort_ilabel: data.arcsort_ilabel.parse(),
+            arcsort_olabel: data.arcsort_olabel.parse(),
         }
     }
 }
@@ -275,6 +282,10 @@ where
     test_state_map_arc_unique(&test_data)?;
 
     test_determinize(&test_data)?;
+
+    test_arcsort_ilabel(&test_data)?;
+
+    test_arcsort_olabel(&test_data)?;
 
     Ok(())
 }
@@ -732,6 +743,46 @@ where
             }
         };
     }
+    Ok(())
+}
+
+fn test_arcsort_ilabel<F>(test_data: &TestData<F>) -> Fallible<()>
+    where
+        F: TextParser + MutableFst,
+        F::W: Semiring<Type = f32> + WeightQuantize,
+{
+    let mut fst_arcsort = test_data.raw.clone();
+    arc_sort(&mut fst_arcsort, ilabel_compare)?;
+    assert_eq!(
+        test_data.arcsort_ilabel,
+        fst_arcsort,
+        "{}",
+        error_message_fst!(
+            test_data.arc_map_output_epsilon,
+            fst_arcsort,
+            "ArcSort ilabel"
+        )
+    );
+    Ok(())
+}
+
+fn test_arcsort_olabel<F>(test_data: &TestData<F>) -> Fallible<()>
+    where
+        F: TextParser + MutableFst,
+        F::W: Semiring<Type = f32> + WeightQuantize,
+{
+    let mut fst_arcsort = test_data.raw.clone();
+    arc_sort(&mut fst_arcsort, olabel_compare)?;
+    assert_eq!(
+        test_data.arcsort_olabel,
+        fst_arcsort,
+        "{}",
+        error_message_fst!(
+            test_data.arc_map_output_epsilon,
+            fst_arcsort,
+            "ArcSort olabel"
+        )
+    );
     Ok(())
 }
 

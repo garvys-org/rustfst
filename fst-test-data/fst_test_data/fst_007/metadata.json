@@ -1,5 +1,5 @@
 {
-    "state_map_arc_sum": {
+    "arcsort_ilabel": {
         "result": "0\t1\t12\t25\t0.3\n0\t2\t12\t25\t0.3\n1\t3\t13\t26\t0.4\n2\t3\t13\t26\t0.4\n3\t4\t14\t27\t0.6\n4\t0.7\n"
     }, 
     "arc_map_times": {
@@ -12,6 +12,9 @@
         "result": "0\t1\t12\t25\t0.3\n0\t2\t12\t25\t0.3\n1\t3\t13\t26\t0.4\n2\t3\t13\t26\t0.4\n3\t4\t14\t27\t0.6\n4\t0.7\n"
     }, 
     "state_map_arc_unique": {
+        "result": "0\t1\t12\t25\t0.3\n0\t2\t12\t25\t0.3\n1\t3\t13\t26\t0.4\n2\t3\t13\t26\t0.4\n3\t4\t14\t27\t0.6\n4\t0.7\n"
+    }, 
+    "state_map_arc_sum": {
         "result": "0\t1\t12\t25\t0.3\n0\t2\t12\t25\t0.3\n1\t3\t13\t26\t0.4\n2\t3\t13\t26\t0.4\n3\t4\t14\t27\t0.6\n4\t0.7\n"
     }, 
     "arc_map_input_epsilon": {
@@ -62,6 +65,13 @@
     "arc_map_output_epsilon": {
         "result": "0\t1\t12\t0\t0.3\n0\t2\t12\t0\t0.3\n1\t3\t13\t0\t0.4\n2\t3\t13\t0\t0.4\n3\t4\t14\t0\t0.6\n4\t0.7\n"
     }, 
+    "weight_pushing_final": {
+        "result": "0\t1\t12\t25\n0\t2\t12\t25\n1\t3\t13\t26\n2\t3\t13\t26\n3\t4\t14\t27\n4\t2\n"
+    }, 
+    "arc_map_identity": {
+        "result": "0\t1\t12\t25\t0.3\n0\t2\t12\t25\t0.3\n1\t3\t13\t26\t0.4\n2\t3\t13\t26\t0.4\n3\t4\t14\t27\t0.6\n4\t0.7\n"
+    }, 
+    "weight_type": "tropical", 
     "encode": [
         {
             "encode_labels": true, 
@@ -84,13 +94,6 @@
             "encode_weights": false
         }
     ], 
-    "arc_map_identity": {
-        "result": "0\t1\t12\t25\t0.3\n0\t2\t12\t25\t0.3\n1\t3\t13\t26\t0.4\n2\t3\t13\t26\t0.4\n3\t4\t14\t27\t0.6\n4\t0.7\n"
-    }, 
-    "weight_type": "tropical", 
-    "weight_pushing_final": {
-        "result": "0\t1\t12\t25\n0\t2\t12\t25\n1\t3\t13\t26\n2\t3\t13\t26\n3\t4\t14\t27\n4\t2\n"
-    }, 
     "project_output": {
         "result": "0\t1\t25\t25\t0.3\n0\t2\t25\t25\t0.3\n1\t3\t26\t26\t0.4\n2\t3\t26\t26\t0.4\n3\t4\t27\t27\t0.6\n4\t0.7\n"
     }, 
@@ -119,6 +122,9 @@
         "result": "0\t2\t12\t25\t0.3\n0\t1\t12\t25\t0.3\n1\t3\t13\t26\t0.4\n2\t3\t13\t26\t0.4\n3\t4\t14\t27\t0.6\n4\t0.7\n"
     }, 
     "name": "fst_007", 
+    "arcsort_olabel": {
+        "result": "0\t1\t12\t25\t0.3\n0\t2\t12\t25\t0.3\n1\t3\t13\t26\t0.4\n2\t3\t13\t26\t0.4\n3\t4\t14\t27\t0.6\n4\t0.7\n"
+    }, 
     "arc_map_plus": {
         "result": "0\t1\t12\t25\t0.3\n0\t2\t12\t25\t0.3\n1\t3\t13\t26\t0.4\n2\t3\t13\t26\t0.4\n3\t4\t14\t27\t0.6\n4\t0.7\n"
     }, 

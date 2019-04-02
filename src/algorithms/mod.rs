@@ -28,6 +28,7 @@ pub mod arc_filters;
 /// Module that provide structures implementing the `ArcMapper` trait.
 pub mod arc_mappers;
 
+#[allow(unused)]
 pub(crate) mod cache;
 
 pub mod factor_iterators;
@@ -36,6 +37,12 @@ pub mod factor_iterators;
 pub mod state_mappers;
 
 pub mod weight_converters;
+
+/// Functions to compare / sort the Arcs of an FST.
+pub mod arc_compares{
+    pub use super::arc_sort::{ilabel_compare, olabel_compare};
+    pub use super::isomorphic::arc_compare;
+}
 
 pub use self::{
     all_pairs_shortest_distance::all_pairs_shortest_distance,
@@ -61,9 +68,4 @@ pub use self::{
     union::union,
     weight_convert::{weight_convert, WeightConverter},
     weight_pushing::push_weights,
-};
-
-pub(crate) use self::{
-    arc_sort::{ilabel_compare, olabel_compare},
-    isomorphic::arc_compare,
 };
