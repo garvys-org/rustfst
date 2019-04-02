@@ -11,7 +11,7 @@ use rustfst::algorithms::arc_mappers::{
 };
 use rustfst::algorithms::state_mappers::{ArcSumMapper, ArcUniqueMapper};
 use rustfst::algorithms::{
-    arc_compare, arc_sort, connect, decode, determinize, encode, invert, isomorphic, project,
+    connect, decode, determinize, encode, invert, isomorphic, project,
     push_weights, reverse, rm_epsilon, DeterminizeType, ProjectType, ReweightType,
 };
 use rustfst::fst_impls::VectorFst;

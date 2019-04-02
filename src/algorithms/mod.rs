@@ -6,7 +6,6 @@ mod composition;
 mod concat;
 mod connect;
 mod determinization;
-mod determinization_2;
 mod encode;
 mod factor_weight;
 mod inversion;
@@ -46,7 +45,7 @@ pub use self::{
     composition::compose,
     concat::concat,
     connect::connect,
-    determinization::{determinize, determinize_fsa, determinize_fst, DeterminizeType},
+    determinization::{determinize, DeterminizeType},
     encode::{decode, encode},
     factor_weight::{factor_weight, FactorIterator, FactorWeightOptions, FactorWeightType},
     inversion::invert,

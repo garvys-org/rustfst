@@ -87,8 +87,12 @@ impl<W: Semiring> Iterator for GallicFactor<W> {
         }
         let w = &self.weight.0.list[self.idx];
         let mut s_it = StringFactorRestrict::new(w.value1().clone());
-        let (p_f, p_s) = s_it.next().unwrap_or_else(|| (StringWeightVariant::Labels(vec![]).into(), StringWeightVariant::Labels(vec![]).into()));
-
+        let (p_f, p_s) = s_it.next().unwrap_or_else(|| {
+            (
+                StringWeightVariant::Labels(vec![]).into(),
+                StringWeightVariant::Labels(vec![]).into(),
+            )
+        });
 
         let grw1: GallicWeightRestrict<W> = (p_f, w.value2().clone()).into();
         let grw2: GallicWeightRestrict<W> = (p_s, W::one()).into();

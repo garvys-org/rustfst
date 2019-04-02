@@ -63,30 +63,31 @@ where
             let mapped_final_arc = mapper.final_arc_map(&final_arc)?;
             match final_action {
                 MapFinalAction::MapNoSuperfinal => {
-                    if mapped_final_arc.ilabel != EPS_LABEL || mapped_final_arc.olabel != EPS_LABEL {
+                    if mapped_final_arc.ilabel != EPS_LABEL || mapped_final_arc.olabel != EPS_LABEL
+                    {
                         bail!("ArcMap: Non-zero arc labels for superfinal arc")
                     }
 
                     fst_out.set_final(state, mapped_final_arc.weight).unwrap();
                 }
                 MapFinalAction::MapAllowSuperfinal => {
-                    if mapped_final_arc.ilabel != EPS_LABEL || mapped_final_arc.olabel != EPS_LABEL {
+                    if mapped_final_arc.ilabel != EPS_LABEL || mapped_final_arc.olabel != EPS_LABEL
+                    {
                         if superfinal.is_none() {
                             let superfinal_id = fst_out.add_state();
                             superfinal = Some(superfinal_id);
                             fst_out.set_final(superfinal_id, F2::W::one()).unwrap();
                         }
 
-                        fst_out
-                            .add_arc(
-                                state,
-                                Arc::new(
-                                    mapped_final_arc.ilabel,
-                                    mapped_final_arc.olabel,
-                                    mapped_final_arc.weight,
-                                    superfinal.unwrap(),
-                                ),
-                            )?;
+                        fst_out.add_arc(
+                            state,
+                            Arc::new(
+                                mapped_final_arc.ilabel,
+                                mapped_final_arc.olabel,
+                                mapped_final_arc.weight,
+                                superfinal.unwrap(),
+                            ),
+                        )?;
 
                         fst_out.delete_final_weight(state)?;
                     } else {

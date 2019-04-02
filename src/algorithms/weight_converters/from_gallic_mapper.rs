@@ -69,11 +69,11 @@ macro_rules! impl_weight_converter_gallic {
                 }
 
                 let new_arc = Arc {
-                        ilabel: arc.ilabel,
-                        olabel: extracted_l,
-                        weight: extracted_w,
-                        nextstate: arc.nextstate,
-                    };
+                    ilabel: arc.ilabel,
+                    olabel: extracted_l,
+                    weight: extracted_w,
+                    nextstate: arc.nextstate,
+                };
                 Ok(new_arc)
             }
 

@@ -213,7 +213,7 @@ impl<W: Semiring> UnionWeightOption<GallicWeightRestrict<W>>
 {
     fn compare(w1: &GallicWeightRestrict<W>, w2: &GallicWeightRestrict<W>) -> bool {
         let s1 = w1.0.value1();
-        let s2 =w2.0.value1();
+        let s2 = w2.0.value1();
         let n1 = s1.len_labels();
         let n2 = s2.len_labels();
         if n1 < n2 {
