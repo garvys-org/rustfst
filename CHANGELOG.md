@@ -33,6 +33,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `IdentityStateMapper`: Return its input.
 - Add `pop_arcs`, `reserve_arcs` and `reserve_state` to the `MutableFst` API.
 - `state_map` method has been added to the MutableFst trait as a provided method.
+- Implement `weight_convert` and `WeightConverter` to changed the Semiring of an FST.
+- Implement WeightConverter trait for `IdentityArcMapper`, `InputEpsilonMapper`, `InvertWeightMapper`, `OutputEpsilonMapper`, `PlusMapper`, `QuantizeMapper`, `RmWeightMapper`, `TimesMapper`, 
+- Add `arcsort` to sort the outgoing arcs of an FST.
+- Add `ilabel_compare`, `olabel_compare` and `arc_compare` to compare two arcs. Can be used with `arcsort`.
+- Add `GallicWeight` and `StringWeight`.
+- Add `ProductWeight` : Weight W1 x W2
+- Add `PowerWeight`: Weoght W ^ N
+- Add `UnionWeight`
+- Add `state_map` and `StateMapper`. Implement `StateMapper` for `ArcSumMapper` and `AddUniqueMapper`.
+- Implement `WeightConverter` for `FromGallicMapper` and `ToGallicMapper`.
+- Add `is_acceptor` to the FST trait to detect whether an FST is an acceptor.
+- Implement `determinize` for both acceptors and transducers.
 
 ### Changed
 - In the `Semiring` trait, `ONE` and `ZERO` associated constants have been removed in favor of `one` and `zero` functions.
@@ -42,6 +54,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement `invert` and `project` using `arc_map`.
 - Change internal representation of float weights to use the `ordered-float` crate and derive `Hash` and `Eq` for each Semiring.
 - `ArcSumMapper` is now called inside `rm_epsilon` function to conform with OpenFST.
+- `plus` and `times` in Semiring now returns Fallible.
+- `ArcMapper` returns Fallible.
 
 ### Removed
 - Removed `Add`, `AddAssign`, `Mul`, `MulAssign` and `Copy` trait bound for `Semiring`.
