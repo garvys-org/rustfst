@@ -194,4 +194,18 @@ pub trait Fst:
         let filter = OutputEpsilonArcFilter {};
         Ok(self.arcs_iter(state)?.filter(|v| filter.keep(v)).count())
     }
+
+    /// Returns true if the Fst is an acceptor. False otherwise.
+    /// Acceptor means for all arc, arc.ilabel == arc.olabel
+    fn is_acceptor(&self) -> bool {
+        let states: Vec<_> = self.states_iter().collect();
+        for state in states {
+            for arc in self.arcs_iter(state).unwrap() {
+                if arc.ilabel != arc.olabel {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }

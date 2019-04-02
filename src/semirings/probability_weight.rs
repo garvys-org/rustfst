@@ -1,12 +1,17 @@
+use std::f32;
 use std::hash::{Hash, Hasher};
+
+use failure::Fallible;
 
 use ordered_float::OrderedFloat;
 
 use crate::semirings::{
-    CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
+    CompleteSemiring, DivideType, Semiring, SemiringProperties, StarSemiring,
+    WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::KDELTA;
 
+/// Probability semiring: (x, +, 0.0, 1.0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
 pub struct ProbabilityWeight {
     value: OrderedFloat<f32>,
@@ -32,12 +37,14 @@ impl Semiring for ProbabilityWeight {
         }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         self.value.0 += rhs.as_ref().value.0;
+        Ok(())
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         self.value.0 *= rhs.as_ref().value.0;
+        Ok(())
     }
 
     fn value(&self) -> Self::Type {
@@ -46,6 +53,12 @@ impl Semiring for ProbabilityWeight {
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
         self.value.0 = value
+    }
+
+    fn properties() -> SemiringProperties {
+        SemiringProperties::LEFT_SEMIRING
+            | SemiringProperties::RIGHT_SEMIRING
+            | SemiringProperties::COMMUTATIVE
     }
 }
 
@@ -66,17 +79,15 @@ impl StarSemiring for ProbabilityWeight {
 }
 
 impl WeaklyDivisibleSemiring for ProbabilityWeight {
-    fn inverse_assign(&mut self) {
-        // May panic if self.value == 0
-        self.value.0 = 1.0 / self.value.0;
-    }
-
-    fn divide(&self, rhs: &Self) -> Self {
+    fn divide(&self, rhs: &Self, _divide_type: DivideType) -> Fallible<Self> {
         // May panic if rhs.value == 0.0
-        Self::new(self.value.0 / rhs.value.0)
+        if rhs.value.0 == 0.0 {
+            bail!("Division bby 0")
+        }
+        Ok(Self::new(self.value.0 / rhs.value.0))
     }
 }
 
-impl WeightQuantize for ProbabilityWeight {}
+impl_quantize_f32!(ProbabilityWeight);
 
 partial_eq_and_hash_f32!(ProbabilityWeight);

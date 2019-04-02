@@ -1,3 +1,5 @@
+use failure::Fallible;
+
 use std::mem::swap;
 
 use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction};
@@ -28,11 +30,14 @@ pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) {
 struct InvertMapper {}
 
 impl<W: Semiring> ArcMapper<W> for InvertMapper {
-    fn arc_map(&mut self, arc: &mut Arc<W>) {
+    fn arc_map(&mut self, arc: &mut Arc<W>) -> Fallible<()> {
         swap(&mut arc.ilabel, &mut arc.olabel);
+        Ok(())
     }
 
-    fn final_arc_map(&mut self, _final_arc: &mut FinalArc<W>) {}
+    fn final_arc_map(&mut self, _final_arc: &mut FinalArc<W>) -> Fallible<()> {
+        Ok(())
+    }
 
     fn final_action(&self) -> MapFinalAction {
         MapFinalAction::MapNoSuperfinal

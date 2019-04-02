@@ -1,5 +1,5 @@
 {
-    "state_map_arc_sum": {
+    "arcsort_ilabel": {
         "result": ""
     }, 
     "arc_map_times": {
@@ -14,9 +14,26 @@
     "state_map_arc_unique": {
         "result": ""
     }, 
+    "state_map_arc_sum": {
+        "result": ""
+    }, 
     "arc_map_input_epsilon": {
         "result": ""
     }, 
+    "determinize": [
+        {
+            "det_type": "functional", 
+            "result": ""
+        }, 
+        {
+            "det_type": "nonfunctional", 
+            "result": ""
+        }, 
+        {
+            "det_type": "disambiguate", 
+            "result": ""
+        }
+    ], 
     "invert": {
         "result": ""
     }, 
@@ -48,6 +65,13 @@
     "arc_map_output_epsilon": {
         "result": ""
     }, 
+    "weight_pushing_final": {
+        "result": ""
+    }, 
+    "arc_map_identity": {
+        "result": ""
+    }, 
+    "weight_type": "tropical", 
     "encode": [
         {
             "encode_labels": true, 
@@ -70,13 +94,6 @@
             "encode_weights": false
         }
     ], 
-    "arc_map_identity": {
-        "result": ""
-    }, 
-    "weight_type": "tropical", 
-    "weight_pushing_final": {
-        "result": ""
-    }, 
     "project_output": {
         "result": ""
     }, 
@@ -99,6 +116,9 @@
         "result": ""
     }, 
     "name": "fst_000", 
+    "arcsort_olabel": {
+        "result": ""
+    }, 
     "arc_map_plus": {
         "result": ""
     }, 

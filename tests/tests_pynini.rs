@@ -5,14 +5,15 @@ use serde_derive::{Deserialize, Serialize};
 
 use failure::{bail, format_err, Fail, Fallible, ResultExt};
 
+use rustfst::algorithms::arc_compares::{ilabel_compare, olabel_compare};
 use rustfst::algorithms::arc_mappers::{
     IdentityArcMapper, InputEpsilonMapper, InvertWeightMapper, OutputEpsilonMapper, PlusMapper,
     QuantizeMapper, RmWeightMapper, TimesMapper,
 };
 use rustfst::algorithms::state_mappers::{ArcSumMapper, ArcUniqueMapper};
 use rustfst::algorithms::{
-    connect, decode, encode, invert, isomorphic, project, push_weights, reverse, rm_epsilon,
-    ProjectType, ReweightType,
+    arc_sort, connect, decode, determinize, encode, invert, isomorphic, project, push_weights,
+    reverse, rm_epsilon, DeterminizeType, ProjectType, ReweightType,
 };
 use rustfst::fst_impls::VectorFst;
 use rustfst::fst_traits::{MutableFst, TextParser};
@@ -57,6 +58,33 @@ impl EncodeOperationResult {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+struct DeterminizeOperationResult {
+    det_type: String,
+    result: String,
+}
+
+impl DeterminizeOperationResult {
+    fn parse<F>(&self) -> DeterminizeTestData<F>
+    where
+        F: TextParser,
+        F::W: Semiring<Type = f32>,
+    {
+        DeterminizeTestData {
+            det_type: match self.det_type.as_str() {
+                "functional" => DeterminizeType::DeterminizeFunctional,
+                "nonfunctional" => DeterminizeType::DeterminizeNonFunctional,
+                "disambiguate" => DeterminizeType::DeterminizeDisambiguate,
+                _ => panic!("Unknown determinize type : {:?}", self.det_type),
+            },
+            result: match self.result.as_str() {
+                "error" => Err(format_err!("lol")),
+                _ => F::from_text_string(self.result.as_str()),
+            },
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 struct ParsedTestData {
     rmepsilon: OperationResult,
     name: String,
@@ -81,6 +109,9 @@ struct ParsedTestData {
     encode_decode: Vec<EncodeOperationResult>,
     state_map_arc_sum: OperationResult,
     state_map_arc_unique: OperationResult,
+    determinize: Vec<DeterminizeOperationResult>,
+    arcsort_ilabel: OperationResult,
+    arcsort_olabel: OperationResult,
 }
 
 struct EncodeTestData<F>
@@ -91,6 +122,15 @@ where
     encode_labels: bool,
     encode_weights: bool,
     result: F,
+}
+
+struct DeterminizeTestData<F>
+where
+    F: TextParser,
+    F::W: Semiring<Type = f32>,
+{
+    det_type: DeterminizeType,
+    result: Fallible<F>,
 }
 
 struct TestData<F>
@@ -121,6 +161,9 @@ where
     encode_decode: Vec<EncodeTestData<F>>,
     state_map_arc_sum: F,
     state_map_arc_unique: F,
+    determinize: Vec<DeterminizeTestData<F>>,
+    arcsort_ilabel: F,
+    arcsort_olabel: F,
 }
 
 impl<F> TestData<F>
@@ -152,6 +195,9 @@ where
             encode_decode: data.encode_decode.iter().map(|v| v.parse()).collect(),
             state_map_arc_sum: data.state_map_arc_sum.parse(),
             state_map_arc_unique: data.state_map_arc_unique.parse(),
+            determinize: data.determinize.iter().map(|v| v.parse()).collect(),
+            arcsort_ilabel: data.arcsort_ilabel.parse(),
+            arcsort_olabel: data.arcsort_olabel.parse(),
         }
     }
 }
@@ -234,6 +280,12 @@ where
     test_state_map_arc_sum(&test_data)?;
 
     test_state_map_arc_unique(&test_data)?;
+
+    test_determinize(&test_data)?;
+
+    test_arcsort_ilabel(&test_data)?;
+
+    test_arcsort_olabel(&test_data)?;
 
     Ok(())
 }
@@ -652,6 +704,88 @@ where
     Ok(())
 }
 
+fn test_determinize<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
+{
+    for determinize_data in &test_data.determinize {
+        println!("det_type = {:?}", determinize_data.det_type);
+        let fst_raw = test_data.raw.clone();
+        let fst_res: Fallible<F> = determinize(&fst_raw, determinize_data.det_type.clone());
+
+        match (&determinize_data.result, fst_res) {
+            (Ok(fst_expected), Ok(ref fst_determinized)) => {
+                let a = isomorphic(fst_expected, fst_determinized)?;
+                assert!(
+                    a,
+                    "{}",
+                    error_message_fst!(
+                        fst_expected,
+                        fst_determinized,
+                        format!(
+                            "Determinize fail for det_type = {:?} ",
+                            determinize_data.det_type
+                        )
+                    )
+                );
+            }
+            (Ok(_fst_expected), Err(_)) => panic!(
+                "Determinize fail for det_type {:?}. Got Err. Expected Ok",
+                determinize_data.det_type
+            ),
+            (Err(_), Ok(_fst_determinized)) => panic!(
+                "Determinize fail for det_type {:?}. Got Ok. Expected Err, \n{}",
+                determinize_data.det_type, _fst_determinized
+            ),
+            (Err(_), Err(_)) => {
+                // Ok
+            }
+        };
+    }
+    Ok(())
+}
+
+fn test_arcsort_ilabel<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
+{
+    let mut fst_arcsort = test_data.raw.clone();
+    arc_sort(&mut fst_arcsort, ilabel_compare)?;
+    assert_eq!(
+        test_data.arcsort_ilabel,
+        fst_arcsort,
+        "{}",
+        error_message_fst!(
+            test_data.arc_map_output_epsilon,
+            fst_arcsort,
+            "ArcSort ilabel"
+        )
+    );
+    Ok(())
+}
+
+fn test_arcsort_olabel<F>(test_data: &TestData<F>) -> Fallible<()>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
+{
+    let mut fst_arcsort = test_data.raw.clone();
+    arc_sort(&mut fst_arcsort, olabel_compare)?;
+    assert_eq!(
+        test_data.arcsort_olabel,
+        fst_arcsort,
+        "{}",
+        error_message_fst!(
+            test_data.arc_map_output_epsilon,
+            fst_arcsort,
+            "ArcSort olabel"
+        )
+    );
+    Ok(())
+}
+
 pub struct ExitFailure(failure::Error);
 
 /// Prints a list of causes for this Error, along with any backtrace
@@ -714,4 +848,9 @@ fn test_pynini_fst_005() -> Result<(), ExitFailure> {
 #[test]
 fn test_pynini_fst_006() -> Result<(), ExitFailure> {
     run_test_pynini("fst_006").map_err(|v| v.into())
+}
+
+#[test]
+fn test_pynini_fst_007() -> Result<(), ExitFailure> {
+    run_test_pynini("fst_007").map_err(|v| v.into())
 }

@@ -1,7 +1,7 @@
 use failure::Fallible;
 
 use crate::fst_traits::{ExpandedFst, FinalStatesIterator, Fst, MutableFst};
-use crate::semirings::{Semiring, WeaklyDivisibleSemiring};
+use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
 
 /// Different types of reweighting.
 pub enum ReweightType {
@@ -45,7 +45,7 @@ where
                 ReweightType::ReweightToInitial => {}
                 ReweightType::ReweightToFinal => {
                     if let Some(final_weight) = fst.final_weight(state) {
-                        let new_weight = F::W::zero().times(&final_weight);
+                        let new_weight = F::W::zero().times(&final_weight)?;
                         fst.set_final(state, new_weight)?;
                     }
                 }
@@ -67,8 +67,13 @@ where
             }
 
             arc.weight = match reweight_type {
-                ReweightType::ReweightToInitial => d_s.inverse().times(&arc.weight.times(d_ns)),
-                ReweightType::ReweightToFinal => (d_s.times(&arc.weight)).times(&d_ns.inverse()),
+                //                ReweightType::ReweightToInitial => d_s.inverse().times(&arc.weight.times(d_ns)),
+                ReweightType::ReweightToInitial => {
+                    (&arc.weight.times(d_ns)?).divide(d_s, DivideType::DivideLeft)?
+                }
+                ReweightType::ReweightToFinal => {
+                    (d_s.times(&arc.weight)?).divide(&d_ns, DivideType::DivideRight)?
+                }
             };
         }
     }
@@ -80,14 +85,15 @@ where
 
         match reweight_type {
             ReweightType::ReweightToFinal => {
-                let new_weight = d_s.times(&final_state.final_weight);
+                let new_weight = d_s.times(&final_state.final_weight)?;
                 fst.set_final(final_state.state_id, new_weight)?;
             }
             ReweightType::ReweightToInitial => {
                 if d_s.is_zero() {
                     continue;
                 }
-                let new_weight = d_s.inverse().times(&final_state.final_weight);
+                let new_weight =
+                    (&final_state.final_weight).divide(&d_s, DivideType::DivideLeft)?;
                 fst.set_final(final_state.state_id, new_weight)?;
             }
         };
@@ -100,18 +106,18 @@ where
         if !d_s.is_one() && !d_s.is_zero() {
             for arc in fst.arcs_iter_mut(start_state)? {
                 arc.weight = match reweight_type {
-                    ReweightType::ReweightToInitial => d_s.times(&arc.weight),
+                    ReweightType::ReweightToInitial => d_s.times(&arc.weight)?,
                     ReweightType::ReweightToFinal => {
-                        (F::W::one().times(&d_s.inverse())).times(&arc.weight)
+                        (F::W::one().divide(&d_s, DivideType::DivideRight)?).times(&arc.weight)?
                     }
                 };
             }
 
             if let Some(final_weight) = fst.final_weight(start_state) {
                 let new_weight = match reweight_type {
-                    ReweightType::ReweightToInitial => d_s.times(&final_weight),
+                    ReweightType::ReweightToInitial => d_s.times(&final_weight)?,
                     ReweightType::ReweightToFinal => {
-                        (F::W::one().times(&d_s.inverse())).times(&final_weight)
+                        (F::W::one().divide(&d_s, DivideType::DivideRight)?).times(&final_weight)?
                     }
                 };
 

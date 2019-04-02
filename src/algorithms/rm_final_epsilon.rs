@@ -57,8 +57,11 @@ where
         for arc in ifst.arcs_iter(state).unwrap() {
             if finals.contains(&arc.nextstate) {
                 if arc.ilabel == 0 && arc.olabel == 0 {
-                    weight
-                        .plus_assign(ifst.final_weight(arc.nextstate).unwrap().times(&arc.weight));
+                    weight.plus_assign(
+                        ifst.final_weight(arc.nextstate)
+                            .unwrap()
+                            .times(&arc.weight)?,
+                    )?;
                 } else {
                     arcs.push(arc);
                 }

@@ -103,7 +103,7 @@ mod tests {
             for path_fst_1 in fst_1.paths_iter() {
                 for path_fst_2 in fst_2.paths_iter() {
                     let mut new_path = path_fst_1.clone();
-                    new_path.concat(path_fst_2);
+                    new_path.concat(path_fst_2)?;
                     paths_ref.update(vec![new_path]);
                 }
             }

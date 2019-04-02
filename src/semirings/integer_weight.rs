@@ -1,9 +1,10 @@
 use std::i32;
 
-use crate::semirings::CompleteSemiring;
-use crate::semirings::Semiring;
-use crate::semirings::StarSemiring;
+use failure::Fallible;
 
+use crate::semirings::{CompleteSemiring, Semiring, SemiringProperties, StarSemiring};
+
+/// Probability semiring: (x, +, 0.0, 1.0).
 #[derive(Clone, Debug, PartialEq, PartialOrd, Default, Hash, Eq, Copy)]
 pub struct IntegerWeight {
     value: i32,
@@ -23,12 +24,14 @@ impl Semiring for IntegerWeight {
         IntegerWeight { value }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         self.value += rhs.as_ref().value;
+        Ok(())
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         self.value *= rhs.as_ref().value;
+        Ok(())
     }
 
     fn value(&self) -> Self::Type {
@@ -37,6 +40,12 @@ impl Semiring for IntegerWeight {
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
         self.value = value
+    }
+
+    fn properties() -> SemiringProperties {
+        SemiringProperties::LEFT_SEMIRING
+            | SemiringProperties::RIGHT_SEMIRING
+            | SemiringProperties::COMMUTATIVE
     }
 }
 

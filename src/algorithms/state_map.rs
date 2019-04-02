@@ -7,9 +7,9 @@ use crate::StateId;
 /// implementing operations that do not change the number of states.
 pub trait StateMapper<F: MutableFst> {
     /// Defines how final weight are mapped.
-    fn map_final_weight(&self, weight: Option<&mut F::W>);
+    fn map_final_weight(&self, weight: Option<&mut F::W>) -> Fallible<()>;
     /// Defines how arcs leaving the state `state` are mapped.
-    fn map_arcs(&self, fst: &mut F, state: StateId);
+    fn map_arcs(&self, fst: &mut F, state: StateId) -> Fallible<()>;
 }
 
 /// This operation transforms each state in the input FST.
@@ -26,8 +26,8 @@ where
     let states: Vec<_> = ifst.states_iter().collect();
 
     for state in states {
-        mapper.map_arcs(ifst, state);
-        mapper.map_final_weight(ifst.final_weight_mut(state));
+        mapper.map_arcs(ifst, state)?;
+        mapper.map_final_weight(ifst.final_weight_mut(state))?;
     }
 
     Ok(())

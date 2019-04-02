@@ -1,5 +1,5 @@
 {
-    "state_map_arc_sum": {
+    "arcsort_ilabel": {
         "result": "0\t1\t12\t25\n1\n"
     }, 
     "arc_map_times": {
@@ -14,9 +14,26 @@
     "state_map_arc_unique": {
         "result": "0\t1\t12\t25\n1\n"
     }, 
+    "state_map_arc_sum": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
     "arc_map_input_epsilon": {
         "result": "0\t1\t0\t25\n1\n"
     }, 
+    "determinize": [
+        {
+            "det_type": "functional", 
+            "result": "0\t1\t12\t25\n1\n"
+        }, 
+        {
+            "det_type": "nonfunctional", 
+            "result": "0\t1\t12\t25\n1\n"
+        }, 
+        {
+            "det_type": "disambiguate", 
+            "result": "0\t1\t12\t25\n1\n"
+        }
+    ], 
     "invert": {
         "result": "0\t1\t25\t12\n1\n"
     }, 
@@ -48,6 +65,13 @@
     "arc_map_output_epsilon": {
         "result": "0\t1\t12\t0\n1\n"
     }, 
+    "weight_pushing_final": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
+    "arc_map_identity": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
+    "weight_type": "tropical", 
     "encode": [
         {
             "encode_labels": true, 
@@ -70,13 +94,6 @@
             "encode_weights": false
         }
     ], 
-    "arc_map_identity": {
-        "result": "0\t1\t12\t25\n1\n"
-    }, 
-    "weight_type": "tropical", 
-    "weight_pushing_final": {
-        "result": "0\t1\t12\t25\n1\n"
-    }, 
     "project_output": {
         "result": "0\t1\t25\t25\n1\n"
     }, 
@@ -102,6 +119,9 @@
         "result": "0\t1\t12\t25\n1\n"
     }, 
     "name": "fst_001", 
+    "arcsort_olabel": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
     "arc_map_plus": {
         "result": "0\t1\t12\t25\n1\n"
     }, 

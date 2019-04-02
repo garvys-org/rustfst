@@ -1,13 +1,17 @@
 use std::f32;
 use std::hash::{Hash, Hasher};
 
+use failure::Fallible;
+
 use crate::semirings::{
-    CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
+    CompleteSemiring, DivideType, Semiring, SemiringProperties, StarSemiring,
+    WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::KDELTA;
 
 use ordered_float::OrderedFloat;
 
+/// Tropical semiring: (min, +, inf, 0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
 pub struct TropicalWeight {
     value: OrderedFloat<f32>,
@@ -34,13 +38,14 @@ impl Semiring for TropicalWeight {
         }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         if rhs.as_ref().value < self.value {
             self.value = rhs.as_ref().value;
         }
+        Ok(())
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         let f1 = self.value();
         let f2 = rhs.as_ref().value();
         if f1 == f32::INFINITY {
@@ -49,6 +54,7 @@ impl Semiring for TropicalWeight {
         } else {
             self.value.0 += f2;
         }
+        Ok(())
     }
 
     fn value(&self) -> Self::Type {
@@ -57,6 +63,14 @@ impl Semiring for TropicalWeight {
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
         self.value.0 = value
+    }
+
+    fn properties() -> SemiringProperties {
+        SemiringProperties::LEFT_SEMIRING
+            | SemiringProperties::RIGHT_SEMIRING
+            | SemiringProperties::COMMUTATIVE
+            | SemiringProperties::PATH
+            | SemiringProperties::IDEMPOTENT
     }
 }
 
@@ -81,15 +95,11 @@ impl StarSemiring for TropicalWeight {
 }
 
 impl WeaklyDivisibleSemiring for TropicalWeight {
-    fn inverse_assign(&mut self) {
-        self.value.0 = -self.value.0;
-    }
-
-    fn divide(&self, rhs: &Self) -> Self {
-        Self::new(self.value.0 - rhs.value.0)
+    fn divide(&self, rhs: &Self, _divide_type: DivideType) -> Fallible<Self> {
+        Ok(Self::new(self.value.0 - rhs.value.0))
     }
 }
 
-impl WeightQuantize for TropicalWeight {}
+impl_quantize_f32!(TropicalWeight);
 
 partial_eq_and_hash_f32!(TropicalWeight);

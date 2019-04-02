@@ -1,13 +1,17 @@
 use std::f32;
 use std::hash::{Hash, Hasher};
 
+use failure::Fallible;
+
 use ordered_float::OrderedFloat;
 
 use crate::semirings::{
-    CompleteSemiring, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
+    CompleteSemiring, DivideType, Semiring, SemiringProperties, StarSemiring,
+    WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::KDELTA;
 
+/// Log semiring: (log(e^-x + e^-y), +, inf, 0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
 pub struct LogWeight {
     value: OrderedFloat<f32>,
@@ -37,7 +41,7 @@ impl Semiring for LogWeight {
         }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         let f1 = self.value();
         let f2 = rhs.as_ref().value();
         self.value.0 = if f1 == f32::INFINITY {
@@ -48,10 +52,11 @@ impl Semiring for LogWeight {
             f2 - ln_pos_exp(f1 - f2)
         } else {
             f1 - ln_pos_exp(f2 - f1)
-        }
+        };
+        Ok(())
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) {
+    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         let f1 = self.value();
         let f2 = rhs.as_ref().value();
         if f1 == f32::INFINITY {
@@ -60,6 +65,7 @@ impl Semiring for LogWeight {
         } else {
             self.value.0 += f2;
         }
+        Ok(())
     }
 
     fn value(&self) -> Self::Type {
@@ -68,6 +74,12 @@ impl Semiring for LogWeight {
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
         self.value.0 = value
+    }
+
+    fn properties() -> SemiringProperties {
+        SemiringProperties::LEFT_SEMIRING
+            | SemiringProperties::RIGHT_SEMIRING
+            | SemiringProperties::COMMUTATIVE
     }
 }
 
@@ -92,15 +104,11 @@ impl StarSemiring for LogWeight {
 }
 
 impl WeaklyDivisibleSemiring for LogWeight {
-    fn inverse_assign(&mut self) {
-        self.value.0 = -self.value.0;
-    }
-
-    fn divide(&self, rhs: &Self) -> Self {
-        Self::new(self.value.0 - rhs.value.0)
+    fn divide(&self, rhs: &Self, _divide_type: DivideType) -> Fallible<Self> {
+        Ok(Self::new(self.value.0 - rhs.value.0))
     }
 }
 
-impl WeightQuantize for LogWeight {}
+impl_quantize_f32!(LogWeight);
 
 partial_eq_and_hash_f32!(LogWeight);

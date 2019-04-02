@@ -63,9 +63,9 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
 
             for arc in fst.arcs_iter(state_cour)? {
                 let nextstate = arc.nextstate;
-                if d[nextstate] != d[nextstate].plus(&r2.times(&arc.weight)) {
-                    d[nextstate] = d[nextstate].plus(&r2.times(&arc.weight));
-                    r[nextstate] = r[nextstate].plus(&r2.times(&arc.weight));
+                if d[nextstate] != d[nextstate].plus(&r2.times(&arc.weight)?)? {
+                    d[nextstate] = d[nextstate].plus(&r2.times(&arc.weight)?)?;
+                    r[nextstate] = r[nextstate].plus(&r2.times(&arc.weight)?)?;
                     if !queue.contains(&nextstate) {
                         queue.push_back(nextstate);
                     }
