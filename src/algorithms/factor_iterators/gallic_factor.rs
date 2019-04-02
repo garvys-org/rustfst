@@ -7,21 +7,25 @@ use crate::semirings::{
     Semiring, StringWeightVariant,
 };
 
+/// Factor a GallicWeight using StringFactor.
 pub struct GallicFactorLeft<W: Semiring> {
     weight: GallicWeightLeft<W>,
     done: bool,
 }
 
+/// Factor a GallicWeight using StringFactor.
 pub struct GallicFactorRight<W: Semiring> {
     weight: GallicWeightRight<W>,
     done: bool,
 }
 
+/// Factor a GallicWeight using StringFactor.
 pub struct GallicFactorMin<W: Semiring> {
     weight: GallicWeightMin<W>,
     done: bool,
 }
 
+/// Factor a GallicWeight using StringFactor.
 pub struct GallicFactorRestrict<W: Semiring> {
     weight: GallicWeightRestrict<W>,
     done: bool,
@@ -72,6 +76,7 @@ impl_gallic_factor!(
 );
 impl_gallic_factor!(GallicWeightMin, GallicFactorMin, StringFactorRestrict);
 
+/// Factor a GallicWeight using StringFactor.
 pub struct GallicFactor<W: Semiring> {
     weight: GallicWeight<W>,
     done: bool,

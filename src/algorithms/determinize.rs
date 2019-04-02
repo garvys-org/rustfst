@@ -21,6 +21,7 @@ use crate::semirings::{
 };
 use crate::{Label, StateId, EPS_LABEL, KDELTA};
 
+/// Determinization type.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum DeterminizeType {
     /// Input transducer is known to be functional (or error).
@@ -293,7 +294,7 @@ where
             .dest_tuple
             .subset
             .pairs
-            .sort_by(|a, b| a.state.partial_cmp(&b.state).unwrap());
+            .sort_by(|a, b| a.state.cmp(&b.state));
 
         for dest_elt in det_arc.dest_tuple.subset.pairs.iter() {
             det_arc.weight = CD::common_divisor(&det_arc.weight, &dest_elt.weight)?;

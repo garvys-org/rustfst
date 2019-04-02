@@ -5,7 +5,7 @@ mod closure;
 mod composition;
 mod concat;
 mod connect;
-mod determinization;
+mod determinize;
 mod encode;
 mod factor_weight;
 mod inversion;
@@ -28,7 +28,7 @@ pub mod arc_filters;
 /// Module that provide structures implementing the `ArcMapper` trait.
 pub mod arc_mappers;
 
-pub mod cache;
+pub(crate) mod cache;
 
 pub mod factor_iterators;
 
@@ -40,16 +40,16 @@ pub mod weight_converters;
 pub use self::{
     all_pairs_shortest_distance::all_pairs_shortest_distance,
     arc_map::{arc_map, ArcMapper, FinalArc, MapFinalAction},
-    arc_sort::{arc_sort, ilabel_compare, olabel_compare},
+    arc_sort::arc_sort,
     closure::{closure_plus, closure_star},
     composition::compose,
     concat::concat,
     connect::connect,
-    determinization::{determinize, DeterminizeType},
+    determinize::{determinize, DeterminizeType},
     encode::{decode, encode},
     factor_weight::{factor_weight, FactorIterator, FactorWeightOptions, FactorWeightType},
     inversion::invert,
-    isomorphic::{arc_compare, isomorphic},
+    isomorphic::isomorphic,
     projection::{project, ProjectType},
     relabel_pairs::relabel_pairs,
     reverse::reverse,
@@ -61,4 +61,9 @@ pub use self::{
     union::union,
     weight_convert::{weight_convert, WeightConverter},
     weight_pushing::push_weights,
+};
+
+pub(crate) use self::{
+    arc_sort::{ilabel_compare, olabel_compare},
+    isomorphic::arc_compare,
 };
