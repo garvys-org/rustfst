@@ -16,7 +16,8 @@ use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::semirings::{
     DivideType, GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, Semiring,
-    StringWeightLeft, StringWeightRestrict, WeaklyDivisibleSemiring, WeightQuantize,
+    SemiringProperties, StringWeightLeft, StringWeightRestrict, WeaklyDivisibleSemiring,
+    WeightQuantize,
 };
 use crate::{Label, StateId, EPS_LABEL, KDELTA};
 
@@ -376,6 +377,9 @@ where
     F2: MutableFst<W = W> + ExpandedFst<W = W>,
     CD: CommonDivisor<W>,
 {
+    if !W::properties().contains(SemiringProperties::LEFT_SEMIRING) {
+        bail!("determinize_fsa : weight must be left distributive")
+    }
     let mut det_fsa_impl: DeterminizeFsaImpl<_, CD> = DeterminizeFsaImpl::new(fst_in);
     det_fsa_impl.compute()
 }
@@ -402,6 +406,9 @@ where
 
     match det_type {
         DeterminizeType::DeterminizeDisambiguate => {
+            if !W::properties().contains(SemiringProperties::PATH) {
+                bail!("determinize : weight needs to have the path property to disambiguate output")
+            }
             let fsa: VectorFst<GallicWeightMin<W>> = weight_convert(fst_in, &mut to_gallic)?;
             let determinized_fsa: VectorFst<GallicWeightMin<W>> =
                 determinize_fsa::<_, _, _, GallicCommonDivisor>(&fsa)?;

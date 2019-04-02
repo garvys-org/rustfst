@@ -2,7 +2,25 @@ use std::fmt::Debug;
 use std::fmt::Display;
 use std::hash::Hash;
 
+use bitflags::bitflags;
+
 use failure::Fallible;
+
+bitflags! {
+    pub struct SemiringProperties: u32 {
+        /// For all a, b, c: Times(c, Plus(a, b)) = Plus(Times(c, a), Times(c, b)).
+        const LEFT_SEMIRING =  0b00001;
+        /// For all a, b, c: Times(Plus(a, b), c) = Plus(Times(a, c), Times(b, c)).
+        const RIGHT_SEMIRING = 0b00010;
+        /// For all a, b: Times(a, b) = Times(b, a).
+        const COMMUTATIVE =    0b00100;
+        /// For all a: Plus(a, a) = a.
+        const IDEMPOTENT =     0b01000;
+        /// For all a, b: Plus(a, b) = a or Plus(a, b) = b.
+        const PATH =           0b10000;
+        const SEMIRING = Self::LEFT_SEMIRING.bits | Self::RIGHT_SEMIRING.bits;
+    }
+}
 
 /// For some operations, the weight set associated to a wFST must have the structure of a semiring.
 /// `(S, +, *, 0, 1)` is a semiring if `(S, +, 0)` is a commutative monoid with identity element 0,
@@ -42,6 +60,8 @@ pub trait Semiring:
     fn is_zero(&self) -> bool {
         *self == Self::zero()
     }
+
+    fn properties() -> SemiringProperties;
 }
 
 #[derive(Copy, Clone, PartialOrd, PartialEq)]

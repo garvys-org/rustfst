@@ -9,7 +9,9 @@ use failure::Fallible;
 use generic_array::ArrayLength;
 use generic_array::GenericArray;
 
-use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
+use crate::semirings::{
+    DivideType, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
+};
 
 pub struct PowerWeight<W, N>
 where
@@ -153,6 +155,14 @@ where
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
         self.weights = value;
+    }
+
+    fn properties() -> SemiringProperties {
+        W::properties()
+            & (SemiringProperties::LEFT_SEMIRING
+                | SemiringProperties::RIGHT_SEMIRING
+                | SemiringProperties::COMMUTATIVE
+                | SemiringProperties::IDEMPOTENT)
     }
 }
 

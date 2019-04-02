@@ -1,4 +1,6 @@
 use std::collections::{HashMap, HashSet, VecDeque};
+use std::marker::PhantomData;
+use std::slice::Iter as IterSlice;
 
 use bimap::BiHashMap;
 
@@ -6,14 +8,11 @@ use bitflags::bitflags;
 
 use failure::Fallible;
 
+use crate::algorithms::cache::CacheImpl;
 use crate::arc::Arc;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::{Label, StateId};
-use std::marker::PhantomData;
-use std::slice::Iter as IterSlice;
-
-use crate::algorithms::cache::CacheImpl;
 
 bitflags! {
     pub struct FactorWeightType: u32 {

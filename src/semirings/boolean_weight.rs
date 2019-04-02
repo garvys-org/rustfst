@@ -1,6 +1,6 @@
 use failure::Fallible;
 
-use crate::semirings::{CompleteSemiring, Semiring, StarSemiring};
+use crate::semirings::{CompleteSemiring, Semiring, SemiringProperties, StarSemiring};
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Default, Eq, Copy, Hash)]
 pub struct BooleanWeight {
@@ -36,6 +36,14 @@ impl Semiring for BooleanWeight {
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
         self.value = value
+    }
+
+    fn properties() -> SemiringProperties {
+        SemiringProperties::LEFT_SEMIRING
+            | SemiringProperties::RIGHT_SEMIRING
+            | SemiringProperties::COMMUTATIVE
+            | SemiringProperties::IDEMPOTENT
+            | SemiringProperties::PATH
     }
 }
 

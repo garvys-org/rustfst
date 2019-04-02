@@ -5,7 +5,9 @@ use std::marker::PhantomData;
 
 use failure::Fallible;
 
-use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
+use crate::semirings::{
+    DivideType, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
+};
 
 pub trait UnionWeightOption<W: Semiring>: Debug + Hash + Default + Clone + PartialOrd + Eq {
     fn compare(w1: &W, w2: &W) -> bool;
@@ -127,6 +129,14 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
 
     fn set_value(&mut self, value: Self::Type) {
         self.list = value;
+    }
+
+    fn properties() -> SemiringProperties {
+        W::properties()
+            & (SemiringProperties::LEFT_SEMIRING
+                | SemiringProperties::RIGHT_SEMIRING
+                | SemiringProperties::COMMUTATIVE
+                | SemiringProperties::IDEMPOTENT)
     }
 }
 

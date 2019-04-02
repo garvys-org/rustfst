@@ -3,7 +3,9 @@ use std::fmt::Debug;
 
 use failure::Fallible;
 
-use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
+use crate::semirings::{
+    DivideType, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
+};
 
 #[derive(Debug, Eq, PartialOrd, PartialEq, Clone, Default, Hash)]
 pub struct ProductWeight<W1, W2>
@@ -82,6 +84,15 @@ where
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
         self.set_value1(value.0);
         self.set_value2(value.1);
+    }
+
+    fn properties() -> SemiringProperties {
+        W1::properties()
+            & W2::properties()
+            & (SemiringProperties::LEFT_SEMIRING
+                | SemiringProperties::RIGHT_SEMIRING
+                | SemiringProperties::COMMUTATIVE
+                | SemiringProperties::IDEMPOTENT)
     }
 }
 

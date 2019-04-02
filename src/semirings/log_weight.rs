@@ -6,7 +6,8 @@ use failure::Fallible;
 use ordered_float::OrderedFloat;
 
 use crate::semirings::{
-    CompleteSemiring, DivideType, Semiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
+    CompleteSemiring, DivideType, Semiring, SemiringProperties, StarSemiring,
+    WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::KDELTA;
 
@@ -72,6 +73,12 @@ impl Semiring for LogWeight {
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
         self.value.0 = value
+    }
+
+    fn properties() -> SemiringProperties {
+        SemiringProperties::LEFT_SEMIRING
+            | SemiringProperties::RIGHT_SEMIRING
+            | SemiringProperties::COMMUTATIVE
     }
 }
 

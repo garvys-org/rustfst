@@ -28,6 +28,9 @@ macro_rules! impl_to_gallic_converter {
             }
 
             fn final_arc_map(&mut self, final_arc: &FinalArc<W>) -> Fallible<FinalArc<$gallic<W>>> {
+                if final_arc.weight.is_zero() {
+                    bail!("Shouldn't happen")
+                }
                 let w = ($string_weight::one(), final_arc.weight.clone());
                 Ok(FinalArc {
                     ilabel: EPS_LABEL,

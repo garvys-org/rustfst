@@ -11,8 +11,8 @@ use rustfst::algorithms::arc_mappers::{
 };
 use rustfst::algorithms::state_mappers::{ArcSumMapper, ArcUniqueMapper};
 use rustfst::algorithms::{
-    connect, decode, determinize, encode, invert, isomorphic, project,
-    push_weights, reverse, rm_epsilon, DeterminizeType, ProjectType, ReweightType,
+    connect, decode, determinize, encode, invert, isomorphic, project, push_weights, reverse,
+    rm_epsilon, DeterminizeType, ProjectType, ReweightType,
 };
 use rustfst::fst_impls::VectorFst;
 use rustfst::fst_traits::{MutableFst, TextParser};

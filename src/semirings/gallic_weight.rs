@@ -5,8 +5,8 @@ use failure::Fallible;
 use crate::semirings::ProductWeight;
 use crate::semirings::Semiring;
 use crate::semirings::{
-    DivideType, StringWeightLeft, StringWeightRestrict, StringWeightRight, UnionWeight,
-    UnionWeightOption, WeaklyDivisibleSemiring, WeightQuantize,
+    DivideType, SemiringProperties, StringWeightLeft, StringWeightRestrict, StringWeightRight,
+    UnionWeight, UnionWeightOption, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::Label;
 
@@ -102,6 +102,10 @@ macro_rules! gallic_weight {
 
             fn set_value(&mut self, value: Self::Type) {
                 self.0 = value;
+            }
+
+            fn properties() -> SemiringProperties {
+                ProductWeight::<$string_weight, W>::properties()
             }
         }
 
@@ -304,6 +308,10 @@ impl<W: Semiring> Semiring for GallicWeight<W> {
 
     fn set_value(&mut self, value: Self::Type) {
         self.0.set_value(value)
+    }
+
+    fn properties() -> SemiringProperties {
+        UnionWeight::<GallicWeightRestrict<W>, GallicUnionWeightOption<GallicWeightRestrict<W>>>::properties()
     }
 }
 

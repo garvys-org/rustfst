@@ -3,7 +3,9 @@ use std::fmt;
 use failure::Fallible;
 
 use crate::semirings::string_variant::StringWeightVariant;
-use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
+use crate::semirings::{
+    DivideType, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
+};
 use crate::Label;
 
 #[derive(Clone, Debug, PartialOrd, Default, PartialEq, Eq, Hash)]
@@ -140,6 +142,22 @@ macro_rules! string_semiring {
 
             fn set_value(&mut self, value: <Self as Semiring>::Type) {
                 self.value = value;
+            }
+
+            fn properties() -> SemiringProperties {
+                match $string_type {
+                    StringType::StringRestrict => {
+                        SemiringProperties::LEFT_SEMIRING
+                            | SemiringProperties::RIGHT_SEMIRING
+                            | SemiringProperties::IDEMPOTENT
+                    }
+                    StringType::StringLeft => {
+                        SemiringProperties::LEFT_SEMIRING | SemiringProperties::IDEMPOTENT
+                    }
+                    StringType::StringRight => {
+                        SemiringProperties::RIGHT_SEMIRING | SemiringProperties::IDEMPOTENT
+                    }
+                }
             }
         }
 
