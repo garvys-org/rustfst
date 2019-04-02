@@ -73,24 +73,27 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
         } else {
             let mut sum: UnionWeight<W, O> = UnionWeight::zero();
             let n1 = self.list.len();
-            let n2 = self.list.len();
-            let n = n1.min(n2);
-            for i in 0..n {
-                let v1 = unsafe { self.list.get_unchecked(i) };
-                let v2 = unsafe { rhs.as_ref().list.get_unchecked(i) };
+            let n2 = rhs.as_ref().list.len();
+            let mut i1 = 0;
+            let mut i2 = 0;
+            while i1 < n1 && i2 < n2 {
+                let v1 = unsafe { self.list.get_unchecked(i1) };
+                let v2 = unsafe { rhs.as_ref().list.get_unchecked(i2) };
                 if O::compare(v1, v2) {
                     sum.push_back(v1.clone(), true)?;
+                    i1 += 1;
                 } else {
                     sum.push_back(v2.clone(), true)?;
+                    i2 += 1;
                 }
             }
 
-            for i in n..n1 {
+            for i in i1..n1 {
                 let v1 = unsafe { self.list.get_unchecked(i) };
                 sum.push_back(v1.clone(), true)?;
             }
 
-            for i in n..n2 {
+            for i in i2..n2 {
                 let v2 = unsafe { rhs.as_ref().list.get_unchecked(i) };
                 sum.push_back(v2.clone(), true)?;
             }
@@ -105,14 +108,11 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
             self.set_value(Self::zero().value());
         } else {
             let mut prod1: UnionWeight<W, O> = UnionWeight::zero();
-            let n1 = self.list.len();
-            let n2 = rhs.as_ref().list.len();
-            for i in 0..n1 {
-                let v1 = unsafe { self.list.get_unchecked(i) };
+            for w1 in self.iter() {
                 let mut prod2: UnionWeight<W, O> = UnionWeight::zero();
-                for j in 0..n2 {
-                    let v2 = unsafe { rhs.as_ref().list.get_unchecked(j) };
-                    prod2.push_back(v1.times(&v2)?, true)?;
+                for w2 in rhs.as_ref().iter() {
+                    let p = w1.times(&w2)?;
+                    prod2.push_back(p, true)?;
                 }
                 prod1.plus_assign(prod2)?;
             }
@@ -173,14 +173,14 @@ where
         if self.is_zero() || rhs.is_zero() {
             return Ok(Self::zero());
         }
-        let mut quot = Self::one();
+        let mut quot = Self::zero();
         if self.len() == 1 {
             for v in rhs.list.iter().rev() {
                 quot.push_back(self.list[0].divide(v, divide_type)?, true)?;
             }
         } else if rhs.len() == 1 {
             for v in self.list.iter() {
-                quot.push_back(rhs.list[0].divide(v, divide_type)?, true)?;
+                quot.push_back(v.divide(&rhs.list[0], divide_type)?, true)?;
             }
         } else {
             bail!("Expected at least of the two parameters to have a single element");

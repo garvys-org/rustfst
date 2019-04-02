@@ -68,21 +68,12 @@ macro_rules! impl_weight_converter_gallic {
                     bail!("Unrepresentable weight : {:?}", &arc);
                 }
 
-                let new_arc = if arc.ilabel == EPS_LABEL && extracted_l != EPS_LABEL {
-                    Arc {
-                        ilabel: self.superfinal_label,
-                        olabel: extracted_l,
-                        weight: extracted_w,
-                        nextstate: arc.nextstate,
-                    }
-                } else {
-                    Arc {
+                let new_arc = Arc {
                         ilabel: arc.ilabel,
                         olabel: extracted_l,
                         weight: extracted_w,
                         nextstate: arc.nextstate,
-                    }
-                };
+                    };
                 Ok(new_arc)
             }
 

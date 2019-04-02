@@ -86,12 +86,11 @@ where
                                     mapped_final_arc.weight,
                                     superfinal.unwrap(),
                                 ),
-                            )
-                            .unwrap();
+                            )?;
 
-                        fst_out.delete_final_weight(state).unwrap();
+                        fst_out.delete_final_weight(state)?;
                     } else {
-                        fst_out.set_final(state, mapped_final_arc.weight).unwrap();
+                        fst_out.set_final(state, mapped_final_arc.weight)?;
                     }
                 }
                 MapFinalAction::MapRequireSuperfinal => {

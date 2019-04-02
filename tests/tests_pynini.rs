@@ -720,12 +720,12 @@ where
                 );
             }
             (Ok(_fst_expected), Err(_)) => panic!(
-                "Determinize fail for det_type {:?}. Got Ok. Expected Err",
+                "Determinize fail for det_type {:?}. Got Err. Expected Ok",
                 determinize_data.det_type
             ),
             (Err(_), Ok(_fst_determinized)) => panic!(
-                "Determinize fail for det_type {:?}. Got Err. Expected Ok",
-                determinize_data.det_type
+                "Determinize fail for det_type {:?}. Got Ok. Expected Err, \n{}",
+                determinize_data.det_type, _fst_determinized
             ),
             (Err(_), Err(_)) => {
                 // Ok

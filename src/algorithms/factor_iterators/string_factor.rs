@@ -39,7 +39,7 @@ macro_rules! impl_string_factor {
             fn new(weight: $semiring) -> Self {
                 let done = match &weight.value {
                     StringWeightVariant::Infinity => true,
-                    StringWeightVariant::Labels(l) => (l.len() <= 1),
+                    StringWeightVariant::Labels(l) => (l.len() == 0),
                 };
                 Self { weight, done }
             }

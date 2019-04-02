@@ -135,10 +135,6 @@ impl<W: Semiring> WeightedSubset<W> {
         WeightedSubset { pairs: vec }
     }
 
-    //    pub fn add(&mut self, state: StateId, weight: W) {
-    //        self.pairs.push(DeterminizeElement::new(state, weight));
-    //    }
-
     pub fn iter(&self) -> impl Iterator<Item = &DeterminizeElement<W>> {
         self.pairs.iter()
     }
@@ -229,12 +225,8 @@ where
 
     fn compute_final(&mut self, state: StateId) -> Fallible<Option<F::W>> {
         let tuple = self.state_table.get_by_left(&state).unwrap();
-        println!("Final tuple {:?} {:?}", state, tuple);
         let mut final_weight = F::W::zero();
         for det_elt in tuple.subset.iter() {
-            //            if let Some(final_weight_fst) = self.fst.final_weight(det_elt.state) {
-            //                final_weight.plus_assign(det_elt.weight.times(final_weight_fst)?)?;
-            //            }
             final_weight.plus_assign(
                 det_elt.weight.times(
                     self.fst
@@ -251,15 +243,16 @@ where
     }
 
     fn expand(&mut self, state: StateId) -> Fallible<()> {
-        println!("[Expand Start] s = {}", state);
         // GetLabelMap
         let mut label_map: HashMap<Label, DeterminizeArc<F::W>> = HashMap::new();
         let src_tuple = self.state_table.get_by_left(&state).unwrap();
         for src_elt in src_tuple.subset.iter() {
             for arc in self.fst.arcs_iter(src_elt.state)? {
-                println!("{:?}", arc);
+
+                let r = src_elt.weight.times(&arc.weight)?;
+
                 let dest_elt =
-                    DeterminizeElement::new(arc.nextstate, src_elt.weight.times(&arc.weight)?);
+                    DeterminizeElement::new(arc.nextstate, r);
 
                 // Filter Arc
                 match label_map.entry(arc.ilabel) {
@@ -268,6 +261,7 @@ where
                         e.insert(DeterminizeArc::from_arc(arc, 0));
                     }
                 };
+
                 label_map
                     .get_mut(&arc.ilabel)
                     .unwrap()
@@ -277,12 +271,11 @@ where
                     .push(dest_elt);
             }
         }
-        println!("Len Label map = {:#?}", &label_map);
+
         for det_arc in label_map.values_mut() {
             self.norm_arc(det_arc)?;
         }
 
-        println!("Len Label map = {:#?}", label_map.len());
         for det_arc in label_map.values() {
             self.add_arc(state, det_arc)?;
         }
@@ -307,18 +300,14 @@ where
             .pairs
             .sort_by(|a, b| a.state.partial_cmp(&b.state).unwrap());
 
-        println!("Det arc sorted = {:#?}", &det_arc);
-
         for dest_elt in det_arc.dest_tuple.subset.pairs.iter() {
             det_arc.weight = CD::common_divisor(&det_arc.weight, &dest_elt.weight)?;
         }
 
-        println!("Det arc common divisor = {:#?}", &det_arc);
-
         let mut new_pairs = HashMap::new();
         for x in &mut det_arc.dest_tuple.subset.pairs {
             match new_pairs.entry(x.state) {
-                Entry::Vacant(mut e) => {
+                Entry::Vacant(e) => {
                     e.insert(x.clone());
                 },
                 Entry::Occupied(mut e) => {
@@ -326,9 +315,8 @@ where
                 }
             };
         }
-        det_arc.dest_tuple.subset.pairs = new_pairs.values().cloned().collect();
 
-        println!("Det arc coalesced = {:#?}", &det_arc);
+        det_arc.dest_tuple.subset.pairs = new_pairs.values().cloned().collect();
 
         for dest_elt in det_arc.dest_tuple.subset.pairs.iter_mut() {
             dest_elt.weight = dest_elt
@@ -423,7 +411,6 @@ where
             let fsa: VectorFst<GallicWeightMin<W>> = weight_convert(fst_in, &mut to_gallic)?;
             let determinized_fsa: VectorFst<GallicWeightMin<W>> =
                 determinize_fsa::<_, _, _, GallicCommonDivisor>(&fsa)?;
-            println!("determinized_fsa=\n{}", &determinized_fsa);
             let factored_determinized_fsa: VectorFst<GallicWeightMin<W>> =
                 factor_weight::<_, _, GallicFactorMin<W>>(&determinized_fsa, factor_opts)?;
             let determinized_fst = weight_convert(&factored_determinized_fsa, &mut from_gallic);
@@ -433,7 +420,6 @@ where
             let fsa: VectorFst<GallicWeightRestrict<W>> = weight_convert(fst_in, &mut to_gallic)?;
             let determinized_fsa: VectorFst<GallicWeightRestrict<W>> =
                 determinize_fsa::<_, _, _, GallicCommonDivisor>(&fsa)?;
-            println!("determinized_fsa=\n{}", &determinized_fsa);
             let factored_determinized_fsa: VectorFst<GallicWeightRestrict<W>> =
                 factor_weight::<_, _, GallicFactorRestrict<W>>(&determinized_fsa, factor_opts)?;
             let determinized_fst = weight_convert(&factored_determinized_fsa, &mut from_gallic);
@@ -443,7 +429,6 @@ where
             let fsa: VectorFst<GallicWeight<W>> = weight_convert(fst_in, &mut to_gallic)?;
             let determinized_fsa: VectorFst<GallicWeight<W>> =
                 determinize_fsa::<_, _, _, GallicCommonDivisor>(&fsa)?;
-            println!("determinized_fsa=\n{}", &determinized_fsa);
             let factored_determinized_fsa: VectorFst<GallicWeight<W>> =
                 factor_weight::<_, _, GallicFactor<W>>(&determinized_fsa, factor_opts)?;
             let determinized_fst = weight_convert(&factored_determinized_fsa, &mut from_gallic);

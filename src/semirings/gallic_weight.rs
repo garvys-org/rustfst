@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter, Result};
+
 use failure::Fallible;
 
 use crate::semirings::ProductWeight;
@@ -210,8 +212,8 @@ impl<W: Semiring> UnionWeightOption<GallicWeightRestrict<W>>
     for GallicUnionWeightOption<GallicWeightRestrict<W>>
 {
     fn compare(w1: &GallicWeightRestrict<W>, w2: &GallicWeightRestrict<W>) -> bool {
-        let s1 = &w1.0.value1();
-        let s2 = &w2.0.value1();
+        let s1 = w1.0.value1();
+        let s2 =w2.0.value1();
         let n1 = s1.len_labels();
         let n2 = s2.len_labels();
         if n1 < n2 {
@@ -255,11 +257,11 @@ pub struct GallicWeight<W>(
 where
     W: Semiring;
 
-impl<W> std::fmt::Display for GallicWeight<W>
+impl<W> Display for GallicWeight<W>
 where
     W: Semiring,
 {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter) -> Result {
         self.0.fmt(f)
     }
 }
