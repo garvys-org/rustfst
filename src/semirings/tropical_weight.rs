@@ -11,6 +11,7 @@ use crate::KDELTA;
 
 use ordered_float::OrderedFloat;
 
+/// Tropical semiring: (min, +, inf, 0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
 pub struct TropicalWeight {
     value: OrderedFloat<f32>,

@@ -7,7 +7,7 @@ use crate::semirings::{
 };
 use crate::{Arc, EPS_LABEL};
 
-// Mapper from A to GallicArc<A>.
+/// Mapper from W to GallicArc<W>.
 pub struct ToGallicConverter {}
 
 macro_rules! impl_to_gallic_converter {

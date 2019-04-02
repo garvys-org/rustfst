@@ -4,6 +4,7 @@ use failure::Fallible;
 
 use crate::semirings::{CompleteSemiring, Semiring, SemiringProperties, StarSemiring};
 
+/// Probability semiring: (x, +, 0.0, 1.0).
 #[derive(Clone, Debug, PartialEq, PartialOrd, Default, Hash, Eq, Copy)]
 pub struct IntegerWeight {
     value: i32,

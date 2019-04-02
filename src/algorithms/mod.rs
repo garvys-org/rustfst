@@ -31,15 +31,17 @@ pub mod arc_mappers;
 #[allow(unused)]
 pub(crate) mod cache;
 
-pub mod factor_iterators;
+#[allow(unused)]
+pub(crate) mod factor_iterators;
 
 /// Module that provide structures implementing the `StateMapper` trait.
 pub mod state_mappers;
 
+/// Module that provide structures implementing the `WeightConverter` trait.
 pub mod weight_converters;
 
 /// Functions to compare / sort the Arcs of an FST.
-pub mod arc_compares{
+pub mod arc_compares {
     pub use super::arc_sort::{ilabel_compare, olabel_compare};
     pub use super::isomorphic::arc_compare;
 }
@@ -54,7 +56,6 @@ pub use self::{
     connect::connect,
     determinize::{determinize, DeterminizeType},
     encode::{decode, encode},
-    factor_weight::{factor_weight, FactorIterator, FactorWeightOptions, FactorWeightType},
     inversion::invert,
     isomorphic::isomorphic,
     projection::{project, ProjectType},
@@ -68,4 +69,9 @@ pub use self::{
     union::union,
     weight_convert::{weight_convert, WeightConverter},
     weight_pushing::push_weights,
+};
+
+#[allow(unused)]
+pub(crate) use self::{
+    factor_weight::{factor_weight, FactorIterator, FactorWeightOptions, FactorWeightType},
 };

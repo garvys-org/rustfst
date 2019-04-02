@@ -11,6 +11,7 @@ use crate::semirings::{
 };
 use crate::KDELTA;
 
+/// Probability semiring: (x, +, 0.0, 1.0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
 pub struct ProbabilityWeight {
     value: OrderedFloat<f32>,

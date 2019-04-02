@@ -7,6 +7,7 @@ use crate::semirings::{
     DivideType, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
 
+/// Product semiring: W1 * W2.
 #[derive(Debug, Eq, PartialOrd, PartialEq, Clone, Default, Hash)]
 pub struct ProductWeight<W1, W2>
 where

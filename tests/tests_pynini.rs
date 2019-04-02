@@ -5,16 +5,16 @@ use serde_derive::{Deserialize, Serialize};
 
 use failure::{bail, format_err, Fail, Fallible, ResultExt};
 
+use rustfst::algorithms::arc_compares::{ilabel_compare, olabel_compare};
 use rustfst::algorithms::arc_mappers::{
     IdentityArcMapper, InputEpsilonMapper, InvertWeightMapper, OutputEpsilonMapper, PlusMapper,
     QuantizeMapper, RmWeightMapper, TimesMapper,
 };
 use rustfst::algorithms::state_mappers::{ArcSumMapper, ArcUniqueMapper};
 use rustfst::algorithms::{
-    connect, decode, determinize, encode, invert, isomorphic, project, push_weights, reverse,
-    rm_epsilon, DeterminizeType, ProjectType, ReweightType, arc_sort
+    arc_sort, connect, decode, determinize, encode, invert, isomorphic, project, push_weights,
+    reverse, rm_epsilon, DeterminizeType, ProjectType, ReweightType,
 };
-use rustfst::algorithms::arc_compares::{ilabel_compare, olabel_compare};
 use rustfst::fst_impls::VectorFst;
 use rustfst::fst_traits::{MutableFst, TextParser};
 use rustfst::semirings::{
@@ -163,7 +163,7 @@ where
     state_map_arc_unique: F,
     determinize: Vec<DeterminizeTestData<F>>,
     arcsort_ilabel: F,
-    arcsort_olabel: F
+    arcsort_olabel: F,
 }
 
 impl<F> TestData<F>
@@ -747,9 +747,9 @@ where
 }
 
 fn test_arcsort_ilabel<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeightQuantize,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arcsort = test_data.raw.clone();
     arc_sort(&mut fst_arcsort, ilabel_compare)?;
@@ -767,9 +767,9 @@ fn test_arcsort_ilabel<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_arcsort_olabel<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeightQuantize,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arcsort = test_data.raw.clone();
     arc_sort(&mut fst_arcsort, olabel_compare)?;

@@ -10,25 +10,30 @@ use crate::semirings::{
 };
 use crate::Label;
 
+/// Product of StringWeightLeft and an arbitrary weight.
 #[derive(PartialOrd, PartialEq, Eq, Clone, Default, Hash, Debug)]
 pub struct GallicWeightLeft<W>(ProductWeight<StringWeightLeft, W>)
 where
     W: Semiring;
 
+/// Product of StringWeightRight and an arbitrary weight.
 #[derive(PartialOrd, PartialEq, Eq, Clone, Default, Hash, Debug)]
 pub struct GallicWeightRight<W>(ProductWeight<StringWeightRight, W>)
 where
     W: Semiring;
 
+/// Product of StringWeighRestrict and an arbitrary weight.
 #[derive(PartialOrd, PartialEq, Eq, Clone, Default, Hash, Debug)]
 pub struct GallicWeightRestrict<W>(ProductWeight<StringWeightRestrict, W>)
 where
     W: Semiring;
 
+/// Product of StringWeightRestrict and an arbitrary weight.
 #[derive(PartialOrd, PartialEq, Eq, Clone, Default, Hash, Debug)]
 pub struct GallicWeightMin<W>(ProductWeight<StringWeightRestrict, W>)
 where
     W: Semiring;
+
 fn natural_less<W: Semiring>(w1: &W, w2: &W) -> Fallible<bool> {
     Ok((&w1.plus(w2)? == w1) && (w1 != w2))
 }
@@ -254,6 +259,7 @@ impl<W: Semiring> UnionWeightOption<GallicWeightRestrict<W>>
     }
 }
 
+/// UnionWeight of GallicWeightRestrict.
 #[derive(Debug, PartialOrd, PartialEq, Clone, Hash, Default, Eq)]
 pub struct GallicWeight<W>(
     pub UnionWeight<GallicWeightRestrict<W>, GallicUnionWeightOption<GallicWeightRestrict<W>>>,

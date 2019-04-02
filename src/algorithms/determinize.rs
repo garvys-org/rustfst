@@ -439,6 +439,9 @@ where
     }
 }
 
+/// This operations creates an equivalent FST that has the property that no
+/// state has two transitions with the same input label. For this algorithm,
+/// epsilon transitions are treated as regular symbols.
 pub fn determinize<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Fallible<F2>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,

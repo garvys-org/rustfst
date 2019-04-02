@@ -11,6 +11,7 @@ use crate::semirings::{
 };
 use crate::KDELTA;
 
+/// Log semiring: (log(e^-x + e^-y), +, inf, 0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
 pub struct LogWeight {
     value: OrderedFloat<f32>,

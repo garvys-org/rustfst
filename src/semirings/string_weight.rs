@@ -8,24 +8,29 @@ use crate::semirings::{
 };
 use crate::Label;
 
+/// String semiring: (identity, ., Infinity, Epsilon)
 #[derive(Clone, Debug, PartialOrd, Default, PartialEq, Eq, Hash)]
 pub struct StringWeightRestrict {
-    /// If None -> Infinity. If Some([]) -> Epsilon
-    pub value: StringWeightVariant,
+    pub(crate) value: StringWeightVariant,
 }
 
+/// String semiring: (longest_common_prefix, ., Infinity, Epsilon)
 #[derive(Clone, Debug, PartialOrd, Default, PartialEq, Eq, Hash)]
 pub struct StringWeightLeft {
-    /// If None -> Infinity. If Some([]) -> Epsilon
-    pub value: StringWeightVariant,
+    pub(crate) value: StringWeightVariant,
 }
 
+/// String semiring: (longest_common_suffix, ., Infinity, Epsilon)
 #[derive(Clone, Debug, PartialOrd, Default, PartialEq, Eq, Hash)]
 pub struct StringWeightRight {
-    /// If None -> Infinity. If Some([]) -> Epsilon
-    pub value: StringWeightVariant,
+    pub(crate) value: StringWeightVariant,
 }
 
+/// Determines whether to use left or right string semiring.  Includes a
+/// 'restricted' version that signals an error if proper prefixes/suffixes
+/// would otherwise be returned by Plus, useful with various
+/// algorithms that require functional transducer input with the
+/// string semirings.
 pub enum StringType {
     StringRestrict,
     StringLeft,
@@ -207,11 +212,11 @@ string_semiring!(StringWeightRight, StringType::StringRight);
 
 fn divide_left(w1: &StringWeightVariant, w2: &StringWeightVariant) -> StringWeightVariant {
     match (w1, w2) {
-        (StringWeightVariant::Infinity, StringWeightVariant::Infinity) => panic!("lol"),
+        (StringWeightVariant::Infinity, StringWeightVariant::Infinity) => panic!("Unexpected"),
         (StringWeightVariant::Infinity, StringWeightVariant::Labels(_)) => {
             StringWeightVariant::Infinity
         }
-        (StringWeightVariant::Labels(_), StringWeightVariant::Infinity) => panic!("lol"),
+        (StringWeightVariant::Labels(_), StringWeightVariant::Infinity) => panic!("Unexpected"),
         (StringWeightVariant::Labels(l1), StringWeightVariant::Labels(l2)) => {
             StringWeightVariant::Labels(l1.iter().skip(l2.len()).cloned().collect())
         }
@@ -220,11 +225,11 @@ fn divide_left(w1: &StringWeightVariant, w2: &StringWeightVariant) -> StringWeig
 
 fn divide_right(w1: &StringWeightVariant, w2: &StringWeightVariant) -> StringWeightVariant {
     match (w1, w2) {
-        (StringWeightVariant::Infinity, StringWeightVariant::Infinity) => panic!("lol"),
+        (StringWeightVariant::Infinity, StringWeightVariant::Infinity) => panic!("Unexpected"),
         (StringWeightVariant::Infinity, StringWeightVariant::Labels(_)) => {
             StringWeightVariant::Infinity
         }
-        (StringWeightVariant::Labels(_), StringWeightVariant::Infinity) => panic!("lol"),
+        (StringWeightVariant::Labels(_), StringWeightVariant::Infinity) => panic!("Unexpected"),
         (StringWeightVariant::Labels(l1), StringWeightVariant::Labels(l2)) => {
             StringWeightVariant::Labels(l1.iter().rev().skip(l2.len()).rev().cloned().collect())
         }

@@ -26,6 +26,6 @@ pub use self::semiring::{
     WeaklyDivisibleSemiring, WeightQuantize,
 };
 pub(crate) use self::string_variant::StringWeightVariant;
-pub use self::string_weight::{StringWeightLeft, StringWeightRestrict, StringWeightRight};
+pub use self::string_weight::{StringWeightLeft, StringWeightRestrict, StringWeightRight, StringType};
 pub use self::tropical_weight::TropicalWeight;
 pub use self::union_weight::{UnionWeight, UnionWeightOption};

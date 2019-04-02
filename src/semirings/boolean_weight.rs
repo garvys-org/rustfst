@@ -2,6 +2,7 @@ use failure::Fallible;
 
 use crate::semirings::{CompleteSemiring, Semiring, SemiringProperties, StarSemiring};
 
+/// Boolean semiring: (&, |, false, true).
 #[derive(Clone, Debug, PartialEq, PartialOrd, Default, Eq, Copy, Hash)]
 pub struct BooleanWeight {
     value: bool,

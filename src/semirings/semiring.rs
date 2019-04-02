@@ -7,6 +7,7 @@ use bitflags::bitflags;
 use failure::Fallible;
 
 bitflags! {
+    /// Properties verified by the Semiring.
     pub struct SemiringProperties: u32 {
         /// For all a, b, c: Times(c, Plus(a, b)) = Plus(Times(c, a), Times(c, b)).
         const LEFT_SEMIRING =  0b00001;
@@ -64,6 +65,7 @@ pub trait Semiring:
     fn properties() -> SemiringProperties;
 }
 
+/// Determines direction of division.
 #[derive(Copy, Clone, PartialOrd, PartialEq)]
 pub enum DivideType {
     /// Left division.

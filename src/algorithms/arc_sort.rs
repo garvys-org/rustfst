@@ -8,12 +8,12 @@ use crate::fst_traits::{CoreFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::Arc;
 
-/// Compare only input label
+/// Compare only input labels.
 pub fn ilabel_compare<W: Semiring>(a: &Arc<W>, b: &Arc<W>) -> Ordering {
     a.ilabel.cmp(&b.ilabel)
 }
 
-/// Compare only output label
+/// Compare only output labels.
 pub fn olabel_compare<W: Semiring>(a: &Arc<W>, b: &Arc<W>) -> Ordering {
     a.olabel.cmp(&b.olabel)
 }
@@ -42,10 +42,10 @@ where
     }
 }
 
-pub fn arc_sort<FST, F>(fst: &mut FST, comp: F) -> Fallible<()>
+/// Sorts arcs leaving each state of the FST using a compare function
+pub fn arc_sort<F>(fst: &mut F, comp: impl Fn(&Arc<F::W>, &Arc<F::W>) -> Ordering) -> Fallible<()>
 where
-    FST: MutableFst,
-    F: Fn(&Arc<FST::W>, &Arc<FST::W>) -> Ordering,
+    F: MutableFst,
 {
     let mut mapper = ArcSortMapper {
         f: comp,

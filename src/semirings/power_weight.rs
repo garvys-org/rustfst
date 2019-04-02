@@ -13,6 +13,7 @@ use crate::semirings::{
     DivideType, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
 
+/// Cartesian power semiring: W ^ n.
 pub struct PowerWeight<W, N>
 where
     W: Semiring,
