@@ -72,6 +72,6 @@ pub use self::{
 };
 
 #[allow(unused)]
-pub(crate) use self::{
-    factor_weight::{factor_weight, FactorIterator, FactorWeightOptions, FactorWeightType},
+pub(crate) use self::factor_weight::{
+    factor_weight, FactorIterator, FactorWeightOptions, FactorWeightType,
 };
