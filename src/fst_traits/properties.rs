@@ -246,5 +246,10 @@ bitflags! {
             Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits | Self::ACCESSIBLE.bits |
             Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits | Self::STRING.bits | Self::WEIGHTED_CYCLES.bits |
             Self::UNWEIGHTED_CYCLES.bits;
-            }
+
+        const POS_PROPERTIES = 0b01010101010101010101010101010101;
+        const NEG_PROPERTIES = Self::POS_PROPERTIES.bits << 1;
+        const ALL_PROPERTIES = Self::POS_PROPERTIES.bits | Self::NEG_PROPERTIES.bits;
+    }
+
 }
