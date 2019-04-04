@@ -2,7 +2,8 @@ use std::collections::HashSet;
 
 use failure::Fallible;
 
-use crate::algorithms::connect::{connect, dfs};
+use crate::algorithms::connect;
+use crate::algorithms::dfs;
 use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
 use crate::semirings::Semiring;
 use crate::Arc;
