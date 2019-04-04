@@ -206,6 +206,6 @@ pub trait Fst:
                 }
             }
         }
-        return true;
+        true
     }
 }

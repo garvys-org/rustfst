@@ -226,9 +226,9 @@ impl<W: Semiring> UnionWeightOption<GallicWeightRestrict<W>>
         let n1 = s1.len_labels();
         let n2 = s2.len_labels();
         if n1 < n2 {
-            return true;
+            true
         } else if n1 > n2 {
-            return false;
+            false
         } else {
             // n1 == n2
             if n1 == 0 {
@@ -246,7 +246,7 @@ impl<W: Semiring> UnionWeightOption<GallicWeightRestrict<W>>
                     return false;
                 }
             }
-            return false;
+            false
         }
     }
 

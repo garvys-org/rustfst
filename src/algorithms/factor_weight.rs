@@ -100,13 +100,13 @@ where
                 self.unfactored.insert(old_state, new_state);
                 self.element_map.insert(new_state, elt.clone());
             }
-            return *self.unfactored.get(&old_state).unwrap();
+            self.unfactored[&old_state]
         } else {
             if !self.element_map.contains_right(&elt) {
                 let new_state = self.element_map.len();
                 self.element_map.insert(new_state, elt.clone());
             }
-            return *self.element_map.get_by_right(&elt).unwrap();
+            *self.element_map.get_by_right(&elt).unwrap()
         }
     }
 

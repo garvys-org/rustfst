@@ -42,7 +42,6 @@ macro_rules! impl_gallic_factor {
                 }
                 let mut it = $s_factor::new(self.weight.value1().clone());
                 let lol = it.next();
-                println!("POUET {:?}", lol);
                 let (p_f, p_s) = lol.unwrap();
                 let g1 = (p_f, self.weight.value2().clone()).into();
                 let g2 = (p_s, W::one()).into();
@@ -109,7 +108,7 @@ impl<W: Semiring> Iterator for GallicFactor<W> {
 impl<W: Semiring> FactorIterator<GallicWeight<W>> for GallicFactor<W> {
     fn new(weight: GallicWeight<W>) -> Self {
         let mut done = false;
-        if weight.0.list.len() == 0 {
+        if weight.0.list.is_empty() {
             done = true;
         } else if weight.0.list.len() == 1 && weight.0.list[0].value1().len_labels() <= 1 {
             done = true;

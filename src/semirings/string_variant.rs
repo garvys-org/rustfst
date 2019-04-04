@@ -43,7 +43,7 @@ impl StringWeightVariant {
     pub fn is_empty_list(&self) -> bool {
         match self {
             StringWeightVariant::Infinity => false,
-            StringWeightVariant::Labels(l) => l.len() == 0,
+            StringWeightVariant::Labels(l) => l.is_empty(),
         }
     }
 
