@@ -1,4 +1,12 @@
+use std::collections::HashSet;
+
 use bitflags::bitflags;
+
+use failure::Fallible;
+
+use crate::Arc;
+use crate::fst_traits::Fst;
+
 
 bitflags! {
     /// The property bits here assert facts about an FST. If individual bits are
@@ -90,7 +98,7 @@ bitflags! {
         /// Not a string FST.
         const NOT_STRING = 0b1 << 29;
 
-        /// FST has least one weighted cycle.
+        /// FST has at least one weighted cycle.
         const WEIGHTED_CYCLES = 0b1 << 30;
 
         /// Only unweighted cycles.
@@ -98,68 +106,86 @@ bitflags! {
 
         /// Properties of an empty machine.
         const NULL_PROPERTIES =
-            Self::ACCEPTOR.bits | Self::I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits | Self::NO_EPSILONS.bits | Self::NO_I_EPSILONS.bits |
-            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits | Self::UNWEIGHTED.bits | Self::ACYCLIC.bits |
-            Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits | Self::ACCESSIBLE.bits | Self::COACCESSIBLE.bits | Self::STRING.bits |
+            Self::ACCEPTOR.bits | Self::I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
+            Self::NO_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::NO_O_EPSILONS.bits |
+            Self::I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits | Self::UNWEIGHTED.bits |
+            Self::ACYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits |
+            Self::ACCESSIBLE.bits | Self::COACCESSIBLE.bits | Self::STRING.bits |
             Self::UNWEIGHTED_CYCLES.bits;
 
         /// Properties that are preserved when an FST is copied.
         const COPY_PROPERTIES =
-             Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits | Self::NOT_I_DETERMINISTIC.bits |
-            Self::O_DETERMINISTIC.bits | Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::NO_EPSILONS.bits |
-            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits | Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits |
-            Self::NOT_I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits |
-            Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits |
-            Self::TOP_SORTED.bits | Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits | Self::NOT_ACCESSIBLE.bits | Self::COACCESSIBLE.bits |
-            Self::NOT_COACCESSIBLE.bits | Self::STRING.bits | Self::NOT_STRING.bits | Self::WEIGHTED_CYCLES.bits |
-            Self::UNWEIGHTED_CYCLES.bits;
+            Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
+            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
+            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::NO_EPSILONS.bits |
+            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits |
+            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits |
+            Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits |
+            Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits |
+            Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits |
+            Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits | Self::NOT_ACCESSIBLE.bits |
+            Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits | Self::STRING.bits |
+            Self::NOT_STRING.bits | Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
 
         /// Properties that are intrinsic to the FST.
         const INTRINSIC_PROPERTIES =
             Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits | Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits |
-            Self::NO_EPSILONS.bits | Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits | Self::NO_O_EPSILONS.bits |
-            Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits |
-            Self::WEIGHTED.bits | Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits |
-            Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits | Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits |
-            Self::NOT_ACCESSIBLE.bits | Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits | Self::STRING.bits | Self::NOT_STRING.bits |
-            Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
+            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
+            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::NO_EPSILONS.bits |
+            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits |
+            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits |
+            Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits |
+            Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits |
+            Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits |
+            Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits | Self::NOT_ACCESSIBLE.bits |
+            Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits | Self::STRING.bits |
+            Self::NOT_STRING.bits | Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
 
         /// Properties that are preserved when an FST start state is set.
         const SET_START_PROPERTIES =
             Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits | Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits |
-            Self::NO_EPSILONS.bits | Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits | Self::NO_O_EPSILONS.bits |
-            Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits |
-            Self::WEIGHTED.bits | Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::TOP_SORTED.bits | Self::NOT_TOP_SORTED.bits |
-            Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits | Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
+            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
+            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::NO_EPSILONS.bits |
+            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits |
+            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits |
+            Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits |
+            Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::TOP_SORTED.bits |
+            Self::NOT_TOP_SORTED.bits | Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits |
+            Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
 
         /// Properties that are preserved when an FST final weight is set.
         const SET_FINAL_PROPERTIES =
             Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits | Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits |
-            Self::NO_EPSILONS.bits | Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits | Self::NO_O_EPSILONS.bits |
-            Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits |
-            Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits |
-            Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits | Self::NOT_ACCESSIBLE.bits | Self::WEIGHTED_CYCLES.bits |
-            Self::UNWEIGHTED_CYCLES.bits;
+            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
+            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::NO_EPSILONS.bits |
+            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits |
+            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits |
+            Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::CYCLIC.bits |
+            Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits |
+            Self::TOP_SORTED.bits | Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits |
+            Self::NOT_ACCESSIBLE.bits | Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
 
         /// Properties that are preserved when an FST state is added.
         const ADD_STATE_PROPERTIES =
             Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits | Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits |
-            Self::NO_EPSILONS.bits | Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits | Self::NO_O_EPSILONS.bits |
-            Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits |
-            Self::WEIGHTED.bits | Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits |
-            Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits | Self::NOT_TOP_SORTED.bits | Self::NOT_ACCESSIBLE.bits |
-            Self::NOT_COACCESSIBLE.bits | Self::NOT_STRING.bits | Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
+            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
+            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::NO_EPSILONS.bits |
+            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits |
+            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits |
+            Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits |
+            Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits |
+            Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits |
+            Self::NOT_TOP_SORTED.bits | Self::NOT_ACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits |
+            Self::NOT_STRING.bits | Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
 
         /// Properties that are preserved when an FST arc is added.
         const ADD_ARC_PROPERTIES =
             Self::NOT_ACCEPTOR.bits | Self::NOT_I_DETERMINISTIC.bits |
-            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::I_EPSILONS.bits | Self::O_EPSILONS.bits |
-            Self::NOT_I_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits | Self::CYCLIC.bits | Self::INITIAL_CYCLIC.bits |
-            Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits | Self::COACCESSIBLE.bits | Self::WEIGHTED_CYCLES.bits;
+            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::I_EPSILONS.bits |
+            Self::O_EPSILONS.bits | Self::NOT_I_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits |
+            Self::WEIGHTED.bits | Self::CYCLIC.bits | Self::INITIAL_CYCLIC.bits |
+            Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits | Self::COACCESSIBLE.bits |
+            Self::WEIGHTED_CYCLES.bits;
 
         /// Properties that are preserved when an FST arc is set.
         const SET_ARC_PROPERTIES = 0b0;
@@ -167,89 +193,108 @@ bitflags! {
         /// Properties that are preserved when FST states are deleted.
         const DELETE_STATE_PROPERTIES =
             Self::ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::O_DETERMINISTIC.bits | Self::NO_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::NO_O_EPSILONS.bits |
-            Self::I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits | Self::UNWEIGHTED.bits | Self::ACYCLIC.bits | Self::INITIAL_ACYCLIC.bits |
+            Self::O_DETERMINISTIC.bits | Self::NO_EPSILONS.bits | Self::NO_I_EPSILONS.bits |
+            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits |
+            Self::UNWEIGHTED.bits | Self::ACYCLIC.bits | Self::INITIAL_ACYCLIC.bits |
             Self::TOP_SORTED.bits | Self::UNWEIGHTED_CYCLES.bits;
 
         /// Properties that are preserved when FST arcs are deleted.
         const DELETE_ARCS_PROPERTIES =
             Self::ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::O_DETERMINISTIC.bits | Self::NO_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::NO_O_EPSILONS.bits |
-            Self::I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits | Self::UNWEIGHTED.bits | Self::ACYCLIC.bits | Self::INITIAL_ACYCLIC.bits |
-            Self::TOP_SORTED.bits | Self::NOT_ACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits | Self::UNWEIGHTED_CYCLES.bits;
+            Self::O_DETERMINISTIC.bits | Self::NO_EPSILONS.bits | Self::NO_I_EPSILONS.bits |
+            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits |
+            Self::UNWEIGHTED.bits | Self::ACYCLIC.bits | Self::INITIAL_ACYCLIC.bits |
+            Self::TOP_SORTED.bits | Self::NOT_ACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits |
+            Self::UNWEIGHTED_CYCLES.bits;
 
         /// Properties that are preserved when an FST's states are reordered.
         const STATESORT_PROPERTIES =
             Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits | Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits |
-            Self::NO_EPSILONS.bits | Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits | Self::NO_O_EPSILONS.bits |
-            Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits |
-            Self::WEIGHTED.bits | Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits |
-            Self::INITIAL_ACYCLIC.bits | Self::ACCESSIBLE.bits | Self::NOT_ACCESSIBLE.bits | Self::COACCESSIBLE.bits |
-            Self::NOT_COACCESSIBLE.bits | Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
+            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
+            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::NO_EPSILONS.bits |
+            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits |
+            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits |
+            Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits |
+            Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits |
+            Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::ACCESSIBLE.bits |
+            Self::NOT_ACCESSIBLE.bits | Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits |
+            Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
 
         /// Properties that are preserved when an FST's arcs are reordered.
         const ARCSORT_PROPERTIES =
             Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits | Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits |
-            Self::NO_EPSILONS.bits | Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits | Self::NO_O_EPSILONS.bits |
-            Self::WEIGHTED.bits | Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits |
-            Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits | Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits |
-            Self::NOT_ACCESSIBLE.bits | Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits | Self::STRING.bits | Self::NOT_STRING.bits |
+            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
+            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::NO_EPSILONS.bits |
+            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits |
+            Self::NO_O_EPSILONS.bits | Self::WEIGHTED.bits | Self::UNWEIGHTED.bits |
+            Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits |
+            Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits | Self::NOT_TOP_SORTED.bits |
+            Self::ACCESSIBLE.bits | Self::NOT_ACCESSIBLE.bits | Self::COACCESSIBLE.bits |
+            Self::NOT_COACCESSIBLE.bits | Self::STRING.bits | Self::NOT_STRING.bits |
             Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
 
         /// Properties that are preserved when an FST's input labels are changed.
         const I_LABEL_INVARIANT_PROPERTIES =
             Self::O_DETERMINISTIC.bits | Self::NOT_O_DETERMINISTIC.bits |
-            Self::O_EPSILONS.bits | Self::NO_O_EPSILONS.bits | Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits |
-            Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits |
-            Self::TOP_SORTED.bits | Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits | Self::NOT_ACCESSIBLE.bits | Self::COACCESSIBLE.bits |
-            Self::NOT_COACCESSIBLE.bits | Self::STRING.bits | Self::NOT_STRING.bits | Self::WEIGHTED_CYCLES.bits |
-            Self::UNWEIGHTED_CYCLES.bits;
+            Self::O_EPSILONS.bits | Self::NO_O_EPSILONS.bits | Self::O_LABEL_SORTED.bits |
+            Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits | Self::UNWEIGHTED.bits |
+            Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits |
+            Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits | Self::NOT_TOP_SORTED.bits |
+            Self::ACCESSIBLE.bits | Self::NOT_ACCESSIBLE.bits | Self::COACCESSIBLE.bits |
+            Self::NOT_COACCESSIBLE.bits | Self::STRING.bits | Self::NOT_STRING.bits |
+            Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
 
         /// Properties that are preserved when an FST's output labels are changed.
         const O_LABEL_INVARIANT_PROPERTIES =
-            Self::I_DETERMINISTIC.bits | Self::NOT_I_DETERMINISTIC.bits |
-            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits | Self::WEIGHTED.bits |
-            Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits |
-            Self::TOP_SORTED.bits | Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits | Self::NOT_ACCESSIBLE.bits | Self::COACCESSIBLE.bits |
-            Self::NOT_COACCESSIBLE.bits | Self::STRING.bits | Self::NOT_STRING.bits | Self::WEIGHTED_CYCLES.bits |
-            Self::UNWEIGHTED_CYCLES.bits;
+            Self::I_DETERMINISTIC.bits | Self::NOT_I_DETERMINISTIC.bits | Self::I_EPSILONS.bits |
+            Self::NO_I_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits |
+            Self::WEIGHTED.bits | Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits |
+            Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits |
+            Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits | Self::NOT_ACCESSIBLE.bits |
+            Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits | Self::STRING.bits |
+            Self::NOT_STRING.bits | Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
 
         /// Properties that are preserved when an FST's weights are changed. This
         /// assumes that the set of states that are non-final is not changed.
         const WEIGHT_INVARIANT_PROPERTIES =
             Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits | Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits |
-            Self::NO_EPSILONS.bits | Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits | Self::NO_O_EPSILONS.bits |
-            Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits |
-            Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits |
-            Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits | Self::NOT_ACCESSIBLE.bits | Self::COACCESSIBLE.bits |
-            Self::NOT_COACCESSIBLE.bits | Self::STRING.bits | Self::NOT_STRING.bits;
+            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
+            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::NO_EPSILONS.bits |
+            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits |
+            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits |
+            Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::CYCLIC.bits |
+            Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits |
+            Self::TOP_SORTED.bits | Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits |
+            Self::NOT_ACCESSIBLE.bits | Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits |
+            Self::STRING.bits | Self::NOT_STRING.bits;
 
         /// Properties that are preserved when a superfinal state is added and an FST's
         /// final weights are directed to it via new transitions.
         const ADD_SUPER_FINAL_PROPERTIES =
             Self::NOT_ACCEPTOR.bits |
-            Self::NOT_I_DETERMINISTIC.bits | Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::I_EPSILONS.bits |
-            Self::O_EPSILONS.bits | Self::NOT_I_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits | Self::UNWEIGHTED.bits |
-            Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::NOT_TOP_SORTED.bits |
-            Self::NOT_ACCESSIBLE.bits | Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits | Self::NOT_STRING.bits |
+            Self::NOT_I_DETERMINISTIC.bits | Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits |
+            Self::I_EPSILONS.bits | Self::O_EPSILONS.bits | Self::NOT_I_LABEL_SORTED.bits |
+            Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits | Self::UNWEIGHTED.bits |
+            Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits |
+            Self::INITIAL_ACYCLIC.bits | Self::NOT_TOP_SORTED.bits | Self::NOT_ACCESSIBLE.bits |
+            Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits | Self::NOT_STRING.bits |
             Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
 
         /// Properties that are preserved when a superfinal state is removed and the
         /// epsilon transitions directed to it are made final weights.
         const RM_SUPER_FINAL_PROPERTIES =
             Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::O_DETERMINISTIC.bits | Self::NO_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::NO_O_EPSILONS.bits |
-            Self::I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits | Self::WEIGHTED.bits | Self::UNWEIGHTED.bits | Self::CYCLIC.bits |
-            Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits | Self::ACCESSIBLE.bits |
-            Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits | Self::STRING.bits | Self::WEIGHTED_CYCLES.bits |
-            Self::UNWEIGHTED_CYCLES.bits;
+            Self::O_DETERMINISTIC.bits | Self::NO_EPSILONS.bits | Self::NO_I_EPSILONS.bits |
+            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits |
+            Self::WEIGHTED.bits | Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits |
+            Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits |
+            Self::ACCESSIBLE.bits | Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits |
+            Self::STRING.bits | Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
 
-        const POS_PROPERTIES = 0b01010101010101010101010101010101;
+        const POS_PROPERTIES = 0b0101_0101_0101_0101_0101_0101_0101_0101;
         const NEG_PROPERTIES = Self::POS_PROPERTIES.bits << 1;
         const ALL_PROPERTIES = Self::POS_PROPERTIES.bits | Self::NEG_PROPERTIES.bits;
     }
 
 }
+
