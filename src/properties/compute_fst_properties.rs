@@ -2,12 +2,11 @@ use std::collections::HashSet;
 
 use failure::Fallible;
 
-use crate::fst_traits::Fst;
 use crate::algorithms::{dfs, find_strongly_connected_components};
+use crate::fst_traits::Fst;
 use crate::properties::FstProperties;
-use crate::Arc;
 use crate::semirings::Semiring;
-
+use crate::Arc;
 
 /// Computes all the FstProperties of the FST bit don't attach them to the FST.
 pub fn compute_fst_properties<F: Fst>(fst: &F) -> Fallible<FstProperties> {
@@ -118,7 +117,7 @@ pub fn compute_fst_properties<F: Fst>(fst: &F) -> Fallible<FstProperties> {
                 }
             }
 
-            if ! arc.weight.is_one() && !arc.weight.is_zero() {
+            if !arc.weight.is_one() && !arc.weight.is_zero() {
                 comp_props |= FstProperties::WEIGHTED;
                 comp_props &= !FstProperties::UNWEIGHTED;
 
@@ -170,4 +169,3 @@ pub fn compute_fst_properties<F: Fst>(fst: &F) -> Fallible<FstProperties> {
     }
     Ok(comp_props)
 }
-

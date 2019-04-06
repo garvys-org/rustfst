@@ -1,3 +1,5 @@
+use std::ops::{Shl, Shr};
+
 use bitflags::bitflags;
 
 bitflags! {
@@ -289,3 +291,20 @@ bitflags! {
     }
 
 }
+
+impl Shl<usize> for FstProperties {
+    type Output = FstProperties;
+
+    fn shl(self, rhs: usize) -> Self::Output {
+        Self::from_bits_truncate(self.bits() << rhs)
+    }
+}
+
+impl Shr<usize> for FstProperties {
+    type Output = FstProperties;
+
+    fn shr(self, rhs: usize) -> Self::Output {
+        Self::from_bits_truncate(self.bits() >> rhs)
+    }
+}
+

@@ -145,9 +145,9 @@ mod test {
     use super::*;
     use crate::fst_impls::VectorFst;
     use crate::fst_traits::MutableFst;
+    use crate::semirings::Semiring;
     use crate::semirings::TropicalWeight;
     use crate::Arc;
-    use crate::semirings::Semiring;
 
     #[test]
     fn test_sccs_1() -> Fallible<()> {
