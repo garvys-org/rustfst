@@ -2,8 +2,7 @@ use std::collections::HashSet;
 
 use failure::Fallible;
 
-use crate::fst_traits::{ExpandedFst, Fst};
-use crate::semirings::Semiring;
+use crate::fst_traits::Fst;
 use crate::StateId;
 
 pub fn dfs<F: Fst>(
@@ -148,6 +147,7 @@ mod test {
     use crate::fst_traits::MutableFst;
     use crate::semirings::TropicalWeight;
     use crate::Arc;
+    use crate::semirings::Semiring;
 
     #[test]
     fn test_sccs_1() -> Fallible<()> {

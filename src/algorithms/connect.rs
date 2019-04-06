@@ -3,8 +3,7 @@ use std::collections::HashSet;
 use failure::Fallible;
 
 use crate::algorithms::dfs;
-use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
-use crate::StateId;
+use crate::fst_traits::{ExpandedFst, MutableFst};
 
 /// This operation trims an FST, removing states and arcs that are not on successful paths.
 ///
