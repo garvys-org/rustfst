@@ -56,7 +56,7 @@ pub use self::{
     concat::concat,
     connect::connect,
     determinize::{determinize, DeterminizeType},
-    dfs::dfs,
+    dfs::{dfs, find_strongly_connected_components},
     encode::{decode, encode},
     inversion::invert,
     isomorphic::isomorphic,

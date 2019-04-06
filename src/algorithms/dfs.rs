@@ -2,9 +2,9 @@ use std::collections::HashSet;
 
 use failure::Fallible;
 
-use crate::fst_traits::{Fst, ExpandedFst};
+use crate::fst_traits::{ExpandedFst, Fst};
+use crate::semirings::Semiring;
 use crate::StateId;
-
 
 pub fn dfs<F: Fst>(
     fst: &F,
@@ -33,28 +33,35 @@ pub fn dfs<F: Fst>(
     Ok(())
 }
 
-
 struct TarjanAlgorithm<'a, F: Fst> {
     index: usize,
     stack: Vec<StateId>,
     state_id_to_lol: Vec<Option<Lol>>,
     fst: &'a F,
-    next_scc_id: usize
+    next_scc_id: usize,
+}
+
+#[derive(Clone)]
+struct Lol {
+    index: StateId,
+    lowlink: StateId,
+    on_stack: bool,
+    scc: Option<usize>,
 }
 
 impl<'a, F: Fst> TarjanAlgorithm<'a, F> {
-    pub fn new(fst: &'a F) -> Self {
+    fn new(fst: &'a F) -> Self {
         Self {
             index: 0,
             stack: vec![],
             state_id_to_lol: vec![],
             fst,
-            next_scc_id: 0
+            next_scc_id: 0,
         }
     }
 
-    pub fn compute(&mut self) -> Fallible<()> {
-        let states : Vec<_> = self.fst.states_iter().collect();
+    fn compute(&mut self) -> Fallible<()> {
+        let states: Vec<_> = self.fst.states_iter().collect();
         self.state_id_to_lol.resize(states.len(), None);
         for state in states {
             if self.state_id_to_lol[state].is_none() {
@@ -65,7 +72,6 @@ impl<'a, F: Fst> TarjanAlgorithm<'a, F> {
     }
 
     fn strongconnect(&mut self, state: StateId) -> Fallible<()> {
-
         let lol = Lol {
             index: self.index,
             lowlink: self.index,
@@ -81,7 +87,10 @@ impl<'a, F: Fst> TarjanAlgorithm<'a, F> {
             if self.state_id_to_lol[arc.nextstate].is_none() {
                 self.strongconnect(arc.nextstate)?;
                 let v_lowlink = self.state_id_to_lol[state].as_ref().unwrap().lowlink;
-                let w_lowlink = self.state_id_to_lol[arc.nextstate].as_ref().unwrap().lowlink;
+                let w_lowlink = self.state_id_to_lol[arc.nextstate]
+                    .as_ref()
+                    .unwrap()
+                    .lowlink;
                 self.state_id_to_lol[state].as_mut().unwrap().lowlink = v_lowlink.min(w_lowlink);
             } else {
                 let w = self.state_id_to_lol[arc.nextstate].as_ref().unwrap();
@@ -103,7 +112,7 @@ impl<'a, F: Fst> TarjanAlgorithm<'a, F> {
                 self.state_id_to_lol[w_state_id].as_mut().unwrap().on_stack = false;
                 self.state_id_to_lol[w_state_id].as_mut().unwrap().scc = Some(self.next_scc_id);
                 if w_state_id == state {
-                    break
+                    break;
                 }
             }
             self.next_scc_id += 1;
@@ -111,13 +120,86 @@ impl<'a, F: Fst> TarjanAlgorithm<'a, F> {
 
         Ok(())
     }
+
+    fn get_scc(self) -> Vec<usize> {
+        self.state_id_to_lol
+            .into_iter()
+            .map(|o_lol| o_lol.unwrap().scc.unwrap())
+            .collect()
+    }
 }
 
-#[derive(Clone)]
-struct Lol {
-    index: StateId,
-    lowlink: StateId,
-    on_stack: bool,
-    scc: Option<usize>
+pub fn find_strongly_connected_components<F: Fst>(
+    fst: &F,
+    sccs: &mut Vec<usize>,
+    n_sccs: &mut usize,
+) -> Fallible<()> {
+    let mut tarjan = TarjanAlgorithm::new(fst);
+    tarjan.compute()?;
+    *n_sccs = tarjan.next_scc_id;
+    *sccs = tarjan.get_scc();
+    Ok(())
 }
 
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::fst_impls::VectorFst;
+    use crate::fst_traits::MutableFst;
+    use crate::semirings::TropicalWeight;
+    use crate::Arc;
+
+    #[test]
+    fn test_sccs_1() -> Fallible<()> {
+        let mut fst = VectorFst::new();
+        let s0 = fst.add_state();
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+
+        fst.set_start(s0)?;
+        fst.set_final(s1, TropicalWeight::one())?;
+
+        fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::one(), s1))?;
+        fst.add_arc(s1, Arc::new(2, 2, TropicalWeight::one(), s2))?;
+
+        // Every state has its own scc.
+        let mut sccs = vec![];
+        let mut n_sccs = 0;
+        find_strongly_connected_components(&fst, &mut sccs, &mut n_sccs)?;
+        assert_eq!(n_sccs, 3);
+        assert_eq!(sccs[s0], 2);
+        assert_eq!(sccs[s1], 1);
+        assert_eq!(sccs[s2], 0);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_sccs_2() -> Fallible<()> {
+        let mut fst = VectorFst::new();
+        let s0 = fst.add_state();
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+        let s3 = fst.add_state();
+        let s4 = fst.add_state();
+
+        fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::one(), s2))?;
+        fst.add_arc(s2, Arc::new(1, 1, TropicalWeight::one(), s1))?;
+        fst.add_arc(s1, Arc::new(1, 1, TropicalWeight::one(), s0))?;
+        fst.add_arc(s0, Arc::new(2, 2, TropicalWeight::one(), s3))?;
+        fst.add_arc(s3, Arc::new(1, 1, TropicalWeight::one(), s4))?;
+
+        // Every state has its own scc.
+        let mut sccs = vec![];
+        let mut n_sccs = 0;
+        find_strongly_connected_components(&fst, &mut sccs, &mut n_sccs)?;
+        assert_eq!(n_sccs, 3);
+        assert_eq!(sccs[s0], 2);
+        assert_eq!(sccs[s1], 2);
+        assert_eq!(sccs[s2], 2);
+        assert_eq!(sccs[s3], 1);
+        assert_eq!(sccs[s4], 0);
+
+        Ok(())
+    }
+}
