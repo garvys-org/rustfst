@@ -35,13 +35,13 @@ pub fn dfs<F: Fst>(
 struct TarjanAlgorithm<'a, F: Fst> {
     index: usize,
     stack: Vec<StateId>,
-    state_id_to_lol: Vec<Option<Lol>>,
+    state_id_to_lol: Vec<Option<TempSccs>>,
     fst: &'a F,
     next_scc_id: usize,
 }
 
 #[derive(Clone)]
-struct Lol {
+struct TempSccs {
     index: StateId,
     lowlink: StateId,
     on_stack: bool,
@@ -71,7 +71,7 @@ impl<'a, F: Fst> TarjanAlgorithm<'a, F> {
     }
 
     fn strongconnect(&mut self, state: StateId) -> Fallible<()> {
-        let lol = Lol {
+        let lol = TempSccs {
             index: self.index,
             lowlink: self.index,
             on_stack: true,
