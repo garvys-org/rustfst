@@ -185,7 +185,7 @@ bitflags! {
         const SET_ARC_PROPERTIES = 0b0;
 
         /// Properties that are preserved when FST states are deleted.
-        const DELETE_STATE_PROPERTIES =
+        const DELETE_STATES_PROPERTIES =
             Self::ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
             Self::O_DETERMINISTIC.bits | Self::NO_EPSILONS.bits | Self::NO_I_EPSILONS.bits |
             Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits |
@@ -307,4 +307,3 @@ impl Shr<usize> for FstProperties {
         Self::from_bits_truncate(self.bits() >> rhs)
     }
 }
-
