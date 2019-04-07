@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## Unreleased
+
+### Added
+- Add `dfs` to the public interface in order to perform Depth First Search.
+- Add `find_strongly_connected_components`  which is the implementation of the Tarjan's algoritm to find the strongly connect components in a directed graph.
+- Add the `FstProperties` bitflags struct and a function to commpute the property flags for an `Fst`.
+
+## [0.3.0] - 2019-04-03
 
 ### Added
 - Add `arc_map` function to perform modifications that don't modify the number of arcs (and `ArcMapper` to specify how to modify the arcs).
@@ -101,6 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - First released version of rustfst
 
-[Unreleased]: https://github.com/garvys/rustfst/compare/0.2.0...HEAD
+[Unreleased]: https://github.com/garvys/rustfst/compare/0.3.0...HEAD
+[0.3.0]: https://github.com/garvys/rustfst/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/garvys/rustfst/compare/0.1.7...0.2.0
 [0.1.7]: https://github.com/garvys/rustfst/compare/0.1.2...0.1.7

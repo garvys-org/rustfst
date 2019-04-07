@@ -84,7 +84,6 @@ extern crate rand;
 #[cfg(test)]
 extern crate serde;
 #[cfg(test)]
-#[cfg(test)]
 extern crate serde_json;
 
 mod symbol_table;
@@ -112,6 +111,10 @@ pub mod algorithms;
 /// Implementation of the transitions inside a wFST.
 mod arc;
 pub use self::arc::Arc;
+
+/// Provides the `FstProperties` struct and some utils functions around it.
+/// Useful to assert some properties on a Fst.
+pub mod fst_properties;
 
 #[macro_use]
 /// Provides traits that must be implemented to be able to use generic algorithms.

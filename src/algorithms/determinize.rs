@@ -415,8 +415,7 @@ where
                 determinize_fsa::<_, _, _, GallicCommonDivisor>(&fsa)?;
             let factored_determinized_fsa: VectorFst<GallicWeightMin<W>> =
                 factor_weight::<_, _, GallicFactorMin<W>>(&determinized_fsa, factor_opts)?;
-            let determinized_fst = weight_convert(&factored_determinized_fsa, &mut from_gallic);
-            determinized_fst
+            weight_convert(&factored_determinized_fsa, &mut from_gallic)
         }
         DeterminizeType::DeterminizeFunctional => {
             let fsa: VectorFst<GallicWeightRestrict<W>> = weight_convert(fst_in, &mut to_gallic)?;
@@ -424,8 +423,7 @@ where
                 determinize_fsa::<_, _, _, GallicCommonDivisor>(&fsa)?;
             let factored_determinized_fsa: VectorFst<GallicWeightRestrict<W>> =
                 factor_weight::<_, _, GallicFactorRestrict<W>>(&determinized_fsa, factor_opts)?;
-            let determinized_fst = weight_convert(&factored_determinized_fsa, &mut from_gallic);
-            determinized_fst
+            weight_convert(&factored_determinized_fsa, &mut from_gallic)
         }
         DeterminizeType::DeterminizeNonFunctional => {
             let fsa: VectorFst<GallicWeight<W>> = weight_convert(fst_in, &mut to_gallic)?;
@@ -433,8 +431,7 @@ where
                 determinize_fsa::<_, _, _, GallicCommonDivisor>(&fsa)?;
             let factored_determinized_fsa: VectorFst<GallicWeight<W>> =
                 factor_weight::<_, _, GallicFactor<W>>(&determinized_fsa, factor_opts)?;
-            let determinized_fst = weight_convert(&factored_determinized_fsa, &mut from_gallic);
-            determinized_fst
+            weight_convert(&factored_determinized_fsa, &mut from_gallic)
         }
     }
 }

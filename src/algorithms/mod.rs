@@ -6,6 +6,7 @@ mod composition;
 mod concat;
 mod connect;
 mod determinize;
+mod dfs;
 mod encode;
 mod factor_weight;
 mod inversion;
@@ -55,6 +56,7 @@ pub use self::{
     concat::concat,
     connect::connect,
     determinize::{determinize, DeterminizeType},
+    dfs::{dfs, find_strongly_connected_components},
     encode::{decode, encode},
     inversion::invert,
     isomorphic::isomorphic,
@@ -72,6 +74,6 @@ pub use self::{
 };
 
 #[allow(unused)]
-pub(crate) use self::{
-    factor_weight::{factor_weight, FactorIterator, FactorWeightOptions, FactorWeightType},
+pub(crate) use self::factor_weight::{
+    factor_weight, FactorIterator, FactorWeightOptions, FactorWeightType,
 };

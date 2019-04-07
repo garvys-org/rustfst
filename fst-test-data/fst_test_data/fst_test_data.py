@@ -114,6 +114,9 @@ class FstTestData(object):
         print("Determinization")
         self.compute_determinization()
 
+        print("Properties")
+        self.compute_fst_properties()
+
         dump_json(self.config, os.path.join(self.path_dir, "metadata.json"))
 
         print("Done\n")
@@ -214,4 +217,48 @@ class FstTestData(object):
         fst_out = self.raw_fst.copy()
         fst_out.arcsort(sort_type=sort_type)
         self.add_data_to_config("arcsort_" + sort_type, fst_out.text())
+
+    def compute_fst_properties(self):
+        self.config["fst_properties"] = {}
+        fst_out = self.raw_fst.copy()
+
+        a = fst_out.properties(p.TRINARY_PROPERTIES, True)
+
+        def compute_prop(prop_name, prop_pynini):
+            self.config["fst_properties"][prop_name] = fst_out.properties(prop_pynini, False) == prop_pynini
+
+        compute_prop("acceptor", p.ACCEPTOR)
+        compute_prop("not_acceptor", p.NOT_ACCEPTOR)
+        compute_prop("i_deterministic", p.I_DETERMINISTIC)
+        compute_prop("not_i_deterministic", p.NON_I_DETERMINISTIC)
+        compute_prop("o_deterministic", p.O_DETERMINISTIC)
+        compute_prop("not_o_deterministic", p.NON_O_DETERMINISTIC)
+        compute_prop("epsilons", p.EPSILONS)
+        compute_prop("no_epsilons", p.NO_EPSILONS)
+        compute_prop("i_epsilons", p.I_EPSILONS)
+        compute_prop("no_i_epsilons", p.NO_I_EPSILONS)
+        compute_prop("o_epsilons", p.O_EPSILONS)
+        compute_prop("no_o_epsilons", p.NO_O_EPSILONS)
+        compute_prop("i_label_sorted", p.I_LABEL_SORTED)
+        compute_prop("not_i_label_sorted", p.NOT_I_LABEL_SORTED)
+        compute_prop("o_label_sorted", p.O_LABEL_SORTED)
+        compute_prop("not_o_label_sorted", p.NOT_O_LABEL_SORTED)
+        compute_prop("weighted", p.WEIGHTED)
+        compute_prop("unweighted", p.UNWEIGHTED)
+        compute_prop("cyclic", p.CYCLIC)
+        compute_prop("acyclic", p.ACYCLIC)
+        compute_prop("initial_cyclic", p.INITIAL_CYCLIC)
+        compute_prop("initial_acyclic", p.INITIAL_ACYCLIC)
+        compute_prop("top_sorted", p.TOP_SORTED)
+        compute_prop("not_top_sorted", p.NOT_TOP_SORTED)
+        compute_prop("accessible", p.ACCESSIBLE)
+        compute_prop("not_accessible", p.NOT_ACCESSIBLE)
+        compute_prop("coaccessible", p.COACCESSIBLE)
+        compute_prop("not_coaccessible", p.NOT_COACCESSIBLE)
+        compute_prop("string", p.STRING)
+        compute_prop("not_string", p.NOT_STRING)
+        compute_prop("weighted_cycles", p.WEIGHTED_CYCLES)
+        compute_prop("unweighted_cycles", p.UNWEIGHTED_CYCLES)
+
+        assert len(self.config["fst_properties"]) == 32
 

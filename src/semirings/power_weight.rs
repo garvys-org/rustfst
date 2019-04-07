@@ -175,7 +175,7 @@ where
     fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
         let mut mul = self.clone();
         for i in 0..self.weights.len() {
-            mul.weights[i] = self.weights[i].divide(&rhs.as_ref().weights[i], divide_type)?;
+            mul.weights[i] = self.weights[i].divide(&rhs.weights[i], divide_type)?;
         }
         Ok(mul)
     }

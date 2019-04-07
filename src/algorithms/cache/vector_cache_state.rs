@@ -59,14 +59,14 @@ impl<W: Semiring> VectorCacheState<W> {
         if state >= self.cache_states.len() {
             return false;
         }
-        return self.get_cache_state_unchecked(state).expanded();
+        self.get_cache_state_unchecked(state).expanded()
     }
 
     pub fn has_final(&self, state: StateId) -> bool {
         if state >= self.cache_states.len() {
             return false;
         }
-        return self.get_cache_state_unchecked(state).has_final();
+        self.get_cache_state_unchecked(state).has_final()
     }
 
     pub fn final_weight_unchecked(&self, state: StateId) -> Option<&W> {
