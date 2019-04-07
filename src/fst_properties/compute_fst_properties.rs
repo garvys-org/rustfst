@@ -3,15 +3,15 @@ use std::collections::HashSet;
 use failure::Fallible;
 
 use crate::algorithms::{dfs, find_strongly_connected_components};
-use crate::fst_traits::Fst;
 use crate::fst_properties::FstProperties;
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::Arc;
 
 /// Computes all the FstProperties of the FST bit don't attach them to the FST.
 pub fn compute_fst_properties<F: Fst>(fst: &F) -> Fallible<FstProperties> {
     let states: Vec<_> = fst.states_iter().collect();
-    let mut comp_props = FstProperties::ALL_PROPERTIES;
+    let mut comp_props = FstProperties::empty();
     let mut accessible_states = HashSet::new();
     let mut coaccessible_states = HashSet::new();
 
@@ -130,6 +130,11 @@ pub fn compute_fst_properties<F: Fst>(fst: &F) -> Fallible<FstProperties> {
             if arc.nextstate <= state {
                 comp_props |= FstProperties::NOT_TOP_SORTED;
                 comp_props &= !FstProperties::TOP_SORTED;
+            }
+
+            if state == arc.nextstate {
+                comp_props |= FstProperties::CYCLIC;
+                comp_props &= !FstProperties::ACYCLIC;
             }
 
             if arc.nextstate != state + 1 {
