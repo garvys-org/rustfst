@@ -3,6 +3,7 @@ mod fst_properties;
 mod mutate_properties;
 mod utils;
 
+/// Functions for getting property bit vectors when executing mutation operations.
 pub mod mutable_properties {
     pub use super::mutate_properties::*;
 }

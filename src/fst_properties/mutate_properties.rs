@@ -1,5 +1,5 @@
 use crate::algorithms::ProjectType;
-use crate::properties::FstProperties;
+use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
 use crate::Arc;
 use crate::StateId;

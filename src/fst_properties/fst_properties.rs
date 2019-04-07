@@ -4,10 +4,10 @@ use bitflags::bitflags;
 
 bitflags! {
     /// The property bits here assert facts about an FST. If individual bits are
-    /// added, then the composite properties below, the property functions and
-    /// property names in properties.cc, and TestProperties() in test-properties.h
+    /// added, then the composite fst_properties below, the property functions and
+    /// property names in fst_properties.cc, and TestProperties() in test-fst_properties.h
     /// should be updated.
-    /// For each of these properties below there is a pair of property bits, one
+    /// For each of these fst_properties below there is a pair of property bits, one
     /// positive and one negative. If the positive bit is set, the property is true.
     /// If the negative bit is set, the property is false. If neither is set, the
     /// property has unknown value. Both should never be simultaneously set. The

@@ -1,11 +1,13 @@
-use crate::properties::FstProperties;
+use crate::fst_properties::FstProperties;
 
+/// Both bits are set iff one bit is set.
 pub fn known_properties(props: FstProperties) -> FstProperties {
     props
         | ((props & FstProperties::POS_PROPERTIES) << 1)
         | ((props & FstProperties::NEG_PROPERTIES) >> 1)
 }
 
+/// Tests compatibility between two sets of properties.
 pub fn compat_properties(props1: FstProperties, props2: FstProperties) -> bool {
     let known_props1 = known_properties(props1);
     let known_props2 = known_properties(props2);

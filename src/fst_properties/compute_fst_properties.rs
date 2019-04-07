@@ -4,7 +4,7 @@ use failure::Fallible;
 
 use crate::algorithms::{dfs, find_strongly_connected_components};
 use crate::fst_traits::Fst;
-use crate::properties::FstProperties;
+use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
 use crate::Arc;
 

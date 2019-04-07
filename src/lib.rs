@@ -112,7 +112,9 @@ pub mod algorithms;
 mod arc;
 pub use self::arc::Arc;
 
-pub mod properties;
+/// Provides the `FstProperties` struct and some utils functions around it.
+/// Useful to assert some properties on a Fst.
+pub mod fst_properties;
 
 #[macro_use]
 /// Provides traits that must be implemented to be able to use generic algorithms.
