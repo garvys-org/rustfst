@@ -30,9 +30,9 @@ struct OperationResult {
 
 impl OperationResult {
     fn parse<F>(&self) -> F
-        where
-            F: TextParser,
-            F::W: Semiring<Type = f32>,
+    where
+        F: TextParser,
+        F::W: Semiring<Type = f32>,
     {
         F::from_text_string(self.result.as_str()).unwrap()
     }
@@ -47,9 +47,9 @@ struct EncodeOperationResult {
 
 impl EncodeOperationResult {
     fn parse<F>(&self) -> EncodeTestData<F>
-        where
-            F: TextParser,
-            F::W: Semiring<Type = f32>,
+    where
+        F: TextParser,
+        F::W: Semiring<Type = f32>,
     {
         EncodeTestData {
             encode_weights: self.encode_weights,
@@ -67,9 +67,9 @@ struct DeterminizeOperationResult {
 
 impl DeterminizeOperationResult {
     fn parse<F>(&self) -> DeterminizeTestData<F>
-        where
-            F: TextParser,
-            F::W: Semiring<Type = f32>,
+    where
+        F: TextParser,
+        F::W: Semiring<Type = f32>,
     {
         DeterminizeTestData {
             det_type: match self.det_type.as_str() {
@@ -118,9 +118,9 @@ struct ParsedTestData {
 }
 
 struct EncodeTestData<F>
-    where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+where
+    F: TextParser,
+    F::W: Semiring<Type = f32>,
 {
     encode_labels: bool,
     encode_weights: bool,
@@ -128,18 +128,18 @@ struct EncodeTestData<F>
 }
 
 struct DeterminizeTestData<F>
-    where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+where
+    F: TextParser,
+    F::W: Semiring<Type = f32>,
 {
     det_type: DeterminizeType,
     result: Fallible<F>,
 }
 
 struct TestData<F>
-    where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+where
+    F: TextParser,
+    F::W: Semiring<Type = f32>,
 {
     rmepsilon: F,
     #[allow(unused)]
@@ -306,9 +306,9 @@ fn parse_fst_properties(mapping: &HashMap<String, bool>) -> FstProperties {
 }
 
 impl<F> TestData<F>
-    where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+where
+    F: TextParser,
+    F::W: Semiring<Type = f32>,
 {
     pub fn new(data: &ParsedTestData) -> Self {
         Self {
@@ -378,9 +378,9 @@ fn run_test_pynini(test_name: &str) -> Fallible<()> {
 }
 
 fn do_run_test_pynini<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: 'static + Semiring<Type = f32> + StarSemiring + WeaklyDivisibleSemiring + WeightQuantize,
+where
+    F: TextParser + MutableFst,
+    F::W: 'static + Semiring<Type = f32> + StarSemiring + WeaklyDivisibleSemiring + WeightQuantize,
 {
     test_rmepsilon(&test_data)?;
 
@@ -434,9 +434,9 @@ fn do_run_test_pynini<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_rmepsilon<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: 'static + Semiring<Type = f32> + WeaklyDivisibleSemiring + StarSemiring,
+where
+    F: TextParser + MutableFst,
+    F::W: 'static + Semiring<Type = f32> + WeaklyDivisibleSemiring + StarSemiring,
 {
     // Remove epsilon
     let fst_rmepsilon: VectorFst<_> = rm_epsilon(&test_data.raw).unwrap();
@@ -449,9 +449,9 @@ fn test_rmepsilon<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_invert<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
 {
     // Invert
     let mut fst_invert = test_data.raw.clone();
@@ -466,9 +466,9 @@ fn test_invert<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_project_output<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
 {
     // Project output
     let mut fst_project_output = test_data.raw.clone();
@@ -487,9 +487,9 @@ fn test_project_output<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_project_input<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
 {
     // Project input
     let mut fst_project_input = test_data.raw.clone();
@@ -504,9 +504,9 @@ fn test_project_input<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_reverse<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: 'static + Semiring<Type = f32> + WeaklyDivisibleSemiring,
+where
+    F: TextParser + MutableFst,
+    F::W: 'static + Semiring<Type = f32> + WeaklyDivisibleSemiring,
 {
     // Reverse
     let fst_reverse: VectorFst<_> = reverse(&test_data.raw).unwrap();
@@ -519,9 +519,9 @@ fn test_reverse<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_connect<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32>,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32>,
 {
     // Connect
     let mut fst_connect = test_data.raw.clone();
@@ -536,9 +536,9 @@ fn test_connect<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_weight_pushing_initial<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
 {
     // Weight pushing initial
     let mut fst_weight_push_initial = test_data.raw.clone();
@@ -560,9 +560,9 @@ fn test_weight_pushing_initial<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_weight_pushing_final<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
 {
     // Weight pushing final
     let mut fst_weight_push_final = test_data.raw.clone();
@@ -581,9 +581,9 @@ fn test_weight_pushing_final<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_arc_map_identity<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeightQuantize,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
 {
     // ArcMap IdentityMapper
     let mut fst_arc_map_identity = test_data.raw.clone();
@@ -603,9 +603,9 @@ fn test_arc_map_identity<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_arc_map_rmweight<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeightQuantize,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
 {
     // ArcMap RmWeightMapper
     let mut fst_arc_map_rmweight = test_data.raw.clone();
@@ -625,9 +625,9 @@ fn test_arc_map_rmweight<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_arc_map_invert<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring,
 {
     // ArcMap InvertWeightMapper
     let mut fst_arc_map_invert = test_data.raw.clone();
@@ -647,9 +647,9 @@ fn test_arc_map_invert<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_arc_map_input_epsilon<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeightQuantize,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = InputEpsilonMapper {};
@@ -668,9 +668,9 @@ fn test_arc_map_input_epsilon<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_arc_map_output_epsilon<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeightQuantize,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = OutputEpsilonMapper {};
@@ -689,9 +689,9 @@ fn test_arc_map_output_epsilon<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_arc_map_plus<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeightQuantize,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = PlusMapper::new(1.5);
@@ -710,9 +710,9 @@ fn test_arc_map_plus<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_arc_map_times<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeightQuantize,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = TimesMapper::new(1.5);
@@ -731,9 +731,9 @@ fn test_arc_map_times<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_arc_map_quantize<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeightQuantize,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = QuantizeMapper {};
@@ -752,9 +752,9 @@ fn test_arc_map_quantize<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_encode<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32>,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32>,
 {
     for encode_test_data in &test_data.encode {
         let mut fst_encoded = test_data.raw.clone();
@@ -773,9 +773,9 @@ fn test_encode<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_encode_decode<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32>,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32>,
 {
     for encode_test_data in &test_data.encode_decode {
         let mut fst_encoded = test_data.raw.clone();
@@ -802,9 +802,9 @@ fn test_encode_decode<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_state_map_arc_sum<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32>,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32>,
 {
     let mut fst_state_map = test_data.raw.clone();
     let mut mapper = ArcSumMapper {};
@@ -825,9 +825,9 @@ fn test_state_map_arc_sum<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_state_map_arc_unique<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32>,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32>,
 {
     let mut fst_state_map = test_data.raw.clone();
     let mut mapper = ArcUniqueMapper {};
@@ -848,9 +848,9 @@ fn test_state_map_arc_unique<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_determinize<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
     for determinize_data in &test_data.determinize {
         println!("det_type = {:?}", determinize_data.det_type);
@@ -890,9 +890,9 @@ fn test_determinize<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_arcsort_ilabel<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeightQuantize,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arcsort = test_data.raw.clone();
     arc_sort(&mut fst_arcsort, ilabel_compare)?;
@@ -910,9 +910,9 @@ fn test_arcsort_ilabel<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_arcsort_olabel<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeightQuantize,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arcsort = test_data.raw.clone();
     arc_sort(&mut fst_arcsort, olabel_compare)?;
@@ -930,9 +930,9 @@ fn test_arcsort_olabel<F>(test_data: &TestData<F>) -> Fallible<()>
 }
 
 fn test_fst_properties<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeightQuantize,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let ref_props = test_data.fst_properties;
     let props = test_data.raw.properties()?;
