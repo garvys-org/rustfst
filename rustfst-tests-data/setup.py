@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 from setuptools import setup, find_packages
 
 setup(
-    name="fst_test_data",
+    name="rustfst_tests_data",
     version="0.1.0",
     description="Python test generator for Rustfst",
     author="Alexandre Caulier",

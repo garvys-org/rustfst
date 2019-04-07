@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import os
 import pynini as p
-from fst_test_data.fst_test_data import FstTestData, weight_one
+from rustfst_tests_data.fst_test_data import FstTestData, weight_one
 
 
 class FstTestData005(FstTestData):
