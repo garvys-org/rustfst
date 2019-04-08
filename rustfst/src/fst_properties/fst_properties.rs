@@ -62,7 +62,7 @@ bitflags! {
         /// FST has cycles.
         const CYCLIC = 0b1 << 18;
         /// FST has no cycles.
-        const ACYCLIC = 0b1 << 29;
+        const ACYCLIC = 0b1 << 19;
 
         /// FST has cycles containing the initial state.
         const INITIAL_CYCLIC = 0b1 << 20;

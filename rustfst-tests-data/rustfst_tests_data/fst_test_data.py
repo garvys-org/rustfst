@@ -114,6 +114,9 @@ class FstTestData(object):
         print("Determinization")
         self.compute_determinization()
 
+        print("Topsort")
+        self.compute_topsort()
+
         print("Properties")
         self.compute_fst_properties()
 
@@ -217,6 +220,12 @@ class FstTestData(object):
         fst_out = self.raw_fst.copy()
         fst_out.arcsort(sort_type=sort_type)
         self.add_data_to_config("arcsort_" + sort_type, fst_out.text())
+
+    def compute_topsort(self):
+        fst_out = self.raw_fst.copy()
+        fst_out.arcsort(sort_type='ilabel')
+        fst_out.topsort()
+        self.add_data_to_config("topsort", fst_out.text())
 
     def compute_fst_properties(self):
         self.config["fst_properties"] = {}
