@@ -9,4 +9,5 @@ pub mod properties;
 pub mod reverse;
 pub mod rm_epsilon;
 pub mod state_map;
+pub mod topsort;
 pub mod weight_pushing;

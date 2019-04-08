@@ -19,6 +19,8 @@ mod rm_epsilon;
 mod rm_final_epsilon;
 mod single_source_shortest_distance;
 mod state_map;
+mod state_sort;
+mod top_sort;
 mod union;
 mod weight_convert;
 mod weight_pushing;
@@ -68,6 +70,8 @@ pub use self::{
     rm_final_epsilon::rm_final_epsilon,
     single_source_shortest_distance::{shortest_distance, single_source_shortest_distance},
     state_map::{state_map, StateMapper},
+    state_sort::state_sort,
+    top_sort::top_sort,
     union::union,
     weight_convert::{weight_convert, WeightConverter},
     weight_pushing::push_weights,

@@ -68,6 +68,9 @@
     "weight_pushing_final": {
         "result": "0\t1\t12\t25\n0\t2\t12\t25\n1\t3\t13\t26\n2\t3\t13\t26\n3\t4\t14\t27\n4\t2\n"
     }, 
+    "topsort": {
+        "result": "0\t2\t12\t25\t0.3\n0\t1\t12\t25\t0.3\n1\t3\t13\t26\t0.4\n2\t3\t13\t26\t0.4\n3\t4\t14\t27\t0.6\n4\t0.7\n"
+    }, 
     "fst_properties": {
         "accessible": true, 
         "not_acceptor": true, 

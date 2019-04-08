@@ -68,6 +68,9 @@
     "weight_pushing_final": {
         "result": "0\t1\t12\t25\n1\n"
     }, 
+    "topsort": {
+        "result": "0\t1\t12\t25\n1\n"
+    }, 
     "fst_properties": {
         "accessible": true, 
         "not_acceptor": true, 

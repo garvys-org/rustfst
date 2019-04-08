@@ -36,6 +36,7 @@ use crate::algorithms::{
     reverse::test_reverse,
     rm_epsilon::test_rmepsilon,
     state_map::{test_state_map_arc_sum, test_state_map_arc_unique},
+    topsort::test_topsort,
     weight_pushing::{test_weight_pushing_final, test_weight_pushing_initial},
 };
 
@@ -82,6 +83,7 @@ pub struct ParsedTestData {
     determinize: Vec<DeterminizeOperationResult>,
     arcsort_ilabel: OperationResult,
     arcsort_olabel: OperationResult,
+    topsort: OperationResult,
     fst_properties: HashMap<String, bool>,
 }
 
@@ -116,6 +118,7 @@ where
     pub determinize: Vec<DeterminizeTestData<F>>,
     pub arcsort_ilabel: F,
     pub arcsort_olabel: F,
+    pub topsort: F,
     pub fst_properties: FstProperties,
 }
 
@@ -151,6 +154,7 @@ where
             determinize: data.determinize.iter().map(|v| v.parse()).collect(),
             arcsort_ilabel: data.arcsort_ilabel.parse(),
             arcsort_olabel: data.arcsort_olabel.parse(),
+            topsort: data.topsort.parse(),
             fst_properties: parse_fst_properties(&data.fst_properties),
         }
     }
@@ -232,6 +236,8 @@ where
     test_arcsort_ilabel(&test_data)?;
 
     test_arcsort_olabel(&test_data)?;
+
+    test_topsort(&test_data)?;
 
     test_fst_properties(&test_data)?;
 
