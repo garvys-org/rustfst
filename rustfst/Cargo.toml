@@ -17,6 +17,7 @@ repository = 'https://github.com/Garvys/rustfst'
 edition = '2018'
 
 [dependencies]
+binary-heap-plus = '0.1.4'
 bimap = '0.3.1'
 bitflags = '1.0.4'
 failure = '0.1'

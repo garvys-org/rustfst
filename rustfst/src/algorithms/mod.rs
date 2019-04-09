@@ -12,6 +12,7 @@ mod factor_weight;
 mod inversion;
 mod isomorphic;
 mod projection;
+mod queue;
 mod relabel_pairs;
 mod reverse;
 mod reweight;
@@ -24,6 +25,8 @@ mod top_sort;
 mod union;
 mod weight_convert;
 mod weight_pushing;
+
+pub mod queues;
 
 /// Function objects to restrict which arcs are traversed in an FST.
 pub mod arc_filters;
@@ -63,6 +66,7 @@ pub use self::{
     inversion::invert,
     isomorphic::isomorphic,
     projection::{project, ProjectType},
+    queue::{QueueType, Queue},
     relabel_pairs::relabel_pairs,
     reverse::reverse,
     reweight::{reweight, ReweightType},
