@@ -3,6 +3,7 @@ use failure::{format_err, Fallible, ResultExt};
 use serde_derive::{Deserialize, Serialize};
 
 use rustfst::algorithms::{decode, encode};
+use rustfst::fst_properties::FstProperties;
 use rustfst::fst_traits::MutableFst;
 use rustfst::fst_traits::TextParser;
 use rustfst::semirings::Semiring;
@@ -80,6 +81,14 @@ where
             .with_context(|_| format_err!(
             "Error when running test_encode with parameters encode_labels={:?} and encode_weights={:?}.",
             encode_test_data.encode_labels, encode_test_data.encode_weights))?;
+        if encode_test_data.encode_labels {
+            assert!(fst_encoded.properties()?.contains(FstProperties::ACCEPTOR));
+        }
+        if encode_test_data.encode_weights {
+            assert!(fst_encoded
+                .properties()?
+                .contains(FstProperties::UNWEIGHTED));
+        }
         assert_eq!(
             encode_test_data.result,
             fst_encoded,

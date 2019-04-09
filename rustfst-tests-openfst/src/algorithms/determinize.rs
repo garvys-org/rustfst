@@ -3,6 +3,7 @@ use failure::{format_err, Fallible};
 use serde_derive::{Deserialize, Serialize};
 
 use rustfst::algorithms::{determinize, isomorphic, DeterminizeType};
+use rustfst::fst_properties::FstProperties;
 use rustfst::fst_traits::MutableFst;
 use rustfst::fst_traits::TextParser;
 use rustfst::semirings::Semiring;
@@ -59,6 +60,11 @@ where
 
         match (&determinize_data.result, fst_res) {
             (Ok(fst_expected), Ok(ref fst_determinized)) => {
+                if determinize_data.det_type == DeterminizeType::DeterminizeFunctional {
+                    assert!(fst_determinized
+                        .properties()?
+                        .contains(FstProperties::I_DETERMINISTIC));
+                }
                 let a = isomorphic(fst_expected, fst_determinized)?;
                 assert!(
                     a,

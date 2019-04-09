@@ -1,6 +1,7 @@
 use failure::Fallible;
 
 use rustfst::algorithms::connect;
+use rustfst::fst_properties::FstProperties;
 use rustfst::fst_traits::MutableFst;
 use rustfst::fst_traits::TextParser;
 use rustfst::semirings::Semiring;
@@ -15,6 +16,11 @@ where
     // Connect
     let mut fst_connect = test_data.raw.clone();
     connect(&mut fst_connect)?;
+
+    assert!(fst_connect
+        .properties()?
+        .contains(FstProperties::ACCESSIBLE | FstProperties::COACCESSIBLE));
+
     assert_eq!(
         test_data.connect,
         fst_connect,
