@@ -66,7 +66,7 @@ pub use self::{
     inversion::invert,
     isomorphic::isomorphic,
     projection::{project, ProjectType},
-    queue::{QueueType, Queue},
+    queue::{Queue, QueueType},
     relabel_pairs::relabel_pairs,
     reverse::reverse,
     reweight::{reweight, ReweightType},
