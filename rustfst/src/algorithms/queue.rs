@@ -1,5 +1,6 @@
 use crate::StateId;
 
+#[derive(PartialOrd, PartialEq)]
 pub enum QueueType {
     /// Single state queue.
     TrivialQueue,
@@ -27,5 +28,5 @@ pub trait Queue {
     fn update(&mut self, state: StateId);
     fn is_empty(&self) -> bool;
     fn clear(&mut self);
-    fn queue_type() -> QueueType;
+    fn queue_type(&self) -> QueueType;
 }

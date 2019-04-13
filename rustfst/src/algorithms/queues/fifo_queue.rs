@@ -1,13 +1,13 @@
 use std::collections::VecDeque;
 
-use crate::StateId;
 use crate::algorithms::{Queue, QueueType};
+use crate::StateId;
 
 /// First-in, first-out (queue) queue discipline.
 pub struct FifoQueue(VecDeque<StateId>);
 
 impl FifoQueue {
-    pub fn new() -> Self{
+    pub fn new() -> Self {
         Self(VecDeque::new())
     }
 }
@@ -35,7 +35,7 @@ impl Queue for FifoQueue {
         self.0.clear()
     }
 
-    fn queue_type() -> QueueType {
+    fn queue_type(&self) -> QueueType {
         QueueType::FifoQueue
     }
 }

@@ -1,5 +1,5 @@
-use crate::StateId;
 use crate::algorithms::{Queue, QueueType};
+use crate::StateId;
 
 /// Trivial queue discipline; one may enqueue at most one state at a time. It
 /// can be used for strongly connected components with only one state and no
@@ -10,7 +10,7 @@ pub struct TrivialQueue {
 
 impl TrivialQueue {
     pub fn new() -> Self {
-        Self{state: None}
+        Self { state: None }
     }
 }
 
@@ -37,7 +37,7 @@ impl Queue for TrivialQueue {
         self.state = None;
     }
 
-    fn queue_type() -> QueueType {
+    fn queue_type(&self) -> QueueType {
         QueueType::TrivialQueue
     }
 }
