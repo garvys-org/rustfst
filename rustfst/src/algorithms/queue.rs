@@ -1,6 +1,6 @@
 use crate::StateId;
 
-#[derive(PartialOrd, PartialEq)]
+#[derive(PartialOrd, PartialEq, Clone)]
 pub enum QueueType {
     /// Single state queue.
     TrivialQueue,
@@ -22,7 +22,7 @@ pub enum QueueType {
 }
 
 pub trait Queue {
-    fn head(&self) -> Option<StateId>;
+    fn head(&mut self) -> Option<StateId>;
     fn enqueue(&mut self, state: StateId);
     fn dequeue(&mut self);
     fn update(&mut self, state: StateId);

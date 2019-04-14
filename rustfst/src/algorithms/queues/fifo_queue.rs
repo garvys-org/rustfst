@@ -13,7 +13,7 @@ impl FifoQueue {
 }
 
 impl Queue for FifoQueue {
-    fn head(&self) -> Option<usize> {
+    fn head(&mut self) -> Option<usize> {
         self.0.front().cloned()
     }
 

@@ -18,7 +18,7 @@ impl StateOrderQueue {
 }
 
 impl Queue for StateOrderQueue {
-    fn head(&self) -> Option<usize> {
+    fn head(&mut self) -> Option<usize> {
         Some(self.front)
     }
 

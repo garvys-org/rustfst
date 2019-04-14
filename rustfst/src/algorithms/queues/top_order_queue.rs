@@ -19,6 +19,10 @@ impl TopOrderQueue {
         let mut accessible_states = HashSet::new();
         let mut order = vec![];
         dfs_topsort(fst, &mut accessible_states, &mut order).unwrap();
+        Self::from_precomputed_order(order)
+    }
+
+    pub fn from_precomputed_order(order: Vec<StateId>) -> Self {
         let order_len = order.len();
         Self {
             order,
@@ -30,7 +34,7 @@ impl TopOrderQueue {
 }
 
 impl Queue for TopOrderQueue {
-    fn head(&self) -> Option<usize> {
+    fn head(&mut self) -> Option<usize> {
         self.state[self.front]
     }
 

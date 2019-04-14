@@ -15,7 +15,7 @@ impl TrivialQueue {
 }
 
 impl Queue for TrivialQueue {
-    fn head(&self) -> Option<StateId> {
+    fn head(&mut self) -> Option<StateId> {
         self.state
     }
 

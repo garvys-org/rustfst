@@ -11,7 +11,7 @@ impl LifoQueue {
 }
 
 impl Queue for LifoQueue {
-    fn head(&self) -> Option<usize> {
+    fn head(&mut self) -> Option<usize> {
         self.0.last().cloned()
     }
 
