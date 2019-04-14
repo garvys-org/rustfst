@@ -113,83 +113,92 @@ where
 {
 }
 
-impl<W, N> Semiring for PowerWeight<W, N>
-where
-    W: Semiring,
-    N: ArrayLength<W>,
-{
-    type Type = GenericArray<W, N>;
-
-    fn zero() -> Self {
-        Self {
-            weights: GenericArray::clone_from_slice(&[W::zero()]),
-        }
-    }
-
-    fn one() -> Self {
-        Self {
-            weights: GenericArray::clone_from_slice(&[W::one()]),
-        }
-    }
-
-    fn new(value: <Self as Semiring>::Type) -> Self {
-        Self { weights: value }
-    }
-
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
-        for i in 0..self.weights.len() {
-            self.weights[i].plus_assign(&rhs.as_ref().weights[i])?;
-        }
-        Ok(())
-    }
-
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
-        for i in 0..self.weights.len() {
-            self.weights[i].times_assign(&rhs.as_ref().weights[i])?;
-        }
-        Ok(())
-    }
-
-    fn value(&self) -> <Self as Semiring>::Type {
-        self.weights.clone()
-    }
-
-    fn set_value(&mut self, value: <Self as Semiring>::Type) {
-        self.weights = value;
-    }
-
-    fn properties() -> SemiringProperties {
-        W::properties()
-            & (SemiringProperties::LEFT_SEMIRING
-                | SemiringProperties::RIGHT_SEMIRING
-                | SemiringProperties::COMMUTATIVE
-                | SemiringProperties::IDEMPOTENT)
-    }
-}
-
-impl<W, N> WeaklyDivisibleSemiring for PowerWeight<W, N>
-where
-    W: WeaklyDivisibleSemiring,
-    N: ArrayLength<W>,
-{
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
-        let mut mul = self.clone();
-        for i in 0..self.weights.len() {
-            mul.weights[i] = self.weights[i].divide(&rhs.weights[i], divide_type)?;
-        }
-        Ok(mul)
-    }
-}
-
-impl<W, N> WeightQuantize for PowerWeight<W, N>
-where
-    W: WeightQuantize,
-    N: ArrayLength<W>,
-{
-    fn quantize_assign(&mut self, delta: f32) -> Fallible<()> {
-        for i in 0..self.weights.len() {
-            unsafe { self.weights.get_unchecked_mut(i).quantize_assign(delta)? };
-        }
-        Ok(())
-    }
-}
+//impl<W, N> Semiring for PowerWeight<W, N>
+//where
+//    W: Semiring,
+//    N: ArrayLength<W>,
+//{
+//    type Type = GenericArray<W, N>;
+//    type ReverseSemiring<P> = PowerWeight<W::ReverseSemiring, P>;
+//
+//    fn zero() -> Self {
+//        Self {
+//            weights: GenericArray::clone_from_slice(&[W::zero()]),
+//        }
+//    }
+//
+//    fn one() -> Self {
+//        Self {
+//            weights: GenericArray::clone_from_slice(&[W::one()]),
+//        }
+//    }
+//
+//    fn new(value: <Self as Semiring>::Type) -> Self {
+//        Self { weights: value }
+//    }
+//
+//    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
+//        for i in 0..self.weights.len() {
+//            self.weights[i].plus_assign(&rhs.as_ref().weights[i])?;
+//        }
+//        Ok(())
+//    }
+//
+//    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
+//        for i in 0..self.weights.len() {
+//            self.weights[i].times_assign(&rhs.as_ref().weights[i])?;
+//        }
+//        Ok(())
+//    }
+//
+//    fn value(&self) -> <Self as Semiring>::Type {
+//        self.weights.clone()
+//    }
+//
+//    fn set_value(&mut self, value: <Self as Semiring>::Type) {
+//        self.weights = value;
+//    }
+//
+//    fn reverse(&self) -> Self::ReverseSemiring {
+//        let mut rw = Vec::with_capacity(self.weights.len());
+//        for i in 0..self.weights.len() {
+//            rw.push(self.weights[i].reverse());
+//        }
+//        PowerWeight::new(GenericArray::clone_from(rw))
+//    }
+//
+//    fn properties() -> SemiringProperties {
+//        W::properties()
+//            & (SemiringProperties::LEFT_SEMIRING
+//                | SemiringProperties::RIGHT_SEMIRING
+//                | SemiringProperties::COMMUTATIVE
+//                | SemiringProperties::IDEMPOTENT)
+//    }
+//}
+//
+//impl<W, N> WeaklyDivisibleSemiring for PowerWeight<W, N>
+//where
+//    W: WeaklyDivisibleSemiring,
+//    N: ArrayLength<W>,
+//{
+//    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
+//        let mut mul = self.clone();
+//        for i in 0..self.weights.len() {
+//            mul.weights[i] = self.weights[i].divide(&rhs.weights[i], divide_type)?;
+//        }
+//        Ok(mul)
+//    }
+//}
+//
+//impl<W, N> WeightQuantize for PowerWeight<W, N>
+//where
+//    W: WeightQuantize,
+//    N: ArrayLength<W>,
+//{
+//    fn quantize_assign(&mut self, delta: f32) -> Fallible<()> {
+//        for i in 0..self.weights.len() {
+//            unsafe { self.weights.get_unchecked_mut(i).quantize_assign(delta)? };
+//        }
+//        Ok(())
+//    }
+//}

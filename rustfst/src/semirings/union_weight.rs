@@ -2,6 +2,7 @@ use std::fmt::Debug;
 use std::fmt::{Display, Formatter, Result};
 use std::hash::Hash;
 use std::marker::PhantomData;
+use std::cmp::Ordering;
 
 use failure::Fallible;
 
@@ -10,6 +11,7 @@ use crate::semirings::{
 };
 
 pub trait UnionWeightOption<W: Semiring>: Debug + Hash + Default + Clone + PartialOrd + Eq {
+    type ReverseOptions : UnionWeightOption<W::ReverseSemiring>;
     fn compare(w1: &W, w2: &W) -> bool;
     fn merge(w1: &W, w2: &W) -> Fallible<W>;
 }
@@ -45,6 +47,7 @@ where
 
 impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
     type Type = Vec<W>;
+    type ReverseSemiring = UnionWeight<W::ReverseSemiring, O::ReverseOptions>;
 
     fn zero() -> Self {
         Self {
@@ -129,6 +132,21 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
 
     fn set_value(&mut self, value: Self::Type) {
         self.list = value;
+    }
+
+    fn reverse(&self) -> Fallible<Self::ReverseSemiring> {
+        let mut rw = Self::ReverseSemiring::zero();
+        for v in self.iter() {
+            rw.push_back(v.reverse()?, false)?;
+        }
+        rw.list.sort_by(|v1, v2| {
+            if O::ReverseOptions::compare(v1, v2) {
+                Ordering::Less
+            } else {
+                Ordering::Greater
+            }
+        });
+        Ok(rw)
     }
 
     fn properties() -> SemiringProperties {

@@ -44,6 +44,7 @@ where
     W2: Semiring,
 {
     type Type = (W1, W2);
+    type ReverseSemiring = ProductWeight<W1::ReverseSemiring, W2::ReverseSemiring>;
 
     fn zero() -> Self {
         Self {
@@ -85,6 +86,10 @@ where
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
         self.set_value1(value.0);
         self.set_value2(value.1);
+    }
+
+    fn reverse(&self) -> Fallible<Self::ReverseSemiring> {
+        Ok((self.value1().reverse()?, self.value2().reverse()?).into())
     }
 
     fn properties() -> SemiringProperties {

@@ -19,6 +19,7 @@ pub struct TropicalWeight {
 
 impl Semiring for TropicalWeight {
     type Type = f32;
+    type ReverseSemiring = TropicalWeight;
 
     fn zero() -> Self {
         Self {
@@ -63,6 +64,10 @@ impl Semiring for TropicalWeight {
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
         self.value.0 = value
+    }
+
+    fn reverse(&self) -> Fallible<Self::ReverseSemiring> {
+        Ok(self.clone())
     }
 
     fn properties() -> SemiringProperties {

@@ -19,7 +19,7 @@ pub fn reverse<W, F1, F2>(fst: &F1) -> Fallible<F2>
 where
     W: Semiring,
     F1: ExpandedFst<W = W>,
-    F2: MutableFst<W = W> + ExpandedFst<W = W>,
+    F2: MutableFst<W = W::ReverseSemiring> + ExpandedFst<W = W::ReverseSemiring>,
 {
     let mut fst_reversed = F2::new();
 
@@ -34,7 +34,7 @@ where
         for arc in fst.arcs_iter(state)? {
             fst_reversed.add_arc(
                 arc.nextstate,
-                Arc::new(arc.ilabel, arc.olabel, arc.weight.clone(), state),
+                Arc::new(arc.ilabel, arc.olabel, arc.weight.reverse()?, state),
             )?;
         }
     }
@@ -50,7 +50,7 @@ where
             Arc::new(
                 EPS_LABEL,
                 EPS_LABEL,
-                final_state.final_weight,
+                final_state.final_weight.reverse()?,
                 final_state.state_id,
             ),
         )?;
@@ -58,7 +58,7 @@ where
 
     // Forme initial states are now final
     if let Some(state_state_in) = fst.start() {
-        fst_reversed.set_final(state_state_in, W::one())?;
+        fst_reversed.set_final(state_state_in, W::ReverseSemiring::one())?;
     }
 
     Ok(fst_reversed)

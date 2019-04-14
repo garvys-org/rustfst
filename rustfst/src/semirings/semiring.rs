@@ -33,6 +33,7 @@ pub trait Semiring:
     Clone + PartialEq + PartialOrd + Debug + Default + Display + AsRef<Self> + Hash + Eq
 {
     type Type;
+    type ReverseSemiring : Semiring;
 
     fn zero() -> Self;
     fn one() -> Self;
@@ -61,6 +62,7 @@ pub trait Semiring:
     fn is_zero(&self) -> bool {
         *self == Self::zero()
     }
+    fn reverse(&self) -> Fallible<Self::ReverseSemiring>;
 
     fn properties() -> SemiringProperties;
 }

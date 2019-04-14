@@ -38,7 +38,7 @@ pub enum StringType {
 }
 
 macro_rules! string_semiring {
-    ($semiring: ty, $string_type: expr) => {
+    ($semiring: ty, $string_type: expr, $reverse_semiring: ty) => {
         impl fmt::Display for $semiring {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                 match &self.value {
@@ -66,6 +66,7 @@ macro_rules! string_semiring {
 
         impl Semiring for $semiring {
             type Type = StringWeightVariant;
+            type ReverseSemiring = $reverse_semiring;
 
             fn zero() -> Self {
                 Self {
@@ -149,6 +150,10 @@ macro_rules! string_semiring {
                 self.value = value;
             }
 
+            fn reverse(&self) -> Fallible<Self::ReverseSemiring> {
+                Ok(self.value().into())
+            }
+
             fn properties() -> SemiringProperties {
                 match $string_type {
                     StringType::StringRestrict => {
@@ -206,9 +211,9 @@ macro_rules! string_semiring {
     };
 }
 
-string_semiring!(StringWeightRestrict, StringType::StringRestrict);
-string_semiring!(StringWeightLeft, StringType::StringLeft);
-string_semiring!(StringWeightRight, StringType::StringRight);
+string_semiring!(StringWeightRestrict, StringType::StringRestrict, StringWeightRestrict);
+string_semiring!(StringWeightLeft, StringType::StringLeft, StringWeightRight);
+string_semiring!(StringWeightRight, StringType::StringRight, StringWeightLeft);
 
 fn divide_left(w1: &StringWeightVariant, w2: &StringWeightVariant) -> StringWeightVariant {
     match (w1, w2) {

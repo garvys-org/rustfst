@@ -10,6 +10,7 @@ pub struct BooleanWeight {
 
 impl Semiring for BooleanWeight {
     type Type = bool;
+    type ReverseSemiring = BooleanWeight;
 
     fn zero() -> Self {
         Self { value: false }
@@ -37,6 +38,10 @@ impl Semiring for BooleanWeight {
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
         self.value = value
+    }
+
+    fn reverse(&self) -> Fallible<Self::ReverseSemiring> {
+        Ok(self.clone())
     }
 
     fn properties() -> SemiringProperties {

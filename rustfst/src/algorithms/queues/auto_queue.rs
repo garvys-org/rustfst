@@ -37,7 +37,7 @@ impl AutoQueue {
 
             let mut queue_types = vec![QueueType::TrivialQueue; n_sccs];
             let mut less = None;
-            if distance.is_some() && F::W::properties().contains(SemiringProperties::PATH) {
+            if distance.is_some() && distance.unwrap().len() >= 1 && F::W::properties().contains(SemiringProperties::PATH) {
                 less = Some(natural_less);
             }
             // Finds the queue type to use per SCC.
