@@ -1,30 +1,47 @@
 use std::cmp::Ordering;
 
-use binary_heap_plus::{BinaryHeap,FnComparator};
+use binary_heap_plus::{BinaryHeap, FnComparator};
 
-use crate::StateId;
+use failure::Fallible;
+
 use crate::algorithms::{Queue, QueueType};
+use crate::semirings::Semiring;
+use crate::StateId;
 
-/// Shortest-first queue discipline, templated on the StateId and as well as a
-/// comparison functor used to compare two StateIds. If a (single) state's order
-/// changes, it can be reordered in the queue with a call to Update(). If update
-/// is false, call to Update() does not reorder the queue.
-pub struct ShortestFirstQueue<F> where F: Clone + FnMut(&StateId, &StateId) -> Ordering {
-    heap: BinaryHeap<StateId, FnComparator<F>>,
+#[derive(Clone)]
+pub struct StateWeightCompare<W: Semiring, C: Clone + Fn(&W, &W) -> Fallible<bool>> {
+    less: C,
+    weights: Vec<W>,
 }
 
-impl<F> ShortestFirstQueue<F>
-    where F: Clone + FnMut(&StateId, &StateId) -> Ordering
-{
-    pub fn new(f: F) -> Self {
-        Self{heap: BinaryHeap::<StateId, FnComparator<F>>::new_by(f)}
+impl<W: Semiring, C: Clone + Fn(&W, &W) -> Fallible<bool>> StateWeightCompare<W, C> {
+    pub fn new(weights: Vec<W>, less: C) -> Self {
+        Self { less, weights }
+    }
+
+    pub fn compare(&self, s1: &StateId, s2: &StateId) -> Fallible<bool> {
+        (self.less)(&self.weights[*s1], &self.weights[*s2])
     }
 }
 
-impl<F> Queue for ShortestFirstQueue<F>
-    where F: Clone + FnMut(&StateId, &StateId) -> Ordering
-{
-    fn head(&self) -> Option<usize> {
+pub fn natural_less<W: Semiring>(w1: &W, w2: &W) -> Fallible<bool> {
+    Ok((&w1.plus(w2)? == w1) && (w1 != w2))
+}
+
+pub struct ShortestFirstQueue<C: Clone + FnMut(&StateId, &StateId) -> Ordering> {
+    heap: BinaryHeap<StateId, FnComparator<C>>,
+}
+
+impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> ShortestFirstQueue<C> {
+    pub fn new(c: C) -> Self {
+        Self {
+            heap: BinaryHeap::new_by(c),
+        }
+    }
+}
+
+impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> Queue for ShortestFirstQueue<C> {
+    fn head(&mut self) -> Option<usize> {
         self.heap.peek().cloned()
     }
 
@@ -36,7 +53,9 @@ impl<F> Queue for ShortestFirstQueue<F>
         self.heap.pop();
     }
 
-    fn update(&mut self, state: usize) {}
+    fn update(&mut self, state: usize) {
+        unimplemented!()
+    }
 
     fn is_empty(&self) -> bool {
         self.heap.is_empty()
@@ -46,37 +65,57 @@ impl<F> Queue for ShortestFirstQueue<F>
         self.heap.clear()
     }
 
-    fn queue_type() -> QueueType {
+    fn queue_type(&self) -> QueueType {
         QueueType::ShortestFirstQueue
     }
 }
 
-#[cfg(test)]
-mod test {
-    use super::*;
+pub struct NaturalShortestFirstQueue {
+    queue: Box<Queue>,
+}
 
-    use failure::Fallible;
+impl NaturalShortestFirstQueue {
+    pub fn new<W: 'static + Semiring>(weights: Vec<W>) -> Self {
+        let a = StateWeightCompare::new(weights, natural_less);
+        let heap = ShortestFirstQueue::new(move |v1, v2| {
+            if a.compare(v1, v2).unwrap() {
+                Ordering::Less
+            } else {
+                Ordering::Greater
+            }
+        });
+        NaturalShortestFirstQueue {
+            queue: Box::new(heap),
+        }
+    }
+}
 
-    #[test]
-    fn test_shortest_first_queue() -> Fallible<()> {
-        let mut queue = ShortestFirstQueue::new(|a: &StateId, b: &StateId| a.cmp(b));
+impl Queue for NaturalShortestFirstQueue {
+    fn head(&mut self) -> Option<usize> {
+        self.queue.head()
+    }
 
-        assert_eq!(queue.head(), None);
+    fn enqueue(&mut self, state: usize) {
+        self.queue.enqueue(state)
+    }
 
-        queue.enqueue(2);
-        queue.enqueue(3);
-        assert_eq!(queue.head(), Some(3));
-        queue.dequeue();
-        assert_eq!(queue.head(), Some(2));
-        queue.dequeue();
+    fn dequeue(&mut self) {
+        self.queue.dequeue()
+    }
 
-        queue.enqueue(2);
-        queue.enqueue(3);
-        assert_eq!(queue.is_empty(), false);
-        assert_eq!(queue.head(), Some(3));
-        queue.clear();
-        assert_eq!(queue.head(), None);
-        assert_eq!(queue.is_empty(), true);
-        Ok(())
+    fn update(&mut self, state: usize) {
+        self.queue.update(state)
+    }
+
+    fn is_empty(&self) -> bool {
+        self.queue.is_empty()
+    }
+
+    fn clear(&mut self) {
+        self.queue.clear()
+    }
+
+    fn queue_type(&self) -> QueueType {
+        self.queue.queue_type()
     }
 }
