@@ -118,8 +118,7 @@ pub fn _shortest_distance<F: ExpandedFst>(fst: &F) -> Fallible<Vec<<F as CoreFst
 
 pub fn shortest_distance<F: ExpandedFst>(fst: &F, reverse: bool) -> Fallible<Vec<<F as CoreFst>::W>>
 where
-    <<F as CoreFst>::W as Semiring>::ReverseSemiring: 'static,
-    <<<F as CoreFst>::W as Semiring>::ReverseSemiring as Semiring>::ReverseSemiring: Semiring<Type=<<F as CoreFst>::W as Semiring>::Type>
+    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
 {
     if !reverse {
         _shortest_distance(fst)
@@ -128,7 +127,16 @@ where
         let rdistance = _shortest_distance(&rfst)?;
         let mut distance = vec![];
         while distance.len() < (rdistance.len() - 1) {
-            distance.push(F::W::new(rdistance[distance.len() + 1].reverse()?.value()));
+            // TODO: Need to find a better to say that W::ReverseWeight::ReverseWeight == W
+            let rw = rdistance[distance.len() + 1].reverse()?;
+            println!("{:?}", rw);
+            distance.push(unsafe {
+                std::mem::transmute::<
+                    &<<<F as CoreFst>::W as Semiring>::ReverseWeight as Semiring>::ReverseWeight,
+                    &<F as CoreFst>::W,
+                >(&rw)
+            }.clone());
+            println!("{:?}", &distance);
         }
         Ok(distance)
     }
@@ -173,7 +181,7 @@ mod tests {
         for data in get_vector_fsts_for_tests() {
             let fst = data.fst;
             let d_ref = data.all_distances;
-            let d = shortest_distance(&fst)?;
+            let d = shortest_distance(&fst, false)?;
 
             if let Some(start_state) = fst.start() {
                 assert_eq!(
@@ -189,6 +197,32 @@ mod tests {
                     data.name
                 );
             }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn test_shortest_distance_generic_2() -> Fallible<()> {
+        for data in get_vector_fsts_for_tests() {
+            let fst = data.fst;
+            let d_ref = data.all_distances;
+            let d = shortest_distance(&fst, true)?;
+            println!("{:?}", d);
+
+//            if let Some(start_state) = fst.start() {
+//                assert_eq!(
+//                    d, d_ref[start_state],
+//                    "Test failing for all shortest distance on wFST : {:?}",
+//                    data.name
+//                );
+//            } else {
+//                assert_eq!(
+//                    d,
+//                    vec![IntegerWeight::zero(); fst.num_states()],
+//                    "Test failing for all shortest distance on wFST : {:?}",
+//                    data.name
+//                );
+//            }
         }
         Ok(())
     }
