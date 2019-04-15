@@ -129,14 +129,12 @@ where
         while distance.len() < (rdistance.len() - 1) {
             // TODO: Need to find a better to say that W::ReverseWeight::ReverseWeight == W
             let rw = rdistance[distance.len() + 1].reverse()?;
-            println!("{:?}", rw);
             distance.push(unsafe {
                 std::mem::transmute::<
                     &<<<F as CoreFst>::W as Semiring>::ReverseWeight as Semiring>::ReverseWeight,
                     &<F as CoreFst>::W,
                 >(&rw)
             }.clone());
-            println!("{:?}", &distance);
         }
         Ok(distance)
     }
