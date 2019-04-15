@@ -125,6 +125,7 @@ where
     } else {
         let rfst: VectorFst<_> = reverse_f(fst)?;
         let rdistance = _shortest_distance(&rfst)?;
+        println!("Lol {:?}", &rdistance);
         let mut distance = vec![];
         while distance.len() < (rdistance.len() - 1) {
             // TODO: Need to find a better to say that W::ReverseWeight::ReverseWeight == W

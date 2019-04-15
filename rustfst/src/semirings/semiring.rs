@@ -65,7 +65,7 @@ pub trait Semiring:
         *self == Self::zero()
     }
     fn reverse(&self) -> Fallible<Self::ReverseWeight>;
-    
+
     fn properties() -> SemiringProperties;
 }
 

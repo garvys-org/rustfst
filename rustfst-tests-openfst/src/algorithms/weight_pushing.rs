@@ -1,7 +1,7 @@
 use failure::Fallible;
 
 use rustfst::algorithms::{push_weights, ReweightType};
-use rustfst::fst_traits::MutableFst;
+use rustfst::fst_traits::{CoreFst, MutableFst};
 use rustfst::fst_traits::TextParser;
 use rustfst::semirings::Semiring;
 use rustfst::semirings::WeaklyDivisibleSemiring;
@@ -12,6 +12,7 @@ pub fn test_weight_pushing_initial<F>(test_data: &TestData<F>) -> Fallible<()>
 where
     F: TextParser + MutableFst,
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
+    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static
 {
     // Weight pushing initial
     let mut fst_weight_push_initial = test_data.raw.clone();
@@ -36,6 +37,7 @@ pub fn test_weight_pushing_final<F>(test_data: &TestData<F>) -> Fallible<()>
 where
     F: TextParser + MutableFst,
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
+    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static
 {
     // Weight pushing final
     let mut fst_weight_push_final = test_data.raw.clone();

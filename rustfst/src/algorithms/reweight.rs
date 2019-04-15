@@ -4,6 +4,7 @@ use crate::fst_traits::{ExpandedFst, FinalStatesIterator, Fst, MutableFst};
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
 
 /// Different types of reweighting.
+#[derive(PartialOrd, PartialEq)]
 pub enum ReweightType {
     /// Reweight toward initial state.
     ReweightToInitial,

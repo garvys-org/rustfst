@@ -19,7 +19,7 @@ mod reweight;
 mod rm_epsilon;
 mod rm_final_epsilon;
 mod shortest_path;
-mod single_source_shortest_distance;
+mod shortest_distance;
 mod state_map;
 mod state_sort;
 mod top_sort;
@@ -74,7 +74,7 @@ pub use self::{
     rm_epsilon::rm_epsilon,
     rm_final_epsilon::rm_final_epsilon,
     shortest_path::shortest_path,
-    single_source_shortest_distance::{shortest_distance, single_source_shortest_distance},
+    shortest_distance::{shortest_distance, single_source_shortest_distance},
     state_map::{state_map, StateMapper},
     state_sort::state_sort,
     top_sort::top_sort,

@@ -19,7 +19,7 @@ pub fn reverse<W, F1, F2>(fst: &F1) -> Fallible<F2>
 where
     W: Semiring,
     F1: ExpandedFst<W = W>,
-    F2: MutableFst<W = W::ReverseSemiring> + ExpandedFst<W = W::ReverseSemiring>,
+    F2: MutableFst<W = W::ReverseWeight> + ExpandedFst<W = W::ReverseWeight>,
 {
     let mut fst_reversed = F2::new();
 
@@ -58,7 +58,7 @@ where
 
     // Forme initial states are now final
     if let Some(state_state_in) = fst.start() {
-        fst_reversed.set_final(state_state_in, W::ReverseSemiring::one())?;
+        fst_reversed.set_final(state_state_in, W::ReverseWeight::one())?;
     }
 
     Ok(fst_reversed)

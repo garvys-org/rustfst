@@ -2,8 +2,9 @@ use failure::Fallible;
 
 use crate::algorithms::{reverse, reweight, shortest_distance, ReweightType};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
+use crate::fst_traits::{ExpandedFst, Fst, MutableFst, CoreFst};
 use crate::semirings::WeaklyDivisibleSemiring;
+use crate::semirings::Semiring;
 
 /// Pushes the weights in FST in the direction defined by TYPE. If
 /// pushing towards the initial state, the sum of the weight of the
@@ -14,19 +15,9 @@ pub fn push_weights<F>(fst: &mut F, reweight_type: ReweightType) -> Fallible<()>
 where
     F: Fst + ExpandedFst + MutableFst,
     F::W: WeaklyDivisibleSemiring,
+    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static
 {
-    unimplemented!()
-    //    match reweight_type {
-    //        ReweightType::ReweightToInitial => {
-    //            let fst_reversed: VectorFst<_> = reverse(fst)?;
-    //            let dist = shortest_distance(&fst_reversed)?;
-    //
-    //            reweight(fst, &dist, ReweightType::ReweightToInitial)
-    //        }
-    //        ReweightType::ReweightToFinal => {
-    //            let dist = shortest_distance(fst)?;
-    //
-    //            reweight(fst, &dist, ReweightType::ReweightToFinal)
-    //        }
-    //    }
+    let dist = shortest_distance(fst, reweight_type == ReweightType::ReweightToInitial)?;
+    reweight(fst, &dist, reweight_type)?;
+    Ok(())
 }

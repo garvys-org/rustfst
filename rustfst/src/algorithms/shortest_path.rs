@@ -1,7 +1,7 @@
 use failure::Fallible;
 
-use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::{reverse, shortest_distance};
+use crate::algorithms::queues::AutoQueue;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::{Semiring, SemiringProperties};
@@ -31,8 +31,8 @@ where
         bail!("ShortestPath : Weight need to have the Path property and be distributive")
     }
 
-//    let distance = shortest_distance(ifst, false)?;
-//    let rfst: VectorFst<_> = reverse(ifst)?;
-//    let mut d = FI::W::zero();
+    //    let distance = shortest_distance(ifst, false)?;
+    //    let rfst: VectorFst<_> = reverse(ifst)?;
+    //    let mut d = FI::W::zero();
     unimplemented!()
 }
