@@ -25,7 +25,7 @@ impl Queue for FifoQueue {
         self.0.pop_front();
     }
 
-    fn update(&mut self, state: usize) {}
+    fn update(&mut self, _state: usize) {}
 
     fn is_empty(&self) -> bool {
         self.0.is_empty()

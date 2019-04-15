@@ -1,8 +1,8 @@
 use failure::Fallible;
 
 use super::{
-    natural_less, FifoQueue, LifoQueue, NaturalShortestFirstQueue, StateOrderQueue, TopOrderQueue,
-    TrivialQueue, SccQueue
+    natural_less, FifoQueue, LifoQueue, NaturalShortestFirstQueue, SccQueue, StateOrderQueue,
+    TopOrderQueue, TrivialQueue,
 };
 use crate::algorithms::{find_strongly_connected_components, Queue, QueueType};
 use crate::fst_properties::FstProperties;
@@ -37,7 +37,10 @@ impl AutoQueue {
 
             let mut queue_types = vec![QueueType::TrivialQueue; n_sccs];
             let mut less = None;
-            if distance.is_some() && distance.unwrap().len() >= 1 && F::W::properties().contains(SemiringProperties::PATH) {
+            if distance.is_some()
+                && distance.unwrap().len() >= 1
+                && F::W::properties().contains(SemiringProperties::PATH)
+            {
                 less = Some(natural_less);
             }
             // Finds the queue type to use per SCC.
@@ -65,9 +68,9 @@ impl AutoQueue {
                 for i in 0..n_sccs {
                     match queue_types[i] {
                         QueueType::TrivialQueue => queues.push(Box::new(TrivialQueue::new())),
-                        QueueType::ShortestFirstQueue => {
-                            queues.push(Box::new(NaturalShortestFirstQueue::new(distance.unwrap().clone())))
-                        }
+                        QueueType::ShortestFirstQueue => queues.push(Box::new(
+                            NaturalShortestFirstQueue::new(distance.unwrap().clone()),
+                        )),
                         QueueType::LifoQueue => queues.push(Box::new(LifoQueue::new())),
                         _ => queues.push(Box::new(FifoQueue::new())),
                     }
@@ -76,7 +79,7 @@ impl AutoQueue {
             }
         }
 
-        Ok(Self{queue})
+        Ok(Self { queue })
     }
 
     pub fn scc_queue_type<F: MutableFst + ExpandedFst, C: Fn(&F::W, &F::W) -> Fallible<bool>>(

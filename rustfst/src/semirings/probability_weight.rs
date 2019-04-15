@@ -19,7 +19,7 @@ pub struct ProbabilityWeight {
 
 impl Semiring for ProbabilityWeight {
     type Type = f32;
-    type ReverseSemiring = ProbabilityWeight;
+    type ReverseWeight = ProbabilityWeight;
 
     fn zero() -> Self {
         Self {
@@ -56,7 +56,7 @@ impl Semiring for ProbabilityWeight {
         self.value.0 = value
     }
 
-    fn reverse(&self) -> Fallible<Self::ReverseSemiring> {
+    fn reverse(&self) -> Fallible<Self::ReverseWeight> {
         Ok(self.clone())
     }
 

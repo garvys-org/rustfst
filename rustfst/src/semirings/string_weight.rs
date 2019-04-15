@@ -66,7 +66,7 @@ macro_rules! string_semiring {
 
         impl Semiring for $semiring {
             type Type = StringWeightVariant;
-            type ReverseSemiring = $reverse_semiring;
+            type ReverseWeight = $reverse_semiring;
 
             fn zero() -> Self {
                 Self {
@@ -150,7 +150,7 @@ macro_rules! string_semiring {
                 self.value = value;
             }
 
-            fn reverse(&self) -> Fallible<Self::ReverseSemiring> {
+            fn reverse(&self) -> Fallible<Self::ReverseWeight> {
                 Ok(self.value().into())
             }
 
@@ -211,7 +211,11 @@ macro_rules! string_semiring {
     };
 }
 
-string_semiring!(StringWeightRestrict, StringType::StringRestrict, StringWeightRestrict);
+string_semiring!(
+    StringWeightRestrict,
+    StringType::StringRestrict,
+    StringWeightRestrict
+);
 string_semiring!(StringWeightLeft, StringType::StringLeft, StringWeightRight);
 string_semiring!(StringWeightRight, StringType::StringRight, StringWeightLeft);
 

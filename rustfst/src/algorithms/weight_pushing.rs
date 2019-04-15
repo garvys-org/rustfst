@@ -1,6 +1,7 @@
 use failure::Fallible;
 
 use crate::algorithms::{reverse, reweight, shortest_distance, ReweightType};
+use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 
@@ -14,17 +15,18 @@ where
     F: Fst + ExpandedFst + MutableFst,
     F::W: WeaklyDivisibleSemiring,
 {
-    match reweight_type {
-        ReweightType::ReweightToInitial => {
-            let fst_reversed: F = reverse(fst)?;
-            let dist = shortest_distance(&fst_reversed)?;
-
-            reweight(fst, &dist, ReweightType::ReweightToInitial)
-        }
-        ReweightType::ReweightToFinal => {
-            let dist = shortest_distance(fst)?;
-
-            reweight(fst, &dist, ReweightType::ReweightToFinal)
-        }
-    }
+    unimplemented!()
+    //    match reweight_type {
+    //        ReweightType::ReweightToInitial => {
+    //            let fst_reversed: VectorFst<_> = reverse(fst)?;
+    //            let dist = shortest_distance(&fst_reversed)?;
+    //
+    //            reweight(fst, &dist, ReweightType::ReweightToInitial)
+    //        }
+    //        ReweightType::ReweightToFinal => {
+    //            let dist = shortest_distance(fst)?;
+    //
+    //            reweight(fst, &dist, ReweightType::ReweightToFinal)
+    //        }
+    //    }
 }

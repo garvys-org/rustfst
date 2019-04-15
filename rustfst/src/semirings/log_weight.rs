@@ -23,7 +23,7 @@ fn ln_pos_exp(x: f32) -> f32 {
 
 impl Semiring for LogWeight {
     type Type = f32;
-    type ReverseSemiring = LogWeight;
+    type ReverseWeight = LogWeight;
 
     fn zero() -> Self {
         Self {
@@ -77,7 +77,7 @@ impl Semiring for LogWeight {
         self.value.0 = value
     }
 
-    fn reverse(&self) -> Fallible<Self::ReverseSemiring> {
+    fn reverse(&self) -> Fallible<Self::ReverseWeight> {
         Ok(self.clone())
     }
 

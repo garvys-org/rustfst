@@ -2,6 +2,8 @@ use std::collections::VecDeque;
 
 use failure::Fallible;
 
+use crate::algorithms::reverse as reverse_f;
+use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, ExpandedFst};
 use crate::semirings::Semiring;
 use crate::StateId;
@@ -107,11 +109,29 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
 /// ]);
 ///
 /// ```
-pub fn shortest_distance<F: ExpandedFst>(fst: &F) -> Fallible<Vec<<F as CoreFst>::W>> {
+pub fn _shortest_distance<F: ExpandedFst>(fst: &F) -> Fallible<Vec<<F as CoreFst>::W>> {
     if let Some(start_state) = fst.start() {
         return single_source_shortest_distance(fst, start_state);
     }
     Ok(vec![<F as CoreFst>::W::zero(); fst.num_states()])
+}
+
+pub fn shortest_distance<F: ExpandedFst>(fst: &F, reverse: bool) -> Fallible<Vec<<F as CoreFst>::W>>
+where
+    <<F as CoreFst>::W as Semiring>::ReverseSemiring: 'static,
+    <<<F as CoreFst>::W as Semiring>::ReverseSemiring as Semiring>::ReverseSemiring: Semiring<Type=<<F as CoreFst>::W as Semiring>::Type>
+{
+    if !reverse {
+        _shortest_distance(fst)
+    } else {
+        let rfst: VectorFst<_> = reverse_f(fst)?;
+        let rdistance = _shortest_distance(&rfst)?;
+        let mut distance = vec![];
+        while distance.len() < (rdistance.len() - 1) {
+            distance.push(F::W::new(rdistance[distance.len() + 1].reverse()?.value()));
+        }
+        Ok(distance)
+    }
 }
 
 #[cfg(test)]

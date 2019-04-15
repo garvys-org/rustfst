@@ -27,7 +27,7 @@ impl Queue for TrivialQueue {
         self.state = None;
     }
 
-    fn update(&mut self, state: usize) {}
+    fn update(&mut self, _state: usize) {}
 
     fn is_empty(&self) -> bool {
         self.state.is_none()

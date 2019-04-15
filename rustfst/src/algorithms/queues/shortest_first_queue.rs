@@ -53,7 +53,7 @@ impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> Queue for ShortestFirstQu
         self.heap.pop();
     }
 
-    fn update(&mut self, state: usize) {
+    fn update(&mut self, _state: usize) {
         unimplemented!()
     }
 

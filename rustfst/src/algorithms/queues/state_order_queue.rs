@@ -47,7 +47,7 @@ impl Queue for StateOrderQueue {
         }
     }
 
-    fn update(&mut self, state: usize) {}
+    fn update(&mut self, _state: usize) {}
 
     fn is_empty(&self) -> bool {
         if let Some(back_) = self.back {

@@ -12,7 +12,7 @@ pub struct IntegerWeight {
 
 impl Semiring for IntegerWeight {
     type Type = i32;
-    type ReverseSemiring = IntegerWeight;
+    type ReverseWeight = IntegerWeight;
 
     fn zero() -> Self {
         Self { value: 0 }
@@ -43,7 +43,7 @@ impl Semiring for IntegerWeight {
         self.value = value
     }
 
-    fn reverse(&self) -> Fallible<Self::ReverseSemiring> {
+    fn reverse(&self) -> Fallible<Self::ReverseWeight> {
         Ok(self.clone())
     }
 

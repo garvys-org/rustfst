@@ -70,7 +70,7 @@ macro_rules! gallic_weight {
             W: Semiring,
         {
             type Type = ProductWeight<$string_weight, W>;
-            type ReverseSemiring = $reverse_semiring;
+            type ReverseWeight = $reverse_semiring;
 
             fn zero() -> Self {
                 Self(ProductWeight::zero())
@@ -110,8 +110,8 @@ macro_rules! gallic_weight {
                 self.0 = value;
             }
 
-            fn reverse(&self) -> Fallible<Self::ReverseSemiring> {
-                Ok(Self::ReverseSemiring::new(self.0.reverse()?))
+            fn reverse(&self) -> Fallible<Self::ReverseWeight> {
+                Ok(Self::ReverseWeight::new(self.0.reverse()?))
             }
 
             fn properties() -> SemiringProperties {
@@ -197,28 +197,28 @@ gallic_weight!(
     GallicWeightLeft<W>,
     StringWeightLeft,
     GallicType::GallicLeft,
-    GallicWeightRight<W::ReverseSemiring>
+    GallicWeightRight<W::ReverseWeight>
 );
 
 gallic_weight!(
     GallicWeightRight<W>,
     StringWeightRight,
     GallicType::GallicRight,
-    GallicWeightLeft<W::ReverseSemiring>
+    GallicWeightLeft<W::ReverseWeight>
 );
 
 gallic_weight!(
     GallicWeightRestrict<W>,
     StringWeightRestrict,
     GallicType::GallicRestrict,
-    GallicWeightRestrict<W::ReverseSemiring>
+    GallicWeightRestrict<W::ReverseWeight>
 );
 
 gallic_weight!(
     GallicWeightMin<W>,
     StringWeightRestrict,
     GallicType::GallicMin,
-    GallicWeightMin<W::ReverseSemiring>
+    GallicWeightMin<W::ReverseWeight>
 );
 use std::marker::PhantomData;
 #[derive(Debug, Hash, Default, Clone, PartialEq, PartialOrd, Eq)]
@@ -229,7 +229,7 @@ pub struct GallicUnionWeightOption<W> {
 impl<W: Semiring> UnionWeightOption<GallicWeightRestrict<W>>
     for GallicUnionWeightOption<GallicWeightRestrict<W>>
 {
-    type ReverseOptions = GallicUnionWeightOption<GallicWeightRestrict<W::ReverseSemiring>>;
+    type ReverseOptions = GallicUnionWeightOption<GallicWeightRestrict<W::ReverseWeight>>;
 
     fn compare(w1: &GallicWeightRestrict<W>, w2: &GallicWeightRestrict<W>) -> bool {
         let s1 = w1.0.value1();
@@ -298,7 +298,7 @@ where
 
 impl<W: Semiring> Semiring for GallicWeight<W> {
     type Type = Vec<GallicWeightRestrict<W>>;
-    type ReverseSemiring = GallicWeight<W::ReverseSemiring>;
+    type ReverseWeight = GallicWeight<W::ReverseWeight>;
 
     fn zero() -> Self {
         Self(UnionWeight::zero())
@@ -328,7 +328,7 @@ impl<W: Semiring> Semiring for GallicWeight<W> {
         self.0.set_value(value)
     }
 
-    fn reverse(&self) -> Fallible<Self::ReverseSemiring> {
+    fn reverse(&self) -> Fallible<Self::ReverseWeight> {
         Ok(GallicWeight(self.0.reverse()?))
     }
 
