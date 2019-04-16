@@ -4,9 +4,9 @@ use std::marker::PhantomData;
 use failure::Fallible;
 
 use crate::algorithms::{state_map, StateMapper};
-use crate::Arc;
 use crate::fst_traits::{CoreFst, MutableFst};
 use crate::semirings::Semiring;
+use crate::Arc;
 
 /// Compare only input labels.
 pub fn ilabel_compare<W: Semiring>(a: &Arc<W>, b: &Arc<W>) -> Ordering {

@@ -9,6 +9,7 @@ pub mod properties;
 pub mod reverse;
 pub mod rm_epsilon;
 pub mod shortest_distance;
+pub mod shortest_path;
 pub mod state_map;
 pub mod topsort;
 pub mod weight_pushing;
