@@ -15,51 +15,41 @@ use crate::EPS_LABEL;
 /// except having the reversed Weight type.
 ///
 /// A superinitial state is always created.
-pub fn reverse<W, F1, F2>(fst: &F1) -> Fallible<F2>
+#[allow(unused)]
+pub fn reverse<W, F1, F2>(ifst: &F1) -> Fallible<F2>
 where
     W: Semiring,
     F1: ExpandedFst<W = W>,
     F2: MutableFst<W = W::ReverseWeight> + ExpandedFst<W = W::ReverseWeight>,
 {
-    let mut fst_reversed = F2::new();
-
-    let num_states = fst.num_states();
-
-    (0..num_states).for_each(|_| {
-        fst_reversed.add_state();
-    });
-
-    // Reverse all the transitions
-    for state in 0..num_states {
-        for arc in fst.arcs_iter(state)? {
-            fst_reversed.add_arc(
-                arc.nextstate,
-                Arc::new(arc.ilabel, arc.olabel, arc.weight.reverse()?, state),
-            )?;
+    let mut ofst = F2::new();
+    ofst.reserve_states(ifst.num_states());
+    let istart = ifst.start();
+    let mut ostart = ofst.add_state();
+    let mut offset = 1;
+    let istates: Vec<_> = ifst.states_iter().collect();
+    for is in istates {
+        let os = is + offset;
+        while ofst.num_states() <= os {
+            ofst.add_state();
+        }
+        if Some(is) == istart {
+            ofst.set_final(os, W::ReverseWeight::one());
+        }
+        let weight = ifst.final_weight(is);
+        if weight.is_some() && offset == 1 {
+            ofst.add_arc(0, Arc::new(0, 0, weight.unwrap().reverse()?, os));
+        }
+        for iarc in ifst.arcs_iter(is)? {
+            let nos = iarc.nextstate + offset;
+            let weight = iarc.weight.reverse()?;
+            while ofst.num_states() <= nos {
+                ofst.add_state();
+            }
+            ofst.add_arc(nos, Arc::new(iarc.ilabel, iarc.olabel, weight, os))?;
         }
     }
+    ofst.set_start(ostart);
 
-    // Creates the initial state
-    let super_initial_state = fst_reversed.add_state();
-    fst_reversed.set_start(super_initial_state)?;
-
-    // Add epsilon arc from the initial state to the former final states
-    for final_state in fst.final_states_iter() {
-        fst_reversed.add_arc(
-            super_initial_state,
-            Arc::new(
-                EPS_LABEL,
-                EPS_LABEL,
-                final_state.final_weight.reverse()?,
-                final_state.state_id,
-            ),
-        )?;
-    }
-
-    // Forme initial states are now final
-    if let Some(state_state_in) = fst.start() {
-        fst_reversed.set_final(state_state_in, W::ReverseWeight::one())?;
-    }
-
-    Ok(fst_reversed)
+    Ok(ofst)
 }
