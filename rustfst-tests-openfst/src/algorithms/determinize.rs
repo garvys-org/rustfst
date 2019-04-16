@@ -54,7 +54,7 @@ where
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
     for determinize_data in &test_data.determinize {
-        println!("det_type = {:?}", determinize_data.det_type);
+        //        println!("det_type = {:?}", determinize_data.det_type);
         let fst_raw = test_data.raw.clone();
         let fst_res: Fallible<F> = determinize(&fst_raw, determinize_data.det_type.clone());
 

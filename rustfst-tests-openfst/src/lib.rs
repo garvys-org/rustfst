@@ -13,6 +13,7 @@ use rustfst::fst_impls::VectorFst;
 use rustfst::fst_properties::FstProperties;
 use rustfst::fst_traits::TextParser;
 use rustfst::fst_traits::{MutableFst, TextParser, CoreFst};
+use rustfst::fst_traits::{CoreFst, MutableFst, TextParser};
 use rustfst::semirings::{
     LogWeight, Semiring, StarSemiring, TropicalWeight, WeaklyDivisibleSemiring, WeightQuantize,
 };
@@ -32,7 +33,10 @@ use crate::algorithms::{
     properties::{parse_fst_properties, test_fst_properties},
     reverse::test_reverse,
     rm_epsilon::test_rmepsilon,
-    shortest_distance::{ShorestDistanceOperationResult, test_shortest_distance, ShortestDistanceTestData},
+    shortest_distance::{
+        test_shortest_distance, ShorestDistanceOperationResult, ShortestDistanceTestData,
+    },
+    shortest_path::{test_shortest_path, ShorestPathOperationResult, ShortestPathTestData},
     state_map::{test_state_map_arc_sum, test_state_map_arc_unique},
     topsort::test_topsort,
     weight_pushing::{test_weight_pushing_final, test_weight_pushing_initial},
@@ -93,6 +97,7 @@ pub struct ParsedTestData {
     fst_properties: HashMap<String, bool>,
     raw_vector_bin_path: String,
     shortest_distance: Vec<ShorestDistanceOperationResult>,
+    shortest_path: Vec<ShorestPathOperationResult>,
 }
 
 pub struct TestData<F>
@@ -130,6 +135,7 @@ where
     pub fst_properties: FstProperties,
     pub raw_vector_bin_path: PathBuf,
     pub shortest_distance: Vec<ShortestDistanceTestData<F::W>>,
+    pub shortest_path: Vec<ShortestPathTestData<F>>,
 }
 
 impl<F> TestData<F>
@@ -169,7 +175,8 @@ where
             raw_vector_bin_path: absolute_path_folder
                 .join(&data.raw_vector_bin_path)
                 .to_path_buf(),
-            shortest_distance: data.shortest_distance.iter().map(|v| v.parse()).collect()
+            shortest_distance: data.shortest_distance.iter().map(|v| v.parse()).collect(),
+            shortest_path: data.shortest_path.iter().map(|v| v.parse()).collect(),
         }
     }
 }
@@ -257,8 +264,10 @@ where
     test_topsort(&test_data)?;
 
     test_fst_properties(&test_data)?;
-
+    
     test_vector_fst_bin_parser(&test_data)?;
+
+//    test_shortest_path(&test_data)?;
 
     Ok(())
 }
