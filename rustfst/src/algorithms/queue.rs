@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use crate::StateId;
 
 #[derive(PartialOrd, PartialEq, Clone)]
@@ -21,7 +23,7 @@ pub enum QueueType {
     OtherQueue,
 }
 
-pub trait Queue {
+pub trait Queue : Debug {
     fn head(&mut self) -> Option<StateId>;
     fn enqueue(&mut self, state: StateId);
     fn dequeue(&mut self);

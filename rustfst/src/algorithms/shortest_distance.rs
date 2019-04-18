@@ -5,7 +5,7 @@ use failure::Fallible;
 use crate::algorithms::reverse as reverse_f;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, ExpandedFst};
-use crate::semirings::Semiring;
+use crate::semirings::{Semiring, SemiringProperties};
 use crate::StateId;
 
 /// This operation computes the shortest distance from the state `state_id` to every state.
@@ -92,6 +92,9 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
 }
 
 pub fn _shortest_distance<F: ExpandedFst>(fst: &F) -> Fallible<Vec<<F as CoreFst>::W>> {
+    if !F::W::properties().contains(SemiringProperties::RIGHT_SEMIRING) {
+        bail!("ShortestDistance: Weight needs to be right distributive");
+    }
     if let Some(start_state) = fst.start() {
         return single_source_shortest_distance(fst, start_state);
     }

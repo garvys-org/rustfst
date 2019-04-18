@@ -50,6 +50,7 @@ where
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
     for data in &test_data.shortest_path {
+        println!("ShortestPath : unique = {} anf nshortest = {}", data.unique, data.nshortest);
         let fst_res: Fallible<F> = shortest_path(&test_data.raw, data.nshortest, data.unique);
         match (&data.result, fst_res) {
             (Ok(fst_expected), Ok(ref fst_shortest)) => {
@@ -72,8 +73,8 @@ where
                 data.nshortest, data.unique
             ),
             (Err(_), Ok(_fst_shortest)) => panic!(
-                "ShortestPath fail for nshortest = {:?} and unique = {:?}. Got Ok. Expected Err",
-                data.nshortest, data.unique
+                "ShortestPath fail for nshortest = {:?} and unique = {:?}. Got Ok. Expected Err \n{}",
+                data.nshortest, data.unique, _fst_shortest
             ),
             (Err(_), Err(_)) => {
                 // Ok

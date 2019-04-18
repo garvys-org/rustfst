@@ -267,7 +267,7 @@ where
     
     test_vector_fst_bin_parser(&test_data)?;
 
-//    test_shortest_path(&test_data)?;
+    test_shortest_path(&test_data)?;
 
     Ok(())
 }

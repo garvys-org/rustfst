@@ -77,7 +77,7 @@ where
     let mut f_distance = F::W::zero();
     distance.clear();
     queue.clear();
-    if !F::W::properties().contains(SemiringProperties::PATH & SemiringProperties::RIGHT_SEMIRING) {
+    if !F::W::properties().contains(SemiringProperties::PATH | SemiringProperties::RIGHT_SEMIRING) {
         bail!(
             "SingleShortestPath: Weight needs to have the path property and be right distributive"
         )
