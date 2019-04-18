@@ -32,7 +32,7 @@ where
         bail!("ShortestPath : Weight need to have the Path property and be distributive")
     }
 
-    let distance = shortest_distance(ifst, false)?;
+    let mut distance = shortest_distance(ifst, false)?;
 
     let rfst: VectorFst<_> = reverse(ifst)?;
     let mut d = FI::W::zero();
@@ -42,6 +42,14 @@ where
             let rweight: FI::W = hack_convert_reverse_reverse(rarc.weight.reverse()?);
             d.plus_assign(rweight.times(&distance[state])?)?;
         }
+    }
+
+    let mut distance_2 = vec![d];
+    distance_2.append(&mut distance);
+    if !unique {
+        return n_shortest_path(ifst, &distance_2, nshortest);
+    } else {
+        unimplemented!()
     }
     unimplemented!()
 }
@@ -169,4 +177,42 @@ where
     }
 
     Ok(ofst)
+}
+
+pub fn natural_less<W: Semiring>(w1: &W, w2: &W) -> Fallible<bool> {
+    Ok((&w1.plus(w2)? == w1) && (w1 != w2))
+}
+
+
+fn n_shortest_path<FI, FO>(
+    ifst: &FI,
+    distance: &Vec<FI::W>,
+    nshortest: usize
+) -> Fallible<FO>
+    where
+        FI: ExpandedFst + MutableFst,
+        <FI as CoreFst>::W: 'static,
+        FO: MutableFst<W = FI::W>,
+{
+    let mut ofst = FO::new();
+    if nshortest == 0 {
+        return Ok(ofst);
+    }
+
+    if !FI::W::properties().contains(SemiringProperties::PATH | SemiringProperties::SEMIRING) {
+        bail!("NShortestPath: Weight needs to have the path property and be distributive");
+    }
+
+    let istart = ifst.start();
+    if istart.is_none() || distance.len() <= istart.unwrap() || distance[istart.unwrap()].is_zero()  {
+        bail!("lol")
+    }
+    let istart = istart.unwrap();
+    let ostart = ofst.add_state();
+    ofst.set_start(ostart)?;
+    let final_state = ofst.add_state();
+    ofst.set_final(final_state, FI::W::one())?;
+    let mut pairs = vec![None; final_state + 1];
+    pairs[final_state]= Some((istart, FI::W::one()));
+    unimplemented!()
 }
