@@ -9,6 +9,7 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::{Semiring, SemiringProperties};
 
+#[derive(Debug)]
 pub struct AutoQueue {
     queue: Box<Queue>,
 }

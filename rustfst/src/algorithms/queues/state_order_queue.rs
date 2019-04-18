@@ -1,6 +1,7 @@
 use crate::algorithms::{Queue, QueueType};
 use crate::StateId;
 
+#[derive(Debug)]
 pub struct StateOrderQueue {
     front: StateId,
     back: Option<StateId>,

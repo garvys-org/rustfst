@@ -7,6 +7,7 @@ use crate::StateId;
 
 /// Topological-order queue discipline, templated on the StateId. States are
 /// ordered in the queue topologically. The FST must be acyclic.
+#[derive(Debug)]
 pub struct TopOrderQueue {
     order: Vec<StateId>,
     state: Vec<Option<StateId>>,

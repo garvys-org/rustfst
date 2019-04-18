@@ -1,6 +1,7 @@
 use crate::algorithms::{Queue, QueueType};
 use crate::StateId;
 
+#[derive(Debug)]
 pub struct SccQueue {
     front: i32,
     back: i32,
@@ -50,13 +51,14 @@ impl Queue for SccQueue {
     }
 
     fn is_empty(&self) -> bool {
-        if self.front < self.back {
-            false
-        } else if self.front > self.back {
-            true
-        } else {
-            self.queues[self.front as usize].is_empty()
-        }
+        self.queues.iter().all(|v| v.is_empty())
+//        if self.front < self.back {
+//            false
+//        } else if self.front > self.back {
+//            true
+//        } else {
+//            self.queues[self.front as usize].is_empty()
+//        }
     }
 
     fn clear(&mut self) {

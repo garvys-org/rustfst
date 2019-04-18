@@ -7,6 +7,10 @@ use failure::Fallible;
 use crate::algorithms::{Queue, QueueType};
 use crate::semirings::Semiring;
 use crate::StateId;
+use std::fmt::Debug;
+use std::fmt::Formatter;
+use std::fmt::Result;
+use std::error::Error;
 
 #[derive(Clone)]
 pub struct StateWeightCompare<W: Semiring, C: Clone + Fn(&W, &W) -> Fallible<bool>> {
@@ -31,6 +35,13 @@ pub fn natural_less<W: Semiring>(w1: &W, w2: &W) -> Fallible<bool> {
 pub struct ShortestFirstQueue<C: Clone + FnMut(&StateId, &StateId) -> Ordering> {
     heap: BinaryHeap<StateId, FnComparator<C>>,
 }
+
+impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> Debug for ShortestFirstQueue<C> {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        unimplemented!()
+    }
+}
+
 
 impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> ShortestFirstQueue<C> {
     pub fn new(c: C) -> Self {
@@ -70,6 +81,7 @@ impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> Queue for ShortestFirstQu
     }
 }
 
+#[derive(Debug)]
 pub struct NaturalShortestFirstQueue {
     queue: Box<Queue>,
 }

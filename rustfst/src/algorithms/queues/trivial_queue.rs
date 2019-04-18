@@ -4,6 +4,7 @@ use crate::StateId;
 /// Trivial queue discipline; one may enqueue at most one state at a time. It
 /// can be used for strongly connected components with only one state and no
 /// self-loops.
+#[derive(Debug)]
 pub struct TrivialQueue {
     state: Option<StateId>,
 }
