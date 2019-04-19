@@ -23,7 +23,7 @@ pub enum QueueType {
     OtherQueue,
 }
 
-pub trait Queue : Debug {
+pub trait Queue: Debug {
     fn head(&mut self) -> Option<StateId>;
     fn enqueue(&mut self, state: StateId);
     fn dequeue(&mut self);

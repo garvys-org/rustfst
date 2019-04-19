@@ -52,13 +52,13 @@ impl Queue for SccQueue {
 
     fn is_empty(&self) -> bool {
         self.queues.iter().all(|v| v.is_empty())
-//        if self.front < self.back {
-//            false
-//        } else if self.front > self.back {
-//            true
-//        } else {
-//            self.queues[self.front as usize].is_empty()
-//        }
+        //        if self.front < self.back {
+        //            false
+        //        } else if self.front > self.back {
+        //            true
+        //        } else {
+        //            self.queues[self.front as usize].is_empty()
+        //        }
     }
 
     fn clear(&mut self) {

@@ -7,10 +7,10 @@ use failure::Fallible;
 use crate::algorithms::{Queue, QueueType};
 use crate::semirings::Semiring;
 use crate::StateId;
+use std::error::Error;
 use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::fmt::Result;
-use std::error::Error;
 
 #[derive(Clone)]
 pub struct StateWeightCompare<W: Semiring, C: Clone + Fn(&W, &W) -> Fallible<bool>> {
@@ -41,7 +41,6 @@ impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> Debug for ShortestFirstQu
         unimplemented!()
     }
 }
-
 
 impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> ShortestFirstQueue<C> {
     pub fn new(c: C) -> Self {

@@ -212,6 +212,7 @@ fn run_test_pynini(test_name: &str) -> Fallible<()> {
 fn do_run_test_openfst<W>(test_data: &TestData<VectorFst<W>>) -> Fallible<()>
 where
     W: 'static + Semiring<Type = f32> + StarSemiring + WeaklyDivisibleSemiring + WeightQuantize,
+    <W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize
 {
     test_rmepsilon(&test_data)?;
 

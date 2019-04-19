@@ -2,7 +2,7 @@ use failure::{format_err, Fallible};
 use serde_derive::{Deserialize, Serialize};
 
 use rustfst::algorithms::{shortest_path, DeterminizeType};
-use rustfst::fst_traits::MutableFst;
+use rustfst::fst_traits::{MutableFst, CoreFst};
 use rustfst::fst_traits::TextParser;
 use rustfst::semirings::Semiring;
 use rustfst::semirings::WeaklyDivisibleSemiring;
@@ -48,9 +48,13 @@ pub fn test_shortest_path<F>(test_data: &TestData<F>) -> Fallible<()>
 where
     F: TextParser + MutableFst,
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
+    <<F as CoreFst>::W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize
 {
     for data in &test_data.shortest_path {
-        println!("ShortestPath : unique = {} anf nshortest = {}", data.unique, data.nshortest);
+        println!(
+            "ShortestPath : unique = {} and nshortest = {}",
+            data.unique, data.nshortest
+        );
         let fst_res: Fallible<F> = shortest_path(&test_data.raw, data.nshortest, data.unique);
         match (&data.result, fst_res) {
             (Ok(fst_expected), Ok(ref fst_shortest)) => {
