@@ -343,3 +343,14 @@ fn test_pynini_fst_006() -> Result<(), ExitFailure> {
 fn test_pynini_fst_007() -> Result<(), ExitFailure> {
     run_test_pynini("fst_007").map_err(|v| v.into())
 }
+
+#[test]
+fn test_pynini_fst_008() -> Result<(), ExitFailure> {
+    run_test_pynini("fst_008").map_err(|v| v.into())
+}
+
+#[test]
+fn test_pynini_fst_009() -> Result<(), ExitFailure> {
+    run_test_pynini("fst_009").map_err(|v| v.into())
+}
+

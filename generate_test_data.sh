@@ -9,3 +9,5 @@ python rustfst-tests-data/rustfst_tests_data/fst_004/gen_data.py
 python rustfst-tests-data/rustfst_tests_data/fst_005/gen_data.py
 python rustfst-tests-data/rustfst_tests_data/fst_006/gen_data.py
 python rustfst-tests-data/rustfst_tests_data/fst_007/gen_data.py
+python rustfst-tests-data/rustfst_tests_data/fst_008/gen_data.py
+python rustfst-tests-data/rustfst_tests_data/fst_009/gen_data.py
