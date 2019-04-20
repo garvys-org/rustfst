@@ -49,6 +49,8 @@ where
     F: TextParser + MutableFst,
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
     <<F as CoreFst>::W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize,
+    F::W: Into<<<F as CoreFst>::W as Semiring>::ReverseWeight>
+        + From<<<F as CoreFst>::W as Semiring>::ReverseWeight>,
 {
     for data in &test_data.shortest_path {
         println!(

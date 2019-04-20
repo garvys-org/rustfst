@@ -61,7 +61,7 @@ pub use self::{
     composition::compose,
     concat::concat,
     connect::connect,
-    determinize::{determinize, DeterminizeType},
+    determinize::{determinize, determinize_with_distance, DeterminizeType},
     dfs::{dfs, find_strongly_connected_components},
     encode::{decode, encode},
     inversion::invert,

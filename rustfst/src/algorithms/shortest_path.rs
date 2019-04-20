@@ -6,7 +6,9 @@ use binary_heap_plus::BinaryHeap;
 use failure::Fallible;
 
 use crate::algorithms::queues::AutoQueue;
-use crate::algorithms::{connect, determinize, reverse, shortest_distance, DeterminizeType, Queue};
+use crate::algorithms::{
+    connect, determinize_with_distance, reverse, shortest_distance, DeterminizeType, Queue,
+};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize};
@@ -17,7 +19,9 @@ pub fn shortest_path<FI, FO>(ifst: &FI, nshortest: usize, unique: bool) -> Falli
 where
     FI: ExpandedFst + MutableFst,
     FO: ExpandedFst<W = FI::W> + MutableFst<W = FI::W>,
-    FI::W: 'static,
+    FI::W: 'static
+        + Into<<<FI as CoreFst>::W as Semiring>::ReverseWeight>
+        + From<<<FI as CoreFst>::W as Semiring>::ReverseWeight>,
     <<FI as CoreFst>::W as Semiring>::ReverseWeight: WeightQuantize + WeaklyDivisibleSemiring,
 {
     let queue = AutoQueue::new(ifst, None)?;
@@ -56,8 +60,12 @@ where
     if !unique {
         n_shortest_path(&rfst, &distance_2, nshortest)
     } else {
-        let dfst: VectorFst<_> = determinize(&rfst, DeterminizeType::DeterminizeFunctional)?;
-        n_shortest_path(&dfst, &distance_2, nshortest)
+        let distance_2_reversed: Vec<<<FI as CoreFst>::W as Semiring>::ReverseWeight> =
+            distance_2.into_iter().map(|v| v.into()).collect();
+        let (dfst, distance_3_reversed): (VectorFst<_>, _) =
+            determinize_with_distance(&rfst, &distance_2_reversed)?;
+        let distance_3 = distance_3_reversed.into_iter().map(|v| v.into()).collect();
+        n_shortest_path(&dfst, &distance_3, nshortest)
     }
 }
 
