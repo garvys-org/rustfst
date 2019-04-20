@@ -1,7 +1,7 @@
 use failure::{format_err, Fallible};
 use serde_derive::{Deserialize, Serialize};
 
-use rustfst::algorithms::{isomorphic, shortest_path, DeterminizeType};
+use rustfst::algorithms::{isomorphic, shortest_path};
 use rustfst::fst_traits::TextParser;
 use rustfst::fst_traits::{CoreFst, MutableFst};
 use rustfst::semirings::Semiring;

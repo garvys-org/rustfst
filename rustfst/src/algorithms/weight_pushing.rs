@@ -1,7 +1,6 @@
 use failure::Fallible;
 
-use crate::algorithms::{reverse, reweight, shortest_distance, ReweightType};
-use crate::fst_impls::VectorFst;
+use crate::algorithms::{reweight, shortest_distance, ReweightType};
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::semirings::WeaklyDivisibleSemiring;

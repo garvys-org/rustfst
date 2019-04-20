@@ -1,16 +1,14 @@
 use std::cmp::Ordering;
+use std::fmt::Debug;
+use std::fmt::Formatter;
+use std::fmt::Result;
 
 use binary_heap_plus::{BinaryHeap, FnComparator};
-
 use failure::Fallible;
 
 use crate::algorithms::{Queue, QueueType};
 use crate::semirings::Semiring;
 use crate::StateId;
-use std::error::Error;
-use std::fmt::Debug;
-use std::fmt::Formatter;
-use std::fmt::Result;
 
 #[derive(Clone)]
 pub struct StateWeightCompare<W: Semiring, C: Clone + Fn(&W, &W) -> Fallible<bool>> {
@@ -38,7 +36,7 @@ pub struct ShortestFirstQueue<C: Clone + FnMut(&StateId, &StateId) -> Ordering> 
 
 impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> Debug for ShortestFirstQueue<C> {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        unimplemented!()
+        f.write_str(format!("ShortestFirstQueue {{ heap: {:?} }}", self.heap).as_str())
     }
 }
 

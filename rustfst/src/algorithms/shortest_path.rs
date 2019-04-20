@@ -6,11 +6,9 @@ use binary_heap_plus::BinaryHeap;
 use failure::Fallible;
 
 use crate::algorithms::queues::AutoQueue;
-use crate::algorithms::{
-    connect, determinize_with_distance, reverse, shortest_distance, DeterminizeType, Queue,
-};
+use crate::algorithms::{connect, determinize_with_distance, reverse, shortest_distance, Queue};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, MutableFst};
+use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::Arc;
 use crate::StateId;
@@ -24,8 +22,6 @@ where
         + From<<<FI as CoreFst>::W as Semiring>::ReverseWeight>,
     <<FI as CoreFst>::W as Semiring>::ReverseWeight: WeightQuantize + WeaklyDivisibleSemiring,
 {
-    let queue = AutoQueue::new(ifst, None)?;
-
     if nshortest == 0 {
         return Ok(FO::new());
     }
@@ -96,7 +92,6 @@ where
     let mut enqueued = vec![];
     let mut queue = AutoQueue::new(ifst, None)?;
     let source = ifst.start().unwrap();
-    let mut final_seen = false;
     let mut f_distance = F::W::zero();
     distance.clear();
     queue.clear();
@@ -127,7 +122,6 @@ where
                 f_distance = plus;
                 *f_parent = Some(s);
             }
-            final_seen = true;
         }
 
         for (pos, arc) in ifst.arcs_iter(s)?.enumerate() {
@@ -164,7 +158,7 @@ where
 {
     let mut ofst = FO::new();
     let mut s_p = None;
-    let mut d_p = None;
+    let mut d_p;
 
     let mut d: Option<StateId> = None;
     let mut nextstate = f_parent.clone();
@@ -269,7 +263,7 @@ where
     ofst.set_start(ostart)?;
     let final_state = ofst.add_state();
     ofst.set_final(final_state, W::one())?;
-    let mut pairs = RefCell::new(vec![(None, W::zero()); final_state + 1]);
+    let pairs = RefCell::new(vec![(None, W::zero()); final_state + 1]);
     pairs.borrow_mut()[final_state] = (Some(istart), W::one());
 
     let shortest_path_compare = ShortestPathCompare::new(&pairs, distance);
@@ -286,15 +280,6 @@ where
     while !heap.is_empty() {
         let state = heap.pop().unwrap();
         let p = pairs.borrow()[state].clone();
-        let d =
-            p.0.map(|v| {
-                if v < distance.len() {
-                    distance[v].clone()
-                } else {
-                    W::zero()
-                }
-            })
-            .unwrap_or_else(W::one);
         let p_first_real = p.0.map(|v| v as i32).unwrap_or(-1) + 1;
         while r.len() as i32 <= p_first_real {
             r.push(0);

@@ -4,8 +4,7 @@ use std::marker::PhantomData;
 use std::slice::Iter as IterSlice;
 
 use bimap::BiHashMap;
-
-use failure::{Fallible, ResultExt};
+use failure::Fallible;
 
 use crate::algorithms::cache::CacheImpl;
 use crate::algorithms::factor_iterators::{GallicFactor, GallicFactorMin, GallicFactorRestrict};
@@ -13,7 +12,6 @@ use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverte
 use crate::algorithms::{factor_weight, weight_convert, FactorWeightOptions, FactorWeightType};
 use crate::arc::Arc;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::CoreFst;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::semirings::{
     DivideType, GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, Semiring,
@@ -356,7 +354,7 @@ where
             } else {
                 &weight_zero
             };
-            outd.plus_assign(element.weight.times(ind)?);
+            outd.plus_assign(element.weight.times(ind)?)?;
         }
         Ok(outd)
     }
@@ -508,10 +506,11 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::arc::Arc;
     use crate::fst_impls::VectorFst;
     use crate::semirings::TropicalWeight;
+
+    use super::*;
 
     #[test]
     fn test_determinize() -> Fallible<()> {

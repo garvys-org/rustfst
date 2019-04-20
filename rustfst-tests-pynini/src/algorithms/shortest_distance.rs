@@ -1,6 +1,6 @@
 use std::f32;
 
-use failure::{bail, Fallible};
+use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
 use rustfst::algorithms::shortest_distance;

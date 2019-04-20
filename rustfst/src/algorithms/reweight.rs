@@ -1,6 +1,6 @@
 use failure::Fallible;
 
-use crate::fst_traits::{CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableFst};
+use crate::fst_traits::{ExpandedFst, FinalStatesIterator, Fst, MutableFst};
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
 
 /// Different types of reweighting.

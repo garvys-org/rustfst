@@ -1,9 +1,8 @@
 use failure::Fallible;
 
 use crate::arc::Arc;
-use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
+use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
-use crate::EPS_LABEL;
 
 /// Reverses an FST. The reversed result is written to an output mutable FST.
 /// If A transduces string x to y with weight a, then the reverse of A

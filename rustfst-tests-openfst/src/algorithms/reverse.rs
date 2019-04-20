@@ -1,18 +1,17 @@
 use failure::Fallible;
 
-use rustfst::algorithms::weight_converters::SimpleWeightConverter;
-use rustfst::algorithms::{isomorphic, reverse, weight_convert};
-use rustfst::fst_impls::VectorFst;
-use rustfst::fst_traits::TextParser;
-use rustfst::fst_traits::{CoreFst, MutableFst};
-use rustfst::semirings::Semiring;
-use rustfst::semirings::WeaklyDivisibleSemiring;
-
-use crate::TestData;
 use rustfst::algorithms::FinalArc;
 use rustfst::algorithms::MapFinalAction;
 use rustfst::algorithms::WeightConverter;
+use rustfst::algorithms::{reverse, weight_convert};
+use rustfst::fst_impls::VectorFst;
+use rustfst::fst_traits::MutableFst;
+use rustfst::fst_traits::TextParser;
+use rustfst::semirings::Semiring;
+use rustfst::semirings::WeaklyDivisibleSemiring;
 use rustfst::Arc;
+
+use crate::TestData;
 
 pub struct ReverseWeightConverter {}
 

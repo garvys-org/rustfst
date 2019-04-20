@@ -42,8 +42,6 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
     fst: &F,
     state_id: StateId,
 ) -> Fallible<Vec<<F as CoreFst>::W>> {
-    let num_states = fst.num_states();
-
     let mut d = vec![];
     let mut r = vec![];
 
@@ -160,10 +158,10 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::fst_traits::StateIterator;
-    use crate::semirings::{IntegerWeight, Semiring};
-    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
+    //    use super::*;
+    //    use crate::fst_traits::StateIterator;
+    //    use crate::semirings::{IntegerWeight, Semiring};
+    //    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
     //    #[test]
     //    fn test_single_source_shortest_distance_generic() -> Fallible<()> {
