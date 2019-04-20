@@ -1,9 +1,9 @@
 use failure::{format_err, Fallible};
 use serde_derive::{Deserialize, Serialize};
 
-use rustfst::algorithms::{shortest_path, DeterminizeType};
-use rustfst::fst_traits::{MutableFst, CoreFst};
+use rustfst::algorithms::{isomorphic, shortest_path, DeterminizeType};
 use rustfst::fst_traits::TextParser;
+use rustfst::fst_traits::{CoreFst, MutableFst};
 use rustfst::semirings::Semiring;
 use rustfst::semirings::WeaklyDivisibleSemiring;
 use rustfst::semirings::WeightQuantize;
@@ -48,7 +48,7 @@ pub fn test_shortest_path<F>(test_data: &TestData<F>) -> Fallible<()>
 where
     F: TextParser + MutableFst,
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
-    <<F as CoreFst>::W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize
+    <<F as CoreFst>::W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize,
 {
     for data in &test_data.shortest_path {
         println!(
@@ -56,11 +56,11 @@ where
             data.unique, data.nshortest
         );
         let fst_res: Fallible<F> = shortest_path(&test_data.raw, data.nshortest, data.unique);
-        match (&data.result, fst_res) {
+        match (&data.result, &fst_res) {
             (Ok(fst_expected), Ok(ref fst_shortest)) => {
-                assert_eq!(
-                    fst_expected,
-                    fst_shortest,
+                let a = isomorphic(fst_expected, fst_shortest)?;
+                assert!(
+                    a,
                     "{}",
                     error_message_fst!(
                         fst_expected,
@@ -72,9 +72,9 @@ where
                     )
                 );
             }
-            (Ok(_fst_expected), Err(_)) => panic!(
-                "ShortestPath fail for nshortest = {:?} and unique = {:?}. Got Err. Expected Ok",
-                data.nshortest, data.unique
+            (Ok(_fst_expected), Err(e)) => panic!(
+                "ShortestPath fail for nshortest = {:?} and unique = {:?}. Got Err. Expected Ok \n{:?}",
+                data.nshortest, data.unique, e
             ),
             (Err(_), Ok(_fst_shortest)) => panic!(
                 "ShortestPath fail for nshortest = {:?} and unique = {:?}. Got Ok. Expected Err \n{}",

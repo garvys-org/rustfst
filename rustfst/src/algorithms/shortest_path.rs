@@ -1,24 +1,24 @@
-use std::cmp::Ordering;
 use std::cell::RefCell;
+use std::cmp::Ordering;
 
 use binary_heap_plus::BinaryHeap;
 
 use failure::Fallible;
 
 use crate::algorithms::queues::AutoQueue;
-use crate::algorithms::{reverse, shortest_distance, Queue, connect, determinize, DeterminizeType};
+use crate::algorithms::{connect, determinize, reverse, shortest_distance, DeterminizeType, Queue};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, MutableFst};
-use crate::semirings::{Semiring, SemiringProperties, WeightQuantize, WeaklyDivisibleSemiring};
-use crate::StateId;
+use crate::semirings::{Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::Arc;
+use crate::StateId;
 
 pub fn shortest_path<FI, FO>(ifst: &FI, nshortest: usize, unique: bool) -> Fallible<FO>
 where
     FI: ExpandedFst + MutableFst,
-    FO: ExpandedFst<W=FI::W> + MutableFst<W = FI::W>,
+    FO: ExpandedFst<W = FI::W> + MutableFst<W = FI::W>,
     FI::W: 'static,
-    <<FI as CoreFst>::W as Semiring>::ReverseWeight: WeightQuantize + WeaklyDivisibleSemiring
+    <<FI as CoreFst>::W as Semiring>::ReverseWeight: WeightQuantize + WeaklyDivisibleSemiring,
 {
     let queue = AutoQueue::new(ifst, None)?;
 
@@ -56,7 +56,7 @@ where
     if !unique {
         n_shortest_path(&rfst, &distance_2, nshortest)
     } else {
-        let dfst : VectorFst<_> = determinize(&rfst, DeterminizeType::DeterminizeFunctional)?;
+        let dfst: VectorFst<_> = determinize(&rfst, DeterminizeType::DeterminizeFunctional)?;
         n_shortest_path(&dfst, &distance_2, nshortest)
     }
 }
@@ -194,7 +194,7 @@ struct ShortestPathCompare<'a, 'b, W: Semiring> {
     pairs: &'a RefCell<Vec<(Option<StateId>, W)>>,
     distance: &'b Vec<W>,
     weight_zero: W,
-    weight_one: W
+    weight_one: W,
 }
 
 impl<'a, 'b, W: Semiring> ShortestPathCompare<'a, 'b, W> {
@@ -203,7 +203,7 @@ impl<'a, 'b, W: Semiring> ShortestPathCompare<'a, 'b, W> {
             pairs,
             distance,
             weight_zero: W::zero(),
-            weight_one: W::one()
+            weight_one: W::one(),
         }
     }
 
@@ -228,7 +228,7 @@ impl<'a, 'b, W: Semiring> ShortestPathCompare<'a, 'b, W> {
         if px.0.is_none() && py.0.is_some() {
             natural_less(&wy, &wx).unwrap() || (wy == wx)
         } else if px.0.is_some() && py.0.is_none() {
-            natural_less(&wy, &wx).unwrap() && ! (wy == wx)
+            natural_less(&wy, &wx).unwrap() && !(wy == wx)
         } else {
             natural_less(&wy, &wx).unwrap()
         }
@@ -238,8 +238,8 @@ impl<'a, 'b, W: Semiring> ShortestPathCompare<'a, 'b, W> {
 fn n_shortest_path<W, FI, FO>(ifst: &FI, distance: &Vec<W>, nshortest: usize) -> Fallible<FO>
 where
     W: Semiring + 'static,
-    FI: ExpandedFst<W=W::ReverseWeight> + MutableFst<W=W::ReverseWeight>,
-    FO: MutableFst<W=W> + ExpandedFst<W=W>,
+    FI: ExpandedFst<W = W::ReverseWeight> + MutableFst<W = W::ReverseWeight>,
+    FO: MutableFst<W = W> + ExpandedFst<W = W>,
 {
     let mut ofst = FO::new();
     if nshortest == 0 {
@@ -253,7 +253,8 @@ where
     let istart = ifst.start();
     if istart.is_none() || distance.len() <= istart.unwrap() || distance[istart.unwrap()].is_zero()
     {
-        bail!("lol")
+        // No start state or start state is unreachable
+        return Ok(ofst);
     }
     let istart = istart.unwrap();
     let ostart = ofst.add_state();
@@ -277,8 +278,8 @@ where
     while !heap.is_empty() {
         let state = heap.pop().unwrap();
         let p = pairs.borrow()[state].clone();
-        let d = p.0
-            .map(|v| {
+        let d =
+            p.0.map(|v| {
                 if v < distance.len() {
                     distance[v].clone()
                 } else {
@@ -294,11 +295,22 @@ where
         if p.0.is_none() {
             ofst.add_arc(ofst.start().unwrap(), Arc::new(0, 0, W::one(), state))?;
         }
-        if p.0.is_none() && r[p_first_real as usize] == nshortest {break;}
-        if r[p_first_real as usize] > nshortest {continue;}
-        if p.0.is_none() {continue}
+        if p.0.is_none() && r[p_first_real as usize] == nshortest {
+            break;
+        }
+        if r[p_first_real as usize] > nshortest {
+            continue;
+        }
+        if p.0.is_none() {
+            continue;
+        }
         for rarc in ifst.arcs_iter(p.0.unwrap())? {
-            let mut arc : Arc<W> = Arc::new(rarc.ilabel, rarc.olabel, hack_convert_reverse_reverse(rarc.weight.reverse()?), rarc.nextstate);
+            let mut arc: Arc<W> = Arc::new(
+                rarc.ilabel,
+                rarc.olabel,
+                hack_convert_reverse_reverse(rarc.weight.reverse()?),
+                rarc.nextstate,
+            );
             let weight = p.1.times(&arc.weight)?;
             let next = ofst.add_state();
             pairs.borrow_mut().push((Some(arc.nextstate), weight));
@@ -308,7 +320,7 @@ where
         }
         let final_weight = ifst.final_weight(p.0.unwrap());
         if let Some(_final_weight) = final_weight {
-            let r_final_weight : W = hack_convert_reverse_reverse(_final_weight.reverse()?);
+            let r_final_weight: W = hack_convert_reverse_reverse(_final_weight.reverse()?);
             if !r_final_weight.is_zero() {
                 let weight = p.1.times(&r_final_weight)?;
                 let next = ofst.add_state();
@@ -317,7 +329,6 @@ where
                 heap.push(next);
             }
         }
-
     }
 
     connect(&mut ofst)?;
