@@ -11,6 +11,7 @@ mod encode;
 mod factor_weight;
 mod inversion;
 mod isomorphic;
+mod minimize;
 mod projection;
 mod queue;
 mod relabel_pairs;
@@ -66,6 +67,7 @@ pub use self::{
     encode::{decode, encode},
     inversion::invert,
     isomorphic::isomorphic,
+    minimize::minimize,
     projection::{project, ProjectType},
     queue::{Queue, QueueType},
     relabel_pairs::relabel_pairs,
