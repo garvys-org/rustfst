@@ -12,6 +12,8 @@ mod factor_weight;
 mod inversion;
 mod isomorphic;
 mod minimize;
+#[allow(unused)]
+mod partition;
 mod projection;
 mod queue;
 mod relabel_pairs;
@@ -89,3 +91,6 @@ pub use self::{
 pub(crate) use self::factor_weight::{
     factor_weight, FactorIterator, FactorWeightOptions, FactorWeightType,
 };
+
+#[allow(unused)]
+pub(crate) use self::partition::Partition;

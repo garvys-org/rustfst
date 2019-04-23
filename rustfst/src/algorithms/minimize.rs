@@ -1,6 +1,7 @@
 use failure::Fallible;
 
 use crate::algorithms::arc_mappers::QuantizeMapper;
+use crate::algorithms::factor_iterators::GallicFactorLeft;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::algorithms::{
     arc_map, decode, encode, factor_weight, push_weights, weight_convert, FactorWeightOptions,
@@ -12,7 +13,6 @@ use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{
     GallicWeightLeft, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::algorithms::factor_iterators::GallicFactorLeft;
 use crate::EPS_LABEL;
 use crate::KDELTA;
 
@@ -55,7 +55,8 @@ where
             increment_final_ilabel: false,
             increment_final_olabel: false,
         };
-        let fwfst: VectorFst<_> = factor_weight::<_, _, GallicFactorLeft<F::W>>(&gfst, factor_opts)?;
+        let fwfst: VectorFst<_> =
+            factor_weight::<_, _, GallicFactorLeft<F::W>>(&gfst, factor_opts)?;
         let mut from_gallic = FromGallicConverter {
             superfinal_label: EPS_LABEL,
         };
