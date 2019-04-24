@@ -189,6 +189,10 @@ impl Partition {
     pub fn num_classes(&self) -> usize {
         self.classes.len()
     }
+
+    pub fn iter(&self, class_id: usize) -> PartitionIterator {
+        PartitionIterator::new(self, class_id)
+    }
 }
 
 pub struct Element {
@@ -223,6 +227,39 @@ impl Class {
             yes_size: 0,
             no_head: -1,
             yes_head: -1,
+        }
+    }
+}
+
+pub struct PartitionIterator<'a> {
+    partition: &'a Partition,
+    class_id: usize,
+    last_element_id: Option<i32>
+}
+
+impl<'a> PartitionIterator<'a> {
+    pub fn new(partition: &'a Partition, class_id: usize) -> Self {
+        PartitionIterator {
+            partition,
+            class_id,
+            last_element_id: None
+        }
+    }
+}
+
+impl<'a> Iterator for PartitionIterator<'a> {
+    type Item = usize;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let new_element_id = match self.last_element_id {
+            None => self.partition.classes[self.class_id].no_head,
+            Some(e) => self.partition.elements[e as usize].next_element
+        };
+        if new_element_id < 0 {
+            None
+        } else {
+            self.last_element_id = Some(new_element_id);
+            Some(new_element_id as usize)
         }
     }
 }
