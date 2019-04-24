@@ -1,20 +1,27 @@
+use std::cmp::max;
+
 use failure::Fallible;
 
-use crate::algorithms::arc_mappers::QuantizeMapper;
+use crate::algorithms::arc_mappers::{QuantizeMapper};
+use crate::algorithms::state_mappers::ArcUniqueMapper;
 use crate::algorithms::factor_iterators::GallicFactorLeft;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::algorithms::{
     arc_map, decode, encode, factor_weight, push_weights, weight_convert, FactorWeightOptions,
-    FactorWeightType, ReweightType,
+    FactorWeightType, ReweightType, connect, state_map, arc_sort
 };
+use crate::algorithms::arc_compares::ilabel_compare;
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
+use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst, Fst};
 use crate::semirings::{
     GallicWeightLeft, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::EPS_LABEL;
 use crate::KDELTA;
+use crate::algorithms::partition::Partition;
+use crate::StateId;
+use std::collections::HashSet;
 
 pub fn minimize<F>(ifst: &mut F, allow_nondet: bool) -> Fallible<()>
 where
@@ -76,6 +83,120 @@ where
     }
 }
 
-fn acceptor_minimize<F>(ifst: &mut F, allow_acyclic_minimization: bool) -> Fallible<()> {
-    unimplemented!()
+fn acceptor_minimize<F: MutableFst + ExpandedFst>(ifst: &mut F, allow_acyclic_minimization: bool) -> Fallible<()> {
+    let props = ifst.properties()?;
+    if !props.contains(FstProperties::ACCEPTOR | FstProperties::UNWEIGHTED) {
+        bail!("FST is not an unweighted acceptor");
+    }
+
+    connect(ifst)?;
+
+    if ifst.num_states() == 0 {
+        return Ok(())
+    }
+
+    if allow_acyclic_minimization && props.contains(FstProperties::ACYCLIC) {
+        // Acyclic minimization
+        arc_sort(ifst, ilabel_compare)?;
+        let minimizer = AcyclicMinimizer::new(ifst);
+        merge_states(minimizer.get_partition(), ifst)?;
+    } else {
+        // Cyclic minimization
+        let minimizer = CyclicMinimizer::new(ifst);
+        merge_states(minimizer.get_partition(), ifst)?;
+    }
+
+    let mut mapper = ArcUniqueMapper {};
+    state_map(ifst, &mut mapper)?;
+
+    Ok(())
+}
+
+fn merge_states<F: MutableFst + ExpandedFst>(partition: Partition, fst: &mut F) -> Fallible<()> {
+    let mut state_map = vec![None; partition.num_classes()];
+    for i in 0..partition.num_classes() {
+        state_map[i] = partition.iter(i).next();
+    }
+
+    for c in 0..partition.num_classes() {
+        for s in partition.iter(c) {
+            if s == state_map[c].unwrap() {
+                for arc in fst.arcs_iter_mut(s)? {
+                    arc.nextstate = state_map[partition.get_class_id(arc.nextstate)].unwrap();
+                }
+            } else {
+                let arcs : Vec<_> = fst.arcs_iter(s)?.cloned().map(|mut arc|{
+                    arc.nextstate = state_map[partition.get_class_id(arc.nextstate)].unwrap();
+                    arc
+                }).collect();
+                for arc in arcs.into_iter() {
+                    fst.add_arc(state_map[c].unwrap(), arc)?;
+                }
+            }
+        }
+    }
+
+    fst.set_start(state_map[partition.get_class_id(fst.start().unwrap())].unwrap())?;
+    connect(fst)?;
+    Ok(())
+}
+
+#[allow(unused)]
+// Compute the height (distance) to final state
+pub fn fst_depth<F: Fst>(
+    fst: &F,
+    state_id_cour: StateId,
+    accessible_states: &mut HashSet<StateId>,
+    fully_examined_states: &mut HashSet<StateId>,
+    heights: &mut Vec<i32>
+) -> Fallible<()> {
+    accessible_states.insert(state_id_cour);
+
+    for i in heights.len()..=state_id_cour {
+        heights.push(-1);
+    }
+
+    let mut height_cur_state = 0;
+    for arc in fst.arcs_iter(state_id_cour)? {
+        let nextstate = arc.nextstate;
+
+        if !accessible_states.contains(&nextstate) {
+            fst_depth(fst, nextstate, accessible_states, fully_examined_states, heights)?;
+        }
+
+        height_cur_state = max(height_cur_state, 1 + heights[nextstate]);
+    }
+    fully_examined_states.insert(state_id_cour);
+
+    heights[state_id_cour] = height_cur_state;
+
+    Ok(())
+}
+
+struct AcyclicMinimizer<'a, F: MutableFst + ExpandedFst> {
+    fst: &'a mut F
+}
+
+impl<'a, F: MutableFst + ExpandedFst> AcyclicMinimizer<'a, F> {
+    pub fn new(fst: &'a mut F) -> Self {
+        Self {fst}
+    }
+
+    pub fn get_partition(&self) -> Partition {
+        unimplemented!()
+    }
+}
+
+struct CyclicMinimizer<'a, F: MutableFst + ExpandedFst> {
+    fst: &'a mut F
+}
+
+impl<'a, F: MutableFst + ExpandedFst> CyclicMinimizer<'a, F> {
+    pub fn new(fst: &'a mut F) -> Self {
+        Self {fst}
+    }
+
+    pub fn get_partition(&self) -> Partition {
+        unimplemented!()
+    }
 }
