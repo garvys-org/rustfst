@@ -2,25 +2,25 @@ use std::cmp::max;
 
 use failure::Fallible;
 
-use crate::algorithms::arc_mappers::{QuantizeMapper};
-use crate::algorithms::state_mappers::ArcUniqueMapper;
+use crate::algorithms::arc_compares::ilabel_compare;
+use crate::algorithms::arc_mappers::QuantizeMapper;
 use crate::algorithms::factor_iterators::GallicFactorLeft;
+use crate::algorithms::partition::Partition;
+use crate::algorithms::state_mappers::ArcUniqueMapper;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::algorithms::{
-    arc_map, decode, encode, factor_weight, push_weights, weight_convert, FactorWeightOptions,
-    FactorWeightType, ReweightType, connect, state_map, arc_sort
+    arc_map, arc_sort, connect, decode, encode, factor_weight, push_weights, state_map,
+    weight_convert, FactorWeightOptions, FactorWeightType, ReweightType,
 };
-use crate::algorithms::arc_compares::ilabel_compare;
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst, Fst};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{
     GallicWeightLeft, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
+use crate::StateId;
 use crate::EPS_LABEL;
 use crate::KDELTA;
-use crate::algorithms::partition::Partition;
-use crate::StateId;
 use std::collections::HashSet;
 
 pub fn minimize<F>(ifst: &mut F, allow_nondet: bool) -> Fallible<()>
@@ -83,7 +83,10 @@ where
     }
 }
 
-fn acceptor_minimize<F: MutableFst + ExpandedFst>(ifst: &mut F, allow_acyclic_minimization: bool) -> Fallible<()> {
+fn acceptor_minimize<F: MutableFst + ExpandedFst>(
+    ifst: &mut F,
+    allow_acyclic_minimization: bool,
+) -> Fallible<()> {
     let props = ifst.properties()?;
     if !props.contains(FstProperties::ACCEPTOR | FstProperties::UNWEIGHTED) {
         bail!("FST is not an unweighted acceptor");
@@ -92,13 +95,13 @@ fn acceptor_minimize<F: MutableFst + ExpandedFst>(ifst: &mut F, allow_acyclic_mi
     connect(ifst)?;
 
     if ifst.num_states() == 0 {
-        return Ok(())
+        return Ok(());
     }
 
     if allow_acyclic_minimization && props.contains(FstProperties::ACYCLIC) {
         // Acyclic minimization
         arc_sort(ifst, ilabel_compare)?;
-        let minimizer = AcyclicMinimizer::new(ifst);
+        let minimizer = AcyclicMinimizer::new(ifst)?;
         merge_states(minimizer.get_partition(), ifst)?;
     } else {
         // Cyclic minimization
@@ -125,10 +128,14 @@ fn merge_states<F: MutableFst + ExpandedFst>(partition: Partition, fst: &mut F) 
                     arc.nextstate = state_map[partition.get_class_id(arc.nextstate)].unwrap();
                 }
             } else {
-                let arcs : Vec<_> = fst.arcs_iter(s)?.cloned().map(|mut arc|{
-                    arc.nextstate = state_map[partition.get_class_id(arc.nextstate)].unwrap();
-                    arc
-                }).collect();
+                let arcs: Vec<_> = fst
+                    .arcs_iter(s)?
+                    .cloned()
+                    .map(|mut arc| {
+                        arc.nextstate = state_map[partition.get_class_id(arc.nextstate)].unwrap();
+                        arc
+                    })
+                    .collect();
                 for arc in arcs.into_iter() {
                     fst.add_arc(state_map[c].unwrap(), arc)?;
                 }
@@ -141,14 +148,13 @@ fn merge_states<F: MutableFst + ExpandedFst>(partition: Partition, fst: &mut F) 
     Ok(())
 }
 
-#[allow(unused)]
 // Compute the height (distance) to final state
 pub fn fst_depth<F: Fst>(
     fst: &F,
     state_id_cour: StateId,
     accessible_states: &mut HashSet<StateId>,
     fully_examined_states: &mut HashSet<StateId>,
-    heights: &mut Vec<i32>
+    heights: &mut Vec<i32>,
 ) -> Fallible<()> {
     accessible_states.insert(state_id_cour);
 
@@ -161,7 +167,13 @@ pub fn fst_depth<F: Fst>(
         let nextstate = arc.nextstate;
 
         if !accessible_states.contains(&nextstate) {
-            fst_depth(fst, nextstate, accessible_states, fully_examined_states, heights)?;
+            fst_depth(
+                fst,
+                nextstate,
+                accessible_states,
+                fully_examined_states,
+                heights,
+            )?;
         }
 
         height_cur_state = max(height_cur_state, 1 + heights[nextstate]);
@@ -173,30 +185,62 @@ pub fn fst_depth<F: Fst>(
     Ok(())
 }
 
-struct AcyclicMinimizer<'a, F: MutableFst + ExpandedFst> {
-    fst: &'a mut F
+struct AcyclicMinimizer {
+    partition: Partition
 }
 
-impl<'a, F: MutableFst + ExpandedFst> AcyclicMinimizer<'a, F> {
-    pub fn new(fst: &'a mut F) -> Self {
-        Self {fst}
+impl AcyclicMinimizer {
+    pub fn new<F: MutableFst + ExpandedFst>(fst: &mut F) -> Fallible<Self> {
+        let mut c = Self{partition: Partition::empty_new()};
+        c.initialize(fst)?;
+        c.refine(fst);
+        Ok(c)
     }
 
-    pub fn get_partition(&self) -> Partition {
+    fn initialize<F: MutableFst + ExpandedFst>(&mut self, fst: &mut F) -> Fallible<()> {
+        let mut accessible_state = HashSet::new();
+        let mut fully_examined_states = HashSet::new();
+        let mut heights = Vec::new();
+        fst_depth(
+            fst,
+            fst.start().unwrap(),
+            &mut accessible_state,
+            &mut fully_examined_states,
+            &mut heights,
+        )?;
+        self.partition.initialize(heights.len());
+        self.partition.allocate_classes((heights.iter().max().unwrap() + 1) as usize);
+        for s in 0..heights.len() {
+            self.partition.add(s, heights[s] as usize);
+        }
+        Ok(())
+    }
+
+
+    fn refine<F: MutableFst + ExpandedFst>(&mut self, fst: &mut F) {
         unimplemented!()
+    }
+
+    pub fn get_partition(self) -> Partition {
+        self.partition
     }
 }
 
 struct CyclicMinimizer<'a, F: MutableFst + ExpandedFst> {
-    fst: &'a mut F
+    fst: &'a mut F,
 }
 
 impl<'a, F: MutableFst + ExpandedFst> CyclicMinimizer<'a, F> {
     pub fn new(fst: &'a mut F) -> Self {
-        Self {fst}
+        Self { fst }
     }
 
     pub fn get_partition(&self) -> Partition {
         unimplemented!()
     }
+}
+
+struct StateComparator<'a, 'b, F: MutableFst + ExpandedFst> {
+    fst: &'a F,
+    partition: &'b Partition
 }
