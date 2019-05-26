@@ -1,5 +1,5 @@
 [workspace]
 members = [
     "rustfst",
-    "rustfst-tests-pynini"
+    "rustfst-tests-openfst"
 ]

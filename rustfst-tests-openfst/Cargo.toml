@@ -1,5 +1,5 @@
 [package]
-name = 'rustfst-tests-pynini'
+name = 'rustfst-tests-openfst'
 version = "0.3.1-alpha.0"
 authors = ['Alexandre Caulier<alexandre.caulier@protonmail.com>']
 description = 'Library for constructing, combining, optimizing, and searching weighted finite-state transducers (FSTs).'

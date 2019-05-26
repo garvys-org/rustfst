@@ -163,8 +163,7 @@ where
 fn run_test_pynini(test_name: &str) -> Fallible<()> {
     let mut absolute_path = std::env::current_dir()?;
     absolute_path.push("..");
-    absolute_path.push("rustfst-tests-openfst");
-//    absolute_path.push("rustfst_tests_data");
+    absolute_path.push("rustfst-tests-data");
     absolute_path.push(test_name);
     absolute_path.push("metadata.json");
 
