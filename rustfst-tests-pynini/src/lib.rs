@@ -163,8 +163,8 @@ where
 fn run_test_pynini(test_name: &str) -> Fallible<()> {
     let mut absolute_path = std::env::current_dir()?;
     absolute_path.push("..");
-    absolute_path.push("rustfst-tests-data");
-    absolute_path.push("rustfst_tests_data");
+    absolute_path.push("rustfst-tests-openfst");
+//    absolute_path.push("rustfst_tests_data");
     absolute_path.push(test_name);
     absolute_path.push("metadata.json");
 
@@ -172,10 +172,11 @@ fn run_test_pynini(test_name: &str) -> Fallible<()> {
     let parsed_test_data: ParsedTestData = serde_json::from_str(&string).unwrap();
 
     match parsed_test_data.weight_type.as_str() {
-        "tropical" => {
+        "tropical" | "standard" => {
             let test_data: TestData<VectorFst<TropicalWeight>> = TestData::new(&parsed_test_data);
             do_run_test_pynini(&test_data)?;
         }
+
         "log" => {
             let test_data: TestData<VectorFst<LogWeight>> = TestData::new(&parsed_test_data);
             do_run_test_pynini(&test_data)?;
@@ -195,9 +196,9 @@ where
 
     test_invert(&test_data)?;
 
-    test_project_output(&test_data)?;
-
     test_project_input(&test_data)?;
+
+    test_project_output(&test_data)?;
 
     test_reverse(&test_data)?;
 

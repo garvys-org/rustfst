@@ -21,7 +21,7 @@ using namespace std;
 using json = nlohmann::json;
 
 template<class A>
-string fst_to_string(const fst::VectorFst<A> a) {
+string fst_to_string(const fst::VectorFst<A>& a) {
     std::stringstream sstrm;
     fst::script::PrintFst(a, sstrm, string("<rustfst>"), NULL, NULL, NULL);
     return sstrm.str();
