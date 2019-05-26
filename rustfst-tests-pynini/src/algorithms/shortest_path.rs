@@ -53,10 +53,10 @@ where
         + From<<<F as CoreFst>::W as Semiring>::ReverseWeight>,
 {
     for data in &test_data.shortest_path {
-        println!(
-            "ShortestPath : unique = {} and nshortest = {}",
-            data.unique, data.nshortest
-        );
+//        println!(
+//            "ShortestPath : unique = {} and nshortest = {}",
+//            data.unique, data.nshortest
+//        );
         let fst_res: Fallible<F> = shortest_path(&test_data.raw, data.nshortest, data.unique);
         match (&data.result, &fst_res) {
             (Ok(fst_expected), Ok(ref fst_shortest)) => {

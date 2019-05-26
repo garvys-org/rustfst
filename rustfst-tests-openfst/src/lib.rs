@@ -27,6 +27,7 @@ use crate::algorithms::{
     arcsort::{test_arcsort_ilabel, test_arcsort_olabel},
     connect::test_connect,
     determinize::{test_determinize, DeterminizeOperationResult, DeterminizeTestData},
+    minimize::{test_minimize, MinimizeOperationResult, MinimizeTestData},
     encode::{test_encode, test_encode_decode, EncodeOperationResult, EncodeTestData},
     inverse::test_invert,
     project::{test_project_input, test_project_output},
@@ -91,6 +92,7 @@ pub struct ParsedTestData {
     state_map_arc_sum: OperationResult,
     state_map_arc_unique: OperationResult,
     determinize: Vec<DeterminizeOperationResult>,
+    minimize: Vec<MinimizeOperationResult>,
     arcsort_ilabel: OperationResult,
     arcsort_olabel: OperationResult,
     topsort: OperationResult,
@@ -129,6 +131,7 @@ where
     pub state_map_arc_sum: F,
     pub state_map_arc_unique: F,
     pub determinize: Vec<DeterminizeTestData<F>>,
+    pub minimize: Vec<MinimizeTestData<F>>,
     pub arcsort_ilabel: F,
     pub arcsort_olabel: F,
     pub topsort: F,
@@ -168,6 +171,7 @@ where
             state_map_arc_sum: data.state_map_arc_sum.parse(),
             state_map_arc_unique: data.state_map_arc_unique.parse(),
             determinize: data.determinize.iter().map(|v| v.parse()).collect(),
+            minimize: data.minimize.iter().map(|v| v.parse()).collect(),
             arcsort_ilabel: data.arcsort_ilabel.parse(),
             arcsort_olabel: data.arcsort_olabel.parse(),
             topsort: data.topsort.parse(),
@@ -271,6 +275,8 @@ where
     test_vector_fst_bin_parser(&test_data)?;
 
     test_shortest_path(&test_data)?;
+
+    test_minimize(&test_data)?;
 
     Ok(())
 }

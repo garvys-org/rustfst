@@ -4,6 +4,7 @@ pub mod connect;
 pub mod determinize;
 pub mod encode;
 pub mod inverse;
+pub mod minimize;
 pub mod project;
 pub mod properties;
 pub mod reverse;
