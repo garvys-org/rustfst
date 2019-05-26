@@ -170,42 +170,30 @@ void compute_fst_state_map(const F& raw_fst, json& j, const string& name, C mapp
     j[name]["result"] = fst_to_string(fst_out);
 }
 
+bool prop_to_bool(uint64 all_props, uint64 prop) {
+    return (all_props & prop) == prop;
+}
+
+template<class F>
+void compute_fst_determinization(const F& raw_fst, json& j, fst::DeterminizeType det_type, const string& name) {
+    fst::DeterminizeOptions<typename F::Arc> opts;
+    opts.type = det_type;
+    F fst_out;
+    fst::Determinize(raw_fst, &fst_out, opts);
+    bool error = prop_to_bool(fst_out.Properties(fst::kError, true), fst::kError);
+    json j2;
+    j2["det_type"] = name;
+    j2["result"] = error? "error": fst_to_string(fst_out);
+    j["determinize"].push_back(j2);
+}
+
 template<class F>
 void compute_fst_determinization(const F& raw_fst, json& j) {
     j["determinize"] = {};
 
-    {
-        fst::DeterminizeOptions<typename F::Arc> opts;
-        opts.type = fst::DeterminizeType::DETERMINIZE_FUNCTIONAL;
-        F fst_out;
-        fst::Determinize(raw_fst, &fst_out, opts);
-        json j2;
-        j2["det_type"] = "functional";
-        j2["result"] = fst_to_string(fst_out);
-        j["determinize"].push_back(j2);
-    }
-
-    {
-        fst::DeterminizeOptions<typename F::Arc> opts;
-        opts.type = fst::DeterminizeType::DETERMINIZE_NONFUNCTIONAL;
-        F fst_out;
-        fst::Determinize(raw_fst, &fst_out, opts);
-        json j2;
-        j2["det_type"] = "nonfunctional";
-        j2["result"] = fst_to_string(fst_out);
-        j["determinize"].push_back(j2);
-    }
-
-    {
-        fst::DeterminizeOptions<typename F::Arc> opts;
-        opts.type = fst::DeterminizeType::DETERMINIZE_DISAMBIGUATE;
-        F fst_out;
-        fst::Determinize(raw_fst, &fst_out, opts);
-        json j2;
-        j2["det_type"] = "disambiguate";
-        j2["result"] = fst_to_string(fst_out);
-        j["determinize"].push_back(j2);
-    }
+    compute_fst_determinization(raw_fst, j, fst::DeterminizeType::DETERMINIZE_FUNCTIONAL, "functional");
+    compute_fst_determinization(raw_fst, j, fst::DeterminizeType::DETERMINIZE_NONFUNCTIONAL, "nonfunctional");
+    compute_fst_determinization(raw_fst, j, fst::DeterminizeType::DETERMINIZE_DISAMBIGUATE, "disambiguate");
 }
 
 template<class F>
@@ -214,10 +202,6 @@ void compute_fst_topsort(const F& raw_fst, json& j) {
     fst::ArcSort(&fst_out, fst::ILabelCompare<typename F::Arc>());
     fst::TopSort(&fst_out);
     j["topsort"]["result"] = fst_to_string(fst_out);
-}
-
-bool prop_to_bool(uint64 all_props, uint64 prop) {
-    return (all_props & prop) == prop;
 }
 
 template<class F>
@@ -262,6 +246,7 @@ void compute_fst_properties(const F& raw_fst, json& j) {
 
 template<class A>
 void compute_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
+    std::cout << "FST :" << fst_name << std::endl;
     json data;
 
     data["name"] = fst_name;
@@ -330,9 +315,12 @@ void compute_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
 
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;
+
+    std::cout << std::endl;
 }
 
 int main() {
+    FLAGS_fst_error_fatal = false;
     compute_data(compute_fst_000(), "fst_000");
     compute_data(compute_fst_001(), "fst_001");
     compute_data(compute_fst_002(), "fst_002");
