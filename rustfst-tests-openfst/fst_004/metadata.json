@@ -6,7 +6,7 @@
         "result": "0\t1\t0\t25\t0.3\n0\t1\t0\t26\t0.4\n1\t3\t0\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
     },
     "arc_map_invert": {
-        "result": "0\t1\t25\t12\t0.3\n0\t1\t26\t10\t0.4\n1\t3\t5\t4\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
+        "result": "0\t1\t12\t25\t-0.3\n0\t1\t10\t26\t-0.4\n1\t3\t4\t5\t-0.1\n1\t-0.7\n2\tInfinity\n3\tInfinity\n"
     },
     "arc_map_output_epsilon": {
         "result": "0\t1\t12\t0\t0.3\n0\t1\t10\t0\t0.4\n1\t3\t4\t0\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
@@ -50,12 +50,12 @@
         {
             "encode_labels": true,
             "encode_weights": true,
-            "result": "0\t1\t1\t0\n0\t1\t2\t0\n1\t3\t3\t0\n1\t4\t4\t0\n2\tInfinity\n3\tInfinity\n4\t0\n"
+            "result": "0\t1\t1\t1\t0\n0\t1\t2\t2\t0\n1\t3\t3\t3\t0\n1\t4\t4\t4\t0\n2\tInfinity\n3\tInfinity\n4\t0\n"
         },
         {
             "encode_labels": true,
             "encode_weights": false,
-            "result": "0\t1\t1\t0.3\n0\t1\t2\t0.4\n1\t3\t3\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
+            "result": "0\t1\t1\t1\t0.3\n0\t1\t2\t2\t0.4\n1\t3\t3\t3\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
         },
         {
             "encode_labels": false,
@@ -129,10 +129,10 @@
     },
     "name": "fst_004",
     "project_input": {
-        "result": "0\t1\t12\t0.3\n0\t1\t10\t0.4\n1\t3\t4\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
+        "result": "0\t1\t12\t12\t0.3\n0\t1\t10\t10\t0.4\n1\t3\t4\t4\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
     },
     "project_output": {
-        "result": "0\t1\t25\t0.3\n0\t1\t26\t0.4\n1\t3\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
+        "result": "0\t1\t25\t25\t0.3\n0\t1\t26\t26\t0.4\n1\t3\t5\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"
     },
     "raw": {
         "result": "0\t1\t12\t25\t0.3\n0\t1\t10\t26\t0.4\n1\t3\t4\t5\t0.1\n1\t0.7\n2\tInfinity\n3\tInfinity\n"

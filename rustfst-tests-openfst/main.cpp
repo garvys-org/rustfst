@@ -23,7 +23,9 @@ using json = nlohmann::json;
 template<class A>
 string fst_to_string(const fst::VectorFst<A>& a) {
     std::stringstream sstrm;
-    fst::script::PrintFst(a, sstrm, string("<rustfst>"), NULL, NULL, NULL);
+    const string sep = FLAGS_fst_field_separator.substr(0, 1);
+    fst::FstPrinter<A> fstprinter(a, NULL, NULL, NULL, false, true, sep);
+    fstprinter.Print(&sstrm, string("<rustfst>"));
     return sstrm.str();
 }
 
@@ -283,7 +285,7 @@ void compute_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
     std::cout << "ArcMap" << std::endl;
     compute_fst_compute_arc_map(raw_fst, data, "arc_map_identity", fst::IdentityMapper<A>());
     compute_fst_compute_arc_map(raw_fst, data, "arc_map_rmweight", fst::RmWeightMapper<A>());
-    compute_fst_compute_arc_map(raw_fst, data, "arc_map_invert", fst::InvertMapper<A>());
+    compute_fst_compute_arc_map(raw_fst, data, "arc_map_invert", fst::InvertWeightMapper<A>());
     compute_fst_compute_arc_map(raw_fst, data, "arc_map_input_epsilon", fst::InputEpsilonMapper<A>());
     compute_fst_compute_arc_map(raw_fst, data, "arc_map_output_epsilon", fst::OutputEpsilonMapper<A>());
     compute_fst_compute_arc_map(raw_fst, data, "arc_map_quantize", fst::QuantizeMapper<A>());

@@ -6,7 +6,7 @@
         "result": "0\t1\t0\t25\t0.3\n0\t1\t0\t26\t0.2\n1\t2\t0\t3\t0.1\n2\t2\t0\t7\t0.4\n2\t0.7\n"
     },
     "arc_map_invert": {
-        "result": "0\t1\t25\t12\t0.3\n0\t1\t26\t14\t0.2\n1\t2\t3\t5\t0.1\n2\t2\t7\t6\t0.4\n2\t0.7\n"
+        "result": "0\t1\t12\t25\t-0.3\n0\t1\t14\t26\t-0.2\n1\t2\t5\t3\t-0.1\n2\t2\t6\t7\t-0.4\n2\t-0.7\n"
     },
     "arc_map_output_epsilon": {
         "result": "0\t1\t12\t0\t0.3\n0\t1\t14\t0\t0.2\n1\t2\t5\t0\t0.1\n2\t2\t6\t0\t0.4\n2\t0.7\n"
@@ -50,12 +50,12 @@
         {
             "encode_labels": true,
             "encode_weights": true,
-            "result": "0\t1\t1\t0\n0\t1\t2\t0\n1\t2\t3\t0\n2\t2\t4\t0\n2\t3\t5\t0\n3\t0\n"
+            "result": "0\t1\t1\t1\t0\n0\t1\t2\t2\t0\n1\t2\t3\t3\t0\n2\t2\t4\t4\t0\n2\t3\t5\t5\t0\n3\t0\n"
         },
         {
             "encode_labels": true,
             "encode_weights": false,
-            "result": "0\t1\t1\t0.3\n0\t1\t2\t0.2\n1\t2\t3\t0.1\n2\t2\t4\t0.4\n2\t0.7\n"
+            "result": "0\t1\t1\t1\t0.3\n0\t1\t2\t2\t0.2\n1\t2\t3\t3\t0.1\n2\t2\t4\t4\t0.4\n2\t0.7\n"
         },
         {
             "encode_labels": false,
@@ -129,10 +129,10 @@
     },
     "name": "fst_003",
     "project_input": {
-        "result": "0\t1\t12\t0.3\n0\t1\t14\t0.2\n1\t2\t5\t0.1\n2\t2\t6\t0.4\n2\t0.7\n"
+        "result": "0\t1\t12\t12\t0.3\n0\t1\t14\t14\t0.2\n1\t2\t5\t5\t0.1\n2\t2\t6\t6\t0.4\n2\t0.7\n"
     },
     "project_output": {
-        "result": "0\t1\t25\t0.3\n0\t1\t26\t0.2\n1\t2\t3\t0.1\n2\t2\t7\t0.4\n2\t0.7\n"
+        "result": "0\t1\t25\t25\t0.3\n0\t1\t26\t26\t0.2\n1\t2\t3\t3\t0.1\n2\t2\t7\t7\t0.4\n2\t0.7\n"
     },
     "raw": {
         "result": "0\t1\t12\t25\t0.3\n0\t1\t14\t26\t0.2\n1\t2\t5\t3\t0.1\n2\t2\t6\t7\t0.4\n2\t0.7\n"

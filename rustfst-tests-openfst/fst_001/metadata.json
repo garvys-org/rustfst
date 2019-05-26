@@ -6,7 +6,7 @@
         "result": "0\t1\t0\t25\t0\n1\t0\n"
     },
     "arc_map_invert": {
-        "result": "0\t1\t25\t12\t0\n1\t0\n"
+        "result": "0\t1\t12\t25\t0\n1\t0\n"
     },
     "arc_map_output_epsilon": {
         "result": "0\t1\t12\t0\t0\n1\t0\n"
@@ -50,12 +50,12 @@
         {
             "encode_labels": true,
             "encode_weights": true,
-            "result": "0\t1\t1\t0\n1\t2\t2\t0\n2\t0\n"
+            "result": "0\t1\t1\t1\t0\n1\t2\t2\t2\t0\n2\t0\n"
         },
         {
             "encode_labels": true,
             "encode_weights": false,
-            "result": "0\t1\t1\t0\n1\t0\n"
+            "result": "0\t1\t1\t1\t0\n1\t0\n"
         },
         {
             "encode_labels": false,
@@ -129,10 +129,10 @@
     },
     "name": "fst_001",
     "project_input": {
-        "result": "0\t1\t12\t0\n1\t0\n"
+        "result": "0\t1\t12\t12\t0\n1\t0\n"
     },
     "project_output": {
-        "result": "0\t1\t25\t0\n1\t0\n"
+        "result": "0\t1\t25\t25\t0\n1\t0\n"
     },
     "raw": {
         "result": "0\t1\t12\t25\t0\n1\t0\n"
