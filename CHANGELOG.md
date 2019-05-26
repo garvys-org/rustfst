@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add the `FstProperties` bitflags struct and a function to commpute the property flags for an `Fst`.
 - Implement `topsort` and `statesort`.
 
+### Changed
+- Before test cases were generated with pynini (python wrapper around openfst). Now they are directly generated with OpenFST (c++). Allows to test operations that are not wrapped.
+
 ## [0.3.0] - 2019-04-03
 
 ### Added
