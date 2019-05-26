@@ -1,0 +1,173 @@
+{
+    "arc_map_identity": {
+        "result": "0\t1\t12\t25\t0.3\n0\t6\t12\t25\t0.3\n1\t2\t112\t75\t0.1\n1\t6\t12\t25\t0.2\n2\t3\t124\t75\t0.5\n3\t4\t152\t55\t0.6\n3\t0.7\n4\tInfinity\n5\t4\t12\t25\t0.4\n5\t2\t12\t25\t0.1\n6\tInfinity\n"
+    },
+    "arc_map_input_epsilon": {
+        "result": "0\t1\t0\t25\t0.3\n0\t6\t0\t25\t0.3\n1\t2\t0\t75\t0.1\n1\t6\t0\t25\t0.2\n2\t3\t0\t75\t0.5\n3\t4\t0\t55\t0.6\n3\t0.7\n4\tInfinity\n5\t4\t0\t25\t0.4\n5\t2\t0\t25\t0.1\n6\tInfinity\n"
+    },
+    "arc_map_invert": {
+        "result": "0\t1\t12\t25\t-0.3\n0\t6\t12\t25\t-0.3\n1\t2\t112\t75\t-0.1\n1\t6\t12\t25\t-0.2\n2\t3\t124\t75\t-0.5\n3\t4\t152\t55\t-0.6\n3\t-0.7\n4\tInfinity\n5\t4\t12\t25\t-0.4\n5\t2\t12\t25\t-0.1\n6\tInfinity\n"
+    },
+    "arc_map_output_epsilon": {
+        "result": "0\t1\t12\t0\t0.3\n0\t6\t12\t0\t0.3\n1\t2\t112\t0\t0.1\n1\t6\t12\t0\t0.2\n2\t3\t124\t0\t0.5\n3\t4\t152\t0\t0.6\n3\t0.7\n4\tInfinity\n5\t4\t12\t0\t0.4\n5\t2\t12\t0\t0.1\n6\tInfinity\n"
+    },
+    "arc_map_plus": {
+        "result": "0\t1\t12\t25\t0.3\n0\t6\t12\t25\t0.3\n1\t2\t112\t75\t0.1\n1\t6\t12\t25\t0.2\n2\t3\t124\t75\t0.5\n3\t4\t152\t55\t0.6\n3\t0.7\n4\tInfinity\n5\t4\t12\t25\t0.4\n5\t2\t12\t25\t0.1\n6\tInfinity\n"
+    },
+    "arc_map_quantize": {
+        "result": "0\t1\t12\t25\t0.299805\n0\t6\t12\t25\t0.299805\n1\t2\t112\t75\t0.0996094\n1\t6\t12\t25\t0.200195\n2\t3\t124\t75\t0.5\n3\t4\t152\t55\t0.599609\n3\t0.700195\n4\tInfinity\n5\t4\t12\t25\t0.400391\n5\t2\t12\t25\t0.0996094\n6\tInfinity\n"
+    },
+    "arc_map_rmweight": {
+        "result": "0\t1\t12\t25\t0\n0\t6\t12\t25\t0\n1\t2\t112\t75\t0\n1\t6\t12\t25\t0\n2\t3\t124\t75\t0\n3\t4\t152\t55\t0\n3\t0\n4\tInfinity\n5\t4\t12\t25\t0\n5\t2\t12\t25\t0\n6\tInfinity\n"
+    },
+    "arc_map_times": {
+        "result": "0\t1\t12\t25\t1.8\n0\t6\t12\t25\t1.8\n1\t2\t112\t75\t1.6\n1\t6\t12\t25\t1.7\n2\t3\t124\t75\t2\n3\t4\t152\t55\t2.1\n3\t2.2\n4\tInfinity\n5\t4\t12\t25\t1.9\n5\t2\t12\t25\t1.6\n6\tInfinity\n"
+    },
+    "arcsort_ilabel": {
+        "result": "0\t1\t12\t25\t0.3\n0\t6\t12\t25\t0.3\n1\t6\t12\t25\t0.2\n1\t2\t112\t75\t0.1\n2\t3\t124\t75\t0.5\n3\t4\t152\t55\t0.6\n3\t0.7\n4\tInfinity\n5\t4\t12\t25\t0.4\n5\t2\t12\t25\t0.1\n6\tInfinity\n"
+    },
+    "arcsort_olabel": {
+        "result": "0\t1\t12\t25\t0.3\n0\t6\t12\t25\t0.3\n1\t6\t12\t25\t0.2\n1\t2\t112\t75\t0.1\n2\t3\t124\t75\t0.5\n3\t4\t152\t55\t0.6\n3\t0.7\n4\tInfinity\n5\t4\t12\t25\t0.4\n5\t2\t12\t25\t0.1\n6\tInfinity\n"
+    },
+    "connect": {
+        "result": "0\t1\t12\t25\t0.3\n1\t2\t112\t75\t0.1\n2\t3\t124\t75\t0.5\n3\t0.7\n"
+    },
+    "determinize": [
+        {
+            "det_type": "functional",
+            "result": "0\t1\t12\t25\t0.3\n1\t2\t12\t25\t0.2\n1\t3\t112\t75\t0.1\n2\tInfinity\n3\t4\t124\t75\t0.5\n4\t5\t152\t55\t0.6\n4\t0.7\n5\tInfinity\n"
+        },
+        {
+            "det_type": "nonfunctional",
+            "result": "0\t1\t12\t25\t0.3\n1\t2\t12\t25\t0.2\n1\t3\t112\t75\t0.1\n2\tInfinity\n3\t4\t124\t75\t0.5\n4\t5\t152\t55\t0.6\n4\t0.7\n5\tInfinity\n"
+        },
+        {
+            "det_type": "disambiguate",
+            "result": "0\t1\t12\t25\t0.3\n1\t2\t12\t25\t0.2\n1\t3\t112\t75\t0.1\n2\tInfinity\n3\t4\t124\t75\t0.5\n4\t5\t152\t55\t0.6\n4\t0.7\n5\tInfinity\n"
+        }
+    ],
+    "encode": [
+        {
+            "encode_labels": true,
+            "encode_weights": true,
+            "result": "0\t1\t1\t1\t0\n0\t6\t1\t1\t0\n1\t2\t2\t2\t0\n1\t6\t3\t3\t0\n2\t3\t4\t4\t0\n3\t4\t5\t5\t0\n3\t7\t6\t6\t0\n4\tInfinity\n5\t4\t7\t7\t0\n5\t2\t8\t8\t0\n6\tInfinity\n7\t0\n"
+        },
+        {
+            "encode_labels": true,
+            "encode_weights": false,
+            "result": "0\t1\t1\t1\t0.3\n0\t6\t1\t1\t0.3\n1\t2\t2\t2\t0.1\n1\t6\t1\t1\t0.2\n2\t3\t3\t3\t0.5\n3\t4\t4\t4\t0.6\n3\t0.7\n4\tInfinity\n5\t4\t1\t1\t0.4\n5\t2\t1\t1\t0.1\n6\tInfinity\n"
+        },
+        {
+            "encode_labels": false,
+            "encode_weights": true,
+            "result": "0\t1\t1\t25\t0\n0\t6\t1\t25\t0\n1\t2\t2\t75\t0\n1\t6\t3\t25\t0\n2\t3\t4\t75\t0\n3\t4\t5\t55\t0\n3\t7\t6\t0\t0\n4\tInfinity\n5\t4\t7\t25\t0\n5\t2\t8\t25\t0\n6\tInfinity\n7\t0\n"
+        },
+        {
+            "encode_labels": false,
+            "encode_weights": false,
+            "result": "0\t1\t1\t25\t0.3\n0\t6\t1\t25\t0.3\n1\t2\t2\t75\t0.1\n1\t6\t1\t25\t0.2\n2\t3\t3\t75\t0.5\n3\t4\t4\t55\t0.6\n3\t0.7\n4\tInfinity\n5\t4\t1\t25\t0.4\n5\t2\t1\t25\t0.1\n6\tInfinity\n"
+        }
+    ],
+    "encode_decode": [
+        {
+            "encode_labels": true,
+            "encode_weights": true,
+            "result": "0\t1\t12\t25\t0.3\n1\t2\t112\t75\t0.1\n2\t3\t124\t75\t0.5\n3\t0.7\n"
+        },
+        {
+            "encode_labels": true,
+            "encode_weights": false,
+            "result": "0\t1\t12\t25\t0.3\n1\t2\t112\t75\t0.1\n2\t3\t124\t75\t0.5\n3\t0.7\n"
+        },
+        {
+            "encode_labels": false,
+            "encode_weights": true,
+            "result": "0\t1\t12\t25\t0.3\n1\t2\t112\t75\t0.1\n2\t3\t124\t75\t0.5\n3\t0.7\n"
+        },
+        {
+            "encode_labels": false,
+            "encode_weights": false,
+            "result": "0\t1\t12\t25\t0.3\n1\t2\t112\t75\t0.1\n2\t3\t124\t75\t0.5\n3\t0.7\n"
+        }
+    ],
+    "fst_properties": {
+        "acceptor": false,
+        "accessible": false,
+        "acyclic": true,
+        "coaccessible": false,
+        "cyclic": false,
+        "epsilons": false,
+        "i_deterministic": false,
+        "i_epsilons": false,
+        "i_label_sorted": false,
+        "initial_acyclic": true,
+        "initial_cyclic": false,
+        "no_epsilons": true,
+        "no_i_epsilons": true,
+        "no_o_epsilons": true,
+        "not_acceptor": true,
+        "not_accessible": true,
+        "not_coaccessible": true,
+        "not_i_deterministic": true,
+        "not_i_label_sorted": true,
+        "not_o_deterministic": true,
+        "not_o_label_sorted": true,
+        "not_string": true,
+        "not_top_sorted": true,
+        "o_deterministic": false,
+        "o_epsilons": false,
+        "o_label_sorted": false,
+        "string": false,
+        "top_sorted": false,
+        "unweighted": false,
+        "unweighted_cycles": true,
+        "weighted": true,
+        "weighted_cycles": false
+    },
+    "invert": {
+        "result": "0\t1\t25\t12\t0.3\n0\t6\t25\t12\t0.3\n1\t2\t75\t112\t0.1\n1\t6\t25\t12\t0.2\n2\t3\t75\t124\t0.5\n3\t4\t55\t152\t0.6\n3\t0.7\n4\tInfinity\n5\t4\t25\t12\t0.4\n5\t2\t25\t12\t0.1\n6\tInfinity\n"
+    },
+    "name": "fst_002",
+    "project_input": {
+        "result": "0\t1\t12\t12\t0.3\n0\t6\t12\t12\t0.3\n1\t2\t112\t112\t0.1\n1\t6\t12\t12\t0.2\n2\t3\t124\t124\t0.5\n3\t4\t152\t152\t0.6\n3\t0.7\n4\tInfinity\n5\t4\t12\t12\t0.4\n5\t2\t12\t12\t0.1\n6\tInfinity\n"
+    },
+    "project_output": {
+        "result": "0\t1\t25\t25\t0.3\n0\t6\t25\t25\t0.3\n1\t2\t75\t75\t0.1\n1\t6\t25\t25\t0.2\n2\t3\t75\t75\t0.5\n3\t4\t55\t55\t0.6\n3\t0.7\n4\tInfinity\n5\t4\t25\t25\t0.4\n5\t2\t25\t25\t0.1\n6\tInfinity\n"
+    },
+    "raw": {
+        "result": "0\t1\t12\t25\t0.3\n0\t6\t12\t25\t0.3\n1\t2\t112\t75\t0.1\n1\t6\t12\t25\t0.2\n2\t3\t124\t75\t0.5\n3\t4\t152\t55\t0.6\n3\t0.7\n4\tInfinity\n5\t4\t12\t25\t0.4\n5\t2\t12\t25\t0.1\n6\tInfinity\n"
+    },
+    "reverse": {
+        "result": "0\t4\t0\t0\t0.7\n1\t0\n2\t1\t12\t25\t0.3\n3\t2\t112\t75\t0.1\n3\t6\t12\t25\t0.1\n4\t3\t124\t75\t0.5\n5\t4\t152\t55\t0.6\n5\t6\t12\t25\t0.4\n6\tInfinity\n7\t1\t12\t25\t0.3\n7\t2\t12\t25\t0.2\n"
+    },
+    "rmepsilon": {
+        "result": "0\t6\t12\t25\t0.3\n0\t1\t12\t25\t0.3\n1\t6\t12\t25\t0.2\n1\t2\t112\t75\t0.1\n2\t3\t124\t75\t0.5\n3\t4\t152\t55\t0.6\n3\t0.7\n4\tInfinity\n5\t2\t12\t25\t0.1\n5\t4\t12\t25\t0.4\n6\tInfinity\n"
+    },
+    "shortest_distance": {
+        "result": [
+            0.0,
+            0.30000001192092896,
+            0.4000000059604645,
+            0.8999999761581421,
+            1.5,
+            null,
+            0.30000001192092896
+        ]
+    },
+    "state_map_arc_sum": {
+        "result": "0\t1\t12\t25\t0.3\n0\t6\t12\t25\t0.3\n1\t6\t12\t25\t0.2\n1\t2\t112\t75\t0.1\n2\t3\t124\t75\t0.5\n3\t4\t152\t55\t0.6\n3\t0.7\n4\tInfinity\n5\t2\t12\t25\t0.1\n5\t4\t12\t25\t0.4\n6\tInfinity\n"
+    },
+    "state_map_arc_unique": {
+        "result": "0\t1\t12\t25\t0.3\n0\t6\t12\t25\t0.3\n1\t6\t12\t25\t0.2\n1\t2\t112\t75\t0.1\n2\t3\t124\t75\t0.5\n3\t4\t152\t55\t0.6\n3\t0.7\n4\tInfinity\n5\t2\t12\t25\t0.1\n5\t4\t12\t25\t0.4\n6\tInfinity\n"
+    },
+    "topsort": {
+        "result": "1\t2\t12\t25\t0.3\n1\t6\t12\t25\t0.3\n0\t5\t12\t25\t0.4\n0\t3\t12\t25\t0.1\n2\t6\t12\t25\t0.2\n2\t3\t112\t75\t0.1\n3\t4\t124\t75\t0.5\n4\t5\t152\t55\t0.6\n4\t0.7\n5\tInfinity\n6\tInfinity\n"
+    },
+    "weight_pushing_final": {
+        "result": "0\t1\t12\t25\t0\n0\t6\t12\t25\t0\n1\t2\t112\t75\t0\n1\t6\t12\t25\t0.2\n2\t3\t124\t75\t0\n3\t4\t152\t55\t0\n3\t1.6\n4\tInfinity\n5\t4\t12\t25\t0.4\n5\t2\t12\t25\t0.1\n6\tInfinity\n"
+    },
+    "weight_pushing_initial": {
+        "result": "0\t1\t12\t25\t1.6\n0\t6\t12\t25\t1.9\n1\t2\t112\t75\t0\n1\t6\t12\t25\t0.2\n2\t3\t124\t75\t0\n3\t4\t152\t55\t0.6\n3\t0\n4\tInfinity\n5\t4\t12\t25\t0.4\n5\t2\t12\t25\t0\n6\tInfinity\n"
+    },
+    "weight_type": "standard"
+}

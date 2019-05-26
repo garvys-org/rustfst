@@ -12,3 +12,5 @@ Cargo.lock
 /target
 **/*.rs.bk
 Cargo.lock
+/openfst-1.7.2
+openfst-1.7.2.tar.gz

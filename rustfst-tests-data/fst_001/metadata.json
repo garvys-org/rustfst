@@ -1,0 +1,168 @@
+{
+    "arc_map_identity": {
+        "result": "0\t1\t12\t25\t0\n1\t0\n"
+    },
+    "arc_map_input_epsilon": {
+        "result": "0\t1\t0\t25\t0\n1\t0\n"
+    },
+    "arc_map_invert": {
+        "result": "0\t1\t12\t25\t0\n1\t0\n"
+    },
+    "arc_map_output_epsilon": {
+        "result": "0\t1\t12\t0\t0\n1\t0\n"
+    },
+    "arc_map_plus": {
+        "result": "0\t1\t12\t25\t0\n1\t0\n"
+    },
+    "arc_map_quantize": {
+        "result": "0\t1\t12\t25\t0\n1\t0\n"
+    },
+    "arc_map_rmweight": {
+        "result": "0\t1\t12\t25\t0\n1\t0\n"
+    },
+    "arc_map_times": {
+        "result": "0\t1\t12\t25\t1.5\n1\t1.5\n"
+    },
+    "arcsort_ilabel": {
+        "result": "0\t1\t12\t25\t0\n1\t0\n"
+    },
+    "arcsort_olabel": {
+        "result": "0\t1\t12\t25\t0\n1\t0\n"
+    },
+    "connect": {
+        "result": "0\t1\t12\t25\t0\n1\t0\n"
+    },
+    "determinize": [
+        {
+            "det_type": "functional",
+            "result": "0\t1\t12\t25\t0\n1\t0\n"
+        },
+        {
+            "det_type": "nonfunctional",
+            "result": "0\t1\t12\t25\t0\n1\t0\n"
+        },
+        {
+            "det_type": "disambiguate",
+            "result": "0\t1\t12\t25\t0\n1\t0\n"
+        }
+    ],
+    "encode": [
+        {
+            "encode_labels": true,
+            "encode_weights": true,
+            "result": "0\t1\t1\t1\t0\n1\t2\t2\t2\t0\n2\t0\n"
+        },
+        {
+            "encode_labels": true,
+            "encode_weights": false,
+            "result": "0\t1\t1\t1\t0\n1\t0\n"
+        },
+        {
+            "encode_labels": false,
+            "encode_weights": true,
+            "result": "0\t1\t1\t25\t0\n1\t2\t2\t0\t0\n2\t0\n"
+        },
+        {
+            "encode_labels": false,
+            "encode_weights": false,
+            "result": "0\t1\t1\t25\t0\n1\t0\n"
+        }
+    ],
+    "encode_decode": [
+        {
+            "encode_labels": true,
+            "encode_weights": true,
+            "result": "0\t1\t12\t25\t0\n1\t0\n"
+        },
+        {
+            "encode_labels": true,
+            "encode_weights": false,
+            "result": "0\t1\t12\t25\t0\n1\t0\n"
+        },
+        {
+            "encode_labels": false,
+            "encode_weights": true,
+            "result": "0\t1\t12\t25\t0\n1\t0\n"
+        },
+        {
+            "encode_labels": false,
+            "encode_weights": false,
+            "result": "0\t1\t12\t25\t0\n1\t0\n"
+        }
+    ],
+    "fst_properties": {
+        "acceptor": false,
+        "accessible": true,
+        "acyclic": true,
+        "coaccessible": true,
+        "cyclic": false,
+        "epsilons": false,
+        "i_deterministic": true,
+        "i_epsilons": false,
+        "i_label_sorted": true,
+        "initial_acyclic": true,
+        "initial_cyclic": false,
+        "no_epsilons": true,
+        "no_i_epsilons": true,
+        "no_o_epsilons": true,
+        "not_acceptor": true,
+        "not_accessible": false,
+        "not_coaccessible": false,
+        "not_i_deterministic": false,
+        "not_i_label_sorted": false,
+        "not_o_deterministic": false,
+        "not_o_label_sorted": false,
+        "not_string": false,
+        "not_top_sorted": false,
+        "o_deterministic": true,
+        "o_epsilons": false,
+        "o_label_sorted": true,
+        "string": true,
+        "top_sorted": true,
+        "unweighted": true,
+        "unweighted_cycles": true,
+        "weighted": false,
+        "weighted_cycles": false
+    },
+    "invert": {
+        "result": "0\t1\t25\t12\t0\n1\t0\n"
+    },
+    "name": "fst_001",
+    "project_input": {
+        "result": "0\t1\t12\t12\t0\n1\t0\n"
+    },
+    "project_output": {
+        "result": "0\t1\t25\t25\t0\n1\t0\n"
+    },
+    "raw": {
+        "result": "0\t1\t12\t25\t0\n1\t0\n"
+    },
+    "reverse": {
+        "result": "0\t2\t0\t0\t0\n1\t0\n2\t1\t12\t25\t0\n"
+    },
+    "rmepsilon": {
+        "result": "0\t1\t12\t25\t0\n1\t0\n"
+    },
+    "shortest_distance": {
+        "result": [
+            0.0,
+            0.0
+        ]
+    },
+    "state_map_arc_sum": {
+        "result": "0\t1\t12\t25\t0\n1\t0\n"
+    },
+    "state_map_arc_unique": {
+        "result": "0\t1\t12\t25\t0\n1\t0\n"
+    },
+    "topsort": {
+        "result": "0\t1\t12\t25\t0\n1\t0\n"
+    },
+    "weight_pushing_final": {
+        "result": "0\t1\t12\t25\t0\n1\t0\n"
+    },
+    "weight_pushing_initial": {
+        "result": "0\t1\t12\t25\t0\n1\t0\n"
+    },
+    "weight_type": "standard"
+}
