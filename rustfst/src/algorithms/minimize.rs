@@ -1,4 +1,5 @@
 use std::cmp::max;
+use std::dbg;
 
 use failure::Fallible;
 
@@ -21,6 +22,7 @@ use crate::semirings::{
 use crate::StateId;
 use crate::EPS_LABEL;
 use crate::KDELTA;
+use crate::NO_STATE_ID;
 use std::collections::HashSet;
 
 pub fn minimize<F>(ifst: &mut F, allow_nondet: bool) -> Fallible<()>
@@ -51,9 +53,14 @@ where
         push_weights(&mut gfst, ReweightType::ReweightToInitial)?;
         let mut quantize_mapper = QuantizeMapper {};
         arc_map(&mut gfst, &mut quantize_mapper)?;
+        dbg!(&gfst);
         let encode_table = encode(&mut gfst, true, true)?;
         acceptor_minimize(&mut gfst, allow_acyclic_minimization)?;
+        dbg!(gfst.num_states());
+        dbg!(&gfst);
         decode(&mut gfst, encode_table)?;
+        dbg!(gfst.num_states());
+        dbg!(&gfst);
         let factor_opts: FactorWeightOptions = FactorWeightOptions {
             delta: KDELTA,
             mode: FactorWeightType::FACTOR_FINAL_WEIGHTS | FactorWeightType::FACTOR_ARC_WEIGHTS,
@@ -64,10 +71,15 @@ where
         };
         let fwfst: VectorFst<_> =
             factor_weight::<_, _, GallicFactorLeft<F::W>>(&gfst, factor_opts)?;
+        println!("lol");
+        dbg!(fwfst.num_states());
+        dbg!(&fwfst);
         let mut from_gallic = FromGallicConverter {
             superfinal_label: EPS_LABEL,
         };
         *ifst = weight_convert(&fwfst, &mut from_gallic)?;
+        dbg!(ifst.num_states());
+        dbg!(ifst);
         Ok(())
     } else if props.contains(FstProperties::WEIGHTED) {
         // Weighted acceptor
@@ -92,7 +104,13 @@ fn acceptor_minimize<F: MutableFst + ExpandedFst>(
         bail!("FST is not an unweighted acceptor");
     }
 
+    println!("acceptor_minimize");
+
+    dbg!(ifst.num_states());
+
     connect(ifst)?;
+
+    dbg!(ifst.num_states());
 
     if ifst.num_states() == 0 {
         return Ok(());
@@ -109,8 +127,12 @@ fn acceptor_minimize<F: MutableFst + ExpandedFst>(
         merge_states(minimizer.get_partition(), ifst)?;
     }
 
+    dbg!(ifst.num_states());
+
     let mut mapper = ArcUniqueMapper {};
     state_map(ifst, &mut mapper)?;
+
+    dbg!(ifst.num_states());
 
     Ok(())
 }
@@ -218,7 +240,37 @@ impl AcyclicMinimizer {
 
 
     fn refine<F: MutableFst + ExpandedFst>(&mut self, fst: &mut F) {
-        unimplemented!()
+        use std::collections::HashMap;
+//        let state_cmp = StateComparator {fst, partition: &self.partition};
+        let height = self.partition.num_classes();
+        for h in 0..height {
+            let mut equiv_classes = HashMap::new();
+            let mut it_partition : Vec<_> = self.partition.iter(h).collect();
+            equiv_classes.insert(it_partition[0], h as i32);
+
+            let mut classes_to_add = vec![];
+            for i in 1..it_partition.len() {
+                if equiv_classes.contains_key(&it_partition[i]) {
+                    equiv_classes.insert(it_partition[i], NO_STATE_ID);
+                } else {
+                    classes_to_add.push(it_partition[i]);
+                    equiv_classes.insert(it_partition[i], NO_STATE_ID);
+                }
+            }
+
+            for v in classes_to_add {
+                equiv_classes.insert(v, self.partition.add_class() as i32);
+            }
+
+            for s in it_partition {
+                let old_class = self.partition.get_class_id(s);
+                let new_class = equiv_classes[&s];
+                assert_ne!(new_class, NO_STATE_ID);
+                if old_class != (new_class as usize) {
+                    self.partition.move_element(s, new_class as usize);
+                }
+            }
+        }
     }
 
     pub fn get_partition(self) -> Partition {
@@ -244,3 +296,57 @@ struct StateComparator<'a, 'b, F: MutableFst + ExpandedFst> {
     fst: &'a F,
     partition: &'b Partition
 }
+
+impl<'a, 'b, F: MutableFst + ExpandedFst> StateComparator<'a, 'b, F> {
+
+    pub fn compare(&self, x: StateId, y: StateId) -> Fallible<bool> {
+        // TODO: Return Ordering instead of bool
+        let xfinal = self.fst.final_weight(x).unwrap_or_else(F::W::zero);
+        let yfinal = self.fst.final_weight(y).unwrap_or_else(F::W::zero);
+
+        if xfinal < yfinal {
+            return Ok(true);
+        } else if xfinal > yfinal {
+            return Ok(false);
+        }
+
+        if self.fst.num_arcs(x)? < self.fst.num_arcs(y)? {
+            return Ok(true);
+        }
+        if self.fst.num_arcs(x)? > self.fst.num_arcs(y)? {
+            return Ok(false);
+        }
+
+        let it_x = self.fst.arcs_iter(x)?;
+        let it_y = self.fst.arcs_iter(y)?;
+
+        for (arc1, arc2) in it_x.zip(it_y) {
+            if arc1.ilabel < arc2.ilabel {
+                return Ok(true);
+            }
+            if arc1.ilabel > arc2.ilabel {
+                return Ok(false);
+            }
+            let id_1 =self.partition.get_class_id(arc1.nextstate);
+            let id_2 = self.partition.get_class_id(arc2.nextstate);
+            if id_1 < id_2 {
+                return Ok(true);
+            }
+            if id_1 > id_2 {
+                return Ok(false);
+            }
+
+        }
+        Ok(false)
+    }
+}
+
+//use std::hash::BuildHasher;
+//
+//impl<'a, 'b, F: MutableFst + ExpandedFst> BuildHasher for StateComparator<'a,'b, F> {
+//    type Hasher = ();
+//
+//    fn build_hasher(&self) -> Self::Hasher {
+//        unimplemented!()
+//    }
+//}

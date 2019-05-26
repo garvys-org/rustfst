@@ -87,6 +87,8 @@ extern crate serde;
 #[cfg(test)]
 extern crate serde_json;
 
+pub(crate) static NO_STATE_ID: i32 = -1;
+
 mod symbol_table;
 pub use crate::symbol_table::SymbolTable;
 
