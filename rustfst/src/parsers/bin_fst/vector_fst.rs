@@ -1,14 +1,16 @@
+use std::fs::File;
 use std::fs::read;
+use std::io::Write;
 use std::path::Path;
 
 use failure::Fallible;
 use nom::{le_f32, le_i32, le_i64, le_u64};
 
+use crate::Arc;
 use crate::fst_impls::vector::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{BinaryParser, MutableFst};
+use crate::fst_traits::{BinaryParser, MutableFst, ExpandedFst, CoreFst, ArcIterator};
 use crate::semirings::Semiring;
-use crate::Arc;
 use crate::StateId;
 
 // Identifies stream data as an FST (and its endianity).
@@ -144,5 +146,99 @@ impl<W: 'static + Semiring<Type = f32>> BinaryParser for VectorFst<W> {
         }
 
         Ok(fst)
+    }
+}
+
+#[inline]
+fn write_bin_i32(file: &mut File, i: i32) -> Fallible<()> {
+    file.write_all(&i.to_le_bytes()).map_err(|e| e.into())
+}
+
+#[inline]
+fn write_bin_u64(file: &mut File, i: u64) -> Fallible<()> {
+    file.write_all(&i.to_le_bytes()).map_err(|e| e.into())
+}
+
+#[inline]
+fn write_bin_i64(file: &mut File, i: i64) -> Fallible<()> {
+    file.write_all(&i.to_le_bytes()).map_err(|e| e.into())
+}
+
+#[inline]
+fn write_bin_f32(file: &mut File, i: f32) -> Fallible<()> {
+    file.write_all(&i.to_bits().to_le_bytes()).map_err(|e| e.into())
+}
+
+#[inline]
+fn write_bin_string<'a>(file: &mut File, s: &'a str) -> Fallible<()> {
+    write_bin_i32(file, s.len() as i32)?;
+    file.write_all(s.as_bytes()).map_err(|e| e.into())
+}
+
+
+impl<W: 'static + Semiring<Type = f32>> VectorFst<W> {
+    pub fn write_bin<P: AsRef<Path>>(&self, path_out: P) -> Fallible<()> {
+
+        let mut file = File::create(path_out)?;
+
+        // FstHeader
+        //magic_number: i32,
+        write_bin_i32(&mut file, FST_MAGIC_NUMBER)?;
+        //fst_type: OpenFstString,
+        write_bin_string(&mut file, "vector")?;
+        //arc_type: OpenFstString,
+        write_bin_string(&mut file, "standard")?; // FIXME
+        //version: i32,
+        write_bin_i32(&mut file, 2i32)?;
+        //flags: i32,
+        write_bin_i32(&mut file, 0i32)?; // FIXME
+        //properties: u64,
+        write_bin_u64(&mut file, 0u64)?; // FIXME
+        //start: i64,
+        write_bin_i64(&mut file, self.start_state.map(|v| v as i64).unwrap_or(-1))?;
+        //num_states: i64,
+        write_bin_i64(&mut file, self.num_states() as i64)?;
+        //num_arcs: i64,
+        let num_arcs : usize = (0..self.num_states()).map(|s: usize| self.num_arcs(s).unwrap()).sum();
+        write_bin_i64(&mut file, num_arcs as i64)?;
+
+        for state in 0..self.num_states() {
+            let f_weight = self.final_weight(state).unwrap_or_else(W::zero).value();
+            write_bin_f32(&mut file, f_weight)?;
+            write_bin_i64(&mut file, self.num_arcs(state).unwrap() as i64)?;
+
+            for arc in self.arcs_iter(state).unwrap() {
+                write_bin_i32(&mut file, arc.ilabel as i32)?;
+                write_bin_i32(&mut file, arc.olabel as i32)?;
+                let weight = arc.weight.value();
+                write_bin_f32(&mut file, weight)?;
+                write_bin_i32(&mut file, arc.nextstate as i32)?;
+            }
+        }
+
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+    use crate::fst_impls::VectorFst;
+    use crate::semirings::TropicalWeight;
+
+    #[test]
+    fn lol() -> Fallible<()> {
+        let path_folder = PathBuf::from("/Users/alexandrecaulier/Perso/rustfst/rustfst-tests-data/fst_001");
+
+        let fst = VectorFst::<TropicalWeight>::read(path_folder.join("raw_vector.fst"))?;
+        fst.write_bin(path_folder.join("lol.fst"))?;
+        let fst2 = VectorFst::<TropicalWeight>::read(path_folder.join("lol.fst"))?;
+
+        std::dbg!(&fst);
+        std::dbg!(&fst2);
+
+        assert_eq!(fst, fst2);
+        Ok(())
     }
 }
