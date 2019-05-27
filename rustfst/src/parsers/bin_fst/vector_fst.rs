@@ -2,16 +2,13 @@ use std::fs::read;
 use std::path::Path;
 
 use failure::Fallible;
-use nom::dbg as ndbg;
-use nom::types::{CompleteByteSlice, CompleteStr};
-use nom::{be_i32, le_f32, le_i32, le_i64, le_u64};
+use nom::{le_f32, le_i32, le_i64, le_u64};
 
 use crate::fst_impls::vector::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{BinaryParser, MutableFst};
 use crate::semirings::Semiring;
 use crate::Arc;
-use crate::Label;
 use crate::StateId;
 
 // Identifies stream data as an FST (and its endianity).
