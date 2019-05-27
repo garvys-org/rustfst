@@ -16,6 +16,7 @@ use rustfst::semirings::{
     LogWeight, Semiring, StarSemiring, TropicalWeight, WeaklyDivisibleSemiring, WeightQuantize,
 };
 
+use crate::algorithms::test_vector_fst_bin_parser::test_vector_fst_bin_parser;
 use crate::algorithms::{
     arc_map::{
         test_arc_map_identity, test_arc_map_input_epsilon, test_arc_map_invert,
@@ -24,8 +25,8 @@ use crate::algorithms::{
     },
     arcsort::{test_arcsort_ilabel, test_arcsort_olabel},
     connect::test_connect,
-    determinize::{DeterminizeOperationResult, DeterminizeTestData, test_determinize},
-    encode::{EncodeOperationResult, EncodeTestData, test_encode, test_encode_decode},
+    determinize::{test_determinize, DeterminizeOperationResult, DeterminizeTestData},
+    encode::{test_encode, test_encode_decode, EncodeOperationResult, EncodeTestData},
     inverse::test_invert,
     project::{test_project_input, test_project_output},
     properties::{parse_fst_properties, test_fst_properties},
@@ -35,7 +36,6 @@ use crate::algorithms::{
     topsort::test_topsort,
     weight_pushing::{test_weight_pushing_final, test_weight_pushing_initial},
 };
-use crate::algorithms::test_vector_fst_bin_parser::test_vector_fst_bin_parser;
 
 #[macro_use]
 mod macros;
@@ -160,7 +160,9 @@ where
             arcsort_olabel: data.arcsort_olabel.parse(),
             topsort: data.topsort.parse(),
             fst_properties: parse_fst_properties(&data.fst_properties),
-            raw_vector_bin_path: absolute_path_folder.join(&data.raw_vector_bin_path).to_path_buf()
+            raw_vector_bin_path: absolute_path_folder
+                .join(&data.raw_vector_bin_path)
+                .to_path_buf(),
         }
     }
 }
@@ -178,11 +180,13 @@ fn run_test_pynini(test_name: &str) -> Fallible<()> {
 
     match parsed_test_data.weight_type.as_str() {
         "tropical" | "standard" => {
-            let test_data: TestData<VectorFst<TropicalWeight>> = TestData::new(&parsed_test_data, absolute_path_folder.as_path());
+            let test_data: TestData<VectorFst<TropicalWeight>> =
+                TestData::new(&parsed_test_data, absolute_path_folder.as_path());
             do_run_test_openfst(&test_data)?;
         }
         "log" => {
-            let test_data: TestData<VectorFst<LogWeight>> = TestData::new(&parsed_test_data, absolute_path_folder.as_path());
+            let test_data: TestData<VectorFst<LogWeight>> =
+                TestData::new(&parsed_test_data, absolute_path_folder.as_path());
             do_run_test_openfst(&test_data)?;
         }
         _ => bail!("Weight type unknown : {:?}", parsed_test_data.weight_type),
