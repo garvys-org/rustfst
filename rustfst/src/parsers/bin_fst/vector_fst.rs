@@ -149,24 +149,3 @@ impl<W: 'static + Semiring<Type = f32>> BinaryParser for VectorFst<W> {
         Ok(fst)
     }
 }
-
-//#[cfg(test)]
-//mod tests {
-//    use failure::Fallible;
-//
-//    use super::*;
-//
-//    #[test]
-//    fn lol() -> Fallible<()> {
-////        let path = "/Users/alexandrecaulier/Perso/rustfst/rustfst-tests-data/fst_001/raw.fst";
-//        let path = "/Users/alexandrecaulier/Perso/rustfst/kaldi_models/0001_aspire_chain_model/data/lang_pp_test/G.fst";
-//        let data = read(path)?;
-//        let complete_data_bytes = CompleteByteSlice(&data);
-//        let (r, parsed_fst) = complete_parse_fst(&data)
-//            .map_err(|_| format_err!("Error while parsing fst"))?;
-//
-//        std::dbg!(parsed_fst.header);
-//        std::dbg!(r);
-//        Ok(())
-//    }
-//}
