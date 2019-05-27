@@ -16,7 +16,6 @@ use rustfst::semirings::{
     LogWeight, Semiring, StarSemiring, TropicalWeight, WeaklyDivisibleSemiring, WeightQuantize,
 };
 
-use crate::algorithms::test_vector_fst_bin_parser::test_vector_fst_bin_parser;
 use crate::algorithms::{
     arc_map::{
         test_arc_map_identity, test_arc_map_input_epsilon, test_arc_map_invert,
@@ -36,11 +35,14 @@ use crate::algorithms::{
     topsort::test_topsort,
     weight_pushing::{test_weight_pushing_final, test_weight_pushing_initial},
 };
+use crate::parsers::vector_fst_bin_parser::test_vector_fst_bin_parser;
 
 #[macro_use]
 mod macros;
 
 mod algorithms;
+
+mod parsers;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct OperationResult {
