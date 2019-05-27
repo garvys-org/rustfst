@@ -1,5 +1,6 @@
 #[macro_use]
 mod macros;
+mod binary_parser;
 mod expanded_fst;
 mod final_states_iterator;
 mod fst;
@@ -13,3 +14,4 @@ pub use self::fst::{ArcIterator, CoreFst, Fst, StateIterator};
 pub use self::mutable_fst::{MutableArcIterator, MutableFst};
 pub use self::paths_iterator::PathsIterator;
 pub use self::text_parser::TextParser;
+pub use self::binary_parser::BinaryParser;
