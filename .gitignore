@@ -14,3 +14,5 @@ Cargo.lock
 Cargo.lock
 /openfst-1.7.2
 openfst-1.7.2.tar.gz
+rustfst-tests-data/**/*.fst
+rustfst-tests-data/**/metadata.json
