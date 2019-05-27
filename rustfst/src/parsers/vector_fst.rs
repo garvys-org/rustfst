@@ -2,22 +2,22 @@ use std::fs::read;
 use std::path::Path;
 
 use failure::Fallible;
-use nom::{be_i32, le_f32, le_i32, le_i64, le_u64};
 use nom::dbg as ndbg;
 use nom::types::{CompleteByteSlice, CompleteStr};
+use nom::{be_i32, le_f32, le_i32, le_i64, le_u64};
 
-use crate::Arc;
 use crate::fst_impls::vector::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{BinaryParser, MutableFst};
-use crate::Label;
 use crate::semirings::Semiring;
+use crate::Arc;
+use crate::Label;
 use crate::StateId;
 
 // Identifies stream data as an FST (and its endianity).
-static FST_MAGIC_NUMBER : i32 = 2125659606;
-static MIN_FILE_VERSION : i32 = 2;
-static NO_STATE_ID : i32 = -1;
+static FST_MAGIC_NUMBER: i32 = 2125659606;
+static MIN_FILE_VERSION: i32 = 2;
+static NO_STATE_ID: i32 = -1;
 
 #[derive(Debug)]
 struct FstHeader {
@@ -29,26 +29,26 @@ struct FstHeader {
     properties: u64,
     start: i64,
     num_states: i64,
-    num_arcs: i64
+    num_arcs: i64,
 }
 
 #[derive(Debug)]
 struct ParsedFst {
     header: FstHeader,
-    states: Vec<FstState>
+    states: Vec<FstState>,
 }
 
 #[derive(Debug)]
 struct OpenFstString {
     n: i32,
-    s: String
+    s: String,
 }
 
 #[derive(Debug)]
 struct FstState {
     final_weight: f32,
     num_arcs: i64,
-    arcs: Vec<Transition>
+    arcs: Vec<Transition>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -129,7 +129,6 @@ impl<W: 'static + Semiring<Type = f32>> BinaryParser for VectorFst<W> {
         let zero_weight = W::zero().value();
 
         for state in 0..num_states {
-
             if parsed_fst.states[state].final_weight != zero_weight {
                 let final_weight = W::new(parsed_fst.states[state].final_weight);
                 fst.set_final(state, final_weight)?;
