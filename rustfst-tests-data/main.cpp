@@ -75,14 +75,20 @@ void compute_fst_connect(const F& raw_fst, json& j) {
 
 template<class F>
 void compute_fst_shortest_distance(const F& raw_fst, json& j) {
-    std::vector<typename F::Weight> v;
-    fst::ShortestDistance(raw_fst, &v);
-    std::vector<float> vf(v.size());
-    for(int i = 0; i < v.size(); i++) {
-        // TODO: Probable issue with infinity
-        vf[i] = v[i].Value();
+    j["shortest_distance"] = {};
+    std::vector<bool> v = {true, false};
+    for(bool reverse: v) {
+        std::vector<typename F::Weight> distance;
+        fst::ShortestDistance(raw_fst, &distance, reverse);
+        std::vector<string> distance_s;
+        for(auto e: distance) {
+            distance_s.push_back(std::to_string(e.Value()));
+        }
+        json j2;
+        j2["reverse"] = reverse;
+        j2["result"] = distance_s;
+        j["shortest_distance"].push_back(j2);
     }
-    j["shortest_distance"]["result"] = vf;
 }
 
 template<class F>
@@ -204,7 +210,8 @@ void compute_fst_topsort(const F& raw_fst, json& j) {
     auto fst_out = *raw_fst.Copy();
     fst::ArcSort(&fst_out, fst::ILabelCompare<typename F::Arc>());
     fst::TopSort(&fst_out);
-    j["topsort"]["result"] = fst_to_string(fst_out);
+    bool error = prop_to_bool(fst_out.Properties(fst::kError, true), fst::kError);
+    j["topsort"]["result"] = error ? "error" : fst_to_string(fst_out);
 }
 
 template<class F>
@@ -245,6 +252,43 @@ void compute_fst_properties(const F& raw_fst, json& j) {
     j["fst_properties"]["unweighted_cycles"] = prop_to_bool(a, fst::kUnweightedCycles);
 
     assert(j["fst_properties"].size() == 32);
+}
+
+template<class F>
+void compute_fst_minimization(const F& raw_fst, json& j) {
+    j["minimize"] = {};
+    std::vector<bool> v = {true, false};
+    for(bool allow_nondet: v) {
+        auto fst_out = *raw_fst.Copy();
+        fst::Minimize(&fst_out, (fst::VectorFst<typename F::Arc>*)nullptr, fst::kShortestDelta, allow_nondet);
+        bool error = prop_to_bool(fst_out.Properties(fst::kError, true), fst::kError);
+
+        json j2;
+        j2["allow_nondet"] = allow_nondet;
+        j2["result"] = error ? "error": fst_to_string(fst_out);
+
+        j["minimize"].push_back(j2);
+    }
+}
+
+template<class F>
+void compute_fst_shortest_path(const F& raw_fst, json& j) {
+    j["shortest_path"] = {};
+    std::vector<bool> v = {true, false};
+    for(int n = 1; n < 10; n++) {
+        for(bool unique: v) {
+            fst::VectorFst<typename F::Arc> fst_out;
+            fst::ShortestPath(raw_fst, &fst_out, n, unique);
+            bool error = prop_to_bool(fst_out.Properties(fst::kError, true), fst::kError);
+            json j2;
+
+            j2["nshortest"] = n;
+            j2["unique"] = unique;
+            j2["result"] = error ? "error": fst_to_string(fst_out);
+
+            j["shortest_path"].push_back(j2);
+        }
+    }
 }
 
 template<class A>
@@ -319,6 +363,12 @@ void compute_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
     std::cout << "Properties" << std::endl;
     compute_fst_properties(raw_fst, data);
 
+    std::cout << "Minimization" << std::endl;
+    compute_fst_minimization(raw_fst, data);
+
+    std::cout << "ShortestPath" << std::endl;
+    compute_fst_shortest_path(raw_fst, data);
+
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;
 
@@ -335,4 +385,6 @@ int main() {
     compute_data(compute_fst_005(), "fst_005");
     compute_data(compute_fst_006(), "fst_006");
     compute_data(compute_fst_007(), "fst_007");
+    compute_data(compute_fst_007(), "fst_008");
+    compute_data(compute_fst_007(), "fst_009");
 }

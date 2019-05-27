@@ -11,8 +11,6 @@ use serde_derive::{Deserialize, Serialize};
 
 use rustfst::fst_impls::VectorFst;
 use rustfst::fst_properties::FstProperties;
-use rustfst::fst_traits::TextParser;
-use rustfst::fst_traits::{MutableFst, TextParser, CoreFst};
 use rustfst::fst_traits::{CoreFst, MutableFst, TextParser};
 use rustfst::semirings::{
     LogWeight, Semiring, StarSemiring, TropicalWeight, WeaklyDivisibleSemiring, WeightQuantize,
@@ -26,18 +24,18 @@ use crate::algorithms::{
     },
     arcsort::{test_arcsort_ilabel, test_arcsort_olabel},
     connect::test_connect,
-    determinize::{test_determinize, DeterminizeOperationResult, DeterminizeTestData},
-    minimize::{test_minimize, MinimizeOperationResult, MinimizeTestData},
-    encode::{test_encode, test_encode_decode, EncodeOperationResult, EncodeTestData},
+    determinize::{DeterminizeOperationResult, DeterminizeTestData, test_determinize},
+    encode::{EncodeOperationResult, EncodeTestData, test_encode, test_encode_decode},
     inverse::test_invert,
+    minimize::{MinimizeOperationResult, MinimizeTestData, test_minimize},
     project::{test_project_input, test_project_output},
     properties::{parse_fst_properties, test_fst_properties},
     reverse::test_reverse,
     rm_epsilon::test_rmepsilon,
     shortest_distance::{
-        test_shortest_distance, ShorestDistanceOperationResult, ShortestDistanceTestData,
+        ShorestDistanceOperationResult, ShortestDistanceTestData, test_shortest_distance,
     },
-    shortest_path::{test_shortest_path, ShorestPathOperationResult, ShortestPathTestData},
+    shortest_path::{ShorestPathOperationResult, ShortestPathTestData, test_shortest_path},
     state_map::{test_state_map_arc_sum, test_state_map_arc_unique},
     topsort::test_topsort,
     weight_pushing::{test_weight_pushing_final, test_weight_pushing_initial},
