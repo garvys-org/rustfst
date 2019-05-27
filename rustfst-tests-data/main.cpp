@@ -7,6 +7,7 @@
 // Fst lib
 #include "fst/vector-fst.h"
 #include "fst/script/print.h"
+#include "fst/fst.h"
 
 #include "fst_000/fst_000.h"
 #include "fst_001/fst_001.h"
@@ -254,6 +255,9 @@ void compute_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
     data["name"] = fst_name;
     data["weight_type"] = A::Type();
     data["raw"]["result"] = fst_to_string(raw_fst);
+
+    data["raw_vector_bin_path"] = "raw_vector.fst";
+    raw_fst.Write(fst_name + "/raw_vector.fst");
 
     std::cout << "Invert" << std::endl;
     compute_fst_invert(raw_fst, data);

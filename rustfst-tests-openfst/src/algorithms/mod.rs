@@ -9,5 +9,6 @@ pub mod properties;
 pub mod reverse;
 pub mod rm_epsilon;
 pub mod state_map;
+pub mod test_vector_fst_bin_parser;
 pub mod topsort;
 pub mod weight_pushing;

@@ -2,7 +2,7 @@
 set -e
 
 cd rustfst-tests-data
-rm **/metadata.json || true
+rm **/metadata.json **/*.fst || true
 echo "Compiling..."
 g++ -std=c++11 main.cpp -I ../openfst-1.7.2/src/include/ ../openfst-1.7.2/lib/libfst.a
 echo "OK"

@@ -1,21 +1,17 @@
 #![cfg(test)]
 
-#[macro_use]
-mod macros;
-
-mod algorithms;
-
 use std::collections::HashMap;
 use std::fs::read_to_string;
+use std::path::Path;
+use std::path::PathBuf;
 use std::string::String;
 
-use serde_derive::{Deserialize, Serialize};
-
 use failure::{bail, Fail, Fallible};
+use serde_derive::{Deserialize, Serialize};
 
 use rustfst::fst_impls::VectorFst;
 use rustfst::fst_properties::FstProperties;
-use rustfst::fst_traits::{MutableFst, TextParser};
+use rustfst::fst_traits::TextParser;
 use rustfst::semirings::{
     LogWeight, Semiring, StarSemiring, TropicalWeight, WeaklyDivisibleSemiring, WeightQuantize,
 };
@@ -28,8 +24,8 @@ use crate::algorithms::{
     },
     arcsort::{test_arcsort_ilabel, test_arcsort_olabel},
     connect::test_connect,
-    determinize::{test_determinize, DeterminizeOperationResult, DeterminizeTestData},
-    encode::{test_encode, test_encode_decode, EncodeOperationResult, EncodeTestData},
+    determinize::{DeterminizeOperationResult, DeterminizeTestData, test_determinize},
+    encode::{EncodeOperationResult, EncodeTestData, test_encode, test_encode_decode},
     inverse::test_invert,
     project::{test_project_input, test_project_output},
     properties::{parse_fst_properties, test_fst_properties},
@@ -39,6 +35,12 @@ use crate::algorithms::{
     topsort::test_topsort,
     weight_pushing::{test_weight_pushing_final, test_weight_pushing_initial},
 };
+use crate::algorithms::test_vector_fst_bin_parser::test_vector_fst_bin_parser;
+
+#[macro_use]
+mod macros;
+
+mod algorithms;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct OperationResult {
@@ -85,6 +87,7 @@ pub struct ParsedTestData {
     arcsort_olabel: OperationResult,
     topsort: OperationResult,
     fst_properties: HashMap<String, bool>,
+    raw_vector_bin_path: String,
 }
 
 pub struct TestData<F>
@@ -120,6 +123,7 @@ where
     pub arcsort_olabel: F,
     pub topsort: F,
     pub fst_properties: FstProperties,
+    pub raw_vector_bin_path: PathBuf,
 }
 
 impl<F> TestData<F>
@@ -127,7 +131,7 @@ where
     F: TextParser,
     F::W: Semiring<Type = f32>,
 {
-    pub fn new(data: &ParsedTestData) -> Self {
+    pub fn new(data: &ParsedTestData, absolute_path_folder: &Path) -> Self {
         Self {
             rmepsilon: data.rmepsilon.parse(),
             name: data.name.clone(),
@@ -156,6 +160,7 @@ where
             arcsort_olabel: data.arcsort_olabel.parse(),
             topsort: data.topsort.parse(),
             fst_properties: parse_fst_properties(&data.fst_properties),
+            raw_vector_bin_path: absolute_path_folder.join(&data.raw_vector_bin_path).to_path_buf()
         }
     }
 }
@@ -165,6 +170,7 @@ fn run_test_pynini(test_name: &str) -> Fallible<()> {
     absolute_path.push("..");
     absolute_path.push("rustfst-tests-data");
     absolute_path.push(test_name);
+    let absolute_path_folder = absolute_path.clone();
     absolute_path.push("metadata.json");
 
     let string = read_to_string(absolute_path).unwrap();
@@ -172,13 +178,12 @@ fn run_test_pynini(test_name: &str) -> Fallible<()> {
 
     match parsed_test_data.weight_type.as_str() {
         "tropical" | "standard" => {
-            let test_data: TestData<VectorFst<TropicalWeight>> = TestData::new(&parsed_test_data);
-            do_run_test_pynini(&test_data)?;
+            let test_data: TestData<VectorFst<TropicalWeight>> = TestData::new(&parsed_test_data, absolute_path_folder.as_path());
+            do_run_test_openfst(&test_data)?;
         }
-
         "log" => {
-            let test_data: TestData<VectorFst<LogWeight>> = TestData::new(&parsed_test_data);
-            do_run_test_pynini(&test_data)?;
+            let test_data: TestData<VectorFst<LogWeight>> = TestData::new(&parsed_test_data, absolute_path_folder.as_path());
+            do_run_test_openfst(&test_data)?;
         }
         _ => bail!("Weight type unknown : {:?}", parsed_test_data.weight_type),
     };
@@ -186,10 +191,9 @@ fn run_test_pynini(test_name: &str) -> Fallible<()> {
     Ok(())
 }
 
-fn do_run_test_pynini<F>(test_data: &TestData<F>) -> Fallible<()>
+fn do_run_test_openfst<W>(test_data: &TestData<VectorFst<W>>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
-    F::W: 'static + Semiring<Type = f32> + StarSemiring + WeaklyDivisibleSemiring + WeightQuantize,
+    W: 'static + Semiring<Type = f32> + StarSemiring + WeaklyDivisibleSemiring + WeightQuantize,
 {
     test_rmepsilon(&test_data)?;
 
@@ -240,6 +244,8 @@ where
     test_topsort(&test_data)?;
 
     test_fst_properties(&test_data)?;
+
+    test_vector_fst_bin_parser(&test_data)?;
 
     Ok(())
 }
