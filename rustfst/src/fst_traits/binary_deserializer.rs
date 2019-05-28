@@ -5,7 +5,7 @@ use failure::Fallible;
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 
-pub trait BinaryParser: ExpandedFst
+pub trait BinaryDeserializer: ExpandedFst
 where
     Self::W: Semiring<Type = f32>,
 {

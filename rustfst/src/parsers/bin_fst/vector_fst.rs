@@ -9,7 +9,7 @@ use nom::{le_f32, le_i32, le_i64, le_u64};
 use crate::Arc;
 use crate::fst_impls::vector::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{BinaryParser, MutableFst, ExpandedFst, CoreFst, ArcIterator, BinarySerializer};
+use crate::fst_traits::{BinaryDeserializer, MutableFst, ExpandedFst, CoreFst, ArcIterator, BinarySerializer};
 use crate::semirings::Semiring;
 use crate::StateId;
 
@@ -100,7 +100,7 @@ named!(parse_fst <&[u8], ParsedFst>, do_parse!(
 
 named!(complete_parse_fst <&[u8], ParsedFst>, complete!(parse_fst));
 
-impl<W: 'static + Semiring<Type = f32>> BinaryParser for VectorFst<W> {
+impl<W: 'static + Semiring<Type = f32>> BinaryDeserializer for VectorFst<W> {
     fn read<P: AsRef<Path>>(path_bin_fst: P) -> Fallible<Self> {
         let data = read(path_bin_fst.as_ref())?;
         let (_, parsed_fst) = complete_parse_fst(&data)

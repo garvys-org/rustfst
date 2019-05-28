@@ -1,7 +1,7 @@
 use failure::Fallible;
 
 use rustfst::fst_impls::VectorFst;
-use rustfst::fst_traits::BinaryParser;
+use rustfst::fst_traits::BinaryDeserializer;
 use rustfst::semirings::Semiring;
 
 use crate::TestData;
