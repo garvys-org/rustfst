@@ -35,14 +35,15 @@ use crate::algorithms::{
     topsort::test_topsort,
     weight_pushing::{test_weight_pushing_final, test_weight_pushing_initial},
 };
-use crate::parsers::vector_fst_bin_parser::test_vector_fst_bin_parser;
+use crate::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
+use crate::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
 
 #[macro_use]
 mod macros;
 
 mod algorithms;
 
-mod parsers;
+mod io;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct OperationResult {
@@ -251,7 +252,9 @@ where
 
     test_fst_properties(&test_data)?;
 
-    test_vector_fst_bin_parser(&test_data)?;
+    test_vector_fst_bin_deserializer(&test_data)?;
+
+    test_vector_fst_bin_serializer(&test_data)?;
 
     Ok(())
 }

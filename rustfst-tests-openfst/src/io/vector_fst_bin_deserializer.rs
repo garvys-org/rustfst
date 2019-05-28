@@ -6,7 +6,7 @@ use rustfst::semirings::Semiring;
 
 use crate::TestData;
 
-pub fn test_vector_fst_bin_parser<W>(test_data: &TestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_vector_fst_bin_deserializer<W>(test_data: &TestData<VectorFst<W>>) -> Fallible<()>
 where
     W: Semiring<Type = f32>,
 {
@@ -16,7 +16,7 @@ where
         test_data.raw,
         parsed_fst_bin,
         "{}",
-        error_message_fst!(test_data.raw, parsed_fst_bin, "Parser VectorFst Bin")
+        error_message_fst!(test_data.raw, parsed_fst_bin, "Deserializer VectorFst Bin")
     );
     Ok(())
 }
