@@ -9,14 +9,14 @@ use std::string::String;
 use failure::{bail, Fail, Fallible};
 use serde_derive::{Deserialize, Serialize};
 
-use rustfst::fst_impls::VectorFst;
-use rustfst::fst_properties::FstProperties;
-use rustfst::fst_traits::{CoreFst, MutableFst, TextParser};
-use rustfst::semirings::{
+use crate::fst_impls::VectorFst;
+use crate::fst_properties::FstProperties;
+use crate::fst_traits::{CoreFst, MutableFst, TextParser};
+use crate::semirings::{
     LogWeight, Semiring, StarSemiring, TropicalWeight, WeaklyDivisibleSemiring, WeightQuantize,
 };
 
-use crate::algorithms::{
+use self::algorithms::{
     arc_map::{
         test_arc_map_identity, test_arc_map_input_epsilon, test_arc_map_invert,
         test_arc_map_output_epsilon, test_arc_map_plus, test_arc_map_quantize,
@@ -40,8 +40,8 @@ use crate::algorithms::{
     topsort::test_topsort,
     weight_pushing::{test_weight_pushing_final, test_weight_pushing_initial},
 };
-use crate::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
-use crate::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
+use self::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
+use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
 
 #[macro_use]
 mod macros;
@@ -277,7 +277,7 @@ where
 
     test_shortest_path(&test_data)?;
 
-    test_minimize(&test_data)?;
+//    test_minimize(&test_data)?;
 
     Ok(())
 }
@@ -312,51 +312,51 @@ impl<T: Into<failure::Error>> From<T> for ExitFailure {
 }
 
 #[test]
-fn test_pynini_fst_000() -> Result<(), ExitFailure> {
+fn test_openfst_fst_000() -> Result<(), ExitFailure> {
     run_test_pynini("fst_000").map_err(|v| v.into())
 }
 
 #[test]
-fn test_pynini_fst_001() -> Result<(), ExitFailure> {
+fn test_openfst_fst_001() -> Result<(), ExitFailure> {
     run_test_pynini("fst_001").map_err(|v| v.into())
 }
 
 #[test]
-fn test_pynini_fst_002() -> Result<(), ExitFailure> {
+fn test_openfst_fst_002() -> Result<(), ExitFailure> {
     run_test_pynini("fst_002").map_err(|v| v.into())
 }
 
 #[test]
-fn test_pynini_fst_003() -> Result<(), ExitFailure> {
+fn test_openfst_fst_003() -> Result<(), ExitFailure> {
     run_test_pynini("fst_003").map_err(|v| v.into())
 }
 
 #[test]
-fn test_pynini_fst_004() -> Result<(), ExitFailure> {
+fn test_openfst_fst_004() -> Result<(), ExitFailure> {
     run_test_pynini("fst_004").map_err(|v| v.into())
 }
 
 #[test]
-fn test_pynini_fst_005() -> Result<(), ExitFailure> {
+fn test_openfst_fst_005() -> Result<(), ExitFailure> {
     run_test_pynini("fst_005").map_err(|v| v.into())
 }
 
 #[test]
-fn test_pynini_fst_006() -> Result<(), ExitFailure> {
+fn test_openfst_fst_006() -> Result<(), ExitFailure> {
     run_test_pynini("fst_006").map_err(|v| v.into())
 }
 
 #[test]
-fn test_pynini_fst_007() -> Result<(), ExitFailure> {
+fn test_openfst_fst_007() -> Result<(), ExitFailure> {
     run_test_pynini("fst_007").map_err(|v| v.into())
 }
 
 #[test]
-fn test_pynini_fst_008() -> Result<(), ExitFailure> {
+fn test_openfst_fst_008() -> Result<(), ExitFailure> {
     run_test_pynini("fst_008").map_err(|v| v.into())
 }
 
 #[test]
-fn test_pynini_fst_009() -> Result<(), ExitFailure> {
+fn test_openfst_fst_009() -> Result<(), ExitFailure> {
     run_test_pynini("fst_009").map_err(|v| v.into())
 }

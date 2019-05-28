@@ -2,13 +2,13 @@ use failure::{format_err, Fallible, ResultExt};
 
 use serde_derive::{Deserialize, Serialize};
 
-use rustfst::algorithms::{decode, encode};
-use rustfst::fst_properties::FstProperties;
-use rustfst::fst_traits::MutableFst;
-use rustfst::fst_traits::TextParser;
-use rustfst::semirings::Semiring;
+use crate::algorithms::{decode, encode};
+use crate::fst_properties::FstProperties;
+use crate::fst_traits::MutableFst;
+use crate::fst_traits::TextParser;
+use crate::semirings::Semiring;
 
-use crate::TestData;
+use crate::tests_openfst::TestData;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EncodeOperationResult {

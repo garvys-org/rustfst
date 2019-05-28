@@ -2,13 +2,13 @@ use std::collections::HashMap;
 
 use failure::Fallible;
 
-use rustfst::fst_properties::FstProperties;
-use rustfst::fst_traits::MutableFst;
-use rustfst::fst_traits::TextParser;
-use rustfst::semirings::Semiring;
-use rustfst::semirings::WeightQuantize;
+use crate::fst_properties::FstProperties;
+use crate::fst_traits::MutableFst;
+use crate::fst_traits::TextParser;
+use crate::semirings::Semiring;
+use crate::semirings::WeightQuantize;
 
-use crate::TestData;
+use crate::tests_openfst::TestData;
 
 pub fn parse_fst_properties(mapping: &HashMap<String, bool>) -> FstProperties {
     let mut props = FstProperties::empty();

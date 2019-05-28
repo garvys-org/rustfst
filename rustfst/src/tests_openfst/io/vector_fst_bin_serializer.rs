@@ -1,10 +1,10 @@
 use failure::Fallible;
 
-use rustfst::fst_impls::VectorFst;
-use rustfst::fst_traits::{BinaryDeserializer, BinarySerializer};
-use rustfst::semirings::Semiring;
+use crate::fst_impls::VectorFst;
+use crate::fst_traits::{BinaryDeserializer, BinarySerializer};
+use crate::semirings::Semiring;
 
-use crate::TestData;
+use crate::tests_openfst::TestData;
 use tempfile::tempdir;
 
 pub fn test_vector_fst_bin_serializer<W>(test_data: &TestData<VectorFst<W>>) -> Fallible<()>

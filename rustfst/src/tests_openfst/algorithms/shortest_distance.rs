@@ -3,14 +3,14 @@ use std::f32;
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
-use rustfst::algorithms::shortest_distance;
-use rustfst::fst_traits::MutableFst;
-use rustfst::fst_traits::TextParser;
-use rustfst::semirings::Semiring;
-use rustfst::semirings::WeaklyDivisibleSemiring;
-use rustfst::semirings::WeightQuantize;
+use crate::algorithms::shortest_distance;
+use crate::fst_traits::MutableFst;
+use crate::fst_traits::TextParser;
+use crate::semirings::Semiring;
+use crate::semirings::WeaklyDivisibleSemiring;
+use crate::semirings::WeightQuantize;
 
-use crate::TestData;
+use crate::tests_openfst::TestData;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ShorestDistanceOperationResult {

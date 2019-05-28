@@ -1,12 +1,12 @@
 use failure::Fallible;
 
-use rustfst::algorithms::{push_weights, ReweightType};
-use rustfst::fst_traits::TextParser;
-use rustfst::fst_traits::{CoreFst, MutableFst};
-use rustfst::semirings::Semiring;
-use rustfst::semirings::WeaklyDivisibleSemiring;
+use crate::algorithms::{push_weights, ReweightType};
+use crate::fst_traits::TextParser;
+use crate::fst_traits::{CoreFst, MutableFst};
+use crate::semirings::Semiring;
+use crate::semirings::WeaklyDivisibleSemiring;
 
-use crate::TestData;
+use crate::tests_openfst::TestData;
 
 pub fn test_weight_pushing_initial<F>(test_data: &TestData<F>) -> Fallible<()>
 where

@@ -1,12 +1,12 @@
 use failure::Fallible;
 
-use rustfst::algorithms::connect;
-use rustfst::fst_properties::FstProperties;
-use rustfst::fst_traits::MutableFst;
-use rustfst::fst_traits::TextParser;
-use rustfst::semirings::Semiring;
+use crate::algorithms::connect;
+use crate::fst_properties::FstProperties;
+use crate::fst_traits::MutableFst;
+use crate::fst_traits::TextParser;
+use crate::semirings::Semiring;
 
-use crate::TestData;
+use crate::tests_openfst::TestData;
 
 pub fn test_connect<F>(test_data: &TestData<F>) -> Fallible<()>
 where

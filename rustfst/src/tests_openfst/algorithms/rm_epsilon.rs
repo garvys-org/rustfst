@@ -1,15 +1,15 @@
 use failure::Fallible;
 
-use rustfst::algorithms::{isomorphic, rm_epsilon};
-use rustfst::fst_impls::VectorFst;
-use rustfst::fst_properties::FstProperties;
-use rustfst::fst_traits::TextParser;
-use rustfst::fst_traits::{Fst, MutableFst};
-use rustfst::semirings::Semiring;
-use rustfst::semirings::StarSemiring;
-use rustfst::semirings::WeaklyDivisibleSemiring;
+use crate::algorithms::{isomorphic, rm_epsilon};
+use crate::fst_impls::VectorFst;
+use crate::fst_properties::FstProperties;
+use crate::fst_traits::TextParser;
+use crate::fst_traits::{Fst, MutableFst};
+use crate::semirings::Semiring;
+use crate::semirings::StarSemiring;
+use crate::semirings::WeaklyDivisibleSemiring;
 
-use crate::TestData;
+use crate::tests_openfst::TestData;
 
 pub fn test_rmepsilon<F>(test_data: &TestData<F>) -> Fallible<()>
 where

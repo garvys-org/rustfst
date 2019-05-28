@@ -1,15 +1,15 @@
 use failure::Fallible;
-use rustfst::algorithms::arc_mappers::{
+
+use crate::algorithms::arc_mappers::{
     IdentityArcMapper, InputEpsilonMapper, InvertWeightMapper, OutputEpsilonMapper, PlusMapper,
     QuantizeMapper, RmWeightMapper, TimesMapper,
 };
-use rustfst::fst_traits::MutableFst;
-use rustfst::fst_traits::TextParser;
-use rustfst::semirings::Semiring;
-use rustfst::semirings::WeaklyDivisibleSemiring;
-use rustfst::semirings::WeightQuantize;
-
-use crate::TestData;
+use crate::fst_traits::MutableFst;
+use crate::fst_traits::TextParser;
+use crate::semirings::Semiring;
+use crate::semirings::WeaklyDivisibleSemiring;
+use crate::semirings::WeightQuantize;
+use crate::tests_openfst::TestData;
 
 pub fn test_arc_map_identity<F>(test_data: &TestData<F>) -> Fallible<()>
 where

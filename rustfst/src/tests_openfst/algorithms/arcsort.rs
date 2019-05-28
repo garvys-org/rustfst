@@ -1,14 +1,13 @@
 use failure::Fallible;
 
-use rustfst::algorithms::arc_compares::{ilabel_compare, olabel_compare};
-use rustfst::algorithms::arc_sort;
-use rustfst::fst_properties::FstProperties;
-use rustfst::fst_traits::MutableFst;
-use rustfst::fst_traits::TextParser;
-use rustfst::semirings::Semiring;
-use rustfst::semirings::WeightQuantize;
-
-use crate::TestData;
+use crate::algorithms::arc_compares::{ilabel_compare, olabel_compare};
+use crate::algorithms::arc_sort;
+use crate::fst_properties::FstProperties;
+use crate::fst_traits::MutableFst;
+use crate::fst_traits::TextParser;
+use crate::semirings::Semiring;
+use crate::semirings::WeightQuantize;
+use crate::tests_openfst::TestData;
 
 pub fn test_arcsort_ilabel<F>(test_data: &TestData<F>) -> Fallible<()>
 where

@@ -1,12 +1,12 @@
 use failure::Fallible;
 
-use rustfst::algorithms::invert;
-use rustfst::fst_traits::MutableFst;
-use rustfst::fst_traits::TextParser;
-use rustfst::semirings::Semiring;
-use rustfst::semirings::WeaklyDivisibleSemiring;
+use crate::algorithms::invert;
+use crate::fst_traits::MutableFst;
+use crate::fst_traits::TextParser;
+use crate::semirings::Semiring;
+use crate::semirings::WeaklyDivisibleSemiring;
 
-use crate::TestData;
+use crate::tests_openfst::TestData;
 
 pub fn test_invert<F>(test_data: &TestData<F>) -> Fallible<()>
 where

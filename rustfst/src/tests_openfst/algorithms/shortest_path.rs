@@ -1,14 +1,14 @@
 use failure::{format_err, Fallible};
 use serde_derive::{Deserialize, Serialize};
 
-use rustfst::algorithms::{isomorphic, shortest_path};
-use rustfst::fst_traits::TextParser;
-use rustfst::fst_traits::{CoreFst, MutableFst};
-use rustfst::semirings::Semiring;
-use rustfst::semirings::WeaklyDivisibleSemiring;
-use rustfst::semirings::WeightQuantize;
+use crate::algorithms::{isomorphic, shortest_path};
+use crate::fst_traits::TextParser;
+use crate::fst_traits::{CoreFst, MutableFst};
+use crate::semirings::Semiring;
+use crate::semirings::WeaklyDivisibleSemiring;
+use crate::semirings::WeightQuantize;
 
-use crate::TestData;
+use crate::tests_openfst::TestData;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ShorestPathOperationResult {

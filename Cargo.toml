@@ -1,5 +1,4 @@
 [workspace]
 members = [
-    "rustfst",
-    "rustfst-tests-openfst"
+    "rustfst"
 ]

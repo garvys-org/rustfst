@@ -1,12 +1,12 @@
 use failure::Fallible;
 
-use rustfst::algorithms::state_mappers::ArcSumMapper;
-use rustfst::algorithms::state_mappers::ArcUniqueMapper;
-use rustfst::fst_traits::MutableFst;
-use rustfst::fst_traits::TextParser;
-use rustfst::semirings::Semiring;
+use crate::algorithms::state_mappers::ArcSumMapper;
+use crate::algorithms::state_mappers::ArcUniqueMapper;
+use crate::fst_traits::MutableFst;
+use crate::fst_traits::TextParser;
+use crate::semirings::Semiring;
 
-use crate::TestData;
+use crate::tests_openfst::TestData;
 
 pub fn test_state_map_arc_sum<F>(test_data: &TestData<F>) -> Fallible<()>
 where
