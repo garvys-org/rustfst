@@ -5,9 +5,9 @@ use failure::Fallible;
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 
-pub trait BinaryParser: ExpandedFst
+pub trait BinarySerializer: ExpandedFst
 where
     Self::W: Semiring<Type = f32>,
 {
-    fn read<P: AsRef<Path>>(path_bin_fst: P) -> Fallible<Self>;
+    fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Fallible<()>;
 }
