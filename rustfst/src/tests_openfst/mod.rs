@@ -277,7 +277,7 @@ where
 
     test_shortest_path(&test_data)?;
 
-//    test_minimize(&test_data)?;
+    test_minimize(&test_data)?;
 
     Ok(())
 }
