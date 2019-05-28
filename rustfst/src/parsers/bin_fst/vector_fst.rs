@@ -1,16 +1,18 @@
-use std::fs::File;
 use std::fs::read;
+use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
 use failure::Fallible;
 use nom::{le_f32, le_i32, le_i64, le_u64};
 
-use crate::Arc;
 use crate::fst_impls::vector::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{BinaryDeserializer, MutableFst, ExpandedFst, CoreFst, ArcIterator, BinarySerializer};
+use crate::fst_traits::{
+    ArcIterator, BinaryDeserializer, BinarySerializer, CoreFst, ExpandedFst, MutableFst,
+};
 use crate::semirings::Semiring;
+use crate::Arc;
 use crate::StateId;
 
 // Identifies stream data as an FST (and its endianity).
@@ -166,7 +168,8 @@ fn write_bin_i64(file: &mut File, i: i64) -> Fallible<()> {
 
 #[inline]
 fn write_bin_f32(file: &mut File, i: f32) -> Fallible<()> {
-    file.write_all(&i.to_bits().to_le_bytes()).map_err(|e| e.into())
+    file.write_all(&i.to_bits().to_le_bytes())
+        .map_err(|e| e.into())
 }
 
 #[inline]
@@ -200,7 +203,9 @@ impl<W: 'static + Semiring<Type = f32>> BinarySerializer for VectorFst<W> {
         //num_states: i64,
         write_bin_i64(&mut file, self.num_states() as i64)?;
         //num_arcs: i64,
-        let num_arcs : usize = (0..self.num_states()).map(|s: usize| self.num_arcs(s).unwrap()).sum();
+        let num_arcs: usize = (0..self.num_states())
+            .map(|s: usize| self.num_arcs(s).unwrap())
+            .sum();
         write_bin_i64(&mut file, num_arcs as i64)?;
 
         // FstBody

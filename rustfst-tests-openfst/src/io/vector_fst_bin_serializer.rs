@@ -1,15 +1,15 @@
 use failure::Fallible;
 
 use rustfst::fst_impls::VectorFst;
-use rustfst::fst_traits::{BinarySerializer, BinaryDeserializer};
+use rustfst::fst_traits::{BinaryDeserializer, BinarySerializer};
 use rustfst::semirings::Semiring;
 
-use tempfile::tempdir;
 use crate::TestData;
+use tempfile::tempdir;
 
 pub fn test_vector_fst_bin_serializer<W>(test_data: &TestData<VectorFst<W>>) -> Fallible<()>
-    where
-        W: Semiring<Type = f32>,
+where
+    W: Semiring<Type = f32>,
 {
     let dir = tempdir()?;
 
