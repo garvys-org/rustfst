@@ -1,7 +1,7 @@
-use failure::{Fallible, format_err};
+use failure::{format_err, Fallible};
 use serde_derive::{Deserialize, Serialize};
 
-use crate::algorithms::{DeterminizeType, isomorphic, minimize};
+use crate::algorithms::{isomorphic, minimize, DeterminizeType};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::fst_traits::TextParser;
@@ -18,9 +18,9 @@ pub struct MinimizeOperationResult {
 }
 
 pub struct MinimizeTestData<F>
-    where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+where
+    F: TextParser,
+    F::W: Semiring<Type = f32>,
 {
     allow_nondet: bool,
     result: Fallible<F>,
@@ -28,9 +28,9 @@ pub struct MinimizeTestData<F>
 
 impl MinimizeOperationResult {
     pub fn parse<F>(&self) -> MinimizeTestData<F>
-        where
-            F: TextParser,
-            F::W: Semiring<Type = f32>,
+    where
+        F: TextParser,
+        F::W: Semiring<Type = f32>,
     {
         MinimizeTestData {
             allow_nondet: self.allow_nondet,
@@ -43,30 +43,24 @@ impl MinimizeOperationResult {
 }
 
 pub fn test_minimize<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
     for minimize_data in &test_data.minimize {
-        println!(
-            "Minimize : allow_nondet = {}",
-            minimize_data.allow_nondet
-        );
+        println!("Minimize : allow_nondet = {}", minimize_data.allow_nondet);
         let mut fst_raw = test_data.raw.clone();
-        let fst_res: Fallible<F> = minimize(&mut fst_raw, minimize_data.allow_nondet).map(|_| fst_raw);
+        let fst_res: Fallible<F> =
+            minimize(&mut fst_raw, minimize_data.allow_nondet).map(|_| fst_raw);
 
         match (&minimize_data.result, fst_res) {
             (Ok(fst_expected), Ok(ref fst_minimized)) => {
-                assert_eq!(
-                    fst_expected, fst_minimized,
-                    "{}",
-                    error_message_fst!(
-                        fst_expected,
-                        fst_minimized,
-                        format!(
-                            "Minimize fail for allow_nondet = {:?} ",
-                            minimize_data.allow_nondet
-                        )
+                assert_eq_fst!(
+                    fst_expected,
+                    fst_minimized,
+                    format!(
+                        "Minimize fail for allow_nondet = {:?} ",
+                        minimize_data.allow_nondet
                     )
                 );
             }

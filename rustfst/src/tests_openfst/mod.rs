@@ -15,6 +15,9 @@ use crate::fst_traits::{CoreFst, MutableFst, TextParser};
 use crate::semirings::{
     LogWeight, Semiring, StarSemiring, TropicalWeight, WeaklyDivisibleSemiring, WeightQuantize,
 };
+use crate::tests_openfst::algorithms::gallic_encode_decode::test_gallic_encode_decode;
+use crate::tests_openfst::algorithms::gallic_encode_decode::GallicOperationResult;
+use crate::tests_openfst::algorithms::gallic_encode_decode::GallicTestData;
 
 use self::algorithms::{
     arc_map::{
@@ -24,24 +27,27 @@ use self::algorithms::{
     },
     arcsort::{test_arcsort_ilabel, test_arcsort_olabel},
     connect::test_connect,
-    determinize::{DeterminizeOperationResult, DeterminizeTestData, test_determinize},
-    encode::{EncodeOperationResult, EncodeTestData, test_encode, test_encode_decode},
+    determinize::{test_determinize, DeterminizeOperationResult, DeterminizeTestData},
+    encode::{test_encode, test_encode_decode, EncodeOperationResult, EncodeTestData},
     inverse::test_invert,
-    minimize::{MinimizeOperationResult, MinimizeTestData, test_minimize},
+    minimize::{test_minimize, MinimizeOperationResult, MinimizeTestData},
     project::{test_project_input, test_project_output},
     properties::{parse_fst_properties, test_fst_properties},
     reverse::test_reverse,
     rm_epsilon::test_rmepsilon,
     shortest_distance::{
-        ShorestDistanceOperationResult, ShortestDistanceTestData, test_shortest_distance,
+        test_shortest_distance, ShorestDistanceOperationResult, ShortestDistanceTestData,
     },
-    shortest_path::{ShorestPathOperationResult, ShortestPathTestData, test_shortest_path},
+    shortest_path::{test_shortest_path, ShorestPathOperationResult, ShortestPathTestData},
     state_map::{test_state_map_arc_sum, test_state_map_arc_unique},
     topsort::test_topsort,
     weight_pushing::{test_weight_pushing_final, test_weight_pushing_initial},
 };
 use self::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
 use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
+use crate::tests_openfst::algorithms::factor_weight_identity::test_factor_weight_identity;
+use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityOperationResult;
+use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityTestData;
 
 #[macro_use]
 mod macros;
@@ -99,6 +105,8 @@ pub struct ParsedTestData {
     raw_vector_bin_path: String,
     shortest_distance: Vec<ShorestDistanceOperationResult>,
     shortest_path: Vec<ShorestPathOperationResult>,
+    gallic_encode_decode: Vec<GallicOperationResult>,
+    factor_weight_identity: Vec<FwIdentityOperationResult>,
 }
 
 pub struct TestData<F>
@@ -138,6 +146,8 @@ where
     pub raw_vector_bin_path: PathBuf,
     pub shortest_distance: Vec<ShortestDistanceTestData<F::W>>,
     pub shortest_path: Vec<ShortestPathTestData<F>>,
+    pub gallic_encode_decode: Vec<GallicTestData<F>>,
+    pub factor_weight_identity: Vec<FwIdentityTestData<F>>,
 }
 
 impl<F> TestData<F>
@@ -180,11 +190,21 @@ where
                 .to_path_buf(),
             shortest_distance: data.shortest_distance.iter().map(|v| v.parse()).collect(),
             shortest_path: data.shortest_path.iter().map(|v| v.parse()).collect(),
+            gallic_encode_decode: data
+                .gallic_encode_decode
+                .iter()
+                .map(|v| v.parse())
+                .collect(),
+            factor_weight_identity: data
+                .factor_weight_identity
+                .iter()
+                .map(|v| v.parse())
+                .collect(),
         }
     }
 }
 
-fn run_test_pynini(test_name: &str) -> Fallible<()> {
+fn run_test_openfst(test_name: &str) -> Fallible<()> {
     let mut absolute_path = std::env::current_dir()?;
     absolute_path.push("..");
     absolute_path.push("rustfst-tests-data");
@@ -216,8 +236,7 @@ fn do_run_test_openfst<W>(test_data: &TestData<VectorFst<W>>) -> Fallible<()>
 where
     W: 'static + Semiring<Type = f32> + StarSemiring + WeaklyDivisibleSemiring + WeightQuantize,
     <W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize + StarSemiring,
-    W: Into<<W as Semiring>::ReverseWeight>
-        + From<<W as Semiring>::ReverseWeight>,
+    W: Into<<W as Semiring>::ReverseWeight> + From<<W as Semiring>::ReverseWeight>,
 {
     test_rmepsilon(&test_data)?;
 
@@ -277,6 +296,10 @@ where
 
     test_shortest_path(&test_data)?;
 
+    test_gallic_encode_decode(&test_data)?;
+
+    test_factor_weight_identity(&test_data)?;
+
     test_minimize(&test_data)?;
 
     Ok(())
@@ -313,50 +336,50 @@ impl<T: Into<failure::Error>> From<T> for ExitFailure {
 
 #[test]
 fn test_openfst_fst_000() -> Result<(), ExitFailure> {
-    run_test_pynini("fst_000").map_err(|v| v.into())
+    run_test_openfst("fst_000").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_001() -> Result<(), ExitFailure> {
-    run_test_pynini("fst_001").map_err(|v| v.into())
+    run_test_openfst("fst_001").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_002() -> Result<(), ExitFailure> {
-    run_test_pynini("fst_002").map_err(|v| v.into())
+    run_test_openfst("fst_002").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_003() -> Result<(), ExitFailure> {
-    run_test_pynini("fst_003").map_err(|v| v.into())
+    run_test_openfst("fst_003").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_004() -> Result<(), ExitFailure> {
-    run_test_pynini("fst_004").map_err(|v| v.into())
+    run_test_openfst("fst_004").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_005() -> Result<(), ExitFailure> {
-    run_test_pynini("fst_005").map_err(|v| v.into())
+    run_test_openfst("fst_005").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_006() -> Result<(), ExitFailure> {
-    run_test_pynini("fst_006").map_err(|v| v.into())
+    run_test_openfst("fst_006").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_007() -> Result<(), ExitFailure> {
-    run_test_pynini("fst_007").map_err(|v| v.into())
+    run_test_openfst("fst_007").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_008() -> Result<(), ExitFailure> {
-    run_test_pynini("fst_008").map_err(|v| v.into())
+    run_test_openfst("fst_008").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_009() -> Result<(), ExitFailure> {
-    run_test_pynini("fst_009").map_err(|v| v.into())
+    run_test_openfst("fst_009").map_err(|v| v.into())
 }

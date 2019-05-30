@@ -320,16 +320,36 @@ void compute_fst_gallic_encode_decode(const F& raw_fst, json& j) {
 
 template<class F>
 void compute_fst_factor_weight_identity(const F& raw_fst, json& j) {
-    fst::FactorWeightOptions<typename F::Arc> opts;
-    fst::FactorWeightFst<
-        typename F::Arc,
-        typename fst::IdentityFactor<
-            typename F::Weight
-        >
-    > factored_fst(raw_fst, opts);
-    fst::VectorFst<typename F::Arc> fst_out(factored_fst);
+    std::vector<bool> v = {false, true};
+    j["factor_weight_identity"] = {};
 
-    j["factor_weight_identity"]["result"] = fst_to_string(fst_out);
+    for(bool factor_arc_weights: v) {
+        for(bool factor_final_weights: v) {
+            uint32 mode;
+            if (factor_arc_weights)
+                mode |= fst::kFactorArcWeights;
+            if (factor_final_weights)
+                mode |= fst::kFactorFinalWeights;
+            if (!factor_arc_weights && !factor_final_weights) {
+                continue;
+            }
+
+            fst::FactorWeightOptions<typename F::Arc> opts(fst::kDelta, mode);
+            fst::FactorWeightFst<
+                typename F::Arc,
+                typename fst::IdentityFactor<
+                    typename F::Weight
+                >
+            > factored_fst(raw_fst, opts);
+            fst::VectorFst<typename F::Arc> fst_out(factored_fst);
+
+            json j2;
+            j2["factor_final_weights"] = factor_final_weights;
+            j2["factor_arc_weights"] = factor_arc_weights;
+            j2["result"] = fst_to_string(fst_out);
+            j["factor_weight_identity"].push_back(j2);
+        }
+    }
 }
 
 template<class F, fst::GallicType G>

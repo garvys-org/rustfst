@@ -208,12 +208,14 @@ pub fn fst_depth<F: Fst>(
 }
 
 struct AcyclicMinimizer {
-    partition: Partition
+    partition: Partition,
 }
 
 impl AcyclicMinimizer {
     pub fn new<F: MutableFst + ExpandedFst>(fst: &mut F) -> Fallible<Self> {
-        let mut c = Self{partition: Partition::empty_new()};
+        let mut c = Self {
+            partition: Partition::empty_new(),
+        };
         c.initialize(fst)?;
         c.refine(fst);
         Ok(c)
@@ -231,21 +233,21 @@ impl AcyclicMinimizer {
             &mut heights,
         )?;
         self.partition.initialize(heights.len());
-        self.partition.allocate_classes((heights.iter().max().unwrap() + 1) as usize);
+        self.partition
+            .allocate_classes((heights.iter().max().unwrap() + 1) as usize);
         for s in 0..heights.len() {
             self.partition.add(s, heights[s] as usize);
         }
         Ok(())
     }
 
-
     fn refine<F: MutableFst + ExpandedFst>(&mut self, fst: &mut F) {
         use std::collections::HashMap;
-//        let state_cmp = StateComparator {fst, partition: &self.partition};
+        //        let state_cmp = StateComparator {fst, partition: &self.partition};
         let height = self.partition.num_classes();
         for h in 0..height {
             let mut equiv_classes = HashMap::new();
-            let mut it_partition : Vec<_> = self.partition.iter(h).collect();
+            let mut it_partition: Vec<_> = self.partition.iter(h).collect();
             equiv_classes.insert(it_partition[0], h as i32);
 
             let mut classes_to_add = vec![];
@@ -294,11 +296,10 @@ impl<'a, F: MutableFst + ExpandedFst> CyclicMinimizer<'a, F> {
 
 struct StateComparator<'a, 'b, F: MutableFst + ExpandedFst> {
     fst: &'a F,
-    partition: &'b Partition
+    partition: &'b Partition,
 }
 
 impl<'a, 'b, F: MutableFst + ExpandedFst> StateComparator<'a, 'b, F> {
-
     pub fn compare(&self, x: StateId, y: StateId) -> Fallible<bool> {
         // TODO: Return Ordering instead of bool
         let xfinal = self.fst.final_weight(x).unwrap_or_else(F::W::zero);
@@ -327,7 +328,7 @@ impl<'a, 'b, F: MutableFst + ExpandedFst> StateComparator<'a, 'b, F> {
             if arc1.ilabel > arc2.ilabel {
                 return Ok(false);
             }
-            let id_1 =self.partition.get_class_id(arc1.nextstate);
+            let id_1 = self.partition.get_class_id(arc1.nextstate);
             let id_2 = self.partition.get_class_id(arc2.nextstate);
             if id_1 < id_2 {
                 return Ok(true);
@@ -335,7 +336,6 @@ impl<'a, 'b, F: MutableFst + ExpandedFst> StateComparator<'a, 'b, F> {
             if id_1 > id_2 {
                 return Ok(false);
             }
-
         }
         Ok(false)
     }

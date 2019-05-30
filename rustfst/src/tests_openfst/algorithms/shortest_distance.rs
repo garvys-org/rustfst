@@ -47,9 +47,9 @@ impl ShorestDistanceOperationResult {
 }
 
 pub fn test_shortest_distance<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
     for data in &test_data.shortest_distance {
         let distance = shortest_distance(&test_data.raw, data.reverse)?;

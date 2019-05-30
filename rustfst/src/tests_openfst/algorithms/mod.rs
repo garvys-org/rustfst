@@ -3,6 +3,8 @@ pub mod arcsort;
 pub mod connect;
 pub mod determinize;
 pub mod encode;
+pub mod factor_weight_identity;
+pub mod gallic_encode_decode;
 pub mod inverse;
 pub mod minimize;
 pub mod project;

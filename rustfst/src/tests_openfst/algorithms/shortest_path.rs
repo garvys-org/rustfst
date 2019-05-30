@@ -18,9 +18,9 @@ pub struct ShorestPathOperationResult {
 }
 
 pub struct ShortestPathTestData<F>
-    where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+where
+    F: TextParser,
+    F::W: Semiring<Type = f32>,
 {
     unique: bool,
     nshortest: usize,
@@ -29,9 +29,9 @@ pub struct ShortestPathTestData<F>
 
 impl ShorestPathOperationResult {
     pub fn parse<F>(&self) -> ShortestPathTestData<F>
-        where
-            F: TextParser,
-            F::W: Semiring<Type = f32>,
+    where
+        F: TextParser,
+        F::W: Semiring<Type = f32>,
     {
         ShortestPathTestData {
             unique: self.unique,
@@ -45,18 +45,18 @@ impl ShorestPathOperationResult {
 }
 
 pub fn test_shortest_path<F>(test_data: &TestData<F>) -> Fallible<()>
-    where
-        F: TextParser + MutableFst,
-        F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
-        <<F as CoreFst>::W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize,
-        F::W: Into<<<F as CoreFst>::W as Semiring>::ReverseWeight>
+where
+    F: TextParser + MutableFst,
+    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
+    <<F as CoreFst>::W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize,
+    F::W: Into<<<F as CoreFst>::W as Semiring>::ReverseWeight>
         + From<<<F as CoreFst>::W as Semiring>::ReverseWeight>,
 {
     for data in &test_data.shortest_path {
-//        println!(
-//            "ShortestPath : unique = {} and nshortest = {}",
-//            data.unique, data.nshortest
-//        );
+        //        println!(
+        //            "ShortestPath : unique = {} and nshortest = {}",
+        //            data.unique, data.nshortest
+        //        );
         let fst_res: Fallible<F> = shortest_path(&test_data.raw, data.nshortest, data.unique);
         match (&data.result, &fst_res) {
             (Ok(fst_expected), Ok(ref fst_shortest)) => {
