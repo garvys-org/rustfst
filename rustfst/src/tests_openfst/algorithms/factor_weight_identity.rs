@@ -1,9 +1,9 @@
-use failure::{Fallible, format_err, ResultExt};
+use failure::{format_err, Fallible, ResultExt};
 use serde_derive::{Deserialize, Serialize};
 
-use crate::algorithms::{FactorWeightOptions, FactorWeightType};
 use crate::algorithms::factor_iterators::IdentityFactor;
 use crate::algorithms::factor_weight;
+use crate::algorithms::{FactorWeightOptions, FactorWeightType};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::TextParser;
 use crate::semirings::Semiring;
@@ -46,9 +46,9 @@ where
     W: Semiring<Type = f32> + WeightQuantize + 'static,
 {
     for data in &test_data.factor_weight_identity {
-        println!("test fwinentity");
-        std::dbg!(data.factor_final_weights);
-        std::dbg!(data.factor_arc_weights);
+        //        println!("test fwinentity");
+        //        std::dbg!(data.factor_final_weights);
+        //        std::dbg!(data.factor_arc_weights);
         let mode = FactorWeightType::from_bools(data.factor_final_weights, data.factor_arc_weights);
         let opts = FactorWeightOptions::new(mode);
 

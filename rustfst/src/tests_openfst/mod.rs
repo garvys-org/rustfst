@@ -15,6 +15,10 @@ use crate::fst_traits::{CoreFst, MutableFst, TextParser};
 use crate::semirings::{
     LogWeight, Semiring, StarSemiring, TropicalWeight, WeaklyDivisibleSemiring, WeightQuantize,
 };
+use crate::tests_openfst::algorithms::factor_weight_gallic::test_factor_weight_gallic;
+use crate::tests_openfst::algorithms::factor_weight_identity::test_factor_weight_identity;
+use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityOperationResult;
+use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityTestData;
 use crate::tests_openfst::algorithms::gallic_encode_decode::test_gallic_encode_decode;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicOperationResult;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicTestData;
@@ -45,9 +49,8 @@ use self::algorithms::{
 };
 use self::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
 use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
-use crate::tests_openfst::algorithms::factor_weight_identity::test_factor_weight_identity;
-use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityOperationResult;
-use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityTestData;
+use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicOperationResult;
+use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicTestData;
 
 #[macro_use]
 mod macros;
@@ -107,6 +110,7 @@ pub struct ParsedTestData {
     shortest_path: Vec<ShorestPathOperationResult>,
     gallic_encode_decode: Vec<GallicOperationResult>,
     factor_weight_identity: Vec<FwIdentityOperationResult>,
+    factor_weight_gallic: Vec<FwGallicOperationResult>,
 }
 
 pub struct TestData<F>
@@ -148,6 +152,7 @@ where
     pub shortest_path: Vec<ShortestPathTestData<F>>,
     pub gallic_encode_decode: Vec<GallicTestData<F>>,
     pub factor_weight_identity: Vec<FwIdentityTestData<F>>,
+    pub factor_weight_gallic: Vec<FwGallicTestData<F>>,
 }
 
 impl<F> TestData<F>
@@ -197,6 +202,11 @@ where
                 .collect(),
             factor_weight_identity: data
                 .factor_weight_identity
+                .iter()
+                .map(|v| v.parse())
+                .collect(),
+            factor_weight_gallic: data
+                .factor_weight_gallic
                 .iter()
                 .map(|v| v.parse())
                 .collect(),
@@ -299,6 +309,8 @@ where
     test_gallic_encode_decode(&test_data)?;
 
     test_factor_weight_identity(&test_data)?;
+
+    test_factor_weight_gallic(&test_data)?;
 
     test_minimize(&test_data)?;
 
