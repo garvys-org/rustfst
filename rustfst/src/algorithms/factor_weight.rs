@@ -195,7 +195,7 @@ where
             for arc in self.fst.arcs_iter(old_state)? {
                 let weight = elt.weight.times(&arc.weight).unwrap();
                 let factor_it = FI::new(weight.clone());
-                if !self.factor_arc_weights() && factor_it.done() {
+                if !self.factor_arc_weights() || factor_it.done() {
                     let dest = self.find_state(&Element::new(Some(arc.nextstate), F::W::one()));
                     self.cache_impl
                         .push_arc(state, Arc::new(arc.ilabel, arc.olabel, weight, dest))?;
@@ -203,7 +203,7 @@ where
                     for (p_f, p_s) in factor_it {
                         let dest = self.find_state(&Element::new(
                             Some(arc.nextstate),
-                            p_s.quantize(self.opts.delta)?,
+                            p_s.quantize(self.opts.delta)?
                         ));
                         self.cache_impl
                             .push_arc(state, Arc::new(arc.ilabel, arc.olabel, p_f, dest))?;

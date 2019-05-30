@@ -17,6 +17,9 @@
 #include "fst_005/fst_005.h"
 #include "fst_006/fst_006.h"
 #include "fst_007/fst_007.h"
+#include "fst_008/fst_008.h"
+#include "fst_009/fst_009.h"
+#include "fst_010/fst_010.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -514,6 +517,7 @@ int main() {
     compute_data(compute_fst_005(), "fst_005");
     compute_data(compute_fst_006(), "fst_006");
     compute_data(compute_fst_007(), "fst_007");
-    compute_data(compute_fst_007(), "fst_008");
-    compute_data(compute_fst_007(), "fst_009");
+    compute_data(compute_fst_008(), "fst_008");
+    compute_data(compute_fst_009(), "fst_009");
+    compute_data(compute_fst_010(), "fst_010");
 }

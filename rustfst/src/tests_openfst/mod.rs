@@ -383,3 +383,8 @@ fn test_openfst_fst_008() -> Result<(), ExitFailure> {
 fn test_openfst_fst_009() -> Result<(), ExitFailure> {
     run_test_openfst("fst_009").map_err(|v| v.into())
 }
+
+#[test]
+fn test_openfst_fst_010() -> Result<(), ExitFailure> {
+    run_test_openfst("fst_010").map_err(|v| v.into())
+}
