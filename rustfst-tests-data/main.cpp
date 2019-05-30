@@ -291,6 +291,106 @@ void compute_fst_shortest_path(const F& raw_fst, json& j) {
     }
 }
 
+template<class F, fst::GallicType G>
+void _compute_fst_gallic_encode_decode(const F& raw_fst, json& j, const string& gtype_s) {
+    fst::ToGallicMapper<typename F::Arc, G> to_gallic;
+    fst::FromGallicMapper<typename F::Arc, G> from_gallic(0);
+
+    fst::VectorFst<fst::GallicArc<typename F::Arc, G>> fst_1;
+    fst::ArcMap(raw_fst, &fst_1, &to_gallic);
+    F fst_out;
+    fst::ArcMap(fst_1, &fst_out, &from_gallic);
+
+    json j2;
+    j2["gallic_type"] = gtype_s;
+    j2["result"] = fst_to_string(fst_out);
+    j["gallic_encode_decode"].push_back(j2);
+}
+
+template<class F>
+void compute_fst_gallic_encode_decode(const F& raw_fst, json& j) {
+    // Encode and decode with a gallic mapper
+    j["gallic_encode_decoder"] = {};
+    _compute_fst_gallic_encode_decode<F, fst::GALLIC_LEFT>(raw_fst, j, "gallic_left");
+    _compute_fst_gallic_encode_decode<F, fst::GALLIC_RIGHT>(raw_fst, j, "gallic_right");
+    _compute_fst_gallic_encode_decode<F, fst::GALLIC_RESTRICT>(raw_fst, j, "gallic_restrict");
+    _compute_fst_gallic_encode_decode<F, fst::GALLIC_MIN>(raw_fst, j, "gallic_min");
+    _compute_fst_gallic_encode_decode<F, fst::GALLIC>(raw_fst, j, "gallic");
+}
+
+template<class F>
+void compute_fst_factor_weight_identity(const F& raw_fst, json& j) {
+    fst::FactorWeightOptions<typename F::Arc> opts;
+    fst::FactorWeightFst<
+        typename F::Arc,
+        typename fst::IdentityFactor<
+            typename F::Weight
+        >
+    > factored_fst(raw_fst, opts);
+    fst::VectorFst<typename F::Arc> fst_out(factored_fst);
+
+    j["factor_weight_identity"]["result"] = fst_to_string(fst_out);
+}
+
+template<class F, fst::GallicType G>
+void _compute_fst_factor_weight_gallic(const F& raw_fst, json& j, const string& gtype_s) {
+
+    std::vector<bool> v = {true, false};
+
+    for(bool factor_arc_weights: v) {
+        for(bool factor_final_weights: v) {
+            uint32 mode;
+            if (factor_arc_weights)
+                mode |= fst::kFactorArcWeights;
+            if (factor_final_weights)
+                mode |= fst::kFactorFinalWeights;
+            if (!factor_arc_weights && !factor_final_weights) {
+                continue;
+            }
+            fst::ToGallicMapper<typename F::Arc, G> to_gallic;
+            fst::FromGallicMapper<typename F::Arc, G> from_gallic(0);
+
+            /// To Gallic
+            fst::VectorFst<fst::GallicArc<typename F::Arc, G>> fst_1;
+            fst::ArcMap(raw_fst, &fst_1, &to_gallic);
+
+            // Factor Weight
+            fst::FactorWeightOptions<
+                fst::GallicArc<typename F::Arc, G>
+            > opts(fst::kDelta, mode);
+            fst::FactorWeightFst<
+                fst::GallicArc<typename F::Arc, G>,
+                typename fst::GallicFactor<
+                    int, typename F::Weight, G
+                >
+            > factored_fst(fst_1, opts);
+            fst::VectorFst<fst::GallicArc<typename F::Arc, G>> fst_2(factored_fst);
+
+            // From Gallic
+            F fst_out;
+            fst::ArcMap(fst_2, &fst_out, &from_gallic);
+
+            json j2;
+            j2["gallic_type"] = gtype_s;
+            j2["factor_final_weights"] = factor_final_weights;
+            j2["factor_arc_weights"] = factor_arc_weights;
+            j2["result"] = fst_to_string(fst_out);
+            j["factor_weight_gallic"].push_back(j2);
+        }
+    }
+}
+
+template<class F>
+void compute_fst_factor_weight_gallic(const F& raw_fst, json& j) {
+    // Encode and decode with a gallic mapper
+    j["factor_weight_gallic"] = {};
+    _compute_fst_factor_weight_gallic<F, fst::GALLIC_LEFT>(raw_fst, j, "gallic_left");
+    _compute_fst_factor_weight_gallic<F, fst::GALLIC_RIGHT>(raw_fst, j, "gallic_right");
+    _compute_fst_factor_weight_gallic<F, fst::GALLIC_RESTRICT>(raw_fst, j, "gallic_restrict");
+    _compute_fst_factor_weight_gallic<F, fst::GALLIC_MIN>(raw_fst, j, "gallic_min");
+    _compute_fst_factor_weight_gallic<F, fst::GALLIC>(raw_fst, j, "gallic");
+}
+
 template<class A>
 void compute_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
     std::cout << "FST :" << fst_name << std::endl;
@@ -368,6 +468,15 @@ void compute_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
 
     std::cout << "ShortestPath" << std::endl;
     compute_fst_shortest_path(raw_fst, data);
+
+    std::cout << "Gallic Encode Decode" << std::endl;
+    compute_fst_gallic_encode_decode(raw_fst, data);
+
+    std::cout << "Factor Weight Identity" << std::endl;
+    compute_fst_factor_weight_identity(raw_fst, data);
+
+    std::cout << "Factor Weight Gallic" << std::endl;
+    compute_fst_factor_weight_gallic(raw_fst, data);
 
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;
