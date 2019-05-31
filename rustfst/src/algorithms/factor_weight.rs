@@ -203,7 +203,7 @@ where
                     for (p_f, p_s) in factor_it {
                         let dest = self.find_state(&Element::new(
                             Some(arc.nextstate),
-                            p_s.quantize(self.opts.delta)?
+                            p_s.quantize(self.opts.delta)?,
                         ));
                         self.cache_impl
                             .push_arc(state, Arc::new(arc.ilabel, arc.olabel, p_f, dest))?;

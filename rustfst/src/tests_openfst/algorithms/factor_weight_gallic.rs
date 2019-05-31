@@ -1,7 +1,11 @@
 use failure::{format_err, Fallible, ResultExt};
 use serde_derive::{Deserialize, Serialize};
 
+use crate::algorithms::factor_iterators::GallicFactor;
 use crate::algorithms::factor_iterators::GallicFactorLeft;
+use crate::algorithms::factor_iterators::GallicFactorMin;
+use crate::algorithms::factor_iterators::GallicFactorRestrict;
+use crate::algorithms::factor_iterators::GallicFactorRight;
 use crate::algorithms::factor_iterators::IdentityFactor;
 use crate::algorithms::factor_weight;
 use crate::algorithms::weight_converters::FromGallicConverter;
@@ -17,10 +21,6 @@ use crate::semirings::GallicWeightRight;
 use crate::semirings::Semiring;
 use crate::semirings::WeightQuantize;
 use crate::tests_openfst::TestData;
-use crate::algorithms::factor_iterators::GallicFactorRight;
-use crate::algorithms::factor_iterators::GallicFactorRestrict;
-use crate::algorithms::factor_iterators::GallicFactorMin;
-use crate::algorithms::factor_iterators::GallicFactor;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FwGallicOperationResult {

@@ -27,6 +27,7 @@ nom = '4.1'
 num-traits = '0.2'
 ordered-float = '1'
 typenum = '1.10.0'
+stable_bst = '0.2.0'
 
 [dev-dependencies]
 counter = '0.4'

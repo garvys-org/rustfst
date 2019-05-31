@@ -1,29 +1,35 @@
 use std::cmp::max;
+//impl<'a, 'b, F: MutableFst + ExpandedFst> Compare for StateComparator<'a, 'b, F> {
+//
+//}
+use std::cmp::Ordering;
+use std::collections::HashMap;
+use std::collections::HashSet;
 use std::dbg;
 
 use failure::Fallible;
+use stable_bst::TreeMap;
 
+use crate::algorithms::{
+    arc_map, arc_sort, connect, decode, encode, factor_weight, FactorWeightOptions, FactorWeightType,
+    push_weights, ReweightType, state_map, weight_convert,
+};
 use crate::algorithms::arc_compares::ilabel_compare;
 use crate::algorithms::arc_mappers::QuantizeMapper;
 use crate::algorithms::factor_iterators::GallicFactorLeft;
 use crate::algorithms::partition::Partition;
 use crate::algorithms::state_mappers::ArcUniqueMapper;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
-use crate::algorithms::{
-    arc_map, arc_sort, connect, decode, encode, factor_weight, push_weights, state_map,
-    weight_convert, FactorWeightOptions, FactorWeightType, ReweightType,
-};
+use crate::EPS_LABEL;
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
+use crate::KDELTA;
+use crate::NO_STATE_ID;
 use crate::semirings::{
     GallicWeightLeft, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::StateId;
-use crate::EPS_LABEL;
-use crate::KDELTA;
-use crate::NO_STATE_ID;
-use std::collections::HashSet;
 
 pub fn minimize<F>(ifst: &mut F, allow_nondet: bool) -> Fallible<()>
 where
@@ -53,14 +59,14 @@ where
         push_weights(&mut gfst, ReweightType::ReweightToInitial)?;
         let mut quantize_mapper = QuantizeMapper {};
         arc_map(&mut gfst, &mut quantize_mapper)?;
-        dbg!(&gfst);
+        //        dbg!(&gfst);
         let encode_table = encode(&mut gfst, true, true)?;
         acceptor_minimize(&mut gfst, allow_acyclic_minimization)?;
-        dbg!(gfst.num_states());
-        dbg!(&gfst);
+        //        dbg!(gfst.num_states());
+        //        dbg!(&gfst);
         decode(&mut gfst, encode_table)?;
-        dbg!(gfst.num_states());
-        dbg!(&gfst);
+        //        dbg!(gfst.num_states());
+        //        dbg!(&gfst);
         let factor_opts: FactorWeightOptions = FactorWeightOptions {
             delta: KDELTA,
             mode: FactorWeightType::FACTOR_FINAL_WEIGHTS | FactorWeightType::FACTOR_ARC_WEIGHTS,
@@ -71,23 +77,27 @@ where
         };
         let fwfst: VectorFst<_> =
             factor_weight::<_, _, GallicFactorLeft<F::W>>(&gfst, factor_opts)?;
-        println!("lol");
-        dbg!(fwfst.num_states());
-        dbg!(&fwfst);
+        //        println!("lol");
+        //        dbg!(fwfst.num_states());
+        //        dbg!(&fwfst);
         let mut from_gallic = FromGallicConverter {
             superfinal_label: EPS_LABEL,
         };
         *ifst = weight_convert(&fwfst, &mut from_gallic)?;
-        dbg!(ifst.num_states());
-        dbg!(ifst);
+        //        dbg!(ifst.num_states());
+        //        dbg!(ifst);
         Ok(())
     } else if props.contains(FstProperties::WEIGHTED) {
         // Weighted acceptor
         push_weights(ifst, ReweightType::ReweightToInitial)?;
+//        println!("{}", ifst);
         let mut quantize_mapper = QuantizeMapper {};
         arc_map(ifst, &mut quantize_mapper)?;
+//        println!("{}", ifst);
         let encode_table = encode(ifst, true, true)?;
+//        println!("{}", ifst);
         acceptor_minimize(ifst, allow_acyclic_minimization)?;
+//        println!("{}", ifst);
         decode(ifst, encode_table)
     } else {
         // Unweighted acceptor
@@ -104,40 +114,40 @@ fn acceptor_minimize<F: MutableFst + ExpandedFst>(
         bail!("FST is not an unweighted acceptor");
     }
 
-    println!("acceptor_minimize");
-
-    dbg!(ifst.num_states());
-
     connect(ifst)?;
 
-    dbg!(ifst.num_states());
+//    println!("after connect \n{}", &ifst);
 
     if ifst.num_states() == 0 {
         return Ok(());
     }
 
     if allow_acyclic_minimization && props.contains(FstProperties::ACYCLIC) {
+//        println!("Acyclic minimization");
         // Acyclic minimization
         arc_sort(ifst, ilabel_compare)?;
         let minimizer = AcyclicMinimizer::new(ifst)?;
         merge_states(minimizer.get_partition(), ifst)?;
+//        println!("{}", ifst);
     } else {
         // Cyclic minimization
         let minimizer = CyclicMinimizer::new(ifst);
         merge_states(minimizer.get_partition(), ifst)?;
     }
 
-    dbg!(ifst.num_states());
+//    dbg!(ifst.num_states());
 
     let mut mapper = ArcUniqueMapper {};
     state_map(ifst, &mut mapper)?;
 
-    dbg!(ifst.num_states());
+//    dbg!(ifst.num_states());
 
     Ok(())
 }
 
 fn merge_states<F: MutableFst + ExpandedFst>(partition: Partition, fst: &mut F) -> Fallible<()> {
+//    std::dbg!(&partition);
+
     let mut state_map = vec![None; partition.num_classes()];
     for i in 0..partition.num_classes() {
         state_map[i] = partition.iter(i).next();
@@ -242,12 +252,24 @@ impl AcyclicMinimizer {
     }
 
     fn refine<F: MutableFst + ExpandedFst>(&mut self, fst: &mut F) {
-        use std::collections::HashMap;
-        //        let state_cmp = StateComparator {fst, partition: &self.partition};
+        let state_cmp = StateComparator {
+            fst,
+            // This clone is necessary for the moment because the partition is modified while
+            // still needing the StateComparator.
+            // TODO: Find a way to remove the clone.
+            partition: self.partition.clone(),
+        };
+
         let height = self.partition.num_classes();
         for h in 0..height {
-            let mut equiv_classes = HashMap::new();
-            let mut it_partition: Vec<_> = self.partition.iter(h).collect();
+
+            // We need here a binary search tree in order to order the states id and create a partition.
+            // For now uses the crate `stable_bst` which is quite old but seems to do the job
+            // TODO: Bench the performances of the implementation. Maybe re-write it.
+            let mut equiv_classes = TreeMap::<StateId, i32, _>::with_comparator(
+                |a: &usize, b: &usize| state_cmp.compare(*a, *b).unwrap());
+
+            let it_partition: Vec<_> = self.partition.iter(h).collect();
             equiv_classes.insert(it_partition[0], h as i32);
 
             let mut classes_to_add = vec![];
@@ -266,8 +288,13 @@ impl AcyclicMinimizer {
 
             for s in it_partition {
                 let old_class = self.partition.get_class_id(s);
-                let new_class = equiv_classes[&s];
-                assert_ne!(new_class, NO_STATE_ID);
+                let new_class = *equiv_classes.get(&s).unwrap();
+                if new_class == NO_STATE_ID {
+                    // The behaviour here is a bit different compared to the c++ because here
+                    // when inserting an equivalent key it modifies the key
+                    // which is not the case in c++.
+                    continue
+                }
                 if old_class != (new_class as usize) {
                     self.partition.move_element(s, new_class as usize);
                 }
@@ -294,14 +321,16 @@ impl<'a, F: MutableFst + ExpandedFst> CyclicMinimizer<'a, F> {
     }
 }
 
-struct StateComparator<'a, 'b, F: MutableFst + ExpandedFst> {
+struct StateComparator<'a, F: MutableFst + ExpandedFst> {
     fst: &'a F,
-    partition: &'b Partition,
+    partition: Partition,
 }
 
-impl<'a, 'b, F: MutableFst + ExpandedFst> StateComparator<'a, 'b, F> {
-    pub fn compare(&self, x: StateId, y: StateId) -> Fallible<bool> {
-        // TODO: Return Ordering instead of bool
+//use compare::Compare;
+
+impl<'a, F: MutableFst + ExpandedFst> StateComparator<'a, F> {
+
+    fn do_compare(&self, x: StateId, y: StateId) -> Fallible<bool> {
         let xfinal = self.fst.final_weight(x).unwrap_or_else(F::W::zero);
         let yfinal = self.fst.final_weight(y).unwrap_or_else(F::W::zero);
 
@@ -338,6 +367,25 @@ impl<'a, 'b, F: MutableFst + ExpandedFst> StateComparator<'a, 'b, F> {
             }
         }
         Ok(false)
+    }
+
+    pub fn compare(&self, x: StateId, y: StateId) -> Fallible<Ordering> {
+        if x == y {
+            return Ok(Ordering::Equal);
+        }
+
+        let x_y = self.do_compare(x, y).unwrap();
+        let y_x = self.do_compare(y, x).unwrap();
+
+        if !(x_y) && !(y_x) {
+            return Ok(Ordering::Equal);
+        }
+
+        if x_y {
+            Ok(Ordering::Less)
+        } else {
+            Ok(Ordering::Greater)
+        }
     }
 }
 

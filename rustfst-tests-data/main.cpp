@@ -8,6 +8,7 @@
 #include "fst/vector-fst.h"
 #include "fst/script/print.h"
 #include "fst/fst.h"
+#include "fst/minimize.h"
 
 #include "fst_000/fst_000.h"
 #include "fst_001/fst_001.h"

@@ -1,6 +1,7 @@
 use crate::algorithms::Queue;
 use crate::StateId;
 
+#[derive(Debug, Clone)]
 pub struct Partition {
     elements: Vec<Element>,
     classes: Vec<Class>,
@@ -195,6 +196,7 @@ impl Partition {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Element {
     class_id: usize,
     yes: usize,
@@ -213,6 +215,7 @@ impl Element {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Class {
     size: usize,
     yes_size: usize,

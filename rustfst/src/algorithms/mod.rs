@@ -12,7 +12,6 @@ mod factor_weight;
 mod inversion;
 mod isomorphic;
 mod minimize;
-#[allow(unused)]
 mod partition;
 mod projection;
 mod queue;
