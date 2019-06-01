@@ -33,6 +33,7 @@ use crate::StateId;
 use crate::EPS_LABEL;
 use crate::KDELTA;
 use crate::NO_STATE_ID;
+use crate::Arc;
 
 pub fn minimize<F>(ifst: &mut F, allow_nondet: bool) -> Fallible<()>
 where
@@ -114,6 +115,7 @@ fn acceptor_minimize<F: MutableFst + ExpandedFst>(
 ) -> Fallible<()>
 where
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
+    F::W: 'static
 {
     let props = ifst.properties()?;
     if !props.contains(FstProperties::ACCEPTOR | FstProperties::UNWEIGHTED) {
@@ -385,8 +387,9 @@ struct CyclicMinimizer<W: Semiring> {
     queue: LifoQueue,
 }
 
-impl<W: Semiring> CyclicMinimizer<W>
+impl<W> CyclicMinimizer<W>
 where
+    W: Semiring + 'static,
     W::ReverseWeight: 'static,
 {
     pub fn new<F: MutableFst<W = W> + ExpandedFst<W = W>>(fst: &mut F) -> Fallible<Self> {
@@ -405,6 +408,17 @@ where
         arc_sort(&mut self.tr, ilabel_compare)?;
         self.partition = Partition::new(self.tr.num_states() - 1);
         self.pre_partition(fst);
+
+        use binary_heap_plus::{BinaryHeap, FnComparator};
+        let comp = ArcIterCompare {partition: self.partition.clone()};
+        let mut v = BinaryHeap::new_by(move |v1, v2| {
+            if comp.compare(v1, v2) {
+                Ordering::Less
+            } else {
+                Ordering::Greater
+            }
+        });
+        v.push(fst.arcs_iter(0)?);
         unimplemented!()
     }
 
@@ -479,5 +493,27 @@ where
         }
 
         return result;
+    }
+}
+
+#[derive(Clone)]
+struct ArcIterCompare {
+    partition: Partition
+}
+
+use std::iter::Peekable;
+impl ArcIterCompare {
+    fn compare<'a, 'b, W, I, J>(&self, x: &I, y: &J) -> bool
+    where
+        W : Semiring + 'static,
+        I : Iterator<Item = &'a Arc<W>>,
+        J : Iterator<Item = &'b Arc<W>>
+    {
+        unimplemented!()
+//        let mut _x = x.clone();
+//        let xarc = _x.next();
+//        let mut _y = y.clone();
+//        let yarc = y.next();
+//        xarc.unwrap().ilabel > yarc.unwrap().ilabel
     }
 }
