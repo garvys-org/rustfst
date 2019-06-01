@@ -10,26 +10,29 @@ use std::dbg;
 use failure::Fallible;
 use stable_bst::TreeMap;
 
-use crate::algorithms::{
-    arc_map, arc_sort, connect, decode, encode, factor_weight, FactorWeightOptions, FactorWeightType,
-    push_weights, ReweightType, state_map, weight_convert,
-};
 use crate::algorithms::arc_compares::ilabel_compare;
 use crate::algorithms::arc_mappers::QuantizeMapper;
 use crate::algorithms::factor_iterators::GallicFactorLeft;
 use crate::algorithms::partition::Partition;
+use crate::algorithms::queues::LifoQueue;
+use crate::algorithms::reverse;
 use crate::algorithms::state_mappers::ArcUniqueMapper;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
-use crate::EPS_LABEL;
+use crate::algorithms::Queue;
+use crate::algorithms::{
+    arc_map, arc_sort, connect, decode, encode, factor_weight, push_weights, state_map,
+    weight_convert, FactorWeightOptions, FactorWeightType, ReweightType,
+};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
-use crate::KDELTA;
-use crate::NO_STATE_ID;
 use crate::semirings::{
     GallicWeightLeft, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::StateId;
+use crate::EPS_LABEL;
+use crate::KDELTA;
+use crate::NO_STATE_ID;
 
 pub fn minimize<F>(ifst: &mut F, allow_nondet: bool) -> Fallible<()>
 where
@@ -90,14 +93,14 @@ where
     } else if props.contains(FstProperties::WEIGHTED) {
         // Weighted acceptor
         push_weights(ifst, ReweightType::ReweightToInitial)?;
-//        println!("{}", ifst);
+        //        println!("{}", ifst);
         let mut quantize_mapper = QuantizeMapper {};
         arc_map(ifst, &mut quantize_mapper)?;
-//        println!("{}", ifst);
+        //        println!("{}", ifst);
         let encode_table = encode(ifst, true, true)?;
-//        println!("{}", ifst);
+        //        println!("{}", ifst);
         acceptor_minimize(ifst, allow_acyclic_minimization)?;
-//        println!("{}", ifst);
+        //        println!("{}", ifst);
         decode(ifst, encode_table)
     } else {
         // Unweighted acceptor
@@ -108,7 +111,10 @@ where
 fn acceptor_minimize<F: MutableFst + ExpandedFst>(
     ifst: &mut F,
     allow_acyclic_minimization: bool,
-) -> Fallible<()> {
+) -> Fallible<()>
+where
+    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
+{
     let props = ifst.properties()?;
     if !props.contains(FstProperties::ACCEPTOR | FstProperties::UNWEIGHTED) {
         bail!("FST is not an unweighted acceptor");
@@ -116,37 +122,37 @@ fn acceptor_minimize<F: MutableFst + ExpandedFst>(
 
     connect(ifst)?;
 
-//    println!("after connect \n{}", &ifst);
+    //    println!("after connect \n{}", &ifst);
 
     if ifst.num_states() == 0 {
         return Ok(());
     }
 
     if allow_acyclic_minimization && props.contains(FstProperties::ACYCLIC) {
-//        println!("Acyclic minimization");
+        //        println!("Acyclic minimization");
         // Acyclic minimization
         arc_sort(ifst, ilabel_compare)?;
         let minimizer = AcyclicMinimizer::new(ifst)?;
         merge_states(minimizer.get_partition(), ifst)?;
-//        println!("{}", ifst);
+    //        println!("{}", ifst);
     } else {
         // Cyclic minimization
-        let minimizer = CyclicMinimizer::new(ifst);
+        let minimizer = CyclicMinimizer::new(ifst)?;
         merge_states(minimizer.get_partition(), ifst)?;
     }
 
-//    dbg!(ifst.num_states());
+    //    dbg!(ifst.num_states());
 
     let mut mapper = ArcUniqueMapper {};
     state_map(ifst, &mut mapper)?;
 
-//    dbg!(ifst.num_states());
+    //    dbg!(ifst.num_states());
 
     Ok(())
 }
 
 fn merge_states<F: MutableFst + ExpandedFst>(partition: Partition, fst: &mut F) -> Fallible<()> {
-//    std::dbg!(&partition);
+    //    std::dbg!(&partition);
 
     let mut state_map = vec![None; partition.num_classes()];
     for i in 0..partition.num_classes() {
@@ -262,12 +268,13 @@ impl AcyclicMinimizer {
 
         let height = self.partition.num_classes();
         for h in 0..height {
-
             // We need here a binary search tree in order to order the states id and create a partition.
             // For now uses the crate `stable_bst` which is quite old but seems to do the job
             // TODO: Bench the performances of the implementation. Maybe re-write it.
-            let mut equiv_classes = TreeMap::<StateId, i32, _>::with_comparator(
-                |a: &usize, b: &usize| state_cmp.compare(*a, *b).unwrap());
+            let mut equiv_classes =
+                TreeMap::<StateId, i32, _>::with_comparator(|a: &usize, b: &usize| {
+                    state_cmp.compare(*a, *b).unwrap()
+                });
 
             let it_partition: Vec<_> = self.partition.iter(h).collect();
             equiv_classes.insert(it_partition[0], h as i32);
@@ -293,7 +300,7 @@ impl AcyclicMinimizer {
                     // The behaviour here is a bit different compared to the c++ because here
                     // when inserting an equivalent key it modifies the key
                     // which is not the case in c++.
-                    continue
+                    continue;
                 }
                 if old_class != (new_class as usize) {
                     self.partition.move_element(s, new_class as usize);
@@ -307,29 +314,12 @@ impl AcyclicMinimizer {
     }
 }
 
-struct CyclicMinimizer<'a, F: MutableFst + ExpandedFst> {
-    fst: &'a mut F,
-}
-
-impl<'a, F: MutableFst + ExpandedFst> CyclicMinimizer<'a, F> {
-    pub fn new(fst: &'a mut F) -> Self {
-        Self { fst }
-    }
-
-    pub fn get_partition(&self) -> Partition {
-        unimplemented!()
-    }
-}
-
 struct StateComparator<'a, F: MutableFst + ExpandedFst> {
     fst: &'a F,
     partition: Partition,
 }
 
-//use compare::Compare;
-
 impl<'a, F: MutableFst + ExpandedFst> StateComparator<'a, F> {
-
     fn do_compare(&self, x: StateId, y: StateId) -> Fallible<bool> {
         let xfinal = self.fst.final_weight(x).unwrap_or_else(F::W::zero);
         let yfinal = self.fst.final_weight(y).unwrap_or_else(F::W::zero);
@@ -389,12 +379,105 @@ impl<'a, F: MutableFst + ExpandedFst> StateComparator<'a, F> {
     }
 }
 
-//use std::hash::BuildHasher;
-//
-//impl<'a, 'b, F: MutableFst + ExpandedFst> BuildHasher for StateComparator<'a,'b, F> {
-//    type Hasher = ();
-//
-//    fn build_hasher(&self) -> Self::Hasher {
-//        unimplemented!()
-//    }
-//}
+struct CyclicMinimizer<W: Semiring> {
+    tr: VectorFst<W::ReverseWeight>,
+    partition: Partition,
+    queue: LifoQueue,
+}
+
+impl<W: Semiring> CyclicMinimizer<W>
+where
+    W::ReverseWeight: 'static,
+{
+    pub fn new<F: MutableFst<W = W> + ExpandedFst<W = W>>(fst: &mut F) -> Fallible<Self> {
+        let mut a = Self {
+            tr: VectorFst::new(),
+            partition: Partition::empty_new(),
+            queue: LifoQueue::new(),
+        };
+        a.initialize(fst)?;
+        a.compute(fst);
+        Ok(a)
+    }
+
+    fn initialize<F: MutableFst<W = W> + ExpandedFst<W = W>>(&mut self, fst: &F) -> Fallible<()> {
+        self.tr = reverse(fst)?;
+        arc_sort(&mut self.tr, ilabel_compare)?;
+        self.partition = Partition::new(self.tr.num_states() - 1);
+        self.pre_partition(fst);
+        unimplemented!()
+    }
+
+    fn pre_partition<F: MutableFst<W = W> + ExpandedFst<W = W>>(&mut self, fst: &F) {
+        let mut next_class: StateId = 0;
+        let num_states = fst.num_states();
+        let mut state_to_initial_class: Vec<StateId> = vec![];
+        {
+            let mut hash_to_class_nonfinal = HashMap::<usize, StateId>::new();
+            let mut hash_to_class_final = HashMap::<usize, StateId>::new();
+            let hasher = StateILabelHasher { fst };
+
+            for s in 0..num_states {
+                let hash = hasher.hash(s);
+
+                let this_map = if fst.is_final(s) {
+                    &mut hash_to_class_final
+                } else {
+                    &mut hash_to_class_nonfinal
+                };
+
+                // TODO: Find a way to avoid the double lookup
+                if this_map.contains_key(&hash) {
+                    state_to_initial_class[s] = this_map[&hash];
+                } else {
+                    this_map.insert(hash, next_class);
+                    next_class += 1;
+                    state_to_initial_class[s] = next_class;
+                }
+            }
+        }
+        self.partition.allocate_classes(next_class);
+        for s in 0..num_states {
+            self.partition.add(s, state_to_initial_class[s]);
+        }
+
+        for c in 0..next_class {
+            self.queue.enqueue(c);
+        }
+    }
+
+    fn compute<F: MutableFst<W = W> + ExpandedFst<W = W>>(&mut self, fst: &F) {
+        unimplemented!()
+    }
+
+    pub fn get_partition(&self) -> Partition {
+        unimplemented!()
+    }
+}
+
+struct StateILabelHasher<'a, F: MutableFst + ExpandedFst> {
+    fst: &'a F,
+}
+
+impl<'a, F> StateILabelHasher<'a, F>
+where
+    F: MutableFst + ExpandedFst,
+{
+    fn hash(&self, s: StateId) -> usize {
+        // C++ crap
+        let p1: usize = 7603;
+        let p2: usize = 433024223;
+        let mut result = p2;
+        let mut current_ilabel = -1;
+
+        for arc in self.fst.arcs_iter(s).unwrap() {
+            let this_ilabel = arc.ilabel;
+            if this_ilabel as i32 != current_ilabel {
+                result = p1 * result + this_ilabel;
+                current_ilabel = this_ilabel as i32;
+            }
+        }
+
+        return result;
+    }
+}

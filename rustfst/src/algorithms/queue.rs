@@ -23,6 +23,7 @@ pub enum QueueType {
     OtherQueue,
 }
 
+// TODO: Test the queues with openfst
 pub trait Queue: Debug {
     fn head(&mut self) -> Option<StateId>;
     fn enqueue(&mut self, state: StateId);
