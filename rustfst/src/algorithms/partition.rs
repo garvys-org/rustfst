@@ -105,7 +105,7 @@ impl Partition {
         }
 
         if this_class.yes_head >= 0 {
-            self.elements[this_class.no_head as usize].prev_element = elt_prev_elt;
+            self.elements[this_class.yes_head as usize].prev_element = elt_prev_elt;
         } else {
             self.visited_classes.push(elt_class_id);
         }
@@ -167,11 +167,11 @@ impl Partition {
         }
     }
 
-    pub fn finalize_split<Q: Queue>(&mut self, queue: &mut Option<Q>) {
+    pub fn finalize_split<Q: Queue>(&mut self, queue: &mut Option<&mut Q>) {
         let visited_classes = self.visited_classes.clone();
         for visited_class in visited_classes {
             let new_class = self.split_refine(visited_class);
-            if new_class != -1 && queue.is_some() {
+            if new_class != -1 && queue.as_ref().is_some() {
                 queue.as_mut().unwrap().enqueue(new_class as usize);
             }
         }
