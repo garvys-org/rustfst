@@ -6,11 +6,8 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::dbg;
-use std::iter::Peekable;
 
 use binary_heap_plus::BinaryHeap;
-use binary_heap_plus::Compare;
-use binary_heap_plus::FnComparator;
 use failure::Fallible;
 use stable_bst::TreeMap;
 
@@ -47,7 +44,7 @@ where
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
 {
     let props = ifst.properties()?;
-    let mut allow_acyclic_minimization;
+    let allow_acyclic_minimization;
 
     if props.contains(FstProperties::I_DETERMINISTIC) {
         allow_acyclic_minimization = true;
@@ -392,12 +389,12 @@ fn pre_partition<W: Semiring, F: MutableFst<W = W> + ExpandedFst<W = W>>(fst: &F
     let num_states = fst.num_states();
     let mut state_to_initial_class: Vec<StateId> = vec![0; num_states];
     {
-        let mut hash_to_class_nonfinal = HashMap::<usize, StateId>::new();
-        let mut hash_to_class_final = HashMap::<usize, StateId>::new();
-        let hasher = StateILabelHasher { fst };
+        let mut hash_to_class_nonfinal = HashMap::<Vec<usize>, StateId>::new();
+        let mut hash_to_class_final = HashMap::<Vec<usize>, StateId>::new();
 
         for s in 0..num_states {
-            let hash = hasher.hash(s);
+
+            let ilabels : Vec<usize> = fst.arcs_iter(s).unwrap().map(|arc| arc.ilabel).collect();
 
             let this_map = if fst.is_final(s) {
                 &mut hash_to_class_final
@@ -406,10 +403,10 @@ fn pre_partition<W: Semiring, F: MutableFst<W = W> + ExpandedFst<W = W>>(fst: &F
             };
 
             // TODO: Find a way to avoid the double lookup
-            if this_map.contains_key(&hash) {
-                state_to_initial_class[s] = this_map[&hash];
+            if this_map.contains_key(&ilabels) {
+                state_to_initial_class[s] = this_map[&ilabels];
             } else {
-                this_map.insert(hash, next_class);
+                this_map.insert(ilabels, next_class);
                 state_to_initial_class[s] = next_class;
                 next_class += 1;
             }
@@ -511,31 +508,6 @@ impl<'a, W: Semiring> ArcsIterCollected<'a, W> {
 
     fn next(&mut self) {
         self.idx += 1;
-    }
-}
-
-impl<'a, F> StateILabelHasher<'a, F>
-where
-    F: MutableFst + ExpandedFst,
-{
-    fn hash(&self, s: StateId) -> usize {
-        // C++ crap
-        let p1: usize = 7603;
-        let p2: usize = 433024223;
-        let mut result = p2;
-        let mut current_ilabel = -1;
-
-        for arc in self.fst.arcs_iter(s).unwrap() {
-            let this_ilabel = arc.ilabel;
-            std::dbg!(this_ilabel);
-            std::dbg!(result);
-            if this_ilabel as i32 != current_ilabel {
-                result = p1 * result + this_ilabel;
-                current_ilabel = this_ilabel as i32;
-            }
-        }
-
-        return result;
     }
 }
 
