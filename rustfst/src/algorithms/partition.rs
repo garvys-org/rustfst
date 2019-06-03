@@ -130,8 +130,6 @@ impl Partition {
         } else {
             let new_class_id = self.classes.len();
             self.classes.resize_with(self.classes.len() + 1, Class::new);
-            //            old_class = self.classes[class_id];
-            //            new_class = self.classes[new_class_id];
             // The new_class will have the values from the constructor.
             if no_size < yes_size {
                 // Moves the 'no' subset to new class ('no' subset).
@@ -152,7 +150,6 @@ impl Partition {
                 self.classes[class_id].yes_head = -1;
             }
 
-            //            auto elements = &(elements_[0]);
             // Updates the 'class_id' of all the elements we moved.
             let mut e = self.classes[new_class_id].no_head;
             loop {

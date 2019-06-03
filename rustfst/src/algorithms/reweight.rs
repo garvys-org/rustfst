@@ -32,9 +32,6 @@ where
         return Ok(());
     }
 
-//    std::dbg!(&potentials);
-//    std::dbg!(&fst);
-
     for state in 0..num_states {
         // This handles elements past the end of the potentials array.
         if state >= potentials.len() {
@@ -71,7 +68,6 @@ where
                     (d_s.times(&arc.weight)?).divide(&d_ns, DivideType::DivideRight)?
                 }
             };
-//            std::dbg!(&arc.weight);
         }
     }
 
@@ -102,15 +98,12 @@ where
 
         if !d_s.is_one() && !d_s.is_zero() {
             for arc in fst.arcs_iter_mut(start_state)? {
-//                std::dbg!(&d_s);
-//                std::dbg!(&arc.weight);
                 arc.weight = match reweight_type {
                     ReweightType::ReweightToInitial => d_s.times(&arc.weight)?,
                     ReweightType::ReweightToFinal => {
                         (F::W::one().divide(&d_s, DivideType::DivideRight)?).times(&arc.weight)?
                     }
                 };
-//                std::dbg!(&arc.weight);
             }
 
             if let Some(final_weight) = fst.final_weight(start_state) {
@@ -125,8 +118,6 @@ where
             }
         }
     }
-
-//    std::dbg!(&fst);
 
     Ok(())
 }

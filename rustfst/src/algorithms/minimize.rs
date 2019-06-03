@@ -58,19 +58,12 @@ where
         // Weighted transducer
         let mut to_gallic = ToGallicConverter {};
         let mut gfst: VectorFst<GallicWeightLeft<F::W>> = weight_convert(ifst, &mut to_gallic)?;
-//        std::dbg!(&gfst);
         push_weights(&mut gfst, ReweightType::ReweightToInitial)?;
-//        std::dbg!(&gfst);
         let mut quantize_mapper = QuantizeMapper {};
         arc_map(&mut gfst, &mut quantize_mapper)?;
-//                std::dbg!(&gfst);
         let encode_table = encode(&mut gfst, true, true)?;
         acceptor_minimize(&mut gfst, allow_acyclic_minimization)?;
-        //        dbg!(gfst.num_states());
-        //        dbg!(&gfst);
         decode(&mut gfst, encode_table)?;
-        //        dbg!(gfst.num_states());
-//                std::dbg!(&gfst);
         let factor_opts: FactorWeightOptions = FactorWeightOptions {
             delta: KDELTA,
             mode: FactorWeightType::FACTOR_FINAL_WEIGHTS | FactorWeightType::FACTOR_ARC_WEIGHTS,
@@ -81,27 +74,18 @@ where
         };
         let fwfst: VectorFst<_> =
             factor_weight::<_, _, GallicFactorLeft<F::W>>(&gfst, factor_opts)?;
-        //        println!("lol");
-        //        dbg!(fwfst.num_states());
-        //        dbg!(&fwfst);
         let mut from_gallic = FromGallicConverter {
             superfinal_label: EPS_LABEL,
         };
         *ifst = weight_convert(&fwfst, &mut from_gallic)?;
-        //        dbg!(ifst.num_states());
-        //        dbg!(ifst);
         Ok(())
     } else if props.contains(FstProperties::WEIGHTED) {
         // Weighted acceptor
         push_weights(ifst, ReweightType::ReweightToInitial)?;
-        //        println!("{}", ifst);
         let mut quantize_mapper = QuantizeMapper {};
         arc_map(ifst, &mut quantize_mapper)?;
-        //        println!("{}", ifst);
         let encode_table = encode(ifst, true, true)?;
-        //        println!("{}", ifst);
         acceptor_minimize(ifst, allow_acyclic_minimization)?;
-        //        println!("{}", ifst);
         decode(ifst, encode_table)
     } else {
         // Unweighted acceptor
@@ -124,38 +108,27 @@ where
 
     connect(ifst)?;
 
-    //    println!("after connect \n{}", &ifst);
-
     if ifst.num_states() == 0 {
         return Ok(());
     }
 
     if allow_acyclic_minimization && props.contains(FstProperties::ACYCLIC) {
-        //        println!("Acyclic minimization");
         // Acyclic minimization
         arc_sort(ifst, ilabel_compare)?;
         let minimizer = AcyclicMinimizer::new(ifst)?;
         merge_states(minimizer.get_partition(), ifst)?;
-    //        println!("{}", ifst);
     } else {
-        // Cyclic minimization
-//        let minimizer = CyclicMinimizer::new(ifst)?;
         let p = cyclic_minimize(ifst)?;
         merge_states(p, ifst)?;
     }
 
-    //    dbg!(ifst.num_states());
-
     let mut mapper = ArcUniqueMapper {};
     state_map(ifst, &mut mapper)?;
-
-    //    dbg!(ifst.num_states());
 
     Ok(())
 }
 
 fn merge_states<F: MutableFst + ExpandedFst>(partition: Partition, fst: &mut F) -> Fallible<()> {
-    //    std::dbg!(&partition);
 
     let mut state_map = vec![None; partition.num_classes()];
     for i in 0..partition.num_classes() {
