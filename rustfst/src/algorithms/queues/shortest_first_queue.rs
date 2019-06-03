@@ -21,8 +21,8 @@ impl<W: Semiring, C: Clone + Fn(&W, &W) -> Fallible<bool>> StateWeightCompare<W,
         Self { less, weights }
     }
 
-    pub fn compare(&self, s1: &StateId, s2: &StateId) -> Fallible<bool> {
-        (self.less)(&self.weights[*s1], &self.weights[*s2])
+    pub fn compare(&self, s1: StateId, s2: StateId) -> Fallible<bool> {
+        (self.less)(&self.weights[s1], &self.weights[s2])
     }
 }
 
@@ -87,7 +87,7 @@ impl NaturalShortestFirstQueue {
     pub fn new<W: 'static + Semiring>(weights: Vec<W>) -> Self {
         let a = StateWeightCompare::new(weights, natural_less);
         let heap = ShortestFirstQueue::new(move |v1, v2| {
-            if a.compare(v1, v2).unwrap() {
+            if a.compare(*v1, *v2).unwrap() {
                 Ordering::Less
             } else {
                 Ordering::Greater

@@ -66,8 +66,8 @@ impl AutoQueue {
             } else {
                 // AutoQueue: using SCC meta-discipline
                 let mut queues: Vec<Box<Queue>> = Vec::with_capacity(n_sccs);
-                for i in 0..n_sccs {
-                    match queue_types[i] {
+                for queue_type in queue_types.iter().take(n_sccs) {
+                    match queue_type {
                         QueueType::TrivialQueue => queues.push(Box::new(TrivialQueue::new())),
                         QueueType::ShortestFirstQueue => queues.push(Box::new(
                             NaturalShortestFirstQueue::new(distance.unwrap().clone()),
@@ -85,7 +85,7 @@ impl AutoQueue {
 
     pub fn scc_queue_type<F: MutableFst + ExpandedFst, C: Fn(&F::W, &F::W) -> Fallible<bool>>(
         fst: &F,
-        sccs: &Vec<usize>,
+        sccs: &[usize],
         compare: Option<C>,
         queue_types: &mut Vec<QueueType>,
         all_trivial: &mut bool,

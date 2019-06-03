@@ -51,7 +51,7 @@ fn extract_gallic<W: Semiring>(gw: &GallicWeight<W>) -> Fallible<(W, Label)> {
     if gw.len() > 1 {
         bail!("error")
     }
-    if gw.len() == 0 {
+    if gw.is_empty() {
         Ok((W::zero(), EPS_LABEL))
     } else {
         let back_w = gw.value();
