@@ -29,6 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement `ShortestDistance` algorithm.
 - Implememt `ShortestPaths` algorithm.
 - Add associated type `ReverseWeight` in the `Semiring` trait denoting the type of the weight reversed.
+- Added the crate `rustfst-cli` as a CLI for the lib. It supports the subcommands:
+    - `minimize` for the minimization
+    - `connect` for the connect algorithm
+- Added a prelude to `rustfst` to reduce the number of imports necessary when using the lib.
 
 ### Changed
 - Before test cases were generated with pynini (python wrapper around openfst). Now they are directly generated with OpenFST (c++). Allows to test operations that are not wrapped.
