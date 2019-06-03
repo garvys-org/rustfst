@@ -23,6 +23,7 @@ fn ln_pos_exp(x: f32) -> f32 {
 
 impl Semiring for LogWeight {
     type Type = f32;
+    type ReverseWeight = LogWeight;
 
     fn zero() -> Self {
         Self {
@@ -74,6 +75,10 @@ impl Semiring for LogWeight {
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
         self.value.0 = value
+    }
+
+    fn reverse(&self) -> Fallible<Self::ReverseWeight> {
+        Ok(*self)
     }
 
     fn properties() -> SemiringProperties {

@@ -70,6 +70,7 @@
 //!
 //! Not all algorithms are (yet) implemented, this is still work in progress.
 //!
+//!
 
 #[warn(missing_docs)]
 #[cfg(test)]
@@ -86,8 +87,18 @@ extern crate serde;
 #[cfg(test)]
 extern crate serde_json;
 
-mod symbol_table;
+pub use crate::drawing_config::DrawingConfig;
+pub use crate::fst_path::FstPath;
 pub use crate::symbol_table::SymbolTable;
+
+pub use self::arc::Arc;
+
+#[cfg(test)]
+mod tests_openfst;
+
+pub(crate) static NO_STATE_ID: i32 = -1;
+
+mod symbol_table;
 
 /// Type used for the input label and output label of an arc in a wFST -> usize
 pub type Label = usize;
@@ -110,8 +121,6 @@ pub mod algorithms;
 
 /// Implementation of the transitions inside a wFST.
 mod arc;
-pub use self::arc::Arc;
-
 /// Provides the `FstProperties` struct and some utils functions around it.
 /// Useful to assert some properties on a Fst.
 pub mod fst_properties;
@@ -127,12 +136,8 @@ pub mod semirings;
 pub(crate) mod test_data;
 
 mod drawing_config;
-pub use crate::drawing_config::DrawingConfig;
-
 /// Implementation of a successful path inside a wFST.
 mod fst_path;
-pub use crate::fst_path::FstPath;
-
 mod parsers;
 
 /// A representable float near .001. (Used in Quantize)

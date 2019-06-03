@@ -8,6 +8,7 @@
 #include "fst/vector-fst.h"
 #include "fst/script/print.h"
 #include "fst/fst.h"
+#include "fst/minimize.h"
 
 #include "fst_000/fst_000.h"
 #include "fst_001/fst_001.h"
@@ -17,6 +18,9 @@
 #include "fst_005/fst_005.h"
 #include "fst_006/fst_006.h"
 #include "fst_007/fst_007.h"
+#include "fst_008/fst_008.h"
+#include "fst_009/fst_009.h"
+#include "fst_010/fst_010.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -75,14 +79,20 @@ void compute_fst_connect(const F& raw_fst, json& j) {
 
 template<class F>
 void compute_fst_shortest_distance(const F& raw_fst, json& j) {
-    std::vector<typename F::Weight> v;
-    fst::ShortestDistance(raw_fst, &v);
-    std::vector<float> vf(v.size());
-    for(int i = 0; i < v.size(); i++) {
-        // TODO: Probable issue with infinity
-        vf[i] = v[i].Value();
+    j["shortest_distance"] = {};
+    std::vector<bool> v = {true, false};
+    for(bool reverse: v) {
+        std::vector<typename F::Weight> distance;
+        fst::ShortestDistance(raw_fst, &distance, reverse);
+        std::vector<string> distance_s;
+        for(auto e: distance) {
+            distance_s.push_back(std::to_string(e.Value()));
+        }
+        json j2;
+        j2["reverse"] = reverse;
+        j2["result"] = distance_s;
+        j["shortest_distance"].push_back(j2);
     }
-    j["shortest_distance"]["result"] = vf;
 }
 
 template<class F>
@@ -204,7 +214,8 @@ void compute_fst_topsort(const F& raw_fst, json& j) {
     auto fst_out = *raw_fst.Copy();
     fst::ArcSort(&fst_out, fst::ILabelCompare<typename F::Arc>());
     fst::TopSort(&fst_out);
-    j["topsort"]["result"] = fst_to_string(fst_out);
+    bool error = prop_to_bool(fst_out.Properties(fst::kError, true), fst::kError);
+    j["topsort"]["result"] = error ? "error" : fst_to_string(fst_out);
 }
 
 template<class F>
@@ -245,6 +256,163 @@ void compute_fst_properties(const F& raw_fst, json& j) {
     j["fst_properties"]["unweighted_cycles"] = prop_to_bool(a, fst::kUnweightedCycles);
 
     assert(j["fst_properties"].size() == 32);
+}
+
+template<class F>
+void compute_fst_minimization(const F& raw_fst, json& j) {
+    j["minimize"] = {};
+    std::vector<bool> v = {true, false};
+    for(bool allow_nondet: v) {
+        auto fst_out = *raw_fst.Copy();
+        fst::Minimize(&fst_out, (fst::VectorFst<typename F::Arc>*)nullptr, fst::kShortestDelta, allow_nondet);
+        bool error = prop_to_bool(fst_out.Properties(fst::kError, true), fst::kError);
+
+        json j2;
+        j2["allow_nondet"] = allow_nondet;
+        j2["result"] = error ? "error": fst_to_string(fst_out);
+
+        j["minimize"].push_back(j2);
+    }
+}
+
+template<class F>
+void compute_fst_shortest_path(const F& raw_fst, json& j) {
+    j["shortest_path"] = {};
+    std::vector<bool> v = {true, false};
+    for(int n = 1; n < 10; n++) {
+        for(bool unique: v) {
+            fst::VectorFst<typename F::Arc> fst_out;
+            fst::ShortestPath(raw_fst, &fst_out, n, unique);
+            bool error = prop_to_bool(fst_out.Properties(fst::kError, true), fst::kError);
+            json j2;
+
+            j2["nshortest"] = n;
+            j2["unique"] = unique;
+            j2["result"] = error ? "error": fst_to_string(fst_out);
+
+            j["shortest_path"].push_back(j2);
+        }
+    }
+}
+
+template<class F, fst::GallicType G>
+void _compute_fst_gallic_encode_decode(const F& raw_fst, json& j, const string& gtype_s) {
+    fst::ToGallicMapper<typename F::Arc, G> to_gallic;
+    fst::FromGallicMapper<typename F::Arc, G> from_gallic(0);
+
+    fst::VectorFst<fst::GallicArc<typename F::Arc, G>> fst_1;
+    fst::ArcMap(raw_fst, &fst_1, &to_gallic);
+    F fst_out;
+    fst::ArcMap(fst_1, &fst_out, &from_gallic);
+
+    json j2;
+    j2["gallic_type"] = gtype_s;
+    j2["result"] = fst_to_string(fst_out);
+    j["gallic_encode_decode"].push_back(j2);
+}
+
+template<class F>
+void compute_fst_gallic_encode_decode(const F& raw_fst, json& j) {
+    // Encode and decode with a gallic mapper
+    j["gallic_encode_decoder"] = {};
+    _compute_fst_gallic_encode_decode<F, fst::GALLIC_LEFT>(raw_fst, j, "gallic_left");
+    _compute_fst_gallic_encode_decode<F, fst::GALLIC_RIGHT>(raw_fst, j, "gallic_right");
+    _compute_fst_gallic_encode_decode<F, fst::GALLIC_RESTRICT>(raw_fst, j, "gallic_restrict");
+    _compute_fst_gallic_encode_decode<F, fst::GALLIC_MIN>(raw_fst, j, "gallic_min");
+    _compute_fst_gallic_encode_decode<F, fst::GALLIC>(raw_fst, j, "gallic");
+}
+
+template<class F>
+void compute_fst_factor_weight_identity(const F& raw_fst, json& j) {
+    std::vector<bool> v = {false, true};
+    j["factor_weight_identity"] = {};
+
+    for(bool factor_arc_weights: v) {
+        for(bool factor_final_weights: v) {
+            uint32 mode;
+            if (factor_arc_weights)
+                mode |= fst::kFactorArcWeights;
+            if (factor_final_weights)
+                mode |= fst::kFactorFinalWeights;
+            if (!factor_arc_weights && !factor_final_weights) {
+                continue;
+            }
+
+            fst::FactorWeightOptions<typename F::Arc> opts(fst::kDelta, mode);
+            fst::FactorWeightFst<
+                typename F::Arc,
+                typename fst::IdentityFactor<
+                    typename F::Weight
+                >
+            > factored_fst(raw_fst, opts);
+            fst::VectorFst<typename F::Arc> fst_out(factored_fst);
+
+            json j2;
+            j2["factor_final_weights"] = factor_final_weights;
+            j2["factor_arc_weights"] = factor_arc_weights;
+            j2["result"] = fst_to_string(fst_out);
+            j["factor_weight_identity"].push_back(j2);
+        }
+    }
+}
+
+template<class F, fst::GallicType G>
+void _compute_fst_factor_weight_gallic(const F& raw_fst, json& j, const string& gtype_s) {
+
+    std::vector<bool> v = {true, false};
+
+    for(bool factor_arc_weights: v) {
+        for(bool factor_final_weights: v) {
+            uint32 mode;
+            if (factor_arc_weights)
+                mode |= fst::kFactorArcWeights;
+            if (factor_final_weights)
+                mode |= fst::kFactorFinalWeights;
+            if (!factor_arc_weights && !factor_final_weights) {
+                continue;
+            }
+            fst::ToGallicMapper<typename F::Arc, G> to_gallic;
+            fst::FromGallicMapper<typename F::Arc, G> from_gallic(0);
+
+            /// To Gallic
+            fst::VectorFst<fst::GallicArc<typename F::Arc, G>> fst_1;
+            fst::ArcMap(raw_fst, &fst_1, &to_gallic);
+
+            // Factor Weight
+            fst::FactorWeightOptions<
+                fst::GallicArc<typename F::Arc, G>
+            > opts(fst::kDelta, mode);
+            fst::FactorWeightFst<
+                fst::GallicArc<typename F::Arc, G>,
+                typename fst::GallicFactor<
+                    int, typename F::Weight, G
+                >
+            > factored_fst(fst_1, opts);
+            fst::VectorFst<fst::GallicArc<typename F::Arc, G>> fst_2(factored_fst);
+
+            // From Gallic
+            F fst_out;
+            fst::ArcMap(fst_2, &fst_out, &from_gallic);
+
+            json j2;
+            j2["gallic_type"] = gtype_s;
+            j2["factor_final_weights"] = factor_final_weights;
+            j2["factor_arc_weights"] = factor_arc_weights;
+            j2["result"] = fst_to_string(fst_out);
+            j["factor_weight_gallic"].push_back(j2);
+        }
+    }
+}
+
+template<class F>
+void compute_fst_factor_weight_gallic(const F& raw_fst, json& j) {
+    // Encode and decode with a gallic mapper
+    j["factor_weight_gallic"] = {};
+    _compute_fst_factor_weight_gallic<F, fst::GALLIC_LEFT>(raw_fst, j, "gallic_left");
+    _compute_fst_factor_weight_gallic<F, fst::GALLIC_RIGHT>(raw_fst, j, "gallic_right");
+    _compute_fst_factor_weight_gallic<F, fst::GALLIC_RESTRICT>(raw_fst, j, "gallic_restrict");
+    _compute_fst_factor_weight_gallic<F, fst::GALLIC_MIN>(raw_fst, j, "gallic_min");
+    _compute_fst_factor_weight_gallic<F, fst::GALLIC>(raw_fst, j, "gallic");
 }
 
 template<class A>
@@ -319,6 +487,21 @@ void compute_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
     std::cout << "Properties" << std::endl;
     compute_fst_properties(raw_fst, data);
 
+    std::cout << "Minimization" << std::endl;
+    compute_fst_minimization(raw_fst, data);
+
+    std::cout << "ShortestPath" << std::endl;
+    compute_fst_shortest_path(raw_fst, data);
+
+    std::cout << "Gallic Encode Decode" << std::endl;
+    compute_fst_gallic_encode_decode(raw_fst, data);
+
+    std::cout << "Factor Weight Identity" << std::endl;
+    compute_fst_factor_weight_identity(raw_fst, data);
+
+    std::cout << "Factor Weight Gallic" << std::endl;
+    compute_fst_factor_weight_gallic(raw_fst, data);
+
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;
 
@@ -335,4 +518,7 @@ int main() {
     compute_data(compute_fst_005(), "fst_005");
     compute_data(compute_fst_006(), "fst_006");
     compute_data(compute_fst_007(), "fst_007");
+    compute_data(compute_fst_008(), "fst_008");
+    compute_data(compute_fst_009(), "fst_009");
+    compute_data(compute_fst_010(), "fst_010");
 }

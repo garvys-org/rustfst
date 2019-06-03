@@ -12,12 +12,27 @@ use crate::algorithms::cache::CacheImpl;
 use crate::arc::Arc;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
+use crate::KDELTA;
 use crate::{Label, StateId};
 
 bitflags! {
     pub struct FactorWeightType: u32 {
         const FACTOR_FINAL_WEIGHTS = 0b01;
         const FACTOR_ARC_WEIGHTS = 0b10;
+    }
+}
+
+#[cfg(test)]
+impl FactorWeightType {
+    pub fn from_bools(factor_final_weights: bool, factor_arc_weights: bool) -> FactorWeightType {
+        match (factor_final_weights, factor_arc_weights) {
+            (true, true) => {
+                FactorWeightType::FACTOR_FINAL_WEIGHTS | FactorWeightType::FACTOR_ARC_WEIGHTS
+            }
+            (true, false) => FactorWeightType::FACTOR_FINAL_WEIGHTS,
+            (false, true) => FactorWeightType::FACTOR_ARC_WEIGHTS,
+            (false, false) => Self::empty(),
+        }
     }
 }
 
@@ -34,6 +49,20 @@ pub struct FactorWeightOptions {
     pub increment_final_ilabel: bool,
     /// When factoring final w' results in > 1 arcs at state, increments olabels to make distinct ?
     pub increment_final_olabel: bool,
+}
+
+impl FactorWeightOptions {
+    #[allow(unused)]
+    pub fn new(mode: FactorWeightType) -> FactorWeightOptions {
+        FactorWeightOptions {
+            delta: KDELTA,
+            mode,
+            final_ilabel: 0,
+            final_olabel: 0,
+            increment_final_ilabel: false,
+            increment_final_olabel: false,
+        }
+    }
 }
 
 pub trait FactorIterator<W: Semiring>: Iterator<Item = (W, W)> {
@@ -167,7 +196,7 @@ where
             for arc in self.fst.arcs_iter(old_state)? {
                 let weight = elt.weight.times(&arc.weight).unwrap();
                 let factor_it = FI::new(weight.clone());
-                if !self.factor_arc_weights() && factor_it.done() {
+                if !self.factor_arc_weights() || factor_it.done() {
                     let dest = self.find_state(&Element::new(Some(arc.nextstate), F::W::one()));
                     self.cache_impl
                         .push_arc(state, Arc::new(arc.ilabel, arc.olabel, weight, dest))?;

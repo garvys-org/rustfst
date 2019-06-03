@@ -15,10 +15,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement `BinaryDeserializer` for VectorFst i.e VectorFst binary deserialization is now supported.
 - Add `BinarySerializer` trait. Should bbe user to serialize an Fst in binary format compatible with OpenFST.
 - Implement `BinarySerializer` for VectorFst i.e VectorFst binary serialization is now supported.
+- Implement `Minimize` algorithm.
+- Implement every queue types supported by OpenFST following the `Queue` trait :
+    - `TrivialQueue`
+    - `FifoQueue`
+    - `LifoQueue`
+    - `ShortestFirstQueue`
+    - `TopOrderQueue`
+    - `StateOrderQueue`
+    - `SccQueue`
+    - `AutoQueue`
+    - `OtherQueue`
+- Implement `ShortestDistance` algorithm.
+- Implememt `ShortestPaths` algorithm.
+- Add associated type `ReverseWeight` in the `Semiring` trait denoting the type of the weight reversed.
 
 ### Changed
 - Before test cases were generated with pynini (python wrapper around openfst). Now they are directly generated with OpenFST (c++). Allows to test operations that are not wrapped.
 - Test cases are now generated directly in the CI by buiding and running openfst which allows to avoid pushing data on the repo.
+- Fix issue in FactorWeight algorithm when `factor_arc_weights` was toggle on.
+- `reverse` function has now the same API as OpenFST returning an Fst of `ReverseWeight`s.
+- `reverse` methods for every Semiring now returns `ReverseWeight`.
+- Fix `reverse` of `GallicWeight`.
+
+
+### Removed
+- Crate `rustfst-tests-openfst` has been removed and moved to the `rustfst` as unit tests. 
 
 ## [0.3.0] - 2019-04-03
 

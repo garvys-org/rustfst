@@ -108,13 +108,13 @@ impl<W: 'static + Semiring<Type = f32>> BinaryDeserializer for VectorFst<W> {
         let (_, parsed_fst) = complete_parse_fst(&data)
             .map_err(|_| format_err!("Error while parsing binary VectorFst"))?;
 
-        let start_state = if parsed_fst.header.start == NO_STATE_ID as i64 {
+        let start_state = if parsed_fst.header.start == i64::from(NO_STATE_ID) {
             None
         } else {
             Some(parsed_fst.header.start as StateId)
         };
 
-        let num_states = if parsed_fst.header.num_states == NO_STATE_ID as i64 {
+        let num_states = if parsed_fst.header.num_states == i64::from(NO_STATE_ID) {
             0
         } else {
             parsed_fst.header.num_states as usize

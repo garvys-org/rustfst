@@ -4,6 +4,7 @@ mod boolean_weight;
 mod gallic_weight;
 mod integer_weight;
 mod log_weight;
+#[allow(unused)]
 mod power_weight;
 mod probability_weight;
 mod product_weight;
@@ -18,7 +19,8 @@ pub use self::gallic_weight::{
 };
 pub use self::integer_weight::IntegerWeight;
 pub use self::log_weight::LogWeight;
-pub use self::power_weight::PowerWeight;
+#[allow(unused)]
+pub(crate) use self::power_weight::PowerWeight;
 pub use self::probability_weight::ProbabilityWeight;
 pub use self::product_weight::ProductWeight;
 pub use self::semiring::{

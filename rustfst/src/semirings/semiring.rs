@@ -30,9 +30,12 @@ bitflags! {
 /// Thus, a semiring is a ring that may lack negation.
 /// For more information : https://cs.nyu.edu/~mohri/pub/hwa.pdf
 pub trait Semiring:
-    Clone + PartialEq + PartialOrd + Debug + Default + Display + AsRef<Self> + Hash + Eq
+    Clone + PartialEq + PartialOrd + Debug + Default + Display + AsRef<Self> + Hash + Eq + Sized
+//where
+//    <<Self as Semiring>::ReverseSemiring as Semiring>::ReverseSemiring: Semiring<Type=<Self as Semiring>::Type>
 {
     type Type;
+    type ReverseWeight: Semiring;
 
     fn zero() -> Self;
     fn one() -> Self;
@@ -61,6 +64,7 @@ pub trait Semiring:
     fn is_zero(&self) -> bool {
         *self == Self::zero()
     }
+    fn reverse(&self) -> Fallible<Self::ReverseWeight>;
 
     fn properties() -> SemiringProperties;
 }

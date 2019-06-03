@@ -11,19 +11,25 @@ mod encode;
 mod factor_weight;
 mod inversion;
 mod isomorphic;
+mod minimize;
+mod partition;
 mod projection;
+mod queue;
 mod relabel_pairs;
 mod reverse;
 mod reweight;
 mod rm_epsilon;
 mod rm_final_epsilon;
-mod single_source_shortest_distance;
+mod shortest_distance;
+mod shortest_path;
 mod state_map;
 mod state_sort;
 mod top_sort;
 mod union;
 mod weight_convert;
 mod weight_pushing;
+
+pub mod queues;
 
 /// Function objects to restrict which arcs are traversed in an FST.
 pub mod arc_filters;
@@ -57,18 +63,21 @@ pub use self::{
     composition::compose,
     concat::concat,
     connect::connect,
-    determinize::{determinize, DeterminizeType},
+    determinize::{determinize, determinize_with_distance, DeterminizeType},
     dfs::{dfs, find_strongly_connected_components},
     encode::{decode, encode},
     inversion::invert,
     isomorphic::isomorphic,
+    minimize::minimize,
     projection::{project, ProjectType},
+    queue::{Queue, QueueType},
     relabel_pairs::relabel_pairs,
     reverse::reverse,
     reweight::{reweight, ReweightType},
     rm_epsilon::rm_epsilon,
     rm_final_epsilon::rm_final_epsilon,
-    single_source_shortest_distance::{shortest_distance, single_source_shortest_distance},
+    shortest_distance::{shortest_distance, single_source_shortest_distance},
+    shortest_path::shortest_path,
     state_map::{state_map, StateMapper},
     state_sort::state_sort,
     top_sort::top_sort,
@@ -81,3 +90,6 @@ pub use self::{
 pub(crate) use self::factor_weight::{
     factor_weight, FactorIterator, FactorWeightOptions, FactorWeightType,
 };
+
+#[allow(unused)]
+pub(crate) use self::partition::Partition;

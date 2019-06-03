@@ -4,7 +4,6 @@ use std::marker::PhantomData;
 use std::slice::Iter as IterSlice;
 
 use bimap::BiHashMap;
-
 use failure::Fallible;
 
 use crate::algorithms::cache::CacheImpl;
@@ -164,7 +163,7 @@ impl<W: Semiring> DeterminizeArc<W> {
     }
 }
 
-struct DeterminizeFsaImpl<'a, F: Fst, CD: CommonDivisor<F::W>>
+struct DeterminizeFsaImpl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>>
 where
     F::W: WeaklyDivisibleSemiring + WeightQuantize,
 {
@@ -172,20 +171,28 @@ where
     cache_impl: CacheImpl<F::W>,
     state_table: BiHashMap<StateId, DeterminizeStateTuple<F::W>>,
     ghost: PhantomData<CD>,
+    in_dist: Option<&'b Vec<F::W>>,
+    out_dist: Vec<F::W>,
 }
 
-impl<'a, F: Fst, CD: CommonDivisor<F::W>> DeterminizeFsaImpl<'a, F, CD>
+impl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>> DeterminizeFsaImpl<'a, 'b, F, CD>
 where
     F::W: WeaklyDivisibleSemiring + WeightQuantize,
 {
-    pub fn new(fst: &'a F) -> Self {
-        Self {
+    pub fn new(fst: &'a F, in_dist: Option<&'b Vec<F::W>>) -> Fallible<Self> {
+        if !fst.is_acceptor() {
+            bail!("DeterminizeFsaImpl : expected acceptor as argument");
+        }
+        Ok(Self {
             fst,
             cache_impl: CacheImpl::new(),
             state_table: BiHashMap::new(),
             ghost: PhantomData,
-        }
+            in_dist,
+            out_dist: vec![],
+        })
     }
+
     pub fn arcs_iter(&mut self, state: StateId) -> Fallible<IterSlice<Arc<F::W>>> {
         if !self.cache_impl.expanded(state) {
             self.expand(state)?;
@@ -193,12 +200,12 @@ where
         self.cache_impl.arcs_iter(state)
     }
 
-    pub fn start(&mut self) -> Option<StateId> {
+    pub fn start(&mut self) -> Fallible<Option<StateId>> {
         if !self.cache_impl.has_start() {
-            let start = self.compute_start();
+            let start = self.compute_start()?;
             self.cache_impl.set_start(start);
         }
-        self.cache_impl.start().unwrap()
+        Ok(self.cache_impl.start().unwrap())
     }
 
     pub fn final_weight(&mut self, state: StateId) -> Fallible<Option<&F::W>> {
@@ -209,16 +216,16 @@ where
         self.cache_impl.final_weight(state)
     }
 
-    fn compute_start(&mut self) -> Option<StateId> {
+    fn compute_start(&mut self) -> Fallible<Option<StateId>> {
         if let Some(start_state) = self.fst.start() {
             let elt = DeterminizeElement::new(start_state, F::W::one());
             let tuple = DeterminizeStateTuple {
                 subset: WeightedSubset::from_vec(vec![elt]),
                 filter_state: start_state,
             };
-            return Some(self.find_state(&tuple));
+            return Ok(Some(self.find_state(&tuple)?));
         }
-        None
+        Ok(None)
     }
 
     fn compute_final(&mut self, state: StateId) -> Fallible<Option<F::W>> {
@@ -284,7 +291,7 @@ where
             det_arc.label,
             det_arc.label,
             det_arc.weight.clone(),
-            self.find_state(&det_arc.dest_tuple),
+            self.find_state(&det_arc.dest_tuple)?,
         );
         self.cache_impl.push_arc(state, arc)
     }
@@ -324,19 +331,39 @@ where
         Ok(())
     }
 
-    fn find_state(&mut self, tuple: &DeterminizeStateTuple<F::W>) -> StateId {
+    fn find_state(&mut self, tuple: &DeterminizeStateTuple<F::W>) -> Fallible<StateId> {
         if !self.state_table.contains_right(tuple) {
             let n = self.state_table.len();
             self.state_table.insert(n, tuple.clone());
         }
-        *self.state_table.get_by_right(tuple).unwrap()
+        let s = *self.state_table.get_by_right(tuple).unwrap();
+        if let Some(_in_dist) = self.in_dist.as_ref() {
+            if self.out_dist.len() <= s {
+                self.out_dist.push(self.compute_distance(&tuple.subset)?);
+            }
+        }
+        Ok(s)
+    }
+
+    fn compute_distance(&self, subset: &WeightedSubset<F::W>) -> Fallible<F::W> {
+        let mut outd = F::W::zero();
+        let weight_zero = F::W::zero();
+        for element in subset.iter() {
+            let ind = if element.state < self.in_dist.as_ref().unwrap().len() {
+                &self.in_dist.as_ref().unwrap()[element.state]
+            } else {
+                &weight_zero
+            };
+            outd.plus_assign(element.weight.times(ind)?)?;
+        }
+        Ok(outd)
     }
 
     pub fn compute<F2: MutableFst<W = F::W> + ExpandedFst<W = F::W>>(&mut self) -> Fallible<F2>
     where
         F::W: 'static,
     {
-        let start_state = self.start();
+        let start_state = self.start()?;
         let mut fst_out = F2::new();
         if start_state.is_none() {
             return Ok(fst_out);
@@ -369,6 +396,31 @@ where
         }
         Ok(fst_out)
     }
+
+    pub fn compute_with_distance<F2: MutableFst<W = F::W> + ExpandedFst<W = F::W>>(
+        &mut self,
+    ) -> Fallible<(F2, Vec<F2::W>)>
+    where
+        F::W: 'static,
+    {
+        let dfst = self.compute()?;
+        let out_dist = self.out_dist.clone();
+        Ok((dfst, out_dist))
+    }
+}
+
+pub fn determinize_with_distance<W, F1, F2>(ifst: &F1, in_dist: &Vec<W>) -> Fallible<(F2, Vec<W>)>
+where
+    W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
+    F1: ExpandedFst<W = W>,
+    F2: MutableFst<W = W> + ExpandedFst<W = W>,
+{
+    if !W::properties().contains(SemiringProperties::LEFT_SEMIRING) {
+        bail!("determinize_fsa : weight must be left distributive")
+    }
+    let mut det_fsa_impl: DeterminizeFsaImpl<_, DefaultCommonDivisor> =
+        DeterminizeFsaImpl::new(ifst, Some(in_dist))?;
+    det_fsa_impl.compute_with_distance()
 }
 
 pub fn determinize_fsa<W, F1, F2, CD>(fst_in: &F1) -> Fallible<F2>
@@ -381,7 +433,7 @@ where
     if !W::properties().contains(SemiringProperties::LEFT_SEMIRING) {
         bail!("determinize_fsa : weight must be left distributive")
     }
-    let mut det_fsa_impl: DeterminizeFsaImpl<_, CD> = DeterminizeFsaImpl::new(fst_in);
+    let mut det_fsa_impl: DeterminizeFsaImpl<_, CD> = DeterminizeFsaImpl::new(fst_in, None)?;
     det_fsa_impl.compute()
 }
 
@@ -454,10 +506,11 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::arc::Arc;
     use crate::fst_impls::VectorFst;
     use crate::semirings::TropicalWeight;
+
+    use super::*;
 
     #[test]
     fn test_determinize() -> Fallible<()> {

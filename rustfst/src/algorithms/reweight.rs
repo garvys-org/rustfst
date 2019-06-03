@@ -4,19 +4,12 @@ use crate::fst_traits::{ExpandedFst, FinalStatesIterator, Fst, MutableFst};
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
 
 /// Different types of reweighting.
+#[derive(PartialOrd, PartialEq)]
 pub enum ReweightType {
     /// Reweight toward initial state.
     ReweightToInitial,
     /// Reweight toward final states.
     ReweightToFinal,
-}
-
-macro_rules! state_to_dist {
-    ($state: expr, $dist: expr) => {
-        $dist
-            .get($state)
-            .ok_or_else(|| format_err!("State {} not in dists array", $state))?;
-    };
 }
 
 /// Reweights an FST according to a vector of potentials in a given direction.
@@ -32,6 +25,7 @@ where
     F: Fst + ExpandedFst + MutableFst,
     F::W: WeaklyDivisibleSemiring,
 {
+    let zero = F::W::zero();
     let num_states = fst.num_states();
 
     if num_states == 0 {
@@ -53,21 +47,20 @@ where
             continue;
         }
 
-        let d_s = state_to_dist!(state, potentials);
+        let d_s = potentials.get(state).unwrap_or(&zero);
 
         if d_s.is_zero() {
             continue;
         }
 
         for arc in fst.arcs_iter_mut(state)? {
-            let d_ns = state_to_dist!(arc.nextstate, potentials);
+            let d_ns = potentials.get(arc.nextstate).unwrap_or(&zero);
 
             if d_ns.is_zero() {
                 continue;
             }
 
             arc.weight = match reweight_type {
-                //                ReweightType::ReweightToInitial => d_s.inverse().times(&arc.weight.times(d_ns)),
                 ReweightType::ReweightToInitial => {
                     (&arc.weight.times(d_ns)?).divide(d_s, DivideType::DivideLeft)?
                 }
@@ -81,7 +74,7 @@ where
     let final_states: Vec<_> = fst.final_states_iter().collect();
 
     for final_state in final_states {
-        let d_s = state_to_dist!(final_state.state_id, potentials);
+        let d_s = potentials.get(final_state.state_id).unwrap_or(&zero);
 
         match reweight_type {
             ReweightType::ReweightToFinal => {
@@ -101,7 +94,7 @@ where
 
     // Handles potential of the start state
     if let Some(start_state) = fst.start() {
-        let d_s = state_to_dist!(start_state, potentials);
+        let d_s = potentials.get(start_state).unwrap_or(&zero);
 
         if !d_s.is_one() && !d_s.is_zero() {
             for arc in fst.arcs_iter_mut(start_state)? {

@@ -1,7 +1,8 @@
 use failure::Fallible;
 
-use crate::algorithms::{reverse, reweight, shortest_distance, ReweightType};
-use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
+use crate::algorithms::{reweight, shortest_distance, ReweightType};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
+use crate::semirings::Semiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 
 /// Pushes the weights in FST in the direction defined by TYPE. If
@@ -13,18 +14,9 @@ pub fn push_weights<F>(fst: &mut F, reweight_type: ReweightType) -> Fallible<()>
 where
     F: Fst + ExpandedFst + MutableFst,
     F::W: WeaklyDivisibleSemiring,
+    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
 {
-    match reweight_type {
-        ReweightType::ReweightToInitial => {
-            let fst_reversed: F = reverse(fst)?;
-            let dist = shortest_distance(&fst_reversed)?;
-
-            reweight(fst, &dist, ReweightType::ReweightToInitial)
-        }
-        ReweightType::ReweightToFinal => {
-            let dist = shortest_distance(fst)?;
-
-            reweight(fst, &dist, ReweightType::ReweightToFinal)
-        }
-    }
+    let dist = shortest_distance(fst, reweight_type == ReweightType::ReweightToInitial)?;
+    reweight(fst, &dist, reweight_type)?;
+    Ok(())
 }

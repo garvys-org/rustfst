@@ -12,6 +12,7 @@ pub struct IntegerWeight {
 
 impl Semiring for IntegerWeight {
     type Type = i32;
+    type ReverseWeight = IntegerWeight;
 
     fn zero() -> Self {
         Self { value: 0 }
@@ -40,6 +41,10 @@ impl Semiring for IntegerWeight {
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
         self.value = value
+    }
+
+    fn reverse(&self) -> Fallible<Self::ReverseWeight> {
+        Ok(*self)
     }
 
     fn properties() -> SemiringProperties {

@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::fmt::{Display, Formatter, Result};
 use std::hash::Hash;
@@ -10,6 +11,7 @@ use crate::semirings::{
 };
 
 pub trait UnionWeightOption<W: Semiring>: Debug + Hash + Default + Clone + PartialOrd + Eq {
+    type ReverseOptions: UnionWeightOption<W::ReverseWeight>;
     fn compare(w1: &W, w2: &W) -> bool;
     fn merge(w1: &W, w2: &W) -> Fallible<W>;
 }
@@ -45,6 +47,7 @@ where
 
 impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
     type Type = Vec<W>;
+    type ReverseWeight = UnionWeight<W::ReverseWeight, O::ReverseOptions>;
 
     fn zero() -> Self {
         Self {
@@ -131,6 +134,21 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
         self.list = value;
     }
 
+    fn reverse(&self) -> Fallible<Self::ReverseWeight> {
+        let mut rw = Self::ReverseWeight::zero();
+        for v in self.iter() {
+            rw.push_back(v.reverse()?, false)?;
+        }
+        rw.list.sort_by(|v1, v2| {
+            if O::ReverseOptions::compare(v1, v2) {
+                Ordering::Less
+            } else {
+                Ordering::Greater
+            }
+        });
+        Ok(rw)
+    }
+
     fn properties() -> SemiringProperties {
         W::properties()
             & (SemiringProperties::LEFT_SEMIRING
@@ -146,14 +164,14 @@ impl<W: Semiring, O: UnionWeightOption<W>> UnionWeight<W, O> {
             self.list.push(weight);
         } else if sorted {
             let n = self.list.len();
-            let back = self.list.get_mut(n - 1).unwrap();
+            let back = &mut self.list[n-1];
             if O::compare(back, &weight) {
                 self.list.push(weight);
             } else {
                 *back = O::merge(back, &weight)?;
             }
         } else {
-            let first = self.list.get_mut(0).unwrap();
+            let first = &mut self.list[0];
             if O::compare(first, &weight) {
                 self.list.push(weight);
             } else {
@@ -168,6 +186,8 @@ impl<W: Semiring, O: UnionWeightOption<W>> UnionWeight<W, O> {
     pub fn len(&self) -> usize {
         self.list.len()
     }
+
+    pub fn is_empty(&self) -> bool {self.list.is_empty()}
 
     pub fn iter(&self) -> impl Iterator<Item = &W> {
         self.list.iter()
