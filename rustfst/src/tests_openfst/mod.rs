@@ -11,17 +11,19 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, MutableFst, TextParser};
+use crate::fst_traits::TextParser;
 use crate::semirings::{
     LogWeight, Semiring, StarSemiring, TropicalWeight, WeaklyDivisibleSemiring, WeightQuantize,
 };
+use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicOperationResult;
+use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicTestData;
 use crate::tests_openfst::algorithms::factor_weight_gallic::test_factor_weight_gallic;
-use crate::tests_openfst::algorithms::factor_weight_identity::test_factor_weight_identity;
 use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityOperationResult;
 use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityTestData;
-use crate::tests_openfst::algorithms::gallic_encode_decode::test_gallic_encode_decode;
+use crate::tests_openfst::algorithms::factor_weight_identity::test_factor_weight_identity;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicOperationResult;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicTestData;
+use crate::tests_openfst::algorithms::gallic_encode_decode::test_gallic_encode_decode;
 
 use self::algorithms::{
     arc_map::{
@@ -31,26 +33,24 @@ use self::algorithms::{
     },
     arcsort::{test_arcsort_ilabel, test_arcsort_olabel},
     connect::test_connect,
-    determinize::{test_determinize, DeterminizeOperationResult, DeterminizeTestData},
-    encode::{test_encode, test_encode_decode, EncodeOperationResult, EncodeTestData},
+    determinize::{DeterminizeOperationResult, DeterminizeTestData, test_determinize},
+    encode::{EncodeOperationResult, EncodeTestData, test_encode, test_encode_decode},
     inverse::test_invert,
-    minimize::{test_minimize, MinimizeOperationResult, MinimizeTestData},
+    minimize::{MinimizeOperationResult, MinimizeTestData, test_minimize},
     project::{test_project_input, test_project_output},
     properties::{parse_fst_properties, test_fst_properties},
     reverse::test_reverse,
     rm_epsilon::test_rmepsilon,
     shortest_distance::{
-        test_shortest_distance, ShorestDistanceOperationResult, ShortestDistanceTestData,
+        ShorestDistanceOperationResult, ShortestDistanceTestData, test_shortest_distance,
     },
-    shortest_path::{test_shortest_path, ShorestPathOperationResult, ShortestPathTestData},
+    shortest_path::{ShorestPathOperationResult, ShortestPathTestData, test_shortest_path},
     state_map::{test_state_map_arc_sum, test_state_map_arc_unique},
     topsort::test_topsort,
     weight_pushing::{test_weight_pushing_final, test_weight_pushing_initial},
 };
 use self::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
 use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
-use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicOperationResult;
-use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicTestData;
 
 #[macro_use]
 mod macros;

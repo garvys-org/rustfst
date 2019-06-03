@@ -151,7 +151,7 @@ macro_rules! string_semiring {
             }
 
             fn reverse(&self) -> Fallible<Self::ReverseWeight> {
-                Ok(self.value().into())
+                Ok(self.value().reverse().into())
             }
 
             fn properties() -> SemiringProperties {

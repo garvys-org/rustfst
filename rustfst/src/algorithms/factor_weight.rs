@@ -22,6 +22,7 @@ bitflags! {
     }
 }
 
+#[cfg(test)]
 impl FactorWeightType {
     pub fn from_bools(factor_final_weights: bool, factor_arc_weights: bool) -> FactorWeightType {
         match (factor_final_weights, factor_arc_weights) {

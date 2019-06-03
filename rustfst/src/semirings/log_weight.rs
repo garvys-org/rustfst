@@ -78,7 +78,7 @@ impl Semiring for LogWeight {
     }
 
     fn reverse(&self) -> Fallible<Self::ReverseWeight> {
-        Ok(self.clone())
+        Ok(*self)
     }
 
     fn properties() -> SemiringProperties {

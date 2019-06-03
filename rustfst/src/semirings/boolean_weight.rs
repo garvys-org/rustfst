@@ -41,7 +41,7 @@ impl Semiring for BooleanWeight {
     }
 
     fn reverse(&self) -> Fallible<Self::ReverseWeight> {
-        Ok(self.clone())
+        Ok(*self)
     }
 
     fn properties() -> SemiringProperties {

@@ -1,5 +1,4 @@
 use crate::algorithms::Queue;
-use crate::StateId;
 
 #[derive(Debug, Clone)]
 pub struct Partition {

@@ -54,6 +54,16 @@ impl StringWeightVariant {
             done: false,
         }
     }
+
+    pub fn reverse(&self) -> Self {
+        match self {
+            StringWeightVariant::Infinity => StringWeightVariant::Infinity,
+            StringWeightVariant::Labels(l) => {
+                let mut l2 = l.clone();
+                l2.reverse();
+                StringWeightVariant::Labels(l2)},
+        }
+    }
 }
 
 impl Default for StringWeightVariant {

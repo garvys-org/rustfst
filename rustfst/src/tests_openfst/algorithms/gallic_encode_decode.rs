@@ -1,9 +1,9 @@
-use failure::{Fallible, ResultExt};
+use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
+use crate::algorithms::weight_convert;
 use crate::algorithms::weight_converters::FromGallicConverter;
 use crate::algorithms::weight_converters::ToGallicConverter;
-use crate::algorithms::{encode, weight_convert};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::TextParser;
 use crate::semirings::GallicWeight;

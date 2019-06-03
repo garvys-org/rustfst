@@ -1,11 +1,7 @@
 use std::cmp::max;
-//impl<'a, 'b, F: MutableFst + ExpandedFst> Compare for StateComparator<'a, 'b, F> {
-//
-//}
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::dbg;
 
 use binary_heap_plus::BinaryHeap;
 use failure::Fallible;
@@ -62,17 +58,19 @@ where
         // Weighted transducer
         let mut to_gallic = ToGallicConverter {};
         let mut gfst: VectorFst<GallicWeightLeft<F::W>> = weight_convert(ifst, &mut to_gallic)?;
+//        std::dbg!(&gfst);
         push_weights(&mut gfst, ReweightType::ReweightToInitial)?;
+//        std::dbg!(&gfst);
         let mut quantize_mapper = QuantizeMapper {};
         arc_map(&mut gfst, &mut quantize_mapper)?;
-        //        dbg!(&gfst);
+//                std::dbg!(&gfst);
         let encode_table = encode(&mut gfst, true, true)?;
         acceptor_minimize(&mut gfst, allow_acyclic_minimization)?;
         //        dbg!(gfst.num_states());
         //        dbg!(&gfst);
         decode(&mut gfst, encode_table)?;
         //        dbg!(gfst.num_states());
-        //        dbg!(&gfst);
+//                std::dbg!(&gfst);
         let factor_opts: FactorWeightOptions = FactorWeightOptions {
             delta: KDELTA,
             mode: FactorWeightType::FACTOR_FINAL_WEIGHTS | FactorWeightType::FACTOR_ARC_WEIGHTS,
@@ -201,7 +199,7 @@ pub fn fst_depth<F: Fst>(
 ) -> Fallible<()> {
     accessible_states.insert(state_id_cour);
 
-    for i in heights.len()..=state_id_cour {
+    for _ in heights.len()..=state_id_cour {
         heights.push(-1);
     }
 
@@ -486,10 +484,6 @@ where
     // Get Partition
     Ok(partition)
 
-}
-
-struct StateILabelHasher<'a, F: MutableFst + ExpandedFst> {
-    fst: &'a F,
 }
 
 struct ArcsIterCollected<'a, W: Semiring> {

@@ -164,14 +164,14 @@ impl<W: Semiring, O: UnionWeightOption<W>> UnionWeight<W, O> {
             self.list.push(weight);
         } else if sorted {
             let n = self.list.len();
-            let back = self.list.get_mut(n - 1).unwrap();
+            let back = &mut self.list[n-1];
             if O::compare(back, &weight) {
                 self.list.push(weight);
             } else {
                 *back = O::merge(back, &weight)?;
             }
         } else {
-            let first = self.list.get_mut(0).unwrap();
+            let first = &mut self.list[0];
             if O::compare(first, &weight) {
                 self.list.push(weight);
             } else {

@@ -44,7 +44,7 @@ impl Semiring for IntegerWeight {
     }
 
     fn reverse(&self) -> Fallible<Self::ReverseWeight> {
-        Ok(self.clone())
+        Ok(*self)
     }
 
     fn properties() -> SemiringProperties {

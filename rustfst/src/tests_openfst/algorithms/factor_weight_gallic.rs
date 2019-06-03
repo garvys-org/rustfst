@@ -1,16 +1,15 @@
-use failure::{format_err, Fallible, ResultExt};
+use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
+use crate::algorithms::{FactorWeightOptions, FactorWeightType, weight_convert};
 use crate::algorithms::factor_iterators::GallicFactor;
 use crate::algorithms::factor_iterators::GallicFactorLeft;
 use crate::algorithms::factor_iterators::GallicFactorMin;
 use crate::algorithms::factor_iterators::GallicFactorRestrict;
 use crate::algorithms::factor_iterators::GallicFactorRight;
-use crate::algorithms::factor_iterators::IdentityFactor;
 use crate::algorithms::factor_weight;
 use crate::algorithms::weight_converters::FromGallicConverter;
 use crate::algorithms::weight_converters::ToGallicConverter;
-use crate::algorithms::{weight_convert, FactorWeightOptions, FactorWeightType};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::TextParser;
 use crate::semirings::GallicWeight;

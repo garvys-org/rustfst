@@ -1,4 +1,4 @@
-use failure::{format_err, Fallible, ResultExt};
+use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::factor_iterators::IdentityFactor;
