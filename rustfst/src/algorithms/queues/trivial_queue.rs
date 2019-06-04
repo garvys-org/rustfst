@@ -4,15 +4,9 @@ use crate::StateId;
 /// Trivial queue discipline; one may enqueue at most one state at a time. It
 /// can be used for strongly connected components with only one state and no
 /// self-loops.
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct TrivialQueue {
     state: Option<StateId>,
-}
-
-impl TrivialQueue {
-    pub fn new() -> Self {
-        Self { state: None }
-    }
 }
 
 impl Queue for TrivialQueue {
@@ -51,7 +45,7 @@ mod test {
 
     #[test]
     fn test_trivial_queue() -> Fallible<()> {
-        let mut queue = TrivialQueue::new();
+        let mut queue = TrivialQueue::default();
 
         assert_eq!(queue.head(), None);
 

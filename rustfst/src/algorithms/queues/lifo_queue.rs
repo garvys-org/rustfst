@@ -2,14 +2,8 @@ use crate::algorithms::{Queue, QueueType};
 use crate::StateId;
 
 /// Last-in, first-out (stack) queue discipline.
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct LifoQueue(Vec<StateId>);
-
-impl LifoQueue {
-    pub fn new() -> Self {
-        Self(vec![])
-    }
-}
 
 impl Queue for LifoQueue {
     fn head(&mut self) -> Option<usize> {
@@ -46,7 +40,7 @@ mod test {
 
     #[test]
     fn test_lifo_queue() -> Fallible<()> {
-        let mut queue = LifoQueue::new();
+        let mut queue = LifoQueue::default();
 
         assert_eq!(queue.head(), None);
 

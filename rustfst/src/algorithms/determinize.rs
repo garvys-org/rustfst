@@ -171,7 +171,7 @@ where
     cache_impl: CacheImpl<F::W>,
     state_table: BiHashMap<StateId, DeterminizeStateTuple<F::W>>,
     ghost: PhantomData<CD>,
-    in_dist: Option<&'b Vec<F::W>>,
+    in_dist: Option<&'b [F::W]>,
     out_dist: Vec<F::W>,
 }
 
@@ -179,7 +179,7 @@ impl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>> DeterminizeFsaImpl<'a, 'b, F, CD>
 where
     F::W: WeaklyDivisibleSemiring + WeightQuantize,
 {
-    pub fn new(fst: &'a F, in_dist: Option<&'b Vec<F::W>>) -> Fallible<Self> {
+    pub fn new(fst: &'a F, in_dist: Option<&'b [F::W]>) -> Fallible<Self> {
         if !fst.is_acceptor() {
             bail!("DeterminizeFsaImpl : expected acceptor as argument");
         }
@@ -409,7 +409,7 @@ where
     }
 }
 
-pub fn determinize_with_distance<W, F1, F2>(ifst: &F1, in_dist: &Vec<W>) -> Fallible<(F2, Vec<W>)>
+pub fn determinize_with_distance<W, F1, F2>(ifst: &F1, in_dist: &[W]) -> Fallible<(F2, Vec<W>)>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
     F1: ExpandedFst<W = W>,

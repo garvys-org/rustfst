@@ -1,21 +1,11 @@
 use crate::algorithms::{Queue, QueueType};
 use crate::StateId;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct StateOrderQueue {
     front: StateId,
     back: Option<StateId>,
     enqueued: Vec<bool>,
-}
-
-impl StateOrderQueue {
-    pub fn new() -> Self {
-        Self {
-            front: 0,
-            back: None,
-            enqueued: vec![],
-        }
-    }
 }
 
 impl Queue for StateOrderQueue {
