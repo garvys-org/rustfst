@@ -44,7 +44,7 @@ impl Partition {
     }
 
     pub fn add(&mut self, element_id: usize, class_id: usize) {
-        let ref mut this_class = self.classes[class_id];
+        let mut this_class = &mut self.classes[class_id];
         this_class.size += 1;
 
         let no_head = this_class.no_head;
@@ -53,7 +53,7 @@ impl Partition {
         }
         this_class.no_head = element_id as i32;
 
-        let ref mut this_element = self.elements[element_id];
+        let mut this_element = &mut self.elements[element_id];
         this_element.class_id = class_id;
         this_element.yes = 0;
         this_element.next_element = no_head;
@@ -65,7 +65,7 @@ impl Partition {
         let elt_next_elt = self.elements[element_id].next_element;
         let elt_class_id = self.elements[element_id].class_id;
 
-        let ref mut old_class = self.classes[elt_class_id];
+        let old_class = &mut self.classes[elt_class_id];
         old_class.size -= 1;
 
         if elt_prev_elt >= 0 {
@@ -87,7 +87,7 @@ impl Partition {
         let elt_prev_elt = self.elements[element_id].prev_element;
         let elt_next_elt = self.elements[element_id].next_element;
 
-        let ref mut this_class = self.classes[elt_class_id];
+        let this_class = &mut self.classes[elt_class_id];
 
         if elt_yes == self.yes_counter {
             return;

@@ -24,26 +24,28 @@ impl AutoQueue {
         let mut queue: Box<Queue>;
 
         if props.contains(FstProperties::TOP_SORTED) || fst.start().is_none() {
-            queue = Box::new(StateOrderQueue::new());
+            queue = Box::new(StateOrderQueue::default());
         } else if props.contains(FstProperties::ACYCLIC) {
             queue = Box::new(TopOrderQueue::new(fst));
         } else if props.contains(FstProperties::UNWEIGHTED)
             && F::W::properties().contains(SemiringProperties::IDEMPOTENT)
         {
-            queue = Box::new(LifoQueue::new());
+            queue = Box::new(LifoQueue::default());
         } else {
             let mut sccs: Vec<usize> = vec![];
             let mut n_sccs: usize = 0;
             find_strongly_connected_components(fst, &mut sccs, &mut n_sccs)?;
 
             let mut queue_types = vec![QueueType::TrivialQueue; n_sccs];
-            let mut less = None;
-            if distance.is_some()
-                && distance.unwrap().len() >= 1
+            let less = if distance.is_some()
+                && !distance.unwrap().is_empty()
                 && F::W::properties().contains(SemiringProperties::PATH)
             {
-                less = Some(natural_less);
-            }
+                Some(natural_less)
+            } else {
+                None
+            };
+            ;
             // Finds the queue type to use per SCC.
             let mut unweighted = false;
             let mut all_trivial = false;
@@ -58,7 +60,7 @@ impl AutoQueue {
 
             if unweighted {
                 // If unweighted and semiring is idempotent, uses LIFO queue.
-                queue = Box::new(LifoQueue::new());
+                queue = Box::new(LifoQueue::default());
             } else if all_trivial {
                 // If all the SCC are trivial, the FST is acyclic and the scc number gives
                 // the topological order.
@@ -68,12 +70,12 @@ impl AutoQueue {
                 let mut queues: Vec<Box<Queue>> = Vec::with_capacity(n_sccs);
                 for queue_type in queue_types.iter().take(n_sccs) {
                     match queue_type {
-                        QueueType::TrivialQueue => queues.push(Box::new(TrivialQueue::new())),
+                        QueueType::TrivialQueue => queues.push(Box::new(TrivialQueue::default())),
                         QueueType::ShortestFirstQueue => queues.push(Box::new(
                             NaturalShortestFirstQueue::new(distance.unwrap().clone()),
                         )),
-                        QueueType::LifoQueue => queues.push(Box::new(LifoQueue::new())),
-                        _ => queues.push(Box::new(FifoQueue::new())),
+                        QueueType::LifoQueue => queues.push(Box::new(LifoQueue::default())),
+                        _ => queues.push(Box::new(FifoQueue::default())),
                     }
                 }
                 queue = Box::new(SccQueue::new(queues, sccs));

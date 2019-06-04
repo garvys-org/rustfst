@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use std::cmp::Ordering;
 use std::fmt;
 use std::fmt::Debug;

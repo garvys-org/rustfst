@@ -164,7 +164,7 @@ impl<W: Semiring, O: UnionWeightOption<W>> UnionWeight<W, O> {
             self.list.push(weight);
         } else if sorted {
             let n = self.list.len();
-            let back = &mut self.list[n-1];
+            let back = &mut self.list[n - 1];
             if O::compare(back, &weight) {
                 self.list.push(weight);
             } else {
@@ -187,7 +187,9 @@ impl<W: Semiring, O: UnionWeightOption<W>> UnionWeight<W, O> {
         self.list.len()
     }
 
-    pub fn is_empty(&self) -> bool {self.list.is_empty()}
+    pub fn is_empty(&self) -> bool {
+        self.list.is_empty()
+    }
 
     pub fn iter(&self) -> impl Iterator<Item = &W> {
         self.list.iter()

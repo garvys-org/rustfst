@@ -108,11 +108,8 @@ impl<W: Semiring> Iterator for GallicFactor<W> {
 impl<W: Semiring> FactorIterator<GallicWeight<W>> for GallicFactor<W> {
     fn new(weight: GallicWeight<W>) -> Self {
         let mut done = false;
-        if weight.0.list.is_empty() {
-            done = true;
-        } else if weight.0.list.len() == 1 && weight.0.list[0].value1().len_labels() <= 1 {
-            done = true;
-        }
+        let done = weight.0.list.is_empty()
+            || (weight.0.list.len() == 1 && weight.0.list[0].value1().len_labels() <= 1);
         Self {
             weight,
             done,

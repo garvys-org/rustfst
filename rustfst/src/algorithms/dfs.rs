@@ -1,15 +1,16 @@
 use std::collections::HashSet;
+use std::hash::BuildHasher;
 
 use failure::Fallible;
 
 use crate::fst_traits::Fst;
 use crate::StateId;
 
-pub fn dfs<F: Fst>(
+pub fn dfs<F: Fst, S1: BuildHasher, S2: BuildHasher>(
     fst: &F,
     state_id_cour: StateId,
-    accessible_states: &mut HashSet<StateId>,
-    coaccessible_states: &mut HashSet<StateId>,
+    accessible_states: &mut HashSet<StateId, S1>,
+    coaccessible_states: &mut HashSet<StateId, S2>,
 ) -> Fallible<()> {
     accessible_states.insert(state_id_cour);
     let mut is_coaccessible = fst.is_final(state_id_cour);

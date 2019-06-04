@@ -1,4 +1,4 @@
-use failure::{Fallible, format_err};
+use failure::{format_err, Fallible};
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::minimize;

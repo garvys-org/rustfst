@@ -60,7 +60,7 @@ where
             distance_2.into_iter().map(|v| v.into()).collect();
         let (dfst, distance_3_reversed): (VectorFst<_>, _) =
             determinize_with_distance(&rfst, &distance_2_reversed)?;
-        let distance_3 = distance_3_reversed.into_iter().map(|v| v.into()).collect();
+        let distance_3: Vec<_> = distance_3_reversed.into_iter().map(|v| v.into()).collect();
         n_shortest_path(&dfst, &distance_3, nshortest)
     }
 }
@@ -150,7 +150,7 @@ where
 fn single_shortest_path_backtrace<FI, FO>(
     ifst: &FI,
     f_parent: &Option<StateId>,
-    parent: &Vec<Option<(StateId, usize)>>,
+    parent: &[Option<(StateId, usize)>],
 ) -> Fallible<FO>
 where
     FI: ExpandedFst + MutableFst,
@@ -161,7 +161,7 @@ where
     let mut d_p;
 
     let mut d: Option<StateId> = None;
-    let mut nextstate = f_parent.clone();
+    let mut nextstate = *f_parent;
     while let Some(state) = nextstate {
         d_p = s_p;
         s_p = Some(ofst.add_state());
@@ -194,13 +194,13 @@ pub fn natural_less<W: Semiring>(w1: &W, w2: &W) -> Fallible<bool> {
 
 struct ShortestPathCompare<'a, 'b, W: Semiring> {
     pairs: &'a RefCell<Vec<(Option<StateId>, W)>>,
-    distance: &'b Vec<W>,
+    distance: &'b [W],
     weight_zero: W,
     weight_one: W,
 }
 
 impl<'a, 'b, W: Semiring> ShortestPathCompare<'a, 'b, W> {
-    pub fn new(pairs: &'a RefCell<Vec<(Option<StateId>, W)>>, distance: &'b Vec<W>) -> Self {
+    pub fn new(pairs: &'a RefCell<Vec<(Option<StateId>, W)>>, distance: &'b [W]) -> Self {
         Self {
             pairs,
             distance,
@@ -237,7 +237,7 @@ impl<'a, 'b, W: Semiring> ShortestPathCompare<'a, 'b, W> {
     }
 }
 
-fn n_shortest_path<W, FI, FO>(ifst: &FI, distance: &Vec<W>, nshortest: usize) -> Fallible<FO>
+fn n_shortest_path<W, FI, FO>(ifst: &FI, distance: &[W], nshortest: usize) -> Fallible<FO>
 where
     W: Semiring + 'static,
     FI: ExpandedFst<W = W::ReverseWeight> + MutableFst<W = W::ReverseWeight>,

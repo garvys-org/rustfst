@@ -158,11 +158,9 @@ pub fn compute_fst_properties<F: Fst>(fst: &F) -> Fallible<FstProperties> {
                 comp_props &= !FstProperties::UNWEIGHTED;
             }
             nfinal += 1;
-        } else {
-            if fst.num_arcs(state)? != 1 {
-                comp_props |= FstProperties::NOT_STRING;
-                comp_props &= !FstProperties::STRING;
-            }
+        } else if fst.num_arcs(state)? != 1 {
+            comp_props |= FstProperties::NOT_STRING;
+            comp_props &= !FstProperties::STRING;
         }
     }
 

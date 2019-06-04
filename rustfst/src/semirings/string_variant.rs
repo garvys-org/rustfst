@@ -61,7 +61,8 @@ impl StringWeightVariant {
             StringWeightVariant::Labels(l) => {
                 let mut l2 = l.clone();
                 l2.reverse();
-                StringWeightVariant::Labels(l2)},
+                StringWeightVariant::Labels(l2)
+            }
         }
     }
 }

@@ -104,7 +104,9 @@ named!(complete_parse_fst <&[u8], ParsedFst>, complete!(parse_fst));
 
 impl<W: 'static + Semiring<Type = f32>> BinaryDeserializer for VectorFst<W> {
     fn read<P: AsRef<Path>>(path_bin_fst: P) -> Fallible<Self> {
-        let data = read(path_bin_fst.as_ref()).with_context(|_| format!("Can't open FST binary file : {:?}", path_bin_fst.as_ref()))?;
+        let data = read(path_bin_fst.as_ref()).with_context(|_| {
+            format!("Can't open FST binary file : {:?}", path_bin_fst.as_ref())
+        })?;
         let (_, parsed_fst) = complete_parse_fst(&data)
             .map_err(|_| format_err!("Error while parsing binary VectorFst"))?;
 

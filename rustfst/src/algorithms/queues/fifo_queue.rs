@@ -4,14 +4,8 @@ use crate::algorithms::{Queue, QueueType};
 use crate::StateId;
 
 /// First-in, first-out (queue) queue discipline.
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct FifoQueue(VecDeque<StateId>);
-
-impl FifoQueue {
-    pub fn new() -> Self {
-        Self(VecDeque::new())
-    }
-}
 
 impl Queue for FifoQueue {
     fn head(&mut self) -> Option<usize> {
@@ -48,7 +42,7 @@ mod test {
 
     #[test]
     fn test_fifo_queue() -> Fallible<()> {
-        let mut queue = FifoQueue::new();
+        let mut queue = FifoQueue::default();
 
         assert_eq!(queue.head(), None);
 

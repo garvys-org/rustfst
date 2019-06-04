@@ -8,7 +8,7 @@ use crate::StateId;
 /// Sorts the input states of an FST. order[i] gives the the state ID after
 /// sorting that corresponds to the state ID i before sorting; it must
 /// therefore be a permutation of the input FST's states ID sequence.
-pub fn state_sort<F>(fst: &mut F, order: &Vec<StateId>) -> Fallible<()>
+pub fn state_sort<F>(fst: &mut F, order: &[StateId]) -> Fallible<()>
 where
     F: MutableFst + ExpandedFst,
 {
