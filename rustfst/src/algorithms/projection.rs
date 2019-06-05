@@ -1,9 +1,4 @@
-use failure::Fallible;
-
-use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction};
 use crate::fst_traits::{ExpandedFst, MutableFst};
-use crate::semirings::Semiring;
-use crate::Arc;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 /// Different types of labels projection in a FST.
