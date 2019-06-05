@@ -10,9 +10,9 @@ mod arcsort;
 mod connect;
 mod minimize;
 mod pretty_errors;
+mod project;
 
 fn main() {
-    //    env_logxger::init();
     let mut app = App::new("rustfst")
         .version("1.0")
         .author("Alexandre Caulier <alexandre.caulier@protonmail.com>")
@@ -82,6 +82,27 @@ fn main() {
         );
     app = app.subcommand(arcsort_cmd);
 
+    let project_cmd = SubCommand::with_name("project")
+        .about("Project algorithm.")
+        .version("1.0")
+        .author("Alexandre Caulier <alexandre.caulier@protonmail.com>")
+        .arg(
+            Arg::with_name("in.fst")
+                .help("Path ti input fst file.")
+                .required(true),
+        )
+        .arg(
+            Arg::with_name("out.fst")
+                .help("Path ti output fst file.")
+                .required(true),
+        )
+        .arg(
+            Arg::with_name("project_output")
+                .help("Project output (vs. input)")
+                .long("project_output"),
+        );
+    app = app.subcommand(project_cmd);
+
     let matches = app.get_matches();
 
     let env = env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "debug");
@@ -111,6 +132,11 @@ fn handle(matches: clap::ArgMatches) -> Result<(), ExitFailure> {
         ("arcsort", Some(m)) => crate::arcsort::arcsort_cli(
             m.value_of("in.fst").unwrap(),
             m.value_of("sort_type").unwrap(),
+            m.value_of("out.fst").unwrap(),
+        ),
+        ("project", Some(m)) => crate::project::project_cli(
+            m.value_of("in.fst").unwrap(),
+            m.is_present("project_type"),
             m.value_of("out.fst").unwrap(),
         ),
         (s, _) => Err(format_err!("Unknown subcommand {}.", s)),
