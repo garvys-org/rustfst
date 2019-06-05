@@ -8,9 +8,11 @@ use crate::pretty_errors::ExitFailure;
 
 mod arcsort;
 mod connect;
+mod invert;
 mod minimize;
 mod pretty_errors;
 mod project;
+mod topsort;
 
 fn main() {
     let mut app = App::new("rustfst")
@@ -82,6 +84,7 @@ fn main() {
         );
     app = app.subcommand(arcsort_cmd);
 
+    // Project
     let project_cmd = SubCommand::with_name("project")
         .about("Project algorithm.")
         .version("1.0")
@@ -102,6 +105,40 @@ fn main() {
                 .long("project_output"),
         );
     app = app.subcommand(project_cmd);
+
+    // Invert
+    let invert_cmd = SubCommand::with_name("invert")
+        .about("Invert algorithm.")
+        .version("1.0")
+        .author("Alexandre Caulier <alexandre.caulier@protonmail.com>")
+        .arg(
+            Arg::with_name("in.fst")
+                .help("Path ti input fst file.")
+                .required(true),
+        )
+        .arg(
+            Arg::with_name("out.fst")
+                .help("Path ti output fst file.")
+                .required(true),
+        );
+    app = app.subcommand(invert_cmd);
+
+    // Topsort
+    let topsort_cmd = SubCommand::with_name("topsort")
+        .about("Topsort algorithm.")
+        .version("1.0")
+        .author("Alexandre Caulier <alexandre.caulier@protonmail.com>")
+        .arg(
+            Arg::with_name("in.fst")
+                .help("Path ti input fst file.")
+                .required(true),
+        )
+        .arg(
+            Arg::with_name("out.fst")
+                .help("Path ti output fst file.")
+                .required(true),
+        );
+    app = app.subcommand(topsort_cmd);
 
     let matches = app.get_matches();
 
@@ -138,6 +175,14 @@ fn handle(matches: clap::ArgMatches) -> Result<(), ExitFailure> {
             m.value_of("in.fst").unwrap(),
             m.is_present("project_type"),
             m.value_of("out.fst").unwrap(),
+        ),
+        ("invert", Some(m)) => crate::invert::invert_cli(
+            m.value_of("in.fst").unwrap(),
+            m.value_of("out.fst").unwrap()
+        ),
+        ("topsort", Some(m)) => crate::topsort::topsort_cli(
+            m.value_of("in.fst").unwrap(),
+            m.value_of("out.fst").unwrap()
         ),
         (s, _) => Err(format_err!("Unknown subcommand {}.", s)),
     }
