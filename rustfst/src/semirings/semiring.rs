@@ -31,8 +31,6 @@ bitflags! {
 /// For more information : https://cs.nyu.edu/~mohri/pub/hwa.pdf
 pub trait Semiring:
     Clone + PartialEq + PartialOrd + Debug + Default + Display + AsRef<Self> + Hash + Eq + Sized
-//where
-//    <<Self as Semiring>::ReverseSemiring as Semiring>::ReverseSemiring: Semiring<Type=<Self as Semiring>::Type>
 {
     type Type;
     type ReverseWeight: Semiring;

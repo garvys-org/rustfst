@@ -1,5 +1,6 @@
 use std::fs::read;
 use std::fs::File;
+use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
 
@@ -154,35 +155,35 @@ impl<W: 'static + Semiring<Type = f32>> BinaryDeserializer for VectorFst<W> {
 }
 
 #[inline]
-fn write_bin_i32(file: &mut File, i: i32) -> Fallible<()> {
+fn write_bin_i32<W: Write>(file: &mut W, i: i32) -> Fallible<()> {
     file.write_all(&i.to_le_bytes()).map_err(|e| e.into())
 }
 
 #[inline]
-fn write_bin_u64(file: &mut File, i: u64) -> Fallible<()> {
+fn write_bin_u64<W: Write>(file: &mut W, i: u64) -> Fallible<()> {
     file.write_all(&i.to_le_bytes()).map_err(|e| e.into())
 }
 
 #[inline]
-fn write_bin_i64(file: &mut File, i: i64) -> Fallible<()> {
+fn write_bin_i64<W: Write>(file: &mut W, i: i64) -> Fallible<()> {
     file.write_all(&i.to_le_bytes()).map_err(|e| e.into())
 }
 
 #[inline]
-fn write_bin_f32(file: &mut File, i: f32) -> Fallible<()> {
+fn write_bin_f32<W: Write>(file: &mut W, i: f32) -> Fallible<()> {
     file.write_all(&i.to_bits().to_le_bytes())
         .map_err(|e| e.into())
 }
 
 #[inline]
-fn write_bin_string<'a>(file: &mut File, s: &'a str) -> Fallible<()> {
+fn write_bin_string<'a, W: Write>(file: &mut W, s: &'a str) -> Fallible<()> {
     write_bin_i32(file, s.len() as i32)?;
     file.write_all(s.as_bytes()).map_err(|e| e.into())
 }
 
 impl<W: 'static + Semiring<Type = f32>> BinarySerializer for VectorFst<W> {
     fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Fallible<()> {
-        let mut file = File::create(path_bin_fst)?;
+        let mut file = BufWriter::new(File::create(path_bin_fst)?);
 
         // FstHeader
         //magic_number: i32,

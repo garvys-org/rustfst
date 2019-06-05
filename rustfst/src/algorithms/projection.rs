@@ -1,9 +1,4 @@
-use failure::Fallible;
-
-use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction};
 use crate::fst_traits::{ExpandedFst, MutableFst};
-use crate::semirings::Semiring;
-use crate::Arc;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 /// Different types of labels projection in a FST.
@@ -51,42 +46,33 @@ pub enum ProjectType {
 /// # }
 /// ```
 pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_type: ProjectType) {
-    let mut mapper = ProjectMapper { project_type };
-    fst.arc_map(&mut mapper).unwrap();
-}
-
-struct ProjectMapper {
-    project_type: ProjectType,
-}
-
-impl<W: Semiring> ArcMapper<W> for ProjectMapper {
-    fn arc_map(&mut self, arc: &mut Arc<W>) -> Fallible<()> {
-        match self.project_type {
-            ProjectType::ProjectInput => arc.olabel = arc.ilabel,
-            ProjectType::ProjectOutput => arc.ilabel = arc.olabel,
-        };
-        Ok(())
-    }
-
-    fn final_arc_map(&mut self, _final_arc: &mut FinalArc<W>) -> Fallible<()> {
-        Ok(())
-    }
-
-    fn final_action(&self) -> MapFinalAction {
-        MapFinalAction::MapNoSuperfinal
-    }
+    match project_type {
+        ProjectType::ProjectInput => {
+            for state in 0..fst.num_states() {
+                for arc in fst.arcs_iter_mut(state).unwrap() {
+                    arc.olabel = arc.ilabel;
+                }
+            }
+        }
+        ProjectType::ProjectOutput => {
+            for state in 0..fst.num_states() {
+                for arc in fst.arcs_iter_mut(state).unwrap() {
+                    arc.ilabel = arc.olabel;
+                }
+            }
+        }
+    };
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use counter::Counter;
-
     use failure::Fallible;
 
     use crate::fst_traits::PathsIterator;
     use crate::test_data::vector_fst::get_vector_fsts_for_tests;
+
+    use super::*;
 
     #[test]
     fn test_projection_input_generic() -> Fallible<()> {

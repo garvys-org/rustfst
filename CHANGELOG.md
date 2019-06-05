@@ -33,6 +33,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `minimize` for the minimization.
     - `connect` for the connect algorithm.
     - `arcsort` for the arcsort algorithm.
+    - `invert` for the invert algorithm.
+    - `project` for the project algorithm.
+    - `topsort` for the topsort algorithm.
 - Added a prelude to `rustfst` to reduce the number of imports necessary when using the lib.
 
 ### Changed
@@ -42,7 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `reverse` function has now the same API as OpenFST returning an Fst of `ReverseWeight`s.
 - `reverse` methods for every Semiring now returns `ReverseWeight`.
 - Fix `reverse` of `GallicWeight`.
-
+- Stopped using `arc_map` in invert's and project's implementation to run faster.
+- Use `BufWriter` in the `BinarySerializer` of the `VectorFst` which improves a lot the serialization speed.
 
 ### Removed
 - Crate `rustfst-tests-openfst` has been removed and moved to the `rustfst` as unit tests. 
