@@ -1,5 +1,6 @@
 use std::fs::read;
 use std::fs::File;
+use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
 
@@ -179,7 +180,7 @@ fn write_bin_string<'a, W: Write>(file: &mut W, s: &'a str) -> Fallible<()> {
     write_bin_i32(file, s.len() as i32)?;
     file.write_all(s.as_bytes()).map_err(|e| e.into())
 }
-use std::io::BufWriter;
+
 impl<W: 'static + Semiring<Type = f32>> BinarySerializer for VectorFst<W> {
     fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Fallible<()> {
         let mut file = BufWriter::new(File::create(path_bin_fst)?);

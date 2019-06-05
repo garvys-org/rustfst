@@ -1,6 +1,6 @@
 use rustfst::prelude::*;
 
-use log::{info, debug};
+use log::{debug, info};
 
 use failure::{bail, Fallible};
 
