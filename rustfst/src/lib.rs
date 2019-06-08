@@ -144,6 +144,7 @@ mod parsers;
 pub(crate) const KDELTA: f32 = 1.0f32 / 1024.0f32;
 
 pub mod prelude {
+    pub use crate::algorithms::arc_compares::*;
     pub use crate::algorithms::*;
     pub use crate::fst_impls::*;
     pub use crate::fst_traits::*;

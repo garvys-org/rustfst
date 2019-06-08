@@ -4,10 +4,18 @@ use clap::{App, Arg, SubCommand};
 use failure::format_err;
 use log::error;
 
+use crate::cmds::arcsort::ArcsortAlgorithm;
+use crate::cmds::connect::ConnectAlgorithm;
+use crate::cmds::invert::InvertAlgorithm;
+use crate::cmds::minimize::MinimizeAlgorithm;
+use crate::cmds::project::ProjectFstAlgorithm;
+use crate::cmds::topsort::TopsortAlgorithm;
 use crate::pretty_errors::ExitFailure;
+use crate::unary_fst_algorithm::UnaryFstAlgorithm;
 
 pub mod cmds;
 pub mod pretty_errors;
+pub mod unary_fst_algorithm;
 
 fn main() {
     let mut app = App::new("rustfst")
@@ -77,33 +85,39 @@ fn main() {
 /// Handles the command-line input.
 fn handle(matches: clap::ArgMatches) -> Result<(), ExitFailure> {
     match matches.subcommand() {
-        ("minimize", Some(m)) => crate::cmds::minimize::minimize_cli(
+        ("minimize", Some(m)) => MinimizeAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.is_present("allow_nondet"),
             m.value_of("out.fst").unwrap(),
-        ),
-        ("connect", Some(m)) => crate::cmds::connect::connect_cli(
+        )
+        .run_cli_or_bench(m),
+        ("connect", Some(m)) => ConnectAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("out.fst").unwrap(),
-        ),
-        ("arcsort", Some(m)) => crate::cmds::arcsort::arcsort_cli(
+        )
+        .run_cli_or_bench(m),
+        ("arcsort", Some(m)) => ArcsortAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("sort_type").unwrap(),
             m.value_of("out.fst").unwrap(),
-        ),
-        ("project", Some(m)) => crate::cmds::project::project_cli(
+        )
+        .run_cli_or_bench(m),
+        ("project", Some(m)) => ProjectFstAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.is_present("project_type"),
             m.value_of("out.fst").unwrap(),
-        ),
-        ("invert", Some(m)) => crate::cmds::invert::invert_cli(
+        )
+        .run_cli_or_bench(m),
+        ("invert", Some(m)) => InvertAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("out.fst").unwrap(),
-        ),
-        ("topsort", Some(m)) => crate::cmds::topsort::topsort_cli(
+        )
+        .run_cli_or_bench(m),
+        ("topsort", Some(m)) => TopsortAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("out.fst").unwrap(),
-        ),
+        )
+        .run_cli_or_bench(m),
         (s, _) => Err(format_err!("Unknown subcommand {}.", s)),
     }
     .map_err(|e| e.into())
@@ -115,12 +129,28 @@ fn one_in_one_out_options<'a, 'b>(command: clap::App<'a, 'b>) -> clap::App<'a, '
         .author("Alexandre Caulier <alexandre.caulier@protonmail.com>")
         .arg(
             Arg::with_name("in.fst")
-                .help("Path ti input fst file.")
+                .help("Path to input fst file.")
                 .required(true),
         )
         .arg(
             Arg::with_name("out.fst")
-                .help("Path ti output fst file.")
+                .help("Path to output fst file.")
                 .required(true),
-        )
+        ).arg(
+            Arg::with_name("bench")
+                .long("bench")
+                .help("Whether to run multiple times the algorithm in order to have a reliable time measurement.")
+        ).arg(
+            Arg::with_name("n_iters")
+                .long("n_iters")
+                .default_value("10")
+                .requires("bench")
+                .help("Number of iterations to run for the benchmark.")
+    ).arg(
+        Arg::with_name("n_warm_ups")
+            .long("n_warm_ups")
+            .default_value("3")
+            .requires("bench")
+            .help("Number of warm ups run before the actual benchmark.")
+    )
 }

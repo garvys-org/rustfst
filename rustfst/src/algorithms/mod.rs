@@ -58,7 +58,7 @@ pub mod arc_compares {
 pub use self::{
     all_pairs_shortest_distance::all_pairs_shortest_distance,
     arc_map::{arc_map, ArcMapper, FinalArc, MapFinalAction},
-    arc_sort::{arc_sort, ilabel_compare, olabel_compare},
+    arc_sort::arc_sort,
     closure::{closure_plus, closure_star},
     composition::compose,
     concat::concat,
