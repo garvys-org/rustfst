@@ -37,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `project` for the project algorithm.
     - `topsort` for the topsort algorithm.
 - Added a prelude to `rustfst` to reduce the number of imports necessary when using the lib.
+- Added a bench keyword the the rustfst-cli to be able to benchmark the running time of the different algorithms across multiple runs.
 
 ### Changed
 - Before test cases were generated with pynini (python wrapper around openfst). Now they are directly generated with OpenFST (c++). Allows to test operations that are not wrapped.
