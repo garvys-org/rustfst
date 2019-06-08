@@ -8,6 +8,10 @@ use rustfst::prelude::*;
 
 use clap::ArgMatches;
 
+fn duration_to_seconds(duration: &Duration) -> f64 {
+    duration.as_secs() as f64 + duration.subsec_nanos() as f64 * 1.0e-9
+}
+
 pub trait UnaryFstAlgorithm {
     fn get_path_in(&self) -> &str;
     fn get_path_out(&self) -> &str;
@@ -63,7 +67,7 @@ pub trait UnaryFstAlgorithm {
     }
 
     fn run_bench(&self, n_warm_ups: usize, n_iters: usize) -> Fallible<()> {
-        info!(
+        println!(
             "Running benchmark for algorithm {}",
             Self::get_algorithm_name().blue()
         );
@@ -88,13 +92,13 @@ pub trait UnaryFstAlgorithm {
             let duration_serialization = serialization_start.elapsed();
 
             if i >= n_warm_ups {
-                info!(
+                println!(
                     "Run #{}/{}: \t{} \t{} \t{}",
                     format!("{}", i + 1 - n_warm_ups).yellow(),
                     format!("{}", n_iters).yellow(),
-                    format!("{:?}", &duration_parsing).blue(),
-                    format!("{:?}", &duration_algo).magenta(),
-                    format!("{:?}", &duration_serialization).cyan(),
+                    format!("{:.6}s", duration_to_seconds(&duration_parsing)).blue(),
+                    format!("{:.6}s", duration_to_seconds(&duration_algo)).magenta(),
+                    format!("{:.6}s", duration_to_seconds(&duration_serialization)).cyan(),
                 );
 
                 avg_parsing_time = avg_parsing_time.checked_add(duration_parsing).unwrap();
@@ -103,13 +107,13 @@ pub trait UnaryFstAlgorithm {
                     .checked_add(duration_serialization)
                     .unwrap();
             } else {
-                info!(
+                println!(
                     "Warmup #{}/{}: \t{} \t{} \t{}",
                     format!("{}", i + 1).yellow(),
                     format!("{}", n_warm_ups).yellow(),
-                    format!("{:?}", &duration_parsing).blue(),
-                    format!("{:?}", &duration_algo).magenta(),
-                    format!("{:?}", &duration_serialization).cyan(),
+                    format!("{:.6}s", duration_to_seconds(&duration_parsing)).blue(),
+                    format!("{:.6}s", duration_to_seconds(&duration_algo)).magenta(),
+                    format!("{:.6}s", duration_to_seconds(&duration_serialization)).cyan(),
                 );
             }
         }
@@ -122,27 +126,35 @@ pub trait UnaryFstAlgorithm {
             "Bench results (Warmups = {}, Iterations = {}):",
             n_warm_ups, n_iters
         );
-        info!("{}", s.bold().underline());
+        println!("{}", s.bold().underline());
 
         let s = format!(
             "\t Mean {} : \t\t{}",
             "parsing time".blue(),
-            format!("{:?}", avg_parsing_time).blue()
+            format!("{:.6}s", duration_to_seconds(&avg_parsing_time)).blue()
         );
-        info!("{}", s.bold());
+        println!("{}", s.bold());
         let s = format!(
             "\t Mean {} : \t\t{}",
             "algorithm time".magenta(),
-            format!("{:?}", avg_algo_time).magenta()
+            format!("{:.6}s", duration_to_seconds(&avg_algo_time)).magenta()
         );
-        info!("{}", s.bold());
+        println!("{}", s.bold());
 
         let s = format!(
             "\t Mean {} : \t{}",
             "serialization time".cyan(),
-            format!("{:?}", avg_serialization_time).cyan()
+            format!("{:.6}s", duration_to_seconds(&avg_serialization_time)).cyan()
         );
-        info!("{}", s.bold());
+        println!("{}", s.bold());
+
+        let mean_total_time = avg_parsing_time + avg_algo_time + avg_serialization_time;
+        let s = format!(
+            "\t Mean {} : \t\t{}",
+            "CLI time".red(),
+            format!("{:.6}s", duration_to_seconds(&mean_total_time)).cyan()
+        );
+        println!("{}", s.bold());
         Ok(())
     }
 }

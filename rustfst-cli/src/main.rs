@@ -104,7 +104,7 @@ fn handle(matches: clap::ArgMatches) -> Result<(), ExitFailure> {
         .run_cli_or_bench(m),
         ("project", Some(m)) => ProjectFstAlgorithm::new(
             m.value_of("in.fst").unwrap(),
-            m.is_present("project_type"),
+            m.is_present("project_output"),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
@@ -144,13 +144,11 @@ fn one_in_one_out_options<'a, 'b>(command: clap::App<'a, 'b>) -> clap::App<'a, '
             Arg::with_name("n_iters")
                 .long("n_iters")
                 .default_value("10")
-                .requires("bench")
                 .help("Number of iterations to run for the benchmark.")
-    ).arg(
-        Arg::with_name("n_warm_ups")
-            .long("n_warm_ups")
-            .default_value("3")
-            .requires("bench")
-            .help("Number of warm ups run before the actual benchmark.")
-    )
+        ).arg(
+            Arg::with_name("n_warm_ups")
+                .long("n_warm_ups")
+                .default_value("3")
+                .help("Number of warm ups run before the actual benchmark.")
+        )
 }
