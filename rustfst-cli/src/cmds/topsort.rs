@@ -1,16 +1,41 @@
 use rustfst::prelude::*;
 
-use log::debug;
-
 use failure::Fallible;
 
-pub fn topsort_cli(path_in: &str, path_out: &str) -> Fallible<()> {
-    debug!("Reading FST");
-    let mut fst = VectorFst::<TropicalWeight>::read(path_in)?;
-    debug!("Running topsort algorithm");
-    top_sort(&mut fst)?;
-    debug!("Writing FST");
-    fst.write(path_out)?;
-    debug!("Done");
-    Ok(())
+use crate::unary_fst_algorithm::UnaryFstAlgorithm;
+
+pub struct TopsortAlgorithm {
+    path_in: String,
+    path_out: String,
+}
+
+impl UnaryFstAlgorithm for TopsortAlgorithm {
+    fn get_path_in(&self) -> &str {
+        self.path_in.as_str()
+    }
+
+    fn get_path_out(&self) -> &str {
+        self.path_out.as_str()
+    }
+
+    fn get_algorithm_name() -> String {
+        "topsort".to_string()
+    }
+
+    fn run_algorithm(
+        &self,
+        mut fst: VectorFst<TropicalWeight>,
+    ) -> Fallible<VectorFst<TropicalWeight>> {
+        top_sort(&mut fst)?;
+        Ok(fst)
+    }
+}
+
+impl TopsortAlgorithm {
+    pub fn new(path_in: &str, path_out: &str) -> Self {
+        Self {
+            path_in: path_in.to_string(),
+            path_out: path_out.to_string(),
+        }
+    }
 }
