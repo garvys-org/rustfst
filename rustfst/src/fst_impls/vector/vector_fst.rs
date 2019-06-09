@@ -58,7 +58,6 @@ impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
 
 impl<'a, W: 'a + Semiring> StateIterator<'a> for VectorFst<W> {
     type Iter = VectorStateIterator<'a, W>;
-    // type Iter = Iterator<Item =&'a StateId>;
     fn states_iter(&'a self) -> Self::Iter {
         VectorStateIterator::new(self)
     }
@@ -153,32 +152,55 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
             "State id {:?} doesn't exist",
             state_to_remove
         );
-        self.states.remove(state_to_remove);
-        for state in &mut self.states {
-            let mut to_delete = vec![];
-            for (arc_id, arc) in state.arcs.iter_mut().enumerate() {
-                if arc.nextstate == state_to_remove {
-                    to_delete.push(arc_id);
-                } else if arc.nextstate > state_to_remove {
-                    arc.nextstate -= 1;
-                }
-            }
-
-            for id in to_delete.iter().rev() {
-                state.arcs.remove(*id);
-            }
-        }
-        Ok(())
+        let v = vec![state_to_remove];
+        self.del_states(v.into_iter())
     }
 
-    fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) -> Fallible<()> {
-        let mut v: Vec<_> = states.into_iter().collect();
+    fn del_states<T: IntoIterator<Item = StateId>>(&mut self, dstates: T) -> Fallible<()> {
+        let mut new_id = vec![0 as i32; self.states.len()];
 
-        // Necessary : the states that are removed modify the id of all the states that come after
-        v.sort();
-        for j in (0..v.len()).rev() {
-            self.del_state(v[j])?;
+        for s in dstates {
+            new_id[s] = -1;
         }
+
+        let mut nstates = 0 as usize;
+
+        for s in 0..self.states.len() {
+            if new_id[s] != -1 {
+                new_id[s] = nstates as i32;
+                if s != nstates {
+                    self.states.swap(nstates, s);
+                }
+                nstates += 1;
+            }
+        }
+
+        self.states.truncate(nstates);
+
+        for s in 0..self.states.len() {
+            let mut to_delete = vec![];
+            for (idx, arc) in self.arcs_iter_unchecked_mut(s).enumerate() {
+                let t = new_id[arc.nextstate];
+                if t != -1 {
+                    arc.nextstate = t as usize;
+                } else {
+                    to_delete.push(idx);
+                }
+            }
+            for i in to_delete.iter().rev() {
+                self.states[s].arcs.remove(*i);
+            }
+        }
+
+        if let Some(start) = self.start() {
+            let new_state = new_id[start];
+            if new_state == -1 {
+                self.start_state = None;
+            } else {
+                self.start_state = Some(new_state as usize);
+            }
+        }
+
         Ok(())
     }
 
