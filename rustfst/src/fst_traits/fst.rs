@@ -136,6 +136,7 @@ where
     type Iter: Iterator<Item = &'a Arc<Self::W>> + Clone;
 
     fn arcs_iter(&'a self, state_id: StateId) -> Fallible<Self::Iter>;
+    fn arcs_iter_unchecked(&'a self, state_id: StateId) -> Self::Iter;
 }
 
 /// Trait defining the minimum interface necessary for a wFST.

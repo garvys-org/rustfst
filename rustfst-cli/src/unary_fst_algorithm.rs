@@ -152,7 +152,7 @@ pub trait UnaryFstAlgorithm {
         let s = format!(
             "\t Mean {} : \t\t{}",
             "CLI time".red(),
-            format!("{:.6}s", duration_to_seconds(&mean_total_time)).cyan()
+            format!("{:.6}s", duration_to_seconds(&mean_total_time)).red()
         );
         println!("{}", s.bold());
         Ok(())

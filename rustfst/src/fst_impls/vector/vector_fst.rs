@@ -98,6 +98,10 @@ impl<'a, W: 'static + Semiring> ArcIterator<'a> for VectorFst<W> {
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
         Ok(state.arcs.iter())
     }
+
+    fn arcs_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
+        unsafe { self.states.get_unchecked(state_id).arcs.iter() }
+    }
 }
 
 impl<W: 'static + Semiring> ExpandedFst for VectorFst<W> {
@@ -244,6 +248,10 @@ impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
             .get_mut(state_id)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
         Ok(state.arcs.iter_mut())
+    }
+
+    fn arcs_iter_unchecked_mut(&'a mut self, state_id: usize) -> Self::IterMut {
+        unsafe { self.states.get_unchecked_mut(state_id).arcs.iter_mut() }
     }
 }
 

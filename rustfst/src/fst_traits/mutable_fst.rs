@@ -245,4 +245,5 @@ where
 {
     type IterMut: Iterator<Item = &'a mut Arc<Self::W>>;
     fn arcs_iter_mut(&'a mut self, state_id: StateId) -> Fallible<Self::IterMut>;
+    fn arcs_iter_unchecked_mut(&'a mut self, state_id: StateId) -> Self::IterMut;
 }
