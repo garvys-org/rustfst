@@ -13,6 +13,7 @@ use crate::fst_traits::{
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::Semiring;
 use crate::StateId;
+use std::cmp::Ordering;
 
 /// Simple concrete, mutable FST whose states and arcs are stored in standard vectors.
 ///
@@ -190,6 +191,10 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(())
     }
 
+    fn add_arc_unchecked(&mut self, source: usize, arc: Arc<Self::W>) {
+        unsafe { self.states.get_unchecked_mut(source).arcs.push(arc) };
+    }
+
     fn delete_final_weight(&mut self, source: usize) -> Fallible<()> {
         self.states
             .get_mut(source)
@@ -218,6 +223,16 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(v)
     }
 
+    fn pop_arcs_unchecked(&mut self, source: usize) -> Vec<Arc<Self::W>> {
+        unsafe {
+            self.states
+                .get_unchecked_mut(source)
+                .arcs
+                .drain(..)
+                .collect()
+        }
+    }
+
     fn reserve_arcs(&mut self, source: usize, additional: usize) -> Fallible<()> {
         self.states
             .get_mut(source)
@@ -225,6 +240,15 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
             .arcs
             .reserve(additional);
         Ok(())
+    }
+
+    fn reserve_arcs_unchecked(&mut self, source: usize, additional: usize) {
+        unsafe {
+            self.states
+                .get_unchecked_mut(source)
+                .arcs
+                .reserve(additional)
+        };
     }
 
     fn reserve_states(&mut self, additional: usize) {
@@ -237,6 +261,14 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         } else {
             None
         }
+    }
+
+    fn sort_arcs_unchecked<F: Fn(&Arc<Self::W>, &Arc<Self::W>) -> Ordering>(
+        &mut self,
+        state: StateId,
+        f: F,
+    ) {
+        unsafe { self.states.get_unchecked_mut(state).arcs.sort_by(f) }
     }
 }
 

@@ -32,7 +32,7 @@ impl UnaryFstAlgorithm for ArcsortAlgorithm {
             "olabel" => olabel_compare,
             _ => bail!("Unknow sort_type : {}", self.sort_type),
         };
-        arc_sort(&mut fst, cmp)?;
+        arc_sort(&mut fst, cmp);
         Ok(fst)
     }
 }

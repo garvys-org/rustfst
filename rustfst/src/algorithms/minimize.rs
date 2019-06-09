@@ -113,7 +113,7 @@ where
 
     if allow_acyclic_minimization && props.contains(FstProperties::ACYCLIC) {
         // Acyclic minimization
-        arc_sort(ifst, ilabel_compare)?;
+        arc_sort(ifst, ilabel_compare);
         let minimizer = AcyclicMinimizer::new(ifst)?;
         merge_states(minimizer.get_partition(), ifst)?;
     } else {
@@ -408,7 +408,7 @@ where
 {
     // Initialize
     let mut tr: VectorFst<W::ReverseWeight> = reverse(fst)?;
-    arc_sort(&mut tr, ilabel_compare)?;
+    arc_sort(&mut tr, ilabel_compare);
     let mut partition = Partition::new(tr.num_states() - 1);
     let mut queue = LifoQueue::default();
     pre_partition(fst, &mut partition, &mut queue);

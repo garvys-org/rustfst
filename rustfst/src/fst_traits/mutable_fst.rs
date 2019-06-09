@@ -2,10 +2,11 @@ use std::collections::HashMap;
 
 use failure::Fallible;
 
-use crate::algorithms::{ArcMapper, StateMapper};
+use crate::algorithms::ArcMapper;
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::StateId;
+use std::cmp::Ordering;
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
@@ -160,6 +161,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// assert_eq!(fst.num_arcs(s1).unwrap(), 1);
     /// ```
     fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Fallible<()>;
+    fn add_arc_unchecked(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>);
 
     /// Remove the final weight of a specific state.
     fn delete_final_weight(&mut self, source: StateId) -> Fallible<()>;
@@ -169,15 +171,23 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
 
     /// Remove all arcs leaving a state and return them.
     fn pop_arcs(&mut self, source: StateId) -> Fallible<Vec<Arc<Self::W>>>;
+    fn pop_arcs_unchecked(&mut self, source: StateId) -> Vec<Arc<Self::W>>;
 
     /// Reserve space for storing enough arcs leaving a state.
     fn reserve_arcs(&mut self, source: StateId, additional: usize) -> Fallible<()>;
+    fn reserve_arcs_unchecked(&mut self, source: StateId, additional: usize);
 
     /// Reserve space for storing enough states.
     fn reserve_states(&mut self, additional: usize);
 
     /// Retrieves a mutable reference to the final weight of a state (if the state is a final one).
     fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut <Self as CoreFst>::W>;
+
+    fn sort_arcs_unchecked<F: Fn(&Arc<Self::W>, &Arc<Self::W>) -> Ordering>(
+        &mut self,
+        state: StateId,
+        f: F,
+    );
 
     fn add_fst<F: ExpandedFst<W = Self::W>>(
         &mut self,
@@ -230,11 +240,6 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// Maps an arc using a `ArcMapper` object.
     fn arc_map<M: ArcMapper<Self::W>>(&mut self, mapper: &mut M) -> Fallible<()> {
         crate::algorithms::arc_map(self, mapper)
-    }
-
-    /// Maps a state using a `StateMapper` object.
-    fn state_map<M: StateMapper<Self>>(&mut self, mapper: &mut M) -> Fallible<()> {
-        crate::algorithms::state_map(self, mapper)
     }
 }
 

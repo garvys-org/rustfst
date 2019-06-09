@@ -1,5 +1,6 @@
 use failure::Fallible;
 
+use crate::algorithms::state_map;
 use crate::algorithms::state_mappers::ArcSumMapper;
 use crate::algorithms::state_mappers::ArcUniqueMapper;
 use crate::fst_traits::MutableFst;
@@ -15,7 +16,7 @@ where
 {
     let mut fst_state_map = test_data.raw.clone();
     let mut mapper = ArcSumMapper {};
-    fst_state_map.state_map(&mut mapper)?;
+    state_map(&mut fst_state_map, &mut mapper)?;
 
     assert_eq!(
         test_data.state_map_arc_sum,
@@ -38,7 +39,7 @@ where
 {
     let mut fst_state_map = test_data.raw.clone();
     let mut mapper = ArcUniqueMapper {};
-    fst_state_map.state_map(&mut mapper)?;
+    state_map(&mut fst_state_map, &mut mapper)?;
 
     assert_eq!(
         test_data.state_map_arc_unique,

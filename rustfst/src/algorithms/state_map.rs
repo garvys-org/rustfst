@@ -1,6 +1,6 @@
 use failure::Fallible;
 
-use crate::fst_traits::MutableFst;
+use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::StateId;
 
 /// StateMapper Interface. The class determines how states are mapped. This is useful for
@@ -16,16 +16,14 @@ pub trait StateMapper<F: MutableFst> {
 /// The transformation is specified by a function object called a `StateMapper`.
 pub fn state_map<F, M>(ifst: &mut F, mapper: &mut M) -> Fallible<()>
 where
-    F: MutableFst,
+    F: MutableFst + ExpandedFst,
     M: StateMapper<F>,
 {
     if ifst.start().is_none() {
         return Ok(());
     }
 
-    let states: Vec<_> = ifst.states_iter().collect();
-
-    for state in states {
+    for state in 0..ifst.num_states() {
         mapper.map_arcs(ifst, state)?;
         mapper.map_final_weight(ifst.final_weight_mut(state))?;
     }

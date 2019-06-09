@@ -15,7 +15,7 @@ where
     F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arcsort = test_data.raw.clone();
-    arc_sort(&mut fst_arcsort, ilabel_compare)?;
+    arc_sort(&mut fst_arcsort, ilabel_compare);
     assert!(fst_arcsort
         .properties()?
         .contains(FstProperties::I_LABEL_SORTED));
@@ -38,7 +38,7 @@ where
     F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arcsort = test_data.raw.clone();
-    arc_sort(&mut fst_arcsort, olabel_compare)?;
+    arc_sort(&mut fst_arcsort, olabel_compare);
     assert!(fst_arcsort
         .properties()?
         .contains(FstProperties::O_LABEL_SORTED));
