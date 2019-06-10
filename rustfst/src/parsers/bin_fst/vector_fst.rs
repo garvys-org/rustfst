@@ -66,7 +66,7 @@ named!(parse_fst_header <&[u8], FstHeader>, do_parse!(
     (FstHeader {magic_number, fst_type, arc_type, version, flags, properties, start, num_states, num_arcs}))
 );
 
-fn parse_fst_arc2<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], Arc<W>, u32> {
+fn parse_fst_arc<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], Arc<W>, u32> {
     do_parse!(
         i,
         ilabel: le_i32
@@ -82,12 +82,12 @@ fn parse_fst_arc2<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], Arc<W>, u
     )
 }
 
-fn parse_fst_state2<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFstState<W>, u32> {
+fn parse_fst_state<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFstState<W>, u32> {
     do_parse!(
         i,
         final_weight: le_f32
             >> num_arcs: le_i64
-            >> arcs: count!(parse_fst_arc2, num_arcs as usize)
+            >> arcs: count!(parse_fst_arc, num_arcs as usize)
             >> (VectorFstState {
                 final_weight: parse_final_weight(final_weight),
                 arcs
@@ -95,11 +95,11 @@ fn parse_fst_state2<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorF
     )
 }
 
-fn parse_fst2<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFst<W>, u32> {
+fn parse_fst<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFst<W>, u32> {
     do_parse!(
         i,
         header: parse_fst_header
-            >> states: count!(parse_fst_state2, header.num_states as usize)
+            >> states: count!(parse_fst_state, header.num_states as usize)
             >> (VectorFst {
                 start_state: parse_start_state(header.start),
                 states: states
@@ -107,8 +107,8 @@ fn parse_fst2<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFst<W>,
     )
 }
 
-fn complete_parse_fst2<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFst<W>, u32> {
-    complete!(i, parse_fst2)
+fn complete_parse_fst<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFst<W>, u32> {
+    complete!(i, parse_fst)
 }
 
 #[inline]
@@ -137,7 +137,7 @@ impl<W: Semiring<Type = f32> + 'static> BinaryDeserializer for VectorFst<W> {
             format!("Can't open FST binary file : {:?}", path_bin_fst.as_ref())
         })?;
 
-        let (_, parsed_fst) = complete_parse_fst2(&data)
+        let (_, parsed_fst) = complete_parse_fst(&data)
             .map_err(|_| format_err!("Error while parsing binary VectorFst"))?;
 
         Ok(parsed_fst)
