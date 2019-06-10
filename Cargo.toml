@@ -3,3 +3,8 @@ members = [
     "rustfst",
     "rustfst-cli"
 ]
+
+[profile.release]
+opt-level = 3
+debug = false
+lto = true

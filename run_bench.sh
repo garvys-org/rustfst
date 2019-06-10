@@ -35,3 +35,20 @@ echo "RUST :"
 echo "==================================================================="
 echo -e "\n\n"
 
+echo "==================================================================="
+echo "BENCH CONNECT"
+echo "C++ :"
+./openfst_benchmark/bench_connect 3 10 $1 tmp_benchs/connect_openfst.fst
+echo "RUST :"
+./target/release/rustfst-cli connect $1 tmp_benchs/connect_rustfst.fst --bench --n_warm_ups 3 --n_iters 10
+echo "==================================================================="
+echo -e "\n\n"
+
+echo "==================================================================="
+echo "BENCH REVERSE"
+echo "C++ :"
+./openfst_benchmark/bench_connect 3 10 $1 tmp_benchs/reverse_openfst.fst
+echo "RUST :"
+./target/release/rustfst-cli reverse $1 tmp_benchs/reverse_rustfst.fst --bench --n_warm_ups 3 --n_iters 10
+echo "==================================================================="
+echo -e "\n\n"
