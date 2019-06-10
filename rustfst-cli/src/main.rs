@@ -127,7 +127,7 @@ fn handle(matches: clap::ArgMatches) -> Result<(), ExitFailure> {
             m.value_of("in.fst").unwrap(),
             m.value_of("out.fst").unwrap(),
         )
-            .run_cli_or_bench(m),
+        .run_cli_or_bench(m),
         (s, _) => Err(format_err!("Unknown subcommand {}.", s)),
     }
     .map_err(|e| e.into())
