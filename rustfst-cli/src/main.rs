@@ -9,6 +9,7 @@ use crate::cmds::connect::ConnectAlgorithm;
 use crate::cmds::invert::InvertAlgorithm;
 use crate::cmds::minimize::MinimizeAlgorithm;
 use crate::cmds::project::ProjectFstAlgorithm;
+use crate::cmds::reverse::ReverseAlgorithm;
 use crate::cmds::topsort::TopsortAlgorithm;
 use crate::pretty_errors::ExitFailure;
 use crate::unary_fst_algorithm::UnaryFstAlgorithm;
@@ -68,6 +69,10 @@ fn main() {
     let topsort_cmd = SubCommand::with_name("topsort").about("Topsort algorithm.");
     app = app.subcommand(one_in_one_out_options(topsort_cmd));
 
+    // Reverse
+    let reverse_cmd = SubCommand::with_name("reverse").about("Reverse algorithm.");
+    app = app.subcommand(one_in_one_out_options(reverse_cmd));
+
     let matches = app.get_matches();
 
     let env = env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "debug");
@@ -118,6 +123,11 @@ fn handle(matches: clap::ArgMatches) -> Result<(), ExitFailure> {
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
+        ("reverse", Some(m)) => ReverseAlgorithm::new(
+            m.value_of("in.fst").unwrap(),
+            m.value_of("out.fst").unwrap(),
+        )
+            .run_cli_or_bench(m),
         (s, _) => Err(format_err!("Unknown subcommand {}.", s)),
     }
     .map_err(|e| e.into())
