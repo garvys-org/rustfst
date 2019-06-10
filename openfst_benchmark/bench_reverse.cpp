@@ -18,6 +18,7 @@ int main(int argc, char **argv) {
     UNARY_ALGO_BENCH({
         auto rfst = new VectorFst<StdArc>();
         Reverse(*fst, rfst);
+        delete fst;
         fst = rfst;
     })
 }

@@ -10,9 +10,7 @@ use nom::{le_f32, le_i32, le_i64, le_u64};
 
 use crate::fst_impls::vector::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{
-    ArcIterator, BinaryDeserializer, BinarySerializer, CoreFst, ExpandedFst,
-};
+use crate::fst_traits::{ArcIterator, BinaryDeserializer, BinarySerializer, CoreFst, ExpandedFst};
 use crate::semirings::Semiring;
 use crate::Arc;
 use crate::StateId;
@@ -188,7 +186,7 @@ impl<W: 'static + Semiring<Type = f32>> BinarySerializer for VectorFst<W> {
         //version: i32,
         write_bin_i32(&mut file, 2i32)?;
         //flags: i32,
-        // FIXME: Flags are used to check whether or not a symbltable has to be loaded
+        // FIXME: Flags are used to check whether or not a symboltable has to be loaded
         write_bin_i32(&mut file, 0i32)?;
         //properties: u64, 3 = kMutable | kExpanded
         // FIXME: Once the properties are stored, need to read them
@@ -199,7 +197,7 @@ impl<W: 'static + Semiring<Type = f32>> BinarySerializer for VectorFst<W> {
         write_bin_i64(&mut file, self.num_states() as i64)?;
         //num_arcs: i64,
         let num_arcs: usize = (0..self.num_states())
-            .map(|s: usize| self.num_arcs(s).unwrap())
+            .map(|s: usize| self.num_arcs_unchecked(s))
             .sum();
         write_bin_i64(&mut file, num_arcs as i64)?;
 
@@ -207,7 +205,7 @@ impl<W: 'static + Semiring<Type = f32>> BinarySerializer for VectorFst<W> {
         for state in 0..self.num_states() {
             let f_weight = self.final_weight(state).unwrap_or_else(W::zero).value();
             write_bin_f32(&mut file, f_weight)?;
-            write_bin_i64(&mut file, self.num_arcs(state).unwrap() as i64)?;
+            write_bin_i64(&mut file, self.num_arcs_unchecked(state) as i64)?;
 
             for arc in self.arcs_iter_unchecked(state) {
                 write_bin_i32(&mut file, arc.ilabel as i32)?;

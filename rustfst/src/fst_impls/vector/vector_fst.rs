@@ -54,6 +54,10 @@ impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
             bail!("State {:?} doesn't exist", s);
         }
     }
+
+    fn num_arcs_unchecked(&self, s: usize) -> usize {
+        unsafe { self.states.get_unchecked(s).num_arcs() }
+    }
 }
 
 impl<'a, W: 'a + Semiring> StateIterator<'a> for VectorFst<W> {
@@ -137,10 +141,19 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         }
     }
 
+    fn set_final_unchecked(&mut self, state_id: usize, final_weight: Self::W) {
+        self.states[state_id].final_weight = Some(final_weight);
+    }
+
     fn add_state(&mut self) -> StateId {
         let id = self.states.len();
         self.states.insert(id, VectorFstState::default());
         id
+    }
+
+    fn add_states(&mut self, n: usize) {
+        let len = self.states.len();
+        self.states.resize_with(len + n, VectorFstState::default);
     }
 
     fn del_state(&mut self, state_to_remove: StateId) -> Fallible<()> {

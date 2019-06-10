@@ -61,6 +61,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// assert_eq!(fst.final_weight(s2), Some(BooleanWeight::one()));
     /// ```
     fn set_final(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W) -> Fallible<()>;
+    fn set_final_unchecked(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W);
 
     /// Adds a new state to the current FST. The identifier of the new state is returned
     ///
@@ -82,6 +83,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     ///
     /// ```
     fn add_state(&mut self) -> StateId;
+    fn add_states(&mut self, n: usize);
 
     /// Removes a state from an FST. It also removes all the arcs starting from another state and
     /// reaching this state. An error is raised if the state `state_id` doesn't exist.
@@ -107,6 +109,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// ```
     fn del_state(&mut self, state_id: StateId) -> Fallible<()>;
 
+    // TODO: Need to define a correct behaviour is the same state is present multiple times in the iterator
     /// Removes multiple states from an FST. If one of the states doesn't exist, an error is raised.
     ///
     /// # Warning
