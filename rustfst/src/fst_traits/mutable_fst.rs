@@ -162,6 +162,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// ```
     fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Fallible<()>;
     fn add_arc_unchecked(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>);
+    fn set_arcs_unchecked(&mut self, source: StateId, arcs: Vec<Arc<<Self as CoreFst>::W>>);
 
     /// Remove the final weight of a specific state.
     fn delete_final_weight(&mut self, source: StateId) -> Fallible<()>;

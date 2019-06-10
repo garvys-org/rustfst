@@ -217,6 +217,10 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         unsafe { self.states.get_unchecked_mut(source).arcs.push(arc) };
     }
 
+    fn set_arcs_unchecked(&mut self, source: usize, arcs: Vec<Arc<Self::W>>) {
+        self.states[source].arcs = arcs;
+    }
+
     fn delete_final_weight(&mut self, source: usize) -> Fallible<()> {
         self.states
             .get_mut(source)
@@ -264,6 +268,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(())
     }
 
+    #[inline]
     fn reserve_arcs_unchecked(&mut self, source: usize, additional: usize) {
         unsafe {
             self.states

@@ -14,7 +14,6 @@ use crate::semirings::Semiring;
 /// except having the reversed Weight type.
 ///
 /// A superinitial state is always created.
-#[allow(unused)]
 pub fn reverse<W, F1, F2>(ifst: &F1) -> Fallible<F2>
 where
     W: Semiring,
@@ -24,31 +23,40 @@ where
     let mut ofst = F2::new();
     ofst.reserve_states(ifst.num_states());
     let istart = ifst.start();
-    let mut ostart = ofst.add_state();
-    let mut offset = 1;
-    let istates: Vec<_> = ifst.states_iter().collect();
-    for is in istates {
-        let os = is + offset;
-        while ofst.num_states() <= os {
-            ofst.add_state();
-        }
-        if Some(is) == istart {
-            ofst.set_final(os, W::ReverseWeight::one());
-        }
-        let weight = ifst.final_weight(is);
-        if weight.is_some() && offset == 1 {
-            ofst.add_arc(0, Arc::new(0, 0, weight.unwrap().reverse()?, os));
-        }
-        for iarc in ifst.arcs_iter(is)? {
-            let nos = iarc.nextstate + offset;
-            let weight = iarc.weight.reverse()?;
-            while ofst.num_states() <= nos {
-                ofst.add_state();
-            }
-            ofst.add_arc(nos, Arc::new(iarc.ilabel, iarc.olabel, weight, os))?;
+    let ostart = ofst.add_state();
+
+    for _ in 0..ifst.num_states() {
+        ofst.add_state();
+    }
+
+    let mut c_arcs = vec![0; ifst.num_states()+1];
+    for is in 0..ifst.num_states() {
+        for iarc in ifst.arcs_iter_unchecked(is) {
+            c_arcs[iarc.nextstate + 1] += 1;
         }
     }
-    ofst.set_start(ostart);
+
+    let mut states_arcs : Vec<_> = c_arcs.into_iter().map(|c| Vec::with_capacity(c)).collect();
+
+    for is in 0..ifst.num_states() {
+        let os = is + 1;
+        if Some(is) == istart {
+            ofst.set_final(os, W::ReverseWeight::one())?;
+        }
+        let weight = ifst.final_weight(is);
+        if let Some(w) = weight {
+            states_arcs[0].push(Arc::new(0, 0, w.reverse()?, os));
+        }
+
+        for iarc in ifst.arcs_iter_unchecked(is) {
+            let nos = iarc.nextstate + 1;
+            let weight = iarc.weight.reverse()?;
+            let w = Arc::new(iarc.ilabel, iarc.olabel, weight, os);
+            states_arcs[nos].push(w);
+        }
+    }
+    states_arcs.into_iter().enumerate().for_each(|(s, arcs)| ofst.set_arcs_unchecked(s, arcs));
+    ofst.set_start(ostart)?;
 
     Ok(ofst)
 }
