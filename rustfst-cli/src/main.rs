@@ -80,7 +80,14 @@ fn main() {
         .arg(
             Arg::with_name("map_type")
                 .long("map_type")
-                .possible_values(&["arc_sum", "arc_unique", "identity"])
+                .possible_values(&[
+                    "arc_sum",
+                    "arc_unique",
+                    "identity",
+                    "input_epsilon",
+                    "invert",
+                    "output_epsilon",
+                ])
                 .default_value("identity")
                 .help("Map operation."),
         );

@@ -36,6 +36,26 @@ impl UnaryFstAlgorithm for MapAlgorithm {
                 arc_sum(&mut fst);
                 Ok(fst)
             }
+            "identity" => {
+                let mut mapper = arc_mappers::IdentityArcMapper {};
+                arc_map(&mut fst, &mut mapper)?;
+                Ok(fst)
+            }
+            "input_epsilon" => {
+                let mut mapper = arc_mappers::InputEpsilonMapper {};
+                arc_map(&mut fst, &mut mapper)?;
+                Ok(fst)
+            }
+            "invert" => {
+                let mut mapper = arc_mappers::InvertWeightMapper {};
+                arc_map(&mut fst, &mut mapper)?;
+                Ok(fst)
+            }
+            "output_epsilon" => {
+                let mut mapper = arc_mappers::OutputEpsilonMapper {};
+                arc_map(&mut fst, &mut mapper)?;
+                Ok(fst)
+            }
             _ => bail!(
                 "Internal error. Should never reach that line. Map type not supported = {}",
                 self.map_type

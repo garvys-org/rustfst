@@ -7,6 +7,7 @@ use crate::Arc;
 /// Mapper to reciprocate all non-Zero() weights.
 pub struct InvertWeightMapper {}
 
+#[inline]
 pub fn map_weight<W: WeaklyDivisibleSemiring>(weight: &mut W) -> Fallible<()> {
     Ok(weight.set_value(W::one().divide(weight, DivideType::DivideAny)?.value()))
 }
