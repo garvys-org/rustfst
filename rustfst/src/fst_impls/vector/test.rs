@@ -204,14 +204,14 @@ mod tests {
 
         let s = fst1.add_state();
 
-        let mut fst2 = fst1.clone();
+        //        let mut fst2 = fst1.clone();
 
         // Perform test with del_state
         assert!(fst1.del_state(s).is_ok());
         assert!(fst1.del_state(s).is_err());
 
         // Perform test with del_states
-        let states_to_remove = vec![s, s];
+        //        let states_to_remove = vec![s, s];
         //        assert!(fst2.del_states(states_to_remove.into_iter()).is_err());
         Ok(())
     }

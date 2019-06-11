@@ -29,14 +29,14 @@ where
         ofst.add_state();
     }
 
-    let mut c_arcs = vec![0; ifst.num_states()+1];
+    let mut c_arcs = vec![0; ifst.num_states() + 1];
     for is in 0..ifst.num_states() {
         for iarc in ifst.arcs_iter_unchecked(is) {
             c_arcs[iarc.nextstate + 1] += 1;
         }
     }
 
-    let mut states_arcs : Vec<_> = c_arcs.into_iter().map(|c| Vec::with_capacity(c)).collect();
+    let mut states_arcs: Vec<_> = c_arcs.into_iter().map(|c| Vec::with_capacity(c)).collect();
 
     for is in 0..ifst.num_states() {
         let os = is + 1;
@@ -55,7 +55,10 @@ where
             states_arcs[nos].push(w);
         }
     }
-    states_arcs.into_iter().enumerate().for_each(|(s, arcs)| ofst.set_arcs_unchecked(s, arcs));
+    states_arcs
+        .into_iter()
+        .enumerate()
+        .for_each(|(s, arcs)| ofst.set_arcs_unchecked(s, arcs));
     ofst.set_start(ostart)?;
 
     Ok(ofst)

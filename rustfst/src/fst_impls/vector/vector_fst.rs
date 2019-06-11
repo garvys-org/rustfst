@@ -4,6 +4,7 @@ use std::slice;
 
 use failure::{bail, ensure, format_err, Fallible};
 
+use crate::algorithms::arc_unique::arc_compare;
 use crate::algorithms::{concat, union};
 use crate::arc::Arc;
 use crate::fst_traits::{
@@ -310,6 +311,39 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
     ) {
         unsafe { self.states.get_unchecked_mut(state).arcs.sort_by(f) }
     }
+
+    fn unique_arcs_unchecked(&mut self, state: usize) {
+        let arcs = unsafe { &mut self.states.get_unchecked_mut(state).arcs };
+        arcs.sort_by(arc_compare);
+        arcs.dedup();
+    }
+
+    fn sum_arcs_unchecked(&mut self, state: usize) {
+        let arcs = unsafe { &mut self.states.get_unchecked_mut(state).arcs };
+        arcs.sort_by(arc_compare);
+        let mut n_arcs: usize = 0;
+        for i in 0..arcs.len() {
+            if n_arcs > 0 && equal_arc(&arcs[i], &arcs[n_arcs - 1]) {
+                let (left, right) = arcs.split_at_mut(i);
+                left[n_arcs - 1]
+                    .weight
+                    .plus_assign(&right[0].weight)
+                    .unwrap();
+            } else {
+                arcs.swap(n_arcs, i);
+                n_arcs += 1;
+            }
+        }
+        arcs.truncate(n_arcs);
+        // Truncate doesn't modify the capacity of the vector. Maybe a shrink_to_fit ?
+    }
+}
+
+#[inline]
+fn equal_arc<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> bool {
+    arc_1.ilabel == arc_2.ilabel
+        && arc_1.olabel == arc_2.olabel
+        && arc_1.nextstate == arc_2.nextstate
 }
 
 impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {

@@ -193,6 +193,10 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
         f: F,
     );
 
+    fn unique_arcs_unchecked(&mut self, state: StateId);
+
+    fn sum_arcs_unchecked(&mut self, state: StateId);
+
     fn add_fst<F: ExpandedFst<W = Self::W>>(
         &mut self,
         fst_to_add: &F,

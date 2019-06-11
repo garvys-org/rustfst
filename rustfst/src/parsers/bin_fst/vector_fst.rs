@@ -166,7 +166,7 @@ fn write_bin_f32<W: Write>(file: &mut W, i: f32) -> Fallible<()> {
 }
 
 #[inline]
-fn write_bin_string<'a, W: Write>(file: &mut W, s: &'a str) -> Fallible<()> {
+fn write_bin_string<W: Write>(file: &mut W, s: &str) -> Fallible<()> {
     write_bin_i32(file, s.len() as i32)?;
     file.write_all(s.as_bytes()).map_err(|e| e.into())
 }

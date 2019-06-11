@@ -1,12 +1,10 @@
 use std::collections::HashSet;
 use std::hash::BuildHasher;
 
-use failure::Fallible;
-
-use crate::algorithms::dfs;
 use crate::fst_traits::Fst;
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::StateId;
+use failure::Fallible;
 use std::time::Instant;
 
 /// This operation trims an FST, removing states and arcs that are not on successful paths.
