@@ -81,6 +81,31 @@ pub fn dfs_unchecked<F: Fst, S1: BuildHasher, S2: BuildHasher>(
     }
 }
 
+//#[derive(PartialOrd, PartialEq, Copy, Clone)]
+//enum StateColor {
+//    DfsWhite, // Undiscovered.
+//    DfsGrey,  // Discovered but unfinished.
+//    DfsBlack, // Finished.
+//}
+//
+//pub fn dfs_unchecked_iterative<F: Fst + ExpandedFst>(fst: &F, start_state: StateId) {
+//    let mut state_color = vec![StateColor::DfsWhite; fst.num_states()];
+//    let mut stack = vec![start_state];
+//
+//    while let Some(state) = stack.pop() {
+//        state_color[state] = StateColor::DfsGrey;
+//
+//        for arc in fst.arcs_iter_unchecked(state) {
+//            if state_color[arc.nextstate] == StateColor::DfsWhite {
+//                state_color[arc.nextstate] = StateColor::DfsGrey;
+//                stack.push(arc.nextstate);
+//            }
+//        }
+//
+//        state_color[state] = StateColor::DfsBlack;
+//    }
+//}
+
 #[cfg(test)]
 mod tests {
     use crate::test_data::vector_fst::get_vector_fsts_for_tests;

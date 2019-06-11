@@ -7,6 +7,7 @@ use log::error;
 use crate::cmds::arcsort::ArcsortAlgorithm;
 use crate::cmds::connect::ConnectAlgorithm;
 use crate::cmds::invert::InvertAlgorithm;
+use crate::cmds::map::MapAlgorithm;
 use crate::cmds::minimize::MinimizeAlgorithm;
 use crate::cmds::project::ProjectFstAlgorithm;
 use crate::cmds::reverse::ReverseAlgorithm;
@@ -73,6 +74,18 @@ fn main() {
     let reverse_cmd = SubCommand::with_name("reverse").about("Reverse algorithm.");
     app = app.subcommand(one_in_one_out_options(reverse_cmd));
 
+    // Map
+    let map_cmd = SubCommand::with_name("map")
+        .about("Applies an operation to each arc of an FST.")
+        .arg(
+            Arg::with_name("map_type")
+                .long("map_type")
+                .possible_values(&["arc_sum", "arc_unique", "identity"])
+                .default_value("identity")
+                .help("Map operation."),
+        );
+    app = app.subcommand(one_in_one_out_options(map_cmd));
+
     let matches = app.get_matches();
 
     let env = env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "debug");
@@ -125,6 +138,12 @@ fn handle(matches: clap::ArgMatches) -> Result<(), ExitFailure> {
         .run_cli_or_bench(m),
         ("reverse", Some(m)) => ReverseAlgorithm::new(
             m.value_of("in.fst").unwrap(),
+            m.value_of("out.fst").unwrap(),
+        )
+        .run_cli_or_bench(m),
+        ("map", Some(m)) => MapAlgorithm::new(
+            m.value_of("in.fst").unwrap(),
+            m.value_of("map_type").unwrap(),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),

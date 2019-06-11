@@ -18,7 +18,7 @@ impl UnaryFstAlgorithm for ConnectAlgorithm {
         self.path_out.as_str()
     }
 
-    fn get_algorithm_name() -> String {
+    fn get_algorithm_name(&self) -> String {
         "connect".to_string()
     }
 

@@ -15,7 +15,7 @@ fn duration_to_seconds(duration: &Duration) -> f64 {
 pub trait UnaryFstAlgorithm {
     fn get_path_in(&self) -> &str;
     fn get_path_out(&self) -> &str;
-    fn get_algorithm_name() -> String;
+    fn get_algorithm_name(&self) -> String;
 
     fn read(&self) -> Fallible<VectorFst<TropicalWeight>> {
         VectorFst::<TropicalWeight>::read(self.get_path_in())
@@ -41,7 +41,7 @@ pub trait UnaryFstAlgorithm {
     }
 
     fn run_cli(&self) -> Fallible<()> {
-        info!("Running {} algorithm", Self::get_algorithm_name().blue());
+        info!("Running {} algorithm", self.get_algorithm_name().blue());
         // Parsing
         debug!("Parsing...");
         let parsing_start = Instant::now();
@@ -69,7 +69,7 @@ pub trait UnaryFstAlgorithm {
     fn run_bench(&self, n_warm_ups: usize, n_iters: usize) -> Fallible<()> {
         println!(
             "Running benchmark for algorithm {}",
-            Self::get_algorithm_name().blue()
+            self.get_algorithm_name().blue()
         );
         let mut avg_parsing_time = Duration::default();
         let mut avg_algo_time = Duration::default();

@@ -18,7 +18,7 @@ impl UnaryFstAlgorithm for TopsortAlgorithm {
         self.path_out.as_str()
     }
 
-    fn get_algorithm_name() -> String {
+    fn get_algorithm_name(&self) -> String {
         "topsort".to_string()
     }
 

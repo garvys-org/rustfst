@@ -23,7 +23,7 @@ impl UnaryFstAlgorithm for ProjectFstAlgorithm {
         self.path_out.as_str()
     }
 
-    fn get_algorithm_name() -> String {
+    fn get_algorithm_name(&self) -> String {
         "project".into()
     }
 
