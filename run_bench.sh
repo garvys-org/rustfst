@@ -89,20 +89,29 @@ mkdir tmp_benchs
 #echo "==================================================================="
 #echo -e "\n\n"
 
-echo "==================================================================="
-echo "BENCH MAP - INVERT WEIGHT"
-echo "C++ :"
-./openfst_benchmark/bench_map_arc_invert_weight 3 10 $1 tmp_benchs/map_arc_invert_openfst.fst
-echo "RUST :"
-./target/release/rustfst-cli map --map_type invert $1 tmp_benchs/map_arc_invert_rustfst.fst --bench --n_warm_ups 3 --n_iters 10
-echo "==================================================================="
-echo -e "\n\n"
+#echo "==================================================================="
+#echo "BENCH MAP - INVERT WEIGHT"
+#echo "C++ :"
+#./openfst_benchmark/bench_map_arc_invert_weight 3 10 $1 tmp_benchs/map_arc_invert_openfst.fst
+#echo "RUST :"
+#./target/release/rustfst-cli map --map_type invert $1 tmp_benchs/map_arc_invert_rustfst.fst --bench --n_warm_ups 3 --n_iters 10
+#echo "==================================================================="
+#echo -e "\n\n"
+#
+#echo "==================================================================="
+#echo "BENCH MAP - OUTPUT EPSILON"
+#echo "C++ :"
+#./openfst_benchmark/bench_map_arc_output_epsilon 3 10 $1 tmp_benchs/map_arc_output_epsilon_openfst.fst
+#echo "RUST :"
+#./target/release/rustfst-cli map --map_type output_epsilon $1 tmp_benchs/map_arc_output_epsilon_rustfst.fst --bench --n_warm_ups 3 --n_iters 10
+#echo "==================================================================="
+#echo -e "\n\n"
 
 echo "==================================================================="
-echo "BENCH MAP - OUTPUT EPSILON"
+echo "BENCH MAP - RMWEIGHT"
 echo "C++ :"
-./openfst_benchmark/bench_map_arc_output_epsilon 3 10 $1 tmp_benchs/map_arc_output_epsilon_openfst.fst
+./openfst_benchmark/bench_map_arc_rmweight 3 10 $1 tmp_benchs/map_arc_rmweight_openfst.fst
 echo "RUST :"
-./target/release/rustfst-cli map --map_type output_epsilon $1 tmp_benchs/map_arc_output_epsilon_rustfst.fst --bench --n_warm_ups 3 --n_iters 10
+./target/release/rustfst-cli map --map_type rmweight $1 tmp_benchs/map_arc_rmweight_rustfst.fst --bench --n_warm_ups 3 --n_iters 10
 echo "==================================================================="
 echo -e "\n\n"

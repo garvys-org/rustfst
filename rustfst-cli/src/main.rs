@@ -11,6 +11,7 @@ use crate::cmds::map::MapAlgorithm;
 use crate::cmds::minimize::MinimizeAlgorithm;
 use crate::cmds::project::ProjectFstAlgorithm;
 use crate::cmds::reverse::ReverseAlgorithm;
+use crate::cmds::shortest_path::ShortestPathAlgorithm;
 use crate::cmds::topsort::TopsortAlgorithm;
 use crate::pretty_errors::ExitFailure;
 use crate::unary_fst_algorithm::UnaryFstAlgorithm;
@@ -87,11 +88,39 @@ fn main() {
                     "input_epsilon",
                     "invert",
                     "output_epsilon",
+                    "plus",
+                    "quantize",
+                    "rmweight",
+                    "times",
                 ])
+                .takes_value(true)
                 .default_value("identity")
                 .help("Map operation."),
+        )
+        .arg(
+            Arg::with_name("weight")
+                .long("weight")
+                .takes_value(true)
+                .required_ifs(&[("map_type", "plus"), ("map_type", "times")]),
         );
     app = app.subcommand(one_in_one_out_options(map_cmd));
+
+    // Shortest Path
+    let shortest_path_cmd = SubCommand::with_name("shortestpath")
+        .about("Shortest Path algorithm.")
+        .arg(
+            Arg::with_name("nshortest")
+                .long("nshortest")
+                .takes_value(true)
+                .default_value("1")
+                .help("Return N-shortest paths"),
+        )
+        .arg(
+            Arg::with_name("unique")
+                .long("unique")
+                .help("Return unique strings"),
+        );
+    app = app.subcommand(one_in_one_out_options(shortest_path_cmd));
 
     let matches = app.get_matches();
 
@@ -151,6 +180,14 @@ fn handle(matches: clap::ArgMatches) -> Result<(), ExitFailure> {
         ("map", Some(m)) => MapAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("map_type").unwrap(),
+            m.value_of("weight"),
+            m.value_of("out.fst").unwrap(),
+        )
+        .run_cli_or_bench(m),
+        ("shortestpath", Some(m)) => ShortestPathAlgorithm::new(
+            m.value_of("in.fst").unwrap(),
+            m.is_present("unique"),
+            m.value_of("nshortest").unwrap().parse().unwrap(),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
