@@ -47,8 +47,22 @@ class InvertAlgorithm:
         return "invert"
 
 
+class ProjectAlgorithm:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def openfst_cli(cls):
+        return "fstproject"
+
+    @classmethod
+    def rustfst_subcommand(cls):
+        return "project"
+
+
 SupportedAlgorithms.register("connect", ConnectAlgorithm)
 SupportedAlgorithms.register("invert", InvertAlgorithm)
+SupportedAlgorithms.register("project", ProjectAlgorithm)
 
 
 def main():
@@ -88,7 +102,9 @@ def main():
         default=10
     )
 
-    args = parser.parse_args()
+    args, extra_args = parser.parse_known_args()
+
+    extra_args = " ".join(extra_args)
 
     OPENFST_BINS = './openfst-1.7.2/bin/'
     RUSTFST_CLI = './target/release/rustfst-cli'
@@ -102,8 +118,8 @@ def main():
     path_out_openfst = f'{args.algo_name}_openfst.fst'
     path_out_rustfst = f'{args.algo_name}_rustfst.fst'
 
-    cmd_openfst = f"{openfst_cli} {args.path_in_fst} {path_out_openfst}"
-    cmd_rustfst = f"{RUSTFST_CLI} {algo.rustfst_subcommand()} {args.path_in_fst} {path_out_rustfst}"
+    cmd_openfst = f"{openfst_cli} {extra_args} {args.path_in_fst} {path_out_openfst}"
+    cmd_rustfst = f"{RUSTFST_CLI} {algo.rustfst_subcommand()} {extra_args} {args.path_in_fst} {path_out_rustfst}"
 
     cmd = f"hyperfine -w {args.warmup} -r {args.runs} '{cmd_openfst}' '{cmd_rustfst}'" \
         f" --export-markdown {args.path_report_md}"
