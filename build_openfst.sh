@@ -7,6 +7,6 @@ if [ ! -d openfst-1.7.2 ]; then
 fi
 
 cd openfst-1.7.2
-./configure --prefix=`pwd` --disable-bin --enable-static
+CXXFLAGS=-O3 CFLAGS=-O3 ./configure --prefix=`pwd` --enable-static
 make
 make install

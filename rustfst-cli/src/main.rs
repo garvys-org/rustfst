@@ -132,7 +132,7 @@ fn main() {
 
     if let Err(e) = handle(matches) {
         error!("{:?}", e);
-        process::exit(1)
+        process::exit(exitcode::OK)
     }
 }
 

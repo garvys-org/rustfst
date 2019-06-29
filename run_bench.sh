@@ -115,3 +115,4 @@ echo "RUST :"
 ./target/release/rustfst-cli map --map_type rmweight $1 tmp_benchs/map_arc_rmweight_rustfst.fst --bench --n_warm_ups 3 --n_iters 10
 echo "==================================================================="
 echo -e "\n\n"
+
