@@ -7,6 +7,7 @@ import re
 from rustfst_python_bench.algorithms.supported_algorithms import SupportedAlgorithms
 from rustfst_python_bench.bench_single_algo import bench_algo
 
+
 def parse():
     parser = argparse.ArgumentParser(
         description="Script to bench all CLIs of OpenFST and RustFST"
@@ -49,7 +50,7 @@ def bench(path_in_fst, path_report_md, warmup, runs):
         report_f.write("# Benchmark Openfst CLI vs Rustfst CLI\n")
         report_f.write(f"Input FST : {path_in_fst}\n")
         with tempfile.TemporaryDirectory() as tmpdirname:
-            for algoname in SupportedAlgorithms.get_suppported_algorithms():
+            for algoname in sorted(SupportedAlgorithms.get_suppported_algorithms()):
                 algo = SupportedAlgorithms.get(algoname)
                 report_path = os.path.join(tmpdirname, f"report_{algoname}.md")
                 bench_algo(algoname, path_in_fst, tmpdirname, report_path, warmup, runs, "")

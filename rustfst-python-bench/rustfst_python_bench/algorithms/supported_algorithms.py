@@ -2,6 +2,8 @@
 from rustfst_python_bench.algorithms.connect import ConnectAlgorithm
 from rustfst_python_bench.algorithms.invert import InvertAlgorithm
 from rustfst_python_bench.algorithms.project import ProjectAlgorithm
+from rustfst_python_bench.algorithms.minimize import MinimizeAlgorithm
+from rustfst_python_bench.algorithms.shortestpath import ShortestPathAlgorithm
 
 
 class SupportedAlgorithms(object):
@@ -23,3 +25,5 @@ class SupportedAlgorithms(object):
 SupportedAlgorithms.register("connect", ConnectAlgorithm)
 SupportedAlgorithms.register("invert", InvertAlgorithm)
 SupportedAlgorithms.register("project", ProjectAlgorithm)
+SupportedAlgorithms.register("minimize", MinimizeAlgorithm)
+SupportedAlgorithms.register("shortestpath", ShortestPathAlgorithm)
