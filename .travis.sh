@@ -10,6 +10,7 @@ cargo test --all
 cargo check --benches --all # running benches on travis is useless
 cargo doc --all
 
+cargo build --release --all
 python3 --version
 virtualenv venv3 -p python3.6
 . venv3/bin/activate
