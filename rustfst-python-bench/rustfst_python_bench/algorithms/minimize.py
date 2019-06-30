@@ -11,3 +11,7 @@ class MinimizeAlgorithm:
     def rustfst_subcommand(cls):
         return "minimize"
 
+    @classmethod
+    def get_parameters(cls):
+        return [""]
+

@@ -1,15 +1,15 @@
-class InvertAlgorithm:
+class ReverseAlgorithm:
 
     def __init__(self):
         pass
 
     @classmethod
     def openfst_cli(cls):
-        return "fstinvert"
+        return "fstreverse"
 
     @classmethod
     def rustfst_subcommand(cls):
-        return "invert"
+        return "reverse"
 
     @classmethod
     def get_parameters(cls):

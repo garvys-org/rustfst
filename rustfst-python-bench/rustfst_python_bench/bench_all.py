@@ -50,17 +50,25 @@ def bench(path_in_fst, path_report_md, warmup, runs):
         report_f.write("# Benchmark Openfst CLI vs Rustfst CLI\n")
         report_f.write(f"Input FST : {path_in_fst}\n")
         with tempfile.TemporaryDirectory() as tmpdirname:
-            for algoname in sorted(SupportedAlgorithms.get_suppported_algorithms()):
-                algo = SupportedAlgorithms.get(algoname)
-                report_path = os.path.join(tmpdirname, f"report_{algoname}.md")
-                bench_algo(algoname, path_in_fst, tmpdirname, report_path, warmup, runs, "")
+            report_path_temp = os.path.join(tmpdirname, f"report_temp.md")
 
-                with io.open(report_path, mode="r") as f:
+            for algoname in sorted(SupportedAlgorithms.get_suppported_algorithms()):
+                    algo = SupportedAlgorithms.get(algoname)
+                    params = algo.get_parameters()
+                    if len(params) == 0:
+                        params = [""]
                     report_f.write(f"## {algoname.capitalize()}\n")
-                    data = f.read()
-                    data = re.sub(r'`\./openfst.*`', f'`{algo.openfst_cli()}`', data)
-                    data = re.sub(r'`\./target.*`', f'`rustfst-cli {algo.rustfst_subcommand()}`', data)
-                    report_f.write(data)
+                    for param in params:
+                        bench_algo(algoname, path_in_fst, tmpdirname, report_path_temp, warmup, runs, param)
+
+                        with io.open(report_path_temp, mode="r") as f:
+
+                            if len(params) > 1:
+                                report_f.write(f"### CLI parameters : ` {param}`\n")
+                            data = f.read()
+                            data = re.sub(r'`\./openfst.*`', f'`{algo.openfst_cli()}`', data)
+                            data = re.sub(r'`\./target.*`', f'`rustfst-cli {algo.rustfst_subcommand()}`', data)
+                            report_f.write(data)
 
 
 def main():

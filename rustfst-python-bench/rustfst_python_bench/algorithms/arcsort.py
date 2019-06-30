@@ -1,16 +1,16 @@
-class InvertAlgorithm:
+class ArcSortAlgorithm:
 
     def __init__(self):
         pass
 
     @classmethod
     def openfst_cli(cls):
-        return "fstinvert"
+        return "fstarcsort"
 
     @classmethod
     def rustfst_subcommand(cls):
-        return "invert"
+        return "arcsort"
 
     @classmethod
     def get_parameters(cls):
-        return [""]
+        return ["--sort_type=ilabel", "--sort_type=olabel"]

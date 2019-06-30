@@ -10,3 +10,7 @@ class ConnectAlgorithm:
     @classmethod
     def rustfst_subcommand(cls):
         return "connect"
+
+    @classmethod
+    def get_parameters(cls):
+        return [""]

@@ -9,3 +9,7 @@ class ProjectAlgorithm:
     @classmethod
     def rustfst_subcommand(cls):
         return "project"
+
+    @classmethod
+    def get_parameters(cls):
+        return ["", "--project_output"]

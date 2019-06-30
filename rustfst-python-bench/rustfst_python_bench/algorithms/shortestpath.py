@@ -11,3 +11,7 @@ class ShortestPathAlgorithm:
     def rustfst_subcommand(cls):
         return "shortestpath"
 
+    @classmethod
+    def get_parameters(cls):
+        return [""]
+
