@@ -3,6 +3,8 @@ import os
 import io
 import tempfile
 import re
+import platform
+import datetime
 
 from rustfst_python_bench.algorithms.supported_algorithms import SupportedAlgorithms
 from rustfst_python_bench.bench_single_algo import bench_algo
@@ -48,7 +50,13 @@ def bench(path_in_fst, path_report_md, warmup, runs):
 
     with io.open(path_report_md, mode="w") as report_f:
         report_f.write("# Benchmark Openfst CLI vs Rustfst CLI\n")
-        report_f.write(f"Input FST : {path_in_fst}\n")
+        report_f.write(f"**Input FST** : {path_in_fst}\n\n")
+        report_f.write(f"**Date**: {datetime.datetime.now().strftime('%x %X')}\n\n")
+        report_f.write(f"**Computer specs**:\n")
+        report_f.write(f"- Machine type : {platform.machine()}\n")
+        report_f.write(f"- Platform : {platform.platform()}\n")
+        report_f.write(f"- Processor : {platform.processor()}\n")
+        report_f.write(f"- System : {platform.system()}\n")
         with tempfile.TemporaryDirectory() as tmpdirname:
             report_path_temp = os.path.join(tmpdirname, f"report_temp.md")
 
