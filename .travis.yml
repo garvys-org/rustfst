@@ -6,11 +6,6 @@ cache:
 
 rust:
 - stable
-- beta
-- nightly
 env:
 - RUST_BACKTRACE=1
 script: ./.travis.sh
-matrix:
-  allow_failures:
-  - rust: nightly
