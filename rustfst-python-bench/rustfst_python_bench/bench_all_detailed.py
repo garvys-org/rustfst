@@ -7,7 +7,7 @@ import platform
 import datetime
 
 from rustfst_python_bench.algorithms.supported_algorithms import SupportedAlgorithms
-from rustfst_python_bench.bench_single_algo import bench_algo
+from rustfst_python_bench.bench_single_algo_detailed import bench_algo
 from rustfst_python_bench.utils import header_report
 
 
@@ -55,23 +55,25 @@ def bench(path_in_fst, path_report_md, warmup, runs):
         with tempfile.TemporaryDirectory() as tmpdirname:
             report_path_temp = os.path.join(tmpdirname, f"report_temp.md")
 
-            for algoname in sorted(SupportedAlgorithms.get_suppported_algorithms()):
-                    algo = SupportedAlgorithms.get(algoname)
-                    params = algo.get_parameters()
-                    if len(params) == 0:
-                        params = [""]
-                    report_f.write(f"## {algoname.capitalize()}\n")
-                    for param in params:
-                        bench_algo(algoname, path_in_fst, tmpdirname, report_path_temp, warmup, runs, param)
+            for algoname in sorted(SupportedAlgorithms.get_suppported_algorithms())[:4]:
+                algo = SupportedAlgorithms.get(algoname)
+                params = algo.get_parameters()
+                if len(params) == 0:
+                    params = [""]
+                report_f.write(f"## {algoname.capitalize()}\n")
+                for param in params:
+                    bench_algo(algoname, path_in_fst, tmpdirname, report_path_temp, warmup, runs, param)
 
-                        with io.open(report_path_temp, mode="r") as f:
+                    with io.open(report_path_temp, mode="r") as f:
 
-                            if len(params) > 1:
-                                report_f.write(f"### CLI parameters : ` {param}`\n")
-                            data = f.read()
-                            data = re.sub(r'`\./openfst.*`', f'`{algo.openfst_cli()}`', data)
-                            data = re.sub(r'`\./target.*`', f'`rustfst-cli {algo.rustfst_subcommand()}`', data)
-                            report_f.write(data)
+                        if len(params) > 1:
+                            report_f.write(f"### CLI parameters : ` {param}`\n")
+                        report_f.write('| Command | Parsing [s] | Algo [s] | Serialization [s] | All [s] | \n')
+                        report_f.write('|:---|' + '---:|'*4 + '\n')
+                        data = f.read()
+                        data = re.sub(r'`\./openfst.*`', f'`{algo.openfst_cli()}`', data)
+                        data = re.sub(r'`\./target.*`', f'`rustfst-cli {algo.rustfst_subcommand()}`', data)
+                        report_f.write('| `rustfst` ' + data)
 
 
 def main():

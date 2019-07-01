@@ -5,7 +5,6 @@ use crate::fst_traits::Fst;
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::StateId;
 use failure::Fallible;
-use std::time::Instant;
 
 /// This operation trims an FST, removing states and arcs that are not on successful paths.
 ///
@@ -48,9 +47,7 @@ pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Fallible<()> {
         }
     }
 
-    let t_start = Instant::now();
     fst.del_states(to_delete)?;
-    println!("Del states : {:?}", t_start.elapsed());
     Ok(())
 }
 

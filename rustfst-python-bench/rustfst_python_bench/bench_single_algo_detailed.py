@@ -58,21 +58,13 @@ def bench_algo(algo_name, path_in_fst, results_dir, path_report_md, warmup, runs
                            f" Supported algorithms {set(SupportedAlgorithms.get_suppported_algorithms())}")
     algo = SupportedAlgorithms.get(algo_name)
 
-    openfst_cli = os.path.join(OPENFST_BINS, algo.openfst_cli())
-
-    path_out_openfst = os.path.join(results_dir, f'{algo_name}_openfst.fst')
     path_out_rustfst = os.path.join(results_dir, f'{algo_name}_rustfst.fst')
 
-    cmd_openfst = f"{openfst_cli} {extra_args} {path_in_fst} {path_out_openfst}"
-    cmd_rustfst = f"{RUSTFST_CLI} {algo.rustfst_subcommand()} {extra_args} {path_in_fst} {path_out_rustfst}"
+    # cmd_openfst = f"{openfst_cli} {extra_args} {path_in_fst} {path_out_openfst}"
+    cmd_rustfst = f"{RUSTFST_CLI} {algo.rustfst_subcommand()} {extra_args} {path_in_fst} {path_out_rustfst} " \
+                  f"--bench --export-markdown {path_report_md} --n_iters {runs} --n_warm_ups {warmup}"
 
-    cmd = f"hyperfine -w {warmup} -r {runs} '{cmd_openfst}' '{cmd_rustfst}'" \
-        f" --export-markdown {path_report_md} --show-output"
-    subprocess.check_call([cmd], shell=True)
-
-    # TODO: Check correctness
-    fstequal = os.path.join(OPENFST_BINS, 'fstequal')
-    # subprocess.check_call([f"{fstequal} {path_out_openfst} {path_out_rustfst}"], shell=True)
+    subprocess.check_call([cmd_rustfst], shell=True)
 
 
 def main():

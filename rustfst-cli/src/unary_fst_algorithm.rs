@@ -1,12 +1,13 @@
+use std::fs::File;
+use std::io::Write;
 use std::time::{Duration, Instant};
 
+use clap::ArgMatches;
 use colored::Colorize;
 use failure::Fallible;
 use log::{debug, info};
 
 use rustfst::prelude::*;
-
-use clap::ArgMatches;
 
 fn duration_to_seconds(duration: &Duration) -> f64 {
     duration.as_secs() as f64 + duration.subsec_nanos() as f64 * 1.0e-9
@@ -33,6 +34,7 @@ pub trait UnaryFstAlgorithm {
             self.run_bench(
                 m.value_of("n_warm_ups").unwrap().parse().unwrap(),
                 m.value_of("n_iters").unwrap().parse().unwrap(),
+                m.value_of("export-markdown")
             )
         } else {
             // Run cli
@@ -66,7 +68,7 @@ pub trait UnaryFstAlgorithm {
         Ok(())
     }
 
-    fn run_bench(&self, n_warm_ups: usize, n_iters: usize) -> Fallible<()> {
+    fn run_bench(&self, n_warm_ups: usize, n_iters: usize, path_markdown_report: Option<&str>) -> Fallible<()> {
         println!(
             "Running benchmark for algorithm {}",
             self.get_algorithm_name().blue()
@@ -155,6 +157,16 @@ pub trait UnaryFstAlgorithm {
             format!("{:.6}s", duration_to_seconds(&mean_total_time)).red()
         );
         println!("{}", s.bold());
+
+        if let Some(_path) = path_markdown_report {
+            let mut file = File::create(_path)?;
+            writeln!(file, "| {:.6} | {:.6} | {:.6} | {:.6} |",
+                     duration_to_seconds(&avg_parsing_time),
+                     duration_to_seconds(&avg_algo_time),
+                     duration_to_seconds(&avg_serialization_time),
+                     duration_to_seconds(&mean_total_time)
+            )?;
+        }
         Ok(())
     }
 }

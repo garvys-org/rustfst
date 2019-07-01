@@ -223,5 +223,9 @@ fn one_in_one_out_options<'a, 'b>(command: clap::App<'a, 'b>) -> clap::App<'a, '
                 .long("n_warm_ups")
                 .default_value("3")
                 .help("Number of warm ups run before the actual benchmark.")
-        )
+        ).arg(
+        Arg::with_name("export-markdown")
+            .long("export-markdown")
+            .takes_value(true)
+    )
 }

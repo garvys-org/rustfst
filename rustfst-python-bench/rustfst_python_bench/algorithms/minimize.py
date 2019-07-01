@@ -13,5 +13,5 @@ class MinimizeAlgorithm:
 
     @classmethod
     def get_parameters(cls):
-        return [""]
+        return ["--allow_nondet=true"]
 
