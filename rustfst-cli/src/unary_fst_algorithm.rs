@@ -13,6 +13,15 @@ fn duration_to_seconds(duration: &Duration) -> f64 {
     duration.as_secs() as f64 + duration.subsec_nanos() as f64 * 1.0e-9
 }
 
+fn standard_deviation(data: &Vec<f64>) -> f64 {
+    let sum: f64 = data.iter().sum();
+    let mean: f64 = sum / data.len() as f64;
+
+    let a: f64 = data.iter().map(|v| (*v - mean).powf(2.0)).sum();
+    let b: f64 = a / data.len() as f64;
+    b.sqrt()
+}
+
 pub trait UnaryFstAlgorithm {
     fn get_path_in(&self) -> &str;
     fn get_path_out(&self) -> &str;
@@ -34,7 +43,7 @@ pub trait UnaryFstAlgorithm {
             self.run_bench(
                 m.value_of("n_warm_ups").unwrap().parse().unwrap(),
                 m.value_of("n_iters").unwrap().parse().unwrap(),
-                m.value_of("export-markdown")
+                m.value_of("export-markdown"),
             )
         } else {
             // Run cli
@@ -68,7 +77,12 @@ pub trait UnaryFstAlgorithm {
         Ok(())
     }
 
-    fn run_bench(&self, n_warm_ups: usize, n_iters: usize, path_markdown_report: Option<&str>) -> Fallible<()> {
+    fn run_bench(
+        &self,
+        n_warm_ups: usize,
+        n_iters: usize,
+        path_markdown_report: Option<&str>,
+    ) -> Fallible<()> {
         println!(
             "Running benchmark for algorithm {}",
             self.get_algorithm_name().blue()
@@ -76,6 +90,11 @@ pub trait UnaryFstAlgorithm {
         let mut avg_parsing_time = Duration::default();
         let mut avg_algo_time = Duration::default();
         let mut avg_serialization_time = Duration::default();
+
+        let mut parsing_times = vec![];
+        let mut algo_times = vec![];
+        let mut serialization_times = vec![];
+        let mut cli_times = vec![];
 
         for i in 0..(n_warm_ups + n_iters) {
             // Parsing
@@ -108,6 +127,15 @@ pub trait UnaryFstAlgorithm {
                 avg_serialization_time = avg_serialization_time
                     .checked_add(duration_serialization)
                     .unwrap();
+
+                parsing_times.push(duration_to_seconds(&duration_parsing));
+                algo_times.push(duration_to_seconds(&duration_algo));
+                serialization_times.push(duration_to_seconds(&duration_serialization));
+                cli_times.push(
+                    duration_to_seconds(&duration_parsing)
+                        + duration_to_seconds(&duration_algo)
+                        + duration_to_seconds(&duration_serialization),
+                )
             } else {
                 println!(
                     "Warmup #{}/{}: \t{} \t{} \t{}",
@@ -160,11 +188,17 @@ pub trait UnaryFstAlgorithm {
 
         if let Some(_path) = path_markdown_report {
             let mut file = File::create(_path)?;
-            writeln!(file, "| {:.6} | {:.6} | {:.6} | {:.6} |",
-                     duration_to_seconds(&avg_parsing_time),
-                     duration_to_seconds(&avg_algo_time),
-                     duration_to_seconds(&avg_serialization_time),
-                     duration_to_seconds(&mean_total_time)
+            writeln!(
+                file,
+                "| {:.6} ± {:.3} | {:.6} ± {:.3} | {:.6} ± {:.3} | {:.6} ± {:.3} |",
+                duration_to_seconds(&avg_parsing_time),
+                standard_deviation(&parsing_times),
+                duration_to_seconds(&avg_algo_time),
+                standard_deviation(&algo_times),
+                duration_to_seconds(&avg_serialization_time),
+                standard_deviation(&serialization_times),
+                duration_to_seconds(&mean_total_time),
+                standard_deviation(&cli_times),
             )?;
         }
         Ok(())

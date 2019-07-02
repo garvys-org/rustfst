@@ -55,7 +55,7 @@ def bench(path_in_fst, path_report_md, warmup, runs):
         with tempfile.TemporaryDirectory() as tmpdirname:
             report_path_temp = os.path.join(tmpdirname, f"report_temp.md")
 
-            for algoname in sorted(SupportedAlgorithms.get_suppported_algorithms())[:4]:
+            for algoname in sorted(SupportedAlgorithms.get_suppported_algorithms()):
                 algo_class = SupportedAlgorithms.get(algoname)
                 params = algo_class.get_parameters()
                 report_f.write(f"## {algoname.capitalize()}\n")

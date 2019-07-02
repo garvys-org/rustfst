@@ -23,10 +23,7 @@ impl UnaryFstAlgorithm for ShortestPathAlgorithm {
         "shortest path".to_string()
     }
 
-    fn run_algorithm(
-        &self,
-        fst: VectorFst<TropicalWeight>,
-    ) -> Fallible<VectorFst<TropicalWeight>> {
+    fn run_algorithm(&self, fst: VectorFst<TropicalWeight>) -> Fallible<VectorFst<TropicalWeight>> {
         shortest_path(&fst, self.nshortest, self.unique)
     }
 }
