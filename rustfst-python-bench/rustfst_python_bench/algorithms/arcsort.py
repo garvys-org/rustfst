@@ -1,7 +1,7 @@
 class ArcSortAlgorithm:
 
-    def __init__(self):
-        pass
+    def __init__(self, sort_olabel=False):
+        self.sort_olabel = sort_olabel
 
     @classmethod
     def openfst_cli(cls):
@@ -11,6 +11,18 @@ class ArcSortAlgorithm:
     def rustfst_subcommand(cls):
         return "arcsort"
 
+    def get_openfst_bench_cli(self):
+        if self.sort_olabel:
+            return "bench_arcsort", ["1"]
+        else:
+            return "bench_arcsort", ["0"]
+
+    def get_cli_args(self):
+        if self.sort_olabel:
+            return "--sort_type=olabel"
+        else:
+            return "--sort_type=ilabel"
+
     @classmethod
     def get_parameters(cls):
-        return ["--sort_type=ilabel", "--sort_type=olabel"]
+        return [cls(sort_olabel=False), cls(sort_olabel=True)]

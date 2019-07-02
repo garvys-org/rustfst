@@ -2,9 +2,10 @@ import argparse
 import os
 import subprocess
 import tempfile
+import io
 
 from rustfst_python_bench.algorithms.supported_algorithms import SupportedAlgorithms
-from rustfst_python_bench.constants import OPENFST_BINS, RUSTFST_CLI
+from rustfst_python_bench.constants import OPENFST_BINS, RUSTFST_CLI, BENCH_OPENFST_BINS
 
 
 def parse():
@@ -51,20 +52,33 @@ def parse():
     return args, extra_args
 
 
-def bench_algo(algo_name, path_in_fst, results_dir, path_report_md, warmup, runs, extra_args):
-
-    if algo_name not in SupportedAlgorithms.get_suppported_algorithms():
-        raise RuntimeError(f"Algorithm {algo_name} not supported."
-                           f" Supported algorithms {set(SupportedAlgorithms.get_suppported_algorithms())}")
-    algo = SupportedAlgorithms.get(algo_name)
+def bench_algo(algo_name, path_in_fst, results_dir, path_report_md, warmup, runs, algo):
 
     path_out_rustfst = os.path.join(results_dir, f'{algo_name}_rustfst.fst')
 
-    # cmd_openfst = f"{openfst_cli} {extra_args} {path_in_fst} {path_out_openfst}"
-    cmd_rustfst = f"{RUSTFST_CLI} {algo.rustfst_subcommand()} {extra_args} {path_in_fst} {path_out_rustfst} " \
+    cmd_rustfst = f"{RUSTFST_CLI} {algo.rustfst_subcommand()} {algo.get_cli_args()} {path_in_fst} {path_out_rustfst} " \
                   f"--bench --export-markdown {path_report_md} --n_iters {runs} --n_warm_ups {warmup}"
 
     subprocess.check_call([cmd_rustfst], shell=True)
+
+    with io.open(path_report_md, mode="r") as f:
+        data_rustfst = "| `rustfst` " + f.read()
+
+    cli_name, xargs_cli = algo.get_openfst_bench_cli()
+    path_out_openfst = os.path.join(results_dir, f'{algo_name}_openfst.fst')
+    xargs_cli = " ".join(xargs_cli)
+
+    path_cli = os.path.join(BENCH_OPENFST_BINS, cli_name)
+    cmd_openfst = f"{path_cli} {warmup} {runs} {path_in_fst} {path_out_openfst} {path_report_md} {xargs_cli}"
+
+    subprocess.check_call([cmd_openfst], shell=True)
+
+    with io.open(path_report_md, mode="r") as f:
+        data_openfst = "| `openfst` " + f.read()
+
+    with io.open(path_report_md, mode="w") as f:
+        f.write(data_openfst)
+        f.write(data_rustfst)
 
 
 def main():

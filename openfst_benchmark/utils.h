@@ -36,4 +36,11 @@
     cout << "\tMean algorithm time : \t\t" << avg_algo_time / n_iters << "s" << endl;\
     cout << "\tMean serialization time : \t" << avg_serialization_time / n_iters << "s" << endl;\
     cout << "\tMean CLI time : \t\t" << (avg_parsing_time + avg_algo_time + avg_serialization_time) / n_iters << "s" << endl;\
+\
+    ofstream myfile;\
+    myfile.open (path_report_md);\
+    myfile << "| " << avg_parsing_time / n_iters << " | " <<  avg_algo_time / n_iters;\
+    myfile << " | " << avg_serialization_time / n_iters << " | ";\
+    myfile << (avg_parsing_time + avg_algo_time + avg_serialization_time) / n_iters << " |" << endl;\
+    myfile.close();\
 }

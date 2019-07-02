@@ -11,7 +11,13 @@ class ShortestPathAlgorithm:
     def rustfst_subcommand(cls):
         return "shortestpath"
 
+    def get_openfst_bench_cli(self):
+        raise NotImplementedError
+
+    def get_cli_args(self):
+        return ""
+
     @classmethod
     def get_parameters(cls):
-        return [""]
+        return [cls()]
 

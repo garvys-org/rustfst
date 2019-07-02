@@ -62,12 +62,12 @@ def bench(path_in_fst, path_report_md, warmup, runs):
                         params = [""]
                     report_f.write(f"## {algoname.capitalize()}\n")
                     for param in params:
-                        bench_algo(algoname, path_in_fst, tmpdirname, report_path_temp, warmup, runs, param)
+                        bench_algo(algoname, path_in_fst, tmpdirname, report_path_temp, warmup, runs, param.get_cli_args())
 
                         with io.open(report_path_temp, mode="r") as f:
 
                             if len(params) > 1:
-                                report_f.write(f"### CLI parameters : ` {param}`\n")
+                                report_f.write(f"### CLI parameters : ` {param.get_cli_args()}`\n")
                             data = f.read()
                             data = re.sub(r'`\./openfst.*`', f'`{algo.openfst_cli()}`', data)
                             data = re.sub(r'`\./target.*`', f'`rustfst-cli {algo.rustfst_subcommand()}`', data)

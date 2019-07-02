@@ -25,11 +25,11 @@ class SupportedAlgorithms(object):
 
 
 SupportedAlgorithms.register("arcsort", ArcSortAlgorithm)
-SupportedAlgorithms.register("connect", ConnectAlgorithm)
+# SupportedAlgorithms.register("connect", ConnectAlgorithm)
 SupportedAlgorithms.register("invert", InvertAlgorithm)
 SupportedAlgorithms.register("map", MapAlgorithm)
-SupportedAlgorithms.register("minimize", MinimizeAlgorithm)
+# SupportedAlgorithms.register("minimize", MinimizeAlgorithm)
 SupportedAlgorithms.register("project", ProjectAlgorithm)
 SupportedAlgorithms.register("reverse", ReverseAlgorithm)
-SupportedAlgorithms.register("shortestpath", ShortestPathAlgorithm)
+# SupportedAlgorithms.register("shortestpath", ShortestPathAlgorithm)
 

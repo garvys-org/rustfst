@@ -11,6 +11,12 @@ class InvertAlgorithm:
     def rustfst_subcommand(cls):
         return "invert"
 
+    def get_openfst_bench_cli(self):
+        return "bench_invert", []
+
+    def get_cli_args(self):
+        return ""
+
     @classmethod
     def get_parameters(cls):
-        return [""]
+        return [cls()]

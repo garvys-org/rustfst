@@ -11,6 +11,12 @@ class ReverseAlgorithm:
     def rustfst_subcommand(cls):
         return "reverse"
 
+    def get_openfst_bench_cli(self):
+        return "bench_reverse", []
+
+    def get_cli_args(self):
+        return ""
+
     @classmethod
     def get_parameters(cls):
-        return [""]
+        return [cls()]
