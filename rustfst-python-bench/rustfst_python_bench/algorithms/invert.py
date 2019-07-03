@@ -1,3 +1,6 @@
+from rustfst_python_bench.utils import check_fst_equals
+
+
 class InvertAlgorithm:
 
     def __init__(self):
@@ -20,3 +23,7 @@ class InvertAlgorithm:
     @classmethod
     def get_parameters(cls):
         return [cls()]
+
+    def check_correctness(self, path_res_openfst, path_res_rustfst):
+        check_fst_equals(path_res_openfst, path_res_rustfst)
+

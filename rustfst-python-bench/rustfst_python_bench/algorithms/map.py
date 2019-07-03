@@ -1,3 +1,6 @@
+from rustfst_python_bench.utils import check_fst_equals
+
+
 class MapAlgorithm:
 
     def __init__(self, map_type="identity"):
@@ -36,3 +39,6 @@ class MapAlgorithm:
     def get_parameters(cls):
         map_types = ["arc_sum", "arc_unique", "identity", "input_epsilon", "invert", "output_epsilon", "rmweight"]
         return [cls(map_type=m) for m in map_types]
+
+    def check_correctness(self, path_res_openfst, path_res_rustfst):
+        check_fst_equals(path_res_openfst, path_res_rustfst)

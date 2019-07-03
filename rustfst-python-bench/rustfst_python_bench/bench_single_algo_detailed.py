@@ -80,6 +80,8 @@ def bench_algo(algo_name, path_in_fst, results_dir, path_report_md, warmup, runs
         f.write(data_openfst)
         f.write(data_rustfst)
 
+    algo.check_correctness(path_out_openfst, path_out_rustfst)
+
 
 def main():
     with tempfile.TemporaryDirectory() as tmpdirname:

@@ -50,16 +50,14 @@ def parse():
 def bench(path_in_fst, path_report_md, warmup, runs):
 
     with io.open(path_report_md, mode="w") as report_f:
-        report_f.write("# Benchmark Openfst CLI vs Rustfst CLI\n")
-        header_report(report_f, path_in_fst)
+        report_f.write("# Benchmark OpenFST CLI vs RustFST CLI\n")
+        header_report(report_f, path_in_fst, warmup, runs)
         with tempfile.TemporaryDirectory() as tmpdirname:
             report_path_temp = os.path.join(tmpdirname, f"report_temp.md")
 
             for algoname in sorted(SupportedAlgorithms.get_suppported_algorithms()):
                     algo = SupportedAlgorithms.get(algoname)
                     params = algo.get_parameters()
-                    if len(params) == 0:
-                        params = [""]
                     report_f.write(f"## {algoname.capitalize()}\n")
                     for param in params:
                         bench_algo(algoname, path_in_fst, tmpdirname, report_path_temp, warmup, runs, param.get_cli_args())

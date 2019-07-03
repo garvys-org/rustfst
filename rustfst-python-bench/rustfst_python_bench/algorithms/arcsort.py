@@ -1,3 +1,6 @@
+from rustfst_python_bench.utils import check_property_set
+
+
 class ArcSortAlgorithm:
 
     def __init__(self, sort_olabel=False):
@@ -26,3 +29,12 @@ class ArcSortAlgorithm:
     @classmethod
     def get_parameters(cls):
         return [cls(sort_olabel=False), cls(sort_olabel=True)]
+
+    def check_correctness(self, path_res_openfst, path_res_rustfst):
+        if self.sort_olabel:
+            check_property_set(path_res_openfst, "output label sorted")
+            check_property_set(path_res_rustfst, "output label sorted")
+        else:
+            check_property_set(path_res_openfst, "input label sorted")
+            check_property_set(path_res_rustfst, "input label sorted")
+
