@@ -1,4 +1,5 @@
 #include<vector>
+#include <iomanip>
 
 float standard_deviation(const std::vector<float>& data) {
     float sum = 0.0;
@@ -67,7 +68,7 @@ float standard_deviation(const std::vector<float>& data) {
 \
     ofstream myfile;\
     myfile.open (path_report_md);\
-    myfile << "| " << avg_parsing_time / n_iters << " ± " << standard_deviation(parsing_times);\
+    myfile << "| " << std::fixed << std::setprecision(3) << avg_parsing_time / n_iters << " ± " << standard_deviation(parsing_times);\
     myfile << " | " <<  avg_algo_time / n_iters << " ± " << standard_deviation(algo_times);\
     myfile << " | " << avg_serialization_time / n_iters << " ± " << standard_deviation(serialization_times);\
     myfile << " | " << (avg_parsing_time + avg_algo_time + avg_serialization_time) / n_iters;\

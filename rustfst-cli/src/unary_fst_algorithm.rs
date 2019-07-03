@@ -190,7 +190,7 @@ pub trait UnaryFstAlgorithm {
             let mut file = File::create(_path)?;
             writeln!(
                 file,
-                "| {:.6} ± {:.3} | {:.6} ± {:.3} | {:.6} ± {:.3} | {:.6} ± {:.3} |",
+                "| {:.3} ± {:.3} | {:.3} ± {:.3} | {:.3} ± {:.3} | {:.3} ± {:.3} |",
                 duration_to_seconds(&avg_parsing_time),
                 standard_deviation(&parsing_times),
                 duration_to_seconds(&avg_algo_time),
