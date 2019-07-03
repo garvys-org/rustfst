@@ -1,8 +1,31 @@
+#include<vector>
+
+float standard_deviation(const std::vector<float>& data) {
+    float sum = 0.0;
+    for (auto f: data) {
+        sum += f;
+    }
+    float mean = sum / data.size();
+
+    float a = 0.0;
+    for (auto f: data) {
+        a += (f - mean) * (f - mean);
+    }
+    float b = a / data.size();
+    return sqrt(b);
+}
+
+
 #define UNARY_ALGO_BENCH(code) { \
     std::cout.precision(6); \
     float avg_parsing_time = 0.0;\
     float avg_algo_time = 0.0;\
     float avg_serialization_time = 0.0;\
+\
+    vector<float> parsing_times;\
+    vector<float> algo_times;\
+    vector<float> serialization_times;\
+    vector<float> cli_times;\
 \
     for(int i = 0; i < (n_warm_ups+n_iters); i++) {\
 \
@@ -26,6 +49,11 @@
             avg_parsing_time += parsing_duration;\
             avg_algo_time += algo_duration;\
             avg_serialization_time += serialization_duration;\
+\
+            parsing_times.push_back(parsing_duration);\
+            algo_times.push_back(algo_duration);\
+            serialization_times.push_back(serialization_duration);\
+            cli_times.push_back(parsing_duration + algo_duration + serialization_duration);\
         } else {\
             cout << "Warmup #" << i+1 << "/" << n_warm_ups <<  ": \t" << parsing_duration << "s\t" << algo_duration << "s\t" << serialization_duration << "s" << endl;\
         }\
@@ -39,8 +67,10 @@
 \
     ofstream myfile;\
     myfile.open (path_report_md);\
-    myfile << "| " << avg_parsing_time / n_iters << " | " <<  avg_algo_time / n_iters;\
-    myfile << " | " << avg_serialization_time / n_iters << " | ";\
-    myfile << (avg_parsing_time + avg_algo_time + avg_serialization_time) / n_iters << " |" << endl;\
+    myfile << "| " << avg_parsing_time / n_iters << " ± " << standard_deviation(parsing_times);\
+    myfile << " | " <<  avg_algo_time / n_iters << " ± " << standard_deviation(algo_times);\
+    myfile << " | " << avg_serialization_time / n_iters << " ± " << standard_deviation(serialization_times);\
+    myfile << " | " << (avg_parsing_time + avg_algo_time + avg_serialization_time) / n_iters;\
+    myfile << " ± " << standard_deviation(cli_times) << " |" << endl;\
     myfile.close();\
 }
