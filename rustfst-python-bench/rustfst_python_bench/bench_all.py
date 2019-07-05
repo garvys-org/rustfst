@@ -46,28 +46,21 @@ def parse():
     return args
 
 
-def bench_algo(algo_name, path_in_fst, results_dir, path_report_md, warmup, runs, extra_args):
-
-    if algo_name not in SupportedAlgorithms.get_suppported_algorithms():
-        raise RuntimeError(f"Algorithm {algo_name} not supported."
-                           f" Supported algorithms {set(SupportedAlgorithms.get_suppported_algorithms())}")
-    algo = SupportedAlgorithms.get(algo_name)
+def bench_algo(algo_name, path_in_fst, results_dir, path_report_md, warmup, runs, algo):
 
     openfst_cli = os.path.join(OPENFST_BINS, algo.openfst_cli())
 
     path_out_openfst = os.path.join(results_dir, f'{algo_name}_openfst.fst')
     path_out_rustfst = os.path.join(results_dir, f'{algo_name}_rustfst.fst')
 
-    cmd_openfst = f"{openfst_cli} {extra_args} {path_in_fst} {path_out_openfst}"
-    cmd_rustfst = f"{RUSTFST_CLI} {algo.rustfst_subcommand()} {extra_args} {path_in_fst} {path_out_rustfst}"
+    cmd_openfst = f"{openfst_cli} {algo.get_cli_args()} {path_in_fst} {path_out_openfst}"
+    cmd_rustfst = f"{RUSTFST_CLI} {algo.rustfst_subcommand()} {algo.get_cli_args()} {path_in_fst} {path_out_rustfst}"
 
     cmd = f"hyperfine -w {warmup} -r {runs} '{cmd_openfst}' '{cmd_rustfst}'" \
           f" --export-markdown {path_report_md} --show-output"
     subprocess.check_call([cmd], shell=True)
 
-    # TODO: Check correctness
-
-
+    algo.check_correctness(path_out_openfst, path_out_rustfst)
 
 
 def bench(path_in_fst, path_report_md, warmup, runs):
@@ -83,7 +76,7 @@ def bench(path_in_fst, path_report_md, warmup, runs):
                     params = algo.get_parameters()
                     report_f.write(f"## {algoname.capitalize()}\n")
                     for param in params:
-                        bench_algo(algoname, path_in_fst, tmpdirname, report_path_temp, warmup, runs, param.get_cli_args())
+                        bench_algo(algoname, path_in_fst, tmpdirname, report_path_temp, warmup, runs, param)
 
                         with io.open(report_path_temp, mode="r") as f:
 
