@@ -17,5 +17,5 @@ virtualenv venv3 -p python3.6
 pip install -e rustfst-python-bench
 # Run benches on a small FST to check that the script is working fine.
 python rustfst-python-bench/rustfst_python_bench/bench_all.py rustfst-tests-data/fst_003/raw_vector.fst report.md
-python rustfst-python-bench/rustfst_python_bench/bench_all-detailed.py rustfst-tests-data/fst_003/raw_vector.fst report2.md
+python rustfst-python-bench/rustfst_python_bench/bench_all_detailed.py rustfst-tests-data/fst_003/raw_vector.fst report2.md
 
