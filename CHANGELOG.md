@@ -36,8 +36,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `invert` for the invert algorithm.
     - `project` for the project algorithm.
     - `topsort` for the topsort algorithm.
+    - `map` for the Map algorithm with several mappers.
+    - `reverse` for the Reverse algorithm.
+    - `shortestpath` for ShortestPath algorithm.
 - Added a prelude to `rustfst` to reduce the number of imports necessary when using the lib.
 - Added a bench keyword the the rustfst-cli to be able to benchmark the running time of the different algorithms across multiple runs.
+- Add a python package `rustfst-python-bench` to perform bench at the CLI level and at the functions level.
+- Added lots of unchecked functions to `Fst` and `MutableFst` traits.
 
 ### Changed
 - Before test cases were generated with pynini (python wrapper around openfst). Now they are directly generated with OpenFST (c++). Allows to test operations that are not wrapped.
@@ -48,9 +53,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix `reverse` of `GallicWeight`.
 - Stopped using `arc_map` in invert's and project's implementation to run faster.
 - Use `BufWriter` in the `BinarySerializer` of the `VectorFst` which improves a lot the serialization speed.
+- Optimize `arcsort` function. Can no longer fail.
+- Optimize `arcsum` function. Can no longer fail. Don't need to use an ArcMapper anymore.
+- Optimize `invert` with unchecked functions.
+- Optimize `project` with unchecked functions.
+- Optimize `reverse`.
 
 ### Removed
 - Crate `rustfst-tests-openfst` has been removed and moved to the `rustfst` as unit tests. 
+- Remove `state_map` and all `StateMappers`. Now use directly the functions `acr_sum` and `arc_unique`.
 
 ## [0.3.0] - 2019-04-03
 
