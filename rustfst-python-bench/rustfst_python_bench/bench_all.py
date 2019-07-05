@@ -1,13 +1,12 @@
 import argparse
-import os
 import io
-import tempfile
+import os
 import re
-import platform
-import datetime
+import subprocess
+import tempfile
 
 from rustfst_python_bench.algorithms.supported_algorithms import SupportedAlgorithms
-from rustfst_python_bench.bench_single_algo import bench_algo
+from rustfst_python_bench.constants import OPENFST_BINS, RUSTFST_CLI
 from rustfst_python_bench.utils import header_report
 
 
@@ -45,6 +44,30 @@ def parse():
     args = parser.parse_args()
 
     return args
+
+
+def bench_algo(algo_name, path_in_fst, results_dir, path_report_md, warmup, runs, extra_args):
+
+    if algo_name not in SupportedAlgorithms.get_suppported_algorithms():
+        raise RuntimeError(f"Algorithm {algo_name} not supported."
+                           f" Supported algorithms {set(SupportedAlgorithms.get_suppported_algorithms())}")
+    algo = SupportedAlgorithms.get(algo_name)
+
+    openfst_cli = os.path.join(OPENFST_BINS, algo.openfst_cli())
+
+    path_out_openfst = os.path.join(results_dir, f'{algo_name}_openfst.fst')
+    path_out_rustfst = os.path.join(results_dir, f'{algo_name}_rustfst.fst')
+
+    cmd_openfst = f"{openfst_cli} {extra_args} {path_in_fst} {path_out_openfst}"
+    cmd_rustfst = f"{RUSTFST_CLI} {algo.rustfst_subcommand()} {extra_args} {path_in_fst} {path_out_rustfst}"
+
+    cmd = f"hyperfine -w {warmup} -r {runs} '{cmd_openfst}' '{cmd_rustfst}'" \
+          f" --export-markdown {path_report_md} --show-output"
+    subprocess.check_call([cmd], shell=True)
+
+    # TODO: Check correctness
+
+
 
 
 def bench(path_in_fst, path_report_md, warmup, runs):
