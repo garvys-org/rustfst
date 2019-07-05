@@ -3,7 +3,6 @@ cache:
   - cargo
   - directories:
     - cached
-python: '3.6'
 rust:
 - stable
 env:
