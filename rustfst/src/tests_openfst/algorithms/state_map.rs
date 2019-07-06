@@ -1,7 +1,7 @@
 use failure::Fallible;
 
-use crate::algorithms::state_mappers::ArcSumMapper;
-use crate::algorithms::state_mappers::ArcUniqueMapper;
+use crate::algorithms::arc_sum;
+use crate::algorithms::arc_unique;
 use crate::fst_traits::MutableFst;
 use crate::fst_traits::TextParser;
 use crate::semirings::Semiring;
@@ -14,8 +14,7 @@ where
     F::W: Semiring<Type = f32>,
 {
     let mut fst_state_map = test_data.raw.clone();
-    let mut mapper = ArcSumMapper {};
-    fst_state_map.state_map(&mut mapper)?;
+    arc_sum(&mut fst_state_map);
 
     assert_eq!(
         test_data.state_map_arc_sum,
@@ -37,8 +36,7 @@ where
     F::W: Semiring<Type = f32>,
 {
     let mut fst_state_map = test_data.raw.clone();
-    let mut mapper = ArcUniqueMapper {};
-    fst_state_map.state_map(&mut mapper)?;
+    arc_unique(&mut fst_state_map);
 
     assert_eq!(
         test_data.state_map_arc_unique,

@@ -7,8 +7,11 @@ use log::error;
 use crate::cmds::arcsort::ArcsortAlgorithm;
 use crate::cmds::connect::ConnectAlgorithm;
 use crate::cmds::invert::InvertAlgorithm;
+use crate::cmds::map::MapAlgorithm;
 use crate::cmds::minimize::MinimizeAlgorithm;
 use crate::cmds::project::ProjectFstAlgorithm;
+use crate::cmds::reverse::ReverseAlgorithm;
+use crate::cmds::shortest_path::ShortestPathAlgorithm;
 use crate::cmds::topsort::TopsortAlgorithm;
 use crate::pretty_errors::ExitFailure;
 use crate::unary_fst_algorithm::UnaryFstAlgorithm;
@@ -68,6 +71,57 @@ fn main() {
     let topsort_cmd = SubCommand::with_name("topsort").about("Topsort algorithm.");
     app = app.subcommand(one_in_one_out_options(topsort_cmd));
 
+    // Reverse
+    let reverse_cmd = SubCommand::with_name("reverse").about("Reverse algorithm.");
+    app = app.subcommand(one_in_one_out_options(reverse_cmd));
+
+    // Map
+    let map_cmd = SubCommand::with_name("map")
+        .about("Applies an operation to each arc of an FST.")
+        .arg(
+            Arg::with_name("map_type")
+                .long("map_type")
+                .possible_values(&[
+                    "arc_sum",
+                    "arc_unique",
+                    "identity",
+                    "input_epsilon",
+                    "invert",
+                    "output_epsilon",
+                    "plus",
+                    "quantize",
+                    "rmweight",
+                    "times",
+                ])
+                .takes_value(true)
+                .default_value("identity")
+                .help("Map operation."),
+        )
+        .arg(
+            Arg::with_name("weight")
+                .long("weight")
+                .takes_value(true)
+                .required_ifs(&[("map_type", "plus"), ("map_type", "times")]),
+        );
+    app = app.subcommand(one_in_one_out_options(map_cmd));
+
+    // Shortest Path
+    let shortest_path_cmd = SubCommand::with_name("shortestpath")
+        .about("Shortest Path algorithm.")
+        .arg(
+            Arg::with_name("nshortest")
+                .long("nshortest")
+                .takes_value(true)
+                .default_value("1")
+                .help("Return N-shortest paths"),
+        )
+        .arg(
+            Arg::with_name("unique")
+                .long("unique")
+                .help("Return unique strings"),
+        );
+    app = app.subcommand(one_in_one_out_options(shortest_path_cmd));
+
     let matches = app.get_matches();
 
     let env = env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "debug");
@@ -78,7 +132,7 @@ fn main() {
 
     if let Err(e) = handle(matches) {
         error!("{:?}", e);
-        process::exit(1)
+        process::exit(exitcode::OK)
     }
 }
 
@@ -104,7 +158,7 @@ fn handle(matches: clap::ArgMatches) -> Result<(), ExitFailure> {
         .run_cli_or_bench(m),
         ("project", Some(m)) => ProjectFstAlgorithm::new(
             m.value_of("in.fst").unwrap(),
-            m.is_present("project_type"),
+            m.is_present("project_output"),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
@@ -115,6 +169,25 @@ fn handle(matches: clap::ArgMatches) -> Result<(), ExitFailure> {
         .run_cli_or_bench(m),
         ("topsort", Some(m)) => TopsortAlgorithm::new(
             m.value_of("in.fst").unwrap(),
+            m.value_of("out.fst").unwrap(),
+        )
+        .run_cli_or_bench(m),
+        ("reverse", Some(m)) => ReverseAlgorithm::new(
+            m.value_of("in.fst").unwrap(),
+            m.value_of("out.fst").unwrap(),
+        )
+        .run_cli_or_bench(m),
+        ("map", Some(m)) => MapAlgorithm::new(
+            m.value_of("in.fst").unwrap(),
+            m.value_of("map_type").unwrap(),
+            m.value_of("weight"),
+            m.value_of("out.fst").unwrap(),
+        )
+        .run_cli_or_bench(m),
+        ("shortestpath", Some(m)) => ShortestPathAlgorithm::new(
+            m.value_of("in.fst").unwrap(),
+            m.is_present("unique"),
+            m.value_of("nshortest").unwrap().parse().unwrap(),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
@@ -144,13 +217,15 @@ fn one_in_one_out_options<'a, 'b>(command: clap::App<'a, 'b>) -> clap::App<'a, '
             Arg::with_name("n_iters")
                 .long("n_iters")
                 .default_value("10")
-                .requires("bench")
                 .help("Number of iterations to run for the benchmark.")
-    ).arg(
-        Arg::with_name("n_warm_ups")
-            .long("n_warm_ups")
-            .default_value("3")
-            .requires("bench")
-            .help("Number of warm ups run before the actual benchmark.")
+        ).arg(
+            Arg::with_name("n_warm_ups")
+                .long("n_warm_ups")
+                .default_value("3")
+                .help("Number of warm ups run before the actual benchmark.")
+        ).arg(
+        Arg::with_name("export-markdown")
+            .long("export-markdown")
+            .takes_value(true)
     )
 }

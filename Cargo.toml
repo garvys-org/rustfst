@@ -3,3 +3,6 @@ members = [
     "rustfst",
     "rustfst-cli"
 ]
+
+[profile.release]
+lto = true

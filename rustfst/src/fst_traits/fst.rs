@@ -70,6 +70,7 @@ pub trait CoreFst {
     /// assert_eq!(fst.num_arcs(s1).unwrap(), 1);
     /// ```
     fn num_arcs(&self, s: StateId) -> Fallible<usize>;
+    fn num_arcs_unchecked(&self, s: StateId) -> usize;
 
     /// Returns whether or not the state with identifier passed as parameters is a final state.
     ///
@@ -136,6 +137,7 @@ where
     type Iter: Iterator<Item = &'a Arc<Self::W>> + Clone;
 
     fn arcs_iter(&'a self, state_id: StateId) -> Fallible<Self::Iter>;
+    fn arcs_iter_unchecked(&'a self, state_id: StateId) -> Self::Iter;
 }
 
 /// Trait defining the minimum interface necessary for a wFST.

@@ -18,7 +18,7 @@ impl UnaryFstAlgorithm for MinimizeAlgorithm {
         self.path_out.as_str()
     }
 
-    fn get_algorithm_name() -> String {
+    fn get_algorithm_name(&self) -> String {
         "minimize".to_string()
     }
 

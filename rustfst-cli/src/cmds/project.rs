@@ -4,10 +4,6 @@ use rustfst::prelude::*;
 
 use crate::unary_fst_algorithm::UnaryFstAlgorithm;
 
-pub fn project_cli(path_in: &str, project_output: bool, path_out: &str) -> Fallible<()> {
-    ProjectFstAlgorithm::new(path_in, project_output, path_out).run_bench(3, 10)
-}
-
 pub struct ProjectFstAlgorithm {
     path_in: String,
     project_type: ProjectType,
@@ -23,7 +19,7 @@ impl UnaryFstAlgorithm for ProjectFstAlgorithm {
         self.path_out.as_str()
     }
 
-    fn get_algorithm_name() -> String {
+    fn get_algorithm_name(&self) -> String {
         "project".into()
     }
 

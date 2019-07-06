@@ -4,6 +4,7 @@ use std::slice;
 
 use failure::{bail, ensure, format_err, Fallible};
 
+use crate::algorithms::arc_unique::arc_compare;
 use crate::algorithms::{concat, union};
 use crate::arc::Arc;
 use crate::fst_traits::{
@@ -13,6 +14,7 @@ use crate::fst_traits::{
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::Semiring;
 use crate::StateId;
+use std::cmp::Ordering;
 
 /// Simple concrete, mutable FST whose states and arcs are stored in standard vectors.
 ///
@@ -53,11 +55,14 @@ impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
             bail!("State {:?} doesn't exist", s);
         }
     }
+
+    fn num_arcs_unchecked(&self, s: usize) -> usize {
+        unsafe { self.states.get_unchecked(s).num_arcs() }
+    }
 }
 
 impl<'a, W: 'a + Semiring> StateIterator<'a> for VectorFst<W> {
     type Iter = VectorStateIterator<'a, W>;
-    // type Iter = Iterator<Item =&'a StateId>;
     fn states_iter(&'a self) -> Self::Iter {
         VectorStateIterator::new(self)
     }
@@ -98,6 +103,10 @@ impl<'a, W: 'static + Semiring> ArcIterator<'a> for VectorFst<W> {
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
         Ok(state.arcs.iter())
     }
+
+    fn arcs_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
+        unsafe { self.states.get_unchecked(state_id).arcs.iter() }
+    }
 }
 
 impl<W: 'static + Semiring> ExpandedFst for VectorFst<W> {
@@ -133,10 +142,19 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         }
     }
 
+    fn set_final_unchecked(&mut self, state_id: usize, final_weight: Self::W) {
+        self.states[state_id].final_weight = Some(final_weight);
+    }
+
     fn add_state(&mut self) -> StateId {
         let id = self.states.len();
         self.states.insert(id, VectorFstState::default());
         id
+    }
+
+    fn add_states(&mut self, n: usize) {
+        let len = self.states.len();
+        self.states.resize_with(len + n, VectorFstState::default);
     }
 
     fn del_state(&mut self, state_to_remove: StateId) -> Fallible<()> {
@@ -148,32 +166,55 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
             "State id {:?} doesn't exist",
             state_to_remove
         );
-        self.states.remove(state_to_remove);
-        for state in &mut self.states {
-            let mut to_delete = vec![];
-            for (arc_id, arc) in state.arcs.iter_mut().enumerate() {
-                if arc.nextstate == state_to_remove {
-                    to_delete.push(arc_id);
-                } else if arc.nextstate > state_to_remove {
-                    arc.nextstate -= 1;
-                }
-            }
-
-            for id in to_delete.iter().rev() {
-                state.arcs.remove(*id);
-            }
-        }
-        Ok(())
+        let v = vec![state_to_remove];
+        self.del_states(v.into_iter())
     }
 
-    fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) -> Fallible<()> {
-        let mut v: Vec<_> = states.into_iter().collect();
+    fn del_states<T: IntoIterator<Item = StateId>>(&mut self, dstates: T) -> Fallible<()> {
+        let mut new_id = vec![0 as i32; self.states.len()];
 
-        // Necessary : the states that are removed modify the id of all the states that come after
-        v.sort();
-        for j in (0..v.len()).rev() {
-            self.del_state(v[j])?;
+        for s in dstates {
+            new_id[s] = -1;
         }
+
+        let mut nstates = 0 as usize;
+
+        for s in 0..self.states.len() {
+            if new_id[s] != -1 {
+                new_id[s] = nstates as i32;
+                if s != nstates {
+                    self.states.swap(nstates, s);
+                }
+                nstates += 1;
+            }
+        }
+
+        self.states.truncate(nstates);
+
+        for s in 0..self.states.len() {
+            let mut to_delete = vec![];
+            for (idx, arc) in self.arcs_iter_unchecked_mut(s).enumerate() {
+                let t = new_id[arc.nextstate];
+                if t != -1 {
+                    arc.nextstate = t as usize;
+                } else {
+                    to_delete.push(idx);
+                }
+            }
+            for i in to_delete.iter().rev() {
+                self.states[s].arcs.remove(*i);
+            }
+        }
+
+        if let Some(start) = self.start() {
+            let new_state = new_id[start];
+            if new_state == -1 {
+                self.start_state = None;
+            } else {
+                self.start_state = Some(new_state as usize);
+            }
+        }
+
         Ok(())
     }
 
@@ -184,6 +225,14 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
             .arcs
             .push(arc);
         Ok(())
+    }
+
+    fn add_arc_unchecked(&mut self, source: usize, arc: Arc<Self::W>) {
+        unsafe { self.states.get_unchecked_mut(source).arcs.push(arc) };
+    }
+
+    fn set_arcs_unchecked(&mut self, source: usize, arcs: Vec<Arc<Self::W>>) {
+        self.states[source].arcs = arcs;
     }
 
     fn delete_final_weight(&mut self, source: usize) -> Fallible<()> {
@@ -214,6 +263,16 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(v)
     }
 
+    fn pop_arcs_unchecked(&mut self, source: usize) -> Vec<Arc<Self::W>> {
+        unsafe {
+            self.states
+                .get_unchecked_mut(source)
+                .arcs
+                .drain(..)
+                .collect()
+        }
+    }
+
     fn reserve_arcs(&mut self, source: usize, additional: usize) -> Fallible<()> {
         self.states
             .get_mut(source)
@@ -221,6 +280,16 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
             .arcs
             .reserve(additional);
         Ok(())
+    }
+
+    #[inline]
+    fn reserve_arcs_unchecked(&mut self, source: usize, additional: usize) {
+        unsafe {
+            self.states
+                .get_unchecked_mut(source)
+                .arcs
+                .reserve(additional)
+        };
     }
 
     fn reserve_states(&mut self, additional: usize) {
@@ -234,6 +303,47 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
             None
         }
     }
+
+    fn sort_arcs_unchecked<F: Fn(&Arc<Self::W>, &Arc<Self::W>) -> Ordering>(
+        &mut self,
+        state: StateId,
+        f: F,
+    ) {
+        unsafe { self.states.get_unchecked_mut(state).arcs.sort_by(f) }
+    }
+
+    fn unique_arcs_unchecked(&mut self, state: usize) {
+        let arcs = unsafe { &mut self.states.get_unchecked_mut(state).arcs };
+        arcs.sort_by(arc_compare);
+        arcs.dedup();
+    }
+
+    fn sum_arcs_unchecked(&mut self, state: usize) {
+        let arcs = unsafe { &mut self.states.get_unchecked_mut(state).arcs };
+        arcs.sort_by(arc_compare);
+        let mut n_arcs: usize = 0;
+        for i in 0..arcs.len() {
+            if n_arcs > 0 && equal_arc(&arcs[i], &arcs[n_arcs - 1]) {
+                let (left, right) = arcs.split_at_mut(i);
+                left[n_arcs - 1]
+                    .weight
+                    .plus_assign(&right[0].weight)
+                    .unwrap();
+            } else {
+                arcs.swap(n_arcs, i);
+                n_arcs += 1;
+            }
+        }
+        arcs.truncate(n_arcs);
+        // Truncate doesn't modify the capacity of the vector. Maybe a shrink_to_fit ?
+    }
+}
+
+#[inline]
+fn equal_arc<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> bool {
+    arc_1.ilabel == arc_2.ilabel
+        && arc_1.olabel == arc_2.olabel
+        && arc_1.nextstate == arc_2.nextstate
 }
 
 impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
@@ -244,6 +354,10 @@ impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
             .get_mut(state_id)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
         Ok(state.arcs.iter_mut())
+    }
+
+    fn arcs_iter_unchecked_mut(&'a mut self, state_id: usize) -> Self::IterMut {
+        unsafe { self.states.get_unchecked_mut(state_id).arcs.iter_mut() }
     }
 }
 

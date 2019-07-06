@@ -1,6 +1,8 @@
 mod all_pairs_shortest_distance;
 mod arc_map;
 mod arc_sort;
+mod arc_sum;
+pub(crate) mod arc_unique;
 mod closure;
 mod composition;
 mod concat;
@@ -22,7 +24,6 @@ mod rm_epsilon;
 mod rm_final_epsilon;
 mod shortest_distance;
 mod shortest_path;
-mod state_map;
 mod state_sort;
 mod top_sort;
 mod union;
@@ -43,9 +44,6 @@ pub(crate) mod cache;
 #[allow(unused)]
 pub(crate) mod factor_iterators;
 
-/// Module that provide structures implementing the `StateMapper` trait.
-pub mod state_mappers;
-
 /// Module that provide structures implementing the `WeightConverter` trait.
 pub mod weight_converters;
 
@@ -59,6 +57,8 @@ pub use self::{
     all_pairs_shortest_distance::all_pairs_shortest_distance,
     arc_map::{arc_map, ArcMapper, FinalArc, MapFinalAction},
     arc_sort::arc_sort,
+    arc_sum::arc_sum,
+    arc_unique::arc_unique,
     closure::{closure_plus, closure_star},
     composition::compose,
     concat::concat,
@@ -78,7 +78,6 @@ pub use self::{
     rm_final_epsilon::rm_final_epsilon,
     shortest_distance::{shortest_distance, single_source_shortest_distance},
     shortest_path::shortest_path,
-    state_map::{state_map, StateMapper},
     state_sort::state_sort,
     top_sort::top_sort,
     union::union,

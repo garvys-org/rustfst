@@ -5,13 +5,12 @@ use std::io::Write;
 use std::path::Path;
 
 use failure::{Fallible, ResultExt};
+use nom::IResult;
 use nom::{le_f32, le_i32, le_i64, le_u64};
 
 use crate::fst_impls::vector::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{
-    ArcIterator, BinaryDeserializer, BinarySerializer, CoreFst, ExpandedFst, MutableFst,
-};
+use crate::fst_traits::{ArcIterator, BinaryDeserializer, BinarySerializer, CoreFst, ExpandedFst};
 use crate::semirings::Semiring;
 use crate::Arc;
 use crate::StateId;
@@ -35,22 +34,9 @@ struct FstHeader {
 }
 
 #[derive(Debug)]
-struct ParsedFst {
-    header: FstHeader,
-    states: Vec<FstState>,
-}
-
-#[derive(Debug)]
 struct OpenFstString {
     n: i32,
     s: String,
-}
-
-#[derive(Debug)]
-struct FstState {
-    final_weight: f32,
-    num_arcs: i64,
-    arcs: Vec<Transition>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -80,77 +66,81 @@ named!(parse_fst_header <&[u8], FstHeader>, do_parse!(
     (FstHeader {magic_number, fst_type, arc_type, version, flags, properties, start, num_states, num_arcs}))
 );
 
-named!(parse_fst_arc <&[u8], Transition>, do_parse!(
-    ilabel: le_i32 >>
-    olabel: le_i32 >>
-    weight: le_f32 >>
-    nextstate: le_i32 >>
-    (Transition{ilabel, olabel, weight, nextstate})
-));
+fn parse_fst_arc<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], Arc<W>, u32> {
+    do_parse!(
+        i,
+        ilabel: le_i32
+            >> olabel: le_i32
+            >> weight: le_f32
+            >> nextstate: le_i32
+            >> (Arc {
+                ilabel: ilabel as usize,
+                olabel: olabel as usize,
+                weight: W::new(weight),
+                nextstate: nextstate as usize
+            })
+    )
+}
 
-named!(parse_fst_state <&[u8], FstState>, do_parse!(
-    final_weight: le_f32 >>
-    num_arcs: le_i64 >>
-    arcs: count!(parse_fst_arc, num_arcs as usize) >>
-    (FstState{final_weight, num_arcs, arcs})
-));
+fn parse_fst_state<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFstState<W>, u32> {
+    do_parse!(
+        i,
+        final_weight: le_f32
+            >> num_arcs: le_i64
+            >> arcs: count!(parse_fst_arc, num_arcs as usize)
+            >> (VectorFstState {
+                final_weight: parse_final_weight(final_weight),
+                arcs
+            })
+    )
+}
 
-named!(parse_fst <&[u8], ParsedFst>, do_parse!(
-    header: parse_fst_header >>
-    states: count!(parse_fst_state, header.num_states as usize) >>
-    (ParsedFst {header, states}))
-);
+fn parse_fst<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFst<W>, u32> {
+    do_parse!(
+        i,
+        header: parse_fst_header
+            >> states: count!(parse_fst_state, header.num_states as usize)
+            >> (VectorFst {
+                start_state: parse_start_state(header.start),
+                states: states
+            })
+    )
+}
 
-named!(complete_parse_fst <&[u8], ParsedFst>, complete!(parse_fst));
+fn complete_parse_fst<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFst<W>, u32> {
+    complete!(i, parse_fst)
+}
 
-impl<W: 'static + Semiring<Type = f32>> BinaryDeserializer for VectorFst<W> {
+#[inline]
+fn parse_start_state(s: i64) -> Option<StateId> {
+    if s == i64::from(NO_STATE_ID) {
+        None
+    } else {
+        Some(s as StateId)
+    }
+}
+
+#[inline]
+fn parse_final_weight<W: Semiring<Type = f32>>(w: f32) -> Option<W> {
+    // TODO: Avoid this re-allocation
+    let zero_weight = W::zero().value();
+    if w != zero_weight {
+        Some(W::new(w))
+    } else {
+        None
+    }
+}
+
+impl<W: Semiring<Type = f32> + 'static> BinaryDeserializer for VectorFst<W> {
     fn read<P: AsRef<Path>>(path_bin_fst: P) -> Fallible<Self> {
         let data = read(path_bin_fst.as_ref()).with_context(|_| {
             format!("Can't open FST binary file : {:?}", path_bin_fst.as_ref())
         })?;
+
         let (_, parsed_fst) = complete_parse_fst(&data)
             .map_err(|_| format_err!("Error while parsing binary VectorFst"))?;
 
-        let start_state = if parsed_fst.header.start == i64::from(NO_STATE_ID) {
-            None
-        } else {
-            Some(parsed_fst.header.start as StateId)
-        };
-
-        let num_states = if parsed_fst.header.num_states == i64::from(NO_STATE_ID) {
-            0
-        } else {
-            parsed_fst.header.num_states as usize
-        };
-
-        let states = vec![VectorFstState::<W>::default(); num_states];
-
-        let mut fst = VectorFst {
-            states,
-            start_state,
-        };
-
-        let zero_weight = W::zero().value();
-
-        for state in 0..num_states {
-            if parsed_fst.states[state].final_weight != zero_weight {
-                let final_weight = W::new(parsed_fst.states[state].final_weight);
-                fst.set_final(state, final_weight)?;
-            };
-
-            for transition in parsed_fst.states[state].arcs.iter() {
-                let weight = W::new(transition.weight);
-                let arc = Arc::new(
-                    transition.ilabel as usize,
-                    transition.olabel as usize,
-                    weight,
-                    transition.nextstate as StateId,
-                );
-                fst.add_arc(state, arc)?;
-            }
-        }
-
-        Ok(fst)
+        Ok(parsed_fst)
     }
 }
 
@@ -176,7 +166,7 @@ fn write_bin_f32<W: Write>(file: &mut W, i: f32) -> Fallible<()> {
 }
 
 #[inline]
-fn write_bin_string<'a, W: Write>(file: &mut W, s: &'a str) -> Fallible<()> {
+fn write_bin_string<W: Write>(file: &mut W, s: &str) -> Fallible<()> {
     write_bin_i32(file, s.len() as i32)?;
     file.write_all(s.as_bytes()).map_err(|e| e.into())
 }
@@ -196,7 +186,7 @@ impl<W: 'static + Semiring<Type = f32>> BinarySerializer for VectorFst<W> {
         //version: i32,
         write_bin_i32(&mut file, 2i32)?;
         //flags: i32,
-        // FIXME: Flags are used to check whether or not a symbltable has to be loaded
+        // FIXME: Flags are used to check whether or not a symboltable has to be loaded
         write_bin_i32(&mut file, 0i32)?;
         //properties: u64, 3 = kMutable | kExpanded
         // FIXME: Once the properties are stored, need to read them
@@ -207,7 +197,7 @@ impl<W: 'static + Semiring<Type = f32>> BinarySerializer for VectorFst<W> {
         write_bin_i64(&mut file, self.num_states() as i64)?;
         //num_arcs: i64,
         let num_arcs: usize = (0..self.num_states())
-            .map(|s: usize| self.num_arcs(s).unwrap())
+            .map(|s: usize| self.num_arcs_unchecked(s))
             .sum();
         write_bin_i64(&mut file, num_arcs as i64)?;
 
@@ -215,9 +205,9 @@ impl<W: 'static + Semiring<Type = f32>> BinarySerializer for VectorFst<W> {
         for state in 0..self.num_states() {
             let f_weight = self.final_weight(state).unwrap_or_else(W::zero).value();
             write_bin_f32(&mut file, f_weight)?;
-            write_bin_i64(&mut file, self.num_arcs(state).unwrap() as i64)?;
+            write_bin_i64(&mut file, self.num_arcs_unchecked(state) as i64)?;
 
-            for arc in self.arcs_iter(state).unwrap() {
+            for arc in self.arcs_iter_unchecked(state) {
                 write_bin_i32(&mut file, arc.ilabel as i32)?;
                 write_bin_i32(&mut file, arc.olabel as i32)?;
                 let weight = arc.weight.value();

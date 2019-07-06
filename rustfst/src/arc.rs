@@ -30,6 +30,7 @@ impl<W: Semiring> Arc<W> {
     /// assert_eq!(arc.nextstate, 2);
     ///
     /// ```
+    #[inline]
     pub fn new(ilabel: Label, olabel: Label, weight: W, nextstate: StateId) -> Self {
         Arc {
             ilabel,
@@ -53,6 +54,7 @@ impl<W: Semiring> Arc<W> {
     ///
     /// assert_eq!(arc_1, arc_2);
     /// ```
+    #[inline]
     pub fn set_value(&mut self, arc: &Arc<W>) {
         self.ilabel = arc.ilabel;
         self.olabel = arc.olabel;

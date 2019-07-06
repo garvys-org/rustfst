@@ -9,16 +9,16 @@ use stable_bst::TreeMap;
 
 use crate::algorithms::arc_compares::ilabel_compare;
 use crate::algorithms::arc_mappers::QuantizeMapper;
+use crate::algorithms::arc_unique;
 use crate::algorithms::factor_iterators::GallicFactorLeft;
 use crate::algorithms::partition::Partition;
 use crate::algorithms::queues::LifoQueue;
 use crate::algorithms::reverse;
-use crate::algorithms::state_mappers::ArcUniqueMapper;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::algorithms::Queue;
 use crate::algorithms::{
-    arc_map, arc_sort, connect, decode, encode, factor_weight, push_weights, state_map,
-    weight_convert, FactorWeightOptions, FactorWeightType, ReweightType,
+    arc_map, arc_sort, connect, decode, encode, factor_weight, push_weights, weight_convert,
+    FactorWeightOptions, FactorWeightType, ReweightType,
 };
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
@@ -113,7 +113,7 @@ where
 
     if allow_acyclic_minimization && props.contains(FstProperties::ACYCLIC) {
         // Acyclic minimization
-        arc_sort(ifst, ilabel_compare)?;
+        arc_sort(ifst, ilabel_compare);
         let minimizer = AcyclicMinimizer::new(ifst)?;
         merge_states(minimizer.get_partition(), ifst)?;
     } else {
@@ -121,8 +121,7 @@ where
         merge_states(p, ifst)?;
     }
 
-    let mut mapper = ArcUniqueMapper {};
-    state_map(ifst, &mut mapper)?;
+    arc_unique(ifst);
 
     Ok(())
 }
@@ -408,7 +407,7 @@ where
 {
     // Initialize
     let mut tr: VectorFst<W::ReverseWeight> = reverse(fst)?;
-    arc_sort(&mut tr, ilabel_compare)?;
+    arc_sort(&mut tr, ilabel_compare);
     let mut partition = Partition::new(tr.num_states() - 1);
     let mut queue = LifoQueue::default();
     pre_partition(fst, &mut partition, &mut queue);
