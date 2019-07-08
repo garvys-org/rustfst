@@ -1,3 +1,6 @@
+from rustfst_python_bench.utils import check_fst_equals, check_property_set
+
+
 class ConnectAlgorithm:
 
     def __init__(self):
@@ -20,3 +23,11 @@ class ConnectAlgorithm:
     @classmethod
     def get_parameters(cls):
         return [cls()]
+
+    def check_correctness(self, path_res_openfst, path_res_rustfst):
+        check_property_set(path_res_openfst, "accessible")
+        check_property_set(path_res_openfst, "coaccessible")
+        check_property_set(path_res_rustfst, "accessible")
+        check_property_set(path_res_rustfst, "coaccessible")
+        # check_fst_equals(path_res_openfst, path_res_rustfst)
+
