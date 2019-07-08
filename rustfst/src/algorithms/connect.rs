@@ -1,16 +1,12 @@
-use std::collections::HashSet;
-use std::hash::BuildHasher;
-
 use failure::Fallible;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::{Arc, NO_STATE_ID};
-use crate::fst_traits::{ExpandedFst, MutableFst, CoreFst};
 use crate::fst_traits::ArcIterator;
 use crate::fst_traits::Fst;
+use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::StateId;
-use crate::algorithms::cache::VectorCacheState;
+use crate::{Arc, NO_STATE_ID};
 
 /// This operation trims an FST, removing states and arcs that are not on successful paths.
 ///
@@ -48,9 +44,12 @@ pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Fallible<()> {
 
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
 enum StateColor {
-    DfsWhite, // Undiscovered.
-    DfsGrey,  // Discovered but unfinished.
-    DfsBlack, // Finished.
+    /// Undiscovered.
+    DfsWhite,
+    /// Discovered but unfinished.
+    DfsGrey,
+    /// Finished.
+    DfsBlack,
 }
 
 pub trait Visitor<'a, F: Fst> {
@@ -83,15 +82,15 @@ struct SccVisitor<'a, F: Fst> {
     coaccess: Vec<bool>,
     start: i32,
     fst: &'a F,
-    nstates : usize,
+    nstates: usize,
     nscc: usize,
     dfnumber: Vec<i32>,
     lowlink: Vec<i32>,
     onstack: Vec<bool>,
-    scc_stack: Vec<StateId>
+    scc_stack: Vec<StateId>,
 }
 
-impl<'a, F: 'a + Fst>  SccVisitor<'a, F> {
+impl<'a, F: 'a + Fst> SccVisitor<'a, F> {
     pub fn new(fst: &'a F) -> Self {
         Self {
             scc: vec![],
@@ -104,44 +103,33 @@ impl<'a, F: 'a + Fst>  SccVisitor<'a, F> {
             dfnumber: vec![],
             lowlink: vec![],
             onstack: vec![],
-            scc_stack: vec![]
+            scc_stack: vec![],
         }
     }
 }
 
-impl<'a, F: 'a + Fst> Visitor<'a, F> for SccVisitor<'a, F> {
+impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
     fn init_visit(&mut self, fst: &'a F) {
-        self.scc.clear();
-        self.access.clear();
-        self.coaccess.clear();
+        let n = fst.num_states();
+        self.scc = vec![-1; n];
+        self.access = vec![false; n];
+        self.coaccess = vec![false; n];
         self.start = fst.start().map(|v| v as i32).unwrap_or(-1);
         self.fst = fst;
         self.nstates = 0;
         self.nscc = 0;
-        self.dfnumber.clear();
-        self.lowlink.clear();
-        self.onstack.clear();
+        self.dfnumber = vec![-1; n];
+        self.lowlink = vec![-1; n];
+        self.onstack = vec![false; n];
         self.scc_stack.clear();
     }
 
     fn init_state(&mut self, s: usize, root: usize) -> bool {
         self.scc_stack.push(s);
-        if self.dfnumber.len() <= s {
-            self.scc.resize(s+1, -1);
-            self.access.resize(s+1, false);
-            self.coaccess.resize(s+1, false);
-            self.dfnumber.resize(s+1, -1);
-            self.lowlink.resize(s+1, -1);
-            self.onstack.resize(s+1, false);
-        }
         self.dfnumber[s] = self.nstates as i32;
         self.lowlink[s] = self.nstates as i32;
         self.onstack[s] = true;
-        if root as i32 == self.start {
-            self.access[s] = true;
-        } else {
-            self.access[s] = false;
-        }
+        self.access[s] = root as i32 == self.start;
         self.nstates += 1;
         true
     }
@@ -163,7 +151,10 @@ impl<'a, F: 'a + Fst> Visitor<'a, F> for SccVisitor<'a, F> {
 
     fn forward_or_cross_arc(&mut self, s: usize, arc: &Arc<<F as CoreFst>::W>) -> bool {
         let t = arc.nextstate;
-        if self.dfnumber[t] < self.dfnumber[s] && self.onstack[t] && self.dfnumber[t] < self.lowlink[s] {
+        if self.dfnumber[t] < self.dfnumber[s]
+            && self.onstack[t]
+            && self.dfnumber[t] < self.lowlink[s]
+        {
             self.lowlink[s] = self.dfnumber[t];
         }
         if self.coaccess[t] {
@@ -172,14 +163,19 @@ impl<'a, F: 'a + Fst> Visitor<'a, F> for SccVisitor<'a, F> {
         true
     }
 
-    fn finish_state(&mut self, s: usize, parent: Option<usize>, arc: Option<&Arc<<F as CoreFst>::W>>) {
+    fn finish_state(
+        &mut self,
+        s: usize,
+        parent: Option<usize>,
+        arc: Option<&Arc<<F as CoreFst>::W>>,
+    ) {
         if self.fst.is_final(s) {
             self.coaccess[s] = true;
         }
         if self.dfnumber[s] == self.lowlink[s] {
             let mut scc_coaccess = false;
             let mut i = self.scc_stack.len();
-            let mut t = 0;
+            let mut t ;
             loop {
                 i -= 1;
                 t = self.scc_stack[i];
@@ -187,7 +183,7 @@ impl<'a, F: 'a + Fst> Visitor<'a, F> for SccVisitor<'a, F> {
                     scc_coaccess = true;
                 }
                 if s == t {
-                    break
+                    break;
                 }
             }
             loop {
@@ -199,7 +195,7 @@ impl<'a, F: 'a + Fst> Visitor<'a, F> for SccVisitor<'a, F> {
                 self.onstack[t] = false;
                 self.scc_stack.pop();
                 if s == t {
-                    break
+                    break;
                 }
             }
             self.nscc += 1;
@@ -253,25 +249,33 @@ struct OpenFstIterator<I: Iterator> {
 }
 
 impl<I: Iterator> OpenFstIterator<I> {
-    pub fn new(mut iter: I) -> Self {
+    #[inline]
+    fn new(mut iter: I) -> Self {
         let e = iter.next();
         Self { iter, e }
     }
 
-    pub fn value(&self) -> &I::Item {
+    #[inline]
+    fn value(&self) -> &I::Item {
         unsafe { self.e.as_ref().unsafe_unwrap() }
     }
 
-    pub fn done(&self) -> bool {
+    #[inline]
+    fn done(&self) -> bool {
         self.e.is_none()
     }
 
-    pub fn next(&mut self) {
+    #[inline]
+    fn next(&mut self) {
         self.e = self.iter.next();
     }
 }
 
-pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>>(fst: &'a F, visitor: &mut V, access_only: bool) {
+pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>>(
+    fst: &'a F,
+    visitor: &mut V,
+    access_only: bool,
+) {
     visitor.init_visit(fst);
     let start = fst.start();
     if start.is_none() {
@@ -294,7 +298,7 @@ pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>>(fst: &'a F, visito
         state_color[root] = StateColor::DfsGrey;
         state_stack.push(DfsState::new(fst, root));
         dfs = visitor.init_state(root, root);
-                let mut state_stack_next = None;
+        let mut state_stack_next = None;
         while !state_stack.is_empty() {
             let dfs_state = unsafe { state_stack.last_mut().unsafe_unwrap() };
             let s = dfs_state.state_id;
@@ -340,13 +344,11 @@ pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>>(fst: &'a F, visito
             }
         }
 
-        if access_only {break;}
+        if access_only {
+            break;
+        }
 
-        root = if root == start {
-            0
-        } else {
-            root + 1
-        };
+        root = if root == start { 0 } else { root + 1 };
 
         while root < nstates && state_color[root] != StateColor::DfsWhite {
             root += 1;
