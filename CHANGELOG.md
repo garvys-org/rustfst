@@ -58,10 +58,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optimize `invert` with unchecked functions.
 - Optimize `project` with unchecked functions.
 - Optimize `reverse`.
+- Change implementation of `connect` algorithm which is now on par with OpenFST's one. Also works now for big fsts, no longer crashes.
 
 ### Removed
 - Crate `rustfst-tests-openfst` has been removed and moved to the `rustfst` as unit tests. 
-- Remove `state_map` and all `StateMappers`. Now use directly the functions `acr_sum` and `arc_unique`.
+- Remove `state_map` and all `StateMappers`. Now use directly the functions `arc_sum` and `arc_unique`.
 
 ## [0.3.0] - 2019-04-03
 
