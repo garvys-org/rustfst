@@ -29,5 +29,5 @@ class ConnectAlgorithm:
         check_property_set(path_res_openfst, "coaccessible")
         check_property_set(path_res_rustfst, "accessible")
         check_property_set(path_res_rustfst, "coaccessible")
-        # check_fst_equals(path_res_openfst, path_res_rustfst)
+        check_fst_equals(path_res_openfst, path_res_rustfst)
 
