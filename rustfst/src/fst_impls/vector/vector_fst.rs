@@ -356,6 +356,7 @@ impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
         Ok(state.arcs.iter_mut())
     }
 
+    #[inline]
     fn arcs_iter_unchecked_mut(&'a mut self, state_id: usize) -> Self::IterMut {
         unsafe { self.states.get_unchecked_mut(state_id).arcs.iter_mut() }
     }

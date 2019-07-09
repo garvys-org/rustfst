@@ -77,13 +77,11 @@ pub trait Visitor<'a, F: Fst> {
 }
 
 struct SccVisitor<'a, F: Fst> {
-    scc: Vec<i32>,
     access: Vec<bool>,
     coaccess: Vec<bool>,
     start: i32,
     fst: &'a F,
     nstates: usize,
-    nscc: usize,
     dfnumber: Vec<i32>,
     lowlink: Vec<i32>,
     onstack: Vec<bool>,
@@ -93,13 +91,11 @@ struct SccVisitor<'a, F: Fst> {
 impl<'a, F: 'a + Fst> SccVisitor<'a, F> {
     pub fn new(fst: &'a F) -> Self {
         Self {
-            scc: vec![],
             access: vec![],
             coaccess: vec![],
             start: fst.start().map(|v| v as i32).unwrap_or(-1),
             fst,
             nstates: 0,
-            nscc: 0,
             dfnumber: vec![],
             lowlink: vec![],
             onstack: vec![],
@@ -111,13 +107,11 @@ impl<'a, F: 'a + Fst> SccVisitor<'a, F> {
 impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
     fn init_visit(&mut self, fst: &'a F) {
         let n = fst.num_states();
-        self.scc = vec![-1; n];
         self.access = vec![false; n];
         self.coaccess = vec![false; n];
         self.start = fst.start().map(|v| v as i32).unwrap_or(-1);
         self.fst = fst;
         self.nstates = 0;
-        self.nscc = 0;
         self.dfnumber = vec![-1; n];
         self.lowlink = vec![-1; n];
         self.onstack = vec![false; n];
@@ -163,6 +157,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         true
     }
 
+    #[inline]
     fn finish_state(
         &mut self,
         s: usize,
@@ -187,8 +182,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
                 }
             }
             loop {
-                t = *self.scc_stack.last().unwrap();
-                self.scc[t] = self.nscc as i32;
+                t = unsafe {*self.scc_stack.last().unsafe_unwrap()};
                 if scc_coaccess {
                     self.coaccess[t] = true;
                 }
@@ -198,7 +192,6 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
                     break;
                 }
             }
-            self.nscc += 1;
         }
         if let Some(_p) = parent {
             if self.coaccess[s] {
@@ -210,15 +203,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         }
     }
 
-    fn finish_visit(&mut self) {
-        for s in 0..self.scc.len() {
-            self.scc[s] = self.nscc as i32 - 1 - self.scc[s];
-        }
-        self.dfnumber.clear();
-        self.lowlink.clear();
-        self.onstack.clear();
-        self.scc_stack.clear();
-    }
+    fn finish_visit(&mut self) {}
 }
 
 struct DfsState<'a, W, AI>
@@ -235,6 +220,7 @@ where
     W: Semiring + 'a,
     AI: Iterator<Item = &'a Arc<W>> + Clone,
 {
+    #[inline]
     pub fn new<F: ArcIterator<'a, Iter = AI, W = W>>(fst: &'a F, s: StateId) -> Self {
         Self {
             state_id: s,
