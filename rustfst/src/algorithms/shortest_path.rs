@@ -211,7 +211,7 @@ impl<'a, 'b, W: Semiring> ShortestPathCompare<'a, 'b, W> {
 
     fn pweight(&self, state: &Option<StateId>) -> &W {
         if let Some(_state) = state {
-            if _state < &self.distance.len() {
+            if *_state < self.distance.len() {
                 &self.distance[*_state]
             } else {
                 &self.weight_zero
