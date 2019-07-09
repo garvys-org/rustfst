@@ -6,7 +6,7 @@ use crate::fst_traits::Fst;
 use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::StateId;
-use crate::{Arc, NO_STATE_ID};
+use crate::Arc;
 
 /// This operation trims an FST, removing states and arcs that are not on successful paths.
 ///
@@ -128,7 +128,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         true
     }
 
-    fn tree_arc(&mut self, s: usize, arc: &Arc<<F as CoreFst>::W>) -> bool {
+    fn tree_arc(&mut self, _s: usize, _arc: &Arc<<F as CoreFst>::W>) -> bool {
         true
     }
 
@@ -162,7 +162,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         &mut self,
         s: usize,
         parent: Option<usize>,
-        arc: Option<&Arc<<F as CoreFst>::W>>,
+        _arc: Option<&Arc<<F as CoreFst>::W>>,
     ) {
         if self.fst.is_final(s) {
             self.coaccess[s] = true;
