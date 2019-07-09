@@ -36,7 +36,7 @@ where
         }
     }
 
-    let mut states_arcs: Vec<_> = c_arcs.into_iter().map(|c| Vec::with_capacity(c)).collect();
+    let mut states_arcs: Vec<_> = c_arcs.into_iter().map(Vec::with_capacity).collect();
 
     for is in 0..ifst.num_states() {
         let os = is + 1;

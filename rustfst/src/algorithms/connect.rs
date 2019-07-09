@@ -5,8 +5,8 @@ use crate::fst_traits::ArcIterator;
 use crate::fst_traits::Fst;
 use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
-use crate::StateId;
 use crate::Arc;
+use crate::StateId;
 
 /// This operation trims an FST, removing states and arcs that are not on successful paths.
 ///
@@ -43,16 +43,16 @@ pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Fallible<()> {
 }
 
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
-enum StateColor {
+enum DfsStateColor {
     /// Undiscovered.
-    DfsWhite,
+    White,
     /// Discovered but unfinished.
-    DfsGrey,
+    Grey,
     /// Finished.
-    DfsBlack,
+    Black,
 }
 
-pub trait Visitor<'a, F: Fst> {
+trait Visitor<'a, F: Fst> {
     /// Invoked before DFS visit.
     fn init_visit(&mut self, fst: &'a F);
 
@@ -170,7 +170,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         if self.dfnumber[s] == self.lowlink[s] {
             let mut scc_coaccess = false;
             let mut i = self.scc_stack.len();
-            let mut t ;
+            let mut t;
             loop {
                 i -= 1;
                 t = self.scc_stack[i];
@@ -182,7 +182,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
                 }
             }
             loop {
-                t = unsafe {*self.scc_stack.last().unsafe_unwrap()};
+                t = unsafe { *self.scc_stack.last().unsafe_unwrap() };
                 if scc_coaccess {
                     self.coaccess[t] = true;
                 }
@@ -257,7 +257,7 @@ impl<I: Iterator> OpenFstIterator<I> {
     }
 }
 
-pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>>(
+fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>>(
     fst: &'a F,
     visitor: &mut V,
     access_only: bool,
@@ -271,7 +271,7 @@ pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>>(
     let start = unsafe { start.unsafe_unwrap() };
 
     let nstates = fst.num_states();
-    let mut state_color = vec![StateColor::DfsWhite; nstates];
+    let mut state_color = vec![DfsStateColor::White; nstates];
     let mut state_stack = vec![];
 
     // Continue dfs while true.
@@ -281,7 +281,7 @@ pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>>(
         if !dfs || root >= nstates {
             break;
         }
-        state_color[root] = StateColor::DfsGrey;
+        state_color[root] = DfsStateColor::Grey;
         state_stack.push(DfsState::new(fst, root));
         dfs = visitor.init_state(root, root);
         let mut state_stack_next = None;
@@ -290,7 +290,7 @@ pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>>(
             let s = dfs_state.state_id;
             let aiter = &mut dfs_state.arc_iter;
             if !dfs || aiter.done() {
-                state_color[s] = StateColor::DfsBlack;
+                state_color[s] = DfsStateColor::Black;
                 state_stack.pop();
                 if !state_stack.is_empty() {
                     let parent_state = unsafe { state_stack.last_mut().unsafe_unwrap() };
@@ -305,20 +305,20 @@ pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>>(
             let arc = aiter.value();
             let next_color = state_color[arc.nextstate];
             match next_color {
-                StateColor::DfsWhite => {
+                DfsStateColor::White => {
                     dfs = visitor.tree_arc(s, arc);
                     if !dfs {
                         break;
                     }
-                    state_color[arc.nextstate] = StateColor::DfsGrey;
+                    state_color[arc.nextstate] = DfsStateColor::Grey;
                     state_stack_next = Some(DfsState::new(fst, arc.nextstate));
                     dfs = visitor.init_state(arc.nextstate, root);
                 }
-                StateColor::DfsGrey => {
+                DfsStateColor::Grey => {
                     dfs = visitor.back_arc(s, arc);
                     aiter.next();
                 }
-                StateColor::DfsBlack => {
+                DfsStateColor::Black => {
                     dfs = visitor.forward_or_cross_arc(s, arc);
                     aiter.next();
                 }
@@ -336,7 +336,7 @@ pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>>(
 
         root = if root == start { 0 } else { root + 1 };
 
-        while root < nstates && state_color[root] != StateColor::DfsWhite {
+        while root < nstates && state_color[root] != DfsStateColor::White {
             root += 1;
         }
     }
