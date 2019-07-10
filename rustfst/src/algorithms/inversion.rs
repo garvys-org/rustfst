@@ -19,7 +19,7 @@ use crate::fst_traits::{ExpandedFst, MutableFst};
 /// ```
 pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) {
     for state in 0..fst.num_states() {
-        for arc in unsafe{fst.arcs_iter_unchecked_mut(state)} {
+        for arc in unsafe { fst.arcs_iter_unchecked_mut(state) } {
             swap(&mut arc.ilabel, &mut arc.olabel);
         }
     }

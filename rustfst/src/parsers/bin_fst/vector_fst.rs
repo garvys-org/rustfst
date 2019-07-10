@@ -207,7 +207,7 @@ impl<W: 'static + Semiring<Type = f32>> BinarySerializer for VectorFst<W> {
             write_bin_f32(&mut file, f_weight)?;
             write_bin_i64(&mut file, self.num_arcs_unchecked(state) as i64)?;
 
-            for arc in unsafe {self.arcs_iter_unchecked(state)} {
+            for arc in unsafe { self.arcs_iter_unchecked(state) } {
                 write_bin_i32(&mut file, arc.ilabel as i32)?;
                 write_bin_i32(&mut file, arc.olabel as i32)?;
                 let weight = arc.weight.value();

@@ -193,7 +193,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
 
         for s in 0..self.states.len() {
             let mut to_delete = vec![];
-            for (idx, arc) in unsafe{self.arcs_iter_unchecked_mut(s).enumerate()} {
+            for (idx, arc) in unsafe { self.arcs_iter_unchecked_mut(s).enumerate() } {
                 let t = new_id[arc.nextstate];
                 if t != -1 {
                     arc.nextstate = t as usize;
@@ -264,11 +264,11 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
     }
 
     unsafe fn pop_arcs_unchecked(&mut self, source: usize) -> Vec<Arc<Self::W>> {
-            self.states
-                .get_unchecked_mut(source)
-                .arcs
-                .drain(..)
-                .collect()
+        self.states
+            .get_unchecked_mut(source)
+            .arcs
+            .drain(..)
+            .collect()
     }
 
     fn reserve_arcs(&mut self, source: usize, additional: usize) -> Fallible<()> {
@@ -282,10 +282,10 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
 
     #[inline]
     unsafe fn reserve_arcs_unchecked(&mut self, source: usize, additional: usize) {
-            self.states
-                .get_unchecked_mut(source)
-                .arcs
-                .reserve(additional)
+        self.states
+            .get_unchecked_mut(source)
+            .arcs
+            .reserve(additional)
     }
 
     fn reserve_states(&mut self, additional: usize) {

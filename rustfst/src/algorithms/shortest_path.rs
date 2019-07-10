@@ -93,7 +93,7 @@ where
     }
     let mut enqueued = vec![];
     let mut queue = AutoQueue::new(ifst, None)?;
-    let source = unsafe {start.unsafe_unwrap()};
+    let source = unsafe { start.unsafe_unwrap() };
     let mut f_distance = F::W::zero();
     distance.clear();
     queue.clear();
@@ -114,7 +114,7 @@ where
 
     while !queue.is_empty() {
         // Safe because non empty
-        let s = unsafe { queue.head().unsafe_unwrap()};
+        let s = unsafe { queue.head().unsafe_unwrap() };
         queue.dequeue();
         enqueued[s] = false;
         let sd = distance[s].clone();
@@ -127,7 +127,7 @@ where
             }
         }
 
-        for (pos, arc) in unsafe {ifst.arcs_iter_unchecked(s).enumerate()} {
+        for (pos, arc) in unsafe { ifst.arcs_iter_unchecked(s).enumerate() } {
             while distance.len() <= arc.nextstate {
                 distance.push(F::W::zero());
                 enqueued.push(false);
