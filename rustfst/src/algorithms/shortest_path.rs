@@ -5,6 +5,8 @@ use binary_heap_plus::BinaryHeap;
 
 use failure::Fallible;
 
+use unsafe_unwrap::UnsafeUnwrap;
+
 use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::{connect, determinize_with_distance, reverse, shortest_distance, Queue};
 use crate::fst_impls::VectorFst;
@@ -12,7 +14,6 @@ use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::Arc;
 use crate::StateId;
-
 pub fn shortest_path<FI, FO>(ifst: &FI, nshortest: usize, unique: bool) -> Fallible<FO>
 where
     FI: ExpandedFst + MutableFst,
@@ -86,12 +87,13 @@ where
 {
     parent.clear();
     *f_parent = None;
-    if ifst.start().is_none() {
+    let start = ifst.start();
+    if start.is_none() {
         return Ok(());
     }
     let mut enqueued = vec![];
     let mut queue = AutoQueue::new(ifst, None)?;
-    let source = ifst.start().unwrap();
+    let source = unsafe {start.unsafe_unwrap()};
     let mut f_distance = F::W::zero();
     distance.clear();
     queue.clear();
@@ -111,7 +113,8 @@ where
     enqueued.push(true);
 
     while !queue.is_empty() {
-        let s = queue.head().unwrap();
+        // Safe because non empty
+        let s = unsafe { queue.head().unsafe_unwrap()};
         queue.dequeue();
         enqueued[s] = false;
         let sd = distance[s].clone();
@@ -124,7 +127,7 @@ where
             }
         }
 
-        for (pos, arc) in ifst.arcs_iter(s)?.enumerate() {
+        for (pos, arc) in ifst.arcs_iter_unchecked(s).enumerate() {
             while distance.len() <= arc.nextstate {
                 distance.push(F::W::zero());
                 enqueued.push(false);
@@ -184,7 +187,6 @@ where
     if let Some(_s_p) = s_p {
         ofst.set_start(_s_p)?;
     }
-
     Ok(ofst)
 }
 
