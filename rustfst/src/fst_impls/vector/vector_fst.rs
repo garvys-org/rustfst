@@ -104,8 +104,8 @@ impl<'a, W: 'static + Semiring> ArcIterator<'a> for VectorFst<W> {
         Ok(state.arcs.iter())
     }
 
-    fn arcs_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
-        unsafe { self.states.get_unchecked(state_id).arcs.iter() }
+    unsafe fn arcs_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
+        self.states.get_unchecked(state_id).arcs.iter()
     }
 }
 
@@ -142,8 +142,8 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         }
     }
 
-    fn set_final_unchecked(&mut self, state_id: usize, final_weight: Self::W) {
-        self.states[state_id].final_weight = Some(final_weight);
+    unsafe fn set_final_unchecked(&mut self, state_id: usize, final_weight: Self::W) {
+        self.states.get_unchecked_mut(state_id).final_weight = Some(final_weight);
     }
 
     fn add_state(&mut self) -> StateId {
@@ -193,7 +193,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
 
         for s in 0..self.states.len() {
             let mut to_delete = vec![];
-            for (idx, arc) in self.arcs_iter_unchecked_mut(s).enumerate() {
+            for (idx, arc) in unsafe{self.arcs_iter_unchecked_mut(s).enumerate()} {
                 let t = new_id[arc.nextstate];
                 if t != -1 {
                     arc.nextstate = t as usize;
@@ -227,12 +227,12 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(())
     }
 
-    fn add_arc_unchecked(&mut self, source: usize, arc: Arc<Self::W>) {
-        unsafe { self.states.get_unchecked_mut(source).arcs.push(arc) };
+    unsafe fn add_arc_unchecked(&mut self, source: usize, arc: Arc<Self::W>) {
+        self.states.get_unchecked_mut(source).arcs.push(arc)
     }
 
-    fn set_arcs_unchecked(&mut self, source: usize, arcs: Vec<Arc<Self::W>>) {
-        self.states[source].arcs = arcs;
+    unsafe fn set_arcs_unchecked(&mut self, source: usize, arcs: Vec<Arc<Self::W>>) {
+        self.states.get_unchecked_mut(source).arcs = arcs
     }
 
     fn delete_final_weight(&mut self, source: usize) -> Fallible<()> {
@@ -263,14 +263,12 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(v)
     }
 
-    fn pop_arcs_unchecked(&mut self, source: usize) -> Vec<Arc<Self::W>> {
-        unsafe {
+    unsafe fn pop_arcs_unchecked(&mut self, source: usize) -> Vec<Arc<Self::W>> {
             self.states
                 .get_unchecked_mut(source)
                 .arcs
                 .drain(..)
                 .collect()
-        }
     }
 
     fn reserve_arcs(&mut self, source: usize, additional: usize) -> Fallible<()> {
@@ -283,13 +281,11 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
     }
 
     #[inline]
-    fn reserve_arcs_unchecked(&mut self, source: usize, additional: usize) {
-        unsafe {
+    unsafe fn reserve_arcs_unchecked(&mut self, source: usize, additional: usize) {
             self.states
                 .get_unchecked_mut(source)
                 .arcs
                 .reserve(additional)
-        };
     }
 
     fn reserve_states(&mut self, additional: usize) {
@@ -312,14 +308,14 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         unsafe { self.states.get_unchecked_mut(state).arcs.sort_by(f) }
     }
 
-    fn unique_arcs_unchecked(&mut self, state: usize) {
-        let arcs = unsafe { &mut self.states.get_unchecked_mut(state).arcs };
+    unsafe fn unique_arcs_unchecked(&mut self, state: usize) {
+        let arcs = &mut self.states.get_unchecked_mut(state).arcs;
         arcs.sort_by(arc_compare);
         arcs.dedup();
     }
 
-    fn sum_arcs_unchecked(&mut self, state: usize) {
-        let arcs = unsafe { &mut self.states.get_unchecked_mut(state).arcs };
+    unsafe fn sum_arcs_unchecked(&mut self, state: usize) {
+        let arcs = &mut self.states.get_unchecked_mut(state).arcs;
         arcs.sort_by(arc_compare);
         let mut n_arcs: usize = 0;
         for i in 0..arcs.len() {
@@ -357,8 +353,8 @@ impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
     }
 
     #[inline]
-    fn arcs_iter_unchecked_mut(&'a mut self, state_id: usize) -> Self::IterMut {
-        unsafe { self.states.get_unchecked_mut(state_id).arcs.iter_mut() }
+    unsafe fn arcs_iter_unchecked_mut(&'a mut self, state_id: usize) -> Self::IterMut {
+        self.states.get_unchecked_mut(state_id).arcs.iter_mut()
     }
 }
 

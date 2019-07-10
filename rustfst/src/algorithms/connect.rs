@@ -224,7 +224,7 @@ where
     pub fn new<F: ArcIterator<'a, Iter = AI, W = W>>(fst: &'a F, s: StateId) -> Self {
         Self {
             state_id: s,
-            arc_iter: OpenFstIterator::new(fst.arcs_iter_unchecked(s)),
+            arc_iter: OpenFstIterator::new(unsafe{ fst.arcs_iter_unchecked(s)}),
         }
     }
 }

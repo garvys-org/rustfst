@@ -127,7 +127,7 @@ where
             }
         }
 
-        for (pos, arc) in ifst.arcs_iter_unchecked(s).enumerate() {
+        for (pos, arc) in unsafe {ifst.arcs_iter_unchecked(s).enumerate()} {
             while distance.len() <= arc.nextstate {
                 distance.push(F::W::zero());
                 enqueued.push(false);
