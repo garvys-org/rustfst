@@ -49,14 +49,14 @@ pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_type: ProjectTy
     match project_type {
         ProjectType::ProjectInput => {
             for state in 0..fst.num_states() {
-                for arc in fst.arcs_iter_unchecked_mut(state) {
+                for arc in unsafe { fst.arcs_iter_unchecked_mut(state) } {
                     arc.olabel = arc.ilabel;
                 }
             }
         }
         ProjectType::ProjectOutput => {
             for state in 0..fst.num_states() {
-                for arc in fst.arcs_iter_unchecked_mut(state) {
+                for arc in unsafe { fst.arcs_iter_unchecked_mut(state) } {
                     arc.ilabel = arc.olabel;
                 }
             }

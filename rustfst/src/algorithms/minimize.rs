@@ -370,7 +370,9 @@ fn pre_partition<W: Semiring, F: MutableFst<W = W> + ExpandedFst<W = W>>(
         let mut hash_to_class_final = HashMap::<Vec<usize>, StateId>::new();
 
         for s in 0..num_states {
-            let ilabels: Vec<usize> = fst.arcs_iter_unchecked(s).map(|arc| arc.ilabel).collect();
+            let ilabels: Vec<usize> = unsafe { fst.arcs_iter_unchecked(s) }
+                .map(|arc| arc.ilabel)
+                .collect();
 
             let this_map = if fst.is_final(s) {
                 &mut hash_to_class_final

@@ -61,7 +61,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// assert_eq!(fst.final_weight(s2), Some(BooleanWeight::one()));
     /// ```
     fn set_final(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W) -> Fallible<()>;
-    fn set_final_unchecked(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W);
+    unsafe fn set_final_unchecked(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W);
 
     /// Adds a new state to the current FST. The identifier of the new state is returned
     ///
@@ -164,8 +164,8 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// assert_eq!(fst.num_arcs(s1).unwrap(), 1);
     /// ```
     fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Fallible<()>;
-    fn add_arc_unchecked(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>);
-    fn set_arcs_unchecked(&mut self, source: StateId, arcs: Vec<Arc<<Self as CoreFst>::W>>);
+    unsafe fn add_arc_unchecked(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>);
+    unsafe fn set_arcs_unchecked(&mut self, source: StateId, arcs: Vec<Arc<<Self as CoreFst>::W>>);
 
     /// Remove the final weight of a specific state.
     fn delete_final_weight(&mut self, source: StateId) -> Fallible<()>;
@@ -175,11 +175,11 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
 
     /// Remove all arcs leaving a state and return them.
     fn pop_arcs(&mut self, source: StateId) -> Fallible<Vec<Arc<Self::W>>>;
-    fn pop_arcs_unchecked(&mut self, source: StateId) -> Vec<Arc<Self::W>>;
+    unsafe fn pop_arcs_unchecked(&mut self, source: StateId) -> Vec<Arc<Self::W>>;
 
     /// Reserve space for storing enough arcs leaving a state.
     fn reserve_arcs(&mut self, source: StateId, additional: usize) -> Fallible<()>;
-    fn reserve_arcs_unchecked(&mut self, source: StateId, additional: usize);
+    unsafe fn reserve_arcs_unchecked(&mut self, source: StateId, additional: usize);
 
     /// Reserve space for storing enough states.
     fn reserve_states(&mut self, additional: usize);
@@ -193,9 +193,9 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
         f: F,
     );
 
-    fn unique_arcs_unchecked(&mut self, state: StateId);
+    unsafe fn unique_arcs_unchecked(&mut self, state: StateId);
 
-    fn sum_arcs_unchecked(&mut self, state: StateId);
+    unsafe fn sum_arcs_unchecked(&mut self, state: StateId);
 
     fn add_fst<F: ExpandedFst<W = Self::W>>(
         &mut self,
@@ -258,5 +258,5 @@ where
 {
     type IterMut: Iterator<Item = &'a mut Arc<Self::W>>;
     fn arcs_iter_mut(&'a mut self, state_id: StateId) -> Fallible<Self::IterMut>;
-    fn arcs_iter_unchecked_mut(&'a mut self, state_id: StateId) -> Self::IterMut;
+    unsafe fn arcs_iter_unchecked_mut(&'a mut self, state_id: StateId) -> Self::IterMut;
 }

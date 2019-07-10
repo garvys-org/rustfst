@@ -28,8 +28,10 @@ pub(crate) fn arc_compare<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> Orderi
 }
 
 pub fn arc_unique<F: MutableFst + ExpandedFst>(ifst: &mut F) {
-    for s in 0..ifst.num_states() {
-        ifst.unique_arcs_unchecked(s);
+    unsafe {
+        for s in 0..ifst.num_states() {
+            ifst.unique_arcs_unchecked(s);
+        }
     }
 }
 

@@ -31,7 +31,7 @@ where
 
     let mut c_arcs = vec![0; ifst.num_states() + 1];
     for is in 0..ifst.num_states() {
-        for iarc in ifst.arcs_iter_unchecked(is) {
+        for iarc in unsafe { ifst.arcs_iter_unchecked(is) } {
             c_arcs[iarc.nextstate + 1] += 1;
         }
     }
@@ -48,7 +48,7 @@ where
             states_arcs[0].push(Arc::new(0, 0, w.reverse()?, os));
         }
 
-        for iarc in ifst.arcs_iter_unchecked(is) {
+        for iarc in unsafe { ifst.arcs_iter_unchecked(is) } {
             let nos = iarc.nextstate + 1;
             let weight = iarc.weight.reverse()?;
             let w = Arc::new(iarc.ilabel, iarc.olabel, weight, os);
@@ -58,7 +58,7 @@ where
     states_arcs
         .into_iter()
         .enumerate()
-        .for_each(|(s, arcs)| ofst.set_arcs_unchecked(s, arcs));
+        .for_each(|(s, arcs)| unsafe { ofst.set_arcs_unchecked(s, arcs) });
     ofst.set_start(ostart)?;
 
     Ok(ofst)

@@ -42,7 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a prelude to `rustfst` to reduce the number of imports necessary when using the lib.
 - Added a bench keyword the the rustfst-cli to be able to benchmark the running time of the different algorithms across multiple runs.
 - Add a python package `rustfst-python-bench` to perform bench at the CLI level and at the functions level.
-- Added lots of unchecked functions to `Fst` and `MutableFst` traits.
+- Added lots of unchecked (thus unsafe) functions to `Fst` and `MutableFst` traits.
+- Add shortespath to OpenFST benchmark.
 
 ### Changed
 - Before test cases were generated with pynini (python wrapper around openfst). Now they are directly generated with OpenFST (c++). Allows to test operations that are not wrapped.
@@ -59,6 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optimize `project` with unchecked functions.
 - Optimize `reverse`.
 - Change implementation of `connect` algorithm which is now on par with OpenFST's one. Also works now for big fsts, no longer crashes.
+- Move panic from `unwind` to `abort`.
 
 ### Removed
 - Crate `rustfst-tests-openfst` has been removed and moved to the `rustfst` as unit tests. 
