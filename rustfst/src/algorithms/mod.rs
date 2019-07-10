@@ -9,6 +9,7 @@ mod concat;
 mod connect;
 mod determinize;
 mod dfs;
+mod dfs_visit;
 mod encode;
 mod factor_weight;
 mod inversion;
