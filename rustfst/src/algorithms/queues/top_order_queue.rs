@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
-use crate::algorithms::top_sort::dfs_topsort;
+use crate::algorithms::dfs_visit::dfs_visit;
+use crate::algorithms::top_sort::TopOrderVisitor;
 use crate::algorithms::{Queue, QueueType};
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::StateId;
@@ -17,10 +18,12 @@ pub struct TopOrderQueue {
 
 impl TopOrderQueue {
     pub fn new<F: MutableFst + ExpandedFst>(fst: &F) -> Self {
-        let mut accessible_states = HashSet::new();
-        let mut order = vec![];
-        dfs_topsort(fst, &mut accessible_states, &mut order).unwrap();
-        Self::from_precomputed_order(order)
+        let mut visitor = TopOrderVisitor::new();
+        dfs_visit(fst, &mut visitor, false);
+        if !visitor.acyclic {
+            panic!("Unexpectted Acyclic FST for TopOprerQueue");
+        }
+        Self::from_precomputed_order(visitor.order)
     }
 
     pub fn from_precomputed_order(order: Vec<StateId>) -> Self {
