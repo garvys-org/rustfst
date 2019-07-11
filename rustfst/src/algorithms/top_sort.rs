@@ -5,63 +5,71 @@ use failure::Fallible;
 use crate::algorithms::state_sort;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
+use crate::Arc;
 use crate::StateId;
+use crate::NO_STATE_ID;
 
-fn _dfs_topsort<F: Fst>(
-    fst: &F,
-    state_id_cour: StateId,
-    accessible_states: &mut HashSet<StateId>,
-    order: &mut Vec<StateId>,
-) -> Fallible<()> {
-    accessible_states.insert(state_id_cour);
+use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
 
-    for arc in fst.arcs_iter(state_id_cour)? {
-        let nextstate = arc.nextstate;
-
-        if !accessible_states.contains(&nextstate) {
-            _dfs_topsort(fst, nextstate, accessible_states, order)?;
-        }
-    }
-
-    order.push(state_id_cour);
-
-    Ok(())
+pub struct TopOrderVisitor {
+    pub order: Vec<StateId>,
+    pub acyclic: bool,
+    pub finish: Vec<StateId>,
 }
 
-pub(crate) fn dfs_topsort<F: MutableFst + ExpandedFst>(
-    fst: &F,
-    accessible_states: &mut HashSet<StateId>,
-    order: &mut Vec<StateId>,
-) -> Fallible<()> {
-    if let Some(start) = fst.start() {
-        _dfs_topsort(fst, start, accessible_states, order)?;
-    }
-    // Topsort unreachable state.
-    for state in fst.states_iter() {
-        if !accessible_states.contains(&state) {
-            _dfs_topsort(fst, state, accessible_states, order)?;
+impl TopOrderVisitor {
+    pub fn new() -> Self {
+        Self {
+            order: vec![],
+            acyclic: true,
+            finish: vec![],
         }
     }
-    Ok(())
+}
+
+impl<'a, F: 'a + Fst> Visitor<'a, F> for TopOrderVisitor {
+    fn init_visit(&mut self, fst: &'a F) {}
+
+    fn init_state(&mut self, s: usize, root: usize) -> bool {
+        true
+    }
+
+    fn tree_arc(&mut self, s: StateId, arc: &Arc<F::W>) -> bool {
+        true
+    }
+
+    fn back_arc(&mut self, s: StateId, arc: &Arc<F::W>) -> bool {
+        self.acyclic = false;
+        false
+    }
+
+    fn forward_or_cross_arc(&mut self, s: StateId, arc: &Arc<F::W>) -> bool {
+        true
+    }
+
+    fn finish_state(&mut self, s: StateId, _parent: Option<StateId>, _arc: Option<&Arc<F::W>>) {
+        self.finish.push(s)
+    }
+
+    fn finish_visit(&mut self) {
+        if self.acyclic {
+            self.order = vec![0; self.finish.len()];
+
+            for s in 0..self.finish.len() {
+                self.order[self.finish[self.finish.len() - s - 1]] = s;
+            }
+        }
+    }
 }
 
 pub fn top_sort<F>(fst: &mut F) -> Fallible<()>
 where
     F: MutableFst + ExpandedFst,
 {
-    let mut accessible_states = HashSet::new();
-    let mut finish = vec![];
-
-    dfs_topsort(fst, &mut accessible_states, &mut finish)?;
-
-    let acyclic = fst.properties()?.contains(FstProperties::ACYCLIC);
-    if acyclic {
-        let mut order: Vec<StateId> = vec![0; finish.len()];
-        let finish_len = finish.len();
-        for s in 0..finish_len {
-            order[finish[finish_len - s - 1]] = s;
-        }
-        state_sort(fst, &order)?;
+    let mut visitor = TopOrderVisitor::new();
+    dfs_visit(fst, &mut visitor, false);
+    if visitor.acyclic {
+        state_sort(fst, &visitor.order)?;
     }
 
     Ok(())

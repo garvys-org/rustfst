@@ -61,6 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optimize `reverse`.
 - Change implementation of `connect` algorithm which is now on par with OpenFST's one. Also works now for big fsts, no longer crashes.
 - Move panic from `unwind` to `abort`.
+- Change implementation of `TopSort` algorithm and `TopSortQueue`. Now uses `TopSortVisitor`.
 
 ### Removed
 - Crate `rustfst-tests-openfst` has been removed and moved to the `rustfst` as unit tests. 
