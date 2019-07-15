@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 use failure::Fallible;
+use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::connect;
 use crate::algorithms::dfs_visit::dfs_visit;
@@ -41,20 +42,20 @@ where
         }
     }
 
-    let states: Vec<_> = ifst.states_iter().collect();
-
-    for state in states {
+    for state in 0..ifst.num_states() {
         let mut arcs = vec![];
         let mut weight = ifst.final_weight(state).unwrap_or_else(F::W::zero);
 
-        for arc in ifst.arcs_iter(state).unwrap() {
+        for arc in unsafe { ifst.arcs_iter_unchecked(state) } {
             if finals.contains(&arc.nextstate) {
                 if arc.ilabel == 0 && arc.olabel == 0 {
-                    weight.plus_assign(
-                        ifst.final_weight(arc.nextstate)
-                            .unwrap()
-                            .times(&arc.weight)?,
-                    )?;
+                    unsafe {
+                        weight.plus_assign(
+                            ifst.final_weight(arc.nextstate)
+                                .unsafe_unwrap()
+                                .times(&arc.weight)?,
+                        )?
+                    };
                 } else {
                     arcs.push(arc);
                 }
@@ -63,7 +64,7 @@ where
             }
         }
 
-        if arcs.len() < ifst.num_arcs(state).unwrap() {
+        if arcs.len() < unsafe { ifst.num_arcs_unchecked(state) } {
             let arcs_owned: Vec<Arc<F::W>> = arcs.into_iter().cloned().collect();
             ifst.delete_arcs(state)?;
             if !weight.is_zero() {
