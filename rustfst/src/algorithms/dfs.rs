@@ -6,6 +6,7 @@ use failure::Fallible;
 use crate::fst_traits::Fst;
 use crate::StateId;
 
+#[deprecated]
 pub fn dfs<F: Fst, S1: BuildHasher, S2: BuildHasher>(
     fst: &F,
     state_id_cour: StateId,
