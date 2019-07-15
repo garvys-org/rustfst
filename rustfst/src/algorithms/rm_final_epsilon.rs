@@ -3,7 +3,8 @@ use std::collections::HashSet;
 use failure::Fallible;
 
 use crate::algorithms::connect;
-use crate::algorithms::dfs;
+use crate::algorithms::dfs_visit::dfs_visit;
+use crate::algorithms::visitors::SccVisitor;
 use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
 use crate::semirings::Semiring;
 use crate::Arc;
@@ -13,17 +14,8 @@ pub fn rm_final_epsilon<F>(ifst: &mut F) -> Fallible<()>
 where
     F: MutableFst + ExpandedFst,
 {
-    let mut accessible_states = HashSet::new();
-    let mut coaccessible_states = HashSet::new();
-
-    if let Some(state_id) = ifst.start() {
-        dfs(
-            ifst,
-            state_id,
-            &mut accessible_states,
-            &mut coaccessible_states,
-        )?;
-    }
+    let mut visitors = SccVisitor::new(ifst, false, true);
+    dfs_visit(ifst, &mut visitors, false);
 
     let mut finals = HashSet::new();
 
@@ -38,7 +30,7 @@ where
         let mut future_coaccess = false;
 
         for arc in ifst.arcs_iter(final_state_id)? {
-            if coaccessible_states.contains(&arc.nextstate) {
+            if visitors.coaccess[arc.nextstate] {
                 future_coaccess = true;
                 break;
             }
