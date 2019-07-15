@@ -39,6 +39,8 @@ pub mod arc_filters;
 /// Module that provide structures implementing the `ArcMapper` trait.
 pub mod arc_mappers;
 
+mod visitors;
+
 #[allow(unused)]
 pub(crate) mod cache;
 
