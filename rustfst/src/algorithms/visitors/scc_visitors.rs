@@ -5,10 +5,10 @@ use crate::{StateId, NO_STATE_ID};
 
 use unsafe_unwrap::UnsafeUnwrap;
 
-struct SccVisitor<'a, F: Fst> {
-    scc: Option<Vec<i32>>,
-    access: Option<Vec<bool>>,
-    coaccess: Vec<bool>,
+pub struct SccVisitor<'a, F: Fst> {
+    pub scc: Option<Vec<i32>>,
+    pub access: Option<Vec<bool>>,
+    pub coaccess: Vec<bool>,
     start: i32,
     fst: &'a F,
     nstates: usize,
@@ -16,7 +16,7 @@ struct SccVisitor<'a, F: Fst> {
     lowlink: Vec<i32>,
     onstack: Vec<bool>,
     scc_stack: Vec<StateId>,
-    nscc: i32,
+    pub nscc: i32,
 }
 
 impl<'a, F: 'a + Fst + ExpandedFst> SccVisitor<'a, F> {

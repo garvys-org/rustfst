@@ -4,7 +4,6 @@ use failure::Fallible;
 
 use crate::algorithms::arc_filters::{ArcFilter, InputEpsilonArcFilter, OutputEpsilonArcFilter};
 use crate::arc::Arc;
-use crate::fst_properties::{compute_fst_properties, FstProperties};
 use crate::semirings::Semiring;
 use crate::StateId;
 
@@ -210,10 +209,5 @@ pub trait Fst:
             }
         }
         true
-    }
-
-    /// Compute the properties verified by the Fst.
-    fn properties(&self) -> Fallible<FstProperties> {
-        compute_fst_properties(self)
     }
 }

@@ -1,51 +1,47 @@
 use std::collections::HashSet;
 
 use failure::Fallible;
+use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::{dfs, find_strongly_connected_components};
+use crate::algorithms::dfs_visit::dfs_visit;
+use crate::algorithms::visitors::SccVisitor;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::Fst;
+use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::Arc;
 
 /// Computes all the FstProperties of the FST bit don't attach them to the FST.
-pub fn compute_fst_properties<F: Fst>(fst: &F) -> Fallible<FstProperties> {
+pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Fallible<FstProperties> {
     let states: Vec<_> = fst.states_iter().collect();
     let mut comp_props = FstProperties::empty();
-    let mut accessible_states = HashSet::new();
-    let mut coaccessible_states = HashSet::new();
 
-    if let Some(start) = fst.start() {
-        dfs(fst, start, &mut accessible_states, &mut coaccessible_states)?;
-    }
+    let mut visitor = SccVisitor::new(fst, true, true);
+    dfs_visit(fst, &mut visitor, false);
+    let ref sccs = unsafe { visitor.scc.unsafe_unwrap() };
 
     comp_props |= FstProperties::ACCESSIBLE;
-    if accessible_states.len() != states.len() {
+    if unsafe { !visitor.access.unsafe_unwrap().iter().all(|v| *v) } {
         // All states are not accessible
         comp_props |= FstProperties::NOT_ACCESSIBLE;
         comp_props &= !FstProperties::ACCESSIBLE;
     }
 
     comp_props |= FstProperties::COACCESSIBLE;
-    if coaccessible_states.len() != states.len() {
+    if !visitor.coaccess.iter().all(|v| *v) {
         // All states are not coaccessible
         comp_props |= FstProperties::NOT_COACCESSIBLE;
         comp_props &= !FstProperties::COACCESSIBLE;
     }
 
-    let mut sccs = vec![];
-    let mut n_sccs = 0;
-    find_strongly_connected_components(fst, &mut sccs, &mut n_sccs)?;
-
     comp_props |= FstProperties::ACYCLIC;
     comp_props |= FstProperties::INITIAL_ACYCLIC;
-    if n_sccs < states.len() {
+    if (visitor.nscc as usize) < states.len() {
         // Cycles
         comp_props |= FstProperties::CYCLIC;
         comp_props &= !FstProperties::ACYCLIC;
 
         if let Some(start) = fst.start() {
-            if sccs.iter().any(|s| sccs[*s] == sccs[start]) {
+            if sccs.iter().any(|s| sccs[*s as usize] == sccs[start]) {
                 // if the start state is not alone in its scc, then it is initial cyclic.
                 comp_props |= FstProperties::INITIAL_CYCLIC;
                 comp_props &= !FstProperties::INITIAL_ACYCLIC;

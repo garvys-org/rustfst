@@ -1,15 +1,10 @@
-use std::collections::HashSet;
-
 use failure::Fallible;
 
+use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
 use crate::algorithms::state_sort;
-use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::Arc;
 use crate::StateId;
-use crate::NO_STATE_ID;
-
-use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
 
 pub struct TopOrderVisitor {
     pub order: Vec<StateId>,
@@ -28,22 +23,22 @@ impl TopOrderVisitor {
 }
 
 impl<'a, F: 'a + Fst> Visitor<'a, F> for TopOrderVisitor {
-    fn init_visit(&mut self, fst: &'a F) {}
+    fn init_visit(&mut self, _fst: &'a F) {}
 
-    fn init_state(&mut self, s: usize, root: usize) -> bool {
+    fn init_state(&mut self, _s: usize, _root: usize) -> bool {
         true
     }
 
-    fn tree_arc(&mut self, s: StateId, arc: &Arc<F::W>) -> bool {
+    fn tree_arc(&mut self, _s: StateId, _arc: &Arc<F::W>) -> bool {
         true
     }
 
-    fn back_arc(&mut self, s: StateId, arc: &Arc<F::W>) -> bool {
+    fn back_arc(&mut self, _s: StateId, _arc: &Arc<F::W>) -> bool {
         self.acyclic = false;
         false
     }
 
-    fn forward_or_cross_arc(&mut self, s: StateId, arc: &Arc<F::W>) -> bool {
+    fn forward_or_cross_arc(&mut self, _s: StateId, _arc: &Arc<F::W>) -> bool {
         true
     }
 
