@@ -69,7 +69,7 @@ pub trait CoreFst {
     /// assert_eq!(fst.num_arcs(s1).unwrap(), 1);
     /// ```
     fn num_arcs(&self, s: StateId) -> Fallible<usize>;
-    fn num_arcs_unchecked(&self, s: StateId) -> usize;
+    unsafe fn num_arcs_unchecked(&self, s: StateId) -> usize;
 
     /// Returns whether or not the state with identifier passed as parameters is a final state.
     ///

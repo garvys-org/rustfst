@@ -56,8 +56,9 @@ impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
         }
     }
 
-    fn num_arcs_unchecked(&self, s: usize) -> usize {
-        unsafe { self.states.get_unchecked(s).num_arcs() }
+    #[inline]
+    unsafe fn num_arcs_unchecked(&self, s: usize) -> usize {
+        self.states.get_unchecked(s).num_arcs()
     }
 }
 

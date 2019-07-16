@@ -197,7 +197,7 @@ impl<W: 'static + Semiring<Type = f32>> BinarySerializer for VectorFst<W> {
         write_bin_i64(&mut file, self.num_states() as i64)?;
         //num_arcs: i64,
         let num_arcs: usize = (0..self.num_states())
-            .map(|s: usize| self.num_arcs_unchecked(s))
+            .map(|s: usize| unsafe { self.num_arcs_unchecked(s) })
             .sum();
         write_bin_i64(&mut file, num_arcs as i64)?;
 
@@ -205,7 +205,7 @@ impl<W: 'static + Semiring<Type = f32>> BinarySerializer for VectorFst<W> {
         for state in 0..self.num_states() {
             let f_weight = self.final_weight(state).unwrap_or_else(W::zero).value();
             write_bin_f32(&mut file, f_weight)?;
-            write_bin_i64(&mut file, self.num_arcs_unchecked(state) as i64)?;
+            write_bin_i64(&mut file, unsafe { self.num_arcs_unchecked(state) } as i64)?;
 
             for arc in unsafe { self.arcs_iter_unchecked(state) } {
                 write_bin_i32(&mut file, arc.ilabel as i32)?;
