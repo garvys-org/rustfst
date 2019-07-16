@@ -29,7 +29,7 @@ where
             fst,
             total_weight,
             reweight_type == ReweightType::ReweightToInitial,
-        );
+        )?;
     } else {
         reweight(fst, &dist, reweight_type)?;
     }

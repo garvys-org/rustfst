@@ -173,12 +173,10 @@ macro_rules! gallic_weight {
         where
             W: WeaklyDivisibleSemiring,
         {
-            fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
-                let tuple = (
-                    self.value1().divide(rhs.value1(), divide_type)?,
-                    self.value2().divide(rhs.value2(), divide_type)?,
-                );
-                Ok(tuple.into())
+            fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
+                self.0.weight1.divide_assign(&rhs.0.weight1, divide_type)?;
+                self.0.weight2.divide_assign(&rhs.0.weight2, divide_type)?;
+                Ok(())
             }
         }
 
@@ -398,8 +396,9 @@ impl<W> WeaklyDivisibleSemiring for GallicWeight<W>
 where
     W: WeaklyDivisibleSemiring,
 {
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
-        Ok(Self(self.0.divide(&rhs.0, divide_type)?))
+    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
+        self.0.divide_assign(&rhs.0, divide_type)?;
+        Ok(())
     }
 }
 

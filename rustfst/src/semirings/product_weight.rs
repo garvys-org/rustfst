@@ -14,8 +14,8 @@ where
     W1: Semiring,
     W2: Semiring,
 {
-    weight1: W1,
-    weight2: W2,
+    pub(crate) weight1: W1,
+    pub(crate) weight2: W2,
 }
 
 impl<W1, W2> fmt::Display for ProductWeight<W1, W2>
@@ -139,12 +139,10 @@ where
     W1: WeaklyDivisibleSemiring,
     W2: WeaklyDivisibleSemiring,
 {
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
-        let tuple = (
-            self.value1().divide(&rhs.value1(), divide_type)?,
-            self.value2().divide(&rhs.value2(), divide_type)?,
-        );
-        Ok(tuple.into())
+    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
+        self.weight1.divide_assign(&rhs.weight1, divide_type)?;
+        self.weight2.divide_assign(&rhs.weight2, divide_type)?;
+        Ok(())
     }
 }
 

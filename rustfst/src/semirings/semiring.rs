@@ -85,7 +85,12 @@ pub enum DivideType {
 /// there exists at least one `z` such that `x = (x+y)*z`.
 /// For more information : `https://cs.nyu.edu/~mohri/pub/hwa.pdf`
 pub trait WeaklyDivisibleSemiring: Semiring {
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self>;
+    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()>;
+    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
+        let mut w = self.clone();
+        w.divide_assign(rhs, divide_type)?;
+        Ok(w)
+    }
 }
 
 /// A semiring `(S, ⊕, ⊗, 0, 1)` is said to be complete if for any index set `I` and any family

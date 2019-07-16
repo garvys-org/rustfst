@@ -201,9 +201,9 @@ where
     W: WeaklyDivisibleSemiring,
     O: UnionWeightOption<W>,
 {
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
+    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
         if self.is_zero() || rhs.is_zero() {
-            return Ok(Self::zero());
+            self.list.clear();
         }
         let mut quot = Self::zero();
         if self.len() == 1 {
@@ -217,7 +217,8 @@ where
         } else {
             bail!("Expected at least of the two parameters to have a single element");
         }
-        Ok(quot)
+        self.set_value(quot.value());
+        Ok(())
     }
 }
 

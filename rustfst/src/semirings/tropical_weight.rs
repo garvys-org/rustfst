@@ -100,8 +100,9 @@ impl StarSemiring for TropicalWeight {
 }
 
 impl WeaklyDivisibleSemiring for TropicalWeight {
-    fn divide(&self, rhs: &Self, _divide_type: DivideType) -> Fallible<Self> {
-        Ok(Self::new(self.value.0 - rhs.value.0))
+    fn divide_assign(&mut self, rhs: &Self, _divide_type: DivideType) -> Fallible<()> {
+        self.value.0 -= rhs.value.0;
+        Ok(())
     }
 }
 
