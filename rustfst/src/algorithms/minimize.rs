@@ -57,7 +57,7 @@ where
         // Weighted transducer
         let mut to_gallic = ToGallicConverter {};
         let mut gfst: VectorFst<GallicWeightLeft<F::W>> = weight_convert(ifst, &mut to_gallic)?;
-        push_weights(&mut gfst, ReweightType::ReweightToInitial)?;
+        push_weights(&mut gfst, ReweightType::ReweightToInitial, false)?;
         let mut quantize_mapper = QuantizeMapper {};
         arc_map(&mut gfst, &mut quantize_mapper)?;
         let encode_table = encode(&mut gfst, true, true)?;
@@ -80,7 +80,7 @@ where
         Ok(())
     } else if props.contains(FstProperties::WEIGHTED) {
         // Weighted acceptor
-        push_weights(ifst, ReweightType::ReweightToInitial)?;
+        push_weights(ifst, ReweightType::ReweightToInitial, false)?;
         let mut quantize_mapper = QuantizeMapper {};
         arc_map(ifst, &mut quantize_mapper)?;
         let encode_table = encode(ifst, true, true)?;
