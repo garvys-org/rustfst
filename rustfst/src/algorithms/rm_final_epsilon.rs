@@ -9,6 +9,7 @@ use crate::algorithms::visitors::SccVisitor;
 use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
 use crate::semirings::Semiring;
 use crate::Arc;
+use crate::EPS_LABEL;
 
 /// Removes final states that have epsilon-only input arcs.
 pub fn rm_final_epsilon<F>(ifst: &mut F) -> Fallible<()>
@@ -30,7 +31,7 @@ where
 
         let mut future_coaccess = false;
 
-        for arc in ifst.arcs_iter(final_state_id)? {
+        for arc in unsafe { ifst.arcs_iter_unchecked(final_state_id) } {
             if visitors.coaccess[arc.nextstate] {
                 future_coaccess = true;
                 break;
@@ -43,12 +44,13 @@ where
     }
 
     for state in 0..ifst.num_states() {
+        // TODO: Deleting arcs + cloning can be optimized.
         let mut arcs = vec![];
         let mut weight = ifst.final_weight(state).unwrap_or_else(F::W::zero);
 
         for arc in unsafe { ifst.arcs_iter_unchecked(state) } {
             if finals.contains(&arc.nextstate) {
-                if arc.ilabel == 0 && arc.olabel == 0 {
+                if arc.ilabel == EPS_LABEL && arc.olabel == EPS_LABEL {
                     unsafe {
                         weight.plus_assign(
                             ifst.final_weight(arc.nextstate)
@@ -71,7 +73,7 @@ where
                 ifst.set_final(state, weight)?;
             }
             for arc in arcs_owned.into_iter() {
-                ifst.add_arc(state, arc)?;
+                unsafe { ifst.add_arc_unchecked(state, arc) };
             }
         }
     }

@@ -20,14 +20,14 @@ pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Fallible<FstProp
     let ref sccs = unsafe { visitor.scc.unsafe_unwrap() };
 
     comp_props |= FstProperties::ACCESSIBLE;
-    if unsafe { !visitor.access.unsafe_unwrap().iter().all(|v| *v) } {
+    if unsafe { visitor.access.unsafe_unwrap().iter().any(|v| !*v) } {
         // All states are not accessible
         comp_props |= FstProperties::NOT_ACCESSIBLE;
         comp_props &= !FstProperties::ACCESSIBLE;
     }
 
     comp_props |= FstProperties::COACCESSIBLE;
-    if !visitor.coaccess.iter().all(|v| *v) {
+    if visitor.coaccess.iter().any(|v| !*v) {
         // All states are not coaccessible
         comp_props |= FstProperties::NOT_COACCESSIBLE;
         comp_props &= !FstProperties::COACCESSIBLE;

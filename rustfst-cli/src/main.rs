@@ -11,9 +11,9 @@ use crate::cmds::map::MapAlgorithm;
 use crate::cmds::minimize::MinimizeAlgorithm;
 use crate::cmds::project::ProjectFstAlgorithm;
 use crate::cmds::reverse::ReverseAlgorithm;
+use crate::cmds::rm_final_epsilon::RmFinalEpsilonAlgorithm;
 use crate::cmds::shortest_path::ShortestPathAlgorithm;
 use crate::cmds::topsort::TopsortAlgorithm;
-use crate::cmds::rm_final_epsilon::RmFinalEpsilonAlgorithm;
 use crate::pretty_errors::ExitFailure;
 use crate::unary_fst_algorithm::UnaryFstAlgorithm;
 
@@ -124,8 +124,8 @@ fn main() {
     app = app.subcommand(one_in_one_out_options(shortest_path_cmd));
 
     // Rm Final Epsilon
-    let rm_final_epsilon_cmd = SubCommand::with_name("rmfinalepsilon")
-        .about("RmFinalEpsilon algorithm.");
+    let rm_final_epsilon_cmd =
+        SubCommand::with_name("rmfinalepsilon").about("RmFinalEpsilon algorithm.");
     app = app.subcommand(one_in_one_out_options(rm_final_epsilon_cmd));
 
     let matches = app.get_matches();
@@ -201,7 +201,7 @@ fn handle(matches: clap::ArgMatches) -> Result<(), ExitFailure> {
             m.value_of("in.fst").unwrap(),
             m.value_of("out.fst").unwrap(),
         )
-            .run_cli_or_bench(m),
+        .run_cli_or_bench(m),
         (s, _) => Err(format_err!("Unknown subcommand {}.", s)),
     }
     .map_err(|e| e.into())
