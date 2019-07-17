@@ -72,7 +72,7 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
 
     fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         if self.is_zero() {
-            self.set_value(rhs.as_ref().value());
+            self.set_value(rhs.as_ref().value().clone());
         } else if rhs.as_ref().is_zero() {
             // Nothing
         } else {
@@ -103,14 +103,14 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
                 sum.push_back(v2.clone(), true)?;
             }
             //TODO: Remove this copy and do the modification inplace
-            self.set_value(sum.value());
+            self.set_value(sum.take_value());
         }
         Ok(())
     }
 
     fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         if self.is_zero() || rhs.as_ref().is_zero() {
-            self.set_value(Self::zero().value());
+            self.set_value(Self::zero().take_value());
         } else {
             let mut prod1: UnionWeight<W, O> = UnionWeight::zero();
             for w1 in self.iter() {
@@ -121,13 +121,17 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
                 }
                 prod1.plus_assign(prod2)?;
             }
-            self.set_value(prod1.value());
+            self.set_value(prod1.take_value());
         }
         Ok(())
     }
 
-    fn value(&self) -> Self::Type {
-        self.list.clone()
+    fn value(&self) -> &Self::Type {
+        &self.list
+    }
+
+    fn take_value(self) -> Self::Type {
+        self.list
     }
 
     fn set_value(&mut self, value: Self::Type) {
@@ -217,7 +221,7 @@ where
         } else {
             bail!("Expected at least of the two parameters to have a single element");
         }
-        self.set_value(quot.value());
+        self.set_value(quot.take_value());
         Ok(())
     }
 }

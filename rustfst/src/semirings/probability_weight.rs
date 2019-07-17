@@ -48,7 +48,11 @@ impl Semiring for ProbabilityWeight {
         Ok(())
     }
 
-    fn value(&self) -> Self::Type {
+    fn value(&self) -> &Self::Type {
+        self.value.as_ref()
+    }
+
+    fn take_value(self) -> Self::Type {
         self.value.into_inner()
     }
 

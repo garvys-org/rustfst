@@ -32,7 +32,7 @@ bitflags! {
 pub trait Semiring:
     Clone + PartialEq + PartialOrd + Debug + Default + Display + AsRef<Self> + Hash + Eq + Sized
 {
-    type Type;
+    type Type : Clone;
     type ReverseWeight: Semiring;
 
     fn zero() -> Self;
@@ -54,7 +54,10 @@ pub trait Semiring:
     }
     fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()>;
 
-    fn value(&self) -> Self::Type;
+    /// Borrow underneath value.
+    fn value(&self) -> &Self::Type;
+    /// Move underneath value.
+    fn take_value(self) -> Self::Type;
     fn set_value(&mut self, value: Self::Type);
     fn is_one(&self) -> bool {
         *self == Self::one()
@@ -122,7 +125,7 @@ macro_rules! impl_quantize_f32 {
     ($semiring: ident) => {
         impl WeightQuantize for $semiring {
             fn quantize_assign(&mut self, delta: f32) -> Fallible<()> {
-                let v = self.value();
+                let v = *self.value();
                 if v == f32::INFINITY || v == f32::NEG_INFINITY {
                     return Ok(());
                 }

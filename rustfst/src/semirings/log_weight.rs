@@ -45,10 +45,10 @@ impl Semiring for LogWeight {
     fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         let f1 = self.value();
         let f2 = rhs.as_ref().value();
-        self.value.0 = if f1 == f32::INFINITY {
-            f2
-        } else if f2 == f32::INFINITY {
-            f1
+        self.value.0 = if f1 == &f32::INFINITY {
+            *f2
+        } else if f2 == &f32::INFINITY {
+            *f1
         } else if f1 > f2 {
             f2 - ln_pos_exp(f1 - f2)
         } else {
@@ -60,17 +60,21 @@ impl Semiring for LogWeight {
     fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         let f1 = self.value();
         let f2 = rhs.as_ref().value();
-        if f1 == f32::INFINITY {
-        } else if f2 == f32::INFINITY {
-            self.value.0 = f2;
+        if f1 == &f32::INFINITY {
+        } else if f2 == &f32::INFINITY {
+            self.value.0 = *f2;
         } else {
             self.value.0 += f2;
         }
         Ok(())
     }
 
-    fn value(&self) -> Self::Type {
-        self.value.0
+    fn value(&self) -> &Self::Type {
+        self.value.as_ref()
+    }
+
+    fn take_value(self) -> Self::Type {
+        self.value.into_inner()
     }
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {

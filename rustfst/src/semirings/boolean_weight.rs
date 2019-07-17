@@ -32,7 +32,11 @@ impl Semiring for BooleanWeight {
         Ok(())
     }
 
-    fn value(&self) -> Self::Type {
+    fn value(&self) -> &Self::Type {
+        &self.value
+    }
+
+    fn take_value(self) -> Self::Type {
         self.value
     }
 

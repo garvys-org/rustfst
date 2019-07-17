@@ -91,7 +91,7 @@ macro_rules! gallic_weight {
                     GallicType::GallicRestrict => self.0.plus_assign(&rhs.as_ref().0)?,
                     GallicType::GallicMin => {
                         if !natural_less(self.value2(), rhs.as_ref().value2())? {
-                            self.set_value(rhs.as_ref().value());
+                            self.set_value(rhs.as_ref().value().clone());
                         }
                     }
                 };
@@ -102,8 +102,12 @@ macro_rules! gallic_weight {
                 self.0.times_assign(&rhs.as_ref().0)
             }
 
-            fn value(&self) -> Self::Type {
-                self.0.clone()
+            fn value(&self) -> &Self::Type {
+                &self.0
+            }
+
+            fn take_value(self) -> Self::Type {
+                self.0
             }
 
             fn set_value(&mut self, value: Self::Type) {
@@ -174,8 +178,8 @@ macro_rules! gallic_weight {
             W: WeaklyDivisibleSemiring,
         {
             fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
-                self.0.weight1.divide_assign(&rhs.0.weight1, divide_type)?;
-                self.0.weight2.divide_assign(&rhs.0.weight2, divide_type)?;
+                self.0.weight.0.divide_assign(&rhs.0.weight.0, divide_type)?;
+                self.0.weight.1.divide_assign(&rhs.0.weight.1, divide_type)?;
                 Ok(())
             }
         }
@@ -318,8 +322,12 @@ impl<W: Semiring> Semiring for GallicWeight<W> {
         self.0.times_assign(&rhs.as_ref().0)
     }
 
-    fn value(&self) -> Self::Type {
+    fn value(&self) -> &Self::Type {
         self.0.value()
+    }
+
+    fn take_value(self) -> Self::Type {
+        self.0.take_value()
     }
 
     fn set_value(&mut self, value: Self::Type) {

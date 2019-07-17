@@ -86,7 +86,7 @@ macro_rules! string_semiring {
 
             fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
                 if self.is_zero() {
-                    self.set_value(rhs.as_ref().value());
+                    self.set_value(rhs.as_ref().value().clone());
                 } else if rhs.as_ref().is_zero() {
                     // Do nothing
                 } else {
@@ -142,8 +142,12 @@ macro_rules! string_semiring {
                 Ok(())
             }
 
-            fn value(&self) -> <Self as Semiring>::Type {
-                self.value.clone()
+            fn value(&self) -> &<Self as Semiring>::Type {
+                &self.value
+            }
+
+            fn take_value(self) -> <Self as Semiring>::Type {
+                self.value
             }
 
             fn set_value(&mut self, value: <Self as Semiring>::Type) {
