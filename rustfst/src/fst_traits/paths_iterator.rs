@@ -59,7 +59,7 @@ where
             for arc in self.fst.arcs_iter(state_id).unwrap() {
                 let mut new_path = path.clone();
                 new_path
-                    .add_to_path(arc.ilabel, arc.olabel, arc.weight.clone())
+                    .add_to_path(arc.ilabel, arc.olabel, &arc.weight)
                     .expect("Error add_to_path in PathsIterator");
                 self.queue.push_back((arc.nextstate, new_path));
             }

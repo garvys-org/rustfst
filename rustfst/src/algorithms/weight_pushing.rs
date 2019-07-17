@@ -52,8 +52,9 @@ where
         }
     } else {
         let mut sum = F::W::zero();
+        let zero = F::W::zero();
         for s in 0..dist.len() {
-            sum.plus_assign(dist[s].times(fst.final_weight(s).unwrap_or_else(F::W::zero))?)?;
+            sum.plus_assign(dist[s].times(fst.final_weight(s).unwrap_or_else(|| &zero))?)?;
         }
         Ok(sum)
     }

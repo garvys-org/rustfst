@@ -47,9 +47,10 @@ pub trait CoreFst {
     ///
     /// // 2 - Access the final weight of each state
     /// assert_eq!(fst.final_weight(s1), None);
-    /// assert_eq!(fst.final_weight(s2), Some(BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s2), Some(&BooleanWeight::one()));
     /// ```
-    fn final_weight(&self, state_id: StateId) -> Option<<Self as CoreFst>::W>;
+    fn final_weight(&self, state_id: StateId) -> Option<&<Self as CoreFst>::W>;
+    unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<&<Self as CoreFst>::W>;
 
     /// Number of arcs leaving a specific state in the wFST.
     ///

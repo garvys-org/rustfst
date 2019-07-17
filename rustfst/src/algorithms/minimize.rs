@@ -299,8 +299,9 @@ struct StateComparator<'a, F: MutableFst + ExpandedFst> {
 
 impl<'a, F: MutableFst + ExpandedFst> StateComparator<'a, F> {
     fn do_compare(&self, x: StateId, y: StateId) -> Fallible<bool> {
-        let xfinal = self.fst.final_weight(x).unwrap_or_else(F::W::zero);
-        let yfinal = self.fst.final_weight(y).unwrap_or_else(F::W::zero);
+        let zero = F::W::zero();
+        let xfinal = self.fst.final_weight(x).unwrap_or_else(|| &zero);
+        let yfinal = self.fst.final_weight(y).unwrap_or_else(|| &zero);
 
         if xfinal < yfinal {
             return Ok(true);

@@ -9,7 +9,7 @@ pub struct RmWeightMapper {}
 
 pub fn map_weight<W: Semiring>(weight: &mut W) {
     if !weight.is_zero() {
-        weight.set_value(W::one().value())
+        weight.set_value(W::one().take_value())
     }
 }
 

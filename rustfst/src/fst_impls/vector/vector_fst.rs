@@ -40,12 +40,17 @@ impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
         self.start_state
     }
 
-    fn final_weight(&self, state_id: StateId) -> Option<W> {
+    fn final_weight(&self, state_id: StateId) -> Option<&W> {
         if let Some(state) = self.states.get(state_id) {
-            state.final_weight.clone()
+            state.final_weight.as_ref()
         } else {
             None
         }
+    }
+
+    #[inline]
+    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<&Self::W> {
+        self.states.get_unchecked(state_id).final_weight.as_ref()
     }
 
     fn num_arcs(&self, s: StateId) -> Fallible<usize> {

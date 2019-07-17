@@ -157,12 +157,13 @@ where
 
     pub fn final_weight(&mut self, state: StateId) -> Fallible<Option<&F::W>> {
         if !self.cache_impl.has_final(state) {
+            let zero = F::W::zero();
             let elt = self.element_map.get_by_left(&state).unwrap();
             let weight = match elt.state {
                 None => elt.weight.clone(),
                 Some(s) => elt
                     .weight
-                    .times(self.fst.final_weight(s).unwrap_or_else(F::W::zero))
+                    .times(self.fst.final_weight(s).unwrap_or_else(||&zero))
                     .unwrap(),
             };
             let factor_iterator = FI::new(weight.clone());
@@ -215,11 +216,12 @@ where
         if self.factor_final_weights()
             && (elt.state.is_none() || self.fst.is_final(elt.state.unwrap()))
         {
+            let one = F::W::one();
             let weight = match elt.state {
                 None => elt.weight.clone(),
                 Some(s) => elt
                     .weight
-                    .times(self.fst.final_weight(s).unwrap_or_else(F::W::one))
+                    .times(self.fst.final_weight(s).unwrap_or_else(|| &one))
                     .unwrap(),
             };
             let mut ilabel = self.opts.final_ilabel;

@@ -53,12 +53,12 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// assert_eq!(fst.final_weight(s2), None);
     ///
     /// fst.set_final(s1, BooleanWeight::one());
-    /// assert_eq!(fst.final_weight(s1), Some(BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s1), Some(&BooleanWeight::one()));
     /// assert_eq!(fst.final_weight(s2), None);
     ///
     /// fst.set_final(s2, BooleanWeight::one());
-    /// assert_eq!(fst.final_weight(s1), Some(BooleanWeight::one()));
-    /// assert_eq!(fst.final_weight(s2), Some(BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s1), Some(&BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s2), Some(&BooleanWeight::one()));
     /// ```
     fn set_final(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W) -> Fallible<()>;
     unsafe fn set_final_unchecked(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W);

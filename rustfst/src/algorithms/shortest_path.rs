@@ -170,7 +170,7 @@ where
         s_p = Some(ofst.add_state());
         if d.is_none() {
             if let Some(final_weight) = ifst.final_weight(f_parent.unwrap()) {
-                ofst.set_final(s_p.unwrap(), final_weight)?;
+                ofst.set_final(s_p.unwrap(), final_weight.clone())?;
             }
         } else {
             let pos = parent[d.unwrap()].unwrap().1;

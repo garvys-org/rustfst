@@ -169,7 +169,7 @@ mod tests {
             .iter()
             .enumerate()
             .all(|(idx, state_id)| fst.final_weight(*state_id)
-                == Some(ProbabilityWeight::new(idx as f32))));
+                == Some(&ProbabilityWeight::new(idx as f32))));
         Ok(())
     }
 

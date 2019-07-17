@@ -57,7 +57,8 @@ where
             if let Some(final_weight) = self.fst.final_weight(state_id) {
                 return Some(FinalState {
                     state_id,
-                    final_weight,
+                    // TODO: No need to clone here.
+                    final_weight: final_weight.clone(),
                 });
             }
         }

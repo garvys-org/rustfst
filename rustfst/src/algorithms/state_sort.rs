@@ -37,19 +37,19 @@ where
         if done[s1] {
             continue;
         }
-        let mut final1 = fst.final_weight(s1);
+        let mut final1 = fst.final_weight(s1).cloned();
         let mut final2 = None;
         let mut arcsa: Vec<_> = fst.arcs_iter(s1)?.cloned().collect();
         let mut arcsb = vec![];
         while !done[s1] {
             let s2 = order[s1];
             if !done[s2] {
-                final2 = fst.final_weight(s2);
+                final2 = fst.final_weight(s2).cloned();
                 arcsb = fst.arcs_iter(s2)?.cloned().collect();
             }
             match final1 {
                 None => fst.delete_final_weight(s2)?,
-                Some(v) => fst.set_final(s2, v)?,
+                Some(v) => fst.set_final(s2, v.clone())?,
             };
             fst.delete_arcs(s2)?;
             for arc in arcsa.iter() {

@@ -123,7 +123,7 @@ fn parse_start_state(s: i64) -> Option<StateId> {
 #[inline]
 fn parse_final_weight<W: Semiring<Type = f32>>(w: f32) -> Option<W> {
     // TODO: Avoid this re-allocation
-    let zero_weight = W::zero().value();
+    let zero_weight = W::zero().take_value();
     if w != zero_weight {
         Some(W::new(w))
     } else {
@@ -201,17 +201,18 @@ impl<W: 'static + Semiring<Type = f32>> BinarySerializer for VectorFst<W> {
             .sum();
         write_bin_i64(&mut file, num_arcs as i64)?;
 
+        let zero = W::zero();
         // FstBody
         for state in 0..self.num_states() {
-            let f_weight = self.final_weight(state).unwrap_or_else(W::zero).value();
-            write_bin_f32(&mut file, f_weight)?;
+            let f_weight = self.final_weight(state).unwrap_or_else(|| &zero).value();
+            write_bin_f32(&mut file, *f_weight)?;
             write_bin_i64(&mut file, unsafe { self.num_arcs_unchecked(state) } as i64)?;
 
             for arc in unsafe { self.arcs_iter_unchecked(state) } {
                 write_bin_i32(&mut file, arc.ilabel as i32)?;
                 write_bin_i32(&mut file, arc.olabel as i32)?;
                 let weight = arc.weight.value();
-                write_bin_f32(&mut file, weight)?;
+                write_bin_f32(&mut file, *weight)?;
                 write_bin_i32(&mut file, arc.nextstate as i32)?;
             }
         }
