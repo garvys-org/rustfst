@@ -224,10 +224,10 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(())
     }
 
-    unsafe fn del_arcs_id_sorted_unchecked(&mut self, state: usize, to_del: Vec<usize>) {
+    unsafe fn del_arcs_id_sorted_unchecked(&mut self, state: usize, to_del: &Vec<usize>) {
         let ref mut arcs = self.states.get_unchecked_mut(state).arcs;
-        for i in to_del.into_iter().rev() {
-            arcs.remove(i);
+        for i in to_del.iter().rev() {
+            arcs.remove(*i);
         }
     }
 

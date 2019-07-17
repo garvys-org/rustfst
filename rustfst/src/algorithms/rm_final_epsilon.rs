@@ -38,9 +38,10 @@ where
         }
     }
 
+    let mut arcs_to_del = vec![];
     for state in 0..ifst.num_states() {
-        let mut arcs_to_del = vec![];
         let mut weight = None;
+        arcs_to_del.clear();
 
         for (idx, arc) in unsafe { ifst.arcs_iter_unchecked(state).enumerate() } {
             if finals.contains(&arc.nextstate) {
@@ -69,7 +70,7 @@ where
             if !w.is_zero() {
                 unsafe { ifst.set_final_unchecked(state, w) };
             }
-            unsafe { ifst.del_arcs_id_sorted_unchecked(state, arcs_to_del) };
+            unsafe { ifst.del_arcs_id_sorted_unchecked(state, &arcs_to_del) };
         }
     }
 
