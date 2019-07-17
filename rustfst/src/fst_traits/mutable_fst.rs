@@ -140,6 +140,8 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// ```
     fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) -> Fallible<()>;
 
+    unsafe fn del_arcs_id_sorted_unchecked(&mut self, state: StateId, to_del: Vec<usize>);
+
     /// Adds an arc to the FST. The arc will start in the state `source`.
     /// An error is raised if the state `source` doesn't exist.
     ///

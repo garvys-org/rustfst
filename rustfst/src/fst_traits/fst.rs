@@ -90,11 +90,17 @@ pub trait CoreFst {
     /// assert!(!fst.is_final(s1));
     /// assert!(fst.is_final(s2));
     /// ```
+    #[inline]
     fn is_final(&self, state_id: StateId) -> bool {
         self.final_weight(state_id).is_some()
     }
+    #[inline]
+    unsafe fn is_final_unchecked(&self, state_id: StateId) -> bool {
+        self.final_weight_unchecked(state_id).is_some()
+    }
 
     /// Check whether a state is the start state or not.
+    #[inline]
     fn is_start(&self, state_id: StateId) -> bool {
         Some(state_id) == self.start()
     }

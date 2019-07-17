@@ -21,60 +21,50 @@ where
 
     let mut finals = HashSet::new();
 
-    for final_state in ifst.final_states_iter() {
-        let final_state_id = final_state.state_id;
-        let final_weight = final_state.final_weight;
+    for s in 0..ifst.num_states() {
+        if unsafe{ifst.is_final_unchecked(s)} {
 
-        if final_weight.is_zero() {
-            continue;
-        }
+            let mut future_coaccess = false;
 
-        let mut future_coaccess = false;
+            for arc in unsafe { ifst.arcs_iter_unchecked(s) } {
+                if visitors.coaccess[arc.nextstate] {
+                    future_coaccess = true;
+                    break;
+                }
+            }
 
-        for arc in unsafe { ifst.arcs_iter_unchecked(final_state_id) } {
-            if visitors.coaccess[arc.nextstate] {
-                future_coaccess = true;
-                break;
+            if !future_coaccess {
+                finals.insert(s);
             }
         }
 
-        if !future_coaccess {
-            finals.insert(final_state_id);
-        }
     }
 
     for state in 0..ifst.num_states() {
-        // TODO: Deleting arcs + cloning can be optimized.
-        let mut arcs = vec![];
-        let mut weight = ifst.final_weight(state).unwrap_or_else(F::W::zero);
+        let mut arcs_to_del = vec![];
+        // TODO: This weight is not always used. Make it optional ?
+        let mut weight = unsafe{ifst.final_weight_unchecked(state).cloned().unwrap_or_else(F::W::zero)};
 
-        for arc in unsafe { ifst.arcs_iter_unchecked(state) } {
+        for (idx, arc) in unsafe { ifst.arcs_iter_unchecked(state).enumerate() } {
             if finals.contains(&arc.nextstate) {
                 if arc.ilabel == EPS_LABEL && arc.olabel == EPS_LABEL {
                     unsafe {
                         weight.plus_assign(
-                            ifst.final_weight(arc.nextstate)
+                            ifst.final_weight_unchecked(arc.nextstate)
                                 .unsafe_unwrap()
                                 .times(&arc.weight)?,
                         )?
                     };
-                } else {
-                    arcs.push(arc);
+                    arcs_to_del.push(idx);
                 }
-            } else {
-                arcs.push(arc);
             }
         }
 
-        if arcs.len() < unsafe { ifst.num_arcs_unchecked(state) } {
-            let arcs_owned: Vec<Arc<F::W>> = arcs.into_iter().cloned().collect();
-            ifst.delete_arcs(state)?;
+        if !arcs_to_del.is_empty() {
             if !weight.is_zero() {
-                ifst.set_final(state, weight)?;
+                unsafe{ifst.set_final_unchecked(state, weight)};
             }
-            for arc in arcs_owned.into_iter() {
-                unsafe { ifst.add_arc_unchecked(state, arc) };
-            }
+            unsafe{ifst.del_arcs_id_sorted_unchecked(state, arcs_to_del)};
         }
     }
 
