@@ -178,8 +178,14 @@ macro_rules! gallic_weight {
             W: WeaklyDivisibleSemiring,
         {
             fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
-                self.0.weight.0.divide_assign(&rhs.0.weight.0, divide_type)?;
-                self.0.weight.1.divide_assign(&rhs.0.weight.1, divide_type)?;
+                self.0
+                    .weight
+                    .0
+                    .divide_assign(&rhs.0.weight.0, divide_type)?;
+                self.0
+                    .weight
+                    .1
+                    .divide_assign(&rhs.0.weight.1, divide_type)?;
                 Ok(())
             }
         }

@@ -32,7 +32,7 @@ bitflags! {
 pub trait Semiring:
     Clone + PartialEq + PartialOrd + Debug + Default + Display + AsRef<Self> + Hash + Eq + Sized
 {
-    type Type : Clone;
+    type Type: Clone;
     type ReverseWeight: Semiring;
 
     fn zero() -> Self;

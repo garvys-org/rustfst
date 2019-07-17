@@ -163,7 +163,7 @@ where
                 None => elt.weight.clone(),
                 Some(s) => elt
                     .weight
-                    .times(self.fst.final_weight(s).unwrap_or_else(||&zero))
+                    .times(self.fst.final_weight(s).unwrap_or_else(|| &zero))
                     .unwrap(),
             };
             let factor_iterator = FI::new(weight.clone());

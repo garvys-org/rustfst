@@ -47,20 +47,18 @@ where
 
     fn zero() -> Self {
         Self {
-            weight: (W1::zero(), W2::zero())
+            weight: (W1::zero(), W2::zero()),
         }
     }
 
     fn one() -> Self {
         Self {
-            weight: (W1::one(), W2::one())
+            weight: (W1::one(), W2::one()),
         }
     }
 
     fn new(weight: <Self as Semiring>::Type) -> Self {
-        Self {
-            weight
-        }
+        Self { weight }
     }
 
     fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
