@@ -6,9 +6,8 @@ use unsafe_unwrap::UnsafeUnwrap;
 use crate::algorithms::connect;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::visitors::SccVisitor;
-use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
+use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
-use crate::Arc;
 use crate::EPS_LABEL;
 
 /// Removes final states that have epsilon-only input arcs.

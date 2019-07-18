@@ -217,8 +217,8 @@ fn handle(matches: clap::ArgMatches) -> Result<(), ExitFailure> {
             m.is_present("to_final"),
             m.is_present("push_weights"),
             m.is_present("remove_total_weight"),
-            
-        ).run_cli_or_bench(m),
+        )
+        .run_cli_or_bench(m),
         (s, _) => Err(format_err!("Unknown subcommand {}.", s)),
     }
     .map_err(|e| e.into())
