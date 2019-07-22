@@ -12,6 +12,7 @@ mod dfs;
 pub(crate) mod dfs_visit;
 mod encode;
 mod factor_weight;
+mod fst_convert;
 mod inversion;
 mod isomorphic;
 mod minimize;
@@ -85,7 +86,7 @@ pub use self::{
     top_sort::top_sort,
     union::union,
     weight_convert::{weight_convert, WeightConverter},
-    weight_pushing::push_weights,
+    weight_pushing::{push, push_weights},
 };
 
 #[allow(unused)]

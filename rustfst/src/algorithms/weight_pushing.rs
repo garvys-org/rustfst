@@ -1,9 +1,21 @@
 use failure::Fallible;
 
-use crate::algorithms::{reweight, shortest_distance, ReweightType};
+use bitflags::bitflags;
+
+use crate::algorithms::arc_mappers::RmWeightMapper;
+use crate::algorithms::factor_iterators::GallicFactorLeft;
+use crate::algorithms::fst_convert::fst_convert;
+use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
+use crate::algorithms::{
+    arc_map, factor_weight, reweight, shortest_distance, weight_convert, FactorWeightOptions,
+    FactorWeightType, ReweightType,
+};
+use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
-use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::{DivideType, Semiring};
+use crate::semirings::{
+    GallicWeightLeft, StringWeightLeft, WeaklyDivisibleSemiring, WeightQuantize,
+};
 
 /// Pushes the weights in FST in the direction defined by TYPE. If
 /// pushing towards the initial state, the sum of the weight of the
@@ -85,4 +97,81 @@ where
         }
     }
     Ok(())
+}
+
+bitflags! {
+    pub struct PushType: u32 {
+        const PUSH_WEIGHTS = 0b01;
+        const PUSH_LABELS = 0b10;
+        const REMOVE_TOTAL_WEIGHT = 0b100;
+        const REMOVE_COMMON_AFFIX = 0b1000;
+    }
+}
+
+pub fn push<F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType) -> Fallible<F2>
+where
+    F1: ExpandedFst,
+    F1::W: WeaklyDivisibleSemiring + WeightQuantize,
+    F2: ExpandedFst<W = F1::W> + MutableFst,
+    <F1 as CoreFst>::W: 'static,
+    <<F1 as CoreFst>::W as Semiring>::ReverseWeight: 'static,
+{
+    if push_type.intersects(PushType::PUSH_WEIGHTS) && !push_type.intersects(PushType::PUSH_LABELS)
+    {
+        // Only weights pushing
+        let mut ofst = fst_convert(ifst);
+        push_weights(
+            &mut ofst,
+            reweight_type,
+            push_type.intersects(PushType::REMOVE_TOTAL_WEIGHT),
+        )?;
+        Ok(ofst)
+    } else if push_type.intersects(PushType::PUSH_LABELS) {
+        // Labels pushing with potentially weights pushing
+        let mut mapper = ToGallicConverter {};
+        let mut gfst: VectorFst<GallicWeightLeft<F1::W>> = weight_convert(ifst, &mut mapper)?;
+        let gdistance = if push_type.intersects(PushType::PUSH_WEIGHTS) {
+            shortest_distance(&gfst, reweight_type == ReweightType::ReweightToInitial)?
+        } else {
+            let mut rm_weight_mapper = RmWeightMapper {};
+            let mut uwfst: VectorFst<_> = fst_convert(ifst);
+            arc_map(&mut uwfst, &mut rm_weight_mapper)?;
+            let guwfst: VectorFst<GallicWeightLeft<F1::W>> = weight_convert(&uwfst, &mut mapper)?;
+            shortest_distance(&guwfst, reweight_type == ReweightType::ReweightToInitial)?
+        };
+        if push_type.intersects(PushType::REMOVE_COMMON_AFFIX | PushType::REMOVE_TOTAL_WEIGHT) {
+            let mut total_weight = compute_total_weight(
+                &gfst,
+                &gdistance,
+                reweight_type == ReweightType::ReweightToInitial,
+            )?;
+            if !push_type.intersects(PushType::REMOVE_COMMON_AFFIX) {
+                total_weight.set_value1(StringWeightLeft::one());
+            }
+            if !push_type.intersects(PushType::REMOVE_TOTAL_WEIGHT) {
+                total_weight.set_value2(F1::W::one());
+            }
+            reweight(&mut gfst, gdistance.as_slice(), reweight_type)?;
+            remove_weight(
+                &mut gfst,
+                total_weight,
+                reweight_type == ReweightType::ReweightToInitial,
+            )?;
+        } else {
+            reweight(&mut gfst, gdistance.as_slice(), reweight_type)?;
+        }
+        let fwfst: VectorFst<_> = factor_weight::<_, _, GallicFactorLeft<F1::W>>(
+            &gfst,
+            FactorWeightOptions::new(
+                FactorWeightType::FACTOR_FINAL_WEIGHTS | FactorWeightType::FACTOR_ARC_WEIGHTS,
+            ),
+        )?;
+        let mut mapper_from_gallic = FromGallicConverter {
+            superfinal_label: 0,
+        };
+        weight_convert(&fwfst, &mut mapper_from_gallic)
+    } else {
+        // NO Labels/Weights pushing
+        Ok(fst_convert(ifst))
+    }
 }
