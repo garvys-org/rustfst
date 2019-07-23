@@ -134,7 +134,9 @@ fn main() {
         .about("Push Weights/Labels algorithm")
         .arg(Arg::with_name("to_final").long("to_final"))
         .arg(Arg::with_name("push_weights").long("push_weights"))
-        .arg(Arg::with_name("remove_total_weight").long("remove_total_weight"));
+        .arg(Arg::with_name("push_labels").long("push_labels"))
+        .arg(Arg::with_name("remove_total_weight").long("remove_total_weight"))
+        .arg(Arg::with_name("remove_common_affix").long("remove_common_affix"));
     app = app.subcommand(one_in_one_out_options(push_cmd));
 
     let matches = app.get_matches();
@@ -216,7 +218,9 @@ fn handle(matches: clap::ArgMatches) -> Result<(), ExitFailure> {
             m.value_of("out.fst").unwrap(),
             m.is_present("to_final"),
             m.is_present("push_weights"),
+            m.is_present("push_labels"),
             m.is_present("remove_total_weight"),
+            m.is_present("remove_common_affix"),
         )
         .run_cli_or_bench(m),
         (s, _) => Err(format_err!("Unknown subcommand {}.", s)),

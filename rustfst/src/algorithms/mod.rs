@@ -72,7 +72,7 @@ pub use self::{
     isomorphic::isomorphic,
     minimize::minimize,
     projection::{project, ProjectType},
-    push::{push, push_weights},
+    push::{push, push_weights, PushType},
     queue::{Queue, QueueType},
     relabel_pairs::relabel_pairs,
     reverse::reverse,

@@ -18,6 +18,15 @@ use crate::semirings::{
     WeaklyDivisibleSemiring, WeightQuantize,
 };
 
+bitflags! {
+    pub struct PushType: u32 {
+        const PUSH_WEIGHTS = 0b01;
+        const PUSH_LABELS = 0b10;
+        const REMOVE_TOTAL_WEIGHT = 0b100;
+        const REMOVE_COMMON_AFFIX = 0b1000;
+    }
+}
+
 /// Pushes the weights in FST in the direction defined by TYPE. If
 /// pushing towards the initial state, the sum of the weight of the
 /// outgoing transitions and final weight at a non-initial state is
@@ -98,15 +107,6 @@ where
         }
     }
     Ok(())
-}
-
-bitflags! {
-    pub struct PushType: u32 {
-        const PUSH_WEIGHTS = 0b01;
-        const PUSH_LABELS = 0b10;
-        const REMOVE_TOTAL_WEIGHT = 0b100;
-        const REMOVE_COMMON_AFFIX = 0b1000;
-    }
 }
 
 macro_rules! m_labels_pushing {
