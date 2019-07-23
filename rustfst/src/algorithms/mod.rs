@@ -8,7 +8,6 @@ mod composition;
 mod concat;
 mod connect;
 mod determinize;
-mod dfs;
 pub(crate) mod dfs_visit;
 mod encode;
 mod factor_weight;
@@ -18,6 +17,7 @@ mod isomorphic;
 mod minimize;
 mod partition;
 mod projection;
+mod push;
 mod queue;
 mod relabel_pairs;
 mod reverse;
@@ -30,7 +30,6 @@ mod state_sort;
 mod top_sort;
 mod union;
 mod weight_convert;
-mod weight_pushing;
 
 pub mod queues;
 
@@ -68,12 +67,12 @@ pub use self::{
     concat::concat,
     connect::connect,
     determinize::{determinize, determinize_with_distance, DeterminizeType},
-    dfs::{dfs, find_strongly_connected_components},
     encode::{decode, encode},
     inversion::invert,
     isomorphic::isomorphic,
     minimize::minimize,
     projection::{project, ProjectType},
+    push::{push, push_weights},
     queue::{Queue, QueueType},
     relabel_pairs::relabel_pairs,
     reverse::reverse,
@@ -86,7 +85,6 @@ pub use self::{
     top_sort::top_sort,
     union::union,
     weight_convert::{weight_convert, WeightConverter},
-    weight_pushing::{push, push_weights},
 };
 
 #[allow(unused)]
