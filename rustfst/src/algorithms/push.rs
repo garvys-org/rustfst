@@ -50,7 +50,7 @@ where
         remove_weight(
             fst,
             total_weight,
-            reweight_type == ReweightType::ReweightToInitial,
+            reweight_type == ReweightType::ReweightToFinal,
         )?;
     } else {
         reweight(fst, &dist, reweight_type)?;
@@ -93,7 +93,7 @@ where
     if at_final {
         for s in 0..fst.num_states() {
             if let Some(final_weight) = fst.final_weight_mut(s) {
-                final_weight.divide(&weight, DivideType::DivideRight)?;
+                final_weight.divide_assign(&weight, DivideType::DivideRight)?;
             }
         }
     } else {
@@ -139,7 +139,7 @@ macro_rules! m_labels_pushing {
             remove_weight(
                 &mut gfst,
                 total_weight,
-                $reweight_type == ReweightType::ReweightToInitial,
+                $reweight_type == ReweightType::ReweightToFinal,
             )?;
         } else {
             reweight(&mut gfst, gdistance.as_slice(), $reweight_type)?;
