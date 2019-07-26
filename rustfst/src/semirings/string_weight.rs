@@ -86,7 +86,7 @@ macro_rules! string_semiring {
 
             fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
                 if self.is_zero() {
-                    self.set_value(rhs.as_ref().value());
+                    self.set_value(rhs.as_ref().value().clone());
                 } else if rhs.as_ref().is_zero() {
                     // Do nothing
                 } else {
@@ -142,8 +142,12 @@ macro_rules! string_semiring {
                 Ok(())
             }
 
-            fn value(&self) -> <Self as Semiring>::Type {
-                self.value.clone()
+            fn value(&self) -> &<Self as Semiring>::Type {
+                &self.value
+            }
+
+            fn take_value(self) -> <Self as Semiring>::Type {
+                self.value
             }
 
             fn set_value(&mut self, value: <Self as Semiring>::Type) {
@@ -246,36 +250,32 @@ fn divide_right(w1: &StringWeightVariant, w2: &StringWeightVariant) -> StringWei
 }
 
 impl WeaklyDivisibleSemiring for StringWeightLeft {
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
+    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
         if divide_type != DivideType::DivideLeft {
             bail!("Only left division is defined.");
         }
-        let s = divide_left(&self.value, &rhs.value);
-        Ok(StringWeightLeft::new(s))
+        self.value = divide_left(&self.value, &rhs.value);
+        Ok(())
     }
 }
 
 impl WeaklyDivisibleSemiring for StringWeightRight {
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
+    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
         if divide_type != DivideType::DivideRight {
             bail!("Only right division is defined.");
         }
-        let s = divide_right(&self.value, &rhs.value);
-        Ok(StringWeightRight::new(s))
+        self.value = divide_right(&self.value, &rhs.value);
+        Ok(())
     }
 }
 
 impl WeaklyDivisibleSemiring for StringWeightRestrict {
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
-        let res = match divide_type {
-            DivideType::DivideLeft => {
-                StringWeightRestrict::new(divide_left(&self.value, &rhs.value))
-            }
-            DivideType::DivideRight => {
-                StringWeightRestrict::new(divide_right(&self.value, &rhs.value))
-            }
+    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
+        self.value = match divide_type {
+            DivideType::DivideLeft => divide_left(&self.value, &rhs.value),
+            DivideType::DivideRight => divide_right(&self.value, &rhs.value),
             DivideType::DivideAny => bail!("Only explicit left or right division is defined."),
         };
-        Ok(res)
+        Ok(())
     }
 }

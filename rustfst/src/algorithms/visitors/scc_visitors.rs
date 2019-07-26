@@ -1,50 +1,14 @@
-use failure::Fallible;
+use crate::algorithms::dfs_visit::Visitor;
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
+use crate::Arc;
+use crate::{StateId, NO_STATE_ID};
+
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
-use crate::fst_traits::Fst;
-use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
-use crate::Arc;
-use crate::StateId;
-use crate::NO_STATE_ID;
-
-/// This operation trims an FST, removing states and arcs that are not on successful paths.
-///
-/// # Example
-/// ```
-/// # #[macro_use] extern crate rustfst;
-/// # use rustfst::utils::transducer;
-/// # use rustfst::semirings::{Semiring, IntegerWeight};
-/// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::algorithms::connect;
-/// # use rustfst::fst_traits::MutableFst;
-/// let fst : VectorFst<IntegerWeight> = fst![2 => 3];
-///
-/// // Add a state not on a successful path
-/// let mut no_connected_fst = fst.clone();
-/// no_connected_fst.add_state();
-///
-/// let mut connected_fst = no_connected_fst.clone();
-/// connect(&mut connected_fst);
-///
-/// assert_eq!(connected_fst, fst);
-/// ```
-pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Fallible<()> {
-    let mut visitor = ConnectVisitor::new(fst);
-    dfs_visit(fst, &mut visitor, false);
-    let mut dstates = Vec::with_capacity(visitor.access.len());
-    for s in 0..visitor.access.len() {
-        if !visitor.access[s] || !visitor.coaccess[s] {
-            dstates.push(s);
-        }
-    }
-    fst.del_states(dstates)?;
-    Ok(())
-}
-
-struct ConnectVisitor<'a, F: Fst> {
-    access: Vec<bool>,
-    coaccess: Vec<bool>,
+pub struct SccVisitor<'a, F: Fst> {
+    pub scc: Option<Vec<i32>>,
+    pub access: Option<Vec<bool>>,
+    pub coaccess: Vec<bool>,
     start: i32,
     fst: &'a F,
     nstates: usize,
@@ -52,13 +16,19 @@ struct ConnectVisitor<'a, F: Fst> {
     lowlink: Vec<i32>,
     onstack: Vec<bool>,
     scc_stack: Vec<StateId>,
+    pub nscc: i32,
 }
 
-impl<'a, F: 'a + Fst + ExpandedFst> ConnectVisitor<'a, F> {
-    pub fn new(fst: &'a F) -> Self {
+impl<'a, F: 'a + Fst + ExpandedFst> SccVisitor<'a, F> {
+    pub fn new(fst: &'a F, compute_scc: bool, compute_acess: bool) -> Self {
         let n = fst.num_states();
         Self {
-            access: vec![false; n],
+            scc: if compute_scc { Some(vec![-1; n]) } else { None },
+            access: if compute_acess {
+                Some(vec![false; n])
+            } else {
+                None
+            },
             coaccess: vec![false; n],
             start: fst.start().map(|v| v as i32).unwrap_or(NO_STATE_ID),
             fst,
@@ -67,11 +37,12 @@ impl<'a, F: 'a + Fst + ExpandedFst> ConnectVisitor<'a, F> {
             lowlink: vec![-1; n],
             onstack: vec![false; n],
             scc_stack: vec![],
+            nscc: 0,
         }
     }
 }
 
-impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for ConnectVisitor<'a, F> {
+impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
     fn init_visit(&mut self, _fst: &'a F) {}
 
     fn init_state(&mut self, s: usize, root: usize) -> bool {
@@ -79,7 +50,9 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for ConnectVisitor<'a, F> {
         self.dfnumber[s] = self.nstates as i32;
         self.lowlink[s] = self.nstates as i32;
         self.onstack[s] = true;
-        self.access[s] = root as i32 == self.start;
+        if let Some(ref mut access) = self.access {
+            access[s] = root as i32 == self.start;
+        }
         self.nstates += 1;
         true
     }
@@ -139,6 +112,9 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for ConnectVisitor<'a, F> {
             }
             loop {
                 t = unsafe { *self.scc_stack.last().unsafe_unwrap() };
+                if let Some(ref mut scc) = self.scc {
+                    scc[t] = self.nscc;
+                }
                 if scc_coaccess {
                     self.coaccess[t] = true;
                 }
@@ -148,6 +124,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for ConnectVisitor<'a, F> {
                     break;
                 }
             }
+            self.nscc += 1;
         }
         if let Some(_p) = parent {
             if self.coaccess[s] {
@@ -160,29 +137,11 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for ConnectVisitor<'a, F> {
     }
 
     #[inline]
-    fn finish_visit(&mut self) {}
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
-
-    use super::*;
-
-    #[test]
-    fn test_connect_generic() -> Fallible<()> {
-        for data in get_vector_fsts_for_tests() {
-            let fst = &data.fst;
-
-            let mut connect_fst = fst.clone();
-            connect(&mut connect_fst)?;
-
-            assert_eq!(
-                connect_fst, data.connected_fst,
-                "Connect test fail for fst : {:?}",
-                &data.name
-            );
+    fn finish_visit(&mut self) {
+        if let Some(ref mut scc) = self.scc {
+            for s in 0..scc.len() {
+                scc[s] = self.nscc - 1 - scc[s];
+            }
         }
-        Ok(())
     }
 }

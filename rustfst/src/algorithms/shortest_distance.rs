@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use failure::Fallible;
+use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::reverse as reverse_f;
 use crate::fst_impls::VectorFst;
@@ -45,9 +46,6 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
     let mut d = vec![];
     let mut r = vec![];
 
-    //    d.resize(num_states, <F as CoreFst>::W::zero());
-    //    r.resize(num_states, <F as CoreFst>::W::zero());
-
     // Check whether the wFST contains the state
     if state_id < fst.num_states() {
         while d.len() <= state_id {
@@ -61,7 +59,7 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
         queue.push_back(state_id);
 
         while !queue.is_empty() {
-            let state_cour = queue.pop_front().unwrap();
+            let state_cour = unsafe { queue.pop_front().unsafe_unwrap() };
             while d.len() <= state_cour {
                 d.push(<F as CoreFst>::W::zero());
                 r.push(<F as CoreFst>::W::zero());
@@ -69,7 +67,7 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
             let r2 = &r[state_cour].clone();
             r[state_cour] = <F as CoreFst>::W::zero();
 
-            for arc in fst.arcs_iter(state_cour)? {
+            for arc in unsafe { fst.arcs_iter_unchecked(state_cour) } {
                 let nextstate = arc.nextstate;
                 while d.len() <= nextstate {
                     d.push(<F as CoreFst>::W::zero());

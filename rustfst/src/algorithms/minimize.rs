@@ -57,7 +57,7 @@ where
         // Weighted transducer
         let mut to_gallic = ToGallicConverter {};
         let mut gfst: VectorFst<GallicWeightLeft<F::W>> = weight_convert(ifst, &mut to_gallic)?;
-        push_weights(&mut gfst, ReweightType::ReweightToInitial)?;
+        push_weights(&mut gfst, ReweightType::ReweightToInitial, false)?;
         let mut quantize_mapper = QuantizeMapper {};
         arc_map(&mut gfst, &mut quantize_mapper)?;
         let encode_table = encode(&mut gfst, true, true)?;
@@ -80,7 +80,7 @@ where
         Ok(())
     } else if props.contains(FstProperties::WEIGHTED) {
         // Weighted acceptor
-        push_weights(ifst, ReweightType::ReweightToInitial)?;
+        push_weights(ifst, ReweightType::ReweightToInitial, false)?;
         let mut quantize_mapper = QuantizeMapper {};
         arc_map(ifst, &mut quantize_mapper)?;
         let encode_table = encode(ifst, true, true)?;
@@ -299,8 +299,9 @@ struct StateComparator<'a, F: MutableFst + ExpandedFst> {
 
 impl<'a, F: MutableFst + ExpandedFst> StateComparator<'a, F> {
     fn do_compare(&self, x: StateId, y: StateId) -> Fallible<bool> {
-        let xfinal = self.fst.final_weight(x).unwrap_or_else(F::W::zero);
-        let yfinal = self.fst.final_weight(y).unwrap_or_else(F::W::zero);
+        let zero = F::W::zero();
+        let xfinal = self.fst.final_weight(x).unwrap_or_else(|| &zero);
+        let yfinal = self.fst.final_weight(y).unwrap_or_else(|| &zero);
 
         if xfinal < yfinal {
             return Ok(true);

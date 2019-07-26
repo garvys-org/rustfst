@@ -91,7 +91,7 @@ macro_rules! gallic_weight {
                     GallicType::GallicRestrict => self.0.plus_assign(&rhs.as_ref().0)?,
                     GallicType::GallicMin => {
                         if !natural_less(self.value2(), rhs.as_ref().value2())? {
-                            self.set_value(rhs.as_ref().value());
+                            self.set_value(rhs.as_ref().value().clone());
                         }
                     }
                 };
@@ -102,8 +102,12 @@ macro_rules! gallic_weight {
                 self.0.times_assign(&rhs.as_ref().0)
             }
 
-            fn value(&self) -> Self::Type {
-                self.0.clone()
+            fn value(&self) -> &Self::Type {
+                &self.0
+            }
+
+            fn take_value(self) -> Self::Type {
+                self.0
             }
 
             fn set_value(&mut self, value: Self::Type) {
@@ -173,12 +177,16 @@ macro_rules! gallic_weight {
         where
             W: WeaklyDivisibleSemiring,
         {
-            fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
-                let tuple = (
-                    self.value1().divide(rhs.value1(), divide_type)?,
-                    self.value2().divide(rhs.value2(), divide_type)?,
-                );
-                Ok(tuple.into())
+            fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
+                self.0
+                    .weight
+                    .0
+                    .divide_assign(&rhs.0.weight.0, divide_type)?;
+                self.0
+                    .weight
+                    .1
+                    .divide_assign(&rhs.0.weight.1, divide_type)?;
+                Ok(())
             }
         }
 
@@ -320,8 +328,12 @@ impl<W: Semiring> Semiring for GallicWeight<W> {
         self.0.times_assign(&rhs.as_ref().0)
     }
 
-    fn value(&self) -> Self::Type {
+    fn value(&self) -> &Self::Type {
         self.0.value()
+    }
+
+    fn take_value(self) -> Self::Type {
+        self.0.take_value()
     }
 
     fn set_value(&mut self, value: Self::Type) {
@@ -398,8 +410,9 @@ impl<W> WeaklyDivisibleSemiring for GallicWeight<W>
 where
     W: WeaklyDivisibleSemiring,
 {
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
-        Ok(Self(self.0.divide(&rhs.0, divide_type)?))
+    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
+        self.0.divide_assign(&rhs.0, divide_type)?;
+        Ok(())
     }
 }
 

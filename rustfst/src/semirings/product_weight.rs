@@ -14,8 +14,7 @@ where
     W1: Semiring,
     W2: Semiring,
 {
-    weight1: W1,
-    weight2: W2,
+    pub(crate) weight: (W1, W2),
 }
 
 impl<W1, W2> fmt::Display for ProductWeight<W1, W2>
@@ -48,39 +47,38 @@ where
 
     fn zero() -> Self {
         Self {
-            weight1: W1::zero(),
-            weight2: W2::zero(),
+            weight: (W1::zero(), W2::zero()),
         }
     }
 
     fn one() -> Self {
         Self {
-            weight1: W1::one(),
-            weight2: W2::one(),
+            weight: (W1::one(), W2::one()),
         }
     }
 
-    fn new(value: <Self as Semiring>::Type) -> Self {
-        Self {
-            weight1: value.0,
-            weight2: value.1,
-        }
+    fn new(weight: <Self as Semiring>::Type) -> Self {
+        Self { weight }
     }
 
     fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
-        self.weight1.plus_assign(&rhs.as_ref().weight1)?;
-        self.weight2.plus_assign(&rhs.as_ref().weight2)?;
+        self.weight.0.plus_assign(&rhs.as_ref().weight.0)?;
+        self.weight.1.plus_assign(&rhs.as_ref().weight.1)?;
         Ok(())
     }
 
     fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
-        self.weight1.times_assign(&rhs.as_ref().weight1)?;
-        self.weight2.times_assign(&rhs.as_ref().weight2)?;
+        self.weight.0.times_assign(&rhs.as_ref().weight.0)?;
+        self.weight.1.times_assign(&rhs.as_ref().weight.1)?;
         Ok(())
     }
 
-    fn value(&self) -> <Self as Semiring>::Type {
-        (self.value1().clone(), self.value2().clone())
+    fn value(&self) -> &<Self as Semiring>::Type {
+        &self.weight
+    }
+
+    fn take_value(self) -> <Self as Semiring>::Type {
+        self.weight
     }
 
     fn set_value(&mut self, value: <Self as Semiring>::Type) {
@@ -108,19 +106,19 @@ where
     W2: Semiring,
 {
     pub fn value1(&self) -> &W1 {
-        &self.weight1
+        &self.weight.0
     }
 
     pub fn value2(&self) -> &W2 {
-        &self.weight2
+        &self.weight.1
     }
 
     pub fn set_value1(&mut self, new_weight: W1) {
-        self.weight1 = new_weight;
+        self.weight.0 = new_weight;
     }
 
     pub fn set_value2(&mut self, new_weight: W2) {
-        self.weight2 = new_weight;
+        self.weight.1 = new_weight;
     }
 }
 
@@ -139,12 +137,10 @@ where
     W1: WeaklyDivisibleSemiring,
     W2: WeaklyDivisibleSemiring,
 {
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
-        let tuple = (
-            self.value1().divide(&rhs.value1(), divide_type)?,
-            self.value2().divide(&rhs.value2(), divide_type)?,
-        );
-        Ok(tuple.into())
+    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
+        self.weight.0.divide_assign(&rhs.weight.0, divide_type)?;
+        self.weight.1.divide_assign(&rhs.weight.1, divide_type)?;
+        Ok(())
     }
 }
 

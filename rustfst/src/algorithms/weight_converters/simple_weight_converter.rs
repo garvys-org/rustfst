@@ -17,7 +17,7 @@ where
         Ok(Arc::new(
             arc.ilabel,
             arc.olabel,
-            SO::new(arc.weight.value()),
+            SO::new(arc.weight.value().clone()),
             arc.nextstate,
         ))
     }
@@ -26,7 +26,7 @@ where
         Ok(FinalArc {
             ilabel: final_arc.ilabel,
             olabel: final_arc.olabel,
-            weight: SO::new(final_arc.weight.value()),
+            weight: SO::new(final_arc.weight.value().clone()),
         })
     }
 

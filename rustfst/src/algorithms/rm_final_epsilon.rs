@@ -1,85 +1,75 @@
 use std::collections::HashSet;
 
 use failure::Fallible;
+use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::connect;
-use crate::algorithms::dfs;
-use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
+use crate::algorithms::dfs_visit::dfs_visit;
+use crate::algorithms::visitors::SccVisitor;
+use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
-use crate::Arc;
+use crate::EPS_LABEL;
 
 /// Removes final states that have epsilon-only input arcs.
 pub fn rm_final_epsilon<F>(ifst: &mut F) -> Fallible<()>
 where
     F: MutableFst + ExpandedFst,
 {
-    let mut accessible_states = HashSet::new();
-    let mut coaccessible_states = HashSet::new();
-
-    if let Some(state_id) = ifst.start() {
-        dfs(
-            ifst,
-            state_id,
-            &mut accessible_states,
-            &mut coaccessible_states,
-        )?;
-    }
+    let mut visitors = SccVisitor::new(ifst, false, true);
+    dfs_visit(ifst, &mut visitors, false);
 
     let mut finals = HashSet::new();
 
-    for final_state in ifst.final_states_iter() {
-        let final_state_id = final_state.state_id;
-        let final_weight = final_state.final_weight;
+    for s in 0..ifst.num_states() {
+        if unsafe { ifst.is_final_unchecked(s) } {
+            let mut future_coaccess = false;
 
-        if final_weight.is_zero() {
-            continue;
-        }
-
-        let mut future_coaccess = false;
-
-        for arc in ifst.arcs_iter(final_state_id)? {
-            if coaccessible_states.contains(&arc.nextstate) {
-                future_coaccess = true;
-                break;
+            for arc in unsafe { ifst.arcs_iter_unchecked(s) } {
+                if visitors.coaccess[arc.nextstate] {
+                    future_coaccess = true;
+                    break;
+                }
             }
-        }
 
-        if !future_coaccess {
-            finals.insert(final_state_id);
+            if !future_coaccess {
+                finals.insert(s);
+            }
         }
     }
 
-    let states: Vec<_> = ifst.states_iter().collect();
+    let mut arcs_to_del = vec![];
+    for state in 0..ifst.num_states() {
+        let mut weight = None;
+        arcs_to_del.clear();
 
-    for state in states {
-        let mut arcs = vec![];
-        let mut weight = ifst.final_weight(state).unwrap_or_else(F::W::zero);
-
-        for arc in ifst.arcs_iter(state).unwrap() {
+        for (idx, arc) in unsafe { ifst.arcs_iter_unchecked(state).enumerate() } {
             if finals.contains(&arc.nextstate) {
-                if arc.ilabel == 0 && arc.olabel == 0 {
-                    weight.plus_assign(
-                        ifst.final_weight(arc.nextstate)
-                            .unwrap()
-                            .times(&arc.weight)?,
-                    )?;
-                } else {
-                    arcs.push(arc);
+                if arc.ilabel == EPS_LABEL && arc.olabel == EPS_LABEL {
+                    unsafe {
+                        if weight.is_none() {
+                            weight = Some(
+                                ifst.final_weight_unchecked(state)
+                                    .cloned()
+                                    .unwrap_or_else(F::W::zero),
+                            );
+                        }
+                        weight.as_mut().unsafe_unwrap().plus_assign(
+                            ifst.final_weight_unchecked(arc.nextstate)
+                                .unsafe_unwrap()
+                                .times(&arc.weight)?,
+                        )?
+                    };
+                    arcs_to_del.push(idx);
                 }
-            } else {
-                arcs.push(arc);
             }
         }
 
-        if arcs.len() < ifst.num_arcs(state).unwrap() {
-            let arcs_owned: Vec<Arc<F::W>> = arcs.into_iter().cloned().collect();
-            ifst.delete_arcs(state)?;
-            if !weight.is_zero() {
-                ifst.set_final(state, weight)?;
+        if !arcs_to_del.is_empty() {
+            let w = unsafe { weight.unsafe_unwrap() };
+            if !w.is_zero() {
+                unsafe { ifst.set_final_unchecked(state, w) };
             }
-            for arc in arcs_owned.into_iter() {
-                ifst.add_arc(state, arc)?;
-            }
+            unsafe { ifst.del_arcs_id_sorted_unchecked(state, &arcs_to_del) };
         }
     }
 

@@ -229,6 +229,7 @@ where
     }
 
     fn compute_final(&mut self, state: StateId) -> Fallible<Option<F::W>> {
+        let zero = F::W::zero();
         let tuple = self.state_table.get_by_left(&state).unwrap();
         let mut final_weight = F::W::zero();
         for det_elt in tuple.subset.iter() {
@@ -236,7 +237,7 @@ where
                 det_elt.weight.times(
                     self.fst
                         .final_weight(det_elt.state)
-                        .unwrap_or_else(F::W::zero),
+                        .unwrap_or_else(|| &zero),
                 )?,
             )?;
         }

@@ -39,6 +39,7 @@ use self::algorithms::{
     minimize::{test_minimize, MinimizeOperationResult, MinimizeTestData},
     project::{test_project_input, test_project_output},
     properties::{parse_fst_properties, test_fst_properties},
+    push::{test_push, PushOperationResult, PushTestData},
     reverse::test_reverse,
     rm_epsilon::test_rmepsilon,
     shortest_distance::{
@@ -111,6 +112,7 @@ pub struct ParsedTestData {
     gallic_encode_decode: Vec<GallicOperationResult>,
     factor_weight_identity: Vec<FwIdentityOperationResult>,
     factor_weight_gallic: Vec<FwGallicOperationResult>,
+    push: Vec<PushOperationResult>,
 }
 
 pub struct TestData<F>
@@ -153,6 +155,7 @@ where
     pub gallic_encode_decode: Vec<GallicTestData<F>>,
     pub factor_weight_identity: Vec<FwIdentityTestData<F>>,
     pub factor_weight_gallic: Vec<FwGallicTestData<F>>,
+    pub push: Vec<PushTestData<F>>,
 }
 
 impl<F> TestData<F>
@@ -210,6 +213,7 @@ where
                 .iter()
                 .map(|v| v.parse())
                 .collect(),
+            push: data.push.iter().map(|v| v.parse()).collect(),
         }
     }
 }
@@ -313,6 +317,8 @@ where
     test_factor_weight_gallic(&test_data)?;
 
     test_minimize(&test_data)?;
+
+    test_push(&test_data)?;
 
     Ok(())
 }

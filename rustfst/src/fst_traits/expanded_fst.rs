@@ -4,6 +4,8 @@ use std::path::Path;
 
 use failure::Fallible;
 
+use crate::fst_properties::compute_fst_properties;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::final_states_iterator::FinalStatesIterator;
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
@@ -89,5 +91,10 @@ pub trait ExpandedFst: Fst {
             writeln!(f, "}}")?;
         }
         Ok(())
+    }
+
+    /// Compute the properties verified by the Fst.
+    fn properties(&self) -> Fallible<FstProperties> {
+        compute_fst_properties(self)
     }
 }

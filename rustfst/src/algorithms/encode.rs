@@ -110,7 +110,7 @@ impl<W: Semiring> ArcMapper<W> for EncodeMapper<W> {
             arc.olabel = label;
         }
         if self.encode_table.encode_weights {
-            arc.weight.set_value(W::one().value());
+            arc.weight.set_value(W::one().take_value());
         }
         Ok(())
     }
@@ -124,7 +124,7 @@ impl<W: Semiring> ArcMapper<W> for EncodeMapper<W> {
                 final_arc.olabel = label;
             }
             if self.encode_table.encode_weights {
-                final_arc.weight.set_value(W::one().value());
+                final_arc.weight.set_value(W::one().take_value());
             }
         }
         Ok(())

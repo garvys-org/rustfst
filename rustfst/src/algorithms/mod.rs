@@ -8,15 +8,16 @@ mod composition;
 mod concat;
 mod connect;
 mod determinize;
-mod dfs;
-mod dfs_visit;
+pub(crate) mod dfs_visit;
 mod encode;
 mod factor_weight;
+mod fst_convert;
 mod inversion;
 mod isomorphic;
 mod minimize;
 mod partition;
 mod projection;
+mod push;
 mod queue;
 mod relabel_pairs;
 mod reverse;
@@ -29,7 +30,6 @@ mod state_sort;
 mod top_sort;
 mod union;
 mod weight_convert;
-mod weight_pushing;
 
 pub mod queues;
 
@@ -38,6 +38,8 @@ pub mod arc_filters;
 
 /// Module that provide structures implementing the `ArcMapper` trait.
 pub mod arc_mappers;
+
+pub(crate) mod visitors;
 
 #[allow(unused)]
 pub(crate) mod cache;
@@ -65,12 +67,13 @@ pub use self::{
     concat::concat,
     connect::connect,
     determinize::{determinize, determinize_with_distance, DeterminizeType},
-    dfs::{dfs, find_strongly_connected_components},
     encode::{decode, encode},
+    fst_convert::fst_convert,
     inversion::invert,
     isomorphic::isomorphic,
     minimize::minimize,
     projection::{project, ProjectType},
+    push::{push, push_weights, PushType},
     queue::{Queue, QueueType},
     relabel_pairs::relabel_pairs,
     reverse::reverse,
@@ -83,7 +86,6 @@ pub use self::{
     top_sort::top_sort,
     union::union,
     weight_convert::{weight_convert, WeightConverter},
-    weight_pushing::push_weights,
 };
 
 #[allow(unused)]

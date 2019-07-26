@@ -4,7 +4,6 @@ use failure::Fallible;
 
 use crate::algorithms::arc_filters::{ArcFilter, InputEpsilonArcFilter, OutputEpsilonArcFilter};
 use crate::arc::Arc;
-use crate::fst_properties::{compute_fst_properties, FstProperties};
 use crate::semirings::Semiring;
 use crate::StateId;
 
@@ -48,9 +47,10 @@ pub trait CoreFst {
     ///
     /// // 2 - Access the final weight of each state
     /// assert_eq!(fst.final_weight(s1), None);
-    /// assert_eq!(fst.final_weight(s2), Some(BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s2), Some(&BooleanWeight::one()));
     /// ```
-    fn final_weight(&self, state_id: StateId) -> Option<<Self as CoreFst>::W>;
+    fn final_weight(&self, state_id: StateId) -> Option<&<Self as CoreFst>::W>;
+    unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<&<Self as CoreFst>::W>;
 
     /// Number of arcs leaving a specific state in the wFST.
     ///
@@ -70,7 +70,7 @@ pub trait CoreFst {
     /// assert_eq!(fst.num_arcs(s1).unwrap(), 1);
     /// ```
     fn num_arcs(&self, s: StateId) -> Fallible<usize>;
-    fn num_arcs_unchecked(&self, s: StateId) -> usize;
+    unsafe fn num_arcs_unchecked(&self, s: StateId) -> usize;
 
     /// Returns whether or not the state with identifier passed as parameters is a final state.
     ///
@@ -90,11 +90,17 @@ pub trait CoreFst {
     /// assert!(!fst.is_final(s1));
     /// assert!(fst.is_final(s2));
     /// ```
+    #[inline]
     fn is_final(&self, state_id: StateId) -> bool {
         self.final_weight(state_id).is_some()
     }
+    #[inline]
+    unsafe fn is_final_unchecked(&self, state_id: StateId) -> bool {
+        self.final_weight_unchecked(state_id).is_some()
+    }
 
     /// Check whether a state is the start state or not.
+    #[inline]
     fn is_start(&self, state_id: StateId) -> bool {
         Some(state_id) == self.start()
     }
@@ -210,10 +216,5 @@ pub trait Fst:
             }
         }
         true
-    }
-
-    /// Compute the properties verified by the Fst.
-    fn properties(&self) -> Fallible<FstProperties> {
-        compute_fst_properties(self)
     }
 }

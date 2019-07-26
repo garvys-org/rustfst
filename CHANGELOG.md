@@ -39,11 +39,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `map` for the Map algorithm with several mappers.
     - `reverse` for the Reverse algorithm.
     - `shortestpath` for ShortestPath algorithm.
+    - `rmfinalepsilon` for RmFinaleEpsilon algorithm.
+    - `push` for Weights/Labels pushing algorithm.
 - Added a prelude to `rustfst` to reduce the number of imports necessary when using the lib.
 - Added a bench keyword the the rustfst-cli to be able to benchmark the running time of the different algorithms across multiple runs.
 - Add a python package `rustfst-python-bench` to perform bench at the CLI level and at the functions level.
 - Added lots of unchecked (thus unsafe) functions to `Fst` and `MutableFst` traits.
 - Add shortespath to OpenFST benchmark.
+- Implemented `push` function which supports weights and / or labels pushing.
+- Added `take_value` method to the Semiring trait to extract a value from a Weight and take the ownership.
+- Added `fst_convert` to the public API to convert one Fst object from one type to another type.
+- Added `divide_assign` to `WeaklyDivisibleSemiring` semiring to perform in-place division.
 
 ### Changed
 - Before test cases were generated with pynini (python wrapper around openfst). Now they are directly generated with OpenFST (c++). Allows to test operations that are not wrapped.
@@ -62,6 +68,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Change implementation of `connect` algorithm which is now on par with OpenFST's one. Also works now for big fsts, no longer crashes.
 - Move panic from `unwind` to `abort`.
 - Change implementation of `TopSort` algorithm and `TopSortQueue`. Now uses `TopSortVisitor`.
+- Use `SccVisitor` in `AutoQueue` implementation.
+- Use `SccVisitor` in `rm_final_epsilon` implementation.
+- Use `SccVisitor` in `compute_fst_properties` implementation.
+- `value` methods of Semiring trait now returns a reference to the underlying weight.
+- `final_weight` method of `Fst` trait now returns a reference to the final weight instead of a copy.
 
 ### Removed
 - Crate `rustfst-tests-openfst` has been removed and moved to the `rustfst` as unit tests. 

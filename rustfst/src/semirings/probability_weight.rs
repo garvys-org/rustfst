@@ -48,7 +48,11 @@ impl Semiring for ProbabilityWeight {
         Ok(())
     }
 
-    fn value(&self) -> Self::Type {
+    fn value(&self) -> &Self::Type {
+        self.value.as_ref()
+    }
+
+    fn take_value(self) -> Self::Type {
         self.value.into_inner()
     }
 
@@ -84,12 +88,13 @@ impl StarSemiring for ProbabilityWeight {
 }
 
 impl WeaklyDivisibleSemiring for ProbabilityWeight {
-    fn divide(&self, rhs: &Self, _divide_type: DivideType) -> Fallible<Self> {
+    fn divide_assign(&mut self, rhs: &Self, _divide_type: DivideType) -> Fallible<()> {
         // May panic if rhs.value == 0.0
         if rhs.value.0 == 0.0 {
-            bail!("Division bby 0")
+            bail!("Division by 0")
         }
-        Ok(Self::new(self.value.0 / rhs.value.0))
+        self.value.0 /= rhs.value.0;
+        Ok(())
     }
 }
 

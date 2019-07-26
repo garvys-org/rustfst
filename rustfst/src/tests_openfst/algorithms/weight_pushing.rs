@@ -19,6 +19,7 @@ where
     push_weights(
         &mut fst_weight_push_initial,
         ReweightType::ReweightToInitial,
+        false,
     )?;
     assert_eq!(
         test_data.weight_pushing_initial,
@@ -41,7 +42,11 @@ where
 {
     // Weight pushing final
     let mut fst_weight_push_final = test_data.raw.clone();
-    push_weights(&mut fst_weight_push_final, ReweightType::ReweightToFinal)?;
+    push_weights(
+        &mut fst_weight_push_final,
+        ReweightType::ReweightToFinal,
+        false,
+    )?;
     assert_eq!(
         test_data.weight_pushing_final,
         fst_weight_push_final,

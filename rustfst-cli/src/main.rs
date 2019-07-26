@@ -10,7 +10,9 @@ use crate::cmds::invert::InvertAlgorithm;
 use crate::cmds::map::MapAlgorithm;
 use crate::cmds::minimize::MinimizeAlgorithm;
 use crate::cmds::project::ProjectFstAlgorithm;
+use crate::cmds::push::PushAlgorithm;
 use crate::cmds::reverse::ReverseAlgorithm;
+use crate::cmds::rm_final_epsilon::RmFinalEpsilonAlgorithm;
 use crate::cmds::shortest_path::ShortestPathAlgorithm;
 use crate::cmds::topsort::TopsortAlgorithm;
 use crate::pretty_errors::ExitFailure;
@@ -122,6 +124,21 @@ fn main() {
         );
     app = app.subcommand(one_in_one_out_options(shortest_path_cmd));
 
+    // Rm Final Epsilon
+    let rm_final_epsilon_cmd =
+        SubCommand::with_name("rmfinalepsilon").about("RmFinalEpsilon algorithm.");
+    app = app.subcommand(one_in_one_out_options(rm_final_epsilon_cmd));
+
+    // Push
+    let push_cmd = SubCommand::with_name("push")
+        .about("Push Weights/Labels algorithm")
+        .arg(Arg::with_name("to_final").long("to_final"))
+        .arg(Arg::with_name("push_weights").long("push_weights"))
+        .arg(Arg::with_name("push_labels").long("push_labels"))
+        .arg(Arg::with_name("remove_total_weight").long("remove_total_weight"))
+        .arg(Arg::with_name("remove_common_affix").long("remove_common_affix"));
+    app = app.subcommand(one_in_one_out_options(push_cmd));
+
     let matches = app.get_matches();
 
     let env = env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "debug");
@@ -189,6 +206,21 @@ fn handle(matches: clap::ArgMatches) -> Result<(), ExitFailure> {
             m.is_present("unique"),
             m.value_of("nshortest").unwrap().parse().unwrap(),
             m.value_of("out.fst").unwrap(),
+        )
+        .run_cli_or_bench(m),
+        ("rmfinalepsilon", Some(m)) => RmFinalEpsilonAlgorithm::new(
+            m.value_of("in.fst").unwrap(),
+            m.value_of("out.fst").unwrap(),
+        )
+        .run_cli_or_bench(m),
+        ("push", Some(m)) => PushAlgorithm::new(
+            m.value_of("in.fst").unwrap(),
+            m.value_of("out.fst").unwrap(),
+            m.is_present("to_final"),
+            m.is_present("push_weights"),
+            m.is_present("push_labels"),
+            m.is_present("remove_total_weight"),
+            m.is_present("remove_common_affix"),
         )
         .run_cli_or_bench(m),
         (s, _) => Err(format_err!("Unknown subcommand {}.", s)),

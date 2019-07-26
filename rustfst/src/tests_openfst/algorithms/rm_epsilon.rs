@@ -4,7 +4,7 @@ use crate::algorithms::{isomorphic, rm_epsilon};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::TextParser;
-use crate::fst_traits::{Fst, MutableFst};
+use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::semirings::StarSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
@@ -13,7 +13,7 @@ use crate::tests_openfst::TestData;
 
 pub fn test_rmepsilon<F>(test_data: &TestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + ExpandedFst,
     F::W: 'static + Semiring<Type = f32> + WeaklyDivisibleSemiring + StarSemiring,
 {
     // Remove epsilon

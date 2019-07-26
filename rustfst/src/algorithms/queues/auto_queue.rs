@@ -1,13 +1,16 @@
 use failure::Fallible;
 
+use crate::algorithms::dfs_visit::dfs_visit;
+use crate::algorithms::visitors::SccVisitor;
+use crate::algorithms::{Queue, QueueType};
+use crate::fst_properties::FstProperties;
+use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::semirings::{Semiring, SemiringProperties};
+
 use super::{
     natural_less, FifoQueue, LifoQueue, NaturalShortestFirstQueue, SccQueue, StateOrderQueue,
     TopOrderQueue, TrivialQueue,
 };
-use crate::algorithms::{find_strongly_connected_components, Queue, QueueType};
-use crate::fst_properties::FstProperties;
-use crate::fst_traits::{ExpandedFst, MutableFst};
-use crate::semirings::{Semiring, SemiringProperties};
 
 #[derive(Debug)]
 pub struct AutoQueue {
@@ -32,9 +35,15 @@ impl AutoQueue {
         {
             queue = Box::new(LifoQueue::default());
         } else {
-            let mut sccs: Vec<usize> = vec![];
-            let mut n_sccs: usize = 0;
-            find_strongly_connected_components(fst, &mut sccs, &mut n_sccs)?;
+            let mut scc_visitor = SccVisitor::new(fst, true, false);
+            dfs_visit(fst, &mut scc_visitor, false);
+            let sccs: Vec<_> = scc_visitor
+                .scc
+                .unwrap()
+                .into_iter()
+                .map(|v| v as usize)
+                .collect();
+            let n_sccs = scc_visitor.nscc as usize;
 
             let mut queue_types = vec![QueueType::TrivialQueue; n_sccs];
             let less = if distance.is_some()
@@ -100,9 +109,8 @@ impl AutoQueue {
             .iter_mut()
             .for_each(|v| *v = QueueType::TrivialQueue);
 
-        let states: Vec<_> = fst.states_iter().collect();
-        for state in states {
-            for arc in fst.arcs_iter(state)? {
+        for state in 0..fst.num_states() {
+            for arc in unsafe { fst.arcs_iter_unchecked(state) } {
                 if sccs[state] == sccs[arc.nextstate] {
                     let queue_type = unsafe { queue_types.get_unchecked_mut(sccs[state]) };
                     if compare.is_none() || compare.as_ref().unwrap()(&arc.weight, &F::W::one())? {

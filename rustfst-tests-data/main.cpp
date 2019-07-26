@@ -415,6 +415,63 @@ void compute_fst_factor_weight_gallic(const F& raw_fst, json& j) {
     _compute_fst_factor_weight_gallic<F, fst::GALLIC>(raw_fst, j, "gallic");
 }
 
+template<class F>
+void compute_fst_push(const F& raw_fst, json& j) {
+    std::vector<bool> v = {true, false};
+    j["push"] = {};
+    for(bool push_weights: v) {
+        for(bool push_labels: v) {
+            for(bool remove_total_weight: v) {
+                for(bool remove_common_affix: v) {
+                    for(bool reweight_to_final: v) {
+
+                        uint32 pflags = 0;
+                        if (push_weights) {
+                            pflags |= fst::kPushWeights;
+                        }
+                        if (push_labels) {
+                            pflags |= fst::kPushLabels;
+                        }
+                        if (remove_total_weight) {
+                            pflags |= fst::kPushRemoveTotalWeight;
+                        }
+                        if (remove_common_affix) {
+                            pflags |= fst::kPushRemoveCommonAffix;
+                        }
+
+                        std::cerr << "push_weights = " << push_weights << std::endl;
+                        std::cerr << "push_labels = " << push_labels << std::endl;
+                        std::cerr << "remove_total_weight = " << remove_total_weight << std::endl;
+                        std::cerr << "remove_common_affix = " << remove_common_affix << std::endl;
+                        std::cerr << "reweight_to_final = " << reweight_to_final << std::endl;
+                        F fst_out;
+                        // Fixes crash in OpenFST on empty input
+                        if (raw_fst.NumStates() > 0) {
+                            if (reweight_to_final) {
+                                fst::Push<typename F::Arc, fst::REWEIGHT_TO_FINAL>(raw_fst, &fst_out, pflags);
+                            } else {
+                                fst::Push<typename F::Arc, fst::REWEIGHT_TO_INITIAL>(raw_fst, &fst_out, pflags);
+                            }
+                        }
+
+                        std::cerr << "Done" << std::endl << std::endl;
+
+                        json j2;
+                        j2["push_weights"] = push_weights;
+                        j2["push_labels"] = push_labels;
+                        j2["remove_total_weight"] = remove_total_weight;
+                        j2["remove_common_affix"] = remove_common_affix;
+                        j2["reweight_to_final"] = reweight_to_final;
+                        j2["result"] = fst_to_string(fst_out);
+                        j["push"].push_back(j2);
+
+                    }
+                }
+            }
+        }
+    }
+}
+
 template<class A>
 void compute_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
     std::cout << "FST :" << fst_name << std::endl;
@@ -501,6 +558,9 @@ void compute_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
 
     std::cout << "Factor Weight Gallic" << std::endl;
     compute_fst_factor_weight_gallic(raw_fst, data);
+
+    std::cout << "Push" << std::endl;
+    compute_fst_push(raw_fst, data);
 
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;

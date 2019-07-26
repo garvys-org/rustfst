@@ -36,6 +36,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// assert_eq!(fst.start(), Some(s2));
     /// ```
     fn set_start(&mut self, state_id: StateId) -> Fallible<()>;
+    unsafe fn set_start_unchecked(&mut self, state_id: StateId);
 
     /// The state with identifier `state_id` is now a final state with a weight `final_weight`.
     /// If the `state_id` doesn't exist an error is raised.
@@ -53,12 +54,12 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// assert_eq!(fst.final_weight(s2), None);
     ///
     /// fst.set_final(s1, BooleanWeight::one());
-    /// assert_eq!(fst.final_weight(s1), Some(BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s1), Some(&BooleanWeight::one()));
     /// assert_eq!(fst.final_weight(s2), None);
     ///
     /// fst.set_final(s2, BooleanWeight::one());
-    /// assert_eq!(fst.final_weight(s1), Some(BooleanWeight::one()));
-    /// assert_eq!(fst.final_weight(s2), Some(BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s1), Some(&BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s2), Some(&BooleanWeight::one()));
     /// ```
     fn set_final(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W) -> Fallible<()>;
     unsafe fn set_final_unchecked(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W);
@@ -139,6 +140,8 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     ///
     /// ```
     fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) -> Fallible<()>;
+
+    unsafe fn del_arcs_id_sorted_unchecked(&mut self, state: StateId, to_del: &Vec<usize>);
 
     /// Adds an arc to the FST. The arc will start in the state `source`.
     /// An error is raised if the state `source` doesn't exist.

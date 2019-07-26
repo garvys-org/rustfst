@@ -10,6 +10,7 @@ pub mod inverse;
 pub mod minimize;
 pub mod project;
 pub mod properties;
+pub mod push;
 pub mod reverse;
 pub mod rm_epsilon;
 pub mod shortest_distance;

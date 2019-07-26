@@ -49,16 +49,20 @@ impl Semiring for TropicalWeight {
     fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
         let f1 = self.value();
         let f2 = rhs.as_ref().value();
-        if f1 == f32::INFINITY {
-        } else if f2 == f32::INFINITY {
-            self.value.0 = f2;
+        if f1 == &f32::INFINITY {
+        } else if f2 == &f32::INFINITY {
+            self.value.0 = *f2;
         } else {
             self.value.0 += f2;
         }
         Ok(())
     }
 
-    fn value(&self) -> Self::Type {
+    fn value(&self) -> &Self::Type {
+        &self.value.0
+    }
+
+    fn take_value(self) -> Self::Type {
         self.value.0
     }
 
@@ -100,8 +104,9 @@ impl StarSemiring for TropicalWeight {
 }
 
 impl WeaklyDivisibleSemiring for TropicalWeight {
-    fn divide(&self, rhs: &Self, _divide_type: DivideType) -> Fallible<Self> {
-        Ok(Self::new(self.value.0 - rhs.value.0))
+    fn divide_assign(&mut self, rhs: &Self, _divide_type: DivideType) -> Fallible<()> {
+        self.value.0 -= rhs.value.0;
+        Ok(())
     }
 }
 
