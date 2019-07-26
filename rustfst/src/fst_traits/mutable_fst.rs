@@ -36,7 +36,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// assert_eq!(fst.start(), Some(s2));
     /// ```
     fn set_start(&mut self, state_id: StateId) -> Fallible<()>;
-    unsafe fn set_start_unchecked(&mut self, state_id: StateId) -> Fallible<()>;
+    unsafe fn set_start_unchecked(&mut self, state_id: StateId);
 
     /// The state with identifier `state_id` is now a final state with a weight `final_weight`.
     /// If the `state_id` doesn't exist an error is raised.

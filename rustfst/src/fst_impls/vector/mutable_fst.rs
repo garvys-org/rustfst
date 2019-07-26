@@ -35,9 +35,8 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(())
     }
 
-    unsafe fn set_start_unchecked(&mut self, state_id: usize) -> Fallible<()> {
+    unsafe fn set_start_unchecked(&mut self, state_id: usize) {
         self.start_state = Some(state_id);
-        Ok(())
     }
 
     fn set_final(&mut self, state_id: StateId, final_weight: W) -> Fallible<()> {

@@ -9,8 +9,7 @@ where
     ofst.add_states(ifst.num_states());
 
     if let Some(start) = ifst.start() {
-        // TODO: Need to implement a set_start_unchecked
-        ofst.set_start(start).unwrap();
+        unsafe {ofst.set_start_unchecked(start)};
 
         for s in 0..ifst.num_states() {
             for arc in unsafe { ifst.arcs_iter_unchecked(s) } {
