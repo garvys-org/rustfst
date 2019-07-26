@@ -34,6 +34,6 @@ SupportedAlgorithms.register("map", MapAlgorithm)
 SupportedAlgorithms.register("project", ProjectAlgorithm)
 SupportedAlgorithms.register("push", PushAlgorithm)
 SupportedAlgorithms.register("reverse", ReverseAlgorithm)
-SupportedAlgorithms.register("rmfinalepsilon", RmFinalEpsilonAlgorithm)
+# SupportedAlgorithms.register("rmfinalepsilon", RmFinalEpsilonAlgorithm)
 SupportedAlgorithms.register("shortestpath", ShortestPathAlgorithm)
 
