@@ -1,3 +1,3 @@
-pub(crate) mod vector;
+pub(crate) mod vector_fst;
 
-pub use self::vector::VectorFst;
+pub use self::vector_fst::VectorFst;

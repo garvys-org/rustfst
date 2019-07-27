@@ -1,6 +1,6 @@
 use failure::Fallible;
 
-use crate::fst_impls::vector::VectorFstState;
+use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{MutableFst, TextParser};
 use crate::parsers::text_fst::ParsedTextFst;

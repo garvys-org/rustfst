@@ -1,9 +1,9 @@
 use std::slice;
 
-use crate::Arc;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ArcIterator, MutableArcIterator};
 use crate::semirings::Semiring;
+use crate::Arc;
 use crate::StateId;
 
 use failure::Fallible;

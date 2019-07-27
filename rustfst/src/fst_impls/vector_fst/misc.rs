@@ -5,7 +5,7 @@ use failure::Fallible;
 
 use crate::algorithms::{concat, union};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{FinalStatesIterator, ArcIterator, StateIterator, CoreFst};
+use crate::fst_traits::{ArcIterator, CoreFst, FinalStatesIterator, StateIterator};
 use crate::semirings::Semiring;
 
 add_or_fst!(W, VectorFst<W>);

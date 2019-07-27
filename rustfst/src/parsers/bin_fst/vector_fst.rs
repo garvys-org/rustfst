@@ -8,7 +8,7 @@ use failure::{Fallible, ResultExt};
 use nom::IResult;
 use nom::{le_f32, le_i32, le_i64, le_u64};
 
-use crate::fst_impls::vector::VectorFstState;
+use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ArcIterator, BinaryDeserializer, BinarySerializer, CoreFst, ExpandedFst};
 use crate::semirings::Semiring;
