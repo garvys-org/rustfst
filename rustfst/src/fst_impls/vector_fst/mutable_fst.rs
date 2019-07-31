@@ -3,8 +3,7 @@ use std::cmp::Ordering;
 use failure::Fallible;
 
 use crate::algorithms::arc_unique::arc_compare;
-use crate::fst_impls::vector::vector_fst::VectorFstState;
-use crate::fst_impls::VectorFst;
+use crate::fst_impls::vector_fst::{VectorFst, VectorFstState};
 use crate::fst_traits::MutableFst;
 use crate::fst_traits::{CoreFst, MutableArcIterator};
 use crate::semirings::Semiring;

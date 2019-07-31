@@ -50,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `take_value` method to the Semiring trait to extract a value from a Weight and take the ownership.
 - Added `fst_convert` to the public API to convert one Fst object from one type to another type.
 - Added `divide_assign` to `WeaklyDivisibleSemiring` semiring to perform in-place division.
+- Added support for `ConstFst`. Also added a converter from `VectorFst` to `ConstFst` through the `From` trait.
 
 ### Changed
 - Before test cases were generated with pynini (python wrapper around openfst). Now they are directly generated with OpenFST (c++). Allows to test operations that are not wrapped.

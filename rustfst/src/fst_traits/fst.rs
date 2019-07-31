@@ -31,6 +31,7 @@ pub trait CoreFst {
     /// ```
     fn start(&self) -> Option<StateId>;
 
+    // TODO: Might be interesting to return a Result<Option<_>> here to differentiate the cases where the state doesn't exist and where the state is not final.
     /// Retrieves the final weight of a state (if the state is a final one).
     ///
     /// # Example
