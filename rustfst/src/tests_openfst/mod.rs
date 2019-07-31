@@ -53,11 +53,13 @@ use self::algorithms::{
 use self::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
 use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
 
+use self::fst_impls::const_fst::test_const_fst_convert_convert;
+
 #[macro_use]
 mod macros;
 
 mod algorithms;
-
+mod fst_impls;
 mod io;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -319,6 +321,8 @@ where
     test_minimize(&test_data)?;
 
     test_push(&test_data)?;
+
+    test_const_fst_convert_convert(&test_data)?;
 
     Ok(())
 }
