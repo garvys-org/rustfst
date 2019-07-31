@@ -1,8 +1,8 @@
-use crate::fst_traits::{CoreFst, Fst};
 use crate::fst_impls::ConstFst;
+use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 
-use failure::{Fallible, format_err};
+use failure::{format_err, Fallible};
 
 impl<W: Semiring + 'static> Fst for ConstFst<W> {}
 
@@ -25,8 +25,11 @@ impl<W: Semiring> CoreFst for ConstFst<W> {
         self.states.get_unchecked(state_id).final_weight.as_ref()
     }
 
-    fn num_arcs(&self, s: usize) -> Fallible<usize>{
-        let const_state = self.states.get(s).ok_or_else(|| format_err!("State doesn't exist"))?;
+    fn num_arcs(&self, s: usize) -> Fallible<usize> {
+        let const_state = self
+            .states
+            .get(s)
+            .ok_or_else(|| format_err!("State doesn't exist"))?;
         Ok(const_state.narcs)
     }
 

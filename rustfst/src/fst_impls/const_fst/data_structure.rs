@@ -15,5 +15,5 @@ pub(crate) struct ConstState<W: Semiring> {
     /// Start of state's arcs in `arcs`.
     pub(crate) pos: usize,
     /// Number of arcs (per state).
-    pub(crate) narcs: usize
+    pub(crate) narcs: usize,
 }

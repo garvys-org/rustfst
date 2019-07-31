@@ -2,10 +2,10 @@ use std::slice;
 
 use failure::Fallible;
 
-use crate::Arc;
 use crate::fst_impls::ConstFst;
 use crate::fst_traits::ArcIterator;
 use crate::semirings::Semiring;
+use crate::Arc;
 use crate::StateId;
 
 impl<'a, W: 'static + Semiring> ArcIterator<'a> for ConstFst<W> {
