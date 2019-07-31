@@ -13,7 +13,7 @@ pub struct VectorFst<W: Semiring> {
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]
-pub struct VectorFstState<W: Semiring> {
+pub(crate) struct VectorFstState<W: Semiring> {
     pub(crate) final_weight: Option<W>,
     pub(crate) arcs: Vec<Arc<W>>,
 }
