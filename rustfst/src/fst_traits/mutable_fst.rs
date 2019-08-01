@@ -187,10 +187,15 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// Reserve space for storing enough states.
     fn reserve_states(&mut self, additional: usize);
 
-    // TODO: Return Result<Option<_>>
-    // TODO: Provide unchecked equivalent
     /// Retrieves a mutable reference to the final weight of a state (if the state is a final one).
-    fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut <Self as CoreFst>::W>;
+    fn final_weight_mut(
+        &mut self,
+        state_id: StateId,
+    ) -> Fallible<Option<&mut <Self as CoreFst>::W>>;
+    unsafe fn final_weight_unchecked_mut(
+        &mut self,
+        state_id: StateId,
+    ) -> Option<&mut <Self as CoreFst>::W>;
 
     fn sort_arcs_unchecked<F: Fn(&Arc<Self::W>, &Arc<Self::W>) -> Ordering>(
         &mut self,

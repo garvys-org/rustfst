@@ -1,6 +1,6 @@
 use failure::Fallible;
 
-use crate::fst_traits::{ExpandedFst, FinalStatesIterator, Fst, MutableFst};
+use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
 
 /// Different types of reweighting.
@@ -72,7 +72,7 @@ where
     }
 
     for state_id in 0..fst.num_states() {
-        if let Some(final_weight) = fst.final_weight_mut(state_id) {
+        if let Some(final_weight) = unsafe { fst.final_weight_unchecked_mut(state_id) } {
             let d_s = potentials.get(state_id).unwrap_or(&zero);
 
             match reweight_type {
