@@ -13,12 +13,12 @@ impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
         self.start_state
     }
 
-    fn final_weight(&self, state_id: StateId) -> Option<&W> {
-        if let Some(state) = self.states.get(state_id) {
-            state.final_weight.as_ref()
-        } else {
-            None
-        }
+    fn final_weight(&self, state_id: StateId) -> Fallible<Option<&W>> {
+        let s = self
+            .states
+            .get(state_id)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
+        Ok(s.final_weight.as_ref())
     }
 
     #[inline]

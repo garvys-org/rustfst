@@ -58,7 +58,7 @@ where
         for arc in fst_in.arcs_iter(state)? {
             fst_out.add_arc(state, mapper.arc_map(arc)?)?;
         }
-        if let Some(w) = fst_in.final_weight(state) {
+        if let Some(w) = unsafe { fst_in.final_weight_unchecked(state) } {
             let final_arc = FinalArc {
                 ilabel: EPS_LABEL,
                 olabel: EPS_LABEL,

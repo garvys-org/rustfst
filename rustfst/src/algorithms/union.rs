@@ -102,7 +102,7 @@ where
                 old_final_state.state_id
             )
         })?;
-        fst_out.set_final(*final_state, old_final_state.final_weight)?;
+        fst_out.set_final(*final_state, old_final_state.final_weight.clone())?;
     }
 
     Ok(())

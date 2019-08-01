@@ -300,8 +300,8 @@ struct StateComparator<'a, F: MutableFst + ExpandedFst> {
 impl<'a, F: MutableFst + ExpandedFst> StateComparator<'a, F> {
     fn do_compare(&self, x: StateId, y: StateId) -> Fallible<bool> {
         let zero = F::W::zero();
-        let xfinal = self.fst.final_weight(x).unwrap_or_else(|| &zero);
-        let yfinal = self.fst.final_weight(y).unwrap_or_else(|| &zero);
+        let xfinal = self.fst.final_weight(x)?.unwrap_or_else(|| &zero);
+        let yfinal = self.fst.final_weight(y)?.unwrap_or_else(|| &zero);
 
         if xfinal < yfinal {
             return Ok(true);
@@ -375,7 +375,7 @@ fn pre_partition<W: Semiring, F: MutableFst<W = W> + ExpandedFst<W = W>>(
                 .map(|arc| arc.ilabel)
                 .collect();
 
-            let this_map = if fst.is_final(s) {
+            let this_map = if unsafe { fst.is_final_unchecked(s) } {
                 &mut hash_to_class_final
             } else {
                 &mut hash_to_class_nonfinal

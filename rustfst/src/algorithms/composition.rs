@@ -55,7 +55,7 @@ where
     while !queue.is_empty() {
         let (q1, q2, q) = queue.pop_front().unwrap();
 
-        if let (Some(rho_1), Some(rho_2)) = (fst_1.final_weight(q1), fst_2.final_weight(q2)) {
+        if let (Some(rho_1), Some(rho_2)) = (fst_1.final_weight(q1)?, fst_2.final_weight(q2)?) {
             composed_fst.set_final(q, rho_1.times(&rho_2)?)?;
         }
 

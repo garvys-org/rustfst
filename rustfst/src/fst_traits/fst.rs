@@ -31,7 +31,6 @@ pub trait CoreFst {
     /// ```
     fn start(&self) -> Option<StateId>;
 
-    // TODO: Might be interesting to return a Result<Option<_>> here to differentiate the cases where the state doesn't exist and where the state is not final.
     /// Retrieves the final weight of a state (if the state is a final one).
     ///
     /// # Example
@@ -47,10 +46,11 @@ pub trait CoreFst {
     /// fst.set_final(s2, BooleanWeight::one());
     ///
     /// // 2 - Access the final weight of each state
-    /// assert_eq!(fst.final_weight(s1), None);
-    /// assert_eq!(fst.final_weight(s2), Some(&BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s1).unwrap(), None);
+    /// assert_eq!(fst.final_weight(s2).unwrap(), Some(&BooleanWeight::one()));
+    /// assert!(fst.final_weight(s2 + 1).is_err());
     /// ```
-    fn final_weight(&self, state_id: StateId) -> Option<&<Self as CoreFst>::W>;
+    fn final_weight(&self, state_id: StateId) -> Fallible<Option<&<Self as CoreFst>::W>>;
     unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<&<Self as CoreFst>::W>;
 
     /// Number of arcs leaving a specific state in the wFST.
@@ -88,12 +88,14 @@ pub trait CoreFst {
     /// fst.set_final(s2, BooleanWeight::one());
     ///
     /// // 2 - Test if a state is final
-    /// assert!(!fst.is_final(s1));
-    /// assert!(fst.is_final(s2));
+    /// assert_eq!(fst.is_final(s1).unwrap(), false);
+    /// assert_eq!(fst.is_final(s2).unwrap(), true);
+    /// assert!(fst.is_final(s2 + 1).is_err());
     /// ```
     #[inline]
-    fn is_final(&self, state_id: StateId) -> bool {
-        self.final_weight(state_id).is_some()
+    fn is_final(&self, state_id: StateId) -> Fallible<bool> {
+        let w = self.final_weight(state_id)?;
+        Ok(w.is_some())
     }
     #[inline]
     unsafe fn is_final_unchecked(&self, state_id: StateId) -> bool {

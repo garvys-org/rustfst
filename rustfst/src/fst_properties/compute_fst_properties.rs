@@ -147,8 +147,8 @@ pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Fallible<FstProp
             comp_props |= FstProperties::NOT_STRING;
             comp_props &= !FstProperties::STRING;
         }
-        if fst.is_final(state) {
-            let final_weight = fst.final_weight(state).unwrap();
+        if fst.is_final(state)? {
+            let final_weight = unsafe { fst.final_weight_unchecked(state).unsafe_unwrap() };
             if !final_weight.is_one() {
                 comp_props |= FstProperties::WEIGHTED;
                 comp_props &= !FstProperties::UNWEIGHTED;

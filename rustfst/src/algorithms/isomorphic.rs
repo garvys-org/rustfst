@@ -66,7 +66,7 @@ impl<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> Isomorphis
     }
 
     fn ismorphic_state(&mut self, s1: StateId, s2: StateId) -> Fallible<bool> {
-        if !(self.fst_1.final_weight(s1) == self.fst_2.final_weight(s2)) {
+        if !(self.fst_1.final_weight(s1)? == self.fst_2.final_weight(s2)?) {
             return Ok(false);
         }
 

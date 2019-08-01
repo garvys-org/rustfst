@@ -236,7 +236,7 @@ where
             final_weight.plus_assign(
                 det_elt.weight.times(
                     self.fst
-                        .final_weight(det_elt.state)
+                        .final_weight(det_elt.state)?
                         .unwrap_or_else(|| &zero),
                 )?,
             )?;

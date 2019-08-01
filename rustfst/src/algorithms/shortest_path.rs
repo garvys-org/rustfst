@@ -119,7 +119,7 @@ where
         enqueued[s] = false;
         let sd = distance[s].clone();
 
-        if let Some(final_weight) = ifst.final_weight(s) {
+        if let Some(final_weight) = ifst.final_weight(s)? {
             let plus = f_distance.plus(&sd.times(&final_weight)?)?;
             if f_distance != plus {
                 f_distance = plus;
@@ -169,7 +169,7 @@ where
         d_p = s_p;
         s_p = Some(ofst.add_state());
         if d.is_none() {
-            if let Some(final_weight) = ifst.final_weight(f_parent.unwrap()) {
+            if let Some(final_weight) = ifst.final_weight(f_parent.unwrap())? {
                 ofst.set_final(s_p.unwrap(), final_weight.clone())?;
             }
         } else {
@@ -313,7 +313,7 @@ where
             ofst.add_arc(next, arc)?;
             heap.push(next);
         }
-        let final_weight = ifst.final_weight(p.0.unwrap());
+        let final_weight = ifst.final_weight(p.0.unwrap())?;
         if let Some(_final_weight) = final_weight {
             let r_final_weight: W = hack_convert_reverse_reverse(_final_weight.reverse()?);
             if !r_final_weight.is_zero() {

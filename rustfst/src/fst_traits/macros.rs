@@ -82,7 +82,7 @@ macro_rules! draw_single_state {
     ($fst:expr, $state_id:expr, $f: expr, $config:expr) => {
         write!($f, "{}", $state_id)?;
         write!($f, " [label = \"{}", $state_id)?;
-        if let Some(final_weight) = $fst.final_weight($state_id) {
+        if let Some(final_weight) = $fst.final_weight($state_id)? {
             if $config.show_weight_one || !final_weight.is_one() {
                 write!($f, "/{}", final_weight)?;
             }

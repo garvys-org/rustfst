@@ -93,7 +93,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         parent: Option<usize>,
         _arc: Option<&Arc<<F as CoreFst>::W>>,
     ) {
-        if self.fst.is_final(s) {
+        if unsafe { self.fst.is_final_unchecked(s) } {
             self.coaccess[s] = true;
         }
         if self.dfnumber[s] == self.lowlink[s] {

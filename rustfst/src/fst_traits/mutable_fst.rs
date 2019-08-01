@@ -50,16 +50,16 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
     ///
-    /// assert_eq!(fst.final_weight(s1), None);
-    /// assert_eq!(fst.final_weight(s2), None);
+    /// assert_eq!(fst.final_weight(s1).unwrap(), None);
+    /// assert_eq!(fst.final_weight(s2).unwrap(), None);
     ///
     /// fst.set_final(s1, BooleanWeight::one());
-    /// assert_eq!(fst.final_weight(s1), Some(&BooleanWeight::one()));
-    /// assert_eq!(fst.final_weight(s2), None);
+    /// assert_eq!(fst.final_weight(s1).unwrap(), Some(&BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s2).unwrap(), None);
     ///
     /// fst.set_final(s2, BooleanWeight::one());
-    /// assert_eq!(fst.final_weight(s1), Some(&BooleanWeight::one()));
-    /// assert_eq!(fst.final_weight(s2), Some(&BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s1).unwrap(), Some(&BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s2).unwrap(), Some(&BooleanWeight::one()));
     /// ```
     fn set_final(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W) -> Fallible<()>;
     unsafe fn set_final_unchecked(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W);
@@ -188,7 +188,14 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     fn reserve_states(&mut self, additional: usize);
 
     /// Retrieves a mutable reference to the final weight of a state (if the state is a final one).
-    fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut <Self as CoreFst>::W>;
+    fn final_weight_mut(
+        &mut self,
+        state_id: StateId,
+    ) -> Fallible<Option<&mut <Self as CoreFst>::W>>;
+    unsafe fn final_weight_unchecked_mut(
+        &mut self,
+        state_id: StateId,
+    ) -> Option<&mut <Self as CoreFst>::W>;
 
     fn sort_arcs_unchecked<F: Fn(&Arc<Self::W>, &Arc<Self::W>) -> Ordering>(
         &mut self,

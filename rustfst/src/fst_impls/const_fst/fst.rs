@@ -13,12 +13,12 @@ impl<W: Semiring> CoreFst for ConstFst<W> {
         self.start
     }
 
-    fn final_weight(&self, state_id: usize) -> Option<&Self::W> {
-        if let Some(state) = self.states.get(state_id) {
-            state.final_weight.as_ref()
-        } else {
-            None
-        }
+    fn final_weight(&self, state_id: usize) -> Fallible<Option<&Self::W>> {
+        let s = self
+            .states
+            .get(state_id)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
+        Ok(s.final_weight.as_ref())
     }
 
     unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<&Self::W> {

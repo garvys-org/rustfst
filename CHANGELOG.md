@@ -51,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `fst_convert` to the public API to convert one Fst object from one type to another type.
 - Added `divide_assign` to `WeaklyDivisibleSemiring` semiring to perform in-place division.
 - Added support for `ConstFst`. Also added a converter from `VectorFst` to `ConstFst` through the `From` trait.
+- Added `final_weight_unnchecked_mut` to `MutableFst` trait.
 
 ### Changed
 - Before test cases were generated with pynini (python wrapper around openfst). Now they are directly generated with OpenFST (c++). Allows to test operations that are not wrapped.
@@ -74,6 +75,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use `SccVisitor` in `compute_fst_properties` implementation.
 - `value` methods of Semiring trait now returns a reference to the underlying weight.
 - `final_weight` method of `Fst` trait now returns a reference to the final weight instead of a copy.
+- `final_weight` method of `Fst` trait now returns a `Fallible`. Fail only when the state doesn't exist.
+- `final_weight_mut` method of `Fst` trait now returns a `Fallible`. Fail only when the state doesn't exist.
+- `FinalStateIterator` now returns reference to final weights instead of copy.
 
 ### Removed
 - Crate `rustfst-tests-openfst` has been removed and moved to the `rustfst` as unit tests. 

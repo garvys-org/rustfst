@@ -1,6 +1,6 @@
 use failure::Fallible;
 
-use crate::fst_traits::MutableFst;
+use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::Arc;
 use crate::{Label, StateId, EPS_LABEL};
@@ -71,13 +71,14 @@ where
         ifst.set_final(superfinal_id, F::W::one()).unwrap();
     }
 
+    // TODO: Remove this collect
     let states: Vec<_> = ifst.states_iter().collect();
     for state in states {
         for arc in ifst.arcs_iter_mut(state).unwrap() {
             mapper.arc_map(arc)?;
         }
 
-        if let Some(w) = ifst.final_weight_mut(state) {
+        if let Some(w) = unsafe { ifst.final_weight_unchecked_mut(state) } {
             let mut final_arc = FinalArc {
                 ilabel: EPS_LABEL,
                 olabel: EPS_LABEL,

@@ -204,12 +204,19 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         self.states.reserve(additional);
     }
 
-    fn final_weight_mut(&mut self, state_id: StateId) -> Option<&mut W> {
-        if let Some(state) = self.states.get_mut(state_id) {
-            state.final_weight.as_mut()
-        } else {
-            None
-        }
+    fn final_weight_mut(&mut self, state_id: StateId) -> Fallible<Option<&mut W>> {
+        let s = self
+            .states
+            .get_mut(state_id)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
+        Ok(s.final_weight.as_mut())
+    }
+
+    unsafe fn final_weight_unchecked_mut(&mut self, state_id: usize) -> Option<&mut Self::W> {
+        self.states
+            .get_unchecked_mut(state_id)
+            .final_weight
+            .as_mut()
     }
 
     fn sort_arcs_unchecked<F: Fn(&Arc<Self::W>, &Arc<Self::W>) -> Ordering>(

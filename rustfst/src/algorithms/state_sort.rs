@@ -37,14 +37,14 @@ where
         if done[s1] {
             continue;
         }
-        let mut final1 = fst.final_weight(s1).cloned();
+        let mut final1 = unsafe { fst.final_weight_unchecked(s1) }.cloned();
         let mut final2 = None;
         let mut arcsa: Vec<_> = fst.arcs_iter(s1)?.cloned().collect();
         let mut arcsb = vec![];
         while !done[s1] {
             let s2 = order[s1];
             if !done[s2] {
-                final2 = fst.final_weight(s2).cloned();
+                final2 = unsafe { fst.final_weight_unchecked(s2) }.cloned();
                 arcsb = fst.arcs_iter(s2)?.cloned().collect();
             }
             match final1 {

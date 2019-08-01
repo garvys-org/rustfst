@@ -62,7 +62,7 @@ where
                 Arc::new(
                     EPS_LABEL,
                     EPS_LABEL,
-                    old_final_state_1.final_weight,
+                    old_final_state_1.final_weight.clone(),
                     *start_state_2,
                 ),
             )?;
@@ -72,7 +72,7 @@ where
     // Final states are final states of the second fst
     for old_final_state in fst_2.final_states_iter() {
         let final_state = mapping_states_fst_2[&old_final_state.state_id];
-        fst_out.set_final(final_state, old_final_state.final_weight)?;
+        fst_out.set_final(final_state, old_final_state.final_weight.clone())?;
     }
 
     // FINISH

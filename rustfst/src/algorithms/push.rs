@@ -76,7 +76,9 @@ where
         let mut sum = F::W::zero();
         let zero = F::W::zero();
         for s in 0..dist.len() {
-            sum.plus_assign(dist[s].times(fst.final_weight(s).unwrap_or_else(|| &zero))?)?;
+            sum.plus_assign(
+                dist[s].times(unsafe { fst.final_weight_unchecked(s) }.unwrap_or_else(|| &zero))?,
+            )?;
         }
         Ok(sum)
     }
@@ -92,7 +94,7 @@ where
     }
     if at_final {
         for s in 0..fst.num_states() {
-            if let Some(final_weight) = fst.final_weight_mut(s) {
+            if let Some(final_weight) = unsafe { fst.final_weight_unchecked_mut(s) } {
                 final_weight.divide_assign(&weight, DivideType::DivideRight)?;
             }
         }
@@ -101,7 +103,7 @@ where
             for arc in unsafe { fst.arcs_iter_unchecked_mut(start) } {
                 arc.weight.divide_assign(&weight, DivideType::DivideLeft)?;
             }
-            if let Some(final_weight) = fst.final_weight_mut(start) {
+            if let Some(final_weight) = unsafe { fst.final_weight_unchecked_mut(start) } {
                 final_weight.divide_assign(&weight, DivideType::DivideLeft)?;
             }
         }

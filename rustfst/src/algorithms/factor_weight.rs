@@ -163,7 +163,7 @@ where
                 None => elt.weight.clone(),
                 Some(s) => elt
                     .weight
-                    .times(self.fst.final_weight(s).unwrap_or_else(|| &zero))
+                    .times(self.fst.final_weight(s)?.unwrap_or_else(|| &zero))
                     .unwrap(),
             };
             let factor_iterator = FI::new(weight.clone());
@@ -214,14 +214,14 @@ where
             }
         }
         if self.factor_final_weights()
-            && (elt.state.is_none() || self.fst.is_final(elt.state.unwrap()))
+            && (elt.state.is_none() || self.fst.is_final(elt.state.unwrap())?)
         {
             let one = F::W::one();
             let weight = match elt.state {
                 None => elt.weight.clone(),
                 Some(s) => elt
                     .weight
-                    .times(self.fst.final_weight(s).unwrap_or_else(|| &one))
+                    .times(self.fst.final_weight(s)?.unwrap_or_else(|| &one))
                     .unwrap(),
             };
             let mut ilabel = self.opts.final_ilabel;
