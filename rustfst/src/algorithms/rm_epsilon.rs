@@ -56,7 +56,7 @@ where
     for old_final_state in fst.final_states_iter() {
         fst_epsilon.set_final(
             mapping_states[&old_final_state.state_id],
-            old_final_state.final_weight,
+            old_final_state.final_weight.clone(),
         )?;
     }
     Ok(fst_epsilon)

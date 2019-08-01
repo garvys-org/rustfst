@@ -71,25 +71,22 @@ where
         }
     }
 
-    let final_states: Vec<_> = fst.final_states_iter().collect();
+    for state_id in 0..fst.num_states() {
+        if let Some(final_weight) = fst.final_weight_mut(state_id) {
+            let d_s = potentials.get(state_id).unwrap_or(&zero);
 
-    for final_state in final_states {
-        let d_s = potentials.get(final_state.state_id).unwrap_or(&zero);
-
-        match reweight_type {
-            ReweightType::ReweightToFinal => {
-                let new_weight = d_s.times(&final_state.final_weight)?;
-                fst.set_final(final_state.state_id, new_weight)?;
-            }
-            ReweightType::ReweightToInitial => {
-                if d_s.is_zero() {
-                    continue;
+            match reweight_type {
+                ReweightType::ReweightToFinal => {
+                    final_weight.times_assign(d_s)?;
                 }
-                let new_weight =
-                    (&final_state.final_weight).divide(&d_s, DivideType::DivideLeft)?;
-                fst.set_final(final_state.state_id, new_weight)?;
-            }
-        };
+                ReweightType::ReweightToInitial => {
+                    if d_s.is_zero() {
+                        continue;
+                    }
+                    final_weight.divide_assign(d_s, DivideType::DivideLeft)?;
+                }
+            };
+        }
     }
 
     // Handles potential of the start state
