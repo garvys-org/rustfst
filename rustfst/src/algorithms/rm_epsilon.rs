@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use failure::Fallible;
+use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::all_pairs_shortest_distance;
 use crate::algorithms::arc_sum;
@@ -131,12 +132,12 @@ where
                 )?;
             }
 
-            if fst_no_epsilon.is_final(*q) {
-                if !fst_no_epsilon.is_final(p) {
+            if unsafe { fst_no_epsilon.is_final_unchecked(*q) } {
+                if !unsafe { fst_no_epsilon.is_final_unchecked(p) } {
                     output_fst.set_final(p, W::zero())?;
                 }
-                let rho_prime_p = output_fst.final_weight(p).unwrap();
-                let rho_q = fst_no_epsilon.final_weight(*q).unwrap();
+                let rho_prime_p = unsafe { output_fst.final_weight_unchecked(p).unsafe_unwrap() };
+                let rho_q = unsafe { fst_no_epsilon.final_weight_unchecked(*q).unsafe_unwrap() };
                 let new_weight = rho_prime_p.plus(&w_prime.times(&rho_q)?)?;
                 output_fst.set_final(p, new_weight)?;
             }
@@ -150,14 +151,16 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use counter::Counter;
+    use failure::format_err;
+    use failure::ResultExt;
+
     use crate::fst_impls::VectorFst;
     use crate::fst_traits::PathsIterator;
     use crate::semirings::IntegerWeight;
     use crate::test_data::vector_fst::get_vector_fsts_for_tests;
-    use counter::Counter;
-    use failure::format_err;
-    use failure::ResultExt;
+
+    use super::*;
 
     // TODO: Add test with epsilon arcs
 

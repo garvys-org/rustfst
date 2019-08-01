@@ -149,7 +149,7 @@ mod tests {
         // None of the states are final => None final weight
         assert!(fst
             .states_iter()
-            .map(|state_id| fst.final_weight(state_id))
+            .map(|state_id| fst.final_weight(state_id).unwrap())
             .all(|v| v.is_none()));
 
         // Select randomly n_final_states
@@ -164,11 +164,13 @@ mod tests {
         });
 
         // Check they are final with the correct weight
-        assert!(final_states.iter().all(|state_id| fst.is_final(*state_id)));
+        assert!(final_states
+            .iter()
+            .all(|state_id| fst.is_final(*state_id).unwrap()));
         assert!(final_states
             .iter()
             .enumerate()
-            .all(|(idx, state_id)| fst.final_weight(*state_id)
+            .all(|(idx, state_id)| fst.final_weight(*state_id).unwrap()
                 == Some(&ProbabilityWeight::new(idx as f32))));
         Ok(())
     }

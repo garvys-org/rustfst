@@ -38,7 +38,7 @@ where
             match reweight_type {
                 ReweightType::ReweightToInitial => {}
                 ReweightType::ReweightToFinal => {
-                    if let Some(final_weight) = fst.final_weight(state) {
+                    if let Some(final_weight) = fst.final_weight(state)? {
                         let new_weight = F::W::zero().times(&final_weight)?;
                         fst.set_final(state, new_weight)?;
                     }
@@ -106,7 +106,7 @@ where
                 };
             }
 
-            if let Some(final_weight) = fst.final_weight(start_state) {
+            if let Some(final_weight) = fst.final_weight(start_state)? {
                 let new_weight = match reweight_type {
                     ReweightType::ReweightToInitial => d_s.times(&final_weight)?,
                     ReweightType::ReweightToFinal => {

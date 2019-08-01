@@ -186,10 +186,10 @@ impl<W: 'static + Semiring<Type = f32>> BinarySerializer for VectorFst<W> {
         //version: i32,
         write_bin_i32(&mut file, 2i32)?;
         //flags: i32,
-        // FIXME: Flags are used to check whether or not a symboltable has to be loaded
+        // TODO: Flags are used to check whether or not a symboltable has to be loaded
         write_bin_i32(&mut file, 0i32)?;
         //properties: u64, 3 = kMutable | kExpanded
-        // FIXME: Once the properties are stored, need to read them
+        // TODO: Once the properties are stored, need to read them
         write_bin_u64(&mut file, 3u64)?;
         //start: i64,
         write_bin_i64(&mut file, self.start_state.map(|v| v as i64).unwrap_or(-1))?;
@@ -204,7 +204,11 @@ impl<W: 'static + Semiring<Type = f32>> BinarySerializer for VectorFst<W> {
         let zero = W::zero();
         // FstBody
         for state in 0..self.num_states() {
-            let f_weight = self.final_weight(state).unwrap_or_else(|| &zero).value();
+            let f_weight = unsafe {
+                self.final_weight_unchecked(state)
+                    .unwrap_or_else(|| &zero)
+                    .value()
+            };
             write_bin_f32(&mut file, *f_weight)?;
             write_bin_i64(&mut file, unsafe { self.num_arcs_unchecked(state) } as i64)?;
 

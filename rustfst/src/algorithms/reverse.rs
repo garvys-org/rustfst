@@ -43,7 +43,7 @@ where
         if Some(is) == istart {
             ofst.set_final(os, W::ReverseWeight::one())?;
         }
-        let weight = ifst.final_weight(is);
+        let weight = unsafe { ifst.final_weight_unchecked(is) };
         if let Some(w) = weight {
             states_arcs[0].push(Arc::new(0, 0, w.reverse()?, os));
         }
