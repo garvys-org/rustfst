@@ -1,39 +1,58 @@
-use nom::float;
-use nom::types::CompleteStr;
+use nom::branch::alt;
+use nom::bytes::complete::tag;
+use nom::character::complete::tab;
+use nom::combinator::opt;
+use nom::multi::separated_list;
+use nom::number::complete::float;
+use nom::sequence::preceded;
+use nom::IResult;
 
 use crate::parsers::nom_utils::num;
 use crate::parsers::text_fst::parsed_text_fst::{FinalState, RowParsed, Transition};
 
-named!(optional_weight <CompleteStr, Option<f32>>, opt!(preceded!(tag!("\t"), float)));
+fn optional_weight(i: &str) -> IResult<&str, Option<f32>> {
+    opt(preceded(tab, float))(i)
+}
 
-named!(transition <CompleteStr, RowParsed>, do_parse!(
-    state: num >>
-    tag!("\t") >>
-    nextstate: num >>
-    tag!("\t") >>
-    ilabel: num >>
-    tag!("\t") >>
-    olabel: num >>
-    weight: optional_weight >>
-    (RowParsed::Transition(Transition {
-        state, ilabel, olabel, weight, nextstate}))
-));
+fn transition(i: &str) -> IResult<&str, RowParsed> {
+    let (i, state) = num(i)?;
+    let (i, _) = tab(i)?;
+    let (i, nextstate) = num(i)?;
+    let (i, _) = tab(i)?;
+    let (i, ilabel) = num(i)?;
+    let (i, _) = tab(i)?;
+    let (i, olabel) = num(i)?;
+    let (i, weight) = optional_weight(i)?;
 
-named!(final_state <CompleteStr, RowParsed>, do_parse!(
-    state: num >>
-    weight: optional_weight >>
-    (RowParsed::FinalState(FinalState {state, weight}))
-));
+    Ok((
+        i,
+        RowParsed::Transition(Transition {
+            state,
+            ilabel,
+            olabel,
+            weight,
+            nextstate,
+        }),
+    ))
+}
 
-named!(infinity_final_state <CompleteStr, RowParsed>, do_parse!(
-    state: num >>
-    tag!("\t") >>
-    tag!("Infinity") >>
-    (RowParsed::InfinityFinalState(state))
-));
+fn final_state(i: &str) -> IResult<&str, RowParsed> {
+    let (i, state) = num(i)?;
+    let (i, weight) = optional_weight(i)?;
+    Ok((i, RowParsed::FinalState(FinalState { state, weight })))
+}
 
-named!(row_parsed <CompleteStr, RowParsed>, alt!(transition | infinity_final_state | final_state));
+fn infinity_final_state(i: &str) -> IResult<&str, RowParsed> {
+    let (i, state) = num(i)?;
+    let (i, _) = tab(i)?;
+    let (i, _) = tag("Infinity")(i)?;
+    Ok((i, RowParsed::InfinityFinalState(state)))
+}
 
-named!(pub vec_rows_parsed <CompleteStr, Vec<RowParsed>>,
- separated_list!(tag!("\n"), row_parsed)
-);
+fn row_parsed(i: &str) -> IResult<&str, RowParsed> {
+    alt((transition, infinity_final_state, final_state))(i)
+}
+
+pub fn vec_rows_parsed(i: &str) -> IResult<&str, Vec<RowParsed>> {
+    separated_list(tag("\n"), row_parsed)(i)
+}

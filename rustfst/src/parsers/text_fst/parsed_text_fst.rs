@@ -3,8 +3,6 @@ use std::path::Path;
 
 use failure::Fallible;
 
-use nom::types::CompleteStr;
-
 use crate::parsers::text_fst::nom_parser::vec_rows_parsed;
 use crate::{Label, StateId};
 
@@ -99,9 +97,8 @@ impl ParsedTextFst {
     /// 3	0.67
     /// ```
     pub fn from_string(fst_string: &str) -> Fallible<Self> {
-        let complete_fst_str = CompleteStr(fst_string);
-        let (_, vec_rows_parsed) = vec_rows_parsed(complete_fst_str)
-            .map_err(|_| format_err!("Error while parsing text fst"))?;
+        let (_, vec_rows_parsed) =
+            vec_rows_parsed(fst_string).map_err(|_| format_err!("Error while parsing text fst"))?;
 
         Ok(vec_rows_parsed.into())
     }
@@ -177,8 +174,9 @@ impl FinalState {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::test_data::text_fst::get_test_data_for_text_parser;
+
+    use super::*;
 
     #[test]
     fn test_parse_text_fst() -> Fallible<()> {

@@ -1,11 +1,13 @@
-use nom::digit1;
-use nom::types::CompleteStr;
+use nom::bytes::complete::take_while;
+use nom::character::complete::digit1;
+use nom::combinator::map_res;
+use nom::IResult;
 
-fn str_to_usize(input: CompleteStr) -> Result<usize, std::num::ParseIntError> {
-    (*input).parse()
+pub fn num(i: &str) -> IResult<&str, usize> {
+    map_res(digit1, |s: &str| s.parse())(i)
 }
 
-named!(pub num <CompleteStr, usize>, map_res!(digit1, str_to_usize));
-
-named!(pub word <CompleteStr, String>, do_parse!(
-    letters: take_while!(|c:char| (c != ' ') && (c != '\t') && (c != '\n')) >> (letters.to_string())));
+pub fn word(i: &str) -> IResult<&str, String> {
+    let (i, letters) = take_while(|c: char| (c != ' ') && (c != '\t') && (c != '\n'))(i)?;
+    Ok((i, letters.to_string()))
+}

@@ -1,6 +1,6 @@
 use failure::Fallible;
 
-use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::Arc;
 use crate::{Label, StateId, EPS_LABEL};

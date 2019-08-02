@@ -3,10 +3,10 @@ use std::collections::HashMap;
 use std::collections::VecDeque;
 
 use failure::Fallible;
+use itertools::iproduct;
 
 use crate::arc::Arc;
 use crate::fst_traits::{ExpandedFst, MutableFst};
-use crate::itertools::iproduct;
 use crate::semirings::Semiring;
 
 /// This operation computes the composition of two transducers.
