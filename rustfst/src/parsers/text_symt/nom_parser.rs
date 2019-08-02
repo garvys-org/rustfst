@@ -1,21 +1,25 @@
-use nom::types::CompleteStr;
+use nom::bytes::complete::tag;
+use nom::character::complete::tab;
+use nom::multi::many0;
+use nom::sequence::terminated;
+use nom::IResult;
 
 use crate::parsers::nom_utils::{num, word};
 use crate::parsers::text_symt::parsed_text_symt::ParsedTextSymt;
 use crate::{Label, Symbol};
 
-named!(row <CompleteStr, (Symbol, Label)>, do_parse!(
-    symbol: word >>
-    tag!("\t") >>
-    label: num >>
-    (symbol, label)
-));
+fn row(i: &str) -> IResult<&str, (Symbol, Label)> {
+    let (i, symbol) = word(i)?;
+    let (i, _) = tab(i)?;
+    let (i, label) = num(i)?;
+    Ok((i, (symbol, label)))
+}
 
-named!(vec_rows <CompleteStr, Vec<(Symbol, Label)>>,
-    many0!(terminated!(row, tag!("\n")))
-);
+fn vec_rows(i: &str) -> IResult<&str, Vec<(Symbol, Label)>> {
+    many0(terminated(row, tag("\n")))(i)
+}
 
-named!(pub(crate) parse_text_symt <CompleteStr, ParsedTextSymt>, do_parse!(
-    pairs: vec_rows >>
-    (ParsedTextSymt {pairs}))
-);
+pub(crate) fn parse_text_symt(i: &str) -> IResult<&str, ParsedTextSymt> {
+    let (i, pairs) = vec_rows(i)?;
+    Ok((i, ParsedTextSymt { pairs }))
+}

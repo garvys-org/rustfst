@@ -5,8 +5,11 @@ use std::io::Write;
 use std::path::Path;
 
 use failure::{Fallible, ResultExt};
+use nom::bytes::complete::take;
+use nom::combinator::verify;
+use nom::multi::count;
+use nom::number::complete::{le_f32, le_i32, le_i64, le_u64};
 use nom::IResult;
-use nom::{le_f32, le_i32, le_i64, le_u64};
 
 use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
@@ -47,68 +50,83 @@ struct Transition {
     nextstate: i32,
 }
 
-named!(parse_kaldi_string <&[u8], OpenFstString>, do_parse!(
-    n: le_i32 >>
-    s: take!(n as usize) >>
-    (OpenFstString{n, s: String::from_utf8(s.to_vec()).unwrap()}))
-);
-
-named!(parse_fst_header <&[u8], FstHeader>, do_parse!(
-    magic_number: verify!(le_i32, |v: i32| v == FST_MAGIC_NUMBER) >>
-    fst_type: parse_kaldi_string >>
-    arc_type: parse_kaldi_string >>
-    version: verify!(le_i32, |v: i32| v >= MIN_FILE_VERSION) >>
-    flags: le_i32 >>
-    properties: le_u64 >>
-    start: le_i64 >>
-    num_states: le_i64 >>
-    num_arcs: le_i64 >>
-    (FstHeader {magic_number, fst_type, arc_type, version, flags, properties, start, num_states, num_arcs}))
-);
-
-fn parse_fst_arc<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], Arc<W>, u32> {
-    do_parse!(
+fn parse_kaldi_string(i: &[u8]) -> IResult<&[u8], OpenFstString> {
+    let (i, n) = le_i32(i)?;
+    let (i, s) = take(n as usize)(i)?;
+    Ok((
         i,
-        ilabel: le_i32
-            >> olabel: le_i32
-            >> weight: le_f32
-            >> nextstate: le_i32
-            >> (Arc {
-                ilabel: ilabel as usize,
-                olabel: olabel as usize,
-                weight: W::new(weight),
-                nextstate: nextstate as usize
-            })
-    )
+        OpenFstString {
+            n,
+            s: String::from_utf8(s.to_vec()).unwrap(),
+        },
+    ))
 }
 
-fn parse_fst_state<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFstState<W>, u32> {
-    do_parse!(
+fn parse_fst_header(i: &[u8]) -> IResult<&[u8], FstHeader> {
+    let (i, magic_number) = verify(le_i32, |v: &i32| *v == FST_MAGIC_NUMBER)(i)?;
+    let (i, fst_type) = parse_kaldi_string(i)?;
+    let (i, arc_type) = parse_kaldi_string(i)?;
+    let (i, version) = verify(le_i32, |v: &i32| *v >= MIN_FILE_VERSION)(i)?;
+    let (i, flags) = le_i32(i)?;
+    let (i, properties) = le_u64(i)?;
+    let (i, start) = le_i64(i)?;
+    let (i, num_states) = le_i64(i)?;
+    let (i, num_arcs) = le_i64(i)?;
+    Ok((
         i,
-        final_weight: le_f32
-            >> num_arcs: le_i64
-            >> arcs: count!(parse_fst_arc, num_arcs as usize)
-            >> (VectorFstState {
-                final_weight: parse_final_weight(final_weight),
-                arcs
-            })
-    )
+        FstHeader {
+            magic_number,
+            fst_type,
+            arc_type,
+            version,
+            flags,
+            properties,
+            start,
+            num_states,
+            num_arcs,
+        },
+    ))
 }
 
-fn parse_fst<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFst<W>, u32> {
-    do_parse!(
+fn parse_fst_arc<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], Arc<W>> {
+    let (i, ilabel) = le_i32(i)?;
+    let (i, olabel) = le_i32(i)?;
+    let (i, weight) = le_f32(i)?;
+    let (i, nextstate) = le_i32(i)?;
+    Ok((
         i,
-        header: parse_fst_header
-            >> states: count!(parse_fst_state, header.num_states as usize)
-            >> (VectorFst {
-                start_state: parse_start_state(header.start),
-                states: states
-            })
-    )
+        Arc {
+            ilabel: ilabel as usize,
+            olabel: olabel as usize,
+            weight: W::new(weight),
+            nextstate: nextstate as usize,
+        },
+    ))
 }
 
-fn complete_parse_fst<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFst<W>, u32> {
-    complete!(i, parse_fst)
+fn parse_fst_state<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFstState<W>> {
+    let (i, final_weight) = le_f32(i)?;
+    let (i, num_arcs) = le_i64(i)?;
+    let (i, arcs) = count(parse_fst_arc, num_arcs as usize)(i)?;
+    Ok((
+        i,
+        VectorFstState {
+            final_weight: parse_final_weight(final_weight),
+            arcs,
+        },
+    ))
+}
+
+fn parse_fst<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFst<W>> {
+    let (i, header) = parse_fst_header(i)?;
+    let (i, states) = count(parse_fst_state, header.num_states as usize)(i)?;
+    Ok((
+        i,
+        VectorFst {
+            start_state: parse_start_state(header.start),
+            states,
+        },
+    ))
 }
 
 #[inline]
@@ -137,8 +155,8 @@ impl<W: Semiring<Type = f32> + 'static> BinaryDeserializer for VectorFst<W> {
             format!("Can't open FST binary file : {:?}", path_bin_fst.as_ref())
         })?;
 
-        let (_, parsed_fst) = complete_parse_fst(&data)
-            .map_err(|_| format_err!("Error while parsing binary VectorFst"))?;
+        let (_, parsed_fst) =
+            parse_fst(&data).map_err(|_| format_err!("Error while parsing binary VectorFst"))?;
 
         Ok(parsed_fst)
     }

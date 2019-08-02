@@ -3,8 +3,6 @@ use std::path::Path;
 
 use failure::Fallible;
 
-use nom::types::CompleteStr;
-
 use crate::parsers::text_symt::nom_parser::parse_text_symt;
 use crate::{Label, Symbol};
 
@@ -15,8 +13,7 @@ pub(crate) struct ParsedTextSymt {
 
 impl ParsedTextSymt {
     pub(crate) fn from_string(symt_string: &str) -> Fallible<Self> {
-        let complete_symt_str = CompleteStr(symt_string);
-        let (_, parsed_symt) = parse_text_symt(complete_symt_str)
+        let (_, parsed_symt) = parse_text_symt(symt_string)
             .map_err(|_| format_err!("Error while parsing text symt"))?;
         Ok(parsed_symt)
     }

@@ -42,12 +42,10 @@ Add it to your `Cargo.toml`:
 rustfst = "*"
 ```
 
-Add `extern crate rustfst` to your crate root and you are good to go!
-
 ## Example
 
 ```rust
-extern crate rustfst;
+# extern crate rustfst;
 
 use rustfst::utils::transducer;
 use rustfst::semirings::{Semiring, IntegerWeight};
