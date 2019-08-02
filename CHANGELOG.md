@@ -78,7 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `final_weight` method of `Fst` trait now returns a `Fallible`. Fail only when the state doesn't exist.
 - `final_weight_mut` method of `Fst` trait now returns a `Fallible`. Fail only when the state doesn't exist.
 - `FinalStateIterator` now returns reference to final weights instead of copy.
-
+- Migrated to nom `5.0`.
 ### Removed
 - Crate `rustfst-tests-openfst` has been removed and moved to the `rustfst` as unit tests. 
 - Remove `state_map` and all `StateMappers`. Now use directly the functions `arc_sum` and `arc_unique`.
