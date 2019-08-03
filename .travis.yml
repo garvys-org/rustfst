@@ -8,7 +8,9 @@ rust:
 - stable
 env:
 - RUST_BACKTRACE=1
-script: ./.travis.sh
+script:
+  - ./.travis.sh
+  - cargo coveralls --verbose --all-features
 before_install:
   - sudo apt-get update
   - sudo apt-get install software-properties-common
@@ -17,6 +19,13 @@ before_install:
   - sudo apt-get install python3.6
   - wget https://github.com/sharkdp/hyperfine/releases/download/v1.6.0/hyperfine_1.6.0_amd64.deb
   - sudo dpkg -i hyperfine_1.6.0_amd64.deb
+
+before_script:
+  - export PATH=$HOME/.cargo/bin:$PATH
+  - cargo install cargo-update   || echo "cargo-update already installed"
+  - cargo install cargo-travis   || echo "cargo-travis already installed"
+  - cargo install-update -a
+  - mkdir -p target/kcov-master
 
 addons:
   apt:
