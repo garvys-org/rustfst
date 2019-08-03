@@ -52,6 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `divide_assign` to `WeaklyDivisibleSemiring` semiring to perform in-place division.
 - Added support for `ConstFst`. Also added a converter from `VectorFst` to `ConstFst` through the `From` trait.
 - Added `final_weight_unnchecked_mut` to `MutableFst` trait.
+- Added Code Coverage tests.
 
 ### Changed
 - Before test cases were generated with pynini (python wrapper around openfst). Now they are directly generated with OpenFST (c++). Allows to test operations that are not wrapped.
