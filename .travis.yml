@@ -6,6 +6,7 @@ cache:
     - openfst-1.7.2
 rust:
 - stable
+- nightly
 env:
 - RUST_BACKTRACE=1
 script:
