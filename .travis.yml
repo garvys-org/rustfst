@@ -3,7 +3,6 @@ sudo: required
 cache:
   - cargo
   - directories:
-    - cached
     - openfst-1.7.2
 rust:
 - stable
