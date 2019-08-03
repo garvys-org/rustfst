@@ -5,6 +5,7 @@
 [![Documentation](https://docs.rs/rustfst/badge.svg)](https://docs.rs/rustfst)
 [![License: MIT/Apache-2.0](https://img.shields.io/crates/l/rustfst.svg)](#license)
 [![Code Coverage]([coverage_badge])]([coverage_report])
+
 [coverage_badge]: https://codecov.io/gh/Garvys/rustfst/branch/master/graph/badge.svg
 [coverage_report]: https://codecov.io/gh/Garvys/rustfst/branch/master
 
