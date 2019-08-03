@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-if [ ! -d openfst-1.7.2 ]; then
+if [[ ! -d openfst-1.7.2 || ! -d openfst-1.7.2/include ]]; then
     wget http://www.openfst.org/twiki/pub/FST/FstDownload/openfst-1.7.2.tar.gz
     tar -zxvf openfst-1.7.2.tar.gz
 fi
