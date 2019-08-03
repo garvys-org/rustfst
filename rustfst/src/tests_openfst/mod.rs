@@ -8,6 +8,7 @@ use std::string::String;
 
 use failure::{bail, Fail, Fallible};
 use path_abs::PathAbs;
+use path_abs::PathInfo;
 use path_abs::PathMut;
 use serde_derive::{Deserialize, Serialize};
 
@@ -222,19 +223,15 @@ where
 }
 
 fn run_test_openfst(test_name: &str) -> Fallible<()> {
-    let mut path_abs = PathAbs::new(file!())?;
-    path_abs.append("..")?;
-    path_abs.pop_up()?;
-    path_abs.pop_up()?;
-    path_abs.pop_up()?;
-    path_abs.pop_up()?;
-    path_abs.append("rustfst-tests-data")?;
-    path_abs.append(test_name)?;
-    let mut absolute_path = path_abs.as_path().to_path_buf();
+    let mut path_repo = PathAbs::new(PathBuf::from(env!("CARGO_MANIFEST_DIR")).parent().unwrap())?;
+    path_repo.append("rustfst-tests-data")?;
+    path_repo.append(test_name)?;
+    let mut absolute_path = path_repo.as_path().to_path_buf();
     let absolute_path_folder = absolute_path.clone();
     absolute_path.push("metadata.json");
 
-    let string = read_to_string(absolute_path).unwrap();
+    let string = read_to_string(&absolute_path)
+        .map_err(|_| format_err!("Can't open {:?}", &absolute_path))?;
     let parsed_test_data: ParsedTestData = serde_json::from_str(&string).unwrap();
 
     match parsed_test_data.weight_type.as_str() {
