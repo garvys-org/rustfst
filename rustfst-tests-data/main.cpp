@@ -439,11 +439,11 @@ void compute_fst_push(const F& raw_fst, json& j) {
                             pflags |= fst::kPushRemoveCommonAffix;
                         }
 
-                        std::cerr << "push_weights = " << push_weights << std::endl;
-                        std::cerr << "push_labels = " << push_labels << std::endl;
-                        std::cerr << "remove_total_weight = " << remove_total_weight << std::endl;
-                        std::cerr << "remove_common_affix = " << remove_common_affix << std::endl;
-                        std::cerr << "reweight_to_final = " << reweight_to_final << std::endl;
+//                        std::cerr << "push_weights = " << push_weights << std::endl;
+//                        std::cerr << "push_labels = " << push_labels << std::endl;
+//                        std::cerr << "remove_total_weight = " << remove_total_weight << std::endl;
+//                        std::cerr << "remove_common_affix = " << remove_common_affix << std::endl;
+//                        std::cerr << "reweight_to_final = " << reweight_to_final << std::endl;
                         F fst_out;
                         // Fixes crash in OpenFST on empty input
                         if (raw_fst.NumStates() > 0) {
@@ -454,7 +454,7 @@ void compute_fst_push(const F& raw_fst, json& j) {
                             }
                         }
 
-                        std::cerr << "Done" << std::endl << std::endl;
+//                        std::cerr << "Done" << std::endl << std::endl;
 
                         json j2;
                         j2["push_weights"] = push_weights;
