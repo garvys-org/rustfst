@@ -5,6 +5,7 @@
 [![Documentation](https://docs.rs/rustfst/badge.svg)](https://docs.rs/rustfst)
 [![License: MIT/Apache-2.0](https://img.shields.io/crates/l/rustfst.svg)](#license)
 [![Code Coverage](https://codecov.io/gh/Garvys/rustfst/branch/master/graph/badge.svg)](https://codecov.io/gh/Garvys/rustfst/branch/master)
+[![Coverage Status](https://coveralls.io/repos/github/Garvys/rustfst/badge.svg?branch=master)](https://coveralls.io/github/Garvys/rustfst?branch=master)
 
 Rust implementation of Weighted Finite States Transducers.
 

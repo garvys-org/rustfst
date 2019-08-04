@@ -1,14 +1,15 @@
 language: rust
+dist: xenial
 sudo: required
 cache:
   - cargo
   - directories:
     - openfst-1.7.2
-rust:
-- stable
+rust: stable
 env:
 - RUST_BACKTRACE=1
 script: ./.travis.sh
+
 before_install:
   - sudo apt-get update
   - sudo apt-get install software-properties-common
@@ -28,18 +29,20 @@ addons:
       - gcc
       - binutils-dev
       - libiberty-dev
+      - libssl-dev
+
+before_cache: |
+  if [[ "$TRAVIS_RUST_VERSION" == stable ]]; then
+    bash <(curl https://raw.githubusercontent.com/xd009642/tarpaulin/master/travis-install.sh)
+  fi
+  rm -rf /home/travis/.cargo/registry
 
 after_success: |
-  wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz &&
-  tar xzf master.tar.gz &&
-  cd kcov-master &&
-  mkdir build &&
-  cd build &&
-  cmake .. &&
-  make &&
-  make install DESTDIR=../../kcov-build &&
-  cd ../.. &&
-  rm -rf kcov-master &&
-  for file in target/debug/rustfst-*; do [ -x "${file}" ] || continue; mkdir -p "target/cov/$(basename $file)"; ./kcov-build/usr/local/bin/kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done &&
-  bash <(curl -s https://codecov.io/bash) &&
-  echo "Uploaded code coverage"
+   if [[ "$TRAVIS_RUST_VERSION" == stable ]]; then
+    # Uncomment the following line for coveralls.io
+     cargo tarpaulin --ciserver travis-ci --coveralls $TRAVIS_JOB_ID
+
+    # Uncomment the following two lines create and upload a report for codecov.io
+     cargo tarpaulin --out Xml
+     bash <(curl -s https://codecov.io/bash)
+   fi
