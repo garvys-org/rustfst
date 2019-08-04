@@ -27,6 +27,7 @@ use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityTestData
 use crate::tests_openfst::algorithms::gallic_encode_decode::test_gallic_encode_decode;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicOperationResult;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicTestData;
+use crate::tests_openfst::io::const_fst_text_serialization::test_const_fst_text_serialization;
 
 use self::algorithms::{
     arc_map::{
@@ -329,6 +330,8 @@ where
     test_const_fst_convert_convert(&test_data)?;
 
     test_vector_fst_text_serialization(&test_data)?;
+
+    test_const_fst_text_serialization(&test_data)?;
 
     Ok(())
 }

@@ -7,8 +7,8 @@ use crate::semirings::Semiring;
 use crate::tests_openfst::TestData;
 
 pub fn test_vector_fst_text_serialization<W>(test_data: &TestData<VectorFst<W>>) -> Fallible<()>
-    where
-        W: Semiring<Type = f32>,
+where
+    W: Semiring<Type = f32>,
 {
     let dir = tempdir()?;
 

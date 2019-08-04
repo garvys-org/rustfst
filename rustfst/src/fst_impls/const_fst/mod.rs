@@ -7,3 +7,4 @@ mod expanded_fst;
 mod fst;
 mod misc;
 mod state_iterator;
+mod text_parser;

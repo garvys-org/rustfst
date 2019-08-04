@@ -53,16 +53,16 @@ where
     W::ReverseWeight: 'static,
 {
     for push_test_data in &test_data.push {
-        println!(
-            "Push : {:?}",
-            vec![
-                push_test_data.push_weights,
-                push_test_data.push_labels,
-                push_test_data.remove_total_weight,
-                push_test_data.remove_common_affix,
-                push_test_data.reweight_to_final
-            ]
-        );
+        //        println!(
+        //            "Push : {:?}",
+        //            vec![
+        //                push_test_data.push_weights,
+        //                push_test_data.push_labels,
+        //                push_test_data.remove_total_weight,
+        //                push_test_data.remove_common_affix,
+        //                push_test_data.reweight_to_final
+        //            ]
+        //        );
         let mut push_type = PushType::empty();
         if push_test_data.push_weights {
             push_type.insert(PushType::PUSH_WEIGHTS);
