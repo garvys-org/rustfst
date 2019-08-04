@@ -56,6 +56,7 @@ use self::algorithms::{
 use self::fst_impls::const_fst::test_const_fst_convert_convert;
 use self::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
 use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
+use self::io::vector_fst_text_serialization::test_vector_fst_text_serialization;
 
 #[macro_use]
 mod macros;
@@ -326,6 +327,8 @@ where
     test_push(&test_data)?;
 
     test_const_fst_convert_convert(&test_data)?;
+
+    test_vector_fst_text_serialization(&test_data)?;
 
     Ok(())
 }

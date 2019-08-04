@@ -74,7 +74,7 @@ where
     // TODO: Remove this collect
     let states: Vec<_> = ifst.states_iter().collect();
     for state in states {
-        for arc in ifst.arcs_iter_mut(state).unwrap() {
+        for arc in unsafe {ifst.arcs_iter_unchecked_mut(state)} {
             mapper.arc_map(arc)?;
         }
 
@@ -125,7 +125,7 @@ where
                             || final_arc.olabel != EPS_LABEL
                             || !final_arc.weight.is_zero()
                         {
-                            ifst.add_arc(
+                            unsafe {ifst.add_arc_unchecked(
                                 state,
                                 Arc::new(
                                     final_arc.ilabel,
@@ -133,8 +133,7 @@ where
                                     final_arc.weight,
                                     superfinal.unwrap(),
                                 ),
-                            )
-                            .unwrap();
+                            )};
                         }
                         ifst.delete_final_weight(state).unwrap();
                     }
