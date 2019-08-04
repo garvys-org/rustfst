@@ -1,4 +1,5 @@
 pub use self::data_structure::ConstFst;
+pub(crate) use self::data_structure::ConstState;
 
 mod arc_iterator;
 mod converters;

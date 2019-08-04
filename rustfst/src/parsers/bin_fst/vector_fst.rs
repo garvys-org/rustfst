@@ -14,33 +14,11 @@ use nom::IResult;
 use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ArcIterator, BinaryDeserializer, BinarySerializer, CoreFst, ExpandedFst};
+use crate::parsers::bin_fst::fst_header::{parse_fst_header, FST_MAGIC_NUMBER};
+use crate::parsers::bin_fst::utils::{parse_final_weight, parse_fst_arc, parse_start_state};
 use crate::semirings::Semiring;
-use crate::Arc;
 use crate::StateId;
-
-// Identifies stream data as an FST (and its endianity).
-static FST_MAGIC_NUMBER: i32 = 2_125_659_606;
-static MIN_FILE_VERSION: i32 = 2;
-static NO_STATE_ID: i32 = -1;
-
-#[derive(Debug)]
-struct FstHeader {
-    magic_number: i32,
-    fst_type: OpenFstString,
-    arc_type: OpenFstString,
-    version: i32,
-    flags: i32,
-    properties: u64,
-    start: i64,
-    num_states: i64,
-    num_arcs: i64,
-}
-
-#[derive(Debug)]
-struct OpenFstString {
-    n: i32,
-    s: String,
-}
+use crate::{Arc, NO_STATE_ID};
 
 #[derive(Debug, PartialEq)]
 struct Transition {
@@ -48,60 +26,6 @@ struct Transition {
     olabel: i32,
     weight: f32,
     nextstate: i32,
-}
-
-fn parse_kaldi_string(i: &[u8]) -> IResult<&[u8], OpenFstString> {
-    let (i, n) = le_i32(i)?;
-    let (i, s) = take(n as usize)(i)?;
-    Ok((
-        i,
-        OpenFstString {
-            n,
-            s: String::from_utf8(s.to_vec()).unwrap(),
-        },
-    ))
-}
-
-fn parse_fst_header(i: &[u8]) -> IResult<&[u8], FstHeader> {
-    let (i, magic_number) = verify(le_i32, |v: &i32| *v == FST_MAGIC_NUMBER)(i)?;
-    let (i, fst_type) = parse_kaldi_string(i)?;
-    let (i, arc_type) = parse_kaldi_string(i)?;
-    let (i, version) = verify(le_i32, |v: &i32| *v >= MIN_FILE_VERSION)(i)?;
-    let (i, flags) = le_i32(i)?;
-    let (i, properties) = le_u64(i)?;
-    let (i, start) = le_i64(i)?;
-    let (i, num_states) = le_i64(i)?;
-    let (i, num_arcs) = le_i64(i)?;
-    Ok((
-        i,
-        FstHeader {
-            magic_number,
-            fst_type,
-            arc_type,
-            version,
-            flags,
-            properties,
-            start,
-            num_states,
-            num_arcs,
-        },
-    ))
-}
-
-fn parse_fst_arc<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], Arc<W>> {
-    let (i, ilabel) = le_i32(i)?;
-    let (i, olabel) = le_i32(i)?;
-    let (i, weight) = le_f32(i)?;
-    let (i, nextstate) = le_i32(i)?;
-    Ok((
-        i,
-        Arc {
-            ilabel: ilabel as usize,
-            olabel: olabel as usize,
-            weight: W::new(weight),
-            nextstate: nextstate as usize,
-        },
-    ))
 }
 
 fn parse_fst_state<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFstState<W>> {
@@ -129,30 +53,13 @@ fn parse_fst<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFst<W>> 
     ))
 }
 
-#[inline]
-fn parse_start_state(s: i64) -> Option<StateId> {
-    if s == i64::from(NO_STATE_ID) {
-        None
-    } else {
-        Some(s as StateId)
-    }
-}
-
-#[inline]
-fn parse_final_weight<W: Semiring<Type = f32>>(w: f32) -> Option<W> {
-    // TODO: Avoid this re-allocation
-    let zero_weight = W::zero().take_value();
-    if w != zero_weight {
-        Some(W::new(w))
-    } else {
-        None
-    }
-}
-
 impl<W: Semiring<Type = f32> + 'static> BinaryDeserializer for VectorFst<W> {
     fn read<P: AsRef<Path>>(path_bin_fst: P) -> Fallible<Self> {
         let data = read(path_bin_fst.as_ref()).with_context(|_| {
-            format!("Can't open FST binary file : {:?}", path_bin_fst.as_ref())
+            format!(
+                "Can't open VectorFst binary file : {:?}",
+                path_bin_fst.as_ref()
+            )
         })?;
 
         let (_, parsed_fst) =

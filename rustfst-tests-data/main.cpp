@@ -484,6 +484,10 @@ void compute_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
     data["raw_vector_bin_path"] = "raw_vector.fst";
     raw_fst.Write(fst_name + "/raw_vector.fst");
 
+    data["raw_const_bin_path"] = "raw_const.fst";
+    fst::ConstFst<A> raw_const_fst(raw_fst);
+    raw_const_fst.Write(fst_name + "/raw_const.fst");
+
     std::cout << "Invert" << std::endl;
     compute_fst_invert(raw_fst, data);
 
