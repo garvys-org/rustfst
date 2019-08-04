@@ -1,11 +1,13 @@
 language: rust
-dist: xenial
 sudo: required
 cache:
   - cargo
   - directories:
     - openfst-1.7.2
-rust: stable
+rust:
+  - stable
+  - beta
+  - nightly
 env:
 - RUST_BACKTRACE=1
 script: ./.travis.sh
