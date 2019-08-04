@@ -5,7 +5,7 @@ cache:
   - directories:
     - openfst-1.7.2
 rust:
-- stable
+#- stable
 - nightly
 env:
 - RUST_BACKTRACE=1
