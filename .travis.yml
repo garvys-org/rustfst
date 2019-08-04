@@ -11,7 +11,7 @@ env:
 - RUST_BACKTRACE=1
 script:
   - ./.travis.sh
-  - cargo coveralls --verbose --all-features
+
 before_install:
   - sudo apt-get update
   - sudo apt-get install software-properties-common
@@ -40,7 +40,9 @@ addons:
       - binutils-dev
       - libiberty-dev
 
-after_success: |
+after_success:
+  - cargo coveralls --verbose --all-features
+  - |
   wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz &&
   tar xzf master.tar.gz &&
   cd kcov-master &&
