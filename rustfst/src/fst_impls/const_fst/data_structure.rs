@@ -16,4 +16,8 @@ pub(crate) struct ConstState<W: Semiring> {
     pub(crate) pos: usize,
     /// Number of arcs (per state).
     pub(crate) narcs: usize,
+    /// Number of input epsilons
+    pub(crate) niepsilons: usize,
+    /// Number of output epsilons
+    pub(crate) noepsilons: usize,
 }

@@ -1,7 +1,8 @@
 use crate::fst_impls::const_fst::data_structure::ConstState;
 use crate::fst_impls::{ConstFst, VectorFst};
-use crate::fst_traits::ExpandedFst;
+use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
+use unsafe_unwrap::UnsafeUnwrap;
 
 impl<W: Semiring + 'static> From<VectorFst<W>> for ConstFst<W> {
     fn from(ifst: VectorFst<W>) -> Self {
@@ -9,11 +10,13 @@ impl<W: Semiring + 'static> From<VectorFst<W>> for ConstFst<W> {
         // TODO: Add a num_arcs in VectorFst to avoid iterating through all the states..
         let mut const_arcs = Vec::with_capacity(ifst.states.iter().map(|s| s.arcs.len()).sum());
         let mut pos = 0;
-        for s in ifst.states {
+        for (idx, s) in ifst.states.into_iter().enumerate() {
             const_states.push(ConstState {
                 final_weight: s.final_weight,
                 pos,
                 narcs: s.arcs.len(),
+                niepsilons: s.niepsilons,
+                noepsilons: s.noepsilons,
             });
 
             pos += s.arcs.len();

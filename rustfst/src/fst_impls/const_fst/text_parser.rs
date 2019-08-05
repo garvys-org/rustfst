@@ -1,12 +1,13 @@
 use failure::Fallible;
 use itertools::Itertools;
 
+use crate::algorithms::arc_filters::{ArcFilter, InputEpsilonArcFilter, OutputEpsilonArcFilter};
 use crate::fst_impls::const_fst::data_structure::ConstState;
 use crate::fst_impls::ConstFst;
 use crate::fst_traits::TextParser;
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::Semiring;
-use crate::Arc;
+use crate::{Arc, EPS_LABEL};
 
 impl<W: 'static + Semiring<Type = f32>> TextParser for ConstFst<W> {
     fn from_parsed_fst_text(mut parsed_fst_text: ParsedTextFst) -> Fallible<Self> {
@@ -30,32 +31,46 @@ impl<W: 'static + Semiring<Type = f32>> TextParser for ConstFst<W> {
                 final_weight: None,
                 pos,
                 narcs: 0,
+                niepsilons: 0,
+                noepsilons: 0,
             });
+            let mut niepsilons = 0;
+            let mut noepsilons = 0;
             const_arcs.extend(arcs_iterator.map(|v| {
                 debug_assert_eq!(_state, v.state);
-                Arc {
+                let arc = Arc {
                     ilabel: v.ilabel,
                     olabel: v.olabel,
                     weight: v.weight.map(W::new).unwrap_or_else(W::one),
                     nextstate: v.nextstate,
+                };
+                if arc.ilabel == EPS_LABEL {
+                    niepsilons += 1;
                 }
+                if arc.olabel == EPS_LABEL {
+                    noepsilons += 1;
+                }
+                arc
             }));
             let num_arcs_this_state = const_arcs.len() - pos;
             const_states.push(ConstState::<W> {
                 final_weight: None,
                 pos,
                 narcs: num_arcs_this_state,
+                niepsilons,
+                noepsilons,
             })
         }
         const_states.resize_with(num_states, || ConstState {
             final_weight: None,
             pos: const_arcs.len(),
             narcs: 0,
+            niepsilons: 0,
+            noepsilons: 0,
         });
         debug_assert_eq!(num_states, const_states.len());
         for final_state in parsed_fst_text.final_states.into_iter() {
             let weight = final_state.weight.map(W::new).unwrap_or_else(W::one);
-            println!("Lol {:?} {:?}", final_state.state, &final_state.weight);
             unsafe {
                 const_states
                     .get_unchecked_mut(final_state.state)
