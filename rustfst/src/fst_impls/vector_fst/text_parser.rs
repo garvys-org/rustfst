@@ -5,7 +5,7 @@ use crate::fst_impls::VectorFst;
 use crate::fst_traits::{MutableFst, TextParser};
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::Semiring;
-use crate::Arc;
+use crate::{Arc, EPS_LABEL};
 
 impl<W: 'static + Semiring<Type = f32>> TextParser for VectorFst<W> {
     fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst) -> Fallible<Self> {
@@ -33,6 +33,23 @@ impl<W: 'static + Semiring<Type = f32>> TextParser for VectorFst<W> {
         for final_state in parsed_fst_text.final_states.into_iter() {
             let weight = final_state.weight.map(W::new).unwrap_or_else(W::one);
             fst.set_final(final_state.state, weight)?;
+        }
+
+        if cfg!(debug_assertions) {
+            for state in &fst.states {
+                let niepsilons_ref = state
+                    .arcs
+                    .iter()
+                    .filter(|arc| arc.ilabel == EPS_LABEL)
+                    .count();
+                let noepsilons_ref = state
+                    .arcs
+                    .iter()
+                    .filter(|arc| arc.olabel == EPS_LABEL)
+                    .count();
+                debug_assert_eq!(niepsilons_ref, state.niepsilons);
+                debug_assert_eq!(noepsilons_ref, state.noepsilons);
+            }
         }
 
         Ok(fst)

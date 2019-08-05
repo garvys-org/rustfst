@@ -7,7 +7,7 @@ use crate::fst_impls::vector_fst::{VectorFst, VectorFstState};
 use crate::fst_traits::MutableFst;
 use crate::fst_traits::{CoreFst, MutableArcIterator};
 use crate::semirings::Semiring;
-use crate::{Arc, StateId};
+use crate::{Arc, StateId, EPS_LABEL};
 
 #[inline]
 fn equal_arc<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> bool {
@@ -131,16 +131,29 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
     }
 
     fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Fallible<()> {
-        self.states
+        let s = self
+            .states
             .get_mut(source)
-            .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
-            .arcs
-            .push(arc);
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?;
+        if arc.ilabel == EPS_LABEL {
+            s.niepsilons += 1;
+        }
+        if arc.olabel == EPS_LABEL {
+            s.noepsilons += 1;
+        }
+        s.arcs.push(arc);
         Ok(())
     }
 
     unsafe fn add_arc_unchecked(&mut self, source: usize, arc: Arc<Self::W>) {
-        self.states.get_unchecked_mut(source).arcs.push(arc)
+        let s = self.states.get_unchecked_mut(source);
+        if arc.ilabel == EPS_LABEL {
+            s.niepsilons += 1;
+        }
+        if arc.olabel == EPS_LABEL {
+            s.noepsilons += 1;
+        }
+        s.arcs.push(arc)
     }
 
     unsafe fn set_arcs_unchecked(&mut self, source: usize, arcs: Vec<Arc<Self::W>>) {
