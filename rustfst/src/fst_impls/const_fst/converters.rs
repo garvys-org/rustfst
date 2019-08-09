@@ -7,16 +7,17 @@ use unsafe_unwrap::UnsafeUnwrap;
 impl<W: Semiring + 'static> From<VectorFst<W>> for ConstFst<W> {
     fn from(ifst: VectorFst<W>) -> Self {
         let mut const_states = Vec::with_capacity(ifst.num_states());
-        // TODO: Add a num_arcs in VectorFst to avoid iterating through all the states..
         let mut const_arcs = Vec::with_capacity(ifst.states.iter().map(|s| s.arcs.len()).sum());
         let mut pos = 0;
         for (idx, s) in ifst.states.into_iter().enumerate() {
+            let niepsilons = s.num_input_epsilons();
+            let noepsilons = s.num_output_epsilons();
             const_states.push(ConstState {
                 final_weight: s.final_weight,
                 pos,
                 narcs: s.arcs.len(),
-                niepsilons: s.niepsilons,
-                noepsilons: s.noepsilons,
+                niepsilons,
+                noepsilons,
             });
 
             pos += s.arcs.len();

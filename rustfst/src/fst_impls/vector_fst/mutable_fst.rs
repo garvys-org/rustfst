@@ -131,29 +131,15 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
     }
 
     fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Fallible<()> {
-        let s = self
-            .states
+        self.states
             .get_mut(source)
-            .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?;
-        if arc.ilabel == EPS_LABEL {
-            s.niepsilons += 1;
-        }
-        if arc.olabel == EPS_LABEL {
-            s.noepsilons += 1;
-        }
-        s.arcs.push(arc);
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?.arcs
+            .push(arc);
         Ok(())
     }
 
     unsafe fn add_arc_unchecked(&mut self, source: usize, arc: Arc<Self::W>) {
-        let s = self.states.get_unchecked_mut(source);
-        if arc.ilabel == EPS_LABEL {
-            s.niepsilons += 1;
-        }
-        if arc.olabel == EPS_LABEL {
-            s.noepsilons += 1;
-        }
-        s.arcs.push(arc)
+        self.states.get_unchecked_mut(source).arcs.push(arc)
     }
 
     unsafe fn set_arcs_unchecked(&mut self, source: usize, arcs: Vec<Arc<Self::W>>) {

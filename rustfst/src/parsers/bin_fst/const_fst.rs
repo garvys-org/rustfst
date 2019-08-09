@@ -7,6 +7,7 @@ use nom::combinator::verify;
 use nom::multi::count;
 use nom::number::complete::{le_f32, le_i32, le_i64, le_u64};
 use nom::IResult;
+use nom::dbg_dmp;
 
 use crate::fst_impls::const_fst::ConstState;
 use crate::fst_impls::ConstFst;
@@ -39,9 +40,8 @@ fn parse_const_state<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], ConstS
         },
     ))
 }
-
 fn parse_const_fst<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], ConstFst<W>> {
-    let (i, hdr) = FstHeader::parse(i)?;
+    let (i, hdr) = dbg_dmp(FstHeader::parse, "fst_header")(i)?;
     let (i, const_states) = count(parse_const_state, hdr.num_states as usize)(i)?;
     let (i, const_arcs) = count(parse_fst_arc, hdr.num_arcs as usize)(i)?;
 
@@ -64,8 +64,8 @@ impl<W: Semiring<Type = f32> + 'static> BinaryDeserializer for ConstFst<W> {
             )
         })?;
 
-        let (data, parsed_fst) = parse_const_fst(&data)
-            .map_err(|_| format_err!("Error while parsing binary ConstFst"))?;
+        let (_, parsed_fst) = parse_const_fst(&data)
+            .map_err(|e| format_err!("Error while parsing binary ConstFst"))?;
 
         Ok(parsed_fst)
     }
@@ -91,28 +91,24 @@ impl<W: 'static + Semiring<Type = f32>> BinarySerializer for ConstFst<W> {
         };
         hdr.write(&mut file)?;
 
-        unimplemented!()
+        let zero = W::zero();
+        for const_state in &self.states {
+            let f_weight = const_state.final_weight.as_ref().unwrap_or_else(|| &zero).value();
+            write_bin_f32(&mut file, *f_weight)?;
+            write_bin_i32(&mut file, const_state.pos as i32)?;
+            write_bin_i32(&mut file, const_state.narcs as i32)?;
+            write_bin_i32(&mut file, const_state.niepsilons as i32)?;
+            write_bin_i32(&mut file, const_state.noepsilons as i32)?;
+        }
 
-        //        let zero = W::zero();
-        //        // FstBody
-        //        for state in 0..self.num_states() {
-        //            let f_weight = unsafe {
-        //                self.final_weight_unchecked(state)
-        //                    .unwrap_or_else(|| &zero)
-        //                    .value()
-        //            };
-        //            write_bin_f32(&mut file, *f_weight)?;
-        //            write_bin_i64(&mut file, unsafe { self.num_arcs_unchecked(state) } as i64)?;
-        //
-        //            for arc in unsafe { self.arcs_iter_unchecked(state) } {
-        //                write_bin_i32(&mut file, arc.ilabel as i32)?;
-        //                write_bin_i32(&mut file, arc.olabel as i32)?;
-        //                let weight = arc.weight.value();
-        //                write_bin_f32(&mut file, *weight)?;
-        //                write_bin_i32(&mut file, arc.nextstate as i32)?;
-        //            }
-        //        }
+        for arc in &self.arcs {
+            write_bin_i32(&mut file, arc.ilabel as i32)?;
+            write_bin_i32(&mut file, arc.olabel as i32)?;
+            let weight = arc.weight.value();
+            write_bin_f32(&mut file, *weight)?;
+            write_bin_i32(&mut file, arc.nextstate as i32)?;
+        }
 
-        //        Ok(())
+        Ok(())
     }
 }

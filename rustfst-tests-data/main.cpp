@@ -484,9 +484,19 @@ void compute_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
     data["raw_vector_bin_path"] = "raw_vector.fst";
     raw_fst.Write(fst_name + "/raw_vector.fst");
 
-    data["raw_const_bin_path"] = "raw_const.fst";
+    fst::FstWriteOptions write_opts("<unspecified>");
     fst::ConstFst<A> raw_const_fst(raw_fst);
-    raw_const_fst.Write(fst_name + "/raw_const.fst");
+    // Not aligned
+    write_opts.align = false;
+    data["raw_const_bin_path"] = "raw_const.fst";
+    std::ofstream strm((fst_name + "/raw_const.fst").c_str(), std::ios_base::out | std::ios_base::binary);
+    raw_const_fst.Write(strm, write_opts);
+
+    // Aligned
+    write_opts.align = true;
+    data["raw_const_aligned_bin_path"] = "raw_const_aligned.fst";
+    std::ofstream strm_aligned((fst_name + "/raw_const_aligned.fst").c_str(), std::ios_base::out | std::ios_base::binary);
+    raw_const_fst.Write(strm_aligned, write_opts);
 
     std::cout << "Invert" << std::endl;
     compute_fst_invert(raw_fst, data);

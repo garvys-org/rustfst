@@ -22,43 +22,31 @@ pub(crate) fn text_fst_001() -> TextParserTest {
     let s0 = VectorFstState {
         final_weight: None,
         arcs: vec![Arc::new(32, 33, ProbabilityWeight::new(0.5), 1)],
-        niepsilons: 0,
-        noepsilons: 0,
     };
 
     let s1 = VectorFstState {
         final_weight: None,
         arcs: vec![Arc::new(44, 45, ProbabilityWeight::new(0.13), 2)],
-        niepsilons: 0,
-        noepsilons: 0,
     };
 
     let s2 = VectorFstState {
         final_weight: None,
         arcs: vec![Arc::new(17, 18, ProbabilityWeight::new(0.25), 3)],
-        niepsilons: 0,
-        noepsilons: 0,
     };
 
     let s3 = VectorFstState {
         final_weight: None,
         arcs: vec![Arc::new(45, 47, ProbabilityWeight::new(0.41), 4)],
-        niepsilons: 0,
-        noepsilons: 0,
     };
 
     let s4 = VectorFstState {
         final_weight: None,
         arcs: vec![Arc::new(5, 6, ProbabilityWeight::new(0.31), 5)],
-        niepsilons: 0,
-        noepsilons: 0,
     };
 
     let s5 = VectorFstState {
         final_weight: Some(ProbabilityWeight::new(0.67)),
         arcs: vec![],
-        niepsilons: 0,
-        noepsilons: 0,
     };
 
     let vector_fst = VectorFst {

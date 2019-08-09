@@ -31,15 +31,11 @@ fn parse_fst_state<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFs
     let (i, final_weight) = le_f32(i)?;
     let (i, num_arcs) = le_i64(i)?;
     let (i, arcs) = count(parse_fst_arc, num_arcs as usize)(i)?;
-    let niepsilons = arcs.iter().filter(|arc| arc.ilabel == EPS_LABEL).count();
-    let noepsilons = arcs.iter().filter(|arc| arc.olabel == EPS_LABEL).count();
     Ok((
         i,
         VectorFstState {
             final_weight: parse_final_weight(final_weight),
             arcs,
-            niepsilons,
-            noepsilons,
         },
     ))
 }
