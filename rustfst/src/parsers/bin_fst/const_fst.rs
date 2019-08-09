@@ -4,10 +4,10 @@ use std::path::Path;
 use failure::{Fallible, ResultExt};
 use nom::bytes::complete::take;
 use nom::combinator::verify;
+use nom::dbg_dmp;
 use nom::multi::count;
 use nom::number::complete::{le_f32, le_i32, le_i64, le_u64};
 use nom::IResult;
-use nom::dbg_dmp;
 
 use crate::fst_impls::const_fst::ConstState;
 use crate::fst_impls::ConstFst;
@@ -93,7 +93,11 @@ impl<W: 'static + Semiring<Type = f32>> BinarySerializer for ConstFst<W> {
 
         let zero = W::zero();
         for const_state in &self.states {
-            let f_weight = const_state.final_weight.as_ref().unwrap_or_else(|| &zero).value();
+            let f_weight = const_state
+                .final_weight
+                .as_ref()
+                .unwrap_or_else(|| &zero)
+                .value();
             write_bin_f32(&mut file, *f_weight)?;
             write_bin_i32(&mut file, const_state.pos as i32)?;
             write_bin_i32(&mut file, const_state.narcs as i32)?;

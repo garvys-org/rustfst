@@ -12,9 +12,9 @@ use path_abs::PathInfo;
 use path_abs::PathMut;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::fst_impls::{VectorFst, ConstFst};
+use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{TextParser, BinaryDeserializer, ExpandedFst};
+use crate::fst_traits::{BinaryDeserializer, ExpandedFst, TextParser};
 use crate::semirings::{
     LogWeight, Semiring, StarSemiring, TropicalWeight, WeaklyDivisibleSemiring, WeightQuantize,
 };
@@ -27,7 +27,9 @@ use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityTestData
 use crate::tests_openfst::algorithms::gallic_encode_decode::test_gallic_encode_decode;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicOperationResult;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicTestData;
-use crate::tests_openfst::io::const_fst_bin_deserializer::{test_const_fst_bin_deserializer, test_const_fst_aligned_bin_deserializer};
+use crate::tests_openfst::io::const_fst_bin_deserializer::{
+    test_const_fst_aligned_bin_deserializer, test_const_fst_bin_deserializer,
+};
 use crate::tests_openfst::io::const_fst_text_serialization::test_const_fst_text_serialization;
 
 use self::algorithms::{
@@ -211,7 +213,9 @@ where
             raw_const_bin_path: absolute_path_folder
                 .join(&data.raw_const_bin_path)
                 .to_path_buf(),
-            raw_const_aligned_bin_path: absolute_path_folder.join(&data.raw_const_aligned_bin_path).to_path_buf(),
+            raw_const_aligned_bin_path: absolute_path_folder
+                .join(&data.raw_const_aligned_bin_path)
+                .to_path_buf(),
             shortest_distance: data.shortest_distance.iter().map(|v| v.parse()).collect(),
             shortest_path: data.shortest_path.iter().map(|v| v.parse()).collect(),
             gallic_encode_decode: data
@@ -269,9 +273,9 @@ where
     <W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize + StarSemiring,
     W: Into<<W as Semiring>::ReverseWeight> + From<<W as Semiring>::ReverseWeight>,
 {
-//    let poeut = ConstFst::<W>::read
-//        ("/var/folders/6n/ll21s7jx0278mbn8132gw0780000gn/T/tmpUgJvzF/model/l.snips")?;
-//    println!("POIUET {:?}", poeut.num_states());
+    //    let poeut = ConstFst::<W>::read
+    //        ("/var/folders/6n/ll21s7jx0278mbn8132gw0780000gn/T/tmpUgJvzF/model/l.snips")?;
+    //    println!("POIUET {:?}", poeut.num_states());
 
     test_rmepsilon(&test_data)?;
 

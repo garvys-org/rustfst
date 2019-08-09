@@ -133,7 +133,8 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
     fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Fallible<()> {
         self.states
             .get_mut(source)
-            .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?.arcs
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
+            .arcs
             .push(arc);
         Ok(())
     }

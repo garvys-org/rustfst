@@ -7,12 +7,12 @@ use crate::semirings::Semiring;
 use crate::tests_openfst::TestData;
 
 pub fn test_const_fst_bin_serializer<W>(test_data: &TestData<VectorFst<W>>) -> Fallible<()>
-    where
-        W: Semiring<Type = f32>,
+where
+    W: Semiring<Type = f32>,
 {
     let dir = tempdir()?;
 
-    let raw_const : ConstFst<_> = test_data.raw.clone().into();
+    let raw_const: ConstFst<_> = test_data.raw.clone().into();
 
     let path_fst_serialized = dir.path().join("raw_const.fst");
     raw_const.write(&path_fst_serialized)?;
