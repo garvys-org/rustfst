@@ -2,7 +2,7 @@ use failure::Fallible;
 use tempfile::tempdir;
 
 use crate::fst_impls::{ConstFst, VectorFst};
-use crate::fst_traits::{BinaryDeserializer, BinarySerializer, ExpandedFst};
+use crate::fst_traits::{BinaryDeserializer, BinarySerializer};
 use crate::semirings::Semiring;
 use crate::tests_openfst::TestData;
 

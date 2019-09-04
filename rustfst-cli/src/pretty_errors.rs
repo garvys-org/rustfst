@@ -10,7 +10,7 @@ impl std::fmt::Debug for ExitFailure {
 
         writeln!(f, "{}", &fail)?;
 
-        let mut x: &Fail = fail;
+        let mut x: &dyn Fail = fail;
         while let Some(cause) = x.cause() {
             writeln!(f, " -> caused by: {}", &cause)?;
             x = cause;

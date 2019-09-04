@@ -12,9 +12,9 @@ use path_abs::PathInfo;
 use path_abs::PathMut;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::fst_impls::{ConstFst, VectorFst};
+use crate::fst_impls::{VectorFst};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{BinaryDeserializer, ExpandedFst, TextParser};
+use crate::fst_traits::{TextParser};
 use crate::semirings::{
     LogWeight, Semiring, StarSemiring, TropicalWeight, WeaklyDivisibleSemiring, WeightQuantize,
 };
@@ -366,7 +366,7 @@ impl std::fmt::Debug for ExitFailure {
 
         writeln!(f, "{}", &fail)?;
 
-        let mut x: &Fail = fail;
+        let mut x: &dyn Fail = fail;
         while let Some(cause) = x.cause() {
             writeln!(f, " -> caused by: {}", &cause)?;
             x = cause;
