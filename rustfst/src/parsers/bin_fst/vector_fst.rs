@@ -17,7 +17,6 @@ use crate::parsers::bin_fst::utils_parsing::{
 };
 use crate::parsers::bin_fst::utils_serialization::{write_bin_f32, write_bin_i32, write_bin_i64};
 use crate::semirings::Semiring;
-use crate::EPS_LABEL;
 
 static VECTOR_MIN_FILE_VERSION: i32 = 2;
 

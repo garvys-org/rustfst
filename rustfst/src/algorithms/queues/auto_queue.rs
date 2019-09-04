@@ -24,7 +24,7 @@ impl AutoQueue {
     {
         let props = fst.properties()?;
 
-        let mut queue: Box<Queue>;
+        let queue: Box<Queue>;
 
         if props.contains(FstProperties::TOP_SORTED) || fst.start().is_none() {
             queue = Box::new(StateOrderQueue::default());

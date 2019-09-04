@@ -1,24 +1,21 @@
-use std::dbg;
-use std::fs::{read, File};
+use std::fs::{File, read};
 use std::io::BufWriter;
 use std::path::Path;
 
 use failure::{Fallible, ResultExt};
 use nom::bytes::complete::take;
-use nom::combinator::verify;
-use nom::dbg_dmp;
-use nom::multi::count;
-use nom::number::complete::{le_f32, le_i32, le_i64, le_u64};
 use nom::IResult;
+use nom::multi::count;
+use nom::number::complete::{le_f32, le_i32};
 
 use crate::fst_impls::const_fst::ConstState;
 use crate::fst_impls::ConstFst;
-use crate::fst_traits::{ArcIterator, BinaryDeserializer, BinarySerializer, CoreFst, ExpandedFst};
-use crate::parsers::bin_fst::fst_header::{FstHeader, OpenFstString, FST_MAGIC_NUMBER};
+use crate::fst_traits::{BinaryDeserializer, BinarySerializer, ExpandedFst};
+use crate::parsers::bin_fst::fst_header::{FST_MAGIC_NUMBER, FstHeader, OpenFstString};
 use crate::parsers::bin_fst::utils_parsing::{
     parse_final_weight, parse_fst_arc, parse_start_state,
 };
-use crate::parsers::bin_fst::utils_serialization::{write_bin_f32, write_bin_i32, write_bin_i64};
+use crate::parsers::bin_fst::utils_serialization::{write_bin_f32, write_bin_i32};
 use crate::semirings::Semiring;
 
 static CONST_MIN_FILE_VERSION: i32 = 1;
@@ -89,7 +86,7 @@ impl<W: Semiring<Type = f32> + 'static> BinaryDeserializer for ConstFst<W> {
         })?;
 
         let (_, parsed_fst) = parse_const_fst(&data)
-            .map_err(|e| format_err!("Error while parsing binary ConstFst"))?;
+            .map_err(|_| format_err!("Error while parsing binary ConstFst"))?;
 
         Ok(parsed_fst)
     }

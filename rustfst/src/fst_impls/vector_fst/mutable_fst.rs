@@ -7,7 +7,7 @@ use crate::fst_impls::vector_fst::{VectorFst, VectorFstState};
 use crate::fst_traits::MutableFst;
 use crate::fst_traits::{CoreFst, MutableArcIterator};
 use crate::semirings::Semiring;
-use crate::{Arc, StateId, EPS_LABEL};
+use crate::{Arc, StateId};
 
 #[inline]
 fn equal_arc<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> bool {

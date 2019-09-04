@@ -1,4 +1,4 @@
-use nom::number::complete::{le_f32, le_i32, le_i64, le_u64};
+use nom::number::complete::{le_f32, le_i32};
 use nom::IResult;
 
 use crate::semirings::Semiring;

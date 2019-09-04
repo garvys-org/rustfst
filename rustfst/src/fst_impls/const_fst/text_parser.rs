@@ -1,7 +1,6 @@
 use failure::Fallible;
 use itertools::Itertools;
 
-use crate::algorithms::arc_filters::{ArcFilter, InputEpsilonArcFilter, OutputEpsilonArcFilter};
 use crate::fst_impls::const_fst::data_structure::ConstState;
 use crate::fst_impls::ConstFst;
 use crate::fst_traits::TextParser;
