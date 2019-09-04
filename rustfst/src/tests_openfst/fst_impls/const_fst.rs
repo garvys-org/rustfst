@@ -3,9 +3,9 @@ use failure::Fallible;
 use crate::algorithms::fst_convert;
 use crate::fst_impls::{ConstFst, VectorFst};
 use crate::semirings::{Semiring, WeightQuantize};
-use crate::tests_openfst::TestData;
+use crate::tests_openfst::FstTestData;
 
-pub fn test_const_fst_convert_convert<W>(test_data: &TestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_const_fst_convert_convert<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
     W: Semiring<Type = f32> + WeightQuantize,
 {

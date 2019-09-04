@@ -12,7 +12,7 @@ use crate::semirings::GallicWeightMin;
 use crate::semirings::GallicWeightRestrict;
 use crate::semirings::GallicWeightRight;
 use crate::semirings::Semiring;
-use crate::tests_openfst::TestData;
+use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GallicOperationResult {
@@ -42,7 +42,7 @@ impl GallicOperationResult {
     }
 }
 
-pub fn test_gallic_encode_decode<W>(test_data: &TestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_gallic_encode_decode<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
     W: Semiring<Type = f32> + 'static,
 {

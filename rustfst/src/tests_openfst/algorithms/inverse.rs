@@ -6,9 +6,9 @@ use crate::fst_traits::TextParser;
 use crate::semirings::Semiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 
-use crate::tests_openfst::TestData;
+use crate::tests_openfst::FstTestData;
 
-pub fn test_invert<F>(test_data: &TestData<F>) -> Fallible<()>
+pub fn test_invert<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
     F: TextParser + MutableFst,
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,

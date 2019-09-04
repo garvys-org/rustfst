@@ -5,7 +5,7 @@ use crate::algorithms::{push, PushType, ReweightType};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::TextParser;
 use crate::semirings::{Semiring, WeaklyDivisibleSemiring, WeightQuantize};
-use crate::tests_openfst::TestData;
+use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PushOperationResult {
@@ -47,7 +47,7 @@ impl PushOperationResult {
     }
 }
 
-pub fn test_push<W>(test_data: &TestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_push<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
     W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,

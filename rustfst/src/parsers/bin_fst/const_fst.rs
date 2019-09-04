@@ -1,17 +1,17 @@
-use std::fs::{File, read};
+use std::fs::{read, File};
 use std::io::BufWriter;
 use std::path::Path;
 
 use failure::{Fallible, ResultExt};
 use nom::bytes::complete::take;
-use nom::IResult;
 use nom::multi::count;
 use nom::number::complete::{le_f32, le_i32};
+use nom::IResult;
 
 use crate::fst_impls::const_fst::ConstState;
 use crate::fst_impls::ConstFst;
 use crate::fst_traits::{BinaryDeserializer, BinarySerializer, ExpandedFst};
-use crate::parsers::bin_fst::fst_header::{FST_MAGIC_NUMBER, FstHeader, OpenFstString};
+use crate::parsers::bin_fst::fst_header::{FstHeader, OpenFstString, FST_MAGIC_NUMBER};
 use crate::parsers::bin_fst::utils_parsing::{
     parse_final_weight, parse_fst_arc, parse_start_state,
 };

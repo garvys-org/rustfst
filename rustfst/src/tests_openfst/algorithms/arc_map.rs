@@ -10,9 +10,9 @@ use crate::fst_traits::TextParser;
 use crate::semirings::Semiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
-use crate::tests_openfst::TestData;
+use crate::tests_openfst::FstTestData;
 
-pub fn test_arc_map_identity<F>(test_data: &TestData<F>) -> Fallible<()>
+pub fn test_arc_map_identity<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
     F: TextParser + MutableFst,
     F::W: Semiring<Type = f32> + WeightQuantize,
@@ -34,7 +34,7 @@ where
     Ok(())
 }
 
-pub fn test_arc_map_invert<F>(test_data: &TestData<F>) -> Fallible<()>
+pub fn test_arc_map_invert<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
     F: TextParser + MutableFst,
     F::W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring,
@@ -56,7 +56,7 @@ where
     Ok(())
 }
 
-pub fn test_arc_map_input_epsilon<F>(test_data: &TestData<F>) -> Fallible<()>
+pub fn test_arc_map_input_epsilon<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
     F: TextParser + MutableFst,
     F::W: Semiring<Type = f32> + WeightQuantize,
@@ -77,7 +77,7 @@ where
     Ok(())
 }
 
-pub fn test_arc_map_output_epsilon<F>(test_data: &TestData<F>) -> Fallible<()>
+pub fn test_arc_map_output_epsilon<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
     F: TextParser + MutableFst,
     F::W: Semiring<Type = f32> + WeightQuantize,
@@ -98,7 +98,7 @@ where
     Ok(())
 }
 
-pub fn test_arc_map_plus<F>(test_data: &TestData<F>) -> Fallible<()>
+pub fn test_arc_map_plus<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
     F: TextParser + MutableFst,
     F::W: Semiring<Type = f32> + WeightQuantize,
@@ -119,7 +119,7 @@ where
     Ok(())
 }
 
-pub fn test_arc_map_times<F>(test_data: &TestData<F>) -> Fallible<()>
+pub fn test_arc_map_times<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
     F: TextParser + MutableFst,
     F::W: Semiring<Type = f32> + WeightQuantize,
@@ -140,7 +140,7 @@ where
     Ok(())
 }
 
-pub fn test_arc_map_quantize<F>(test_data: &TestData<F>) -> Fallible<()>
+pub fn test_arc_map_quantize<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
     F: TextParser + MutableFst,
     F::W: Semiring<Type = f32> + WeightQuantize,
@@ -161,7 +161,7 @@ where
     Ok(())
 }
 
-pub fn test_arc_map_rmweight<F>(test_data: &TestData<F>) -> Fallible<()>
+pub fn test_arc_map_rmweight<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
     F: TextParser + MutableFst,
     F::W: Semiring<Type = f32> + WeightQuantize,

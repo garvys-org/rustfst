@@ -22,6 +22,9 @@
 #include "fst_009/fst_009.h"
 #include "fst_010/fst_010.h"
 
+#include "symt_000/symt_000.h"
+#include "symt_001/symt_001.h"
+
 using namespace std;
 using json = nlohmann::json;
 
@@ -473,7 +476,7 @@ void compute_fst_push(const F& raw_fst, json& j) {
 }
 
 template<class A>
-void compute_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
+void compute_fst_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
     std::cout << "FST :" << fst_name << std::endl;
     json data;
 
@@ -582,17 +585,41 @@ void compute_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
     std::cout << std::endl;
 }
 
+void compute_symt_data(const fst::SymbolTable symt, const string symt_name) {
+    std::cout << "Symt :" << symt_name << std::endl;
+    json data;
+
+    data["name"] = symt_name;
+
+    data["num_symbols"] = symt.NumSymbols();
+
+    data["symt_bin"] = "symt.bin";
+    symt.Write(symt_name + "/symt.bin");
+
+    data["symt_text"] = "symt.text";
+    symt.WriteText(symt_name + "/symt.text");
+
+    std::ofstream o(symt_name + "/metadata.json");
+    o << std::setw(4) << data << std::endl;
+
+    std::cout << std::endl;
+}
+
+
 int main() {
     FLAGS_fst_error_fatal = false;
-    compute_data(compute_fst_000(), "fst_000");
-    compute_data(compute_fst_001(), "fst_001");
-    compute_data(compute_fst_002(), "fst_002");
-    compute_data(compute_fst_003(), "fst_003");
-    compute_data(compute_fst_004(), "fst_004");
-    compute_data(compute_fst_005(), "fst_005");
-    compute_data(compute_fst_006(), "fst_006");
-    compute_data(compute_fst_007(), "fst_007");
-    compute_data(compute_fst_008(), "fst_008");
-    compute_data(compute_fst_009(), "fst_009");
-    compute_data(compute_fst_010(), "fst_010");
+    compute_fst_data(compute_fst_000(), "fst_000");
+    compute_fst_data(compute_fst_001(), "fst_001");
+    compute_fst_data(compute_fst_002(), "fst_002");
+    compute_fst_data(compute_fst_003(), "fst_003");
+    compute_fst_data(compute_fst_004(), "fst_004");
+    compute_fst_data(compute_fst_005(), "fst_005");
+    compute_fst_data(compute_fst_006(), "fst_006");
+    compute_fst_data(compute_fst_007(), "fst_007");
+    compute_fst_data(compute_fst_008(), "fst_008");
+    compute_fst_data(compute_fst_009(), "fst_009");
+    compute_fst_data(compute_fst_010(), "fst_010");
+
+    compute_symt_data(compute_symt_000(), "symt_000");
+    compute_symt_data(compute_symt_001(), "symt_001");
 }

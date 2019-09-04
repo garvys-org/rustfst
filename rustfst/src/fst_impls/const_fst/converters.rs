@@ -1,5 +1,5 @@
-use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_impls::const_fst::data_structure::ConstState;
+use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 

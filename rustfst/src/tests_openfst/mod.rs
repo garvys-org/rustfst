@@ -12,9 +12,9 @@ use path_abs::PathInfo;
 use path_abs::PathMut;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::fst_impls::{VectorFst};
+use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{TextParser};
+use crate::fst_traits::TextParser;
 use crate::semirings::{
     LogWeight, Semiring, StarSemiring, TropicalWeight, WeaklyDivisibleSemiring, WeightQuantize,
 };
@@ -30,6 +30,7 @@ use crate::tests_openfst::algorithms::gallic_encode_decode::GallicTestData;
 use crate::tests_openfst::io::const_fst_bin_deserializer::{
     test_const_fst_aligned_bin_deserializer, test_const_fst_bin_deserializer,
 };
+use crate::tests_openfst::io::const_fst_bin_serializer::test_const_fst_bin_serializer;
 use crate::tests_openfst::io::const_fst_text_serialization::test_const_fst_text_serialization;
 
 use self::algorithms::{
@@ -61,7 +62,6 @@ use self::fst_impls::const_fst::test_const_fst_convert_convert;
 use self::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
 use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
 use self::io::vector_fst_text_serialization::test_vector_fst_text_serialization;
-use crate::tests_openfst::io::const_fst_bin_serializer::test_const_fst_bin_serializer;
 
 #[macro_use]
 mod macros;
@@ -69,13 +69,14 @@ mod macros;
 mod algorithms;
 mod fst_impls;
 mod io;
+mod test_symt;
 
 #[derive(Serialize, Deserialize, Debug)]
-struct OperationResult {
+struct FstOperationResult {
     result: String,
 }
 
-impl OperationResult {
+impl FstOperationResult {
     fn parse<F>(&self) -> F
     where
         F: TextParser,
@@ -86,35 +87,35 @@ impl OperationResult {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct ParsedTestData {
-    rmepsilon: OperationResult,
+pub struct ParsedFstTestData {
+    rmepsilon: FstOperationResult,
     name: String,
-    invert: OperationResult,
+    invert: FstOperationResult,
     weight_type: String,
-    raw: OperationResult,
-    project_output: OperationResult,
-    connect: OperationResult,
-    weight_pushing_initial: OperationResult,
-    weight_pushing_final: OperationResult,
-    project_input: OperationResult,
-    reverse: OperationResult,
-    arc_map_identity: OperationResult,
-    arc_map_rmweight: OperationResult,
-    arc_map_invert: OperationResult,
-    arc_map_input_epsilon: OperationResult,
-    arc_map_output_epsilon: OperationResult,
-    arc_map_plus: OperationResult,
-    arc_map_times: OperationResult,
-    arc_map_quantize: OperationResult,
+    raw: FstOperationResult,
+    project_output: FstOperationResult,
+    connect: FstOperationResult,
+    weight_pushing_initial: FstOperationResult,
+    weight_pushing_final: FstOperationResult,
+    project_input: FstOperationResult,
+    reverse: FstOperationResult,
+    arc_map_identity: FstOperationResult,
+    arc_map_rmweight: FstOperationResult,
+    arc_map_invert: FstOperationResult,
+    arc_map_input_epsilon: FstOperationResult,
+    arc_map_output_epsilon: FstOperationResult,
+    arc_map_plus: FstOperationResult,
+    arc_map_times: FstOperationResult,
+    arc_map_quantize: FstOperationResult,
     encode: Vec<EncodeOperationResult>,
     encode_decode: Vec<EncodeOperationResult>,
-    state_map_arc_sum: OperationResult,
-    state_map_arc_unique: OperationResult,
+    state_map_arc_sum: FstOperationResult,
+    state_map_arc_unique: FstOperationResult,
     determinize: Vec<DeterminizeOperationResult>,
     minimize: Vec<MinimizeOperationResult>,
-    arcsort_ilabel: OperationResult,
-    arcsort_olabel: OperationResult,
-    topsort: OperationResult,
+    arcsort_ilabel: FstOperationResult,
+    arcsort_olabel: FstOperationResult,
+    topsort: FstOperationResult,
     fst_properties: HashMap<String, bool>,
     raw_vector_bin_path: String,
     raw_const_bin_path: String,
@@ -127,7 +128,7 @@ pub struct ParsedTestData {
     push: Vec<PushOperationResult>,
 }
 
-pub struct TestData<F>
+pub struct FstTestData<F>
 where
     F: TextParser,
     F::W: Semiring<Type = f32>,
@@ -172,12 +173,12 @@ where
     pub push: Vec<PushTestData<F>>,
 }
 
-impl<F> TestData<F>
+impl<F> FstTestData<F>
 where
     F: TextParser,
     F::W: Semiring<Type = f32>,
 {
-    pub fn new(data: &ParsedTestData, absolute_path_folder: &Path) -> Self {
+    pub fn new(data: &ParsedFstTestData, absolute_path_folder: &Path) -> Self {
         Self {
             rmepsilon: data.rmepsilon.parse(),
             name: data.name.clone(),
@@ -238,27 +239,31 @@ where
     }
 }
 
-fn run_test_openfst(test_name: &str) -> Fallible<()> {
+pub(crate) fn get_path_folder(test_name: &str) -> Fallible<PathBuf> {
     let mut path_repo = PathAbs::new(PathBuf::from(env!("CARGO_MANIFEST_DIR")).parent().unwrap())?;
     path_repo.append("rustfst-tests-data")?;
     path_repo.append(test_name)?;
-    let mut absolute_path = path_repo.as_path().to_path_buf();
-    let absolute_path_folder = absolute_path.clone();
-    absolute_path.push("metadata.json");
+    Ok(path_repo.as_path().to_path_buf())
+}
 
-    let string = read_to_string(&absolute_path)
-        .map_err(|_| format_err!("Can't open {:?}", &absolute_path))?;
-    let parsed_test_data: ParsedTestData = serde_json::from_str(&string).unwrap();
+fn run_test_openfst_fst(test_name: &str) -> Fallible<()> {
+    let absolute_path_folder = get_path_folder(test_name)?;
+    let mut path_metadata = absolute_path_folder.clone();
+    path_metadata.push("metadata.json");
+
+    let string = read_to_string(&path_metadata)
+        .map_err(|_| format_err!("Can't open {:?}", &path_metadata))?;
+    let parsed_test_data: ParsedFstTestData = serde_json::from_str(&string).unwrap();
 
     match parsed_test_data.weight_type.as_str() {
         "tropical" | "standard" => {
-            let test_data: TestData<VectorFst<TropicalWeight>> =
-                TestData::new(&parsed_test_data, absolute_path_folder.as_path());
+            let test_data: FstTestData<VectorFst<TropicalWeight>> =
+                FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
             do_run_test_openfst(&test_data)?;
         }
         "log" => {
-            let test_data: TestData<VectorFst<LogWeight>> =
-                TestData::new(&parsed_test_data, absolute_path_folder.as_path());
+            let test_data: FstTestData<VectorFst<LogWeight>> =
+                FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
             do_run_test_openfst(&test_data)?;
         }
         _ => bail!("Weight type unknown : {:?}", parsed_test_data.weight_type),
@@ -267,7 +272,7 @@ fn run_test_openfst(test_name: &str) -> Fallible<()> {
     Ok(())
 }
 
-fn do_run_test_openfst<W>(test_data: &TestData<VectorFst<W>>) -> Fallible<()>
+fn do_run_test_openfst<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
     W: 'static + Semiring<Type = f32> + StarSemiring + WeaklyDivisibleSemiring + WeightQuantize,
     <W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize + StarSemiring,
@@ -356,7 +361,7 @@ where
     Ok(())
 }
 
-pub struct ExitFailure(failure::Error);
+pub(crate) struct ExitFailure(failure::Error);
 
 /// Prints a list of causes for this Error, along with any backtrace
 /// information collected by the Error (if RUST_BACKTRACE=1).
@@ -387,55 +392,55 @@ impl<T: Into<failure::Error>> From<T> for ExitFailure {
 
 #[test]
 fn test_openfst_fst_000() -> Result<(), ExitFailure> {
-    run_test_openfst("fst_000").map_err(|v| v.into())
+    run_test_openfst_fst("fst_000").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_001() -> Result<(), ExitFailure> {
-    run_test_openfst("fst_001").map_err(|v| v.into())
+    run_test_openfst_fst("fst_001").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_002() -> Result<(), ExitFailure> {
-    run_test_openfst("fst_002").map_err(|v| v.into())
+    run_test_openfst_fst("fst_002").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_003() -> Result<(), ExitFailure> {
-    run_test_openfst("fst_003").map_err(|v| v.into())
+    run_test_openfst_fst("fst_003").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_004() -> Result<(), ExitFailure> {
-    run_test_openfst("fst_004").map_err(|v| v.into())
+    run_test_openfst_fst("fst_004").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_005() -> Result<(), ExitFailure> {
-    run_test_openfst("fst_005").map_err(|v| v.into())
+    run_test_openfst_fst("fst_005").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_006() -> Result<(), ExitFailure> {
-    run_test_openfst("fst_006").map_err(|v| v.into())
+    run_test_openfst_fst("fst_006").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_007() -> Result<(), ExitFailure> {
-    run_test_openfst("fst_007").map_err(|v| v.into())
+    run_test_openfst_fst("fst_007").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_008() -> Result<(), ExitFailure> {
-    run_test_openfst("fst_008").map_err(|v| v.into())
+    run_test_openfst_fst("fst_008").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_009() -> Result<(), ExitFailure> {
-    run_test_openfst("fst_009").map_err(|v| v.into())
+    run_test_openfst_fst("fst_009").map_err(|v| v.into())
 }
 
 #[test]
 fn test_openfst_fst_010() -> Result<(), ExitFailure> {
-    run_test_openfst("fst_010").map_err(|v| v.into())
+    run_test_openfst_fst("fst_010").map_err(|v| v.into())
 }

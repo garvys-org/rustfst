@@ -5,9 +5,9 @@ use crate::algorithms::fst_convert;
 use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_traits::{ExpandedFst, TextParser};
 use crate::semirings::Semiring;
-use crate::tests_openfst::TestData;
+use crate::tests_openfst::FstTestData;
 
-pub fn test_const_fst_text_serialization<W>(test_data: &TestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_const_fst_text_serialization<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
     W: Semiring<Type = f32>,
 {

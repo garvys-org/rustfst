@@ -8,7 +8,7 @@ use crate::semirings::Semiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
 
-use crate::tests_openfst::TestData;
+use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ShorestPathOperationResult {
@@ -44,7 +44,7 @@ impl ShorestPathOperationResult {
     }
 }
 
-pub fn test_shortest_path<F>(test_data: &TestData<F>) -> Fallible<()>
+pub fn test_shortest_path<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
     F: TextParser + MutableFst,
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,

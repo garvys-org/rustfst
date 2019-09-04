@@ -8,7 +8,7 @@ use crate::fst_impls::VectorFst;
 use crate::fst_traits::TextParser;
 use crate::semirings::Semiring;
 use crate::semirings::WeightQuantize;
-use crate::tests_openfst::TestData;
+use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FwIdentityOperationResult {
@@ -41,7 +41,7 @@ impl FwIdentityOperationResult {
     }
 }
 
-pub fn test_factor_weight_identity<W>(test_data: &TestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_factor_weight_identity<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
     W: Semiring<Type = f32> + WeightQuantize + 'static,
 {
