@@ -273,10 +273,6 @@ where
     <W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize + StarSemiring,
     W: Into<<W as Semiring>::ReverseWeight> + From<<W as Semiring>::ReverseWeight>,
 {
-    //    let poeut = ConstFst::<W>::read
-    //        ("/var/folders/6n/ll21s7jx0278mbn8132gw0780000gn/T/tmpUgJvzF/model/l.snips")?;
-    //    println!("POIUET {:?}", poeut.num_states());
-
     test_rmepsilon(&test_data)?;
 
     test_invert(&test_data)?;

@@ -10,8 +10,6 @@ use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64,
 
 // Identifies stream data as an FST (and its endianity).
 pub(crate) static FST_MAGIC_NUMBER: i32 = 2_125_659_606;
-// TODO: Make this min_file_version fst_type dependent
-static MIN_FILE_VERSION: i32 = 2;
 
 #[derive(Debug)]
 pub(crate) struct FstHeader {
@@ -33,11 +31,11 @@ pub(crate) struct OpenFstString {
 }
 
 impl FstHeader {
-    pub(crate) fn parse(i: &[u8]) -> IResult<&[u8], FstHeader> {
+    pub(crate) fn parse(i: &[u8], min_file_version: i32) -> IResult<&[u8], FstHeader> {
         let (i, magic_number) = verify(le_i32, |v: &i32| *v == FST_MAGIC_NUMBER)(i)?;
         let (i, fst_type) = OpenFstString::parse(i)?;
         let (i, arc_type) = OpenFstString::parse(i)?;
-        let (i, version) = verify(le_i32, |v: &i32| *v >= MIN_FILE_VERSION)(i)?;
+        let (i, version) = verify(le_i32, |v: &i32| *v >= min_file_version)(i)?;
         let (i, flags) = le_i32(i)?;
         let (i, properties) = le_u64(i)?;
         let (i, start) = le_i64(i)?;

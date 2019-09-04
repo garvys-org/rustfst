@@ -19,6 +19,8 @@ use crate::parsers::bin_fst::utils_serialization::{write_bin_f32, write_bin_i32,
 use crate::semirings::Semiring;
 use crate::EPS_LABEL;
 
+static VECTOR_MIN_FILE_VERSION: i32 = 2;
+
 #[derive(Debug, PartialEq)]
 struct Transition {
     ilabel: i32,
@@ -41,7 +43,7 @@ fn parse_fst_state<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFs
 }
 
 fn parse_fst<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFst<W>> {
-    let (i, header) = FstHeader::parse(i)?;
+    let (i, header) = FstHeader::parse(i, VECTOR_MIN_FILE_VERSION)?;
     let (i, states) = count(parse_fst_state, header.num_states as usize)(i)?;
     Ok((
         i,
