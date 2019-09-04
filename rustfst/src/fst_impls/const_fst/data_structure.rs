@@ -1,6 +1,7 @@
 use crate::semirings::Semiring;
 use crate::{Arc, StateId};
 
+/// Immutable FST whose states and arcs each implemented by single arrays,
 #[derive(Debug, PartialEq, Clone)]
 pub struct ConstFst<W: Semiring> {
     pub(crate) states: Vec<ConstState<W>>,
