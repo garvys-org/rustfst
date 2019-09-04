@@ -46,7 +46,7 @@ where
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
     for minimize_data in &test_data.minimize {
-        println!("Minimize : allow_nondet = {}", minimize_data.allow_nondet);
+        //        println!("Minimize : allow_nondet = {}", minimize_data.allow_nondet);
         let mut fst_raw = test_data.raw.clone();
         let fst_res: Fallible<F> =
             minimize(&mut fst_raw, minimize_data.allow_nondet).map(|_| fst_raw);

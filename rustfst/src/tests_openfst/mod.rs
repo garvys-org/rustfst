@@ -12,9 +12,9 @@ use path_abs::PathInfo;
 use path_abs::PathMut;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::fst_impls::VectorFst;
+use crate::fst_impls::{VectorFst};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::TextParser;
+use crate::fst_traits::{TextParser};
 use crate::semirings::{
     LogWeight, Semiring, StarSemiring, TropicalWeight, WeaklyDivisibleSemiring, WeightQuantize,
 };
@@ -27,6 +27,10 @@ use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityTestData
 use crate::tests_openfst::algorithms::gallic_encode_decode::test_gallic_encode_decode;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicOperationResult;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicTestData;
+use crate::tests_openfst::io::const_fst_bin_deserializer::{
+    test_const_fst_aligned_bin_deserializer, test_const_fst_bin_deserializer,
+};
+use crate::tests_openfst::io::const_fst_text_serialization::test_const_fst_text_serialization;
 
 use self::algorithms::{
     arc_map::{
@@ -56,6 +60,8 @@ use self::algorithms::{
 use self::fst_impls::const_fst::test_const_fst_convert_convert;
 use self::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
 use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
+use self::io::vector_fst_text_serialization::test_vector_fst_text_serialization;
+use crate::tests_openfst::io::const_fst_bin_serializer::test_const_fst_bin_serializer;
 
 #[macro_use]
 mod macros;
@@ -111,6 +117,8 @@ pub struct ParsedTestData {
     topsort: OperationResult,
     fst_properties: HashMap<String, bool>,
     raw_vector_bin_path: String,
+    raw_const_bin_path: String,
+    raw_const_aligned_bin_path: String,
     shortest_distance: Vec<ShorestDistanceOperationResult>,
     shortest_path: Vec<ShorestPathOperationResult>,
     gallic_encode_decode: Vec<GallicOperationResult>,
@@ -154,6 +162,8 @@ where
     pub topsort: F,
     pub fst_properties: FstProperties,
     pub raw_vector_bin_path: PathBuf,
+    pub raw_const_bin_path: PathBuf,
+    pub raw_const_aligned_bin_path: PathBuf,
     pub shortest_distance: Vec<ShortestDistanceTestData<F::W>>,
     pub shortest_path: Vec<ShortestPathTestData<F>>,
     pub gallic_encode_decode: Vec<GallicTestData<F>>,
@@ -199,6 +209,12 @@ where
             fst_properties: parse_fst_properties(&data.fst_properties),
             raw_vector_bin_path: absolute_path_folder
                 .join(&data.raw_vector_bin_path)
+                .to_path_buf(),
+            raw_const_bin_path: absolute_path_folder
+                .join(&data.raw_const_bin_path)
+                .to_path_buf(),
+            raw_const_aligned_bin_path: absolute_path_folder
+                .join(&data.raw_const_aligned_bin_path)
                 .to_path_buf(),
             shortest_distance: data.shortest_distance.iter().map(|v| v.parse()).collect(),
             shortest_path: data.shortest_path.iter().map(|v| v.parse()).collect(),
@@ -327,6 +343,16 @@ where
 
     test_const_fst_convert_convert(&test_data)?;
 
+    test_vector_fst_text_serialization(&test_data)?;
+
+    test_const_fst_text_serialization(&test_data)?;
+
+    test_const_fst_bin_deserializer(&test_data)?;
+
+    test_const_fst_aligned_bin_deserializer(&test_data)?;
+
+    test_const_fst_bin_serializer(&test_data)?;
+
     Ok(())
 }
 
@@ -340,7 +366,7 @@ impl std::fmt::Debug for ExitFailure {
 
         writeln!(f, "{}", &fail)?;
 
-        let mut x: &Fail = fail;
+        let mut x: &dyn Fail = fail;
         while let Some(cause) = x.cause() {
             writeln!(f, " -> caused by: {}", &cause)?;
             x = cause;

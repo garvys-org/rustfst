@@ -80,7 +80,7 @@ impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> Queue for ShortestFirstQu
 
 #[derive(Debug)]
 pub struct NaturalShortestFirstQueue {
-    queue: Box<Queue>,
+    queue: Box<dyn Queue>,
 }
 
 impl NaturalShortestFirstQueue {

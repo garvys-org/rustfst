@@ -5,14 +5,14 @@ use crate::StateId;
 pub struct SccQueue {
     front: i32,
     back: i32,
-    queues: Vec<Box<Queue>>,
+    queues: Vec<Box<dyn Queue>>,
     sccs: Vec<StateId>,
 }
 
 static NO_STATE_ID: i32 = -1;
 
 impl SccQueue {
-    pub fn new(queues: Vec<Box<Queue>>, sccs: Vec<StateId>) -> Self {
+    pub fn new(queues: Vec<Box<dyn Queue>>, sccs: Vec<StateId>) -> Self {
         Self {
             front: 0,
             back: NO_STATE_ID,

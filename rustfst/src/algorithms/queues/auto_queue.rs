@@ -14,7 +14,7 @@ use super::{
 
 #[derive(Debug)]
 pub struct AutoQueue {
-    queue: Box<Queue>,
+    queue: Box<dyn Queue>,
 }
 
 impl AutoQueue {
@@ -24,7 +24,7 @@ impl AutoQueue {
     {
         let props = fst.properties()?;
 
-        let mut queue: Box<Queue>;
+        let queue: Box<dyn Queue>;
 
         if props.contains(FstProperties::TOP_SORTED) || fst.start().is_none() {
             queue = Box::new(StateOrderQueue::default());
@@ -76,7 +76,7 @@ impl AutoQueue {
                 queue = Box::new(TopOrderQueue::from_precomputed_order(sccs));
             } else {
                 // AutoQueue: using SCC meta-discipline
-                let mut queues: Vec<Box<Queue>> = Vec::with_capacity(n_sccs);
+                let mut queues: Vec<Box<dyn Queue>> = Vec::with_capacity(n_sccs);
                 for queue_type in queue_types.iter().take(n_sccs) {
                     match queue_type {
                         QueueType::TrivialQueue => queues.push(Box::new(TrivialQueue::default())),

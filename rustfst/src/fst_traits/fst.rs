@@ -153,6 +153,7 @@ where
 pub trait Fst:
     CoreFst + PartialEq + Clone + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b> + Display + Debug
 {
+    // TODO: Move niepsilons and noepsilons to required methods.
     /// Returns the number of arcs with epsilon input labels leaving a state.
     ///
     /// # Example :

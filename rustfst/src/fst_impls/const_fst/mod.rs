@@ -1,4 +1,5 @@
 pub use self::data_structure::ConstFst;
+pub(crate) use self::data_structure::ConstState;
 
 mod arc_iterator;
 mod converters;
@@ -7,3 +8,4 @@ mod expanded_fst;
 mod fst;
 mod misc;
 mod state_iterator;
+mod text_parser;

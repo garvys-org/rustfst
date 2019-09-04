@@ -1,4 +1,5 @@
 use failure::Fallible;
+use pretty_assertions::assert_eq;
 
 use crate::algorithms::arc_mappers::{
     IdentityArcMapper, InputEpsilonMapper, InvertWeightMapper, OutputEpsilonMapper, PlusMapper,
