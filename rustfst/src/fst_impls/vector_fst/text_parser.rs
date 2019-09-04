@@ -1,11 +1,11 @@
 use failure::Fallible;
 
-use crate::Arc;
 use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{MutableFst, TextParser};
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::Semiring;
+use crate::Arc;
 
 impl<W: 'static + Semiring<Type = f32>> TextParser for VectorFst<W> {
     fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst) -> Fallible<Self> {

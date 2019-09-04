@@ -3,8 +3,8 @@ use std::io::Write;
 use failure::Fallible;
 use nom::bytes::complete::take;
 use nom::combinator::verify;
-use nom::IResult;
 use nom::number::complete::{le_i32, le_i64, le_u64};
+use nom::IResult;
 
 use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64, write_bin_u64};
 

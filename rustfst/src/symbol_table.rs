@@ -234,7 +234,7 @@ impl SymbolTable {
         Self::from_parsed_symt_text(parsed_symt)
     }
 
-    pub fn read_text<P: AsRef<Path>>(&self, path_text_symt: P) -> Fallible<Self> {
+    pub fn read_text<P: AsRef<Path>>(path_text_symt: P) -> Fallible<Self> {
         let parsed_symt = ParsedTextSymt::from_path(path_text_symt)?;
         Self::from_parsed_symt_text(parsed_symt)
     }

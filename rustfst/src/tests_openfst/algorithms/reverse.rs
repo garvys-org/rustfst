@@ -11,7 +11,7 @@ use crate::semirings::Semiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::Arc;
 
-use crate::tests_openfst::TestData;
+use crate::tests_openfst::FstTestData;
 
 pub struct ReverseWeightConverter {}
 
@@ -42,7 +42,7 @@ where
     }
 }
 
-pub fn test_reverse<F>(test_data: &TestData<F>) -> Fallible<()>
+pub fn test_reverse<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
     F: TextParser + MutableFst,
     F::W: 'static + Semiring<Type = f32> + WeaklyDivisibleSemiring,
