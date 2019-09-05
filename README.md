@@ -39,7 +39,7 @@ Implementation heavily inspired from Mehryar Mohri's, Cyril Alluzen's and Michae
 
 Add it to your `Cargo.toml`:
 
-```
+```ignore
 [dependencies]
 rustfst = "*"
 ```
@@ -47,15 +47,10 @@ rustfst = "*"
 ## Example
 
 ```rust
-# extern crate rustfst;
+use failure::Fallible;
+use rustfst::prelude::*;
 
-use rustfst::utils::transducer;
-use rustfst::semirings::{Semiring, IntegerWeight};
-use rustfst::fst_impls::VectorFst;
-use rustfst::fst_traits::{MutableFst, PathsIterator};
-use rustfst::Arc;
-
-fn main() {
+fn main() -> Fallible<()> {
     // Creates a empty wFST
     let mut fst = VectorFst::new();
     
@@ -65,24 +60,43 @@ fn main() {
     let s2 = fst.add_state();
     
     // Set s0 as the start state
-    fst.set_start(s0).unwrap();
+    fst.set_start(s0)?;
     
     // Add an arc from s0 to s1
-    fst.add_arc(s0, Arc::new(3, 5, IntegerWeight::new(10), s1))
-         .unwrap();
+    fst.add_arc(s0, Arc::new(3, 5, TropicalWeight::new(10.0), s1))?;
     
     // Add an arc from s0 to s2
-    fst.add_arc(s0, Arc::new(5, 7, IntegerWeight::new(18), s2))
-         .unwrap();
+    fst.add_arc(s0, Arc::new(5, 7, TropicalWeight::new(18.0), s2))?;
     
     // Set s1 and s2 as final states
-    fst.set_final(s1, IntegerWeight::new(31)).unwrap();
-    fst.set_final(s2, IntegerWeight::new(45)).unwrap();
+    fst.set_final(s1, TropicalWeight::new(31.0))?;
+    fst.set_final(s2, TropicalWeight::new(45.0))?;
     
     // Iter over all the paths in the wFST
     for p in fst.paths_iter() {
          println!("{:?}", p);
     }
+
+    // A lot of operations are available to modify/optimize the FST. 
+    // Here are a few examples :
+
+    // - Remove useless states.
+    connect(&mut fst)?;
+
+    // - Optimize the FST by merging states with the same behaviour.
+    minimize(&mut fst, true)?;
+
+    // - Copy all the input labels in the output.
+    project(&mut fst, ProjectType::ProjectInput);
+
+    // - Remove epsilon transitions
+    fst = rm_epsilon(&fst)?;
+
+    // - Compute an equivalent FST but deterministic
+    fst = determinize(&fst, DeterminizeType::DeterminizeFunctional)?;
+
+    Ok(())
+
 }
 ```
 
@@ -93,7 +107,11 @@ https://docs.rs/rustfst
 
 ## Status
 
-Not all the algorithms are (yet) implemented. This is work in progress.
+A big number of algorithms are already implemented. The main ones missing are:
+ - Composition
+ - Replacement
+
+Also, all the algorithms are implemented in a static fashion, some work is necessary to add support for dynamic fsts.
 
 ## License
    
