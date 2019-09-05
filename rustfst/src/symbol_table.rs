@@ -1,4 +1,4 @@
-use std::collections::hash_map::{Iter, Keys};
+use std::collections::hash_map::{Entry, Iter, Keys};
 use std::collections::HashMap;
 use std::fmt;
 use std::fs::File;
@@ -74,11 +74,16 @@ impl SymbolTable {
         let label = self.num_symbols;
         let sym = sym.into();
 
-        self.symbol_to_label.entry(sym.clone()).or_insert(label);
-        self.label_to_symbol.entry(label).or_insert(sym);
-
-        self.num_symbols += 1;
-        label
+        // Only insert if
+        match self.symbol_to_label.entry(sym.clone()) {
+            Entry::Occupied(e) => *e.get(),
+            Entry::Vacant(e) => {
+                e.insert(label);
+                self.label_to_symbol.entry(label).or_insert(sym);
+                self.num_symbols += 1;
+                label
+            }
+        }
     }
 
     /// Returns the number of symbols stored in the symbol table.
@@ -286,4 +291,68 @@ macro_rules! symt {
             temp_vec
         }
     };
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_symt() {
+        let mut symt = SymbolTable::new();
+        symt.add_symbol("a");
+        symt.add_symbol("b");
+
+        assert_eq!(symt.len(), 3);
+
+        assert_eq!(symt.is_empty(), false);
+
+        assert_eq!(symt.get_label(EPS_SYMBOL), Some(0));
+        assert_eq!(symt.get_label("a"), Some(1));
+        assert_eq!(symt.get_label("b"), Some(2));
+
+        assert_eq!(symt.contains_symbol(EPS_SYMBOL), true);
+        assert_eq!(symt.contains_symbol("a"), true);
+        assert_eq!(symt.contains_symbol("b"), true);
+        assert_eq!(symt.contains_symbol("c"), false);
+
+        assert_eq!(symt.get_symbol(0), Some(EPS_SYMBOL));
+        assert_eq!(symt.get_symbol(1), Some("a"));
+        assert_eq!(symt.get_symbol(2), Some("b"));
+
+        assert_eq!(symt.contains_label(0), true);
+        assert_eq!(symt.contains_label(1), true);
+        assert_eq!(symt.contains_label(2), true);
+        assert_eq!(symt.contains_label(3), false);
+    }
+
+    #[test]
+    fn test_symt_add_twice_symbol() {
+        let mut symt = SymbolTable::new();
+        symt.add_symbol("a");
+        symt.add_symbol("a");
+
+        assert_eq!(symt.len(), 2);
+        assert_eq!(symt.get_label("a"), Some(1));
+    }
+
+    #[test]
+    fn test_add_table() {
+        let mut symt1 = SymbolTable::new();
+        symt1.add_symbol("a");
+        symt1.add_symbol("b");
+
+        let mut symt2 = SymbolTable::new();
+        symt2.add_symbol("c");
+        symt2.add_symbol("b");
+
+        symt1.add_table(&symt2);
+
+        assert_eq!(symt1.len(), 4);
+        assert_eq!(symt1.get_label(EPS_SYMBOL), Some(0));
+        assert_eq!(symt1.get_label("a"), Some(1));
+        assert_eq!(symt1.get_label("b"), Some(2));
+        assert_eq!(symt1.get_label("c"), Some(3));
+    }
+
 }
