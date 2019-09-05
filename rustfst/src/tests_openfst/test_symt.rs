@@ -56,3 +56,8 @@ fn test_openfst_symt_000() -> Result<(), ExitFailure> {
 fn test_openfst_symt_001() -> Result<(), ExitFailure> {
     run_test_openfst_symt("symt_001").map_err(|v| v.into())
 }
+
+#[test]
+fn test_openfst_symt_002() -> Result<(), ExitFailure> {
+    run_test_openfst_symt("symt_002").map_err(|v| v.into())
+}

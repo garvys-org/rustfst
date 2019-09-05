@@ -24,6 +24,7 @@
 
 #include "symt_000/symt_000.h"
 #include "symt_001/symt_001.h"
+#include "symt_002/symt_002.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -622,4 +623,5 @@ int main() {
 
     compute_symt_data(compute_symt_000(), "symt_000");
     compute_symt_data(compute_symt_001(), "symt_001");
+    compute_symt_data(compute_symt_002(), "symt_002");
 }

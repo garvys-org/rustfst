@@ -31,50 +31,72 @@
 //! ## Example
 //!
 //! ```
-//! # use rustfst::utils::transducer;
-//! # use rustfst::semirings::{Semiring, IntegerWeight};
-//! # use rustfst::fst_impls::VectorFst;
-//! # use rustfst::fst_traits::{MutableFst, PathsIterator};
-//! # use rustfst::Arc;
-//! // Creates a empty wFST
-//! let mut fst = VectorFst::new();
+//! use failure::Fallible;
+//! use rustfst::prelude::*;
 //!
-//! // Add some states
-//! let s0 = fst.add_state();
-//! let s1 = fst.add_state();
-//! let s2 = fst.add_state();
+//! fn main() -> Fallible<()> {
+//!     // Creates a empty wFST
+//!     let mut fst = VectorFst::new();
 //!
-//! // Set s0 as the start state
-//! fst.set_start(s0).unwrap();
+//!     // Add some states
+//!     let s0 = fst.add_state();
+//!     let s1 = fst.add_state();
+//!     let s2 = fst.add_state();
 //!
-//! // Add an arc from s0 to s1
-//! fst.add_arc(s0, Arc::new(3, 5, IntegerWeight::new(10), s1))
-//!     .unwrap();
+//!     // Set s0 as the start state
+//!     fst.set_start(s0)?;
 //!
-//! // Add an arc from s0 to s2
-//! fst.add_arc(s0, Arc::new(5, 7, IntegerWeight::new(18), s2))
-//!     .unwrap();
+//!     // Add an arc from s0 to s1
+//!     fst.add_arc(s0, Arc::new(3, 5, TropicalWeight::new(10.0), s1))?;
 //!
-//! // Set s1 and s2 as final states
-//! fst.set_final(s1, IntegerWeight::new(31)).unwrap();
-//! fst.set_final(s2, IntegerWeight::new(45)).unwrap();
+//!     // Add an arc from s0 to s2
+//!     fst.add_arc(s0, Arc::new(5, 7, TropicalWeight::new(18.0), s2))?;
 //!
-//! // Iter over all the paths in the wFST
-//! for p in fst.paths_iter() {
-//!     println!("{:?}", p);
+//!     // Set s1 and s2 as final states
+//!     fst.set_final(s1, TropicalWeight::new(31.0))?;
+//!     fst.set_final(s2, TropicalWeight::new(45.0))?;
+//!
+//!     // Iter over all the paths in the wFST
+//!     for p in fst.paths_iter() {
+//!          println!("{:?}", p);
+//!     }
+//!
+//!     // A lot of operations are available to modify/optimize the FST.
+//!     // Here are a few examples :
+//!
+//!     // - Remove useless states.
+//!     connect(&mut fst)?;
+//!
+//!     // - Optimize the FST by merging states with the same behaviour.
+//!     minimize(&mut fst, true)?;
+//!
+//!     // - Copy all the input labels in the output.
+//!     project(&mut fst, ProjectType::ProjectInput);
+//!
+//!     // - Remove epsilon transitions.
+//!     fst = rm_epsilon(&fst)?;
+//!
+//!     // - Compute an equivalent FST but deterministic.
+//!     fst = determinize(&fst, DeterminizeType::DeterminizeFunctional)?;
+//!
+//!     Ok(())
 //! }
-//!
 //! ```
 //!
 //! ## Status
 //!
-//! Not all algorithms are (yet) implemented, this is still work in progress.
+//! A big number of algorithms are already implemented. The main ones missing are:
+//! - Composition
+//! - Replacement
 //!
+//! Also, all the algorithms are implemented in a static fashion, some work is necessary to add support for dynamic fsts.
 //!
 
 #[warn(missing_docs)]
 #[cfg(test)]
 extern crate counter;
+#[macro_use]
+extern crate doc_comment;
 #[macro_use]
 extern crate failure;
 #[cfg(test)]
@@ -89,6 +111,9 @@ pub use crate::fst_path::FstPath;
 pub use crate::symbol_table::SymbolTable;
 
 pub use self::arc::Arc;
+
+// When running `cargo test`, rustdoc will check this file as well.
+doc_comment!(include_str!("../../README.md"));
 
 #[cfg(test)]
 mod tests_openfst;
@@ -143,6 +168,7 @@ pub(crate) const KDELTA: f32 = 1.0f32 / 1024.0f32;
 pub mod prelude {
     pub use crate::algorithms::arc_compares::*;
     pub use crate::algorithms::*;
+    pub use crate::arc::Arc;
     pub use crate::fst_impls::*;
     pub use crate::fst_traits::*;
     pub use crate::semirings::*;
