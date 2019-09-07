@@ -173,3 +173,5 @@ pub mod prelude {
     pub use crate::fst_traits::*;
     pub use crate::semirings::*;
 }
+
+mod proptest_fst;
