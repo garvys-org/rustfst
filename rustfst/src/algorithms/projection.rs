@@ -70,9 +70,30 @@ mod tests {
     use failure::Fallible;
 
     use crate::fst_traits::PathsIterator;
+    use crate::proptest_fst::proptest_fst;
     use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
+    use crate::fst_properties::FstProperties;
+
     use super::*;
+
+    use proptest::prelude::*;
+
+    proptest! {
+        #[test]
+        fn test_project_input_proptest(mut fst in proptest_fst()) {
+            project(&mut fst, ProjectType::ProjectInput);
+            prop_assume!(fst.properties().unwrap().intersects(FstProperties::ACCEPTOR));
+        }
+    }
+
+    proptest! {
+        #[test]
+        fn test_project_output_proptest(mut fst in proptest_fst()) {
+            project(&mut fst, ProjectType::ProjectOutput);
+            prop_assume!(fst.properties().unwrap().intersects(FstProperties::ACCEPTOR));
+        }
+    }
 
     #[test]
     fn test_projection_input_generic() -> Fallible<()> {
