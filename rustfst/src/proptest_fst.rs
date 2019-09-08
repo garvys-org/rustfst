@@ -2,10 +2,10 @@
 
 use proptest::prelude::*;
 
-use crate::Arc;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::MutableFst;
 use crate::semirings::{Semiring, TropicalWeight};
+use crate::Arc;
 
 static MAX_NUM_STATES: usize = 100;
 static MAX_ILABEL: usize = 100;
@@ -50,7 +50,7 @@ fn proptest_arcs(nstates: usize) -> impl Strategy<Value = Vec<(usize, Arc<Tropic
 
 pub(crate) fn proptest_fst() -> impl Strategy<Value = VectorFst<TropicalWeight>> {
     let nstates_strategy = 1..MAX_NUM_STATES;
-    let non_empty_fst_strategy = nstates_strategy
+    nstates_strategy
         .prop_flat_map(|nstates| {
             (
                 // Number of states.
@@ -85,6 +85,5 @@ pub(crate) fn proptest_fst() -> impl Strategy<Value = VectorFst<TropicalWeight>>
             }
 
             fst
-        });
-    prop_oneof![Just(VectorFst::new()), non_empty_fst_strategy]
+        })
 }

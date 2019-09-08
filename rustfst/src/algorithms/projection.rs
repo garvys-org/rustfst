@@ -70,8 +70,8 @@ mod tests {
     use failure::Fallible;
 
     use crate::fst_traits::PathsIterator;
-    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
     use crate::proptest_fst::proptest_fst;
+    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
     use crate::fst_properties::FstProperties;
 

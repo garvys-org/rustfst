@@ -167,7 +167,23 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for ConnectVisitor<'a, F> {
 mod tests {
     use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
+    use crate::proptest_fst::proptest_fst;
+
+    use crate::fst_properties::FstProperties;
+
+    use proptest::prelude::*;
+
     use super::*;
+
+    proptest! {
+        #[test]
+        fn test_connect_proptest(mut fst in proptest_fst()) {
+            connect(&mut fst).unwrap();
+            prop_assume!(fst.properties().unwrap().intersects(
+                FstProperties::ACCESSIBLE | FstProperties::COACCESSIBLE
+            ));
+        }
+    }
 
     #[test]
     fn test_connect_generic() -> Fallible<()> {
