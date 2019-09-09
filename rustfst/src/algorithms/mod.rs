@@ -20,6 +20,7 @@ mod projection;
 mod push;
 mod queue;
 mod relabel_pairs;
+mod replace;
 mod reverse;
 mod reweight;
 mod rm_epsilon;
