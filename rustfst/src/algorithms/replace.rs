@@ -6,6 +6,7 @@ use failure::{bail, Fallible};
 
 use crate::algorithms::cache::CacheImpl;
 use crate::fst_traits::ExpandedFst;
+use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL};
 use std::hash::Hash;
 
@@ -184,8 +185,25 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
             self.cache_impl.push_arc(state, arc)?;
         }
 
-        unimplemented!();
-        //        }
+        let tuple = self.state_table.tuple_table.find_tuple(state).clone();
+        for arc in self
+            .fst_array
+            .get(tuple.fst_id.unwrap())
+            .unwrap()
+            .arcs_iter(tuple.fst_state.unwrap())?
+        {
+            if let Some(new_arc) = compute_arc(
+                &tuple,
+                arc,
+                &mut self.state_table,
+                &self.nonterminal_set,
+                &self.nonterminal_hash,
+                self.call_label_type_,
+                &self.call_output_label_,
+            ) {
+                self.cache_impl.push_arc(state, new_arc);
+            }
+        }
 
         self.cache_impl.mark_expanded(state);
         Ok(())
@@ -267,6 +285,23 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         prefix.push(fst_id, nextstate);
         self.get_prefix_id(&prefix)
     }
+}
+
+fn compute_arc<W: Semiring>(
+    tuple: &ReplaceStateTuple,
+    arc: &Arc<W>,
+    state_table: &mut ReplaceStateTable,
+    nonterminal_set: &HashSet<Label>,
+    nonterminal_hash: &HashMap<Label, Label>,
+    call_label_type_: ReplaceLabelType,
+    call_output_label_: &Option<Label>,
+) -> Option<Arc<W>> {
+    if !epsilon_on_input(call_label_type_) {
+        return None;
+    }
+    //    if arc.olabel == EPS_LABEL || arc.olabel <
+
+    unimplemented!()
 }
 
 #[derive(Hash, Eq, PartialOrd, PartialEq, Clone)]
