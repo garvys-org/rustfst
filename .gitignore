@@ -18,6 +18,7 @@ rustfst-tests-data/**/*.fst
 rustfst-tests-data/**/metadata.json
 rustfst-tests-data/a.out
 rustfst-tests-data/json.hpp
+proptest-regressions/lib.txt
 
 
 .idea
