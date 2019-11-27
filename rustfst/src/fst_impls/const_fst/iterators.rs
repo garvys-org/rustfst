@@ -78,12 +78,19 @@ impl<W: Semiring> FstIterator for ConstFst<W> {
     }
 
     fn arcs_index_iter(&self, state: Self::StateIndex) -> Fallible<Self::ArcIter> {
-
         let state = self
             .states
             .get(state.0)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state.0))?;
         Ok(ArcIndexIter(self.arc_range(state)))
+    }
+
+    fn get_state_id(&self, state_idx: Self::StateIndex) -> Fallible<StateId> {
+        let _ = self
+            .states
+            .get(state_idx.0)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_idx.0))?;
+        Ok(state_idx.0)
     }
 
     fn get_arc<'a>(&'a self, state: Self::StateIndex, arc: Self::ArcIndex) -> Fallible<&'a Arc<Self::W>> {
@@ -92,5 +99,83 @@ impl<W: Semiring> FstIterator for ConstFst<W> {
             .get(state.0)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state.0))?;
         Ok(&self.arcs[arc.0])
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::fst_impls::VectorFst;
+
+    use crate::fst_traits::{ MutableFst };
+    use crate::semirings::{ProbabilityWeight, Semiring};
+
+    #[test]
+    fn test_states_index_iterator() -> Fallible<()> {
+        let mut fst = VectorFst::new();
+
+        // States
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+        let s3 = fst.add_state();
+
+        fst.set_start(s1)?;
+
+        // Arcs
+        let arc_1_2 = Arc::new(0, 0, ProbabilityWeight::new(1.0), s2);
+        let arc_1_2_bis = Arc::new(0, 0, ProbabilityWeight::new(1.0), s2);
+
+        let arc_2_3 = Arc::new(0, 0, ProbabilityWeight::new(1.0), s3);
+        let arc_2_3_bis = Arc::new(0, 0, ProbabilityWeight::new(1.0), s3);
+
+        fst.add_arc(s1, arc_1_2.clone())?;
+        fst.add_arc(s1, arc_1_2_bis.clone())?;
+
+        fst.add_arc(s2, arc_2_3.clone())?;
+        fst.add_arc(s2, arc_2_3_bis.clone())?;
+
+        let const_fst: ConstFst<_> = fst.into();
+
+
+        let states = const_fst.states_index_iter().map(|it| const_fst.get_state_id(it)).collect::<Fallible<Vec<_>>>()?;
+        assert_eq!(states, vec![s1, s2, s3]);
+        Ok(())
+    }
+
+    #[test]
+    fn test_arcs_index_iterator() -> Fallible<()> {
+        let mut fst = VectorFst::new();
+
+        // States
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+        let s3 = fst.add_state();
+
+        fst.set_start(s1)?;
+
+        // Arcs
+        let arc_1_2 = Arc::new(0, 0, ProbabilityWeight::new(1.0), s2);
+        let arc_1_2_bis = Arc::new(0, 0, ProbabilityWeight::new(1.0), s2);
+
+        let arc_2_3 = Arc::new(0, 0, ProbabilityWeight::new(1.0), s3);
+        let arc_2_3_bis = Arc::new(0, 0, ProbabilityWeight::new(1.0), s3);
+
+        fst.add_arc(s1, arc_1_2.clone())?;
+        fst.add_arc(s1, arc_1_2_bis.clone())?;
+
+        fst.add_arc(s2, arc_2_3.clone())?;
+        fst.add_arc(s2, arc_2_3_bis.clone())?;
+
+        let const_fst: ConstFst<_> = fst.into();
+
+        let mut arcs_ref = vec![];
+        for state_index in const_fst.states_index_iter() {
+            for arc_index in const_fst.arcs_index_iter(state_index)? {
+                arcs_ref.push(const_fst.get_arc(state_index, arc_index)?);
+            }
+        }
+
+        assert_eq!(arcs_ref, vec![&arc_1_2, &arc_1_2_bis, &arc_2_3, &arc_2_3_bis]);
+        Ok(())
     }
 }
