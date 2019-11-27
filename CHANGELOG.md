@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+- Add `FstIterator` and `FstIteratorMut` to iterate over states and arcs in a given FST without referencing the FST.
+- Implement `FstIterator` and `FstIteratorMut` for ConstFst and VectorFst.
 - Add `dfs` to the public interface in order to perform Depth First Search.
 - Add `find_strongly_connected_components`  which is the implementation of the Tarjan's algoritm to find the strongly connect components in a directed graph.
 - Add the `FstProperties` bitflags struct and a function to commpute the property flags for an `Fst`.

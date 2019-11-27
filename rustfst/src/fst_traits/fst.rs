@@ -1,9 +1,9 @@
+use crate::fst_traits::iterators::{ ArcIterator, StateIterator };
 use std::fmt::{Debug, Display};
 
 use failure::Fallible;
 
 use crate::algorithms::arc_filters::{ArcFilter, InputEpsilonArcFilter, OutputEpsilonArcFilter};
-use crate::arc::Arc;
 use crate::semirings::Semiring;
 use crate::StateId;
 
@@ -109,45 +109,6 @@ pub trait CoreFst {
     }
 }
 
-/// Trait to iterate over the states of a wFST.
-pub trait StateIterator<'a> {
-    /// Iterator used to iterate over the `state_id` of the states of an FST.
-    type Iter: Iterator<Item = StateId> + Clone;
-
-    /// Creates an iterator over the `state_id` of the states of an FST.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, StateIterator};
-    /// # use rustfst::fst_impls::VectorFst;
-    /// # use rustfst::semirings::{BooleanWeight, Semiring};
-    /// let mut fst = VectorFst::<BooleanWeight>::new();
-    ///
-    /// let s1 = fst.add_state();
-    /// let s2 = fst.add_state();
-    ///
-    /// for state_id in fst.states_iter() {
-    ///     println!("State ID : {:?}", state_id);
-    /// }
-    ///
-    /// let states : Vec<_> = fst.states_iter().collect();
-    /// assert_eq!(states, vec![s1, s2]);
-    /// ```
-    fn states_iter(&'a self) -> Self::Iter;
-}
-
-/// Trait to iterate over the outgoing arcs of a particular state in a wFST
-pub trait ArcIterator<'a>: CoreFst
-where
-    Self::W: 'a,
-{
-    /// Iterator used to iterate over the arcs leaving a state of an FST.
-    type Iter: Iterator<Item = &'a Arc<Self::W>> + Clone;
-
-    fn arcs_iter(&'a self, state_id: StateId) -> Fallible<Self::Iter>;
-    unsafe fn arcs_iter_unchecked(&'a self, state_id: StateId) -> Self::Iter;
-}
 
 /// Trait defining the minimum interface necessary for a wFST.
 pub trait Fst:
