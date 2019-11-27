@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add `FstIterator` and `FstIteratorMut` to iterate over states and arcs in a given FST without referencing the FST.
 - Implement `FstIterator` and `FstIteratorMut` for ConstFst and VectorFst.
+
+## [0.4.0] - 2019-11-12
+
+### Added
 - Add `dfs` to the public interface in order to perform Depth First Search.
 - Add `find_strongly_connected_components`  which is the implementation of the Tarjan's algoritm to find the strongly connect components in a directed graph.
 - Add the `FstProperties` bitflags struct and a function to commpute the property flags for an `Fst`.
@@ -184,7 +188,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - First released version of rustfst
 
-[Unreleased]: https://github.com/garvys/rustfst/compare/0.3.0...HEAD
+[Unreleased]: https://github.com/garvys/rustfst/compare/0.4.0...HEAD
+[0.3.0]: https://github.com/garvys/rustfst/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/garvys/rustfst/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/garvys/rustfst/compare/0.1.7...0.2.0
 [0.1.7]: https://github.com/garvys/rustfst/compare/0.1.2...0.1.7
