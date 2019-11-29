@@ -165,7 +165,7 @@ mod fst_path;
 mod parsers;
 
 /// A representable float near .001. (Used in Quantize)
-pub(crate) const KDELTA: f32 = 1.0f32 / 1024.0f32;
+pub const KDELTA: f32 = 1.0f32 / 1024.0f32;
 
 pub mod prelude {
     pub use crate::algorithms::arc_compares::*;
