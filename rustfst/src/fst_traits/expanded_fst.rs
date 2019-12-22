@@ -67,7 +67,7 @@ pub trait ExpandedFst: Fst {
             }
 
             writeln!(f, "size = \"{},{}\";", config.width, config.height)?;
-            writeln!(f, "label = {};", config.title)?;
+            writeln!(f, "label = \"{}\";", config.title)?;
             writeln!(f, "center = 1;")?;
 
             if config.portrait {
