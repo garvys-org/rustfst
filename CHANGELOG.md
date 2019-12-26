@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Make `KDELTA` public outside of the crate
+- Fix serialization into a DOT file by putting the `label` into quotes.
 
 ## [0.4.0] - 2019-11-12
 
