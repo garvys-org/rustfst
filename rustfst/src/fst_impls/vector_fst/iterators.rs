@@ -1,7 +1,9 @@
 use std::slice;
 
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{ArcIterator, MutableArcIterator, StateIterator, FstIterator, FstIteratorMut};
+use crate::fst_traits::{
+    ArcIterator, FstIterator, FstIteratorMut, MutableArcIterator, StateIterator,
+};
 use crate::semirings::Semiring;
 use crate::Arc;
 use crate::StateId;
@@ -16,7 +18,6 @@ impl<'a, W: 'a + Semiring> StateIterator<'a> for VectorFst<W> {
         (0..self.states.len())
     }
 }
-
 
 impl<'a, W: 'static + Semiring> ArcIterator<'a> for VectorFst<W> {
     type Iter = slice::Iter<'a, Arc<W>>;
@@ -100,22 +101,43 @@ impl<W: 'static + Semiring> FstIterator for VectorFst<W> {
         Ok(state_idx.0)
     }
 
-    fn get_arc<'a>(&'a self, state_idx: Self::StateIndex, arc: Self::ArcIndex) -> Fallible<&'a Arc<Self::W>> {
+    fn get_arc<'a>(
+        &'a self,
+        state_idx: Self::StateIndex,
+        arc: Self::ArcIndex,
+    ) -> Fallible<&'a Arc<Self::W>> {
         let state = self
             .states
             .get(state_idx.0)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_idx.0))?;
-        state.arcs.get(arc.0).ok_or_else(|| format_err!("State {:?} | Arcs: {:?} doesn't exit", state_idx.0, arc.0))
+        state
+            .arcs
+            .get(arc.0)
+            .ok_or_else(|| format_err!("State {:?} | Arcs: {:?} doesn't exit", state_idx.0, arc.0))
     }
 }
 
 impl<W: 'static + Semiring> FstIteratorMut for VectorFst<W> {
-    fn modify_arc<F>(&mut self, state_idx: Self::StateIndex, arc_idx: Self::ArcIndex, modify: F) -> Fallible<()> where F: Fn(&mut Arc<Self::W>) -> Fallible<()> {
+    fn modify_arc<F>(
+        &mut self,
+        state_idx: Self::StateIndex,
+        arc_idx: Self::ArcIndex,
+        modify: F,
+    ) -> Fallible<()>
+    where
+        F: Fn(&mut Arc<Self::W>) -> Fallible<()>,
+    {
         let state = self
             .states
             .get_mut(state_idx.0)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_idx.0))?;
-        let arc = state.arcs.get_mut(arc_idx.0).ok_or_else(|| format_err!("State {:?} | Arcs: {:?} doesn't exit", state_idx.0, arc_idx.0))?;
+        let arc = state.arcs.get_mut(arc_idx.0).ok_or_else(|| {
+            format_err!(
+                "State {:?} | Arcs: {:?} doesn't exit",
+                state_idx.0,
+                arc_idx.0
+            )
+        })?;
         (modify)(arc)
     }
 }
@@ -124,7 +146,7 @@ impl<W: 'static + Semiring> FstIteratorMut for VectorFst<W> {
 mod tests {
     use super::*;
 
-    use crate::fst_traits::{ MutableFst };
+    use crate::fst_traits::MutableFst;
     use crate::semirings::{ProbabilityWeight, Semiring};
 
     #[test]
@@ -151,8 +173,10 @@ mod tests {
         fst.add_arc(s2, arc_2_3.clone())?;
         fst.add_arc(s2, arc_2_3_bis.clone())?;
 
-
-        let states = fst.states_index_iter().map(|it| fst.get_state_id(it)).collect::<Fallible<Vec<_>>>()?;
+        let states = fst
+            .states_index_iter()
+            .map(|it| fst.get_state_id(it))
+            .collect::<Fallible<Vec<_>>>()?;
         assert_eq!(states, vec![s1, s2, s3]);
         Ok(())
     }
@@ -181,7 +205,6 @@ mod tests {
         fst.add_arc(s2, arc_2_3.clone())?;
         fst.add_arc(s2, arc_2_3_bis.clone())?;
 
-
         let mut arcs_ref = vec![];
         for state_index in fst.states_index_iter() {
             for arc_index in fst.arcs_index_iter(state_index)? {
@@ -189,7 +212,10 @@ mod tests {
             }
         }
 
-        assert_eq!(arcs_ref, vec![&arc_1_2, &arc_1_2_bis, &arc_2_3, &arc_2_3_bis]);
+        assert_eq!(
+            arcs_ref,
+            vec![&arc_1_2, &arc_1_2_bis, &arc_2_3, &arc_2_3_bis]
+        );
         Ok(())
     }
 
@@ -216,7 +242,6 @@ mod tests {
 
         fst.add_arc(s2, arc_2_3.clone())?;
         fst.add_arc(s2, arc_2_3_bis.clone())?;
-
 
         for state_index in fst.states_index_iter() {
             for arc_index in fst.arcs_index_iter(state_index)? {

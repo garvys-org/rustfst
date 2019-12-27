@@ -54,7 +54,7 @@ impl AutoQueue {
             } else {
                 None
             };
-            ;
+
             // Finds the queue type to use per SCC.
             let mut unweighted = false;
             let mut all_trivial = false;

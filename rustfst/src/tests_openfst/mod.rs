@@ -62,6 +62,7 @@ use self::fst_impls::const_fst::test_const_fst_convert_convert;
 use self::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
 use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
 use self::io::vector_fst_text_serialization::test_vector_fst_text_serialization;
+use self::misc::test_del_all_states;
 
 #[macro_use]
 mod macros;
@@ -69,6 +70,7 @@ mod macros;
 mod algorithms;
 mod fst_impls;
 mod io;
+mod misc;
 mod test_symt;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -357,6 +359,8 @@ where
     test_const_fst_aligned_bin_deserializer(&test_data)?;
 
     test_const_fst_bin_serializer(&test_data)?;
+
+    test_del_all_states(&test_data)?;
 
     Ok(())
 }

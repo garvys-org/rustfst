@@ -354,5 +354,4 @@ mod tests {
         assert_eq!(symt1.get_label("b"), Some(2));
         assert_eq!(symt1.get_label("c"), Some(3));
     }
-
 }
