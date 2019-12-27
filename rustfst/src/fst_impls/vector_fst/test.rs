@@ -312,4 +312,25 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn test_del_all_states() -> Fallible<()> {
+        let mut fst = VectorFst::<ProbabilityWeight>::new();
+
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+
+        fst.add_arc(s1, Arc::new(0, 0, ProbabilityWeight::one(), s2))?;
+        fst.add_arc(s2, Arc::new(0, 0, ProbabilityWeight::one(), s1))?;
+        fst.add_arc(s2, Arc::new(0, 0, ProbabilityWeight::one(), s2))?;
+
+        fst.set_start(s1)?;
+        fst.set_final(s2, ProbabilityWeight::one())?;
+
+        assert_eq!(fst.num_states(), 2);
+        fst.del_all_states();
+        assert_eq!(fst.num_states(), 0);
+
+        Ok(())
+    }
 }

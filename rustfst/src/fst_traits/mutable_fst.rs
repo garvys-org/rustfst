@@ -141,6 +141,31 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// ```
     fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) -> Fallible<()>;
 
+    /// Remove all the states in the FST. As a result, all the arcs are also removed,
+    /// as well as the start state and all the fina states.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, StateIterator};
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::{BooleanWeight, Semiring};
+    /// let mut fst = VectorFst::<BooleanWeight>::new();
+    ///
+    /// assert_eq!(fst.states_iter().count(), 0);
+    ///
+    /// let s1 = fst.add_state();
+    /// let s2 = fst.add_state();
+    ///
+    /// assert_eq!(fst.states_iter().count(), 2);
+    ///
+    /// fst.del_all_states();
+    ///
+    /// assert_eq!(fst.states_iter().count(), 0);
+    ///
+    /// ```
+    fn del_all_states(&mut self);
+
     unsafe fn del_arcs_id_sorted_unchecked(&mut self, state: StateId, to_del: &Vec<usize>);
 
     /// Adds an arc to the FST. The arc will start in the state `source`.
@@ -192,6 +217,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
         &mut self,
         state_id: StateId,
     ) -> Fallible<Option<&mut <Self as CoreFst>::W>>;
+
     unsafe fn final_weight_unchecked_mut(
         &mut self,
         state_id: StateId,
