@@ -1,13 +1,13 @@
 use crate::fst_impls::const_fst::data_structure::ConstState;
 use std::slice;
 
-use failure::Fallible;
 use crate::fst_impls::ConstFst;
-use crate::fst_traits::{ StateIterator, ArcIterator, FstIterator };
+use crate::fst_traits::{ArcIterator, FstIterator, StateIterator};
+use crate::semirings::Semiring;
 use crate::Arc;
 use crate::StateId;
+use failure::Fallible;
 use std::ops::Range;
-use crate::semirings::Semiring;
 
 impl<W: Semiring> ConstFst<W> {
     fn state_range(&self) -> Range<usize> {
@@ -93,7 +93,11 @@ impl<W: Semiring> FstIterator for ConstFst<W> {
         Ok(state_idx.0)
     }
 
-    fn get_arc<'a>(&'a self, state: Self::StateIndex, arc: Self::ArcIndex) -> Fallible<&'a Arc<Self::W>> {
+    fn get_arc<'a>(
+        &'a self,
+        state: Self::StateIndex,
+        arc: Self::ArcIndex,
+    ) -> Fallible<&'a Arc<Self::W>> {
         let _ = self
             .states
             .get(state.0)
@@ -107,7 +111,7 @@ mod tests {
     use super::*;
     use crate::fst_impls::VectorFst;
 
-    use crate::fst_traits::{ MutableFst };
+    use crate::fst_traits::MutableFst;
     use crate::semirings::{ProbabilityWeight, Semiring};
 
     #[test]
@@ -136,8 +140,10 @@ mod tests {
 
         let const_fst: ConstFst<_> = fst.into();
 
-
-        let states = const_fst.states_index_iter().map(|it| const_fst.get_state_id(it)).collect::<Fallible<Vec<_>>>()?;
+        let states = const_fst
+            .states_index_iter()
+            .map(|it| const_fst.get_state_id(it))
+            .collect::<Fallible<Vec<_>>>()?;
         assert_eq!(states, vec![s1, s2, s3]);
         Ok(())
     }
@@ -175,7 +181,10 @@ mod tests {
             }
         }
 
-        assert_eq!(arcs_ref, vec![&arc_1_2, &arc_1_2_bis, &arc_2_3, &arc_2_3_bis]);
+        assert_eq!(
+            arcs_ref,
+            vec![&arc_1_2, &arc_1_2_bis, &arc_2_3, &arc_2_3_bis]
+        );
         Ok(())
     }
 }

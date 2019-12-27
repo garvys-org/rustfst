@@ -38,5 +38,4 @@ mod tests {
         println!("{:?}", ParsedTextSymt::from_string(&s));
         Ok(())
     }
-
 }

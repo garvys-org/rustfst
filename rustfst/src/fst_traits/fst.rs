@@ -1,4 +1,4 @@
-use crate::fst_traits::iterators::{ ArcIterator, StateIterator };
+use crate::fst_traits::iterators::{ArcIterator, StateIterator};
 use std::fmt::{Debug, Display};
 
 use failure::Fallible;
@@ -108,7 +108,6 @@ pub trait CoreFst {
         Some(state_id) == self.start()
     }
 }
-
 
 /// Trait defining the minimum interface necessary for a wFST.
 pub trait Fst:

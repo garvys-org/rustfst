@@ -105,5 +105,4 @@ mod tests {
         assert!(decode_linear_fst(&fst).is_err());
         Ok(())
     }
-
 }
