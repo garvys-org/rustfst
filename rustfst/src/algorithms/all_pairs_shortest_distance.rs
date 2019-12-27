@@ -38,7 +38,7 @@ use crate::semirings::{Semiring, StarSemiring};
 /// # Ok(())
 /// # }
 /// ```
-pub fn all_pairs_shortest_distance<F>(fst: &F) -> Fallible<(Vec<Vec<F::W>>)>
+pub fn all_pairs_shortest_distance<F>(fst: &F) -> Fallible<Vec<Vec<F::W>>>
 where
     F: Fst + ExpandedFst,
     F::W: StarSemiring,
