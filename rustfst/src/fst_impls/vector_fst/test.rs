@@ -263,43 +263,6 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_text() -> Fallible<()> {
-        for data in get_test_data_for_text_parser() {
-            let name = data.name;
-            let path_serialized_fst = data.path;
-            let vector_fst_ref = data.vector_fst;
-
-            let vector_fst = VectorFst::<ProbabilityWeight>::read_text(path_serialized_fst)?;
-
-            assert_eq!(
-                vector_fst, vector_fst_ref,
-                "Test failing for test parse text for wFST : {}",
-                name
-            );
-        }
-        Ok(())
-    }
-
-    #[test]
-    fn test_write_read_text() -> Fallible<()> {
-        for data in get_test_data_for_text_parser() {
-            let name = data.name;
-            let vector_fst_ref = data.vector_fst;
-
-            let text = vector_fst_ref.text()?;
-
-            let vector_fst = VectorFst::<ProbabilityWeight>::from_text_string(&text)?;
-
-            assert_eq!(
-                vector_fst, vector_fst_ref,
-                "Test failing for test write read text for wFST : {}",
-                name
-            );
-        }
-        Ok(())
-    }
-
-    #[test]
     fn test_parse_single_final_state() -> Fallible<()> {
         let parsed_fst = VectorFst::<ProbabilityWeight>::from_text_string("0\tInfinity\n")?;
 

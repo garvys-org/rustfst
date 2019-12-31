@@ -165,8 +165,6 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for ConnectVisitor<'a, F> {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
-
     use crate::proptest_fst::proptest_fst;
 
     use crate::fst_properties::FstProperties;
@@ -183,22 +181,5 @@ mod tests {
                 FstProperties::ACCESSIBLE | FstProperties::COACCESSIBLE
             ));
         }
-    }
-
-    #[test]
-    fn test_connect_generic() -> Fallible<()> {
-        for data in get_vector_fsts_for_tests() {
-            let fst = &data.fst;
-
-            let mut connect_fst = fst.clone();
-            connect(&mut connect_fst)?;
-
-            assert_eq!(
-                connect_fst, data.connected_fst,
-                "Connect test fail for fst : {:?}",
-                &data.name
-            );
-        }
-        Ok(())
     }
 }

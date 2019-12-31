@@ -76,26 +76,3 @@ where
     Ok(d)
 }
 
-#[cfg(test)]
-mod test {
-    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
-
-    use super::*;
-
-    #[test]
-    fn test_all_pairs_distance_generic() -> Fallible<()> {
-        for data in get_vector_fsts_for_tests() {
-            let fst = data.fst;
-            let d_ref = data.all_distances;
-
-            let d = all_pairs_shortest_distance(&fst)?;
-
-            assert_eq!(
-                d, d_ref,
-                "Test failing for all shortest distance on wFST : {:?}",
-                data.name
-            );
-        }
-        Ok(())
-    }
-}

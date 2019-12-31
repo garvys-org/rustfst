@@ -71,7 +71,6 @@ mod tests {
 
     use crate::fst_traits::PathsIterator;
     use crate::proptest_fst::proptest_fst;
-    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
     use crate::fst_properties::FstProperties;
 
@@ -93,59 +92,5 @@ mod tests {
             project(&mut fst, ProjectType::ProjectOutput);
             prop_assume!(fst.properties().unwrap().intersects(FstProperties::ACCEPTOR));
         }
-    }
-
-    #[test]
-    fn test_projection_input_generic() -> Fallible<()> {
-        for data in get_vector_fsts_for_tests() {
-            let fst = &data.fst;
-
-            let paths_ref: Counter<_> = fst
-                .paths_iter()
-                .map(|mut p| {
-                    p.olabels = p.ilabels.clone();
-                    p
-                })
-                .collect();
-
-            let mut projected_fst = fst.clone();
-
-            project(&mut projected_fst, ProjectType::ProjectInput);
-            let paths: Counter<_> = projected_fst.paths_iter().collect();
-
-            assert_eq!(
-                paths, paths_ref,
-                "Test failing for project_input on wFST {:?}",
-                &data.name
-            )
-        }
-        Ok(())
-    }
-
-    #[test]
-    fn test_projection_output_generic() -> Fallible<()> {
-        for data in get_vector_fsts_for_tests() {
-            let fst = &data.fst;
-
-            let paths_ref: Counter<_> = fst
-                .paths_iter()
-                .map(|mut p| {
-                    p.ilabels = p.olabels.clone();
-                    p
-                })
-                .collect();
-
-            let mut projected_fst = fst.clone();
-
-            project(&mut projected_fst, ProjectType::ProjectOutput);
-            let paths: Counter<_> = projected_fst.paths_iter().collect();
-
-            assert_eq!(
-                paths, paths_ref,
-                "Test failing for project_output on wFST {:?}",
-                &data.name
-            )
-        }
-        Ok(())
     }
 }

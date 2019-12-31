@@ -156,8 +156,6 @@ pub mod fst_traits;
 pub mod fst_impls;
 /// Provides a trait that shall be implemented for all weights stored inside a wFST.
 pub mod semirings;
-#[cfg(test)]
-pub(crate) mod test_data;
 
 mod drawing_config;
 /// Implementation of a successful path inside a wFST.
