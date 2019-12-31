@@ -2,7 +2,7 @@ use failure::{format_err, Fallible};
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::minimize;
-use crate::fst_traits::MutableFst;
+use crate::fst_traits::{ MutableFst, AllocableFst };
 use crate::fst_traits::TextParser;
 use crate::semirings::Semiring;
 use crate::semirings::WeaklyDivisibleSemiring;
@@ -42,7 +42,7 @@ impl MinimizeOperationResult {
 
 pub fn test_minimize<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + AllocableFst,
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
     for minimize_data in &test_data.minimize {
