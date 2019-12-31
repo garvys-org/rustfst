@@ -2,10 +2,10 @@ use failure::Fallible;
 
 use crate::algorithms::fst_convert;
 use crate::fst_impls::{ConstFst, VectorFst};
+use crate::fst_traits::{Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
 use crate::SymbolTable;
-use crate::fst_traits::{MutableFst, Fst};
 use std::rc::Rc;
 
 pub fn test_const_fst_convert_convert<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
