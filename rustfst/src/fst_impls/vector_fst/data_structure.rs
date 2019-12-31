@@ -14,7 +14,8 @@ use std::rc::Rc;
 pub struct VectorFst<W: Semiring> {
     pub(crate) states: Vec<VectorFstState<W>>,
     pub(crate) start_state: Option<StateId>,
-    pub(crate) isymt: Option<Rc<SymbolTable>>
+    pub(crate) isymt: Option<Rc<SymbolTable>>,
+    pub(crate) osymt: Option<Rc<SymbolTable>>,
 }
 
 // In my opinion, it is not a good idea to store values like num_arcs, num_input_epsilons

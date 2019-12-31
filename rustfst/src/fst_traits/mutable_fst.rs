@@ -288,6 +288,9 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
 
     fn input_symbols(&self) -> Option<Rc<SymbolTable>>;
     fn set_input_symbols(&mut self, symt: Rc<SymbolTable>);
+
+    fn output_symbols(&self) -> Option<Rc<SymbolTable>>;
+    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>);
 }
 use crate::symbol_table::SymbolTable;
 use std::rc::Rc;

@@ -312,6 +312,7 @@ mod tests {
         fst.set_start(s1)?;
         fst.set_final(s2, ProbabilityWeight::one())?;
 
+        // Test input symbol table
         {
             let mut symt = SymbolTable::new();
             symt.add_symbol("a"); // 1
@@ -325,6 +326,18 @@ mod tests {
             assert!(symt.is_some());
             let symt = symt.unwrap();
             assert_eq!(symt.len(), 4);
+        }
+
+        // Test output symbol table
+        {
+            let mut symt = SymbolTable::new();
+            fst.set_output_symbols(Rc::new(symt));
+        }
+        {
+            let symt = fst.output_symbols();
+            assert!(symt.is_some());
+            let symt = symt.unwrap();
+            assert_eq!(symt.len(), 1);
         }
 
         Ok(())

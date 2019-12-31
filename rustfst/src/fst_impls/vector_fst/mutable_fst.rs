@@ -22,7 +22,8 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         VectorFst {
             states: vec![],
             start_state: None,
-            isymt: None
+            isymt: None,
+            osymt: None
         }
     }
 
@@ -270,5 +271,13 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
 
     fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
         self.isymt = Some(Rc::clone(&symt))
+    }
+
+    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
+        self.osymt.clone()
+    }
+
+    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
+        self.osymt = Some(Rc::clone(&symt));
     }
 }
