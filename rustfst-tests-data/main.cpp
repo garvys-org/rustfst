@@ -476,6 +476,37 @@ void compute_fst_push(const F& raw_fst, json& j) {
     }
 }
 
+template<class F>
+void compute_fst_replace(const F& raw_fst, json& j) {
+    using Weight = typename F::Weight;
+    using Arc = typename F::Arc;
+    using StateId = typename F::Arc::StateId;
+    fst::VectorFst<typename F::Arc> fst;
+    fst.AddState();
+    fst.AddState();
+    fst.AddState();
+    fst.SetStart(0);
+    fst.SetFinal(2, Weight::One());
+    fst.AddArc(0, Arc(2, 3, Weight::One(), 1));
+    fst.AddArc(1, Arc(5, 7, Weight::One(), 2));
+
+    std::set<int> labels;
+    for (fst::StateIterator<F> siter(fst); !siter.Done(); siter.Next()) {
+        StateId state_id = siter.Value();
+        for (fst::ArcIterator<F> aiter(fst, state_id); !aiter.Done(); aiter.Next()) {
+            const Arc &arc = aiter.Value();
+            labels.insert(arc.olabel);
+        }
+    }
+
+    auto root = std::max_element(labels.begin(), labels.end()) + 1;
+    for (auto label: labels) {
+        if (label > 0) {
+            // TODO
+        }
+    }
+}
+
 template<class A>
 void compute_fst_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
     std::cout << "FST :" << fst_name << std::endl;
@@ -579,6 +610,9 @@ void compute_fst_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
 
     std::cout << "Push" << std::endl;
     compute_fst_push(raw_fst, data);
+
+    std::cout << "Replace" << std::endl;
+    compute_fst_replace(raw_fst, data);
 
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;
