@@ -194,27 +194,6 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
             .collect()
     }
 
-    fn reserve_arcs(&mut self, source: usize, additional: usize) -> Fallible<()> {
-        self.states
-            .get_mut(source)
-            .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
-            .arcs
-            .reserve(additional);
-        Ok(())
-    }
-
-    #[inline]
-    unsafe fn reserve_arcs_unchecked(&mut self, source: usize, additional: usize) {
-        self.states
-            .get_unchecked_mut(source)
-            .arcs
-            .reserve(additional)
-    }
-
-    fn reserve_states(&mut self, additional: usize) {
-        self.states.reserve(additional);
-    }
-
     fn final_weight_mut(&mut self, state_id: StateId) -> Fallible<Option<&mut W>> {
         let s = self
             .states

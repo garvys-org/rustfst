@@ -1,7 +1,7 @@
 use failure::Fallible;
 
 use crate::algorithms::{FinalArc, MapFinalAction};
-use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Arc, EPS_LABEL};
 
@@ -18,7 +18,7 @@ pub trait WeightConverter<SI: Semiring, SO: Semiring> {
 pub fn weight_convert<F1, F2, M>(fst_in: &F1, mapper: &mut M) -> Fallible<F2>
 where
     F1: ExpandedFst,
-    F2: MutableFst,
+    F2: MutableFst + AllocableFst,
     M: WeightConverter<F1::W, F2::W>,
 {
     let mut fst_out = F2::new();

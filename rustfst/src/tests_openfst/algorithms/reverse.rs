@@ -5,8 +5,7 @@ use crate::algorithms::MapFinalAction;
 use crate::algorithms::WeightConverter;
 use crate::algorithms::{reverse, weight_convert};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::MutableFst;
-use crate::fst_traits::TextParser;
+use crate::fst_traits::{ MutableFst, TextParser, AllocableFst };
 use crate::semirings::Semiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::Arc;
@@ -44,7 +43,7 @@ where
 
 pub fn test_reverse<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + AllocableFst,
     F::W: 'static + Semiring<Type = f32> + WeaklyDivisibleSemiring,
 {
     let fst_reverse: VectorFst<_> = reverse(&test_data.raw).unwrap();

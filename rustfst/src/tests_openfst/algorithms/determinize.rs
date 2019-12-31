@@ -4,8 +4,7 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{determinize, isomorphic, DeterminizeType};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::MutableFst;
-use crate::fst_traits::TextParser;
+use crate::fst_traits::{ MutableFst, TextParser , AllocableFst};
 use crate::semirings::Semiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
@@ -50,7 +49,7 @@ impl DeterminizeOperationResult {
 
 pub fn test_determinize<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + AllocableFst,
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
     for determinize_data in &test_data.determinize {

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add `FstIterator` and `FstIteratorMut` to iterate over states and arcs in a given FST without referencing the FST.
 - Implement `FstIterator` and `FstIteratorMut` for ConstFst and VectorFst.
+- Add `AllocableFst` to control the wFst allocation: `capacity`, `reserve`, `shrink_to_fit`
+- Implement `AllocableFst` for Vector Fst
 - Add `del_all_states` method in the `MutableFst` trait to remove all the states in a Fst.
 - Add `set_input_symbols()` and `set_output_symbols()` to the `MutableFst` trait to attach a `SymbolTable` to an Fst.
 - Add `input_symbols()` and `output_symbols()` to the `Fst` trait to retrieve previously attached `SymbolTable`.
@@ -16,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Make `KDELTA` public outside of the crate
 - Fix serialization into a DOT file by putting the `label` into quotes.
+- remove `reserve` API from `MutableFst`, see `AllocableFst` for this API 
 
 ## [0.4.0] - 2019-11-12
 

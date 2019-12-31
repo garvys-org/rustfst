@@ -1,5 +1,6 @@
 #[macro_use]
 mod macros;
+mod allocable_fst;
 mod binary_deserializer;
 mod binary_serializer;
 mod expanded_fst;
@@ -10,6 +11,7 @@ mod mutable_fst;
 mod paths_iterator;
 mod text_parser;
 
+pub use self::allocable_fst::AllocableFst;
 pub use self::binary_deserializer::BinaryDeserializer;
 pub use self::binary_serializer::BinarySerializer;
 pub use self::expanded_fst::ExpandedFst;
