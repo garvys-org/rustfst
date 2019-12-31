@@ -1,15 +1,18 @@
-use std::collections::{BTreeSet, HashMap};
+use std::collections::{BTreeSet, HashMap, HashSet};
 use std::collections::hash_map::Entry;
 use std::hash::Hash;
+use std::slice::Iter as IterSlice;
 
 use bimap::BiHashMap;
 use bitflags::_core::cell::{Ref, RefCell};
 use failure::{bail, Fallible};
+use nom::lib::std::collections::VecDeque;
 
 use crate::{Arc, EPS_LABEL, Label, StateId};
 use crate::algorithms::cache::CacheImpl;
-use crate::fst_traits::ExpandedFst;
+use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
+use crate::algorithms::replace::ReplaceLabelType::{ReplaceLabelNeither, ReplaceLabelInput};
 
 /// This specifies what labels to output on the call or return arc.
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
@@ -33,7 +36,28 @@ struct ReplaceFstOptions {
     return_label: Label,
 }
 
-type FstList<F> = Vec<(Label, F)>;
+impl ReplaceFstOptions {
+    pub fn new(root: Label, epsilon_on_replace: bool) -> Self {
+        Self {
+            root,
+            call_label_type: if epsilon_on_replace {ReplaceLabelNeither} else {ReplaceLabelInput},
+            return_label_type: ReplaceLabelNeither,
+            call_output_label: if epsilon_on_replace {Some(0)} else {None},
+            return_label: 0
+        }
+    }
+}
+
+pub fn replace<F1, F2>(fst_list: Vec<(Label, F1)>, root: Label, epsilon_on_replace: bool) -> Fallible<F2>
+where
+    F1: ExpandedFst,
+    F1::W: 'static,
+    F2: MutableFst<W=F1::W> + ExpandedFst<W=F1::W>
+{
+    let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
+    let mut fst = ReplaceFstImpl::new(fst_list, opts)?;
+    fst.compute()
+}
 
 #[allow(unused)]
 /// Returns true if label type on arc results in epsilon input label.
@@ -121,6 +145,13 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         };
 
         Ok(replace_fst_impl)
+    }
+
+    pub fn arcs_iter(&mut self, state: StateId) -> Fallible<IterSlice<Arc<F::W>>> {
+        if !self.cache_impl.expanded(state) {
+            self.expand(state)?;
+        }
+        self.cache_impl.arcs_iter(state)
     }
 
     #[allow(unused)]
@@ -345,6 +376,44 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
                 ));
             }
         }
+    }
+
+    pub fn compute<F2: MutableFst<W = F::W> + ExpandedFst<W = F::W>>(&mut self) -> Fallible<F2>
+        where
+            F::W: 'static,
+    {
+        let start_state = self.start()?;
+        let mut fst_out = F2::new();
+        if start_state.is_none() {
+            return Ok(fst_out);
+        }
+        let start_state = start_state.unwrap();
+        for _ in 0..=start_state {
+            fst_out.add_state();
+        }
+        fst_out.set_start(start_state)?;
+        let mut queue = VecDeque::new();
+        let mut visited_states = HashSet::new();
+        visited_states.insert(start_state);
+        queue.push_back(start_state);
+        while !queue.is_empty() {
+            let s = queue.pop_front().unwrap();
+            for arc in self.arcs_iter(s)? {
+                if !visited_states.contains(&arc.nextstate) {
+                    queue.push_back(arc.nextstate);
+                    visited_states.insert(arc.nextstate);
+                }
+                let n = fst_out.num_states();
+                for _ in n..=arc.nextstate {
+                    fst_out.add_state();
+                }
+                fst_out.add_arc(s, arc.clone())?;
+            }
+            if let Some(f_w) = self.final_weight(s)? {
+                fst_out.set_final(s, f_w.clone())?;
+            }
+        }
+        Ok(fst_out)
     }
 }
 
