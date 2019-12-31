@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `FstIterator` and `FstIteratorMut` to iterate over states and arcs in a given FST without referencing the FST.
 - Implement `FstIterator` and `FstIteratorMut` for ConstFst and VectorFst.
 - Add `del_all_states` method in the `MutableFst` trait to remove all the states in a Fst.
+- Add `set_input_symbols()` and `set_output_symbols()` to the `MutableFst` trait to attach a `SymbolTable` to an Fst.
+- Add `input_symbols()` and `output_symbols()` to the `Fst` trait to retrieved previously attached `SymbolTable`.
 
 ### Changed
 - Make `KDELTA` public outside of the crate
