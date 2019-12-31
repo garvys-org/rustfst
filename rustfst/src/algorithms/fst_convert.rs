@@ -1,4 +1,4 @@
-use crate::fst_traits::{ExpandedFst, MutableFst, AllocableFst};
+use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 
 pub fn fst_convert<F1, F2>(ifst: &F1) -> F2
 where

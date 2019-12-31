@@ -207,7 +207,6 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     fn pop_arcs(&mut self, source: StateId) -> Fallible<Vec<Arc<Self::W>>>;
     unsafe fn pop_arcs_unchecked(&mut self, source: StateId) -> Vec<Arc<Self::W>>;
 
-
     /// Retrieves a mutable reference to the final weight of a state (if the state is a final one).
     fn final_weight_mut(
         &mut self,

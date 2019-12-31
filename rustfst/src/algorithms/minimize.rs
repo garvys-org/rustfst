@@ -23,7 +23,7 @@ use crate::algorithms::{
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::ArcIterator;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, AllocableFst};
+use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{
     GallicWeightLeft, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };

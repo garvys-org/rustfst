@@ -1,7 +1,7 @@
 use failure::Fallible;
 
 use crate::arc::Arc;
-use crate::fst_traits::{ExpandedFst, MutableFst, AllocableFst};
+use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 
 /// Reverses an FST. The reversed result is written to an output mutable FST.

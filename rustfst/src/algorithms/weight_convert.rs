@@ -1,7 +1,7 @@
 use failure::Fallible;
 
 use crate::algorithms::{FinalArc, MapFinalAction};
-use crate::fst_traits::{ExpandedFst, MutableFst, AllocableFst};
+use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Arc, EPS_LABEL};
 

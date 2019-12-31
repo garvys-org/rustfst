@@ -11,7 +11,7 @@ use crate::algorithms::{
     FactorWeightType, ReweightType,
 };
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, AllocableFst};
+use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{DivideType, Semiring};
 use crate::semirings::{
     GallicWeightLeft, GallicWeightRight, StringWeightLeft, StringWeightRight,
