@@ -22,5 +22,13 @@ where
         }
     }
 
+    if let Some(isymt) = ifst.input_symbols() {
+        ofst.set_input_symbols(isymt);
+    }
+
+    if let Some(osymt) = ifst.output_symbols() {
+        ofst.set_output_symbols(osymt);
+    }
+
     ofst
 }

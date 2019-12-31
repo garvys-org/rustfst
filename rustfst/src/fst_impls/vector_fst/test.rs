@@ -7,11 +7,12 @@ mod tests {
     use crate::arc::Arc;
     use crate::fst_impls::VectorFst;
     use crate::fst_traits::{
-        ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, MutableArcIterator, MutableFst,
-        StateIterator, TextParser,
+        ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableArcIterator,
+        MutableFst, StateIterator, TextParser,
     };
     use crate::semirings::{ProbabilityWeight, Semiring};
-    use crate::test_data::text_fst::get_test_data_for_text_parser;
+    use crate::SymbolTable;
+    use std::rc::Rc;
 
     #[test]
     fn test_small_fst() -> Fallible<()> {
@@ -263,43 +264,6 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_text() -> Fallible<()> {
-        for data in get_test_data_for_text_parser() {
-            let name = data.name;
-            let path_serialized_fst = data.path;
-            let vector_fst_ref = data.vector_fst;
-
-            let vector_fst = VectorFst::<ProbabilityWeight>::read_text(path_serialized_fst)?;
-
-            assert_eq!(
-                vector_fst, vector_fst_ref,
-                "Test failing for test parse text for wFST : {}",
-                name
-            );
-        }
-        Ok(())
-    }
-
-    #[test]
-    fn test_write_read_text() -> Fallible<()> {
-        for data in get_test_data_for_text_parser() {
-            let name = data.name;
-            let vector_fst_ref = data.vector_fst;
-
-            let text = vector_fst_ref.text()?;
-
-            let vector_fst = VectorFst::<ProbabilityWeight>::from_text_string(&text)?;
-
-            assert_eq!(
-                vector_fst, vector_fst_ref,
-                "Test failing for test write read text for wFST : {}",
-                name
-            );
-        }
-        Ok(())
-    }
-
-    #[test]
     fn test_parse_single_final_state() -> Fallible<()> {
         let parsed_fst = VectorFst::<ProbabilityWeight>::from_text_string("0\tInfinity\n")?;
 
@@ -330,6 +294,51 @@ mod tests {
         assert_eq!(fst.num_states(), 2);
         fst.del_all_states();
         assert_eq!(fst.num_states(), 0);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_attach_symt() -> Fallible<()> {
+        let mut fst = VectorFst::<ProbabilityWeight>::new();
+
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+
+        fst.add_arc(s1, Arc::new(1, 0, ProbabilityWeight::one(), s2))?;
+        fst.add_arc(s2, Arc::new(2, 0, ProbabilityWeight::one(), s1))?;
+        fst.add_arc(s2, Arc::new(3, 0, ProbabilityWeight::one(), s2))?;
+
+        fst.set_start(s1)?;
+        fst.set_final(s2, ProbabilityWeight::one())?;
+
+        // Test input symbol table
+        {
+            let mut symt = SymbolTable::new();
+            symt.add_symbol("a"); // 1
+            symt.add_symbol("b"); // 2
+            symt.add_symbol("c"); // 3
+
+            fst.set_input_symbols(Rc::new(symt));
+        }
+        {
+            let symt = fst.input_symbols();
+            assert!(symt.is_some());
+            let symt = symt.unwrap();
+            assert_eq!(symt.len(), 4);
+        }
+
+        // Test output symbol table
+        {
+            let symt = SymbolTable::new();
+            fst.set_output_symbols(Rc::new(symt));
+        }
+        {
+            let symt = fst.output_symbols();
+            assert!(symt.is_some());
+            let symt = symt.unwrap();
+            assert_eq!(symt.len(), 1);
+        }
 
         Ok(())
     }

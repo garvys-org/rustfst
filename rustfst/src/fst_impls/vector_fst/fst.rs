@@ -1,11 +1,22 @@
+use std::rc::Rc;
+
 use failure::Fallible;
 
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
-use crate::StateId;
+use crate::{StateId, SymbolTable};
 
-impl<W: 'static + Semiring> Fst for VectorFst<W> {}
+impl<W: 'static + Semiring> Fst for VectorFst<W> {
+    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
+        // Rc is incremented, SymbolTable is not duplicated
+        self.isymt.clone()
+    }
+
+    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
+        self.osymt.clone()
+    }
+}
 
 impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
     type W = W;

@@ -174,23 +174,7 @@ impl FinalState {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_data::text_fst::get_test_data_for_text_parser;
-
     use super::*;
-
-    #[test]
-    fn test_parse_text_fst() -> Fallible<()> {
-        for data in get_test_data_for_text_parser() {
-            let parsed_fst = ParsedTextFst::from_path(data.path)?;
-            let parsed_fst_ref = data.parsed_text_fst;
-            assert_eq!(
-                parsed_fst, parsed_fst_ref,
-                "Tests failing for parse text fst for wFST : {}",
-                data.name
-            );
-        }
-        Ok(())
-    }
 
     #[test]
     fn test_parse_text_fst_not_contiguous() -> Fallible<()> {
