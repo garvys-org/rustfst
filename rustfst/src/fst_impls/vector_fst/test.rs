@@ -7,8 +7,8 @@ mod tests {
     use crate::arc::Arc;
     use crate::fst_impls::VectorFst;
     use crate::fst_traits::{
-        ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, MutableArcIterator, MutableFst,
-        StateIterator, TextParser,
+        ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableArcIterator,
+        MutableFst, StateIterator, TextParser,
     };
     use crate::semirings::{ProbabilityWeight, Semiring};
     use crate::SymbolTable;

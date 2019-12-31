@@ -72,6 +72,8 @@ fn parse_const_fst<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], ConstFst
             start: parse_start_state(hdr.start),
             states: const_states,
             arcs: const_arcs,
+            isymt: None,
+            osymt: None,
         },
     ))
 }

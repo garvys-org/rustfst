@@ -28,6 +28,8 @@ impl<W: Semiring + 'static> From<VectorFst<W>> for ConstFst<W> {
             states: const_states,
             arcs: const_arcs,
             start: ifst.start_state,
+            isymt: ifst.isymt,
+            osymt: ifst.osymt,
         }
     }
 }

@@ -288,17 +288,9 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
         crate::algorithms::arc_map(self, mapper)
     }
 
-    /// Retrieves the input `SymbolTable` associated to the Fst.
-    /// If no SymbolTable has been previously attached then `None` is returned.
-    fn input_symbols(&self) -> Option<Rc<SymbolTable>>;
-
     /// Attaches an output `SymbolTable` to the Fst.
     /// The `SymbolTable` is not duplicated with the use of Rc.
     fn set_input_symbols(&mut self, symt: Rc<SymbolTable>);
-
-    /// Retrieves the output `SymbolTable` associated to the Fst.
-    /// If no SymbolTable has been previously attached then `None` is returned.
-    fn output_symbols(&self) -> Option<Rc<SymbolTable>>;
 
     /// Attaches an output `SymbolTable` to the Fst.
     /// The `SymbolTable` is not duplicated with the use of Rc.

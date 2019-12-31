@@ -81,6 +81,8 @@ impl<W: 'static + Semiring<Type = f32>> TextParser for ConstFst<W> {
             states: const_states,
             arcs: const_arcs,
             start: start_state,
+            isymt: None,
+            osymt: None,
         })
     }
 }

@@ -2,9 +2,19 @@ use crate::fst_impls::ConstFst;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 
+use crate::SymbolTable;
 use failure::{format_err, Fallible};
+use std::rc::Rc;
 
-impl<W: Semiring + 'static> Fst for ConstFst<W> {}
+impl<W: Semiring + 'static> Fst for ConstFst<W> {
+    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
+        self.isymt.clone()
+    }
+
+    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
+        self.osymt.clone()
+    }
+}
 
 impl<W: Semiring> CoreFst for ConstFst<W> {
     type W = W;

@@ -1,11 +1,12 @@
-use crate::fst_traits::iterators::{ArcIterator, StateIterator};
 use std::fmt::{Debug, Display};
+use std::rc::Rc;
 
 use failure::Fallible;
 
 use crate::algorithms::arc_filters::{ArcFilter, InputEpsilonArcFilter, OutputEpsilonArcFilter};
+use crate::fst_traits::iterators::{ArcIterator, StateIterator};
 use crate::semirings::Semiring;
-use crate::StateId;
+use crate::{StateId, SymbolTable};
 
 /// Trait defining necessary methods for a wFST to access start states and final states.
 pub trait CoreFst {
@@ -181,4 +182,12 @@ pub trait Fst:
         }
         true
     }
+
+    /// Retrieves the input `SymbolTable` associated to the Fst.
+    /// If no SymbolTable has been previously attached then `None` is returned.
+    fn input_symbols(&self) -> Option<Rc<SymbolTable>>;
+
+    /// Retrieves the output `SymbolTable` associated to the Fst.
+    /// If no SymbolTable has been previously attached then `None` is returned.
+    fn output_symbols(&self) -> Option<Rc<SymbolTable>>;
 }

@@ -264,17 +264,8 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         // Truncate doesn't modify the capacity of the vector. Maybe a shrink_to_fit ?
     }
 
-    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
-        // Rc is incremented, SymbolTable is not duplicated
-        self.isymt.clone()
-    }
-
     fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
         self.isymt = Some(Rc::clone(&symt))
-    }
-
-    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
-        self.osymt.clone()
     }
 
     fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
