@@ -1,8 +1,9 @@
 use crate::StateId;
 use failure::Fallible;
+use crate::fst_traits::Fst;
 
 /// Trait defining the methods to control allocation for a wFST
-pub trait AllocableFst {
+pub trait AllocableFst: Fst {
     /// Reserve capacity for at least additional more arcs leaving the state.
     /// The FST may reserve more space to avoid frequent allocation.
     /// After calling `reserve_arcs`, the capacity will be greater or equal to `num_arcs` + `additionnal`
