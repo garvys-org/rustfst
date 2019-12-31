@@ -1,7 +1,7 @@
 use failure::Fallible;
 
 use crate::arc::Arc;
-use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::fst_traits::{ExpandedFst, MutableFst, AllocableFst};
 use crate::semirings::Semiring;
 
 /// Reverses an FST. The reversed result is written to an output mutable FST.
@@ -18,7 +18,7 @@ pub fn reverse<W, F1, F2>(ifst: &F1) -> Fallible<F2>
 where
     W: Semiring,
     F1: ExpandedFst<W = W>,
-    F2: MutableFst<W = W::ReverseWeight> + ExpandedFst<W = W::ReverseWeight>,
+    F2: MutableFst<W = W::ReverseWeight> + ExpandedFst<W = W::ReverseWeight> + AllocableFst,
 {
     let mut ofst = F2::new();
     ofst.reserve_states(ifst.num_states());

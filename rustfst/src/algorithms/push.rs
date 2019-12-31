@@ -11,7 +11,7 @@ use crate::algorithms::{
     FactorWeightType, ReweightType,
 };
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, AllocableFst};
 use crate::semirings::{DivideType, Semiring};
 use crate::semirings::{
     GallicWeightLeft, GallicWeightRight, StringWeightLeft, StringWeightRight,
@@ -163,7 +163,7 @@ pub fn push<F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType)
 where
     F1: ExpandedFst,
     F1::W: WeaklyDivisibleSemiring + WeightQuantize,
-    F2: ExpandedFst<W = F1::W> + MutableFst,
+    F2: ExpandedFst<W = F1::W> + MutableFst + AllocableFst,
     <F1 as CoreFst>::W: 'static,
     <<F1 as CoreFst>::W as Semiring>::ReverseWeight: 'static,
 {

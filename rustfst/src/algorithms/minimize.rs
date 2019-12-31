@@ -23,7 +23,7 @@ use crate::algorithms::{
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::ArcIterator;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, AllocableFst};
 use crate::semirings::{
     GallicWeightLeft, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
@@ -35,7 +35,7 @@ use crate::NO_STATE_ID;
 
 pub fn minimize<F>(ifst: &mut F, allow_nondet: bool) -> Fallible<()>
 where
-    F: MutableFst + ExpandedFst,
+    F: MutableFst + ExpandedFst + AllocableFst,
     F::W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
 {

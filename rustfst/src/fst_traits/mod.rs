@@ -9,6 +9,7 @@ mod iterators;
 mod mutable_fst;
 mod paths_iterator;
 mod text_parser;
+mod allocable_fst;
 
 pub use self::binary_deserializer::BinaryDeserializer;
 pub use self::binary_serializer::BinarySerializer;
@@ -19,3 +20,4 @@ pub use self::iterators::{ArcIterator, FstIterator, FstIteratorMut, StateIterato
 pub use self::mutable_fst::{MutableArcIterator, MutableFst};
 pub use self::paths_iterator::PathsIterator;
 pub use self::text_parser::TextParser;
+pub use self::allocable_fst::AllocableFst;

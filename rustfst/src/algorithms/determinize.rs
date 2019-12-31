@@ -12,7 +12,7 @@ use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverte
 use crate::algorithms::{factor_weight, weight_convert, FactorWeightOptions, FactorWeightType};
 use crate::arc::Arc;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
+use crate::fst_traits::{ExpandedFst, Fst, MutableFst, AllocableFst};
 use crate::semirings::{
     DivideType, GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, Semiring,
     SemiringProperties, StringWeightLeft, StringWeightRestrict, WeaklyDivisibleSemiring,
@@ -442,7 +442,7 @@ pub fn determinize_fst<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Fal
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
     F1: ExpandedFst<W = W>,
-    F2: MutableFst<W = W> + ExpandedFst<W = W>,
+    F2: MutableFst<W = W> + ExpandedFst<W = W> + AllocableFst,
 {
     let mut to_gallic = ToGallicConverter {};
     let mut from_gallic = FromGallicConverter {
@@ -496,7 +496,7 @@ pub fn determinize<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Fallibl
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
     F1: ExpandedFst<W = W>,
-    F2: MutableFst<W = W> + ExpandedFst<W = W>,
+    F2: MutableFst<W = W> + ExpandedFst<W = W> + AllocableFst,
 {
     if fst_in.is_acceptor() {
         determinize_fsa::<_, _, _, DefaultCommonDivisor>(fst_in)
