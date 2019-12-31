@@ -11,7 +11,8 @@ mod tests {
         StateIterator, TextParser,
     };
     use crate::semirings::{ProbabilityWeight, Semiring};
-    use crate::test_data::text_fst::get_test_data_for_text_parser;
+    use crate::SymbolTable;
+    use std::rc::Rc;
 
     #[test]
     fn test_small_fst() -> Fallible<()> {
@@ -293,6 +294,38 @@ mod tests {
         assert_eq!(fst.num_states(), 2);
         fst.del_all_states();
         assert_eq!(fst.num_states(), 0);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_attach_symt() -> Fallible<()> {
+        let mut fst = VectorFst::<ProbabilityWeight>::new();
+
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+
+        fst.add_arc(s1, Arc::new(1, 0, ProbabilityWeight::one(), s2))?;
+        fst.add_arc(s2, Arc::new(2, 0, ProbabilityWeight::one(), s1))?;
+        fst.add_arc(s2, Arc::new(3, 0, ProbabilityWeight::one(), s2))?;
+
+        fst.set_start(s1)?;
+        fst.set_final(s2, ProbabilityWeight::one())?;
+
+        {
+            let mut symt = SymbolTable::new();
+            symt.add_symbol("a"); // 1
+            symt.add_symbol("b"); // 2
+            symt.add_symbol("c"); // 3
+
+            fst.set_input_symbols(Rc::new(symt));
+        }
+        {
+            let symt = fst.input_symbols();
+            assert!(symt.is_some());
+            let symt = symt.unwrap();
+            assert_eq!(symt.len(), 4);
+        }
 
         Ok(())
     }

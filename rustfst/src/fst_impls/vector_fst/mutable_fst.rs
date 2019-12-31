@@ -7,7 +7,8 @@ use crate::fst_impls::vector_fst::{VectorFst, VectorFstState};
 use crate::fst_traits::MutableFst;
 use crate::fst_traits::{CoreFst, MutableArcIterator};
 use crate::semirings::Semiring;
-use crate::{Arc, StateId};
+use crate::{Arc, StateId, SymbolTable};
+use std::rc::Rc;
 
 #[inline]
 fn equal_arc<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> bool {
@@ -21,6 +22,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         VectorFst {
             states: vec![],
             start_state: None,
+            isymt: None
         }
     }
 
@@ -259,5 +261,14 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         }
         arcs.truncate(n_arcs);
         // Truncate doesn't modify the capacity of the vector. Maybe a shrink_to_fit ?
+    }
+
+    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
+        // Rc is incremented, SymbolTable is not duplicated
+        self.isymt.clone()
+    }
+
+    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
+        self.isymt = Some(Rc::clone(&symt))
     }
 }

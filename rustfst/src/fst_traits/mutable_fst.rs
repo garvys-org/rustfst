@@ -285,7 +285,12 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     fn arc_map<M: ArcMapper<Self::W>>(&mut self, mapper: &mut M) -> Fallible<()> {
         crate::algorithms::arc_map(self, mapper)
     }
+
+    fn input_symbols(&self) -> Option<Rc<SymbolTable>>;
+    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>);
 }
+use crate::symbol_table::SymbolTable;
+use std::rc::Rc;
 
 /// Iterate over mutable arcs in a wFST.
 pub trait MutableArcIterator<'a>: CoreFst

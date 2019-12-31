@@ -49,6 +49,7 @@ fn parse_fst<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], VectorFst<W>> 
         VectorFst {
             start_state: parse_start_state(header.start),
             states,
+            isymt: None
         },
     ))
 }
