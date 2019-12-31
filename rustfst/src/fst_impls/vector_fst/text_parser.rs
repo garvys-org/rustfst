@@ -18,7 +18,7 @@ impl<W: 'static + Semiring<Type = f32>> TextParser for VectorFst<W> {
             states,
             start_state,
             isymt: None,
-            osymt: None
+            osymt: None,
         };
 
         for transition in parsed_fst_text.transitions.into_iter() {

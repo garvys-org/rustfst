@@ -1,12 +1,14 @@
+use std::cmp::Ordering;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 use failure::Fallible;
 
 use crate::algorithms::ArcMapper;
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
+use crate::symbol_table::SymbolTable;
 use crate::StateId;
-use std::cmp::Ordering;
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
@@ -286,14 +288,22 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
         crate::algorithms::arc_map(self, mapper)
     }
 
+    /// Retrieves the input `SymbolTable` associated to the Fst.
+    /// If no SymbolTable has been previously attached then `None` is returned.
     fn input_symbols(&self) -> Option<Rc<SymbolTable>>;
+
+    /// Attaches an output `SymbolTable` to the Fst.
+    /// The `SymbolTable` is not duplicated with the use of Rc.
     fn set_input_symbols(&mut self, symt: Rc<SymbolTable>);
 
+    /// Retrieves the output `SymbolTable` associated to the Fst.
+    /// If no SymbolTable has been previously attached then `None` is returned.
     fn output_symbols(&self) -> Option<Rc<SymbolTable>>;
+
+    /// Attaches an output `SymbolTable` to the Fst.
+    /// The `SymbolTable` is not duplicated with the use of Rc.
     fn set_output_symbols(&mut self, symt: Rc<SymbolTable>);
 }
-use crate::symbol_table::SymbolTable;
-use std::rc::Rc;
 
 /// Iterate over mutable arcs in a wFST.
 pub trait MutableArcIterator<'a>: CoreFst

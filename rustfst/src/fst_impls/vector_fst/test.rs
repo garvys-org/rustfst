@@ -330,7 +330,7 @@ mod tests {
 
         // Test output symbol table
         {
-            let mut symt = SymbolTable::new();
+            let symt = SymbolTable::new();
             fst.set_output_symbols(Rc::new(symt));
         }
         {

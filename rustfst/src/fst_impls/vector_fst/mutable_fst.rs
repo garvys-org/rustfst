@@ -23,7 +23,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
             states: vec![],
             start_state: None,
             isymt: None,
-            osymt: None
+            osymt: None,
         }
     }
 

@@ -2,8 +2,8 @@ use crate::algorithms::arc_filters::ArcFilter;
 use crate::algorithms::arc_filters::{InputEpsilonArcFilter, OutputEpsilonArcFilter};
 use crate::arc::Arc;
 use crate::semirings::Semiring;
-use crate::StateId;
 use crate::symbol_table::SymbolTable;
+use crate::StateId;
 use std::rc::Rc;
 
 /// Simple concrete, mutable FST whose states and arcs are stored in standard vectors.

@@ -66,10 +66,6 @@ pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_type: ProjectTy
 
 #[cfg(test)]
 mod tests {
-    use counter::Counter;
-    use failure::Fallible;
-
-    use crate::fst_traits::PathsIterator;
     use crate::proptest_fst::proptest_fst;
 
     use crate::fst_properties::FstProperties;
