@@ -1,5 +1,5 @@
 use std::collections::hash_map::Entry;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, BTreeSet};
 
 use bimap::BiHashMap;
 use failure::{bail, Fallible};
@@ -9,6 +9,7 @@ use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL};
 use std::hash::Hash;
+use bitflags::_core::cell::{RefCell, Ref};
 
 /// This specifies what labels to output on the call or return arc.
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
@@ -69,7 +70,7 @@ struct ReplaceFstImpl<F: ExpandedFst> {
     call_output_label_: Option<Label>,
     return_label_: Label,
     fst_array: Vec<F>,
-    nonterminal_set: HashSet<Label>,
+    nonterminal_set: BTreeSet<Label>,
     nonterminal_hash: HashMap<Label, Label>,
     root: Label,
     state_table: ReplaceStateTable,
@@ -85,7 +86,7 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
             call_output_label_: opts.call_output_label,
             return_label_: opts.return_label,
             fst_array: Vec::with_capacity(fst_list.len()),
-            nonterminal_set: HashSet::new(),
+            nonterminal_set: BTreeSet::new(),
             nonterminal_hash: HashMap::new(),
             root: 0,
             state_table: ReplaceStateTable::new(),
@@ -192,14 +193,9 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
             .unwrap()
             .arcs_iter(tuple.fst_state.unwrap())?
         {
-            if let Some(new_arc) = compute_arc(
+            if let Some(new_arc) = self.compute_arc(
                 &tuple,
-                arc,
-                &mut self.state_table,
-                &self.nonterminal_set,
-                &self.nonterminal_hash,
-                self.call_label_type_,
-                &self.call_output_label_,
+                arc
             ) {
                 self.cache_impl.push_arc(state, new_arc);
             }
@@ -267,17 +263,17 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         }
     }
 
-    fn get_prefix_id(&mut self, prefix: &ReplaceStackPrefix) -> StateId {
+    fn get_prefix_id(&self, prefix: &ReplaceStackPrefix) -> StateId {
         self.state_table.prefix_table.find_id(prefix)
     }
 
-    fn pop_prefix(&mut self, mut prefix: ReplaceStackPrefix) -> StateId {
+    fn pop_prefix(&self, mut prefix: ReplaceStackPrefix) -> StateId {
         prefix.pop();
         self.get_prefix_id(&prefix)
     }
 
     fn push_prefix(
-        &mut self,
+        &self,
         mut prefix: ReplaceStackPrefix,
         fst_id: Option<Label>,
         nextstate: Option<StateId>,
@@ -285,24 +281,42 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         prefix.push(fst_id, nextstate);
         self.get_prefix_id(&prefix)
     }
-}
 
-fn compute_arc<W: Semiring>(
-    tuple: &ReplaceStateTuple,
-    arc: &Arc<W>,
-    state_table: &mut ReplaceStateTable,
-    nonterminal_set: &HashSet<Label>,
-    nonterminal_hash: &HashMap<Label, Label>,
-    call_label_type_: ReplaceLabelType,
-    call_output_label_: &Option<Label>,
-) -> Option<Arc<W>> {
-    if !epsilon_on_input(call_label_type_) {
-        return None;
+    fn compute_arc<W: Semiring>(
+        &self,
+        tuple: &ReplaceStateTuple,
+        arc: &Arc<W>,
+    ) -> Option<Arc<W>> {
+        if !epsilon_on_input(self.call_label_type_) {
+            return Some(arc.clone());
+        }
+        if arc.olabel == EPS_LABEL || arc.olabel  < *self.nonterminal_set.iter().next().unwrap() || arc.olabel > *self.nonterminal_set.iter().rev().next().unwrap() {
+            let state_tuple = ReplaceStateTuple::new(tuple.prefix_id, tuple.fst_id, Some(arc.nextstate));
+            let nextstate = self.state_table.tuple_table.find_id(&state_tuple);
+            return Some(Arc::new(arc.ilabel, arc.olabel, arc.weight.clone(), nextstate));
+        } else {
+            // Checks for non-terminal
+            if let Some(nonterminal) = self.nonterminal_hash.get(&arc.olabel) {
+                let mut p = self.state_table.prefix_table.find_tuple(tuple.prefix_id).clone();
+                let nt_prefix = self.push_prefix(p, tuple.fst_id, Some(arc.nextstate));
+                if let Some(nt_start) =  self.fst_array.get(*nonterminal).unwrap().start() {
+                    let nt_nextstate = self.state_table.tuple_table.find_id(&ReplaceStateTuple::new(nt_prefix, Some(*nonterminal), Some(nt_start)));
+                    let ilabel = if epsilon_on_input(self.call_label_type_) {0} else {arc.ilabel};
+                    let olabel = if epsilon_on_output(self.call_label_type_) {0} else {
+                        self.call_output_label_.unwrap_or(arc.olabel)
+                    };
+                    return Some(Arc::new(ilabel, olabel, arc.weight.clone(), nt_nextstate));
+                } else {
+                    return None;
+                }
+            } else {
+                let nextstate = self.state_table.tuple_table.find_id(&ReplaceStateTuple::new(tuple.prefix_id, tuple.fst_id, Some(arc.nextstate)));
+                return Some(Arc::new(arc.ilabel, arc.olabel, arc.weight.clone(), nextstate));
+            }
+        }
     }
-    //    if arc.olabel == EPS_LABEL || arc.olabel <
-
-    unimplemented!()
 }
+
 
 #[derive(Hash, Eq, PartialOrd, PartialEq, Clone)]
 struct PrefixTuple {
@@ -366,28 +380,30 @@ impl ReplaceStateTuple {
 
 // TODO: Move this struct into its own file + use it for all implementation starting with determinization
 struct StateTable<T: Hash + Eq + Clone> {
-    table: BiHashMap<StateId, T>,
+    table: RefCell<BiHashMap<StateId, T>>,
 }
 
 impl<T: Hash + Eq + Clone> StateTable<T> {
     fn new() -> Self {
         Self {
-            table: BiHashMap::new(),
+            table: RefCell::new(BiHashMap::new()),
         }
     }
 
     /// Looks up integer ID from entry. If it doesn't exist and insert
-    fn find_id(&mut self, tuple: &T) -> StateId {
-        if !self.table.contains_right(tuple) {
-            let n = self.table.len();
-            self.table.insert(n, tuple.clone());
+    fn find_id(&self, tuple: &T) -> StateId {
+        if !self.table.borrow().contains_right(tuple) {
+            let n = self.table.borrow().len();
+            self.table.borrow_mut().insert(n, tuple.clone());
         }
-        *self.table.get_by_right(tuple).unwrap()
+        *self.table.borrow().get_by_right(tuple).unwrap()
     }
 
     /// Looks up tuple from integer ID.
-    fn find_tuple(&self, tuple_id: StateId) -> &T {
-        self.table.get_by_left(&tuple_id).as_ref().unwrap()
+    fn find_tuple(&self, tuple_id: StateId) -> Ref<T> {
+//        self.table.borrow().get_by_left(&tuple_id).as_ref().unwrap()
+        let table = self.table.borrow();
+        Ref::map(table, |x| x.get_by_left(&tuple_id).unwrap())
     }
 }
 
