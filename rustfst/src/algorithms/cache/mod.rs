@@ -5,6 +5,5 @@ pub use self::vector_cache_state::VectorCacheState;
 
 mod cache_impl;
 mod cache_state;
-mod vector_cache_state;
 mod fst_impl;
-
+mod vector_cache_state;

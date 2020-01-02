@@ -5,11 +5,10 @@ use std::marker::PhantomData;
 use bimap::BiHashMap;
 use failure::Fallible;
 
-use crate::{EPS_LABEL, KDELTA, Label, StateId};
-use crate::algorithms::{factor_weight, FactorWeightOptions, FactorWeightType, weight_convert};
 use crate::algorithms::cache::{CacheImpl, FstImpl};
 use crate::algorithms::factor_iterators::{GallicFactor, GallicFactorMin, GallicFactorRestrict};
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
+use crate::algorithms::{factor_weight, weight_convert, FactorWeightOptions, FactorWeightType};
 use crate::arc::Arc;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, Fst, MutableFst};
@@ -18,6 +17,7 @@ use crate::semirings::{
     SemiringProperties, StringWeightLeft, StringWeightRestrict, WeaklyDivisibleSemiring,
     WeightQuantize,
 };
+use crate::{Label, StateId, EPS_LABEL, KDELTA};
 
 /// Determinization type.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
@@ -175,8 +175,8 @@ where
 }
 
 impl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>> FstImpl<F::W> for DeterminizeFsaImpl<'a, 'b, F, CD>
-    where
-        F::W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
+where
+    F::W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
     fn cache_impl(&mut self) -> &mut CacheImpl<<F as CoreFst>::W> {
         &mut self.cache_impl
@@ -253,7 +253,6 @@ impl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>> FstImpl<F::W> for DeterminizeFsaIm
         }
     }
 }
-
 
 impl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>> DeterminizeFsaImpl<'a, 'b, F, CD>
 where

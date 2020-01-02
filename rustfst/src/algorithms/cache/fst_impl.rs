@@ -3,10 +3,10 @@ use std::slice::Iter as IterSlice;
 
 use failure::Fallible;
 
-use crate::{Arc, StateId};
 use crate::algorithms::cache::CacheImpl;
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
+use crate::{Arc, StateId};
 
 pub trait FstImpl<W: Semiring + 'static> {
     fn cache_impl(&mut self) -> &mut CacheImpl<W>;
@@ -36,6 +36,15 @@ pub trait FstImpl<W: Semiring + 'static> {
             self.cache_impl().mark_expanded(state);
         }
         self.cache_impl().arcs_iter(state)
+    }
+
+    #[allow(unused)]
+    fn num_arcs(&mut self, state: StateId) -> Fallible<usize> {
+        if !self.cache_impl().expanded(state) {
+            self.expand(state)?;
+            self.cache_impl().mark_expanded(state);
+        }
+        self.cache_impl().num_arcs(state)
     }
 
     /// Turns the Dynamic FST into a static one.

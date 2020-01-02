@@ -1,16 +1,14 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::HashMap;
 use std::marker::PhantomData;
-use std::slice::Iter as IterSlice;
 
 use bimap::BiHashMap;
+use failure::Fallible;
 
 use bitflags::bitflags;
 
-use failure::Fallible;
-
-use crate::algorithms::cache::CacheImpl;
+use crate::algorithms::cache::{CacheImpl, FstImpl};
 use crate::arc::Arc;
-use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::KDELTA;
 use crate::{Label, StateId};
@@ -91,107 +89,15 @@ struct FactorWeightImpl<'a, F: Fst, FI: FactorIterator<F::W>> {
     ghost: PhantomData<FI>,
 }
 
-impl<'a, F: Fst, FI: FactorIterator<F::W>> FactorWeightImpl<'a, F, FI>
+impl<'a, F: Fst, FI: FactorIterator<F::W>> FstImpl<F::W> for FactorWeightImpl<'a, F, FI>
 where
-    F::W: WeightQuantize,
+    F::W: WeightQuantize + 'static,
 {
-    pub fn new(fst: &'a F, opts: FactorWeightOptions) -> Fallible<Self> {
-        if opts.mode.is_empty() {
-            bail!("Factoring neither arc weights nor final weights");
-        }
-        Ok(Self {
-            opts,
-            fst,
-            element_map: BiHashMap::new(),
-            cache_impl: CacheImpl::new(),
-            unfactored: HashMap::new(),
-            ghost: PhantomData,
-        })
+    fn cache_impl(&mut self) -> &mut CacheImpl<<F as CoreFst>::W> {
+        &mut self.cache_impl
     }
 
-    pub fn factor_arc_weights(&self) -> bool {
-        self.opts
-            .mode
-            .intersects(FactorWeightType::FACTOR_ARC_WEIGHTS)
-    }
-
-    pub fn factor_final_weights(&self) -> bool {
-        self.opts
-            .mode
-            .intersects(FactorWeightType::FACTOR_FINAL_WEIGHTS)
-    }
-
-    pub fn find_state(&mut self, elt: &Element<F::W>) -> StateId {
-        if !self.factor_arc_weights() && elt.weight.is_one() && elt.state.is_some() {
-            let old_state = elt.state.unwrap();
-            if !self.unfactored.contains_key(&elt.state.unwrap()) {
-                let new_state = self.element_map.len();
-                self.unfactored.insert(old_state, new_state);
-                self.element_map.insert(new_state, elt.clone());
-            }
-            self.unfactored[&old_state]
-        } else {
-            if !self.element_map.contains_right(&elt) {
-                let new_state = self.element_map.len();
-                self.element_map.insert(new_state, elt.clone());
-            }
-            *self.element_map.get_by_right(&elt).unwrap()
-        }
-    }
-
-    pub fn start(&mut self) -> Option<StateId> {
-        if !self.cache_impl.has_start() {
-            match self.fst.start() {
-                None => self.cache_impl.set_start(None),
-                Some(s) => {
-                    let new_state = self.find_state(&Element {
-                        state: Some(s),
-                        weight: F::W::one(),
-                    });
-                    self.cache_impl.set_start(Some(new_state));
-                }
-            };
-        }
-        self.cache_impl.start().unwrap()
-    }
-
-    pub fn final_weight(&mut self, state: StateId) -> Fallible<Option<&F::W>> {
-        if !self.cache_impl.has_final(state) {
-            let zero = F::W::zero();
-            let elt = self.element_map.get_by_left(&state).unwrap();
-            let weight = match elt.state {
-                None => elt.weight.clone(),
-                Some(s) => elt
-                    .weight
-                    .times(self.fst.final_weight(s)?.unwrap_or_else(|| &zero))
-                    .unwrap(),
-            };
-            let factor_iterator = FI::new(weight.clone());
-            if !weight.is_zero() && (!self.factor_final_weights() || factor_iterator.done()) {
-                self.cache_impl.set_final_weight(state, Some(weight))?;
-            } else {
-                self.cache_impl.set_final_weight(state, None)?;
-            }
-        }
-        self.cache_impl.final_weight(state)
-    }
-
-    #[allow(unused)]
-    pub fn num_arcs(&mut self, state: StateId) -> Fallible<usize> {
-        if !self.cache_impl.expanded(state) {
-            self.expand(state)?;
-        }
-        self.cache_impl.num_arcs(state)
-    }
-
-    pub fn arcs_iter(&mut self, state: StateId) -> Fallible<IterSlice<Arc<F::W>>> {
-        if !self.cache_impl.expanded(state) {
-            self.expand(state)?;
-        }
-        self.cache_impl.arcs_iter(state)
-    }
-
-    pub fn expand(&mut self, state: StateId) -> Fallible<()> {
+    fn expand(&mut self, state: usize) -> Fallible<()> {
         let elt = self.element_map.get_by_left(&state).unwrap().clone();
         if let Some(old_state) = elt.state {
             for arc in self.fst.arcs_iter(old_state)? {
@@ -239,51 +145,87 @@ where
                 }
             }
         }
-        self.cache_impl.mark_expanded(state);
         Ok(())
+    }
+
+    fn compute_start(&mut self) -> Fallible<Option<usize>> {
+        match self.fst.start() {
+            None => Ok(None),
+            Some(s) => {
+                let new_state = self.find_state(&Element {
+                    state: Some(s),
+                    weight: F::W::one(),
+                });
+                Ok(Some(new_state))
+            }
+        }
+    }
+
+    fn compute_final(&mut self, state: usize) -> Fallible<Option<<F as CoreFst>::W>> {
+        let zero = F::W::zero();
+        let elt = self.element_map.get_by_left(&state).unwrap();
+        let weight = match elt.state {
+            None => elt.weight.clone(),
+            Some(s) => elt
+                .weight
+                .times(self.fst.final_weight(s)?.unwrap_or_else(|| &zero))
+                .unwrap(),
+        };
+        let factor_iterator = FI::new(weight.clone());
+        if !weight.is_zero() && (!self.factor_final_weights() || factor_iterator.done()) {
+            Ok(Some(weight))
+        } else {
+            Ok(None)
+        }
     }
 }
 
 impl<'a, F: Fst, FI: FactorIterator<F::W>> FactorWeightImpl<'a, F, FI>
 where
-    F::W: WeightQuantize,
+    F::W: WeightQuantize + 'static,
 {
-    pub fn compute<F2: MutableFst<W = F::W> + ExpandedFst<W = F::W>>(&mut self) -> Fallible<F2>
-    where
-        F::W: 'static,
-    {
-        let start_state = self.start();
-        let mut fst_out = F2::new();
-        if start_state.is_none() {
-            return Ok(fst_out);
+    pub fn new(fst: &'a F, opts: FactorWeightOptions) -> Fallible<Self> {
+        if opts.mode.is_empty() {
+            bail!("Factoring neither arc weights nor final weights");
         }
-        let start_state = start_state.unwrap();
-        for _ in 0..=start_state {
-            fst_out.add_state();
-        }
-        fst_out.set_start(start_state)?;
-        let mut queue = VecDeque::new();
-        let mut visited_states = HashSet::new();
-        visited_states.insert(start_state);
-        queue.push_back(start_state);
-        while !queue.is_empty() {
-            let s = queue.pop_front().unwrap();
-            for arc in self.arcs_iter(s)? {
-                if !visited_states.contains(&arc.nextstate) {
-                    queue.push_back(arc.nextstate);
-                    visited_states.insert(arc.nextstate);
-                }
-                let n = fst_out.num_states();
-                for _ in n..=arc.nextstate {
-                    fst_out.add_state();
-                }
-                fst_out.add_arc(s, arc.clone())?;
+        Ok(Self {
+            opts,
+            fst,
+            element_map: BiHashMap::new(),
+            cache_impl: CacheImpl::new(),
+            unfactored: HashMap::new(),
+            ghost: PhantomData,
+        })
+    }
+
+    pub fn factor_arc_weights(&self) -> bool {
+        self.opts
+            .mode
+            .intersects(FactorWeightType::FACTOR_ARC_WEIGHTS)
+    }
+
+    pub fn factor_final_weights(&self) -> bool {
+        self.opts
+            .mode
+            .intersects(FactorWeightType::FACTOR_FINAL_WEIGHTS)
+    }
+
+    pub fn find_state(&mut self, elt: &Element<F::W>) -> StateId {
+        if !self.factor_arc_weights() && elt.weight.is_one() && elt.state.is_some() {
+            let old_state = elt.state.unwrap();
+            if !self.unfactored.contains_key(&elt.state.unwrap()) {
+                let new_state = self.element_map.len();
+                self.unfactored.insert(old_state, new_state);
+                self.element_map.insert(new_state, elt.clone());
             }
-            if let Some(f_w) = self.final_weight(s)? {
-                fst_out.set_final(s, f_w.clone())?;
+            self.unfactored[&old_state]
+        } else {
+            if !self.element_map.contains_right(&elt) {
+                let new_state = self.element_map.len();
+                self.element_map.insert(new_state, elt.clone());
             }
+            *self.element_map.get_by_right(&elt).unwrap()
         }
-        Ok(fst_out)
     }
 }
 

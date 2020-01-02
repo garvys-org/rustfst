@@ -8,7 +8,7 @@ use failure::{bail, Fallible};
 
 use crate::algorithms::cache::{CacheImpl, FstImpl};
 use crate::algorithms::replace::ReplaceLabelType::{ReplaceLabelInput, ReplaceLabelNeither};
-use crate::fst_traits::{ExpandedFst, MutableFst, CoreFst};
+use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL};
 
@@ -123,7 +123,8 @@ struct ReplaceFstImpl<F: ExpandedFst> {
 }
 
 impl<F: ExpandedFst> FstImpl<F::W> for ReplaceFstImpl<F>
-where F::W: 'static
+where
+    F::W: 'static,
 {
     fn cache_impl(&mut self) -> &mut CacheImpl<<F as CoreFst>::W> {
         &mut self.cache_impl
@@ -141,11 +142,11 @@ where F::W: 'static
                 .get(tuple.fst_id.unwrap())
                 .unwrap()
                 .arcs_iter(fst_state)?
-                {
-                    if let Some(new_arc) = self.compute_arc(&tuple, arc) {
-                        self.cache_impl.push_arc(state, new_arc)?;
-                    }
+            {
+                if let Some(new_arc) = self.compute_arc(&tuple, arc) {
+                    self.cache_impl.push_arc(state, new_arc)?;
                 }
+            }
         }
         Ok(())
     }
