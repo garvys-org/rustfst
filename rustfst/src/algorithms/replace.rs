@@ -54,6 +54,7 @@ where
     F1::W: 'static,
     F2: MutableFst<W=F1::W> + ExpandedFst<W=F1::W>
 {
+    println!("Replace pouet");
     let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
     let mut fst = ReplaceFstImpl::new(fst_list, opts)?;
     fst.compute()
@@ -193,7 +194,6 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         self.cache_impl.final_weight(state)
     }
 
-    #[allow(unused)]
     fn compute_final(&mut self, state: StateId) -> Fallible<Option<F::W>> {
         let tuple = self.state_table.tuple_table.find_tuple(state);
         if tuple.prefix_id == 0 {
@@ -208,25 +208,24 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         }
     }
 
-    #[allow(unused)]
     fn expand(&mut self, state: StateId) -> Fallible<()> {
-        //        let tuple = self.state_table.tuple_table.find_tuple(state);
-
-        //        if tuple.fst_state.is_some() {
-        if let Some(arc) = self.compute_final_arc(state) {
-            self.cache_impl.push_arc(state, arc)?;
-        }
-
+        println!("[Expand] state = {:?}", state);
         let tuple = self.state_table.tuple_table.find_tuple(state).clone();
-        for arc in self
-            .fst_array
-            .get(tuple.fst_id.unwrap())
-            .unwrap()
-            .arcs_iter(tuple.fst_state.unwrap())?
-        {
-            if let Some(new_arc) = self.compute_arc(&tuple, arc) {
-                self.cache_impl.push_arc(state, new_arc);
+        if let Some(fst_state) = tuple.fst_state {
+            if let Some(arc) = self.compute_final_arc(state) {
+                self.cache_impl.push_arc(state, arc)?;
             }
+
+            for arc in self
+                .fst_array
+                .get(tuple.fst_id.unwrap())
+                .unwrap()
+                .arcs_iter(fst_state)?
+                {
+                    if let Some(new_arc) = self.compute_arc(&tuple, arc) {
+                        self.cache_impl.push_arc(state, new_arc);
+                    }
+                }
         }
 
         self.cache_impl.mark_expanded(state);
@@ -248,7 +247,10 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
             .unwrap()
             && tuple.prefix_id > 0
         {
-            let tuple = tuple.clone();
+            // FIXME
+            let tuple_2 = tuple.clone();
+            drop(tuple);
+            let tuple = tuple_2;
             //            let mut arc = Arc::new();
             let ilabel = if epsilon_on_input(self.return_label_type_) {
                 EPS_LABEL
@@ -310,10 +312,7 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         self.get_prefix_id(&prefix)
     }
 
-    fn compute_arc<W: Semiring>(&self, tuple: &ReplaceStateTuple, arc: &Arc<W>) -> Option<Arc<W>> {
-        if !epsilon_on_input(self.call_label_type_) {
-            return Some(arc.clone());
-        }
+    fn compute_arc<W: Semiring>(&self, tuple: &ReplaceStateTuple, arc: &Arc<W>) -> Option<Arc<W>> {s
         if arc.olabel == EPS_LABEL
             || arc.olabel < *self.nonterminal_set.iter().next().unwrap()
             || arc.olabel > *self.nonterminal_set.iter().rev().next().unwrap()
@@ -391,6 +390,7 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         for _ in 0..=start_state {
             fst_out.add_state();
         }
+        println!("Start state = {:?}", start_state);
         fst_out.set_start(start_state)?;
         let mut queue = VecDeque::new();
         let mut visited_states = HashSet::new();
@@ -500,7 +500,6 @@ impl<T: Hash + Eq + Clone> StateTable<T> {
 
     /// Looks up tuple from integer ID.
     fn find_tuple(&self, tuple_id: StateId) -> Ref<T> {
-        //        self.table.borrow().get_by_left(&tuple_id).as_ref().unwrap()
         let table = self.table.borrow();
         Ref::map(table, |x| x.get_by_left(&tuple_id).unwrap())
     }
