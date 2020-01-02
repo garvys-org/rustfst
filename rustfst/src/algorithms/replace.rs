@@ -2,11 +2,9 @@ use std::collections::hash_map::Entry;
 use std::collections::{BTreeSet, HashMap};
 use std::hash::Hash;
 
-use bimap::BiHashMap;
-use bitflags::_core::cell::{Ref, RefCell};
 use failure::{bail, Fallible};
 
-use crate::algorithms::cache::{CacheImpl, FstImpl};
+use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::replace::ReplaceLabelType::{ReplaceLabelInput, ReplaceLabelNeither};
 use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
@@ -425,34 +423,6 @@ impl ReplaceStateTuple {
             fst_id,
             fst_state,
         }
-    }
-}
-
-// TODO: Move this struct into its own file + use it for all implementation starting with determinization
-struct StateTable<T: Hash + Eq + Clone> {
-    table: RefCell<BiHashMap<StateId, T>>,
-}
-
-impl<T: Hash + Eq + Clone> StateTable<T> {
-    fn new() -> Self {
-        Self {
-            table: RefCell::new(BiHashMap::new()),
-        }
-    }
-
-    /// Looks up integer ID from entry. If it doesn't exist and insert
-    fn find_id(&self, tuple: &T) -> StateId {
-        if !self.table.borrow().contains_right(tuple) {
-            let n = self.table.borrow().len();
-            self.table.borrow_mut().insert(n, tuple.clone());
-        }
-        *self.table.borrow().get_by_right(tuple).unwrap()
-    }
-
-    /// Looks up tuple from integer ID.
-    fn find_tuple(&self, tuple_id: StateId) -> Ref<T> {
-        let table = self.table.borrow();
-        Ref::map(table, |x| x.get_by_left(&tuple_id).unwrap())
     }
 }
 

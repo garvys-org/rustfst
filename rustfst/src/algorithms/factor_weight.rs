@@ -1,12 +1,11 @@
 use std::collections::HashMap;
 use std::marker::PhantomData;
 
-use bimap::BiHashMap;
 use failure::Fallible;
 
 use bitflags::bitflags;
 
-use crate::algorithms::cache::{CacheImpl, FstImpl};
+use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
@@ -83,7 +82,7 @@ impl<W: Semiring> Element<W> {
 struct FactorWeightImpl<'a, F: Fst, FI: FactorIterator<F::W>> {
     opts: FactorWeightOptions,
     cache_impl: CacheImpl<F::W>,
-    element_map: BiHashMap<StateId, Element<F::W>>,
+    state_table: StateTable<Element<F::W>>,
     fst: &'a F,
     unfactored: HashMap<StateId, StateId>,
     ghost: PhantomData<FI>,
@@ -98,7 +97,7 @@ where
     }
 
     fn expand(&mut self, state: usize) -> Fallible<()> {
-        let elt = self.element_map.get_by_left(&state).unwrap().clone();
+        let elt = self.state_table.find_tuple(state).clone();
         if let Some(old_state) = elt.state {
             for arc in self.fst.arcs_iter(old_state)? {
                 let weight = elt.weight.times(&arc.weight).unwrap();
@@ -163,7 +162,7 @@ where
 
     fn compute_final(&mut self, state: usize) -> Fallible<Option<<F as CoreFst>::W>> {
         let zero = F::W::zero();
-        let elt = self.element_map.get_by_left(&state).unwrap();
+        let elt = self.state_table.find_tuple(state);
         let weight = match elt.state {
             None => elt.weight.clone(),
             Some(s) => elt
@@ -191,7 +190,7 @@ where
         Ok(Self {
             opts,
             fst,
-            element_map: BiHashMap::new(),
+            state_table: StateTable::new(),
             cache_impl: CacheImpl::new(),
             unfactored: HashMap::new(),
             ghost: PhantomData,
@@ -214,17 +213,17 @@ where
         if !self.factor_arc_weights() && elt.weight.is_one() && elt.state.is_some() {
             let old_state = elt.state.unwrap();
             if !self.unfactored.contains_key(&elt.state.unwrap()) {
-                let new_state = self.element_map.len();
+                // FIXME: Avoid leaking internal implementation
+                let new_state = self.state_table.table.borrow().len();
                 self.unfactored.insert(old_state, new_state);
-                self.element_map.insert(new_state, elt.clone());
+                self.state_table
+                    .table
+                    .borrow_mut()
+                    .insert(new_state, elt.clone());
             }
             self.unfactored[&old_state]
         } else {
-            if !self.element_map.contains_right(&elt) {
-                let new_state = self.element_map.len();
-                self.element_map.insert(new_state, elt.clone());
-            }
-            *self.element_map.get_by_right(&elt).unwrap()
+            self.state_table.find_id(&elt)
         }
     }
 }

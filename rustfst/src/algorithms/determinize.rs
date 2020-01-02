@@ -2,10 +2,9 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::marker::PhantomData;
 
-use bimap::BiHashMap;
 use failure::Fallible;
 
-use crate::algorithms::cache::{CacheImpl, FstImpl};
+use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::factor_iterators::{GallicFactor, GallicFactorMin, GallicFactorRestrict};
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::algorithms::{factor_weight, weight_convert, FactorWeightOptions, FactorWeightType};
@@ -168,7 +167,7 @@ where
 {
     fst: &'a F,
     cache_impl: CacheImpl<F::W>,
-    state_table: BiHashMap<StateId, DeterminizeStateTuple<F::W>>,
+    state_table: StateTable<DeterminizeStateTuple<F::W>>,
     ghost: PhantomData<CD>,
     in_dist: Option<&'b [F::W]>,
     out_dist: Vec<F::W>,
@@ -185,7 +184,7 @@ where
     fn expand(&mut self, state: usize) -> Fallible<()> {
         // GetLabelMap
         let mut label_map: HashMap<Label, DeterminizeArc<F::W>> = HashMap::new();
-        let src_tuple = self.state_table.get_by_left(&state).unwrap();
+        let src_tuple = self.state_table.find_tuple(state);
         for src_elt in src_tuple.subset.iter() {
             for arc in self.fst.arcs_iter(src_elt.state)? {
                 let r = src_elt.weight.times(&arc.weight)?;
@@ -209,6 +208,7 @@ where
                     .push(dest_elt);
             }
         }
+        drop(src_tuple);
 
         for det_arc in label_map.values_mut() {
             self.norm_arc(det_arc)?;
@@ -235,7 +235,7 @@ where
 
     fn compute_final(&mut self, state: usize) -> Fallible<Option<<F as CoreFst>::W>> {
         let zero = F::W::zero();
-        let tuple = self.state_table.get_by_left(&state).unwrap();
+        let tuple = self.state_table.find_tuple(state);
         let mut final_weight = F::W::zero();
         for det_elt in tuple.subset.iter() {
             final_weight.plus_assign(
@@ -265,7 +265,7 @@ where
         Ok(Self {
             fst,
             cache_impl: CacheImpl::new(),
-            state_table: BiHashMap::new(),
+            state_table: StateTable::new(),
             ghost: PhantomData,
             in_dist,
             out_dist: vec![],
@@ -318,11 +318,7 @@ where
     }
 
     fn find_state(&mut self, tuple: &DeterminizeStateTuple<F::W>) -> Fallible<StateId> {
-        if !self.state_table.contains_right(tuple) {
-            let n = self.state_table.len();
-            self.state_table.insert(n, tuple.clone());
-        }
-        let s = *self.state_table.get_by_right(tuple).unwrap();
+        let s = self.state_table.find_id(&tuple);
         if let Some(_in_dist) = self.in_dist.as_ref() {
             if self.out_dist.len() <= s {
                 self.out_dist.push(self.compute_distance(&tuple.subset)?);
