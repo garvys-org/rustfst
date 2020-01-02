@@ -1,6 +1,6 @@
+use crate::fst_traits::Fst;
 use crate::StateId;
 use failure::Fallible;
-use crate::fst_traits::Fst;
 
 /// Trait defining the methods to control allocation for a wFST
 pub trait AllocableFst: Fst {

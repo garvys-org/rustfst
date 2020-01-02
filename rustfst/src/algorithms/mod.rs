@@ -20,6 +20,7 @@ mod projection;
 mod push;
 mod queue;
 mod relabel_pairs;
+mod replace;
 mod reverse;
 mod reweight;
 mod rm_epsilon;
@@ -76,6 +77,7 @@ pub use self::{
     push::{push, push_weights, PushType},
     queue::{Queue, QueueType},
     relabel_pairs::relabel_pairs,
+    replace::replace,
     reverse::reverse,
     reweight::{reweight, ReweightType},
     rm_epsilon::rm_epsilon,

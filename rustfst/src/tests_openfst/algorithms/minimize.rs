@@ -2,8 +2,8 @@ use failure::{format_err, Fallible};
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::minimize;
-use crate::fst_traits::{ MutableFst, AllocableFst };
 use crate::fst_traits::TextParser;
+use crate::fst_traits::{AllocableFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;

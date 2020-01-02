@@ -5,7 +5,7 @@ use crate::algorithms::MapFinalAction;
 use crate::algorithms::WeightConverter;
 use crate::algorithms::{reverse, weight_convert};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{ MutableFst, TextParser, AllocableFst };
+use crate::fst_traits::{AllocableFst, MutableFst, TextParser};
 use crate::semirings::Semiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::Arc;

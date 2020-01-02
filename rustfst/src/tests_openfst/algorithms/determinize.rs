@@ -4,7 +4,7 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{determinize, isomorphic, DeterminizeType};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{ MutableFst, TextParser , AllocableFst};
+use crate::fst_traits::{AllocableFst, MutableFst, TextParser};
 use crate::semirings::Semiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
