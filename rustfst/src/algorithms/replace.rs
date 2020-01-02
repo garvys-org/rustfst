@@ -125,7 +125,6 @@ struct ReplaceFstImpl<F: ExpandedFst> {
 }
 
 impl<F: ExpandedFst> ReplaceFstImpl<F> {
-
     fn new(fst_list: Vec<(Label, F)>, opts: ReplaceFstOptions) -> Fallible<Self> {
         let mut replace_fst_impl = Self {
             cache_impl: CacheImpl::new(),
@@ -266,11 +265,11 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
             .unwrap()
             && tuple.prefix_id > 0
         {
-            // FIXME
-            let tuple_2 = tuple.clone();
+            // Necessary to avoid issues with the RefCell.
+            let tuple_owned = tuple.clone();
             drop(tuple);
-            let tuple = tuple_2;
-            //            let mut arc = Arc::new();
+            let tuple = tuple_owned;
+
             let ilabel = if epsilon_on_input(self.return_label_type_) {
                 EPS_LABEL
             } else {
