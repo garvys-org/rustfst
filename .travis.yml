@@ -46,6 +46,7 @@ before_cache: |
 
 after_success: |
    if [[ "$TRAVIS_RUST_VERSION" == stable ]]; then
+    apt-get update && apt-get install libssl-dev
     # Uncomment the following line for coveralls.io
      cargo tarpaulin --ciserver travis-ci --coveralls $TRAVIS_JOB_ID
 
