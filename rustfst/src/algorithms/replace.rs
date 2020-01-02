@@ -6,13 +6,11 @@ use bimap::BiHashMap;
 use bitflags::_core::cell::{Ref, RefCell};
 use failure::{bail, Fallible};
 
-use crate::algorithms::cache::CacheImpl;
+use crate::algorithms::cache::{CacheImpl, FstImpl};
 use crate::algorithms::replace::ReplaceLabelType::{ReplaceLabelInput, ReplaceLabelNeither};
 use crate::fst_traits::{ExpandedFst, MutableFst, CoreFst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL};
-
-use crate::algorithms::cache::fst_impl::FstImpl;
 
 /// This specifies what labels to output on the call or return arc.
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
