@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `del_all_states` method in the `MutableFst` trait to remove all the states in a Fst.
 - Add `set_input_symbols()` and `set_output_symbols()` to the `MutableFst` trait to attach a `SymbolTable` to an Fst.
 - Add `input_symbols()` and `output_symbols()` to the `Fst` trait to retrieve previously attached `SymbolTable`.
+- Add `replace` fst operations.
 
 ### Changed
 - Make `KDELTA` public outside of the crate

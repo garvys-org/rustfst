@@ -85,9 +85,7 @@
 //!
 //! ## Status
 //!
-//! A big number of algorithms are already implemented. The main ones missing are:
-//! - Composition
-//! - Replacement
+//! A big number of algorithms are already implemented. The main one missing is the Composition.
 //!
 //! Also, all the algorithms are implemented in a static fashion, some work is necessary to add support for dynamic fsts.
 //!

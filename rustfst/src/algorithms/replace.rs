@@ -58,6 +58,18 @@ impl ReplaceFstOptions {
     }
 }
 
+/// Recursively replaces arcs in the root FSTs with other FSTs.
+///
+/// Replace supports replacement of arcs in one Fst with another FST. This
+/// replacement is recursive. Replace takes an array of FST(s). One FST
+/// represents the root (or topology) machine. The root FST refers to other FSTs
+/// by recursively replacing arcs labeled as non-terminals with the matching
+/// non-terminal FST. Currently Replace uses the output symbols of the arcs to
+/// determine whether the arc is a non-terminal arc or not. A non-terminal can be
+/// any label that is not a non-zero terminal label in the output alphabet.
+///
+/// Note that input argument is a vector of pairs. These correspond to the tuple
+/// of non-terminal Label and corresponding FST.
 pub fn replace<F1, F2>(
     fst_list: Vec<(Label, F1)>,
     root: Label,
