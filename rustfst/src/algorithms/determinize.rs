@@ -318,7 +318,7 @@ where
     }
 
     fn find_state(&mut self, tuple: &DeterminizeStateTuple<F::W>) -> Fallible<StateId> {
-        let s = self.state_table.find_id(&tuple);
+        let s = self.state_table.find_id_from_ref(&tuple);
         if let Some(_in_dist) = self.in_dist.as_ref() {
             if self.out_dist.len() <= s {
                 self.out_dist.push(self.compute_distance(&tuple.subset)?);

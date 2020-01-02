@@ -223,7 +223,7 @@ where
             }
             self.unfactored[&old_state]
         } else {
-            self.state_table.find_id(&elt)
+            self.state_table.find_id_from_ref(&elt)
         }
     }
 }

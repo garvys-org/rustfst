@@ -17,12 +17,21 @@ impl<T: Hash + Eq + Clone> StateTable<T> {
     }
 
     /// Looks up integer ID from entry. If it doesn't exist and insert
-    pub fn find_id(&self, tuple: &T) -> StateId {
+    pub fn find_id_from_ref(&self, tuple: &T) -> StateId {
         if !self.table.borrow().contains_right(tuple) {
             let n = self.table.borrow().len();
             self.table.borrow_mut().insert(n, tuple.clone());
         }
         *self.table.borrow().get_by_right(tuple).unwrap()
+    }
+
+    pub fn find_id(&self, tuple: T) -> StateId {
+        if !self.table.borrow().contains_right(&tuple) {
+            let n = self.table.borrow().len();
+            self.table.borrow_mut().insert(n, tuple);
+            return n;
+        }
+        *self.table.borrow().get_by_right(&tuple).unwrap()
     }
 
     /// Looks up tuple from integer ID.

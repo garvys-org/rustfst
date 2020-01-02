@@ -154,15 +154,12 @@ where
             return Ok(None);
         } else {
             if let Some(fst_start) = self.fst_array[self.root].start() {
-                let prefix = self.get_prefix_id(&ReplaceStackPrefix::new());
-                let start = self
-                    .state_table
-                    .tuple_table
-                    .find_id(&ReplaceStateTuple::new(
-                        prefix,
-                        Some(self.root),
-                        Some(fst_start),
-                    ));
+                let prefix = self.get_prefix_id(ReplaceStackPrefix::new());
+                let start = self.state_table.tuple_table.find_id(ReplaceStateTuple::new(
+                    prefix,
+                    Some(self.root),
+                    Some(fst_start),
+                ));
                 return Ok(Some(start));
             } else {
                 return Ok(None);
@@ -267,14 +264,11 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
                 .clone();
             let top = stack.top();
             let prefix_id = self.pop_prefix(stack.clone());
-            let nextstate = self
-                .state_table
-                .tuple_table
-                .find_id(&ReplaceStateTuple::new(
-                    prefix_id,
-                    top.fst_id,
-                    top.nextstate,
-                ));
+            let nextstate = self.state_table.tuple_table.find_id(ReplaceStateTuple::new(
+                prefix_id,
+                top.fst_id,
+                top.nextstate,
+            ));
             if let Some(weight) = self
                 .fst_array
                 .get(tuple.fst_id.unwrap())
@@ -291,13 +285,13 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         }
     }
 
-    fn get_prefix_id(&self, prefix: &ReplaceStackPrefix) -> StateId {
+    fn get_prefix_id(&self, prefix: ReplaceStackPrefix) -> StateId {
         self.state_table.prefix_table.find_id(prefix)
     }
 
     fn pop_prefix(&self, mut prefix: ReplaceStackPrefix) -> StateId {
         prefix.pop();
-        self.get_prefix_id(&prefix)
+        self.get_prefix_id(prefix)
     }
 
     fn push_prefix(
@@ -307,7 +301,7 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         nextstate: Option<StateId>,
     ) -> StateId {
         prefix.push(fst_id, nextstate);
-        self.get_prefix_id(&prefix)
+        self.get_prefix_id(prefix)
     }
 
     fn compute_arc<W: Semiring>(&self, tuple: &ReplaceStateTuple, arc: &Arc<W>) -> Option<Arc<W>> {
@@ -317,7 +311,7 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         {
             let state_tuple =
                 ReplaceStateTuple::new(tuple.prefix_id, tuple.fst_id, Some(arc.nextstate));
-            let nextstate = self.state_table.tuple_table.find_id(&state_tuple);
+            let nextstate = self.state_table.tuple_table.find_id(state_tuple);
             return Some(Arc::new(
                 arc.ilabel,
                 arc.olabel,
@@ -334,14 +328,9 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
                     .clone();
                 let nt_prefix = self.push_prefix(p, tuple.fst_id, Some(arc.nextstate));
                 if let Some(nt_start) = self.fst_array.get(*nonterminal).unwrap().start() {
-                    let nt_nextstate =
-                        self.state_table
-                            .tuple_table
-                            .find_id(&ReplaceStateTuple::new(
-                                nt_prefix,
-                                Some(*nonterminal),
-                                Some(nt_start),
-                            ));
+                    let nt_nextstate = self.state_table.tuple_table.find_id(
+                        ReplaceStateTuple::new(nt_prefix, Some(*nonterminal), Some(nt_start)),
+                    );
                     let ilabel = if epsilon_on_input(self.call_label_type_) {
                         0
                     } else {
@@ -357,14 +346,11 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
                     return None;
                 }
             } else {
-                let nextstate = self
-                    .state_table
-                    .tuple_table
-                    .find_id(&ReplaceStateTuple::new(
-                        tuple.prefix_id,
-                        tuple.fst_id,
-                        Some(arc.nextstate),
-                    ));
+                let nextstate = self.state_table.tuple_table.find_id(ReplaceStateTuple::new(
+                    tuple.prefix_id,
+                    tuple.fst_id,
+                    Some(arc.nextstate),
+                ));
                 return Some(Arc::new(
                     arc.ilabel,
                     arc.olabel,
