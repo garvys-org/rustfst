@@ -519,10 +519,12 @@ void compute_fst_replace(const F& raw_fst, json& j) {
                 fst::VectorFst<Arc> res;
                 fst::Replace(label_fst_pairs, &res, root, epsilon_on_replace);
 
+                vector<pair<typename Arc::Label, string > > label_fst_pairs_serialized;
+                label_fst_pairs_serialized.push_back(std::make_pair(label, fst_to_string(fst)));
+
                 json j2;
+                j2["label_fst_pairs"] = label_fst_pairs_serialized;
                 j2["root"] = root;
-                j2["label"] = label;
-                j2["fst_to_replace"] = fst_to_string(fst);
                 j2["epsilon_on_replace"] = epsilon_on_replace;
                 j2["result"] = fst_to_string(res);
                 j["replace"].push_back(j2);

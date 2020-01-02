@@ -10,8 +10,7 @@ use crate::tests_openfst::FstTestData;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ReplaceOperationResult {
     root: usize,
-    label: usize,
-    fst_to_replace: String,
+    label_fst_pairs: Vec<(usize, String)>,
     epsilon_on_replace: bool,
     result: String,
 }
@@ -22,8 +21,7 @@ where
     F::W: Semiring<Type = f32>,
 {
     pub root: usize,
-    pub label: usize,
-    pub fst_to_replace: F,
+    pub label_fst_pairs: Vec<(usize, F)>,
     pub epsilon_on_replace: bool,
     pub result: F,
 }
@@ -36,8 +34,7 @@ impl ReplaceOperationResult {
     {
         ReplaceTestData {
             root: self.root,
-            label: self.label,
-            fst_to_replace: F::from_text_string(self.fst_to_replace.as_str()).unwrap(),
+            label_fst_pairs: self.label_fst_pairs.iter().map(|v| (v.0, F::from_text_string(v.1.as_str()).unwrap())).collect(),
             epsilon_on_replace: self.epsilon_on_replace,
             result: F::from_text_string(self.result.as_str()).unwrap(),
         }
@@ -52,10 +49,7 @@ where
     for replace_test_data in &test_data.replace {
         let mut fst_list = vec![];
         fst_list.push((replace_test_data.root, test_data.raw.clone()));
-        fst_list.push((
-            replace_test_data.label,
-            replace_test_data.fst_to_replace.clone(),
-        ));
+        fst_list.extend_from_slice(replace_test_data.label_fst_pairs.as_slice());
         let replaced_fst = replace(
             fst_list,
             replace_test_data.root,
@@ -70,9 +64,8 @@ where
                 replace_test_data.result,
                 replaced_fst,
                 format!(
-                    "Replace failed with parameters root={:?} label={:?} epsilon_on_replace={:?}",
+                    "Replace failed with parameters root={:?} epsilon_on_replace={:?}",
                     replace_test_data.root,
-                    replace_test_data.label,
                     replace_test_data.epsilon_on_replace
                 )
             )
