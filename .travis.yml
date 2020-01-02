@@ -40,13 +40,12 @@ addons:
 
 before_cache: |
   if [[ "$TRAVIS_RUST_VERSION" == stable ]]; then
-    bash <(curl https://raw.githubusercontent.com/xd009642/tarpaulin/master/travis-install.sh)
+    cargo install cargo-tarpaulin -f
   fi
-  rm -rf /home/travis/.cargo/registry
 
 after_success: |
    if [[ "$TRAVIS_RUST_VERSION" == stable ]]; then
-    apt-get update && apt-get install libssl-dev
+    sudo apt-get update && apt-get install libssl-dev
     # Uncomment the following line for coveralls.io
      cargo tarpaulin --ciserver travis-ci --coveralls $TRAVIS_JOB_ID
 
