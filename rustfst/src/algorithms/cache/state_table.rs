@@ -21,6 +21,7 @@ impl<T: Hash + Eq + Clone> StateTable<T> {
         if !self.table.borrow().contains_right(tuple) {
             let n = self.table.borrow().len();
             self.table.borrow_mut().insert(n, tuple.clone());
+            return n;
         }
         *self.table.borrow().get_by_right(tuple).unwrap()
     }
