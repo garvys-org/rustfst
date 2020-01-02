@@ -34,7 +34,11 @@ impl ReplaceOperationResult {
     {
         ReplaceTestData {
             root: self.root,
-            label_fst_pairs: self.label_fst_pairs.iter().map(|v| (v.0, F::from_text_string(v.1.as_str()).unwrap())).collect(),
+            label_fst_pairs: self
+                .label_fst_pairs
+                .iter()
+                .map(|v| (v.0, F::from_text_string(v.1.as_str()).unwrap()))
+                .collect(),
             epsilon_on_replace: self.epsilon_on_replace,
             result: F::from_text_string(self.result.as_str()).unwrap(),
         }
@@ -65,8 +69,7 @@ where
                 replaced_fst,
                 format!(
                     "Replace failed with parameters root={:?} epsilon_on_replace={:?}",
-                    replace_test_data.root,
-                    replace_test_data.epsilon_on_replace
+                    replace_test_data.root, replace_test_data.epsilon_on_replace
                 )
             )
         );

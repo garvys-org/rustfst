@@ -62,7 +62,6 @@ where
     F1::W: 'static,
     F2: MutableFst<W = F1::W> + ExpandedFst<W = F1::W>,
 {
-    println!("Replace pouet");
     let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
     let mut fst = ReplaceFstImpl::new(fst_list, opts)?;
     fst.compute()
@@ -205,7 +204,6 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
     fn compute_final(&mut self, state: StateId) -> Fallible<Option<F::W>> {
         let tuple = self.state_table.tuple_table.find_tuple(state);
         if tuple.prefix_id == 0 {
-            let fst_state = tuple.fst_state;
             self.fst_array
                 .get(tuple.fst_id.unwrap())
                 .unwrap()
@@ -217,7 +215,6 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
     }
 
     fn expand(&mut self, state: StateId) -> Fallible<()> {
-        println!("[Expand] state = {:?}", state);
         let tuple = self.state_table.tuple_table.find_tuple(state).clone();
         if let Some(fst_state) = tuple.fst_state {
             if let Some(arc) = self.compute_final_arc(state) {
@@ -231,7 +228,7 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
                 .arcs_iter(fst_state)?
             {
                 if let Some(new_arc) = self.compute_arc(&tuple, arc) {
-                    self.cache_impl.push_arc(state, new_arc);
+                    self.cache_impl.push_arc(state, new_arc)?;
                 }
             }
         }
@@ -398,7 +395,6 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         for _ in 0..=start_state {
             fst_out.add_state();
         }
-        println!("Start state = {:?}", start_state);
         fst_out.set_start(start_state)?;
         let mut queue = VecDeque::new();
         let mut visited_states = HashSet::new();
@@ -431,12 +427,6 @@ struct PrefixTuple {
     nextstate: Option<StateId>,
 }
 
-impl PrefixTuple {
-    fn new(fst_id: Option<Label>, nextstate: Option<StateId>) -> Self {
-        Self { fst_id, nextstate }
-    }
-}
-
 #[derive(Hash, Eq, PartialOrd, PartialEq, Clone)]
 struct ReplaceStackPrefix {
     prefix: Vec<PrefixTuple>,
@@ -457,10 +447,6 @@ impl ReplaceStackPrefix {
 
     fn top(&self) -> &PrefixTuple {
         self.prefix.last().as_ref().unwrap()
-    }
-
-    fn depth(&self) -> usize {
-        self.prefix.len()
     }
 }
 
