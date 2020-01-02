@@ -481,30 +481,61 @@ void compute_fst_replace(const F& raw_fst, json& j) {
     using Weight = typename F::Weight;
     using Arc = typename F::Arc;
     using StateId = typename F::Arc::StateId;
+
+    std::set<int> labels;
+    for (fst::StateIterator<F> siter(raw_fst); !siter.Done(); siter.Next()) {
+        StateId state_id = siter.Value();
+        for (fst::ArcIterator<F> aiter(raw_fst, state_id); !aiter.Done(); aiter.Next()) {
+            const Arc &arc = aiter.Value();
+            labels.insert(arc.olabel);
+        }
+    }
+
+    j["replace"] = {};
+    auto max_label = *std::max_element(labels.begin(), labels.end());
+    auto root = max_label + 1;
+    auto label_1 = max_label + 2;
+    auto label_2 = max_label + 3;
+    auto label_3 = max_label + 4;
+    auto label_4 = max_label + 5;
+
     fst::VectorFst<typename F::Arc> fst;
     fst.AddState();
     fst.AddState();
     fst.AddState();
     fst.SetStart(0);
     fst.SetFinal(2, Weight::One());
-    fst.AddArc(0, Arc(2, 3, Weight::One(), 1));
-    fst.AddArc(1, Arc(5, 7, Weight::One(), 2));
+    fst.AddArc(0, Arc(label_1, label_2, Weight::One(), 1));
+    fst.AddArc(1, Arc(label_3, label_4, Weight::One(), 2));
 
-    std::set<int> labels;
-    for (fst::StateIterator<F> siter(fst); !siter.Done(); siter.Next()) {
-        StateId state_id = siter.Value();
-        for (fst::ArcIterator<F> aiter(fst, state_id); !aiter.Done(); aiter.Next()) {
-            const Arc &arc = aiter.Value();
-            labels.insert(arc.olabel);
-        }
-    }
-
-    auto root = std::max_element(labels.begin(), labels.end()) + 1;
+    std::vector<bool> v = {true, false};
     for (auto label: labels) {
-        if (label > 0) {
-            // TODO
+        for (bool epsilon_on_replace: v) {
+            if (label > 0) {
+                vector<pair<typename Arc::Label, const fst::Fst<Arc>* > > label_fst_pairs;
+                label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
+                label_fst_pairs.push_back(std::make_pair(label, &fst));
+
+                fst::VectorFst<Arc> res;
+                fst::Replace(label_fst_pairs, &res, root, epsilon_on_replace);
+
+                json j2;
+                j2["root"] = root;
+                j2["label"] = label;
+                j2["fst_to_replace"] = fst_to_string(fst);
+                j2["epsilon_on_replace"] = epsilon_on_replace;
+                j2["result"] = fst_to_string(res);
+                j["replace"].push_back(j2);
+            }
         }
     }
+
+    if (labels.size() == 0) {
+        vector<int> p;
+        j["replace"] = p;
+    }
+
+
 }
 
 template<class A>

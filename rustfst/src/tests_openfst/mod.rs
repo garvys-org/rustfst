@@ -48,6 +48,7 @@ use self::algorithms::{
     project::{test_project_input, test_project_output},
     properties::{parse_fst_properties, test_fst_properties},
     push::{test_push, PushOperationResult, PushTestData},
+    replace::{test_replace, ReplaceOperationResult, ReplaceTestData},
     reverse::test_reverse,
     rm_epsilon::test_rmepsilon,
     shortest_distance::{
@@ -128,6 +129,7 @@ pub struct ParsedFstTestData {
     factor_weight_identity: Vec<FwIdentityOperationResult>,
     factor_weight_gallic: Vec<FwGallicOperationResult>,
     push: Vec<PushOperationResult>,
+    replace: Vec<ReplaceOperationResult>
 }
 
 pub struct FstTestData<F>
@@ -173,6 +175,7 @@ where
     pub factor_weight_identity: Vec<FwIdentityTestData<F>>,
     pub factor_weight_gallic: Vec<FwGallicTestData<F>>,
     pub push: Vec<PushTestData<F>>,
+    pub replace: Vec<ReplaceTestData<F>>
 }
 
 impl<F> FstTestData<F>
@@ -237,6 +240,7 @@ where
                 .map(|v| v.parse())
                 .collect(),
             push: data.push.iter().map(|v| v.parse()).collect(),
+            replace: data.replace.iter().map(|v| v.parse()).collect()
         }
     }
 }
@@ -361,6 +365,8 @@ where
     test_const_fst_bin_serializer(&test_data)?;
 
     test_del_all_states(&test_data)?;
+
+    test_replace(&test_data)?;
 
     Ok(())
 }
