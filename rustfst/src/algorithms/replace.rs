@@ -23,16 +23,22 @@ enum ReplaceLabelType {
     ReplaceLabelInput,
     /// Epsilon on input and non-epsilon on output.
     ReplaceLabelOutput,
+    #[allow(unused)]
     /// Non-epsilon labels on both input and output.
     ReplaceLabelBoth,
 }
 
-#[allow(unused)]
 struct ReplaceFstOptions {
+    /// Index of root rule for expansion.
     root: Label,
+    /// How to label call arc.
     call_label_type: ReplaceLabelType,
+    /// How to label return arc.
     return_label_type: ReplaceLabelType,
+    /// Specifies output label to put on call arc; if `None`, use existing label
+    /// on call arc. Otherwise, use this field as the output label.
     call_output_label: Option<Label>,
+    /// Specifies label to put on return arc.
     return_label: Label,
 }
 
@@ -67,14 +73,12 @@ where
     fst.compute()
 }
 
-#[allow(unused)]
 /// Returns true if label type on arc results in epsilon input label.
 fn epsilon_on_input(label_type: ReplaceLabelType) -> bool {
     label_type == ReplaceLabelType::ReplaceLabelNeither
         || label_type == ReplaceLabelType::ReplaceLabelOutput
 }
 
-#[allow(unused)]
 /// Returns true if label type on arc results in epsilon input label.
 fn epsilon_on_output(label_type: ReplaceLabelType) -> bool {
     label_type == ReplaceLabelType::ReplaceLabelNeither
@@ -82,6 +86,7 @@ fn epsilon_on_output(label_type: ReplaceLabelType) -> bool {
 }
 
 #[allow(unused)]
+// Necessary when setting the properties.
 fn replace_transducer(
     call_label_type: ReplaceLabelType,
     return_label_type: ReplaceLabelType,
@@ -94,7 +99,6 @@ fn replace_transducer(
         || return_label_type == ReplaceLabelType::ReplaceLabelOutput
 }
 
-#[allow(unused)]
 struct ReplaceFstImpl<F: ExpandedFst> {
     cache_impl: CacheImpl<F::W>,
     call_label_type_: ReplaceLabelType,
@@ -109,7 +113,7 @@ struct ReplaceFstImpl<F: ExpandedFst> {
 }
 
 impl<F: ExpandedFst> ReplaceFstImpl<F> {
-    #[allow(unused)]
+
     fn new(fst_list: Vec<(Label, F)>, opts: ReplaceFstOptions) -> Fallible<Self> {
         let mut replace_fst_impl = Self {
             cache_impl: CacheImpl::new(),
@@ -134,7 +138,7 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
             replace_fst_impl.return_label_type_ = ReplaceLabelType::ReplaceLabelNeither;
         }
 
-        for (idx, (label, fst)) in fst_list.into_iter().enumerate() {
+        for (label, fst) in fst_list.into_iter() {
             replace_fst_impl
                 .nonterminal_hash
                 .insert(label, replace_fst_impl.fst_array.len());
@@ -155,14 +159,13 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         Ok(replace_fst_impl)
     }
 
-    pub fn arcs_iter(&mut self, state: StateId) -> Fallible<IterSlice<Arc<F::W>>> {
+    fn arcs_iter(&mut self, state: StateId) -> Fallible<IterSlice<Arc<F::W>>> {
         if !self.cache_impl.expanded(state) {
             self.expand(state)?;
         }
         self.cache_impl.arcs_iter(state)
     }
 
-    #[allow(unused)]
     fn start(&mut self) -> Fallible<Option<StateId>> {
         if !self.cache_impl.has_start() {
             let start = self.compute_start()?;
@@ -192,8 +195,7 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         }
     }
 
-    #[allow(unused)]
-    pub fn final_weight(&mut self, state: StateId) -> Fallible<Option<&F::W>> {
+    fn final_weight(&mut self, state: StateId) -> Fallible<Option<&F::W>> {
         if !self.cache_impl.has_final(state) {
             let final_weight = self.compute_final(state)?;
             self.cache_impl.set_final_weight(state, final_weight)?;
