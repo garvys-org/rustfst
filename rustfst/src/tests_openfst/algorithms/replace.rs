@@ -1,7 +1,7 @@
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::algorithms::{replace};
+use crate::algorithms::replace;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::TextParser;
 use crate::semirings::{Semiring, WeaklyDivisibleSemiring, WeightQuantize};
@@ -17,9 +17,9 @@ pub struct ReplaceOperationResult {
 }
 
 pub struct ReplaceTestData<F>
-    where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+where
+    F: TextParser,
+    F::W: Semiring<Type = f32>,
 {
     pub root: usize,
     pub label: usize,
@@ -30,9 +30,9 @@ pub struct ReplaceTestData<F>
 
 impl ReplaceOperationResult {
     pub fn parse<F>(&self) -> ReplaceTestData<F>
-        where
-            F: TextParser,
-            F::W: Semiring<Type = f32>,
+    where
+        F: TextParser,
+        F::W: Semiring<Type = f32>,
     {
         ReplaceTestData {
             root: self.root,
@@ -45,15 +45,22 @@ impl ReplaceOperationResult {
 }
 
 pub fn test_replace<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
-    where
-        W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-        W::ReverseWeight: 'static,
+where
+    W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+    W::ReverseWeight: 'static,
 {
     for replace_test_data in &test_data.replace {
         let mut fst_list = vec![];
         fst_list.push((replace_test_data.root, test_data.raw.clone()));
-        fst_list.push((replace_test_data.label, replace_test_data.fst_to_replace.clone()));
-        let replaced_fst = replace(fst_list, replace_test_data.root, replace_test_data.epsilon_on_replace)?;
+        fst_list.push((
+            replace_test_data.label,
+            replace_test_data.fst_to_replace.clone(),
+        ));
+        let replaced_fst = replace(
+            fst_list,
+            replace_test_data.root,
+            replace_test_data.epsilon_on_replace,
+        )?;
 
         assert_eq!(
             replace_test_data.result,

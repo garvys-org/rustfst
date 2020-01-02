@@ -1,5 +1,5 @@
-use std::collections::{BTreeSet, HashMap, HashSet};
 use std::collections::hash_map::Entry;
+use std::collections::{BTreeSet, HashMap, HashSet};
 use std::hash::Hash;
 use std::slice::Iter as IterSlice;
 
@@ -8,11 +8,11 @@ use bitflags::_core::cell::{Ref, RefCell};
 use failure::{bail, Fallible};
 use nom::lib::std::collections::VecDeque;
 
-use crate::{Arc, EPS_LABEL, Label, StateId};
 use crate::algorithms::cache::CacheImpl;
+use crate::algorithms::replace::ReplaceLabelType::{ReplaceLabelInput, ReplaceLabelNeither};
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
-use crate::algorithms::replace::ReplaceLabelType::{ReplaceLabelNeither, ReplaceLabelInput};
+use crate::{Arc, Label, StateId, EPS_LABEL};
 
 /// This specifies what labels to output on the call or return arc.
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
@@ -40,19 +40,27 @@ impl ReplaceFstOptions {
     pub fn new(root: Label, epsilon_on_replace: bool) -> Self {
         Self {
             root,
-            call_label_type: if epsilon_on_replace {ReplaceLabelNeither} else {ReplaceLabelInput},
+            call_label_type: if epsilon_on_replace {
+                ReplaceLabelNeither
+            } else {
+                ReplaceLabelInput
+            },
             return_label_type: ReplaceLabelNeither,
-            call_output_label: if epsilon_on_replace {Some(0)} else {None},
-            return_label: 0
+            call_output_label: if epsilon_on_replace { Some(0) } else { None },
+            return_label: 0,
         }
     }
 }
 
-pub fn replace<F1, F2>(fst_list: Vec<(Label, F1)>, root: Label, epsilon_on_replace: bool) -> Fallible<F2>
+pub fn replace<F1, F2>(
+    fst_list: Vec<(Label, F1)>,
+    root: Label,
+    epsilon_on_replace: bool,
+) -> Fallible<F2>
 where
     F1: ExpandedFst,
     F1::W: 'static,
-    F2: MutableFst<W=F1::W> + ExpandedFst<W=F1::W>
+    F2: MutableFst<W = F1::W> + ExpandedFst<W = F1::W>,
 {
     println!("Replace pouet");
     let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
@@ -221,11 +229,11 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
                 .get(tuple.fst_id.unwrap())
                 .unwrap()
                 .arcs_iter(fst_state)?
-                {
-                    if let Some(new_arc) = self.compute_arc(&tuple, arc) {
-                        self.cache_impl.push_arc(state, new_arc);
-                    }
+            {
+                if let Some(new_arc) = self.compute_arc(&tuple, arc) {
+                    self.cache_impl.push_arc(state, new_arc);
                 }
+            }
         }
 
         self.cache_impl.mark_expanded(state);
@@ -312,7 +320,7 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         self.get_prefix_id(&prefix)
     }
 
-    fn compute_arc<W: Semiring>(&self, tuple: &ReplaceStateTuple, arc: &Arc<W>) -> Option<Arc<W>> {s
+    fn compute_arc<W: Semiring>(&self, tuple: &ReplaceStateTuple, arc: &Arc<W>) -> Option<Arc<W>> {
         if arc.olabel == EPS_LABEL
             || arc.olabel < *self.nonterminal_set.iter().next().unwrap()
             || arc.olabel > *self.nonterminal_set.iter().rev().next().unwrap()
@@ -378,8 +386,8 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
     }
 
     pub fn compute<F2: MutableFst<W = F::W> + ExpandedFst<W = F::W>>(&mut self) -> Fallible<F2>
-        where
-            F::W: 'static,
+    where
+        F::W: 'static,
     {
         let start_state = self.start()?;
         let mut fst_out = F2::new();

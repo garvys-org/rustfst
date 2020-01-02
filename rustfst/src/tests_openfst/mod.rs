@@ -129,7 +129,7 @@ pub struct ParsedFstTestData {
     factor_weight_identity: Vec<FwIdentityOperationResult>,
     factor_weight_gallic: Vec<FwGallicOperationResult>,
     push: Vec<PushOperationResult>,
-    replace: Vec<ReplaceOperationResult>
+    replace: Vec<ReplaceOperationResult>,
 }
 
 pub struct FstTestData<F>
@@ -175,7 +175,7 @@ where
     pub factor_weight_identity: Vec<FwIdentityTestData<F>>,
     pub factor_weight_gallic: Vec<FwGallicTestData<F>>,
     pub push: Vec<PushTestData<F>>,
-    pub replace: Vec<ReplaceTestData<F>>
+    pub replace: Vec<ReplaceTestData<F>>,
 }
 
 impl<F> FstTestData<F>
@@ -240,7 +240,7 @@ where
                 .map(|v| v.parse())
                 .collect(),
             push: data.push.iter().map(|v| v.parse()).collect(),
-            replace: data.replace.iter().map(|v| v.parse()).collect()
+            replace: data.replace.iter().map(|v| v.parse()).collect(),
         }
     }
 }
