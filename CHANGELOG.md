@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `set_input_symbols()` and `set_output_symbols()` to the `MutableFst` trait to attach a `SymbolTable` to an Fst.
 - Add `input_symbols()` and `output_symbols()` to the `Fst` trait to retrieve previously attached `SymbolTable`.
 - Add `replace` fst operations.
+- Change internal implementation of `Replace`, `Determinize` and `FactorWeight` to share more code by creating the trait `FstImpl` and the struct `StateTable`.
 
 ### Changed
 - Make `KDELTA` public outside of the crate

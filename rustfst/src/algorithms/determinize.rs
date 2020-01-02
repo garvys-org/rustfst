@@ -1,18 +1,16 @@
 use std::collections::hash_map::Entry;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::HashMap;
 use std::marker::PhantomData;
-use std::slice::Iter as IterSlice;
 
-use bimap::BiHashMap;
 use failure::Fallible;
 
-use crate::algorithms::cache::CacheImpl;
+use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::factor_iterators::{GallicFactor, GallicFactorMin, GallicFactorRestrict};
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::algorithms::{factor_weight, weight_convert, FactorWeightOptions, FactorWeightType};
 use crate::arc::Arc;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{AllocableFst, ExpandedFst, Fst, MutableFst};
+use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{
     DivideType, GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, Semiring,
     SemiringProperties, StringWeightLeft, StringWeightRestrict, WeaklyDivisibleSemiring,
@@ -169,89 +167,24 @@ where
 {
     fst: &'a F,
     cache_impl: CacheImpl<F::W>,
-    state_table: BiHashMap<StateId, DeterminizeStateTuple<F::W>>,
+    state_table: StateTable<DeterminizeStateTuple<F::W>>,
     ghost: PhantomData<CD>,
     in_dist: Option<&'b [F::W]>,
     out_dist: Vec<F::W>,
 }
 
-impl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>> DeterminizeFsaImpl<'a, 'b, F, CD>
+impl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>> FstImpl<F::W> for DeterminizeFsaImpl<'a, 'b, F, CD>
 where
-    F::W: WeaklyDivisibleSemiring + WeightQuantize,
+    F::W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
-    pub fn new(fst: &'a F, in_dist: Option<&'b [F::W]>) -> Fallible<Self> {
-        if !fst.is_acceptor() {
-            bail!("DeterminizeFsaImpl : expected acceptor as argument");
-        }
-        Ok(Self {
-            fst,
-            cache_impl: CacheImpl::new(),
-            state_table: BiHashMap::new(),
-            ghost: PhantomData,
-            in_dist,
-            out_dist: vec![],
-        })
+    fn cache_impl(&mut self) -> &mut CacheImpl<<F as CoreFst>::W> {
+        &mut self.cache_impl
     }
 
-    pub fn arcs_iter(&mut self, state: StateId) -> Fallible<IterSlice<Arc<F::W>>> {
-        if !self.cache_impl.expanded(state) {
-            self.expand(state)?;
-        }
-        self.cache_impl.arcs_iter(state)
-    }
-
-    pub fn start(&mut self) -> Fallible<Option<StateId>> {
-        if !self.cache_impl.has_start() {
-            let start = self.compute_start()?;
-            self.cache_impl.set_start(start);
-        }
-        Ok(self.cache_impl.start().unwrap())
-    }
-
-    pub fn final_weight(&mut self, state: StateId) -> Fallible<Option<&F::W>> {
-        if !self.cache_impl.has_final(state) {
-            let final_weight = self.compute_final(state)?;
-            self.cache_impl.set_final_weight(state, final_weight)?;
-        }
-        self.cache_impl.final_weight(state)
-    }
-
-    fn compute_start(&mut self) -> Fallible<Option<StateId>> {
-        if let Some(start_state) = self.fst.start() {
-            let elt = DeterminizeElement::new(start_state, F::W::one());
-            let tuple = DeterminizeStateTuple {
-                subset: WeightedSubset::from_vec(vec![elt]),
-                filter_state: start_state,
-            };
-            return Ok(Some(self.find_state(&tuple)?));
-        }
-        Ok(None)
-    }
-
-    fn compute_final(&mut self, state: StateId) -> Fallible<Option<F::W>> {
-        let zero = F::W::zero();
-        let tuple = self.state_table.get_by_left(&state).unwrap();
-        let mut final_weight = F::W::zero();
-        for det_elt in tuple.subset.iter() {
-            final_weight.plus_assign(
-                det_elt.weight.times(
-                    self.fst
-                        .final_weight(det_elt.state)?
-                        .unwrap_or_else(|| &zero),
-                )?,
-            )?;
-        }
-        if final_weight.is_zero() {
-            Ok(None)
-        } else {
-            Ok(Some(final_weight))
-        }
-    }
-
-    fn expand(&mut self, state: StateId) -> Fallible<()> {
+    fn expand(&mut self, state: usize) -> Fallible<()> {
         // GetLabelMap
         let mut label_map: HashMap<Label, DeterminizeArc<F::W>> = HashMap::new();
-        let src_tuple = self.state_table.get_by_left(&state).unwrap();
+        let src_tuple = self.state_table.find_tuple(state);
         for src_elt in src_tuple.subset.iter() {
             for arc in self.fst.arcs_iter(src_elt.state)? {
                 let r = src_elt.weight.times(&arc.weight)?;
@@ -275,6 +208,7 @@ where
                     .push(dest_elt);
             }
         }
+        drop(src_tuple);
 
         for det_arc in label_map.values_mut() {
             self.norm_arc(det_arc)?;
@@ -283,8 +217,59 @@ where
         for det_arc in label_map.values() {
             self.add_arc(state, det_arc)?;
         }
-        self.cache_impl.mark_expanded(state);
+
         Ok(())
+    }
+
+    fn compute_start(&mut self) -> Fallible<Option<usize>> {
+        if let Some(start_state) = self.fst.start() {
+            let elt = DeterminizeElement::new(start_state, F::W::one());
+            let tuple = DeterminizeStateTuple {
+                subset: WeightedSubset::from_vec(vec![elt]),
+                filter_state: start_state,
+            };
+            return Ok(Some(self.find_state(&tuple)?));
+        }
+        Ok(None)
+    }
+
+    fn compute_final(&mut self, state: usize) -> Fallible<Option<<F as CoreFst>::W>> {
+        let zero = F::W::zero();
+        let tuple = self.state_table.find_tuple(state);
+        let mut final_weight = F::W::zero();
+        for det_elt in tuple.subset.iter() {
+            final_weight.plus_assign(
+                det_elt.weight.times(
+                    self.fst
+                        .final_weight(det_elt.state)?
+                        .unwrap_or_else(|| &zero),
+                )?,
+            )?;
+        }
+        if final_weight.is_zero() {
+            Ok(None)
+        } else {
+            Ok(Some(final_weight))
+        }
+    }
+}
+
+impl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>> DeterminizeFsaImpl<'a, 'b, F, CD>
+where
+    F::W: WeaklyDivisibleSemiring + WeightQuantize,
+{
+    pub fn new(fst: &'a F, in_dist: Option<&'b [F::W]>) -> Fallible<Self> {
+        if !fst.is_acceptor() {
+            bail!("DeterminizeFsaImpl : expected acceptor as argument");
+        }
+        Ok(Self {
+            fst,
+            cache_impl: CacheImpl::new(),
+            state_table: StateTable::new(),
+            ghost: PhantomData,
+            in_dist,
+            out_dist: vec![],
+        })
     }
 
     fn add_arc(&mut self, state: StateId, det_arc: &DeterminizeArc<F::W>) -> Fallible<()> {
@@ -333,11 +318,7 @@ where
     }
 
     fn find_state(&mut self, tuple: &DeterminizeStateTuple<F::W>) -> Fallible<StateId> {
-        if !self.state_table.contains_right(tuple) {
-            let n = self.state_table.len();
-            self.state_table.insert(n, tuple.clone());
-        }
-        let s = *self.state_table.get_by_right(tuple).unwrap();
+        let s = self.state_table.find_id_from_ref(&tuple);
         if let Some(_in_dist) = self.in_dist.as_ref() {
             if self.out_dist.len() <= s {
                 self.out_dist.push(self.compute_distance(&tuple.subset)?);
@@ -358,44 +339,6 @@ where
             outd.plus_assign(element.weight.times(ind)?)?;
         }
         Ok(outd)
-    }
-
-    pub fn compute<F2: MutableFst<W = F::W> + ExpandedFst<W = F::W>>(&mut self) -> Fallible<F2>
-    where
-        F::W: 'static,
-    {
-        let start_state = self.start()?;
-        let mut fst_out = F2::new();
-        if start_state.is_none() {
-            return Ok(fst_out);
-        }
-        let start_state = start_state.unwrap();
-        for _ in 0..=start_state {
-            fst_out.add_state();
-        }
-        fst_out.set_start(start_state)?;
-        let mut queue = VecDeque::new();
-        let mut visited_states = HashSet::new();
-        visited_states.insert(start_state);
-        queue.push_back(start_state);
-        while !queue.is_empty() {
-            let s = queue.pop_front().unwrap();
-            for arc in self.arcs_iter(s)? {
-                if !visited_states.contains(&arc.nextstate) {
-                    queue.push_back(arc.nextstate);
-                    visited_states.insert(arc.nextstate);
-                }
-                let n = fst_out.num_states();
-                for _ in n..=arc.nextstate {
-                    fst_out.add_state();
-                }
-                fst_out.add_arc(s, arc.clone())?;
-            }
-            if let Some(f_w) = self.final_weight(s)? {
-                fst_out.set_final(s, f_w.clone())?;
-            }
-        }
-        Ok(fst_out)
     }
 
     pub fn compute_with_distance<F2: MutableFst<W = F::W> + ExpandedFst<W = F::W>>(

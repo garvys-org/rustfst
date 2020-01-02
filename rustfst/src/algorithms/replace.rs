@@ -1,16 +1,12 @@
 use std::collections::hash_map::Entry;
-use std::collections::{BTreeSet, HashMap, HashSet};
+use std::collections::{BTreeSet, HashMap};
 use std::hash::Hash;
-use std::slice::Iter as IterSlice;
 
-use bimap::BiHashMap;
-use bitflags::_core::cell::{Ref, RefCell};
 use failure::{bail, Fallible};
-use nom::lib::std::collections::VecDeque;
 
-use crate::algorithms::cache::CacheImpl;
+use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::replace::ReplaceLabelType::{ReplaceLabelInput, ReplaceLabelNeither};
-use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL};
 
@@ -124,6 +120,67 @@ struct ReplaceFstImpl<F: ExpandedFst> {
     state_table: ReplaceStateTable,
 }
 
+impl<F: ExpandedFst> FstImpl<F::W> for ReplaceFstImpl<F>
+where
+    F::W: 'static,
+{
+    fn cache_impl(&mut self) -> &mut CacheImpl<<F as CoreFst>::W> {
+        &mut self.cache_impl
+    }
+
+    fn expand(&mut self, state: usize) -> Fallible<()> {
+        let tuple = self.state_table.tuple_table.find_tuple(state).clone();
+        if let Some(fst_state) = tuple.fst_state {
+            if let Some(arc) = self.compute_final_arc(state) {
+                self.cache_impl.push_arc(state, arc)?;
+            }
+
+            for arc in self
+                .fst_array
+                .get(tuple.fst_id.unwrap())
+                .unwrap()
+                .arcs_iter(fst_state)?
+            {
+                if let Some(new_arc) = self.compute_arc(&tuple, arc) {
+                    self.cache_impl.push_arc(state, new_arc)?;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn compute_start(&mut self) -> Fallible<Option<usize>> {
+        if self.fst_array.is_empty() {
+            return Ok(None);
+        } else {
+            if let Some(fst_start) = self.fst_array[self.root].start() {
+                let prefix = self.get_prefix_id(ReplaceStackPrefix::new());
+                let start = self.state_table.tuple_table.find_id(ReplaceStateTuple::new(
+                    prefix,
+                    Some(self.root),
+                    Some(fst_start),
+                ));
+                return Ok(Some(start));
+            } else {
+                return Ok(None);
+            }
+        }
+    }
+
+    fn compute_final(&mut self, state: usize) -> Fallible<Option<F::W>> {
+        let tuple = self.state_table.tuple_table.find_tuple(state);
+        if tuple.prefix_id == 0 {
+            self.fst_array
+                .get(tuple.fst_id.unwrap())
+                .unwrap()
+                .final_weight(tuple.fst_state.unwrap())
+                .map(|e| e.cloned())
+        } else {
+            Ok(None)
+        }
+    }
+}
+
 impl<F: ExpandedFst> ReplaceFstImpl<F> {
     fn new(fst_list: Vec<(Label, F)>, opts: ReplaceFstOptions) -> Fallible<Self> {
         let mut replace_fst_impl = Self {
@@ -170,86 +227,6 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         Ok(replace_fst_impl)
     }
 
-    fn arcs_iter(&mut self, state: StateId) -> Fallible<IterSlice<Arc<F::W>>> {
-        if !self.cache_impl.expanded(state) {
-            self.expand(state)?;
-        }
-        self.cache_impl.arcs_iter(state)
-    }
-
-    fn start(&mut self) -> Fallible<Option<StateId>> {
-        if !self.cache_impl.has_start() {
-            let start = self.compute_start()?;
-            self.cache_impl.set_start(start);
-        }
-        Ok(self.cache_impl.start().unwrap())
-    }
-
-    fn compute_start(&mut self) -> Fallible<Option<StateId>> {
-        if self.fst_array.is_empty() {
-            return Ok(None);
-        } else {
-            if let Some(fst_start) = self.fst_array[self.root].start() {
-                let prefix = self.get_prefix_id(&ReplaceStackPrefix::new());
-                let start = self
-                    .state_table
-                    .tuple_table
-                    .find_id(&ReplaceStateTuple::new(
-                        prefix,
-                        Some(self.root),
-                        Some(fst_start),
-                    ));
-                return Ok(Some(start));
-            } else {
-                return Ok(None);
-            }
-        }
-    }
-
-    fn final_weight(&mut self, state: StateId) -> Fallible<Option<&F::W>> {
-        if !self.cache_impl.has_final(state) {
-            let final_weight = self.compute_final(state)?;
-            self.cache_impl.set_final_weight(state, final_weight)?;
-        }
-        self.cache_impl.final_weight(state)
-    }
-
-    fn compute_final(&mut self, state: StateId) -> Fallible<Option<F::W>> {
-        let tuple = self.state_table.tuple_table.find_tuple(state);
-        if tuple.prefix_id == 0 {
-            self.fst_array
-                .get(tuple.fst_id.unwrap())
-                .unwrap()
-                .final_weight(tuple.fst_state.unwrap())
-                .map(|e| e.cloned())
-        } else {
-            Ok(None)
-        }
-    }
-
-    fn expand(&mut self, state: StateId) -> Fallible<()> {
-        let tuple = self.state_table.tuple_table.find_tuple(state).clone();
-        if let Some(fst_state) = tuple.fst_state {
-            if let Some(arc) = self.compute_final_arc(state) {
-                self.cache_impl.push_arc(state, arc)?;
-            }
-
-            for arc in self
-                .fst_array
-                .get(tuple.fst_id.unwrap())
-                .unwrap()
-                .arcs_iter(fst_state)?
-            {
-                if let Some(new_arc) = self.compute_arc(&tuple, arc) {
-                    self.cache_impl.push_arc(state, new_arc)?;
-                }
-            }
-        }
-
-        self.cache_impl.mark_expanded(state);
-        Ok(())
-    }
-
     fn compute_final_arc(&mut self, state: StateId) -> Option<Arc<F::W>> {
         let tuple = self.state_table.tuple_table.find_tuple(state);
         let fst_state = tuple.fst_state;
@@ -287,14 +264,11 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
                 .clone();
             let top = stack.top();
             let prefix_id = self.pop_prefix(stack.clone());
-            let nextstate = self
-                .state_table
-                .tuple_table
-                .find_id(&ReplaceStateTuple::new(
-                    prefix_id,
-                    top.fst_id,
-                    top.nextstate,
-                ));
+            let nextstate = self.state_table.tuple_table.find_id(ReplaceStateTuple::new(
+                prefix_id,
+                top.fst_id,
+                top.nextstate,
+            ));
             if let Some(weight) = self
                 .fst_array
                 .get(tuple.fst_id.unwrap())
@@ -311,13 +285,13 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         }
     }
 
-    fn get_prefix_id(&self, prefix: &ReplaceStackPrefix) -> StateId {
+    fn get_prefix_id(&self, prefix: ReplaceStackPrefix) -> StateId {
         self.state_table.prefix_table.find_id(prefix)
     }
 
     fn pop_prefix(&self, mut prefix: ReplaceStackPrefix) -> StateId {
         prefix.pop();
-        self.get_prefix_id(&prefix)
+        self.get_prefix_id(prefix)
     }
 
     fn push_prefix(
@@ -327,7 +301,7 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         nextstate: Option<StateId>,
     ) -> StateId {
         prefix.push(fst_id, nextstate);
-        self.get_prefix_id(&prefix)
+        self.get_prefix_id(prefix)
     }
 
     fn compute_arc<W: Semiring>(&self, tuple: &ReplaceStateTuple, arc: &Arc<W>) -> Option<Arc<W>> {
@@ -337,7 +311,7 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
         {
             let state_tuple =
                 ReplaceStateTuple::new(tuple.prefix_id, tuple.fst_id, Some(arc.nextstate));
-            let nextstate = self.state_table.tuple_table.find_id(&state_tuple);
+            let nextstate = self.state_table.tuple_table.find_id(state_tuple);
             return Some(Arc::new(
                 arc.ilabel,
                 arc.olabel,
@@ -354,14 +328,9 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
                     .clone();
                 let nt_prefix = self.push_prefix(p, tuple.fst_id, Some(arc.nextstate));
                 if let Some(nt_start) = self.fst_array.get(*nonterminal).unwrap().start() {
-                    let nt_nextstate =
-                        self.state_table
-                            .tuple_table
-                            .find_id(&ReplaceStateTuple::new(
-                                nt_prefix,
-                                Some(*nonterminal),
-                                Some(nt_start),
-                            ));
+                    let nt_nextstate = self.state_table.tuple_table.find_id(
+                        ReplaceStateTuple::new(nt_prefix, Some(*nonterminal), Some(nt_start)),
+                    );
                     let ilabel = if epsilon_on_input(self.call_label_type_) {
                         0
                     } else {
@@ -377,14 +346,11 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
                     return None;
                 }
             } else {
-                let nextstate = self
-                    .state_table
-                    .tuple_table
-                    .find_id(&ReplaceStateTuple::new(
-                        tuple.prefix_id,
-                        tuple.fst_id,
-                        Some(arc.nextstate),
-                    ));
+                let nextstate = self.state_table.tuple_table.find_id(ReplaceStateTuple::new(
+                    tuple.prefix_id,
+                    tuple.fst_id,
+                    Some(arc.nextstate),
+                ));
                 return Some(Arc::new(
                     arc.ilabel,
                     arc.olabel,
@@ -393,44 +359,6 @@ impl<F: ExpandedFst> ReplaceFstImpl<F> {
                 ));
             }
         }
-    }
-
-    pub fn compute<F2: MutableFst<W = F::W> + ExpandedFst<W = F::W>>(&mut self) -> Fallible<F2>
-    where
-        F::W: 'static,
-    {
-        let start_state = self.start()?;
-        let mut fst_out = F2::new();
-        if start_state.is_none() {
-            return Ok(fst_out);
-        }
-        let start_state = start_state.unwrap();
-        for _ in 0..=start_state {
-            fst_out.add_state();
-        }
-        fst_out.set_start(start_state)?;
-        let mut queue = VecDeque::new();
-        let mut visited_states = HashSet::new();
-        visited_states.insert(start_state);
-        queue.push_back(start_state);
-        while !queue.is_empty() {
-            let s = queue.pop_front().unwrap();
-            for arc in self.arcs_iter(s)? {
-                if !visited_states.contains(&arc.nextstate) {
-                    queue.push_back(arc.nextstate);
-                    visited_states.insert(arc.nextstate);
-                }
-                let n = fst_out.num_states();
-                for _ in n..=arc.nextstate {
-                    fst_out.add_state();
-                }
-                fst_out.add_arc(s, arc.clone())?;
-            }
-            if let Some(f_w) = self.final_weight(s)? {
-                fst_out.set_final(s, f_w.clone())?;
-            }
-        }
-        Ok(fst_out)
     }
 }
 
@@ -481,34 +409,6 @@ impl ReplaceStateTuple {
             fst_id,
             fst_state,
         }
-    }
-}
-
-// TODO: Move this struct into its own file + use it for all implementation starting with determinization
-struct StateTable<T: Hash + Eq + Clone> {
-    table: RefCell<BiHashMap<StateId, T>>,
-}
-
-impl<T: Hash + Eq + Clone> StateTable<T> {
-    fn new() -> Self {
-        Self {
-            table: RefCell::new(BiHashMap::new()),
-        }
-    }
-
-    /// Looks up integer ID from entry. If it doesn't exist and insert
-    fn find_id(&self, tuple: &T) -> StateId {
-        if !self.table.borrow().contains_right(tuple) {
-            let n = self.table.borrow().len();
-            self.table.borrow_mut().insert(n, tuple.clone());
-        }
-        *self.table.borrow().get_by_right(tuple).unwrap()
-    }
-
-    /// Looks up tuple from integer ID.
-    fn find_tuple(&self, tuple_id: StateId) -> Ref<T> {
-        let table = self.table.borrow();
-        Ref::map(table, |x| x.get_by_left(&tuple_id).unwrap())
     }
 }
 
