@@ -177,8 +177,11 @@ impl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>> FstImpl<F::W> for DeterminizeFsaIm
 where
     F::W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
-    fn cache_impl(&mut self) -> &mut CacheImpl<<F as CoreFst>::W> {
+    fn cache_impl_mut(&mut self) -> &mut CacheImpl<<F as CoreFst>::W> {
         &mut self.cache_impl
+    }
+    fn cache_impl_ref(&self) -> &CacheImpl<<F as CoreFst>::W> {
+        &self.cache_impl
     }
 
     fn expand(&mut self, state: usize) -> Fallible<()> {

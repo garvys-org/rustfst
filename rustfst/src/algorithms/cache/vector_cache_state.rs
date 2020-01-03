@@ -17,6 +17,10 @@ impl<W: Semiring> VectorCacheState<W> {
         }
     }
 
+    pub fn len(&self) -> usize {
+        self.cache_states.len()
+    }
+
     pub fn resize(&mut self, new_len: usize) {
         self.cache_states.resize_with(new_len, CacheState::new);
     }

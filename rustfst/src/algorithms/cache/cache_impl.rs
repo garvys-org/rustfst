@@ -23,6 +23,10 @@ impl<W: Semiring> CacheImpl<W> {
         }
     }
 
+    pub fn num_known_states(&self) -> usize {
+        self.vector_cache_states.len()
+    }
+
     pub fn set_start(&mut self, start_state: Option<StateId>) {
         self.cache_start_state = start_state;
         self.has_start = true;
