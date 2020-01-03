@@ -5,6 +5,7 @@ use crate::semirings::Semiring;
 use crate::Arc;
 use crate::StateId;
 
+#[derive(Clone, Debug, PartialOrd, PartialEq)]
 pub struct VectorCacheState<W: Semiring> {
     cache_states: Vec<CacheState<W>>,
 }
