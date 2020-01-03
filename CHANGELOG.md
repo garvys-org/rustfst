@@ -16,11 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `input_symbols()` and `output_symbols()` to the `Fst` trait to retrieve previously attached `SymbolTable`.
 - Add `replace` fst operations.
 - Change internal implementation of `Replace`, `Determinize` and `FactorWeight` to share more code by creating the trait `FstImpl` and the struct `StateTable`.
+- Implement/Derive `Clone`/`PartielEq`/`PartialOrd`/`Debug` for all iternal structures when possible.
 
 ### Changed
 - Make `KDELTA` public outside of the crate
 - Fix serialization into a DOT file by putting the `label` into quotes.
-- remove `reserve` API from `MutableFst`, see `AllocableFst` for this API 
+- Remove `reserve` API from `MutableFst`, see `AllocableFst` for this API 
+- Remove `Fst` trait bound on `Display`.
 
 ## [0.4.0] - 2019-11-12
 
