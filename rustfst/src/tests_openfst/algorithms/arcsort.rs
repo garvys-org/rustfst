@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use failure::Fallible;
 
 use crate::algorithms::arc_compares::{ilabel_compare, olabel_compare};
@@ -11,7 +13,7 @@ use crate::tests_openfst::FstTestData;
 
 pub fn test_arcsort_ilabel<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arcsort = test_data.raw.clone();
@@ -34,7 +36,7 @@ where
 
 pub fn test_arcsort_olabel<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arcsort = test_data.raw.clone();

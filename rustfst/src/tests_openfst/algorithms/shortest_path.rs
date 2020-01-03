@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use failure::{format_err, Fallible};
 use serde_derive::{Deserialize, Serialize};
 
@@ -46,7 +48,7 @@ impl ShorestPathOperationResult {
 
 pub fn test_shortest_path<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
     <<F as CoreFst>::W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize,
     F::W: Into<<<F as CoreFst>::W as Semiring>::ReverseWeight>

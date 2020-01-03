@@ -1,12 +1,26 @@
 use std::cell::{Ref, RefCell};
+use std::fmt;
 use std::hash::Hash;
 
 use bimap::BiHashMap;
 
 use crate::StateId;
 
+#[derive(Clone)]
 pub struct StateTable<T: Hash + Eq + Clone> {
     pub(crate) table: RefCell<BiHashMap<StateId, T>>,
+}
+
+impl<T: Hash + Eq + Clone + fmt::Debug> fmt::Debug for StateTable<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "StateTable {{ table : {:?} }}", self.table.borrow())
+    }
+}
+
+impl<T: Hash + Eq + Clone + PartialEq> PartialEq for StateTable<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.table.borrow().eq(&*other.table.borrow())
+    }
 }
 
 impl<T: Hash + Eq + Clone> StateTable<T> {

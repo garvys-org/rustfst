@@ -124,8 +124,12 @@ impl<F: ExpandedFst> FstImpl<F::W> for ReplaceFstImpl<F>
 where
     F::W: 'static,
 {
-    fn cache_impl(&mut self) -> &mut CacheImpl<<F as CoreFst>::W> {
+    fn cache_impl_mut(&mut self) -> &mut CacheImpl<<F as CoreFst>::W> {
         &mut self.cache_impl
+    }
+
+    fn cache_impl_ref(&self) -> &CacheImpl<<F as CoreFst>::W> {
+        &self.cache_impl
     }
 
     fn expand(&mut self, state: usize) -> Fallible<()> {

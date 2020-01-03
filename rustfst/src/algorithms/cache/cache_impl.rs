@@ -7,6 +7,7 @@ use crate::semirings::Semiring;
 use crate::Arc;
 use crate::StateId;
 
+#[derive(Clone, Debug, PartialEq, PartialOrd)]
 pub struct CacheImpl<W: Semiring> {
     has_start: bool,
     cache_start_state: Option<StateId>,
@@ -20,6 +21,10 @@ impl<W: Semiring> CacheImpl<W> {
             cache_start_state: None,
             vector_cache_states: VectorCacheState::new(),
         }
+    }
+
+    pub fn num_known_states(&self) -> usize {
+        self.vector_cache_states.len()
     }
 
     pub fn set_start(&mut self, start_state: Option<StateId>) {

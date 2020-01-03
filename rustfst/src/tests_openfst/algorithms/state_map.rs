@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use failure::Fallible;
 
 use crate::algorithms::arc_sum;
@@ -10,7 +12,7 @@ use crate::tests_openfst::FstTestData;
 
 pub fn test_state_map_arc_sum<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32>,
 {
     let mut fst_state_map = test_data.raw.clone();
@@ -32,7 +34,7 @@ where
 
 pub fn test_state_map_arc_unique<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32>,
 {
     let mut fst_state_map = test_data.raw.clone();

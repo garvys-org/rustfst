@@ -9,42 +9,49 @@ use crate::semirings::Semiring;
 use crate::{Arc, StateId};
 
 pub trait FstImpl<W: Semiring + 'static> {
-    fn cache_impl(&mut self) -> &mut CacheImpl<W>;
+    fn cache_impl_mut(&mut self) -> &mut CacheImpl<W>;
+    fn cache_impl_ref(&self) -> &CacheImpl<W>;
     fn expand(&mut self, state: StateId) -> Fallible<()>;
     fn compute_start(&mut self) -> Fallible<Option<StateId>>;
     fn compute_final(&mut self, state: StateId) -> Fallible<Option<W>>;
 
+    fn num_known_states(&self) -> usize {
+        self.cache_impl_ref().num_known_states()
+    }
+
     fn start(&mut self) -> Fallible<Option<StateId>> {
-        if !self.cache_impl().has_start() {
+        if !self.cache_impl_ref().has_start() {
             let start = self.compute_start()?;
-            self.cache_impl().set_start(start);
+            self.cache_impl_mut().set_start(start);
         }
-        Ok(self.cache_impl().start().unwrap())
+        Ok(self.cache_impl_ref().start().unwrap())
     }
 
     fn final_weight(&mut self, state: StateId) -> Fallible<Option<&W>> {
-        if !self.cache_impl().has_final(state) {
+        if !self.cache_impl_ref().has_final(state) {
             let final_weight = self.compute_final(state)?;
-            self.cache_impl().set_final_weight(state, final_weight)?;
+            self.cache_impl_mut()
+                .set_final_weight(state, final_weight)?;
         }
-        self.cache_impl().final_weight(state)
+        self.cache_impl_ref().final_weight(state)
     }
 
     fn arcs_iter(&mut self, state: StateId) -> Fallible<IterSlice<Arc<W>>> {
-        if !self.cache_impl().expanded(state) {
-            self.expand(state)?;
-            self.cache_impl().mark_expanded(state);
-        }
-        self.cache_impl().arcs_iter(state)
+        self.expand_if_necessary(state)?;
+        self.cache_impl_ref().arcs_iter(state)
     }
 
-    #[allow(unused)]
-    fn num_arcs(&mut self, state: StateId) -> Fallible<usize> {
-        if !self.cache_impl().expanded(state) {
+    fn expand_if_necessary(&mut self, state: StateId) -> Fallible<()> {
+        if !self.cache_impl_ref().expanded(state) {
             self.expand(state)?;
-            self.cache_impl().mark_expanded(state);
+            self.cache_impl_mut().mark_expanded(state);
         }
-        self.cache_impl().num_arcs(state)
+        Ok(())
+    }
+
+    fn num_arcs(&mut self, state: StateId) -> Fallible<usize> {
+        self.expand_if_necessary(state)?;
+        self.cache_impl_ref().num_arcs(state)
     }
 
     /// Turns the Dynamic FST into a static one.

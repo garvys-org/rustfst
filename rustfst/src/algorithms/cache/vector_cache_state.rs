@@ -5,6 +5,7 @@ use crate::semirings::Semiring;
 use crate::Arc;
 use crate::StateId;
 
+#[derive(Clone, Debug, PartialOrd, PartialEq)]
 pub struct VectorCacheState<W: Semiring> {
     cache_states: Vec<CacheState<W>>,
 }
@@ -14,6 +15,10 @@ impl<W: Semiring> VectorCacheState<W> {
         Self {
             cache_states: Vec::new(),
         }
+    }
+
+    pub fn len(&self) -> usize {
+        self.cache_states.len()
     }
 
     pub fn resize(&mut self, new_len: usize) {

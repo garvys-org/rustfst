@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use failure::Fallible;
 use pretty_assertions::assert_eq;
 
@@ -14,7 +16,7 @@ use crate::tests_openfst::FstTestData;
 
 pub fn test_arc_map_identity<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32> + WeightQuantize,
 {
     // ArcMap IdentityMapper
@@ -36,7 +38,7 @@ where
 
 pub fn test_arc_map_invert<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring,
 {
     // ArcMap InvertWeightMapper
@@ -58,7 +60,7 @@ where
 
 pub fn test_arc_map_input_epsilon<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arc_map = test_data.raw.clone();
@@ -79,7 +81,7 @@ where
 
 pub fn test_arc_map_output_epsilon<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arc_map = test_data.raw.clone();
@@ -100,7 +102,7 @@ where
 
 pub fn test_arc_map_plus<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arc_map = test_data.raw.clone();
@@ -121,7 +123,7 @@ where
 
 pub fn test_arc_map_times<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arc_map = test_data.raw.clone();
@@ -142,7 +144,7 @@ where
 
 pub fn test_arc_map_quantize<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32> + WeightQuantize,
 {
     let mut fst_arc_map = test_data.raw.clone();
@@ -163,7 +165,7 @@ where
 
 pub fn test_arc_map_rmweight<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32> + WeightQuantize,
 {
     // ArcMap RmWeightMapper

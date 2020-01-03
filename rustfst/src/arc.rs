@@ -2,7 +2,7 @@ use crate::semirings::Semiring;
 use crate::{Label, StateId};
 
 /// Structure representing a transition from a state to another state in a FST.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Arc<W: Semiring> {
     /// Input label.
     pub ilabel: Label,
