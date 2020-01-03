@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use failure::Fallible;
 
 use crate::algorithms::FinalArc;
@@ -43,7 +45,7 @@ where
 
 pub fn test_reverse<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + AllocableFst,
+    F: TextParser + MutableFst + AllocableFst + Display,
     F::W: 'static + Semiring<Type = f32> + WeaklyDivisibleSemiring,
 {
     let fst_reverse: VectorFst<_> = reverse(&test_data.raw).unwrap();

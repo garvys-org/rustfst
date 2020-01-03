@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use failure::Fallible;
 
 use crate::algorithms::top_sort;
@@ -10,7 +12,7 @@ use crate::tests_openfst::FstTestData;
 
 pub fn test_topsort<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32>,
 {
     let mut fst_topsort = test_data.raw.clone();

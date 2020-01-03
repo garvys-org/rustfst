@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use failure::{format_err, Fallible};
 use serde_derive::{Deserialize, Serialize};
 
@@ -42,7 +44,7 @@ impl MinimizeOperationResult {
 
 pub fn test_minimize<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + AllocableFst,
+    F: TextParser + MutableFst + AllocableFst + Display,
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
     for minimize_data in &test_data.minimize {

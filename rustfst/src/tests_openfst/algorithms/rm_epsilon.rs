@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use failure::Fallible;
 
 use crate::algorithms::{isomorphic, rm_epsilon};
@@ -13,7 +15,7 @@ use crate::tests_openfst::FstTestData;
 
 pub fn test_rmepsilon<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + ExpandedFst,
+    F: TextParser + MutableFst + ExpandedFst + Display,
     F::W: 'static + Semiring<Type = f32> + WeaklyDivisibleSemiring + StarSemiring,
 {
     // Remove epsilon

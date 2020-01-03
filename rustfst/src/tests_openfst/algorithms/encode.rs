@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use failure::{format_err, Fallible, ResultExt};
 
 use serde_derive::{Deserialize, Serialize};
@@ -43,7 +45,7 @@ impl EncodeOperationResult {
 
 pub fn test_encode_decode<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32>,
 {
     for encode_test_data in &test_data.encode_decode {
@@ -72,7 +74,7 @@ where
 
 pub fn test_encode<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32>,
 {
     for encode_test_data in &test_data.encode {

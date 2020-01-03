@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use failure::Fallible;
 
 use crate::algorithms::{push_weights, ReweightType};
@@ -5,12 +7,11 @@ use crate::fst_traits::TextParser;
 use crate::fst_traits::{CoreFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::semirings::WeaklyDivisibleSemiring;
-
 use crate::tests_openfst::FstTestData;
 
 pub fn test_weight_pushing_initial<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
 {
@@ -36,7 +37,7 @@ where
 
 pub fn test_weight_pushing_final<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
 {

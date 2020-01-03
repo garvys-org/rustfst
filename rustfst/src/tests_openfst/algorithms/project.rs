@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use failure::Fallible;
 
 use crate::algorithms::{project, ProjectType};
@@ -10,7 +12,7 @@ use crate::tests_openfst::FstTestData;
 
 pub fn test_project_output<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
 {
     // Project output
@@ -31,7 +33,7 @@ where
 
 pub fn test_project_input<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
+    F: TextParser + MutableFst + Display,
     F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
 {
     // Project input
