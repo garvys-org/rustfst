@@ -77,7 +77,7 @@ pub use self::{
     push::{push, push_weights, PushType},
     queue::{Queue, QueueType},
     relabel_pairs::relabel_pairs,
-    replace::replace,
+    replace::{replace, ReplaceFst},
     reverse::reverse,
     reweight::{reweight, ReweightType},
     rm_epsilon::rm_epsilon,

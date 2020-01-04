@@ -48,7 +48,7 @@ use self::algorithms::{
     project::{test_project_input, test_project_output},
     properties::{parse_fst_properties, test_fst_properties},
     push::{test_push, PushOperationResult, PushTestData},
-    replace::{test_replace, ReplaceOperationResult, ReplaceTestData},
+    replace::{test_replace, test_replace_dynamic, ReplaceOperationResult, ReplaceTestData},
     reverse::test_reverse,
     rm_epsilon::test_rmepsilon,
     shortest_distance::{
@@ -367,6 +367,8 @@ where
     test_del_all_states(&test_data)?;
 
     test_replace(&test_data)?;
+
+    test_replace_dynamic(&test_data)?;
 
     Ok(())
 }

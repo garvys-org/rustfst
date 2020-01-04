@@ -61,6 +61,8 @@ impl<W: Semiring> CacheImpl<W> {
             bail!("Can't add arcs to a fully expanded state")
         }
         self.vector_cache_states.resize_if_necessary(state + 1);
+        self.vector_cache_states
+            .resize_if_necessary(arc.nextstate + 1);
         self.vector_cache_states.push_arc(state, arc);
         Ok(())
     }
@@ -94,5 +96,38 @@ impl<W: Semiring> CacheImpl<W> {
 
     pub fn has_start(&self) -> bool {
         self.has_start
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::semirings::TropicalWeight;
+
+    fn test_cache_impl_start() -> Fallible<()> {
+        let mut cache_impl = CacheImpl::<TropicalWeight>::new();
+        assert!(!cache_impl.has_start());
+        assert_eq!(cache_impl.num_known_states(), 0);
+        cache_impl.set_start(Some(1));
+        assert_eq!(cache_impl.start()?, Some(1));
+        assert!(cache_impl.has_start());
+        assert_eq!(cache_impl.num_known_states(), 1);
+        Ok(())
+    }
+
+    fn test_cache_expanded() -> Fallible<()> {
+        let mut cache_impl = CacheImpl::<TropicalWeight>::new();
+        cache_impl.set_start(Some(1));
+        assert!(!cache_impl.expanded(2));
+        cache_impl.mark_expanded(2);
+        assert!(cache_impl.expanded(2));
+
+        cache_impl.push_arc(1, Arc::new(2, 3, TropicalWeight::new(2.3), 3));
+
+        assert!(!cache_impl.expanded(3));
+        cache_impl.mark_expanded(3);
+        assert!(cache_impl.expanded(3));
+
+        Ok(())
     }
 }
