@@ -1,16 +1,18 @@
+use std::cell::UnsafeCell;
 use std::collections::HashMap;
 use std::marker::PhantomData;
+use std::rc::Rc;
 
 use failure::Fallible;
 
 use bitflags::bitflags;
 
+use crate::{KDELTA, SymbolTable};
+use crate::{Label, StateId};
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
-use crate::KDELTA;
-use crate::{Label, StateId};
 
 bitflags! {
     pub struct FactorWeightType: u32 {
@@ -240,4 +242,23 @@ where
 {
     let mut factor_weight_impl: FactorWeightImpl<F1, FI> = FactorWeightImpl::new(fst_in, opts)?;
     factor_weight_impl.compute()
+}
+
+pub struct FactorWeightFst<'a, F: Fst, FI: FactorIterator<F::W>> {
+    fst_impl: UnsafeCell<FactorWeightImpl<'a, F, FI>>,
+    isymt: Option<Rc<SymbolTable>>,
+    osymt: Option<Rc<SymbolTable>>,
+}
+
+impl<'a, F: Fst, FI: FactorIterator<F::W>> FactorWeightFst<'a, F, FI>
+where
+    F::W: WeightQuantize + 'static
+{
+    pub fn new(fst: &'a F, opts: FactorWeightOptions) -> Fallible<Self> {
+        Ok(Self {
+            fst_impl: UnsafeCell::new(FactorWeightImpl::new(fst, opts)?),
+            isymt: fst.input_symbols(),
+            osymt: fst.output_symbols()
+        })
+    }
 }
