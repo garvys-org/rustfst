@@ -12,9 +12,9 @@ use failure::Fallible;
 
 use std::ops::Range;
 
-impl<'a, W: 'a + Semiring> StateIterator<'a> for VectorFst<W> {
+impl<W: Semiring> StateIterator for VectorFst<W> {
     type Iter = Range<StateId>;
-    fn states_iter(&'a self) -> Self::Iter {
+    fn states_iter(&self) -> Self::Iter {
         (0..self.states.len())
     }
 }

@@ -31,7 +31,7 @@ where
     F: 'f + Fst,
 {
     fst: &'f F,
-    it: <F as StateIterator<'f>>::Iter,
+    it: <F as StateIterator>::Iter,
 }
 
 impl<'f, F> StructFinalStatesIterator<'f, F>

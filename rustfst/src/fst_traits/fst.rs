@@ -112,7 +112,7 @@ pub trait CoreFst {
 
 /// Trait defining the minimum interface necessary for a wFST.
 pub trait Fst:
-    CoreFst + PartialEq + Clone + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b> + Debug
+    CoreFst + PartialEq + Clone + for<'a> ArcIterator<'a> + StateIterator + Debug
 {
     // TODO: Move niepsilons and noepsilons to required methods.
     /// Returns the number of arcs with epsilon input labels leaving a state.
