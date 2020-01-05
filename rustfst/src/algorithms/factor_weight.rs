@@ -7,12 +7,12 @@ use failure::Fallible;
 
 use bitflags::bitflags;
 
-use crate::{KDELTA, SymbolTable};
-use crate::{Label, StateId};
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
+use crate::{Label, StateId};
+use crate::{SymbolTable, KDELTA};
 
 bitflags! {
     pub struct FactorWeightType: u32 {
@@ -90,10 +90,11 @@ struct FactorWeightImpl<'a, F: Fst, FI: FactorIterator<F::W>> {
     ghost: PhantomData<FI>,
 }
 
-impl<'a, F: Fst, FI: FactorIterator<F::W>> FstImpl<F::W> for FactorWeightImpl<'a, F, FI>
+impl<'a, F: Fst, FI: FactorIterator<F::W>> FstImpl for FactorWeightImpl<'a, F, FI>
 where
     F::W: WeightQuantize + 'static,
 {
+    type W = F::W;
     fn cache_impl_mut(&mut self) -> &mut CacheImpl<<F as CoreFst>::W> {
         &mut self.cache_impl
     }
@@ -252,13 +253,13 @@ pub struct FactorWeightFst<'a, F: Fst, FI: FactorIterator<F::W>> {
 
 impl<'a, F: Fst, FI: FactorIterator<F::W>> FactorWeightFst<'a, F, FI>
 where
-    F::W: WeightQuantize + 'static
+    F::W: WeightQuantize + 'static,
 {
     pub fn new(fst: &'a F, opts: FactorWeightOptions) -> Fallible<Self> {
         Ok(Self {
             fst_impl: UnsafeCell::new(FactorWeightImpl::new(fst, opts)?),
             isymt: fst.input_symbols(),
-            osymt: fst.output_symbols()
+            osymt: fst.output_symbols(),
         })
     }
 }

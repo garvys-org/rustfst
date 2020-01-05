@@ -72,7 +72,7 @@ impl ReplaceFstOptions {
 /// Note that input argument is a vector of pairs. These correspond to the tuple
 /// of non-terminal Label and corresponding FST.
 pub fn replace<F1, F2>(
-    fst_list: Vec<(Label, F1)>,
+    fst_list: Vec<(Label, Rc<F1>)>,
     root: Label,
     epsilon_on_replace: bool,
 ) -> Fallible<F2>
@@ -119,17 +119,18 @@ pub(crate) struct ReplaceFstImpl<F: ExpandedFst> {
     return_label_type_: ReplaceLabelType,
     call_output_label_: Option<Label>,
     return_label_: Label,
-    fst_array: Vec<F>,
+    fst_array: Vec<Rc<F>>,
     nonterminal_set: BTreeSet<Label>,
     nonterminal_hash: HashMap<Label, Label>,
     root: Label,
     state_table: ReplaceStateTable,
 }
 
-impl<F: ExpandedFst> FstImpl<F::W> for ReplaceFstImpl<F>
+impl<F: ExpandedFst> FstImpl for ReplaceFstImpl<F>
 where
     F::W: 'static,
 {
+    type W = F::W;
     fn cache_impl_mut(&mut self) -> &mut CacheImpl<<F as CoreFst>::W> {
         &mut self.cache_impl
     }
@@ -192,7 +193,7 @@ where
 }
 
 impl<F: ExpandedFst> ReplaceFstImpl<F> {
-    fn new(fst_list: Vec<(Label, F)>, opts: ReplaceFstOptions) -> Fallible<Self> {
+    fn new(fst_list: Vec<(Label, Rc<F>)>, opts: ReplaceFstOptions) -> Fallible<Self> {
         let mut replace_fst_impl = Self {
             cache_impl: CacheImpl::new(),
             call_label_type_: opts.call_label_type,
@@ -447,7 +448,11 @@ impl<F: ExpandedFst> ReplaceFst<F>
 where
     F::W: 'static,
 {
-    pub fn new(fst_list: Vec<(Label, F)>, root: Label, epsilon_on_replace: bool) -> Fallible<Self> {
+    pub fn new(
+        fst_list: Vec<(Label, Rc<F>)>,
+        root: Label,
+        epsilon_on_replace: bool,
+    ) -> Fallible<Self> {
         let mut isymt = None;
         let mut osymt = None;
         if let Some(first_elt) = fst_list.first() {

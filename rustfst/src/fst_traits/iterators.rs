@@ -4,7 +4,7 @@ use crate::StateId;
 use failure::Fallible;
 
 /// Trait to iterate over the states of a wFST.
-pub trait StateIterator {
+pub trait StateIterator<'a> {
     /// Iterator used to iterate over the `state_id` of the states of an FST.
     type Iter: Iterator<Item = StateId> + Clone;
 
@@ -28,7 +28,7 @@ pub trait StateIterator {
     /// let states : Vec<_> = fst.states_iter().collect();
     /// assert_eq!(states, vec![s1, s2]);
     /// ```
-    fn states_iter(&self) -> Self::Iter;
+    fn states_iter(&'a self) -> Self::Iter;
 }
 
 /// Trait to iterate over the outgoing arcs of a particular state in a wFST

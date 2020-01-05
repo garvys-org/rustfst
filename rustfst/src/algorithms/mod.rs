@@ -94,7 +94,7 @@ pub use self::{
 
 #[allow(unused)]
 pub use self::factor_weight::{
-    factor_weight, FactorIterator, FactorWeightOptions, FactorWeightType, FactorWeightFst
+    factor_weight, FactorIterator, FactorWeightFst, FactorWeightOptions, FactorWeightType,
 };
 
 #[allow(unused)]

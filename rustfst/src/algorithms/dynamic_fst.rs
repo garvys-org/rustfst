@@ -1,3 +1,7 @@
+use crate::algorithms::ReplaceFst;
+use crate::fst_traits::ExpandedFst;
+use std::marker::PhantomData;
+
 #[derive(Clone)]
 pub struct StatesIteratorDynamicFst<'a, T> {
     pub(crate) fst: &'a T,
@@ -8,7 +12,7 @@ macro_rules! dynamic_fst {
     ($name: expr, $dyn_fst: ty) => {
         use crate::algorithms::dynamic_fst::StatesIteratorDynamicFst;
 
-        impl<F: ExpandedFst> ReplaceFst<F>
+        impl<F: ExpandedFst> $dyn_fst
         where
             F::W: 'static,
         {
@@ -137,11 +141,14 @@ macro_rules! dynamic_fst {
 
             fn states_iter(&'a self) -> Self::Iter {
                 self.start();
-                StatesIteratorDynamicFst { fst: &self, s: 0 }
+                StatesIteratorDynamicFst {
+                    fst: &self,
+                    s: 0,
+                }
             }
         }
 
-        impl<'a, F: ExpandedFst + 'static> Fst for $dyn_fst
+        impl<F: ExpandedFst + 'static> Fst for $dyn_fst
         where
             F::W: 'static,
         {
