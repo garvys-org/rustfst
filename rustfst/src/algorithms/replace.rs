@@ -1,12 +1,16 @@
+use std::cell::UnsafeCell;
 use std::collections::hash_map::Entry;
 use std::collections::{BTreeSet, HashMap};
+use std::fmt;
 use std::hash::Hash;
+use std::rc::Rc;
+use std::slice::Iter as IterSlice;
 
 use failure::{bail, Fallible};
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::replace::ReplaceLabelType::{ReplaceLabelInput, ReplaceLabelNeither};
-use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
+use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, SymbolTable, EPS_LABEL};
 
@@ -109,7 +113,7 @@ fn replace_transducer(
 }
 
 #[derive(Clone, Debug, PartialEq)]
-struct ReplaceFstImpl<F: ExpandedFst> {
+pub(crate) struct ReplaceFstImpl<F: ExpandedFst> {
     cache_impl: CacheImpl<F::W>,
     call_label_type_: ReplaceLabelType,
     return_label_type_: ReplaceLabelType,
@@ -433,17 +437,10 @@ impl ReplaceStateTable {
     }
 }
 
-// Dynamic fst
-use crate::fst_traits::{ArcIterator, Fst, StateIterator};
-use std::cell::UnsafeCell;
-use std::fmt;
-use std::rc::Rc;
-use std::slice::Iter as IterSlice;
-
 pub struct ReplaceFst<F: ExpandedFst> {
-    fst_impl: UnsafeCell<ReplaceFstImpl<F>>,
-    isymt: Option<Rc<SymbolTable>>,
-    osymt: Option<Rc<SymbolTable>>,
+    pub(crate) fst_impl: UnsafeCell<ReplaceFstImpl<F>>,
+    pub(crate) isymt: Option<Rc<SymbolTable>>,
+    pub(crate) osymt: Option<Rc<SymbolTable>>,
 }
 
 impl<F: ExpandedFst> ReplaceFst<F>
@@ -460,155 +457,11 @@ where
         let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
         let fst = ReplaceFstImpl::new(fst_list, opts)?;
         Ok(ReplaceFst {
-            isymt, osymt,
+            isymt,
+            osymt,
             fst_impl: UnsafeCell::new(fst),
         })
     }
-
-    fn num_known_states(&self) -> usize {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_ref().unwrap() };
-        fst_impl.num_known_states()
-    }
 }
 
-impl<F: ExpandedFst> PartialEq for ReplaceFst<F>
-where
-    F::W: 'static,
-{
-    fn eq(&self, other: &Self) -> bool {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_ref().unwrap() };
-
-        let ptr_other = other.fst_impl.get();
-        let fst_impl_other = unsafe { ptr_other.as_ref().unwrap() };
-
-        fst_impl.eq(fst_impl_other)
-    }
-}
-
-impl<F: ExpandedFst> fmt::Debug for ReplaceFst<F>
-where
-    F::W: 'static,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_ref().unwrap() };
-        write!(f, "ReplaceFst {{ {:?} }}", &fst_impl)
-    }
-}
-
-impl<F: ExpandedFst + 'static> Clone for ReplaceFst<F>
-where
-    F::W: 'static,
-{
-    fn clone(&self) -> Self {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_ref().unwrap() };
-        Self {
-            fst_impl: UnsafeCell::new(fst_impl.clone()),
-            isymt: self.input_symbols(),
-            osymt: self.output_symbols()
-        }
-    }
-}
-
-impl<F: ExpandedFst> CoreFst for ReplaceFst<F>
-where
-    F::W: 'static,
-{
-    type W = F::W;
-
-    fn start(&self) -> Option<usize> {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_mut().unwrap() };
-        fst_impl.start().unwrap()
-    }
-
-    fn final_weight(&self, state_id: usize) -> Fallible<Option<&Self::W>> {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_mut().unwrap() };
-        fst_impl.final_weight(state_id)
-    }
-
-    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<&Self::W> {
-        self.final_weight(state_id).unwrap()
-    }
-
-    fn num_arcs(&self, s: usize) -> Fallible<usize> {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_mut().unwrap() };
-        fst_impl.num_arcs(s)
-    }
-
-    unsafe fn num_arcs_unchecked(&self, s: usize) -> usize {
-        self.num_arcs(s).unwrap()
-    }
-}
-
-impl<'a, F: ExpandedFst> ArcIterator<'a> for ReplaceFst<F>
-where
-    F::W: 'static,
-{
-    type Iter = IterSlice<'a, Arc<F::W>>;
-
-    fn arcs_iter(&'a self, state_id: usize) -> Fallible<Self::Iter> {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_mut().unwrap() };
-        fst_impl.arcs_iter(state_id)
-    }
-
-    unsafe fn arcs_iter_unchecked(&'a self, _state_id: usize) -> Self::Iter {
-        unimplemented!()
-    }
-}
-
-#[derive(Clone)]
-pub struct StatesIteratorReplaceFst<'a, F: ExpandedFst> {
-    fst: &'a ReplaceFst<F>,
-    s: usize,
-}
-
-impl<'a, F: ExpandedFst> Iterator for StatesIteratorReplaceFst<'a, F>
-where
-    F::W: 'static,
-{
-    type Item = StateId;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.s < self.fst.num_known_states() {
-            let s_cur = self.s;
-            // Force expansion of the state
-            self.fst.arcs_iter(s_cur).unwrap();
-            self.s += 1;
-            Some(s_cur)
-        } else {
-            None
-        }
-    }
-}
-
-impl<'a, F: ExpandedFst + 'a> StateIterator<'a> for ReplaceFst<F>
-where
-    F::W: 'static,
-{
-    type Iter = StatesIteratorReplaceFst<'a, F>;
-
-    fn states_iter(&'a self) -> Self::Iter {
-        self.start();
-        StatesIteratorReplaceFst { fst: &self, s: 0 }
-    }
-}
-
-impl<'a, F: ExpandedFst + 'static> Fst for ReplaceFst<F>
-where
-    F::W: 'static,
-{
-    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
-        self.isymt.clone()
-    }
-
-    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
-        self.osymt.clone()
-    }
-}
+dynamic_fst!("ReplaceFst", ReplaceFst<F>);

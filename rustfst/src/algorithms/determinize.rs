@@ -398,8 +398,8 @@ where
     let factor_opts = FactorWeightOptions {
         delta: KDELTA,
         mode: FactorWeightType::FACTOR_FINAL_WEIGHTS,
-        final_ilabel: 0,
-        final_olabel: 0,
+        final_ilabel: EPS_LABEL,
+        final_olabel: EPS_LABEL,
         increment_final_ilabel: false,
         increment_final_olabel: false,
     };

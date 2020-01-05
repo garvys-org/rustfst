@@ -5,7 +5,7 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{replace, ReplaceFst};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{CoreFst, ExpandedFst, StateIterator, TextParser, ArcIterator};
+use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, StateIterator, TextParser};
 use crate::semirings::{Semiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
 
@@ -129,10 +129,10 @@ where
                 )
             };
 
-            let mut arcs_dynamic : Counter<_, usize> = Counter::new();
+            let mut arcs_dynamic: Counter<_, usize> = Counter::new();
             arcs_dynamic.update(replaced_dynamic_fst.arcs_iter(i)?.cloned());
 
-            let mut arcs_static : Counter<_, usize> = Counter::new();
+            let mut arcs_static: Counter<_, usize> = Counter::new();
             arcs_static.update(replaced_static_fst.arcs_iter(i)?.cloned());
 
             assert_eq!(arcs_dynamic, arcs_static);

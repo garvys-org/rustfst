@@ -9,6 +9,8 @@ mod concat;
 mod connect;
 mod determinize;
 pub(crate) mod dfs_visit;
+#[macro_use]
+pub(crate) mod dynamic_fst;
 mod encode;
 mod factor_weight;
 mod fst_convert;
