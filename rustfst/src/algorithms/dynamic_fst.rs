@@ -144,9 +144,11 @@ macro_rules! dynamic_fst {
             }
         }
 
-        impl<F: ExpandedFst + 'static, B: BorrowFst<F> + 'static> Fst for $dyn_fst
+        impl<F: ExpandedFst, B: BorrowFst<F>> Fst for $dyn_fst
         where
             F::W: 'static,
+            F: 'static,
+            B: 'static,
         {
             fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
                 self.isymt.clone()

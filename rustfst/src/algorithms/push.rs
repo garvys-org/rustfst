@@ -146,7 +146,7 @@ macro_rules! m_labels_pushing {
         } else {
             reweight(&mut gfst, gdistance.as_slice(), $reweight_type)?;
         }
-        let fwfst: VectorFst<_> = factor_weight::<_, _, $gallic_factor>(
+        let fwfst: VectorFst<_> = factor_weight::<_, _, _, $gallic_factor>(
             &gfst,
             FactorWeightOptions::new(
                 FactorWeightType::FACTOR_FINAL_WEIGHTS | FactorWeightType::FACTOR_ARC_WEIGHTS,

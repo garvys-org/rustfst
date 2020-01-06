@@ -52,7 +52,8 @@ where
         let mode = FactorWeightType::from_bools(data.factor_final_weights, data.factor_arc_weights);
         let opts = FactorWeightOptions::new(mode);
 
-        let fst_res: VectorFst<_> = factor_weight::<_, _, IdentityFactor<_>>(&test_data.raw, opts)?;
+        let fst_res: VectorFst<_> =
+            factor_weight::<_, _, _, IdentityFactor<_>>(&test_data.raw, opts)?;
 
         assert_eq_fst!(
         data.result,
