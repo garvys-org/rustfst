@@ -7,7 +7,7 @@ use crate::semirings::Semiring;
 use crate::Arc;
 use crate::StateId;
 
-#[derive(Clone, Debug, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct CacheImpl<W: Semiring> {
     has_start: bool,
     cache_start_state: Option<StateId>,

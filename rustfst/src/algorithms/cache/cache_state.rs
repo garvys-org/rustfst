@@ -4,7 +4,7 @@ use std::slice::IterMut as IterSliceMut;
 use crate::semirings::Semiring;
 use crate::Arc;
 
-#[derive(Clone, Debug, PartialOrd, PartialEq)]
+#[derive(Clone, Debug, PartialOrd, PartialEq, Eq)]
 pub struct CacheState<W: Semiring> {
     arcs: Vec<Arc<W>>,
     final_weight: Option<W>,

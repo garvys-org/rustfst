@@ -6,7 +6,7 @@ use bimap::BiHashMap;
 
 use crate::StateId;
 
-#[derive(Clone)]
+#[derive(Clone, Eq)]
 pub struct StateTable<T: Hash + Eq + Clone> {
     pub(crate) table: RefCell<BiHashMap<StateId, T>>,
 }

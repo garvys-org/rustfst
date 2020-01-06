@@ -8,7 +8,6 @@ use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Arc, StateId};
 
-
 pub trait FstImpl {
     type W: Semiring + 'static;
     fn cache_impl_mut(&mut self) -> &mut CacheImpl<Self::W>;

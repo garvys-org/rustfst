@@ -7,12 +7,12 @@ use failure::Fallible;
 
 use bitflags::bitflags;
 
+use crate::{Label, StateId};
+use crate::{KDELTA, SymbolTable};
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
-use crate::{Label, StateId};
-use crate::{SymbolTable, KDELTA};
 
 bitflags! {
     pub struct FactorWeightType: u32 {
@@ -184,9 +184,6 @@ where
         }
     }
 }
-
-
-use std::ops::Deref;
 
 impl<'a, F: Fst, FI: FactorIterator<F::W>> FactorWeightImpl<'a, F, FI>
 where
