@@ -1,18 +1,21 @@
+use std::borrow::Borrow;
 use std::cell::UnsafeCell;
-use std::collections::hash_map::Entry;
 use std::collections::{BTreeSet, HashMap};
+use std::collections::hash_map::Entry;
 use std::fmt;
 use std::hash::Hash;
+use std::marker::PhantomData;
 use std::rc::Rc;
 use std::slice::Iter as IterSlice;
 
 use failure::{bail, Fallible};
 
+use crate::{Arc, EPS_LABEL, Label, StateId, SymbolTable};
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::replace::ReplaceLabelType::{ReplaceLabelInput, ReplaceLabelNeither};
 use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, MutableFst, StateIterator};
+use crate::prelude::{TropicalWeight, VectorFst};
 use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, SymbolTable, EPS_LABEL};
 
 /// This specifies what labels to output on the call or return arc.
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug)]
@@ -72,7 +75,7 @@ impl ReplaceFstOptions {
 /// Note that input argument is a vector of pairs. These correspond to the tuple
 /// of non-terminal Label and corresponding FST.
 pub fn replace<F1, F2>(
-    fst_list: Vec<(Label, Rc<F1>)>,
+    fst_list: Vec<(Label, &F1)>,
     root: Label,
     epsilon_on_replace: bool,
 ) -> Fallible<F2>
@@ -113,20 +116,20 @@ fn replace_transducer(
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub(crate) struct ReplaceFstImpl<F: ExpandedFst> {
+pub(crate) struct ReplaceFstImpl<'a, F: ExpandedFst> {
     cache_impl: CacheImpl<F::W>,
     call_label_type_: ReplaceLabelType,
     return_label_type_: ReplaceLabelType,
     call_output_label_: Option<Label>,
     return_label_: Label,
-    fst_array: Vec<Rc<F>>,
+    fst_array: Vec<&'a F>,
     nonterminal_set: BTreeSet<Label>,
     nonterminal_hash: HashMap<Label, Label>,
     root: Label,
     state_table: ReplaceStateTable,
 }
 
-impl<F: ExpandedFst> FstImpl for ReplaceFstImpl<F>
+impl<'a, F: ExpandedFst> FstImpl for ReplaceFstImpl<'a, F>
 where
     F::W: 'static,
 {
@@ -192,8 +195,8 @@ where
     }
 }
 
-impl<F: ExpandedFst> ReplaceFstImpl<F> {
-    fn new(fst_list: Vec<(Label, Rc<F>)>, opts: ReplaceFstOptions) -> Fallible<Self> {
+impl<'a, F: ExpandedFst> ReplaceFstImpl<'a, F> {
+    fn new(fst_list: Vec<(Label, &'a F)>, opts: ReplaceFstOptions) -> Fallible<Self> {
         let mut replace_fst_impl = Self {
             cache_impl: CacheImpl::new(),
             call_label_type_: opts.call_label_type,
@@ -438,18 +441,18 @@ impl ReplaceStateTable {
     }
 }
 
-pub struct ReplaceFst<F: ExpandedFst> {
-    pub(crate) fst_impl: UnsafeCell<ReplaceFstImpl<F>>,
+pub struct ReplaceFst<'a, F: ExpandedFst> {
+    pub(crate) fst_impl: UnsafeCell<ReplaceFstImpl<'a, F>>,
     pub(crate) isymt: Option<Rc<SymbolTable>>,
     pub(crate) osymt: Option<Rc<SymbolTable>>,
 }
 
-impl<F: ExpandedFst> ReplaceFst<F>
+impl<'a, F: ExpandedFst> ReplaceFst<'a, F>
 where
     F::W: 'static,
 {
     pub fn new(
-        fst_list: Vec<(Label, Rc<F>)>,
+        fst_list: Vec<(Label, &'a F)>,
         root: Label,
         epsilon_on_replace: bool,
     ) -> Fallible<Self> {
@@ -469,4 +472,4 @@ where
     }
 }
 
-dynamic_fst!("ReplaceFst", ReplaceFst<F>);
+//dynamic_fst!("ReplaceFst", ReplaceFst<F>);

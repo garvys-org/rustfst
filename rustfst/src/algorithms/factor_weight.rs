@@ -185,6 +185,9 @@ where
     }
 }
 
+
+use std::ops::Deref;
+
 impl<'a, F: Fst, FI: FactorIterator<F::W>> FactorWeightImpl<'a, F, FI>
 where
     F::W: WeightQuantize + 'static,
