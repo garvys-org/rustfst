@@ -477,5 +477,8 @@ where
 
 dynamic_fst!("ReplaceFst", ReplaceFst<F, B>);
 
-impl<W: Semiring> BorrowFst<VectorFst<W>> for VectorFst<W> {}
-impl<W: Semiring> BorrowFst<VectorFst<W>> for &VectorFst<W> {}
+impl<F: Fst> BorrowFst<F> for F {}
+impl<F: Fst> BorrowFst<F> for &F {}
+impl<F: Fst> BorrowFst<F> for Rc<F> {}
+impl<F: Fst> BorrowFst<F> for Box<F> {}
+impl<F: Fst> BorrowFst<F> for std::sync::Arc<F> {}
