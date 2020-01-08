@@ -11,11 +11,12 @@ pub struct StatesIteratorDynamicFst<'a, T> {
 }
 
 macro_rules! dynamic_fst {
-    ($name: expr, $dyn_fst: ty) => {
+    ($name: expr, $dyn_fst: ty, $([$a:tt => $b:tt $( < $c:ty > )? ])* $( where $d:ty => $e: tt )?) => {
         use crate::algorithms::dynamic_fst::StatesIteratorDynamicFst;
 
-        impl<F: ExpandedFst, B: BorrowFst<F>> $dyn_fst
+        impl<$($a: $b $( < $c >)? ),*> $dyn_fst
         where
+            $($d: $e,)?
             F::W: 'static,
         {
             fn num_known_states(&self) -> usize {
@@ -25,7 +26,7 @@ macro_rules! dynamic_fst {
             }
         }
 
-        impl<F: ExpandedFst, B: BorrowFst<F>> PartialEq for $dyn_fst {
+        impl<$($a: $b $( < $c >)? ),*> PartialEq for $dyn_fst {
             fn eq(&self, other: &Self) -> bool {
                 let ptr = self.fst_impl.get();
                 let fst_impl = unsafe { ptr.as_ref().unwrap() };
@@ -37,8 +38,9 @@ macro_rules! dynamic_fst {
             }
         }
 
-        impl<F: ExpandedFst, B: BorrowFst<F>> fmt::Debug for $dyn_fst
+        impl<$($a: $b $( < $c >)? ),*> std::fmt::Debug for $dyn_fst
         where
+            $($d: $e,)?
             F::W: 'static,
         {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -48,9 +50,11 @@ macro_rules! dynamic_fst {
             }
         }
 
-        impl<F: ExpandedFst + 'static, B: BorrowFst<F> + 'static> Clone for $dyn_fst
+        impl<$($a: $b $( < $c >)? ),*> Clone for $dyn_fst
         where
+            $($d: $e,)?
             F::W: 'static,
+            $($a : 'static),*
         {
             fn clone(&self) -> Self {
                 let ptr = self.fst_impl.get();
@@ -63,8 +67,9 @@ macro_rules! dynamic_fst {
             }
         }
 
-        impl<F: ExpandedFst, B: BorrowFst<F>> CoreFst for $dyn_fst
+        impl<$($a: $b $( < $c >)? ),*> CoreFst for $dyn_fst
         where
+            $($d: $e,)?
             F::W: 'static,
         {
             type W = F::W;
@@ -96,9 +101,11 @@ macro_rules! dynamic_fst {
             }
         }
 
-        impl<'a, F: ExpandedFst, B: BorrowFst<F>> ArcIterator<'a> for $dyn_fst
+        impl<'a, $($a: $b $( < $c >)? ),*> ArcIterator<'a> for $dyn_fst
         where
+            $($d: $e,)?
             F::W: 'static,
+            $($d: $e)?
         {
             type Iter = IterSlice<'a, Arc<F::W>>;
 
@@ -113,9 +120,10 @@ macro_rules! dynamic_fst {
             }
         }
 
-        impl<'a, F: ExpandedFst, B: BorrowFst<F>> Iterator
+        impl<'a, $($a: $b $( < $c >)? ),*> Iterator
             for StatesIteratorDynamicFst<'a, $dyn_fst>
         where
+            $($d: $e,)?
             F::W: 'static,
         {
             type Item = StateId;
@@ -133,10 +141,12 @@ macro_rules! dynamic_fst {
             }
         }
 
-        impl<'a, F: ExpandedFst + 'static, B: BorrowFst<F> + 'a + 'static> StateIterator<'a>
+        impl<'a, $($a: $b $( < $c >)? ),*> StateIterator<'a>
             for $dyn_fst
         where
+            $($d: $e,)?
             F::W: 'static,
+            $($a : 'static),*
         {
             type Iter = StatesIteratorDynamicFst<'a, $dyn_fst>;
 
@@ -146,11 +156,11 @@ macro_rules! dynamic_fst {
             }
         }
 
-        impl<F: ExpandedFst, B: BorrowFst<F>> Fst for $dyn_fst
+        impl<$($a: $b $( < $c >)? ),*> Fst for $dyn_fst
         where
+            $($d: $e,)?
             F::W: 'static,
-            F: 'static,
-            B: 'static,
+            $($a : 'static),*
         {
             fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
                 self.isymt.clone()

@@ -37,6 +37,7 @@ impl FactorWeightType {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
 pub struct FactorWeightOptions {
     /// Quantization delta
     pub delta: f32,
@@ -66,7 +67,9 @@ impl FactorWeightOptions {
     }
 }
 
-pub trait FactorIterator<W: Semiring>: Iterator<Item = (W, W)> {
+pub trait FactorIterator<W: Semiring>:
+    fmt::Debug + PartialEq + Clone + Iterator<Item = (W, W)>
+{
     fn new(weight: W) -> Self;
     fn done(&self) -> bool;
 }
@@ -83,6 +86,7 @@ impl<W: Semiring> Element<W> {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
 struct FactorWeightImpl<F: Fst, B: BorrowFst<F>, FI: FactorIterator<F::W>> {
     opts: FactorWeightOptions,
     cache_impl: CacheImpl<F::W>,
@@ -268,3 +272,8 @@ where
         })
     }
 }
+
+use crate::fst_traits::{ArcIterator, StateIterator};
+use std::fmt;
+use std::slice::Iter as IterSlice;
+dynamic_fst!("FactorWeightFst", FactorWeightFst<F, B, FI>, [F => Fst] [B => BorrowFst<F>] [FI => FactorIterator<F::W>] where F::W => WeightQuantize);

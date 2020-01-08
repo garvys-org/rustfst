@@ -475,7 +475,7 @@ where
     }
 }
 
-dynamic_fst!("ReplaceFst", ReplaceFst<F, B>);
+dynamic_fst!("ReplaceFst", ReplaceFst<F, B>, [F => ExpandedFst] [B => BorrowFst<F>]);
 
 impl<F: Fst> BorrowFst<F> for F {}
 impl<F: Fst> BorrowFst<F> for &F {}

@@ -2,6 +2,7 @@ use crate::algorithms::FactorIterator;
 use crate::semirings::Semiring;
 use std::marker::PhantomData;
 
+#[derive(Debug, PartialEq, Clone)]
 /// Trivial factor. Doesn't factor anything.
 pub struct IdentityFactor<W> {
     ghost: PhantomData<W>,

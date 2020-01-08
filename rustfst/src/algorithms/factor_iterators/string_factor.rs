@@ -3,18 +3,21 @@ use crate::semirings::{
     StringWeightLeft, StringWeightRestrict, StringWeightRight, StringWeightVariant,
 };
 
+#[derive(Debug, PartialEq, Clone)]
 /// Factors a StringWeightLeft w as 'ab' where 'a' is a label.
 pub struct StringFactorLeft {
     weight: StringWeightLeft,
     done: bool,
 }
 
+#[derive(Debug, PartialEq, Clone)]
 /// Factors a StringFactorRight w as 'ab' where 'a' is a label.
 pub struct StringFactorRight {
     weight: StringWeightRight,
     done: bool,
 }
 
+#[derive(Debug, PartialEq, Clone)]
 /// Factors a StringFactorRestrict w as 'ab' where 'a' is a label.
 pub struct StringFactorRestrict {
     weight: StringWeightRestrict,
