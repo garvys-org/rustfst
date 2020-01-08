@@ -1,8 +1,10 @@
 use std::cell::RefCell;
 use std::cell::UnsafeCell;
 use std::collections::HashMap;
+use std::fmt;
 use std::marker::PhantomData;
 use std::rc::Rc;
+use std::slice::Iter as IterSlice;
 
 use failure::Fallible;
 
@@ -11,6 +13,7 @@ use bitflags::bitflags;
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::replace::BorrowFst;
 use crate::arc::Arc;
+use crate::fst_traits::{ArcIterator, StateIterator};
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::{Label, StateId};
@@ -273,7 +276,4 @@ where
     }
 }
 
-use crate::fst_traits::{ArcIterator, StateIterator};
-use std::fmt;
-use std::slice::Iter as IterSlice;
 dynamic_fst!("FactorWeightFst", FactorWeightFst<F, B, FI>, [F => Fst] [B => BorrowFst<F>] [FI => FactorIterator<F::W>] where F::W => WeightQuantize);

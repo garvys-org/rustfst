@@ -21,9 +21,11 @@ use crate::semirings::{
 use crate::tests_openfst::algorithms::factor_weight_gallic::test_factor_weight_gallic;
 use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicOperationResult;
 use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicTestData;
-use crate::tests_openfst::algorithms::factor_weight_identity::test_factor_weight_identity;
 use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityOperationResult;
 use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityTestData;
+use crate::tests_openfst::algorithms::factor_weight_identity::{
+    test_factor_weight_identity, test_factor_weight_identity_dynamic,
+};
 use crate::tests_openfst::algorithms::gallic_encode_decode::test_gallic_encode_decode;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicOperationResult;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicTestData;
@@ -345,6 +347,8 @@ where
     test_gallic_encode_decode(&test_data)?;
 
     test_factor_weight_identity(&test_data)?;
+
+    test_factor_weight_identity_dynamic(&test_data)?;
 
     test_factor_weight_gallic(&test_data)?;
 

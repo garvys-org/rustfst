@@ -2,6 +2,7 @@ pub mod arc_map;
 pub mod arcsort;
 pub mod connect;
 pub mod determinize;
+pub mod dynamic_fst;
 pub mod encode;
 pub mod factor_weight_gallic;
 pub mod factor_weight_identity;
