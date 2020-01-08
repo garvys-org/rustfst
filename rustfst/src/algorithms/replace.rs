@@ -82,7 +82,7 @@ pub fn replace<F1, F2, B>(
     epsilon_on_replace: bool,
 ) -> Fallible<F2>
 where
-    F1: ExpandedFst,
+    F1: Fst,
     F1::W: Semiring + 'static,
     F2: MutableFst<W = F1::W> + ExpandedFst<W = F1::W>,
     B: BorrowFst<F1>,
@@ -119,7 +119,7 @@ fn replace_transducer(
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct ReplaceFstImpl<F: ExpandedFst, B: BorrowFst<F>> {
+pub(crate) struct ReplaceFstImpl<F: Fst, B: BorrowFst<F>> {
     cache_impl: CacheImpl<F::W>,
     call_label_type_: ReplaceLabelType,
     return_label_type_: ReplaceLabelType,
@@ -133,7 +133,7 @@ pub(crate) struct ReplaceFstImpl<F: ExpandedFst, B: BorrowFst<F>> {
     fst_type: PhantomData<F>,
 }
 
-impl<'a, F: ExpandedFst, B: BorrowFst<F>> FstImpl for ReplaceFstImpl<F, B>
+impl<'a, F: Fst, B: BorrowFst<F>> FstImpl for ReplaceFstImpl<F, B>
 where
     F::W: 'static,
 {
@@ -201,7 +201,7 @@ where
     }
 }
 
-impl<F: ExpandedFst, B: BorrowFst<F>> ReplaceFstImpl<F, B> {
+impl<F: Fst, B: BorrowFst<F>> ReplaceFstImpl<F, B> {
     fn new(fst_list: Vec<(Label, B)>, opts: ReplaceFstOptions) -> Fallible<Self> {
         let mut replace_fst_impl = Self {
             cache_impl: CacheImpl::new(),
@@ -448,13 +448,13 @@ impl ReplaceStateTable {
     }
 }
 
-pub struct ReplaceFst<F: ExpandedFst, B: BorrowFst<F>> {
+pub struct ReplaceFst<F: Fst, B: BorrowFst<F>> {
     pub(crate) fst_impl: UnsafeCell<ReplaceFstImpl<F, B>>,
     pub(crate) isymt: Option<Rc<SymbolTable>>,
     pub(crate) osymt: Option<Rc<SymbolTable>>,
 }
 
-impl<F: ExpandedFst, B: BorrowFst<F>> ReplaceFst<F, B>
+impl<F: Fst, B: BorrowFst<F>> ReplaceFst<F, B>
 where
     F::W: 'static,
 {
@@ -475,7 +475,7 @@ where
     }
 }
 
-dynamic_fst!("ReplaceFst", ReplaceFst<F, B>, [F => ExpandedFst] [B => BorrowFst<F>]);
+dynamic_fst!("ReplaceFst", ReplaceFst<F, B>, [F => Fst] [B => BorrowFst<F>]);
 
 impl<F: Fst> BorrowFst<F> for F {}
 impl<F: Fst> BorrowFst<F> for &F {}
