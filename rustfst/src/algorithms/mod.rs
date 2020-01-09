@@ -88,7 +88,7 @@ pub use self::{
     shortest_path::shortest_path,
     state_sort::state_sort,
     top_sort::top_sort,
-    union::union,
+    union::{union, UnionFst},
     weight_convert::{weight_convert, WeightConverter},
 };
 

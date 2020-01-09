@@ -3,9 +3,12 @@ use std::collections::HashMap;
 use failure::{format_err, Fallible};
 
 use crate::arc::Arc;
-use crate::fst_traits::{CoreFst, ExpandedFst, FinalStatesIterator, MutableFst};
+use crate::fst_traits::{
+    AllocableFst, ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableFst,
+    StateIterator,
+};
 use crate::semirings::Semiring;
-use crate::StateId;
+use crate::{StateId, SymbolTable};
 
 /// Performs the union of two wFSTs. If A transduces string `x` to `y` with weight `a`
 /// and `B` transduces string `w` to `v` with weight `b`, then their union transduces `x` to `y`
@@ -106,4 +109,106 @@ where
     }
 
     Ok(())
+}
+
+use crate::algorithms::{BorrowFst, ReplaceFst};
+use std::rc::Rc;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct UnionFst<F: Fst + 'static>(ReplaceFst<F, F>)
+where
+    F::W: 'static;
+
+impl<F: Fst + MutableFst + AllocableFst> UnionFst<F>
+where
+    F::W: 'static,
+{
+    pub fn new(fst1: F, fst2: F) -> Fallible<Self> {
+        let mut rfst = F::new();
+        rfst.add_states(2);
+        rfst.set_start(0)?;
+        unsafe { rfst.set_final_unchecked(1, F::W::one()) };
+        if let Some(isymt) = fst1.input_symbols() {
+            rfst.set_input_symbols(isymt);
+        }
+        if let Some(osymt) = fst1.output_symbols() {
+            rfst.set_output_symbols(osymt);
+        }
+        unsafe { rfst.reserve_arcs_unchecked(0, 2) };
+        unsafe { rfst.add_arc_unchecked(0, Arc::new(0, std::usize::MAX, F::W::one(), 1)) };
+        unsafe { rfst.add_arc_unchecked(0, Arc::new(0, std::usize::MAX - 1, F::W::one(), 1)) };
+
+        let mut fst_tuples = Vec::with_capacity(3);
+        fst_tuples.push((0, rfst));
+        fst_tuples.push((std::usize::MAX, fst1));
+        fst_tuples.push((std::usize::MAX - 1, fst2));
+
+        Ok(UnionFst(ReplaceFst::new(fst_tuples, 0, false)?))
+    }
+}
+
+impl<F: Fst> CoreFst for UnionFst<F>
+where
+    F::W: 'static,
+{
+    type W = F::W;
+
+    fn start(&self) -> Option<usize> {
+        self.0.start()
+    }
+
+    fn final_weight(&self, state_id: usize) -> Fallible<Option<&Self::W>> {
+        self.0.final_weight(state_id)
+    }
+
+    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<&Self::W> {
+        self.0.final_weight_unchecked(state_id)
+    }
+
+    fn num_arcs(&self, s: usize) -> Fallible<usize> {
+        self.0.num_arcs(s)
+    }
+
+    unsafe fn num_arcs_unchecked(&self, s: usize) -> usize {
+        self.0.num_arcs_unchecked(s)
+    }
+}
+
+impl<'a, F: Fst + 'static> StateIterator<'a> for UnionFst<F>
+where
+    F::W: 'static,
+{
+    type Iter = <ReplaceFst<F, F> as StateIterator<'a>>::Iter;
+
+    fn states_iter(&'a self) -> Self::Iter {
+        self.0.states_iter()
+    }
+}
+
+impl<'a, F: Fst + 'static> ArcIterator<'a> for UnionFst<F>
+where
+    F::W: 'static,
+{
+    type Iter = <ReplaceFst<F, F> as ArcIterator<'a>>::Iter;
+
+    fn arcs_iter(&'a self, state_id: usize) -> Fallible<Self::Iter> {
+        self.0.arcs_iter(state_id)
+    }
+
+    unsafe fn arcs_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
+        self.0.arcs_iter_unchecked(state_id)
+    }
+}
+
+impl<F: Fst + 'static> Fst for UnionFst<F>
+where
+    F::W: 'static,
+{
+    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
+        self.0.input_symbols()
+    }
+
+    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
+        self.0.output_symbols()
+    }
 }
