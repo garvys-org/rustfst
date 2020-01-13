@@ -13,7 +13,6 @@ use failure::{bail, Fallible};
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::replace::ReplaceLabelType::{ReplaceLabelInput, ReplaceLabelNeither};
 use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, MutableFst, StateIterator};
-use crate::prelude::{TropicalWeight, VectorFst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, SymbolTable, EPS_LABEL};
 

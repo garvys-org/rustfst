@@ -1,7 +1,9 @@
 use std::collections::HashMap;
+use std::rc::Rc;
 
 use failure::{format_err, Fallible};
 
+use crate::algorithms::ReplaceFst;
 use crate::arc::Arc;
 use crate::fst_traits::{
     AllocableFst, ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableFst,
@@ -110,9 +112,6 @@ where
 
     Ok(())
 }
-
-use crate::algorithms::{BorrowFst, ReplaceFst};
-use std::rc::Rc;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct UnionFst<F: Fst + 'static>(ReplaceFst<F, F>)

@@ -1,12 +1,9 @@
-use std::rc::Rc;
-
-use counter::Counter;
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{replace, ReplaceFst};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, StateIterator, TextParser};
+use crate::fst_traits::TextParser;
 use crate::semirings::{Semiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
 
@@ -65,9 +62,10 @@ where
             replace_test_data.epsilon_on_replace,
         )?;
 
+        // Try givinf borrowed fst as parameters.
         let fst_list_2: Vec<(usize, &VectorFst<W>)> =
             fst_list.iter().map(|v| (v.0, &v.1)).collect();
-        let replaced_fst_2: VectorFst<W> = replace(
+        let _replaced_fst_2: VectorFst<W> = replace(
             fst_list_2,
             replace_test_data.root,
             replace_test_data.epsilon_on_replace,

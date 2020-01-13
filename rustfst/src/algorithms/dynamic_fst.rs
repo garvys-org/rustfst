@@ -1,9 +1,3 @@
-use crate::algorithms::BorrowFst;
-use crate::algorithms::ReplaceFst;
-use crate::fst_traits::ExpandedFst;
-use std::borrow::Borrow;
-use std::marker::PhantomData;
-
 #[derive(Clone)]
 pub struct StatesIteratorDynamicFst<'a, T> {
     pub(crate) fst: &'a T,

@@ -59,6 +59,7 @@ use self::algorithms::{
     shortest_path::{test_shortest_path, ShorestPathOperationResult, ShortestPathTestData},
     state_map::{test_state_map_arc_sum, test_state_map_arc_unique},
     topsort::test_topsort,
+    union::{UnionOperationResult, UnionTestData},
     weight_pushing::{test_weight_pushing_final, test_weight_pushing_initial},
 };
 use self::fst_impls::const_fst::test_const_fst_convert_convert;
@@ -66,6 +67,7 @@ use self::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
 use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
 use self::io::vector_fst_text_serialization::test_vector_fst_text_serialization;
 use self::misc::test_del_all_states;
+use crate::tests_openfst::algorithms::union::test_union;
 
 #[macro_use]
 mod macros;
@@ -132,6 +134,7 @@ pub struct ParsedFstTestData {
     factor_weight_gallic: Vec<FwGallicOperationResult>,
     push: Vec<PushOperationResult>,
     replace: Vec<ReplaceOperationResult>,
+    union: Vec<UnionOperationResult>,
 }
 
 pub struct FstTestData<F>
@@ -178,6 +181,7 @@ where
     pub factor_weight_gallic: Vec<FwGallicTestData<F>>,
     pub push: Vec<PushTestData<F>>,
     pub replace: Vec<ReplaceTestData<F>>,
+    pub union: Vec<UnionTestData<F>>,
 }
 
 impl<F> FstTestData<F>
@@ -243,6 +247,7 @@ where
                 .collect(),
             push: data.push.iter().map(|v| v.parse()).collect(),
             replace: data.replace.iter().map(|v| v.parse()).collect(),
+            union: data.union.iter().map(|v| v.parse()).collect(),
         }
     }
 }
@@ -373,6 +378,8 @@ where
     test_replace(&test_data)?;
 
     test_replace_dynamic(&test_data)?;
+
+    test_union(&test_data)?;
 
     Ok(())
 }
