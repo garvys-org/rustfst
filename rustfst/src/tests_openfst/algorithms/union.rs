@@ -44,7 +44,8 @@ where
     W::ReverseWeight: 'static,
 {
     for union_test_data in &test_data.union {
-        let fst_res_static = union(&test_data.raw, &union_test_data.fst_2)?;
+        let mut fst_res_static = test_data.raw.clone();
+         union(&mut fst_res_static, &union_test_data.fst_2)?;
 
         assert_eq!(
             union_test_data.result_static,

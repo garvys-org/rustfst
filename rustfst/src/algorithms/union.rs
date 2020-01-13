@@ -1,16 +1,17 @@
-use std::collections::HashMap;
 use std::rc::Rc;
 
-use failure::{format_err, Fallible};
+use failure::Fallible;
 
 use crate::algorithms::ReplaceFst;
 use crate::arc::Arc;
 use crate::fst_traits::{
-    AllocableFst, ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableFst,
+    AllocableFst, ArcIterator, CoreFst, ExpandedFst, Fst, MutableFst,
     StateIterator,
 };
 use crate::semirings::Semiring;
-use crate::{StateId, SymbolTable};
+use crate::{SymbolTable, EPS_LABEL};
+use crate::fst_properties::FstProperties;
+use unsafe_unwrap::UnsafeUnwrap;
 
 /// Performs the union of two wFSTs. If A transduces string `x` to `y` with weight `a`
 /// and `B` transduces string `w` to `v` with weight `b`, then their union transduces `x` to `y`
@@ -28,11 +29,11 @@ use crate::{StateId, SymbolTable};
 /// # use rustfst::algorithms::union;
 /// # use std::collections::HashSet;
 /// # fn main() -> Fallible<()> {
-/// let fst_a : VectorFst<IntegerWeight> = fst![2 => 3];
+/// let mut fst_a : VectorFst<IntegerWeight> = fst![2 => 3];
 /// let fst_b : VectorFst<IntegerWeight> = fst![6 => 5];
 ///
-/// let fst_res : VectorFst<IntegerWeight> = union(&fst_a, &fst_b)?;
-/// let paths : HashSet<_> = fst_res.paths_iter().collect();
+/// union(&mut fst_a, &fst_b)?;
+/// let paths : HashSet<_> = fst_a.paths_iter().collect();
 ///
 /// let mut paths_ref = HashSet::<FstPath<IntegerWeight>>::new();
 /// paths_ref.insert(fst_path![2 => 3]);
@@ -42,76 +43,53 @@ use crate::{StateId, SymbolTable};
 /// # Ok(())
 /// # }
 /// ```
-pub fn union<W, F1, F2, F3>(fst_1: &F1, fst_2: &F2) -> Fallible<F3>
-where
-    W: Semiring,
-    F1: ExpandedFst<W = W>,
-    F2: ExpandedFst<W = W>,
-    F3: MutableFst<W = W>,
+pub fn union<W, F1, F2>(fst_1: &mut F1, fst_2: &F2) -> Fallible<()>
+    where
+        W: Semiring,
+        F1: ExpandedFst<W = W> + AllocableFst<W=W> + MutableFst<W=W>,
+        F2: ExpandedFst<W = W>,
 {
-    let mut fst_out = F3::new();
+    let numstates1 = fst_1.num_states();
+    let fst_props_1 = fst_1.properties()?;
+    let initial_acyclic_1 = fst_props_1.contains(FstProperties::INITIAL_ACYCLIC);
+    let start2 = fst_2.start();
+    if start2.is_none() {
+        return Ok(())
+    }
+    let start2 = unsafe {start2.unsafe_unwrap()};
+    fst_1.reserve_states(fst_2.num_states()+ if initial_acyclic_1{ 1} else {0});
 
-    let start_state = fst_out.add_state();
-    fst_out.set_start(start_state)?;
+    for s2 in 0..fst_2.num_states() {
+        let s1 = fst_1.add_state();
+        if let Some(final_weight) = unsafe{fst_2.final_weight_unchecked(s2)} {
+            unsafe {fst_1.set_final_unchecked(s1, final_weight.clone())};
+        }
+        unsafe{fst_1.reserve_arcs_unchecked(s1, fst_2.num_arcs_unchecked(s2))};
+        for arc in unsafe{fst_2.arcs_iter_unchecked(s2)} {
+            let mut new_arc = arc.clone();
+            new_arc.nextstate += numstates1;
+            unsafe {fst_1.add_arc_unchecked(s1, new_arc)};
+        }
+    }
 
-    let mapping_states_fst_1 = fst_out.add_fst(fst_1)?;
-    let mapping_states_fst_2 = fst_out.add_fst(fst_2)?;
+    let start1 = fst_1.start();
+    if start1.is_none() {
+        unsafe {fst_1.set_start_unchecked(start2)};
+        return Ok(())
+    }
+    let start1 = unsafe {start1.unsafe_unwrap()};
 
-    add_epsilon_arc_to_initial_state(fst_1, &mapping_states_fst_1, &mut fst_out)?;
-    add_epsilon_arc_to_initial_state(fst_2, &mapping_states_fst_2, &mut fst_out)?;
-
-    set_new_final_states(fst_1, &mapping_states_fst_1, &mut fst_out)?;
-    set_new_final_states(fst_2, &mapping_states_fst_2, &mut fst_out)?;
-
-    Ok(fst_out)
-}
-
-fn add_epsilon_arc_to_initial_state<F1, F2>(
-    fst: &F1,
-    mapping: &HashMap<StateId, StateId>,
-    fst_out: &mut F2,
-) -> Fallible<()>
-where
-    F1: ExpandedFst,
-    F2: MutableFst,
-{
-    let start_state = fst_out.start().unwrap();
-    if let Some(old_start_state_fst) = fst.start() {
-        fst_out.add_arc(
-            start_state,
-            Arc::new(
-                0,
-                0,
-                <F2 as CoreFst>::W::one(),
-                *mapping.get(&old_start_state_fst).unwrap(),
-            ),
-        )?;
+    if initial_acyclic_1 {
+        unsafe {fst_1.add_arc_unchecked(start1, Arc::new(EPS_LABEL, EPS_LABEL, W::one(), start2+numstates1))};
+    } else {
+        let nstart1 = fst_1.add_state();
+        unsafe {fst_1.set_start_unchecked(nstart1)};
+        unsafe {fst_1.add_arc_unchecked(nstart1, Arc::new(EPS_LABEL, EPS_LABEL, W::one(), start1))};
+        unsafe {fst_1.add_arc_unchecked(nstart1, Arc::new(EPS_LABEL, EPS_LABEL, W::one(), start2 + numstates1))};
     }
     Ok(())
 }
 
-fn set_new_final_states<W, F1, F2>(
-    fst: &F1,
-    mapping: &HashMap<StateId, StateId>,
-    fst_out: &mut F2,
-) -> Fallible<()>
-where
-    W: Semiring,
-    F1: ExpandedFst<W = W>,
-    F2: MutableFst<W = W>,
-{
-    for old_final_state in fst.final_states_iter() {
-        let final_state = mapping.get(&old_final_state.state_id).ok_or_else(|| {
-            format_err!(
-                "Key {:?} doesn't exist in mapping",
-                old_final_state.state_id
-            )
-        })?;
-        fst_out.set_final(*final_state, old_final_state.final_weight.clone())?;
-    }
-
-    Ok(())
-}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct UnionFst<F: Fst + 'static>(ReplaceFst<F, F>)
