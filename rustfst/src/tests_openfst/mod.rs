@@ -67,7 +67,7 @@ use self::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
 use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
 use self::io::vector_fst_text_serialization::test_vector_fst_text_serialization;
 use self::misc::test_del_all_states;
-use crate::tests_openfst::algorithms::union::test_union;
+use crate::tests_openfst::algorithms::union::{test_union, test_union_dynamic};
 
 #[macro_use]
 mod macros;
@@ -380,6 +380,8 @@ where
     test_replace_dynamic(&test_data)?;
 
     test_union(&test_data)?;
+
+    test_union_dynamic(&test_data)?;
 
     Ok(())
 }
