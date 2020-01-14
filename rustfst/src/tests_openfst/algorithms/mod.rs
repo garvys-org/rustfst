@@ -1,5 +1,6 @@
 pub mod arc_map;
 pub mod arcsort;
+pub mod closure;
 pub mod concat;
 pub mod connect;
 pub mod determinize;

@@ -13,13 +13,17 @@ where
 {
     // Add an epsilon arc from each final states to the start state
     if let Some(start_state) = fst.start() {
-        let final_states_id: Vec<_> = fst.final_states_iter().map(|u| u.state_id).collect();
-        for final_state_id in final_states_id {
-            fst.add_arc(
-                final_state_id,
-                Arc::new(EPS_LABEL, EPS_LABEL, <F as CoreFst>::W::one(), start_state),
-            )
-            .unwrap();
+        let final_states_id: Vec<_> = fst
+            .final_states_iter()
+            .map(|u| (u.state_id, u.final_weight.clone()))
+            .collect();
+        for (final_state_id, final_weight) in final_states_id {
+            unsafe {
+                fst.add_arc_unchecked(
+                    final_state_id,
+                    Arc::new(EPS_LABEL, EPS_LABEL, final_weight, start_state),
+                )
+            };
         }
     }
 }
@@ -35,20 +39,25 @@ where
 {
     closure_plus(fst);
 
+    let nstart = fst.add_state();
+
     // Add a new start state to allow empty path
-    let start_state = fst.start();
-    if let Some(start_state_id) = start_state {
-        let new_start_state_id = fst.add_state();
-        fst.set_start(new_start_state_id).unwrap();
-        fst.add_arc(
-            new_start_state_id,
-            Arc::new(
-                EPS_LABEL,
-                EPS_LABEL,
-                <F as CoreFst>::W::one(),
-                start_state_id,
-            ),
-        )
-        .unwrap();
+    if let Some(start_state_id) = fst.start() {
+        unsafe {
+            fst.add_arc_unchecked(
+                nstart,
+                Arc::new(
+                    EPS_LABEL,
+                    EPS_LABEL,
+                    <F as CoreFst>::W::one(),
+                    start_state_id,
+                ),
+            );
+        }
+    }
+
+    unsafe {
+        fst.set_start_unchecked(nstart);
+        fst.set_final_unchecked(nstart, F::W::one());
     }
 }

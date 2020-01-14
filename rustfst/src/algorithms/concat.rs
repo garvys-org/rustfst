@@ -1,10 +1,12 @@
 use failure::Fallible;
 
-use crate::arc::Arc;
-use crate::fst_traits::{ExpandedFst, MutableFst, AllocableFst, Fst, StateIterator, ArcIterator, CoreFst};
-use crate::semirings::Semiring;
-use crate::{EPS_LABEL, SymbolTable};
 use crate::algorithms::ReplaceFst;
+use crate::arc::Arc;
+use crate::fst_traits::{
+    AllocableFst, ArcIterator, CoreFst, ExpandedFst, Fst, MutableFst, StateIterator,
+};
+use crate::semirings::Semiring;
+use crate::{SymbolTable, EPS_LABEL};
 use std::rc::Rc;
 
 /// Performs the concatenation of two wFSTs. If `A` transduces string `x` to `y` with weight `a`
@@ -39,37 +41,42 @@ use std::rc::Rc;
 pub fn concat<W, F1, F2>(fst_1: &mut F1, fst_2: &F2) -> Fallible<()>
 where
     W: Semiring,
-    F1: ExpandedFst<W = W> + MutableFst<W=W> + AllocableFst<W=W>,
+    F1: ExpandedFst<W = W> + MutableFst<W = W> + AllocableFst<W = W>,
     F2: ExpandedFst<W = W>,
 {
     let start1 = fst_1.start();
     if start1.is_none() {
-        return Ok(())
+        return Ok(());
     }
     let numstates1 = fst_1.num_states();
     fst_1.reserve_states(fst_2.num_states());
 
     for s2 in 0..fst_2.num_states() {
         let s1 = fst_1.add_state();
-        if let Some(final_weight) = unsafe {fst_2.final_weight_unchecked(s2)} {
-            unsafe {fst_1.set_final_unchecked(s1, final_weight.clone())};
+        if let Some(final_weight) = unsafe { fst_2.final_weight_unchecked(s2) } {
+            unsafe { fst_1.set_final_unchecked(s1, final_weight.clone()) };
         }
-        unsafe {fst_1.reserve_arcs_unchecked(s1, fst_2.num_arcs_unchecked(s2))};
-        for arc in unsafe {fst_2.arcs_iter_unchecked(s2)} {
+        unsafe { fst_1.reserve_arcs_unchecked(s1, fst_2.num_arcs_unchecked(s2)) };
+        for arc in unsafe { fst_2.arcs_iter_unchecked(s2) } {
             let mut new_arc = arc.clone();
             new_arc.nextstate += numstates1;
-            unsafe {fst_1.add_arc_unchecked(s1, new_arc)};
+            unsafe { fst_1.add_arc_unchecked(s1, new_arc) };
         }
     }
 
     let start2 = fst_2.start();
     for s1 in 0..numstates1 {
-        if let Some(weight) = unsafe {fst_1.final_weight_unchecked(s1)} {
+        if let Some(weight) = unsafe { fst_1.final_weight_unchecked(s1) } {
             if let Some(_start2) = start2 {
                 let weight = weight.clone();
-                unsafe {fst_1.add_arc_unchecked(s1, Arc::new(EPS_LABEL, EPS_LABEL, weight, _start2 + numstates1))};
+                unsafe {
+                    fst_1.add_arc_unchecked(
+                        s1,
+                        Arc::new(EPS_LABEL, EPS_LABEL, weight, _start2 + numstates1),
+                    )
+                };
             }
-            unsafe {fst_1.delete_final_weight_unchecked(s1)};
+            unsafe { fst_1.delete_final_weight_unchecked(s1) };
         }
     }
 
@@ -78,28 +85,30 @@ where
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConcatFst<F: Fst + 'static>(ReplaceFst<F, F>)
-    where
-        F::W: 'static;
+where
+    F::W: 'static;
 
 impl<F: Fst + MutableFst + AllocableFst> ConcatFst<F>
-    where
-        F::W: 'static,
+where
+    F::W: 'static,
 {
     //TODO: Use a borrow and not a move
     //TODO: Allow fsts of different types
     pub fn new(fst1: F, fst2: F) -> Fallible<Self> {
         let mut rfst = F::new();
         rfst.add_states(3);
-        unsafe {rfst.set_start_unchecked(0)};
-        unsafe {rfst.set_final_unchecked(2, F::W::one())};
+        unsafe { rfst.set_start_unchecked(0) };
+        unsafe { rfst.set_final_unchecked(2, F::W::one()) };
         if let Some(isymt) = fst1.input_symbols() {
             rfst.set_input_symbols(isymt);
         }
         if let Some(osymt) = fst1.output_symbols() {
             rfst.set_output_symbols(osymt);
         }
-        unsafe {rfst.add_arc_unchecked(0, Arc::new(EPS_LABEL, std::usize::MAX, F::W::one(), 1))};
-        unsafe {rfst.add_arc_unchecked(1, Arc::new(EPS_LABEL, std::usize::MAX - 1, F::W::one(), 2))};
+        unsafe { rfst.add_arc_unchecked(0, Arc::new(EPS_LABEL, std::usize::MAX, F::W::one(), 1)) };
+        unsafe {
+            rfst.add_arc_unchecked(1, Arc::new(EPS_LABEL, std::usize::MAX - 1, F::W::one(), 2))
+        };
 
         let mut fst_tuples = Vec::with_capacity(3);
         fst_tuples.push((0, rfst));
@@ -111,8 +120,8 @@ impl<F: Fst + MutableFst + AllocableFst> ConcatFst<F>
 }
 
 impl<F: Fst> CoreFst for ConcatFst<F>
-    where
-        F::W: 'static,
+where
+    F::W: 'static,
 {
     type W = F::W;
 
@@ -138,8 +147,8 @@ impl<F: Fst> CoreFst for ConcatFst<F>
 }
 
 impl<'a, F: Fst + 'static> StateIterator<'a> for ConcatFst<F>
-    where
-        F::W: 'static,
+where
+    F::W: 'static,
 {
     type Iter = <ReplaceFst<F, F> as StateIterator<'a>>::Iter;
 
@@ -149,8 +158,8 @@ impl<'a, F: Fst + 'static> StateIterator<'a> for ConcatFst<F>
 }
 
 impl<'a, F: Fst + 'static> ArcIterator<'a> for ConcatFst<F>
-    where
-        F::W: 'static,
+where
+    F::W: 'static,
 {
     type Iter = <ReplaceFst<F, F> as ArcIterator<'a>>::Iter;
 
@@ -164,8 +173,8 @@ impl<'a, F: Fst + 'static> ArcIterator<'a> for ConcatFst<F>
 }
 
 impl<F: Fst + 'static> Fst for ConcatFst<F>
-    where
-        F::W: 'static,
+where
+    F::W: 'static,
 {
     fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
         self.0.input_symbols()

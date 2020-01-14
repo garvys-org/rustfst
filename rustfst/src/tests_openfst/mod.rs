@@ -67,8 +67,13 @@ use self::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
 use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
 use self::io::vector_fst_text_serialization::test_vector_fst_text_serialization;
 use self::misc::test_del_all_states;
+use crate::tests_openfst::algorithms::closure::{
+    test_closure_plus, test_closure_star, ClosureOperationResult, ClosureTestData,
+};
+use crate::tests_openfst::algorithms::concat::{
+    test_concat, test_concat_dynamic, ConcatOperationResult, ConcatTestData,
+};
 use crate::tests_openfst::algorithms::union::{test_union, test_union_dynamic};
-use crate::tests_openfst::algorithms::concat::{test_concat, ConcatOperationResult, ConcatTestData, test_concat_dynamic};
 
 #[macro_use]
 mod macros;
@@ -137,6 +142,8 @@ pub struct ParsedFstTestData {
     replace: Vec<ReplaceOperationResult>,
     union: Vec<UnionOperationResult>,
     concat: Vec<ConcatOperationResult>,
+    closure_plus: ClosureOperationResult,
+    closure_star: ClosureOperationResult,
 }
 
 pub struct FstTestData<F>
@@ -185,6 +192,8 @@ where
     pub replace: Vec<ReplaceTestData<F>>,
     pub union: Vec<UnionTestData<F>>,
     pub concat: Vec<ConcatTestData<F>>,
+    pub closure_plus: ClosureTestData<F>,
+    pub closure_star: ClosureTestData<F>,
 }
 
 impl<F> FstTestData<F>
@@ -252,6 +261,8 @@ where
             replace: data.replace.iter().map(|v| v.parse()).collect(),
             union: data.union.iter().map(|v| v.parse()).collect(),
             concat: data.concat.iter().map(|v| v.parse()).collect(),
+            closure_plus: data.closure_plus.parse(),
+            closure_star: data.closure_star.parse(),
         }
     }
 }
@@ -390,6 +401,10 @@ where
     test_concat(&test_data)?;
 
     test_concat_dynamic(&test_data)?;
+
+    test_closure_plus(&test_data)?;
+
+    test_closure_star(&test_data)?;
 
     Ok(())
 }

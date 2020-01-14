@@ -1,7 +1,7 @@
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::algorithms::{union, UnionFst, concat, ConcatFst};
+use crate::algorithms::{concat, union, ConcatFst, UnionFst};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::TextParser;
 use crate::semirings::{Semiring, WeaklyDivisibleSemiring, WeightQuantize};
@@ -16,9 +16,9 @@ pub struct ConcatOperationResult {
 }
 
 pub struct ConcatTestData<F>
-    where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+where
+    F: TextParser,
+    F::W: Semiring<Type = f32>,
 {
     pub fst_2: F,
     pub result_static: F,
@@ -27,9 +27,9 @@ pub struct ConcatTestData<F>
 
 impl ConcatOperationResult {
     pub fn parse<F>(&self) -> ConcatTestData<F>
-        where
-            F: TextParser,
-            F::W: Semiring<Type = f32>,
+    where
+        F: TextParser,
+        F::W: Semiring<Type = f32>,
     {
         ConcatTestData {
             fst_2: F::from_text_string(self.fst_2.as_str()).unwrap(),
@@ -40,9 +40,9 @@ impl ConcatOperationResult {
 }
 
 pub fn test_concat<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
-    where
-        W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-        W::ReverseWeight: 'static,
+where
+    W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+    W::ReverseWeight: 'static,
 {
     for concat_test_data in &test_data.concat {
         let mut fst_res_static = test_data.raw.clone();
@@ -63,9 +63,9 @@ pub fn test_concat<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 }
 
 pub fn test_concat_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
-    where
-        W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-        W::ReverseWeight: 'static,
+where
+    W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+    W::ReverseWeight: 'static,
 {
     for concat_test_data in &test_data.concat {
         let concat_dynamic_fst_openfst = &concat_test_data.result_dynamic;
