@@ -199,6 +199,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
 
     /// Remove the final weight of a specific state.
     fn delete_final_weight(&mut self, source: StateId) -> Fallible<()>;
+    unsafe fn delete_final_weight_unchecked(&mut self, source: StateId);
 
     /// Deletes all the arcs leaving a state.
     fn delete_arcs(&mut self, source: StateId) -> Fallible<()>;

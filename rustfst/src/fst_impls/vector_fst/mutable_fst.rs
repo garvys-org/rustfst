@@ -166,6 +166,10 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(())
     }
 
+    unsafe fn delete_final_weight_unchecked(&mut self, source: usize) {
+        self.states.get_unchecked_mut(source).final_weight = None;
+    }
+
     fn delete_arcs(&mut self, source: usize) -> Fallible<()> {
         self.states
             .get_mut(source)
