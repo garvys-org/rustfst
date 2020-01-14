@@ -68,7 +68,7 @@ use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
 use self::io::vector_fst_text_serialization::test_vector_fst_text_serialization;
 use self::misc::test_del_all_states;
 use crate::tests_openfst::algorithms::union::{test_union, test_union_dynamic};
-use crate::tests_openfst::algorithms::concat::{test_concat, ConcatOperationResult, ConcatTestData};
+use crate::tests_openfst::algorithms::concat::{test_concat, ConcatOperationResult, ConcatTestData, test_concat_dynamic};
 
 #[macro_use]
 mod macros;
@@ -388,6 +388,8 @@ where
     test_union_dynamic(&test_data)?;
 
     test_concat(&test_data)?;
+
+    test_concat_dynamic(&test_data)?;
 
     Ok(())
 }

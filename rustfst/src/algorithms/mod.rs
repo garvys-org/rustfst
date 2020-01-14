@@ -67,7 +67,7 @@ pub use self::{
     arc_unique::arc_unique,
     closure::{closure_plus, closure_star},
     composition::compose,
-    concat::concat,
+    concat::{concat, ConcatFst},
     connect::connect,
     determinize::{determinize, determinize_with_distance, DeterminizeType},
     encode::{decode, encode},

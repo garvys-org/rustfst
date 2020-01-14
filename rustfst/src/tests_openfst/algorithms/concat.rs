@@ -1,7 +1,7 @@
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::algorithms::{union, UnionFst, concat};
+use crate::algorithms::{union, UnionFst, concat, ConcatFst};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::TextParser;
 use crate::semirings::{Semiring, WeaklyDivisibleSemiring, WeightQuantize};
@@ -62,17 +62,17 @@ pub fn test_concat<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
     Ok(())
 }
 
-//pub fn test_concat_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
-//    where
-//        W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-//        W::ReverseWeight: 'static,
-//{
-//    for union_test_data in &test_data.union {
-//        let union_dynamic_fst_openfst = &union_test_data.result_dynamic;
-//        let union_dynamic_fst =
-//            UnionFst::new(test_data.raw.clone(), union_test_data.fst_2.clone())?;
-//
-//        compare_fst_static_dynamic(union_dynamic_fst_openfst, &union_dynamic_fst)?;
-//    }
-//    Ok(())
-//}
+pub fn test_concat_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+    where
+        W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+        W::ReverseWeight: 'static,
+{
+    for concat_test_data in &test_data.concat {
+        let concat_dynamic_fst_openfst = &concat_test_data.result_dynamic;
+        let concat_dynamic_fst =
+            ConcatFst::new(test_data.raw.clone(), concat_test_data.fst_2.clone())?;
+
+        compare_fst_static_dynamic(concat_dynamic_fst_openfst, &concat_dynamic_fst)?;
+    }
+    Ok(())
+}
