@@ -68,6 +68,7 @@ use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
 use self::io::vector_fst_text_serialization::test_vector_fst_text_serialization;
 use self::misc::test_del_all_states;
 use crate::tests_openfst::algorithms::union::{test_union, test_union_dynamic};
+use crate::tests_openfst::algorithms::concat::{test_concat, ConcatOperationResult, ConcatTestData};
 
 #[macro_use]
 mod macros;
@@ -135,6 +136,7 @@ pub struct ParsedFstTestData {
     push: Vec<PushOperationResult>,
     replace: Vec<ReplaceOperationResult>,
     union: Vec<UnionOperationResult>,
+    concat: Vec<ConcatOperationResult>,
 }
 
 pub struct FstTestData<F>
@@ -182,6 +184,7 @@ where
     pub push: Vec<PushTestData<F>>,
     pub replace: Vec<ReplaceTestData<F>>,
     pub union: Vec<UnionTestData<F>>,
+    pub concat: Vec<ConcatTestData<F>>,
 }
 
 impl<F> FstTestData<F>
@@ -248,6 +251,7 @@ where
             push: data.push.iter().map(|v| v.parse()).collect(),
             replace: data.replace.iter().map(|v| v.parse()).collect(),
             union: data.union.iter().map(|v| v.parse()).collect(),
+            concat: data.concat.iter().map(|v| v.parse()).collect(),
         }
     }
 }
@@ -382,6 +386,8 @@ where
     test_union(&test_data)?;
 
     test_union_dynamic(&test_data)?;
+
+    test_concat(&test_data)?;
 
     Ok(())
 }

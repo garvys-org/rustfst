@@ -1,5 +1,6 @@
 pub mod arc_map;
 pub mod arcsort;
+pub mod concat;
 pub mod connect;
 pub mod determinize;
 pub mod dynamic_fst;
