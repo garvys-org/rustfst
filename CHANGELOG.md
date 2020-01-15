@@ -17,12 +17,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `replace` fst operations.
 - Change internal implementation of `Replace`, `Determinize` and `FactorWeight` to share more code by creating the trait `FstImpl` and the struct `StateTable`.
 - Implement/Derive `Clone`/`PartialEq`/`PartialOrd`/`Debug` for all internal structures when possible.
+- Added dynamic versions of some algorithms:
+    - `replace` -> `ReplaceFst`
+    - `factor_weight` -> `FactorWeightFst`
+    - `union` -> `UnionFst`
+    - `concat` -> `ConcatFst`
+    - `closure` -> `ClosureFst`
+- Added `delete_final_weight_unchecked` to the `Fst` trait and implement it for `VectorFst`.
 
 ### Changed
 - Make `KDELTA` public outside of the crate
 - Fix serialization into a DOT file by putting the `label` into quotes.
 - Remove `reserve` API from `MutableFst`, see `AllocableFst` for this API 
 - Remove `Fst` trait bound on `Display`.
+- Removed `closure_plus` and `closure_star` in favor of `closure` with a `ClosureType` parameter.
+- Fixed bugs in `concat`, `union` and `closure`.
+- `factor_weight` now takes as input a type implementing `Borrow` instead of `&fst`.
+- `replace` now takes as input a vector of types implementing `Borrow` instead of `fst`.
 
 ## [0.4.0] - 2019-11-12
 
