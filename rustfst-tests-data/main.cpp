@@ -600,6 +600,100 @@ void compute_fst_replace(const F& raw_fst, json& j) {
     }
 }
 
+template<class F>
+void compute_fst_union(const F& raw_fst, json& j) {
+    using Weight = typename F::Weight;
+    using Arc = typename F::Arc;
+    j["union"] = {};
+
+    fst::VectorFst<typename F::Arc> fst_2;
+    fst_2.AddState();
+    fst_2.AddState();
+    fst_2.AddState();
+    fst_2.SetStart(0);
+    fst_2.SetFinal(2, Weight(0.3));
+    fst_2.AddArc(0, Arc(2, 12, Weight(1.2), 1));
+    fst_2.AddArc(0, Arc(3, 1, Weight(2.2), 1));
+    fst_2.AddArc(1, Arc(6, 3, Weight(2.3), 2));
+    fst_2.AddArc(1, Arc(4, 2, Weight(1.7), 2));
+
+    auto fst_1 = new fst::VectorFst<Arc>(raw_fst);
+
+    auto res_dynamic = fst::VectorFst<Arc>(fst::UnionFst<Arc>(*fst_1, fst_2));
+
+    fst::Union(fst_1, fst_2);
+
+    json j2;
+    j2["fst_2"] = fst_to_string(fst_2);
+    j2["result_static"] = fst_to_string(*fst_1);
+    j2["result_dynamic"] = fst_to_string(res_dynamic);
+
+    j["union"].push_back(j2);
+}
+
+template<class F>
+void compute_fst_concat(const F& raw_fst, json& j) {
+    using Weight = typename F::Weight;
+    using Arc = typename F::Arc;
+    j["concat"] = {};
+
+    fst::VectorFst<typename F::Arc> fst_2;
+    fst_2.AddState();
+    fst_2.AddState();
+    fst_2.AddState();
+    fst_2.SetStart(0);
+    fst_2.SetFinal(2, Weight(0.3));
+    fst_2.AddArc(0, Arc(2, 12, Weight(1.2), 1));
+    fst_2.AddArc(0, Arc(3, 1, Weight(2.2), 1));
+    fst_2.AddArc(1, Arc(6, 3, Weight(2.3), 2));
+    fst_2.AddArc(1, Arc(4, 2, Weight(1.7), 2));
+
+    auto fst_1 = new fst::VectorFst<Arc>(raw_fst);
+
+    auto res_dynamic = fst::VectorFst<Arc>(fst::ConcatFst<Arc>(*fst_1, fst_2));
+
+    fst::Concat(fst_1, fst_2);
+
+    json j2;
+    j2["fst_2"] = fst_to_string(fst_2);
+    j2["result_static"] = fst_to_string(*fst_1);
+    j2["result_dynamic"] = fst_to_string(res_dynamic);
+
+    j["concat"].push_back(j2);
+}
+
+template<class F>
+void compute_fst_closure_plus(const F& raw_fst, json& j) {
+    using Weight = typename F::Weight;
+    using Arc = typename F::Arc;
+
+    j["closure_plus"] = {};
+
+    auto static_fst = fst::VectorFst<Arc>(raw_fst);
+    fst::Closure(&static_fst, fst::CLOSURE_PLUS);
+
+    auto dynamic_fst = fst::VectorFst<Arc>(fst::ClosureFst<Arc>(raw_fst, fst::CLOSURE_PLUS));
+
+    j["closure_plus"]["result_static"] = fst_to_string(static_fst);
+    j["closure_plus"]["result_dynamic"] = fst_to_string(dynamic_fst);
+}
+
+template<class F>
+void compute_fst_closure_star(const F& raw_fst, json& j) {
+    using Weight = typename F::Weight;
+    using Arc = typename F::Arc;
+
+    j["closure_star"] = {};
+
+    auto static_fst = fst::VectorFst<Arc>(raw_fst);
+    fst::Closure(&static_fst, fst::CLOSURE_STAR);
+
+    auto dynamic_fst = fst::VectorFst<Arc>(fst::ClosureFst<Arc>(raw_fst, fst::CLOSURE_STAR));
+
+    j["closure_star"]["result_static"] = fst_to_string(static_fst);
+    j["closure_star"]["result_dynamic"] = fst_to_string(dynamic_fst);
+}
+
 template<class A>
 void compute_fst_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
     std::cout << "FST :" << fst_name << std::endl;
@@ -706,6 +800,18 @@ void compute_fst_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
 
     std::cout << "Replace" << std::endl;
     compute_fst_replace(raw_fst, data);
+
+    std::cout << "Union" << std::endl;
+    compute_fst_union(raw_fst, data);
+
+    std::cout << "Concat" << std::endl;
+    compute_fst_concat(raw_fst, data);
+
+    std::cout << "Closure Plus" << std::endl;
+    compute_fst_closure_plus(raw_fst, data);
+
+    std::cout << "Closure Star" << std::endl;
+    compute_fst_closure_star(raw_fst, data);
 
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;

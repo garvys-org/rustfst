@@ -21,9 +21,11 @@ use crate::semirings::{
 use crate::tests_openfst::algorithms::factor_weight_gallic::test_factor_weight_gallic;
 use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicOperationResult;
 use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicTestData;
-use crate::tests_openfst::algorithms::factor_weight_identity::test_factor_weight_identity;
 use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityOperationResult;
 use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityTestData;
+use crate::tests_openfst::algorithms::factor_weight_identity::{
+    test_factor_weight_identity, test_factor_weight_identity_dynamic,
+};
 use crate::tests_openfst::algorithms::gallic_encode_decode::test_gallic_encode_decode;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicOperationResult;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicTestData;
@@ -48,7 +50,7 @@ use self::algorithms::{
     project::{test_project_input, test_project_output},
     properties::{parse_fst_properties, test_fst_properties},
     push::{test_push, PushOperationResult, PushTestData},
-    replace::{test_replace, ReplaceOperationResult, ReplaceTestData},
+    replace::{test_replace, test_replace_dynamic, ReplaceOperationResult, ReplaceTestData},
     reverse::test_reverse,
     rm_epsilon::test_rmepsilon,
     shortest_distance::{
@@ -57,6 +59,7 @@ use self::algorithms::{
     shortest_path::{test_shortest_path, ShorestPathOperationResult, ShortestPathTestData},
     state_map::{test_state_map_arc_sum, test_state_map_arc_unique},
     topsort::test_topsort,
+    union::{UnionOperationResult, UnionTestData},
     weight_pushing::{test_weight_pushing_final, test_weight_pushing_initial},
 };
 use self::fst_impls::const_fst::test_const_fst_convert_convert;
@@ -64,6 +67,14 @@ use self::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
 use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
 use self::io::vector_fst_text_serialization::test_vector_fst_text_serialization;
 use self::misc::test_del_all_states;
+use crate::tests_openfst::algorithms::closure::{
+    test_closure_plus, test_closure_plus_dynamic, test_closure_star, test_closure_star_dynamic,
+    ClosureOperationResult, ClosureTestData,
+};
+use crate::tests_openfst::algorithms::concat::{
+    test_concat, test_concat_dynamic, ConcatOperationResult, ConcatTestData,
+};
+use crate::tests_openfst::algorithms::union::{test_union, test_union_dynamic};
 
 #[macro_use]
 mod macros;
@@ -130,6 +141,10 @@ pub struct ParsedFstTestData {
     factor_weight_gallic: Vec<FwGallicOperationResult>,
     push: Vec<PushOperationResult>,
     replace: Vec<ReplaceOperationResult>,
+    union: Vec<UnionOperationResult>,
+    concat: Vec<ConcatOperationResult>,
+    closure_plus: ClosureOperationResult,
+    closure_star: ClosureOperationResult,
 }
 
 pub struct FstTestData<F>
@@ -176,6 +191,10 @@ where
     pub factor_weight_gallic: Vec<FwGallicTestData<F>>,
     pub push: Vec<PushTestData<F>>,
     pub replace: Vec<ReplaceTestData<F>>,
+    pub union: Vec<UnionTestData<F>>,
+    pub concat: Vec<ConcatTestData<F>>,
+    pub closure_plus: ClosureTestData<F>,
+    pub closure_star: ClosureTestData<F>,
 }
 
 impl<F> FstTestData<F>
@@ -241,6 +260,10 @@ where
                 .collect(),
             push: data.push.iter().map(|v| v.parse()).collect(),
             replace: data.replace.iter().map(|v| v.parse()).collect(),
+            union: data.union.iter().map(|v| v.parse()).collect(),
+            concat: data.concat.iter().map(|v| v.parse()).collect(),
+            closure_plus: data.closure_plus.parse(),
+            closure_star: data.closure_star.parse(),
         }
     }
 }
@@ -346,6 +369,8 @@ where
 
     test_factor_weight_identity(&test_data)?;
 
+    test_factor_weight_identity_dynamic(&test_data)?;
+
     test_factor_weight_gallic(&test_data)?;
 
     test_minimize(&test_data)?;
@@ -367,6 +392,24 @@ where
     test_del_all_states(&test_data)?;
 
     test_replace(&test_data)?;
+
+    test_replace_dynamic(&test_data)?;
+
+    test_union(&test_data)?;
+
+    test_union_dynamic(&test_data)?;
+
+    test_concat(&test_data)?;
+
+    test_concat_dynamic(&test_data)?;
+
+    test_closure_plus(&test_data)?;
+
+    test_closure_plus_dynamic(&test_data)?;
+
+    test_closure_star(&test_data)?;
+
+    test_closure_star_dynamic(&test_data)?;
 
     Ok(())
 }

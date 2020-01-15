@@ -72,7 +72,7 @@ where
             increment_final_olabel: false,
         };
         let fwfst: VectorFst<_> =
-            factor_weight::<_, _, GallicFactorLeft<F::W>>(&gfst, factor_opts)?;
+            factor_weight::<_, _, _, GallicFactorLeft<F::W>>(&gfst, factor_opts)?;
         let mut from_gallic = FromGallicConverter {
             superfinal_label: EPS_LABEL,
         };

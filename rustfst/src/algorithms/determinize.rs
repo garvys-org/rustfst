@@ -173,10 +173,11 @@ where
     out_dist: Vec<F::W>,
 }
 
-impl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>> FstImpl<F::W> for DeterminizeFsaImpl<'a, 'b, F, CD>
+impl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>> FstImpl for DeterminizeFsaImpl<'a, 'b, F, CD>
 where
     F::W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
+    type W = F::W;
     fn cache_impl_mut(&mut self) -> &mut CacheImpl<<F as CoreFst>::W> {
         &mut self.cache_impl
     }
@@ -398,8 +399,8 @@ where
     let factor_opts = FactorWeightOptions {
         delta: KDELTA,
         mode: FactorWeightType::FACTOR_FINAL_WEIGHTS,
-        final_ilabel: 0,
-        final_olabel: 0,
+        final_ilabel: EPS_LABEL,
+        final_olabel: EPS_LABEL,
         increment_final_ilabel: false,
         increment_final_olabel: false,
     };
@@ -413,7 +414,7 @@ where
             let determinized_fsa: VectorFst<GallicWeightMin<W>> =
                 determinize_fsa::<_, _, _, GallicCommonDivisor>(&fsa)?;
             let factored_determinized_fsa: VectorFst<GallicWeightMin<W>> =
-                factor_weight::<_, _, GallicFactorMin<W>>(&determinized_fsa, factor_opts)?;
+                factor_weight::<_, _, _, GallicFactorMin<W>>(&determinized_fsa, factor_opts)?;
             weight_convert(&factored_determinized_fsa, &mut from_gallic)
         }
         DeterminizeType::DeterminizeFunctional => {
@@ -421,7 +422,7 @@ where
             let determinized_fsa: VectorFst<GallicWeightRestrict<W>> =
                 determinize_fsa::<_, _, _, GallicCommonDivisor>(&fsa)?;
             let factored_determinized_fsa: VectorFst<GallicWeightRestrict<W>> =
-                factor_weight::<_, _, GallicFactorRestrict<W>>(&determinized_fsa, factor_opts)?;
+                factor_weight::<_, _, _, GallicFactorRestrict<W>>(&determinized_fsa, factor_opts)?;
             weight_convert(&factored_determinized_fsa, &mut from_gallic)
         }
         DeterminizeType::DeterminizeNonFunctional => {
@@ -429,7 +430,7 @@ where
             let determinized_fsa: VectorFst<GallicWeight<W>> =
                 determinize_fsa::<_, _, _, GallicCommonDivisor>(&fsa)?;
             let factored_determinized_fsa: VectorFst<GallicWeight<W>> =
-                factor_weight::<_, _, GallicFactor<W>>(&determinized_fsa, factor_opts)?;
+                factor_weight::<_, _, _, GallicFactor<W>>(&determinized_fsa, factor_opts)?;
             weight_convert(&factored_determinized_fsa, &mut from_gallic)
         }
     }

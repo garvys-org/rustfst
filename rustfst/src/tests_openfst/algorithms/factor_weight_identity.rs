@@ -3,12 +3,14 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::factor_iterators::IdentityFactor;
 use crate::algorithms::factor_weight;
-use crate::algorithms::{FactorWeightOptions, FactorWeightType};
+use crate::algorithms::{FactorWeightFst, FactorWeightOptions, FactorWeightType};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::TextParser;
 use crate::semirings::Semiring;
 use crate::semirings::WeightQuantize;
 use crate::tests_openfst::FstTestData;
+
+use super::dynamic_fst::compare_fst_static_dynamic;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FwIdentityOperationResult {
@@ -46,13 +48,11 @@ where
     W: Semiring<Type = f32> + WeightQuantize + 'static,
 {
     for data in &test_data.factor_weight_identity {
-        //        println!("test fwinentity");
-        //        std::dbg!(data.factor_final_weights);
-        //        std::dbg!(data.factor_arc_weights);
         let mode = FactorWeightType::from_bools(data.factor_final_weights, data.factor_arc_weights);
         let opts = FactorWeightOptions::new(mode);
 
-        let fst_res: VectorFst<_> = factor_weight::<_, _, IdentityFactor<_>>(&test_data.raw, opts)?;
+        let fst_res: VectorFst<_> =
+            factor_weight::<_, _, _, IdentityFactor<_>>(&test_data.raw, opts)?;
 
         assert_eq_fst!(
         data.result,
@@ -62,6 +62,26 @@ where
             data.factor_final_weights, data.factor_arc_weights
         )
     );
+    }
+
+    Ok(())
+}
+
+pub fn test_factor_weight_identity_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+where
+    W: Semiring<Type = f32> + WeightQuantize + 'static,
+{
+    for data in &test_data.factor_weight_identity {
+        let mode = FactorWeightType::from_bools(data.factor_final_weights, data.factor_arc_weights);
+        let opts = FactorWeightOptions::new(mode);
+
+        let fst_res_static: VectorFst<_> =
+            factor_weight::<_, _, _, IdentityFactor<_>>(&test_data.raw, opts.clone())?;
+
+        let fst_res_dynamic =
+            FactorWeightFst::<_, _, IdentityFactor<_>>::new(test_data.raw.clone(), opts)?;
+
+        compare_fst_static_dynamic(&fst_res_static, &fst_res_dynamic)?;
     }
 
     Ok(())

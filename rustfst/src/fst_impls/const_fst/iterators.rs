@@ -35,7 +35,7 @@ impl<'a, W: 'static + Semiring> ArcIterator<'a> for ConstFst<W> {
     }
 }
 
-impl<'a, W: 'a + Semiring> StateIterator<'a> for ConstFst<W> {
+impl<'a, W: Semiring> StateIterator<'a> for ConstFst<W> {
     type Iter = Range<StateId>;
     fn states_iter(&'a self) -> Self::Iter {
         self.state_range()

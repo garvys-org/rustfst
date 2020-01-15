@@ -9,6 +9,8 @@ mod concat;
 mod connect;
 mod determinize;
 pub(crate) mod dfs_visit;
+#[macro_use]
+pub(crate) mod dynamic_fst;
 mod encode;
 mod factor_weight;
 mod fst_convert;
@@ -63,9 +65,9 @@ pub use self::{
     arc_sort::arc_sort,
     arc_sum::arc_sum,
     arc_unique::arc_unique,
-    closure::{closure_plus, closure_star},
+    closure::{closure, ClosureFst, ClosureType},
     composition::compose,
-    concat::concat,
+    concat::{concat, ConcatFst},
     connect::connect,
     determinize::{determinize, determinize_with_distance, DeterminizeType},
     encode::{decode, encode},
@@ -77,7 +79,7 @@ pub use self::{
     push::{push, push_weights, PushType},
     queue::{Queue, QueueType},
     relabel_pairs::relabel_pairs,
-    replace::replace,
+    replace::{replace, BorrowFst, ReplaceFst},
     reverse::reverse,
     reweight::{reweight, ReweightType},
     rm_epsilon::rm_epsilon,
@@ -86,13 +88,13 @@ pub use self::{
     shortest_path::shortest_path,
     state_sort::state_sort,
     top_sort::top_sort,
-    union::union,
+    union::{union, UnionFst},
     weight_convert::{weight_convert, WeightConverter},
 };
 
 #[allow(unused)]
-pub(crate) use self::factor_weight::{
-    factor_weight, FactorIterator, FactorWeightOptions, FactorWeightType,
+pub use self::factor_weight::{
+    factor_weight, FactorIterator, FactorWeightFst, FactorWeightOptions, FactorWeightType,
 };
 
 #[allow(unused)]

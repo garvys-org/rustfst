@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use failure::Fallible;
 
-use crate::algorithms::ArcMapper;
+use crate::algorithms::{ArcMapper, ClosureType};
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::symbol_table::SymbolTable;
@@ -199,6 +199,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
 
     /// Remove the final weight of a specific state.
     fn delete_final_weight(&mut self, source: StateId) -> Fallible<()>;
+    unsafe fn delete_final_weight_unchecked(&mut self, source: StateId);
 
     /// Deletes all the arcs leaving a state.
     fn delete_arcs(&mut self, source: StateId) -> Fallible<()>;
@@ -263,17 +264,9 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// If A transduces string `x` to `y` with weight `a`,
     /// then the closure transduces `x` to `y` with weight `a`,
     /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
-    fn closure_plus(&mut self) {
-        crate::algorithms::closure_plus(self)
-    }
-
-    /// This operation computes the concatenative closure.
-    /// If A transduces string `x` to `y` with weight `a`,
-    /// then the closure transduces `x` to `y` with weight `a`,
-    /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
-    /// The empty string is transduced to itself with weight `1` as well.
-    fn closure_star(&mut self) {
-        crate::algorithms::closure_star(self)
+    ///  If closure_star then the empty string is transduced to itself with weight `1` as well.
+    fn closure(&mut self, closure_type: ClosureType) {
+        crate::algorithms::closure(self, closure_type)
     }
 
     /// Maps an arc using a `ArcMapper` object.
