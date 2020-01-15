@@ -1,7 +1,7 @@
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::algorithms::{closure_plus, closure_star, concat, union, ConcatFst, UnionFst};
+use crate::algorithms::{closure, ClosureFst, ClosureType};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::TextParser;
 use crate::semirings::{Semiring, WeaklyDivisibleSemiring, WeightQuantize};
@@ -43,7 +43,7 @@ where
 {
     let closure_test_data = &test_data.closure_plus;
     let mut fst_res_static = test_data.raw.clone();
-    closure_plus(&mut fst_res_static);
+    closure(&mut fst_res_static, ClosureType::ClosurePlus);
 
     assert_eq!(
         closure_test_data.result_static,
@@ -65,7 +65,7 @@ where
 {
     let closure_test_data = &test_data.closure_star;
     let mut fst_res_static = test_data.raw.clone();
-    closure_star(&mut fst_res_static);
+    closure(&mut fst_res_static, ClosureType::ClosureStar);
 
     assert_eq!(
         closure_test_data.result_static,
@@ -80,17 +80,28 @@ where
     Ok(())
 }
 
-//pub fn test_concat_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
-//    where
-//        W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-//        W::ReverseWeight: 'static,
-//{
-//    for concat_test_data in &test_data.concat {
-//        let concat_dynamic_fst_openfst = &concat_test_data.result_dynamic;
-//        let concat_dynamic_fst =
-//            ConcatFst::new(test_data.raw.clone(), concat_test_data.fst_2.clone())?;
-//
-//        compare_fst_static_dynamic(concat_dynamic_fst_openfst, &concat_dynamic_fst)?;
-//    }
-//    Ok(())
-//}
+pub fn test_closure_plus_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+where
+    W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+    W::ReverseWeight: 'static,
+{
+    let closure_test_data = &test_data.closure_plus;
+    let closure_dynamic_fst_openfst = &closure_test_data.result_dynamic;
+    let closure_dynamic_fst = ClosureFst::new(test_data.raw.clone(), ClosureType::ClosurePlus)?;
+
+    compare_fst_static_dynamic(closure_dynamic_fst_openfst, &closure_dynamic_fst)?;
+    Ok(())
+}
+
+pub fn test_closure_star_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+where
+    W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+    W::ReverseWeight: 'static,
+{
+    let closure_test_data = &test_data.closure_star;
+    let closure_dynamic_fst_openfst = &closure_test_data.result_dynamic;
+    let closure_dynamic_fst = ClosureFst::new(test_data.raw.clone(), ClosureType::ClosureStar)?;
+
+    compare_fst_static_dynamic(closure_dynamic_fst_openfst, &closure_dynamic_fst)?;
+    Ok(())
+}

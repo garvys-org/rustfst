@@ -65,7 +65,7 @@ pub use self::{
     arc_sort::arc_sort,
     arc_sum::arc_sum,
     arc_unique::arc_unique,
-    closure::{closure_plus, closure_star},
+    closure::{closure, ClosureFst, ClosureType},
     composition::compose,
     concat::{concat, ConcatFst},
     connect::connect,

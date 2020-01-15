@@ -68,7 +68,8 @@ use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
 use self::io::vector_fst_text_serialization::test_vector_fst_text_serialization;
 use self::misc::test_del_all_states;
 use crate::tests_openfst::algorithms::closure::{
-    test_closure_plus, test_closure_star, ClosureOperationResult, ClosureTestData,
+    test_closure_plus, test_closure_plus_dynamic, test_closure_star, test_closure_star_dynamic,
+    ClosureOperationResult, ClosureTestData,
 };
 use crate::tests_openfst::algorithms::concat::{
     test_concat, test_concat_dynamic, ConcatOperationResult, ConcatTestData,
@@ -404,7 +405,11 @@ where
 
     test_closure_plus(&test_data)?;
 
+    test_closure_plus_dynamic(&test_data)?;
+
     test_closure_star(&test_data)?;
+
+    test_closure_star_dynamic(&test_data)?;
 
     Ok(())
 }
