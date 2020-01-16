@@ -171,4 +171,5 @@ pub trait SerializableSemiring: Semiring {
     fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()>;
 
     fn parse_text(i: &str) -> IResult<&str, Self>;
+    fn write_text<F: Write>(&self, file: &mut F) -> Fallible<()>;
 }

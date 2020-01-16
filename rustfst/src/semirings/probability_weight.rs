@@ -120,4 +120,9 @@ impl SerializableSemiring for ProbabilityWeight {
         let (i, f) = float(i)?;
         Ok((i, Self::new(f)))
     }
+
+    fn write_text<F: Write>(&self, file: &mut F) -> Fallible<()> {
+        write!(file, "{}", self.value())?;
+        Ok(())
+    }
 }
