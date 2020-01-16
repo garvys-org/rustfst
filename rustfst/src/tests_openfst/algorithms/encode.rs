@@ -1,15 +1,12 @@
 use std::fmt::Display;
 
 use failure::{format_err, Fallible, ResultExt};
-
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{decode, encode};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::MutableFst;
-use crate::fst_traits::TextParser;
-use crate::semirings::Semiring;
-
+use crate::fst_traits::{MutableFst, SerializableFst};
+use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -21,8 +18,8 @@ pub struct EncodeOperationResult {
 
 pub struct EncodeTestData<F>
 where
-    F: TextParser,
-    F::W: Semiring<Type = f32>,
+    F: SerializableFst,
+    F::W: SerializableSemiring,
 {
     pub encode_labels: bool,
     pub encode_weights: bool,
@@ -32,8 +29,8 @@ where
 impl EncodeOperationResult {
     pub fn parse<F>(&self) -> EncodeTestData<F>
     where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+        F: SerializableFst,
+        F::W: SerializableSemiring,
     {
         EncodeTestData {
             encode_weights: self.encode_weights,
@@ -45,8 +42,8 @@ impl EncodeOperationResult {
 
 pub fn test_encode_decode<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32>,
+    F: SerializableFst + MutableFst + Display,
+    F::W: SerializableSemiring,
 {
     for encode_test_data in &test_data.encode_decode {
         let mut fst_encoded = test_data.raw.clone();
@@ -74,8 +71,8 @@ where
 
 pub fn test_encode<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32>,
+    F: SerializableFst + MutableFst + Display,
+    F::W: SerializableSemiring,
 {
     for encode_test_data in &test_data.encode {
         let mut fst_encoded = test_data.raw.clone();

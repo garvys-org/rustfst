@@ -7,17 +7,16 @@ use crate::algorithms::arc_mappers::{
     IdentityArcMapper, InputEpsilonMapper, InvertWeightMapper, OutputEpsilonMapper, PlusMapper,
     QuantizeMapper, RmWeightMapper, TimesMapper,
 };
-use crate::fst_traits::MutableFst;
-use crate::fst_traits::TextParser;
-use crate::semirings::Semiring;
+use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
+use crate::semirings::{Semiring, SerializableSemiring};
 use crate::tests_openfst::FstTestData;
 
 pub fn test_arc_map_identity<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32> + WeightQuantize,
+    F: SerializableFst + MutableFst + Display,
+    F::W: SerializableSemiring + WeightQuantize,
 {
     // ArcMap IdentityMapper
     let mut fst_arc_map_identity = test_data.raw.clone();
@@ -38,8 +37,8 @@ where
 
 pub fn test_arc_map_invert<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring,
+    F: SerializableFst + MutableFst + Display,
+    F::W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
     // ArcMap InvertWeightMapper
     let mut fst_arc_map_invert = test_data.raw.clone();
@@ -60,8 +59,8 @@ where
 
 pub fn test_arc_map_input_epsilon<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32> + WeightQuantize,
+    F: SerializableFst + MutableFst + Display,
+    F::W: SerializableSemiring + WeightQuantize,
 {
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = InputEpsilonMapper {};
@@ -81,8 +80,8 @@ where
 
 pub fn test_arc_map_output_epsilon<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32> + WeightQuantize,
+    F: SerializableFst + MutableFst + Display,
+    F::W: SerializableSemiring + WeightQuantize,
 {
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = OutputEpsilonMapper {};
@@ -102,8 +101,8 @@ where
 
 pub fn test_arc_map_plus<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32> + WeightQuantize,
+    F: SerializableFst + MutableFst + Display,
+    F::W: SerializableSemiring + WeightQuantize + Semiring<Type = f32>,
 {
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = PlusMapper::new(1.5);
@@ -123,8 +122,8 @@ where
 
 pub fn test_arc_map_times<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32> + WeightQuantize,
+    F: SerializableFst + MutableFst + Display,
+    F::W: SerializableSemiring + WeightQuantize + Semiring<Type = f32>,
 {
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = TimesMapper::new(1.5);
@@ -144,8 +143,8 @@ where
 
 pub fn test_arc_map_quantize<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32> + WeightQuantize,
+    F: SerializableFst + MutableFst + Display,
+    F::W: SerializableSemiring + WeightQuantize,
 {
     let mut fst_arc_map = test_data.raw.clone();
     let mut mapper = QuantizeMapper {};
@@ -165,8 +164,8 @@ where
 
 pub fn test_arc_map_rmweight<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32> + WeightQuantize,
+    F: SerializableFst + MutableFst + Display,
+    F::W: SerializableSemiring + WeightQuantize,
 {
     // ArcMap RmWeightMapper
     let mut fst_arc_map_rmweight = test_data.raw.clone();

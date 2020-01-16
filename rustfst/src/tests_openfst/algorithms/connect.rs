@@ -4,16 +4,14 @@ use failure::Fallible;
 
 use crate::algorithms::connect;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::MutableFst;
-use crate::fst_traits::TextParser;
-use crate::semirings::Semiring;
-
+use crate::fst_traits::{MutableFst, SerializableFst};
+use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
 pub fn test_connect<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32>,
+    F: MutableFst + Display + SerializableFst,
+    F::W: SerializableSemiring,
 {
     // Connect
     let mut fst_connect = test_data.raw.clone();

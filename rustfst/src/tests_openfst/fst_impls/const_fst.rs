@@ -1,16 +1,17 @@
+use std::rc::Rc;
+
 use failure::Fallible;
 
 use crate::algorithms::fst_convert;
 use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_traits::{Fst, MutableFst};
-use crate::semirings::{Semiring, WeightQuantize};
+use crate::semirings::{SerializableSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
 use crate::SymbolTable;
-use std::rc::Rc;
 
 pub fn test_const_fst_convert_convert<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: Semiring<Type = f32> + WeightQuantize,
+    W: SerializableSemiring + WeightQuantize + 'static,
 {
     let mut raw_fst = test_data.raw.clone();
 

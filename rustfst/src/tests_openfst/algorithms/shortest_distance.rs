@@ -4,11 +4,10 @@ use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::shortest_distance;
-use crate::fst_traits::MutableFst;
-use crate::fst_traits::TextParser;
-use crate::semirings::Semiring;
+use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
+use crate::semirings::{Semiring, SerializableSemiring};
 
 use crate::tests_openfst::FstTestData;
 
@@ -19,13 +18,15 @@ pub struct ShorestDistanceOperationResult {
 }
 
 #[derive(Debug)]
-pub struct ShortestDistanceTestData<W: Semiring<Type = f32>> {
+pub struct ShortestDistanceTestData<W> {
     reverse: bool,
     result: Vec<W>,
 }
 
 impl ShorestDistanceOperationResult {
-    pub fn parse<W: Semiring<Type = f32>>(&self) -> ShortestDistanceTestData<W> {
+    pub fn parse<W: SerializableSemiring + Semiring<Type = f32>>(
+        &self,
+    ) -> ShortestDistanceTestData<W> {
         let inf = "Infinity".to_string();
         let r = self
             .result
@@ -48,8 +49,8 @@ impl ShorestDistanceOperationResult {
 
 pub fn test_shortest_distance<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
-    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
+    F: SerializableFst + MutableFst,
+    F::W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
     for data in &test_data.shortest_distance {
         let distance = shortest_distance(&test_data.raw, data.reverse)?;

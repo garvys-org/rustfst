@@ -4,9 +4,8 @@ use failure::{format_err, Fallible};
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::minimize;
-use crate::fst_traits::TextParser;
-use crate::fst_traits::{AllocableFst, MutableFst};
-use crate::semirings::Semiring;
+use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
+use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
 use crate::tests_openfst::FstTestData;
@@ -19,8 +18,8 @@ pub struct MinimizeOperationResult {
 
 pub struct MinimizeTestData<F>
 where
-    F: TextParser,
-    F::W: Semiring<Type = f32>,
+    F: SerializableFst,
+    F::W: SerializableSemiring,
 {
     allow_nondet: bool,
     result: Fallible<F>,
@@ -29,8 +28,8 @@ where
 impl MinimizeOperationResult {
     pub fn parse<F>(&self) -> MinimizeTestData<F>
     where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+        F: SerializableFst,
+        F::W: SerializableSemiring,
     {
         MinimizeTestData {
             allow_nondet: self.allow_nondet,
@@ -44,8 +43,8 @@ impl MinimizeOperationResult {
 
 pub fn test_minimize<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + AllocableFst + Display,
-    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
+    F: SerializableFst + MutableFst + AllocableFst + Display,
+    F::W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
     for minimize_data in &test_data.minimize {
         //        println!("Minimize : allow_nondet = {}", minimize_data.allow_nondet);

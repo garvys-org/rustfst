@@ -1,15 +1,19 @@
 use std::f32;
 use std::hash::{Hash, Hasher};
+use std::io::Write;
 
 use failure::Fallible;
+use nom::number::complete::{float, le_f32};
+use nom::IResult;
+use ordered_float::OrderedFloat;
 
+use crate::parsers::bin_fst::utils_serialization::write_bin_f32;
+use crate::semirings::semiring::SerializableSemiring;
 use crate::semirings::{
     CompleteSemiring, DivideType, Semiring, SemiringProperties, StarSemiring,
     WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::KDELTA;
-
-use ordered_float::OrderedFloat;
 
 /// Tropical semiring: (min, +, inf, 0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
@@ -113,3 +117,19 @@ impl WeaklyDivisibleSemiring for TropicalWeight {
 impl_quantize_f32!(TropicalWeight);
 
 partial_eq_and_hash_f32!(TropicalWeight);
+
+impl SerializableSemiring for TropicalWeight {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
+        let (i, weight) = le_f32(i)?;
+        Ok((i, Self::new(weight)))
+    }
+
+    fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()> {
+        write_bin_f32(file, *self.value())
+    }
+
+    fn parse_text(i: &str) -> IResult<&str, Self> {
+        let (i, f) = float(i)?;
+        Ok((i, Self::new(f)))
+    }
+}

@@ -1,7 +1,7 @@
-use nom::number::complete::{le_f32, le_i32};
+use nom::number::complete::le_i32;
 use nom::IResult;
 
-use crate::semirings::Semiring;
+use crate::semirings::SerializableSemiring;
 use crate::Arc;
 use crate::StateId;
 use crate::NO_STATE_ID;
@@ -16,27 +16,27 @@ pub(crate) fn parse_start_state(s: i64) -> Option<StateId> {
 }
 
 #[inline]
-pub(crate) fn parse_final_weight<W: Semiring<Type = f32>>(w: f32) -> Option<W> {
+pub(crate) fn parse_final_weight<W: SerializableSemiring>(weight: W) -> Option<W> {
     // TODO: Avoid this re-allocation
-    let zero_weight = W::zero().take_value();
-    if w != zero_weight {
-        Some(W::new(w))
+    let zero_weight = W::zero();
+    if weight != zero_weight {
+        Some(weight)
     } else {
         None
     }
 }
 
-pub(crate) fn parse_fst_arc<W: Semiring<Type = f32>>(i: &[u8]) -> IResult<&[u8], Arc<W>> {
+pub(crate) fn parse_fst_arc<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], Arc<W>> {
     let (i, ilabel) = le_i32(i)?;
     let (i, olabel) = le_i32(i)?;
-    let (i, weight) = le_f32(i)?;
+    let (i, weight) = W::parse_binary(i)?;
     let (i, nextstate) = le_i32(i)?;
     Ok((
         i,
         Arc {
             ilabel: ilabel as usize,
             olabel: olabel as usize,
-            weight: W::new(weight),
+            weight,
             nextstate: nextstate as usize,
         },
     ))

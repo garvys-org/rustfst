@@ -14,9 +14,9 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::TextParser;
 use crate::semirings::{
-    LogWeight, Semiring, StarSemiring, TropicalWeight, WeaklyDivisibleSemiring, WeightQuantize,
+    LogWeight, Semiring, SerializableSemiring, StarSemiring, TropicalWeight,
+    WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::tests_openfst::algorithms::factor_weight_gallic::test_factor_weight_gallic;
 use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicOperationResult;
@@ -67,6 +67,7 @@ use self::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
 use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
 use self::io::vector_fst_text_serialization::test_vector_fst_text_serialization;
 use self::misc::test_del_all_states;
+use crate::fst_traits::SerializableFst;
 use crate::tests_openfst::algorithms::closure::{
     test_closure_plus, test_closure_plus_dynamic, test_closure_star, test_closure_star_dynamic,
     ClosureOperationResult, ClosureTestData,
@@ -91,10 +92,9 @@ struct FstOperationResult {
 }
 
 impl FstOperationResult {
-    fn parse<F>(&self) -> F
+    fn parse<F: SerializableFst>(&self) -> F
     where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+        F::W: SerializableSemiring,
     {
         F::from_text_string(self.result.as_str()).unwrap()
     }
@@ -147,10 +147,9 @@ pub struct ParsedFstTestData {
     closure_star: ClosureOperationResult,
 }
 
-pub struct FstTestData<F>
+pub struct FstTestData<F: SerializableFst>
 where
-    F: TextParser,
-    F::W: Semiring<Type = f32>,
+    F::W: SerializableSemiring,
 {
     pub rmepsilon: F,
     #[allow(unused)]
@@ -197,10 +196,9 @@ where
     pub closure_star: ClosureTestData<F>,
 }
 
-impl<F> FstTestData<F>
+impl<F: SerializableFst> FstTestData<F>
 where
-    F: TextParser,
-    F::W: Semiring<Type = f32>,
+    F::W: SerializableSemiring + Semiring<Type = f32>,
 {
     pub fn new(data: &ParsedFstTestData, absolute_path_folder: &Path) -> Self {
         Self {
@@ -303,7 +301,12 @@ fn run_test_openfst_fst(test_name: &str) -> Fallible<()> {
 
 fn do_run_test_openfst<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: 'static + Semiring<Type = f32> + StarSemiring + WeaklyDivisibleSemiring + WeightQuantize,
+    W: 'static
+        + Semiring<Type = f32>
+        + SerializableSemiring
+        + StarSemiring
+        + WeaklyDivisibleSemiring
+        + WeightQuantize,
     <W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize + StarSemiring,
     W: Into<<W as Semiring>::ReverseWeight> + From<<W as Semiring>::ReverseWeight>,
 {

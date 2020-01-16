@@ -4,15 +4,21 @@ use failure::Fallible;
 
 use crate::fst_traits::ExpandedFst;
 use crate::parsers::text_fst::ParsedTextFst;
-use crate::semirings::Semiring;
+use crate::semirings::SerializableSemiring;
 
-/// Trait to allow serialization and deserialization of a wFST in text format.
-pub trait TextParser: ExpandedFst
+pub trait SerializableFst: ExpandedFst
 where
-    Self::W: Semiring<Type = f32>,
+    Self::W: SerializableSemiring,
 {
+    // BINARY
+
+    fn read<P: AsRef<Path>>(path_bin_fst: P) -> Fallible<Self>;
+    fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Fallible<()>;
+
+    // TEXT
+
     /// Turns a generic wFST format into the one of the wFST.
-    fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst) -> Fallible<Self>;
+    fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst<Self::W>) -> Fallible<Self>;
 
     /// Deserializes a wFST in text from a path and returns a loaded wFST.
     fn from_text_string(fst_string: &str) -> Fallible<Self> {

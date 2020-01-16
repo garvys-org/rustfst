@@ -5,16 +5,15 @@ use failure::Fallible;
 use crate::algorithms::arc_compares::{ilabel_compare, olabel_compare};
 use crate::algorithms::arc_sort;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::MutableFst;
-use crate::fst_traits::TextParser;
-use crate::semirings::Semiring;
+use crate::fst_traits::{MutableFst, SerializableFst};
+use crate::semirings::SerializableSemiring;
 use crate::semirings::WeightQuantize;
 use crate::tests_openfst::FstTestData;
 
 pub fn test_arcsort_ilabel<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32> + WeightQuantize,
+    F: SerializableFst + MutableFst + Display,
+    F::W: SerializableSemiring + WeightQuantize,
 {
     let mut fst_arcsort = test_data.raw.clone();
     arc_sort(&mut fst_arcsort, ilabel_compare);
@@ -36,8 +35,8 @@ where
 
 pub fn test_arcsort_olabel<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32> + WeightQuantize,
+    F: SerializableFst + MutableFst + Display,
+    F::W: SerializableSemiring + WeightQuantize,
 {
     let mut fst_arcsort = test_data.raw.clone();
     arc_sort(&mut fst_arcsort, olabel_compare);

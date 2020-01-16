@@ -11,14 +11,13 @@ use crate::algorithms::weight_converters::FromGallicConverter;
 use crate::algorithms::weight_converters::ToGallicConverter;
 use crate::algorithms::{weight_convert, FactorWeightOptions, FactorWeightType};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::TextParser;
-use crate::semirings::GallicWeight;
+use crate::fst_traits::SerializableFst;
 use crate::semirings::GallicWeightLeft;
 use crate::semirings::GallicWeightMin;
 use crate::semirings::GallicWeightRestrict;
 use crate::semirings::GallicWeightRight;
-use crate::semirings::Semiring;
 use crate::semirings::WeightQuantize;
+use crate::semirings::{GallicWeight, SerializableSemiring};
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -31,8 +30,8 @@ pub struct FwGallicOperationResult {
 
 pub struct FwGallicTestData<F>
 where
-    F: TextParser,
-    F::W: Semiring<Type = f32>,
+    F: SerializableFst,
+    F::W: SerializableSemiring,
 {
     pub factor_final_weights: bool,
     pub factor_arc_weights: bool,
@@ -43,8 +42,8 @@ where
 impl FwGallicOperationResult {
     pub fn parse<F>(&self) -> FwGallicTestData<F>
     where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+        F: SerializableFst,
+        F::W: SerializableSemiring,
     {
         FwGallicTestData {
             factor_final_weights: self.factor_final_weights,
@@ -57,7 +56,7 @@ impl FwGallicOperationResult {
 
 pub fn test_factor_weight_gallic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: Semiring<Type = f32> + WeightQuantize + 'static,
+    W: SerializableSemiring + WeightQuantize + 'static,
 {
     for data in &test_data.factor_weight_gallic {
         //        println!("test fwgallic");

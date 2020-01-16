@@ -5,6 +5,8 @@ use std::hash::Hash;
 use bitflags::bitflags;
 
 use failure::Fallible;
+use nom::IResult;
+use std::io::Write;
 
 bitflags! {
     /// Properties verified by the Semiring.
@@ -162,4 +164,11 @@ macro_rules! partial_eq_and_hash_f32 {
             }
         }
     };
+}
+
+pub trait SerializableSemiring: Semiring {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self>;
+    fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()>;
+
+    fn parse_text(i: &str) -> IResult<&str, Self>;
 }

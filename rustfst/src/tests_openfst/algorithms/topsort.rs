@@ -4,16 +4,14 @@ use failure::Fallible;
 
 use crate::algorithms::top_sort;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::MutableFst;
-use crate::fst_traits::TextParser;
-use crate::semirings::Semiring;
-
+use crate::fst_traits::{MutableFst, SerializableFst};
+use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
 pub fn test_topsort<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32>,
+    F: SerializableFst + MutableFst + Display,
+    F::W: SerializableSemiring,
 {
     let mut fst_topsort = test_data.raw.clone();
     top_sort(&mut fst_topsort)?;

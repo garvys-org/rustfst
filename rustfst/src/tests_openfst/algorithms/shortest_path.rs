@@ -4,11 +4,10 @@ use failure::{format_err, Fallible};
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{isomorphic, shortest_path};
-use crate::fst_traits::TextParser;
-use crate::fst_traits::{CoreFst, MutableFst};
-use crate::semirings::Semiring;
+use crate::fst_traits::{CoreFst, MutableFst, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
+use crate::semirings::{Semiring, SerializableSemiring};
 
 use crate::tests_openfst::FstTestData;
 
@@ -21,8 +20,8 @@ pub struct ShorestPathOperationResult {
 
 pub struct ShortestPathTestData<F>
 where
-    F: TextParser,
-    F::W: Semiring<Type = f32>,
+    F: SerializableFst,
+    F::W: SerializableSemiring,
 {
     unique: bool,
     nshortest: usize,
@@ -32,8 +31,8 @@ where
 impl ShorestPathOperationResult {
     pub fn parse<F>(&self) -> ShortestPathTestData<F>
     where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+        F: SerializableFst,
+        F::W: SerializableSemiring,
     {
         ShortestPathTestData {
             unique: self.unique,
@@ -48,8 +47,8 @@ impl ShorestPathOperationResult {
 
 pub fn test_shortest_path<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
+    F: SerializableFst + MutableFst + Display,
+    F::W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize + 'static,
     <<F as CoreFst>::W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize,
     F::W: Into<<<F as CoreFst>::W as Semiring>::ReverseWeight>
         + From<<<F as CoreFst>::W as Semiring>::ReverseWeight>,

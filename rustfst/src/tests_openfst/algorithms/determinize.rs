@@ -1,16 +1,14 @@
 use std::fmt::Display;
 
 use failure::{format_err, Fallible};
-
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{determinize, isomorphic, DeterminizeType};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{AllocableFst, MutableFst, TextParser};
-use crate::semirings::Semiring;
+use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
+use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
-
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -21,8 +19,8 @@ pub struct DeterminizeOperationResult {
 
 pub struct DeterminizeTestData<F>
 where
-    F: TextParser,
-    F::W: Semiring<Type = f32>,
+    F: SerializableFst,
+    F::W: SerializableSemiring,
 {
     det_type: DeterminizeType,
     result: Fallible<F>,
@@ -31,8 +29,8 @@ where
 impl DeterminizeOperationResult {
     pub fn parse<F>(&self) -> DeterminizeTestData<F>
     where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+        F: SerializableFst,
+        F::W: SerializableSemiring,
     {
         DeterminizeTestData {
             det_type: match self.det_type.as_str() {
@@ -51,8 +49,8 @@ impl DeterminizeOperationResult {
 
 pub fn test_determinize<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + AllocableFst + Display,
-    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
+    F: SerializableFst + MutableFst + AllocableFst + Display,
+    F::W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
     for determinize_data in &test_data.determinize {
         //        println!("det_type = {:?}", determinize_data.det_type);

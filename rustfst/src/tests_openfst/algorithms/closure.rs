@@ -3,8 +3,8 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{closure, ClosureFst, ClosureType};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::TextParser;
-use crate::semirings::{Semiring, WeaklyDivisibleSemiring, WeightQuantize};
+use crate::fst_traits::SerializableFst;
+use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::algorithms::dynamic_fst::compare_fst_static_dynamic;
 use crate::tests_openfst::FstTestData;
 
@@ -16,8 +16,8 @@ pub struct ClosureOperationResult {
 
 pub struct ClosureTestData<F>
 where
-    F: TextParser,
-    F::W: Semiring<Type = f32>,
+    F: SerializableFst,
+    F::W: SerializableSemiring,
 {
     pub result_static: F,
     pub result_dynamic: F,
@@ -26,8 +26,8 @@ where
 impl ClosureOperationResult {
     pub fn parse<F>(&self) -> ClosureTestData<F>
     where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+        F: SerializableFst,
+        F::W: SerializableSemiring,
     {
         ClosureTestData {
             result_static: F::from_text_string(self.result_static.as_str()).unwrap(),
@@ -38,7 +38,7 @@ impl ClosureOperationResult {
 
 pub fn test_closure_plus<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
     let closure_test_data = &test_data.closure_plus;
@@ -60,7 +60,7 @@ where
 
 pub fn test_closure_star<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
     let closure_test_data = &test_data.closure_star;
@@ -82,7 +82,7 @@ where
 
 pub fn test_closure_plus_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
     let closure_test_data = &test_data.closure_plus;
@@ -95,7 +95,7 @@ where
 
 pub fn test_closure_star_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
     let closure_test_data = &test_data.closure_star;

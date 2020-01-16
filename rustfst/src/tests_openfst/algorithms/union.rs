@@ -3,8 +3,8 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{union, UnionFst};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::TextParser;
-use crate::semirings::{Semiring, WeaklyDivisibleSemiring, WeightQuantize};
+use crate::fst_traits::SerializableFst;
+use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::algorithms::dynamic_fst::compare_fst_static_dynamic;
 use crate::tests_openfst::FstTestData;
 
@@ -17,8 +17,8 @@ pub struct UnionOperationResult {
 
 pub struct UnionTestData<F>
 where
-    F: TextParser,
-    F::W: Semiring<Type = f32>,
+    F: SerializableFst,
+    F::W: SerializableSemiring,
 {
     pub fst_2: F,
     pub result_static: F,
@@ -28,8 +28,8 @@ where
 impl UnionOperationResult {
     pub fn parse<F>(&self) -> UnionTestData<F>
     where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+        F: SerializableFst,
+        F::W: SerializableSemiring,
     {
         UnionTestData {
             fst_2: F::from_text_string(self.fst_2.as_str()).unwrap(),
@@ -41,7 +41,7 @@ impl UnionOperationResult {
 
 pub fn test_union<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
     for union_test_data in &test_data.union {
@@ -64,7 +64,7 @@ where
 
 pub fn test_union_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
     for union_test_data in &test_data.union {

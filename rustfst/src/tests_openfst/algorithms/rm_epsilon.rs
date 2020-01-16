@@ -5,18 +5,16 @@ use failure::Fallible;
 use crate::algorithms::{isomorphic, rm_epsilon};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::TextParser;
-use crate::fst_traits::{ExpandedFst, MutableFst};
-use crate::semirings::Semiring;
+use crate::fst_traits::{ExpandedFst, MutableFst, SerializableFst};
+use crate::semirings::SerializableSemiring;
 use crate::semirings::StarSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
-
 use crate::tests_openfst::FstTestData;
 
 pub fn test_rmepsilon<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + ExpandedFst + Display,
-    F::W: 'static + Semiring<Type = f32> + WeaklyDivisibleSemiring + StarSemiring,
+    F: SerializableFst + MutableFst + ExpandedFst + Display,
+    F::W: 'static + SerializableSemiring + WeaklyDivisibleSemiring + StarSemiring,
 {
     // Remove epsilon
     let fst_rmepsilon: VectorFst<_> = rm_epsilon(&test_data.raw).unwrap();

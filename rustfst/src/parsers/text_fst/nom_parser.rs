@@ -3,18 +3,18 @@ use nom::bytes::complete::tag;
 use nom::character::complete::tab;
 use nom::combinator::opt;
 use nom::multi::separated_list;
-use nom::number::complete::float;
 use nom::sequence::preceded;
 use nom::IResult;
 
 use crate::parsers::nom_utils::num;
 use crate::parsers::text_fst::parsed_text_fst::{FinalState, RowParsed, Transition};
+use crate::semirings::SerializableSemiring;
 
-fn optional_weight(i: &str) -> IResult<&str, Option<f32>> {
-    opt(preceded(tab, float))(i)
+fn optional_weight<W: SerializableSemiring>(i: &str) -> IResult<&str, Option<W>> {
+    opt(preceded(tab, W::parse_text))(i)
 }
 
-fn transition(i: &str) -> IResult<&str, RowParsed> {
+fn transition<W: SerializableSemiring>(i: &str) -> IResult<&str, RowParsed<W>> {
     let (i, state) = num(i)?;
     let (i, _) = tab(i)?;
     let (i, nextstate) = num(i)?;
@@ -36,23 +36,23 @@ fn transition(i: &str) -> IResult<&str, RowParsed> {
     ))
 }
 
-fn final_state(i: &str) -> IResult<&str, RowParsed> {
+fn final_state<W: SerializableSemiring>(i: &str) -> IResult<&str, RowParsed<W>> {
     let (i, state) = num(i)?;
     let (i, weight) = optional_weight(i)?;
     Ok((i, RowParsed::FinalState(FinalState { state, weight })))
 }
 
-fn infinity_final_state(i: &str) -> IResult<&str, RowParsed> {
+fn infinity_final_state<W: SerializableSemiring>(i: &str) -> IResult<&str, RowParsed<W>> {
     let (i, state) = num(i)?;
     let (i, _) = tab(i)?;
     let (i, _) = tag("Infinity")(i)?;
     Ok((i, RowParsed::InfinityFinalState(state)))
 }
 
-fn row_parsed(i: &str) -> IResult<&str, RowParsed> {
+fn row_parsed<W: SerializableSemiring>(i: &str) -> IResult<&str, RowParsed<W>> {
     alt((transition, infinity_final_state, final_state))(i)
 }
 
-pub fn vec_rows_parsed(i: &str) -> IResult<&str, Vec<RowParsed>> {
+pub fn vec_rows_parsed<W: SerializableSemiring>(i: &str) -> IResult<&str, Vec<RowParsed<W>>> {
     separated_list(tag("\n"), row_parsed)(i)
 }

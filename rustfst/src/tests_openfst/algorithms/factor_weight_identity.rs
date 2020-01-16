@@ -5,8 +5,8 @@ use crate::algorithms::factor_iterators::IdentityFactor;
 use crate::algorithms::factor_weight;
 use crate::algorithms::{FactorWeightFst, FactorWeightOptions, FactorWeightType};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::TextParser;
-use crate::semirings::Semiring;
+use crate::fst_traits::SerializableFst;
+use crate::semirings::SerializableSemiring;
 use crate::semirings::WeightQuantize;
 use crate::tests_openfst::FstTestData;
 
@@ -21,8 +21,8 @@ pub struct FwIdentityOperationResult {
 
 pub struct FwIdentityTestData<F>
 where
-    F: TextParser,
-    F::W: Semiring<Type = f32>,
+    F: SerializableFst,
+    F::W: SerializableSemiring,
 {
     pub factor_final_weights: bool,
     pub factor_arc_weights: bool,
@@ -32,8 +32,8 @@ where
 impl FwIdentityOperationResult {
     pub fn parse<F>(&self) -> FwIdentityTestData<F>
     where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+        F: SerializableFst,
+        F::W: SerializableSemiring,
     {
         FwIdentityTestData {
             factor_final_weights: self.factor_final_weights,
@@ -45,7 +45,7 @@ impl FwIdentityOperationResult {
 
 pub fn test_factor_weight_identity<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: Semiring<Type = f32> + WeightQuantize + 'static,
+    W: SerializableSemiring + WeightQuantize + 'static,
 {
     for data in &test_data.factor_weight_identity {
         let mode = FactorWeightType::from_bools(data.factor_final_weights, data.factor_arc_weights);
@@ -69,7 +69,7 @@ where
 
 pub fn test_factor_weight_identity_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: Semiring<Type = f32> + WeightQuantize + 'static,
+    W: SerializableSemiring + WeightQuantize + 'static,
 {
     for data in &test_data.factor_weight_identity {
         let mode = FactorWeightType::from_bools(data.factor_final_weights, data.factor_arc_weights);
