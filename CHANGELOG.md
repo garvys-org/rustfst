@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed bugs in `concat`, `union` and `closure`.
 - `factor_weight` now takes as input a type implementing `Borrow` instead of `&fst`.
 - `replace` now takes as input a vector of types implementing `Borrow` instead of `fst`.
+- Parse `FstFlags` when parsing binary `ConstFst` and `VectorFst`. Raise an error if the file contains a SymbolTable. Not yet supported.
 
 ## [0.4.0] - 2019-11-12
 
