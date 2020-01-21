@@ -13,7 +13,7 @@ use nom::IResult;
 use crate::fst_impls::const_fst::data_structure::ConstState;
 use crate::fst_impls::ConstFst;
 use crate::fst_traits::{ExpandedFst, SerializableFst};
-use crate::parsers::bin_fst::fst_header::{FstHeader, OpenFstString, FST_MAGIC_NUMBER};
+use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FST_MAGIC_NUMBER};
 use crate::parsers::bin_fst::utils_parsing::{
     parse_final_weight, parse_fst_arc, parse_start_state,
 };
@@ -47,7 +47,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
             arc_type: OpenFstString::new("standard"),
             version: CONST_FILE_VERSION,
             // TODO: Flags are used to check whether or not a symboltable has to be loaded
-            flags: 0i32,
+            flags: FstFlags::empty(),
             // TODO: Once the properties are stored, need to read them. kExpanded
             properties: 1u64,
             start: self.start.map(|v| v as i64).unwrap_or(-1),
