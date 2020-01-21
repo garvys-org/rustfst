@@ -2,14 +2,26 @@ use std::io::Write;
 
 use failure::Fallible;
 use nom::bytes::complete::take;
-use nom::combinator::verify;
-use nom::number::complete::{le_i32, le_i64, le_u64};
+use nom::combinator::{map_res, verify};
+use nom::number::complete::{le_i32, le_i64, le_u32, le_u64};
 use nom::IResult;
 
-use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64, write_bin_u64};
+use crate::parsers::bin_fst::utils_serialization::{
+    write_bin_i32, write_bin_i64, write_bin_u32, write_bin_u64,
+};
 
 // Identifies stream data as an FST (and its endianity).
 pub(crate) static FST_MAGIC_NUMBER: i32 = 2_125_659_606;
+
+use bitflags::bitflags;
+
+bitflags! {
+    pub struct FstFlags: u32 {
+        const HAS_ISYMBOLS = 0b1;
+        const HAS_OSYMBOLS = 0b1 << 1;
+        const IS_ALIGNED = 0b1 << 2;
+    }
+}
 
 #[derive(Debug)]
 pub(crate) struct FstHeader {
@@ -17,7 +29,7 @@ pub(crate) struct FstHeader {
     pub(crate) fst_type: OpenFstString,
     pub(crate) arc_type: OpenFstString,
     pub(crate) version: i32,
-    pub(crate) flags: i32,
+    pub(crate) flags: FstFlags,
     pub(crate) properties: u64,
     pub(crate) start: i64,
     pub(crate) num_states: i64,
@@ -36,7 +48,19 @@ impl FstHeader {
         let (i, fst_type) = OpenFstString::parse(i)?;
         let (i, arc_type) = OpenFstString::parse(i)?;
         let (i, version) = verify(le_i32, |v: &i32| *v >= min_file_version)(i)?;
-        let (i, flags) = le_i32(i)?;
+        let (i, flags) = map_res(le_u32, |v: u32| {
+            FstFlags::from_bits(v)
+                .ok_or_else(|| "Could not parse Fst Flags")
+                .and_then(|flags| {
+                    if flags.contains(FstFlags::HAS_ISYMBOLS)
+                        || flags.contains(FstFlags::HAS_OSYMBOLS)
+                    {
+                        Err("Input symbols parsing and Output symbols parsing are not supported")
+                    } else {
+                        Ok(flags)
+                    }
+                })
+        })(i)?;
         let (i, properties) = le_u64(i)?;
         let (i, start) = le_i64(i)?;
         let (i, num_states) = le_i64(i)?;
@@ -67,7 +91,7 @@ impl FstHeader {
         //version: i32,
         write_bin_i32(file, self.version)?;
         //flags: i32,
-        write_bin_i32(file, self.flags)?;
+        write_bin_u32(file, self.flags.bits())?;
         //properties: u64
         write_bin_u64(file, self.properties)?;
         //start: i64,
