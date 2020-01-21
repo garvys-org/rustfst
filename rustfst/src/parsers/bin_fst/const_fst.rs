@@ -6,7 +6,7 @@ use failure::{Fallible, ResultExt};
 use nom::bytes::complete::take;
 use nom::multi::count;
 use nom::number::complete::{le_f32, le_i32};
-use nom::{ IResult };
+use nom::IResult;
 
 use crate::fst_impls::const_fst::ConstState;
 use crate::fst_impls::ConstFst;

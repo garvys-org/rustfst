@@ -2,11 +2,13 @@ use std::io::Write;
 
 use failure::Fallible;
 use nom::bytes::complete::take;
-use nom::combinator::{ verify, map_res };
+use nom::combinator::{map_res, verify};
 use nom::number::complete::{le_i32, le_i64, le_u32, le_u64};
 use nom::IResult;
 
-use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_u32, write_bin_i64, write_bin_u64};
+use crate::parsers::bin_fst::utils_serialization::{
+    write_bin_i32, write_bin_i64, write_bin_u32, write_bin_u64,
+};
 
 // Identifies stream data as an FST (and its endianity).
 pub(crate) static FST_MAGIC_NUMBER: i32 = 2_125_659_606;
@@ -47,9 +49,12 @@ impl FstHeader {
         let (i, arc_type) = OpenFstString::parse(i)?;
         let (i, version) = verify(le_i32, |v: &i32| *v >= min_file_version)(i)?;
         let (i, flags) = map_res(le_u32, |v: u32| {
-            FstFlags::from_bits(v).ok_or_else(|| "Could not parse Fst Flags")
+            FstFlags::from_bits(v)
+                .ok_or_else(|| "Could not parse Fst Flags")
                 .and_then(|flags| {
-                    if flags.contains(FstFlags::HAS_ISYMBOLS) || flags.contains(FstFlags::HAS_OSYMBOLS) {
+                    if flags.contains(FstFlags::HAS_ISYMBOLS)
+                        || flags.contains(FstFlags::HAS_OSYMBOLS)
+                    {
                         Err("Input symbols parsing and Output symbols parsing are not supported")
                     } else {
                         Ok(flags)
