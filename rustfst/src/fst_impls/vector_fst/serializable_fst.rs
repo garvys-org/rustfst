@@ -29,8 +29,8 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
             )
         })?;
 
-        let (_, parsed_fst) =
-            parse_fst(&data).map_err(|_| format_err!("Error while parsing binary VectorFst"))?;
+        let (_, parsed_fst) = parse_vector_fst(&data)
+            .map_err(|e| format_err!("Error while parsing binary VectorFst : {:?}", e))?;
 
         Ok(parsed_fst)
     }
@@ -119,7 +119,7 @@ struct Transition {
     nextstate: i32,
 }
 
-fn parse_fst_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFstState<W>> {
+fn parse_vector_fst_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFstState<W>> {
     let (i, final_weight) = W::parse_binary(i)?;
     let (i, num_arcs) = le_i64(i)?;
     let (i, arcs) = count(parse_fst_arc, num_arcs as usize)(i)?;
@@ -132,9 +132,9 @@ fn parse_fst_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFs
     ))
 }
 
-fn parse_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFst<W>> {
+fn parse_vector_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFst<W>> {
     let (i, header) = FstHeader::parse(i, VECTOR_MIN_FILE_VERSION)?;
-    let (i, states) = count(parse_fst_state, header.num_states as usize)(i)?;
+    let (i, states) = count(parse_vector_fst_state, header.num_states as usize)(i)?;
     Ok((
         i,
         VectorFst {
