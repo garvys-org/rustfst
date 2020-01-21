@@ -307,7 +307,8 @@ where
         + StarSemiring
         + WeaklyDivisibleSemiring
         + WeightQuantize,
-    <W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize + StarSemiring,
+    <W as Semiring>::ReverseWeight:
+        WeaklyDivisibleSemiring + WeightQuantize + StarSemiring + SerializableSemiring,
     W: Into<<W as Semiring>::ReverseWeight> + From<<W as Semiring>::ReverseWeight>,
 {
     test_rmepsilon(&test_data)?;

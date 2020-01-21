@@ -141,9 +141,9 @@ impl SerializableSemiring for LogWeight {
         let (i, f) = float(i)?;
         Ok((i, Self::new(f)))
     }
-
-    fn write_text<F: Write>(&self, file: &mut F) -> Fallible<()> {
-        write!(file, "{}", self.value())?;
-        Ok(())
-    }
 }
+
+test_semiring_serializable!(
+    tests_tropical_weight_serializable,
+    LogWeight::new(0.3) LogWeight::new(0.5) LogWeight::new(0.0) LogWeight::new(-1.2)
+);

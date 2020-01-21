@@ -3,7 +3,7 @@ use tempfile::tempdir;
 
 use crate::algorithms::fst_convert;
 use crate::fst_impls::{ConstFst, VectorFst};
-use crate::fst_traits::{ExpandedFst, SerializableFst};
+use crate::fst_traits::SerializableFst;
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 

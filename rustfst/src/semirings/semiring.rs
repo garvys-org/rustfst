@@ -32,7 +32,7 @@ bitflags! {
 /// Thus, a semiring is a ring that may lack negation.
 /// For more information : https://cs.nyu.edu/~mohri/pub/hwa.pdf
 pub trait Semiring:
-    Clone + PartialEq + PartialOrd + Debug + Default + Display + AsRef<Self> + Hash + Eq + Sized
+    Clone + PartialEq + PartialOrd + Debug + Default + AsRef<Self> + Hash + Eq + Sized
 {
     type Type: Clone;
     type ReverseWeight: Semiring;
@@ -166,10 +166,14 @@ macro_rules! partial_eq_and_hash_f32 {
     };
 }
 
-pub trait SerializableSemiring: Semiring {
+pub trait SerializableSemiring: Semiring + Display {
     fn parse_binary(i: &[u8]) -> IResult<&[u8], Self>;
     fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()>;
 
     fn parse_text(i: &str) -> IResult<&str, Self>;
-    fn write_text<F: Write>(&self, file: &mut F) -> Fallible<()>;
+    fn write_text<F: Write>(&self, file: &mut F) -> Fallible<()> {
+        // Use implementation of Display trait.
+        write!(file, "{}", self)?;
+        Ok(())
+    }
 }

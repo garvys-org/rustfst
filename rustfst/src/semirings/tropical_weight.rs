@@ -132,9 +132,9 @@ impl SerializableSemiring for TropicalWeight {
         let (i, f) = float(i)?;
         Ok((i, Self::new(f)))
     }
-
-    fn write_text<F: Write>(&self, file: &mut F) -> Fallible<()> {
-        write!(file, "{}", self.value())?;
-        Ok(())
-    }
 }
+
+test_semiring_serializable!(
+    tests_tropical_weight_serializable,
+    TropicalWeight::new(0.3) TropicalWeight::new(0.5) TropicalWeight::new(0.0) TropicalWeight::new(-1.2)
+);
