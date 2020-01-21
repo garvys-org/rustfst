@@ -4,10 +4,12 @@ use failure::Fallible;
 
 use crate::semirings::string_variant::StringWeightVariant;
 use crate::semirings::{
-    DivideType, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
+    DivideType, Semiring, SemiringProperties, SerializableSemiring, WeaklyDivisibleSemiring,
+    WeightQuantize,
 };
 use crate::Label;
-
+use nom::IResult;
+use std::io::Write;
 /// String semiring: (identity, ., Infinity, Epsilon)
 #[derive(Clone, Debug, PartialOrd, Default, PartialEq, Eq, Hash)]
 pub struct StringWeightRestrict {
@@ -210,6 +212,20 @@ macro_rules! string_semiring {
             fn quantize_assign(&mut self, _delta: f32) -> Fallible<()> {
                 // Nothing to do
                 Ok(())
+            }
+        }
+
+        impl SerializableSemiring for $semiring {
+            fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
+                unimplemented!()
+            }
+
+            fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()> {
+                unimplemented!()
+            }
+
+            fn parse_text(i: &str) -> IResult<&str, Self> {
+                unimplemented!()
             }
         }
     };

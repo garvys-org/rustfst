@@ -5,8 +5,8 @@ use failure::Fallible;
 use crate::semirings::ProductWeight;
 use crate::semirings::Semiring;
 use crate::semirings::{
-    DivideType, SemiringProperties, StringWeightLeft, StringWeightRestrict, StringWeightRight,
-    UnionWeight, UnionWeightOption, WeaklyDivisibleSemiring, WeightQuantize,
+    DivideType, SemiringProperties, SerializableSemiring, StringWeightLeft, StringWeightRestrict,
+    StringWeightRight, UnionWeight, UnionWeightOption, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::Label;
 
@@ -49,7 +49,7 @@ macro_rules! gallic_weight {
     ($semiring: ty, $string_weight: ty, $gallic_type: expr, $reverse_semiring: ty) => {
         impl<W> std::fmt::Display for $semiring
         where
-            W: Semiring,
+            W: SerializableSemiring,
         {
             fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
                 self.0.fmt(f)

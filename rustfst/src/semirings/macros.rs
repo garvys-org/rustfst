@@ -1,5 +1,5 @@
 macro_rules! test_semiring_serializable {
-    ($sem_name:  tt, $( $weight: expr )* ) => {
+    ($sem_name:  tt, $semiring: ty, $( $weight: expr )* ) => {
 
         #[cfg(test)]
         mod $sem_name {
@@ -13,10 +13,10 @@ macro_rules! test_semiring_serializable {
 
                     weight.write_binary(&mut serialization)?;
 
-                    let (_, weight_deserialized) = SerializableSemiring::parse_binary(serialization.as_slice())
+                    let (_, weight_deserialized) = <$semiring>::parse_binary(serialization.as_slice())
                         .map_err(|e| format_err!("Can't parse weight : {:?}", e))?;
 
-                    assert_eq!(weight, weight_deserialized);
+                    assert_eq!(weight_deserialized, weight);
                 }
 
                 Ok(())
@@ -28,10 +28,10 @@ macro_rules! test_semiring_serializable {
                     let weight = weight.clone();
                     let serialization = format!("{}", weight);
 
-                    let (_, weight_deserialized) = SerializableSemiring::parse_text(serialization.as_str())
+                    let (_, weight_deserialized) = <$semiring>::parse_text(serialization.as_str())
                         .map_err(|e| format_err!("Can't parse weight : {:?}", e))?;
 
-                    assert_eq!(weight, weight_deserialized);
+                    assert_eq!(weight_deserialized, weight);
                 }
 
                 Ok(())

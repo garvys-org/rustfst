@@ -144,6 +144,7 @@ impl SerializableSemiring for LogWeight {
 }
 
 test_semiring_serializable!(
-    tests_tropical_weight_serializable,
+    tests_log_weight_serializable,
+    LogWeight,
     LogWeight::new(0.3) LogWeight::new(0.5) LogWeight::new(0.0) LogWeight::new(-1.2)
 );
