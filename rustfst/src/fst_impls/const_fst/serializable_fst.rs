@@ -43,7 +43,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
         let hdr = FstHeader {
             magic_number: FST_MAGIC_NUMBER,
             fst_type: OpenFstString::new("const"),
-            arc_type: OpenFstString::new(W::weight_type()),
+            arc_type: OpenFstString::new(Arc::<W>::arc_type()),
             version: CONST_FILE_VERSION,
             // TODO: Flags are used to check whether or not a symboltable has to be loaded
             flags: FstFlags::empty(),

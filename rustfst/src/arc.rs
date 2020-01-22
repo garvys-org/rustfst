@@ -61,4 +61,13 @@ impl<W: Semiring> Arc<W> {
         self.weight = arc.weight.clone();
         self.nextstate = arc.nextstate;
     }
+
+    pub fn arc_type() -> String {
+        let weight_type = W::weight_type();
+        if weight_type.as_str() == "tropical" {
+            "standard".to_string()
+        } else {
+            weight_type
+        }
+    }
 }
