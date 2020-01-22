@@ -15,7 +15,7 @@ use serde_derive::{Deserialize, Serialize};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
 use crate::semirings::{
-    LogWeight, ProductWeight, Semiring, SerializableSemiring, StarSemiring, TropicalWeight,
+    LogWeight, ProductWeight, Semiring, SerializableSemiring, TropicalWeight,
     WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::tests_openfst::algorithms::factor_weight_gallic::test_factor_weight_gallic;

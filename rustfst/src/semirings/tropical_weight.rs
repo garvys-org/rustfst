@@ -137,5 +137,5 @@ impl SerializableSemiring for TropicalWeight {
 test_semiring_serializable!(
     tests_tropical_weight_serializable,
     TropicalWeight,
-    TropicalWeight::new(0.3) TropicalWeight::new(0.5) TropicalWeight::new(0.0) TropicalWeight::new(-1.2)
+    TropicalWeight::one() TropicalWeight::zero() TropicalWeight::new(0.3) TropicalWeight::new(0.5) TropicalWeight::new(0.0) TropicalWeight::new(-1.2)
 );

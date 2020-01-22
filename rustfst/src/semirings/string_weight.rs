@@ -1,15 +1,22 @@
 use std::fmt;
+use std::io::Write;
 
 use failure::Fallible;
+use nom::branch::alt;
+use nom::bytes::complete::tag;
+use nom::IResult;
+use nom::multi::{count, separated_list};
+use nom::number::complete::le_i32;
 
-use crate::semirings::string_variant::StringWeightVariant;
+use crate::Label;
+use crate::parsers::bin_fst::utils_serialization::write_bin_i32;
+use crate::parsers::nom_utils::num;
 use crate::semirings::{
     DivideType, Semiring, SemiringProperties, SerializableSemiring, WeaklyDivisibleSemiring,
     WeightQuantize,
 };
-use crate::Label;
-use nom::IResult;
-use std::io::Write;
+use crate::semirings::string_variant::StringWeightVariant;
+
 /// String semiring: (identity, ., Infinity, Epsilon)
 #[derive(Clone, Debug, PartialOrd, Default, PartialEq, Eq, Hash)]
 pub struct StringWeightRestrict {
@@ -41,25 +48,6 @@ pub enum StringType {
 
 macro_rules! string_semiring {
     ($semiring: ty, $string_type: expr, $reverse_semiring: ty) => {
-        impl fmt::Display for $semiring {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                match &self.value {
-                    StringWeightVariant::Infinity => {
-                        write!(f, "Infinity")?;
-                    }
-                    StringWeightVariant::Labels(v) => {
-                        if v.is_empty() {
-                            write!(f, "Epsilon")?;
-                        } else {
-                            // FIXME
-                            write!(f, "{:?}", v)?;
-                        }
-                    }
-                };
-                Ok(())
-            }
-        }
-
         impl AsRef<Self> for $semiring {
             fn as_ref(&self) -> &$semiring {
                 &self
@@ -215,17 +203,82 @@ macro_rules! string_semiring {
             }
         }
 
+        impl fmt::Display for $semiring {
+            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                match &self.value {
+                    StringWeightVariant::Infinity => {
+                        write!(f, "Infinity")?;
+                    }
+                    StringWeightVariant::Labels(v) => {
+                        if v.is_empty() {
+                            write!(f, "Epsilon")?;
+                        } else {
+                            for (idx, label) in v.iter().enumerate() {
+                                if idx > 0 {
+                                    write!(f, "_")?;
+                                }
+                                write!(f, "{:?}", label)?;
+                            }
+                        }
+                    }
+                };
+                Ok(())
+            }
+        }
+
+        impl $semiring {
+            fn parse_text_infinity(i: &str) -> IResult<&str, Self> {
+                let (i, _) = tag("Infinity")(i)?;
+                Ok((i, <$semiring>::new(StringWeightVariant::Infinity)))
+            }
+
+            fn parse_text_espilon(i: &str) -> IResult<&str, Self> {
+                let (i, _) = tag("Epsilon")(i)?;
+                Ok((i, <$semiring>::new(StringWeightVariant::Labels(vec![]))))
+            }
+
+            fn parse_text_labels(i: &str) -> IResult<&str, Self> {
+                let (i, labels) = separated_list(tag("_"), num)(i)?;
+                Ok((i, <$semiring>::new(StringWeightVariant::Labels(labels))))
+            }
+        }
+
         impl SerializableSemiring for $semiring {
             fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
-                unimplemented!()
+                let (i, n) = le_i32(i)?;
+                let (i, labels) = count(le_i32, n as usize)(i)?;
+                // Check for infinity
+                let weight = if labels == vec![-1] {
+                    Self::new(StringWeightVariant::Infinity)
+                } else {
+                    Self::new(StringWeightVariant::Labels(labels.into_iter().map(|e| e as usize).collect()))
+                };
+                Ok((i, weight))
             }
 
             fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()> {
-                unimplemented!()
+                match &self.value {
+                    StringWeightVariant::Infinity => {
+                        write_bin_i32(file, 1 as i32)?;
+                        write_bin_i32(file, -1 as i32)?;
+                    },
+                    StringWeightVariant::Labels(labels) => {
+                        write_bin_i32(file, labels.len() as i32)?;
+                        for label in labels.iter() {
+                            write_bin_i32(file, *label as i32)?;
+                        }
+                    },
+                }
+                Ok(())
             }
 
             fn parse_text(i: &str) -> IResult<&str, Self> {
-                unimplemented!()
+                let (i, res) = alt((
+                    Self::parse_text_infinity,
+                    Self::parse_text_espilon,
+                    Self::parse_text_labels,
+                ))(i)?;
+                Ok((i, res))
             }
         }
     };
@@ -295,3 +348,27 @@ impl WeaklyDivisibleSemiring for StringWeightRestrict {
         Ok(())
     }
 }
+
+test_semiring_serializable!(
+    tests_string_weight_left_serializable,
+    StringWeightLeft,
+    StringWeightLeft::one() StringWeightLeft::zero()
+    StringWeightLeft::new(StringWeightVariant::Labels(vec![1]))
+    StringWeightLeft::new(StringWeightVariant::Labels(vec![4, 5, 2]))
+);
+
+test_semiring_serializable!(
+    tests_string_weight_right_serializable,
+    StringWeightRight,
+    StringWeightRight::one() StringWeightRight::zero()
+    StringWeightRight::new(StringWeightVariant::Labels(vec![1]))
+    StringWeightRight::new(StringWeightVariant::Labels(vec![4, 5, 2]))
+);
+
+test_semiring_serializable!(
+    tests_string_weight_restrict_serializable,
+    StringWeightRestrict,
+    StringWeightRestrict::one() StringWeightRestrict::zero()
+    StringWeightRestrict::new(StringWeightVariant::Labels(vec![1]))
+    StringWeightRestrict::new(StringWeightVariant::Labels(vec![4, 5, 2]))
+);

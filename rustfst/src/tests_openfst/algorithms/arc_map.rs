@@ -9,9 +9,9 @@ use crate::algorithms::arc_mappers::{
     QuantizeMapper, RmWeightMapper, TimesMapper,
 };
 use crate::fst_traits::{MutableFst, SerializableFst};
+use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
-use crate::semirings::{Semiring, SerializableSemiring};
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]

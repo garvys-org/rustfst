@@ -3,10 +3,9 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::shortest_distance;
 use crate::fst_traits::{MutableFst, SerializableFst};
+use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
-use crate::semirings::{Semiring, SerializableSemiring};
-
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -27,7 +26,7 @@ impl ShorestDistanceOperationResult {
             .result
             .iter()
             .map(|v| {
-                let (i, w) = W::parse_text(v.as_str()).unwrap();
+                let (_, w) = W::parse_text(v.as_str()).unwrap();
                 w
             })
             .collect();
