@@ -15,7 +15,7 @@ use serde_derive::{Deserialize, Serialize};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
 use crate::semirings::{
-    LogWeight, Semiring, SerializableSemiring, StarSemiring, TropicalWeight,
+    LogWeight, ProductWeight, Semiring, SerializableSemiring, StarSemiring, TropicalWeight,
     WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::tests_openfst::algorithms::factor_weight_gallic::test_factor_weight_gallic;
@@ -39,7 +39,8 @@ use self::algorithms::{
     arc_map::{
         test_arc_map_identity, test_arc_map_input_epsilon, test_arc_map_invert,
         test_arc_map_output_epsilon, test_arc_map_plus, test_arc_map_quantize,
-        test_arc_map_rmweight, test_arc_map_times,
+        test_arc_map_rmweight, test_arc_map_times, ArcMapWithWeightOperationResult,
+        ArcMapWithWeightTestData,
     },
     arcsort::{test_arcsort_ilabel, test_arcsort_olabel},
     connect::test_connect,
@@ -118,8 +119,8 @@ pub struct ParsedFstTestData {
     arc_map_invert: FstOperationResult,
     arc_map_input_epsilon: FstOperationResult,
     arc_map_output_epsilon: FstOperationResult,
-    arc_map_plus: FstOperationResult,
-    arc_map_times: FstOperationResult,
+    arc_map_plus: ArcMapWithWeightOperationResult,
+    arc_map_times: ArcMapWithWeightOperationResult,
     arc_map_quantize: FstOperationResult,
     encode: Vec<EncodeOperationResult>,
     encode_decode: Vec<EncodeOperationResult>,
@@ -167,8 +168,8 @@ where
     pub arc_map_invert: F,
     pub arc_map_input_epsilon: F,
     pub arc_map_output_epsilon: F,
-    pub arc_map_plus: F,
-    pub arc_map_times: F,
+    pub arc_map_plus: ArcMapWithWeightTestData<F>,
+    pub arc_map_times: ArcMapWithWeightTestData<F>,
     pub arc_map_quantize: F,
     pub encode: Vec<EncodeTestData<F>>,
     pub encode_decode: Vec<EncodeTestData<F>>,
@@ -198,7 +199,7 @@ where
 
 impl<F: SerializableFst> FstTestData<F>
 where
-    F::W: SerializableSemiring + Semiring<Type = f32>,
+    F::W: SerializableSemiring,
 {
     pub fn new(data: &ParsedFstTestData, absolute_path_folder: &Path) -> Self {
         Self {
@@ -287,9 +288,16 @@ fn run_test_openfst_fst(test_name: &str) -> Fallible<()> {
             let test_data: FstTestData<VectorFst<TropicalWeight>> =
                 FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
             do_run_test_openfst(&test_data)?;
+            test_rmepsilon(&test_data)?;
         }
         "log" => {
             let test_data: FstTestData<VectorFst<LogWeight>> =
+                FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
+            do_run_test_openfst(&test_data)?;
+            test_rmepsilon(&test_data)?;
+        }
+        "tropical_X_log" => {
+            let test_data: FstTestData<VectorFst<ProductWeight<TropicalWeight, LogWeight>>> =
                 FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
             do_run_test_openfst(&test_data)?;
         }
@@ -301,17 +309,12 @@ fn run_test_openfst_fst(test_name: &str) -> Fallible<()> {
 
 fn do_run_test_openfst<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: 'static
-        + Semiring<Type = f32>
-        + SerializableSemiring
-        + StarSemiring
-        + WeaklyDivisibleSemiring
-        + WeightQuantize,
-    <W as Semiring>::ReverseWeight:
-        WeaklyDivisibleSemiring + WeightQuantize + StarSemiring + SerializableSemiring,
+    W: 'static + SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
+    <W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize + SerializableSemiring,
     W: Into<<W as Semiring>::ReverseWeight> + From<<W as Semiring>::ReverseWeight>,
 {
-    test_rmepsilon(&test_data)?;
+    // FIXME: rmepsilon implementation requires the StarSemiring implementation which seems avoidable.
+    //    test_rmepsilon(&test_data)?;
 
     test_invert(&test_data)?;
 
@@ -500,4 +503,9 @@ fn test_openfst_fst_009() -> Result<(), ExitFailure> {
 #[test]
 fn test_openfst_fst_010() -> Result<(), ExitFailure> {
     run_test_openfst_fst("fst_010").map_err(|v| v.into())
+}
+
+#[test]
+fn test_openfst_fst_011() -> Result<(), ExitFailure> {
+    run_test_openfst_fst("fst_011").map_err(|v| v.into())
 }

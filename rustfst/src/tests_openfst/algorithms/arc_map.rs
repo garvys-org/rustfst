@@ -2,6 +2,7 @@ use std::fmt::Display;
 
 use failure::Fallible;
 use pretty_assertions::assert_eq;
+use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::arc_mappers::{
     IdentityArcMapper, InputEpsilonMapper, InvertWeightMapper, OutputEpsilonMapper, PlusMapper,
@@ -12,6 +13,34 @@ use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
 use crate::semirings::{Semiring, SerializableSemiring};
 use crate::tests_openfst::FstTestData;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ArcMapWithWeightOperationResult {
+    weight: String,
+    result: String,
+}
+
+pub struct ArcMapWithWeightTestData<F>
+where
+    F: SerializableFst,
+    F::W: SerializableSemiring,
+{
+    pub weight: F::W,
+    pub result: F,
+}
+
+impl ArcMapWithWeightOperationResult {
+    pub fn parse<F>(&self) -> ArcMapWithWeightTestData<F>
+    where
+        F: SerializableFst,
+        F::W: SerializableSemiring,
+    {
+        ArcMapWithWeightTestData {
+            weight: F::W::parse_text(self.weight.as_str()).unwrap().1,
+            result: F::from_text_string(self.result.as_str()).unwrap(),
+        }
+    }
+}
 
 pub fn test_arc_map_identity<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
@@ -102,19 +131,19 @@ where
 pub fn test_arc_map_plus<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
     F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeightQuantize + Semiring<Type = f32>,
+    F::W: SerializableSemiring + WeightQuantize,
 {
     let mut fst_arc_map = test_data.raw.clone();
-    let mut mapper = PlusMapper::new(1.5);
+    let mut mapper = PlusMapper::from_weight(test_data.arc_map_plus.weight.clone());
     fst_arc_map.arc_map(&mut mapper)?;
     assert_eq!(
-        test_data.arc_map_plus,
+        test_data.arc_map_plus.result,
         fst_arc_map,
         "{}",
         error_message_fst!(
-            test_data.arc_map_plus,
+            test_data.arc_map_plus.result,
             fst_arc_map,
-            "ArcMap PlusMapper (1.5)"
+            "ArcMap PlusMapper"
         )
     );
     Ok(())
@@ -123,19 +152,19 @@ where
 pub fn test_arc_map_times<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
     F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeightQuantize + Semiring<Type = f32>,
+    F::W: SerializableSemiring + WeightQuantize,
 {
     let mut fst_arc_map = test_data.raw.clone();
-    let mut mapper = TimesMapper::new(1.5);
+    let mut mapper = TimesMapper::from_weight(test_data.arc_map_times.weight.clone());
     fst_arc_map.arc_map(&mut mapper)?;
     assert_eq!(
-        test_data.arc_map_times,
+        test_data.arc_map_times.result,
         fst_arc_map,
         "{}",
         error_message_fst!(
-            test_data.arc_map_times,
+            test_data.arc_map_times.result,
             fst_arc_map,
-            "ArcMap TimesMapper (1.5)"
+            "ArcMap TimesMapper"
         )
     );
     Ok(())

@@ -1,5 +1,3 @@
-use std::f32;
-
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
@@ -24,21 +22,14 @@ pub struct ShortestDistanceTestData<W> {
 }
 
 impl ShorestDistanceOperationResult {
-    pub fn parse<W: SerializableSemiring + Semiring<Type = f32>>(
-        &self,
-    ) -> ShortestDistanceTestData<W> {
-        let inf = "Infinity".to_string();
+    pub fn parse<W: SerializableSemiring>(&self) -> ShortestDistanceTestData<W> {
         let r = self
             .result
             .iter()
             .map(|v| {
-                if v == &inf {
-                    f32::INFINITY
-                } else {
-                    v.parse().unwrap()
-                }
+                let (i, w) = W::parse_text(v.as_str()).unwrap();
+                w
             })
-            .map(|v| W::new(v))
             .collect();
         ShortestDistanceTestData {
             result: r,

@@ -20,17 +20,6 @@ where
     pub(crate) weight: (W1, W2),
 }
 
-impl<W1, W2> fmt::Display for ProductWeight<W1, W2>
-where
-    W1: SerializableSemiring,
-    W2: SerializableSemiring,
-{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{},{}", self.value1(), self.value2())?;
-        Ok(())
-    }
-}
-
 impl<W1, W2> AsRef<Self> for ProductWeight<W1, W2>
 where
     W1: Semiring,
@@ -156,6 +145,17 @@ where
     fn quantize_assign(&mut self, delta: f32) -> Fallible<()> {
         self.set_value1(self.value1().quantize(delta)?);
         self.set_value2(self.value2().quantize(delta)?);
+        Ok(())
+    }
+}
+
+impl<W1, W2> fmt::Display for ProductWeight<W1, W2>
+where
+    W1: SerializableSemiring,
+    W2: SerializableSemiring,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{},{}", self.value1(), self.value2())?;
         Ok(())
     }
 }

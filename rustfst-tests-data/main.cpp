@@ -42,6 +42,13 @@ string fst_to_string(const F& a) {
     return sstrm.str();
 }
 
+template<class W>
+string weight_to_string(const W& a) {
+    std::stringstream ss;
+    ss << a;
+    return ss.str();
+}
+
 template<class F>
 void compute_fst_invert(const F& raw_fst, json& j) {
     auto fst_out = *raw_fst.Copy();
@@ -94,9 +101,7 @@ void compute_fst_shortest_distance(const F& raw_fst, json& j) {
         fst::ShortestDistance(raw_fst, &distance, reverse);
         std::vector<string> distance_s;
         for(auto e: distance) {
-            std::stringstream ss;
-            ss << e;
-            distance_s.push_back(ss.str());
+            distance_s.push_back(weight_to_string(e));
         }
         json j2;
         j2["reverse"] = reverse;
@@ -123,6 +128,26 @@ template<class F, class C>
 void compute_fst_compute_arc_map(const F& raw_fst, json& j, const string& name, C mapper) {
     auto fst_out = *raw_fst.Copy();
     fst::ArcMap(&fst_out, mapper);
+    j[name]["result"] = fst_to_string(fst_out);
+}
+
+template<class F>
+void compute_fst_compute_arc_map_plus(const F& raw_fst, json& j, const typename F::Weight& weight) {
+    auto fst_out = *raw_fst.Copy();
+    auto mapper = fst::PlusMapper<typename F::Arc>(weight);
+    fst::ArcMap(&fst_out, mapper);
+    auto name = "arc_map_plus";
+    j[name]["weight"] = weight_to_string(weight);
+    j[name]["result"] = fst_to_string(fst_out);
+}
+
+template<class F>
+void compute_fst_compute_arc_map_times(const F& raw_fst, json& j, const typename F::Weight& weight) {
+    auto fst_out = *raw_fst.Copy();
+    auto mapper = fst::TimesMapper<typename F::Arc>(weight);
+    fst::ArcMap(&fst_out, mapper);
+    auto name = "arc_map_times";
+    j[name]["weight"] = weight_to_string(weight);
     j[name]["result"] = fst_to_string(fst_out);
 }
 
@@ -740,8 +765,8 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     compute_fst_compute_arc_map(raw_fst, data, "arc_map_input_epsilon", fst::InputEpsilonMapper<typename F::MyArc>());
     compute_fst_compute_arc_map(raw_fst, data, "arc_map_output_epsilon", fst::OutputEpsilonMapper<typename F::MyArc>());
     compute_fst_compute_arc_map(raw_fst, data, "arc_map_quantize", fst::QuantizeMapper<typename F::MyArc>());
-    compute_fst_compute_arc_map(raw_fst, data, "arc_map_plus", fst::PlusMapper<typename F::MyArc>(fst_test_data.get_weight_plus_mapper()));
-    compute_fst_compute_arc_map(raw_fst, data, "arc_map_times", fst::TimesMapper<typename F::MyArc>(fst_test_data.get_weight_times_mapper()));
+    compute_fst_compute_arc_map_plus(raw_fst, data, fst_test_data.get_weight_plus_mapper());
+    compute_fst_compute_arc_map_times(raw_fst, data, fst_test_data.get_weight_times_mapper());
 
     std::cout << "ArcSort" << std::endl;
     compute_fst_compute_arcsort(raw_fst, data, "arcsort_ilabel", fst::ILabelCompare<typename F::MyArc>());
