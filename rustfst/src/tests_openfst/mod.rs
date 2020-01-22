@@ -86,6 +86,7 @@ mod fst_impls;
 mod io;
 mod misc;
 mod test_symt;
+mod test_weights;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct FstOperationResult {

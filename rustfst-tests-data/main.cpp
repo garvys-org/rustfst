@@ -24,6 +24,7 @@
 #include "fst_009/fst_009.h"
 #include "fst_010/fst_010.h"
 #include "fst_011/fst_011.h"
+#include "fst_012/fst_012.h"
 
 #include "symt_000/symt_000.h"
 #include "symt_001/symt_001.h"
@@ -850,6 +851,26 @@ void compute_symt_data(const fst::SymbolTable symt, const string symt_name) {
     std::cout << std::endl;
 }
 
+template <class W>
+void compute_weight_data(const W& w1, const W& w2, const string weight_name) {
+    std::cout << "Weight :" << weight_name << std::endl;
+    json data;
+
+    data["name"] = weight_name;
+    data["serialized_type"] = W::Type();
+    data["one"] = weight_to_string(W::One());
+    data["zero"] = weight_to_string(W::Zero());
+
+    data["weight_1"] = weight_to_string(w1);
+    data["weight_2"] = weight_to_string(w2);
+
+    data["plus"] = weight_to_string(Plus(w1, w2));
+    data["times"] = weight_to_string(Times(w1, w2));
+
+    std::ofstream o("weights/" + weight_name + ".json");
+    o << std::setw(4) << data << std::endl;
+}
+
 
 int main() {
     srand (time(NULL));
@@ -866,8 +887,38 @@ int main() {
     compute_fst_data(FstTestData009(), "fst_009");
     compute_fst_data(FstTestData010(), "fst_010");
     compute_fst_data(FstTestData011(), "fst_011");
+//    compute_fst_data(FstTestData012(), "fst_012");
 
     compute_symt_data(compute_symt_000(), "symt_000");
     compute_symt_data(compute_symt_001(), "symt_001");
     compute_symt_data(compute_symt_002(), "symt_002");
+
+    compute_weight_data(fst::TropicalWeight(1.2), fst::TropicalWeight(3.2), "weight_001");
+    compute_weight_data(fst::LogWeight(1.2), fst::LogWeight(3.2), "weight_002");
+    compute_weight_data(
+        fst::ProductWeight<fst::TropicalWeight, fst::LogWeight>(1.2, 3.2),
+        fst::ProductWeight<fst::TropicalWeight, fst::LogWeight>(0.3, 0.1),
+        "weight_003"
+    );
+    compute_weight_data(
+        fst::ProductWeight<fst::LogWeight, fst::TropicalWeight>(1.2, 3.2),
+        fst::ProductWeight<fst::LogWeight, fst::TropicalWeight>(0.3, 0.1),
+        "weight_004"
+    );
+    compute_weight_data(
+        fst::StringWeight<int, fst::STRING_LEFT>(1),
+        fst::StringWeight<int, fst::STRING_LEFT>(3),
+        "weight_005"
+    );
+    compute_weight_data(
+        fst::StringWeight<int, fst::STRING_RIGHT>(1),
+        fst::StringWeight<int, fst::STRING_RIGHT>(3),
+        "weight_006"
+    );
+    compute_weight_data(
+        fst::StringWeight<int, fst::STRING_RESTRICT>(1),
+        fst::StringWeight<int, fst::STRING_RESTRICT>(1),
+        "weight_007"
+    );
+
 }
