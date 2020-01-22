@@ -85,6 +85,10 @@ impl Semiring for TropicalWeight {
             | SemiringProperties::PATH
             | SemiringProperties::IDEMPOTENT
     }
+
+    fn weight_type() -> String {
+        "tropical".to_string()
+    }
 }
 
 impl AsRef<TropicalWeight> for TropicalWeight {

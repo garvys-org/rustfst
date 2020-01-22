@@ -3,7 +3,10 @@ use std::fs::read_to_string;
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::semirings::{LogWeight, Semiring, SerializableSemiring, TropicalWeight, ProductWeight, StringWeightLeft, StringWeightRight, StringWeightRestrict};
+use crate::semirings::{
+    LogWeight, ProductWeight, Semiring, SerializableSemiring, StringWeightLeft,
+    StringWeightRestrict, StringWeightRight, TropicalWeight,
+};
 
 use self::super::get_path_folder;
 
@@ -42,14 +45,20 @@ pub struct ParsedWeightTestData<W> {
     one: W,
     zero: W,
     plus: W,
-    times: W
+    times: W,
 }
 
 fn do_run_test_openfst_weight<W: Semiring>(test_data: ParsedWeightTestData<W>) -> Fallible<()> {
     assert_eq!(W::one(), test_data.one);
     assert_eq!(W::zero(), test_data.zero);
-    assert_eq!(test_data.weight_1.times(&test_data.weight_2)?, test_data.times);
-    assert_eq!(test_data.weight_1.plus(&test_data.weight_2)?, test_data.plus);
+    assert_eq!(
+        test_data.weight_1.times(&test_data.weight_2)?,
+        test_data.times
+    );
+    assert_eq!(
+        test_data.weight_1.plus(&test_data.weight_2)?,
+        test_data.plus
+    );
 
     Ok(())
 }
@@ -61,7 +70,8 @@ fn run_test_openfst_weight(test_name: &str) -> Fallible<()> {
 
     let string = read_to_string(&path_metadata)
         .map_err(|_| format_err!("Can't open {:?}", &path_metadata))?;
-    let parsed_operation_result: ParsedWeightOperationResult = serde_json::from_str(&string).unwrap();
+    let parsed_operation_result: ParsedWeightOperationResult =
+        serde_json::from_str(&string).unwrap();
 
     match parsed_operation_result.serialized_type.as_str() {
         "tropical" => {
@@ -73,11 +83,13 @@ fn run_test_openfst_weight(test_name: &str) -> Fallible<()> {
             do_run_test_openfst_weight(parsed_test_data)?;
         }
         "tropical_X_log" => {
-            let parsed_test_data = parsed_operation_result.parse::<ProductWeight<TropicalWeight, LogWeight>>();
+            let parsed_test_data =
+                parsed_operation_result.parse::<ProductWeight<TropicalWeight, LogWeight>>();
             do_run_test_openfst_weight(parsed_test_data)?;
         }
         "log_X_tropical" => {
-            let parsed_test_data = parsed_operation_result.parse::<ProductWeight<LogWeight, TropicalWeight>>();
+            let parsed_test_data =
+                parsed_operation_result.parse::<ProductWeight<LogWeight, TropicalWeight>>();
             do_run_test_openfst_weight(parsed_test_data)?;
         }
         "left_string" => {
@@ -92,12 +104,14 @@ fn run_test_openfst_weight(test_name: &str) -> Fallible<()> {
             let parsed_test_data = parsed_operation_result.parse::<StringWeightRestrict>();
             do_run_test_openfst_weight(parsed_test_data)?;
         }
-        _ => bail!("Unknown weight_type : {:?}", parsed_operation_result.serialized_type)
+        _ => bail!(
+            "Unknown weight_type : {:?}",
+            parsed_operation_result.serialized_type
+        ),
     }
 
     Ok(())
 }
-
 
 #[test]
 fn test_openfst_weight_001() -> Fallible<()> {

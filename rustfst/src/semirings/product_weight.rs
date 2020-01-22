@@ -91,6 +91,10 @@ where
                 | SemiringProperties::COMMUTATIVE
                 | SemiringProperties::IDEMPOTENT)
     }
+
+    fn weight_type() -> String {
+        format!("{}_X_{}", W1::weight_type(), W2::weight_type())
+    }
 }
 
 impl<W1, W2> ProductWeight<W1, W2>

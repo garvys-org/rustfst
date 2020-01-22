@@ -73,6 +73,10 @@ impl Semiring for ProbabilityWeight {
             | SemiringProperties::RIGHT_SEMIRING
             | SemiringProperties::COMMUTATIVE
     }
+
+    fn weight_type() -> String {
+        "probability".to_string()
+    }
 }
 
 impl AsRef<ProbabilityWeight> for ProbabilityWeight {

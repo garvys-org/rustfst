@@ -94,6 +94,10 @@ impl Semiring for LogWeight {
             | SemiringProperties::RIGHT_SEMIRING
             | SemiringProperties::COMMUTATIVE
     }
+
+    fn weight_type() -> String {
+        "log".to_string()
+    }
 }
 
 impl AsRef<LogWeight> for LogWeight {

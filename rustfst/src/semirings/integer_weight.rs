@@ -56,6 +56,10 @@ impl Semiring for IntegerWeight {
             | SemiringProperties::RIGHT_SEMIRING
             | SemiringProperties::COMMUTATIVE
     }
+
+    fn weight_type() -> String {
+        "integer".to_string()
+    }
 }
 
 impl AsRef<IntegerWeight> for IntegerWeight {

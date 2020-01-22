@@ -6,9 +6,7 @@ use unsafe_unwrap::UnsafeUnwrap;
 use crate::algorithms::all_pairs_shortest_distance;
 use crate::algorithms::arc_sum;
 use crate::arc::Arc;
-use crate::fst_traits::{
-    ExpandedFst, FinalStatesIterator, MutableFst,
-};
+use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
 use crate::semirings::{Semiring, StarSemiring};
 use crate::EPS_LABEL;
 

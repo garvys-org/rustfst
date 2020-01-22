@@ -55,6 +55,10 @@ impl Semiring for BooleanWeight {
             | SemiringProperties::IDEMPOTENT
             | SemiringProperties::PATH
     }
+
+    fn weight_type() -> String {
+        "boolean".to_string()
+    }
 }
 
 impl AsRef<BooleanWeight> for BooleanWeight {

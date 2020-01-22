@@ -70,6 +70,8 @@ pub trait Semiring:
     fn reverse(&self) -> Fallible<Self::ReverseWeight>;
 
     fn properties() -> SemiringProperties;
+
+    fn weight_type() -> String;
 }
 
 /// Determines direction of division.

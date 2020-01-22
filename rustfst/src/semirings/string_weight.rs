@@ -4,18 +4,18 @@ use std::io::Write;
 use failure::Fallible;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
-use nom::IResult;
 use nom::multi::{count, separated_list};
 use nom::number::complete::le_i32;
+use nom::IResult;
 
-use crate::Label;
 use crate::parsers::bin_fst::utils_serialization::write_bin_i32;
 use crate::parsers::nom_utils::num;
+use crate::semirings::string_variant::StringWeightVariant;
 use crate::semirings::{
     DivideType, Semiring, SemiringProperties, SerializableSemiring, WeaklyDivisibleSemiring,
     WeightQuantize,
 };
-use crate::semirings::string_variant::StringWeightVariant;
+use crate::Label;
 
 /// String semiring: (identity, ., Infinity, Epsilon)
 #[derive(Clone, Debug, PartialOrd, Default, PartialEq, Eq, Hash)]
@@ -163,6 +163,14 @@ macro_rules! string_semiring {
                     }
                 }
             }
+
+            fn weight_type() -> String {
+                match $string_type {
+                    StringType::StringRestrict => "restricted_string".to_string(),
+                    StringType::StringLeft => "left_string".to_string(),
+                    StringType::StringRight => "right_string".to_string(),
+                }
+            }
         }
 
         impl $semiring {
@@ -251,7 +259,9 @@ macro_rules! string_semiring {
                 let weight = if labels == vec![-1] {
                     Self::new(StringWeightVariant::Infinity)
                 } else {
-                    Self::new(StringWeightVariant::Labels(labels.into_iter().map(|e| e as usize).collect()))
+                    Self::new(StringWeightVariant::Labels(
+                        labels.into_iter().map(|e| e as usize).collect(),
+                    ))
                 };
                 Ok((i, weight))
             }
@@ -261,13 +271,13 @@ macro_rules! string_semiring {
                     StringWeightVariant::Infinity => {
                         write_bin_i32(file, 1 as i32)?;
                         write_bin_i32(file, -1 as i32)?;
-                    },
+                    }
                     StringWeightVariant::Labels(labels) => {
                         write_bin_i32(file, labels.len() as i32)?;
                         for label in labels.iter() {
                             write_bin_i32(file, *label as i32)?;
                         }
-                    },
+                    }
                 }
                 Ok(())
             }
