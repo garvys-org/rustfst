@@ -857,7 +857,8 @@ void compute_weight_data(const W& w1, const W& w2, const string weight_name) {
     json data;
 
     data["name"] = weight_name;
-    data["serialized_type"] = W::Type();
+    data["weight_type"] = W::Type();
+    data["arc_type"] = fst::ArcTpl<W>::Type();
     data["one"] = weight_to_string(W::One());
     data["zero"] = weight_to_string(W::Zero());
 

@@ -4,16 +4,18 @@ use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::semirings::{
-    LogWeight, ProductWeight, SerializableSemiring, StringWeightLeft,
-    StringWeightRestrict, StringWeightRight, TropicalWeight,
+    LogWeight, ProductWeight, SerializableSemiring, StringWeightLeft, StringWeightRestrict,
+    StringWeightRight, TropicalWeight,
 };
+use crate::Arc;
 
 use self::super::get_path_folder;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ParsedWeightOperationResult {
     name: String,
-    serialized_type: String,
+    arc_type: String,
+    weight_type: String,
     weight_1: String,
     weight_2: String,
     one: String,
@@ -26,7 +28,8 @@ impl ParsedWeightOperationResult {
     pub fn parse<W: SerializableSemiring>(self) -> ParsedWeightTestData<W> {
         ParsedWeightTestData {
             name: self.name,
-            serialized_type: self.serialized_type,
+            weight_type: self.weight_type,
+            arc_type: self.arc_type,
             weight_1: W::parse_text(self.weight_1.as_str()).unwrap().1,
             weight_2: W::parse_text(self.weight_2.as_str()).unwrap().1,
             one: W::parse_text(self.one.as_str()).unwrap().1,
@@ -40,7 +43,8 @@ impl ParsedWeightOperationResult {
 pub struct ParsedWeightTestData<W> {
     #[allow(unused)]
     name: String,
-    serialized_type: String,
+    weight_type: String,
+    arc_type: String,
     weight_1: W,
     weight_2: W,
     one: W,
@@ -62,7 +66,8 @@ fn do_run_test_openfst_weight<W: SerializableSemiring>(
         test_data.weight_1.plus(&test_data.weight_2)?,
         test_data.plus
     );
-    assert_eq!(W::weight_type(), test_data.serialized_type);
+    assert_eq!(W::weight_type(), test_data.weight_type);
+    assert_eq!(Arc::<W>::arc_type(), test_data.arc_type);
 
     Ok(())
 }
@@ -77,7 +82,7 @@ fn run_test_openfst_weight(test_name: &str) -> Fallible<()> {
     let parsed_operation_result: ParsedWeightOperationResult =
         serde_json::from_str(&string).unwrap();
 
-    match parsed_operation_result.serialized_type.as_str() {
+    match parsed_operation_result.weight_type.as_str() {
         "tropical" => {
             let parsed_test_data = parsed_operation_result.parse::<TropicalWeight>();
             do_run_test_openfst_weight(parsed_test_data)?;
@@ -110,7 +115,7 @@ fn run_test_openfst_weight(test_name: &str) -> Fallible<()> {
         }
         _ => bail!(
             "Unknown weight_type : {:?}",
-            parsed_operation_result.serialized_type
+            parsed_operation_result.weight_type
         ),
     }
 

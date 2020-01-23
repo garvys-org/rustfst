@@ -4,11 +4,11 @@ use std::hash::{Hash, Hasher};
 use failure::Fallible;
 use ordered_float::OrderedFloat;
 
-use crate::KDELTA;
 use crate::semirings::{
     CompleteSemiring, DivideType, Semiring, SemiringProperties, StarSemiring,
     WeaklyDivisibleSemiring, WeightQuantize,
 };
+use crate::KDELTA;
 
 /// Probability semiring: (x, +, 0.0, 1.0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
