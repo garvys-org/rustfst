@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `concat` -> `ConcatFst`
     - `closure` -> `ClosureFst`
 - Added `delete_final_weight_unchecked` to the `Fst` trait and implement it for `VectorFst`.
+- Added `SerializableSemiring` trait and implement it for most `Semiring`s.
+- All `Fst` that implements `SerializableFst` with a `Semiring` implementing `SerializableSemiring` can now be serialized/deserialized consistently with OpenFst.
+- Added `arc_type()` method to `rustfst::Arc`.
 
 ### Changed
 - Make `KDELTA` public outside of the crate
@@ -35,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `factor_weight` now takes as input a type implementing `Borrow` instead of `&fst`.
 - `replace` now takes as input a vector of types implementing `Borrow` instead of `fst`.
 - Parse `FstFlags` when parsing binary `ConstFst` and `VectorFst`. Raise an error if the file contains a SymbolTable. Not yet supported.
+- Remove `TextParser`, `BinarySerializer` and `BinaryDeserializer` traits. Add `SerializableFst` in replacement.
 
 ## [0.4.0] - 2019-11-12
 
