@@ -4,8 +4,11 @@ use std::fmt::Debug;
 use failure::Fallible;
 
 use crate::semirings::{
-    DivideType, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
+    DivideType, Semiring, SemiringProperties, SerializableSemiring, WeaklyDivisibleSemiring,
+    WeightQuantize,
 };
+use nom::IResult;
+use std::io::Write;
 
 /// Product semiring: W1 * W2.
 #[derive(Debug, Eq, PartialOrd, PartialEq, Clone, Default, Hash)]
@@ -15,16 +18,6 @@ where
     W2: Semiring,
 {
     pub(crate) weight: (W1, W2),
-}
-
-impl<W1, W2> fmt::Display for ProductWeight<W1, W2>
-where
-    W1: Semiring,
-    W2: Semiring,
-{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        (&self.value1(), &self.value2()).fmt(f)
-    }
 }
 
 impl<W1, W2> AsRef<Self> for ProductWeight<W1, W2>
@@ -155,3 +148,51 @@ where
         Ok(())
     }
 }
+
+impl<W1, W2> fmt::Display for ProductWeight<W1, W2>
+where
+    W1: SerializableSemiring,
+    W2: SerializableSemiring,
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{},{}", self.value1(), self.value2())?;
+        Ok(())
+    }
+}
+
+impl<W1, W2> SerializableSemiring for ProductWeight<W1, W2>
+where
+    W1: SerializableSemiring,
+    W2: SerializableSemiring,
+{
+    fn weight_type() -> String {
+        format!("{}_X_{}", W1::weight_type(), W2::weight_type())
+    }
+
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
+        let (i, weight_1) = W1::parse_binary(i)?;
+        let (i, weight_2) = W2::parse_binary(i)?;
+        Ok((i, Self::new((weight_1, weight_2))))
+    }
+
+    fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()> {
+        self.value1().write_binary(file)?;
+        self.value2().write_binary(file)?;
+        Ok(())
+    }
+
+    fn parse_text(i: &str) -> IResult<&str, Self> {
+        let (i, weight_1) = W1::parse_text(i)?;
+        let (i, _) = nom::bytes::complete::tag(",")(i)?;
+        let (i, weight_2) = W2::parse_text(i)?;
+        Ok((i, Self::new((weight_1, weight_2))))
+    }
+}
+
+#[cfg(test)]
+use crate::semirings::{LogWeight, TropicalWeight};
+test_semiring_serializable!(
+    tests_product_weight_serializable,
+    ProductWeight::<TropicalWeight, LogWeight>,
+    ProductWeight::new((TropicalWeight::new(0.2), LogWeight::new(1.7)))
+);

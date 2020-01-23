@@ -3,8 +3,8 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{replace, ReplaceFst};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::TextParser;
-use crate::semirings::{Semiring, WeaklyDivisibleSemiring, WeightQuantize};
+use crate::fst_traits::SerializableFst;
+use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
 
 use super::dynamic_fst::compare_fst_static_dynamic;
@@ -19,8 +19,8 @@ pub struct ReplaceOperationResult {
 
 pub struct ReplaceTestData<F>
 where
-    F: TextParser,
-    F::W: Semiring<Type = f32>,
+    F: SerializableFst,
+    F::W: SerializableSemiring,
 {
     pub root: usize,
     pub label_fst_pairs: Vec<(usize, F)>,
@@ -31,8 +31,8 @@ where
 impl ReplaceOperationResult {
     pub fn parse<F>(&self) -> ReplaceTestData<F>
     where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+        F: SerializableFst,
+        F::W: SerializableSemiring,
     {
         ReplaceTestData {
             root: self.root,
@@ -49,7 +49,7 @@ impl ReplaceOperationResult {
 
 pub fn test_replace<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
     for replace_test_data in &test_data.replace {
@@ -90,7 +90,7 @@ where
 
 pub fn test_replace_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
     for replace_test_data in &test_data.replace {

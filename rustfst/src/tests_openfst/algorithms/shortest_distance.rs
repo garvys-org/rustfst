@@ -1,15 +1,11 @@
-use std::f32;
-
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::shortest_distance;
-use crate::fst_traits::MutableFst;
-use crate::fst_traits::TextParser;
-use crate::semirings::Semiring;
+use crate::fst_traits::{MutableFst, SerializableFst};
+use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
-
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -19,25 +15,20 @@ pub struct ShorestDistanceOperationResult {
 }
 
 #[derive(Debug)]
-pub struct ShortestDistanceTestData<W: Semiring<Type = f32>> {
+pub struct ShortestDistanceTestData<W> {
     reverse: bool,
     result: Vec<W>,
 }
 
 impl ShorestDistanceOperationResult {
-    pub fn parse<W: Semiring<Type = f32>>(&self) -> ShortestDistanceTestData<W> {
-        let inf = "Infinity".to_string();
+    pub fn parse<W: SerializableSemiring>(&self) -> ShortestDistanceTestData<W> {
         let r = self
             .result
             .iter()
             .map(|v| {
-                if v == &inf {
-                    f32::INFINITY
-                } else {
-                    v.parse().unwrap()
-                }
+                let (_, w) = W::parse_text(v.as_str()).unwrap();
+                w
             })
-            .map(|v| W::new(v))
             .collect();
         ShortestDistanceTestData {
             result: r,
@@ -48,8 +39,8 @@ impl ShorestDistanceOperationResult {
 
 pub fn test_shortest_distance<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
-    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring + WeightQuantize + 'static,
+    F: SerializableFst + MutableFst,
+    F::W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
     for data in &test_data.shortest_distance {
         let distance = shortest_distance(&test_data.raw, data.reverse)?;

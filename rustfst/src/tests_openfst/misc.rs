@@ -1,12 +1,13 @@
-use crate::fst_traits::{MutableFst, TextParser};
-use crate::semirings::{Semiring, WeightQuantize};
-use crate::tests_openfst::FstTestData;
 use failure::Fallible;
+
+use crate::fst_traits::{MutableFst, SerializableFst};
+use crate::semirings::SerializableSemiring;
+use crate::tests_openfst::FstTestData;
 
 pub fn test_del_all_states<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
-    F::W: Semiring<Type = f32> + WeightQuantize,
+    F: MutableFst + SerializableFst,
+    F::W: SerializableSemiring,
 {
     let mut fst = test_data.raw.clone();
 

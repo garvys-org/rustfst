@@ -154,13 +154,13 @@ mod test {
     use super::*;
 
     use crate::fst_impls::VectorFst;
-    use crate::fst_traits::{MutableFst, TextParser};
+    use crate::fst_traits::{MutableFst, SerializableFst};
     use crate::semirings::{LogWeight, Semiring};
     use crate::Arc;
 
     #[test]
     fn test_isomorphic_1() -> Fallible<()> {
-        let fst_1: VectorFst<LogWeight> = TextParser::from_text_string(
+        let fst_1: VectorFst<LogWeight> = SerializableFst::from_text_string(
             "0\t1\t12\t25\n\
              1\n",
         )?;
@@ -176,12 +176,12 @@ mod test {
 
     #[test]
     fn test_isomorphic_2() -> Fallible<()> {
-        let fst_1: VectorFst<LogWeight> = TextParser::from_text_string(
+        let fst_1: VectorFst<LogWeight> = SerializableFst::from_text_string(
             "0\t1\t12\t25\n\
              1\n",
         )?;
 
-        let fst_2: VectorFst<LogWeight> = TextParser::from_text_string(
+        let fst_2: VectorFst<LogWeight> = SerializableFst::from_text_string(
             "1\t0\t12\t25\n\
              0\n",
         )?;

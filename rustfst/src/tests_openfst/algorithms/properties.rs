@@ -3,11 +3,9 @@ use std::collections::HashMap;
 use failure::Fallible;
 
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::MutableFst;
-use crate::fst_traits::TextParser;
-use crate::semirings::Semiring;
+use crate::fst_traits::{MutableFst, SerializableFst};
+use crate::semirings::SerializableSemiring;
 use crate::semirings::WeightQuantize;
-
 use crate::tests_openfst::FstTestData;
 
 pub fn parse_fst_properties(mapping: &HashMap<String, bool>) -> FstProperties {
@@ -147,8 +145,8 @@ pub fn parse_fst_properties(mapping: &HashMap<String, bool>) -> FstProperties {
 
 pub fn test_fst_properties<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst,
-    F::W: Semiring<Type = f32> + WeightQuantize,
+    F: SerializableFst + MutableFst,
+    F::W: SerializableSemiring + WeightQuantize,
 {
     let ref_props = test_data.fst_properties;
     let props = test_data.raw.properties()?;

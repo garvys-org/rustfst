@@ -4,12 +4,13 @@ use std::path::Path;
 use failure::Fallible;
 
 use crate::parsers::text_fst::nom_parser::vec_rows_parsed;
+use crate::semirings::SerializableSemiring;
 use crate::{Label, StateId};
 
 #[derive(Debug, PartialEq)]
-pub enum RowParsed {
-    Transition(Transition),
-    FinalState(FinalState),
+pub enum RowParsed<W: SerializableSemiring> {
+    Transition(Transition<W>),
+    FinalState(FinalState<W>),
     InfinityFinalState(StateId),
 }
 
@@ -17,9 +18,9 @@ pub enum RowParsed {
 /// and a vector final states. The first state in the vector of transition is the start state.
 /// This container doesn't depend on any Semiring.
 #[derive(Debug, PartialEq, Default)]
-pub struct ParsedTextFst {
-    pub transitions: Vec<Transition>,
-    pub final_states: Vec<FinalState>,
+pub struct ParsedTextFst<W: SerializableSemiring> {
+    pub transitions: Vec<Transition<W>>,
+    pub final_states: Vec<FinalState<W>>,
     pub start_state: Option<StateId>,
 }
 
@@ -28,7 +29,7 @@ pub struct ParsedTextFst {
 /// Also there are both labels and weight stored on the arc.
 /// Transitions without weight have a one weight in the Semiring.
 #[derive(Debug, PartialEq)]
-pub struct Transition {
+pub struct Transition<W: SerializableSemiring> {
     /// state from which the arc is leaving.
     pub state: StateId,
     /// Input label of the arc.
@@ -36,7 +37,7 @@ pub struct Transition {
     /// Output label of the arc.
     pub olabel: Label,
     /// Weight on the arc.
-    pub weight: Option<f32>,
+    pub weight: Option<W>,
     /// state reached by the arc.
     pub nextstate: StateId,
 }
@@ -44,35 +45,12 @@ pub struct Transition {
 /// A final state is composed of a state and a final weight.
 /// If the weight is missing there it has a one weight in the semiring.
 #[derive(Debug, PartialEq)]
-pub struct FinalState {
+pub struct FinalState<W: SerializableSemiring> {
     pub state: StateId,
-    pub weight: Option<f32>,
+    pub weight: Option<W>,
 }
 
-/// Removes the enum
-impl Into<ParsedTextFst> for Vec<RowParsed> {
-    fn into(self) -> ParsedTextFst {
-        let mut parsed_fst = ParsedTextFst::default();
-
-        parsed_fst.start_state = self.first().map(|v| match v {
-            RowParsed::Transition(t) => t.state,
-            RowParsed::FinalState(f) => f.state,
-            RowParsed::InfinityFinalState(g) => *g,
-        });
-
-        for row_parsed in self.into_iter() {
-            match row_parsed {
-                RowParsed::Transition(t) => parsed_fst.transitions.push(t),
-                RowParsed::FinalState(f) => parsed_fst.final_states.push(f),
-                RowParsed::InfinityFinalState(_) => {}
-            };
-        }
-
-        parsed_fst
-    }
-}
-
-impl ParsedTextFst {
+impl<W: SerializableSemiring> ParsedTextFst<W> {
     /// Loads an FST from a loaded string in text format usually called `At&T FSM format`.
     ///
     /// # Format:
@@ -100,7 +78,27 @@ impl ParsedTextFst {
         let (_, vec_rows_parsed) =
             vec_rows_parsed(fst_string).map_err(|_| format_err!("Error while parsing text fst"))?;
 
-        Ok(vec_rows_parsed.into())
+        Ok(Self::from_vec_rows_parsed(vec_rows_parsed))
+    }
+
+    fn from_vec_rows_parsed(v: Vec<RowParsed<W>>) -> Self {
+        let mut parsed_fst = ParsedTextFst::default();
+
+        parsed_fst.start_state = v.first().map(|v| match v {
+            RowParsed::Transition(t) => t.state,
+            RowParsed::FinalState(f) => f.state,
+            RowParsed::InfinityFinalState(g) => *g,
+        });
+
+        for row_parsed in v.into_iter() {
+            match row_parsed {
+                RowParsed::Transition(t) => parsed_fst.transitions.push(t),
+                RowParsed::FinalState(f) => parsed_fst.final_states.push(f),
+                RowParsed::InfinityFinalState(_) => {}
+            };
+        }
+
+        parsed_fst
     }
 
     /// Loads an FST from a serialized file in text format usually called `At&T FSM format`.
@@ -148,12 +146,12 @@ impl ParsedTextFst {
     }
 }
 
-impl Transition {
+impl<W: SerializableSemiring> Transition<W> {
     pub fn new(
         state: StateId,
         ilabel: Label,
         olabel: Label,
-        weight: Option<f32>,
+        weight: Option<W>,
         nextstate: StateId,
     ) -> Self {
         Self {
@@ -166,8 +164,8 @@ impl Transition {
     }
 }
 
-impl FinalState {
-    pub fn new(state: StateId, weight: Option<f32>) -> Self {
+impl<W: SerializableSemiring> FinalState<W> {
+    pub fn new(state: StateId, weight: Option<W>) -> Self {
         Self { state, weight }
     }
 }
@@ -175,11 +173,13 @@ impl FinalState {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::semirings::{Semiring, TropicalWeight};
 
     #[test]
     fn test_parse_text_fst_not_contiguous() -> Fallible<()> {
         // Check that parsing transitions, then final states then transition is working
-        let parsed_fst = ParsedTextFst::from_string("0\t2\t0\t0\n1\n2\t1\t12\t25\n")?;
+        let parsed_fst =
+            ParsedTextFst::<TropicalWeight>::from_string("0\t2\t0\t0\n1\n2\t1\t12\t25\n")?;
 
         let mut transitions = vec![];
         transitions.push(Transition::new(0, 0, 0, None, 2));
@@ -202,7 +202,7 @@ mod tests {
     #[test]
     fn test_parse_text_fst_not_finishing_with_eol() -> Fallible<()> {
         // Check that parsing transitions, then final states then transition is working
-        let parsed_fst = ParsedTextFst::from_string("0\t1\t0\t0\n1")?;
+        let parsed_fst = ParsedTextFst::<TropicalWeight>::from_string("0\t1\t0\t0\n1")?;
 
         let mut transitions = vec![];
         transitions.push(Transition::new(0, 0, 0, None, 1));
@@ -223,13 +223,20 @@ mod tests {
 
     #[test]
     fn test_parse_text_fst_infinity_final_states() -> Fallible<()> {
-        let parsed_fst = ParsedTextFst::from_string("0\t1\t12\t25\t0.3\n1\tInfinity\n0\t0\n")?;
+        let parsed_fst =
+            ParsedTextFst::<TropicalWeight>::from_string("0\t1\t12\t25\t0.3\n1\tInfinity\n0\t0\n")?;
 
         let mut transitions = vec![];
-        transitions.push(Transition::new(0, 12, 25, Some(0.3), 1));
+        transitions.push(Transition::new(
+            0,
+            12,
+            25,
+            Some(TropicalWeight::new(0.3)),
+            1,
+        ));
 
         let mut final_states = vec![];
-        final_states.push(FinalState::new(0, Some(0.0)));
+        final_states.push(FinalState::new(0, Some(TropicalWeight::new(0.0))));
 
         let parsed_fst_ref = ParsedTextFst {
             start_state: Some(0),

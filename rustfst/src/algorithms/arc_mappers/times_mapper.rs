@@ -16,6 +16,10 @@ impl<W: Semiring> TimesMapper<W> {
         }
     }
 
+    pub fn from_weight(value: W) -> Self {
+        TimesMapper { to_multiply: value }
+    }
+
     pub fn map_weight(&self, weight: &mut W) -> Fallible<()> {
         weight.times_assign(&self.to_multiply)
     }

@@ -4,16 +4,14 @@ use failure::Fallible;
 
 use crate::algorithms::arc_sum;
 use crate::algorithms::arc_unique;
-use crate::fst_traits::MutableFst;
-use crate::fst_traits::TextParser;
-use crate::semirings::Semiring;
-
+use crate::fst_traits::{MutableFst, SerializableFst};
+use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
 pub fn test_state_map_arc_sum<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32>,
+    F: SerializableFst + MutableFst + Display,
+    F::W: SerializableSemiring,
 {
     let mut fst_state_map = test_data.raw.clone();
     arc_sum(&mut fst_state_map);
@@ -34,8 +32,8 @@ where
 
 pub fn test_state_map_arc_unique<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32>,
+    F: SerializableFst + MutableFst + Display,
+    F::W: SerializableSemiring,
 {
     let mut fst_state_map = test_data.raw.clone();
     arc_unique(&mut fst_state_map);

@@ -5,11 +5,15 @@ use failure::Fallible;
 
 use ordered_float::OrderedFloat;
 
+use crate::parsers::bin_fst::utils_serialization::write_bin_f32;
 use crate::semirings::{
-    CompleteSemiring, DivideType, Semiring, SemiringProperties, StarSemiring,
+    CompleteSemiring, DivideType, Semiring, SemiringProperties, SerializableSemiring, StarSemiring,
     WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::KDELTA;
+use nom::number::complete::{float, le_f32};
+use nom::IResult;
+use std::io::Write;
 
 /// Log semiring: (log(e^-x + e^-y), +, inf, 0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
@@ -122,3 +126,29 @@ impl WeaklyDivisibleSemiring for LogWeight {
 impl_quantize_f32!(LogWeight);
 
 partial_eq_and_hash_f32!(LogWeight);
+
+impl SerializableSemiring for LogWeight {
+    fn weight_type() -> String {
+        "log".to_string()
+    }
+
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
+        let (i, weight) = le_f32(i)?;
+        Ok((i, Self::new(weight)))
+    }
+
+    fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()> {
+        write_bin_f32(file, *self.value())
+    }
+
+    fn parse_text(i: &str) -> IResult<&str, Self> {
+        let (i, f) = float(i)?;
+        Ok((i, Self::new(f)))
+    }
+}
+
+test_semiring_serializable!(
+    tests_log_weight_serializable,
+    LogWeight,
+    LogWeight::new(0.3) LogWeight::new(0.5) LogWeight::new(0.0) LogWeight::new(-1.2)
+);

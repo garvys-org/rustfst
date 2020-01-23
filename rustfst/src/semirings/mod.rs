@@ -1,5 +1,9 @@
 #[macro_use]
 mod semiring;
+
+#[macro_use]
+mod macros;
+
 mod boolean_weight;
 mod gallic_weight;
 mod integer_weight;
@@ -21,7 +25,7 @@ pub use self::log_weight::LogWeight;
 pub use self::probability_weight::ProbabilityWeight;
 pub use self::product_weight::ProductWeight;
 pub use self::semiring::{
-    CompleteSemiring, DivideType, Semiring, SemiringProperties, StarSemiring,
+    CompleteSemiring, DivideType, Semiring, SemiringProperties, SerializableSemiring, StarSemiring,
     WeaklyDivisibleSemiring, WeightQuantize,
 };
 pub(crate) use self::string_variant::StringWeightVariant;

@@ -5,13 +5,12 @@ use crate::algorithms::weight_convert;
 use crate::algorithms::weight_converters::FromGallicConverter;
 use crate::algorithms::weight_converters::ToGallicConverter;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::TextParser;
-use crate::semirings::GallicWeight;
+use crate::fst_traits::SerializableFst;
 use crate::semirings::GallicWeightLeft;
 use crate::semirings::GallicWeightMin;
 use crate::semirings::GallicWeightRestrict;
 use crate::semirings::GallicWeightRight;
-use crate::semirings::Semiring;
+use crate::semirings::{GallicWeight, SerializableSemiring};
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -22,8 +21,8 @@ pub struct GallicOperationResult {
 
 pub struct GallicTestData<F>
 where
-    F: TextParser,
-    F::W: Semiring<Type = f32>,
+    F: SerializableFst,
+    F::W: SerializableSemiring,
 {
     pub gallic_type: String,
     pub result: F,
@@ -32,8 +31,8 @@ where
 impl GallicOperationResult {
     pub fn parse<F>(&self) -> GallicTestData<F>
     where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+        F: SerializableFst,
+        F::W: SerializableSemiring,
     {
         GallicTestData {
             gallic_type: self.gallic_type.clone(),
@@ -44,7 +43,7 @@ impl GallicOperationResult {
 
 pub fn test_gallic_encode_decode<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: Semiring<Type = f32> + 'static,
+    W: 'static + SerializableSemiring,
 {
     for data in &test_data.gallic_encode_decode {
         let mut to_gallic = ToGallicConverter {};

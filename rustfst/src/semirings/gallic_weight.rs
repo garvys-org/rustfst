@@ -1,12 +1,15 @@
 use std::fmt::{Display, Formatter, Result};
+use std::io::Write;
+use std::marker::PhantomData;
 
 use failure::Fallible;
+use nom::IResult;
 
 use crate::semirings::ProductWeight;
 use crate::semirings::Semiring;
 use crate::semirings::{
-    DivideType, SemiringProperties, StringWeightLeft, StringWeightRestrict, StringWeightRight,
-    UnionWeight, UnionWeightOption, WeaklyDivisibleSemiring, WeightQuantize,
+    DivideType, SemiringProperties, SerializableSemiring, StringWeightLeft, StringWeightRestrict,
+    StringWeightRight, UnionWeight, UnionWeightOption, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::Label;
 
@@ -49,7 +52,7 @@ macro_rules! gallic_weight {
     ($semiring: ty, $string_weight: ty, $gallic_type: expr, $reverse_semiring: ty) => {
         impl<W> std::fmt::Display for $semiring
         where
-            W: Semiring,
+            W: SerializableSemiring,
         {
             fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
                 self.0.fmt(f)
@@ -198,6 +201,31 @@ macro_rules! gallic_weight {
                 self.0.quantize_assign(delta)
             }
         }
+
+        impl<W: SerializableSemiring> SerializableSemiring for $semiring {
+            fn weight_type() -> String {
+                match $gallic_type {
+                    GallicType::GallicLeft => "left_gallic".to_string(),
+                    GallicType::GallicRight => "right_gallic".to_string(),
+                    GallicType::GallicRestrict => "restricted_gallic".to_string(),
+                    GallicType::GallicMin => "min_gallic".to_string(),
+                }
+            }
+
+            fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
+                let (i, w) = ProductWeight::<$string_weight, W>::parse_binary(i)?;
+                Ok((i, Self(w)))
+            }
+
+            fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()> {
+                self.0.write_binary(file)
+            }
+
+            fn parse_text(i: &str) -> IResult<&str, Self> {
+                let (i, w) = ProductWeight::<$string_weight, W>::parse_text(i)?;
+                Ok((i, Self(w)))
+            }
+        }
     };
 }
 
@@ -228,7 +256,6 @@ gallic_weight!(
     GallicType::GallicMin,
     GallicWeightMin<W::ReverseWeight>
 );
-use std::marker::PhantomData;
 #[derive(Debug, Hash, Default, Clone, PartialEq, PartialOrd, Eq)]
 pub struct GallicUnionWeightOption<W> {
     ghost: PhantomData<W>,
@@ -288,7 +315,7 @@ where
 
 impl<W> Display for GallicWeight<W>
 where
-    W: Semiring,
+    W: SerializableSemiring,
 {
     fn fmt(&self, f: &mut Formatter) -> Result {
         self.0.fmt(f)
@@ -424,3 +451,73 @@ where
         self.0.quantize_assign(delta)
     }
 }
+
+impl<W: SerializableSemiring> SerializableSemiring for GallicWeight<W> {
+    fn weight_type() -> String {
+        "gallic".to_string()
+    }
+
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
+        let (i, w) = UnionWeight::<
+            GallicWeightRestrict<W>,
+            GallicUnionWeightOption<GallicWeightRestrict<W>>,
+        >::parse_binary(i)?;
+        Ok((i, Self(w)))
+    }
+
+    fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()> {
+        self.0.write_binary(file)
+    }
+
+    fn parse_text(i: &str) -> IResult<&str, Self> {
+        let (i, w) = UnionWeight::<
+            GallicWeightRestrict<W>,
+            GallicUnionWeightOption<GallicWeightRestrict<W>>,
+        >::parse_text(i)?;
+        Ok((i, Self(w)))
+    }
+}
+
+// TODO: Add test
+#[cfg(test)]
+use crate::semirings::TropicalWeight;
+
+test_semiring_serializable!(
+    test_gallic_weight_left_serializable,
+    GallicWeightLeft<TropicalWeight>,
+    GallicWeightLeft::one()
+    GallicWeightLeft::zero()
+    GallicWeightLeft::from((vec![1,2],TropicalWeight::new(0.3)))
+);
+
+test_semiring_serializable!(
+    test_gallic_weight_right_serializable,
+    GallicWeightRight<TropicalWeight>,
+    GallicWeightRight::one()
+    GallicWeightRight::zero()
+    GallicWeightRight::from((vec![1,2],TropicalWeight::new(0.3)))
+);
+
+test_semiring_serializable!(
+    test_gallic_weight_restrict_serializable,
+    GallicWeightRestrict<TropicalWeight>,
+    GallicWeightRestrict::one()
+    GallicWeightRestrict::zero()
+    GallicWeightRestrict::from((vec![1,2],TropicalWeight::new(0.3)))
+);
+
+test_semiring_serializable!(
+    test_gallic_weight_min_serializable,
+    GallicWeightMin<TropicalWeight>,
+    GallicWeightMin::one()
+    GallicWeightMin::zero()
+    GallicWeightMin::from((vec![1,2],TropicalWeight::new(0.3)))
+);
+
+test_semiring_serializable!(
+    test_gallic_weight_serializable,
+    GallicWeight<TropicalWeight>,
+    GallicWeight::one()
+    GallicWeight::zero()
+    GallicWeight::from((vec![1,2],TropicalWeight::new(0.3)))
+);

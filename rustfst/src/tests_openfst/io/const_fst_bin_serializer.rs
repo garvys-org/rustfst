@@ -2,13 +2,13 @@ use failure::Fallible;
 use tempfile::tempdir;
 
 use crate::fst_impls::{ConstFst, VectorFst};
-use crate::fst_traits::{BinaryDeserializer, BinarySerializer};
-use crate::semirings::Semiring;
+use crate::fst_traits::SerializableFst;
+use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
 pub fn test_const_fst_bin_serializer<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: Semiring<Type = f32>,
+    W: SerializableSemiring + 'static,
 {
     let dir = tempdir()?;
 

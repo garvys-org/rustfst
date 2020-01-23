@@ -16,6 +16,10 @@ impl<W: Semiring> PlusMapper<W> {
         }
     }
 
+    pub fn from_weight(value: W) -> Self {
+        PlusMapper { to_add: value }
+    }
+
     pub fn map_weight(&self, weight: &mut W) -> Fallible<()> {
         weight.plus_assign(&self.to_add)
     }

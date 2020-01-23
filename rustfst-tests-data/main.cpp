@@ -4,6 +4,8 @@
 // Json library
 #include "json.hpp"
 
+#include "utils.h"
+
 // Fst lib
 #include "fst/vector-fst.h"
 #include "fst/script/print.h"
@@ -21,6 +23,7 @@
 #include "fst_008/fst_008.h"
 #include "fst_009/fst_009.h"
 #include "fst_010/fst_010.h"
+#include "fst_011/fst_011.h"
 
 #include "symt_000/symt_000.h"
 #include "symt_001/symt_001.h"
@@ -37,6 +40,13 @@ string fst_to_string(const F& a) {
     fst::FstPrinter<Arc> fstprinter(a, NULL, NULL, NULL, false, true, sep);
     fstprinter.Print(&sstrm, string("<rustfst>"));
     return sstrm.str();
+}
+
+template<class W>
+string weight_to_string(const W& a) {
+    std::stringstream ss;
+    ss << a;
+    return ss.str();
 }
 
 template<class F>
@@ -91,7 +101,7 @@ void compute_fst_shortest_distance(const F& raw_fst, json& j) {
         fst::ShortestDistance(raw_fst, &distance, reverse);
         std::vector<string> distance_s;
         for(auto e: distance) {
-            distance_s.push_back(std::to_string(e.Value()));
+            distance_s.push_back(weight_to_string(e));
         }
         json j2;
         j2["reverse"] = reverse;
@@ -118,6 +128,26 @@ template<class F, class C>
 void compute_fst_compute_arc_map(const F& raw_fst, json& j, const string& name, C mapper) {
     auto fst_out = *raw_fst.Copy();
     fst::ArcMap(&fst_out, mapper);
+    j[name]["result"] = fst_to_string(fst_out);
+}
+
+template<class F>
+void compute_fst_compute_arc_map_plus(const F& raw_fst, json& j, const typename F::Weight& weight) {
+    auto fst_out = *raw_fst.Copy();
+    auto mapper = fst::PlusMapper<typename F::Arc>(weight);
+    fst::ArcMap(&fst_out, mapper);
+    auto name = "arc_map_plus";
+    j[name]["weight"] = weight_to_string(weight);
+    j[name]["result"] = fst_to_string(fst_out);
+}
+
+template<class F>
+void compute_fst_compute_arc_map_times(const F& raw_fst, json& j, const typename F::Weight& weight) {
+    auto fst_out = *raw_fst.Copy();
+    auto mapper = fst::TimesMapper<typename F::Arc>(weight);
+    fst::ArcMap(&fst_out, mapper);
+    auto name = "arc_map_times";
+    j[name]["weight"] = weight_to_string(weight);
     j[name]["result"] = fst_to_string(fst_out);
 }
 
@@ -508,15 +538,16 @@ void do_compute_fst_replace(
 }
 
 template<class F>
-void compute_fst_replace(const F& raw_fst, json& j) {
-    using Weight = typename F::Weight;
-    using Arc = typename F::Arc;
-    using StateId = typename F::Arc::StateId;
+void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fst_test_data) {
+    using MyFst = typename F::MyFst;
+    using Weight = typename F::MyWeight;
+    using Arc = typename F::MyArc;
+    using StateId = typename F::MyArc::StateId;
 
     std::set<int> labels;
-    for (fst::StateIterator<F> siter(raw_fst); !siter.Done(); siter.Next()) {
+    for (fst::StateIterator<MyFst> siter(raw_fst); !siter.Done(); siter.Next()) {
         StateId state_id = siter.Value();
-        for (fst::ArcIterator<F> aiter(raw_fst, state_id); !aiter.Done(); aiter.Next()) {
+        for (fst::ArcIterator<MyFst> aiter(raw_fst, state_id); !aiter.Done(); aiter.Next()) {
             const Arc &arc = aiter.Value();
             labels.insert(arc.olabel);
         }
@@ -530,27 +561,27 @@ void compute_fst_replace(const F& raw_fst, json& j) {
     auto label_3 = max_label + 4;
     auto label_4 = max_label + 5;
 
-    fst::VectorFst<typename F::Arc> fst_1;
+    fst::VectorFst<Arc> fst_1;
     fst_1.AddState();
     fst_1.AddState();
     fst_1.AddState();
     fst_1.SetStart(0);
-    fst_1.SetFinal(2, Weight(0.3));
-    fst_1.AddArc(0, Arc(label_1, label_2, Weight(1.2), 1));
-    fst_1.AddArc(0, Arc(label_3, label_2, Weight(2.2), 1));
-    fst_1.AddArc(1, Arc(label_3, label_4, Weight(2.3), 2));
-    fst_1.AddArc(1, Arc(label_1, label_4, Weight(1.7), 2));
+    fst_1.SetFinal(2, fst_test_data.random_weight());
+    fst_1.AddArc(0, Arc(label_1, label_2, fst_test_data.random_weight(), 1));
+    fst_1.AddArc(0, Arc(label_3, label_2, fst_test_data.random_weight(), 1));
+    fst_1.AddArc(1, Arc(label_3, label_4, fst_test_data.random_weight(), 2));
+    fst_1.AddArc(1, Arc(label_1, label_4, fst_test_data.random_weight(), 2));
 
-    fst::VectorFst<typename F::Arc> fst_2;
+    fst::VectorFst<Arc> fst_2;
     fst_2.AddState();
     fst_2.AddState();
     fst_2.AddState();
     fst_2.SetStart(0);
-    fst_2.SetFinal(2, Weight(0.3));
-    fst_2.AddArc(0, Arc(label_4, label_1, Weight(1.4), 1));
-    fst_2.AddArc(0, Arc(label_1, label_3, Weight(2.2), 1));
-    fst_2.AddArc(1, Arc(label_4, label_4, Weight(2.6), 2));
-    fst_2.AddArc(1, Arc(label_1, label_3, Weight(1.9), 2));
+    fst_2.SetFinal(2, fst_test_data.random_weight());
+    fst_2.AddArc(0, Arc(label_4, label_1, fst_test_data.random_weight(), 1));
+    fst_2.AddArc(0, Arc(label_1, label_3, fst_test_data.random_weight(), 1));
+    fst_2.AddArc(1, Arc(label_4, label_4, fst_test_data.random_weight(), 2));
+    fst_2.AddArc(1, Arc(label_1, label_3, fst_test_data.random_weight(), 2));
 
     std::vector<bool> v = {true, false};
 
@@ -560,7 +591,7 @@ void compute_fst_replace(const F& raw_fst, json& j) {
             vector<pair<typename Arc::Label, const fst::Fst<Arc>* > > label_fst_pairs;
             label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
             label_fst_pairs.push_back(std::make_pair(label, &fst_1));
-            do_compute_fst_replace<F>(label_fst_pairs, root, epsilon_on_replace, j);
+            do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j);
         }
     }
 
@@ -573,15 +604,15 @@ void compute_fst_replace(const F& raw_fst, json& j) {
                     label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
                     label_fst_pairs.push_back(std::make_pair(label_fst_1, &fst_1));
                     label_fst_pairs.push_back(std::make_pair(label_fst_2, &fst_2));
-                    do_compute_fst_replace<F>(label_fst_pairs, root, epsilon_on_replace, j);
+                    do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j);
                 }
             }
         }
     }
 
     auto label_5 = label_4 + 1;
-    fst_1.AddArc(0, Arc(label_3, label_5, Weight(2.2), 1));
-    fst_1.AddArc(1, Arc(label_5, label_2, Weight(2.2), 2));
+    fst_1.AddArc(0, Arc(label_3, label_5, fst_test_data.random_weight(), 1));
+    fst_1.AddArc(1, Arc(label_5, label_2, fst_test_data.random_weight(), 2));
 
     // Two replacements + recursion
     for (auto label: labels) {
@@ -590,7 +621,7 @@ void compute_fst_replace(const F& raw_fst, json& j) {
             label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
             label_fst_pairs.push_back(std::make_pair(label, &fst_1));
             label_fst_pairs.push_back(std::make_pair(label_5, &fst_2));
-            do_compute_fst_replace<F>(label_fst_pairs, root, epsilon_on_replace, j);
+            do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j);
         }
     }
 
@@ -601,21 +632,10 @@ void compute_fst_replace(const F& raw_fst, json& j) {
 }
 
 template<class F>
-void compute_fst_union(const F& raw_fst, json& j) {
+void compute_fst_union(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2) {
     using Weight = typename F::Weight;
     using Arc = typename F::Arc;
     j["union"] = {};
-
-    fst::VectorFst<typename F::Arc> fst_2;
-    fst_2.AddState();
-    fst_2.AddState();
-    fst_2.AddState();
-    fst_2.SetStart(0);
-    fst_2.SetFinal(2, Weight(0.3));
-    fst_2.AddArc(0, Arc(2, 12, Weight(1.2), 1));
-    fst_2.AddArc(0, Arc(3, 1, Weight(2.2), 1));
-    fst_2.AddArc(1, Arc(6, 3, Weight(2.3), 2));
-    fst_2.AddArc(1, Arc(4, 2, Weight(1.7), 2));
 
     auto fst_1 = new fst::VectorFst<Arc>(raw_fst);
 
@@ -632,21 +652,10 @@ void compute_fst_union(const F& raw_fst, json& j) {
 }
 
 template<class F>
-void compute_fst_concat(const F& raw_fst, json& j) {
+void compute_fst_concat(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2) {
     using Weight = typename F::Weight;
     using Arc = typename F::Arc;
     j["concat"] = {};
-
-    fst::VectorFst<typename F::Arc> fst_2;
-    fst_2.AddState();
-    fst_2.AddState();
-    fst_2.AddState();
-    fst_2.SetStart(0);
-    fst_2.SetFinal(2, Weight(0.3));
-    fst_2.AddArc(0, Arc(2, 12, Weight(1.2), 1));
-    fst_2.AddArc(0, Arc(3, 1, Weight(2.2), 1));
-    fst_2.AddArc(1, Arc(6, 3, Weight(2.3), 2));
-    fst_2.AddArc(1, Arc(4, 2, Weight(1.7), 2));
 
     auto fst_1 = new fst::VectorFst<Arc>(raw_fst);
 
@@ -694,20 +703,22 @@ void compute_fst_closure_star(const F& raw_fst, json& j) {
     j["closure_star"]["result_dynamic"] = fst_to_string(dynamic_fst);
 }
 
-template<class A>
-void compute_fst_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
+template<class F>
+void compute_fst_data(const F& fst_test_data, const string fst_name) {
     std::cout << "FST :" << fst_name << std::endl;
     json data;
 
+    auto raw_fst = fst_test_data.get_fst();
+
     data["name"] = fst_name;
-    data["weight_type"] = A::Type();
+    data["weight_type"] = F::MyArc::Type();
     data["raw"]["result"] = fst_to_string(raw_fst);
 
     data["raw_vector_bin_path"] = "raw_vector.fst";
     raw_fst.Write(fst_name + "/raw_vector.fst");
 
     fst::FstWriteOptions write_opts("<unspecified>");
-    fst::ConstFst<A> raw_const_fst(raw_fst);
+    fst::ConstFst<typename F::MyArc> raw_const_fst(raw_fst);
     // Not aligned
     write_opts.align = false;
     data["raw_const_bin_path"] = "raw_const.fst";
@@ -748,18 +759,18 @@ void compute_fst_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
     compute_fst_compute_weight_pushing_final(raw_fst, data);
 
     std::cout << "ArcMap" << std::endl;
-    compute_fst_compute_arc_map(raw_fst, data, "arc_map_identity", fst::IdentityMapper<A>());
-    compute_fst_compute_arc_map(raw_fst, data, "arc_map_rmweight", fst::RmWeightMapper<A>());
-    compute_fst_compute_arc_map(raw_fst, data, "arc_map_invert", fst::InvertWeightMapper<A>());
-    compute_fst_compute_arc_map(raw_fst, data, "arc_map_input_epsilon", fst::InputEpsilonMapper<A>());
-    compute_fst_compute_arc_map(raw_fst, data, "arc_map_output_epsilon", fst::OutputEpsilonMapper<A>());
-    compute_fst_compute_arc_map(raw_fst, data, "arc_map_quantize", fst::QuantizeMapper<A>());
-    compute_fst_compute_arc_map(raw_fst, data, "arc_map_plus", fst::PlusMapper<A>(1.5));
-    compute_fst_compute_arc_map(raw_fst, data, "arc_map_times", fst::TimesMapper<A>(1.5));
+    compute_fst_compute_arc_map(raw_fst, data, "arc_map_identity", fst::IdentityMapper<typename F::MyArc>());
+    compute_fst_compute_arc_map(raw_fst, data, "arc_map_rmweight", fst::RmWeightMapper<typename F::MyArc>());
+    compute_fst_compute_arc_map(raw_fst, data, "arc_map_invert", fst::InvertWeightMapper<typename F::MyArc>());
+    compute_fst_compute_arc_map(raw_fst, data, "arc_map_input_epsilon", fst::InputEpsilonMapper<typename F::MyArc>());
+    compute_fst_compute_arc_map(raw_fst, data, "arc_map_output_epsilon", fst::OutputEpsilonMapper<typename F::MyArc>());
+    compute_fst_compute_arc_map(raw_fst, data, "arc_map_quantize", fst::QuantizeMapper<typename F::MyArc>());
+    compute_fst_compute_arc_map_plus(raw_fst, data, fst_test_data.get_weight_plus_mapper());
+    compute_fst_compute_arc_map_times(raw_fst, data, fst_test_data.get_weight_times_mapper());
 
     std::cout << "ArcSort" << std::endl;
-    compute_fst_compute_arcsort(raw_fst, data, "arcsort_ilabel", fst::ILabelCompare<A>());
-    compute_fst_compute_arcsort(raw_fst, data, "arcsort_olabel", fst::OLabelCompare<A>());
+    compute_fst_compute_arcsort(raw_fst, data, "arcsort_ilabel", fst::ILabelCompare<typename F::MyArc>());
+    compute_fst_compute_arcsort(raw_fst, data, "arcsort_olabel", fst::OLabelCompare<typename F::MyArc>());
 
     std::cout << "Encode" << std::endl;
     compute_fst_encode(raw_fst, data);
@@ -768,8 +779,8 @@ void compute_fst_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
     compute_fst_encode_decode(raw_fst, data);
 
     std::cout << "StateMap" << std::endl;
-    compute_fst_state_map(raw_fst, data, "state_map_arc_sum", fst::ArcSumMapper<A>(raw_fst));
-    compute_fst_state_map(raw_fst, data, "state_map_arc_unique", fst::ArcUniqueMapper<A>(raw_fst));
+    compute_fst_state_map(raw_fst, data, "state_map_arc_sum", fst::ArcSumMapper<typename F::MyArc>(raw_fst));
+    compute_fst_state_map(raw_fst, data, "state_map_arc_unique", fst::ArcUniqueMapper<typename F::MyArc>(raw_fst));
 
     std::cout << "Determinization" << std::endl;
     compute_fst_determinization(raw_fst, data);
@@ -799,13 +810,13 @@ void compute_fst_data(const fst::VectorFst<A>& raw_fst, const string fst_name) {
     compute_fst_push(raw_fst, data);
 
     std::cout << "Replace" << std::endl;
-    compute_fst_replace(raw_fst, data);
+    compute_fst_replace(raw_fst, data, fst_test_data);
 
     std::cout << "Union" << std::endl;
-    compute_fst_union(raw_fst, data);
+    compute_fst_union(raw_fst, data, fst_test_data.get_fst_union());
 
     std::cout << "Concat" << std::endl;
-    compute_fst_concat(raw_fst, data);
+    compute_fst_concat(raw_fst, data, fst_test_data.get_fst_concat());
 
     std::cout << "Closure Plus" << std::endl;
     compute_fst_closure_plus(raw_fst, data);
@@ -839,22 +850,113 @@ void compute_symt_data(const fst::SymbolTable symt, const string symt_name) {
     std::cout << std::endl;
 }
 
+template <class W>
+void compute_weight_data(const W& w1, const W& w2, const string weight_name) {
+    std::cout << "Weight :" << weight_name << std::endl;
+    json data;
+
+    data["name"] = weight_name;
+    data["weight_type"] = W::Type();
+    data["arc_type"] = fst::ArcTpl<W>::Type();
+    data["one"] = weight_to_string(W::One());
+    data["zero"] = weight_to_string(W::Zero());
+
+    data["weight_1"] = weight_to_string(w1);
+    data["weight_2"] = weight_to_string(w2);
+
+    data["plus"] = weight_to_string(Plus(w1, w2));
+    data["times"] = weight_to_string(Times(w1, w2));
+
+    std::ofstream o("weights/" + weight_name + ".json");
+    o << std::setw(4) << data << std::endl;
+}
+
 
 int main() {
+    srand (time(NULL));
     FLAGS_fst_error_fatal = false;
-    compute_fst_data(compute_fst_000(), "fst_000");
-    compute_fst_data(compute_fst_001(), "fst_001");
-    compute_fst_data(compute_fst_002(), "fst_002");
-    compute_fst_data(compute_fst_003(), "fst_003");
-    compute_fst_data(compute_fst_004(), "fst_004");
-    compute_fst_data(compute_fst_005(), "fst_005");
-    compute_fst_data(compute_fst_006(), "fst_006");
-    compute_fst_data(compute_fst_007(), "fst_007");
-    compute_fst_data(compute_fst_008(), "fst_008");
-    compute_fst_data(compute_fst_009(), "fst_009");
-    compute_fst_data(compute_fst_010(), "fst_010");
+    compute_fst_data(FstTestData000(), "fst_000");
+    compute_fst_data(FstTestData001(), "fst_001");
+    compute_fst_data(FstTestData002(), "fst_002");
+    compute_fst_data(FstTestData003(), "fst_003");
+    compute_fst_data(FstTestData004(), "fst_004");
+    compute_fst_data(FstTestData005(), "fst_005");
+    compute_fst_data(FstTestData006(), "fst_006");
+    compute_fst_data(FstTestData007(), "fst_007");
+    compute_fst_data(FstTestData008(), "fst_008");
+    compute_fst_data(FstTestData009(), "fst_009");
+    compute_fst_data(FstTestData010(), "fst_010");
+    compute_fst_data(FstTestData011(), "fst_011");
 
     compute_symt_data(compute_symt_000(), "symt_000");
     compute_symt_data(compute_symt_001(), "symt_001");
     compute_symt_data(compute_symt_002(), "symt_002");
+
+    compute_weight_data(fst::TropicalWeight(1.2), fst::TropicalWeight(3.2), "weight_001");
+    compute_weight_data(fst::LogWeight(1.2), fst::LogWeight(3.2), "weight_002");
+    compute_weight_data(
+        fst::ProductWeight<fst::TropicalWeight, fst::LogWeight>(1.2, 3.2),
+        fst::ProductWeight<fst::TropicalWeight, fst::LogWeight>(0.3, 0.1),
+        "weight_003"
+    );
+    compute_weight_data(
+        fst::ProductWeight<fst::LogWeight, fst::TropicalWeight>(1.2, 3.2),
+        fst::ProductWeight<fst::LogWeight, fst::TropicalWeight>(0.3, 0.1),
+        "weight_004"
+    );
+    compute_weight_data(
+        fst::StringWeight<int, fst::STRING_LEFT>(1),
+        fst::StringWeight<int, fst::STRING_LEFT>(3),
+        "weight_005"
+    );
+    compute_weight_data(
+        fst::StringWeight<int, fst::STRING_RIGHT>(1),
+        fst::StringWeight<int, fst::STRING_RIGHT>(3),
+        "weight_006"
+    );
+    compute_weight_data(
+        fst::StringWeight<int, fst::STRING_RESTRICT>(1),
+        fst::StringWeight<int, fst::STRING_RESTRICT>(1),
+        "weight_007"
+    );
+    {
+        using SW = fst::StringWeight<int, fst::STRING_LEFT>;
+        using W = fst::TropicalWeight;
+        using GW = fst::GallicWeight<int, W, fst::GALLIC_LEFT>;
+        auto w1 = GW(SW(1), W(1.2));
+        auto w2 = GW(SW(2), W(3.1));
+        compute_weight_data(w1, w2, "weight_008");
+    }
+    {
+        using SW = fst::StringWeight<int, fst::STRING_RIGHT>;
+        using W = fst::TropicalWeight;
+        using GW = fst::GallicWeight<int, W, fst::GALLIC_RIGHT>;
+        auto w1 = GW(SW(1), W(1.2));
+        auto w2 = GW(SW(2), W(3.1));
+        compute_weight_data(w1, w2, "weight_009");
+    }
+    {
+        using SW = fst::StringWeight<int, fst::STRING_RESTRICT>;
+        using W = fst::TropicalWeight;
+        using GW = fst::GallicWeight<int, W, fst::GALLIC_RESTRICT>;
+        auto w1 = GW(SW(1), W(1.2));
+        auto w2 = GW(SW(1), W(3.1));
+        compute_weight_data(w1, w2, "weight_010");
+    }
+    {
+        using SW = fst::StringWeight<int, fst::STRING_RESTRICT>;
+        using W = fst::TropicalWeight;
+        using GW = fst::GallicWeight<int, W, fst::GALLIC_MIN>;
+        auto w1 = GW(SW(1), W(1.2));
+        auto w2 = GW(SW(2), W(3.1));
+        compute_weight_data(w1, w2, "weight_011");
+    }
+    {
+        using SW = fst::StringWeight<int, fst::STRING_RESTRICT>;
+        using W = fst::TropicalWeight;
+        using GW = fst::GallicWeight<int, W, fst::GALLIC>;
+        auto w1 = GW(SW(1), W(1.2));
+        auto w2 = GW(SW(2), W(3.1));
+        compute_weight_data(w1, w2, "weight_012");
+    }
 }

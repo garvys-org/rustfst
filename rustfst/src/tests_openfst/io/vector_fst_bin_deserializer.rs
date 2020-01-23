@@ -1,14 +1,13 @@
 use failure::Fallible;
 
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::BinaryDeserializer;
-use crate::semirings::Semiring;
-
+use crate::fst_traits::SerializableFst;
+use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
 pub fn test_vector_fst_bin_deserializer<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: Semiring<Type = f32>,
+    W: SerializableSemiring + 'static,
 {
     let parsed_fst_bin = VectorFst::<W>::read(&test_data.raw_vector_bin_path)?;
 

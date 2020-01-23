@@ -2,7 +2,6 @@ use std::f32;
 use std::hash::{Hash, Hasher};
 
 use failure::Fallible;
-
 use ordered_float::OrderedFloat;
 
 use crate::semirings::{

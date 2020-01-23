@@ -3,8 +3,8 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{push, PushType, ReweightType};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::TextParser;
-use crate::semirings::{Semiring, WeaklyDivisibleSemiring, WeightQuantize};
+use crate::fst_traits::SerializableFst;
+use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -19,8 +19,8 @@ pub struct PushOperationResult {
 
 pub struct PushTestData<F>
 where
-    F: TextParser,
-    F::W: Semiring<Type = f32>,
+    F: SerializableFst,
+    F::W: SerializableSemiring,
 {
     pub push_labels: bool,
     pub push_weights: bool,
@@ -33,8 +33,8 @@ where
 impl PushOperationResult {
     pub fn parse<F>(&self) -> PushTestData<F>
     where
-        F: TextParser,
-        F::W: Semiring<Type = f32>,
+        F: SerializableFst,
+        F::W: SerializableSemiring,
     {
         PushTestData {
             push_labels: self.push_labels,
@@ -49,7 +49,7 @@ impl PushOperationResult {
 
 pub fn test_push<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
-    W: Semiring<Type = f32> + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
     for push_test_data in &test_data.push {

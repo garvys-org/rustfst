@@ -3,17 +3,15 @@ use std::fmt::Display;
 use failure::Fallible;
 
 use crate::algorithms::invert;
-use crate::fst_traits::MutableFst;
-use crate::fst_traits::TextParser;
-use crate::semirings::Semiring;
+use crate::fst_traits::{MutableFst, SerializableFst};
+use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
-
 use crate::tests_openfst::FstTestData;
 
 pub fn test_invert<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
-    F: TextParser + MutableFst + Display,
-    F::W: Semiring<Type = f32> + WeaklyDivisibleSemiring,
+    F: SerializableFst + MutableFst + Display,
+    F::W: SerializableSemiring + WeaklyDivisibleSemiring,
 {
     // Invert
     let mut fst_invert = test_data.raw.clone();

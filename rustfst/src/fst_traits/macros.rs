@@ -49,7 +49,7 @@ macro_rules! write_fst {
 
 macro_rules! display_fst_trait {
     ($semiring:tt, $fst_type:ty) => {
-        impl<$semiring: 'static + Semiring> fmt::Display for $fst_type {
+        impl<$semiring: 'static + SerializableSemiring> fmt::Display for $fst_type {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                 write_fst!(self, f, true);
                 Ok(())
