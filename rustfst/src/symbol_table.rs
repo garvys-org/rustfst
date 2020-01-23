@@ -2,12 +2,11 @@ use std::collections::hash_map::{Entry, Iter, Keys};
 use std::collections::HashMap;
 use std::fmt;
 use std::fs::File;
-use std::io::{LineWriter, Write};
+use std::io::{BufWriter, LineWriter, Write};
 use std::path::Path;
 
-use itertools::Itertools;
-
 use failure::Fallible;
+use itertools::Itertools;
 
 use crate::parsers::text_symt::parsed_text_symt::ParsedTextSymt;
 use crate::{Label, Symbol, EPS_SYMBOL};
@@ -246,9 +245,9 @@ impl SymbolTable {
 
     pub fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Fallible<()> {
         let buffer = File::create(path_output.as_ref())?;
-        let mut line_writer = LineWriter::new(buffer);
+        let mut writer = BufWriter::new(LineWriter::new(buffer));
 
-        write_symt_text!(self, line_writer);
+        write_symt_text!(self, writer);
 
         Ok(())
     }
@@ -256,9 +255,9 @@ impl SymbolTable {
     /// Writes the text_fst representation of the symbol table into a String.
     pub fn text(&self) -> Fallible<String> {
         let buffer = Vec::<u8>::new();
-        let mut line_writer = LineWriter::new(buffer);
-        write_symt_text!(self, line_writer);
-        Ok(String::from_utf8(line_writer.into_inner()?)?)
+        let mut writer = BufWriter::new(LineWriter::new(buffer));
+        write_symt_text!(self, writer);
+        Ok(String::from_utf8(writer.into_inner()?.into_inner()?)?)
     }
 }
 
