@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Parse `FstFlags` when parsing binary `ConstFst` and `VectorFst`. Raise an error if the file contains a SymbolTable. Not yet supported.
 - Remove `TextParser`, `BinarySerializer` and `BinaryDeserializer` traits. Add `SerializableFst` in replacement.
 - Fix: when serializing an `Fst`, now uses the result of the `arc_type()` method instead of using an hardcoded value.
+- `Display` is no longer a trait bound of `Semiring`. However, it is required to implement `SerializableSemiring`.
 
 ## [0.4.0] - 2019-11-12
 
