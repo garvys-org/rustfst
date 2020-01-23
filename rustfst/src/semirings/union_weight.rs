@@ -2,12 +2,20 @@ use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::fmt::{Display, Formatter, Result};
 use std::hash::Hash;
+use std::io::Write;
 use std::marker::PhantomData;
 
 use failure::Fallible;
+use nom::branch::alt;
+use nom::bytes::complete::tag;
+use nom::multi::{count, separated_list};
+use nom::number::complete::le_i32;
+use nom::IResult;
 
+use crate::parsers::bin_fst::utils_serialization::write_bin_i32;
 use crate::semirings::{
-    DivideType, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
+    DivideType, Semiring, SemiringProperties, SerializableSemiring, WeaklyDivisibleSemiring,
+    WeightQuantize,
 };
 
 pub trait UnionWeightOption<W: Semiring>: Debug + Hash + Default + Clone + PartialOrd + Eq {
@@ -23,16 +31,6 @@ pub trait UnionWeightOption<W: Semiring>: Debug + Hash + Default + Clone + Parti
 pub struct UnionWeight<W: Semiring, O: UnionWeightOption<W>> {
     pub(crate) list: Vec<W>,
     ghost: PhantomData<O>,
-}
-
-impl<W, O> Display for UnionWeight<W, O>
-where
-    W: Semiring,
-    O: UnionWeightOption<W>,
-{
-    fn fmt(&self, f: &mut Formatter) -> Result {
-        self.list.fmt(f)
-    }
 }
 
 impl<W, O> AsRef<UnionWeight<W, O>> for UnionWeight<W, O>
@@ -238,5 +236,70 @@ where
             self.push_back(e.quantize(delta)?, true)?;
         }
         Ok(())
+    }
+}
+
+impl<W, O> UnionWeight<W, O>
+where
+    W: SerializableSemiring,
+    O: UnionWeightOption<W>,
+{
+    fn parse_text_empty_set(i: &str) -> IResult<&str, Self> {
+        let (i, _) = tag("EmptySet")(i)?;
+        Ok((i, Self::zero()))
+    }
+
+    fn parse_text_non_empty_set(i: &str) -> IResult<&str, Self> {
+        let (i, weights) = separated_list(tag(","), W::parse_text)(i)?;
+        Ok((i, Self::new(weights)))
+    }
+}
+
+impl<W, O> Display for UnionWeight<W, O>
+where
+    W: SerializableSemiring,
+    O: UnionWeightOption<W>,
+{
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        if self.is_empty() {
+            write!(f, "EmptySet")?;
+        } else {
+            for (idx, w) in self.list.iter().enumerate() {
+                if idx > 0 {
+                    write!(f, ",")?;
+                }
+                write!(f, "{}", w)?;
+            }
+        }
+        Ok(())
+    }
+}
+
+impl<W, O> SerializableSemiring for UnionWeight<W, O>
+where
+    W: SerializableSemiring,
+    O: UnionWeightOption<W>,
+{
+    fn weight_type() -> String {
+        format!("{}_union", W::weight_type())
+    }
+
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
+        let (i, n) = le_i32(i)?;
+        let (i, labels) = count(W::parse_binary, n as usize)(i)?;
+        Ok((i, Self::new(labels)))
+    }
+
+    fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()> {
+        write_bin_i32(file, self.list.len() as i32)?;
+        for w in self.list.iter() {
+            w.write_binary(file)?;
+        }
+        Ok(())
+    }
+
+    fn parse_text(i: &str) -> IResult<&str, Self> {
+        let (i, res) = alt((Self::parse_text_empty_set, Self::parse_text_non_empty_set))(i)?;
+        Ok((i, res))
     }
 }

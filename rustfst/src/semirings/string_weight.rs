@@ -217,7 +217,7 @@ macro_rules! string_semiring {
                                 if idx > 0 {
                                     write!(f, "_")?;
                                 }
-                                write!(f, "{:?}", label)?;
+                                write!(f, "{}", label)?;
                             }
                         }
                     }

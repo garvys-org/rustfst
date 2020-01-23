@@ -921,5 +921,44 @@ int main() {
         fst::StringWeight<int, fst::STRING_RESTRICT>(1),
         "weight_007"
     );
-
+    {
+        using SW = fst::StringWeight<int, fst::STRING_LEFT>;
+        using W = fst::TropicalWeight;
+        using GW = fst::GallicWeight<int, W, fst::GALLIC_LEFT>;
+        auto w1 = GW(SW(1), W(1.2));
+        auto w2 = GW(SW(2), W(3.1));
+        compute_weight_data(w1, w2, "weight_008");
+    }
+    {
+        using SW = fst::StringWeight<int, fst::STRING_RIGHT>;
+        using W = fst::TropicalWeight;
+        using GW = fst::GallicWeight<int, W, fst::GALLIC_RIGHT>;
+        auto w1 = GW(SW(1), W(1.2));
+        auto w2 = GW(SW(2), W(3.1));
+        compute_weight_data(w1, w2, "weight_009");
+    }
+    {
+        using SW = fst::StringWeight<int, fst::STRING_RESTRICT>;
+        using W = fst::TropicalWeight;
+        using GW = fst::GallicWeight<int, W, fst::GALLIC_RESTRICT>;
+        auto w1 = GW(SW(1), W(1.2));
+        auto w2 = GW(SW(1), W(3.1));
+        compute_weight_data(w1, w2, "weight_010");
+    }
+    {
+        using SW = fst::StringWeight<int, fst::STRING_RESTRICT>;
+        using W = fst::TropicalWeight;
+        using GW = fst::GallicWeight<int, W, fst::GALLIC_MIN>;
+        auto w1 = GW(SW(1), W(1.2));
+        auto w2 = GW(SW(2), W(3.1));
+        compute_weight_data(w1, w2, "weight_011");
+    }
+    {
+        using SW = fst::StringWeight<int, fst::STRING_RESTRICT>;
+        using W = fst::TropicalWeight;
+        using GW = fst::GallicWeight<int, W, fst::GALLIC>;
+        auto w1 = GW(SW(1), W(1.2));
+        auto w2 = GW(SW(2), W(3.1));
+        compute_weight_data(w1, w2, "weight_012");
+    }
 }

@@ -4,6 +4,7 @@ use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::semirings::{
+    GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, GallicWeightRight,
     LogWeight, ProductWeight, SerializableSemiring, StringWeightLeft, StringWeightRestrict,
     StringWeightRight, TropicalWeight,
 };
@@ -82,6 +83,7 @@ fn run_test_openfst_weight(test_name: &str) -> Fallible<()> {
     let parsed_operation_result: ParsedWeightOperationResult =
         serde_json::from_str(&string).unwrap();
 
+    // TODO: Infer the Rust weight type from the serialized weight type.
     match parsed_operation_result.weight_type.as_str() {
         "tropical" => {
             let parsed_test_data = parsed_operation_result.parse::<TropicalWeight>();
@@ -111,6 +113,30 @@ fn run_test_openfst_weight(test_name: &str) -> Fallible<()> {
         }
         "restricted_string" => {
             let parsed_test_data = parsed_operation_result.parse::<StringWeightRestrict>();
+            do_run_test_openfst_weight(parsed_test_data)?;
+        }
+        "left_gallic" => {
+            let parsed_test_data =
+                parsed_operation_result.parse::<GallicWeightLeft<TropicalWeight>>();
+            do_run_test_openfst_weight(parsed_test_data)?;
+        }
+        "right_gallic" => {
+            let parsed_test_data =
+                parsed_operation_result.parse::<GallicWeightRight<TropicalWeight>>();
+            do_run_test_openfst_weight(parsed_test_data)?;
+        }
+        "restricted_gallic" => {
+            let parsed_test_data =
+                parsed_operation_result.parse::<GallicWeightRestrict<TropicalWeight>>();
+            do_run_test_openfst_weight(parsed_test_data)?;
+        }
+        "min_gallic" => {
+            let parsed_test_data =
+                parsed_operation_result.parse::<GallicWeightMin<TropicalWeight>>();
+            do_run_test_openfst_weight(parsed_test_data)?;
+        }
+        "gallic" => {
+            let parsed_test_data = parsed_operation_result.parse::<GallicWeight<TropicalWeight>>();
             do_run_test_openfst_weight(parsed_test_data)?;
         }
         _ => bail!(
@@ -155,4 +181,29 @@ fn test_openfst_weight_006() -> Fallible<()> {
 #[test]
 fn test_openfst_weight_007() -> Fallible<()> {
     run_test_openfst_weight("weight_007").map_err(|v| v.into())
+}
+
+#[test]
+fn test_openfst_weight_008() -> Fallible<()> {
+    run_test_openfst_weight("weight_008").map_err(|v| v.into())
+}
+
+#[test]
+fn test_openfst_weight_009() -> Fallible<()> {
+    run_test_openfst_weight("weight_009").map_err(|v| v.into())
+}
+
+#[test]
+fn test_openfst_weight_010() -> Fallible<()> {
+    run_test_openfst_weight("weight_010").map_err(|v| v.into())
+}
+
+#[test]
+fn test_openfst_weight_011() -> Fallible<()> {
+    run_test_openfst_weight("weight_011").map_err(|v| v.into())
+}
+
+#[test]
+fn test_openfst_weight_012() -> Fallible<()> {
+    run_test_openfst_weight("weight_012").map_err(|v| v.into())
 }
