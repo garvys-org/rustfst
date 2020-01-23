@@ -85,10 +85,6 @@ impl Semiring for TropicalWeight {
             | SemiringProperties::PATH
             | SemiringProperties::IDEMPOTENT
     }
-
-    fn weight_type() -> String {
-        "tropical".to_string()
-    }
 }
 
 impl AsRef<TropicalWeight> for TropicalWeight {
@@ -123,6 +119,10 @@ impl_quantize_f32!(TropicalWeight);
 partial_eq_and_hash_f32!(TropicalWeight);
 
 impl SerializableSemiring for TropicalWeight {
+    fn weight_type() -> String {
+        "tropical".to_string()
+    }
+
     fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
         let (i, weight) = le_f32(i)?;
         Ok((i, Self::new(weight)))

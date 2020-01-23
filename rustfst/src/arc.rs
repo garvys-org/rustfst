@@ -1,4 +1,4 @@
-use crate::semirings::Semiring;
+use crate::semirings::{Semiring, SerializableSemiring};
 use crate::{Label, StateId};
 
 /// Structure representing a transition from a state to another state in a FST.
@@ -61,7 +61,9 @@ impl<W: Semiring> Arc<W> {
         self.weight = arc.weight.clone();
         self.nextstate = arc.nextstate;
     }
+}
 
+impl<W: SerializableSemiring> Arc<W> {
     pub fn arc_type() -> String {
         let weight_type = W::weight_type();
         if weight_type.as_str() == "tropical" {

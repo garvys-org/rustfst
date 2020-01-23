@@ -94,10 +94,6 @@ impl Semiring for LogWeight {
             | SemiringProperties::RIGHT_SEMIRING
             | SemiringProperties::COMMUTATIVE
     }
-
-    fn weight_type() -> String {
-        "log".to_string()
-    }
 }
 
 impl AsRef<LogWeight> for LogWeight {
@@ -132,6 +128,10 @@ impl_quantize_f32!(LogWeight);
 partial_eq_and_hash_f32!(LogWeight);
 
 impl SerializableSemiring for LogWeight {
+    fn weight_type() -> String {
+        "log".to_string()
+    }
+
     fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
         let (i, weight) = le_f32(i)?;
         Ok((i, Self::new(weight)))

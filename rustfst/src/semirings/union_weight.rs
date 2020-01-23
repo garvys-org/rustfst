@@ -160,10 +160,6 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
                 | SemiringProperties::COMMUTATIVE
                 | SemiringProperties::IDEMPOTENT)
     }
-
-    fn weight_type() -> String {
-        format!("{}_union", W::weight_type())
-    }
 }
 
 impl<W: Semiring, O: UnionWeightOption<W>> UnionWeight<W, O> {

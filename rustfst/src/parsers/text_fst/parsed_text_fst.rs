@@ -173,13 +173,13 @@ impl<W: SerializableSemiring> FinalState<W> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::semirings::{ProbabilityWeight, Semiring};
+    use crate::semirings::{Semiring, TropicalWeight};
 
     #[test]
     fn test_parse_text_fst_not_contiguous() -> Fallible<()> {
         // Check that parsing transitions, then final states then transition is working
         let parsed_fst =
-            ParsedTextFst::<ProbabilityWeight>::from_string("0\t2\t0\t0\n1\n2\t1\t12\t25\n")?;
+            ParsedTextFst::<TropicalWeight>::from_string("0\t2\t0\t0\n1\n2\t1\t12\t25\n")?;
 
         let mut transitions = vec![];
         transitions.push(Transition::new(0, 0, 0, None, 2));
@@ -202,7 +202,7 @@ mod tests {
     #[test]
     fn test_parse_text_fst_not_finishing_with_eol() -> Fallible<()> {
         // Check that parsing transitions, then final states then transition is working
-        let parsed_fst = ParsedTextFst::<ProbabilityWeight>::from_string("0\t1\t0\t0\n1")?;
+        let parsed_fst = ParsedTextFst::<TropicalWeight>::from_string("0\t1\t0\t0\n1")?;
 
         let mut transitions = vec![];
         transitions.push(Transition::new(0, 0, 0, None, 1));
@@ -223,21 +223,20 @@ mod tests {
 
     #[test]
     fn test_parse_text_fst_infinity_final_states() -> Fallible<()> {
-        let parsed_fst = ParsedTextFst::<ProbabilityWeight>::from_string(
-            "0\t1\t12\t25\t0.3\n1\tInfinity\n0\t0\n",
-        )?;
+        let parsed_fst =
+            ParsedTextFst::<TropicalWeight>::from_string("0\t1\t12\t25\t0.3\n1\tInfinity\n0\t0\n")?;
 
         let mut transitions = vec![];
         transitions.push(Transition::new(
             0,
             12,
             25,
-            Some(ProbabilityWeight::new(0.3)),
+            Some(TropicalWeight::new(0.3)),
             1,
         ));
 
         let mut final_states = vec![];
-        final_states.push(FinalState::new(0, Some(ProbabilityWeight::new(0.0))));
+        final_states.push(FinalState::new(0, Some(TropicalWeight::new(0.0))));
 
         let parsed_fst_ref = ParsedTextFst {
             start_state: Some(0),

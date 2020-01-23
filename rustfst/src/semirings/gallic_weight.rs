@@ -121,15 +121,6 @@ macro_rules! gallic_weight {
             fn properties() -> SemiringProperties {
                 ProductWeight::<$string_weight, W>::properties()
             }
-
-            fn weight_type() -> String {
-                match $gallic_type {
-                    GallicType::GallicLeft => "left_gallic".to_string(),
-                    GallicType::GallicRight => "right_gallic".to_string(),
-                    GallicType::GallicRestrict => "restricted_gallic".to_string(),
-                    GallicType::GallicMin => "min_gallic".to_string(),
-                }
-            }
         }
 
         impl<W> $semiring
@@ -355,10 +346,6 @@ impl<W: Semiring> Semiring for GallicWeight<W> {
 
     fn properties() -> SemiringProperties {
         UnionWeight::<GallicWeightRestrict<W>, GallicUnionWeightOption<GallicWeightRestrict<W>>>::properties()
-    }
-
-    fn weight_type() -> String {
-        "gallic".to_string()
     }
 }
 

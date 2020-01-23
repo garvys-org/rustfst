@@ -2,18 +2,13 @@ use std::f32;
 use std::hash::{Hash, Hasher};
 
 use failure::Fallible;
-
 use ordered_float::OrderedFloat;
 
-use crate::parsers::bin_fst::utils_serialization::write_bin_f32;
+use crate::KDELTA;
 use crate::semirings::{
-    CompleteSemiring, DivideType, Semiring, SemiringProperties, SerializableSemiring, StarSemiring,
+    CompleteSemiring, DivideType, Semiring, SemiringProperties, StarSemiring,
     WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::KDELTA;
-use nom::number::complete::{float, le_f32};
-use nom::IResult;
-use std::io::Write;
 
 /// Probability semiring: (x, +, 0.0, 1.0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
@@ -73,10 +68,6 @@ impl Semiring for ProbabilityWeight {
             | SemiringProperties::RIGHT_SEMIRING
             | SemiringProperties::COMMUTATIVE
     }
-
-    fn weight_type() -> String {
-        "probability".to_string()
-    }
 }
 
 impl AsRef<ProbabilityWeight> for ProbabilityWeight {
@@ -109,24 +100,3 @@ impl WeaklyDivisibleSemiring for ProbabilityWeight {
 impl_quantize_f32!(ProbabilityWeight);
 
 partial_eq_and_hash_f32!(ProbabilityWeight);
-
-impl SerializableSemiring for ProbabilityWeight {
-    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
-        let (i, weight) = le_f32(i)?;
-        Ok((i, Self::new(weight)))
-    }
-
-    fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()> {
-        write_bin_f32(file, *self.value())
-    }
-
-    fn parse_text(i: &str) -> IResult<&str, Self> {
-        let (i, f) = float(i)?;
-        Ok((i, Self::new(f)))
-    }
-
-    fn write_text<F: Write>(&self, file: &mut F) -> Fallible<()> {
-        write!(file, "{}", self.value())?;
-        Ok(())
-    }
-}

@@ -163,14 +163,6 @@ macro_rules! string_semiring {
                     }
                 }
             }
-
-            fn weight_type() -> String {
-                match $string_type {
-                    StringType::StringRestrict => "restricted_string".to_string(),
-                    StringType::StringLeft => "left_string".to_string(),
-                    StringType::StringRight => "right_string".to_string(),
-                }
-            }
         }
 
         impl $semiring {
@@ -252,6 +244,14 @@ macro_rules! string_semiring {
         }
 
         impl SerializableSemiring for $semiring {
+            fn weight_type() -> String {
+                match $string_type {
+                    StringType::StringRestrict => "restricted_string".to_string(),
+                    StringType::StringLeft => "left_string".to_string(),
+                    StringType::StringRight => "right_string".to_string(),
+                }
+            }
+
             fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
                 let (i, n) = le_i32(i)?;
                 let (i, labels) = count(le_i32, n as usize)(i)?;

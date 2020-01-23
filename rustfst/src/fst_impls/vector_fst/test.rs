@@ -10,7 +10,7 @@ mod tests {
         ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableArcIterator,
         MutableFst, SerializableFst, StateIterator,
     };
-    use crate::semirings::{ProbabilityWeight, Semiring};
+    use crate::semirings::{ProbabilityWeight, Semiring, TropicalWeight};
     use crate::SymbolTable;
     use std::rc::Rc;
 
@@ -265,9 +265,9 @@ mod tests {
 
     #[test]
     fn test_parse_single_final_state() -> Fallible<()> {
-        let parsed_fst = VectorFst::<ProbabilityWeight>::from_text_string("0\tInfinity\n")?;
+        let parsed_fst = VectorFst::<TropicalWeight>::from_text_string("0\tInfinity\n")?;
 
-        let mut fst_ref: VectorFst<ProbabilityWeight> = VectorFst::new();
+        let mut fst_ref: VectorFst<TropicalWeight> = VectorFst::new();
 
         fst_ref.add_state();
         fst_ref.set_start(0)?;

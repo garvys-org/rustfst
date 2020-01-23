@@ -70,8 +70,6 @@ pub trait Semiring:
     fn reverse(&self) -> Fallible<Self::ReverseWeight>;
 
     fn properties() -> SemiringProperties;
-
-    fn weight_type() -> String;
 }
 
 /// Determines direction of division.
@@ -169,6 +167,7 @@ macro_rules! partial_eq_and_hash_f32 {
 }
 
 pub trait SerializableSemiring: Semiring + Display {
+    fn weight_type() -> String;
     fn parse_binary(i: &[u8]) -> IResult<&[u8], Self>;
     fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()>;
 

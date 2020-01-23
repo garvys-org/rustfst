@@ -4,7 +4,7 @@ use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::semirings::{
-    LogWeight, ProductWeight, Semiring, SerializableSemiring, StringWeightLeft,
+    LogWeight, ProductWeight, SerializableSemiring, StringWeightLeft,
     StringWeightRestrict, StringWeightRight, TropicalWeight,
 };
 
@@ -38,6 +38,7 @@ impl ParsedWeightOperationResult {
 }
 
 pub struct ParsedWeightTestData<W> {
+    #[allow(unused)]
     name: String,
     serialized_type: String,
     weight_1: W,
@@ -48,7 +49,9 @@ pub struct ParsedWeightTestData<W> {
     times: W,
 }
 
-fn do_run_test_openfst_weight<W: Semiring>(test_data: ParsedWeightTestData<W>) -> Fallible<()> {
+fn do_run_test_openfst_weight<W: SerializableSemiring>(
+    test_data: ParsedWeightTestData<W>,
+) -> Fallible<()> {
     assert_eq!(W::one(), test_data.one);
     assert_eq!(W::zero(), test_data.zero);
     assert_eq!(
@@ -59,6 +62,7 @@ fn do_run_test_openfst_weight<W: Semiring>(test_data: ParsedWeightTestData<W>) -
         test_data.weight_1.plus(&test_data.weight_2)?,
         test_data.plus
     );
+    assert_eq!(W::weight_type(), test_data.serialized_type);
 
     Ok(())
 }
