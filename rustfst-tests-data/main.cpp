@@ -24,7 +24,6 @@
 #include "fst_009/fst_009.h"
 #include "fst_010/fst_010.h"
 #include "fst_011/fst_011.h"
-#include "fst_012/fst_012.h"
 
 #include "symt_000/symt_000.h"
 #include "symt_001/symt_001.h"
