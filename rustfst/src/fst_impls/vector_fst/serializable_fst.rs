@@ -21,6 +21,10 @@ use crate::semirings::SerializableSemiring;
 use crate::Arc;
 
 impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
+    fn fst_type() -> String {
+        "vector".to_string()
+    }
+
     fn read<P: AsRef<Path>>(path_bin_fst: P) -> Fallible<Self> {
         let data = read(path_bin_fst.as_ref()).with_context(|_| {
             format!(
@@ -44,7 +48,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
 
         let hdr = FstHeader {
             magic_number: FST_MAGIC_NUMBER,
-            fst_type: OpenFstString::new("vector"),
+            fst_type: OpenFstString::new(Self::fst_type()),
             arc_type: OpenFstString::new(Arc::<W>::arc_type()),
             version: 2i32,
             // TODO: Set flags if the content is aligned

@@ -13,6 +13,8 @@ pub trait SerializableFst: ExpandedFst
 where
     Self::W: SerializableSemiring,
 {
+    fn fst_type() -> String;
+
     // BINARY
 
     fn read<P: AsRef<Path>>(path_bin_fst: P) -> Fallible<Self>;

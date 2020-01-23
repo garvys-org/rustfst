@@ -23,6 +23,10 @@ use crate::semirings::SerializableSemiring;
 use crate::{Arc, EPS_LABEL};
 
 impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
+    fn fst_type() -> String {
+        "const".to_string()
+    }
+
     fn read<P: AsRef<Path>>(path_bin_fst: P) -> Fallible<Self> {
         let data = read(path_bin_fst.as_ref()).with_context(|_| {
             format!(
@@ -42,7 +46,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
 
         let hdr = FstHeader {
             magic_number: FST_MAGIC_NUMBER,
-            fst_type: OpenFstString::new("const"),
+            fst_type: OpenFstString::new(Self::fst_type()),
             arc_type: OpenFstString::new(Arc::<W>::arc_type()),
             version: CONST_FILE_VERSION,
             // TODO: Flags are used to check whether or not a symboltable has to be loaded
