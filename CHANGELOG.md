@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove `TextParser`, `BinarySerializer` and `BinaryDeserializer` traits. Add `SerializableFst` in replacement.
 - Fix: when serializing an `Fst`, now uses the result of the `arc_type()` method instead of using an hardcoded value.
 - `Display` is no longer a trait bound of `Semiring`. However, it is required to implement `SerializableSemiring`.
+- Use `BufWriter` when serializing a `SymbolTable` object increasing the serialization speed.
 
 ## [0.4.0] - 2019-11-12
 
