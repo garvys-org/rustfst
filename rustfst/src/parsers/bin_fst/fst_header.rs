@@ -6,14 +6,17 @@ use nom::combinator::{map_res, verify};
 use nom::number::complete::{le_i32, le_i64, le_u32, le_u64};
 use nom::IResult;
 
+use bitflags::bitflags;
+
 use crate::parsers::bin_fst::utils_serialization::{
     write_bin_i32, write_bin_i64, write_bin_u32, write_bin_u64,
 };
+use crate::parsers::bin_symt::nom_parser::parse_symbol_table_bin;
+use crate::SymbolTable;
+use std::rc::Rc;
 
 // Identifies stream data as an FST (and its endianity).
 pub(crate) static FST_MAGIC_NUMBER: i32 = 2_125_659_606;
-
-use bitflags::bitflags;
 
 bitflags! {
     pub struct FstFlags: u32 {
@@ -34,12 +37,23 @@ pub(crate) struct FstHeader {
     pub(crate) start: i64,
     pub(crate) num_states: i64,
     pub(crate) num_arcs: i64,
+    pub(crate) isymt: Option<Rc<SymbolTable>>,
+    pub(crate) osymt: Option<Rc<SymbolTable>>,
 }
 
 #[derive(Debug)]
 pub(crate) struct OpenFstString {
     n: i32,
     s: String,
+}
+
+fn optionally_parse_symt(i: &[u8], parse_symt: bool) -> IResult<&[u8], Option<SymbolTable>> {
+    if parse_symt {
+        let (i, symt) = parse_symbol_table_bin(i)?;
+        Ok((i, Some(symt)))
+    } else {
+        Ok((i, None))
+    }
 }
 
 impl FstHeader {
@@ -49,22 +63,16 @@ impl FstHeader {
         let (i, arc_type) = OpenFstString::parse(i)?;
         let (i, version) = verify(le_i32, |v: &i32| *v >= min_file_version)(i)?;
         let (i, flags) = map_res(le_u32, |v: u32| {
-            FstFlags::from_bits(v)
-                .ok_or_else(|| "Could not parse Fst Flags")
-                .and_then(|flags| {
-                    if flags.contains(FstFlags::HAS_ISYMBOLS)
-                        || flags.contains(FstFlags::HAS_OSYMBOLS)
-                    {
-                        Err("Input symbols parsing and Output symbols parsing are not supported")
-                    } else {
-                        Ok(flags)
-                    }
-                })
+            FstFlags::from_bits(v).ok_or_else(|| "Could not parse Fst Flags")
         })(i)?;
         let (i, properties) = le_u64(i)?;
         let (i, start) = le_i64(i)?;
         let (i, num_states) = le_i64(i)?;
         let (i, num_arcs) = le_i64(i)?;
+
+        let (i, isymt) = optionally_parse_symt(i, flags.contains(FstFlags::HAS_ISYMBOLS))?;
+        let (i, osymt) = optionally_parse_symt(i, flags.contains(FstFlags::HAS_OSYMBOLS))?;
+
         Ok((
             i,
             FstHeader {
@@ -77,6 +85,8 @@ impl FstHeader {
                 start,
                 num_states,
                 num_arcs,
+                isymt: isymt.map(|s| Rc::new(s)),
+                osymt: osymt.map(|s| Rc::new(s)),
             },
         ))
     }
@@ -127,5 +137,11 @@ impl OpenFstString {
     pub(crate) fn write<W: Write>(&self, file: &mut W) -> Fallible<()> {
         write_bin_i32(file, self.n)?;
         file.write_all(self.s.as_bytes()).map_err(|e| e.into())
+    }
+}
+
+impl Into<String> for OpenFstString {
+    fn into(self) -> String {
+        self.s
     }
 }

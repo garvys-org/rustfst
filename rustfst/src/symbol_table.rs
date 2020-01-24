@@ -1,22 +1,22 @@
 use std::collections::hash_map::{Entry, Iter, Keys};
 use std::collections::HashMap;
 use std::fmt;
-use std::fs::File;
+use std::fs::{File, read};
 use std::io::{BufWriter, LineWriter, Write};
 use std::path::Path;
 
-use failure::Fallible;
+use failure::{Fallible, ResultExt};
 use itertools::Itertools;
 
+use crate::{EPS_SYMBOL, Label, Symbol};
+use crate::parsers::bin_symt::nom_parser::parse_symbol_table_bin;
 use crate::parsers::text_symt::parsed_text_symt::ParsedTextSymt;
-use crate::{Label, Symbol, EPS_SYMBOL};
 
 /// A symbol table stores a bidirectional mapping between arc labels and "symbols" (strings).
 #[derive(PartialEq, Debug, Clone, Default)]
 pub struct SymbolTable {
     label_to_symbol: HashMap<Label, Symbol>,
     symbol_to_label: HashMap<Symbol, Label>,
-    num_symbols: usize,
 }
 
 macro_rules! write_symt_text {
@@ -36,15 +36,18 @@ impl SymbolTable {
     /// let mut symt = SymbolTable::new();
     /// ```
     pub fn new() -> Self {
-        let mut symt = SymbolTable {
-            label_to_symbol: HashMap::new(),
-            symbol_to_label: HashMap::new(),
-            num_symbols: 0,
-        };
+        let mut symt = SymbolTable::empty();
 
         symt.add_symbol(EPS_SYMBOL.to_string());
 
         symt
+    }
+
+    pub fn empty() -> Self {
+        SymbolTable {
+            label_to_symbol: HashMap::new(),
+            symbol_to_label: HashMap::new(),
+        }
     }
 
     pub fn is_empty(&self) -> bool {
@@ -70,7 +73,7 @@ impl SymbolTable {
     /// # }
     /// ```
     pub fn add_symbol<S: Into<String>>(&mut self, sym: S) -> Label {
-        let label = self.num_symbols;
+        let label = self.len();
         let sym = sym.into();
 
         // Only insert if
@@ -79,10 +82,16 @@ impl SymbolTable {
             Entry::Vacant(e) => {
                 e.insert(label);
                 self.label_to_symbol.entry(label).or_insert(sym);
-                self.num_symbols += 1;
                 label
             }
         }
+    }
+
+    pub(crate) fn add_symbol_key<S: Into<String>>(&mut self, sym: S, key: usize) {
+        let sym = sym.into();
+        self.symbol_to_label.insert(sym.clone(), key);
+        self.label_to_symbol.insert(key, sym.clone());
+        // TODO: Add some checks here
     }
 
     /// Returns the number of symbols stored in the symbol table.
@@ -96,7 +105,7 @@ impl SymbolTable {
     /// # }
     /// ```
     pub fn len(&self) -> usize {
-        self.num_symbols
+        self.label_to_symbol.len()
     }
 
     /// Given a symbol, returns the label corresponding.
@@ -218,7 +227,6 @@ impl SymbolTable {
     }
 
     fn from_parsed_symt_text(parsed_symt_text: ParsedTextSymt) -> Fallible<Self> {
-        let num_symbols = parsed_symt_text.pairs.len();
         let mut label_to_symbol: HashMap<Label, Symbol> = HashMap::new();
         let mut symbol_to_label: HashMap<Symbol, Label> = HashMap::new();
         for (symbol, label) in parsed_symt_text.pairs.into_iter() {
@@ -227,7 +235,6 @@ impl SymbolTable {
         }
 
         Ok(SymbolTable {
-            num_symbols,
             symbol_to_label,
             label_to_symbol,
         })
@@ -250,6 +257,20 @@ impl SymbolTable {
         write_symt_text!(self, writer);
 
         Ok(())
+    }
+
+    pub fn read<P: AsRef<Path>>(path_bin_symt: P) -> Fallible<Self> {
+        let data = read(path_bin_symt.as_ref()).with_context(|_| {
+            format!(
+                "Can't open SymbolTable binary file : {:?}",
+                path_bin_symt.as_ref()
+            )
+        })?;
+
+        let (_, symt) = parse_symbol_table_bin(&data)
+            .map_err(|e| format_err!("Error while parsing binary SymbolTable : {:?}", e))?;
+
+        Ok(symt)
     }
 
     /// Writes the text_fst representation of the symbol table into a String.

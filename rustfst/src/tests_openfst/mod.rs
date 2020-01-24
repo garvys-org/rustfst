@@ -77,6 +77,7 @@ use crate::tests_openfst::algorithms::concat::{
     test_concat, test_concat_dynamic, ConcatOperationResult, ConcatTestData,
 };
 use crate::tests_openfst::algorithms::union::{test_union, test_union_dynamic};
+use crate::tests_openfst::io::vector_fst_bin_deserializer::test_vector_fst_bin_with_symt_deserializer;
 
 #[macro_use]
 mod macros;
@@ -147,6 +148,7 @@ pub struct ParsedFstTestData {
     concat: Vec<ConcatOperationResult>,
     closure_plus: ClosureOperationResult,
     closure_star: ClosureOperationResult,
+    raw_vector_with_symt_bin_path: String,
 }
 
 pub struct FstTestData<F: SerializableFst>
@@ -196,6 +198,7 @@ where
     pub concat: Vec<ConcatTestData<F>>,
     pub closure_plus: ClosureTestData<F>,
     pub closure_star: ClosureTestData<F>,
+    pub raw_vector_with_symt_bin_path: PathBuf,
 }
 
 impl<F: SerializableFst> FstTestData<F>
@@ -264,6 +267,9 @@ where
             concat: data.concat.iter().map(|v| v.parse()).collect(),
             closure_plus: data.closure_plus.parse(),
             closure_star: data.closure_star.parse(),
+            raw_vector_with_symt_bin_path: absolute_path_folder
+                .join(&data.raw_vector_with_symt_bin_path)
+                .to_path_buf(),
         }
     }
 }
@@ -418,6 +424,8 @@ where
     test_closure_star(&test_data)?;
 
     test_closure_star_dynamic(&test_data)?;
+
+    test_vector_fst_bin_with_symt_deserializer(&test_data)?;
 
     Ok(())
 }

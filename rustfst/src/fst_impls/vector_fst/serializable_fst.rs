@@ -10,7 +10,7 @@ use nom::IResult;
 
 use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, MutableFst, SerializableFst};
+use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, MutableFst, SerializableFst};
 use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FST_MAGIC_NUMBER};
 use crate::parsers::bin_fst::utils_parsing::{
     parse_final_weight, parse_fst_arc, parse_start_state,
@@ -58,6 +58,8 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
             start: self.start_state.map(|v| v as i64).unwrap_or(-1),
             num_states: self.num_states() as i64,
             num_arcs: num_arcs as i64,
+            isymt: self.input_symbols(),
+            osymt: self.output_symbols(),
         };
         hdr.write(&mut file)?;
 
@@ -143,9 +145,8 @@ fn parse_vector_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorF
         VectorFst {
             start_state: parse_start_state(header.start),
             states,
-            // FIXME: Parse serialized symts
-            isymt: None,
-            osymt: None,
+            isymt: header.isymt,
+            osymt: header.osymt,
         },
     ))
 }

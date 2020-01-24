@@ -12,7 +12,7 @@ use nom::IResult;
 
 use crate::fst_impls::const_fst::data_structure::ConstState;
 use crate::fst_impls::ConstFst;
-use crate::fst_traits::{ExpandedFst, SerializableFst};
+use crate::fst_traits::{ExpandedFst, Fst, SerializableFst};
 use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FST_MAGIC_NUMBER};
 use crate::parsers::bin_fst::utils_parsing::{
     parse_final_weight, parse_fst_arc, parse_start_state,
@@ -56,6 +56,8 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
             start: self.start.map(|v| v as i64).unwrap_or(-1),
             num_states: self.num_states() as i64,
             num_arcs: self.arcs.len() as i64,
+            isymt: self.input_symbols(),
+            osymt: self.output_symbols(),
         };
         hdr.write(&mut file)?;
 
@@ -212,9 +214,8 @@ fn parse_const_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], ConstFst
             start: parse_start_state(hdr.start),
             states: const_states,
             arcs: const_arcs,
-            // FIXME: Parse serialized symts
-            isymt: None,
-            osymt: None,
+            isymt: hdr.isymt,
+            osymt: hdr.osymt,
         },
     ))
 }

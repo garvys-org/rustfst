@@ -281,6 +281,9 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// Attaches an output `SymbolTable` to the Fst.
     /// The `SymbolTable` is not duplicated with the use of Rc.
     fn set_output_symbols(&mut self, symt: Rc<SymbolTable>);
+
+    fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>>;
+    fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>>;
 }
 
 /// Iterate over mutable arcs in a wFST.
