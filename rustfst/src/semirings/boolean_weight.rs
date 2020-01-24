@@ -1,7 +1,7 @@
 use failure::Fallible;
 
 use crate::semirings::{CompleteSemiring, Semiring, SemiringProperties, StarSemiring};
-
+use std::borrow::Borrow;
 /// Boolean semiring: (&, |, false, true).
 #[derive(Clone, Debug, PartialEq, PartialOrd, Default, Eq, Copy, Hash)]
 pub struct BooleanWeight {
@@ -23,12 +23,12 @@ impl Semiring for BooleanWeight {
         BooleanWeight { value }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
-        self.value |= rhs.as_ref().value;
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+        self.value |= rhs.borrow().value;
         Ok(())
     }
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
-        self.value &= rhs.as_ref().value;
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+        self.value &= rhs.borrow().value;
         Ok(())
     }
 
@@ -54,12 +54,6 @@ impl Semiring for BooleanWeight {
             | SemiringProperties::COMMUTATIVE
             | SemiringProperties::IDEMPOTENT
             | SemiringProperties::PATH
-    }
-}
-
-impl AsRef<BooleanWeight> for BooleanWeight {
-    fn as_ref(&self) -> &BooleanWeight {
-        &self
     }
 }
 

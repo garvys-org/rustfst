@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::f32;
 use std::hash::{Hash, Hasher};
 
@@ -46,9 +47,9 @@ impl Semiring for LogWeight {
         }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
         let f1 = self.value();
-        let f2 = rhs.as_ref().value();
+        let f2 = rhs.borrow().value();
         self.value.0 = if f1 == &f32::INFINITY {
             *f2
         } else if f2 == &f32::INFINITY {
@@ -61,9 +62,9 @@ impl Semiring for LogWeight {
         Ok(())
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
         let f1 = self.value();
-        let f2 = rhs.as_ref().value();
+        let f2 = rhs.borrow().value();
         if f1 == &f32::INFINITY {
         } else if f2 == &f32::INFINITY {
             self.value.0 = *f2;

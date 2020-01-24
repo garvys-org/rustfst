@@ -85,7 +85,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
         let start_state = parsed_fst_text.start();
         let num_states = parsed_fst_text.num_states();
 
-        let states = vec![VectorFstState::<W>::default(); num_states];
+        let states = vec![VectorFstState::<W>::new(); num_states];
 
         let mut fst = VectorFst {
             states,

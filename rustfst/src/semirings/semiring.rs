@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::hash::Hash;
@@ -31,9 +32,7 @@ bitflags! {
 /// `0` is an annihilator for `*`.
 /// Thus, a semiring is a ring that may lack negation.
 /// For more information : https://cs.nyu.edu/~mohri/pub/hwa.pdf
-pub trait Semiring:
-    Clone + PartialEq + PartialOrd + Debug + Default + AsRef<Self> + Hash + Eq + Sized
-{
+pub trait Semiring: Clone + PartialEq + PartialOrd + Debug + Hash + Eq {
     type Type: Clone;
     type ReverseWeight: Semiring;
 
@@ -42,19 +41,19 @@ pub trait Semiring:
 
     fn new(value: Self::Type) -> Self;
 
-    fn plus<P: AsRef<Self>>(&self, rhs: P) -> Fallible<Self> {
+    fn plus<P: Borrow<Self>>(&self, rhs: P) -> Fallible<Self> {
         let mut w = self.clone();
         w.plus_assign(rhs)?;
         Ok(w)
     }
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()>;
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()>;
 
-    fn times<P: AsRef<Self>>(&self, rhs: P) -> Fallible<Self> {
+    fn times<P: Borrow<Self>>(&self, rhs: P) -> Fallible<Self> {
         let mut w = self.clone();
         w.times_assign(rhs)?;
         Ok(w)
     }
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()>;
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()>;
 
     /// Borrow underneath value.
     fn value(&self) -> &Self::Type;

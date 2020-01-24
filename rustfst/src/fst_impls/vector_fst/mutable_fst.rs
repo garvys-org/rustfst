@@ -56,13 +56,13 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
 
     fn add_state(&mut self) -> StateId {
         let id = self.states.len();
-        self.states.insert(id, VectorFstState::default());
+        self.states.insert(id, VectorFstState::new());
         id
     }
 
     fn add_states(&mut self, n: usize) {
         let len = self.states.len();
-        self.states.resize_with(len + n, VectorFstState::default);
+        self.states.resize_with(len + n, VectorFstState::new);
     }
 
     fn del_state(&mut self, state_to_remove: StateId) -> Fallible<()> {

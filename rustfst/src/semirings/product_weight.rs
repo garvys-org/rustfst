@@ -1,14 +1,17 @@
+use std::borrow::Borrow;
 use std::fmt;
 use std::fmt::Debug;
+use std::io::Write;
 
 use failure::Fallible;
+use nom::IResult;
 
 use crate::semirings::{
     DivideType, Semiring, SemiringProperties, SerializableSemiring, WeaklyDivisibleSemiring,
     WeightQuantize,
 };
-use nom::IResult;
-use std::io::Write;
+#[cfg(test)]
+use crate::semirings::{LogWeight, TropicalWeight};
 
 /// Product semiring: W1 * W2.
 #[derive(Debug, Eq, PartialOrd, PartialEq, Clone, Default, Hash)]
@@ -54,15 +57,15 @@ where
         Self { weight }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
-        self.weight.0.plus_assign(&rhs.as_ref().weight.0)?;
-        self.weight.1.plus_assign(&rhs.as_ref().weight.1)?;
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+        self.weight.0.plus_assign(&rhs.borrow().weight.0)?;
+        self.weight.1.plus_assign(&rhs.borrow().weight.1)?;
         Ok(())
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
-        self.weight.0.times_assign(&rhs.as_ref().weight.0)?;
-        self.weight.1.times_assign(&rhs.as_ref().weight.1)?;
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+        self.weight.0.times_assign(&rhs.borrow().weight.0)?;
+        self.weight.1.times_assign(&rhs.borrow().weight.1)?;
         Ok(())
     }
 
@@ -189,8 +192,6 @@ where
     }
 }
 
-#[cfg(test)]
-use crate::semirings::{LogWeight, TropicalWeight};
 test_semiring_serializable!(
     tests_product_weight_serializable,
     ProductWeight::<TropicalWeight, LogWeight>,

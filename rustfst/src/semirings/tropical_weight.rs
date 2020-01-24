@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::f32;
 use std::hash::{Hash, Hasher};
 use std::io::Write;
@@ -43,16 +44,16 @@ impl Semiring for TropicalWeight {
         }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
-        if rhs.as_ref().value < self.value {
-            self.value = rhs.as_ref().value;
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+        if rhs.borrow().value < self.value {
+            self.value = rhs.borrow().value;
         }
         Ok(())
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
         let f1 = self.value();
-        let f2 = rhs.as_ref().value();
+        let f2 = rhs.borrow().value();
         if f1 == &f32::INFINITY {
         } else if f2 == &f32::INFINITY {
             self.value.0 = *f2;

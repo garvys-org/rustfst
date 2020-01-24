@@ -17,7 +17,7 @@ pub enum RowParsed<W: SerializableSemiring> {
 /// Struct representing a parsed fst in text format. It contains a vector of transitions
 /// and a vector final states. The first state in the vector of transition is the start state.
 /// This container doesn't depend on any Semiring.
-#[derive(Debug, PartialEq, Default)]
+#[derive(Debug, PartialEq)]
 pub struct ParsedTextFst<W: SerializableSemiring> {
     pub transitions: Vec<Transition<W>>,
     pub final_states: Vec<FinalState<W>>,
@@ -51,6 +51,14 @@ pub struct FinalState<W: SerializableSemiring> {
 }
 
 impl<W: SerializableSemiring> ParsedTextFst<W> {
+    pub fn new() -> Self {
+        Self {
+            transitions: vec![],
+            final_states: vec![],
+            start_state: None,
+        }
+    }
+
     /// Loads an FST from a loaded string in text format usually called `At&T FSM format`.
     ///
     /// # Format:
@@ -82,7 +90,7 @@ impl<W: SerializableSemiring> ParsedTextFst<W> {
     }
 
     fn from_vec_rows_parsed(v: Vec<RowParsed<W>>) -> Self {
-        let mut parsed_fst = ParsedTextFst::default();
+        let mut parsed_fst = ParsedTextFst::new();
 
         parsed_fst.start_state = v.first().map(|v| match v {
             RowParsed::Transition(t) => t.state,

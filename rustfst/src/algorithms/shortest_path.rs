@@ -120,7 +120,7 @@ where
         let sd = distance[s].clone();
 
         if let Some(final_weight) = ifst.final_weight(s)? {
-            let plus = f_distance.plus(&sd.times(&final_weight)?)?;
+            let plus = f_distance.plus(&sd.times(final_weight)?)?;
             if f_distance != plus {
                 f_distance = plus;
                 *f_parent = Some(s);

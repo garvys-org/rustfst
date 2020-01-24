@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::fmt;
 use std::io::Write;
 
@@ -18,19 +19,19 @@ use crate::semirings::{
 use crate::Label;
 
 /// String semiring: (identity, ., Infinity, Epsilon)
-#[derive(Clone, Debug, PartialOrd, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialOrd, PartialEq, Eq, Hash)]
 pub struct StringWeightRestrict {
     pub(crate) value: StringWeightVariant,
 }
 
 /// String semiring: (longest_common_prefix, ., Infinity, Epsilon)
-#[derive(Clone, Debug, PartialOrd, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialOrd, PartialEq, Eq, Hash)]
 pub struct StringWeightLeft {
     pub(crate) value: StringWeightVariant,
 }
 
 /// String semiring: (longest_common_suffix, ., Infinity, Epsilon)
-#[derive(Clone, Debug, PartialOrd, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialOrd, PartialEq, Eq, Hash)]
 pub struct StringWeightRight {
     pub(crate) value: StringWeightVariant,
 }
@@ -74,22 +75,22 @@ macro_rules! string_semiring {
                 Self { value }
             }
 
-            fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
+            fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
                 if self.is_zero() {
-                    self.set_value(rhs.as_ref().value().clone());
-                } else if rhs.as_ref().is_zero() {
+                    self.set_value(rhs.borrow().value().clone());
+                } else if rhs.borrow().is_zero() {
                     // Do nothing
                 } else {
                     let l1 = self.value.unwrap_labels();
-                    let l2 = rhs.as_ref().value.unwrap_labels();
+                    let l2 = rhs.borrow().value.unwrap_labels();
 
                     match $string_type {
                         StringType::StringRestrict => {
-                            if self != rhs.as_ref() {
+                            if self != rhs.borrow() {
                                 bail!(
                                     "Unequal arguments : non-functional FST ? w1 = {:?} w2 = {:?}",
                                     &self,
-                                    &rhs.as_ref()
+                                    &rhs.borrow()
                                 );
                             }
                         }
@@ -119,9 +120,9 @@ macro_rules! string_semiring {
                 };
                 Ok(())
             }
-            fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
+            fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
                 if let StringWeightVariant::Labels(ref mut labels_left) = self.value {
-                    if let StringWeightVariant::Labels(ref labels_right) = rhs.as_ref().value {
+                    if let StringWeightVariant::Labels(ref labels_right) = rhs.borrow().value {
                         for l in labels_right {
                             labels_left.push(*l);
                         }
