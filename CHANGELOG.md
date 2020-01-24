@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `SerializableSemiring` trait and implement it for most `Semiring`s.
 - All `Fst` that implements `SerializableFst` with a `Semiring` implementing `SerializableSemiring` can now be serialized/deserialized consistently with OpenFst.
 - Added `arc_type()` method to `rustfst::Arc`.
+- Added `write` and `read` method to the `SymbolTable` API to serialize and deserialize SymbolTable in binary format consistently with OpenFst.
+- Added `unset_input_symbols` and `unset_output_symbols` methods to remove the symbol tables attached to a mutable fst.
 
 ### Changed
 - Make `KDELTA` public outside of the crate
@@ -42,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix: when serializing an `Fst`, now uses the result of the `arc_type()` method instead of using an hardcoded value.
 - `Display` is no longer a trait bound of `Semiring`. However, it is required to implement `SerializableSemiring`.
 - Use `BufWriter` when serializing a `SymbolTable` object increasing the serialization speed.
+- Fix bug when the parsing of fst in binary format crashed because a symbol tables was attached to the fst. The symbol table are now retrieved directly from the fst file.
 
 ## [0.4.0] - 2019-11-12
 
