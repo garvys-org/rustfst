@@ -9,7 +9,7 @@ use failure::{Fallible, ResultExt};
 use itertools::Itertools;
 
 use crate::{EPS_SYMBOL, Label, Symbol};
-use crate::parsers::bin_symt::nom_parser::parse_symbol_table_bin;
+use crate::parsers::bin_symt::nom_parser::{parse_symbol_table_bin, write_bin_symt};
 use crate::parsers::text_symt::parsed_text_symt::ParsedTextSymt;
 
 /// A symbol table stores a bidirectional mapping between arc labels and "symbols" (strings).
@@ -17,14 +17,6 @@ use crate::parsers::text_symt::parsed_text_symt::ParsedTextSymt;
 pub struct SymbolTable {
     label_to_symbol: HashMap<Label, Symbol>,
     symbol_to_label: HashMap<Symbol, Label>,
-}
-
-macro_rules! write_symt_text {
-    ($symt:expr, $f:expr) => {
-        for (label, symbol) in $symt.iter().sorted_by_key(|k| k.0) {
-            writeln!($f, "{}\t{}", symbol, label)?;
-        }
-    };
 }
 
 impl SymbolTable {
@@ -254,7 +246,7 @@ impl SymbolTable {
         let buffer = File::create(path_output.as_ref())?;
         let mut writer = BufWriter::new(LineWriter::new(buffer));
 
-        write_symt_text!(self, writer);
+        write!(writer, "{}", self)?;
 
         Ok(())
     }
@@ -273,18 +265,29 @@ impl SymbolTable {
         Ok(symt)
     }
 
+    pub fn write<P: AsRef<Path>>(&self, path_bin_symt: P) -> Fallible<()> {
+        let buffer = File::create(path_bin_symt.as_ref())?;
+        let mut writer = BufWriter::new(LineWriter::new(buffer));
+
+        write_bin_symt(&mut writer, &self)?;
+
+        Ok(())
+    }
+
     /// Writes the text_fst representation of the symbol table into a String.
     pub fn text(&self) -> Fallible<String> {
         let buffer = Vec::<u8>::new();
         let mut writer = BufWriter::new(LineWriter::new(buffer));
-        write_symt_text!(self, writer);
+        write!(writer, "{}", self)?;
         Ok(String::from_utf8(writer.into_inner()?.into_inner()?)?)
     }
 }
 
 impl fmt::Display for SymbolTable {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_symt_text!(self, f);
+        for (label, symbol) in self.iter().sorted_by_key(|k| k.0) {
+            writeln!(f, "{}\t{}", symbol, label)?;
+        }
         Ok(())
     }
 }

@@ -5,6 +5,9 @@ use nom::IResult;
 
 use crate::parsers::bin_fst::fst_header::OpenFstString;
 use crate::SymbolTable;
+use std::io::Write;
+use failure::Fallible;
+use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64};
 
 static SYMBOL_TABLE_MAGIC_NUMBER: i32 = 2_125_658_996;
 
@@ -27,4 +30,18 @@ pub(crate) fn parse_symbol_table_bin(i: &[u8]) -> IResult<&[u8], SymbolTable> {
     }
 
     Ok((i, symt))
+}
+
+pub(crate) fn write_bin_symt<W: Write>(file: &mut W, symt: &SymbolTable) -> Fallible<()> {
+    write_bin_i32(file, SYMBOL_TABLE_MAGIC_NUMBER)?;
+    OpenFstString::new("rustfst_symboltable").write(file)?;
+    // TODO: Might not be available
+    write_bin_i64(file, symt.len() as i64)?;
+    write_bin_i64(file, symt.len() as i64)?;
+    for (label, symbol) in symt.iter() {
+        OpenFstString::new(symbol).write(file)?;
+        write_bin_i64(file, *label as i64)?;
+    }
+
+    Ok(())
 }
