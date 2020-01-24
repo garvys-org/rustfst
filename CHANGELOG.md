@@ -44,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix: when serializing an `Fst`, now uses the result of the `arc_type()` method instead of using an hardcoded value.
 - `Display` is no longer a trait bound of `Semiring`. However, it is required to implement `SerializableSemiring`.
 - Use `BufWriter` when serializing a `SymbolTable` object increasing the serialization speed.
-- Fix bug when the parsing of fst in binary format crashed because a symbol tables was attached to the fst. The symbol table are now retrieved directly from the fst file.
+- Fix bug when the parsing of fst in binary format crashed because a symbol table was attached to the fst. The symbol tables are now retrieved directly from the fst file.
 
 ## [0.4.0] - 2019-11-12
 
