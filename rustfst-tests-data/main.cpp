@@ -717,6 +717,25 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     data["raw_vector_bin_path"] = "raw_vector.fst";
     raw_fst.Write(fst_name + "/raw_vector.fst");
 
+    fst::SymbolTable isymt;
+    isymt.AddSymbol("<eps>");
+    isymt.AddSymbol("good");
+    isymt.AddSymbol("day");
+
+    fst::SymbolTable osymt;
+    osymt.AddSymbol("<epsilon>");
+    osymt.AddSymbol("knock");
+    osymt.AddSymbol("world");
+    osymt.AddSymbol("hello");
+
+    fst::VectorFst<typename F::MyArc> fst_with_symt(raw_fst);
+
+    fst_with_symt.SetInputSymbols(&isymt);
+    fst_with_symt.SetOutputSymbols(&osymt);
+
+    data["raw_vector_with_symt_bin_path"] = "raw_vector_with_symt.fst";
+    fst_with_symt.Write(fst_name + "/raw_vector_with_symt.fst");
+
     fst::FstWriteOptions write_opts("<unspecified>");
     fst::ConstFst<typename F::MyArc> raw_const_fst(raw_fst);
     // Not aligned

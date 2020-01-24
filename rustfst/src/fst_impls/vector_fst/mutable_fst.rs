@@ -254,4 +254,12 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
     fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
         self.osymt = Some(Rc::clone(&symt));
     }
+
+    fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+        self.isymt.take()
+    }
+
+    fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+        self.osymt.take()
+    }
 }

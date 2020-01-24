@@ -1,13 +1,14 @@
 use std::collections::hash_map::{Entry, Iter, Keys};
 use std::collections::HashMap;
 use std::fmt;
-use std::fs::File;
+use std::fs::{read, File};
 use std::io::{BufWriter, LineWriter, Write};
 use std::path::Path;
 
-use failure::Fallible;
+use failure::{Fallible, ResultExt};
 use itertools::Itertools;
 
+use crate::parsers::bin_symt::nom_parser::{parse_symbol_table_bin, write_bin_symt};
 use crate::parsers::text_symt::parsed_text_symt::ParsedTextSymt;
 use crate::{Label, Symbol, EPS_SYMBOL};
 
@@ -16,15 +17,6 @@ use crate::{Label, Symbol, EPS_SYMBOL};
 pub struct SymbolTable {
     label_to_symbol: HashMap<Label, Symbol>,
     symbol_to_label: HashMap<Symbol, Label>,
-    num_symbols: usize,
-}
-
-macro_rules! write_symt_text {
-    ($symt:expr, $f:expr) => {
-        for (label, symbol) in $symt.iter().sorted_by_key(|k| k.0) {
-            writeln!($f, "{}\t{}", symbol, label)?;
-        }
-    };
 }
 
 impl SymbolTable {
@@ -36,15 +28,18 @@ impl SymbolTable {
     /// let mut symt = SymbolTable::new();
     /// ```
     pub fn new() -> Self {
-        let mut symt = SymbolTable {
-            label_to_symbol: HashMap::new(),
-            symbol_to_label: HashMap::new(),
-            num_symbols: 0,
-        };
+        let mut symt = SymbolTable::empty();
 
         symt.add_symbol(EPS_SYMBOL.to_string());
 
         symt
+    }
+
+    pub fn empty() -> Self {
+        SymbolTable {
+            label_to_symbol: HashMap::new(),
+            symbol_to_label: HashMap::new(),
+        }
     }
 
     pub fn is_empty(&self) -> bool {
@@ -70,7 +65,7 @@ impl SymbolTable {
     /// # }
     /// ```
     pub fn add_symbol<S: Into<String>>(&mut self, sym: S) -> Label {
-        let label = self.num_symbols;
+        let label = self.len();
         let sym = sym.into();
 
         // Only insert if
@@ -79,10 +74,16 @@ impl SymbolTable {
             Entry::Vacant(e) => {
                 e.insert(label);
                 self.label_to_symbol.entry(label).or_insert(sym);
-                self.num_symbols += 1;
                 label
             }
         }
+    }
+
+    pub(crate) fn add_symbol_key<S: Into<String>>(&mut self, sym: S, key: usize) {
+        let sym = sym.into();
+        self.symbol_to_label.insert(sym.clone(), key);
+        self.label_to_symbol.insert(key, sym.clone());
+        // TODO: Add some checks here
     }
 
     /// Returns the number of symbols stored in the symbol table.
@@ -96,7 +97,7 @@ impl SymbolTable {
     /// # }
     /// ```
     pub fn len(&self) -> usize {
-        self.num_symbols
+        self.label_to_symbol.len()
     }
 
     /// Given a symbol, returns the label corresponding.
@@ -218,7 +219,6 @@ impl SymbolTable {
     }
 
     fn from_parsed_symt_text(parsed_symt_text: ParsedTextSymt) -> Fallible<Self> {
-        let num_symbols = parsed_symt_text.pairs.len();
         let mut label_to_symbol: HashMap<Label, Symbol> = HashMap::new();
         let mut symbol_to_label: HashMap<Symbol, Label> = HashMap::new();
         for (symbol, label) in parsed_symt_text.pairs.into_iter() {
@@ -227,7 +227,6 @@ impl SymbolTable {
         }
 
         Ok(SymbolTable {
-            num_symbols,
             symbol_to_label,
             label_to_symbol,
         })
@@ -247,7 +246,30 @@ impl SymbolTable {
         let buffer = File::create(path_output.as_ref())?;
         let mut writer = BufWriter::new(LineWriter::new(buffer));
 
-        write_symt_text!(self, writer);
+        write!(writer, "{}", self)?;
+
+        Ok(())
+    }
+
+    pub fn read<P: AsRef<Path>>(path_bin_symt: P) -> Fallible<Self> {
+        let data = read(path_bin_symt.as_ref()).with_context(|_| {
+            format!(
+                "Can't open SymbolTable binary file : {:?}",
+                path_bin_symt.as_ref()
+            )
+        })?;
+
+        let (_, symt) = parse_symbol_table_bin(&data)
+            .map_err(|e| format_err!("Error while parsing binary SymbolTable : {:?}", e))?;
+
+        Ok(symt)
+    }
+
+    pub fn write<P: AsRef<Path>>(&self, path_bin_symt: P) -> Fallible<()> {
+        let buffer = File::create(path_bin_symt.as_ref())?;
+        let mut writer = BufWriter::new(LineWriter::new(buffer));
+
+        write_bin_symt(&mut writer, &self)?;
 
         Ok(())
     }
@@ -256,14 +278,16 @@ impl SymbolTable {
     pub fn text(&self) -> Fallible<String> {
         let buffer = Vec::<u8>::new();
         let mut writer = BufWriter::new(LineWriter::new(buffer));
-        write_symt_text!(self, writer);
+        write!(writer, "{}", self)?;
         Ok(String::from_utf8(writer.into_inner()?.into_inner()?)?)
     }
 }
 
 impl fmt::Display for SymbolTable {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_symt_text!(self, f);
+        for (label, symbol) in self.iter().sorted_by_key(|k| k.0) {
+            writeln!(f, "{}\t{}", symbol, label)?;
+        }
         Ok(())
     }
 }
