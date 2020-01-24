@@ -719,12 +719,12 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
 
     fst::SymbolTable isymt;
     isymt.AddSymbol("<eps>");
-    isymt.AddSymbol("lol");
-    isymt.AddSymbol("pouet");
+    isymt.AddSymbol("good");
+    isymt.AddSymbol("day");
 
     fst::SymbolTable osymt;
     osymt.AddSymbol("<epsilon>");
-    osymt.AddSymbol("carotte");
+    osymt.AddSymbol("knock");
     osymt.AddSymbol("world");
     osymt.AddSymbol("hello");
 

@@ -4,10 +4,10 @@ use nom::number::complete::{le_i32, le_i64};
 use nom::IResult;
 
 use crate::parsers::bin_fst::fst_header::OpenFstString;
-use crate::SymbolTable;
-use std::io::Write;
-use failure::Fallible;
 use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64};
+use crate::SymbolTable;
+use failure::Fallible;
+use std::io::Write;
 
 static SYMBOL_TABLE_MAGIC_NUMBER: i32 = 2_125_658_996;
 

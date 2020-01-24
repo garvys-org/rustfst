@@ -1,16 +1,16 @@
 use std::collections::hash_map::{Entry, Iter, Keys};
 use std::collections::HashMap;
 use std::fmt;
-use std::fs::{File, read};
+use std::fs::{read, File};
 use std::io::{BufWriter, LineWriter, Write};
 use std::path::Path;
 
 use failure::{Fallible, ResultExt};
 use itertools::Itertools;
 
-use crate::{EPS_SYMBOL, Label, Symbol};
 use crate::parsers::bin_symt::nom_parser::{parse_symbol_table_bin, write_bin_symt};
 use crate::parsers::text_symt::parsed_text_symt::ParsedTextSymt;
+use crate::{Label, Symbol, EPS_SYMBOL};
 
 /// A symbol table stores a bidirectional mapping between arc labels and "symbols" (strings).
 #[derive(PartialEq, Debug, Clone, Default)]
