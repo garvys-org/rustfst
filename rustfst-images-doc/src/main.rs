@@ -67,14 +67,14 @@ fn generate_project_images<P: AsRef<Path>>(path_images: P) -> Fallible<()> {
     config.portrait = true;
     config.vertical = false;
 
-    generate_image(path_images, &fst, "project.in", &config)?;
+    generate_image(path_images, &fst, "project_in", &config)?;
     {
         let mut fst_input_project = fst.clone();
         project(&mut fst_input_project, ProjectType::ProjectInput);
         generate_image(
             path_images,
             &fst_input_project,
-            "project.out.project_input",
+            "project_out_project-input",
             &config,
         )?;
     }
@@ -84,7 +84,7 @@ fn generate_project_images<P: AsRef<Path>>(path_images: P) -> Fallible<()> {
         generate_image(
             path_images,
             &fst_output_project,
-            "project.out.project_output",
+            "project_out_project-output",
             &config,
         )?;
     }
