@@ -22,11 +22,8 @@ impl UnaryFstAlgorithm for ReverseAlgorithm {
         "reverse".to_string()
     }
 
-    fn run_algorithm(
-        &self,
-        mut fst: VectorFst<TropicalWeight>,
-    ) -> Fallible<VectorFst<TropicalWeight>> {
-        reverse(&mut fst)
+    fn run_algorithm(&self, fst: VectorFst<TropicalWeight>) -> Fallible<VectorFst<TropicalWeight>> {
+        reverse(&fst)
     }
 }
 

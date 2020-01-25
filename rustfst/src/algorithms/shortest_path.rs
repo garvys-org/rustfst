@@ -174,7 +174,7 @@ where
             }
         } else {
             let pos = parent[d.unwrap()].unwrap().1;
-            let mut arc = ifst.arcs_iter(state)?.skip(pos).next().unwrap().clone();
+            let mut arc = ifst.arcs_iter(state)?.nth(pos).unwrap().clone();
             arc.nextstate = d_p.unwrap();
             ofst.add_arc(s_p.unwrap(), arc)?;
         }

@@ -192,19 +192,15 @@ fn parse_const_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], ConstFst
     let pos = stream_len - i.len();
 
     // Align input
-    if aligned && hdr.num_states > 0 {
-        if pos % CONST_ARCH_ALIGNMENT > 0 {
-            i = take(CONST_ARCH_ALIGNMENT - (pos % CONST_ARCH_ALIGNMENT))(i)?.0;
-        }
+    if aligned && hdr.num_states > 0 && pos % CONST_ARCH_ALIGNMENT > 0 {
+        i = take(CONST_ARCH_ALIGNMENT - (pos % CONST_ARCH_ALIGNMENT))(i)?.0;
     }
     let (mut i, const_states) = count(parse_const_state, hdr.num_states as usize)(i)?;
     let pos = stream_len - i.len();
 
     // Align input
-    if aligned && hdr.num_arcs > 0 {
-        if pos % CONST_ARCH_ALIGNMENT > 0 {
-            i = take(CONST_ARCH_ALIGNMENT - (pos % CONST_ARCH_ALIGNMENT))(i)?.0;
-        }
+    if aligned && hdr.num_arcs > 0 && pos % CONST_ARCH_ALIGNMENT > 0 {
+        i = take(CONST_ARCH_ALIGNMENT - (pos % CONST_ARCH_ALIGNMENT))(i)?.0;
     }
     let (i, const_arcs) = count(parse_fst_arc, hdr.num_arcs as usize)(i)?;
 

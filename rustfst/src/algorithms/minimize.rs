@@ -1,5 +1,6 @@
 use std::cmp::max;
 use std::cmp::Ordering;
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
@@ -381,14 +382,16 @@ fn pre_partition<W: Semiring, F: MutableFst<W = W> + ExpandedFst<W = W>>(
                 &mut hash_to_class_nonfinal
             };
 
-            // TODO: Find a way to avoid the double lookup
-            if this_map.contains_key(&ilabels) {
-                state_to_initial_class[s] = this_map[&ilabels];
-            } else {
-                this_map.insert(ilabels, next_class);
-                state_to_initial_class[s] = next_class;
-                next_class += 1;
-            }
+            match this_map.entry(ilabels) {
+                Entry::Occupied(e) => {
+                    state_to_initial_class[s] = *e.get();
+                }
+                Entry::Vacant(e) => {
+                    e.insert(next_class);
+                    state_to_initial_class[s] = next_class;
+                    next_class += 1;
+                }
+            };
         }
     }
     partition.allocate_classes(next_class);

@@ -54,8 +54,8 @@ impl Semiring for TropicalWeight {
     fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
         let f1 = self.value();
         let f2 = rhs.borrow().value();
-        if f1 == &f32::INFINITY {
-        } else if f2 == &f32::INFINITY {
+        if f1.eq(&f32::INFINITY) {
+        } else if f2.eq(&f32::INFINITY) {
             self.value.0 = *f2;
         } else {
             self.value.0 += f2;

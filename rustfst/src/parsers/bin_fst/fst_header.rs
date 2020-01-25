@@ -85,8 +85,8 @@ impl FstHeader {
                 start,
                 num_states,
                 num_arcs,
-                isymt: isymt.map(|s| Rc::new(s)),
-                osymt: osymt.map(|s| Rc::new(s)),
+                isymt: isymt.map(Rc::new),
+                osymt: osymt.map(Rc::new),
             },
         ))
     }

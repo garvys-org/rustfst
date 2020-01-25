@@ -92,10 +92,6 @@ pub use self::{
     weight_convert::{weight_convert, WeightConverter},
 };
 
-#[allow(unused)]
 pub use self::factor_weight::{
     factor_weight, FactorIterator, FactorWeightFst, FactorWeightOptions, FactorWeightType,
 };
-
-#[allow(unused)]
-pub(crate) use self::partition::Partition;

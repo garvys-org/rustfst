@@ -11,7 +11,6 @@ use std::slice::Iter as IterSlice;
 use failure::{bail, Fallible};
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
-use crate::algorithms::replace::ReplaceLabelType::{ReplaceLabelInput, ReplaceLabelNeither};
 use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, SymbolTable, EPS_LABEL};
@@ -22,14 +21,14 @@ pub trait BorrowFst<F>: Borrow<F> + std::fmt::Debug + PartialEq + Clone {}
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug, Eq)]
 enum ReplaceLabelType {
     /// Epsilon labels on both input and output.
-    ReplaceLabelNeither,
+    Neither,
     /// Non-epsilon labels on input and epsilon on output.
-    ReplaceLabelInput,
+    Input,
     /// Epsilon on input and non-epsilon on output.
-    ReplaceLabelOutput,
+    Output,
     #[allow(unused)]
     /// Non-epsilon labels on both input and output.
-    ReplaceLabelBoth,
+    Both,
 }
 
 #[derive(PartialOrd, PartialEq, Clone, Debug, Eq)]
@@ -52,11 +51,11 @@ impl ReplaceFstOptions {
         Self {
             root,
             call_label_type: if epsilon_on_replace {
-                ReplaceLabelNeither
+                ReplaceLabelType::Neither
             } else {
-                ReplaceLabelInput
+                ReplaceLabelType::Input
             },
-            return_label_type: ReplaceLabelNeither,
+            return_label_type: ReplaceLabelType::Neither,
             call_output_label: if epsilon_on_replace { Some(0) } else { None },
             return_label: 0,
         }
@@ -93,14 +92,12 @@ where
 
 /// Returns true if label type on arc results in epsilon input label.
 fn epsilon_on_input(label_type: ReplaceLabelType) -> bool {
-    label_type == ReplaceLabelType::ReplaceLabelNeither
-        || label_type == ReplaceLabelType::ReplaceLabelOutput
+    label_type == ReplaceLabelType::Neither || label_type == ReplaceLabelType::Output
 }
 
 /// Returns true if label type on arc results in epsilon input label.
 fn epsilon_on_output(label_type: ReplaceLabelType) -> bool {
-    label_type == ReplaceLabelType::ReplaceLabelNeither
-        || label_type == ReplaceLabelType::ReplaceLabelInput
+    label_type == ReplaceLabelType::Neither || label_type == ReplaceLabelType::Input
 }
 
 #[allow(unused)]
@@ -110,11 +107,11 @@ fn replace_transducer(
     return_label_type: ReplaceLabelType,
     call_output_label: Option<Label>,
 ) -> bool {
-    call_label_type == ReplaceLabelType::ReplaceLabelInput
-        || call_label_type == ReplaceLabelType::ReplaceLabelOutput
-        || (call_label_type == ReplaceLabelType::ReplaceLabelBoth && call_output_label.is_some())
-        || return_label_type == ReplaceLabelType::ReplaceLabelInput
-        || return_label_type == ReplaceLabelType::ReplaceLabelOutput
+    call_label_type == ReplaceLabelType::Input
+        || call_label_type == ReplaceLabelType::Output
+        || (call_label_type == ReplaceLabelType::Both && call_output_label.is_some())
+        || return_label_type == ReplaceLabelType::Input
+        || return_label_type == ReplaceLabelType::Output
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -169,19 +166,17 @@ where
 
     fn compute_start(&mut self) -> Fallible<Option<usize>> {
         if self.fst_array.is_empty() {
-            return Ok(None);
+            Ok(None)
+        } else if let Some(fst_start) = self.fst_array[self.root].borrow().start() {
+            let prefix = self.get_prefix_id(ReplaceStackPrefix::new());
+            let start = self.state_table.tuple_table.find_id(ReplaceStateTuple::new(
+                prefix,
+                Some(self.root),
+                Some(fst_start),
+            ));
+            Ok(Some(start))
         } else {
-            if let Some(fst_start) = self.fst_array[self.root].borrow().start() {
-                let prefix = self.get_prefix_id(ReplaceStackPrefix::new());
-                let start = self.state_table.tuple_table.find_id(ReplaceStateTuple::new(
-                    prefix,
-                    Some(self.root),
-                    Some(fst_start),
-                ));
-                return Ok(Some(start));
-            } else {
-                return Ok(None);
-            }
+            Ok(None)
         }
     }
 
@@ -218,12 +213,12 @@ impl<F: Fst, B: BorrowFst<F>> ReplaceFstImpl<F, B> {
 
         if let Some(v) = replace_fst_impl.call_output_label_ {
             if v == EPS_LABEL {
-                replace_fst_impl.call_label_type_ = ReplaceLabelType::ReplaceLabelNeither;
+                replace_fst_impl.call_label_type_ = ReplaceLabelType::Neither;
             }
         }
 
         if replace_fst_impl.return_label_ == 0 {
-            replace_fst_impl.return_label_type_ = ReplaceLabelType::ReplaceLabelNeither;
+            replace_fst_impl.return_label_type_ = ReplaceLabelType::Neither;
         }
 
         for (label, fst) in fst_list.into_iter() {
@@ -249,16 +244,13 @@ impl<F: Fst, B: BorrowFst<F>> ReplaceFstImpl<F, B> {
 
     fn compute_final_arc(&mut self, state: StateId) -> Option<Arc<F::W>> {
         let tuple = self.state_table.tuple_table.find_tuple(state);
-        let fst_state = tuple.fst_state;
-        if fst_state.is_none() {
-            return None;
-        }
+        let fst_state = tuple.fst_state?;
         if self
             .fst_array
             .get(tuple.fst_id.unwrap())
             .unwrap()
             .borrow()
-            .is_final(fst_state.unwrap())
+            .is_final(fst_state)
             .unwrap()
             && tuple.prefix_id > 0
         {
@@ -294,7 +286,7 @@ impl<F: Fst, B: BorrowFst<F>> ReplaceFstImpl<F, B> {
                 .get(tuple.fst_id.unwrap())
                 .unwrap()
                 .borrow()
-                .final_weight(fst_state.unwrap())
+                .final_weight(fst_state)
                 .unwrap()
             {
                 return Some(Arc::new(ilabel, olabel, weight.clone(), nextstate));
@@ -332,12 +324,12 @@ impl<F: Fst, B: BorrowFst<F>> ReplaceFstImpl<F, B> {
             let state_tuple =
                 ReplaceStateTuple::new(tuple.prefix_id, tuple.fst_id, Some(arc.nextstate));
             let nextstate = self.state_table.tuple_table.find_id(state_tuple);
-            return Some(Arc::new(
+            Some(Arc::new(
                 arc.ilabel,
                 arc.olabel,
                 arc.weight.clone(),
                 nextstate,
-            ));
+            ))
         } else {
             // Checks for non-terminal
             if let Some(nonterminal) = self.nonterminal_hash.get(&arc.olabel) {
@@ -361,9 +353,9 @@ impl<F: Fst, B: BorrowFst<F>> ReplaceFstImpl<F, B> {
                     } else {
                         self.call_output_label_.unwrap_or(arc.olabel)
                     };
-                    return Some(Arc::new(ilabel, olabel, arc.weight.clone(), nt_nextstate));
+                    Some(Arc::new(ilabel, olabel, arc.weight.clone(), nt_nextstate))
                 } else {
-                    return None;
+                    None
                 }
             } else {
                 let nextstate = self.state_table.tuple_table.find_id(ReplaceStateTuple::new(
@@ -371,12 +363,12 @@ impl<F: Fst, B: BorrowFst<F>> ReplaceFstImpl<F, B> {
                     tuple.fst_id,
                     Some(arc.nextstate),
                 ));
-                return Some(Arc::new(
+                Some(Arc::new(
                     arc.ilabel,
                     arc.olabel,
                     arc.weight.clone(),
                     nextstate,
-                ));
+                ))
             }
         }
     }

@@ -58,7 +58,7 @@ where
     Ok(())
 }
 
-fn compute_total_weight<F>(fst: &F, dist: &Vec<F::W>, reverse: bool) -> Fallible<F::W>
+fn compute_total_weight<F>(fst: &F, dist: &[F::W], reverse: bool) -> Fallible<F::W>
 where
     F: ExpandedFst,
 {
@@ -98,14 +98,12 @@ where
                 final_weight.divide_assign(&weight, DivideType::DivideRight)?;
             }
         }
-    } else {
-        if let Some(start) = fst.start() {
-            for arc in unsafe { fst.arcs_iter_unchecked_mut(start) } {
-                arc.weight.divide_assign(&weight, DivideType::DivideLeft)?;
-            }
-            if let Some(final_weight) = unsafe { fst.final_weight_unchecked_mut(start) } {
-                final_weight.divide_assign(&weight, DivideType::DivideLeft)?;
-            }
+    } else if let Some(start) = fst.start() {
+        for arc in unsafe { fst.arcs_iter_unchecked_mut(start) } {
+            arc.weight.divide_assign(&weight, DivideType::DivideLeft)?;
+        }
+        if let Some(final_weight) = unsafe { fst.final_weight_unchecked_mut(start) } {
+            final_weight.divide_assign(&weight, DivideType::DivideLeft)?;
         }
     }
     Ok(())
