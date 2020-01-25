@@ -184,10 +184,15 @@ fn parse_const_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], ConstS
     ))
 }
 
-fn parse_const_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], ConstFst<W>> {
+fn parse_const_fst<W: SerializableSemiring + 'static>(i: &[u8]) -> IResult<&[u8], ConstFst<W>> {
     let stream_len = i.len();
 
-    let (mut i, hdr) = FstHeader::parse(i, CONST_MIN_FILE_VERSION)?;
+    let (mut i, hdr) = FstHeader::parse(
+        i,
+        CONST_MIN_FILE_VERSION,
+        ConstFst::<W>::fst_type(),
+        Arc::<W>::arc_type(),
+    )?;
     let aligned = hdr.version == CONST_ALIGNED_FILE_VERSION;
     let pos = stream_len - i.len();
 

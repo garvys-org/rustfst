@@ -137,8 +137,13 @@ fn parse_vector_fst_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], V
     ))
 }
 
-fn parse_vector_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFst<W>> {
-    let (i, header) = FstHeader::parse(i, VECTOR_MIN_FILE_VERSION)?;
+fn parse_vector_fst<W: SerializableSemiring + 'static>(i: &[u8]) -> IResult<&[u8], VectorFst<W>> {
+    let (i, header) = FstHeader::parse(
+        i,
+        VECTOR_MIN_FILE_VERSION,
+        VectorFst::<W>::fst_type(),
+        Arc::<W>::arc_type(),
+    )?;
     let (i, states) = count(parse_vector_fst_state, header.num_states as usize)(i)?;
     Ok((
         i,
