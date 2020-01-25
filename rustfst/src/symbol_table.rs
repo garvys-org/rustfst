@@ -79,6 +79,12 @@ impl SymbolTable {
         }
     }
 
+    pub fn add_symbols<S: Into<String>, P: IntoIterator<Item=S>>(&mut self, symbols: P) {
+        for symbol in symbols.into_iter() {
+            self.add_symbol(symbol.into());
+        }
+    }
+
     pub(crate) fn add_symbol_key<S: Into<String>>(&mut self, sym: S, key: usize) {
         let sym = sym.into();
         self.symbol_to_label.insert(sym.clone(), key);
