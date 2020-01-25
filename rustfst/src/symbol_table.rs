@@ -82,7 +82,7 @@ impl SymbolTable {
     pub(crate) fn add_symbol_key<S: Into<String>>(&mut self, sym: S, key: usize) {
         let sym = sym.into();
         self.symbol_to_label.insert(sym.clone(), key);
-        self.label_to_symbol.insert(key, sym.clone());
+        self.label_to_symbol.insert(key, sym);
         // TODO: Add some checks here
     }
 

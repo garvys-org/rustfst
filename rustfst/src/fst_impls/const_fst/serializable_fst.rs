@@ -184,27 +184,28 @@ fn parse_const_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], ConstS
     ))
 }
 
-fn parse_const_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], ConstFst<W>> {
+fn parse_const_fst<W: SerializableSemiring + 'static>(i: &[u8]) -> IResult<&[u8], ConstFst<W>> {
     let stream_len = i.len();
 
-    let (mut i, hdr) = FstHeader::parse(i, CONST_MIN_FILE_VERSION)?;
+    let (mut i, hdr) = FstHeader::parse(
+        i,
+        CONST_MIN_FILE_VERSION,
+        ConstFst::<W>::fst_type(),
+        Arc::<W>::arc_type(),
+    )?;
     let aligned = hdr.version == CONST_ALIGNED_FILE_VERSION;
     let pos = stream_len - i.len();
 
     // Align input
-    if aligned && hdr.num_states > 0 {
-        if pos % CONST_ARCH_ALIGNMENT > 0 {
-            i = take(CONST_ARCH_ALIGNMENT - (pos % CONST_ARCH_ALIGNMENT))(i)?.0;
-        }
+    if aligned && hdr.num_states > 0 && pos % CONST_ARCH_ALIGNMENT > 0 {
+        i = take(CONST_ARCH_ALIGNMENT - (pos % CONST_ARCH_ALIGNMENT))(i)?.0;
     }
     let (mut i, const_states) = count(parse_const_state, hdr.num_states as usize)(i)?;
     let pos = stream_len - i.len();
 
     // Align input
-    if aligned && hdr.num_arcs > 0 {
-        if pos % CONST_ARCH_ALIGNMENT > 0 {
-            i = take(CONST_ARCH_ALIGNMENT - (pos % CONST_ARCH_ALIGNMENT))(i)?.0;
-        }
+    if aligned && hdr.num_arcs > 0 && pos % CONST_ARCH_ALIGNMENT > 0 {
+        i = take(CONST_ARCH_ALIGNMENT - (pos % CONST_ARCH_ALIGNMENT))(i)?.0;
     }
     let (i, const_arcs) = count(parse_fst_arc, hdr.num_arcs as usize)(i)?;
 

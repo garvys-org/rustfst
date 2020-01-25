@@ -85,7 +85,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
         let start_state = parsed_fst_text.start();
         let num_states = parsed_fst_text.num_states();
 
-        let states = vec![VectorFstState::<W>::default(); num_states];
+        let states = vec![VectorFstState::<W>::new(); num_states];
 
         let mut fst = VectorFst {
             states,
@@ -137,8 +137,13 @@ fn parse_vector_fst_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], V
     ))
 }
 
-fn parse_vector_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFst<W>> {
-    let (i, header) = FstHeader::parse(i, VECTOR_MIN_FILE_VERSION)?;
+fn parse_vector_fst<W: SerializableSemiring + 'static>(i: &[u8]) -> IResult<&[u8], VectorFst<W>> {
+    let (i, header) = FstHeader::parse(
+        i,
+        VECTOR_MIN_FILE_VERSION,
+        VectorFst::<W>::fst_type(),
+        Arc::<W>::arc_type(),
+    )?;
     let (i, states) = count(parse_vector_fst_state, header.num_states as usize)(i)?;
     Ok((
         i,

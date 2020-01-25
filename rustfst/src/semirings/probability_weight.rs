@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::f32;
 use std::hash::{Hash, Hasher};
 
@@ -37,13 +38,13 @@ impl Semiring for ProbabilityWeight {
         }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
-        self.value.0 += rhs.as_ref().value.0;
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+        self.value.0 += rhs.borrow().value.0;
         Ok(())
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
-        self.value.0 *= rhs.as_ref().value.0;
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+        self.value.0 *= rhs.borrow().value.0;
         Ok(())
     }
 

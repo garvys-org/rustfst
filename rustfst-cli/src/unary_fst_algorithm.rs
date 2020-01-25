@@ -13,7 +13,7 @@ fn duration_to_seconds(duration: &Duration) -> f64 {
     duration.as_secs() as f64 + duration.subsec_nanos() as f64 * 1.0e-9
 }
 
-fn standard_deviation(data: &Vec<f64>) -> f64 {
+fn standard_deviation(data: &[f64]) -> f64 {
     let sum: f64 = data.iter().sum();
     let mean: f64 = sum / data.len() as f64;
 

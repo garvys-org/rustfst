@@ -15,7 +15,7 @@ use std::ops::Range;
 impl<'a, W: Semiring> StateIterator<'a> for VectorFst<W> {
     type Iter = Range<StateId>;
     fn states_iter(&'a self) -> Self::Iter {
-        (0..self.states.len())
+        0..self.states.len()
     }
 }
 
@@ -64,14 +64,14 @@ pub struct ArcIndexIter(Range<usize>);
 impl std::iter::Iterator for StateIndexIter {
     type Item = StateIndex;
     fn next(&mut self) -> Option<Self::Item> {
-        self.0.next().map(|it| StateIndex(it))
+        self.0.next().map(StateIndex)
     }
 }
 
 impl std::iter::Iterator for ArcIndexIter {
     type Item = ArcIndex;
     fn next(&mut self) -> Option<Self::Item> {
-        self.0.next().map(|it| ArcIndex(it))
+        self.0.next().map(ArcIndex)
     }
 }
 

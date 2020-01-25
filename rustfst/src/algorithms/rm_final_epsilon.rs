@@ -43,24 +43,23 @@ where
         arcs_to_del.clear();
 
         for (idx, arc) in unsafe { ifst.arcs_iter_unchecked(state).enumerate() } {
-            if finals.contains(&arc.nextstate) {
-                if arc.ilabel == EPS_LABEL && arc.olabel == EPS_LABEL {
-                    unsafe {
-                        if weight.is_none() {
-                            weight = Some(
-                                ifst.final_weight_unchecked(state)
-                                    .cloned()
-                                    .unwrap_or_else(F::W::zero),
-                            );
-                        }
-                        weight.as_mut().unsafe_unwrap().plus_assign(
-                            ifst.final_weight_unchecked(arc.nextstate)
-                                .unsafe_unwrap()
-                                .times(&arc.weight)?,
-                        )?
-                    };
-                    arcs_to_del.push(idx);
-                }
+            if finals.contains(&arc.nextstate) && arc.ilabel == EPS_LABEL && arc.olabel == EPS_LABEL
+            {
+                unsafe {
+                    if weight.is_none() {
+                        weight = Some(
+                            ifst.final_weight_unchecked(state)
+                                .cloned()
+                                .unwrap_or_else(F::W::zero),
+                        );
+                    }
+                    weight.as_mut().unsafe_unwrap().plus_assign(
+                        ifst.final_weight_unchecked(arc.nextstate)
+                            .unsafe_unwrap()
+                            .times(&arc.weight)?,
+                    )?
+                };
+                arcs_to_del.push(idx);
             }
         }
 

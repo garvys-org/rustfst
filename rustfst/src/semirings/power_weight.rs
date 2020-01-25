@@ -54,18 +54,6 @@ where
     }
 }
 
-impl<W, N> Default for PowerWeight<W, N>
-where
-    W: Semiring,
-    N: ArrayLength<W>,
-{
-    fn default() -> Self {
-        Self {
-            weights: GenericArray::clone_from_slice(vec![W::default(); N::to_usize()].as_slice()),
-        }
-    }
-}
-
 impl<W, N> Clone for PowerWeight<W, N>
 where
     W: Semiring,

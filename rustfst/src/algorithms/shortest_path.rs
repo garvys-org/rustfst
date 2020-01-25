@@ -120,7 +120,7 @@ where
         let sd = distance[s].clone();
 
         if let Some(final_weight) = ifst.final_weight(s)? {
-            let plus = f_distance.plus(&sd.times(&final_weight)?)?;
+            let plus = f_distance.plus(&sd.times(final_weight)?)?;
             if f_distance != plus {
                 f_distance = plus;
                 *f_parent = Some(s);
@@ -174,7 +174,7 @@ where
             }
         } else {
             let pos = parent[d.unwrap()].unwrap().1;
-            let mut arc = ifst.arcs_iter(state)?.skip(pos).next().unwrap().clone();
+            let mut arc = ifst.arcs_iter(state)?.nth(pos).unwrap().clone();
             arc.nextstate = d_p.unwrap();
             ofst.add_arc(s_p.unwrap(), arc)?;
         }

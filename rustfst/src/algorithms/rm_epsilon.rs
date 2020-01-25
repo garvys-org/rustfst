@@ -138,7 +138,7 @@ where
                 }
                 let rho_prime_p = unsafe { output_fst.final_weight_unchecked(p).unsafe_unwrap() };
                 let rho_q = unsafe { fst_no_epsilon.final_weight_unchecked(*q).unsafe_unwrap() };
-                let new_weight = rho_prime_p.plus(&w_prime.times(&rho_q)?)?;
+                let new_weight = rho_prime_p.plus(&w_prime.times(rho_q)?)?;
                 output_fst.set_final(p, new_weight)?;
             }
         }

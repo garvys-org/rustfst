@@ -9,7 +9,8 @@ pub struct InvertWeightMapper {}
 
 #[inline]
 pub fn map_weight<W: WeaklyDivisibleSemiring>(weight: &mut W) -> Fallible<()> {
-    Ok(weight.set_value(W::one().divide(weight, DivideType::DivideAny)?.take_value()))
+    weight.set_value(W::one().divide(weight, DivideType::DivideAny)?.take_value());
+    Ok(())
 }
 
 impl<S: WeaklyDivisibleSemiring> ArcMapper<S> for InvertWeightMapper {

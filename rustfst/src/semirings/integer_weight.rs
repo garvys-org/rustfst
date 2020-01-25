@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::i32;
 
 use failure::Fallible;
@@ -25,13 +26,13 @@ impl Semiring for IntegerWeight {
         IntegerWeight { value }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
-        self.value += rhs.as_ref().value;
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+        self.value += rhs.borrow().value;
         Ok(())
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
-        self.value *= rhs.as_ref().value;
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+        self.value *= rhs.borrow().value;
         Ok(())
     }
 

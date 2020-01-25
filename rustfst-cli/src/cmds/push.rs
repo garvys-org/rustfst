@@ -24,11 +24,8 @@ impl UnaryFstAlgorithm for PushAlgorithm {
         "push".to_string()
     }
 
-    fn run_algorithm(
-        &self,
-        mut fst: VectorFst<TropicalWeight>,
-    ) -> Fallible<VectorFst<TropicalWeight>> {
-        push(&mut fst, self.reweight_type, self.push_type)
+    fn run_algorithm(&self, fst: VectorFst<TropicalWeight>) -> Fallible<VectorFst<TropicalWeight>> {
+        push(&fst, self.reweight_type, self.push_type)
     }
 }
 

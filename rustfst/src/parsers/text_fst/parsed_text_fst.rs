@@ -17,7 +17,7 @@ pub enum RowParsed<W: SerializableSemiring> {
 /// Struct representing a parsed fst in text format. It contains a vector of transitions
 /// and a vector final states. The first state in the vector of transition is the start state.
 /// This container doesn't depend on any Semiring.
-#[derive(Debug, PartialEq, Default)]
+#[derive(Debug, PartialEq)]
 pub struct ParsedTextFst<W: SerializableSemiring> {
     pub transitions: Vec<Transition<W>>,
     pub final_states: Vec<FinalState<W>>,
@@ -50,6 +50,16 @@ pub struct FinalState<W: SerializableSemiring> {
     pub weight: Option<W>,
 }
 
+impl<W: SerializableSemiring> Default for ParsedTextFst<W> {
+    fn default() -> Self {
+        Self {
+            transitions: vec![],
+            final_states: vec![],
+            start_state: None,
+        }
+    }
+}
+
 impl<W: SerializableSemiring> ParsedTextFst<W> {
     /// Loads an FST from a loaded string in text format usually called `At&T FSM format`.
     ///
@@ -67,12 +77,12 @@ impl<W: SerializableSemiring> ParsedTextFst<W> {
     ///
     /// ## Example:
     /// ```text
-    /// 0	1	32	32
-    /// 1	2	45	45
-    /// 2	3	18	18	0.25
-    /// 3	4	45	45
-    /// 4	5	5	5	0.31
-    /// 3	0.67
+    /// 0   1   32  32
+    /// 1   2   45  45
+    /// 2   3   18  18  0.25
+    /// 3   4   45  45
+    /// 4   5   5   5   0.31
+    /// 3   0.67
     /// ```
     pub fn from_string(fst_string: &str) -> Fallible<Self> {
         let (_, vec_rows_parsed) =
@@ -116,12 +126,12 @@ impl<W: SerializableSemiring> ParsedTextFst<W> {
     ///
     /// ## Example:
     /// ```text
-    /// 0	1	32	32
-    /// 1	2	45	45
-    /// 2	3	18	18	0.25
-    /// 3	4	45	45
-    /// 4	5	5	5	0.31
-    /// 3	0.67
+    /// 0   1   32  32
+    /// 1   2   45  45
+    /// 2   3   18  18  0.25
+    /// 3   4   45  45
+    /// 4   5   5   5   0.31
+    /// 3   0.67
     /// ```
     pub fn from_path<P: AsRef<Path>>(path_fst_text: P) -> Fallible<Self> {
         let fst_string = read_to_string(path_fst_text)?;

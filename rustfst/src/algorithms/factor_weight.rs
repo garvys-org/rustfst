@@ -138,7 +138,7 @@ where
         {
             let one = F::W::one();
             let weight = match elt.state {
-                None => elt.weight.clone(),
+                None => elt.weight,
                 Some(s) => elt
                     .weight
                     .times(self.fst.borrow().final_weight(s)?.unwrap_or_else(|| &one))

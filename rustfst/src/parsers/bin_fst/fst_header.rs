@@ -57,10 +57,19 @@ fn optionally_parse_symt(i: &[u8], parse_symt: bool) -> IResult<&[u8], Option<Sy
 }
 
 impl FstHeader {
-    pub(crate) fn parse(i: &[u8], min_file_version: i32) -> IResult<&[u8], FstHeader> {
+    pub(crate) fn parse<S1: AsRef<str>, S2: AsRef<str>>(
+        i: &[u8],
+        min_file_version: i32,
+        fst_loading_type: S1,
+        arc_loading_type: S2,
+    ) -> IResult<&[u8], FstHeader> {
         let (i, magic_number) = verify(le_i32, |v: &i32| *v == FST_MAGIC_NUMBER)(i)?;
-        let (i, fst_type) = OpenFstString::parse(i)?;
-        let (i, arc_type) = OpenFstString::parse(i)?;
+        let (i, fst_type) = verify(OpenFstString::parse, |v| {
+            v.s.as_str() == fst_loading_type.as_ref()
+        })(i)?;
+        let (i, arc_type) = verify(OpenFstString::parse, |v| {
+            v.s.as_str() == arc_loading_type.as_ref()
+        })(i)?;
         let (i, version) = verify(le_i32, |v: &i32| *v >= min_file_version)(i)?;
         let (i, flags) = map_res(le_u32, |v: u32| {
             FstFlags::from_bits(v).ok_or_else(|| "Could not parse Fst Flags")
@@ -85,8 +94,8 @@ impl FstHeader {
                 start,
                 num_states,
                 num_arcs,
-                isymt: isymt.map(|s| Rc::new(s)),
-                osymt: osymt.map(|s| Rc::new(s)),
+                isymt: isymt.map(Rc::new),
+                osymt: osymt.map(Rc::new),
             },
         ))
     }

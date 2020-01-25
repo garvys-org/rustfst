@@ -22,13 +22,19 @@ pub struct VectorFst<W: Semiring> {
 // and num_output_epsilons inside the data structure as it would mean having to maintain them
 // when the object is modified. Which is not trivial with the MutableArcIterator API for instance.
 // Same goes for ArcMap. For not-mutable fst however, it is usefull.
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq)]
 pub(crate) struct VectorFstState<W: Semiring> {
     pub(crate) final_weight: Option<W>,
     pub(crate) arcs: Vec<Arc<W>>,
 }
 
 impl<W: Semiring> VectorFstState<W> {
+    pub fn new() -> Self {
+        Self {
+            final_weight: None,
+            arcs: vec![],
+        }
+    }
     pub fn num_arcs(&self) -> usize {
         self.arcs.len()
     }

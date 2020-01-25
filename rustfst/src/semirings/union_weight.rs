@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::fmt::{Display, Formatter, Result};
@@ -18,7 +19,7 @@ use crate::semirings::{
     WeightQuantize,
 };
 
-pub trait UnionWeightOption<W: Semiring>: Debug + Hash + Default + Clone + PartialOrd + Eq {
+pub trait UnionWeightOption<W: Semiring>: Debug + Hash + Clone + PartialOrd + Eq {
     type ReverseOptions: UnionWeightOption<W::ReverseWeight>;
     fn compare(w1: &W, w2: &W) -> bool;
     fn merge(w1: &W, w2: &W) -> Fallible<W>;
@@ -68,20 +69,20 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
         }
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
         if self.is_zero() {
-            self.set_value(rhs.as_ref().value().clone());
-        } else if rhs.as_ref().is_zero() {
+            self.set_value(rhs.borrow().value().clone());
+        } else if rhs.borrow().is_zero() {
             // Nothing
         } else {
             let mut sum: UnionWeight<W, O> = UnionWeight::zero();
             let n1 = self.list.len();
-            let n2 = rhs.as_ref().list.len();
+            let n2 = rhs.borrow().list.len();
             let mut i1 = 0;
             let mut i2 = 0;
             while i1 < n1 && i2 < n2 {
                 let v1 = unsafe { self.list.get_unchecked(i1) };
-                let v2 = unsafe { rhs.as_ref().list.get_unchecked(i2) };
+                let v2 = unsafe { rhs.borrow().list.get_unchecked(i2) };
                 if O::compare(v1, v2) {
                     sum.push_back(v1.clone(), true)?;
                     i1 += 1;
@@ -97,7 +98,7 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
             }
 
             for i in i2..n2 {
-                let v2 = unsafe { rhs.as_ref().list.get_unchecked(i) };
+                let v2 = unsafe { rhs.borrow().list.get_unchecked(i) };
                 sum.push_back(v2.clone(), true)?;
             }
             //TODO: Remove this copy and do the modification inplace
@@ -106,15 +107,15 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
         Ok(())
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
-        if self.is_zero() || rhs.as_ref().is_zero() {
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+        if self.is_zero() || rhs.borrow().is_zero() {
             self.set_value(Self::zero().take_value());
         } else {
             let mut prod1: UnionWeight<W, O> = UnionWeight::zero();
             for w1 in self.iter() {
                 let mut prod2: UnionWeight<W, O> = UnionWeight::zero();
-                for w2 in rhs.as_ref().iter() {
-                    let p = w1.times(&w2)?;
+                for w2 in rhs.borrow().iter() {
+                    let p = w1.times(w2)?;
                     prod2.push_back(p, true)?;
                 }
                 prod1.plus_assign(prod2)?;

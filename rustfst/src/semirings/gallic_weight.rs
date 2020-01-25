@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::fmt::{Display, Formatter, Result};
 use std::io::Write;
 use std::marker::PhantomData;
@@ -7,6 +8,8 @@ use nom::IResult;
 
 use crate::semirings::ProductWeight;
 use crate::semirings::Semiring;
+#[cfg(test)]
+use crate::semirings::TropicalWeight;
 use crate::semirings::{
     DivideType, SemiringProperties, SerializableSemiring, StringWeightLeft, StringWeightRestrict,
     StringWeightRight, UnionWeight, UnionWeightOption, WeaklyDivisibleSemiring, WeightQuantize,
@@ -14,25 +17,25 @@ use crate::semirings::{
 use crate::Label;
 
 /// Product of StringWeightLeft and an arbitrary weight.
-#[derive(PartialOrd, PartialEq, Eq, Clone, Default, Hash, Debug)]
+#[derive(PartialOrd, PartialEq, Eq, Clone, Hash, Debug)]
 pub struct GallicWeightLeft<W>(ProductWeight<StringWeightLeft, W>)
 where
     W: Semiring;
 
 /// Product of StringWeightRight and an arbitrary weight.
-#[derive(PartialOrd, PartialEq, Eq, Clone, Default, Hash, Debug)]
+#[derive(PartialOrd, PartialEq, Eq, Clone, Hash, Debug)]
 pub struct GallicWeightRight<W>(ProductWeight<StringWeightRight, W>)
 where
     W: Semiring;
 
 /// Product of StringWeighRestrict and an arbitrary weight.
-#[derive(PartialOrd, PartialEq, Eq, Clone, Default, Hash, Debug)]
+#[derive(PartialOrd, PartialEq, Eq, Clone, Hash, Debug)]
 pub struct GallicWeightRestrict<W>(ProductWeight<StringWeightRestrict, W>)
 where
     W: Semiring;
 
 /// Product of StringWeightRestrict and an arbitrary weight.
-#[derive(PartialOrd, PartialEq, Eq, Clone, Default, Hash, Debug)]
+#[derive(PartialOrd, PartialEq, Eq, Clone, Hash, Debug)]
 pub struct GallicWeightMin<W>(ProductWeight<StringWeightRestrict, W>)
 where
     W: Semiring;
@@ -87,22 +90,22 @@ macro_rules! gallic_weight {
                 Self(value)
             }
 
-            fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
+            fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
                 match $gallic_type {
-                    GallicType::GallicLeft => self.0.plus_assign(&rhs.as_ref().0)?,
-                    GallicType::GallicRight => self.0.plus_assign(&rhs.as_ref().0)?,
-                    GallicType::GallicRestrict => self.0.plus_assign(&rhs.as_ref().0)?,
+                    GallicType::GallicLeft => self.0.plus_assign(&rhs.borrow().0)?,
+                    GallicType::GallicRight => self.0.plus_assign(&rhs.borrow().0)?,
+                    GallicType::GallicRestrict => self.0.plus_assign(&rhs.borrow().0)?,
                     GallicType::GallicMin => {
-                        if !natural_less(self.value2(), rhs.as_ref().value2())? {
-                            self.set_value(rhs.as_ref().value().clone());
+                        if !natural_less(self.value2(), rhs.borrow().value2())? {
+                            self.set_value(rhs.borrow().value().clone());
                         }
                     }
                 };
                 Ok(())
             }
 
-            fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
-                self.0.times_assign(&rhs.as_ref().0)
+            fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+                self.0.times_assign(&rhs.borrow().0)
             }
 
             fn value(&self) -> &Self::Type {
@@ -256,7 +259,7 @@ gallic_weight!(
     GallicType::GallicMin,
     GallicWeightMin<W::ReverseWeight>
 );
-#[derive(Debug, Hash, Default, Clone, PartialEq, PartialOrd, Eq)]
+#[derive(Debug, Hash, Clone, PartialEq, PartialOrd, Eq)]
 pub struct GallicUnionWeightOption<W> {
     ghost: PhantomData<W>,
 }
@@ -300,13 +303,13 @@ impl<W: Semiring> UnionWeightOption<GallicWeightRestrict<W>>
         w1: &GallicWeightRestrict<W>,
         w2: &GallicWeightRestrict<W>,
     ) -> Fallible<GallicWeightRestrict<W>> {
-        let p = ProductWeight::new((w1.0.value1().clone(), w1.0.value2().plus(&w2.0.value2())?));
+        let p = ProductWeight::new((w1.0.value1().clone(), w1.0.value2().plus(w2.0.value2())?));
         Ok(GallicWeightRestrict(p))
     }
 }
 
 /// UnionWeight of GallicWeightRestrict.
-#[derive(Debug, PartialOrd, PartialEq, Clone, Hash, Default, Eq)]
+#[derive(Debug, PartialOrd, PartialEq, Clone, Hash, Eq)]
 pub struct GallicWeight<W>(
     pub UnionWeight<GallicWeightRestrict<W>, GallicUnionWeightOption<GallicWeightRestrict<W>>>,
 )
@@ -347,12 +350,12 @@ impl<W: Semiring> Semiring for GallicWeight<W> {
         Self(UnionWeight::new(value))
     }
 
-    fn plus_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
-        self.0.plus_assign(&rhs.as_ref().0)
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+        self.0.plus_assign(&rhs.borrow().0)
     }
 
-    fn times_assign<P: AsRef<Self>>(&mut self, rhs: P) -> Fallible<()> {
-        self.0.times_assign(&rhs.as_ref().0)
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+        self.0.times_assign(&rhs.borrow().0)
     }
 
     fn value(&self) -> &Self::Type {
@@ -477,10 +480,6 @@ impl<W: SerializableSemiring> SerializableSemiring for GallicWeight<W> {
         Ok((i, Self(w)))
     }
 }
-
-// TODO: Add test
-#[cfg(test)]
-use crate::semirings::TropicalWeight;
 
 test_semiring_serializable!(
     test_gallic_weight_left_serializable,

@@ -17,7 +17,7 @@ pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Fallible<FstProp
 
     let mut visitor = SccVisitor::new(fst, true, true);
     dfs_visit(fst, &mut visitor, false);
-    let ref sccs = unsafe { visitor.scc.unsafe_unwrap() };
+    let sccs = unsafe { &visitor.scc.unsafe_unwrap() };
 
     comp_props |= FstProperties::ACCESSIBLE;
     if unsafe { visitor.access.unsafe_unwrap().iter().any(|v| !*v) } {
