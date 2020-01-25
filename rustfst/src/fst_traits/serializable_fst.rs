@@ -5,7 +5,7 @@ use failure::Fallible;
 use crate::fst_traits::{ExpandedFst, FinalStatesIterator};
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::{Semiring, SerializableSemiring};
-use crate::DrawingConfig;
+use crate::{DrawingConfig, StateId};
 use std::fs::File;
 use std::io::{LineWriter, Write};
 
@@ -81,11 +81,11 @@ where
             writeln!(f, "nodesep = {}", config.nodesep)?;
 
             // Start state first
-            draw_single_state!(self, start_state, f, config);
+            draw_single_fst_state(self, &mut f, start_state, config)?;
 
             for state in self.states_iter() {
                 if state != start_state {
-                    draw_single_state!(self, state, f, config);
+                    draw_single_fst_state(self, &mut f, state, config)?;
                 }
             }
 
@@ -93,4 +93,70 @@ where
         }
         Ok(())
     }
+}
+
+fn draw_single_fst_state<F: SerializableFst, W: Write>(
+    fst: &F,
+    writer: &mut W,
+    state_id: StateId,
+    config: &DrawingConfig,
+) -> Fallible<()>
+where
+    F::W: SerializableSemiring,
+{
+    let opt_isymt = fst.input_symbols();
+    let opt_osymt = fst.output_symbols();
+
+    write!(writer, "{}", state_id)?;
+    write!(writer, " [label = \"{}", state_id)?;
+    if let Some(final_weight) = fst.final_weight(state_id)? {
+        if config.show_weight_one || !final_weight.is_one() {
+            write!(writer, "/{}", final_weight)?;
+        }
+        write!(writer, "\", shape = doublecircle,")?;
+    } else {
+        write!(writer, "\", shape = circle,")?;
+    }
+
+    if fst.is_start(state_id) {
+        write!(writer, " style = bold,")?;
+    } else {
+        write!(writer, " style = solid,")?;
+    }
+
+    writeln!(writer, " fontsize = {}]", config.fontsize)?;
+
+    for arc in fst.arcs_iter(state_id).unwrap() {
+        write!(writer, "\t{} -> {}", state_id, arc.nextstate)?;
+
+        let ilabel = opt_isymt.clone().map_or_else(
+            || Ok(format!("{}", arc.ilabel)),
+            |symt| {
+                symt.get_symbol(arc.ilabel)
+                    .map(|v| v.to_string())
+                    .ok_or_else(|| format_err!("Missing {} in input SymbolTable", arc.ilabel))
+            },
+        )?;
+
+        let olabel = opt_osymt.clone().map_or_else(
+            || Ok(format!("{}", arc.ilabel)),
+            |symt| {
+                symt.get_symbol(arc.olabel)
+                    .map(|v| v.to_string())
+                    .ok_or_else(|| format_err!("Missing {} in output SymbolTable", arc.olabel))
+            },
+        )?;
+
+        write!(writer, " [label = \"{}", ilabel)?;
+        if !config.acceptor {
+            write!(writer, ":{}", olabel)?;
+        }
+
+        if config.show_weight_one || !arc.weight.is_one() {
+            write!(writer, "/{}", arc.weight)?;
+        }
+        writeln!(writer, "\", fontsize = {}];", config.fontsize)?;
+    }
+
+    Ok(())
 }
