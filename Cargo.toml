@@ -1,7 +1,8 @@
 [workspace]
 members = [
     "rustfst",
-    "rustfst-cli"
+    "rustfst-cli",
+    "rustfst-images-doc"
 ]
 
 [profile.release]
