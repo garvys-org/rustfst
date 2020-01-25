@@ -79,7 +79,7 @@ impl SymbolTable {
         }
     }
 
-    pub fn add_symbols<S: Into<String>, P: IntoIterator<Item=S>>(&mut self, symbols: P) {
+    pub fn add_symbols<S: Into<String>, P: IntoIterator<Item = S>>(&mut self, symbols: P) {
         for symbol in symbols.into_iter() {
             self.add_symbol(symbol.into());
         }
