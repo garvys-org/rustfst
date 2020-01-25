@@ -12,7 +12,16 @@ pub enum ProjectType {
 /// This operation projects an FST onto its domain or range by either copying
 /// each arc's input label to its output label or vice versa.
 ///
-/// # Example : Project input
+/// # Example
+///
+/// ## Input
+///
+/// ![project_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/project_in.svg?sanitize=true)
+///
+/// ## Project input
+///
+/// ![project_out_project-input](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/project_out_project-input.svg?sanitize=true)
+///
 /// ```
 /// # #[macro_use] extern crate rustfst;
 /// # use failure::Fallible;
@@ -21,16 +30,18 @@ pub enum ProjectType {
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::{project, ProjectType};
 /// # fn main() -> Fallible<()> {
-/// let mut fst : VectorFst<IntegerWeight> = fst![2 => 3];
+/// # let mut fst : VectorFst<IntegerWeight> = fst![2 => 3];
 /// project(&mut fst, ProjectType::ProjectInput);
-///
-/// assert_eq!(fst, fst![2]);
+/// # assert_eq!(fst, fst![2]);
 /// # Ok(())
 /// # }
 /// ```
 ///
-/// # Example : Project output
-/// ```
+/// ## Project output
+///
+/// ![project_out_project-input](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/project_out_project-output.svg?sanitize=true)
+///
+/// ```rust
 /// # #[macro_use] extern crate rustfst;
 /// # use failure::Fallible;
 /// # use rustfst::utils::{acceptor, transducer};
@@ -38,10 +49,9 @@ pub enum ProjectType {
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::{project, ProjectType};
 /// # fn main() -> Fallible<()> {
-/// let mut fst : VectorFst<IntegerWeight> = fst![2 => 3];
+/// # let mut fst : VectorFst<IntegerWeight> = fst![2 => 3];
 /// project(&mut fst, ProjectType::ProjectOutput);
-///
-/// assert_eq!(fst, fst![3]);
+/// # assert_eq!(fst, fst![3]);
 /// # Ok(())
 /// # }
 /// ```
