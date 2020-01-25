@@ -29,6 +29,8 @@ optimized by determinization and minimization, models can be applied to hypothes
 (also represented as automata) or cascaded by finite-state composition, and the best
 results can be selected by shortest-path algorithms.
 
+![fst](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/project_in.svg?sanitize=true)
+
 ## References
 
 Implementation heavily inspired from Mehryar Mohri's, Cyril Allauzen's and Michael Riley's work :
@@ -114,3 +116,4 @@ at your option.
 ## Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
+

@@ -18,6 +18,8 @@
 //! (also represented as automata) or cascaded by finite-state composition, and the best
 //! results can be selected by shortest-path algorithms.
 //!
+//! ![fst](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/project_in.svg?sanitize=true)
+//!
 //! ## References
 //!
 //! Implementation heavily inspired from Mehryar Mohri's, Cyril Allauzen's and Michael Riley's work :
