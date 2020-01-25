@@ -18,7 +18,7 @@
 //! (also represented as automata) or cascaded by finite-state composition, and the best
 //! results can be selected by shortest-path algorithms.
 //!
-//! ![fst][https://github.com/Garvys/rustfst/blob/task/images_in_doc/rustfst-images-doc/images/project.in.svg]
+//! ![fst][https://raw.githubusercontent.com/Garvys/rustfst/task/images_in_doc/rustfst-images-doc/images/project.in.svg?sanitize=true]
 //!
 //! ## References
 //!
