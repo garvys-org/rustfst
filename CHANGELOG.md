@@ -45,6 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Display` is no longer a trait bound of `Semiring`. However, it is required to implement `SerializableSemiring`.
 - Use `BufWriter` when serializing a `SymbolTable` object increasing the serialization speed.
 - Fix bug when the parsing of fst in binary format crashed because a symbol table was attached to the fst. The symbol tables are now retrieved directly from the fst file.
+- `plus` and `times` methods of `Semiring` now takes a `Borrow` instead of an `AsRef`. Remove trait bounds on `AsRef<Self>`, `Default` and `Sized`.
+- Add checks on `fst_type` and `arc_type` when loading a binary fst. As a result, for instance, loading a `ConstFst` with a `VectorFst` file will trigger a nice error.
 
 ## [0.4.0] - 2019-11-12
 
