@@ -9,8 +9,6 @@
 
 <!-- cargo-sync-readme start -->
 
-# Rustfst
-
 Rust implementation of Weighted Finite States Transducers.
 
 Rustfst is a library for constructing, combining, optimizing, and searching weighted
@@ -97,7 +95,6 @@ fn main() -> Fallible<()> {
 ## Status
 
 A big number of algorithms are already implemented. The main one missing is the Composition.
-
 
 <!-- cargo-sync-readme end -->
 
