@@ -28,7 +28,7 @@
 //!
 //! ## Example
 //!
-//! ```
+//! ```rust
 //! use failure::Fallible;
 //! use rustfst::prelude::*;
 //!

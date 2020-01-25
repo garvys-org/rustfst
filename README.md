@@ -39,7 +39,7 @@ Implementation heavily inspired from Mehryar Mohri's, Cyril Allauzen's and Micha
 
 ## Example
 
-```
+```rust
 use failure::Fallible;
 use rustfst::prelude::*;
 
