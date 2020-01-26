@@ -19,6 +19,17 @@ pub enum ClosureType {
 /// then the closure transduces `x` to `y` with weight `a`,
 /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
 ///  If closure_star then the empty string is transduced to itself with weight `1` as well.
+///
+/// # Example
+///
+/// ## Input
+/// ![closure_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/closure_in.svg?sanitize=true)
+///
+/// ## Closure Plus
+/// ![closure_out_closure_plus](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/closure_out_closure_plus.svg?sanitize=true)
+///
+/// ## Closure Star
+/// ![closure_out_closure_star](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/closure_out_closure_star.svg?sanitize=true)
 pub fn closure<F>(fst: &mut F, closure_type: ClosureType)
 where
     F: MutableFst,
