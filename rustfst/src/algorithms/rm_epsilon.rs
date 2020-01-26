@@ -99,7 +99,7 @@ pub fn rm_epsilon<W, F1, F2>(fst: &F1) -> Fallible<F2>
 where
     W: StarSemiring,
     F1: ExpandedFst<W = W>,
-    F2: MutableFst<W = W> + ExpandedFst<W = W>,
+    F2: MutableFst<W = W>,
 {
     let fst_epsilon: F2 = compute_fst_epsilon(fst, true)?;
     let dists_fst_epsilon = all_pairs_shortest_distance(&fst_epsilon)?;

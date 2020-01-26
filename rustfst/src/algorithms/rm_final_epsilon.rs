@@ -6,14 +6,14 @@ use unsafe_unwrap::UnsafeUnwrap;
 use crate::algorithms::connect;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::visitors::SccVisitor;
-use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::EPS_LABEL;
 
 /// Removes final states that have epsilon-only input arcs.
 pub fn rm_final_epsilon<F>(ifst: &mut F) -> Fallible<()>
 where
-    F: MutableFst + ExpandedFst,
+    F: MutableFst,
 {
     let mut visitors = SccVisitor::new(ifst, false, true);
     dfs_visit(ifst, &mut visitors, false);

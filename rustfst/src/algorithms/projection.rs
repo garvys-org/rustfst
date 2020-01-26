@@ -1,4 +1,4 @@
-use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::fst_traits::MutableFst;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd, Copy)]
 /// Different types of labels projection in a FST.
@@ -55,7 +55,7 @@ pub enum ProjectType {
 /// # Ok(())
 /// # }
 /// ```
-pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_type: ProjectType) {
+pub fn project<F: MutableFst>(fst: &mut F, project_type: ProjectType) {
     match project_type {
         ProjectType::ProjectInput => {
             for state in 0..fst.num_states() {
@@ -76,13 +76,13 @@ pub fn project<F: ExpandedFst + MutableFst>(fst: &mut F, project_type: ProjectTy
 
 #[cfg(test)]
 mod tests {
-    use crate::proptest_fst::proptest_fst;
+    use proptest::prelude::*;
 
     use crate::fst_properties::FstProperties;
+    use crate::fst_traits::ExpandedFst;
+    use crate::proptest_fst::proptest_fst;
 
     use super::*;
-
-    use proptest::prelude::*;
 
     proptest! {
         #[test]

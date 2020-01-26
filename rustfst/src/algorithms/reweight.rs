@@ -1,6 +1,6 @@
 use failure::Fallible;
 
-use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
+use crate::fst_traits::MutableFst;
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
 
 /// Different types of reweighting.
@@ -22,7 +22,7 @@ pub enum ReweightType {
 /// reweighting towards the final states.
 pub fn reweight<F>(fst: &mut F, potentials: &[F::W], reweight_type: ReweightType) -> Fallible<()>
 where
-    F: Fst + ExpandedFst + MutableFst,
+    F: MutableFst,
     F::W: WeaklyDivisibleSemiring,
 {
     let zero = F::W::zero();
