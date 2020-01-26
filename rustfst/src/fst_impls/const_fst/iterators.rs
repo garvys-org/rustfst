@@ -138,7 +138,7 @@ mod tests {
         fst.add_arc(s2, arc_2_3.clone())?;
         fst.add_arc(s2, arc_2_3_bis.clone())?;
 
-        let const_fst: ConstFst<_> = fst.into();
+        let const_fst: ConstFst<ProbabilityWeight> = fst.into();
 
         let states = const_fst
             .states_index_iter()
@@ -172,7 +172,7 @@ mod tests {
         fst.add_arc(s2, arc_2_3.clone())?;
         fst.add_arc(s2, arc_2_3_bis.clone())?;
 
-        let const_fst: ConstFst<_> = fst.into();
+        let const_fst: ConstFst<ProbabilityWeight> = fst.into();
 
         let mut arcs_ref = vec![];
         for state_index in const_fst.states_index_iter() {

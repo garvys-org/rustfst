@@ -63,8 +63,8 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// assert_eq!(fst.final_weight(s1).unwrap(), Some(&BooleanWeight::one()));
     /// assert_eq!(fst.final_weight(s2).unwrap(), Some(&BooleanWeight::one()));
     /// ```
-    fn set_final(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W) -> Fallible<()>;
-    unsafe fn set_final_unchecked(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W);
+    fn set_final<S: Into<Self::W>>(&mut self, state_id: StateId, final_weight: S) -> Fallible<()>;
+    unsafe fn set_final_unchecked<S: Into<Self::W>>(&mut self, state_id: StateId, final_weight: S);
 
     /// Adds a new state to the current FST. The identifier of the new state is returned
     ///
@@ -193,10 +193,10 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// fst.add_arc(s1, Arc::new(3, 5, BooleanWeight::new(true), s2));
     /// assert_eq!(fst.num_arcs(s1).unwrap(), 1);
     /// ```
-    fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Fallible<()>;
-    unsafe fn add_arc_unchecked(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>);
+    fn add_arc(&mut self, source: StateId, arc: Arc<Self::W>) -> Fallible<()>;
+    unsafe fn add_arc_unchecked(&mut self, source: StateId, arc: Arc<Self::W>);
 
-    unsafe fn set_arcs_unchecked(&mut self, source: StateId, arcs: Vec<Arc<<Self as CoreFst>::W>>);
+    unsafe fn set_arcs_unchecked(&mut self, source: StateId, arcs: Vec<Arc<Self::W>>);
 
     /// Remove the final weight of a specific state.
     fn delete_final_weight(&mut self, source: StateId) -> Fallible<()>;
@@ -230,6 +230,7 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
 
     unsafe fn sum_arcs_unchecked(&mut self, state: StateId);
 
+    // TODO: Remove
     fn add_fst<F: ExpandedFst<W = Self::W>>(
         &mut self,
         fst_to_add: &F,

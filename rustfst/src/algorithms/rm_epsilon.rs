@@ -84,14 +84,14 @@ where
 ///
 /// let fst_no_epsilon : VectorFst<_> = rm_epsilon(&fst).unwrap();
 ///
-/// let mut fst_no_epsilon_ref = VectorFst::new();
+/// let mut fst_no_epsilon_ref = VectorFst::<IntegerWeight>::new();
 /// let s0 = fst_no_epsilon_ref.add_state();
 /// let s1 = fst_no_epsilon_ref.add_state();
-/// fst_no_epsilon_ref.add_arc(s0, Arc::new(32, 25, IntegerWeight::new(78), s1));
-/// fst_no_epsilon_ref.add_arc(s1, Arc::new(32, 25, IntegerWeight::new(78 * 13), s1));
+/// fst_no_epsilon_ref.add_arc(s0, Arc::new(32, 25, 78, s1));
+/// fst_no_epsilon_ref.add_arc(s1, Arc::new(32, 25, 78 * 13, s1));
 /// fst_no_epsilon_ref.set_start(s0).unwrap();
-/// fst_no_epsilon_ref.set_final(s0, IntegerWeight::new(5));
-/// fst_no_epsilon_ref.set_final(s1, IntegerWeight::new(5 * 13));
+/// fst_no_epsilon_ref.set_final(s0, 5);
+/// fst_no_epsilon_ref.set_final(s1, 5 * 13);
 ///
 /// assert_eq!(fst_no_epsilon, fst_no_epsilon_ref);
 /// ```

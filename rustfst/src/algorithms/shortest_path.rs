@@ -303,7 +303,7 @@ where
             let mut arc: Arc<W> = Arc::new(
                 rarc.ilabel,
                 rarc.olabel,
-                hack_convert_reverse_reverse(rarc.weight.reverse()?),
+                hack_convert_reverse_reverse::<W>(rarc.weight.reverse()?),
                 rarc.nextstate,
             );
             let weight = p.1.times(&arc.weight)?;

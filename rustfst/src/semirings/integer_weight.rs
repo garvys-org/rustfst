@@ -77,3 +77,9 @@ impl StarSemiring for IntegerWeight {
         Self::new(i32::max_value())
     }
 }
+
+impl Into<IntegerWeight> for i32 {
+    fn into(self) -> IntegerWeight {
+        IntegerWeight::new(self)
+    }
+}

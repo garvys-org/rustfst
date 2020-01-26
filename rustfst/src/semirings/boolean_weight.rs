@@ -67,6 +67,12 @@ impl StarSemiring for BooleanWeight {
     }
 }
 
+impl Into<BooleanWeight> for bool {
+    fn into(self) -> BooleanWeight {
+        BooleanWeight::new(self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

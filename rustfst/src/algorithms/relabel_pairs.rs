@@ -81,18 +81,18 @@ mod tests {
     #[test]
     fn test_projection_input_generic() -> Fallible<()> {
         // Initial FST
-        let mut fst = VectorFst::new();
+        let mut fst = VectorFst::<IntegerWeight>::new();
         let s0 = fst.add_state();
         let s1 = fst.add_state();
         let s2 = fst.add_state();
         fst.set_start(s0)?;
 
-        fst.add_arc(s0, Arc::new(3, 18, IntegerWeight::new(10), s1))?;
-        fst.add_arc(s0, Arc::new(2, 5, IntegerWeight::new(10), s1))?;
-        fst.add_arc(s0, Arc::new(5, 9, IntegerWeight::new(18), s2))?;
-        fst.add_arc(s0, Arc::new(5, 7, IntegerWeight::new(18), s2))?;
-        fst.set_final(s1, IntegerWeight::new(31))?;
-        fst.set_final(s2, IntegerWeight::new(45))?;
+        fst.add_arc(s0, Arc::new(3, 18, 10, s1))?;
+        fst.add_arc(s0, Arc::new(2, 5, 10, s1))?;
+        fst.add_arc(s0, Arc::new(5, 9, 18, s2))?;
+        fst.add_arc(s0, Arc::new(5, 7, 18, s2))?;
+        fst.set_final(s1, 31)?;
+        fst.set_final(s2, 45)?;
 
         // Expected FST
         // Initial FST

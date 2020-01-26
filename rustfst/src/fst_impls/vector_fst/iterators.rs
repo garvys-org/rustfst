@@ -147,11 +147,11 @@ mod tests {
     use super::*;
 
     use crate::fst_traits::MutableFst;
-    use crate::semirings::{ProbabilityWeight, Semiring};
+    use crate::semirings::ProbabilityWeight;
 
     #[test]
     fn test_states_index_iterator() -> Fallible<()> {
-        let mut fst = VectorFst::new();
+        let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         // States
         let s1 = fst.add_state();
@@ -161,11 +161,11 @@ mod tests {
         fst.set_start(s1)?;
 
         // Arcs
-        let arc_1_2 = Arc::new(0, 0, ProbabilityWeight::new(1.0), s2);
-        let arc_1_2_bis = Arc::new(0, 0, ProbabilityWeight::new(1.0), s2);
+        let arc_1_2 = Arc::new(0, 0, 1.0, s2);
+        let arc_1_2_bis = Arc::new(0, 0, 1.0, s2);
 
-        let arc_2_3 = Arc::new(0, 0, ProbabilityWeight::new(1.0), s3);
-        let arc_2_3_bis = Arc::new(0, 0, ProbabilityWeight::new(1.0), s3);
+        let arc_2_3 = Arc::new(0, 0, 1.0, s3);
+        let arc_2_3_bis = Arc::new(0, 0, 1.0, s3);
 
         fst.add_arc(s1, arc_1_2.clone())?;
         fst.add_arc(s1, arc_1_2_bis.clone())?;
@@ -183,7 +183,7 @@ mod tests {
 
     #[test]
     fn test_arcs_index_iterator() -> Fallible<()> {
-        let mut fst = VectorFst::new();
+        let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         // States
         let s1 = fst.add_state();
@@ -193,11 +193,11 @@ mod tests {
         fst.set_start(s1)?;
 
         // Arcs
-        let arc_1_2 = Arc::new(0, 0, ProbabilityWeight::new(1.0), s2);
-        let arc_1_2_bis = Arc::new(0, 0, ProbabilityWeight::new(1.0), s2);
+        let arc_1_2 = Arc::new(0, 0, 1.0, s2);
+        let arc_1_2_bis = Arc::new(0, 0, 1.0, s2);
 
-        let arc_2_3 = Arc::new(0, 0, ProbabilityWeight::new(1.0), s3);
-        let arc_2_3_bis = Arc::new(0, 0, ProbabilityWeight::new(1.0), s3);
+        let arc_2_3 = Arc::new(0, 0, 1.0, s3);
+        let arc_2_3_bis = Arc::new(0, 0, 1.0, s3);
 
         fst.add_arc(s1, arc_1_2.clone())?;
         fst.add_arc(s1, arc_1_2_bis.clone())?;
@@ -221,7 +221,7 @@ mod tests {
 
     #[test]
     fn test_arcs_index_iterator_with_modify() -> Fallible<()> {
-        let mut fst = VectorFst::new();
+        let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         // States
         let s1 = fst.add_state();
@@ -231,11 +231,11 @@ mod tests {
         fst.set_start(s1)?;
 
         // Arcs
-        let arc_1_2 = Arc::new(0, 0, ProbabilityWeight::new(1.0), s2);
-        let arc_1_2_bis = Arc::new(0, 0, ProbabilityWeight::new(1.0), s2);
+        let arc_1_2 = Arc::new(0, 0, 1.0, s2);
+        let arc_1_2_bis = Arc::new(0, 0, 1.0, s2);
 
-        let arc_2_3 = Arc::new(0, 0, ProbabilityWeight::new(1.0), s3);
-        let arc_2_3_bis = Arc::new(0, 0, ProbabilityWeight::new(1.0), s3);
+        let arc_2_3 = Arc::new(0, 0, 1.0, s3);
+        let arc_2_3_bis = Arc::new(0, 0, 1.0, s3);
 
         fst.add_arc(s1, arc_1_2.clone())?;
         fst.add_arc(s1, arc_1_2_bis.clone())?;
