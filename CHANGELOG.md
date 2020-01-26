@@ -48,6 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `plus` and `times` methods of `Semiring` now takes a `Borrow` instead of an `AsRef`. Remove trait bounds on `AsRef<Self>`, `Default` and `Sized`.
 - Add checks on `fst_type` and `arc_type` when loading a binary fst. As a result, for instance, loading a `ConstFst` with a `VectorFst` file will trigger a nice error.
 - `SymbolTable` attached to an `Fst` are now used when drawing it.
+- Change parameter from W to Into<W> for `add_arc`, `set_final_unchecked` and `set_final` methods.
+- `MutableFst` now has a trait bound on `ExpandedFst`.
 
 ## [0.4.0] - 2019-11-12
 
