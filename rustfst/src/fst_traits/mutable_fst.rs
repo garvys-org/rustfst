@@ -1,17 +1,16 @@
 use std::cmp::Ordering;
-use std::collections::HashMap;
 use std::rc::Rc;
 
 use failure::Fallible;
 
 use crate::algorithms::{ArcMapper, ClosureType};
 use crate::arc::Arc;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
+use crate::fst_traits::{CoreFst, ExpandedFst};
 use crate::symbol_table::SymbolTable;
 use crate::StateId;
 
 /// Trait defining the methods to modify a wFST.
-pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
+pub trait MutableFst: ExpandedFst + for<'a> MutableArcIterator<'a> {
     /// Creates an empty wFST.
     fn new() -> Self;
 
@@ -63,8 +62,8 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// assert_eq!(fst.final_weight(s1).unwrap(), Some(&BooleanWeight::one()));
     /// assert_eq!(fst.final_weight(s2).unwrap(), Some(&BooleanWeight::one()));
     /// ```
-    fn set_final(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W) -> Fallible<()>;
-    unsafe fn set_final_unchecked(&mut self, state_id: StateId, final_weight: <Self as CoreFst>::W);
+    fn set_final<S: Into<Self::W>>(&mut self, state_id: StateId, final_weight: S) -> Fallible<()>;
+    unsafe fn set_final_unchecked<S: Into<Self::W>>(&mut self, state_id: StateId, final_weight: S);
 
     /// Adds a new state to the current FST. The identifier of the new state is returned
     ///
@@ -193,10 +192,10 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     /// fst.add_arc(s1, Arc::new(3, 5, BooleanWeight::new(true), s2));
     /// assert_eq!(fst.num_arcs(s1).unwrap(), 1);
     /// ```
-    fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Fallible<()>;
-    unsafe fn add_arc_unchecked(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>);
+    fn add_arc(&mut self, source: StateId, arc: Arc<Self::W>) -> Fallible<()>;
+    unsafe fn add_arc_unchecked(&mut self, source: StateId, arc: Arc<Self::W>);
 
-    unsafe fn set_arcs_unchecked(&mut self, source: StateId, arcs: Vec<Arc<<Self as CoreFst>::W>>);
+    unsafe fn set_arcs_unchecked(&mut self, source: StateId, arcs: Vec<Arc<Self::W>>);
 
     /// Remove the final weight of a specific state.
     fn delete_final_weight(&mut self, source: StateId) -> Fallible<()>;
@@ -229,37 +228,6 @@ pub trait MutableFst: Fst + for<'a> MutableArcIterator<'a> {
     unsafe fn unique_arcs_unchecked(&mut self, state: StateId);
 
     unsafe fn sum_arcs_unchecked(&mut self, state: StateId);
-
-    fn add_fst<F: ExpandedFst<W = Self::W>>(
-        &mut self,
-        fst_to_add: &F,
-    ) -> Fallible<HashMap<StateId, StateId>> {
-        // Map old states id to new ones
-        let mut mapping_states = HashMap::new();
-
-        // First pass to add the necessary states
-        for old_state_id in fst_to_add.states_iter() {
-            let new_state_id = self.add_state();
-            mapping_states.insert(old_state_id, new_state_id);
-        }
-
-        // Second pass to add the arcs
-        for old_state_id in fst_to_add.states_iter() {
-            for old_arc in fst_to_add.arcs_iter(old_state_id)? {
-                self.add_arc(
-                    mapping_states[&old_state_id],
-                    Arc::new(
-                        old_arc.ilabel,
-                        old_arc.olabel,
-                        old_arc.weight.clone(),
-                        mapping_states[&old_arc.nextstate],
-                    ),
-                )?;
-            }
-        }
-
-        Ok(mapping_states)
-    }
 
     /// This operation computes the concatenative closure.
     /// If A transduces string `x` to `y` with weight `a`,

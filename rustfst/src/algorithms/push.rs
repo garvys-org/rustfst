@@ -11,7 +11,7 @@ use crate::algorithms::{
     FactorWeightType, ReweightType,
 };
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, Fst, MutableFst};
+use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{DivideType, Semiring};
 use crate::semirings::{
     GallicWeightLeft, GallicWeightRight, StringWeightLeft, StringWeightRight,
@@ -38,7 +38,7 @@ pub fn push_weights<F>(
     remove_total_weight: bool,
 ) -> Fallible<()>
 where
-    F: Fst + ExpandedFst + MutableFst,
+    F: MutableFst,
     F::W: WeaklyDivisibleSemiring,
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
 {
@@ -86,7 +86,7 @@ where
 
 fn remove_weight<F>(fst: &mut F, weight: F::W, at_final: bool) -> Fallible<()>
 where
-    F: MutableFst + ExpandedFst,
+    F: MutableFst,
     F::W: WeaklyDivisibleSemiring,
 {
     if weight.is_one() || weight.is_zero() {

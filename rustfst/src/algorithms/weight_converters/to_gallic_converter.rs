@@ -19,10 +19,10 @@ macro_rules! impl_to_gallic_converter {
             fn arc_map(&mut self, arc: &Arc<W>) -> Fallible<Arc<$gallic<W>>> {
                 let new_arc = if arc.olabel == EPS_LABEL {
                     let w = ($string_weight::one(), arc.weight.clone());
-                    Arc::new(arc.ilabel, arc.ilabel, w.into(), arc.nextstate)
+                    Arc::new(arc.ilabel, arc.ilabel, w, arc.nextstate)
                 } else {
                     let w = (arc.olabel, arc.weight.clone());
-                    Arc::new(arc.ilabel, arc.ilabel, w.into(), arc.nextstate)
+                    Arc::new(arc.ilabel, arc.ilabel, w, arc.nextstate)
                 };
                 Ok(new_arc)
             }

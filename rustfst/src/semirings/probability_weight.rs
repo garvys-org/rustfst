@@ -101,3 +101,9 @@ impl WeaklyDivisibleSemiring for ProbabilityWeight {
 impl_quantize_f32!(ProbabilityWeight);
 
 partial_eq_and_hash_f32!(ProbabilityWeight);
+
+impl Into<ProbabilityWeight> for f32 {
+    fn into(self) -> ProbabilityWeight {
+        ProbabilityWeight::new(self)
+    }
+}

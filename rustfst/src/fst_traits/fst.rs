@@ -124,7 +124,7 @@ pub trait Fst:
     /// # use rustfst::semirings::{Semiring, IntegerWeight};
     /// # use rustfst::EPS_LABEL;
     /// # use rustfst::Arc;
-    /// let mut fst = VectorFst::new();
+    /// let mut fst = VectorFst::<IntegerWeight>::new();
     /// let s0 = fst.add_state();
     /// let s1 = fst.add_state();
     ///
@@ -151,7 +151,7 @@ pub trait Fst:
     /// # use rustfst::semirings::{Semiring, IntegerWeight};
     /// # use rustfst::EPS_LABEL;
     /// # use rustfst::Arc;
-    /// let mut fst = VectorFst::new();
+    /// let mut fst = VectorFst::<IntegerWeight>::new();
     /// let s0 = fst.add_state();
     /// let s1 = fst.add_state();
     ///

@@ -4,6 +4,7 @@ use crate::algorithms::{FinalArc, MapFinalAction};
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Arc, EPS_LABEL};
+use unsafe_unwrap::UnsafeUnwrap;
 
 /// The WeightConverter interfaces defines how a weight should be turned into another one.
 /// Useful for changing the semiring of an FST.
@@ -89,7 +90,7 @@ where
                                 mapped_final_arc.ilabel,
                                 mapped_final_arc.olabel,
                                 mapped_final_arc.weight,
-                                superfinal.unwrap(),
+                                unsafe { superfinal.unsafe_unwrap() },
                             ),
                         )?;
 

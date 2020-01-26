@@ -41,17 +41,17 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         self.start_state = Some(state_id);
     }
 
-    fn set_final(&mut self, state_id: StateId, final_weight: W) -> Fallible<()> {
+    fn set_final<S: Into<W>>(&mut self, state_id: StateId, final_weight: S) -> Fallible<()> {
         if let Some(state) = self.states.get_mut(state_id) {
-            state.final_weight = Some(final_weight);
+            state.final_weight = Some(final_weight.into());
             Ok(())
         } else {
             bail!("Stateid {:?} doesn't exist", state_id);
         }
     }
 
-    unsafe fn set_final_unchecked(&mut self, state_id: usize, final_weight: Self::W) {
-        self.states.get_unchecked_mut(state_id).final_weight = Some(final_weight);
+    unsafe fn set_final_unchecked<S: Into<W>>(&mut self, state_id: usize, final_weight: S) {
+        self.states.get_unchecked_mut(state_id).final_weight = Some(final_weight.into());
     }
 
     fn add_state(&mut self) -> StateId {
@@ -263,3 +263,9 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         self.osymt.take()
     }
 }
+
+//#[test]
+//fn lol() {
+//    let mut fst = VectorFst::<crate::semirings::TropicalWeight>::new();
+//    fst.set_final(0, 1.0).unwrap();
+//}

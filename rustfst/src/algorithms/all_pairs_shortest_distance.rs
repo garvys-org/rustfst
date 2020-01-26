@@ -19,14 +19,14 @@ use crate::semirings::{Semiring, StarSemiring};
 /// # use rustfst::Arc;
 /// # use failure::Fallible;
 /// # fn main() -> Fallible<()> {
-/// let mut fst = VectorFst::new();
+/// let mut fst = VectorFst::<IntegerWeight>::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
 /// let s2 = fst.add_state();
 ///
-/// fst.add_arc(s0, Arc::new(32, 23, IntegerWeight::new(18), s1));
-/// fst.add_arc(s0, Arc::new(32, 23, IntegerWeight::new(21), s2));
-/// fst.add_arc(s1, Arc::new(32, 23, IntegerWeight::new(55), s2));
+/// fst.add_arc(s0, Arc::new(32, 23, 18, s1));
+/// fst.add_arc(s0, Arc::new(32, 23, 21, s2));
+/// fst.add_arc(s1, Arc::new(32, 23, 55, s2));
 ///
 /// let dists = all_pairs_shortest_distance(&fst)?;
 ///

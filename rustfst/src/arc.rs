@@ -21,21 +21,20 @@ impl<W: Semiring> Arc<W> {
     ///
     /// ```
     /// # use rustfst::Arc;
-    /// # use rustfst::semirings::{BooleanWeight, Semiring};
-    /// let arc = Arc::new(0, 1, BooleanWeight::one(), 2);
+    /// # use rustfst::semirings::{TropicalWeight, Semiring};
+    /// let arc = Arc::<TropicalWeight>::new(0, 1, 1.3, 2);
     ///
     /// assert_eq!(arc.ilabel, 0);
     /// assert_eq!(arc.olabel, 1);
-    /// assert_eq!(arc.weight, BooleanWeight::one());
+    /// assert_eq!(arc.weight, TropicalWeight::new(1.3));
     /// assert_eq!(arc.nextstate, 2);
     ///
     /// ```
-    #[inline]
-    pub fn new(ilabel: Label, olabel: Label, weight: W, nextstate: StateId) -> Self {
+    pub fn new<S: Into<W>>(ilabel: Label, olabel: Label, weight: S, nextstate: StateId) -> Self {
         Arc {
             ilabel,
             olabel,
-            weight,
+            weight: weight.into(),
             nextstate,
         }
     }
@@ -46,9 +45,9 @@ impl<W: Semiring> Arc<W> {
     ///
     /// ```
     /// # use rustfst::Arc;
-    /// # use rustfst::semirings::{BooleanWeight, Semiring};
-    /// let mut arc_1 = Arc::new(0, 1, BooleanWeight::one(), 2);
-    /// let arc_2 = Arc::new(1, 2, BooleanWeight::zero(), 3);
+    /// # use rustfst::semirings::{Semiring, TropicalWeight};
+    /// let mut arc_1 = Arc::<TropicalWeight>::new(0, 1, 1.3, 2);
+    /// let arc_2 = Arc::new(1, 2, 1.2, 3);
     ///
     /// arc_1.set_value(&arc_2);
     ///

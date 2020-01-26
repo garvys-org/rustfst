@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use failure::Fallible;
+use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::ReplaceFst;
 use crate::arc::Arc;
@@ -10,7 +11,6 @@ use crate::fst_traits::{
 };
 use crate::semirings::Semiring;
 use crate::{SymbolTable, EPS_LABEL};
-use unsafe_unwrap::UnsafeUnwrap;
 
 /// Performs the union of two wFSTs. If A transduces string `x` to `y` with weight `a`
 /// and `B` transduces string `w` to `v` with weight `b`, then their union transduces `x` to `y`
@@ -45,7 +45,7 @@ use unsafe_unwrap::UnsafeUnwrap;
 pub fn union<W, F1, F2>(fst_1: &mut F1, fst_2: &F2) -> Fallible<()>
 where
     W: Semiring,
-    F1: ExpandedFst<W = W> + AllocableFst<W = W> + MutableFst<W = W>,
+    F1: AllocableFst<W = W> + MutableFst<W = W>,
     F2: ExpandedFst<W = W>,
 {
     let numstates1 = fst_1.num_states();

@@ -14,10 +14,7 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
-use crate::semirings::{
-    LogWeight, ProductWeight, Semiring, SerializableSemiring, TropicalWeight,
-    WeaklyDivisibleSemiring, WeightQuantize,
-};
+use crate::semirings::{LogWeight, ProductWeight, SerializableSemiring, TropicalWeight};
 use crate::tests_openfst::algorithms::factor_weight_gallic::test_factor_weight_gallic;
 use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicOperationResult;
 use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicTestData;
@@ -281,155 +278,6 @@ pub(crate) fn get_path_folder(test_name: &str) -> Fallible<PathBuf> {
     Ok(path_repo.as_path().to_path_buf())
 }
 
-fn run_test_openfst_fst(test_name: &str) -> Fallible<()> {
-    let absolute_path_folder = get_path_folder(test_name)?;
-    let mut path_metadata = absolute_path_folder.clone();
-    path_metadata.push("metadata.json");
-
-    let string = read_to_string(&path_metadata)
-        .map_err(|_| format_err!("Can't open {:?}", &path_metadata))?;
-    let parsed_test_data: ParsedFstTestData = serde_json::from_str(&string).unwrap();
-
-    match parsed_test_data.weight_type.as_str() {
-        "tropical" | "standard" => {
-            let test_data: FstTestData<VectorFst<TropicalWeight>> =
-                FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
-            do_run_test_openfst(&test_data)?;
-            test_rmepsilon(&test_data)?;
-        }
-        "log" => {
-            let test_data: FstTestData<VectorFst<LogWeight>> =
-                FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
-            do_run_test_openfst(&test_data)?;
-            test_rmepsilon(&test_data)?;
-        }
-        "tropical_X_log" => {
-            let test_data: FstTestData<VectorFst<ProductWeight<TropicalWeight, LogWeight>>> =
-                FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
-            do_run_test_openfst(&test_data)?;
-        }
-        _ => bail!("Weight type unknown : {:?}", parsed_test_data.weight_type),
-    };
-
-    Ok(())
-}
-
-fn do_run_test_openfst<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
-where
-    W: 'static + SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
-    <W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize + SerializableSemiring,
-    W: Into<<W as Semiring>::ReverseWeight> + From<<W as Semiring>::ReverseWeight>,
-{
-    // FIXME: rmepsilon implementation requires the StarSemiring implementation which seems avoidable.
-    //    test_rmepsilon(&test_data)?;
-
-    test_invert(&test_data)?;
-
-    test_project_input(&test_data)?;
-
-    test_project_output(&test_data)?;
-
-    test_reverse(&test_data)?;
-
-    test_connect(&test_data)?;
-
-    test_shortest_distance(&test_data)?;
-
-    test_weight_pushing_initial(&test_data)?;
-
-    test_weight_pushing_final(&test_data)?;
-
-    test_arc_map_identity(&test_data)?;
-
-    test_arc_map_rmweight(&test_data)?;
-
-    test_arc_map_invert(&test_data)?;
-
-    test_arc_map_input_epsilon(&test_data)?;
-
-    test_arc_map_output_epsilon(&test_data)?;
-
-    test_arc_map_plus(&test_data)?;
-
-    test_arc_map_times(&test_data)?;
-
-    test_arc_map_quantize(&test_data)?;
-
-    test_encode(&test_data)?;
-
-    test_encode_decode(&test_data)?;
-
-    test_state_map_arc_sum(&test_data)?;
-
-    test_state_map_arc_unique(&test_data)?;
-
-    test_determinize(&test_data)?;
-
-    test_arcsort_ilabel(&test_data)?;
-
-    test_arcsort_olabel(&test_data)?;
-
-    test_topsort(&test_data)?;
-
-    test_fst_properties(&test_data)?;
-
-    test_vector_fst_bin_deserializer(&test_data)?;
-
-    test_vector_fst_bin_serializer(&test_data)?;
-
-    test_shortest_path(&test_data)?;
-
-    test_gallic_encode_decode(&test_data)?;
-
-    test_factor_weight_identity(&test_data)?;
-
-    test_factor_weight_identity_dynamic(&test_data)?;
-
-    test_factor_weight_gallic(&test_data)?;
-
-    test_minimize(&test_data)?;
-
-    test_push(&test_data)?;
-
-    test_const_fst_convert_convert(&test_data)?;
-
-    test_vector_fst_text_serialization(&test_data)?;
-
-    test_const_fst_text_serialization(&test_data)?;
-
-    test_const_fst_bin_deserializer(&test_data)?;
-
-    test_const_fst_aligned_bin_deserializer(&test_data)?;
-
-    test_const_fst_bin_serializer(&test_data)?;
-
-    test_del_all_states(&test_data)?;
-
-    test_replace(&test_data)?;
-
-    test_replace_dynamic(&test_data)?;
-
-    test_union(&test_data)?;
-
-    test_union_dynamic(&test_data)?;
-
-    test_concat(&test_data)?;
-
-    test_concat_dynamic(&test_data)?;
-
-    test_closure_plus(&test_data)?;
-
-    test_closure_plus_dynamic(&test_data)?;
-
-    test_closure_star(&test_data)?;
-
-    test_closure_star_dynamic(&test_data)?;
-
-    test_vector_fst_bin_with_symt_deserializer(&test_data)?;
-
-    Ok(())
-}
-
 pub(crate) struct ExitFailure(failure::Error);
 
 /// Prints a list of causes for this Error, along with any backtrace
@@ -459,62 +307,402 @@ impl<T: Into<failure::Error>> From<T> for ExitFailure {
     }
 }
 
-#[test]
-fn test_openfst_fst_000() -> Result<(), ExitFailure> {
-    run_test_openfst_fst("fst_000").map_err(|v| v.into())
+macro_rules! do_run {
+    ($f: ident, $fst_name: expr) => {
+        let absolute_path_folder = get_path_folder($fst_name)?;
+        let mut path_metadata = absolute_path_folder.clone();
+        path_metadata.push("metadata.json");
+
+        let string = read_to_string(&path_metadata)
+            .map_err(|_| format_err!("Can't open {:?}", &path_metadata))?;
+        let parsed_test_data: ParsedFstTestData = serde_json::from_str(&string).unwrap();
+
+        match parsed_test_data.weight_type.as_str() {
+            "tropical" | "standard" => {
+                let test_data: FstTestData<VectorFst<TropicalWeight>> =
+                    FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
+                $f(&test_data)?;
+            }
+            "log" => {
+                let test_data: FstTestData<VectorFst<LogWeight>> =
+                    FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
+                $f(&test_data)?;
+            }
+            "tropical_X_log" => {
+                let test_data: FstTestData<VectorFst<ProductWeight<TropicalWeight, LogWeight>>> =
+                    FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
+                $f(&test_data)?;
+            }
+            _ => bail!("Weight type unknown : {:?}", parsed_test_data.weight_type),
+        };
+    };
 }
 
-#[test]
-fn test_openfst_fst_001() -> Result<(), ExitFailure> {
-    run_test_openfst_fst("fst_001").map_err(|v| v.into())
+// TODO: rmepsilon implementation requires the StarSemiring implementation which seems avoidable.
+macro_rules! do_run_rmepsilon {
+    ($f: ident, $fst_name: expr) => {
+        let absolute_path_folder = get_path_folder($fst_name)?;
+        let mut path_metadata = absolute_path_folder.clone();
+        path_metadata.push("metadata.json");
+
+        let string = read_to_string(&path_metadata)
+            .map_err(|_| format_err!("Can't open {:?}", &path_metadata))?;
+        let parsed_test_data: ParsedFstTestData = serde_json::from_str(&string).unwrap();
+
+        match parsed_test_data.weight_type.as_str() {
+            "tropical" | "standard" => {
+                let test_data: FstTestData<VectorFst<TropicalWeight>> =
+                    FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
+                $f(&test_data)?;
+            }
+            "log" => {
+                let test_data: FstTestData<VectorFst<LogWeight>> =
+                    FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
+                $f(&test_data)?;
+            }
+            _ => bail!("Weight type unknown : {:?}", parsed_test_data.weight_type),
+        };
+    };
 }
 
-#[test]
-fn test_openfst_fst_002() -> Result<(), ExitFailure> {
-    run_test_openfst_fst("fst_002").map_err(|v| v.into())
+macro_rules! test_fst {
+    ($namespace: tt, $fst_name: expr) => {
+        mod $namespace {
+            use super::*;
+
+            #[test]
+            fn test_union_openfst() -> Fallible<()> {
+                do_run!(test_union, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_arc_map_identity_openfst() -> Fallible<()> {
+                do_run!(test_arc_map_identity, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_arc_map_invert_openfst() -> Fallible<()> {
+                do_run!(test_arc_map_invert, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_arc_map_input_epsilon_openfst() -> Fallible<()> {
+                do_run!(test_arc_map_input_epsilon, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_arc_map_output_epsilon_openfst() -> Fallible<()> {
+                do_run!(test_arc_map_output_epsilon, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_arc_map_plus_openfst() -> Fallible<()> {
+                do_run!(test_arc_map_plus, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_arc_map_times_openfst() -> Fallible<()> {
+                do_run!(test_arc_map_times, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_arc_map_quantize_openfst() -> Fallible<()> {
+                do_run!(test_arc_map_quantize, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_arc_map_rmweight_openfst() -> Fallible<()> {
+                do_run!(test_arc_map_rmweight, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_arcsort_ilabel_openfst() -> Fallible<()> {
+                do_run!(test_arcsort_ilabel, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_arcsort_olabel_openfst() -> Fallible<()> {
+                do_run!(test_arcsort_olabel, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_closure_plus_openfst() -> Fallible<()> {
+                do_run!(test_closure_plus, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_closure_star_openfst() -> Fallible<()> {
+                do_run!(test_closure_star, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_closure_plus_dynamic_openfst() -> Fallible<()> {
+                do_run!(test_closure_plus_dynamic, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_closure_star_dynamic_openfst() -> Fallible<()> {
+                do_run!(test_closure_star_dynamic, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_concat_openfst() -> Fallible<()> {
+                do_run!(test_concat, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_concat_dynamic_openfst() -> Fallible<()> {
+                do_run!(test_concat_dynamic, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_connect_openfst() -> Fallible<()> {
+                do_run!(test_connect, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_factor_weight_identity_openfst() -> Fallible<()> {
+                do_run!(test_factor_weight_identity, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_determinize_openfst() -> Fallible<()> {
+                do_run!(test_determinize, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_encode_decode_openfst() -> Fallible<()> {
+                do_run!(test_encode_decode, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_encode_openfst() -> Fallible<()> {
+                do_run!(test_encode, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_factor_weight_gallic_openfst() -> Fallible<()> {
+                do_run!(test_factor_weight_gallic, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_factor_weight_identity_dynamic_openfst() -> Fallible<()> {
+                do_run!(test_factor_weight_identity_dynamic, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_gallic_encode_decode_openfst() -> Fallible<()> {
+                do_run!(test_gallic_encode_decode, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_invert_openfst() -> Fallible<()> {
+                do_run!(test_invert, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_minimize_openfst() -> Fallible<()> {
+                do_run!(test_minimize, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_project_output_openfst() -> Fallible<()> {
+                do_run!(test_project_output, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_project_input_openfst() -> Fallible<()> {
+                do_run!(test_project_input, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_fst_properties_openfst() -> Fallible<()> {
+                do_run!(test_fst_properties, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_push_openfst() -> Fallible<()> {
+                do_run!(test_push, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_replace_openfst() -> Fallible<()> {
+                do_run!(test_replace, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_replace_dynamic_openfst() -> Fallible<()> {
+                do_run!(test_replace_dynamic, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_reverse_openfst() -> Fallible<()> {
+                do_run!(test_reverse, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_shortest_distance_openfst() -> Fallible<()> {
+                do_run!(test_shortest_distance, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_state_map_arc_unique_openfst() -> Fallible<()> {
+                do_run!(test_state_map_arc_unique, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_state_map_arc_sum_openfst() -> Fallible<()> {
+                do_run!(test_state_map_arc_sum, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_shortest_path_openfst() -> Fallible<()> {
+                do_run!(test_shortest_path, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_topsort_openfst() -> Fallible<()> {
+                do_run!(test_topsort, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_union_dynamic_openfst() -> Fallible<()> {
+                do_run!(test_union_dynamic, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_weight_pushing_initial_openfst() -> Fallible<()> {
+                do_run!(test_weight_pushing_initial, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_del_all_states_openfst() -> Fallible<()> {
+                do_run!(test_del_all_states, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_vector_fst_text_serialization_openfst() -> Fallible<()> {
+                do_run!(test_vector_fst_text_serialization, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_vector_fst_bin_serializer_openfst() -> Fallible<()> {
+                do_run!(test_vector_fst_bin_serializer, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_vector_fst_bin_with_symt_deserializer_openfst() -> Fallible<()> {
+                do_run!(test_vector_fst_bin_with_symt_deserializer, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_vector_fst_bin_deserializer_openfst() -> Fallible<()> {
+                do_run!(test_vector_fst_bin_deserializer, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_weight_pushing_final_openfst() -> Fallible<()> {
+                do_run!(test_weight_pushing_final, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_const_fst_convert_convert_openfst() -> Fallible<()> {
+                do_run!(test_const_fst_convert_convert, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_const_fst_bin_deserializer_openfst() -> Fallible<()> {
+                do_run!(test_const_fst_bin_deserializer, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_const_fst_aligned_bin_deserializer_openfst() -> Fallible<()> {
+                do_run!(test_const_fst_aligned_bin_deserializer, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_const_fst_bin_serializer_openfst() -> Fallible<()> {
+                do_run!(test_const_fst_bin_serializer, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_const_fst_text_serialization_openfst() -> Fallible<()> {
+                do_run!(test_const_fst_text_serialization, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_rmepsilon_openfst() -> Fallible<()> {
+                if $fst_name != "fst_011" {
+                    do_run_rmepsilon!(test_rmepsilon, $fst_name);
+                }
+
+                Ok(())
+            }
+        }
+    };
 }
 
-#[test]
-fn test_openfst_fst_003() -> Result<(), ExitFailure> {
-    run_test_openfst_fst("fst_003").map_err(|v| v.into())
-}
-
-#[test]
-fn test_openfst_fst_004() -> Result<(), ExitFailure> {
-    run_test_openfst_fst("fst_004").map_err(|v| v.into())
-}
-
-#[test]
-fn test_openfst_fst_005() -> Result<(), ExitFailure> {
-    run_test_openfst_fst("fst_005").map_err(|v| v.into())
-}
-
-#[test]
-fn test_openfst_fst_006() -> Result<(), ExitFailure> {
-    run_test_openfst_fst("fst_006").map_err(|v| v.into())
-}
-
-#[test]
-fn test_openfst_fst_007() -> Result<(), ExitFailure> {
-    run_test_openfst_fst("fst_007").map_err(|v| v.into())
-}
-
-#[test]
-fn test_openfst_fst_008() -> Result<(), ExitFailure> {
-    run_test_openfst_fst("fst_008").map_err(|v| v.into())
-}
-
-#[test]
-fn test_openfst_fst_009() -> Result<(), ExitFailure> {
-    run_test_openfst_fst("fst_009").map_err(|v| v.into())
-}
-
-#[test]
-fn test_openfst_fst_010() -> Result<(), ExitFailure> {
-    run_test_openfst_fst("fst_010").map_err(|v| v.into())
-}
-
-#[test]
-fn test_openfst_fst_011() -> Result<(), ExitFailure> {
-    run_test_openfst_fst("fst_011").map_err(|v| v.into())
-}
+test_fst!(test_openfst_fst_000, "fst_000");
+test_fst!(test_openfst_fst_001, "fst_001");
+test_fst!(test_openfst_fst_002, "fst_002");
+test_fst!(test_openfst_fst_003, "fst_003");
+test_fst!(test_openfst_fst_004, "fst_004");
+test_fst!(test_openfst_fst_005, "fst_005");
+test_fst!(test_openfst_fst_006, "fst_006");
+test_fst!(test_openfst_fst_007, "fst_007");
+test_fst!(test_openfst_fst_008, "fst_008");
+test_fst!(test_openfst_fst_009, "fst_009");
+test_fst!(test_openfst_fst_010, "fst_010");
+test_fst!(test_openfst_fst_011, "fst_011");

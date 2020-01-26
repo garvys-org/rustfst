@@ -20,15 +20,15 @@ use crate::StateId;
 /// # use rustfst::fst_traits::MutableFst;
 /// # use rustfst::algorithms::single_source_shortest_distance;
 /// # use rustfst::Arc;
-/// let mut fst = VectorFst::new();
+/// let mut fst = VectorFst::<IntegerWeight>::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
 /// let s2 = fst.add_state();
 ///
 /// fst.set_start(s0).unwrap();
-/// fst.add_arc(s0, Arc::new(32, 23, IntegerWeight::new(18), s1));
-/// fst.add_arc(s0, Arc::new(32, 23, IntegerWeight::new(21), s2));
-/// fst.add_arc(s1, Arc::new(32, 23, IntegerWeight::new(55), s2));
+/// fst.add_arc(s0, Arc::new(32, 23, 18, s1));
+/// fst.add_arc(s0, Arc::new(32, 23, 21, s2));
+/// fst.add_arc(s1, Arc::new(32, 23, 55, s2));
 ///
 /// let dists = single_source_shortest_distance(&fst, s1).unwrap();
 ///
@@ -108,24 +108,27 @@ pub fn _shortest_distance<F: ExpandedFst>(fst: &F) -> Fallible<Vec<<F as CoreFst
 /// # use rustfst::fst_traits::MutableFst;
 /// # use rustfst::algorithms::shortest_distance;
 /// # use rustfst::Arc;
-/// let mut fst = VectorFst::new();
+/// # use failure::Fallible;
+/// fn main() -> Fallible<()> {
+/// let mut fst = VectorFst::<IntegerWeight>::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
 /// let s2 = fst.add_state();
 ///
 /// fst.set_start(s0).unwrap();
-/// fst.add_arc(s0, Arc::new(32, 23, IntegerWeight::new(18), s1));
-/// fst.add_arc(s0, Arc::new(32, 23, IntegerWeight::new(21), s2));
-/// fst.add_arc(s1, Arc::new(32, 23, IntegerWeight::new(55), s2));
+/// fst.add_arc(s0, Arc::new(32, 23, 18, s1));
+/// fst.add_arc(s0, Arc::new(32, 23, 21, s2));
+/// fst.add_arc(s1, Arc::new(32, 23, 55, s2));
 ///
-/// let dists = shortest_distance(&fst, false).unwrap();
+/// let dists = shortest_distance(&fst, false)?;
 ///
 /// assert_eq!(dists, vec![
 ///     IntegerWeight::one(),
 ///     IntegerWeight::new(18),
 ///     IntegerWeight::new(21 + 18*55),
 /// ]);
-///
+/// # Ok(())
+/// # }
 /// ```
 pub fn shortest_distance<F: ExpandedFst>(fst: &F, reverse: bool) -> Fallible<Vec<<F as CoreFst>::W>>
 where

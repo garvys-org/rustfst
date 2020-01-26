@@ -16,7 +16,7 @@ mod tests {
 
     #[test]
     fn test_small_fst() -> Fallible<()> {
-        let mut fst = VectorFst::new();
+        let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         // States
         let s1 = fst.add_state();
@@ -25,12 +25,12 @@ mod tests {
         fst.set_start(s1)?;
 
         // Arcs
-        let arc_1 = Arc::new(3, 5, ProbabilityWeight::new(10.0), s2);
+        let arc_1 = Arc::new(3, 5, 10.0, s2);
         fst.add_arc(s1, arc_1.clone())?;
 
         assert_eq!(fst.num_arcs(s1).unwrap(), 1);
 
-        let arc_2 = Arc::new(5, 7, ProbabilityWeight::new(18.0), s2);
+        let arc_2 = Arc::new(5, 7, 18.0, s2);
         fst.add_arc(s1, arc_2.clone())?;
         assert_eq!(fst.num_arcs(s1).unwrap(), 2);
         assert_eq!(fst.arcs_iter(s1)?.count(), 2);
@@ -57,7 +57,7 @@ mod tests {
 
     #[test]
     fn test_mutable_iter_arcs_small() -> Fallible<()> {
-        let mut fst = VectorFst::new();
+        let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         // States
         let s1 = fst.add_state();
@@ -66,12 +66,12 @@ mod tests {
         fst.set_start(s1)?;
 
         // Arcs
-        let arc_1 = Arc::new(3, 5, ProbabilityWeight::new(10.0), s2);
+        let arc_1 = Arc::new(3, 5, 10.0, s2);
         fst.add_arc(s1, arc_1.clone())?;
-        let arc_2 = Arc::new(5, 7, ProbabilityWeight::new(18.0), s2);
+        let arc_2 = Arc::new(5, 7, 18.0, s2);
         fst.add_arc(s1, arc_2.clone())?;
 
-        let new_arc_1 = Arc::new(15, 29, ProbabilityWeight::new(33.0), s2 + 55);
+        let new_arc_1 = Arc::new(15, 29, 33.0, s2 + 55);
 
         // Modify first arc leaving s1
         fst.arcs_iter_mut(s1)?

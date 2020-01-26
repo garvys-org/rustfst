@@ -144,3 +144,9 @@ test_semiring_serializable!(
     TropicalWeight,
     TropicalWeight::one() TropicalWeight::zero() TropicalWeight::new(0.3) TropicalWeight::new(0.5) TropicalWeight::new(0.0) TropicalWeight::new(-1.2)
 );
+
+impl Into<TropicalWeight> for f32 {
+    fn into(self) -> TropicalWeight {
+        TropicalWeight::new(self)
+    }
+}

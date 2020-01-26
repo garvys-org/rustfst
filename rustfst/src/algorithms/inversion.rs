@@ -5,7 +5,7 @@ use crate::fst_traits::{ExpandedFst, MutableFst};
 /// This operation inverts the transduction corresponding to an FST
 /// by exchanging the FST's input and output labels.
 ///
-/// # Example
+/// # Example 1
 /// ```
 /// # use rustfst::fst;
 /// # use rustfst::utils::{acceptor, transducer};
@@ -17,6 +17,15 @@ use crate::fst_traits::{ExpandedFst, MutableFst};
 ///
 /// assert_eq!(fst, fst![3 => 2]);
 /// ```
+///
+/// # Example 2
+///
+/// ## Input
+/// ![invert_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/invert_in.svg?sanitize=true)
+///
+/// ## Invert
+/// ![invert_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/invert_out.svg?sanitize=true)
+///
 pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) {
     for state in 0..fst.num_states() {
         for arc in unsafe { fst.arcs_iter_unchecked_mut(state) } {

@@ -462,16 +462,16 @@ mod tests {
 
     #[test]
     fn test_determinize() -> Fallible<()> {
-        let mut input_fst = VectorFst::new();
+        let mut input_fst = VectorFst::<TropicalWeight>::new();
         let s0 = input_fst.add_state();
         let s1 = input_fst.add_state();
 
         input_fst.set_start(s0)?;
         input_fst.set_final(s1, TropicalWeight::one())?;
 
-        input_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
-        input_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
-        input_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
+        input_fst.add_arc(s0, Arc::new(1, 1, 2.0, s1))?;
+        input_fst.add_arc(s0, Arc::new(1, 1, 2.0, s1))?;
+        input_fst.add_arc(s0, Arc::new(1, 1, 2.0, s1))?;
 
         let mut ref_fst = VectorFst::new();
         let s0 = ref_fst.add_state();
@@ -491,7 +491,7 @@ mod tests {
 
     #[test]
     fn test_determinize_2() -> Fallible<()> {
-        let mut input_fst = VectorFst::new();
+        let mut input_fst = VectorFst::<TropicalWeight>::new();
         let s0 = input_fst.add_state();
         let s1 = input_fst.add_state();
         let s2 = input_fst.add_state();
@@ -500,11 +500,11 @@ mod tests {
         input_fst.set_start(s0)?;
         input_fst.set_final(s3, TropicalWeight::one())?;
 
-        input_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
-        input_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(3.0), s2))?;
+        input_fst.add_arc(s0, Arc::new(1, 1, 2.0, s1))?;
+        input_fst.add_arc(s0, Arc::new(1, 1, 3.0, s2))?;
 
-        input_fst.add_arc(s1, Arc::new(2, 2, TropicalWeight::new(4.0), s3))?;
-        input_fst.add_arc(s2, Arc::new(2, 2, TropicalWeight::new(3.0), s3))?;
+        input_fst.add_arc(s1, Arc::new(2, 2, 4.0, s3))?;
+        input_fst.add_arc(s2, Arc::new(2, 2, 3.0, s3))?;
 
         let mut ref_fst = VectorFst::new();
         let s0 = ref_fst.add_state();
