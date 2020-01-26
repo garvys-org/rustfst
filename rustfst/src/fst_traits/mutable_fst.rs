@@ -1,5 +1,4 @@
 use std::cmp::Ordering;
-use std::collections::HashMap;
 use std::rc::Rc;
 
 use failure::Fallible;
@@ -7,8 +6,8 @@ use failure::Fallible;
 use crate::algorithms::{ArcMapper, ClosureType};
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, ExpandedFst};
-use crate::symbol_table::SymbolTable;
 use crate::StateId;
+use crate::symbol_table::SymbolTable;
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst: ExpandedFst + for<'a> MutableArcIterator<'a> {
@@ -229,38 +228,6 @@ pub trait MutableFst: ExpandedFst + for<'a> MutableArcIterator<'a> {
     unsafe fn unique_arcs_unchecked(&mut self, state: StateId);
 
     unsafe fn sum_arcs_unchecked(&mut self, state: StateId);
-
-    // TODO: Remove
-    fn add_fst<F: ExpandedFst<W = Self::W>>(
-        &mut self,
-        fst_to_add: &F,
-    ) -> Fallible<HashMap<StateId, StateId>> {
-        // Map old states id to new ones
-        let mut mapping_states = HashMap::new();
-
-        // First pass to add the necessary states
-        for old_state_id in fst_to_add.states_iter() {
-            let new_state_id = self.add_state();
-            mapping_states.insert(old_state_id, new_state_id);
-        }
-
-        // Second pass to add the arcs
-        for old_state_id in fst_to_add.states_iter() {
-            for old_arc in fst_to_add.arcs_iter(old_state_id)? {
-                self.add_arc(
-                    mapping_states[&old_state_id],
-                    Arc::new(
-                        old_arc.ilabel,
-                        old_arc.olabel,
-                        old_arc.weight.clone(),
-                        mapping_states[&old_arc.nextstate],
-                    ),
-                )?;
-            }
-        }
-
-        Ok(mapping_states)
-    }
 
     /// This operation computes the concatenative closure.
     /// If A transduces string `x` to `y` with weight `a`,
