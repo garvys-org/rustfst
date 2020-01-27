@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `arc_type()` method to `rustfst::Arc`.
 - Added `write` and `read` method to the `SymbolTable` API to serialize and deserialize SymbolTable in binary format consistently with OpenFst.
 - Added `unset_input_symbols` and `unset_output_symbols` methods to remove the symbol tables attached to a mutable fst.
+- Added `emplace_arc` and `emplace_arc_unchecked` as provided methods to the `MutableFst` trait.
 
 ### Changed
 - Make `KDELTA` public outside of the crate
