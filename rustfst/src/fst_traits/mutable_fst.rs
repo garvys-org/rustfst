@@ -7,7 +7,7 @@ use crate::algorithms::{ArcMapper, ClosureType};
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, ExpandedFst};
 use crate::symbol_table::SymbolTable;
-use crate::StateId;
+use crate::{Label, StateId};
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst: ExpandedFst + for<'a> MutableArcIterator<'a> {
@@ -170,30 +170,79 @@ pub trait MutableFst: ExpandedFst + for<'a> MutableArcIterator<'a> {
     unsafe fn del_arcs_id_sorted_unchecked(&mut self, state: StateId, to_del: &Vec<usize>);
 
     /// Adds an arc to the FST. The arc will start in the state `source`.
+    ///
+    /// # Errors
+    ///
     /// An error is raised if the state `source` doesn't exist.
-    ///
-    /// # Warning
-    ///
-    /// This method modifies the id of the states that are left in the FST. Id that were used before
-    /// calling this function should no longer be used.
     ///
     /// # Example
     ///
     /// ```
     /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
     /// # use rustfst::fst_impls::VectorFst;
-    /// # use rustfst::semirings::{BooleanWeight, Semiring};
+    /// # use rustfst::semirings::{ProbabilityWeight, Semiring};
     /// # use rustfst::Arc;
-    /// let mut fst = VectorFst::<BooleanWeight>::new();
+    /// # use failure::Fallible;
+    /// # fn main() -> Fallible<()> {
+    /// let mut fst = VectorFst::<ProbabilityWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
     ///
-    /// assert_eq!(fst.num_arcs(s1).unwrap(), 0);
-    /// fst.add_arc(s1, Arc::new(3, 5, BooleanWeight::new(true), s2));
-    /// assert_eq!(fst.num_arcs(s1).unwrap(), 1);
+    /// assert_eq!(fst.num_arcs(s1)?, 0);
+    /// fst.add_arc(s1, Arc::new(3, 5, 1.2, s2));
+    /// assert_eq!(fst.num_arcs(s1)?, 1);
+    /// # Ok(())
+    /// # }
     /// ```
     fn add_arc(&mut self, source: StateId, arc: Arc<Self::W>) -> Fallible<()>;
     unsafe fn add_arc_unchecked(&mut self, source: StateId, arc: Arc<Self::W>);
+
+    /// Adds an arc to the FST. The arc will start in the state `source`.
+    ///
+    /// # Errors
+    ///
+    /// An error is raised if the state `source` doesn't exist.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::{Semiring, ProbabilityWeight};
+    /// # use rustfst::Arc;
+    /// # use failure::Fallible;
+    /// fn main() -> Fallible<()> {
+    /// let mut fst = VectorFst::<ProbabilityWeight>::new();
+    /// let s1 = fst.add_state();
+    /// let s2 = fst.add_state();
+    ///
+    /// assert_eq!(fst.num_arcs(s1)?, 0);
+    /// fst.emplace_arc(s1, 3, 5, 1.2, s2);
+    /// assert_eq!(fst.num_arcs(s1)?, 1);
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn emplace_arc<S: Into<Self::W>>(
+        &mut self,
+        source: StateId,
+        ilabel: Label,
+        olabel: Label,
+        weight: S,
+        nextstate: StateId,
+    ) -> Fallible<()> {
+        self.add_arc(source, Arc::new(ilabel, olabel, weight, nextstate))
+    }
+
+    unsafe fn emplace_arc_unchecked<S: Into<Self::W>>(
+        &mut self,
+        source: StateId,
+        ilabel: Label,
+        olabel: Label,
+        weight: S,
+        nextstate: StateId,
+    ) {
+        self.add_arc_unchecked(source, Arc::new(ilabel, olabel, weight, nextstate))
+    }
 
     unsafe fn set_arcs_unchecked(&mut self, source: StateId, arcs: Vec<Arc<Self::W>>);
 

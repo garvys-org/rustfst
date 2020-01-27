@@ -70,15 +70,15 @@ impl<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> Isomorphis
             return Ok(false);
         }
 
-        let narcs1 = self.fst_1.num_arcs(s1).unwrap();
-        let narcs2 = self.fst_2.num_arcs(s2).unwrap();
+        let narcs1 = self.fst_1.num_arcs(s1)?;
+        let narcs2 = self.fst_2.num_arcs(s2)?;
 
         if narcs1 != narcs2 {
             return Ok(false);
         }
 
-        let mut arcs1: Vec<_> = self.fst_1.arcs_iter(s1).unwrap().collect();
-        let mut arcs2: Vec<_> = self.fst_2.arcs_iter(s2).unwrap().collect();
+        let mut arcs1: Vec<_> = self.fst_1.arcs_iter(s1)?.collect();
+        let mut arcs2: Vec<_> = self.fst_2.arcs_iter(s2)?.collect();
 
         arcs1.sort_by(|a, b| arc_compare(a, b));
         arcs2.sort_by(|a, b| arc_compare(a, b));
