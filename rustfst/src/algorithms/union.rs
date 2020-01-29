@@ -16,7 +16,7 @@ use crate::{SymbolTable, EPS_LABEL};
 /// and `B` transduces string `w` to `v` with weight `b`, then their union transduces `x` to `y`
 /// with weight `a` and `w` to `v` with weight `b`.
 ///
-/// # Example
+/// # Example 1
 /// ```
 /// # #[macro_use] extern crate rustfst;
 /// # use failure::Fallible;
@@ -42,6 +42,21 @@ use crate::{SymbolTable, EPS_LABEL};
 /// # Ok(())
 /// # }
 /// ```
+///
+/// # Example 2
+///
+/// ## Input Fst 1
+///
+/// ![union_in_1](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/union_in_1.svg?sanitize=true)
+///
+/// ## Input Fst 2
+///
+/// ![union_in_2](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/union_in_2.svg?sanitize=true)
+///
+/// ## Union
+///
+/// ![union_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/union_out.svg?sanitize=true)
+///
 pub fn union<W, F1, F2>(fst_1: &mut F1, fst_2: &F2) -> Fallible<()>
 where
     W: Semiring,

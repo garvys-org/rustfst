@@ -57,6 +57,19 @@ impl<'a, F: 'a + Fst> Visitor<'a, F> for TopOrderVisitor {
     }
 }
 
+/// This operation topologically sorts its input. When sorted, all transitions are from
+/// lower to higher state IDs.
+///
+/// # Example
+///
+/// ## Input
+///
+/// ![topsort_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_in.svg?sanitize=true)
+///
+/// ## Output
+///
+/// ![topsort_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_out.svg?sanitize=true)
+///
 pub fn top_sort<F>(fst: &mut F) -> Fallible<()>
 where
     F: MutableFst + ExpandedFst,

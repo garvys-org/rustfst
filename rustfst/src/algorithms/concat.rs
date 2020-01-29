@@ -13,7 +13,7 @@ use std::rc::Rc;
 /// and `B` transduces string `w` to `v` with weight `b`, then their concatenation
 /// transduces string `xw` to `yv` with weight `a ⊗ b`.
 ///
-/// # Example
+/// # Example 1
 /// ```
 /// # #[macro_use] extern crate rustfst;
 /// # use rustfst::utils::transducer;
@@ -38,6 +38,21 @@ use std::rc::Rc;
 /// # Ok(())
 /// # }
 /// ```
+///
+/// # Example 2
+///
+/// ## Input Fst 1
+///
+/// ![concat_in_1](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/concat_in_1.svg?sanitize=true)
+///
+/// ## Input Fst 2
+///
+/// ![concat_in_2](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/concat_in_2.svg?sanitize=true)
+///
+/// ## Concat
+///
+/// ![concat_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/concat_out.svg?sanitize=true)
+///
 pub fn concat<W, F1, F2>(fst_1: &mut F1, fst_2: &F2) -> Fallible<()>
 where
     W: Semiring,

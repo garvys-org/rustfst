@@ -14,6 +14,24 @@ use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::Arc;
 use crate::StateId;
+
+/// Creates an FST containing the n-shortest paths in the input FST. The n-shortest paths are the
+/// n-lowest weight paths w.r.t. the natural semiring order.
+///
+/// # Example
+///
+/// ## Input
+///
+/// ![shortestpath_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/shortestpath_in.svg?sanitize=true)
+///
+/// ## Output with n=1
+///
+/// ![shortestpath_out_n_1](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/shortestpath_out_n_1.svg?sanitize=true)
+///
+/// ## Output with n=2
+///
+/// ![shortestpath_out_n_2](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/shortestpath_out_n_2.svg?sanitize=true)
+///
 pub fn shortest_path<FI, FO>(ifst: &FI, nshortest: usize, unique: bool) -> Fallible<FO>
 where
     FI: MutableFst + ExpandedFst,
