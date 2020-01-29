@@ -21,9 +21,11 @@ use crate::fst_traits::{ExpandedFst, MutableFst};
 /// # Example 2
 ///
 /// ## Input
+///
 /// ![invert_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/invert_in.svg?sanitize=true)
 ///
 /// ## Invert
+///
 /// ![invert_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/invert_out.svg?sanitize=true)
 ///
 pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) {
