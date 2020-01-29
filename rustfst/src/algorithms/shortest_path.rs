@@ -16,8 +16,8 @@ use crate::Arc;
 use crate::StateId;
 pub fn shortest_path<FI, FO>(ifst: &FI, nshortest: usize, unique: bool) -> Fallible<FO>
 where
-    FI: ExpandedFst + MutableFst,
-    FO: ExpandedFst<W = FI::W> + MutableFst<W = FI::W>,
+    FI: MutableFst + ExpandedFst,
+    FO: MutableFst<W = FI::W>,
     FI::W: 'static
         + Into<<<FI as CoreFst>::W as Semiring>::ReverseWeight>
         + From<<<FI as CoreFst>::W as Semiring>::ReverseWeight>,
@@ -33,7 +33,9 @@ where
         let mut distance = vec![];
 
         single_shortest_path(ifst, &mut distance, &mut f_parent, &mut parent)?;
-        return single_shortest_path_backtrace(ifst, &f_parent, &parent);
+        let mut fst_res: FO = single_shortest_path_backtrace(ifst, &f_parent, &parent)?;
+        fst_res.set_symts_from_fst(ifst);
+        return Ok(fst_res);
     }
 
     if !FI::W::properties().contains(SemiringProperties::PATH | SemiringProperties::SEMIRING) {
@@ -54,16 +56,20 @@ where
 
     let mut distance_2 = vec![d];
     distance_2.append(&mut distance);
-    if !unique {
-        n_shortest_path(&rfst, &distance_2, nshortest)
+    let mut fst_res: FO = if !unique {
+        n_shortest_path(&rfst, &distance_2, nshortest)?
     } else {
         let distance_2_reversed: Vec<<<FI as CoreFst>::W as Semiring>::ReverseWeight> =
             distance_2.into_iter().map(|v| v.into()).collect();
         let (dfst, distance_3_reversed): (VectorFst<_>, _) =
             determinize_with_distance(&rfst, &distance_2_reversed)?;
         let distance_3: Vec<_> = distance_3_reversed.into_iter().map(|v| v.into()).collect();
-        n_shortest_path(&dfst, &distance_3, nshortest)
-    }
+        n_shortest_path(&dfst, &distance_3, nshortest)?
+    };
+
+    fst_res.set_symts_from_fst(ifst);
+
+    Ok(fst_res)
 }
 
 pub fn hack_convert_reverse_reverse<W: Semiring>(

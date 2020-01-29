@@ -61,5 +61,7 @@ where
         .for_each(|(s, arcs)| unsafe { ofst.set_arcs_unchecked(s, arcs) });
     ofst.set_start(ostart)?;
 
+    ofst.set_symts_from_fst(ifst);
+
     Ok(ofst)
 }
