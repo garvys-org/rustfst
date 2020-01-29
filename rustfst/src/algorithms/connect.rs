@@ -10,7 +10,7 @@ use crate::NO_STATE_ID;
 
 /// This operation trims an FST, removing states and arcs that are not on successful paths.
 ///
-/// # Example
+/// # Example 1
 /// ```
 /// # #[macro_use] extern crate rustfst;
 /// # use rustfst::utils::transducer;
@@ -18,6 +18,8 @@ use crate::NO_STATE_ID;
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::connect;
 /// # use rustfst::fst_traits::MutableFst;
+/// # use failure::Fallible;
+/// # fn main() -> Fallible<()> {
 /// let fst : VectorFst<IntegerWeight> = fst![2 => 3];
 ///
 /// // Add a state not on a successful path
@@ -25,10 +27,23 @@ use crate::NO_STATE_ID;
 /// no_connected_fst.add_state();
 ///
 /// let mut connected_fst = no_connected_fst.clone();
-/// connect(&mut connected_fst);
+/// connect(&mut connected_fst)?;
 ///
 /// assert_eq!(connected_fst, fst);
+/// # Ok(())
+/// # }
 /// ```
+///
+/// # Example 2
+///
+/// ## Input
+///
+/// ![connect_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/connect_in.svg?sanitize=true)
+///
+/// ## Connect
+///
+/// ![connect_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/connect_out.svg?sanitize=true)
+///
 pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Fallible<()> {
     let mut visitor = ConnectVisitor::new(fst);
     dfs_visit(fst, &mut visitor, false);

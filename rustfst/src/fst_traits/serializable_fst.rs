@@ -7,7 +7,7 @@ use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::{Semiring, SerializableSemiring};
 use crate::{DrawingConfig, StateId};
 use std::fs::File;
-use std::io::{LineWriter, Write};
+use std::io::{BufWriter, LineWriter, Write};
 
 pub trait SerializableFst: ExpandedFst
 where
@@ -56,7 +56,7 @@ where
     /// Serializes the FST as a DOT file compatible with GraphViz binaries.
     fn draw<P: AsRef<Path>>(&self, path_output: P, config: &DrawingConfig) -> Fallible<()> {
         let buffer = File::create(path_output.as_ref())?;
-        let mut f = LineWriter::new(buffer);
+        let mut f = BufWriter::new(LineWriter::new(buffer));
 
         if let Some(start_state) = self.start() {
             writeln!(f, "digraph FST {{")?;
@@ -67,7 +67,10 @@ where
                 writeln!(f, "rankdir = LR;")?;
             }
 
-            writeln!(f, "size = \"{},{}\";", config.width, config.height)?;
+            if let Some((width, height)) = config.size {
+                writeln!(f, "size = \"{},{}\";", width, height)?;
+            }
+
             writeln!(f, "label = \"{}\";", config.title)?;
             writeln!(f, "center = 1;")?;
 
@@ -77,8 +80,13 @@ where
                 writeln!(f, "orientation = Landscape;")?;
             }
 
-            writeln!(f, "ranksep = {}", config.ranksep)?;
-            writeln!(f, "nodesep = {}", config.nodesep)?;
+            if let Some(ranksep) = config.ranksep {
+                writeln!(f, "ranksep = {}", ranksep)?;
+            }
+
+            if let Some(nodesep) = config.nodesep {
+                writeln!(f, "nodesep = {}", nodesep)?;
+            }
 
             // Start state first
             draw_single_fst_state(self, &mut f, start_state, config)?;

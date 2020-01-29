@@ -5,7 +5,7 @@ use failure::Fallible;
 
 use crate::algorithms::{ArcMapper, ClosureType};
 use crate::arc::Arc;
-use crate::fst_traits::{CoreFst, ExpandedFst};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::symbol_table::SymbolTable;
 use crate::{Label, StateId};
 
@@ -302,6 +302,20 @@ pub trait MutableFst: ExpandedFst + for<'a> MutableArcIterator<'a> {
 
     fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>>;
     fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>>;
+
+    fn set_symts_from_fst<OF: Fst>(&mut self, other_fst: &OF) {
+        if let Some(symt) = other_fst.input_symbols() {
+            self.set_input_symbols(symt);
+        } else {
+            self.unset_input_symbols();
+        }
+
+        if let Some(symt) = other_fst.output_symbols() {
+            self.set_output_symbols(symt);
+        } else {
+            self.unset_output_symbols();
+        }
+    }
 }
 
 /// Iterate over mutable arcs in a wFST.

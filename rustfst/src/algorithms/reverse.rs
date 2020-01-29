@@ -14,6 +14,17 @@ use crate::semirings::Semiring;
 /// except having the reversed Weight type.
 ///
 /// A superinitial state is always created.
+///
+/// # Example
+///
+/// ## Input
+///
+/// ![reverse_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/reverse_in.svg?sanitize=true)
+///
+/// ## Output
+///
+/// ![reverse_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/reverse_out.svg?sanitize=true)
+///
 pub fn reverse<W, F1, F2>(ifst: &F1) -> Fallible<F2>
 where
     W: Semiring,
@@ -60,6 +71,8 @@ where
         .enumerate()
         .for_each(|(s, arcs)| unsafe { ofst.set_arcs_unchecked(s, arcs) });
     ofst.set_start(ostart)?;
+
+    ofst.set_symts_from_fst(ifst);
 
     Ok(ofst)
 }

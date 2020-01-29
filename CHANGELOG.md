@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `write` and `read` method to the `SymbolTable` API to serialize and deserialize SymbolTable in binary format consistently with OpenFst.
 - Added `unset_input_symbols` and `unset_output_symbols` methods to remove the symbol tables attached to a mutable fst.
 - Added `emplace_arc` and `emplace_arc_unchecked` as provided methods to the `MutableFst` trait.
+- Added `set_symts_from_fst` to MutableFst trait to copy the SymbolTable from another `Fst`.
 
 ### Changed
 - Make `KDELTA` public outside of the crate
@@ -51,6 +52,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `SymbolTable` attached to an `Fst` are now used when drawing it.
 - Change parameter from W to Into<W> for `add_arc`, `set_final_unchecked` and `set_final` methods.
 - `MutableFst` now has a trait bound on `ExpandedFst`.
+- `DrawingConfig` parameters `size`, `ranksep` and `nodesep` are now optional.
+- Fix SymbolTable conservation for `Reverse` and `ShortestPath`.
 
 ## [0.4.0] - 2019-11-12
 
