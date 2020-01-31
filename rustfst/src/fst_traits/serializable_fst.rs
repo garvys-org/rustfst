@@ -122,8 +122,8 @@ where
             if config.show_weight_one || !final_weight.is_one() {
                 write!(writer, "/{}", final_weight)?;
             }
-            write!(writer, "\", shape = doublecircle,")?;
         }
+        write!(writer, "\", shape = doublecircle,")?;
     } else {
         write!(writer, "\", shape = circle,")?;
     }
