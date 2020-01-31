@@ -118,7 +118,7 @@ where
     write!(writer, "{}", state_id)?;
     write!(writer, " [label = \"{}", state_id)?;
     if let Some(final_weight) = fst.final_weight(state_id)? {
-        if config.show_weight_one || !final_weight.is_one() {
+        if config.print_weight && (config.show_weight_one || !final_weight.is_one()) {
             write!(writer, "/{}", final_weight)?;
         }
         write!(writer, "\", shape = doublecircle,")?;
@@ -160,7 +160,7 @@ where
             write!(writer, ":{}", olabel)?;
         }
 
-        if config.show_weight_one || !arc.weight.is_one() {
+        if config.print_weight && (config.show_weight_one || !arc.weight.is_one()) {
             write!(writer, "/{}", arc.weight)?;
         }
         writeln!(writer, "\", fontsize = {}];", config.fontsize)?;

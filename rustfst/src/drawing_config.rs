@@ -19,6 +19,8 @@ pub struct DrawingConfig {
     pub acceptor: bool,
     /// Print/draw arc weights and final weights equal to Weight::ONE.
     pub show_weight_one: bool,
+    /// Print/draw arc weights and final weights.
+    pub print_weight: bool,
 }
 
 impl Default for DrawingConfig {
@@ -33,6 +35,7 @@ impl Default for DrawingConfig {
             fontsize: 14,
             acceptor: false,
             show_weight_one: true,
+            print_weight: true,
         }
     }
 }
