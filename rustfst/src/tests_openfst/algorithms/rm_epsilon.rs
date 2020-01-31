@@ -3,21 +3,20 @@ use std::fmt::Display;
 use failure::Fallible;
 
 use crate::algorithms::{isomorphic, rm_epsilon};
-use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ExpandedFst, MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
-use crate::semirings::StarSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::tests_openfst::FstTestData;
 
 pub fn test_rmepsilon<F>(test_data: &FstTestData<F>) -> Fallible<()>
 where
     F: SerializableFst + MutableFst + ExpandedFst + Display,
-    F::W: 'static + SerializableSemiring + WeaklyDivisibleSemiring + StarSemiring,
+    F::W: 'static + SerializableSemiring + WeaklyDivisibleSemiring,
 {
     // Remove epsilon
-    let fst_rmepsilon: VectorFst<_> = rm_epsilon(&test_data.raw).unwrap();
+    let mut fst_rmepsilon = test_data.raw.clone();
+    rm_epsilon(&mut fst_rmepsilon)?;
     assert!(fst_rmepsilon
         .properties()?
         .contains(FstProperties::NO_EPSILONS));

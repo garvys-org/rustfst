@@ -1,66 +1,19 @@
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
 use failure::Fallible;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::all_pairs_shortest_distance;
-use crate::algorithms::arc_sum;
-use crate::arc::Arc;
-use crate::fst_traits::{ExpandedFst, FinalStatesIterator, MutableFst};
-use crate::semirings::{Semiring, StarSemiring};
-use crate::EPS_LABEL;
-
-// Compute the wFST derived from "fst" by keeping only the epsilon transitions
-fn compute_fst_epsilon<W, F1, F2>(fst: &F1, keep_only_epsilon: bool) -> Fallible<F2>
-where
-    W: Semiring,
-    F1: ExpandedFst<W = W>,
-    F2: MutableFst<W = W> + ExpandedFst<W = W>,
-{
-    let mut fst_epsilon = F2::new();
-
-    // Map old states id to new ones
-    let mut mapping_states = HashMap::new();
-
-    // First pass to add the necessary states
-    for old_state_id in fst.states_iter() {
-        let new_state_id = fst_epsilon.add_state();
-        mapping_states.insert(old_state_id, new_state_id);
-    }
-
-    // Second pass to add the arcs
-    for old_state_id in fst.states_iter() {
-        for old_arc in fst.arcs_iter(old_state_id)? {
-            let a = keep_only_epsilon && old_arc.ilabel == EPS_LABEL && old_arc.olabel == EPS_LABEL;
-            let b =
-                !(old_arc.ilabel == EPS_LABEL && old_arc.olabel == EPS_LABEL || keep_only_epsilon);
-
-            if a || b {
-                fst_epsilon.add_arc(
-                    mapping_states[&old_state_id],
-                    Arc::new(
-                        old_arc.ilabel,
-                        old_arc.olabel,
-                        old_arc.weight.clone(),
-                        mapping_states[&old_arc.nextstate],
-                    ),
-                )?;
-            }
-        }
-    }
-
-    if let Some(start_state) = fst.start() {
-        fst_epsilon.set_start(mapping_states[&start_state])?;
-    }
-
-    for old_final_state in fst.final_states_iter() {
-        fst_epsilon.set_final(
-            mapping_states[&old_final_state.state_id],
-            old_final_state.final_weight.clone(),
-        )?;
-    }
-    Ok(fst_epsilon)
-}
+use crate::{EPS_LABEL, Label, StateId};
+use crate::algorithms::arc_filters::{ArcFilter, EpsilonArcFilter};
+use crate::algorithms::dfs_visit::dfs_visit;
+use crate::algorithms::shortest_distance;
+use crate::algorithms::top_sort::TopOrderVisitor;
+use crate::algorithms::visitors::SccVisitor;
+use crate::fst_properties::FstProperties;
+use crate::fst_traits::{Fst, MutableFst};
+use crate::fst_traits::CoreFst;
+use crate::semirings::Semiring;
 
 /// This operation removes epsilon-transitions (when both the input and
 /// output labels are an epsilon) from a transducer. The result will be an
@@ -95,56 +48,175 @@ where
 ///
 /// assert_eq!(fst_no_epsilon, fst_no_epsilon_ref);
 /// ```
-pub fn rm_epsilon<W, F1, F2>(fst: &F1) -> Fallible<F2>
+pub fn rm_epsilon<F: MutableFst>(fst: &mut F) -> Fallible<()>
 where
-    W: StarSemiring,
-    F1: ExpandedFst<W = W>,
-    F2: MutableFst<W = W>,
+    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
 {
-    let fst_epsilon: F2 = compute_fst_epsilon(fst, true)?;
-    let dists_fst_epsilon = all_pairs_shortest_distance(&fst_epsilon)?;
+    let start_state = fst.start();
+    if start_state.is_none() {
+        return Ok(());
+    }
+    let start_state = unsafe { start_state.unsafe_unwrap() };
 
-    let mut eps_closures = vec![vec![]; fst_epsilon.num_states()];
+    // noneps_in[s] will be set to true iff s admits a non-epsilon incoming
+    // transition or is the start state.
+    let mut noneps_in = vec![false; fst.num_states()];
+    noneps_in[start_state] = true;
 
-    for p in fst_epsilon.states_iter() {
-        for q in fst_epsilon.states_iter() {
-            if p != q && dists_fst_epsilon[p][q] != W::zero() {
-                eps_closures[p].push((q, &dists_fst_epsilon[p][q]));
+    for state in 0..fst.num_states() {
+        for arc in fst.arcs_iter(state)? {
+            if arc.ilabel != EPS_LABEL || arc.olabel != EPS_LABEL {
+                noneps_in[arc.nextstate] = true;
             }
         }
     }
 
-    let fst_no_epsilon: F2 = compute_fst_epsilon(fst, false)?;
+    // States sorted in topological order when (acyclic) or generic topological
+    // order (cyclic).
+    let mut states = vec![];
 
-    let mut output_fst = fst_no_epsilon.clone();
+    let fst_props = fst.properties()?;
 
-    for p in fst_no_epsilon.states_iter() {
-        for (q, w_prime) in &eps_closures[p] {
-            for arc in fst_no_epsilon.arcs_iter(*q)? {
-                output_fst.add_arc(
-                    p,
-                    Arc::new(
-                        arc.ilabel,
-                        arc.olabel,
-                        w_prime.times(&arc.weight)?,
-                        arc.nextstate,
-                    ),
-                )?;
+    if fst_props.contains(FstProperties::TOP_SORTED) {
+        states = (0..fst.num_states()).collect();
+    } else if fst_props.contains(FstProperties::TOP_SORTED) {
+        let mut visitor = TopOrderVisitor::new();
+        dfs_visit(fst, &mut visitor, EpsilonArcFilter{}, false);
+
+        for i in 0..visitor.order.len() {
+            states[visitor.order[i]] = i;
+        }
+    } else {
+        let mut visitor = SccVisitor::new(fst, true, false);
+        dfs_visit(fst, &mut visitor, EpsilonArcFilter {}, false);
+
+        let scc = visitor.scc.as_ref().unwrap();
+
+        let mut first = vec![None; scc.len()];
+        let mut next = vec![None; scc.len()];
+
+        for i in 0..scc.len() {
+            if first[scc[i] as usize].is_some() {
+                next[i] = first[scc[i] as usize];
             }
+            first[scc[i] as usize] = Some(i);
+        }
 
-            if unsafe { fst_no_epsilon.is_final_unchecked(*q) } {
-                if !unsafe { fst_no_epsilon.is_final_unchecked(p) } {
-                    output_fst.set_final(p, W::zero())?;
+        for i in 0..first.len() {
+            let mut opt_j = first[i];
+            while let Some(j) = opt_j {
+                states.push(j);
+                opt_j = next[j];
+            }
+        }
+    }
+    let mut rmeps_state = RmEpsilonState {
+        fst,
+        visited: vec![],
+        visited_states: vec![],
+        element_map: HashMap::new(),
+        expand_id: 0
+    };
+    for state in states.into_iter().rev() {
+        if !noneps_in[state] {
+            continue;
+        }
+        rmeps_state.expand(state)?;
+    }
+    Ok(())
+}
+
+#[derive(Hash, Debug, PartialOrd, PartialEq, Eq)]
+struct Element {
+    ilabel: Label,
+    olabel: Label,
+    nextstate: StateId
+}
+
+struct RmEpsilonState<'a, F: Fst> {
+    fst: &'a mut F,
+    visited: Vec<bool>,
+    visited_states: Vec<StateId>,
+    element_map: HashMap<Element, (StateId, usize)>,
+    expand_id: usize
+}
+
+impl<'a, F: MutableFst> RmEpsilonState<'a, F>
+where
+    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
+{
+    pub fn expand(&mut self, source: StateId) -> Fallible<()> {
+        let zero = F::W::zero();
+        let distance = shortest_distance(self.fst, false)?;
+
+        let arc_filter = EpsilonArcFilter {};
+
+        let mut eps_queue = vec![source];
+
+        let mut arcs = vec![];
+        let mut final_weight = F::W::zero();
+        while let Some(state) = eps_queue.pop() {
+            while self.visited.len() <= state {
+                self.visited.push(false);
+            }
+            if self.visited[state] {
+                continue;
+            }
+            self.visited[state] = true;
+            self.visited_states.push(state);
+            for arc in self.fst.arcs_iter(state)? {
+                // TODO: Remove this clone
+                let mut arc = arc.clone();
+                arc.weight = distance[state].times(&arc.weight)?;
+                if arc_filter.keep(&arc) {
+                    while self.visited.len() <= state {
+                        self.visited.push(false);
+                    }
+                    if !self.visited[arc.nextstate] {
+                        eps_queue.push(arc.nextstate);
+                    }
+                } else {
+                    let elt = Element {ilabel: arc.ilabel, olabel: arc.olabel, nextstate: arc.nextstate};
+                    let val = (self.expand_id, arcs.len());
+
+                    match self.element_map.entry(elt) {
+                        Entry::Vacant(e) => {
+                            e.insert(val);
+                            arcs.push(arc);
+                        },
+                        Entry::Occupied(mut e) => {
+                            if e.get().0 == self.expand_id {
+                                unsafe {
+                                    arcs.get_unchecked_mut(e.get().1).weight.plus_assign(&arc.weight)?;
+                                }
+                            } else {
+                                e.get_mut().0 = self.expand_id;
+                                e.get_mut().1 = arcs.len();
+                                arcs.push(arc);
+                            }
+                        }
+                    };
                 }
-                let rho_prime_p = unsafe { output_fst.final_weight_unchecked(p).unsafe_unwrap() };
-                let rho_q = unsafe { fst_no_epsilon.final_weight_unchecked(*q).unsafe_unwrap() };
-                let new_weight = rho_prime_p.plus(&w_prime.times(rho_q)?)?;
-                output_fst.set_final(p, new_weight)?;
+            }
+            final_weight.plus_assign(distance[state].times(self.fst.final_weight(state)?.unwrap_or(&zero))?)?;
+        }
+
+        while let Some(s) = self.visited_states.pop() {
+            self.visited[s] = false;
+        }
+
+        self.expand_id += 1;
+
+        unsafe {
+            // TODO: Use these arcs instead of cloning
+            self.fst.pop_arcs_unchecked(source);
+            self.fst.set_arcs_unchecked(source, arcs.into_iter().rev().collect());
+            if final_weight != zero {
+                self.fst.set_final_unchecked(source, final_weight);
+            } else {
+                self.fst.delete_final_weight_unchecked(source);
             }
         }
+        Ok(())
     }
-
-    arc_sum(&mut output_fst);
-
-    Ok(output_fst)
 }

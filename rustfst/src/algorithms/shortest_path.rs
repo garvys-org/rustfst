@@ -14,6 +14,7 @@ use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::Arc;
 use crate::StateId;
+use crate::algorithms::arc_filters::AnyArcFilter;
 
 /// Creates an FST containing the n-shortest paths in the input FST. The n-shortest paths are the
 /// n-lowest weight paths w.r.t. the natural semiring order.
@@ -116,7 +117,7 @@ where
         return Ok(());
     }
     let mut enqueued = vec![];
-    let mut queue = AutoQueue::new(ifst, None)?;
+    let mut queue = AutoQueue::new(ifst, None, &AnyArcFilter{})?;
     let source = unsafe { start.unsafe_unwrap() };
     let mut f_distance = F::W::zero();
     distance.clear();

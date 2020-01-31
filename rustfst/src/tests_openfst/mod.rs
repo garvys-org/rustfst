@@ -338,33 +338,6 @@ macro_rules! do_run {
     };
 }
 
-// TODO: rmepsilon implementation requires the StarSemiring implementation which seems avoidable.
-macro_rules! do_run_rmepsilon {
-    ($f: ident, $fst_name: expr) => {
-        let absolute_path_folder = get_path_folder($fst_name)?;
-        let mut path_metadata = absolute_path_folder.clone();
-        path_metadata.push("metadata.json");
-
-        let string = read_to_string(&path_metadata)
-            .map_err(|_| format_err!("Can't open {:?}", &path_metadata))?;
-        let parsed_test_data: ParsedFstTestData = serde_json::from_str(&string).unwrap();
-
-        match parsed_test_data.weight_type.as_str() {
-            "tropical" | "standard" => {
-                let test_data: FstTestData<VectorFst<TropicalWeight>> =
-                    FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
-                $f(&test_data)?;
-            }
-            "log" => {
-                let test_data: FstTestData<VectorFst<LogWeight>> =
-                    FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
-                $f(&test_data)?;
-            }
-            _ => bail!("Weight type unknown : {:?}", parsed_test_data.weight_type),
-        };
-    };
-}
-
 macro_rules! test_fst {
     ($namespace: tt, $fst_name: expr) => {
         mod $namespace {
@@ -684,10 +657,7 @@ macro_rules! test_fst {
 
             #[test]
             fn test_rmepsilon_openfst() -> Fallible<()> {
-                if $fst_name != "fst_011" {
-                    do_run_rmepsilon!(test_rmepsilon, $fst_name);
-                }
-
+                do_run!(test_rmepsilon, $fst_name);
                 Ok(())
             }
         }

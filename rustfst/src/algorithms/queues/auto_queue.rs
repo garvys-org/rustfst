@@ -11,6 +11,7 @@ use super::{
     natural_less, FifoQueue, LifoQueue, NaturalShortestFirstQueue, SccQueue, StateOrderQueue,
     TopOrderQueue, TrivialQueue,
 };
+use crate::algorithms::arc_filters::ArcFilter;
 
 #[derive(Debug)]
 pub struct AutoQueue {
@@ -18,7 +19,7 @@ pub struct AutoQueue {
 }
 
 impl AutoQueue {
-    pub fn new<F: MutableFst + ExpandedFst>(fst: &F, distance: Option<&Vec<F::W>>) -> Fallible<Self>
+    pub fn new<F: MutableFst + ExpandedFst, A: ArcFilter<F::W>>(fst: &F, distance: Option<&Vec<F::W>>, arc_filter: &A) -> Fallible<Self>
     where
         F::W: 'static,
     {
@@ -29,14 +30,14 @@ impl AutoQueue {
         if props.contains(FstProperties::TOP_SORTED) || fst.start().is_none() {
             queue = Box::new(StateOrderQueue::default());
         } else if props.contains(FstProperties::ACYCLIC) {
-            queue = Box::new(TopOrderQueue::new(fst));
+            queue = Box::new(TopOrderQueue::new(fst, arc_filter));
         } else if props.contains(FstProperties::UNWEIGHTED)
             && F::W::properties().contains(SemiringProperties::IDEMPOTENT)
         {
             queue = Box::new(LifoQueue::default());
         } else {
             let mut scc_visitor = SccVisitor::new(fst, true, false);
-            dfs_visit(fst, &mut scc_visitor, false);
+            dfs_visit(fst, &mut scc_visitor, arc_filter, false);
             let sccs: Vec<_> = scc_visitor
                 .scc
                 .unwrap()
@@ -65,6 +66,7 @@ impl AutoQueue {
                 &mut queue_types,
                 &mut all_trivial,
                 &mut unweighted,
+                arc_filter
             )?;
 
             if unweighted {

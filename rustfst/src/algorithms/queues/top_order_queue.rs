@@ -3,6 +3,7 @@ use crate::algorithms::top_sort::TopOrderVisitor;
 use crate::algorithms::{Queue, QueueType};
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::StateId;
+use crate::algorithms::arc_filters::ArcFilter;
 
 /// Topological-order queue discipline, templated on the StateId. States are
 /// ordered in the queue topologically. The FST must be acyclic.
@@ -15,9 +16,9 @@ pub struct TopOrderQueue {
 }
 
 impl TopOrderQueue {
-    pub fn new<F: MutableFst + ExpandedFst>(fst: &F) -> Self {
+    pub fn new<F: MutableFst + ExpandedFst, A: ArcFilter<F::W>>(fst: &F, arc_filter: &A) -> Self {
         let mut visitor = TopOrderVisitor::new();
-        dfs_visit(fst, &mut visitor, false);
+        dfs_visit(fst, &mut visitor, false, arc_filter);
         if !visitor.acyclic {
             panic!("Unexpectted Acyclic FST for TopOprerQueue");
         }

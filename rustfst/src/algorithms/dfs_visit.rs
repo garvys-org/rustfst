@@ -4,6 +4,8 @@ use crate::semirings::Semiring;
 use crate::StateId;
 
 use unsafe_unwrap::UnsafeUnwrap;
+use crate::algorithms::arc_filters::ArcFilter;
+use failure::_core::borrow::Borrow;
 
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
 enum DfsStateColor {
@@ -90,11 +92,13 @@ impl<I: Iterator> OpenFstIterator<I> {
     }
 }
 
-pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>>(
+pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>, A: ArcFilter<F::W>, B: Borrow<A>>(
     fst: &'a F,
     visitor: &mut V,
+    arc_filter: B,
     access_only: bool,
 ) {
+    let arc_filter = arc_filter.borrow();
     visitor.init_visit(fst);
     let start = fst.start();
     if start.is_none() {
@@ -137,6 +141,10 @@ pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>>(
             }
             let arc = aiter.value();
             let next_color = state_color[arc.nextstate];
+            if !(arc_filter.keep(arc)) {
+                aiter.next();
+                continue;
+            }
             match next_color {
                 DfsStateColor::White => {
                     dfs = visitor.tree_arc(s, arc);

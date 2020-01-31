@@ -49,11 +49,11 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
     // Check whether the wFST contains the state
     if state_id < fst.num_states() {
         while d.len() <= state_id {
-            d.push(<F as CoreFst>::W::zero());
-            r.push(<F as CoreFst>::W::zero());
+            d.push(F::W::zero());
+            r.push(F::W::zero());
         }
-        d[state_id] = <F as CoreFst>::W::one();
-        r[state_id] = <F as CoreFst>::W::one();
+        d[state_id] = F::W::one();
+        r[state_id] = F::W::one();
 
         let mut queue = VecDeque::new();
         queue.push_back(state_id);
@@ -61,17 +61,17 @@ pub fn single_source_shortest_distance<F: ExpandedFst>(
         while !queue.is_empty() {
             let state_cour = unsafe { queue.pop_front().unsafe_unwrap() };
             while d.len() <= state_cour {
-                d.push(<F as CoreFst>::W::zero());
-                r.push(<F as CoreFst>::W::zero());
+                d.push(F::W::zero());
+                r.push(F::W::zero());
             }
             let r2 = &r[state_cour].clone();
-            r[state_cour] = <F as CoreFst>::W::zero();
+            r[state_cour] = F::W::zero();
 
             for arc in unsafe { fst.arcs_iter_unchecked(state_cour) } {
                 let nextstate = arc.nextstate;
                 while d.len() <= nextstate {
-                    d.push(<F as CoreFst>::W::zero());
-                    r.push(<F as CoreFst>::W::zero());
+                    d.push(F::W::zero());
+                    r.push(F::W::zero());
                 }
                 if d[nextstate] != d[nextstate].plus(&r2.times(&arc.weight)?)? {
                     d[nextstate] = d[nextstate].plus(&r2.times(&arc.weight)?)?;
@@ -157,62 +157,24 @@ where
     }
 }
 
-#[cfg(test)]
-mod tests {
-    //    use super::*;
-    //    use crate::fst_traits::StateIterator;
-    //    use crate::semirings::{IntegerWeight, Semiring};
-    //    use crate::test_data::vector_fst::get_vector_fsts_for_tests;
 
-    //    #[test]
-    //    fn test_single_source_shortest_distance_generic() -> Fallible<()> {
-    //        for data in get_vector_fsts_for_tests() {
-    //            let fst = data.fst;
-    //            let d_ref = data.all_distances;
-    //
-    //            for state in fst.states_iter() {
-    //                let d = single_source_shortest_distance(&fst, state)?;
-    //                assert_eq!(
-    //                    d, d_ref[state],
-    //                    "Test failing for single source shortest distance on wFST {:?} at state {:?}",
-    //                    data.name, state
-    //                );
-    //            }
-    //
-    //            let d = single_source_shortest_distance(&fst, fst.num_states())?;
-    //            assert_eq!(
-    //                d,
-    //                vec![IntegerWeight::zero(); fst.num_states()],
-    //                "Test failing for single source shortest distance on wFST {:?} at state {:?}",
-    //                data.name,
-    //                fst.num_states()
-    //            );
-    //        }
-    //        Ok(())
-    //    }
-    //
-    //    #[test]
-    //    fn test_shortest_distance_generic() -> Fallible<()> {
-    //        for data in get_vector_fsts_for_tests() {
-    //            let fst = data.fst;
-    //            let d_ref = data.all_distances;
-    //            let d = shortest_distance(&fst, false)?;
-    //
-    //            if let Some(start_state) = fst.start() {
-    //                assert_eq!(
-    //                    d, d_ref[start_state],
-    //                    "Test failing for all shortest distance on wFST : {:?}",
-    //                    data.name
-    //                );
-    //            } else {
-    //                assert_eq!(
-    //                    d,
-    //                    vec![IntegerWeight::zero(); fst.num_states()],
-    //                    "Test failing for all shortest distance on wFST : {:?}",
-    //                    data.name
-    //                );
-    //            }
-    //        }
-    //        Ok(())
-    //    }
+pub mod revamp {
+    use failure::Fallible;
+
+    use crate::fst_traits::Fst;
+    use crate::algorithms::arc_filters::AnyArcFilter;
+    use crate::algorithms::queues::AutoQueue;
+
+    pub fn shortest_distance<F: Fst>(fst: &F, reverse: bool) -> Fallible<Vec<F::W>>{
+
+        if !reverse {
+            let arc_filer = AnyArcFilter{};
+//            let queue = AutoQueue::
+            unimplemented!()
+        } else {
+            unimplemented!()
+        }
+
+        unimplemented!()
+    }
 }
