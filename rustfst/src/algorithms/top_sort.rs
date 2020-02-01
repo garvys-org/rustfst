@@ -1,11 +1,11 @@
 use failure::Fallible;
 
+use crate::algorithms::arc_filters::AnyArcFilter;
 use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
 use crate::algorithms::state_sort;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::Arc;
 use crate::StateId;
-use crate::algorithms::arc_filters::AnyArcFilter;
 
 pub struct TopOrderVisitor {
     pub order: Vec<StateId>,
@@ -76,7 +76,7 @@ where
     F: MutableFst + ExpandedFst,
 {
     let mut visitor = TopOrderVisitor::new();
-    dfs_visit(fst, &mut visitor, AnyArcFilter{}, false);
+    dfs_visit(fst, &mut visitor, &AnyArcFilter {}, false);
     if visitor.acyclic {
         state_sort(fst, &visitor.order)?;
     }

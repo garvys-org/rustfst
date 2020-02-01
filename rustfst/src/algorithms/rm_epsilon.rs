@@ -4,16 +4,18 @@ use std::collections::HashMap;
 use failure::Fallible;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::{EPS_LABEL, Label, StateId};
 use crate::algorithms::arc_filters::{ArcFilter, EpsilonArcFilter};
 use crate::algorithms::dfs_visit::dfs_visit;
-use crate::algorithms::shortest_distance;
+use crate::algorithms::{shortest_distance, Queue};
 use crate::algorithms::top_sort::TopOrderVisitor;
 use crate::algorithms::visitors::SccVisitor;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{Fst, MutableFst};
 use crate::fst_traits::CoreFst;
+use crate::fst_traits::{Fst, MutableFst};
 use crate::semirings::Semiring;
+use crate::{Label, StateId, EPS_LABEL, Arc};
+use crate::algorithms::shortest_distance::revamp::{ShortestDistanceState, ShortestDistanceOptions};
+use crate::algorithms::queues::AutoQueue;
 
 /// This operation removes epsilon-transitions (when both the input and
 /// output labels are an epsilon) from a transducer. The result will be an
@@ -51,6 +53,7 @@ use crate::semirings::Semiring;
 pub fn rm_epsilon<F: MutableFst>(fst: &mut F) -> Fallible<()>
 where
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
+    F::W: 'static
 {
     let start_state = fst.start();
     if start_state.is_none() {
@@ -81,14 +84,14 @@ where
         states = (0..fst.num_states()).collect();
     } else if fst_props.contains(FstProperties::TOP_SORTED) {
         let mut visitor = TopOrderVisitor::new();
-        dfs_visit(fst, &mut visitor, EpsilonArcFilter{}, false);
+        dfs_visit(fst, &mut visitor, &EpsilonArcFilter {}, false);
 
         for i in 0..visitor.order.len() {
             states[visitor.order[i]] = i;
         }
     } else {
         let mut visitor = SccVisitor::new(fst, true, false);
-        dfs_visit(fst, &mut visitor, EpsilonArcFilter {}, false);
+        dfs_visit(fst, &mut visitor, &EpsilonArcFilter {}, false);
 
         let scc = visitor.scc.as_ref().unwrap();
 
@@ -110,18 +113,46 @@ where
             }
         }
     }
+
+    let arc_filter = EpsilonArcFilter {};
+
+    let state_queue = AutoQueue::new(fst, None, &arc_filter)?;
+    let opts = ShortestDistanceOptions::new(arc_filter, state_queue, None, false);
+    let sd_state = ShortestDistanceState::new(fst, opts, true);
     let mut rmeps_state = RmEpsilonState {
         fst,
         visited: vec![],
         visited_states: vec![],
         element_map: HashMap::new(),
-        expand_id: 0
+        expand_id: 0,
+        sd_state
     };
+    let zero = F::W::zero();
+
+    use std::cell::RefCell;
+    let mut v = Vec::with_capacity(states.len());
     for state in states.into_iter().rev() {
         if !noneps_in[state] {
             continue;
         }
-        rmeps_state.expand(state)?;
+        let (arcs, final_weight) = rmeps_state.expand(state)?;
+
+        // Copy everything, not great ...
+        v.push((state, (arcs, final_weight)));
+    }
+
+    for (state, (arcs, final_weight)) in v.into_iter() {
+        unsafe {
+            // TODO: Use these arcs instead of cloning
+            fst.pop_arcs_unchecked(state);
+            fst
+                .set_arcs_unchecked(state, arcs.into_iter().rev().collect());
+            if final_weight != zero {
+                fst.set_final_unchecked(state, final_weight);
+            } else {
+                fst.delete_final_weight_unchecked(state);
+            }
+        }
     }
     Ok(())
 }
@@ -130,24 +161,25 @@ where
 struct Element {
     ilabel: Label,
     olabel: Label,
-    nextstate: StateId
+    nextstate: StateId,
 }
 
-struct RmEpsilonState<'a, F: Fst> {
-    fst: &'a mut F,
+struct RmEpsilonState<'a, F: MutableFst, Q: Queue, A: ArcFilter<F::W>> {
+    fst: &'a F,
     visited: Vec<bool>,
     visited_states: Vec<StateId>,
     element_map: HashMap<Element, (StateId, usize)>,
-    expand_id: usize
+    expand_id: usize,
+    sd_state: ShortestDistanceState<'a, F::W, Q, A, F>
 }
 
-impl<'a, F: MutableFst> RmEpsilonState<'a, F>
+impl<'a, F: MutableFst, Q: Queue, A: ArcFilter<F::W>> RmEpsilonState<'a, F, Q, A>
 where
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
 {
-    pub fn expand(&mut self, source: StateId) -> Fallible<()> {
+    pub fn expand(&mut self, source: StateId) -> Fallible<(Vec<Arc<F::W>>, F::W)> {
         let zero = F::W::zero();
-        let distance = shortest_distance(self.fst, false)?;
+        let distance = self.sd_state.shortest_distance(Some(source))?;
 
         let arc_filter = EpsilonArcFilter {};
 
@@ -176,18 +208,24 @@ where
                         eps_queue.push(arc.nextstate);
                     }
                 } else {
-                    let elt = Element {ilabel: arc.ilabel, olabel: arc.olabel, nextstate: arc.nextstate};
+                    let elt = Element {
+                        ilabel: arc.ilabel,
+                        olabel: arc.olabel,
+                        nextstate: arc.nextstate,
+                    };
                     let val = (self.expand_id, arcs.len());
 
                     match self.element_map.entry(elt) {
                         Entry::Vacant(e) => {
                             e.insert(val);
                             arcs.push(arc);
-                        },
+                        }
                         Entry::Occupied(mut e) => {
                             if e.get().0 == self.expand_id {
                                 unsafe {
-                                    arcs.get_unchecked_mut(e.get().1).weight.plus_assign(&arc.weight)?;
+                                    arcs.get_unchecked_mut(e.get().1)
+                                        .weight
+                                        .plus_assign(&arc.weight)?;
                                 }
                             } else {
                                 e.get_mut().0 = self.expand_id;
@@ -198,7 +236,9 @@ where
                     };
                 }
             }
-            final_weight.plus_assign(distance[state].times(self.fst.final_weight(state)?.unwrap_or(&zero))?)?;
+            final_weight.plus_assign(
+                distance[state].times(self.fst.final_weight(state)?.unwrap_or(&zero))?,
+            )?;
         }
 
         while let Some(s) = self.visited_states.pop() {
@@ -207,16 +247,6 @@ where
 
         self.expand_id += 1;
 
-        unsafe {
-            // TODO: Use these arcs instead of cloning
-            self.fst.pop_arcs_unchecked(source);
-            self.fst.set_arcs_unchecked(source, arcs.into_iter().rev().collect());
-            if final_weight != zero {
-                self.fst.set_final_unchecked(source, final_weight);
-            } else {
-                self.fst.delete_final_weight_unchecked(source);
-            }
-        }
-        Ok(())
+        Ok((arcs, final_weight))
     }
 }
