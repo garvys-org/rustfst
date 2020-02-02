@@ -162,16 +162,16 @@ pub mod revamp {
 
     use crate::algorithms::arc_filters::{AnyArcFilter, ArcFilter};
     use crate::algorithms::queues::AutoQueue;
+    use crate::algorithms::shortest_path::hack_convert_reverse_reverse;
     use crate::algorithms::Queue;
+    use crate::fst_impls::VectorFst;
     use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
     use crate::semirings::{Semiring, SemiringProperties};
     use crate::StateId;
     use failure::_core::marker::PhantomData;
     use nom::combinator::opt;
-    use crate::fst_impls::VectorFst;
-    use crate::algorithms::shortest_path::hack_convert_reverse_reverse;
 
-    pub struct ShortestDistanceOptions<W: Semiring, Q: Queue, A: ArcFilter<W>> {
+    pub struct ShortestDistanceConfig<W: Semiring, Q: Queue, A: ArcFilter<W>> {
         arc_filter: A,
         state_queue: Q,
         source: Option<StateId>,
@@ -180,11 +180,24 @@ pub mod revamp {
         weight: PhantomData<W>,
     }
 
-    impl<W: Semiring, Q: Queue, A: ArcFilter<W>> ShortestDistanceOptions<W,Q,A> {
-        pub fn new(arc_filter: A, state_queue: Q, source: Option<StateId>, first_path: bool) -> Self {
+    impl<W: Semiring, Q: Queue, A: ArcFilter<W>> ShortestDistanceConfig<W, Q, A> {
+        pub fn new(
+            arc_filter: A,
+            state_queue: Q,
+            source: Option<StateId>,
+            first_path: bool,
+        ) -> Self {
             Self {
-                arc_filter, state_queue, source, first_path, weight: PhantomData
+                arc_filter,
+                state_queue,
+                source,
+                first_path,
+                weight: PhantomData,
             }
+        }
+
+        pub fn new_with_default(arc_filter: A, state_queue: Q) -> Self {
+            Self::new(arc_filter, state_queue, None, false)
         }
     }
 
@@ -205,13 +218,13 @@ pub mod revamp {
         radder: Vec<W>,
         sources: Vec<Option<StateId>>,
         retain: bool,
-        source_id: usize
+        source_id: usize,
     }
 
     impl<'a, W: Semiring, Q: Queue, A: ArcFilter<W>, F: ExpandedFst<W = W>>
         ShortestDistanceState<'a, W, Q, A, F>
     {
-        pub fn new(fst: &'a F, opts: ShortestDistanceOptions<W, Q, A>, retain: bool) -> Self {
+        pub fn new(fst: &'a F, opts: ShortestDistanceConfig<W, Q, A>, retain: bool) -> Self {
             Self {
                 fst,
                 state_queue: opts.state_queue,
@@ -223,7 +236,7 @@ pub mod revamp {
                 radder: Vec::with_capacity(fst.num_states()),
                 sources: Vec::with_capacity(fst.num_states()),
                 source_id: 0,
-                retain
+                retain,
             }
         }
 
@@ -277,7 +290,7 @@ pub mod revamp {
                 self.state_queue.dequeue();
                 self.ensure_distance_index_is_valid(state);
                 if self.first_path && self.fst.is_final(state)? {
-                    break
+                    break;
                 }
                 self.enqueued[state] = false;
                 let r = self.radder[state].clone();
@@ -285,7 +298,7 @@ pub mod revamp {
                 for arc in self.fst.arcs_iter(state)? {
                     let nextstate = arc.nextstate;
                     if !self.arc_filter.keep(arc) {
-                        continue
+                        continue;
                     }
                     self.ensure_distance_index_is_valid(nextstate);
                     if self.retain {
@@ -306,7 +319,7 @@ pub mod revamp {
                         na.plus_assign(&weight)?;
                         *nd = na.clone();
                         nr.plus_assign(&weight)?;
-                        if ! self.enqueued[state] {
+                        if !self.enqueued[state] {
                             self.state_queue.enqueue(nextstate);
                             self.enqueued[nextstate] = true;
                         } else {
@@ -321,42 +334,50 @@ pub mod revamp {
         }
     }
 
-    pub fn shortest_distance_1<W: Semiring, Q: Queue, A: ArcFilter<W>, F: MutableFst<W=W>>(fst: &F, opts: ShortestDistanceOptions<W,Q,A>) -> Fallible<Vec<W>> {
+    pub fn shortest_distance_with_config<W: Semiring, Q: Queue, A: ArcFilter<W>, F: MutableFst<W = W>>(
+        fst: &F,
+        opts: ShortestDistanceConfig<W, Q, A>,
+    ) -> Fallible<Vec<W>> {
         let source = opts.source;
         let mut sd_state = ShortestDistanceState::new(fst, opts, false);
         sd_state.shortest_distance(source)
     }
 
-    pub fn shortest_distance_2<F: MutableFst>(fst: &F, reverse: bool) -> Fallible<Vec<F::W>>
+    pub fn shortest_distance<F: MutableFst>(fst: &F, reverse: bool) -> Fallible<Vec<F::W>>
     where
         F::W: 'static,
     {
         if !reverse {
             let arc_filter = AnyArcFilter {};
             let queue = AutoQueue::new(fst, None, &arc_filter)?;
-            let opts = ShortestDistanceOptions::new(arc_filter, queue, None, false);
-            shortest_distance_1(fst, opts)
+            let config = ShortestDistanceConfig::new_with_default(arc_filter, queue);
+            shortest_distance_with_config(fst, config)
         } else {
             let arc_filter = AnyArcFilter {};
-            let rfst : VectorFst<_> = crate::algorithms::reverse(fst)?;
+            let rfst: VectorFst<_> = crate::algorithms::reverse(fst)?;
             let state_queue = AutoQueue::new(&rfst, None, &arc_filter)?;
-            let ropts  = ShortestDistanceOptions::new(arc_filter, state_queue, None, false);
-            let rdistance = shortest_distance_1(&rfst, ropts)?;
+            let ropts = ShortestDistanceConfig::new_with_default(arc_filter, state_queue);
+            let rdistance = shortest_distance_with_config(&rfst, ropts)?;
             let mut distance = Vec::with_capacity(rdistance.len() - 1); //reversing added one state
             while distance.len() < rdistance.len() - 1 {
-                distance.push(hack_convert_reverse_reverse(rdistance[distance.len() + 1].reverse()?));
+                distance.push(hack_convert_reverse_reverse(
+                    rdistance[distance.len() + 1].reverse()?,
+                ));
             }
             Ok(distance)
         }
     }
 
+    /// Return the sum of the weight of all successful paths in an FST, i.e., the
+    /// shortest-distance from the initial state to the final states..
     pub fn shortest_distance_3<F: MutableFst>(fst: &F) -> Fallible<F::W>
-    where F::W: 'static
+    where
+        F::W: 'static,
     {
         let weight_properties = F::W::properties();
 
         if weight_properties.contains(SemiringProperties::RIGHT_SEMIRING) {
-            let distance = shortest_distance_2(fst, false)?;
+            let distance = shortest_distance(fst, false)?;
             let mut sum = F::W::zero();
             let zero = F::W::zero();
             for state in 0..distance.len() {
@@ -364,7 +385,7 @@ pub mod revamp {
             }
             Ok(sum)
         } else {
-            let distance = shortest_distance_2(fst, true)?;
+            let distance = shortest_distance(fst, true)?;
             if let Some(state) = fst.start() {
                 if state < distance.len() {
                     Ok(distance[state].clone())
@@ -374,7 +395,6 @@ pub mod revamp {
             } else {
                 Ok(F::W::zero())
             }
-
         }
     }
 }

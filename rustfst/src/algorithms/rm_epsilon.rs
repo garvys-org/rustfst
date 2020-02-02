@@ -6,16 +6,45 @@ use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::arc_filters::{ArcFilter, EpsilonArcFilter};
 use crate::algorithms::dfs_visit::dfs_visit;
-use crate::algorithms::{shortest_distance, Queue};
+use crate::algorithms::queues::AutoQueue;
+use crate::algorithms::shortest_distance::revamp::{
+    ShortestDistanceConfig, ShortestDistanceState,
+};
 use crate::algorithms::top_sort::TopOrderVisitor;
 use crate::algorithms::visitors::SccVisitor;
+use crate::algorithms::{shortest_distance, Queue};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::CoreFst;
 use crate::fst_traits::{Fst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Label, StateId, EPS_LABEL, Arc};
-use crate::algorithms::shortest_distance::revamp::{ShortestDistanceState, ShortestDistanceOptions};
-use crate::algorithms::queues::AutoQueue;
+use crate::{Arc, Label, StateId, EPS_LABEL};
+
+pub struct RmEpsilonConfig<W: Semiring, Q: Queue> {
+    sd_opts: ShortestDistanceConfig<W, Q, EpsilonArcFilter>,
+    connect: bool,
+    weight_threshold: W,
+    state_threshold: Option<StateId>,
+}
+
+impl<W: Semiring, Q: Queue> RmEpsilonConfig<W, Q> {
+    pub fn new(
+        queue: Q,
+        connect: bool,
+        weight_threshold: W,
+        state_threshold: Option<StateId>,
+    ) -> Self {
+        Self {
+            sd_opts: ShortestDistanceConfig::new_with_default(EpsilonArcFilter {}, queue),
+            connect,
+            weight_threshold,
+            state_threshold,
+        }
+    }
+
+    pub fn new_with_default(queue: Q) -> Self {
+        Self::new(queue, true, W::zero(), None)
+    }
+}
 
 /// This operation removes epsilon-transitions (when both the input and
 /// output labels are an epsilon) from a transducer. The result will be an
@@ -52,8 +81,20 @@ use crate::algorithms::queues::AutoQueue;
 /// ```
 pub fn rm_epsilon<F: MutableFst>(fst: &mut F) -> Fallible<()>
 where
+    F::W: 'static,
+{
+    let arc_filter = EpsilonArcFilter {};
+    let queue = AutoQueue::new(fst, None, &arc_filter)?;
+    let opts = RmEpsilonConfig::new_with_default(queue);
+    rm_epsilon_advanced(fst, opts)
+}
+pub fn rm_epsilon_with_config<F: MutableFst, Q: Queue>(
+    fst: &mut F,
+    opts: RmEpsilonConfig<F::W, Q>,
+) -> Fallible<()>
+where
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
-    F::W: 'static
+    F::W: 'static,
 {
     let start_state = fst.start();
     if start_state.is_none() {
@@ -114,19 +155,7 @@ where
         }
     }
 
-    let arc_filter = EpsilonArcFilter {};
-
-    let state_queue = AutoQueue::new(fst, None, &arc_filter)?;
-    let opts = ShortestDistanceOptions::new(arc_filter, state_queue, None, false);
-    let sd_state = ShortestDistanceState::new(fst, opts, true);
-    let mut rmeps_state = RmEpsilonState {
-        fst,
-        visited: vec![],
-        visited_states: vec![],
-        element_map: HashMap::new(),
-        expand_id: 0,
-        sd_state
-    };
+    let mut rmeps_state = RmEpsilonState::new(fst, opts);
     let zero = F::W::zero();
 
     use std::cell::RefCell;
@@ -145,8 +174,7 @@ where
         unsafe {
             // TODO: Use these arcs instead of cloning
             fst.pop_arcs_unchecked(state);
-            fst
-                .set_arcs_unchecked(state, arcs.into_iter().rev().collect());
+            fst.set_arcs_unchecked(state, arcs.into_iter().rev().collect());
             if final_weight != zero {
                 fst.set_final_unchecked(state, final_weight);
             } else {
@@ -164,19 +192,30 @@ struct Element {
     nextstate: StateId,
 }
 
-struct RmEpsilonState<'a, F: MutableFst, Q: Queue, A: ArcFilter<F::W>> {
+struct RmEpsilonState<'a, F: MutableFst, Q: Queue> {
     fst: &'a F,
     visited: Vec<bool>,
     visited_states: Vec<StateId>,
     element_map: HashMap<Element, (StateId, usize)>,
     expand_id: usize,
-    sd_state: ShortestDistanceState<'a, F::W, Q, A, F>
+    sd_state: ShortestDistanceState<'a, F::W, Q, EpsilonArcFilter, F>,
 }
 
-impl<'a, F: MutableFst, Q: Queue, A: ArcFilter<F::W>> RmEpsilonState<'a, F, Q, A>
+impl<'a, F: MutableFst, Q: Queue> RmEpsilonState<'a, F, Q>
 where
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
 {
+    pub fn new(fst: &'a F, opts: RmEpsilonConfig<F::W, Q>) -> Self {
+        Self {
+            fst,
+            visited: vec![],
+            visited_states: vec![],
+            element_map: HashMap::new(),
+            expand_id: 0,
+            sd_state: ShortestDistanceState::new(fst, opts.sd_opts, true),
+        }
+    }
+
     pub fn expand(&mut self, source: StateId) -> Fallible<(Vec<Arc<F::W>>, F::W)> {
         let zero = F::W::zero();
         let distance = self.sd_state.shortest_distance(Some(source))?;
