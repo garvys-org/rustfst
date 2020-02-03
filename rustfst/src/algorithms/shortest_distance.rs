@@ -3,9 +3,9 @@ use std::marker::PhantomData;
 use failure::Fallible;
 
 use crate::algorithms::arc_filters::{AnyArcFilter, ArcFilter};
-use crate::algorithms::Queue;
 use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::shortest_path::hack_convert_reverse_reverse;
+use crate::algorithms::Queue;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::{Semiring, SemiringProperties};
@@ -99,10 +99,10 @@ impl<'a, W: Semiring, Q: Queue, A: ArcFilter<W>, F: ExpandedFst<W = W>>
     }
 
     pub fn shortest_distance(&mut self, source: Option<StateId>) -> Fallible<Vec<W>> {
-        let start_state = self
-            .fst
-            .start()
-            .ok_or_else(|| format_err!("Fst doesn't have s start state"))?;
+        let start_state = match self.fst.start() {
+            Some(start_state) => start_state,
+            None => return Ok(vec![]),
+        };
         let weight_properties = W::properties();
         if !weight_properties.contains(SemiringProperties::RIGHT_SEMIRING) {
             bail!("ShortestDistance: Weight needs to be right distributive")

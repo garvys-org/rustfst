@@ -4,18 +4,18 @@ use std::collections::HashMap;
 use failure::Fallible;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::{Arc, EPS_LABEL, Label, StateId};
-use crate::algorithms::Queue;
 use crate::algorithms::arc_filters::{ArcFilter, EpsilonArcFilter};
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::shortest_distance::{ShortestDistanceConfig, ShortestDistanceState};
 use crate::algorithms::top_sort::TopOrderVisitor;
 use crate::algorithms::visitors::SccVisitor;
+use crate::algorithms::Queue;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::CoreFst;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
+use crate::{Arc, Label, StateId, EPS_LABEL};
 
 pub struct RmEpsilonConfig<W: Semiring, Q: Queue> {
     sd_opts: ShortestDistanceConfig<W, Q, EpsilonArcFilter>,
@@ -56,26 +56,31 @@ impl<W: Semiring, Q: Queue> RmEpsilonConfig<W, Q> {
 /// # use rustfst::algorithms::rm_epsilon;
 /// # use rustfst::Arc;
 /// # use rustfst::EPS_LABEL;
+/// # use failure::Fallible;
+/// # fn main() -> Fallible<()> {
 /// let mut fst = VectorFst::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
 /// fst.add_arc(s0, Arc::new(32, 25, IntegerWeight::new(78), s1));
 /// fst.add_arc(s1, Arc::new(EPS_LABEL, EPS_LABEL, IntegerWeight::new(13), s0));
-/// fst.set_start(s0).unwrap();
-/// fst.set_final(s0, IntegerWeight::new(5));
+/// fst.set_start(s0)?;
+/// fst.set_final(s0, IntegerWeight::new(5))?;
 ///
-/// let fst_no_epsilon : VectorFst<_> = rm_epsilon(&fst).unwrap();
+/// let mut fst_no_epsilon = fst.clone();
+/// rm_epsilon(&mut fst_no_epsilon)?;
 ///
 /// let mut fst_no_epsilon_ref = VectorFst::<IntegerWeight>::new();
 /// let s0 = fst_no_epsilon_ref.add_state();
 /// let s1 = fst_no_epsilon_ref.add_state();
 /// fst_no_epsilon_ref.add_arc(s0, Arc::new(32, 25, 78, s1));
 /// fst_no_epsilon_ref.add_arc(s1, Arc::new(32, 25, 78 * 13, s1));
-/// fst_no_epsilon_ref.set_start(s0).unwrap();
-/// fst_no_epsilon_ref.set_final(s0, 5);
-/// fst_no_epsilon_ref.set_final(s1, 5 * 13);
+/// fst_no_epsilon_ref.set_start(s0)?;
+/// fst_no_epsilon_ref.set_final(s0, 5)?;
+/// fst_no_epsilon_ref.set_final(s1, 5 * 13)?;
 ///
 /// assert_eq!(fst_no_epsilon, fst_no_epsilon_ref);
+/// # Ok(())
+/// # }
 /// ```
 pub fn rm_epsilon<F: MutableFst>(fst: &mut F) -> Fallible<()>
 where

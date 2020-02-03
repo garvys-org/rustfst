@@ -81,7 +81,7 @@ template<class F>
 void compute_fst_remove_epsilon(const F& raw_fst, json& j) {
     auto fst_out = *raw_fst.Copy();
     // Connect = false
-    fst::RmEpsilon(&fst_out, false);
+    fst::RmEpsilon(&fst_out);
     j["rmepsilon"]["result"] = fst_to_string(fst_out);
 }
 
