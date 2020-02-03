@@ -18,13 +18,6 @@ pub struct AutoQueue {
     queue: Box<dyn Queue>,
 }
 
-//impl Clone for AutoQueue {
-//    fn clone(&self) -> Self {
-//        self.queue.
-//        unimplemented!()
-//    }
-//}
-
 impl AutoQueue {
     pub fn new<F: MutableFst + ExpandedFst, A: ArcFilter<F::W>>(
         fst: &F,
