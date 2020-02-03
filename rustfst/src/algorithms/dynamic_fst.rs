@@ -20,18 +20,6 @@ macro_rules! dynamic_fst {
             }
         }
 
-//        impl<$($a: $b $( < $c >)? ),*> PartialEq for $dyn_fst {
-//            fn eq(&self, other: &Self) -> bool {
-//                let ptr = self.fst_impl.get();
-//                let fst_impl = unsafe { ptr.as_ref().unwrap() };
-//
-//                let ptr_other = other.fst_impl.get();
-//                let fst_impl_other = unsafe { ptr_other.as_ref().unwrap() };
-//
-//                fst_impl.eq(fst_impl_other)
-//            }
-//        }
-
         impl<$($a: $b $( < $c >)? ),*> std::fmt::Debug for $dyn_fst
         where
             $($d: $e,)?
@@ -43,23 +31,6 @@ macro_rules! dynamic_fst {
                 write!(f, "{:?} {{ {:?} }}", $name, &fst_impl)
             }
         }
-
-//        impl<$($a: $b $( < $c >)? ),*> Clone for $dyn_fst
-//        where
-//            $($d: $e,)?
-//            F::W: 'static,
-//            $($a : 'static),*
-//        {
-//            fn clone(&self) -> Self {
-//                let ptr = self.fst_impl.get();
-//                let fst_impl = unsafe { ptr.as_ref().unwrap() };
-//                Self {
-//                    fst_impl: UnsafeCell::new(fst_impl.clone()),
-//                    isymt: self.input_symbols(),
-//                    osymt: self.output_symbols(),
-//                }
-//            }
-//        }
 
         impl<$($a: $b $( < $c >)? ),*> CoreFst for $dyn_fst
         where
