@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `union` -> `UnionFst`
     - `concat` -> `ConcatFst`
     - `closure` -> `ClosureFst`
+    - `rmepsilon` -> `RmEpsilonFst`
 - Added `delete_final_weight_unchecked` to the `Fst` trait and implement it for `VectorFst`.
 - Added `SerializableSemiring` trait and implement it for most `Semiring`s.
 - All `Fst` that implements `SerializableFst` with a `Semiring` implementing `SerializableSemiring` can now be serialized/deserialized consistently with OpenFst.
@@ -55,6 +56,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `MutableFst` now has a trait bound on `ExpandedFst`.
 - `DrawingConfig` parameters `size`, `ranksep` and `nodesep` are now optional.
 - Fix SymbolTable conservation for `Reverse` and `ShortestPath`.
+- `RmEpsilon` now mutates its input.
+- `dfs_visit` now accepts an `ArcFilter` to be able to skip some arcs.
+- `AutoQueue` and `TopOrderQueue` now take an `ArcFilter` in input.
+- Remove `Fst` trait bound on `Clone` and `PartialEq`. However this is mandatory to be an `ExpandedFst`.
+- `rmepsilon` no longer requires the `Semiring` to be a `StarSemiring`.
+- Revamped RmEpsilon and ShortestDistance implementations in order to be closer to OpenFst's one.
 
 ## [0.4.0] - 2019-11-12
 

@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use failure::Fallible;
 use unsafe_unwrap::UnsafeUnwrap;
 
+use crate::algorithms::arc_filters::AnyArcFilter;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::visitors::SccVisitor;
 use crate::fst_properties::FstProperties;
@@ -16,7 +17,7 @@ pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Fallible<FstProp
     let mut comp_props = FstProperties::empty();
 
     let mut visitor = SccVisitor::new(fst, true, true);
-    dfs_visit(fst, &mut visitor, false);
+    dfs_visit(fst, &mut visitor, &AnyArcFilter {}, false);
     let sccs = unsafe { &visitor.scc.unsafe_unwrap() };
 
     comp_props |= FstProperties::ACCESSIBLE;

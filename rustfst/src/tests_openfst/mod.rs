@@ -50,7 +50,7 @@ use self::algorithms::{
     push::{test_push, PushOperationResult, PushTestData},
     replace::{test_replace, test_replace_dynamic, ReplaceOperationResult, ReplaceTestData},
     reverse::test_reverse,
-    rm_epsilon::test_rmepsilon,
+    rm_epsilon::{test_rmepsilon, test_rmepsilon_dynamic},
     shortest_distance::{
         test_shortest_distance, ShorestDistanceOperationResult, ShortestDistanceTestData,
     },
@@ -68,7 +68,7 @@ use self::misc::test_del_all_states;
 use crate::fst_traits::SerializableFst;
 use crate::tests_openfst::algorithms::closure::{
     test_closure_plus, test_closure_plus_dynamic, test_closure_star, test_closure_star_dynamic,
-    ClosureOperationResult, ClosureTestData,
+    SimpleStaticDynamicOperationResult, SimpleStaticDynamicTestData,
 };
 use crate::tests_openfst::algorithms::concat::{
     test_concat, test_concat_dynamic, ConcatOperationResult, ConcatTestData,
@@ -102,7 +102,7 @@ impl FstOperationResult {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ParsedFstTestData {
-    rmepsilon: FstOperationResult,
+    rmepsilon: SimpleStaticDynamicOperationResult,
     name: String,
     invert: FstOperationResult,
     weight_type: String,
@@ -143,8 +143,8 @@ pub struct ParsedFstTestData {
     replace: Vec<ReplaceOperationResult>,
     union: Vec<UnionOperationResult>,
     concat: Vec<ConcatOperationResult>,
-    closure_plus: ClosureOperationResult,
-    closure_star: ClosureOperationResult,
+    closure_plus: SimpleStaticDynamicOperationResult,
+    closure_star: SimpleStaticDynamicOperationResult,
     raw_vector_with_symt_bin_path: String,
 }
 
@@ -152,7 +152,7 @@ pub struct FstTestData<F: SerializableFst>
 where
     F::W: SerializableSemiring,
 {
-    pub rmepsilon: F,
+    pub rmepsilon: SimpleStaticDynamicTestData<F>,
     #[allow(unused)]
     pub name: String,
     pub invert: F,
@@ -193,8 +193,8 @@ where
     pub replace: Vec<ReplaceTestData<F>>,
     pub union: Vec<UnionTestData<F>>,
     pub concat: Vec<ConcatTestData<F>>,
-    pub closure_plus: ClosureTestData<F>,
-    pub closure_star: ClosureTestData<F>,
+    pub closure_plus: SimpleStaticDynamicTestData<F>,
+    pub closure_star: SimpleStaticDynamicTestData<F>,
     pub raw_vector_with_symt_bin_path: PathBuf,
 }
 
@@ -330,33 +330,6 @@ macro_rules! do_run {
             }
             "tropical_X_log" => {
                 let test_data: FstTestData<VectorFst<ProductWeight<TropicalWeight, LogWeight>>> =
-                    FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
-                $f(&test_data)?;
-            }
-            _ => bail!("Weight type unknown : {:?}", parsed_test_data.weight_type),
-        };
-    };
-}
-
-// TODO: rmepsilon implementation requires the StarSemiring implementation which seems avoidable.
-macro_rules! do_run_rmepsilon {
-    ($f: ident, $fst_name: expr) => {
-        let absolute_path_folder = get_path_folder($fst_name)?;
-        let mut path_metadata = absolute_path_folder.clone();
-        path_metadata.push("metadata.json");
-
-        let string = read_to_string(&path_metadata)
-            .map_err(|_| format_err!("Can't open {:?}", &path_metadata))?;
-        let parsed_test_data: ParsedFstTestData = serde_json::from_str(&string).unwrap();
-
-        match parsed_test_data.weight_type.as_str() {
-            "tropical" | "standard" => {
-                let test_data: FstTestData<VectorFst<TropicalWeight>> =
-                    FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
-                $f(&test_data)?;
-            }
-            "log" => {
-                let test_data: FstTestData<VectorFst<LogWeight>> =
                     FstTestData::new(&parsed_test_data, absolute_path_folder.as_path());
                 $f(&test_data)?;
             }
@@ -684,10 +657,13 @@ macro_rules! test_fst {
 
             #[test]
             fn test_rmepsilon_openfst() -> Fallible<()> {
-                if $fst_name != "fst_011" {
-                    do_run_rmepsilon!(test_rmepsilon, $fst_name);
-                }
+                do_run!(test_rmepsilon, $fst_name);
+                Ok(())
+            }
 
+            #[test]
+            fn test_rmepsilon_dynamic_openfst() -> Fallible<()> {
+                do_run!(test_rmepsilon_dynamic, $fst_name);
                 Ok(())
             }
         }

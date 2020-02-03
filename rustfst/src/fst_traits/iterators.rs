@@ -6,7 +6,7 @@ use failure::Fallible;
 /// Trait to iterate over the states of a wFST.
 pub trait StateIterator<'a> {
     /// Iterator used to iterate over the `state_id` of the states of an FST.
-    type Iter: Iterator<Item = StateId> + Clone;
+    type Iter: Iterator<Item = StateId>;
 
     /// Creates an iterator over the `state_id` of the states of an FST.
     ///

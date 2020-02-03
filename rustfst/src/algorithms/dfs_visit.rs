@@ -3,6 +3,7 @@ use crate::fst_traits::{ArcIterator, ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::StateId;
 
+use crate::algorithms::arc_filters::ArcFilter;
 use unsafe_unwrap::UnsafeUnwrap;
 
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
@@ -90,9 +91,10 @@ impl<I: Iterator> OpenFstIterator<I> {
     }
 }
 
-pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>>(
+pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>, A: ArcFilter<F::W>>(
     fst: &'a F,
     visitor: &mut V,
+    arc_filter: &A,
     access_only: bool,
 ) {
     visitor.init_visit(fst);
@@ -137,6 +139,10 @@ pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>>(
             }
             let arc = aiter.value();
             let next_color = state_color[arc.nextstate];
+            if !(arc_filter.keep(arc)) {
+                aiter.next();
+                continue;
+            }
             match next_color {
                 DfsStateColor::White => {
                     dfs = visitor.tree_arc(s, arc);

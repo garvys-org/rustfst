@@ -7,6 +7,7 @@ use failure::Fallible;
 
 use unsafe_unwrap::UnsafeUnwrap;
 
+use crate::algorithms::arc_filters::AnyArcFilter;
 use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::{connect, determinize_with_distance, reverse, shortest_distance, Queue};
 use crate::fst_impls::VectorFst;
@@ -116,7 +117,7 @@ where
         return Ok(());
     }
     let mut enqueued = vec![];
-    let mut queue = AutoQueue::new(ifst, None)?;
+    let mut queue = AutoQueue::new(ifst, None, &AnyArcFilter {})?;
     let source = unsafe { start.unsafe_unwrap() };
     let mut f_distance = F::W::zero();
     distance.clear();

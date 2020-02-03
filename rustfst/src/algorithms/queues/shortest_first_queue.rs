@@ -30,6 +30,7 @@ pub fn natural_less<W: Semiring>(w1: &W, w2: &W) -> Fallible<bool> {
     Ok((&w1.plus(w2)? == w1) && (w1 != w2))
 }
 
+#[derive(Clone)]
 pub struct ShortestFirstQueue<C: Clone + FnMut(&StateId, &StateId) -> Ordering> {
     heap: BinaryHeap<StateId, FnComparator<C>>,
 }

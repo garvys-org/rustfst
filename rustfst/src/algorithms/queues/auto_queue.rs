@@ -11,6 +11,7 @@ use super::{
     natural_less, FifoQueue, LifoQueue, NaturalShortestFirstQueue, SccQueue, StateOrderQueue,
     TopOrderQueue, TrivialQueue,
 };
+use crate::algorithms::arc_filters::ArcFilter;
 
 #[derive(Debug)]
 pub struct AutoQueue {
@@ -18,7 +19,11 @@ pub struct AutoQueue {
 }
 
 impl AutoQueue {
-    pub fn new<F: MutableFst + ExpandedFst>(fst: &F, distance: Option<&Vec<F::W>>) -> Fallible<Self>
+    pub fn new<F: MutableFst + ExpandedFst, A: ArcFilter<F::W>>(
+        fst: &F,
+        distance: Option<&Vec<F::W>>,
+        arc_filter: &A,
+    ) -> Fallible<Self>
     where
         F::W: 'static,
     {
@@ -29,14 +34,14 @@ impl AutoQueue {
         if props.contains(FstProperties::TOP_SORTED) || fst.start().is_none() {
             queue = Box::new(StateOrderQueue::default());
         } else if props.contains(FstProperties::ACYCLIC) {
-            queue = Box::new(TopOrderQueue::new(fst));
+            queue = Box::new(TopOrderQueue::new(fst, arc_filter));
         } else if props.contains(FstProperties::UNWEIGHTED)
             && F::W::properties().contains(SemiringProperties::IDEMPOTENT)
         {
             queue = Box::new(LifoQueue::default());
         } else {
             let mut scc_visitor = SccVisitor::new(fst, true, false);
-            dfs_visit(fst, &mut scc_visitor, false);
+            dfs_visit(fst, &mut scc_visitor, arc_filter, false);
             let sccs: Vec<_> = scc_visitor
                 .scc
                 .unwrap()
@@ -65,6 +70,7 @@ impl AutoQueue {
                 &mut queue_types,
                 &mut all_trivial,
                 &mut unweighted,
+                arc_filter,
             )?;
 
             if unweighted {
@@ -94,13 +100,18 @@ impl AutoQueue {
         Ok(Self { queue })
     }
 
-    pub fn scc_queue_type<F: MutableFst + ExpandedFst, C: Fn(&F::W, &F::W) -> Fallible<bool>>(
+    pub fn scc_queue_type<
+        F: MutableFst + ExpandedFst,
+        C: Fn(&F::W, &F::W) -> Fallible<bool>,
+        A: ArcFilter<F::W>,
+    >(
         fst: &F,
         sccs: &[usize],
         compare: Option<C>,
         queue_types: &mut Vec<QueueType>,
         all_trivial: &mut bool,
         unweighted: &mut bool,
+        arc_filter: &A,
     ) -> Fallible<()> {
         *all_trivial = true;
         *unweighted = true;
@@ -111,6 +122,9 @@ impl AutoQueue {
 
         for state in 0..fst.num_states() {
             for arc in unsafe { fst.arcs_iter_unchecked(state) } {
+                if !arc_filter.keep(arc) {
+                    continue;
+                }
                 if sccs[state] == sccs[arc.nextstate] {
                     let queue_type = unsafe { queue_types.get_unchecked_mut(sccs[state]) };
                     if compare.is_none() || compare.as_ref().unwrap()(&arc.weight, &F::W::one())? {

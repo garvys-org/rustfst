@@ -85,7 +85,7 @@ fn main() -> Fallible<()> {
     project(&mut fst, ProjectType::ProjectInput);
 
     // - Remove epsilon transitions.
-    fst = rm_epsilon(&fst)?;
+    rm_epsilon(&mut fst)?;
 
     // - Compute an equivalent FST but deterministic.
     fst = determinize(&fst, DeterminizeType::DeterminizeFunctional)?;

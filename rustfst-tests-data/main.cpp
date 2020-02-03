@@ -79,10 +79,16 @@ void compute_fst_reverse(const F& raw_fst, json& j) {
 
 template<class F>
 void compute_fst_remove_epsilon(const F& raw_fst, json& j) {
+    using Arc = typename F::Arc;
     auto fst_out = *raw_fst.Copy();
-    // Connect = false
-    fst::RmEpsilon(&fst_out, false);
-    j["rmepsilon"]["result"] = fst_to_string(fst_out);
+
+    auto dyn_rmeps = fst::VectorFst<Arc>(fst::RmEpsilonFst<Arc>(raw_fst));
+
+    fst::RmEpsilon(&fst_out);
+    j["rmepsilon"]["result_static"] = fst_to_string(fst_out);
+    j["rmepsilon"]["result_dynamic"] = fst_to_string(dyn_rmeps);
+
+
 }
 
 template<class F>

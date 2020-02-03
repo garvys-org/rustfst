@@ -15,7 +15,7 @@ use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, MutableFst, Stat
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, SymbolTable, EPS_LABEL};
 
-pub trait BorrowFst<F>: Borrow<F> + std::fmt::Debug + PartialEq + Clone {}
+pub trait BorrowFst<F>: Borrow<F> + std::fmt::Debug {}
 
 /// This specifies what labels to output on the call or return arc.
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug, Eq)]
@@ -468,9 +468,42 @@ pub struct ReplaceFst<F: Fst, B: BorrowFst<F>> {
     pub(crate) osymt: Option<Rc<SymbolTable>>,
 }
 
+impl<F: Fst + Clone, B: BorrowFst<F> + Clone> Clone for ReplaceFst<F, B>
+where
+    F: 'static,
+    F::W: 'static,
+    B: 'static,
+{
+    fn clone(&self) -> Self {
+        let ptr = self.fst_impl.get();
+        let fst_impl = unsafe { ptr.as_ref().unwrap() };
+        Self {
+            fst_impl: UnsafeCell::new(fst_impl.clone()),
+            isymt: self.input_symbols(),
+            osymt: self.output_symbols(),
+        }
+    }
+}
+
+impl<F: Fst + PartialEq, B: BorrowFst<F> + PartialEq> PartialEq for ReplaceFst<F, B>
+where
+    F::W: 'static,
+{
+    fn eq(&self, other: &Self) -> bool {
+        let ptr = self.fst_impl.get();
+        let fst_impl = unsafe { ptr.as_ref().unwrap() };
+
+        let ptr_other = other.fst_impl.get();
+        let fst_impl_other = unsafe { ptr_other.as_ref().unwrap() };
+
+        fst_impl.eq(fst_impl_other)
+    }
+}
+
 impl<F: Fst, B: BorrowFst<F>> ReplaceFst<F, B>
 where
     F::W: 'static,
+    B: 'static,
 {
     pub fn new(fst_list: Vec<(Label, B)>, root: Label, epsilon_on_replace: bool) -> Fallible<Self> {
         let mut isymt = None;

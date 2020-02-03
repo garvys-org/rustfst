@@ -1,6 +1,7 @@
 use failure::Fallible;
 use unsafe_unwrap::UnsafeUnwrap;
 
+use crate::algorithms::arc_filters::AnyArcFilter;
 use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
 use crate::fst_traits::Fst;
 use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
@@ -46,7 +47,7 @@ use crate::NO_STATE_ID;
 ///
 pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Fallible<()> {
     let mut visitor = ConnectVisitor::new(fst);
-    dfs_visit(fst, &mut visitor, false);
+    dfs_visit(fst, &mut visitor, &AnyArcFilter {}, false);
     let mut dstates = Vec::with_capacity(visitor.access.len());
     for s in 0..visitor.access.len() {
         if !visitor.access[s] || !visitor.coaccess[s] {

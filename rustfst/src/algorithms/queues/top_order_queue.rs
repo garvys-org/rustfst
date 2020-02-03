@@ -1,3 +1,4 @@
+use crate::algorithms::arc_filters::ArcFilter;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::top_sort::TopOrderVisitor;
 use crate::algorithms::{Queue, QueueType};
@@ -6,7 +7,7 @@ use crate::StateId;
 
 /// Topological-order queue discipline, templated on the StateId. States are
 /// ordered in the queue topologically. The FST must be acyclic.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TopOrderQueue {
     order: Vec<StateId>,
     state: Vec<Option<StateId>>,
@@ -15,9 +16,9 @@ pub struct TopOrderQueue {
 }
 
 impl TopOrderQueue {
-    pub fn new<F: MutableFst + ExpandedFst>(fst: &F) -> Self {
+    pub fn new<F: MutableFst + ExpandedFst, A: ArcFilter<F::W>>(fst: &F, arc_filter: &A) -> Self {
         let mut visitor = TopOrderVisitor::new();
-        dfs_visit(fst, &mut visitor, false);
+        dfs_visit(fst, &mut visitor, arc_filter, false);
         if !visitor.acyclic {
             panic!("Unexpectted Acyclic FST for TopOprerQueue");
         }

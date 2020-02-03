@@ -6,7 +6,7 @@ use crate::fst_traits::Fst;
 
 /// Trait defining the necessary methods that should implement an ExpandedFST e.g
 /// a FST where all the states are already computed and not computed on the fly.
-pub trait ExpandedFst: Fst {
+pub trait ExpandedFst: Fst + Clone + PartialEq {
     /// Returns the number of states that contains the FST. They are all counted even if some states
     /// are not on a successful path (doesn't perform triming).
     ///

@@ -9,12 +9,12 @@ use crate::tests_openfst::algorithms::dynamic_fst::compare_fst_static_dynamic;
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct ClosureOperationResult {
+pub struct SimpleStaticDynamicOperationResult {
     result_static: String,
     result_dynamic: String,
 }
 
-pub struct ClosureTestData<F>
+pub struct SimpleStaticDynamicTestData<F>
 where
     F: SerializableFst,
     F::W: SerializableSemiring,
@@ -23,13 +23,13 @@ where
     pub result_dynamic: F,
 }
 
-impl ClosureOperationResult {
-    pub fn parse<F>(&self) -> ClosureTestData<F>
+impl SimpleStaticDynamicOperationResult {
+    pub fn parse<F>(&self) -> SimpleStaticDynamicTestData<F>
     where
         F: SerializableFst,
         F::W: SerializableSemiring,
     {
-        ClosureTestData {
+        SimpleStaticDynamicTestData {
             result_static: F::from_text_string(self.result_static.as_str()).unwrap(),
             result_dynamic: F::from_text_string(self.result_dynamic.as_str()).unwrap(),
         }
