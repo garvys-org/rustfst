@@ -4,20 +4,18 @@ use std::collections::HashMap;
 use failure::Fallible;
 use unsafe_unwrap::UnsafeUnwrap;
 
+use crate::{Arc, EPS_LABEL, Label, StateId};
+use crate::algorithms::Queue;
 use crate::algorithms::arc_filters::{ArcFilter, EpsilonArcFilter};
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::queues::AutoQueue;
-use crate::algorithms::shortest_distance::revamp::{
-    ShortestDistanceConfig, ShortestDistanceState,
-};
+use crate::algorithms::shortest_distance::{ShortestDistanceConfig, ShortestDistanceState};
 use crate::algorithms::top_sort::TopOrderVisitor;
 use crate::algorithms::visitors::SccVisitor;
-use crate::algorithms::{shortest_distance, Queue};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::CoreFst;
-use crate::fst_traits::{Fst, MutableFst};
+use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, EPS_LABEL};
 
 pub struct RmEpsilonConfig<W: Semiring, Q: Queue> {
     sd_opts: ShortestDistanceConfig<W, Q, EpsilonArcFilter>,
@@ -86,7 +84,7 @@ where
     let arc_filter = EpsilonArcFilter {};
     let queue = AutoQueue::new(fst, None, &arc_filter)?;
     let opts = RmEpsilonConfig::new_with_default(queue);
-    rm_epsilon_advanced(fst, opts)
+    rm_epsilon_with_config(fst, opts)
 }
 pub fn rm_epsilon_with_config<F: MutableFst, Q: Queue>(
     fst: &mut F,
@@ -96,6 +94,10 @@ where
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
     F::W: 'static,
 {
+    let connect = opts.connect;
+    let weight_threshold = opts.weight_threshold.clone();
+    let state_threshold = opts.state_threshold.clone();
+
     let start_state = fst.start();
     if start_state.is_none() {
         return Ok(());
@@ -158,7 +160,6 @@ where
     let mut rmeps_state = RmEpsilonState::new(fst, opts);
     let zero = F::W::zero();
 
-    use std::cell::RefCell;
     let mut v = Vec::with_capacity(states.len());
     for state in states.into_iter().rev() {
         if !noneps_in[state] {
@@ -181,6 +182,22 @@ where
                 fst.delete_final_weight_unchecked(state);
             }
         }
+    }
+
+    if connect || weight_threshold != F::W::zero() || state_threshold != None {
+        for s in 0..fst.num_states() {
+            if !noneps_in[s] {
+                fst.delete_arcs(s)?;
+            }
+        }
+    }
+
+    if weight_threshold != F::W::zero() || state_threshold != None {
+        todo!("Implement Prune!")
+    }
+
+    if connect && weight_threshold == F::W::zero() && state_threshold == None {
+        crate::algorithms::connect(fst)?;
     }
     Ok(())
 }
@@ -212,7 +229,7 @@ where
             visited_states: vec![],
             element_map: HashMap::new(),
             expand_id: 0,
-            sd_state: ShortestDistanceState::new(fst, opts.sd_opts, true),
+            sd_state: ShortestDistanceState::new_from_config(fst, opts.sd_opts, true),
         }
     }
 

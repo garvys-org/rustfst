@@ -84,7 +84,7 @@ pub use self::{
     reweight::{reweight, ReweightType},
     rm_epsilon::rm_epsilon,
     rm_final_epsilon::rm_final_epsilon,
-    shortest_distance::{shortest_distance, single_source_shortest_distance},
+    shortest_distance::shortest_distance,
     shortest_path::shortest_path,
     state_sort::state_sort,
     top_sort::top_sort,

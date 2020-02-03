@@ -39,7 +39,7 @@ pub fn push_weights<F>(
 ) -> Fallible<()>
 where
     F: MutableFst,
-    F::W: WeaklyDivisibleSemiring,
+    F::W: WeaklyDivisibleSemiring + 'static,
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
 {
     let dist = shortest_distance(fst, reweight_type == ReweightType::ReweightToInitial)?;
