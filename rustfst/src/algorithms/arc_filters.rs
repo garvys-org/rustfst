@@ -3,7 +3,7 @@ use crate::Arc;
 use crate::EPS_LABEL;
 
 /// Base trait to restrict which arcs are traversed in an FST.
-pub trait ArcFilter<S: Semiring> : Clone {
+pub trait ArcFilter<S: Semiring>: Clone {
     /// If true, Arc should be kept, else Arc should be ignored.
     fn keep(&self, arc: &Arc<S>) -> bool;
 }

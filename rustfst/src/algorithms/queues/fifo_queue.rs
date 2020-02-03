@@ -4,7 +4,7 @@ use crate::algorithms::{Queue, QueueType};
 use crate::StateId;
 
 /// First-in, first-out (queue) queue discipline.
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct FifoQueue(VecDeque<StateId>);
 
 impl Queue for FifoQueue {
