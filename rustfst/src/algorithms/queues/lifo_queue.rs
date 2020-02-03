@@ -2,7 +2,7 @@ use crate::algorithms::{Queue, QueueType};
 use crate::StateId;
 
 /// Last-in, first-out (stack) queue discipline.
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct LifoQueue(Vec<StateId>);
 
 impl Queue for LifoQueue {

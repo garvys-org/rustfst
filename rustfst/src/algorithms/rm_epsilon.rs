@@ -1,6 +1,7 @@
 use std::cell::UnsafeCell;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use std::fmt;
 use std::rc::Rc;
 use std::slice::Iter as IterSlice;
 
@@ -8,18 +9,17 @@ use failure::Fallible;
 use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::{Arc, EPS_LABEL, Label, StateId, SymbolTable};
+use crate::algorithms::{BorrowFst, Queue};
 use crate::algorithms::arc_filters::{ArcFilter, EpsilonArcFilter};
 use crate::algorithms::cache::{CacheImpl, FstImpl};
 use crate::algorithms::dfs_visit::dfs_visit;
-use crate::algorithms::dynamic_fst::StatesIteratorDynamicFst;
-use crate::algorithms::Queue;
 use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::shortest_distance::{ShortestDistanceConfig, ShortestDistanceState};
 use crate::algorithms::top_sort::TopOrderVisitor;
 use crate::algorithms::visitors::SccVisitor;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{MutableFst, StateIterator};
 use crate::fst_traits::{ArcIterator, CoreFst, Fst};
+use crate::fst_traits::{MutableFst, StateIterator};
 use crate::semirings::Semiring;
 
 pub struct RmEpsilonConfig<W: Semiring, Q: Queue> {
@@ -167,7 +167,7 @@ where
         }
     }
 
-    let mut rmeps_state = RmEpsilonState::new(fst, opts);
+    let mut rmeps_state = RmEpsilonState::new(&*fst, opts);
     let zero = F::W::zero();
 
     let mut v = Vec::with_capacity(states.len());
@@ -212,34 +212,33 @@ where
     Ok(())
 }
 
-#[derive(Hash, Debug, PartialOrd, PartialEq, Eq)]
+#[derive(Hash, Debug, PartialOrd, PartialEq, Eq, Clone)]
 struct Element {
     ilabel: Label,
     olabel: Label,
     nextstate: StateId,
 }
 
-struct RmEpsilonState<'a, F: MutableFst, Q: Queue> {
-    fst: &'a F,
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct RmEpsilonState<F: MutableFst, B: BorrowFst<F>, Q: Queue> {
     visited: Vec<bool>,
     visited_states: Vec<StateId>,
     element_map: HashMap<Element, (StateId, usize)>,
     expand_id: usize,
-    sd_state: ShortestDistanceState<'a, F::W, Q, EpsilonArcFilter, F>,
+    sd_state: ShortestDistanceState<Q, F, B, EpsilonArcFilter>,
 }
 
-impl<'a, F: MutableFst, Q: Queue> RmEpsilonState<'a, F, Q>
+impl<F: MutableFst, B: BorrowFst<F>, Q: Queue> RmEpsilonState<F, B, Q>
 where
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
 {
-    pub fn new(fst: &'a F, opts: RmEpsilonConfig<F::W, Q>) -> Self {
+    pub fn new(fst: B, opts: RmEpsilonConfig<F::W, Q>) -> Self {
         Self {
-            fst,
+            sd_state: ShortestDistanceState::new_from_config(fst, opts.sd_opts, true),
             visited: vec![],
             visited_states: vec![],
             element_map: HashMap::new(),
             expand_id: 0,
-            sd_state: ShortestDistanceState::new_from_config(fst, opts.sd_opts, true),
         }
     }
 
@@ -262,7 +261,7 @@ where
             }
             self.visited[state] = true;
             self.visited_states.push(state);
-            for arc in self.fst.arcs_iter(state)? {
+            for arc in self.sd_state.fst.borrow().arcs_iter(state)? {
                 // TODO: Remove this clone
                 let mut arc = arc.clone();
                 arc.weight = distance[state].times(&arc.weight)?;
@@ -303,7 +302,13 @@ where
                 }
             }
             final_weight.plus_assign(
-                distance[state].times(self.fst.final_weight(state)?.unwrap_or(&zero))?,
+                distance[state].times(
+                    self.sd_state
+                        .fst
+                        .borrow()
+                        .final_weight(state)?
+                        .unwrap_or(&zero),
+                )?,
             )?;
         }
 
@@ -317,12 +322,13 @@ where
     }
 }
 
-pub(crate) struct RmEpsilonImpl<'a, F: MutableFst, Q: Queue> {
-    rmeps_state: RmEpsilonState<'a, F, Q>,
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct RmEpsilonImpl<F: MutableFst, B: BorrowFst<F>, Q: Queue> {
+    rmeps_state: RmEpsilonState<F, B, Q>,
     cache_impl: CacheImpl<F::W>,
 }
 
-impl<'a, F: MutableFst, Q: Queue> FstImpl for RmEpsilonImpl<'a, F, Q>
+impl<F: MutableFst, B: BorrowFst<F>, Q: Queue> FstImpl for RmEpsilonImpl<F, B, Q>
 where
     F::W: 'static,
 {
@@ -354,7 +360,7 @@ where
     }
 
     fn compute_start(&mut self) -> Fallible<Option<usize>> {
-        Ok(self.rmeps_state.fst.start())
+        Ok(self.rmeps_state.sd_state.fst.borrow().start())
     }
 
     fn compute_final(&mut self, state: usize) -> Fallible<Option<Self::W>> {
@@ -366,153 +372,12 @@ where
     }
 }
 
-pub struct RmEpsilonFst<'a, F: MutableFst, Q: Queue> {
-    pub(crate) fst_impl: UnsafeCell<RmEpsilonImpl<'a, F, Q>>,
+pub struct RmEpsilonFst<F: MutableFst, B: BorrowFst<F>, Q: Queue> {
+    pub(crate) fst_impl: UnsafeCell<RmEpsilonImpl<F, B, Q>>,
     pub(crate) isymt: Option<Rc<SymbolTable>>,
     pub(crate) osymt: Option<Rc<SymbolTable>>,
 }
 
-impl<'a, F: MutableFst, Q: Queue> RmEpsilonFst<'a, F, Q>
-where
-    F::W: 'static,
-{
-    fn num_known_states(&self) -> usize {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_ref().unwrap() };
-        fst_impl.num_known_states()
-    }
-}
+dynamic_fst!("RmEpsilonFst", RmEpsilonFst<F, B, Q>, [F => MutableFst] [B => BorrowFst<F>] [Q => Queue]);
 
-impl<'a, F: MutableFst, Q: Queue> PartialEq for RmEpsilonFst<'a, F, Q> {
-    fn eq(&self, other: &Self) -> bool {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_ref().unwrap() };
 
-        let ptr_other = other.fst_impl.get();
-        let fst_impl_other = unsafe { ptr_other.as_ref().unwrap() };
-
-        fst_impl.eq(fst_impl_other)
-    }
-}
-
-impl<'a, F: MutableFst, Q: Queue> std::fmt::Debug for RmEpsilonFst<'a, F, Q>
-where
-    F::W: 'static,
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_ref().unwrap() };
-        write!(f, "RmEpsilonFst {{ {:?} }}", &fst_impl)
-    }
-}
-
-impl<'a, F: MutableFst, Q: Queue> Clone for RmEpsilonFst<'a, F, Q>
-where
-    F::W: 'static,
-{
-    fn clone(&self) -> Self {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_ref().unwrap() };
-        Self {
-            fst_impl: UnsafeCell::new(fst_impl.clone()),
-            isymt: self.input_symbols(),
-            osymt: self.output_symbols(),
-        }
-    }
-}
-
-impl<'a, F: MutableFst, Q: Queue> CoreFst for RmEpsilonFst<'a, F, Q>
-where
-    F::W: 'static,
-{
-    type W = F::W;
-
-    fn start(&self) -> Option<usize> {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_mut().unwrap() };
-        fst_impl.start().unwrap()
-    }
-
-    fn final_weight(&self, state_id: usize) -> Fallible<Option<&Self::W>> {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_mut().unwrap() };
-        fst_impl.final_weight(state_id)
-    }
-
-    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<&Self::W> {
-        self.final_weight(state_id).unwrap()
-    }
-
-    fn num_arcs(&self, s: usize) -> Fallible<usize> {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_mut().unwrap() };
-        fst_impl.num_arcs(s)
-    }
-
-    unsafe fn num_arcs_unchecked(&self, s: usize) -> usize {
-        self.num_arcs(s).unwrap()
-    }
-}
-
-impl<'a, 'b, F: MutableFst, Q: Queue> ArcIterator<'a> for RmEpsilonFst<'b, F, Q>
-where
-    F::W: 'static,
-{
-    type Iter = IterSlice<'a, Arc<F::W>>;
-
-    fn arcs_iter(&'a self, state_id: usize) -> Fallible<Self::Iter> {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_mut().unwrap() };
-        fst_impl.arcs_iter(state_id)
-    }
-
-    unsafe fn arcs_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
-        self.arcs_iter(state_id).unwrap()
-    }
-}
-
-impl<'a, 'b, F: MutableFst, Q: Queue> Iterator
-    for StatesIteratorDynamicFst<'a, RmEpsilonFst<'b, F, Q>>
-where
-    F::W: 'static,
-{
-    type Item = StateId;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.s < self.fst.num_known_states() {
-            let s_cur = self.s;
-            // Force expansion of the state
-            self.fst.arcs_iter(s_cur).unwrap();
-            self.s += 1;
-            Some(s_cur)
-        } else {
-            None
-        }
-    }
-}
-
-impl<'a, 'b, F: MutableFst, Q: Queue> StateIterator<'a> for RmEpsilonFst<'b, F, Q>
-where
-    F::W: 'static,
-    'a: 'b
-{
-    type Iter = StatesIteratorDynamicFst<'a, RmEpsilonFst<'b, F, Q>>;
-
-    fn states_iter(&'a self) -> Self::Iter {
-        self.start();
-        StatesIteratorDynamicFst { fst: &self, s: 0 }
-    }
-}
-
-impl<'a, F: MutableFst, Q: Queue> Fst for RmEpsilonFst<'a, F, Q>
-where
-    F::W: 'static,
-{
-    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
-        self.isymt.clone()
-    }
-
-    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
-        self.osymt.clone()
-    }
-}

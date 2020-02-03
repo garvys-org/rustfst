@@ -82,7 +82,7 @@ pub use self::{
     replace::{replace, BorrowFst, ReplaceFst},
     reverse::reverse,
     reweight::{reweight, ReweightType},
-    rm_epsilon::rm_epsilon,
+    rm_epsilon::{rm_epsilon, RmEpsilonFst},
     rm_final_epsilon::rm_final_epsilon,
     shortest_distance::shortest_distance,
     shortest_path::shortest_path,

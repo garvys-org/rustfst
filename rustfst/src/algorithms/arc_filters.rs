@@ -3,12 +3,13 @@ use crate::Arc;
 use crate::EPS_LABEL;
 
 /// Base trait to restrict which arcs are traversed in an FST.
-pub trait ArcFilter<S: Semiring> {
+pub trait ArcFilter<S: Semiring> : Clone {
     /// If true, Arc should be kept, else Arc should be ignored.
     fn keep(&self, arc: &Arc<S>) -> bool;
 }
 
 /// True for all arcs.
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AnyArcFilter {}
 
 impl<S: Semiring> ArcFilter<S> for AnyArcFilter {
@@ -18,6 +19,7 @@ impl<S: Semiring> ArcFilter<S> for AnyArcFilter {
 }
 
 /// True for (input/output) epsilon arcs.
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct EpsilonArcFilter {}
 
 impl<S: Semiring> ArcFilter<S> for EpsilonArcFilter {
@@ -27,6 +29,7 @@ impl<S: Semiring> ArcFilter<S> for EpsilonArcFilter {
 }
 
 /// True for input epsilon arcs.
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct InputEpsilonArcFilter {}
 
 impl<S: Semiring> ArcFilter<S> for InputEpsilonArcFilter {
@@ -36,6 +39,7 @@ impl<S: Semiring> ArcFilter<S> for InputEpsilonArcFilter {
 }
 
 /// True for output epsilon arcs.
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct OutputEpsilonArcFilter {}
 
 impl<S: Semiring> ArcFilter<S> for OutputEpsilonArcFilter {
