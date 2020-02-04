@@ -9,15 +9,20 @@ use crate::{DrawingConfig, StateId};
 use std::fs::File;
 use std::io::{BufWriter, LineWriter, Write};
 
+/// Trait definining the methods an Fst must implement to be serialized and deserialized.
 pub trait SerializableFst: ExpandedFst
 where
     Self::W: SerializableSemiring,
 {
+    /// String identifying the type of the FST. Will be used when serialiing and
+    /// deserializing an FST in binary format.
     fn fst_type() -> String;
 
     // BINARY
 
+    /// Loads an FST from a file in binary format.
     fn read<P: AsRef<Path>>(path_bin_fst: P) -> Fallible<Self>;
+    /// Writes the FST to a file in binary format.
     fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Fallible<()>;
 
     // TEXT

@@ -1,5 +1,6 @@
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 
+/// Generic method to convert an Fst into any other types implementing the MutableFst trait.
 pub fn fst_convert<F1, F2>(ifst: &F1) -> F2
 where
     F1: ExpandedFst,

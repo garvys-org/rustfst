@@ -34,6 +34,9 @@ use crate::EPS_LABEL;
 use crate::KDELTA;
 use crate::NO_STATE_ID;
 
+/// In place minimization of deterministic weighted automata and transducers,
+/// and also non-deterministic ones if they use an idempotent semiring.
+/// For transducers, the algorithm produces a compact factorization of the minimal transducer.
 pub fn minimize<F>(ifst: &mut F, allow_nondet: bool) -> Fallible<()>
 where
     F: MutableFst + ExpandedFst + AllocableFst,

@@ -2,6 +2,7 @@ use std::fmt::Debug;
 
 use crate::StateId;
 
+/// Defines the different types of Queues usable.
 #[derive(PartialOrd, PartialEq, Clone)]
 pub enum QueueType {
     /// Single state queue.
@@ -24,6 +25,7 @@ pub enum QueueType {
 }
 
 // TODO: Test the queues with openfst
+/// Unified interface to use different implementation of Queues.
 pub trait Queue: Debug {
     fn head(&mut self) -> Option<StateId>;
     fn enqueue(&mut self, state: StateId);

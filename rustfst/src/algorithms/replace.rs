@@ -462,6 +462,9 @@ impl ReplaceStateTable {
     }
 }
 
+/// ReplaceFst supports dynamic replacement of arcs in one FST with another FST.
+/// This replacement is recursive. ReplaceFst can be used to support a variety of
+/// delayed constructions such as recursive transition networks, union, or closure.
 pub struct ReplaceFst<F: Fst, B: BorrowFst<F>> {
     pub(crate) fst_impl: UnsafeCell<ReplaceFstImpl<F, B>>,
     pub(crate) isymt: Option<Rc<SymbolTable>>,

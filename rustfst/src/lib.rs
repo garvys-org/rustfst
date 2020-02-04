@@ -160,6 +160,7 @@ mod parsers;
 /// A representable float near .001. (Used in Quantize)
 pub const KDELTA: f32 = 1.0f32 / 1024.0f32;
 
+/// Module reexporting most of the objects from this crate.
 pub mod prelude {
     pub use crate::algorithms::arc_compares::*;
     pub use crate::algorithms::*;

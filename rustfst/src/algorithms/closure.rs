@@ -8,6 +8,7 @@ use crate::{SymbolTable, EPS_LABEL};
 use failure::Fallible;
 use std::rc::Rc;
 
+/// Defines the different types of closure : Star or Plus.
 #[derive(Clone, Debug, Copy, PartialEq)]
 pub enum ClosureType {
     ClosureStar,
@@ -74,6 +75,11 @@ where
     }
 }
 
+/// Computes the concatenative closure. This version is a delayed FST. If an FST
+/// transduces string x to y with weight a, then its closure transduces x to y
+/// with weight a, xx to yy with weight Times(a, a), xxx to yyy with weight
+/// Times(Times(a, a), a), etc. If closure_type == CLOSURE_STAR, then the empty
+/// string is transduced to itself with weight Weight::One() as well.
 #[derive(Debug, PartialEq)]
 pub struct ClosureFst<F: Fst + 'static>(ReplaceFst<F, F>)
 where

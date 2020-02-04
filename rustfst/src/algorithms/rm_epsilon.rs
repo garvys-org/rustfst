@@ -53,7 +53,7 @@ impl<W: Semiring, Q: Queue> RmEpsilonConfig<W, Q> {
 /// output labels are an epsilon) from a transducer. The result will be an
 /// equivalent FST that has no such epsilon transitions.
 ///
-/// # Example
+/// # Example 1
 /// ```
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
@@ -87,6 +87,17 @@ impl<W: Semiring, Q: Queue> RmEpsilonConfig<W, Q> {
 /// # Ok(())
 /// # }
 /// ```
+///
+/// # Example 2
+///
+/// ## Input
+///
+/// ![rmepsilon_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/rmepsilon_in.svg?sanitize=true)
+///
+/// ## RmEpsilon
+///
+/// ![rmepsilon_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/rmepsilon_out.svg?sanitize=true)
+///
 pub fn rm_epsilon<F: MutableFst>(fst: &mut F) -> Fallible<()>
 where
     F::W: 'static,
@@ -387,6 +398,9 @@ where
     }
 }
 
+/// Removes epsilon-transitions (when both the input and output label are an
+/// epsilon) from a transducer. The result will be an equivalent FST that has no
+/// such epsilon transitions. This version is a delayed FST.
 pub struct RmEpsilonFst<F: MutableFst, B: BorrowFst<F>> {
     pub(crate) fst_impl: UnsafeCell<RmEpsilonImpl<F, B>>,
     pub(crate) isymt: Option<Rc<SymbolTable>>,

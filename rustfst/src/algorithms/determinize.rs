@@ -439,13 +439,24 @@ where
 /// This operations creates an equivalent FST that has the property that no
 /// state has two transitions with the same input label. For this algorithm,
 /// epsilon transitions are treated as regular symbols.
+///
+/// # Example
+///
+/// ## Input
+///
+/// ![determinize_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/determinize_in.svg?sanitize=true)
+///
+/// ## Determinize
+///
+/// ![determinize_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/determinize_out.svg?sanitize=true)
+///
 pub fn determinize<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Fallible<F2>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
     F1: ExpandedFst<W = W>,
     F2: MutableFst<W = W> + ExpandedFst<W = W> + AllocableFst,
 {
-    let mut fst_res : F2 = if fst_in.is_acceptor() {
+    let mut fst_res: F2 = if fst_in.is_acceptor() {
         determinize_fsa::<_, _, _, DefaultCommonDivisor>(fst_in)?
     } else {
         determinize_fst(fst_in, det_type)?

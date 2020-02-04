@@ -20,8 +20,11 @@ use crate::{Label, StateId};
 use crate::{SymbolTable, KDELTA};
 
 bitflags! {
+    /// What kind of weight should be factored ? Arc weight ? Final weights ?
     pub struct FactorWeightType: u32 {
+        /// Factor weights located on the Arcs.
         const FACTOR_FINAL_WEIGHTS = 0b01;
+        /// Factor weights located in the final states.
         const FACTOR_ARC_WEIGHTS = 0b10;
     }
 }
@@ -40,6 +43,7 @@ impl FactorWeightType {
     }
 }
 
+/// Configuration to control the behaviour of the `factor_weight` algorithm.
 #[derive(Clone, Debug, PartialEq)]
 pub struct FactorWeightOptions {
     /// Quantization delta
@@ -70,6 +74,9 @@ impl FactorWeightOptions {
     }
 }
 
+/// A factor iterator takes as argument a weight w and returns a sequence of
+/// pairs of weights (xi, yi) such that the sum of the products xi times yi is
+/// equal to w. If w is fully factored, the iterator should return nothing.
 pub trait FactorIterator<W: Semiring>:
     fmt::Debug + PartialEq + Clone + Iterator<Item = (W, W)>
 {
@@ -243,6 +250,11 @@ where
     }
 }
 
+/// The result of weight factoring is a transducer equivalent to the
+/// input whose path weights have been factored according to the FactorIterator.
+/// States and transitions will be added as necessary. The algorithm is a
+/// generalization to arbitrary weights of the second step of the input
+/// epsilon-normalization algorithm.
 pub fn factor_weight<F1, B, F2, FI>(fst_in: B, opts: FactorWeightOptions) -> Fallible<F2>
 where
     F1: Fst,
@@ -255,6 +267,11 @@ where
     factor_weight_impl.compute()
 }
 
+/// The result of weight factoring is a transducer equivalent to the
+/// input whose path weights have been factored according to the FactorIterator.
+/// States and transitions will be added as necessary. The algorithm is a
+/// generalization to arbitrary weights of the second step of the input
+/// epsilon-normalization algorithm. This version is a Delayed FST.
 pub struct FactorWeightFst<F: Fst, B: BorrowFst<F>, FI: FactorIterator<F::W>> {
     fst_impl: UnsafeCell<FactorWeightImpl<F, B, FI>>,
     isymt: Option<Rc<SymbolTable>>,
