@@ -445,11 +445,14 @@ where
     F1: ExpandedFst<W = W>,
     F2: MutableFst<W = W> + ExpandedFst<W = W> + AllocableFst,
 {
-    if fst_in.is_acceptor() {
-        determinize_fsa::<_, _, _, DefaultCommonDivisor>(fst_in)
+    let mut fst_res : F2 = if fst_in.is_acceptor() {
+        determinize_fsa::<_, _, _, DefaultCommonDivisor>(fst_in)?
     } else {
-        determinize_fst(fst_in, det_type)
-    }
+        determinize_fst(fst_in, det_type)?
+    };
+
+    fst_res.set_symts_from_fst(fst_in);
+    Ok(fst_res)
 }
 
 #[cfg(test)]
