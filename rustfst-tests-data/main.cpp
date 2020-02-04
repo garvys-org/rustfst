@@ -24,6 +24,7 @@
 #include "fst_009/fst_009.h"
 #include "fst_010/fst_010.h"
 #include "fst_011/fst_011.h"
+#include "fst_012/fst_012.h"
 
 #include "symt_000/symt_000.h"
 #include "symt_001/symt_001.h"
@@ -912,6 +913,7 @@ int main() {
     compute_fst_data(FstTestData009(), "fst_009");
     compute_fst_data(FstTestData010(), "fst_010");
     compute_fst_data(FstTestData011(), "fst_011");
+    compute_fst_data(FstTestData012(), "fst_012");
 
     compute_symt_data(compute_symt_000(), "symt_000");
     compute_symt_data(compute_symt_001(), "symt_001");
