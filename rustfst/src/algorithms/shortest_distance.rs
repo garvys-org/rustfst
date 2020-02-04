@@ -5,11 +5,12 @@ use failure::Fallible;
 use crate::algorithms::arc_filters::{AnyArcFilter, ArcFilter};
 use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::shortest_path::hack_convert_reverse_reverse;
-use crate::algorithms::{BorrowFst, Queue};
+use crate::algorithms::Queue;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::{Semiring, SemiringProperties};
 use crate::StateId;
+use std::borrow::Borrow;
 
 pub struct ShortestDistanceConfig<W: Semiring, Q: Queue, A: ArcFilter<W>> {
     pub arc_filter: A,
@@ -36,8 +37,8 @@ impl<W: Semiring, Q: Queue, A: ArcFilter<W>> ShortestDistanceConfig<W, Q, A> {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct ShortestDistanceState<Q: Queue, F: ExpandedFst, B: BorrowFst<F>, A: ArcFilter<F::W>> {
+#[derive(Clone, PartialEq, Eq)]
+pub struct ShortestDistanceState<Q: Queue, F: ExpandedFst, B: Borrow<F>, A: ArcFilter<F::W>> {
     pub fst: B,
     state_queue: Q,
     arc_filter: A,
@@ -49,6 +50,27 @@ pub struct ShortestDistanceState<Q: Queue, F: ExpandedFst, B: BorrowFst<F>, A: A
     sources: Vec<Option<StateId>>,
     retain: bool,
     source_id: usize,
+}
+
+impl<Q: Queue, F: ExpandedFst, B: Borrow<F>, A: ArcFilter<F::W>> std::fmt::Debug
+    for ShortestDistanceState<Q, F, B, A>
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ShortestDistanceState {{ ")?;
+        write!(f, "fst : {:?}, ", self.fst.borrow())?;
+        write!(f, "state_queue : {:?}, ", self.state_queue)?;
+        write!(f, "arc_filter : {:?}, ", self.arc_filter)?;
+        write!(f, "first_path : {:?}, ", self.first_path)?;
+        write!(f, "enqueued : {:?}, ", self.enqueued)?;
+        write!(f, "distance : {:?}, ", self.distance)?;
+        write!(f, "adder : {:?}, ", self.adder)?;
+        write!(f, "radder : {:?}, ", self.radder)?;
+        write!(f, "sources : {:?}, ", self.sources)?;
+        write!(f, "retain : {:?}, ", self.retain)?;
+        write!(f, "source_id : {:?} ", self.source_id)?;
+        write!(f, "}}")?;
+        Ok(())
+    }
 }
 
 macro_rules! ensure_distance_index_is_valid {
@@ -70,9 +92,7 @@ macro_rules! ensure_source_index_is_valid {
     };
 }
 
-impl<Q: Queue, F: ExpandedFst, B: BorrowFst<F>, A: ArcFilter<F::W>>
-    ShortestDistanceState<Q, F, B, A>
-{
+impl<Q: Queue, F: ExpandedFst, B: Borrow<F>, A: ArcFilter<F::W>> ShortestDistanceState<Q, F, B, A> {
     pub fn new(fst: B, state_queue: Q, arc_filter: A, first_path: bool, retain: bool) -> Self {
         Self {
             state_queue,
@@ -206,7 +226,7 @@ pub fn shortest_distance_with_config<
     opts: ShortestDistanceConfig<W, Q, A>,
 ) -> Fallible<Vec<W>> {
     let source = opts.source;
-    let mut sd_state = ShortestDistanceState::new_from_config(fst, opts, false);
+    let mut sd_state = ShortestDistanceState::<_, F, _, _>::new_from_config(fst, opts, false);
     sd_state.shortest_distance(source)
 }
 

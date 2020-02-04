@@ -14,8 +14,7 @@ use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, SymbolTable, EPS_LABEL};
-
-pub trait BorrowFst<F>: Borrow<F> + std::fmt::Debug {}
+use itertools::Itertools;
 
 /// This specifies what labels to output on the call or return arc.
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug, Eq)]
@@ -106,7 +105,7 @@ where
     F1: Fst,
     F1::W: Semiring + 'static,
     F2: MutableFst<W = F1::W> + ExpandedFst<W = F1::W>,
-    B: BorrowFst<F1>,
+    B: Borrow<F1>,
 {
     let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
     let mut fst = ReplaceFstImpl::new(fst_list, opts)?;
@@ -137,8 +136,8 @@ fn replace_transducer(
         || return_label_type == ReplaceLabelType::Output
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct ReplaceFstImpl<F: Fst, B: BorrowFst<F>> {
+#[derive(Clone, PartialEq, Eq)]
+pub(crate) struct ReplaceFstImpl<F: Fst, B: Borrow<F>> {
     cache_impl: CacheImpl<F::W>,
     call_label_type_: ReplaceLabelType,
     return_label_type_: ReplaceLabelType,
@@ -152,7 +151,31 @@ pub(crate) struct ReplaceFstImpl<F: Fst, B: BorrowFst<F>> {
     fst_type: PhantomData<F>,
 }
 
-impl<'a, F: Fst, B: BorrowFst<F>> FstImpl for ReplaceFstImpl<F, B>
+impl<F: Fst, B: Borrow<F>> std::fmt::Debug for ReplaceFstImpl<F, B> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // TODO: Allocating in debug should be avoided.
+        let slice_fst = self.fst_array.iter().map(|fst| fst.borrow()).collect_vec();
+        write!(
+            f,
+            "ReplaceFstImpl {{ cache_impl : {:?}, call_label_type_ : {:?}, \
+        return_label_type_ : {:?}, call_output_label_ : {:?}, return_label_ : {:?}, \
+        fst_array : {:?}, nonterminal_set : {:?}, nonterminal_hash : {:?}, root : {:?}, \
+        state_table : {:?} }}",
+            self.cache_impl,
+            self.call_label_type_,
+            self.return_label_type_,
+            self.call_output_label_,
+            self.return_label_,
+            slice_fst,
+            self.nonterminal_set,
+            self.nonterminal_hash,
+            self.root,
+            self.state_table
+        )
+    }
+}
+
+impl<'a, F: Fst, B: Borrow<F>> FstImpl for ReplaceFstImpl<F, B>
 where
     F::W: 'static,
 {
@@ -218,7 +241,7 @@ where
     }
 }
 
-impl<F: Fst, B: BorrowFst<F>> ReplaceFstImpl<F, B> {
+impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
     fn new(fst_list: Vec<(Label, B)>, opts: ReplaceFstOptions) -> Fallible<Self> {
         let mut replace_fst_impl = Self {
             cache_impl: CacheImpl::new(),
@@ -465,13 +488,13 @@ impl ReplaceStateTable {
 /// ReplaceFst supports dynamic replacement of arcs in one FST with another FST.
 /// This replacement is recursive. ReplaceFst can be used to support a variety of
 /// delayed constructions such as recursive transition networks, union, or closure.
-pub struct ReplaceFst<F: Fst, B: BorrowFst<F>> {
+pub struct ReplaceFst<F: Fst, B: Borrow<F>> {
     pub(crate) fst_impl: UnsafeCell<ReplaceFstImpl<F, B>>,
     pub(crate) isymt: Option<Rc<SymbolTable>>,
     pub(crate) osymt: Option<Rc<SymbolTable>>,
 }
 
-impl<F: Fst + Clone, B: BorrowFst<F> + Clone> Clone for ReplaceFst<F, B>
+impl<F: Fst + Clone, B: Borrow<F> + Clone> Clone for ReplaceFst<F, B>
 where
     F: 'static,
     F::W: 'static,
@@ -488,7 +511,7 @@ where
     }
 }
 
-impl<F: Fst + PartialEq, B: BorrowFst<F> + PartialEq> PartialEq for ReplaceFst<F, B>
+impl<F: Fst + PartialEq, B: Borrow<F> + PartialEq> PartialEq for ReplaceFst<F, B>
 where
     F::W: 'static,
 {
@@ -503,7 +526,7 @@ where
     }
 }
 
-impl<F: Fst, B: BorrowFst<F>> ReplaceFst<F, B>
+impl<F: Fst, B: Borrow<F>> ReplaceFst<F, B>
 where
     F::W: 'static,
     B: 'static,
@@ -525,10 +548,4 @@ where
     }
 }
 
-dynamic_fst!("ReplaceFst", ReplaceFst<F, B>, [F => Fst] [B => BorrowFst<F>]);
-
-impl<F: Fst> BorrowFst<F> for F {}
-impl<F: Fst> BorrowFst<F> for &F {}
-impl<F: Fst> BorrowFst<F> for Rc<F> {}
-impl<F: Fst> BorrowFst<F> for Box<F> {}
-impl<F: Fst> BorrowFst<F> for std::sync::Arc<F> {}
+dynamic_fst!("ReplaceFst", ReplaceFst<F, B>, [F => Fst] [B => Borrow<F>]);

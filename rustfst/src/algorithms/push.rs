@@ -145,12 +145,13 @@ macro_rules! m_labels_pushing {
         } else {
             reweight(&mut gfst, gdistance.as_slice(), $reweight_type)?;
         }
-        let fwfst: VectorFst<_> = factor_weight::<_, _, _, $gallic_factor>(
-            &gfst,
-            FactorWeightOptions::new(
-                FactorWeightType::FACTOR_FINAL_WEIGHTS | FactorWeightType::FACTOR_ARC_WEIGHTS,
-            ),
-        )?;
+        let fwfst: VectorFst<$gallic_weight> =
+            factor_weight::<VectorFst<$gallic_weight>, _, _, $gallic_factor>(
+                &gfst,
+                FactorWeightOptions::new(
+                    FactorWeightType::FACTOR_FINAL_WEIGHTS | FactorWeightType::FACTOR_ARC_WEIGHTS,
+                ),
+            )?;
         let mut mapper_from_gallic = FromGallicConverter {
             superfinal_label: 0,
         };

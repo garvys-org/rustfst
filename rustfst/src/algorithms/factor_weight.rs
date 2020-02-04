@@ -11,13 +11,13 @@ use failure::Fallible;
 use bitflags::bitflags;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
-use crate::algorithms::replace::BorrowFst;
 use crate::arc::Arc;
 use crate::fst_traits::{ArcIterator, StateIterator};
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::{Label, StateId};
 use crate::{SymbolTable, KDELTA};
+use std::borrow::Borrow;
 
 bitflags! {
     /// What kind of weight should be factored ? Arc weight ? Final weights ?
@@ -96,8 +96,8 @@ impl<W: Semiring> Element<W> {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
-struct FactorWeightImpl<F: Fst, B: BorrowFst<F>, FI: FactorIterator<F::W>> {
+#[derive(Clone, PartialEq)]
+struct FactorWeightImpl<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> {
     opts: FactorWeightOptions,
     cache_impl: CacheImpl<F::W>,
     state_table: StateTable<Element<F::W>>,
@@ -106,7 +106,24 @@ struct FactorWeightImpl<F: Fst, B: BorrowFst<F>, FI: FactorIterator<F::W>> {
     ghost: PhantomData<FI>,
 }
 
-impl<'a, F: Fst, B: BorrowFst<F>, FI: FactorIterator<F::W>> FstImpl for FactorWeightImpl<F, B, FI>
+impl<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> std::fmt::Debug
+    for FactorWeightImpl<F, B, FI>
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "FactorWeightImpl {{ opts : {:?}, cache_impl: {:?}, \
+            state_table: {:?}, fst: {:?}, unfactored : {:?} }}",
+            self.opts,
+            self.cache_impl,
+            self.state_table,
+            self.fst.borrow(),
+            self.unfactored.borrow()
+        )
+    }
+}
+
+impl<'a, F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> FstImpl for FactorWeightImpl<F, B, FI>
 where
     F::W: WeightQuantize + 'static,
 {
@@ -201,7 +218,7 @@ where
     }
 }
 
-impl<F: Fst, B: BorrowFst<F>, FI: FactorIterator<F::W>> FactorWeightImpl<F, B, FI>
+impl<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> FactorWeightImpl<F, B, FI>
 where
     F::W: WeightQuantize + 'static,
 {
@@ -258,7 +275,7 @@ where
 pub fn factor_weight<F1, B, F2, FI>(fst_in: B, opts: FactorWeightOptions) -> Fallible<F2>
 where
     F1: Fst,
-    B: BorrowFst<F1>,
+    B: Borrow<F1>,
     F2: MutableFst<W = F1::W> + ExpandedFst<W = F1::W>,
     FI: FactorIterator<F1::W>,
     F1::W: WeightQuantize + 'static,
@@ -272,13 +289,13 @@ where
 /// States and transitions will be added as necessary. The algorithm is a
 /// generalization to arbitrary weights of the second step of the input
 /// epsilon-normalization algorithm. This version is a Delayed FST.
-pub struct FactorWeightFst<F: Fst, B: BorrowFst<F>, FI: FactorIterator<F::W>> {
+pub struct FactorWeightFst<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> {
     fst_impl: UnsafeCell<FactorWeightImpl<F, B, FI>>,
     isymt: Option<Rc<SymbolTable>>,
     osymt: Option<Rc<SymbolTable>>,
 }
 
-impl<'a, F: Fst, B: BorrowFst<F>, FI: FactorIterator<F::W>> FactorWeightFst<F, B, FI>
+impl<'a, F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> FactorWeightFst<F, B, FI>
 where
     F::W: WeightQuantize + 'static,
 {
@@ -293,4 +310,4 @@ where
     }
 }
 
-dynamic_fst!("FactorWeightFst", FactorWeightFst<F, B, FI>, [F => Fst] [B => BorrowFst<F>] [FI => FactorIterator<F::W>] where F::W => WeightQuantize);
+dynamic_fst!("FactorWeightFst", FactorWeightFst<F, B, FI>, [F => Fst] [B => Borrow<F>] [FI => FactorIterator<F::W>] where F::W => WeightQuantize);
