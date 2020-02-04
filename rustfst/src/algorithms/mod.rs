@@ -98,3 +98,5 @@ pub use self::{
 pub use self::factor_weight::{
     factor_weight, FactorIterator, FactorWeightFst, FactorWeightOptions, FactorWeightType,
 };
+
+pub mod filter_states;
