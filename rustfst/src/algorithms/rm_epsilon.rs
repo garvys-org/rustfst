@@ -266,7 +266,7 @@ where
                 let mut arc = arc.clone();
                 arc.weight = distance[state].times(&arc.weight)?;
                 if arc_filter.keep(&arc) {
-                    while self.visited.len() <= state {
+                    while self.visited.len() <= arc.nextstate {
                         self.visited.push(false);
                     }
                     if !self.visited[arc.nextstate] {
