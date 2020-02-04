@@ -116,6 +116,10 @@ where
     Ok(())
 }
 
+/// Computes the union (sum) of two FSTs. This version is a delayed FST. If A
+/// transduces string x to y with weight a and B transduces string w to v with
+/// weight b, then their union transduces x to y with weight a and w to v with
+/// weight b.
 #[derive(Debug, Clone, PartialEq)]
 pub struct UnionFst<F: Fst + 'static>(ReplaceFst<F, F>)
 where

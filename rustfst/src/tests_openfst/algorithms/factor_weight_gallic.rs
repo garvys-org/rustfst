@@ -75,35 +75,37 @@ where
                 let fst_temp: VectorFst<GallicWeightLeft<W>> =
                     weight_convert(&test_data.raw, &mut to_gallic)?;
                 let fst_temp: VectorFst<_> =
-                    factor_weight::<_, _, _, GallicFactorLeft<_>>(&fst_temp, opts)?;
+                    factor_weight::<VectorFst<_>, _, _, GallicFactorLeft<_>>(&fst_temp, opts)?;
                 weight_convert(&fst_temp, &mut from_gallic)?
             }
             "gallic_right" => {
                 let fst_temp: VectorFst<GallicWeightRight<W>> =
                     weight_convert(&test_data.raw, &mut to_gallic)?;
                 let fst_temp: VectorFst<_> =
-                    factor_weight::<_, _, _, GallicFactorRight<_>>(&fst_temp, opts)?;
+                    factor_weight::<VectorFst<_>, _, _, GallicFactorRight<_>>(&fst_temp, opts)?;
                 weight_convert(&fst_temp, &mut from_gallic)?
             }
             "gallic_restrict" => {
                 let fst_temp: VectorFst<GallicWeightRestrict<W>> =
                     weight_convert(&test_data.raw, &mut to_gallic)?;
                 let fst_temp: VectorFst<_> =
-                    factor_weight::<_, _, _, GallicFactorRestrict<_>>(&fst_temp, opts)?;
+                    factor_weight::<VectorFst<_>, _, _, GallicFactorRestrict<_>>(&fst_temp, opts)?;
                 weight_convert(&fst_temp, &mut from_gallic)?
             }
             "gallic_min" => {
                 let fst_temp: VectorFst<GallicWeightMin<W>> =
                     weight_convert(&test_data.raw, &mut to_gallic)?;
-                let fst_temp: VectorFst<_> =
-                    factor_weight::<_, _, _, GallicFactorMin<_>>(&fst_temp, opts)?;
+                let fst_temp: VectorFst<GallicWeightMin<W>> =
+                    factor_weight::<VectorFst<GallicWeightMin<W>>, _, _, GallicFactorMin<_>>(
+                        &fst_temp, opts,
+                    )?;
                 weight_convert(&fst_temp, &mut from_gallic)?
             }
             "gallic" => {
                 let fst_temp: VectorFst<GallicWeight<W>> =
                     weight_convert(&test_data.raw, &mut to_gallic)?;
                 let fst_temp: VectorFst<_> =
-                    factor_weight::<_, _, _, GallicFactor<_>>(&fst_temp, opts)?;
+                    factor_weight::<VectorFst<_>, _, _, GallicFactor<_>>(&fst_temp, opts)?;
                 weight_convert(&fst_temp, &mut from_gallic)?
             }
             _ => bail!("Unexpected gallic_type={:?}", data.gallic_type),

@@ -52,7 +52,7 @@ where
         let opts = FactorWeightOptions::new(mode);
 
         let fst_res: VectorFst<_> =
-            factor_weight::<_, _, _, IdentityFactor<_>>(&test_data.raw, opts)?;
+            factor_weight::<VectorFst<_>, _, _, IdentityFactor<_>>(&test_data.raw, opts)?;
 
         assert_eq_fst!(
         data.result,
@@ -76,7 +76,7 @@ where
         let opts = FactorWeightOptions::new(mode);
 
         let fst_res_static: VectorFst<_> =
-            factor_weight::<_, _, _, IdentityFactor<_>>(&test_data.raw, opts.clone())?;
+            factor_weight::<VectorFst<_>, _, _, IdentityFactor<_>>(&test_data.raw, opts.clone())?;
 
         let fst_res_dynamic =
             FactorWeightFst::<_, _, IdentityFactor<_>>::new(test_data.raw.clone(), opts)?;

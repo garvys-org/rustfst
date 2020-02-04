@@ -27,6 +27,8 @@ pub(crate) fn arc_compare<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> Orderi
     Ordering::Equal
 }
 
+/// Keep a single instance of arcs leaving the same state, going to the same state and
+/// with the same input labels, output labels and weight.
 pub fn arc_unique<F: MutableFst + ExpandedFst>(ifst: &mut F) {
     unsafe {
         for s in 0..ifst.num_states() {

@@ -65,7 +65,7 @@ where
         // Try givinf borrowed fst as parameters.
         let fst_list_2: Vec<(usize, &VectorFst<W>)> =
             fst_list.iter().map(|v| (v.0, &v.1)).collect();
-        let _replaced_fst_2: VectorFst<W> = replace(
+        let _replaced_fst_2: VectorFst<W> = replace::<VectorFst<_>, _, _>(
             fst_list_2,
             replace_test_data.root,
             replace_test_data.epsilon_on_replace,
@@ -100,7 +100,7 @@ where
 
         let fst_list_2: Vec<(usize, &VectorFst<W>)> =
             fst_list.iter().map(|v| (v.0, &v.1)).collect();
-        let replaced_static_fst: VectorFst<_> = replace(
+        let replaced_static_fst: VectorFst<_> = replace::<VectorFst<_>, _, _>(
             fst_list_2,
             replace_test_data.root,
             replace_test_data.epsilon_on_replace,

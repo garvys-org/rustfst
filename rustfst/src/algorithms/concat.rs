@@ -98,6 +98,10 @@ where
     Ok(())
 }
 
+/// Computes the concatenation (product) of two FSTs; this version is a delayed
+/// FST. If FST1 transduces string x to y with weight a and FST2 transduces
+/// string w to v with weight b, then their concatenation transduces string xw
+/// to yv with Times(a, b).
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConcatFst<F: Fst + 'static>(ReplaceFst<F, F>)
 where

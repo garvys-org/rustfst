@@ -15,12 +15,13 @@ use crate::algorithms::queues::{AutoQueue, FifoQueue};
 use crate::algorithms::shortest_distance::{ShortestDistanceConfig, ShortestDistanceState};
 use crate::algorithms::top_sort::TopOrderVisitor;
 use crate::algorithms::visitors::SccVisitor;
-use crate::algorithms::{BorrowFst, Queue};
+use crate::algorithms::Queue;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ArcIterator, CoreFst, Fst};
 use crate::fst_traits::{MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, SymbolTable, EPS_LABEL};
+use std::borrow::Borrow;
 
 pub struct RmEpsilonConfig<W: Semiring, Q: Queue> {
     sd_opts: ShortestDistanceConfig<W, Q, EpsilonArcFilter>,
@@ -53,7 +54,7 @@ impl<W: Semiring, Q: Queue> RmEpsilonConfig<W, Q> {
 /// output labels are an epsilon) from a transducer. The result will be an
 /// equivalent FST that has no such epsilon transitions.
 ///
-/// # Example
+/// # Example 1
 /// ```
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
@@ -87,6 +88,17 @@ impl<W: Semiring, Q: Queue> RmEpsilonConfig<W, Q> {
 /// # Ok(())
 /// # }
 /// ```
+///
+/// # Example 2
+///
+/// ## Input
+///
+/// ![rmepsilon_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/rmepsilon_in.svg?sanitize=true)
+///
+/// ## RmEpsilon
+///
+/// ![rmepsilon_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/rmepsilon_out.svg?sanitize=true)
+///
 pub fn rm_epsilon<F: MutableFst>(fst: &mut F) -> Fallible<()>
 where
     F::W: 'static,
@@ -167,10 +179,10 @@ where
         }
     }
 
-    let mut rmeps_state = RmEpsilonState::new(&*fst, opts);
+    let mut rmeps_state = RmEpsilonState::<F, _, _>::new(&*fst, opts);
     let zero = F::W::zero();
 
-    let mut v = Vec::with_capacity(states.len());
+    let mut v: Vec<(_, (_, F::W))> = Vec::with_capacity(states.len());
     for state in states.into_iter().rev() {
         if !noneps_in[state] {
             continue;
@@ -219,8 +231,8 @@ struct Element {
     nextstate: StateId,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-struct RmEpsilonState<F: MutableFst, B: BorrowFst<F>, Q: Queue> {
+#[derive(Clone, PartialEq, Eq)]
+struct RmEpsilonState<F: MutableFst, B: Borrow<F>, Q: Queue> {
     visited: Vec<bool>,
     visited_states: Vec<StateId>,
     element_map: HashMap<Element, (StateId, usize)>,
@@ -228,7 +240,14 @@ struct RmEpsilonState<F: MutableFst, B: BorrowFst<F>, Q: Queue> {
     sd_state: ShortestDistanceState<Q, F, B, EpsilonArcFilter>,
 }
 
-impl<F: MutableFst, B: BorrowFst<F>, Q: Queue> RmEpsilonState<F, B, Q>
+impl<F: MutableFst, B: Borrow<F>, Q: Queue> std::fmt::Debug for RmEpsilonState<F, B, Q> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "RmEpsilonState {{ visited : {:?}, visited_states : {:?}, element_map : {:?}, expand_id : {:?}, sd_state : {:?} }}",
+        self.visited, self.visited_states, self.element_map, self.expand_id, self.sd_state)
+    }
+}
+
+impl<F: MutableFst, B: Borrow<F>, Q: Queue> RmEpsilonState<F, B, Q>
 where
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
 {
@@ -322,13 +341,23 @@ where
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct RmEpsilonImpl<F: MutableFst, B: BorrowFst<F>> {
+#[derive(Clone, PartialEq, Eq)]
+pub(crate) struct RmEpsilonImpl<F: MutableFst, B: Borrow<F>> {
     rmeps_state: RmEpsilonState<F, B, FifoQueue>,
     cache_impl: CacheImpl<F::W>,
 }
 
-impl<F: MutableFst, B: BorrowFst<F>> RmEpsilonImpl<F, B>
+impl<F: MutableFst, B: Borrow<F>> std::fmt::Debug for RmEpsilonImpl<F, B> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "RmEpsilonImpl {{ rmeps_state : {:?}, cache_impl : {:?} }}",
+            self.rmeps_state, self.cache_impl
+        )
+    }
+}
+
+impl<F: MutableFst, B: Borrow<F>> RmEpsilonImpl<F, B>
 where
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
 {
@@ -343,7 +372,7 @@ where
     }
 }
 
-impl<F: MutableFst, B: BorrowFst<F>> FstImpl for RmEpsilonImpl<F, B>
+impl<F: MutableFst, B: Borrow<F>> FstImpl for RmEpsilonImpl<F, B>
 where
     F::W: 'static,
 {
@@ -387,13 +416,16 @@ where
     }
 }
 
-pub struct RmEpsilonFst<F: MutableFst, B: BorrowFst<F>> {
+/// Removes epsilon-transitions (when both the input and output label are an
+/// epsilon) from a transducer. The result will be an equivalent FST that has no
+/// such epsilon transitions. This version is a delayed FST.
+pub struct RmEpsilonFst<F: MutableFst, B: Borrow<F>> {
     pub(crate) fst_impl: UnsafeCell<RmEpsilonImpl<F, B>>,
     pub(crate) isymt: Option<Rc<SymbolTable>>,
     pub(crate) osymt: Option<Rc<SymbolTable>>,
 }
 
-impl<F: MutableFst, B: BorrowFst<F>> RmEpsilonFst<F, B>
+impl<F: MutableFst, B: Borrow<F>> RmEpsilonFst<F, B>
 where
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
 {
@@ -408,4 +440,4 @@ where
     }
 }
 
-dynamic_fst!("RmEpsilonFst", RmEpsilonFst<F, B>, [F => MutableFst] [B => BorrowFst<F>]);
+dynamic_fst!("RmEpsilonFst", RmEpsilonFst<F, B>, [F => MutableFst] [B => Borrow<F>]);

@@ -34,12 +34,13 @@ mod top_sort;
 mod union;
 mod weight_convert;
 
+/// Module that provides different structures implementing the `Queue` trait.
 pub mod queues;
 
 /// Function objects to restrict which arcs are traversed in an FST.
 pub mod arc_filters;
 
-/// Module that provide structures implementing the `ArcMapper` trait.
+/// Module that provides structures implementing the `ArcMapper` trait.
 pub mod arc_mappers;
 
 pub(crate) mod visitors;
@@ -50,7 +51,7 @@ pub(crate) mod cache;
 #[allow(unused)]
 pub(crate) mod factor_iterators;
 
-/// Module that provide structures implementing the `WeightConverter` trait.
+/// Module that provides structures implementing the `WeightConverter` trait.
 pub mod weight_converters;
 
 /// Functions to compare / sort the Arcs of an FST.
@@ -79,7 +80,7 @@ pub use self::{
     push::{push, push_weights, PushType},
     queue::{Queue, QueueType},
     relabel_pairs::relabel_pairs,
-    replace::{replace, BorrowFst, ReplaceFst},
+    replace::{replace, ReplaceFst},
     reverse::reverse,
     reweight::{reweight, ReweightType},
     rm_epsilon::{rm_epsilon, RmEpsilonFst},

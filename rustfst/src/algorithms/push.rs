@@ -19,6 +19,7 @@ use crate::semirings::{
 };
 
 bitflags! {
+    /// Configuration to control the behaviour of the pushing algorithm.
     pub struct PushType: u32 {
         const PUSH_WEIGHTS = 0b01;
         const PUSH_LABELS = 0b10;
@@ -144,12 +145,13 @@ macro_rules! m_labels_pushing {
         } else {
             reweight(&mut gfst, gdistance.as_slice(), $reweight_type)?;
         }
-        let fwfst: VectorFst<_> = factor_weight::<_, _, _, $gallic_factor>(
-            &gfst,
-            FactorWeightOptions::new(
-                FactorWeightType::FACTOR_FINAL_WEIGHTS | FactorWeightType::FACTOR_ARC_WEIGHTS,
-            ),
-        )?;
+        let fwfst: VectorFst<$gallic_weight> =
+            factor_weight::<VectorFst<$gallic_weight>, _, _, $gallic_factor>(
+                &gfst,
+                FactorWeightOptions::new(
+                    FactorWeightType::FACTOR_FINAL_WEIGHTS | FactorWeightType::FACTOR_ARC_WEIGHTS,
+                ),
+            )?;
         let mut mapper_from_gallic = FromGallicConverter {
             superfinal_label: 0,
         };
@@ -157,6 +159,8 @@ macro_rules! m_labels_pushing {
     }};
 }
 
+/// Pushes the weights and/or labels of the input FST into the output
+/// mutable FST by pushing weights and/or labels towards the initial state or final states.
 pub fn push<F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType) -> Fallible<F2>
 where
     F1: ExpandedFst,
