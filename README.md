@@ -100,6 +100,19 @@ A big number of algorithms are already implemented. The main one missing is the 
 
 <!-- cargo-sync-readme end -->
 
+## Benchmark with OpenFST
+
+I did a benchmark some time ago on almost every linear fst algorithm and compared the results with `OpenFst`. You can find the results here :
+
+- [Benchmark at the C++ level](https://github.com/Garvys/rustfst/blob/master/bench_results/bench_funct_80.md)
+- [Benchmark at the CLI level](https://github.com/Garvys/rustfst/blob/master/bench_results/bench_cli_80.md)
+
+Spoiler alert: `Rustfst` is faster on all those algorithms 😅
+
+For the other algorithms, i'm finishing the implementation then will do another round of benchmarks.
+
+At the moment, the main algorithm missing in `Rustfst` is the composition that will be implemented shortly. All the important algorithms like minimization, determinization ... are already implemented but not benched and thus not (necessarily) optimized.
+
 ## Documentation
 
 The documentation of the last released version is available here :
