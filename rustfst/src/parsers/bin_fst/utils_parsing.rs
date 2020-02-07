@@ -8,7 +8,7 @@ use crate::NO_STATE_ID;
 
 #[inline]
 pub(crate) fn parse_start_state(s: i64) -> Option<StateId> {
-    if s == i64::from(NO_STATE_ID) {
+    if s == (NO_STATE_ID as i64) {
         None
     } else {
         Some(s as StateId)

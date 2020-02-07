@@ -61,7 +61,7 @@ pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Fallible<()> {
 struct ConnectVisitor<'a, F: Fst> {
     access: Vec<bool>,
     coaccess: Vec<bool>,
-    start: i32,
+    start: usize,
     fst: &'a F,
     nstates: usize,
     dfnumber: Vec<i32>,
@@ -76,7 +76,7 @@ impl<'a, F: 'a + Fst + ExpandedFst> ConnectVisitor<'a, F> {
         Self {
             access: vec![false; n],
             coaccess: vec![false; n],
-            start: fst.start().map(|v| v as i32).unwrap_or(NO_STATE_ID),
+            start: fst.start().unwrap_or(NO_STATE_ID),
             fst,
             nstates: 0,
             dfnumber: vec![-1; n],
@@ -95,7 +95,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for ConnectVisitor<'a, F> {
         self.dfnumber[s] = self.nstates as i32;
         self.lowlink[s] = self.nstates as i32;
         self.onstack[s] = true;
-        self.access[s] = root as i32 == self.start;
+        self.access[s] = root == self.start;
         self.nstates += 1;
         true
     }

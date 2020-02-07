@@ -9,7 +9,7 @@ pub struct SccVisitor<'a, F: Fst> {
     pub scc: Option<Vec<i32>>,
     pub access: Option<Vec<bool>>,
     pub coaccess: Vec<bool>,
-    start: i32,
+    start: StateId,
     fst: &'a F,
     nstates: usize,
     dfnumber: Vec<i32>,
@@ -30,7 +30,7 @@ impl<'a, F: 'a + Fst + ExpandedFst> SccVisitor<'a, F> {
                 None
             },
             coaccess: vec![false; n],
-            start: fst.start().map(|v| v as i32).unwrap_or(NO_STATE_ID),
+            start: fst.start().unwrap_or(NO_STATE_ID),
             fst,
             nstates: 0,
             dfnumber: vec![-1; n],
@@ -51,7 +51,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         self.lowlink[s] = self.nstates as i32;
         self.onstack[s] = true;
         if let Some(ref mut access) = self.access {
-            access[s] = root as i32 == self.start;
+            access[s] = root == self.start;
         }
         self.nstates += 1;
         true
