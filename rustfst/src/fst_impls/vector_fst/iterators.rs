@@ -1,12 +1,14 @@
 use std::ops::Range;
 use std::slice;
-use std::vec::IntoIter;
 
 use failure::Fallible;
 
 use crate::Arc;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{ArcIterator, CoreFst, FstIntoIterator, FstIterator, FstIteratorMut, MutableArcIterator, StateIterator};
+use crate::fst_traits::{
+    ArcIterator, FstIntoIterator, FstIterator, FstIteratorMut, MutableArcIterator,
+    StateIterator,
+};
 use crate::semirings::Semiring;
 use crate::StateId;
 
@@ -48,20 +50,43 @@ impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
     }
 }
 
-impl<W: Semiring> IntoIterator for VectorFst<W> where W: 'static {
-    type Item = (StateId, std::vec::IntoIter<Arc<W>>, Option<W>);
+impl<W: Semiring> FstIntoIterator for VectorFst<W>
+where
+    W: 'static,
+{
+    type ArcsIter = std::vec::IntoIter<Arc<W>>;
+
     // TODO: Change this to impl once the feature has been stabilized
     // #![feature(type_alias_impl_trait)]
     // https://github.com/rust-lang/rust/issues/63063)
-    type IntoIter = Box<dyn Iterator<Item=(StateId, std::vec::IntoIter<Arc<W>>, Option<W>)>>;
+    type FstIter = Box<dyn Iterator<Item = (StateId, Self::ArcsIter, Option<W>)>>;
 
-    fn into_iter(self) -> Self::IntoIter {
-        Box::new(self.states.
-            into_iter().
-            enumerate().
-            map(|(state_id, fst_state)| (state_id,fst_state.arcs.into_iter(),  fst_state.final_weight)))
+    fn fst_into_iter(self) -> Self::FstIter {
+        Box::new(
+            self.states
+                .into_iter()
+                .enumerate()
+                .map(|(state_id, fst_state)| {
+                    (state_id, fst_state.arcs.into_iter(), fst_state.final_weight)
+                }),
+        )
     }
 }
+//
+//impl<W: Semiring> IntoIterator for VectorFst<W> where W: 'static {
+//    type Item = (StateId, std::vec::IntoIter<Arc<W>>, Option<W>);
+//    // TODO: Change this to impl once the feature has been stabilized
+//    // #![feature(type_alias_impl_trait)]
+//    // https://github.com/rust-lang/rust/issues/63063)
+//    type IntoIter = Box<dyn Iterator<Item=(StateId, std::vec::IntoIter<Arc<W>>, Option<W>)>>;
+//
+//    fn into_iter(self) -> Self::IntoIter {
+//        Box::new(self.states.
+//            into_iter().
+//            enumerate().
+//            map(|(state_id, fst_state)| (state_id,fst_state.arcs.into_iter(),  fst_state.final_weight)))
+//    }
+//}
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct StateIndex(StateId);
@@ -187,7 +212,7 @@ mod tests {
         fst.add_arc(s2, arc_2_3.clone())?;
         fst.add_arc(s2, arc_2_3_bis.clone())?;
 
-        for (state_id, arcs, final_weight) in fst {
+        for (state_id, arcs, final_weight) in fst.fst_into_iter() {
             println!("State id {:?}", state_id);
             println!("Final weight : {:?}", final_weight);
             for arc in arcs {
