@@ -1,7 +1,8 @@
 use crate::arc::Arc;
-use crate::fst_traits::CoreFst;
+use crate::fst_traits::{CoreFst, Fst};
 use crate::StateId;
 use failure::Fallible;
+use crate::semirings::Semiring;
 
 /// Trait to iterate over the states of a wFST.
 pub trait StateIterator<'a> {
@@ -43,6 +44,18 @@ where
     unsafe fn arcs_iter_unchecked(&'a self, state_id: StateId) -> Self::Iter;
 }
 
+///// Trait to iterate over the outgoing arcs of a particular state in a wFST
+//pub trait FstIntoIterator: CoreFst
+//{
+//
+//    fn into_iter<I: IntoIterator<>>(self, state_id: StateId) -> dyn IntoIterator<Item = Option<Self::W>>;
+//}
+
+pub trait FstIntoIterator: Fst {
+    type ArcsIter : Iterator<Item=Arc<Self::W>>;
+    type FstIter : Iterator<Item=(StateId, Self::ArcsIter, Option<Self::W>)>;
+    fn _into_iter(self) -> Self::FstIter;
+}
 /// Trait to iterator over a wFST in order to modify its arcs without changing the number of states or the number of arcs
 pub trait FstIterator: CoreFst {
     type StateIndex: Copy;

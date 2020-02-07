@@ -1,16 +1,14 @@
+use std::ops::Range;
 use std::slice;
-
-use crate::fst_impls::VectorFst;
-use crate::fst_traits::{
-    ArcIterator, FstIterator, FstIteratorMut, MutableArcIterator, StateIterator,
-};
-use crate::semirings::Semiring;
-use crate::Arc;
-use crate::StateId;
+use std::vec::IntoIter;
 
 use failure::Fallible;
 
-use std::ops::Range;
+use crate::Arc;
+use crate::fst_impls::VectorFst;
+use crate::fst_traits::{ArcIterator, CoreFst, FstIntoIterator, FstIterator, FstIteratorMut, MutableArcIterator, StateIterator};
+use crate::semirings::Semiring;
+use crate::StateId;
 
 impl<'a, W: Semiring> StateIterator<'a> for VectorFst<W> {
     type Iter = Range<StateId>;
@@ -47,6 +45,31 @@ impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
     #[inline]
     unsafe fn arcs_iter_unchecked_mut(&'a mut self, state_id: usize) -> Self::IterMut {
         self.states.get_unchecked_mut(state_id).arcs.iter_mut()
+    }
+}
+
+impl<W: Semiring> FstIntoIterator for VectorFst<W> where W: 'static {
+    type ArcsIter = std::vec::IntoIter<Arc<W>>;
+
+    // TODO: Change this to impl once the feature has been stabilized
+    // #![feature(type_alias_impl_trait)]
+    // https://github.com/rust-lang/rust/issues/63063)
+    type FstIter = Box<dyn Iterator<Item=(StateId, Self::ArcsIter, Option<W>)>>;
+
+    fn _into_iter(self) -> Self::FstIter {
+        Box::new(self.states.
+            into_iter().
+            enumerate().
+            map(|(state_id, fst_state)| (state_id,fst_state.arcs.into_iter(),  fst_state.final_weight)))
+    }
+}
+
+impl<W: Semiring> IntoIterator for VectorFst<W> where W: 'static {
+    type Item = (StateId, <VectorFst::<W> as FstIntoIterator>::ArcsIter, Option<W>);
+    type IntoIter = <VectorFst::<W> as FstIntoIterator>::FstIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self._into_iter()
     }
 }
 
@@ -144,10 +167,45 @@ impl<W: 'static + Semiring> FstIteratorMut for VectorFst<W> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use crate::fst_traits::MutableFst;
     use crate::semirings::ProbabilityWeight;
+
+    use super::*;
+
+    #[test]
+    fn test_lol() -> Fallible<()> {
+        let mut fst = VectorFst::<ProbabilityWeight>::new();
+
+        // States
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+        let s3 = fst.add_state();
+
+        fst.set_start(s1)?;
+        fst.set_final(s3, 3.2)?;
+
+        // Arcs
+        let arc_1_2 = Arc::new(0, 0, 1.0, s2);
+        let arc_1_2_bis = Arc::new(0, 0, 1.0, s2);
+
+        let arc_2_3 = Arc::new(0, 0, 1.0, s3);
+        let arc_2_3_bis = Arc::new(0, 0, 1.0, s3);
+
+        fst.add_arc(s1, arc_1_2.clone())?;
+        fst.add_arc(s1, arc_1_2_bis.clone())?;
+
+        fst.add_arc(s2, arc_2_3.clone())?;
+        fst.add_arc(s2, arc_2_3_bis.clone())?;
+
+        for (state_id, arcs, final_weight) in fst {
+            println!("State id {:?}", state_id);
+            println!("Final weight : {:?}", final_weight);
+            for arc in arcs {
+                println!("Arc : {:?}", arc);
+            }
+        }
+        Ok(())
+    }
 
     #[test]
     fn test_states_index_iterator() -> Fallible<()> {
