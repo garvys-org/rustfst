@@ -48,28 +48,18 @@ impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
     }
 }
 
-impl<W: Semiring> FstIntoIterator for VectorFst<W> where W: 'static {
-    type ArcsIter = std::vec::IntoIter<Arc<W>>;
-
+impl<W: Semiring> IntoIterator for VectorFst<W> where W: 'static {
+    type Item = (StateId, std::vec::IntoIter<Arc<W>>, Option<W>);
     // TODO: Change this to impl once the feature has been stabilized
     // #![feature(type_alias_impl_trait)]
     // https://github.com/rust-lang/rust/issues/63063)
-    type FstIter = Box<dyn Iterator<Item=(StateId, Self::ArcsIter, Option<W>)>>;
+    type IntoIter = Box<dyn Iterator<Item=(StateId, std::vec::IntoIter<Arc<W>>, Option<W>)>>;
 
-    fn _into_iter(self) -> Self::FstIter {
+    fn into_iter(self) -> Self::IntoIter {
         Box::new(self.states.
             into_iter().
             enumerate().
             map(|(state_id, fst_state)| (state_id,fst_state.arcs.into_iter(),  fst_state.final_weight)))
-    }
-}
-
-impl<W: Semiring> IntoIterator for VectorFst<W> where W: 'static {
-    type Item = (StateId, <VectorFst::<W> as FstIntoIterator>::ArcsIter, Option<W>);
-    type IntoIter = <VectorFst::<W> as FstIntoIterator>::FstIter;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self._into_iter()
     }
 }
 
