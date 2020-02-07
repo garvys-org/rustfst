@@ -71,21 +71,6 @@ where
         )
     }
 }
-//
-//impl<W: Semiring> IntoIterator for VectorFst<W> where W: 'static {
-//    type Item = (StateId, std::vec::IntoIter<Arc<W>>, Option<W>);
-//    // TODO: Change this to impl once the feature has been stabilized
-//    // #![feature(type_alias_impl_trait)]
-//    // https://github.com/rust-lang/rust/issues/63063)
-//    type IntoIter = Box<dyn Iterator<Item=(StateId, std::vec::IntoIter<Arc<W>>, Option<W>)>>;
-//
-//    fn into_iter(self) -> Self::IntoIter {
-//        Box::new(self.states.
-//            into_iter().
-//            enumerate().
-//            map(|(state_id, fst_state)| (state_id,fst_state.arcs.into_iter(),  fst_state.final_weight)))
-//    }
-//}
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct StateIndex(StateId);
