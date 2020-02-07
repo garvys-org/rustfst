@@ -2,13 +2,13 @@ use std::ops::Range;
 use std::slice;
 
 use failure::Fallible;
-use itertools::iproduct;
 use itertools::Itertools;
+use itertools::izip;
 
 use crate::Arc;
 use crate::fst_impls::const_fst::data_structure::ConstState;
 use crate::fst_impls::ConstFst;
-use crate::fst_traits::{ArcIterator, ExpandedFst, FstIntoIterator, FstIterator, StateIterator};
+use crate::fst_traits::{ArcIterator, FstIntoIterator, FstIterator, StateIterator};
 use crate::semirings::Semiring;
 use crate::StateId;
 
@@ -58,7 +58,7 @@ where
         }
 
         Box::new(
-            iproduct!(self.states.into_iter(), arcs.into_iter())
+            izip!(self.states.into_iter(), arcs.into_iter())
                 .enumerate()
                 .map(|(state_id, (const_state, arcs_from_state))| {
                     (

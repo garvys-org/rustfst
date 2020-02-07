@@ -2,7 +2,6 @@ use failure::Fallible;
 
 use crate::arc::Arc;
 use crate::fst_traits::{CoreFst, Fst};
-use crate::semirings::Semiring;
 use crate::StateId;
 
 /// Trait to iterate over the states of a wFST.

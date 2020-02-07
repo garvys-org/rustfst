@@ -3,8 +3,7 @@ use failure::Fallible;
 use crate::fst_properties::compute_fst_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{Fst, FstIntoIterator};
-use crate::Arc;
-use crate::StateId;
+
 /// Trait defining the necessary methods that should implement an ExpandedFST e.g
 /// a FST where all the states are already computed and not computed on the fly.
 pub trait ExpandedFst: Fst + Clone + PartialEq + FstIntoIterator {

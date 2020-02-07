@@ -61,6 +61,9 @@ use self::algorithms::{
     weight_pushing::{test_weight_pushing_final, test_weight_pushing_initial},
 };
 use self::fst_impls::const_fst::test_const_fst_convert_convert;
+use self::fst_impls::test_fst_into_iterator::{
+    test_fst_into_iterator_const, test_fst_into_iterator_vector,
+};
 use self::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
 use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
 use self::io::vector_fst_text_serialization::test_vector_fst_text_serialization;
@@ -664,6 +667,18 @@ macro_rules! test_fst {
             #[test]
             fn test_rmepsilon_dynamic_openfst() -> Fallible<()> {
                 do_run!(test_rmepsilon_dynamic, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_fst_into_iterator_const_openfst() -> Fallible<()> {
+                do_run!(test_fst_into_iterator_const, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_fst_into_iterator_vector_openfst() -> Fallible<()> {
+                do_run!(test_fst_into_iterator_vector, $fst_name);
                 Ok(())
             }
         }
