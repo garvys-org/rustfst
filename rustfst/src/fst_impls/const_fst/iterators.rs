@@ -50,7 +50,8 @@ where
     type FstIter = Box<dyn Iterator<Item = (StateId, Self::ArcsIter, Option<W>)>>;
 
     fn fst_into_iter(mut self) -> Self::FstIter {
-        // Here the contiguous arcs are moved into multiple vectors in order to be able to create in iterator for each states.
+        // Here the contiguous arcs are moved into multiple vectors in order to be able to create
+        // iterator for each states.
         // TODO: Find a way to avoid this allocation.
         let mut arcs = Vec::with_capacity(self.states.len());
         for const_state in &self.states {
