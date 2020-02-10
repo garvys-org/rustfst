@@ -13,7 +13,7 @@ pub struct ConstFst<W: Semiring> {
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]
-pub(crate) struct ConstState<W: Semiring> {
+pub struct ConstState<W: Semiring> {
     /// Final Weight
     pub(crate) final_weight: Option<W>,
     /// Start of state's arcs in `arcs`.

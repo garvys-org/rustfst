@@ -23,7 +23,7 @@ pub struct VectorFst<W: Semiring> {
 // when the object is modified. Which is not trivial with the MutableArcIterator API for instance.
 // Same goes for ArcMap. For not-mutable fst however, it is usefull.
 #[derive(Debug, Clone, PartialEq)]
-pub(crate) struct VectorFstState<W: Semiring> {
+pub struct VectorFstState<W: Semiring> {
     pub(crate) final_weight: Option<W>,
     pub(crate) arcs: Vec<Arc<W>>,
 }

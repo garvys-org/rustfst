@@ -1,10 +1,15 @@
+use std::iter::Enumerate;
+use std::iter::Map;
 use std::ops::Range;
 use std::slice;
 
 use failure::Fallible;
 
+use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{ArcIterator, FstIntoIterator, MutableArcIterator, StateIterator};
+use crate::fst_traits::{
+    ArcIterator, FstIntoIterator, FstIterator, FstIteratorMut, MutableArcIterator, StateIterator,
+};
 use crate::semirings::Semiring;
 use crate::Arc;
 use crate::StateId;
@@ -67,5 +72,52 @@ where
                     (state_id, fst_state.arcs.into_iter(), fst_state.final_weight)
                 }),
         )
+    }
+}
+
+impl<'a, W: Semiring + 'static> FstIterator<'a> for VectorFst<W> {
+    type ArcsIter = std::slice::Iter<'a, Arc<W>>;
+    type FstIter = Map<
+        Enumerate<std::slice::Iter<'a, VectorFstState<W>>>,
+        Box<
+            dyn FnMut((StateId, &'a VectorFstState<W>)) -> (StateId, Self::ArcsIter, Option<&'a W>),
+        >,
+    >;
+    fn fst_iter(&'a self) -> Self::FstIter {
+        self.states
+            .iter()
+            .enumerate()
+            .map(Box::new(|(state_id, fst_state)| {
+                (
+                    state_id,
+                    fst_state.arcs.iter(),
+                    fst_state.final_weight.as_ref(),
+                )
+            }))
+    }
+}
+
+impl<'a, W: Semiring + 'static> FstIteratorMut<'a> for VectorFst<W> {
+    type ArcsIter = std::slice::IterMut<'a, Arc<W>>;
+    type FstIter = Map<
+        Enumerate<std::slice::IterMut<'a, VectorFstState<W>>>,
+        Box<
+            dyn FnMut(
+                (StateId, &'a mut VectorFstState<W>),
+            ) -> (StateId, Self::ArcsIter, Option<&'a mut W>),
+        >,
+    >;
+
+    fn fst_iter_mut(&'a mut self) -> Self::FstIter {
+        self.states
+            .iter_mut()
+            .enumerate()
+            .map(Box::new(|(state_id, fst_state)| {
+                (
+                    state_id,
+                    fst_state.arcs.iter_mut(),
+                    fst_state.final_weight.as_mut(),
+                )
+            }))
     }
 }

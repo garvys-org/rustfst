@@ -1,15 +1,20 @@
+use std::iter::Enumerate;
+use std::iter::Map;
+use std::iter::Skip;
+use std::iter::Take;
+use std::iter::Zip;
 use std::ops::Range;
 use std::slice;
 
 use failure::Fallible;
-use itertools::izip;
+use itertools::{izip, repeat_n, RepeatN};
 use itertools::Itertools;
 
+use crate::Arc;
 use crate::fst_impls::const_fst::data_structure::ConstState;
 use crate::fst_impls::ConstFst;
-use crate::fst_traits::{ArcIterator, FstIntoIterator, StateIterator};
+use crate::fst_traits::{ArcIterator, FstIntoIterator, FstIterator, StateIterator};
 use crate::semirings::Semiring;
-use crate::Arc;
 use crate::StateId;
 
 impl<W: Semiring> ConstFst<W> {
@@ -76,5 +81,37 @@ impl<'a, W: Semiring> StateIterator<'a> for ConstFst<W> {
     type Iter = Range<StateId>;
     fn states_iter(&'a self) -> Self::Iter {
         self.state_range()
+    }
+}
+
+//pub fn lol<'a, W>((state_id, (fst_state, arcs)): (StateId, (&'a ConstState<W>, &'a Vec<Arc<W>>))) -> (StateId, impl Iterator<&'a Arc<W>>, Option<&'a W>) {
+//    (
+//        state_id,
+//        arcs.iter().skip(fst_state.pos).take(fst_state.narcs),
+//        fst_state.final_weight.as_ref(),
+//    )
+//}
+
+impl<'a, W: Semiring + 'static> FstIterator<'a> for ConstFst<W> {
+    type ArcsIter = Take<Skip<std::slice::Iter<'a, Arc<W>>>>;
+    type FstIter = Map<
+        Enumerate<Zip<std::slice::Iter<'a, ConstState<W>>, RepeatN<&'a Vec<Arc<W>>>>>,
+        Box<
+            dyn FnMut(
+                (StateId, (&'a ConstState<W>, &'a Vec<Arc<W>>)),
+            ) -> (StateId, Self::ArcsIter, Option<&'a W>),
+        >,
+    >;
+    fn fst_iter(&'a self) -> Self::FstIter {
+        let it = repeat_n(&self.arcs, self.states.len());
+        izip!(self.states.iter(), it).enumerate().map(Box::new(
+            |(state_id, (fst_state, arcs)): (StateId, (&'a ConstState<W>, &'a Vec<Arc<W>>))| {
+                (
+                    state_id,
+                    arcs.iter().skip(fst_state.pos).take(fst_state.narcs),
+                    fst_state.final_weight.as_ref(),
+                )
+            },
+        ))
     }
 }

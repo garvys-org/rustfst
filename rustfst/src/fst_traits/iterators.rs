@@ -49,3 +49,21 @@ pub trait FstIntoIterator: Fst {
     type FstIter: Iterator<Item = (StateId, Self::ArcsIter, Option<Self::W>)>;
     fn fst_into_iter(self) -> Self::FstIter;
 }
+
+pub trait FstIterator<'a>: Fst
+where
+    Self::W: 'a,
+{
+    type ArcsIter: Iterator<Item = &'a Arc<Self::W>>;
+    type FstIter: Iterator<Item = (StateId, Self::ArcsIter, Option<&'a Self::W>)>;
+    fn fst_iter(&'a self) -> Self::FstIter;
+}
+
+pub trait FstIteratorMut<'a>: Fst
+where
+    Self::W: 'a,
+{
+    type ArcsIter: Iterator<Item = &'a mut Arc<Self::W>>;
+    type FstIter: Iterator<Item = (StateId, Self::ArcsIter, Option<&'a mut Self::W>)>;
+    fn fst_iter_mut(&'a mut self) -> Self::FstIter;
+}
