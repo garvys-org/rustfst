@@ -1,3 +1,4 @@
+mod add_super_final_state;
 mod all_pairs_shortest_distance;
 mod arc_map;
 mod arc_sort;
@@ -61,6 +62,7 @@ pub mod arc_compares {
 }
 
 pub use self::{
+    add_super_final_state::add_super_final_state,
     all_pairs_shortest_distance::all_pairs_shortest_distance,
     arc_map::{arc_map, ArcMapper, FinalArc, MapFinalAction},
     arc_sort::arc_sort,

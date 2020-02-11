@@ -90,8 +90,9 @@ where
                     if final_arc.ilabel != EPS_LABEL || final_arc.olabel != EPS_LABEL {
                         bail!("ArcMap: Non-zero arc labels for superfinal arc")
                     }
-
-                    ifst.set_final(state, final_arc.weight).unwrap();
+                    unsafe {
+                        ifst.set_final_unchecked(state, final_arc.weight);
+                    }
                 }
                 MapFinalAction::MapAllowSuperfinal => {
                     if Some(state) != superfinal {
@@ -99,23 +100,26 @@ where
                             if superfinal.is_none() {
                                 let superfinal_id = ifst.add_state();
                                 superfinal = Some(superfinal_id);
-                                ifst.set_final(superfinal_id, F::W::one()).unwrap();
+                                unsafe { // Checked because the state is created just above
+                                    ifst.set_final_unchecked(superfinal_id, F::W::one());
+                                }
                             }
-
-                            ifst.add_arc(
-                                state,
-                                Arc::new(
-                                    final_arc.ilabel,
-                                    final_arc.olabel,
-                                    final_arc.weight,
-                                    superfinal.unwrap(),
-                                ),
-                            )
-                            .unwrap();
-
-                            ifst.delete_final_weight(state).unwrap();
+                            unsafe { // Checked
+                                ifst.add_arc_unchecked(
+                                    state,
+                                    Arc::new(
+                                        final_arc.ilabel,
+                                        final_arc.olabel,
+                                        final_arc.weight,
+                                        superfinal.unwrap(), // Checked 
+                                    ),
+                                );
+                                ifst.delete_final_weight_unchecked(state);
+                            }
                         } else {
-                            ifst.set_final(state, final_arc.weight).unwrap();
+                            unsafe { // Checked
+                                ifst.set_final_unchecked(state, final_arc.weight);
+                            }
                         }
                     }
                 }
@@ -125,7 +129,7 @@ where
                             || final_arc.olabel != EPS_LABEL
                             || !final_arc.weight.is_zero()
                         {
-                            unsafe {
+                            unsafe { // checked
                                 ifst.add_arc_unchecked(
                                     state,
                                     Arc::new(
@@ -134,10 +138,10 @@ where
                                         final_arc.weight,
                                         superfinal.unwrap(),
                                     ),
-                                )
-                            };
+                                );
+                                ifst.delete_final_weight_unchecked(state);
+                            }
                         }
-                        ifst.delete_final_weight(state).unwrap();
                     }
                 }
             };

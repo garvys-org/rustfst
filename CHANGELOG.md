@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.5.0] - 2020-02-04
 
 ### Added
+- Add `add_super_final_state` algorithm
 - Add `FstIterator` and `FstIteratorMut` to iterate over states and arcs in a given FST without referencing the FST.
 - Implement `FstIterator` and `FstIteratorMut` for ConstFst and VectorFst.
 - Add `AllocableFst` to control the wFst allocation: `capacity`, `reserve`, `shrink_to_fit`
