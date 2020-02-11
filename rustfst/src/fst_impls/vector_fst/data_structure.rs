@@ -11,7 +11,7 @@ use std::rc::Rc;
 /// All states are stored in a vector of states.
 /// In each state, there is a vector of arcs containing the outgoing transitions.
 #[derive(Debug, PartialEq, Clone)]
-pub struct VectorFst<W: Semiring> {
+pub struct VectorFst<W> {
     pub(crate) states: Vec<VectorFstState<W>>,
     pub(crate) start_state: Option<StateId>,
     pub(crate) isymt: Option<Rc<SymbolTable>>,
@@ -23,12 +23,12 @@ pub struct VectorFst<W: Semiring> {
 // when the object is modified. Which is not trivial with the MutableArcIterator API for instance.
 // Same goes for ArcMap. For not-mutable fst however, it is usefull.
 #[derive(Debug, Clone, PartialEq)]
-pub struct VectorFstState<W: Semiring> {
+pub struct VectorFstState<W> {
     pub(crate) final_weight: Option<W>,
     pub(crate) arcs: Vec<Arc<W>>,
 }
 
-impl<W: Semiring> VectorFstState<W> {
+impl<W> VectorFstState<W> {
     pub fn new() -> Self {
         Self {
             final_weight: None,

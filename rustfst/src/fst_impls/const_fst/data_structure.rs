@@ -1,10 +1,9 @@
-use crate::semirings::Semiring;
 use crate::{Arc, StateId, SymbolTable};
 use std::rc::Rc;
 
 /// Immutable FST whose states and arcs each implemented by single arrays,
 #[derive(Debug, PartialEq, Clone)]
-pub struct ConstFst<W: Semiring> {
+pub struct ConstFst<W> {
     pub(crate) states: Vec<ConstState<W>>,
     pub(crate) arcs: Vec<Arc<W>>,
     pub(crate) start: Option<StateId>,
@@ -13,7 +12,7 @@ pub struct ConstFst<W: Semiring> {
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]
-pub struct ConstState<W: Semiring> {
+pub struct ConstState<W> {
     /// Final Weight
     pub(crate) final_weight: Option<W>,
     /// Start of state's arcs in `arcs`.
