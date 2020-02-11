@@ -101,6 +101,7 @@ impl<W> CacheImpl<W> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::semirings::Semiring;
     use crate::semirings::TropicalWeight;
 
     fn test_cache_impl_start() -> Fallible<()> {
