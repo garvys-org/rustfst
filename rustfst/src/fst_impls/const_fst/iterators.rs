@@ -7,14 +7,14 @@ use std::ops::Range;
 use std::slice;
 
 use failure::Fallible;
-use itertools::{izip, repeat_n, RepeatN};
 use itertools::Itertools;
+use itertools::{izip, repeat_n, RepeatN};
 
-use crate::Arc;
 use crate::fst_impls::const_fst::data_structure::ConstState;
 use crate::fst_impls::ConstFst;
 use crate::fst_traits::{ArcIterator, FstIntoIterator, FstIterator, StateIterator};
 use crate::semirings::Semiring;
+use crate::Arc;
 use crate::StateId;
 
 impl<W: Semiring> ConstFst<W> {
@@ -83,14 +83,6 @@ impl<'a, W: Semiring> StateIterator<'a> for ConstFst<W> {
         self.state_range()
     }
 }
-
-//pub fn lol<'a, W>((state_id, (fst_state, arcs)): (StateId, (&'a ConstState<W>, &'a Vec<Arc<W>>))) -> (StateId, impl Iterator<&'a Arc<W>>, Option<&'a W>) {
-//    (
-//        state_id,
-//        arcs.iter().skip(fst_state.pos).take(fst_state.narcs),
-//        fst_state.final_weight.as_ref(),
-//    )
-//}
 
 impl<'a, W: Semiring + 'static> FstIterator<'a> for ConstFst<W> {
     type ArcsIter = Take<Skip<std::slice::Iter<'a, Arc<W>>>>;
