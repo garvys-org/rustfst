@@ -5,12 +5,14 @@ use failure::Fallible;
 
 use crate::algorithms::{ArcMapper, ClosureType};
 use crate::arc::Arc;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, FstIteratorMut};
 use crate::symbol_table::SymbolTable;
 use crate::{Label, StateId};
 
 /// Trait defining the methods to modify a wFST.
-pub trait MutableFst: ExpandedFst + for<'a> MutableArcIterator<'a> {
+pub trait MutableFst:
+    ExpandedFst + for<'a> MutableArcIterator<'a> + for<'b> FstIteratorMut<'b>
+{
     /// Creates an empty wFST.
     fn new() -> Self;
 

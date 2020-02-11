@@ -3,7 +3,7 @@ use failure::Fallible;
 use crate::algorithms::ReplaceFst;
 use crate::arc::Arc;
 use crate::fst_traits::{
-    AllocableFst, ArcIterator, CoreFst, ExpandedFst, Fst, MutableFst, StateIterator,
+    AllocableFst, ArcIterator, CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator,
 };
 use crate::semirings::Semiring;
 use crate::{SymbolTable, EPS_LABEL};
@@ -201,5 +201,17 @@ where
 
     fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
         self.0.output_symbols()
+    }
+}
+
+impl<'a, F: Fst + 'static> FstIterator<'a> for ConcatFst<F>
+where
+    F::W: 'static,
+{
+    type ArcsIter = <ReplaceFst<F, F> as FstIterator<'a>>::ArcsIter;
+    type FstIter = <ReplaceFst<F, F> as FstIterator<'a>>::FstIter;
+
+    fn fst_iter(&'a self) -> Self::FstIter {
+        self.0.fst_iter()
     }
 }

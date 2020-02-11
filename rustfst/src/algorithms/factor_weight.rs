@@ -1,23 +1,28 @@
+use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::cell::UnsafeCell;
 use std::collections::HashMap;
 use std::fmt;
+use std::iter::repeat;
+use std::iter::Map;
+use std::iter::Repeat;
+use std::iter::Zip;
 use std::marker::PhantomData;
 use std::rc::Rc;
 use std::slice::Iter as IterSlice;
 
 use failure::Fallible;
+use itertools::izip;
 
 use bitflags::bitflags;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::arc::Arc;
-use crate::fst_traits::{ArcIterator, StateIterator};
+use crate::fst_traits::{ArcIterator, FstIterator, StateIterator};
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::{Label, StateId};
 use crate::{SymbolTable, KDELTA};
-use std::borrow::Borrow;
 
 bitflags! {
     /// What kind of weight should be factored ? Arc weight ? Final weights ?

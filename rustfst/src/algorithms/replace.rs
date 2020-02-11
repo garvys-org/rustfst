@@ -4,17 +4,24 @@ use std::collections::hash_map::Entry;
 use std::collections::{BTreeSet, HashMap};
 use std::fmt;
 use std::hash::Hash;
+use std::iter::repeat;
+use std::iter::Map;
+use std::iter::Repeat;
+use std::iter::Zip;
 use std::marker::PhantomData;
 use std::rc::Rc;
 use std::slice::Iter as IterSlice;
 
 use failure::{bail, Fallible};
+use itertools::izip;
+use itertools::Itertools;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
-use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, MutableFst, StateIterator};
+use crate::fst_traits::{
+    ArcIterator, CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator,
+};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, SymbolTable, EPS_LABEL};
-use itertools::Itertools;
 
 /// This specifies what labels to output on the call or return arc.
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug, Eq)]
@@ -547,5 +554,4 @@ where
         })
     }
 }
-
 dynamic_fst!("ReplaceFst", ReplaceFst<F, B>, [F => Fst] [B => Borrow<F>]);

@@ -5,6 +5,7 @@ use failure::Fallible;
 
 use crate::algorithms::arc_filters::{ArcFilter, InputEpsilonArcFilter, OutputEpsilonArcFilter};
 use crate::fst_traits::iterators::{ArcIterator, StateIterator};
+use crate::fst_traits::FstIterator;
 use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable};
 
@@ -111,7 +112,9 @@ pub trait CoreFst {
 }
 
 /// Trait defining the minimum interface necessary for a wFST.
-pub trait Fst: CoreFst + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b> + Debug {
+pub trait Fst:
+    CoreFst + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b> + for<'c> FstIterator<'c> + Debug
+{
     // TODO: Move niepsilons and noepsilons to required methods.
     /// Returns the number of arcs with epsilon input labels leaving a state.
     ///

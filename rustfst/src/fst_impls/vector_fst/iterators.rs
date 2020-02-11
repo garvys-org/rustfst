@@ -1,16 +1,18 @@
+use std::iter::Enumerate;
+use std::iter::Map;
+use std::ops::Range;
 use std::slice;
 
+use failure::Fallible;
+
+use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{
-    ArcIterator, FstIterator, FstIteratorMut, MutableArcIterator, StateIterator,
+    ArcIterator, FstIntoIterator, FstIterator, FstIteratorMut, MutableArcIterator, StateIterator,
 };
 use crate::semirings::Semiring;
 use crate::Arc;
 use crate::StateId;
-
-use failure::Fallible;
-
-use std::ops::Range;
 
 impl<'a, W: Semiring> StateIterator<'a> for VectorFst<W> {
     type Iter = Range<StateId>;
@@ -50,216 +52,72 @@ impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
-pub struct StateIndex(StateId);
+impl<W: Semiring> FstIntoIterator for VectorFst<W>
+where
+    W: 'static,
+{
+    type ArcsIter = std::vec::IntoIter<Arc<W>>;
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
-pub struct ArcIndex(usize);
+    // TODO: Change this to impl once the feature has been stabilized
+    // #![feature(type_alias_impl_trait)]
+    // https://github.com/rust-lang/rust/issues/63063)
+    type FstIter = Box<dyn Iterator<Item = (StateId, Self::ArcsIter, Option<W>)>>;
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct StateIndexIter(Range<usize>);
-#[derive(Debug, Clone, PartialEq)]
-pub struct ArcIndexIter(Range<usize>);
-
-impl std::iter::Iterator for StateIndexIter {
-    type Item = StateIndex;
-    fn next(&mut self) -> Option<Self::Item> {
-        self.0.next().map(StateIndex)
+    fn fst_into_iter(self) -> Self::FstIter {
+        Box::new(
+            self.states
+                .into_iter()
+                .enumerate()
+                .map(|(state_id, fst_state)| {
+                    (state_id, fst_state.arcs.into_iter(), fst_state.final_weight)
+                }),
+        )
     }
 }
 
-impl std::iter::Iterator for ArcIndexIter {
-    type Item = ArcIndex;
-    fn next(&mut self) -> Option<Self::Item> {
-        self.0.next().map(ArcIndex)
+impl<'a, W: Semiring + 'static> FstIterator<'a> for VectorFst<W> {
+    type ArcsIter = std::slice::Iter<'a, Arc<W>>;
+    type FstIter = Map<
+        Enumerate<std::slice::Iter<'a, VectorFstState<W>>>,
+        Box<
+            dyn FnMut((StateId, &'a VectorFstState<W>)) -> (StateId, Self::ArcsIter, Option<&'a W>),
+        >,
+    >;
+    fn fst_iter(&'a self) -> Self::FstIter {
+        self.states
+            .iter()
+            .enumerate()
+            .map(Box::new(|(state_id, fst_state)| {
+                (
+                    state_id,
+                    fst_state.arcs.iter(),
+                    fst_state.final_weight.as_ref(),
+                )
+            }))
     }
 }
 
-impl<W: 'static + Semiring> FstIterator for VectorFst<W> {
-    type StateIndex = StateIndex;
-    type ArcIndex = ArcIndex;
-    type ArcIter = ArcIndexIter;
-    type StateIter = StateIndexIter;
+impl<'a, W: Semiring + 'static> FstIteratorMut<'a> for VectorFst<W> {
+    type ArcsIter = std::slice::IterMut<'a, Arc<W>>;
+    type FstIter = Map<
+        Enumerate<std::slice::IterMut<'a, VectorFstState<W>>>,
+        Box<
+            dyn FnMut(
+                (StateId, &'a mut VectorFstState<W>),
+            ) -> (StateId, Self::ArcsIter, Option<&'a mut W>),
+        >,
+    >;
 
-    fn states_index_iter(&self) -> Self::StateIter {
-        StateIndexIter(self.states_iter())
-    }
-
-    fn arcs_index_iter(&self, state: Self::StateIndex) -> Fallible<Self::ArcIter> {
-        let state = self
-            .states
-            .get(state.0)
-            .ok_or_else(|| format_err!("State {:?} doesn't exist", state.0))?;
-        Ok(ArcIndexIter(0..state.num_arcs()))
-    }
-
-    fn get_state_id(&self, state_idx: Self::StateIndex) -> Fallible<StateId> {
-        let _ = self
-            .states
-            .get(state_idx.0)
-            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_idx.0))?;
-        Ok(state_idx.0)
-    }
-
-    fn get_arc<'a>(
-        &'a self,
-        state_idx: Self::StateIndex,
-        arc: Self::ArcIndex,
-    ) -> Fallible<&'a Arc<Self::W>> {
-        let state = self
-            .states
-            .get(state_idx.0)
-            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_idx.0))?;
-        state
-            .arcs
-            .get(arc.0)
-            .ok_or_else(|| format_err!("State {:?} | Arcs: {:?} doesn't exit", state_idx.0, arc.0))
-    }
-}
-
-impl<W: 'static + Semiring> FstIteratorMut for VectorFst<W> {
-    fn modify_arc<F>(
-        &mut self,
-        state_idx: Self::StateIndex,
-        arc_idx: Self::ArcIndex,
-        modify: F,
-    ) -> Fallible<()>
-    where
-        F: Fn(&mut Arc<Self::W>) -> Fallible<()>,
-    {
-        let state = self
-            .states
-            .get_mut(state_idx.0)
-            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_idx.0))?;
-        let arc = state.arcs.get_mut(arc_idx.0).ok_or_else(|| {
-            format_err!(
-                "State {:?} | Arcs: {:?} doesn't exit",
-                state_idx.0,
-                arc_idx.0
-            )
-        })?;
-        (modify)(arc)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    use crate::fst_traits::MutableFst;
-    use crate::semirings::ProbabilityWeight;
-
-    #[test]
-    fn test_states_index_iterator() -> Fallible<()> {
-        let mut fst = VectorFst::<ProbabilityWeight>::new();
-
-        // States
-        let s1 = fst.add_state();
-        let s2 = fst.add_state();
-        let s3 = fst.add_state();
-
-        fst.set_start(s1)?;
-
-        // Arcs
-        let arc_1_2 = Arc::new(0, 0, 1.0, s2);
-        let arc_1_2_bis = Arc::new(0, 0, 1.0, s2);
-
-        let arc_2_3 = Arc::new(0, 0, 1.0, s3);
-        let arc_2_3_bis = Arc::new(0, 0, 1.0, s3);
-
-        fst.add_arc(s1, arc_1_2.clone())?;
-        fst.add_arc(s1, arc_1_2_bis.clone())?;
-
-        fst.add_arc(s2, arc_2_3.clone())?;
-        fst.add_arc(s2, arc_2_3_bis.clone())?;
-
-        let states = fst
-            .states_index_iter()
-            .map(|it| fst.get_state_id(it))
-            .collect::<Fallible<Vec<_>>>()?;
-        assert_eq!(states, vec![s1, s2, s3]);
-        Ok(())
-    }
-
-    #[test]
-    fn test_arcs_index_iterator() -> Fallible<()> {
-        let mut fst = VectorFst::<ProbabilityWeight>::new();
-
-        // States
-        let s1 = fst.add_state();
-        let s2 = fst.add_state();
-        let s3 = fst.add_state();
-
-        fst.set_start(s1)?;
-
-        // Arcs
-        let arc_1_2 = Arc::new(0, 0, 1.0, s2);
-        let arc_1_2_bis = Arc::new(0, 0, 1.0, s2);
-
-        let arc_2_3 = Arc::new(0, 0, 1.0, s3);
-        let arc_2_3_bis = Arc::new(0, 0, 1.0, s3);
-
-        fst.add_arc(s1, arc_1_2.clone())?;
-        fst.add_arc(s1, arc_1_2_bis.clone())?;
-
-        fst.add_arc(s2, arc_2_3.clone())?;
-        fst.add_arc(s2, arc_2_3_bis.clone())?;
-
-        let mut arcs_ref = vec![];
-        for state_index in fst.states_index_iter() {
-            for arc_index in fst.arcs_index_iter(state_index)? {
-                arcs_ref.push(fst.get_arc(state_index, arc_index)?);
-            }
-        }
-
-        assert_eq!(
-            arcs_ref,
-            vec![&arc_1_2, &arc_1_2_bis, &arc_2_3, &arc_2_3_bis]
-        );
-        Ok(())
-    }
-
-    #[test]
-    fn test_arcs_index_iterator_with_modify() -> Fallible<()> {
-        let mut fst = VectorFst::<ProbabilityWeight>::new();
-
-        // States
-        let s1 = fst.add_state();
-        let s2 = fst.add_state();
-        let s3 = fst.add_state();
-
-        fst.set_start(s1)?;
-
-        // Arcs
-        let arc_1_2 = Arc::new(0, 0, 1.0, s2);
-        let arc_1_2_bis = Arc::new(0, 0, 1.0, s2);
-
-        let arc_2_3 = Arc::new(0, 0, 1.0, s3);
-        let arc_2_3_bis = Arc::new(0, 0, 1.0, s3);
-
-        fst.add_arc(s1, arc_1_2.clone())?;
-        fst.add_arc(s1, arc_1_2_bis.clone())?;
-
-        fst.add_arc(s2, arc_2_3.clone())?;
-        fst.add_arc(s2, arc_2_3_bis.clone())?;
-
-        for state_index in fst.states_index_iter() {
-            for arc_index in fst.arcs_index_iter(state_index)? {
-                fst.modify_arc(state_index, arc_index, |arc| {
-                    arc.ilabel = 1;
-                    Ok(())
-                })?;
-            }
-        }
-
-        let mut arcs_ref = vec![];
-        for state_index in fst.states_index_iter() {
-            for arc_index in fst.arcs_index_iter(state_index)? {
-                arcs_ref.push(fst.get_arc(state_index, arc_index)?.ilabel);
-            }
-        }
-
-        assert_eq!(arcs_ref, vec![1; 4]);
-        Ok(())
+    fn fst_iter_mut(&'a mut self) -> Self::FstIter {
+        self.states
+            .iter_mut()
+            .enumerate()
+            .map(Box::new(|(state_id, fst_state)| {
+                (
+                    state_id,
+                    fst_state.arcs.iter_mut(),
+                    fst_state.final_weight.as_mut(),
+                )
+            }))
     }
 }
