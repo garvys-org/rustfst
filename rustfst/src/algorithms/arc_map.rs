@@ -100,24 +100,27 @@ where
                             if superfinal.is_none() {
                                 let superfinal_id = ifst.add_state();
                                 superfinal = Some(superfinal_id);
-                                unsafe { // Checked because the state is created just above
+                                unsafe {
+                                    // Checked because the state is created just above
                                     ifst.set_final_unchecked(superfinal_id, F::W::one());
                                 }
                             }
-                            unsafe { // Checked
+                            unsafe {
+                                // Checked
                                 ifst.add_arc_unchecked(
                                     state,
                                     Arc::new(
                                         final_arc.ilabel,
                                         final_arc.olabel,
                                         final_arc.weight,
-                                        superfinal.unwrap(), // Checked 
+                                        superfinal.unwrap(), // Checked
                                     ),
                                 );
                                 ifst.delete_final_weight_unchecked(state);
                             }
                         } else {
-                            unsafe { // Checked
+                            unsafe {
+                                // Checked
                                 ifst.set_final_unchecked(state, final_arc.weight);
                             }
                         }
@@ -129,7 +132,8 @@ where
                             || final_arc.olabel != EPS_LABEL
                             || !final_arc.weight.is_zero()
                         {
-                            unsafe { // checked
+                            unsafe {
+                                // checked
                                 ifst.add_arc_unchecked(
                                     state,
                                     Arc::new(
