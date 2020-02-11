@@ -5,8 +5,8 @@ cache:
     - openfst-1.7.2
 rust:
   - stable
-  - beta
-  - nightly
+#  - beta
+#  - nightly
 
 matrix:
   allow_failures:
