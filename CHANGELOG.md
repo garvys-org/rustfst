@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Introduce new iterators to iterate on a whole Fst:
+    - `FstIntoIterator` as a trait bound of `ExpandedFst`.
+    - `FstIterator` as a trait bound of `Fst`.
+    - `FstIteratorMut` as a trait bound of `MutableFst`
+
 ### Changed
 
 ## [0.5.0] - 2020-02-04
