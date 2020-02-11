@@ -9,7 +9,7 @@ use crate::semirings::Semiring;
 use crate::{Arc, StateId};
 
 pub trait FstImpl {
-    type W: Semiring + 'static;
+    type W: 'static;
     fn cache_impl_mut(&mut self) -> &mut CacheImpl<Self::W>;
     fn cache_impl_ref(&self) -> &CacheImpl<Self::W>;
     fn expand(&mut self, state: StateId) -> Fallible<()>;
@@ -56,7 +56,10 @@ pub trait FstImpl {
     }
 
     /// Turns the Dynamic FST into a static one.
-    fn compute<F2: MutableFst<W = Self::W> + ExpandedFst<W = Self::W>>(&mut self) -> Fallible<F2> {
+    fn compute<F2: MutableFst<W = Self::W> + ExpandedFst<W = Self::W>>(&mut self) -> Fallible<F2>
+    where
+        Self::W: Semiring,
+    {
         let start_state = self.start()?;
         let mut fst_out = F2::new();
         if start_state.is_none() {

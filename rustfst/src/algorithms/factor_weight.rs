@@ -118,7 +118,7 @@ impl<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> std::fmt::Debug
         write!(
             f,
             "FactorWeightImpl {{ opts : {:?}, cache_impl: {:?}, \
-            state_table: {:?}, fst: {:?}, unfactored : {:?} }}",
+             state_table: {:?}, fst: {:?}, unfactored : {:?} }}",
             self.opts,
             self.cache_impl,
             self.state_table,

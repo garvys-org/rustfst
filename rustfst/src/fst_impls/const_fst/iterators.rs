@@ -17,7 +17,7 @@ use crate::semirings::Semiring;
 use crate::Arc;
 use crate::StateId;
 
-impl<W: Semiring> ConstFst<W> {
+impl<W> ConstFst<W> {
     fn state_range(&self) -> Range<usize> {
         0..self.states.len()
     }
@@ -77,7 +77,7 @@ where
     }
 }
 
-impl<'a, W: Semiring> StateIterator<'a> for ConstFst<W> {
+impl<'a, W> StateIterator<'a> for ConstFst<W> {
     type Iter = Range<StateId>;
     fn states_iter(&'a self) -> Self::Iter {
         self.state_range()

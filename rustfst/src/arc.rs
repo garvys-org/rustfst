@@ -1,9 +1,9 @@
-use crate::semirings::{Semiring, SerializableSemiring};
+use crate::semirings::SerializableSemiring;
 use crate::{Label, StateId};
 
 /// Structure representing a transition from a state to another state in a FST.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Hash)]
-pub struct Arc<W: Semiring> {
+pub struct Arc<W> {
     /// Input label.
     pub ilabel: Label,
     /// Output label.
@@ -14,7 +14,7 @@ pub struct Arc<W: Semiring> {
     pub nextstate: StateId,
 }
 
-impl<W: Semiring> Arc<W> {
+impl<W> Arc<W> {
     /// Creates a new Arc.
     ///
     /// # Example
@@ -54,7 +54,10 @@ impl<W: Semiring> Arc<W> {
     /// assert_eq!(arc_1, arc_2);
     /// ```
     #[inline]
-    pub fn set_value(&mut self, arc: &Arc<W>) {
+    pub fn set_value(&mut self, arc: &Arc<W>)
+    where
+        W: std::clone::Clone,
+    {
         self.ilabel = arc.ilabel;
         self.olabel = arc.olabel;
         self.weight = arc.weight.clone();

@@ -3,7 +3,7 @@ use crate::semirings::Semiring;
 use crate::StateId;
 
 #[derive(Debug)]
-pub struct FinalState<'f, W: Semiring> {
+pub struct FinalState<'f, W> {
     pub state_id: StateId,
     pub final_weight: &'f W,
 }

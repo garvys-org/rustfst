@@ -1,18 +1,17 @@
 use std::slice::Iter as IterSlice;
 use std::slice::IterMut as IterSliceMut;
 
-use crate::semirings::Semiring;
 use crate::Arc;
 
 #[derive(Clone, Debug, PartialOrd, PartialEq, Eq)]
-pub struct CacheState<W: Semiring> {
+pub struct CacheState<W> {
     arcs: Vec<Arc<W>>,
     final_weight: Option<W>,
     expanded: bool,
     has_final: bool,
 }
 
-impl<W: Semiring> CacheState<W> {
+impl<W> CacheState<W> {
     pub fn new() -> Self {
         Self {
             arcs: Vec::new(),
