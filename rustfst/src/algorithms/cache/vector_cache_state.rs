@@ -6,11 +6,11 @@ use crate::Arc;
 use crate::StateId;
 
 #[derive(Clone, Debug, PartialOrd, PartialEq, Eq)]
-pub struct VectorCacheState<W: Semiring> {
+pub struct VectorCacheState<W> {
     cache_states: Vec<CacheState<W>>,
 }
 
-impl<W: Semiring> VectorCacheState<W> {
+impl<W> VectorCacheState<W> {
     pub fn new() -> Self {
         Self {
             cache_states: Vec::new(),

@@ -3,18 +3,17 @@ use std::slice::Iter as IterSlice;
 use failure::Fallible;
 
 use crate::algorithms::cache::VectorCacheState;
-use crate::semirings::Semiring;
 use crate::Arc;
 use crate::StateId;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
-pub struct CacheImpl<W: Semiring> {
+pub struct CacheImpl<W> {
     has_start: bool,
     cache_start_state: Option<StateId>,
     vector_cache_states: VectorCacheState<W>,
 }
 
-impl<W: Semiring> CacheImpl<W> {
+impl<W> CacheImpl<W> {
     pub fn new() -> Self {
         Self {
             has_start: false,
