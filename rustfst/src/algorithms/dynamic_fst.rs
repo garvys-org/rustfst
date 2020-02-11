@@ -135,5 +135,29 @@ macro_rules! dynamic_fst {
                 self.osymt.clone()
             }
         }
+
+        impl<'a, $($a: $b $( < $c >)? ),*> FstIterator<'a> for $dyn_fst
+        where
+            $($d: $e,)?
+            F::W: 'static,
+            $($a : 'static),*
+        {
+            type ArcsIter = <$dyn_fst as ArcIterator<'a>>::Iter;
+            type FstIter = Map<
+                Zip<<$dyn_fst as StateIterator<'a>>::Iter, Repeat<&'a Self>>,
+                Box<dyn FnMut((StateId, &'a Self)) -> (StateId, Self::ArcsIter, Option<&'a F::W>)>,
+            >;
+
+            fn fst_iter(&'a self) -> Self::FstIter {
+                let it = repeat(self);
+                izip!(self.states_iter(), it).map(Box::new(|(state_id, p): (StateId, &'a Self)| {
+                    (
+                        state_id,
+                        p.arcs_iter(state_id).unwrap(),
+                        p.final_weight(state_id).unwrap(),
+                    )
+                }))
+            }
+        }
     };
 }

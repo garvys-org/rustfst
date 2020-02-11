@@ -1,7 +1,7 @@
 use failure::Fallible;
 
 use crate::arc::Arc;
-use crate::fst_traits::{CoreFst, Fst};
+use crate::fst_traits::CoreFst;
 use crate::StateId;
 
 /// Trait to iterate over the states of a wFST.
@@ -44,13 +44,13 @@ where
     unsafe fn arcs_iter_unchecked(&'a self, state_id: StateId) -> Self::Iter;
 }
 
-pub trait FstIntoIterator: Fst {
+pub trait FstIntoIterator: CoreFst {
     type ArcsIter: Iterator<Item = Arc<Self::W>>;
     type FstIter: Iterator<Item = (StateId, Self::ArcsIter, Option<Self::W>)>;
     fn fst_into_iter(self) -> Self::FstIter;
 }
 
-pub trait FstIterator<'a>: Fst
+pub trait FstIterator<'a>: CoreFst
 where
     Self::W: 'a,
 {
@@ -59,7 +59,7 @@ where
     fn fst_iter(&'a self) -> Self::FstIter;
 }
 
-pub trait FstIteratorMut<'a>: Fst
+pub trait FstIteratorMut<'a>: CoreFst
 where
     Self::W: 'a,
 {

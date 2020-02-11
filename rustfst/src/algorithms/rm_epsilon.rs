@@ -2,6 +2,7 @@ use std::cell::UnsafeCell;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::fmt;
+use std::iter::{repeat, Map, Repeat, Zip};
 use std::rc::Rc;
 use std::slice::Iter as IterSlice;
 
@@ -18,10 +19,12 @@ use crate::algorithms::visitors::SccVisitor;
 use crate::algorithms::Queue;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ArcIterator, CoreFst, Fst};
-use crate::fst_traits::{MutableFst, StateIterator};
+use crate::fst_traits::{FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, SymbolTable, EPS_LABEL};
 use std::borrow::Borrow;
+
+use itertools::izip;
 
 pub struct RmEpsilonConfig<W: Semiring, Q: Queue> {
     sd_opts: ShortestDistanceConfig<W, Q, EpsilonArcFilter>,
