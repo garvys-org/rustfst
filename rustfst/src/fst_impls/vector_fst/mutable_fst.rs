@@ -213,6 +213,21 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
             .as_mut()
     }
 
+    fn take_final_weight(&mut self, state_id: usize) -> Fallible<Option<Self::W>> {
+        let s = self
+            .states
+            .get_mut(state_id)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
+        Ok(s.final_weight.take())
+    }
+
+    unsafe fn take_final_weight_unchecked(&mut self, state_id: usize) -> Option<Self::W> {
+        self.states
+            .get_unchecked_mut(state_id)
+            .final_weight
+            .take()
+    }
+
     fn sort_arcs_unchecked<F: Fn(&Arc<Self::W>, &Arc<Self::W>) -> Ordering>(
         &mut self,
         state: StateId,

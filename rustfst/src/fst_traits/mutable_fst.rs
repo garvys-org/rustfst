@@ -213,7 +213,7 @@ pub trait MutableFst:
     /// # use rustfst::semirings::{Semiring, ProbabilityWeight};
     /// # use rustfst::Arc;
     /// # use failure::Fallible;
-    /// fn main() -> Fallible<()> {
+    /// # fn main() -> Fallible<()> {
     /// let mut fst = VectorFst::<ProbabilityWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
@@ -269,6 +269,59 @@ pub trait MutableFst:
         &mut self,
         state_id: StateId,
     ) -> Option<&mut <Self as CoreFst>::W>;
+
+    /// Takes the final weight out of the fst, leaving a None in its place.
+    ///
+    /// # Errors
+    ///
+    /// An error is raised if the state with id `state_id` doesn't exist.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::{Semiring, ProbabilityWeight};
+    /// # use rustfst::Arc;
+    /// # use failure::Fallible;
+    /// # fn main() -> Fallible<()> {
+    /// let mut fst = VectorFst::<ProbabilityWeight>::new();
+    /// let s1 = fst.add_state();
+    /// fst.set_final(s1, 1.2)?;
+    ///
+    /// assert_eq!(fst.final_weight(s1)?, Some(&ProbabilityWeight::new(1.2)));
+    /// let weight = fst.take_final_weight(s1)?;
+    /// assert_eq!(weight, Some(ProbabilityWeight::new(1.2)));
+    /// assert_eq!(fst.final_weight(s1)?, None);
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn take_final_weight(&mut self, state_id: StateId) -> Fallible<Option<Self::W>>;
+
+    /// Takes the final weight out of the fst, leaving a None in its place.
+    /// This version leads to `undefined behaviour` if the state doesn't exist.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::{Semiring, ProbabilityWeight};
+    /// # use rustfst::Arc;
+    /// # use failure::Fallible;
+    /// # fn main() -> Fallible<()> {
+    /// let mut fst = VectorFst::<ProbabilityWeight>::new();
+    /// let s1 = fst.add_state();
+    /// fst.set_final(s1, 1.2)?;
+    ///
+    /// assert_eq!(fst.final_weight(s1)?, Some(&ProbabilityWeight::new(1.2)));
+    /// let weight = unsafe {fst.take_final_weight_unchecked(s1)};
+    /// assert_eq!(weight, Some(ProbabilityWeight::new(1.2)));
+    /// assert_eq!(fst.final_weight(s1)?, None);
+    /// # Ok(())
+    /// # }
+    /// ```
+    unsafe fn take_final_weight_unchecked(&mut self, state_id: StateId) -> Option<Self::W>;
 
     fn sort_arcs_unchecked<F: Fn(&Arc<Self::W>, &Arc<Self::W>) -> Ordering>(
         &mut self,
