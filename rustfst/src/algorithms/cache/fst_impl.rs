@@ -56,8 +56,10 @@ pub trait FstImpl {
     }
 
     /// Turns the Dynamic FST into a static one.
-    fn compute<F2: MutableFst<W = Self::W> + ExpandedFst<W = Self::W>>(&mut self) -> Fallible<F2> 
-        where Self::W: Semiring {
+    fn compute<F2: MutableFst<W = Self::W> + ExpandedFst<W = Self::W>>(&mut self) -> Fallible<F2>
+    where
+        Self::W: Semiring,
+    {
         let start_state = self.start()?;
         let mut fst_out = F2::new();
         if start_state.is_none() {

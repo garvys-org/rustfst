@@ -54,7 +54,10 @@ impl<W> Arc<W> {
     /// assert_eq!(arc_1, arc_2);
     /// ```
     #[inline]
-    pub fn set_value(&mut self, arc: &Arc<W>) where W: std::clone::Clone {
+    pub fn set_value(&mut self, arc: &Arc<W>)
+    where
+        W: std::clone::Clone,
+    {
         self.ilabel = arc.ilabel;
         self.olabel = arc.olabel;
         self.weight = arc.weight.clone();

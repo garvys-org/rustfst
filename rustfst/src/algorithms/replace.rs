@@ -165,9 +165,9 @@ impl<F: Fst, B: Borrow<F>> std::fmt::Debug for ReplaceFstImpl<F, B> {
         write!(
             f,
             "ReplaceFstImpl {{ cache_impl : {:?}, call_label_type_ : {:?}, \
-        return_label_type_ : {:?}, call_output_label_ : {:?}, return_label_ : {:?}, \
-        fst_array : {:?}, nonterminal_set : {:?}, nonterminal_hash : {:?}, root : {:?}, \
-        state_table : {:?} }}",
+             return_label_type_ : {:?}, call_output_label_ : {:?}, return_label_ : {:?}, \
+             fst_array : {:?}, nonterminal_set : {:?}, nonterminal_hash : {:?}, root : {:?}, \
+             state_table : {:?} }}",
             self.cache_impl,
             self.call_label_type_,
             self.return_label_type_,
