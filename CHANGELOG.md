@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `FstIntoIterator` as a trait bound of `ExpandedFst`.
     - `FstIterator` as a trait bound of `Fst`.
     - `FstIteratorMut` as a trait bound of `MutableFst`
+- Add `take_final_weight` and `take_final_weight_unchecked` to MutableFst API.
 
 ### Changed
 
