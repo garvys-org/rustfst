@@ -1,6 +1,8 @@
-use crate::fst_traits::{ExpandedFst, Fst};
 use counter::Counter;
 use failure::Fallible;
+use itertools::Itertools;
+
+use crate::fst_traits::{ExpandedFst, Fst};
 
 pub fn compare_fst_static_dynamic<FS, FD>(fst_static: &FS, fst_dynamic: &FD) -> Fallible<()>
 where
@@ -35,6 +37,11 @@ where
 
         assert_eq!(arcs_dynamic, arcs_static);
     }
+
+    let fst_data_static = fst_static.fst_iter().map(|(a,b,c)| (a, b.collect_vec(), c)).collect_vec();
+    let fst_data_dynamic = fst_dynamic.fst_iter().map(|(a,b,c)| (a, b.collect_vec(), c)).collect_vec();
+
+    assert_eq!(fst_data_static, fst_data_dynamic);
 
     Ok(())
 }
