@@ -49,3 +49,89 @@ pub fn add_super_final_state<F: MutableFst>(ifst: &mut F) -> StateId {
 
     super_final_state
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use failure::Fallible;
+    use crate::fst_traits::{CoreFst, ExpandedFst };
+    use crate::semirings::TropicalWeight;
+    use crate::fst_impls::VectorFst;
+
+    #[test]
+    fn test_add_super_final_states() -> Fallible<()> {
+        let mut fst = VectorFst::<TropicalWeight>::new();
+        let s0 = fst.add_state();
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+        let s3 = fst.add_state();
+
+        fst.set_start(s0)?;
+        fst.emplace_arc(s0, 1, 0, 1.0, s1)?;
+        fst.emplace_arc(s1, 1, 0, 1.0, s2)?;
+        fst.emplace_arc(s1, 1, 0, 1.0, s3)?;
+
+        fst.set_final(s2, 1.0)?;
+        fst.set_final(s3, 1.0)?;
+
+        let num_states = fst.num_states();
+
+        let super_final_state = add_super_final_state(&mut fst);
+        assert_eq!(num_states, super_final_state);
+        assert!(!fst.is_final(s2)?);
+        assert_eq!(1, fst.num_arcs(s2)?);
+        assert!(!fst.is_final(s3)?);
+        assert_eq!(1, fst.num_arcs(s3)?);
+        assert_eq!(Some(&TropicalWeight::one()), fst.final_weight(super_final_state)?);
+        Ok(())
+    }
+
+    #[test]
+    fn test_add_super_final_states_1() -> Fallible<()> {
+        let mut fst = VectorFst::<TropicalWeight>::new();
+        let s0 = fst.add_state();
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+        let s3 = fst.add_state();
+
+        fst.set_start(s0)?;
+        fst.emplace_arc(s0, 1, 0, 1.0, s1)?;
+        fst.emplace_arc(s1, 1, 0, 1.0, s2)?;
+        fst.emplace_arc(s2, 1, 0, 1.0, s3)?;
+
+        fst.set_final(s3, TropicalWeight::one())?;
+
+        let super_final_state = add_super_final_state(&mut fst);
+        assert_eq!(s3, super_final_state);
+        assert_eq!(Some(&TropicalWeight::one()), fst.final_weight(super_final_state)?);
+        Ok(())
+    }
+
+    #[test]
+    fn test_add_super_final_states_2() -> Fallible<()> {
+        let mut fst = VectorFst::<TropicalWeight>::new();
+        let s0 = fst.add_state();
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+        let s3 = fst.add_state();
+
+        fst.set_start(s0)?;
+        fst.emplace_arc(s0, 1, 0, 1.0, s1)?;
+        fst.emplace_arc(s1, 1, 0, 1.0, s2)?;
+        fst.emplace_arc(s2, 1, 0, 1.0, s3)?;
+
+        fst.set_final(s3, 2.0)?;
+
+        let num_states = fst.num_states();
+
+        let super_final_state = add_super_final_state(&mut fst);
+        assert_eq!(num_states, super_final_state);
+        assert!(!fst.is_final(s3)?);
+        assert_eq!(1, fst.num_arcs(s3)?);
+        assert_eq!(Some(&TropicalWeight::one()), fst.final_weight(super_final_state)?);
+        Ok(())
+    }
+
+
+}
