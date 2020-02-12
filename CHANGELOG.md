@@ -13,9 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `FstIterator` as a trait bound of `Fst`.
     - `FstIteratorMut` as a trait bound of `MutableFst`
 - Add `take_final_weight` and `take_final_weight_unchecked` to MutableFst API.
-- Add `add_super_final_state` algorithm
+- Add `add_super_final_state` algorithm.
 
 ### Changed
+- `fst_convert` now consumes its input. Use `fst_convert_from_ref` to pass a borrow.
 
 ## [0.5.0] - 2020-02-04
 
