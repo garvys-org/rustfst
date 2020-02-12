@@ -1,12 +1,10 @@
 use std::cmp::Ordering;
-use std::rc::Rc;
 
 use failure::Fallible;
 
 use crate::algorithms::{ArcMapper, ClosureType};
 use crate::arc::Arc;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst, FstIteratorMut};
-use crate::symbol_table::SymbolTable;
+use crate::fst_traits::{CoreFst, ExpandedFst, FstIteratorMut};
 use crate::{Label, StateId};
 
 /// Trait defining the methods to modify a wFST.
@@ -345,31 +343,6 @@ pub trait MutableFst:
     /// Maps an arc using a `ArcMapper` object.
     fn arc_map<M: ArcMapper<Self::W>>(&mut self, mapper: &mut M) -> Fallible<()> {
         crate::algorithms::arc_map(self, mapper)
-    }
-
-    /// Attaches an output `SymbolTable` to the Fst.
-    /// The `SymbolTable` is not duplicated with the use of Rc.
-    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>);
-
-    /// Attaches an output `SymbolTable` to the Fst.
-    /// The `SymbolTable` is not duplicated with the use of Rc.
-    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>);
-
-    fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>>;
-    fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>>;
-
-    fn set_symts_from_fst<OF: Fst>(&mut self, other_fst: &OF) {
-        if let Some(symt) = other_fst.input_symbols() {
-            self.set_input_symbols(symt);
-        } else {
-            self.unset_input_symbols();
-        }
-
-        if let Some(symt) = other_fst.output_symbols() {
-            self.set_output_symbols(symt);
-        } else {
-            self.unset_output_symbols();
-        }
     }
 }
 

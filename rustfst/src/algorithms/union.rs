@@ -221,6 +221,22 @@ where
     fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
         self.0.output_symbols()
     }
+
+    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
+        self.0.set_input_symbols(symt)
+    }
+
+    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
+        self.0.set_output_symbols(symt)
+    }
+
+    fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+        self.0.unset_input_symbols()
+    }
+
+    fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+        self.0.unset_output_symbols()
+    }
 }
 
 impl<'a, F: Fst + 'static> FstIterator<'a> for UnionFst<F>

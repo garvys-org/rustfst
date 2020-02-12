@@ -134,6 +134,22 @@ macro_rules! dynamic_fst {
             fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
                 self.osymt.clone()
             }
+
+            fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
+                self.isymt = Some(Rc::clone(&symt))
+            }
+
+            fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
+                self.osymt = Some(Rc::clone(&symt));
+            }
+
+            fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+                self.isymt.take()
+            }
+
+            fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+                self.osymt.take()
+            }
         }
 
         impl<'a, $($a: $b $( < $c >)? ),*> FstIterator<'a> for $dyn_fst
