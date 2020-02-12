@@ -12,17 +12,16 @@ where
     if let Some(start) = ifst.start() {
         unsafe { ofst.set_start_unchecked(start) };
 
-        for s in 0..ifst.num_states() {
-            // Preallocation
+        for data in ifst.fst_iter() {
             unsafe {
-                ofst.reserve_arcs_unchecked(s, ifst.num_arcs_unchecked(s));
+                ofst.reserve_arcs_unchecked(data.state_id, data.num_arcs);
             }
-            for arc in unsafe { ifst.arcs_iter_unchecked(s) } {
-                unsafe { ofst.add_arc_unchecked(s, arc.clone()) };
+            for arc in data.arcs {
+                unsafe { ofst.add_arc_unchecked(data.state_id, arc.clone()) };
             }
 
-            if let Some(final_weight) = unsafe { ifst.final_weight_unchecked(s) } {
-                unsafe { ofst.set_final_unchecked(s, final_weight.clone()) };
+            if let Some(final_weight) = data.final_weight {
+                unsafe { ofst.set_final_unchecked(data.state_id, final_weight.clone()) };
             }
         }
     }
