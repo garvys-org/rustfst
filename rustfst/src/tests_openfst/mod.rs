@@ -23,6 +23,7 @@ use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityTestData
 use crate::tests_openfst::algorithms::factor_weight_identity::{
     test_factor_weight_identity, test_factor_weight_identity_dynamic,
 };
+use crate::tests_openfst::algorithms::fst_convert::test_fst_convert;
 use crate::tests_openfst::algorithms::gallic_encode_decode::test_gallic_encode_decode;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicOperationResult;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicTestData;
@@ -679,6 +680,12 @@ macro_rules! test_fst {
             #[test]
             fn test_fst_into_iterator_vector_openfst() -> Fallible<()> {
                 do_run!(test_fst_into_iterator_vector, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_fst_convert_openfst() -> Fallible<()> {
+                do_run!(test_fst_convert, $fst_name);
                 Ok(())
             }
         }

@@ -14,7 +14,7 @@ pub use self::expanded_fst::ExpandedFst;
 pub use self::final_states_iterator::FinalStatesIterator;
 pub use self::fst::{CoreFst, Fst};
 pub use self::iterators::{
-    ArcIterator, FstIntoIterator, FstIterator, FstIteratorMut, StateIterator,
+    ArcIterator, FstIntoIterator, FstIterData, FstIterator, FstIteratorMut, StateIterator,
 };
 pub use self::mutable_fst::{MutableArcIterator, MutableFst};
 pub use self::paths_iterator::PathsIterator;

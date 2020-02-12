@@ -1,7 +1,7 @@
 use failure::Fallible;
 use tempfile::tempdir;
 
-use crate::algorithms::fst_convert;
+use crate::algorithms::fst_convert_from_ref;
 use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_traits::SerializableFst;
 use crate::semirings::SerializableSemiring;
@@ -28,7 +28,7 @@ where
         error_message_fst!(const_fst_ref, deserialized_fst, "Serializer ConstFst Text")
     );
 
-    let deserialized_fst_vec: VectorFst<_> = fst_convert(&deserialized_fst);
+    let deserialized_fst_vec: VectorFst<_> = fst_convert_from_ref(&deserialized_fst);
 
     // Same assert but at the VectorFst level
     assert_eq!(

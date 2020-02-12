@@ -74,7 +74,7 @@ pub use self::{
     connect::connect,
     determinize::{determinize, determinize_with_distance, DeterminizeType},
     encode::{decode, encode},
-    fst_convert::fst_convert,
+    fst_convert::{fst_convert, fst_convert_from_ref},
     inversion::invert,
     isomorphic::isomorphic,
     minimize::minimize,

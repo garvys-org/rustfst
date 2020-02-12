@@ -12,6 +12,7 @@ use itertools::{izip, repeat_n, RepeatN};
 
 use crate::fst_impls::const_fst::data_structure::ConstState;
 use crate::fst_impls::ConstFst;
+use crate::fst_traits::FstIterData;
 use crate::fst_traits::{ArcIterator, FstIntoIterator, FstIterator, StateIterator};
 use crate::semirings::Semiring;
 use crate::Arc;
@@ -52,7 +53,7 @@ where
     // TODO: Change this to impl once the feature has been stabilized
     // #![feature(type_alias_impl_trait)]
     // https://github.com/rust-lang/rust/issues/63063)
-    type FstIter = Box<dyn Iterator<Item = (StateId, Self::ArcsIter, Option<W>)>>;
+    type FstIter = Box<dyn Iterator<Item = FstIterData<W, Self::ArcsIter>>>;
 
     fn fst_into_iter(mut self) -> Self::FstIter {
         // Here the contiguous arcs are moved into multiple vectors in order to be able to create
@@ -66,12 +67,11 @@ where
         Box::new(
             izip!(self.states.into_iter(), arcs.into_iter())
                 .enumerate()
-                .map(|(state_id, (const_state, arcs_from_state))| {
-                    (
-                        state_id,
-                        arcs_from_state.into_iter(),
-                        const_state.final_weight,
-                    )
+                .map(|(state_id, (const_state, arcs_from_state))| FstIterData {
+                    state_id,
+                    arcs: arcs_from_state.into_iter(),
+                    final_weight: const_state.final_weight,
+                    num_arcs: const_state.narcs,
                 }),
         )
     }
@@ -91,18 +91,19 @@ impl<'a, W: Semiring + 'static> FstIterator<'a> for ConstFst<W> {
         Box<
             dyn FnMut(
                 (StateId, (&'a ConstState<W>, &'a Vec<Arc<W>>)),
-            ) -> (StateId, Self::ArcsIter, Option<&'a W>),
+            ) -> FstIterData<&'a W, Self::ArcsIter>,
         >,
     >;
     fn fst_iter(&'a self) -> Self::FstIter {
         let it = repeat_n(&self.arcs, self.states.len());
         izip!(self.states.iter(), it).enumerate().map(Box::new(
             |(state_id, (fst_state, arcs)): (StateId, (&'a ConstState<W>, &'a Vec<Arc<W>>))| {
-                (
+                FstIterData {
                     state_id,
-                    arcs.iter().skip(fst_state.pos).take(fst_state.narcs),
-                    fst_state.final_weight.as_ref(),
-                )
+                    arcs: arcs.iter().skip(fst_state.pos).take(fst_state.narcs),
+                    final_weight: fst_state.final_weight.as_ref(),
+                    num_arcs: fst_state.narcs,
+                }
             },
         ))
     }

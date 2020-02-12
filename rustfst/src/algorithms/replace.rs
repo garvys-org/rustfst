@@ -18,7 +18,7 @@ use itertools::Itertools;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::fst_traits::{
-    ArcIterator, CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator,
+    ArcIterator, CoreFst, ExpandedFst, Fst, FstIterData, FstIterator, MutableFst, StateIterator,
 };
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, SymbolTable, EPS_LABEL};
