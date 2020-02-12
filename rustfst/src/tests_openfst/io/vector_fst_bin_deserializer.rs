@@ -1,7 +1,7 @@
 use failure::Fallible;
 
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{MutableFst, SerializableFst};
+use crate::fst_traits::{Fst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
