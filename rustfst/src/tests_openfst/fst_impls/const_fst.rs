@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use failure::Fallible;
 
-use crate::algorithms::fst_convert;
+use crate::algorithms::fst_convert_from_ref;
 use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_traits::{Fst, MutableFst};
 use crate::semirings::{SerializableSemiring, WeightQuantize};
@@ -27,7 +27,7 @@ where
     }
 
     let const_fst: ConstFst<_> = raw_fst.clone().into();
-    let pred_fst: VectorFst<_> = fst_convert(&const_fst);
+    let pred_fst: VectorFst<_> = fst_convert_from_ref(&const_fst);
     assert_eq!(
         raw_fst,
         pred_fst,

@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::algorithms::fst_convert_2;
+use crate::algorithms::fst_convert;
 use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring};
 use crate::tests_openfst::FstTestData;
@@ -14,7 +14,7 @@ where
 {
     // Invert
     let fst = test_data.raw.clone();
-    let fst_converted: F = fst_convert_2(fst.clone());
+    let fst_converted: F = fst_convert(fst.clone());
     assert_eq!(
         fst_converted,
         fst,
