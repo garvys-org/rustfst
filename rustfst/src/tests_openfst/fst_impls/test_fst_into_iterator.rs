@@ -14,12 +14,18 @@ fn do_test_fst_into_iterator<F: ExpandedFst>(fst: F) -> Fallible<()> {
             state,
             fst.arcs_iter(state)?.cloned().collect_vec(),
             fst.final_weight(state)?.cloned(),
+            fst.num_arcs(state)?,
         ));
     }
 
     let mut fst_data = vec![];
-    for (state_id, arcs, final_weight) in fst.fst_into_iter() {
-        fst_data.push((state_id, arcs.collect_vec(), final_weight));
+    for fst_iter_data in fst.fst_into_iter() {
+        fst_data.push((
+            fst_iter_data.state_id,
+            fst_iter_data.arcs.collect_vec(),
+            fst_iter_data.final_weight,
+            fst_iter_data.num_arcs,
+        ));
     }
     assert_eq!(fst_data, fst_data_ref);
 
@@ -34,12 +40,18 @@ fn do_test_fst_iterator<F: ExpandedFst>(fst: &F) -> Fallible<()> {
             state,
             fst.arcs_iter(state)?.collect_vec(),
             fst.final_weight(state)?,
+            fst.num_arcs(state)?,
         ));
     }
 
     let mut fst_data = vec![];
-    for (state_id, arcs, final_weight) in fst.fst_iter() {
-        fst_data.push((state_id, arcs.collect_vec(), final_weight));
+    for data in fst.fst_iter() {
+        fst_data.push((
+            data.state_id,
+            data.arcs.collect_vec(),
+            data.final_weight,
+            data.num_arcs,
+        ));
     }
     assert_eq!(fst_data, fst_data_ref);
 

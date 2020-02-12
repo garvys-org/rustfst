@@ -18,7 +18,7 @@ use crate::algorithms::top_sort::TopOrderVisitor;
 use crate::algorithms::visitors::SccVisitor;
 use crate::algorithms::Queue;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{ArcIterator, CoreFst, Fst};
+use crate::fst_traits::{ArcIterator, CoreFst, Fst, FstIterData};
 use crate::fst_traits::{FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, SymbolTable, EPS_LABEL};

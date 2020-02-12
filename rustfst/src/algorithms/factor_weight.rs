@@ -18,7 +18,7 @@ use bitflags::bitflags;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::arc::Arc;
-use crate::fst_traits::{ArcIterator, FstIterator, StateIterator};
+use crate::fst_traits::{ArcIterator, FstIterData, FstIterator, StateIterator};
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::{Label, StateId};

@@ -46,10 +46,16 @@ where
     if let Some(start) = ifst.start() {
         unsafe { ofst.set_start_unchecked(start) };
 
-        for (state_id, arcs, final_weight) in ifst.fst_into_iter() {
-            arcs.for_each(|arc| unsafe { ofst.add_arc_unchecked(state_id, arc) });
-            if let Some(w) = final_weight {
-                unsafe { ofst.set_final_unchecked(state_id, w) };
+        for fst_iter_data in ifst.fst_into_iter() {
+            unsafe {
+                ofst.reserve_arcs_unchecked(fst_iter_data.state_id, fst_iter_data.num_arcs);
+            }
+            for arc in fst_iter_data.arcs {
+                unsafe { ofst.add_arc_unchecked(fst_iter_data.state_id, arc) }
+            }
+
+            if let Some(w) = fst_iter_data.final_weight {
+                unsafe { ofst.set_final_unchecked(fst_iter_data.state_id, w) };
             }
         }
     }

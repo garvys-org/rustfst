@@ -7,6 +7,7 @@ use failure::Fallible;
 
 use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
+use crate::fst_traits::FstIterData;
 use crate::fst_traits::{
     ArcIterator, FstIntoIterator, FstIterator, FstIteratorMut, MutableArcIterator, StateIterator,
 };
@@ -61,15 +62,18 @@ where
     // TODO: Change this to impl once the feature has been stabilized
     // #![feature(type_alias_impl_trait)]
     // https://github.com/rust-lang/rust/issues/63063)
-    type FstIter = Box<dyn Iterator<Item = (StateId, Self::ArcsIter, Option<W>)>>;
+    type FstIter = Box<dyn Iterator<Item = FstIterData<W, Self::ArcsIter>>>;
 
     fn fst_into_iter(self) -> Self::FstIter {
         Box::new(
             self.states
                 .into_iter()
                 .enumerate()
-                .map(|(state_id, fst_state)| {
-                    (state_id, fst_state.arcs.into_iter(), fst_state.final_weight)
+                .map(|(state_id, fst_state)| FstIterData {
+                    state_id,
+                    num_arcs: fst_state.arcs.len(),
+                    arcs: fst_state.arcs.into_iter(),
+                    final_weight: fst_state.final_weight,
                 }),
         )
     }
@@ -79,20 +83,17 @@ impl<'a, W: Semiring + 'static> FstIterator<'a> for VectorFst<W> {
     type ArcsIter = std::slice::Iter<'a, Arc<W>>;
     type FstIter = Map<
         Enumerate<std::slice::Iter<'a, VectorFstState<W>>>,
-        Box<
-            dyn FnMut((StateId, &'a VectorFstState<W>)) -> (StateId, Self::ArcsIter, Option<&'a W>),
-        >,
+        Box<dyn FnMut((StateId, &'a VectorFstState<W>)) -> FstIterData<&'a W, Self::ArcsIter>>,
     >;
     fn fst_iter(&'a self) -> Self::FstIter {
         self.states
             .iter()
             .enumerate()
-            .map(Box::new(|(state_id, fst_state)| {
-                (
-                    state_id,
-                    fst_state.arcs.iter(),
-                    fst_state.final_weight.as_ref(),
-                )
+            .map(Box::new(|(state_id, fst_state)| FstIterData {
+                state_id,
+                arcs: fst_state.arcs.iter(),
+                final_weight: fst_state.final_weight.as_ref(),
+                num_arcs: fst_state.arcs.len(),
             }))
     }
 }

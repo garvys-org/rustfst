@@ -40,11 +40,25 @@ where
 
     let fst_data_static = fst_static
         .fst_iter()
-        .map(|(a, b, c)| (a, b.collect_vec(), c))
+        .map(|data| {
+            (
+                data.state_id,
+                data.arcs.collect_vec(),
+                data.final_weight,
+                data.num_arcs,
+            )
+        })
         .collect_vec();
     let fst_data_dynamic = fst_dynamic
         .fst_iter()
-        .map(|(a, b, c)| (a, b.collect_vec(), c))
+        .map(|data| {
+            (
+                data.state_id,
+                data.arcs.collect_vec(),
+                data.final_weight,
+                data.num_arcs,
+            )
+        })
         .collect_vec();
 
     assert_eq!(fst_data_static, fst_data_dynamic);

@@ -44,9 +44,16 @@ where
     unsafe fn arcs_iter_unchecked(&'a self, state_id: StateId) -> Self::Iter;
 }
 
+pub struct FstIterData<W, I> {
+    pub state_id: StateId,
+    pub final_weight: Option<W>,
+    pub arcs: I,
+    pub num_arcs: usize,
+}
+
 pub trait FstIntoIterator: CoreFst {
     type ArcsIter: Iterator<Item = Arc<Self::W>>;
-    type FstIter: Iterator<Item = (StateId, Self::ArcsIter, Option<Self::W>)>;
+    type FstIter: Iterator<Item = FstIterData<Self::W, Self::ArcsIter>>;
     fn fst_into_iter(self) -> Self::FstIter;
 }
 
@@ -55,7 +62,7 @@ where
     Self::W: 'a,
 {
     type ArcsIter: Iterator<Item = &'a Arc<Self::W>>;
-    type FstIter: Iterator<Item = (StateId, Self::ArcsIter, Option<&'a Self::W>)>;
+    type FstIter: Iterator<Item = FstIterData<&'a Self::W, Self::ArcsIter>>;
     fn fst_iter(&'a self) -> Self::FstIter;
 }
 
