@@ -14,11 +14,11 @@ pub fn map_weight<W: WeaklyDivisibleSemiring>(weight: &mut W) -> Fallible<()> {
 }
 
 impl<S: WeaklyDivisibleSemiring> ArcMapper<S> for InvertWeightMapper {
-    fn arc_map(&mut self, arc: &mut Arc<S>) -> Fallible<()> {
+    fn arc_map(&self, arc: &mut Arc<S>) -> Fallible<()> {
         map_weight(&mut arc.weight)
     }
 
-    fn final_arc_map(&mut self, final_arc: &mut FinalArc<S>) -> Fallible<()> {
+    fn final_arc_map(&self, final_arc: &mut FinalArc<S>) -> Fallible<()> {
         map_weight(&mut final_arc.weight)
     }
 

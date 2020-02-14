@@ -42,18 +42,18 @@ pub enum MapFinalAction {
 /// arcs.
 pub trait ArcMapper<S: Semiring> {
     /// How to modify the arcs.
-    fn arc_map(&mut self, arc: &mut Arc<S>) -> Fallible<()>;
+    fn arc_map(&self, arc: &mut Arc<S>) -> Fallible<()>;
 
     /// The mapper will be passed final weights as arcs of the form
     /// `FinalArc(EPS_LABEL, EPS_LABEL, weight)`.
-    fn final_arc_map(&mut self, final_arc: &mut FinalArc<S>) -> Fallible<()>;
+    fn final_arc_map(&self, final_arc: &mut FinalArc<S>) -> Fallible<()>;
 
     /// Specifies final action the mapper requires (see above).
     fn final_action(&self) -> MapFinalAction;
 }
 
 /// Maps every arc in the FST using an `ArcMapper` object.
-pub fn arc_map<F, M>(ifst: &mut F, mapper: &mut M) -> Fallible<()>
+pub fn arc_map<F, M>(ifst: &mut F, mapper: &M) -> Fallible<()>
 where
     F: MutableFst,
     M: ArcMapper<F::W>,

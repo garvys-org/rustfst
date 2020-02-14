@@ -26,11 +26,11 @@ impl<W: Semiring> TimesMapper<W> {
 }
 
 impl<S: Semiring> ArcMapper<S> for TimesMapper<S> {
-    fn arc_map(&mut self, arc: &mut Arc<S>) -> Fallible<()> {
+    fn arc_map(&self, arc: &mut Arc<S>) -> Fallible<()> {
         self.map_weight(&mut arc.weight)
     }
 
-    fn final_arc_map(&mut self, final_arc: &mut FinalArc<S>) -> Fallible<()> {
+    fn final_arc_map(&self, final_arc: &mut FinalArc<S>) -> Fallible<()> {
         self.map_weight(&mut final_arc.weight)
     }
 
