@@ -10,7 +10,10 @@ use ordered_float::OrderedFloat;
 
 use crate::parsers::bin_fst::utils_serialization::write_bin_f32;
 use crate::semirings::semiring::SerializableSemiring;
-use crate::semirings::{CompleteSemiring, DivideType, Semiring, SemiringProperties, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize, IntoSemiring};
+use crate::semirings::{
+    CompleteSemiring, DivideType, IntoSemiring, Semiring, SemiringProperties, StarSemiring,
+    WeaklyDivisibleSemiring, WeightQuantize,
+};
 use crate::KDELTA;
 
 /// Tropical semiring: (min, +, inf, 0).

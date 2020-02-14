@@ -6,7 +6,6 @@ use std::marker::PhantomData;
 use failure::Fallible;
 use nom::IResult;
 
-use crate::semirings::{ProductWeight, IntoSemiring};
 use crate::semirings::Semiring;
 #[cfg(test)]
 use crate::semirings::TropicalWeight;
@@ -14,6 +13,7 @@ use crate::semirings::{
     DivideType, SemiringProperties, SerializableSemiring, StringWeightLeft, StringWeightRestrict,
     StringWeightRight, UnionWeight, UnionWeightOption, WeaklyDivisibleSemiring, WeightQuantize,
 };
+use crate::semirings::{IntoSemiring, ProductWeight};
 use crate::Label;
 
 /// Product of StringWeightLeft and an arbitrary weight.

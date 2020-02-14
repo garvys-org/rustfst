@@ -5,7 +5,10 @@ use std::hash::{Hash, Hasher};
 use failure::Fallible;
 use ordered_float::OrderedFloat;
 
-use crate::semirings::{CompleteSemiring, DivideType, Semiring, SemiringProperties, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize, IntoSemiring};
+use crate::semirings::{
+    CompleteSemiring, DivideType, IntoSemiring, Semiring, SemiringProperties, StarSemiring,
+    WeaklyDivisibleSemiring, WeightQuantize,
+};
 use crate::KDELTA;
 
 /// Probability semiring: (x, +, 0.0, 1.0).

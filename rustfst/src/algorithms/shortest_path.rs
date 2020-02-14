@@ -12,7 +12,9 @@ use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::{connect, determinize_with_distance, reverse, shortest_distance, Queue};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, MutableFst};
-use crate::semirings::{Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize, IntoSemiring};
+use crate::semirings::{
+    IntoSemiring, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
+};
 use crate::Arc;
 use crate::StateId;
 
@@ -99,7 +101,7 @@ fn single_shortest_path<F>(
 ) -> Fallible<()>
 where
     F: ExpandedFst,
-    <F as CoreFst>::W: 'static,
+    F::W: 'static,
 {
     parent.clear();
     *f_parent = None;
@@ -257,7 +259,7 @@ impl<'a, 'b, W: Semiring> ShortestPathCompare<'a, 'b, W> {
 
 fn n_shortest_path<W, FI, FO>(ifst: &FI, distance: &[W], nshortest: usize) -> Fallible<FO>
 where
-    W: Semiring + 'static,
+    W: Semiring,
     FI: ExpandedFst<W = W::ReverseWeight> + MutableFst<W = W::ReverseWeight>,
     FO: MutableFst<W = W> + ExpandedFst<W = W>,
 {

@@ -3,7 +3,9 @@ use std::i32;
 
 use failure::Fallible;
 
-use crate::semirings::{CompleteSemiring, Semiring, SemiringProperties, StarSemiring, IntoSemiring};
+use crate::semirings::{
+    CompleteSemiring, IntoSemiring, Semiring, SemiringProperties, StarSemiring,
+};
 
 /// Probability semiring: (x, +, 0.0, 1.0).
 #[derive(Clone, Debug, PartialEq, PartialOrd, Default, Hash, Eq, Copy)]

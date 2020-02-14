@@ -7,7 +7,7 @@ use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::Queue;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ExpandedFst, MutableFst};
-use crate::semirings::{Semiring, SemiringProperties, IntoSemiring};
+use crate::semirings::{IntoSemiring, Semiring, SemiringProperties};
 use crate::StateId;
 use std::borrow::Borrow;
 
@@ -279,9 +279,7 @@ where
         let rdistance = shortest_distance_with_config(&rfst, ropts)?;
         let mut distance = Vec::with_capacity(rdistance.len() - 1); //reversing added one state
         while distance.len() < rdistance.len() - 1 {
-            distance.push(
-                rdistance[distance.len() + 1].reverse_back()?,
-            );
+            distance.push(rdistance[distance.len() + 1].reverse_back()?);
         }
         Ok(distance)
     }

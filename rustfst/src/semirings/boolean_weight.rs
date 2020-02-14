@@ -1,6 +1,8 @@
 use failure::Fallible;
 
-use crate::semirings::{CompleteSemiring, Semiring, SemiringProperties, StarSemiring, IntoSemiring};
+use crate::semirings::{
+    CompleteSemiring, IntoSemiring, Semiring, SemiringProperties, StarSemiring,
+};
 use std::borrow::Borrow;
 /// Boolean semiring: (&, |, false, true).
 #[derive(Clone, Debug, PartialEq, PartialOrd, Default, Eq, Copy, Hash)]

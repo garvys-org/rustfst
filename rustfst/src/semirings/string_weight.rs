@@ -13,8 +13,8 @@ use crate::parsers::bin_fst::utils_serialization::write_bin_i32;
 use crate::parsers::nom_utils::num;
 use crate::semirings::string_variant::StringWeightVariant;
 use crate::semirings::{
-    DivideType, Semiring, SemiringProperties, SerializableSemiring, WeaklyDivisibleSemiring,
-    WeightQuantize, IntoSemiring
+    DivideType, IntoSemiring, Semiring, SemiringProperties, SerializableSemiring,
+    WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::Label;
 

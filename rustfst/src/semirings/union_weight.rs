@@ -14,7 +14,10 @@ use nom::number::complete::le_i32;
 use nom::IResult;
 
 use crate::parsers::bin_fst::utils_serialization::write_bin_i32;
-use crate::semirings::{DivideType, Semiring, SemiringProperties, SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize, IntoSemiring};
+use crate::semirings::{
+    DivideType, IntoSemiring, Semiring, SemiringProperties, SerializableSemiring,
+    WeaklyDivisibleSemiring, WeightQuantize,
+};
 
 pub trait UnionWeightOption<W: Semiring>: Debug + Hash + Clone + PartialOrd + Eq {
     type ReverseOptions: UnionWeightOption<W::ReverseWeight>;
@@ -302,7 +305,9 @@ where
     }
 }
 
-impl<W: Semiring, O: UnionWeightOption<W>> IntoSemiring<UnionWeight<W, O>> for <UnionWeight<W,O> as Semiring>::ReverseWeight {
+impl<W: Semiring, O: UnionWeightOption<W>> IntoSemiring<UnionWeight<W, O>>
+    for <UnionWeight<W, O> as Semiring>::ReverseWeight
+{
     fn reverse_back(&self) -> Fallible<UnionWeight<W, O>> {
         unimplemented!()
     }

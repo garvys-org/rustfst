@@ -1,7 +1,7 @@
-use crate::algorithms::{Queue, QueueType};
 use crate::algorithms::arc_filters::ArcFilter;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::top_sort::TopOrderVisitor;
+use crate::algorithms::{Queue, QueueType};
 use crate::fst_traits::ExpandedFst;
 use crate::StateId;
 

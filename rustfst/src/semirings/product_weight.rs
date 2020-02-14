@@ -6,7 +6,10 @@ use std::io::Write;
 use failure::Fallible;
 use nom::IResult;
 
-use crate::semirings::{DivideType, Semiring, SemiringProperties, SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize, IntoSemiring};
+use crate::semirings::{
+    DivideType, IntoSemiring, Semiring, SemiringProperties, SerializableSemiring,
+    WeaklyDivisibleSemiring, WeightQuantize,
+};
 #[cfg(test)]
 use crate::semirings::{LogWeight, TropicalWeight};
 
@@ -93,7 +96,9 @@ where
     }
 }
 
-impl<W1: Semiring, W2: Semiring> IntoSemiring<ProductWeight<W1, W2>> for <ProductWeight<W1, W2> as Semiring>::ReverseWeight {
+impl<W1: Semiring, W2: Semiring> IntoSemiring<ProductWeight<W1, W2>>
+    for <ProductWeight<W1, W2> as Semiring>::ReverseWeight
+{
     fn reverse_back(&self) -> Fallible<ProductWeight<W1, W2>> {
         unimplemented!()
     }

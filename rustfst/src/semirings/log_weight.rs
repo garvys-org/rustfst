@@ -7,7 +7,10 @@ use failure::Fallible;
 use ordered_float::OrderedFloat;
 
 use crate::parsers::bin_fst::utils_serialization::write_bin_f32;
-use crate::semirings::{CompleteSemiring, DivideType, Semiring, SemiringProperties, SerializableSemiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize, IntoSemiring};
+use crate::semirings::{
+    CompleteSemiring, DivideType, IntoSemiring, Semiring, SemiringProperties, SerializableSemiring,
+    StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
+};
 use crate::KDELTA;
 use nom::number::complete::{float, le_f32};
 use nom::IResult;
