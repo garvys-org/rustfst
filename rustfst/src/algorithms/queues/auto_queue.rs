@@ -1,17 +1,17 @@
 use failure::Fallible;
 
+use crate::algorithms::{Queue, QueueType};
+use crate::algorithms::arc_filters::ArcFilter;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::visitors::SccVisitor;
-use crate::algorithms::{Queue, QueueType};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::fst_traits::ExpandedFst;
 use crate::semirings::{Semiring, SemiringProperties};
 
 use super::{
-    natural_less, FifoQueue, LifoQueue, NaturalShortestFirstQueue, SccQueue, StateOrderQueue,
+    FifoQueue, LifoQueue, natural_less, NaturalShortestFirstQueue, SccQueue, StateOrderQueue,
     TopOrderQueue, TrivialQueue,
 };
-use crate::algorithms::arc_filters::ArcFilter;
 
 #[derive(Debug)]
 pub struct AutoQueue {
@@ -19,7 +19,7 @@ pub struct AutoQueue {
 }
 
 impl AutoQueue {
-    pub fn new<F: MutableFst + ExpandedFst, A: ArcFilter<F::W>>(
+    pub fn new<F: ExpandedFst, A: ArcFilter<F::W>>(
         fst: &F,
         distance: Option<&Vec<F::W>>,
         arc_filter: &A,
@@ -101,7 +101,7 @@ impl AutoQueue {
     }
 
     pub fn scc_queue_type<
-        F: MutableFst + ExpandedFst,
+        F: ExpandedFst,
         C: Fn(&F::W, &F::W) -> Fallible<bool>,
         A: ArcFilter<F::W>,
     >(

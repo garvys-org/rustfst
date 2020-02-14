@@ -220,7 +220,7 @@ pub fn shortest_distance_with_config<
     W: Semiring,
     Q: Queue,
     A: ArcFilter<W>,
-    F: MutableFst<W = W>,
+    F: ExpandedFst<W = W>,
 >(
     fst: &F,
     opts: ShortestDistanceConfig<W, Q, A>,
@@ -263,7 +263,7 @@ pub fn shortest_distance_with_config<
 /// # Ok(())
 /// # }
 /// ```
-pub fn shortest_distance<F: MutableFst>(fst: &F, reverse: bool) -> Fallible<Vec<F::W>>
+pub fn shortest_distance<F: ExpandedFst>(fst: &F, reverse: bool) -> Fallible<Vec<F::W>>
 where
     F::W: 'static,
 {

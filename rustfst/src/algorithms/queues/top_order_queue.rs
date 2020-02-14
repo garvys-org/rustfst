@@ -1,8 +1,8 @@
+use crate::algorithms::{Queue, QueueType};
 use crate::algorithms::arc_filters::ArcFilter;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::top_sort::TopOrderVisitor;
-use crate::algorithms::{Queue, QueueType};
-use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::fst_traits::ExpandedFst;
 use crate::StateId;
 
 /// Topological-order queue discipline, templated on the StateId. States are
@@ -16,7 +16,7 @@ pub struct TopOrderQueue {
 }
 
 impl TopOrderQueue {
-    pub fn new<F: MutableFst + ExpandedFst, A: ArcFilter<F::W>>(fst: &F, arc_filter: &A) -> Self {
+    pub fn new<F: ExpandedFst, A: ArcFilter<F::W>>(fst: &F, arc_filter: &A) -> Self {
         let mut visitor = TopOrderVisitor::new();
         dfs_visit(fst, &mut visitor, arc_filter, false);
         if !visitor.acyclic {
