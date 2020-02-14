@@ -35,7 +35,7 @@ use crate::StateId;
 ///
 pub fn shortest_path<FI, FO>(ifst: &FI, nshortest: usize, unique: bool) -> Fallible<FO>
 where
-    FI: MutableFst + ExpandedFst,
+    FI: ExpandedFst,
     FO: MutableFst<W = FI::W>,
     FI::W: 'static
         + Into<<<FI as CoreFst>::W as Semiring>::ReverseWeight>
@@ -107,7 +107,7 @@ fn single_shortest_path<F>(
     parent: &mut Vec<Option<(StateId, usize)>>,
 ) -> Fallible<()>
 where
-    F: ExpandedFst + MutableFst,
+    F: ExpandedFst,
     <F as CoreFst>::W: 'static,
 {
     parent.clear();
@@ -181,7 +181,7 @@ fn single_shortest_path_backtrace<FI, FO>(
     parent: &[Option<(StateId, usize)>],
 ) -> Fallible<FO>
 where
-    FI: ExpandedFst + MutableFst,
+    FI: ExpandedFst,
     FO: MutableFst<W = FI::W>,
 {
     let mut ofst = FO::new();
