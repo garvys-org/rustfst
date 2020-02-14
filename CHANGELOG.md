@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - `fst_convert` now consumes its input. Use `fst_convert_from_ref` to pass a borrow.
 - `set_input_symbols`, `set_output_symbols`, `unset_input_symbols`, `unset_output_symbols` and `set_symts_from_fst` methods have been moved from `MutableFst` to `Fst`.
+- Remove `MutableFst` trait bound from input of `shortest_path`.
 
 ## [0.5.0] - 2020-02-04
 
