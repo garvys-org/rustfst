@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 use failure::Fallible;
 use nom::IResult;
 
-use crate::semirings::ProductWeight;
+use crate::semirings::{ProductWeight, IntoSemiring};
 use crate::semirings::Semiring;
 #[cfg(test)]
 use crate::semirings::TropicalWeight;
@@ -68,6 +68,12 @@ macro_rules! gallic_weight {
         {
             fn as_ref(&self) -> &Self {
                 &self
+            }
+        }
+
+        impl<W: Semiring> IntoSemiring<$semiring> for <$semiring as Semiring>::ReverseWeight {
+            fn reverse_back(&self) -> Fallible<$semiring> {
+                unimplemented!()
             }
         }
 
@@ -376,6 +382,12 @@ impl<W: Semiring> Semiring for GallicWeight<W> {
 
     fn properties() -> SemiringProperties {
         UnionWeight::<GallicWeightRestrict<W>, GallicUnionWeightOption<GallicWeightRestrict<W>>>::properties()
+    }
+}
+
+impl<W: Semiring> IntoSemiring<GallicWeight<W>> for <GallicWeight<W> as Semiring>::ReverseWeight {
+    fn reverse_back(&self) -> Fallible<GallicWeight<W>> {
+        unimplemented!()
     }
 }
 

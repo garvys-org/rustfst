@@ -14,7 +14,7 @@ use crate::parsers::nom_utils::num;
 use crate::semirings::string_variant::StringWeightVariant;
 use crate::semirings::{
     DivideType, Semiring, SemiringProperties, SerializableSemiring, WeaklyDivisibleSemiring,
-    WeightQuantize,
+    WeightQuantize, IntoSemiring
 };
 use crate::Label;
 
@@ -52,6 +52,12 @@ macro_rules! string_semiring {
         impl AsRef<Self> for $semiring {
             fn as_ref(&self) -> &$semiring {
                 &self
+            }
+        }
+
+        impl IntoSemiring<$semiring> for <$semiring as Semiring>::ReverseWeight {
+            fn reverse_back(&self) -> Fallible<$semiring> {
+                unimplemented!()
             }
         }
 

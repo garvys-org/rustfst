@@ -7,10 +7,7 @@ use failure::Fallible;
 use ordered_float::OrderedFloat;
 
 use crate::parsers::bin_fst::utils_serialization::write_bin_f32;
-use crate::semirings::{
-    CompleteSemiring, DivideType, Semiring, SemiringProperties, SerializableSemiring, StarSemiring,
-    WeaklyDivisibleSemiring, WeightQuantize,
-};
+use crate::semirings::{CompleteSemiring, DivideType, Semiring, SemiringProperties, SerializableSemiring, StarSemiring, WeaklyDivisibleSemiring, WeightQuantize, IntoSemiring};
 use crate::KDELTA;
 use nom::number::complete::{float, le_f32};
 use nom::IResult;
@@ -94,6 +91,12 @@ impl Semiring for LogWeight {
         SemiringProperties::LEFT_SEMIRING
             | SemiringProperties::RIGHT_SEMIRING
             | SemiringProperties::COMMUTATIVE
+    }
+}
+
+impl IntoSemiring<LogWeight> for LogWeight {
+    fn reverse_back(&self) -> Fallible<LogWeight> {
+        unimplemented!()
     }
 }
 
