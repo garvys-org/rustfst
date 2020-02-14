@@ -8,6 +8,7 @@ use crate::semirings::Semiring;
 use crate::Arc;
 use crate::Label;
 use crate::EPS_LABEL;
+use failure::_core::cell::RefCell;
 
 #[derive(PartialEq, Eq, Hash, Clone)]
 pub struct EncodeTuple<W: Semiring> {
@@ -16,7 +17,7 @@ pub struct EncodeTuple<W: Semiring> {
     weight: W,
 }
 
-pub struct EncodeTable<W: Semiring> {
+struct EncodeTableMut<W: Semiring> {
     encode_labels: bool,
     encode_weights: bool,
     // FIXME : Store references ?
@@ -24,9 +25,11 @@ pub struct EncodeTable<W: Semiring> {
     tuple_to_id: HashMap<EncodeTuple<W>, usize>,
 }
 
-impl<W: Semiring> EncodeTable<W> {
+pub struct EncodeTable<W: Semiring>(RefCell<EncodeTableMut<W>>);
+
+impl<W: Semiring> EncodeTableMut<W> {
     pub fn new(encode_labels: bool, encode_weights: bool) -> Self {
-        EncodeTable {
+        EncodeTableMut {
             encode_labels,
             encode_weights,
             id_to_tuple: vec![],
@@ -83,7 +86,7 @@ impl<W: Semiring> EncodeTable<W> {
     }
 }
 
-impl<W: Semiring> Default for EncodeTable<W> {
+impl<W: Semiring> Default for EncodeTableMut<W> {
     fn default() -> Self {
         Self::new(true, true)
     }
@@ -96,34 +99,37 @@ struct EncodeMapper<W: Semiring> {
 impl<W: Semiring> EncodeMapper<W> {
     pub fn new(encode_labels: bool, encode_weights: bool) -> Self {
         EncodeMapper {
-            encode_table: EncodeTable::new(encode_labels, encode_weights),
+            encode_table: EncodeTable(RefCell::new(EncodeTableMut::new(
+                encode_labels,
+                encode_weights,
+            ))),
         }
     }
 }
 
 impl<W: Semiring> ArcMapper<W> for EncodeMapper<W> {
-    fn arc_map(&mut self, arc: &mut Arc<W>) -> Fallible<()> {
-        let tuple = self.encode_table.arc_to_tuple(arc);
-        let label = self.encode_table.encode(tuple);
+    fn arc_map(&self, arc: &mut Arc<W>) -> Fallible<()> {
+        let tuple = self.encode_table.0.borrow().arc_to_tuple(arc);
+        let label = self.encode_table.0.borrow_mut().encode(tuple);
         arc.ilabel = label;
-        if self.encode_table.encode_labels {
+        if self.encode_table.0.borrow().encode_labels {
             arc.olabel = label;
         }
-        if self.encode_table.encode_weights {
+        if self.encode_table.0.borrow().encode_weights {
             arc.weight.set_value(W::one().take_value());
         }
         Ok(())
     }
 
-    fn final_arc_map(&mut self, final_arc: &mut FinalArc<W>) -> Fallible<()> {
-        if self.encode_table.encode_weights {
-            let tuple = self.encode_table.final_arc_to_tuple(final_arc);
-            let label = self.encode_table.encode(tuple);
+    fn final_arc_map(&self, final_arc: &mut FinalArc<W>) -> Fallible<()> {
+        if self.encode_table.0.borrow().encode_weights {
+            let tuple = self.encode_table.0.borrow().final_arc_to_tuple(final_arc);
+            let label = self.encode_table.0.borrow_mut().encode(tuple);
             final_arc.ilabel = label;
-            if self.encode_table.encode_labels {
+            if self.encode_table.0.borrow().encode_labels {
                 final_arc.olabel = label;
             }
-            if self.encode_table.encode_weights {
+            if self.encode_table.0.borrow().encode_weights {
                 final_arc.weight.set_value(W::one().take_value());
             }
         }
@@ -131,7 +137,7 @@ impl<W: Semiring> ArcMapper<W> for EncodeMapper<W> {
     }
 
     fn final_action(&self) -> MapFinalAction {
-        if self.encode_table.encode_weights {
+        if self.encode_table.0.borrow().encode_weights {
             MapFinalAction::MapRequireSuperfinal
         } else {
             MapFinalAction::MapNoSuperfinal
@@ -150,19 +156,25 @@ impl<W: Semiring> DecodeMapper<W> {
 }
 
 impl<W: Semiring> ArcMapper<W> for DecodeMapper<W> {
-    fn arc_map(&mut self, arc: &mut Arc<W>) -> Fallible<()> {
-        let tuple = self.encode_table.decode(arc.ilabel).unwrap().clone();
+    fn arc_map(&self, arc: &mut Arc<W>) -> Fallible<()> {
+        let tuple = self
+            .encode_table
+            .0
+            .borrow_mut()
+            .decode(arc.ilabel)
+            .unwrap()
+            .clone();
         arc.ilabel = tuple.ilabel;
-        if self.encode_table.encode_labels {
+        if self.encode_table.0.borrow().encode_labels {
             arc.olabel = tuple.olabel;
         }
-        if self.encode_table.encode_weights {
+        if self.encode_table.0.borrow().encode_weights {
             arc.weight = tuple.weight;
         }
         Ok(())
     }
 
-    fn final_arc_map(&mut self, _final_arc: &mut FinalArc<W>) -> Fallible<()> {
+    fn final_arc_map(&self, _final_arc: &mut FinalArc<W>) -> Fallible<()> {
         Ok(())
     }
 

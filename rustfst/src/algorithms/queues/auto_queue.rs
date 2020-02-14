@@ -1,15 +1,15 @@
 use failure::Fallible;
 
-use crate::algorithms::{Queue, QueueType};
 use crate::algorithms::arc_filters::ArcFilter;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::visitors::SccVisitor;
+use crate::algorithms::{Queue, QueueType};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::{Semiring, SemiringProperties};
 
 use super::{
-    FifoQueue, LifoQueue, natural_less, NaturalShortestFirstQueue, SccQueue, StateOrderQueue,
+    natural_less, FifoQueue, LifoQueue, NaturalShortestFirstQueue, SccQueue, StateOrderQueue,
     TopOrderQueue, TrivialQueue,
 };
 

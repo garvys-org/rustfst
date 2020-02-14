@@ -9,12 +9,12 @@ use crate::EPS_LABEL;
 pub struct InputEpsilonMapper {}
 
 impl<S: Semiring> ArcMapper<S> for InputEpsilonMapper {
-    fn arc_map(&mut self, arc: &mut Arc<S>) -> Fallible<()> {
+    fn arc_map(&self, arc: &mut Arc<S>) -> Fallible<()> {
         arc.ilabel = EPS_LABEL;
         Ok(())
     }
 
-    fn final_arc_map(&mut self, _final_arc: &mut FinalArc<S>) -> Fallible<()> {
+    fn final_arc_map(&self, _final_arc: &mut FinalArc<S>) -> Fallible<()> {
         Ok(())
     }
 

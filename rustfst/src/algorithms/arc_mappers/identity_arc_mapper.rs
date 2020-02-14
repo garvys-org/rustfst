@@ -8,11 +8,11 @@ use crate::Arc;
 pub struct IdentityArcMapper {}
 
 impl<S: Semiring> ArcMapper<S> for IdentityArcMapper {
-    fn arc_map(&mut self, _arc_to_map: &mut Arc<S>) -> Fallible<()> {
+    fn arc_map(&self, _arc_to_map: &mut Arc<S>) -> Fallible<()> {
         Ok(())
     }
 
-    fn final_arc_map(&mut self, _final_arc: &mut FinalArc<S>) -> Fallible<()> {
+    fn final_arc_map(&self, _final_arc: &mut FinalArc<S>) -> Fallible<()> {
         Ok(())
     }
 

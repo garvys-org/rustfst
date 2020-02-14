@@ -13,11 +13,11 @@ pub fn map_weight<W: WeightQuantize>(weight: &mut W) -> Fallible<()> {
 }
 
 impl<S: WeightQuantize + Semiring> ArcMapper<S> for QuantizeMapper {
-    fn arc_map(&mut self, arc: &mut Arc<S>) -> Fallible<()> {
+    fn arc_map(&self, arc: &mut Arc<S>) -> Fallible<()> {
         map_weight(&mut arc.weight)
     }
 
-    fn final_arc_map(&mut self, final_arc: &mut FinalArc<S>) -> Fallible<()> {
+    fn final_arc_map(&self, final_arc: &mut FinalArc<S>) -> Fallible<()> {
         map_weight(&mut final_arc.weight)
     }
 
