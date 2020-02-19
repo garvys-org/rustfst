@@ -152,7 +152,7 @@ where
         )?;
 
         let olabel = opt_osymt.clone().map_or_else(
-            || Ok(format!("{}", arc.ilabel)),
+            || Ok(format!("{}", arc.olabel)),
             |symt| {
                 symt.get_symbol(arc.olabel)
                     .map(|v| v.to_string())

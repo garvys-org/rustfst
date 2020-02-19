@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove `MutableFst` trait bound from input of `shortest_path`.
 - `ArcMap` now takes an immutable mapper as parameter.
 
+### Fixed
+- Fix olabel display while drawing a FST if no symbol table is provided
+
 ## [0.5.0] - 2020-02-04
 
 ### Added
