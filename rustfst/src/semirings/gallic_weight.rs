@@ -13,7 +13,7 @@ use crate::semirings::{
     DivideType, SemiringProperties, SerializableSemiring, StringWeightLeft, StringWeightRestrict,
     StringWeightRight, UnionWeight, UnionWeightOption, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::semirings::{IntoSemiring, ProductWeight};
+use crate::semirings::{ProductWeight, ReverseBack};
 use crate::Label;
 
 /// Product of StringWeightLeft and an arbitrary weight.
@@ -71,9 +71,9 @@ macro_rules! gallic_weight {
             }
         }
 
-        impl<W: Semiring> IntoSemiring<$semiring> for <$semiring as Semiring>::ReverseWeight {
+        impl<W: Semiring> ReverseBack<$semiring> for <$semiring as Semiring>::ReverseWeight {
             fn reverse_back(&self) -> Fallible<$semiring> {
-                unimplemented!()
+                Ok(<$semiring>::new(self.0.reverse_back()?))
             }
         }
 
@@ -385,9 +385,9 @@ impl<W: Semiring> Semiring for GallicWeight<W> {
     }
 }
 
-impl<W: Semiring> IntoSemiring<GallicWeight<W>> for <GallicWeight<W> as Semiring>::ReverseWeight {
+impl<W: Semiring> ReverseBack<GallicWeight<W>> for <GallicWeight<W> as Semiring>::ReverseWeight {
     fn reverse_back(&self) -> Fallible<GallicWeight<W>> {
-        unimplemented!()
+        Ok(GallicWeight(self.0.reverse_back()?))
     }
 }
 

@@ -13,7 +13,7 @@ use crate::algorithms::{connect, determinize_with_distance, reverse, shortest_di
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{
-    IntoSemiring, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
+    ReverseBack, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::Arc;
 use crate::StateId;

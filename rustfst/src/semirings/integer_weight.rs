@@ -3,9 +3,7 @@ use std::i32;
 
 use failure::Fallible;
 
-use crate::semirings::{
-    CompleteSemiring, IntoSemiring, Semiring, SemiringProperties, StarSemiring,
-};
+use crate::semirings::{CompleteSemiring, ReverseBack, Semiring, SemiringProperties, StarSemiring};
 
 /// Probability semiring: (x, +, 0.0, 1.0).
 #[derive(Clone, Debug, PartialEq, PartialOrd, Default, Hash, Eq, Copy)]
@@ -61,9 +59,9 @@ impl Semiring for IntegerWeight {
     }
 }
 
-impl IntoSemiring<IntegerWeight> for IntegerWeight {
+impl ReverseBack<IntegerWeight> for IntegerWeight {
     fn reverse_back(&self) -> Fallible<IntegerWeight> {
-        unimplemented!()
+        Ok(self.clone())
     }
 }
 

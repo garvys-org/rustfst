@@ -8,7 +8,7 @@ use ordered_float::OrderedFloat;
 
 use crate::parsers::bin_fst::utils_serialization::write_bin_f32;
 use crate::semirings::{
-    CompleteSemiring, DivideType, IntoSemiring, Semiring, SemiringProperties, SerializableSemiring,
+    CompleteSemiring, DivideType, ReverseBack, Semiring, SemiringProperties, SerializableSemiring,
     StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::KDELTA;
@@ -97,9 +97,9 @@ impl Semiring for LogWeight {
     }
 }
 
-impl IntoSemiring<LogWeight> for LogWeight {
+impl ReverseBack<LogWeight> for LogWeight {
     fn reverse_back(&self) -> Fallible<LogWeight> {
-        unimplemented!()
+        Ok(self.clone())
     }
 }
 

@@ -1,8 +1,6 @@
 use failure::Fallible;
 
-use crate::semirings::{
-    CompleteSemiring, IntoSemiring, Semiring, SemiringProperties, StarSemiring,
-};
+use crate::semirings::{CompleteSemiring, ReverseBack, Semiring, SemiringProperties, StarSemiring};
 use std::borrow::Borrow;
 /// Boolean semiring: (&, |, false, true).
 #[derive(Clone, Debug, PartialEq, PartialOrd, Default, Eq, Copy, Hash)]
@@ -59,9 +57,9 @@ impl Semiring for BooleanWeight {
     }
 }
 
-impl IntoSemiring<BooleanWeight> for BooleanWeight {
+impl ReverseBack<BooleanWeight> for BooleanWeight {
     fn reverse_back(&self) -> Fallible<BooleanWeight> {
-        unimplemented!()
+        Ok(self.clone())
     }
 }
 

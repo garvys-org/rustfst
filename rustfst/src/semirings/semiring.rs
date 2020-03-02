@@ -34,7 +34,7 @@ bitflags! {
 /// For more information : https://cs.nyu.edu/~mohri/pub/hwa.pdf
 pub trait Semiring: Clone + PartialEq + PartialOrd + Debug + Hash + Eq {
     type Type: Clone;
-    type ReverseWeight: Semiring + IntoSemiring<Self>;
+    type ReverseWeight: Semiring + ReverseBack<Self>;
 
     fn zero() -> Self;
     fn one() -> Self;
@@ -70,15 +70,9 @@ pub trait Semiring: Clone + PartialEq + PartialOrd + Debug + Hash + Eq {
     fn properties() -> SemiringProperties;
 }
 
-pub trait IntoSemiring<W> {
+pub trait ReverseBack<W> {
     fn reverse_back(&self) -> Fallible<W>;
 }
-
-//impl<W: Semiring> IntoSemiring<W> for W {
-//    fn reverse(&self) -> Fallible<W> {
-//        unimplemented!()
-//    }
-//}
 
 /// Determines direction of division.
 #[derive(Copy, Clone, PartialOrd, PartialEq)]

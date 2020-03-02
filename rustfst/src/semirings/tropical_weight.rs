@@ -11,7 +11,7 @@ use ordered_float::OrderedFloat;
 use crate::parsers::bin_fst::utils_serialization::write_bin_f32;
 use crate::semirings::semiring::SerializableSemiring;
 use crate::semirings::{
-    CompleteSemiring, DivideType, IntoSemiring, Semiring, SemiringProperties, StarSemiring,
+    CompleteSemiring, DivideType, ReverseBack, Semiring, SemiringProperties, StarSemiring,
     WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::KDELTA;
@@ -88,9 +88,9 @@ impl Semiring for TropicalWeight {
     }
 }
 
-impl IntoSemiring<TropicalWeight> for TropicalWeight {
+impl ReverseBack<TropicalWeight> for TropicalWeight {
     fn reverse_back(&self) -> Fallible<TropicalWeight> {
-        unimplemented!()
+        Ok(self.clone())
     }
 }
 

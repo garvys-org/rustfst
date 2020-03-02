@@ -5,8 +5,8 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::semirings::{
     GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, GallicWeightRight,
-    LogWeight, ProductWeight, SerializableSemiring, StringWeightLeft, StringWeightRestrict,
-    StringWeightRight, TropicalWeight,
+    LogWeight, ProductWeight, ReverseBack, SerializableSemiring, StringWeightLeft,
+    StringWeightRestrict, StringWeightRight, TropicalWeight,
 };
 use crate::Arc;
 
@@ -69,6 +69,11 @@ fn do_run_test_openfst_weight<W: SerializableSemiring>(
     );
     assert_eq!(W::weight_type(), test_data.weight_type);
     assert_eq!(Arc::<W>::arc_type(), test_data.arc_type);
+
+    assert_eq!(
+        test_data.weight_1.reverse()?.reverse_back()?,
+        test_data.weight_1
+    );
 
     Ok(())
 }

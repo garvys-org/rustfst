@@ -7,7 +7,7 @@ use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::Queue;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ExpandedFst, MutableFst};
-use crate::semirings::{IntoSemiring, Semiring, SemiringProperties};
+use crate::semirings::{ReverseBack, Semiring, SemiringProperties};
 use crate::StateId;
 use std::borrow::Borrow;
 
