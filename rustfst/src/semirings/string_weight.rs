@@ -13,8 +13,8 @@ use crate::parsers::bin_fst::utils_serialization::write_bin_i32;
 use crate::parsers::nom_utils::num;
 use crate::semirings::string_variant::StringWeightVariant;
 use crate::semirings::{
-    DivideType, Semiring, SemiringProperties, SerializableSemiring, WeaklyDivisibleSemiring,
-    WeightQuantize,
+    DivideType, ReverseBack, Semiring, SemiringProperties, SerializableSemiring,
+    WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::Label;
 
@@ -52,6 +52,12 @@ macro_rules! string_semiring {
         impl AsRef<Self> for $semiring {
             fn as_ref(&self) -> &$semiring {
                 &self
+            }
+        }
+
+        impl ReverseBack<$semiring> for <$semiring as Semiring>::ReverseWeight {
+            fn reverse_back(&self) -> Fallible<$semiring> {
+                self.reverse()
             }
         }
 

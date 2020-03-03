@@ -7,8 +7,8 @@ use failure::Fallible;
 use nom::IResult;
 
 use crate::semirings::{
-    DivideType, Semiring, SemiringProperties, SerializableSemiring, WeaklyDivisibleSemiring,
-    WeightQuantize,
+    DivideType, ReverseBack, Semiring, SemiringProperties, SerializableSemiring,
+    WeaklyDivisibleSemiring, WeightQuantize,
 };
 #[cfg(test)]
 use crate::semirings::{LogWeight, TropicalWeight};
@@ -93,6 +93,14 @@ where
                 | SemiringProperties::RIGHT_SEMIRING
                 | SemiringProperties::COMMUTATIVE
                 | SemiringProperties::IDEMPOTENT)
+    }
+}
+
+impl<W1: Semiring, W2: Semiring> ReverseBack<ProductWeight<W1, W2>>
+    for <ProductWeight<W1, W2> as Semiring>::ReverseWeight
+{
+    fn reverse_back(&self) -> Fallible<ProductWeight<W1, W2>> {
+        Ok((self.value1().reverse_back()?, self.value2().reverse_back()?).into())
     }
 }
 

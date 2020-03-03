@@ -15,8 +15,8 @@ use nom::IResult;
 
 use crate::parsers::bin_fst::utils_serialization::write_bin_i32;
 use crate::semirings::{
-    DivideType, Semiring, SemiringProperties, SerializableSemiring, WeaklyDivisibleSemiring,
-    WeightQuantize,
+    DivideType, ReverseBack, Semiring, SemiringProperties, SerializableSemiring,
+    WeaklyDivisibleSemiring, WeightQuantize,
 };
 
 pub trait UnionWeightOption<W: Semiring>: Debug + Hash + Clone + PartialOrd + Eq {
@@ -302,5 +302,15 @@ where
     fn parse_text(i: &str) -> IResult<&str, Self> {
         let (i, res) = alt((Self::parse_text_empty_set, Self::parse_text_non_empty_set))(i)?;
         Ok((i, res))
+    }
+}
+
+impl<W: Semiring, O: UnionWeightOption<W>> ReverseBack<UnionWeight<W, O>>
+    for <UnionWeight<W, O> as Semiring>::ReverseWeight
+{
+    fn reverse_back(&self) -> Fallible<UnionWeight<W, O>> {
+        let res = self.reverse()?;
+        // TODO: Find a way to avoid this transmute. For the moment, it is necessary because of the compare function.
+        unsafe { Ok(std::mem::transmute(res)) }
     }
 }

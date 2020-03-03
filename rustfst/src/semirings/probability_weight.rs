@@ -6,7 +6,7 @@ use failure::Fallible;
 use ordered_float::OrderedFloat;
 
 use crate::semirings::{
-    CompleteSemiring, DivideType, Semiring, SemiringProperties, StarSemiring,
+    CompleteSemiring, DivideType, ReverseBack, Semiring, SemiringProperties, StarSemiring,
     WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::KDELTA;
@@ -68,6 +68,12 @@ impl Semiring for ProbabilityWeight {
         SemiringProperties::LEFT_SEMIRING
             | SemiringProperties::RIGHT_SEMIRING
             | SemiringProperties::COMMUTATIVE
+    }
+}
+
+impl ReverseBack<ProbabilityWeight> for ProbabilityWeight {
+    fn reverse_back(&self) -> Fallible<ProbabilityWeight> {
+        unimplemented!()
     }
 }
 

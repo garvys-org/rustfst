@@ -12,7 +12,9 @@ use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::{connect, determinize_with_distance, reverse, shortest_distance, Queue};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, MutableFst};
-use crate::semirings::{Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize};
+use crate::semirings::{
+    ReverseBack, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
+};
 use crate::Arc;
 use crate::StateId;
 
@@ -68,7 +70,7 @@ where
     for rarc in rfst.arcs_iter(0)? {
         let state = rarc.nextstate - 1;
         if state < distance.len() {
-            let rweight: FI::W = hack_convert_reverse_reverse(rarc.weight.reverse()?);
+            let rweight: FI::W = rarc.weight.reverse_back()?;
             d.plus_assign(rweight.times(&distance[state])?)?;
         }
     }
@@ -91,15 +93,6 @@ where
     Ok(fst_res)
 }
 
-pub fn hack_convert_reverse_reverse<W: Semiring>(
-    p: <<W as Semiring>::ReverseWeight as Semiring>::ReverseWeight,
-) -> W {
-    unsafe {
-        std::mem::transmute::<&<<W as Semiring>::ReverseWeight as Semiring>::ReverseWeight, &W>(&p)
-    }
-    .clone()
-}
-
 fn single_shortest_path<F>(
     ifst: &F,
     distance: &mut Vec<F::W>,
@@ -108,7 +101,7 @@ fn single_shortest_path<F>(
 ) -> Fallible<()>
 where
     F: ExpandedFst,
-    <F as CoreFst>::W: 'static,
+    F::W: 'static,
 {
     parent.clear();
     *f_parent = None;
@@ -266,7 +259,7 @@ impl<'a, 'b, W: Semiring> ShortestPathCompare<'a, 'b, W> {
 
 fn n_shortest_path<W, FI, FO>(ifst: &FI, distance: &[W], nshortest: usize) -> Fallible<FO>
 where
-    W: Semiring + 'static,
+    W: Semiring,
     FI: ExpandedFst<W = W::ReverseWeight> + MutableFst<W = W::ReverseWeight>,
     FO: MutableFst<W = W> + ExpandedFst<W = W>,
 {
@@ -328,7 +321,7 @@ where
             let mut arc: Arc<W> = Arc::new(
                 rarc.ilabel,
                 rarc.olabel,
-                hack_convert_reverse_reverse::<W>(rarc.weight.reverse()?),
+                rarc.weight.reverse_back()?,
                 rarc.nextstate,
             );
             let weight = p.1.times(&arc.weight)?;
@@ -340,7 +333,7 @@ where
         }
         let final_weight = ifst.final_weight(p.0.unwrap())?;
         if let Some(_final_weight) = final_weight {
-            let r_final_weight: W = hack_convert_reverse_reverse(_final_weight.reverse()?);
+            let r_final_weight: W = _final_weight.reverse_back()?;
             if !r_final_weight.is_zero() {
                 let weight = p.1.times(&r_final_weight)?;
                 let next = ofst.add_state();

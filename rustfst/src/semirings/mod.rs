@@ -25,8 +25,8 @@ pub use self::log_weight::LogWeight;
 pub use self::probability_weight::ProbabilityWeight;
 pub use self::product_weight::ProductWeight;
 pub use self::semiring::{
-    CompleteSemiring, DivideType, Semiring, SemiringProperties, SerializableSemiring, StarSemiring,
-    WeaklyDivisibleSemiring, WeightQuantize,
+    CompleteSemiring, DivideType, ReverseBack, Semiring, SemiringProperties, SerializableSemiring,
+    StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
 pub(crate) use self::string_variant::StringWeightVariant;
 pub use self::string_weight::{

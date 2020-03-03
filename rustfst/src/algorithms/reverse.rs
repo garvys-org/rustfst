@@ -3,6 +3,7 @@ use failure::Fallible;
 use crate::arc::Arc;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
+use crate::EPS_LABEL;
 
 /// Reverses an FST. The reversed result is written to an output mutable FST.
 /// If A transduces string x to y with weight a, then the reverse of A
@@ -36,9 +37,7 @@ where
     let istart = ifst.start();
     let ostart = ofst.add_state();
 
-    for _ in 0..ifst.num_states() {
-        ofst.add_state();
-    }
+    ofst.add_states(ifst.num_states());
 
     let mut c_arcs = vec![0; ifst.num_states() + 1];
     for is in 0..ifst.num_states() {
@@ -56,7 +55,7 @@ where
         }
         let weight = unsafe { ifst.final_weight_unchecked(is) };
         if let Some(w) = weight {
-            states_arcs[0].push(Arc::new(0, 0, w.reverse()?, os));
+            states_arcs[0].push(Arc::new(EPS_LABEL, EPS_LABEL, w.reverse()?, os));
         }
 
         for iarc in unsafe { ifst.arcs_iter_unchecked(is) } {

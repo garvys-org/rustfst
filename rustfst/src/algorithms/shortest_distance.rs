@@ -4,11 +4,10 @@ use failure::Fallible;
 
 use crate::algorithms::arc_filters::{AnyArcFilter, ArcFilter};
 use crate::algorithms::queues::AutoQueue;
-use crate::algorithms::shortest_path::hack_convert_reverse_reverse;
 use crate::algorithms::Queue;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ExpandedFst, MutableFst};
-use crate::semirings::{Semiring, SemiringProperties};
+use crate::semirings::{ReverseBack, Semiring, SemiringProperties};
 use crate::StateId;
 use std::borrow::Borrow;
 
@@ -280,9 +279,7 @@ where
         let rdistance = shortest_distance_with_config(&rfst, ropts)?;
         let mut distance = Vec::with_capacity(rdistance.len() - 1); //reversing added one state
         while distance.len() < rdistance.len() - 1 {
-            distance.push(hack_convert_reverse_reverse(
-                rdistance[distance.len() + 1].reverse()?,
-            ));
+            distance.push(rdistance[distance.len() + 1].reverse_back()?);
         }
         Ok(distance)
     }
