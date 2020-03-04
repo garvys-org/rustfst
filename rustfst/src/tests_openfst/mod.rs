@@ -27,6 +27,7 @@ use crate::tests_openfst::algorithms::fst_convert::test_fst_convert;
 use crate::tests_openfst::algorithms::gallic_encode_decode::test_gallic_encode_decode;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicOperationResult;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicTestData;
+use crate::tests_openfst::algorithms::matcher::test_sorted_matcher;
 use crate::tests_openfst::io::const_fst_bin_deserializer::{
     test_const_fst_aligned_bin_deserializer, test_const_fst_bin_deserializer,
 };
@@ -78,6 +79,7 @@ use crate::tests_openfst::algorithms::closure::{
 use crate::tests_openfst::algorithms::concat::{
     test_concat, test_concat_dynamic, ConcatOperationResult, ConcatTestData,
 };
+use crate::tests_openfst::algorithms::matcher::{MatcherOperationResult, MatcherTestData};
 use crate::tests_openfst::algorithms::union::{test_union, test_union_dynamic};
 use crate::tests_openfst::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
 use crate::tests_openfst::io::vector_fst_bin_deserializer::test_vector_fst_bin_with_symt_deserializer;
@@ -158,6 +160,7 @@ pub struct ParsedFstTestData {
     closure_plus: SimpleStaticDynamicOperationResult,
     closure_star: SimpleStaticDynamicOperationResult,
     raw_vector_with_symt_bin_path: String,
+    matcher: Vec<MatcherOperationResult>,
 }
 
 pub struct FstTestData<F: SerializableFst>
@@ -208,6 +211,7 @@ where
     pub closure_plus: SimpleStaticDynamicTestData<F>,
     pub closure_star: SimpleStaticDynamicTestData<F>,
     pub raw_vector_with_symt_bin_path: PathBuf,
+    pub matcher: Vec<MatcherTestData<F>>,
 }
 
 impl<F: SerializableFst> FstTestData<F>
@@ -279,6 +283,7 @@ where
             raw_vector_with_symt_bin_path: absolute_path_folder
                 .join(&data.raw_vector_with_symt_bin_path)
                 .to_path_buf(),
+            matcher: data.matcher.iter().map(|v| v.parse()).collect(),
         }
     }
 }
@@ -718,6 +723,12 @@ macro_rules! test_fst {
             #[test]
             fn test_fst_convert_openfst() -> Fallible<()> {
                 do_run!(test_fst_convert, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_fst_sorted_matcher_openfst() -> Fallible<()> {
+                do_run!(test_sorted_matcher, $fst_name);
                 Ok(())
             }
         }

@@ -11,6 +11,7 @@ pub mod factor_weight_identity;
 pub mod fst_convert;
 pub mod gallic_encode_decode;
 pub mod inverse;
+pub mod matcher;
 pub mod minimize;
 pub mod project;
 pub mod properties;

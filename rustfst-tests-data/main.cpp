@@ -710,6 +710,63 @@ void compute_fst_closure_star(const F& raw_fst, json& j) {
 }
 
 template<class F>
+void compute_fst_matcher(const F& raw_fst, json& j) {
+    fst::vector<fst::MatchType> match_types = {fst::MATCH_INPUT, fst::MATCH_OUTPUT};
+    j["matcher"] = {};
+
+    auto num_states = raw_fst.NumStates();
+
+    if (num_states == 0) {
+        j["matcher"] = std::vector<int>();
+    }
+
+    std::set<int> labels;
+    labels.insert(0);
+    for (int state = 0; state < num_states; state++) {
+        for (fst::ArcIterator<F> aiter(raw_fst, state); !aiter.Done(); aiter.Next()) {
+            const auto &arc = aiter.Value();
+            labels.insert(arc.ilabel);
+            labels.insert(arc.olabel);
+        }
+    }
+
+    for (auto match_type: match_types) {
+        auto fst_sorted = fst::VectorFst<typename F::Arc>(raw_fst);
+        if (match_type == fst::MATCH_INPUT) {
+            fst::ArcSort(&fst_sorted, fst::ILabelCompare<typename F::Arc>());
+        } else if (match_type == fst::MATCH_OUTPUT) {
+            fst::ArcSort(&fst_sorted, fst::OLabelCompare<typename F::Arc>());
+        }
+        fst::SortedMatcher<F> matcher(fst_sorted, match_type);
+        for (int state = 0; state < num_states; state++) {
+            matcher.SetState(state);
+            for (int label: labels) {
+                json j2 = {};
+                if (matcher.Find(label)) {
+                    for (; !matcher.Done(); matcher.Next()) {
+                    auto &arc = matcher.Value();
+                        json j3;
+                        j3["ilabel"] = arc.ilabel;
+                        j3["olabel"] = arc.olabel;
+                        j3["weight"] = weight_to_string(arc.weight);
+                        j3["nextstate"] = arc.nextstate;
+                        j2.push_back(j3);
+                    }
+                } else {
+                    j2 = vector<int>();
+                }
+                json j1;
+                j1["state"] = state;
+                j1["label"] = label;
+                j1["arcs"] = j2;
+                j1["match_type"] = match_type;
+                j["matcher"].push_back(j1);
+            }
+        }
+    }
+}
+
+template<class F>
 void compute_fst_data(const F& fst_test_data, const string fst_name) {
     std::cout << "FST :" << fst_name << std::endl;
     json data;
@@ -848,6 +905,9 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
 
     std::cout << "Closure Star" << std::endl;
     compute_fst_closure_star(raw_fst, data);
+
+    std::cout << "Matcher" << std::endl;
+    compute_fst_matcher(raw_fst, data);
 
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;
