@@ -1,7 +1,7 @@
 use self::super::FilterState;
 
 /// Single non-blocking filter state.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Eq, Hash)]
 pub struct TrivialFilterState {
     state: bool,
 }

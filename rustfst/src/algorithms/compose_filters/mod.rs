@@ -1,24 +1,24 @@
 use failure::Fallible;
 
-pub use alt_sequence_compose_filter::AltSequenceComposeFilter;
-pub use match_compose_filter::MatchComposeFilter;
-pub use multi_eps_filter::MultiEpsFilter;
-pub use no_match_compose_filter::NoMatchComposeFilter;
-pub use null_compose_filter::NullComposeFilter;
-pub use sequence_compose_filter::SequenceComposeFilter;
-pub use trivial_compose_filter::TrivialComposeFilter;
+// pub use alt_sequence_compose_filter::AltSequenceComposeFilter;
+// pub use match_compose_filter::MatchComposeFilter;
+// pub use multi_eps_filter::MultiEpsFilter;
+// pub use no_match_compose_filter::NoMatchComposeFilter;
+// pub use null_compose_filter::NullComposeFilter;
+// pub use sequence_compose_filter::SequenceComposeFilter;
+// pub use trivial_compose_filter::TrivialComposeFilter;
 
 use crate::algorithms::filter_states::FilterState;
 use crate::algorithms::matchers::Matcher;
 use crate::fst_traits::Fst;
 use crate::{Arc, StateId};
 
-mod alt_sequence_compose_filter;
-mod match_compose_filter;
-mod multi_eps_filter;
-mod no_match_compose_filter;
-mod null_compose_filter;
-mod sequence_compose_filter;
+// mod alt_sequence_compose_filter;
+// mod match_compose_filter;
+// mod multi_eps_filter;
+// mod no_match_compose_filter;
+// mod null_compose_filter;
+// mod sequence_compose_filter;
 mod trivial_compose_filter;
 
 pub trait ComposeFilter<'matcher, 'fst: 'matcher, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst> {
@@ -38,7 +38,9 @@ pub trait ComposeFilter<'matcher, 'fst: 'matcher, F1: Fst + 'fst, F2: Fst<W = F1
 
     fn filter_final(&self, w1: &mut F1::W, w2: &mut F2::W);
 
-    fn matcher1(&mut self) -> &mut Self::M1;
+    // fn matcher1(&mut self) -> &mut Self::M1;
+    //
+    // fn matcher2(&mut self) -> &mut Self::M2;
 
-    fn matcher2(&mut self) -> &mut Self::M2;
+    fn final_weight_1(&self, state: StateId) -> Fallible<Option<&'matcher F1::W>>;
 }

@@ -2,7 +2,7 @@ use failure::Fallible;
 use superslice::Ext;
 
 use crate::algorithms::matchers::{MatchType, Matcher};
-use crate::fst_traits::Fst;
+use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
@@ -36,6 +36,10 @@ impl<'matcher, 'fst: 'matcher, F: Fst> Matcher<'matcher, 'fst, F> for SortedMatc
             &self.eps_loop,
             self.match_type,
         ))
+    }
+
+    fn final_weight(&'matcher self, state: usize) -> Fallible<Option<&'matcher <F as CoreFst>::W>> {
+        self.fst.final_weight(state)
     }
 }
 

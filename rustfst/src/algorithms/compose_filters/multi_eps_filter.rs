@@ -58,11 +58,11 @@ impl<
         self.filter.filter_final(w1, w2)
     }
 
-    fn matcher1(&mut self) -> &mut Self::M1 {
+    fn matcher1(&mut self) -> &'matcher mut Self::M1 {
         self.filter.matcher1()
     }
 
-    fn matcher2(&mut self) -> &mut Self::M2 {
+    fn matcher2(&mut self) -> &'matcher mut Self::M2 {
         self.filter.matcher2()
     }
 }

@@ -1,7 +1,7 @@
 use self::super::FilterState;
 
 /// Filter state that is the combination of two filter states.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Eq, Hash)]
 pub struct PairFilterState<FS1: FilterState, FS2: FilterState> {
     state: Option<(FS1, FS2)>,
 }

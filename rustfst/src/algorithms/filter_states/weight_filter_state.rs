@@ -2,7 +2,7 @@ use self::super::FilterState;
 use crate::semirings::Semiring;
 
 /// Filter state that is a weight implementing the Semiring trait.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Eq, Hash)]
 pub struct WeightFilterState<W: Semiring> {
     state: Option<W>,
 }
