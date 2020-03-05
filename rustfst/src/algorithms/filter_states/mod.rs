@@ -1,5 +1,6 @@
-pub use integer_filter_state::IntFilterState;
-pub use integer_filter_state::IntegerFilterState;
+pub use integer_filter_state::{
+    CharFilterState, IntFilterState, IntegerFilterState, ShortFilterState,
+};
 pub use list_filter_state::ListFilterState;
 pub use pair_filter_state::PairFilterState;
 pub use trivial_filter_state::TrivialFilterState;

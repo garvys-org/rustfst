@@ -8,6 +8,7 @@ use crate::fst_traits::Fst;
 use crate::{Arc, StateId};
 
 mod null_compose_filter;
+mod sequence_compose_filter;
 mod trivial_compose_filter;
 
 pub trait ComposeFilter<'matcher, 'fst: 'matcher, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst> {
