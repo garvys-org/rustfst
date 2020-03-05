@@ -1,18 +1,22 @@
-use crate::algorithms::matchers::{MatchType, Matcher};
-use crate::fst_traits::ExpandedFst;
-use crate::semirings::Semiring;
-use crate::{Arc, Label, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 use failure::Fallible;
 use superslice::Ext;
 
-pub struct SortedMatcher<'a, F: ExpandedFst> {
+use crate::algorithms::matchers::{MatchType, Matcher};
+use crate::fst_traits::Fst;
+use crate::semirings::Semiring;
+use crate::{Arc, Label, EPS_LABEL, NO_LABEL, NO_STATE_ID};
+
+pub struct SortedMatcher<'a, F: Fst> {
     fst: &'a F,
     match_type: MatchType,
     eps_loop: Arc<F::W>,
 }
 
-impl<'a, F: ExpandedFst> SortedMatcher<'a, F> {
-    pub fn new(fst: &'a F, match_type: MatchType) -> Fallible<Self> {
+impl<'matcher, 'fst: 'matcher, F: Fst> Matcher<'matcher, 'fst, F> for SortedMatcher<'fst, F> {
+    type W = F::W;
+    type Iter = IteratorSortedMatcher<'matcher, Self::W>;
+
+    fn new(fst: &'fst F, match_type: MatchType) -> Fallible<Self> {
         Ok(Self {
             fst,
             match_type,
@@ -23,11 +27,6 @@ impl<'a, F: ExpandedFst> SortedMatcher<'a, F> {
             },
         })
     }
-}
-
-impl<'matcher, 'fst: 'matcher, F: ExpandedFst> Matcher<'matcher> for SortedMatcher<'fst, F> {
-    type W = F::W;
-    type Iter = IteratorSortedMatcher<'matcher, Self::W>;
 
     fn iter(&'matcher mut self, state: usize, label: usize) -> Fallible<Self::Iter> {
         self.eps_loop.nextstate = state;

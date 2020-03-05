@@ -99,5 +99,6 @@ pub use self::factor_weight::{
     factor_weight, FactorIterator, FactorWeightFst, FactorWeightOptions, FactorWeightType,
 };
 
+pub mod compose_filters;
 pub mod filter_states;
 pub mod matchers;
