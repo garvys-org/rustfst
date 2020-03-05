@@ -1,6 +1,7 @@
 use failure::Fallible;
 
 pub use alt_sequence_compose_filter::AltSequenceComposeFilter;
+pub use match_compose_filter::MatchComposeFilter;
 pub use null_compose_filter::NullComposeFilter;
 pub use sequence_compose_filter::SequenceComposeFilter;
 pub use trivial_compose_filter::TrivialComposeFilter;
@@ -11,6 +12,7 @@ use crate::fst_traits::Fst;
 use crate::{Arc, StateId};
 
 mod alt_sequence_compose_filter;
+mod match_compose_filter;
 mod null_compose_filter;
 mod sequence_compose_filter;
 mod trivial_compose_filter;

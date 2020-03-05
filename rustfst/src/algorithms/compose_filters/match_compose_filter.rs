@@ -6,7 +6,8 @@ use crate::algorithms::matchers::{MatchType, Matcher};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::{Arc, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
-pub struct AltSequenceComposeFilter<'fst, F2, M1, M2> {
+pub struct MatchComposeFilter<'fst, F1, F2, M1, M2> {
+    fst1: &'fst F1,
     fst2: &'fst F2,
     matcher1: M1,
     matcher2: M2,
@@ -16,8 +17,12 @@ pub struct AltSequenceComposeFilter<'fst, F2, M1, M2> {
     s2: StateId,
     /// Current filter state
     fs: CharFilterState,
+    /// Only epsilons (and non-final) leaving s1 ?
+    alleps1: bool,
     /// Only epsilons (and non-final) leaving s2 ?
     alleps2: bool,
+    /// No epsilons leaving s1 ?
+    noeps1: bool,
     /// No epsilons leaving s2 ?
     noeps2: bool,
 }
@@ -29,7 +34,7 @@ impl<
         F2: Fst<W = F1::W> + 'fst,
         M1: Matcher<'matcher, 'fst, F1>,
         M2: Matcher<'matcher, 'fst, F2>,
-    > ComposeFilter<'matcher, 'fst, F1, F2> for AltSequenceComposeFilter<'fst, F2, M1, M2>
+    > ComposeFilter<'matcher, 'fst, F1, F2> for MatchComposeFilter<'fst, F1, F2, M1, M2>
 {
     type M1 = M1;
     type M2 = M2;
@@ -37,13 +42,16 @@ impl<
 
     fn new(fst1: &'fst F1, fst2: &'fst F2) -> Fallible<Self> {
         Ok(Self {
+            fst1,
             fst2,
             matcher1: Self::M1::new(fst1, MatchType::MatchOutput)?,
             matcher2: Self::M2::new(fst2, MatchType::MatchInput)?,
             s1: NO_STATE_ID,
             s2: NO_STATE_ID,
             fs: Self::FS::default(),
+            alleps1: false,
             alleps2: false,
+            noeps1: false,
             noeps2: false,
         })
     }
@@ -57,11 +65,20 @@ impl<
             self.s1 = s1;
             self.s2 = s2;
             self.fs = filter_state.clone();
-            // TODO: Could probably use unchecked here as the state should exist.
-            let na2 = self.fst2.num_arcs(self.s2).unwrap();
-            let ne2 = self.fst2.num_input_epsilons(self.s2).unwrap();
-            let fin2 = self.fst2.is_final(self.s2).unwrap();
-            self.alleps2 = na2 == ne2 && !fin2;
+
+            let na1 = self.fst1.num_arcs(s1).unwrap();
+            let na2 = self.fst2.num_arcs(s2).unwrap();
+
+            let ne1 = self.fst1.num_output_epsilons(s1).unwrap();
+            let ne2 = self.fst2.num_input_epsilons(s2).unwrap();
+
+            let f1 = self.fst1.is_final(s1).unwrap();
+            let f2 = self.fst2.is_final(s2).unwrap();
+
+            self.alleps1 = na1 == ne1 && !f1;
+            self.alleps2 = na2 == ne2 && !f2;
+
+            self.noeps1 = ne1 == 0;
             self.noeps2 = ne2 == 0;
         }
     }
@@ -71,26 +88,50 @@ impl<
         arc1: &Arc<<F1 as CoreFst>::W>,
         arc2: &Arc<<F2 as CoreFst>::W>,
     ) -> Option<Self::FS> {
-        if arc1.olabel == NO_LABEL {
-            if self.alleps2 {
-                None
-            } else if self.noeps2 {
-                Some(Self::FS::new(0))
+        if arc2.ilabel == NO_LABEL {
+            // EPSILON in FST1
+            if self.fs == Self::FS::new(0) {
+                if self.noeps2 {
+                    Some(Self::FS::new(0))
+                } else if self.alleps2 {
+                    None
+                } else {
+                    Some(Self::FS::new(1))
+                }
             } else {
-                Some(Self::FS::new(1))
+                if self.fs == Self::FS::new(1) {
+                    Some(Self::FS::new(1))
+                } else {
+                    None
+                }
             }
-        } else if arc2.ilabel == NO_LABEL {
-            if self.fs != Self::FS::new(0) {
-                None
+        } else if arc1.olabel == NO_LABEL {
+            // Epsilon in FST2
+            if self.fs == Self::FS::new(0) {
+                if self.noeps1 {
+                    Some(Self::FS::new(0))
+                } else if self.alleps1 {
+                    None
+                } else {
+                    Some(Self::FS::new(2))
+                }
             } else {
+                if self.fs == Self::FS::new(2) {
+                    Some(Self::FS::new(2))
+                } else {
+                    None
+                }
+            }
+        } else if arc1.olabel == EPS_LABEL {
+            // Epsilon in both
+            if self.fs == Self::FS::new(0) {
                 Some(Self::FS::new(0))
+            } else {
+                None
             }
         } else {
-            if arc1.olabel == EPS_LABEL {
-                None
-            } else {
-                Some(Self::FS::new(0))
-            }
+            // Both are non-epsilons
+            Some(Self::FS::new(0))
         }
     }
 
