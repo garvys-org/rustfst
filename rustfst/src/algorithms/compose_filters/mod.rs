@@ -2,6 +2,7 @@ use failure::Fallible;
 
 pub use alt_sequence_compose_filter::AltSequenceComposeFilter;
 pub use match_compose_filter::MatchComposeFilter;
+pub use multi_eps_filter::MultiEpsFilter;
 pub use no_match_compose_filter::NoMatchComposeFilter;
 pub use null_compose_filter::NullComposeFilter;
 pub use sequence_compose_filter::SequenceComposeFilter;
@@ -14,6 +15,7 @@ use crate::{Arc, StateId};
 
 mod alt_sequence_compose_filter;
 mod match_compose_filter;
+mod multi_eps_filter;
 mod no_match_compose_filter;
 mod null_compose_filter;
 mod sequence_compose_filter;
@@ -28,11 +30,11 @@ pub trait ComposeFilter<'matcher, 'fst: 'matcher, F1: Fst + 'fst, F2: Fst<W = F1
     where
         Self: std::marker::Sized;
 
-    fn start() -> Self::FS;
+    fn start(&self) -> Self::FS;
 
     fn set_state(&mut self, s1: StateId, s2: StateId, filter_state: &Self::FS);
 
-    fn filter_arc(&self, arc1: &Arc<F1::W>, arc2: &Arc<F2::W>) -> Option<Self::FS>;
+    fn filter_arc(&self, arc1: &mut Arc<F1::W>, arc2: &mut Arc<F2::W>) -> Option<Self::FS>;
 
     fn filter_final(&self, w1: &mut F1::W, w2: &mut F2::W);
 

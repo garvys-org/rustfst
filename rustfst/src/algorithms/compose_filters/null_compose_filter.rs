@@ -32,7 +32,7 @@ impl<
         })
     }
 
-    fn start() -> Self::FS {
+    fn start(&self) -> Self::FS {
         Self::FS::new(true)
     }
 
@@ -40,8 +40,8 @@ impl<
 
     fn filter_arc(
         &self,
-        arc1: &Arc<<F1 as CoreFst>::W>,
-        arc2: &Arc<<F2 as CoreFst>::W>,
+        arc1: &mut Arc<<F1 as CoreFst>::W>,
+        arc2: &mut Arc<<F2 as CoreFst>::W>,
     ) -> Option<Self::FS> {
         if arc1.olabel == NO_LABEL || arc2.ilabel == NO_LABEL {
             None

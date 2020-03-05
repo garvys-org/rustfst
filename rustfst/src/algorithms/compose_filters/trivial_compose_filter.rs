@@ -31,7 +31,7 @@ impl<
         })
     }
 
-    fn start() -> Self::FS {
+    fn start(&self) -> Self::FS {
         Self::FS::new(true)
     }
 
@@ -39,8 +39,8 @@ impl<
 
     fn filter_arc(
         &self,
-        _arc1: &Arc<<F1 as CoreFst>::W>,
-        _arc2: &Arc<<F2 as CoreFst>::W>,
+        _arc1: &mut Arc<<F1 as CoreFst>::W>,
+        _arc2: &mut Arc<<F2 as CoreFst>::W>,
     ) -> Option<Self::FS> {
         Some(Self::FS::new(true))
     }
