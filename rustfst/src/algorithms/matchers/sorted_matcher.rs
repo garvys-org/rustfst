@@ -6,15 +6,15 @@ use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
-pub struct SortedMatcher<'a, F: Fst> {
-    fst: &'a F,
+pub struct SortedMatcher<'fst, F: Fst> {
+    fst: &'fst F,
     match_type: MatchType,
     eps_loop: Arc<F::W>,
 }
 
-impl<'matcher, 'fst: 'matcher, F: Fst> Matcher<'matcher, 'fst, F> for SortedMatcher<'fst, F> {
+impl<'iter, 'fst: 'iter, F: Fst> Matcher<'iter, 'fst, F> for SortedMatcher<'fst, F> {
     type W = F::W;
-    type Iter = IteratorSortedMatcher<'matcher, Self::W>;
+    type Iter = IteratorSortedMatcher<'iter, 'fst, Self::W>;
 
     fn new(fst: &'fst F, match_type: MatchType) -> Fallible<Self> {
         Ok(Self {
@@ -23,12 +23,12 @@ impl<'matcher, 'fst: 'matcher, F: Fst> Matcher<'matcher, 'fst, F> for SortedMatc
             eps_loop: match match_type {
                 MatchType::MatchInput => Arc::new(NO_LABEL, EPS_LABEL, F::W::one(), NO_STATE_ID),
                 MatchType::MatchOutput => Arc::new(EPS_LABEL, NO_LABEL, F::W::one(), NO_STATE_ID),
-                _ => bail!("Unsuppored match_type : {:?}", match_type),
+                _ => bail!("Unsupported match_type : {:?}", match_type),
             },
         })
     }
 
-    fn iter(&'matcher mut self, state: usize, label: usize) -> Fallible<Self::Iter> {
+    fn iter(&'iter mut self, state: usize, label: usize) -> Fallible<Self::Iter> {
         self.eps_loop.nextstate = state;
         Ok(IteratorSortedMatcher::new(
             self.fst.arcs_iter(state)?.collect(),
@@ -38,25 +38,25 @@ impl<'matcher, 'fst: 'matcher, F: Fst> Matcher<'matcher, 'fst, F> for SortedMatc
         ))
     }
 
-    fn final_weight(&self, state: usize) -> Fallible<Option<&'matcher <F as CoreFst>::W>> {
+    fn final_weight(&self, state: usize) -> Fallible<Option<&'iter <F as CoreFst>::W>> {
         self.fst.final_weight(state)
     }
 }
 
-pub struct IteratorSortedMatcher<'a, W: Semiring> {
-    arcs: Vec<&'a Arc<W>>,
+pub struct IteratorSortedMatcher<'eps, 'fst, W: Semiring> {
+    arcs: Vec<&'fst Arc<W>>,
     match_label: Label,
     pos: usize,
     current_loop: bool,
-    eps_loop: &'a Arc<W>,
+    eps_loop: &'eps Arc<W>,
     match_type: MatchType,
 }
 
-impl<'a, W: Semiring> IteratorSortedMatcher<'a, W> {
+impl<'eps, 'fst: 'eps, W: Semiring> IteratorSortedMatcher<'eps, 'fst, W> {
     pub fn new(
-        arcs: Vec<&'a Arc<W>>,
+        arcs: Vec<&'fst Arc<W>>,
         match_label: Label,
-        eps_loop: &'a Arc<W>,
+        eps_loop: &'eps Arc<W>,
         match_type: MatchType,
     ) -> Self {
         // If we have to match epsilon, an epsilon loop is added
@@ -92,8 +92,8 @@ impl<'a, W: Semiring> IteratorSortedMatcher<'a, W> {
     }
 }
 
-impl<'a, W: Semiring> Iterator for IteratorSortedMatcher<'a, W> {
-    type Item = &'a Arc<W>;
+impl<'eps, 'fst: 'eps, W: Semiring> Iterator for IteratorSortedMatcher<'eps, 'fst, W> {
+    type Item = &'eps Arc<W>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.current_loop {

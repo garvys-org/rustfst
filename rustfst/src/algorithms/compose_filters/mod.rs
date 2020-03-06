@@ -10,10 +10,11 @@ use failure::Fallible;
 // pub use sequence_compose_filter::SequenceComposeFilter;
 pub use trivial_compose_filter::TrivialComposeFilter;
 
-use crate::{Arc, StateId};
 use crate::algorithms::filter_states::FilterState;
 use crate::algorithms::matchers::Matcher;
 use crate::fst_traits::Fst;
+use crate::{Arc, StateId};
+use failure::_core::cell::RefCell;
 
 // mod alt_sequence_compose_filter;
 // mod match_compose_filter;
@@ -23,9 +24,9 @@ use crate::fst_traits::Fst;
 // mod sequence_compose_filter;
 mod trivial_compose_filter;
 
-pub trait ComposeFilter<'matcher, 'fst: 'matcher, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst> {
-    type M1: Matcher<'matcher, 'fst, F1>;
-    type M2: Matcher<'matcher, 'fst, F2>;
+pub trait ComposeFilter<'iter, 'fst: 'iter, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst> {
+    type M1: Matcher<'iter, 'fst, F1>;
+    type M2: Matcher<'iter, 'fst, F2>;
     type FS: FilterState;
 
     fn new(fst1: &'fst F1, fst2: &'fst F2) -> Fallible<Self>
@@ -40,7 +41,7 @@ pub trait ComposeFilter<'matcher, 'fst: 'matcher, F1: Fst + 'fst, F2: Fst<W = F1
 
     fn filter_final(&self, w1: &mut F1::W, w2: &mut F2::W);
 
-    fn matcher1(&self) -> Rc<Self::M1>;
+    fn matcher1(&self) -> Rc<RefCell<Self::M1>>;
 
-    fn matcher2(&self) -> Rc<Self::M2>;
+    fn matcher2(&self) -> Rc<RefCell<Self::M2>>;
 }

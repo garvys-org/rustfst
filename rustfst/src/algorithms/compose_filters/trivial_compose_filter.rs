@@ -5,11 +5,12 @@ use crate::algorithms::filter_states::{FilterState, TrivialFilterState};
 use crate::algorithms::matchers::{MatchType, Matcher};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::Arc;
+use failure::_core::cell::RefCell;
 use std::rc::Rc;
 
 pub struct TrivialComposeFilter<M1, M2> {
-    matcher1: Rc<M1>,
-    matcher2: Rc<M2>,
+    matcher1: Rc<RefCell<M1>>,
+    matcher2: Rc<RefCell<M2>>,
 }
 
 impl<
@@ -27,8 +28,8 @@ impl<
 
     fn new(fst1: &'fst F1, fst2: &'fst F2) -> Fallible<Self> {
         Ok(Self {
-            matcher1: Rc::new(Self::M1::new(fst1, MatchType::MatchOutput)?),
-            matcher2: Rc::new(Self::M2::new(fst2, MatchType::MatchInput)?),
+            matcher1: Rc::new(RefCell::new(Self::M1::new(fst1, MatchType::MatchOutput)?)),
+            matcher2: Rc::new(RefCell::new(Self::M2::new(fst2, MatchType::MatchInput)?)),
         })
     }
 
@@ -48,11 +49,11 @@ impl<
 
     fn filter_final(&self, _w1: &mut <F1 as CoreFst>::W, _w2: &mut <F2 as CoreFst>::W) {}
 
-    fn matcher1(&self) -> Rc<Self::M1> {
+    fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
         Rc::clone(&self.matcher1)
     }
 
-    fn matcher2(&self) -> Rc<Self::M2> {
+    fn matcher2(&self) -> Rc<RefCell<Self::M2>> {
         Rc::clone(&self.matcher2)
     }
 }
