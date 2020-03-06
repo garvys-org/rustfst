@@ -9,6 +9,14 @@ use crate::{Label, StateId};
 
 // mod sorted_matcher;
 
+use bitflags::bitflags;
+
+bitflags! {
+    pub struct MatcherFlags: u32 {
+        const REQUIRE_MATCH =  0b00001;
+    }
+}
+
 #[derive(Copy, Debug, PartialOrd, PartialEq, Clone)]
 /// Specifies matcher action
 pub enum MatchType {
@@ -36,4 +44,6 @@ pub trait Matcher<'iter, 'fst: 'iter, F: Fst + 'fst> {
         Self: std::marker::Sized;
     fn iter(&mut self, state: StateId, label: Label) -> Fallible<Self::Iter>;
     fn final_weight(&self, state: StateId) -> Fallible<Option<&'iter F::W>>;
+    fn match_type(&self) -> MatchType;
+    fn flags(&self) -> MatcherFlags;
 }

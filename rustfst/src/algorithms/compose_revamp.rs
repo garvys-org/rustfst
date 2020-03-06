@@ -5,7 +5,7 @@ use failure::Fallible;
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::matchers::MatchType;
-use crate::algorithms::matchers::Matcher;
+use crate::algorithms::matchers::{Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Arc, StateId, EPS_LABEL, NO_LABEL};
@@ -47,6 +47,57 @@ impl<
 where
     <F1 as CoreFst>::W: 'static,
 {
+    fn new(fst1: &'fst F1, fst2: &'fst F2) -> Fallible<Self> {
+        let compose_filter = CF::new(fst1, fst2)?;
+        let matcher1 = compose_filter.matcher1();
+        let matcher2 = compose_filter.matcher2();
+        Ok(Self {
+            fst1,
+            fst2,
+            compose_filter,
+            cache_impl: CacheImpl::new(),
+            state_table: StateTable::new(),
+            match_type: Self::match_type(&matcher1, &matcher2)?,
+            matcher1,
+            matcher2,
+        })
+    }
+
+    fn match_type(
+        matcher1: &Rc<RefCell<CF::M1>>,
+        matcher2: &Rc<RefCell<CF::M2>>,
+    ) -> Fallible<MatchType> {
+        if matcher1
+            .borrow()
+            .flags()
+            .contains(MatcherFlags::REQUIRE_MATCH)
+            && matcher1.borrow().match_type() == MatchType::MatchOutput
+        {
+            bail!("ComposeFst: 1st argument cannot perform required matching (sort?)")
+        }
+        if matcher2
+            .borrow()
+            .flags()
+            .contains(MatcherFlags::REQUIRE_MATCH)
+            && matcher2.borrow().match_type() == MatchType::MatchInput
+        {
+            bail!("ComposeFst: 2nd argument cannot perform required matching (sort?)")
+        }
+
+        let type1 = matcher1.borrow().match_type();
+        let type2 = matcher2.borrow().match_type();
+        let mt = if type1 == MatchType::MatchOutput && type2 == MatchType::MatchInput {
+            MatchType::MatchBoth
+        } else if type1 == MatchType::MatchOutput {
+            MatchType::MatchOutput
+        } else if type2 == MatchType::MatchInput {
+            MatchType::MatchInput
+        } else {
+            bail!("ComposeFst: 1st argument cannot match on output labels and 2nd argument cannot match on input labels (sort?).")
+        };
+        Ok(mt)
+    }
+
     fn match_input(&self, s1: StateId, s2: StateId) -> bool {
         match self.match_type {
             MatchType::MatchInput => true,
