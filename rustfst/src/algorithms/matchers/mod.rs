@@ -36,5 +36,5 @@ pub trait Matcher<'matcher, 'fst: 'matcher, F: Fst + 'fst> {
     where
         Self: std::marker::Sized;
     fn iter(&'matcher mut self, state: StateId, label: Label) -> Fallible<Self::Iter>;
-    fn final_weight(&'matcher self, state: StateId) -> Fallible<Option<&'matcher F::W>>;
+    fn final_weight(&self, state: StateId) -> Fallible<Option<&'matcher F::W>>;
 }

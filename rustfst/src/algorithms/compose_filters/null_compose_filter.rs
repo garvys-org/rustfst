@@ -52,11 +52,11 @@ impl<
 
     fn filter_final(&self, _w1: &mut <F1 as CoreFst>::W, _w2: &mut <F2 as CoreFst>::W) {}
 
-    fn matcher1(&mut self) -> &'matcher mut Self::M1 {
+    fn matcher1(&mut self) -> &mut Self::M1 {
         &mut self.matcher1
     }
 
-    fn matcher2(&mut self) -> &'matcher mut Self::M2 {
+    fn matcher2(&mut self) -> &mut Self::M2 {
         &mut self.matcher2
     }
 }

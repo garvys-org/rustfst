@@ -38,7 +38,7 @@ impl<'matcher, 'fst: 'matcher, F: Fst> Matcher<'matcher, 'fst, F> for SortedMatc
         ))
     }
 
-    fn final_weight(&'matcher self, state: usize) -> Fallible<Option<&'matcher <F as CoreFst>::W>> {
+    fn final_weight(&self, state: usize) -> Fallible<Option<&'matcher <F as CoreFst>::W>> {
         self.fst.final_weight(state)
     }
 }

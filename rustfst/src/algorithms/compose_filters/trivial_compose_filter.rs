@@ -46,16 +46,12 @@ impl<
     }
 
     fn filter_final(&self, _w1: &mut <F1 as CoreFst>::W, _w2: &mut <F2 as CoreFst>::W) {}
-    //
-    // fn matcher1(&mut self) -> &'matcher mut Self::M1 {
-    //     &mut self.matcher1
-    // }
-    //
-    // fn matcher2(&mut self) -> &'matcher mut Self::M2 {
-    //     &mut self.matcher2
-    // }
 
-    fn final_weight_1(&self, state: usize) -> Fallible<Option<&'matcher <F1 as CoreFst>::W>> {
-        self.matcher1.final_weight(state)
+    fn matcher1(&mut self) -> &mut Self::M1 {
+        &mut self.matcher1
+    }
+
+    fn matcher2(&mut self) -> &mut Self::M2 {
+        &mut self.matcher2
     }
 }

@@ -9,8 +9,6 @@ use crate::algorithms::matchers::Matcher;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::StateId;
-use failure::_core::marker::PhantomData;
-use std::rc::Rc;
 
 #[derive(Default, PartialEq, Eq, Clone, Hash, PartialOrd, Debug)]
 struct ComposeStateTuple<FS> {
@@ -20,7 +18,13 @@ struct ComposeStateTuple<FS> {
 }
 
 #[derive(Clone, PartialEq)]
-struct ComposeFstImpl<'matcher, 'fst, F1: Fst + 'fst, F2: Fst<W=F1::W> + 'fst, CF: ComposeFilter<'matcher, 'fst, F1, F2>> {
+struct ComposeFstImpl<
+    'matcher,
+    'fst,
+    F1: Fst + 'fst,
+    F2: Fst<W = F1::W> + 'fst,
+    CF: ComposeFilter<'matcher, 'fst, F1, F2>,
+> {
     fst1: &'fst F1,
     fst2: &'fst F2,
     compose_filter: CF,
@@ -69,28 +73,27 @@ where
         Ok(Some(self.state_table.find_id(tuple)))
     }
 
-    fn compute_final(&mut self, state: usize) -> Fallible<Option<Self::W>>{
+    fn compute_final(&mut self, state: usize) -> Fallible<Option<Self::W>> {
         let tuple = self.state_table.find_tuple(state);
 
         let s1 = tuple.s1;
-        let final1 = self.compose_filter.final_weight_1(s1)?;
+        let final1 = self.compose_filter.matcher1().final_weight(s1)?;
         if final1.is_none() {
             return Ok(None);
         }
         let mut final1 = final1.unwrap().clone();
 
-        // let s2 = tuple.s2;
-        // let final2 = self.matcher2.final_weight(s2)?;
-        // if final2.is_none() {
-        //     return Ok(None);
-        // }
-        // let mut final2 = final2.unwrap().clone();
-        //
-        // self.compose_filter.set_state(s1, s2, &tuple.fs);
-        // self.compose_filter.filter_final(&mut final1, &mut final2);
-        //
-        // final1.times_assign(&final2)?;
-        // Ok(Some(final1))
-        todo!()
+        let s2 = tuple.s2;
+        let final2 = self.compose_filter.matcher2().final_weight(s2)?;
+        if final2.is_none() {
+            return Ok(None);
+        }
+        let mut final2 = final2.unwrap().clone();
+
+        self.compose_filter.set_state(s1, s2, &tuple.fs);
+        self.compose_filter.filter_final(&mut final1, &mut final2);
+
+        final1.times_assign(&final2)?;
+        Ok(Some(final1))
     }
 }
