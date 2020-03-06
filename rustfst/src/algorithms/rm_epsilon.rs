@@ -25,6 +25,7 @@ use crate::{Arc, Label, StateId, SymbolTable, EPS_LABEL};
 use std::borrow::Borrow;
 
 use itertools::izip;
+use crate::algorithms::dynamic_fst::DynamicFst;
 
 pub struct RmEpsilonConfig<W: Semiring, Q: Queue> {
     sd_opts: ShortestDistanceConfig<W, Q, EpsilonArcFilter>,
@@ -344,8 +345,8 @@ where
     }
 }
 
-#[derive(Clone, PartialEq, Eq)]
-pub(crate) struct RmEpsilonImpl<F: MutableFst, B: Borrow<F>> {
+#[derive(Clone, Eq)]
+pub struct RmEpsilonImpl<F: MutableFst, B: Borrow<F>> {
     rmeps_state: RmEpsilonState<F, B, FifoQueue>,
     cache_impl: CacheImpl<F::W>,
 }
@@ -372,6 +373,12 @@ where
                 RmEpsilonConfig::new_with_default(FifoQueue::default()),
             ),
         }
+    }
+}
+
+impl<F: MutableFst, B: Borrow<F>> PartialEq for RmEpsilonImpl<F, B> {
+    fn eq(&self, other: &Self) -> bool {
+        unimplemented!()
     }
 }
 
@@ -422,25 +429,17 @@ where
 /// Removes epsilon-transitions (when both the input and output label are an
 /// epsilon) from a transducer. The result will be an equivalent FST that has no
 /// such epsilon transitions. This version is a delayed FST.
-pub struct RmEpsilonFst<F: MutableFst, B: Borrow<F>> {
-    pub(crate) fst_impl: UnsafeCell<RmEpsilonImpl<F, B>>,
-    pub(crate) isymt: Option<Rc<SymbolTable>>,
-    pub(crate) osymt: Option<Rc<SymbolTable>>,
-}
-
+pub type RmEpsilonFst<F: MutableFst, B: Borrow<F>>=DynamicFst<RmEpsilonImpl<F, B>>;
 impl<F: MutableFst, B: Borrow<F>> RmEpsilonFst<F, B>
 where
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
+    F::W: 'static
 {
     pub fn new(fst: B) -> Self {
         let isymt = fst.borrow().input_symbols();
         let osymt = fst.borrow().output_symbols();
-        Self {
-            fst_impl: UnsafeCell::new(RmEpsilonImpl::new(fst)),
-            isymt,
-            osymt,
-        }
+        Self::from_impl(RmEpsilonImpl::new(fst), isymt, osymt)
+
     }
 }
 
-dynamic_fst!("RmEpsilonFst", RmEpsilonFst<F, B>, [F => MutableFst] [B => Borrow<F>]);

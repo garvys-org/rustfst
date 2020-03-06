@@ -8,6 +8,7 @@ use crate::Arc;
 use failure::_core::cell::RefCell;
 use std::rc::Rc;
 
+#[derive(Debug, PartialEq)]
 pub struct TrivialComposeFilter<M1, M2> {
     matcher1: Rc<RefCell<M1>>,
     matcher2: Rc<RefCell<M2>>,

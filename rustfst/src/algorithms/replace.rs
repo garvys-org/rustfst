@@ -22,6 +22,7 @@ use crate::fst_traits::{
 };
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, SymbolTable, EPS_LABEL};
+use crate::algorithms::dynamic_fst::DynamicFst;
 
 /// This specifies what labels to output on the call or return arc.
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug, Eq)]
@@ -143,8 +144,8 @@ fn replace_transducer(
         || return_label_type == ReplaceLabelType::Output
 }
 
-#[derive(Clone, PartialEq, Eq)]
-pub(crate) struct ReplaceFstImpl<F: Fst, B: Borrow<F>> {
+#[derive(Clone, Eq)]
+pub struct ReplaceFstImpl<F: Fst, B: Borrow<F>> {
     cache_impl: CacheImpl<F::W>,
     call_label_type_: ReplaceLabelType,
     return_label_type_: ReplaceLabelType,
@@ -156,6 +157,12 @@ pub(crate) struct ReplaceFstImpl<F: Fst, B: Borrow<F>> {
     root: Label,
     state_table: ReplaceStateTable,
     fst_type: PhantomData<F>,
+}
+
+impl<F: Fst, B: Borrow<F>> PartialEq for ReplaceFstImpl<F, B> {
+    fn eq(&self, other: &Self) -> bool {
+        unimplemented!()
+    }
 }
 
 impl<F: Fst, B: Borrow<F>> std::fmt::Debug for ReplaceFstImpl<F, B> {
@@ -495,43 +502,7 @@ impl ReplaceStateTable {
 /// ReplaceFst supports dynamic replacement of arcs in one FST with another FST.
 /// This replacement is recursive. ReplaceFst can be used to support a variety of
 /// delayed constructions such as recursive transition networks, union, or closure.
-pub struct ReplaceFst<F: Fst, B: Borrow<F>> {
-    pub(crate) fst_impl: UnsafeCell<ReplaceFstImpl<F, B>>,
-    pub(crate) isymt: Option<Rc<SymbolTable>>,
-    pub(crate) osymt: Option<Rc<SymbolTable>>,
-}
-
-impl<F: Fst + Clone, B: Borrow<F> + Clone> Clone for ReplaceFst<F, B>
-where
-    F: 'static,
-    F::W: 'static,
-    B: 'static,
-{
-    fn clone(&self) -> Self {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_ref().unwrap() };
-        Self {
-            fst_impl: UnsafeCell::new(fst_impl.clone()),
-            isymt: self.input_symbols(),
-            osymt: self.output_symbols(),
-        }
-    }
-}
-
-impl<F: Fst + PartialEq, B: Borrow<F> + PartialEq> PartialEq for ReplaceFst<F, B>
-where
-    F::W: 'static,
-{
-    fn eq(&self, other: &Self) -> bool {
-        let ptr = self.fst_impl.get();
-        let fst_impl = unsafe { ptr.as_ref().unwrap() };
-
-        let ptr_other = other.fst_impl.get();
-        let fst_impl_other = unsafe { ptr_other.as_ref().unwrap() };
-
-        fst_impl.eq(fst_impl_other)
-    }
-}
+pub type ReplaceFst<F, B>=DynamicFst<ReplaceFstImpl<F,B>>;
 
 impl<F: Fst, B: Borrow<F>> ReplaceFst<F, B>
 where
@@ -547,11 +518,7 @@ where
         }
         let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
         let fst = ReplaceFstImpl::new(fst_list, opts)?;
-        Ok(ReplaceFst {
-            isymt,
-            osymt,
-            fst_impl: UnsafeCell::new(fst),
-        })
+        Ok(Self::from_impl(fst, isymt, osymt))
     }
 }
-dynamic_fst!("ReplaceFst", ReplaceFst<F, B>, [F => Fst] [B => Borrow<F>]);
+

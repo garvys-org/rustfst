@@ -1,15 +1,16 @@
 use std::collections::{HashSet, VecDeque};
+use std::fmt::Debug;
 use std::slice::Iter as IterSlice;
 
 use failure::Fallible;
 
+use crate::{Arc, StateId};
 use crate::algorithms::cache::CacheImpl;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Arc, StateId};
 
-pub trait FstImpl {
-    type W: 'static;
+pub trait FstImpl : Debug + PartialEq {
+    type W: Semiring + 'static;
     fn cache_impl_mut(&mut self) -> &mut CacheImpl<Self::W>;
     fn cache_impl_ref(&self) -> &CacheImpl<Self::W>;
     fn expand(&mut self, state: StateId) -> Fallible<()>;

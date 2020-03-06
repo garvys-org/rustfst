@@ -2,6 +2,7 @@ use num_traits::Num;
 
 use self::super::FilterState;
 use std::hash::Hash;
+use std::fmt::Debug;
 
 /// Filter state is a list of signed integer types T. Order matters for equality.
 #[derive(Debug, PartialEq, Clone, Eq, Hash)]
@@ -9,7 +10,7 @@ pub struct ListFilterState<T: Num> {
     state: Option<Vec<T>>,
 }
 
-impl<T: Num + Clone + Eq + Hash> FilterState for ListFilterState<T> {
+impl<T: Num + Clone + Eq + Hash + Debug> FilterState for ListFilterState<T> {
     type Type = Vec<T>;
 
     fn new(value: Self::Type) -> Self {

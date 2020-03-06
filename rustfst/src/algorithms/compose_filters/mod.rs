@@ -15,6 +15,7 @@ use crate::algorithms::matchers::Matcher;
 use crate::fst_traits::Fst;
 use crate::{Arc, StateId};
 use failure::_core::cell::RefCell;
+use std::fmt::Debug;
 
 // mod alt_sequence_compose_filter;
 // mod match_compose_filter;
@@ -24,7 +25,7 @@ use failure::_core::cell::RefCell;
 // mod sequence_compose_filter;
 mod trivial_compose_filter;
 
-pub trait ComposeFilter<'iter, 'fst: 'iter, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst> {
+pub trait ComposeFilter<'iter, 'fst: 'iter, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst> : Debug + PartialEq {
     type M1: Matcher<'iter, 'fst, F1>;
     type M2: Matcher<'iter, 'fst, F2>;
     type FS: FilterState;

@@ -23,6 +23,7 @@ use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::{Label, StateId};
 use crate::{SymbolTable, KDELTA};
+use crate::algorithms::dynamic_fst::DynamicFst;
 
 bitflags! {
     /// What kind of weight should be factored ? Arc weight ? Final weights ?
@@ -101,8 +102,8 @@ impl<W: Semiring> Element<W> {
     }
 }
 
-#[derive(Clone, PartialEq)]
-struct FactorWeightImpl<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> {
+#[derive(Clone)]
+pub struct FactorWeightImpl<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> {
     opts: FactorWeightOptions,
     cache_impl: CacheImpl<F::W>,
     state_table: StateTable<Element<F::W>>,
@@ -128,7 +129,13 @@ impl<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> std::fmt::Debug
     }
 }
 
-impl<'a, F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> FstImpl for FactorWeightImpl<F, B, FI>
+impl<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> PartialEq for FactorWeightImpl<F, B, FI> {
+    fn eq(&self, other: &Self) -> bool {
+        unimplemented!()
+    }
+}
+
+impl<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> FstImpl for FactorWeightImpl<F, B, FI>
 where
     F::W: WeightQuantize + 'static,
 {
@@ -253,7 +260,7 @@ where
             .intersects(FactorWeightType::FACTOR_FINAL_WEIGHTS)
     }
 
-    pub fn find_state(&self, elt: &Element<F::W>) -> StateId {
+    fn find_state(&self, elt: &Element<F::W>) -> StateId {
         if !self.factor_arc_weights() && elt.weight.is_one() && elt.state.is_some() {
             let old_state = elt.state.unwrap();
             if !self.unfactored.borrow().contains_key(&elt.state.unwrap()) {
@@ -294,11 +301,7 @@ where
 /// States and transitions will be added as necessary. The algorithm is a
 /// generalization to arbitrary weights of the second step of the input
 /// epsilon-normalization algorithm. This version is a Delayed FST.
-pub struct FactorWeightFst<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> {
-    fst_impl: UnsafeCell<FactorWeightImpl<F, B, FI>>,
-    isymt: Option<Rc<SymbolTable>>,
-    osymt: Option<Rc<SymbolTable>>,
-}
+pub type FactorWeightFst<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>>=DynamicFst<FactorWeightImpl<F,B,FI>>;
 
 impl<'a, F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> FactorWeightFst<F, B, FI>
 where
@@ -307,12 +310,10 @@ where
     pub fn new(fst: B, opts: FactorWeightOptions) -> Fallible<Self> {
         let isymt = fst.borrow().input_symbols();
         let osymt = fst.borrow().output_symbols();
-        Ok(Self {
-            fst_impl: UnsafeCell::new(FactorWeightImpl::new(fst, opts)?),
+        Ok(Self::from_impl(
+            FactorWeightImpl::new(fst, opts)?,
             isymt,
             osymt,
-        })
+        ))
     }
 }
-
-dynamic_fst!("FactorWeightFst", FactorWeightFst<F, B, FI>, [F => Fst] [B => Borrow<F>] [FI => FactorIterator<F::W>] where F::W => WeightQuantize);

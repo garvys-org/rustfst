@@ -1,13 +1,15 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use std::fmt::Debug;
 use std::marker::PhantomData;
 
 use failure::Fallible;
 
+use crate::{EPS_LABEL, KDELTA, Label, StateId};
+use crate::algorithms::{factor_weight, FactorWeightOptions, FactorWeightType, weight_convert};
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::factor_iterators::{GallicFactor, GallicFactorMin, GallicFactorRestrict};
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
-use crate::algorithms::{factor_weight, weight_convert, FactorWeightOptions, FactorWeightType};
 use crate::arc::Arc;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, Fst, MutableFst};
@@ -16,7 +18,7 @@ use crate::semirings::{
     SemiringProperties, StringWeightLeft, StringWeightRestrict, WeaklyDivisibleSemiring,
     WeightQuantize,
 };
-use crate::{Label, StateId, EPS_LABEL, KDELTA};
+use failure::_core::fmt::{Formatter, Error};
 
 /// Determinization type.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
@@ -30,10 +32,11 @@ pub enum DeterminizeType {
     DeterminizeDisambiguate,
 }
 
-pub trait CommonDivisor<W: Semiring> {
+pub trait CommonDivisor<W: Semiring> : PartialEq + Debug {
     fn common_divisor(w1: &W, w2: &W) -> Fallible<W>;
 }
 
+#[derive(PartialEq, Debug)]
 struct DefaultCommonDivisor {}
 
 impl<W: Semiring> CommonDivisor<W> for DefaultCommonDivisor {
@@ -42,6 +45,7 @@ impl<W: Semiring> CommonDivisor<W> for DefaultCommonDivisor {
     }
 }
 
+#[derive(PartialEq, Debug)]
 struct LabelCommonDivisor {}
 
 macro_rules! impl_label_common_divisor {
@@ -76,6 +80,7 @@ macro_rules! impl_label_common_divisor {
 impl_label_common_divisor!(StringWeightLeft);
 impl_label_common_divisor!(StringWeightRestrict);
 
+#[derive(Debug, PartialEq)]
 struct GallicCommonDivisor {}
 
 macro_rules! impl_gallic_common_divisor {
@@ -161,9 +166,8 @@ impl<W: Semiring> DeterminizeArc<W> {
     }
 }
 
+#[derive(PartialEq, Debug)]
 struct DeterminizeFsaImpl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>>
-where
-    F::W: WeaklyDivisibleSemiring + WeightQuantize,
 {
     fst: &'a F,
     cache_impl: CacheImpl<F::W>,

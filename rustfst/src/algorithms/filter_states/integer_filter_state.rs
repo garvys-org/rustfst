@@ -1,6 +1,7 @@
 use self::super::FilterState;
 use num_traits::Num;
 use std::hash::Hash;
+use std::fmt::Debug;
 
 /// Filter state that is a signed integral type.
 #[derive(Debug, PartialEq, Clone, Eq, Hash)]
@@ -8,7 +9,7 @@ pub struct IntegerFilterState<T: Num> {
     state: Option<T>,
 }
 
-impl<T: Num + Clone + Eq + Hash> FilterState for IntegerFilterState<T> {
+impl<T: Num + Clone + Eq + Hash + Debug> FilterState for IntegerFilterState<T> {
     type Type = T;
 
     fn new(value: Self::Type) -> Self {

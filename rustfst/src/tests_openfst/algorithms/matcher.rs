@@ -1,6 +1,6 @@
 use crate::algorithms::arc_compares::{ilabel_compare, olabel_compare};
 use crate::algorithms::arc_sort;
-use crate::algorithms::matchers::{MatchType, Matcher, SortedMatcher};
+use crate::algorithms::matchers::{MatchType, Matcher};
 use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
@@ -89,30 +89,31 @@ where
     F: SerializableFst + MutableFst + AllocableFst,
     F::W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize + 'static,
 {
-    let mut fst_isorted = test_data.raw.clone();
-    arc_sort(&mut fst_isorted, ilabel_compare);
-
-    let mut fst_osorted = test_data.raw.clone();
-    arc_sort(&mut fst_osorted, olabel_compare);
-
-    for matcher_data in &test_data.matcher {
-        let fst = match matcher_data.match_type {
-            MatchType::MatchInput => &fst_isorted,
-            MatchType::MatchOutput => &fst_osorted,
-            _ => bail!("Unsupported match_type : {:?}", matcher_data.match_type),
-        };
-
-        let mut matcher = SortedMatcher::new(fst, matcher_data.match_type)?;
-        let arcs = matcher
-            .iter(matcher_data.state, matcher_data.label)?
-            .cloned()
-            .collect_vec();
-
-        assert_eq!(
-            arcs, matcher_data.arcs,
-            "Test matcher failed {:?} {:?} {:?}",
-            matcher_data.state, matcher_data.label, matcher_data.match_type
-        );
-    }
-    Ok(())
+    todo!()
+    // let mut fst_isorted = test_data.raw.clone();
+    // arc_sort(&mut fst_isorted, ilabel_compare);
+    //
+    // let mut fst_osorted = test_data.raw.clone();
+    // arc_sort(&mut fst_osorted, olabel_compare);
+    //
+    // for matcher_data in &test_data.matcher {
+    //     let fst = match matcher_data.match_type {
+    //         MatchType::MatchInput => &fst_isorted,
+    //         MatchType::MatchOutput => &fst_osorted,
+    //         _ => bail!("Unsupported match_type : {:?}", matcher_data.match_type),
+    //     };
+    //
+    //     let mut matcher = SortedMatcher::new(fst, matcher_data.match_type)?;
+    //     let arcs = matcher
+    //         .iter(matcher_data.state, matcher_data.label)?
+    //         .cloned()
+    //         .collect_vec();
+    //
+    //     assert_eq!(
+    //         arcs, matcher_data.arcs,
+    //         "Test matcher failed {:?} {:?} {:?}",
+    //         matcher_data.state, matcher_data.label, matcher_data.match_type
+    //     );
+    // }
+    // Ok(())
 }

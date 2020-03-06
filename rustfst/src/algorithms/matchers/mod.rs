@@ -10,6 +10,7 @@ use crate::{Label, StateId};
 // mod sorted_matcher;
 
 use bitflags::bitflags;
+use std::fmt::Debug;
 
 bitflags! {
     pub struct MatcherFlags: u32 {
@@ -36,7 +37,7 @@ pub enum MatchType {
 /// simplest form, these are just some associative map or search keyed on labels.
 /// More generally, they may implement matching special labels that represent
 /// sets of labels such as sigma (all), rho (rest), or phi (fail).
-pub trait Matcher<'iter, 'fst: 'iter, F: Fst + 'fst> {
+pub trait Matcher<'iter, 'fst: 'iter, F: Fst + 'fst> : Debug + PartialEq {
     type Iter: Iterator<Item = &'iter Arc<F::W>>;
 
     fn new(fst: &'fst F, match_type: MatchType) -> Fallible<Self>

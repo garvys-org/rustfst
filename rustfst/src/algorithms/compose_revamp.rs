@@ -1,16 +1,19 @@
+use std::cell::RefCell;
 use std::hash::Hash;
+use std::rc::Rc;
+use std::slice::Iter as IterSlice;
 
 use failure::Fallible;
+use failure::_core::cell::UnsafeCell;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::matchers::MatchType;
 use crate::algorithms::matchers::{Matcher, MatcherFlags};
-use crate::fst_traits::{CoreFst, Fst};
+use crate::fst_traits::{ArcIterator, CoreFst, Fst, FstIterData, FstIterator, StateIterator};
 use crate::semirings::Semiring;
-use crate::{Arc, StateId, EPS_LABEL, NO_LABEL};
-use std::cell::RefCell;
-use std::rc::Rc;
+use crate::{Arc, StateId, SymbolTable, EPS_LABEL, NO_LABEL};
+use itertools::izip;
 
 #[derive(Default, PartialEq, Eq, Clone, Hash, PartialOrd, Debug)]
 struct ComposeStateTuple<FS> {
@@ -19,8 +22,8 @@ struct ComposeStateTuple<FS> {
     s2: StateId,
 }
 
-#[derive(Clone, PartialEq)]
-struct ComposeFstImpl<
+#[derive(Clone, PartialEq, Debug)]
+pub struct ComposeFstImpl<
     'matcher,
     'fst,
     F1: Fst + 'fst,
@@ -280,3 +283,14 @@ where
         Ok(Some(final1))
     }
 }
+
+pub enum ComposeFilterEnum {
+    AutoFilter,
+    NullFilter,
+    TrivialFilter,
+    SequenceFilter,
+    AltSequenceFilter,
+    MatchFilter,
+    NoMatchFilter,
+}
+
