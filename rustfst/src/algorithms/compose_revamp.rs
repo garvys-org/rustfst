@@ -8,7 +8,7 @@ use crate::algorithms::matchers::MatchType;
 use crate::algorithms::matchers::Matcher;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
-use crate::{Arc, StateId};
+use crate::{Arc, StateId, EPS_LABEL, NO_LABEL};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -55,17 +55,32 @@ where
         }
     }
 
-    fn ordered_expand<FA: Fst, FB: Fst, M>(
-        &self,
+    fn ordered_expand<
+        'a,
+        'b: 'a,
+        FA: Fst<W = F1::W> + 'b,
+        FB: Fst<W = FA::W> + 'b,
+        M: Matcher<'a, 'b, FA>,
+    >(
+        &mut self,
         s: StateId,
         fsta: &FA,
         sa: StateId,
         fstb: &FB,
         sb: StateId,
-        mut matchera: Rc<M>,
+        matchera: Rc<RefCell<M>>,
         match_input: bool,
-    ) {
-        unimplemented!()
+    ) -> Fallible<()> {
+        let arc_loop = if match_input {
+            Arc::new(EPS_LABEL, NO_LABEL, FA::W::one(), sb)
+        } else {
+            Arc::new(NO_LABEL, EPS_LABEL, FA::W::one(), sb)
+        };
+        self.match_arc(s, sa, &matchera, &arc_loop, match_input)?;
+        for arc in fstb.arcs_iter(sb)? {
+            self.match_arc(s, sa, &matchera, arc, match_input)?;
+        }
+        Ok(())
     }
 
     fn add_arc(
@@ -89,23 +104,23 @@ where
                 arc1.weight,
                 self.state_table.find_id(tuple),
             ),
-        );
+        )?;
 
         Ok(())
     }
 
-    fn match_arc<'a, 'b: 'a, F: Fst + 'b, M: Matcher<'a, 'b, F>>(
+    fn match_arc<'a, 'b: 'a, F: Fst<W = F1::W> + 'b, M: Matcher<'a, 'b, F>>(
         &mut self,
         s: StateId,
         sa: StateId,
-        matchera: Rc<RefCell<M>>,
-        arc: &Arc<F1::W>,
+        matchera: &Rc<RefCell<M>>,
+        arc: &Arc<F::W>,
         match_input: bool,
     ) -> Fallible<()> {
         let label = if match_input { arc.olabel } else { arc.ilabel };
 
         for arca in matchera.borrow_mut().iter(sa, label)? {
-            let mut arca = arc.clone();
+            let mut arca = arca.clone();
             let mut arcb = arc.clone();
             if match_input {
                 let opt_fs = self.compose_filter.filter_arc(&mut arcb, &mut arca);
@@ -159,7 +174,7 @@ where
                 s1,
                 Rc::clone(&self.matcher2),
                 true,
-            );
+            )?;
         } else {
             self.ordered_expand(
                 state,
@@ -169,7 +184,7 @@ where
                 s2,
                 Rc::clone(&self.matcher1),
                 false,
-            );
+            )?;
         }
         Ok(())
     }

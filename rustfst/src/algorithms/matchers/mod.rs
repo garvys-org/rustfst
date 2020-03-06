@@ -29,8 +29,7 @@ pub enum MatchType {
 /// More generally, they may implement matching special labels that represent
 /// sets of labels such as sigma (all), rho (rest), or phi (fail).
 pub trait Matcher<'iter, 'fst: 'iter, F: Fst + 'fst> {
-    type W: Semiring + 'fst;
-    type Iter: Iterator<Item = &'iter Arc<Self::W>>;
+    type Iter: Iterator<Item = &'iter Arc<F::W>>;
 
     fn new(fst: &'fst F, match_type: MatchType) -> Fallible<Self>
     where
