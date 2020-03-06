@@ -9,6 +9,7 @@ use crate::algorithms::matchers::Matcher;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::StateId;
+use std::rc::Rc;
 
 #[derive(Default, PartialEq, Eq, Clone, Hash, PartialOrd, Debug)]
 struct ComposeStateTuple<FS> {
@@ -27,10 +28,31 @@ struct ComposeFstImpl<
 > {
     fst1: &'fst F1,
     fst2: &'fst F2,
+    matcher1: Rc<CF::M1>,
+    matcher2: Rc<CF::M2>,
     compose_filter: CF,
     cache_impl: CacheImpl<F1::W>,
     state_table: StateTable<ComposeStateTuple<CF::FS>>,
     match_type: MatchType,
+}
+
+impl<
+    'matcher,
+    'fst: 'matcher,
+    F1: Fst + 'fst,
+    F2: Fst<W = F1::W> + 'fst,
+    CF: ComposeFilter<'matcher, 'fst, F1, F2>,
+> ComposeFstImpl<'matcher, 'fst, F1, F2, CF>
+    where
+        <F1 as CoreFst>::W: 'static {
+
+    fn match_input(&self, s1: StateId, s2: StateId) -> bool {
+        unimplemented!()
+    }
+
+    fn ordered_expand<FA: Fst, FB: Fst, M>(&self, s: StateId, fsta: &FA, sa: StateId, fstb: &FB, sb: StateId, matchera: Rc<M>, match_input: bool) {
+        unimplemented!()
+    }
 }
 
 impl<
@@ -54,7 +76,17 @@ where
     }
 
     fn expand(&mut self, state: usize) -> Fallible<()> {
-        unimplemented!()
+        let tuple = self.state_table.find_tuple(state);
+        let s1 = tuple.s1;
+        let s2 = tuple.s2;
+        self.compose_filter.set_state(s1, s2, &tuple.fs);
+        drop(tuple);
+        if self.match_input(s1, s2) {
+            self.ordered_expand(state, self.fst2, s2, self.fst1, s1, Rc::clone(&self.matcher2), true);
+        } else {
+            self.ordered_expand(state, self.fst1, s1, self.fst2, s2, Rc::clone(&self.matcher1), false);
+        }
+        Ok(())
     }
 
     fn compute_start(&mut self) -> Fallible<Option<StateId>> {
