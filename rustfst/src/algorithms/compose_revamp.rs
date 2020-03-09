@@ -9,7 +9,7 @@ use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::dynamic_fst::DynamicFst;
 use crate::algorithms::matchers::MatchType;
 use crate::algorithms::matchers::{Matcher, MatcherFlags};
-use crate::fst_traits::{CoreFst, Fst};
+use crate::fst_traits::{CoreFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Arc, StateId, EPS_LABEL, NO_LABEL};
 
@@ -265,6 +265,7 @@ where
     }
 }
 
+#[derive(PartialOrd, PartialEq, Debug, Clone, Copy)]
 pub enum ComposeFilterEnum {
     AutoFilter,
     NullFilter,
@@ -294,4 +295,45 @@ where
         let compose_impl = ComposeFstImpl::new(fst1, fst2)?;
         Ok(Self::from_impl(compose_impl, isymt, osymt))
     }
+}
+
+#[derive(PartialOrd, PartialEq, Debug, Clone, Copy)]
+pub struct ComposeConfig {
+    compose_filter: ComposeFilterEnum,
+    connect: bool
+}
+
+impl Default for ComposeConfig {
+    fn default() -> Self {
+        Self {
+            compose_filter: ComposeFilterEnum::AutoFilter,
+            connect: true
+        }
+    }
+}
+
+pub fn compose_with_config<F1: Fst, F2: Fst<W = F1::W>, F3: MutableFst<W = F1::W>>(fst1: &F1, fst2: &F2, config: ComposeConfig) -> Fallible<F3> {
+    let mut ofst = match config.compose_filter {
+        ComposeFilterEnum::AutoFilter => {unimplemented!()},
+        ComposeFilterEnum::NullFilter => {unimplemented!()},
+        ComposeFilterEnum::SequenceFilter => {unimplemented!()},
+        ComposeFilterEnum::AltSequenceFilter => {unimplemented!()},
+        ComposeFilterEnum::MatchFilter => {unimplemented!()},
+        ComposeFilterEnum::NoMatchFilter => {unimplemented!()},
+        ComposeFilterEnum::TrivialFilter => {unimplemented!()}
+    };
+
+    if config.connect {
+        crate::algorithms::connect(&mut ofst)?;
+    }
+
+    Ok(ofst)
+}
+
+pub fn compose<F1: Fst, F2: Fst<W = F1::W>, F3: MutableFst<W = F1::W>>(
+    fst1: &F1,
+    fst2: &F2,
+) -> Fallible<F3> {
+    let config = ComposeConfig::default();
+    compose_with_config(fst1, fst2, config)
 }
