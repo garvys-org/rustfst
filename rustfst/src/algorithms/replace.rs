@@ -8,12 +8,10 @@ use failure::{bail, Fallible};
 use itertools::Itertools;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
-use crate::fst_traits::{
-    CoreFst, ExpandedFst, Fst, MutableFst,
-};
+use crate::algorithms::dynamic_fst::DynamicFst;
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL};
-use crate::algorithms::dynamic_fst::DynamicFst;
 
 /// This specifies what labels to output on the call or return arc.
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug, Eq)]
@@ -150,9 +148,22 @@ pub struct ReplaceFstImpl<F: Fst, B: Borrow<F>> {
     fst_type: PhantomData<F>,
 }
 
-impl<F: Fst, B: Borrow<F>> PartialEq for ReplaceFstImpl<F, B> {
+impl<F: Fst + PartialEq, B: Borrow<F>> PartialEq for ReplaceFstImpl<F, B> {
     fn eq(&self, other: &Self) -> bool {
-        unimplemented!()
+        self.cache_impl.eq(&other.cache_impl)
+            && self.call_label_type_.eq(&other.call_label_type_)
+            && self.return_label_type_.eq(&other.return_label_type_)
+            && self.call_output_label_.eq(&other.call_output_label_)
+            && self.return_label_.eq(&other.return_label_)
+            && self
+                .fst_array
+                .iter()
+                .zip(other.fst_array.iter())
+                .all(|(a, b)| a.borrow().eq(b.borrow()))
+            && self.nonterminal_set.eq(&other.nonterminal_set)
+            && self.nonterminal_hash.eq(&other.nonterminal_hash)
+            && self.root.eq(&other.root)
+            && self.state_table.eq(&other.state_table)
     }
 }
 
@@ -493,7 +504,7 @@ impl ReplaceStateTable {
 /// ReplaceFst supports dynamic replacement of arcs in one FST with another FST.
 /// This replacement is recursive. ReplaceFst can be used to support a variety of
 /// delayed constructions such as recursive transition networks, union, or closure.
-pub type ReplaceFst<F, B>=DynamicFst<ReplaceFstImpl<F,B>>;
+pub type ReplaceFst<F, B> = DynamicFst<ReplaceFstImpl<F, B>>;
 
 impl<F: Fst, B: Borrow<F>> ReplaceFst<F, B>
 where

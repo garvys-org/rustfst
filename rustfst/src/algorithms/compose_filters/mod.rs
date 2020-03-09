@@ -25,7 +25,9 @@ use std::fmt::Debug;
 // mod sequence_compose_filter;
 mod trivial_compose_filter;
 
-pub trait ComposeFilter<'iter, 'fst: 'iter, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst> : Debug + PartialEq {
+pub trait ComposeFilter<'iter, 'fst: 'iter, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst>:
+    Debug + PartialEq
+{
     type M1: Matcher<'iter, 'fst, F1>;
     type M2: Matcher<'iter, 'fst, F2>;
     type FS: FilterState;

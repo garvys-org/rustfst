@@ -1,8 +1,8 @@
 use num_traits::Num;
 
 use self::super::FilterState;
-use std::hash::Hash;
 use std::fmt::Debug;
+use std::hash::Hash;
 
 /// Filter state is a list of signed integer types T. Order matters for equality.
 #[derive(Debug, PartialEq, Clone, Eq, Hash)]

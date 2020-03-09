@@ -68,6 +68,7 @@ pub use self::{
     arc_sum::arc_sum,
     arc_unique::arc_unique,
     closure::{closure, ClosureFst, ClosureType},
+    compose_revamp::{ComposeFilterEnum, ComposeFst},
     composition::compose,
     concat::{concat, ConcatFst},
     connect::connect,

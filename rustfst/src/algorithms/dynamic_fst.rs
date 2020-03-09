@@ -1,16 +1,16 @@
 use std::cell::UnsafeCell;
 use std::fmt;
-use std::iter::{Map, repeat, Repeat, Zip};
+use std::iter::{repeat, Map, Repeat, Zip};
 use std::rc::Rc;
 use std::slice::Iter as IterSlice;
 
 use failure::Fallible;
 use itertools::izip;
 
-use crate::{Arc, StateId, SymbolTable};
 use crate::algorithms::cache::FstImpl;
-use crate::fst_traits::{ArcIterator, Fst, FstIterator, FstIterData, StateIterator};
+use crate::fst_traits::{ArcIterator, Fst, FstIterData, FstIterator, StateIterator};
 use crate::prelude::CoreFst;
+use crate::{Arc, StateId, SymbolTable};
 
 pub struct DynamicFst<IMPL> {
     fst_impl: UnsafeCell<IMPL>,
@@ -19,9 +19,16 @@ pub struct DynamicFst<IMPL> {
 }
 
 impl<IMPL: FstImpl> DynamicFst<IMPL> {
-
-    pub(crate) fn from_impl(fst_impl: IMPL, isymt: Option<Rc<SymbolTable>>, osymt: Option<Rc<SymbolTable>>) -> Self {
-        Self {fst_impl: UnsafeCell::new(fst_impl), isymt, osymt}
+    pub(crate) fn from_impl(
+        fst_impl: IMPL,
+        isymt: Option<Rc<SymbolTable>>,
+        osymt: Option<Rc<SymbolTable>>,
+    ) -> Self {
+        Self {
+            fst_impl: UnsafeCell::new(fst_impl),
+            isymt,
+            osymt,
+        }
     }
 
     fn num_known_states(&self) -> usize {
@@ -106,7 +113,7 @@ impl<'a, IMPL: FstImpl + 'a> StateIterator<'a> for DynamicFst<IMPL> {
     }
 }
 
-impl<IMPL: FstImpl +'static> Fst for DynamicFst<IMPL> {
+impl<IMPL: FstImpl + 'static> Fst for DynamicFst<IMPL> {
     fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
         self.isymt.clone()
     }
@@ -140,7 +147,7 @@ impl<IMPL: FstImpl> std::fmt::Debug for DynamicFst<IMPL> {
     }
 }
 
-impl<'a, IMPL: FstImpl +'a> FstIterator<'a> for DynamicFst<IMPL> {
+impl<'a, IMPL: FstImpl + 'a> FstIterator<'a> for DynamicFst<IMPL> {
     type ArcsIter = <DynamicFst<IMPL> as ArcIterator<'a>>::Iter;
     type FstIter = Map<
         Zip<<DynamicFst<IMPL> as StateIterator<'a>>::Iter, Repeat<&'a Self>>,
@@ -160,8 +167,7 @@ impl<'a, IMPL: FstImpl +'a> FstIterator<'a> for DynamicFst<IMPL> {
     }
 }
 
-impl<IMPL: FstImpl> PartialEq for DynamicFst<IMPL>
-{
+impl<IMPL: FstImpl + PartialEq> PartialEq for DynamicFst<IMPL> {
     fn eq(&self, other: &Self) -> bool {
         let ptr = self.fst_impl.get();
         let fst_impl = unsafe { ptr.as_ref().unwrap() };
@@ -173,8 +179,7 @@ impl<IMPL: FstImpl> PartialEq for DynamicFst<IMPL>
     }
 }
 
-impl<IMPL: FstImpl + Clone +'static> Clone for DynamicFst<IMPL>
-{
+impl<IMPL: FstImpl + Clone + 'static> Clone for DynamicFst<IMPL> {
     fn clone(&self) -> Self {
         let ptr = self.fst_impl.get();
         let fst_impl = unsafe { ptr.as_ref().unwrap() };

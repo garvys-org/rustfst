@@ -1,7 +1,7 @@
 use self::super::FilterState;
 use num_traits::Num;
-use std::hash::Hash;
 use std::fmt::Debug;
+use std::hash::Hash;
 
 /// Filter state that is a signed integral type.
 #[derive(Debug, PartialEq, Clone, Eq, Hash)]

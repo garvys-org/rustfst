@@ -6,11 +6,12 @@ use failure::Fallible;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::compose_filters::ComposeFilter;
+use crate::algorithms::dynamic_fst::DynamicFst;
 use crate::algorithms::matchers::MatchType;
 use crate::algorithms::matchers::{Matcher, MatcherFlags};
-use crate::fst_traits::{ArcIterator, CoreFst, Fst};
+use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
-use crate::{Arc, StateId, SymbolTable, EPS_LABEL, NO_LABEL};
+use crate::{Arc, StateId, EPS_LABEL, NO_LABEL};
 
 #[derive(Default, PartialEq, Eq, Clone, Hash, PartialOrd, Debug)]
 struct ComposeStateTuple<FS> {
@@ -98,7 +99,7 @@ where
         Ok(mt)
     }
 
-    fn match_input(&self, s1: StateId, s2: StateId) -> bool {
+    fn match_input(&self, _s1: StateId, _s2: StateId) -> bool {
         match self.match_type {
             MatchType::MatchInput => true,
             MatchType::MatchOutput => false,
@@ -115,7 +116,6 @@ where
     >(
         &mut self,
         s: StateId,
-        fsta: &FA,
         sa: StateId,
         fstb: &FB,
         sb: StateId,
@@ -217,25 +217,9 @@ where
         self.compose_filter.set_state(s1, s2, &tuple.fs);
         drop(tuple);
         if self.match_input(s1, s2) {
-            self.ordered_expand(
-                state,
-                self.fst2,
-                s2,
-                self.fst1,
-                s1,
-                Rc::clone(&self.matcher2),
-                true,
-            )?;
+            self.ordered_expand(state, s2, self.fst1, s1, Rc::clone(&self.matcher2), true)?;
         } else {
-            self.ordered_expand(
-                state,
-                self.fst1,
-                s1,
-                self.fst2,
-                s2,
-                Rc::clone(&self.matcher1),
-                false,
-            )?;
+            self.ordered_expand(state, s1, self.fst2, s2, Rc::clone(&self.matcher1), false)?;
         }
         Ok(())
     }
@@ -291,3 +275,23 @@ pub enum ComposeFilterEnum {
     NoMatchFilter,
 }
 
+pub type ComposeFst<'matcher, 'fst, F1, F2, CF> =
+    DynamicFst<ComposeFstImpl<'matcher, 'fst, F1, F2, CF>>;
+
+impl<
+        'iter,
+        'fst: 'iter,
+        F1: Fst + 'fst,
+        F2: Fst<W = F1::W> + 'fst,
+        CF: ComposeFilter<'iter, 'fst, F1, F2>,
+    > ComposeFst<'iter, 'fst, F1, F2, CF>
+where
+    <F1 as CoreFst>::W: 'static,
+{
+    pub fn new(fst1: &'fst F1, fst2: &'fst F2) -> Fallible<Self> {
+        let isymt = fst1.input_symbols();
+        let osymt = fst2.output_symbols();
+        let compose_impl = ComposeFstImpl::new(fst1, fst2)?;
+        Ok(Self::from_impl(compose_impl, isymt, osymt))
+    }
+}

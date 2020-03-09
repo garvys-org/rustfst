@@ -3,7 +3,6 @@ use failure::Fallible;
 // pub use sorted_matcher::SortedMatcher;
 
 use crate::fst_traits::Fst;
-use crate::semirings::Semiring;
 use crate::Arc;
 use crate::{Label, StateId};
 
@@ -37,7 +36,7 @@ pub enum MatchType {
 /// simplest form, these are just some associative map or search keyed on labels.
 /// More generally, they may implement matching special labels that represent
 /// sets of labels such as sigma (all), rho (rest), or phi (fail).
-pub trait Matcher<'iter, 'fst: 'iter, F: Fst + 'fst> : Debug + PartialEq {
+pub trait Matcher<'iter, 'fst: 'iter, F: Fst + 'fst>: Debug + PartialEq {
     type Iter: Iterator<Item = &'iter Arc<F::W>>;
 
     fn new(fst: &'fst F, match_type: MatchType) -> Fallible<Self>

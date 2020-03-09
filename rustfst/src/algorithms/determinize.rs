@@ -5,11 +5,10 @@ use std::marker::PhantomData;
 
 use failure::Fallible;
 
-use crate::{EPS_LABEL, KDELTA, Label, StateId};
-use crate::algorithms::{factor_weight, FactorWeightOptions, FactorWeightType, weight_convert};
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::factor_iterators::{GallicFactor, GallicFactorMin, GallicFactorRestrict};
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
+use crate::algorithms::{factor_weight, weight_convert, FactorWeightOptions, FactorWeightType};
 use crate::arc::Arc;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, Fst, MutableFst};
@@ -18,6 +17,7 @@ use crate::semirings::{
     SemiringProperties, StringWeightLeft, StringWeightRestrict, WeaklyDivisibleSemiring,
     WeightQuantize,
 };
+use crate::{Label, StateId, EPS_LABEL, KDELTA};
 
 /// Determinization type.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
@@ -31,7 +31,7 @@ pub enum DeterminizeType {
     DeterminizeDisambiguate,
 }
 
-pub trait CommonDivisor<W: Semiring> : PartialEq + Debug {
+pub trait CommonDivisor<W: Semiring>: PartialEq + Debug {
     fn common_divisor(w1: &W, w2: &W) -> Fallible<W>;
 }
 
@@ -166,8 +166,7 @@ impl<W: Semiring> DeterminizeArc<W> {
 }
 
 #[derive(PartialEq, Debug)]
-struct DeterminizeFsaImpl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>>
-{
+struct DeterminizeFsaImpl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>> {
     fst: &'a F,
     cache_impl: CacheImpl<F::W>,
     state_table: StateTable<DeterminizeStateTuple<F::W>>,
