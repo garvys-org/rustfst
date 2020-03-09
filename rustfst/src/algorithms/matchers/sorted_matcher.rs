@@ -1,7 +1,7 @@
 use failure::Fallible;
 use superslice::Ext;
 
-use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags, IterItemMatcher};
+use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, EPS_LABEL};
@@ -16,10 +16,7 @@ impl<'fst, F: Fst> Matcher<'fst, F> for SortedMatcher<'fst, F> {
     type Iter = IteratorSortedMatcher<'fst, F::W>;
 
     fn new(fst: &'fst F, match_type: MatchType) -> Fallible<Self> {
-        Ok(Self {
-            fst,
-            match_type,
-        })
+        Ok(Self { fst, match_type })
     }
 
     fn iter(&self, state: usize, label: usize) -> Fallible<Self::Iter> {
@@ -52,11 +49,7 @@ pub struct IteratorSortedMatcher<'fst, W: Semiring> {
 }
 
 impl<'fst, W: Semiring> IteratorSortedMatcher<'fst, W> {
-    pub fn new(
-        arcs: Vec<&'fst Arc<W>>,
-        match_label: Label,
-        match_type: MatchType,
-    ) -> Self {
+    pub fn new(arcs: Vec<&'fst Arc<W>>, match_label: Label, match_type: MatchType) -> Self {
         // If we have to match epsilon, an epsilon loop is added
         let current_loop = match_label == EPS_LABEL;
 

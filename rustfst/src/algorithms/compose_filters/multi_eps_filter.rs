@@ -3,19 +3,21 @@ use failure::Fallible;
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::{Arc, NO_LABEL};
+use std::rc::Rc;
+use std::cell::RefCell;
 
+#[derive(Debug)]
 pub struct MultiEpsFilter<F> {
     filter: F,
     keep_multi_eps: bool,
 }
 
 impl<
-        'matcher,
-        'fst: 'matcher,
+        'fst,
         F1: Fst + 'fst,
         F2: Fst<W = F1::W> + 'fst,
-        F: ComposeFilter<'matcher, 'fst, F1, F2>,
-    > ComposeFilter<'matcher, 'fst, F1, F2> for MultiEpsFilter<F>
+        F: ComposeFilter<'fst, F1, F2>,
+    > ComposeFilter<'fst, F1, F2> for MultiEpsFilter<F>
 {
     type M1 = F::M1;
     type M2 = F::M2;
@@ -58,11 +60,11 @@ impl<
         self.filter.filter_final(w1, w2)
     }
 
-    fn matcher1(&mut self) -> &mut Self::M1 {
-        self.filter.matcher1()
+    fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
+        Rc::clone(&self.filter.matcher1())
     }
 
-    fn matcher2(&mut self) -> &mut Self::M2 {
-        self.filter.matcher2()
+    fn matcher2(&self) -> Rc<RefCell<Self::M2>> {
+        Rc::clone(&self.filter.matcher2())
     }
 }

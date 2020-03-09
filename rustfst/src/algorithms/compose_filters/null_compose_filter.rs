@@ -6,20 +6,22 @@ use crate::algorithms::filter_states::TrivialFilterState;
 use crate::algorithms::matchers::{MatchType, Matcher};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::{Arc, NO_LABEL};
+use std::rc::Rc;
+use std::cell::RefCell;
 
+#[derive(Debug)]
 pub struct NullComposeFilter<M1, M2> {
-    matcher1: M1,
-    matcher2: M2,
+    matcher1: Rc<RefCell<M1>>,
+    matcher2: Rc<RefCell<M2>>,
 }
 
 impl<
-        'matcher,
-        'fst: 'matcher,
+        'fst,
         F1: Fst + 'fst,
         F2: Fst<W = F1::W> + 'fst,
-        M1: Matcher<'matcher, 'fst, F1>,
-        M2: Matcher<'matcher, 'fst, F2>,
-    > ComposeFilter<'matcher, 'fst, F1, F2> for NullComposeFilter<M1, M2>
+        M1: Matcher<'fst, F1>,
+        M2: Matcher<'fst, F2>,
+    > ComposeFilter<'fst, F1, F2> for NullComposeFilter<M1, M2>
 {
     type M1 = M1;
     type M2 = M2;
@@ -27,8 +29,8 @@ impl<
 
     fn new(fst1: &'fst F1, fst2: &'fst F2) -> Fallible<Self> {
         Ok(Self {
-            matcher1: M1::new(fst1, MatchType::MatchOutput)?,
-            matcher2: M2::new(fst2, MatchType::MatchInput)?,
+            matcher1: Rc::new(RefCell::new(M1::new(fst1, MatchType::MatchOutput)?)),
+            matcher2: Rc::new(RefCell::new(M2::new(fst2, MatchType::MatchInput)?)),
         })
     }
 
@@ -52,11 +54,11 @@ impl<
 
     fn filter_final(&self, _w1: &mut <F1 as CoreFst>::W, _w2: &mut <F2 as CoreFst>::W) {}
 
-    fn matcher1(&mut self) -> &mut Self::M1 {
-        &mut self.matcher1
+    fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
+        Rc::clone(&self.matcher1)
     }
 
-    fn matcher2(&mut self) -> &mut Self::M2 {
-        &mut self.matcher2
+    fn matcher2(&self) -> Rc<RefCell<Self::M2>> {
+        Rc::clone(&self.matcher2)
     }
 }

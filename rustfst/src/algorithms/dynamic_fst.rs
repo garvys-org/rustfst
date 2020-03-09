@@ -8,7 +8,7 @@ use failure::Fallible;
 use itertools::izip;
 
 use crate::algorithms::cache::FstImpl;
-use crate::fst_traits::{ArcIterator, Fst, FstIterData, FstIterator, StateIterator};
+use crate::fst_traits::{ArcIterator, Fst, FstIterData, FstIterator, MutableFst, StateIterator};
 use crate::prelude::CoreFst;
 use crate::{Arc, StateId, SymbolTable};
 
@@ -35,6 +35,19 @@ impl<IMPL: FstImpl> DynamicFst<IMPL> {
         let ptr = self.fst_impl.get();
         let fst_impl = unsafe { ptr.as_ref().unwrap() };
         fst_impl.num_known_states()
+    }
+
+    pub fn compute<F: MutableFst<W = IMPL::W>>(&mut self) -> Fallible<F> {
+        let ptr = self.fst_impl.get();
+        let fst_impl = unsafe { ptr.as_mut().unwrap() };
+        let mut fst: F = fst_impl.compute()?;
+        if let Some(isymt) = &self.isymt {
+            fst.set_input_symbols(Rc::clone(isymt));
+        }
+        if let Some(osymt) = &self.osymt {
+            fst.set_output_symbols(Rc::clone(osymt));
+        }
+        Ok(fst)
     }
 }
 

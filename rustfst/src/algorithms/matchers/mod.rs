@@ -3,14 +3,14 @@ use failure::Fallible;
 pub use sorted_matcher::SortedMatcher;
 
 use crate::fst_traits::Fst;
-use crate::{Arc, EPS_LABEL, NO_LABEL, NO_STATE_ID};
+use crate::{Arc, EPS_LABEL, NO_LABEL};
 use crate::{Label, StateId};
 
 mod sorted_matcher;
 
+use crate::semirings::Semiring;
 use bitflags::bitflags;
 use std::fmt::Debug;
-use crate::semirings::Semiring;
 
 bitflags! {
     pub struct MatcherFlags: u32 {
@@ -36,14 +36,14 @@ pub enum MatchType {
 // Use this to avoid autoref
 pub enum IterItemMatcher<'a, W: Semiring> {
     Arc(&'a Arc<W>),
-    EpsLoop
+    EpsLoop,
 }
 
 impl<'a, W: Semiring> IterItemMatcher<'a, W> {
     pub fn into_arc(self, state: StateId, match_type: MatchType) -> Fallible<Arc<W>> {
         match self {
             IterItemMatcher::Arc(arc) => Ok(arc.clone()),
-            IterItemMatcher::EpsLoop => eps_loop(state, match_type)
+            IterItemMatcher::EpsLoop => eps_loop(state, match_type),
         }
     }
 }
