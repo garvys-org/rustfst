@@ -1,31 +1,24 @@
-use std::cell::UnsafeCell;
+use std::borrow::Borrow;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use std::fmt;
-use std::iter::{repeat, Map, Repeat, Zip};
-use std::rc::Rc;
-use std::slice::Iter as IterSlice;
 
 use failure::Fallible;
 use unsafe_unwrap::UnsafeUnwrap;
 
+use crate::{Arc, EPS_LABEL, Label, StateId};
 use crate::algorithms::arc_filters::{ArcFilter, EpsilonArcFilter};
 use crate::algorithms::cache::{CacheImpl, FstImpl};
 use crate::algorithms::dfs_visit::dfs_visit;
+use crate::algorithms::dynamic_fst::DynamicFst;
+use crate::algorithms::Queue;
 use crate::algorithms::queues::{AutoQueue, FifoQueue};
 use crate::algorithms::shortest_distance::{ShortestDistanceConfig, ShortestDistanceState};
 use crate::algorithms::top_sort::TopOrderVisitor;
 use crate::algorithms::visitors::SccVisitor;
-use crate::algorithms::Queue;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{ArcIterator, CoreFst, Fst, FstIterData};
-use crate::fst_traits::{FstIterator, MutableFst, StateIterator};
+use crate::fst_traits::CoreFst;
+use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, SymbolTable, EPS_LABEL};
-use std::borrow::Borrow;
-
-use itertools::izip;
-use crate::algorithms::dynamic_fst::DynamicFst;
 
 pub struct RmEpsilonConfig<W: Semiring, Q: Queue> {
     sd_opts: ShortestDistanceConfig<W, Q, EpsilonArcFilter>,
@@ -429,7 +422,7 @@ where
 /// Removes epsilon-transitions (when both the input and output label are an
 /// epsilon) from a transducer. The result will be an equivalent FST that has no
 /// such epsilon transitions. This version is a delayed FST.
-pub type RmEpsilonFst<F: MutableFst, B: Borrow<F>>=DynamicFst<RmEpsilonImpl<F, B>>;
+pub type RmEpsilonFst<F, B>=DynamicFst<RmEpsilonImpl<F, B>>;
 impl<F: MutableFst, B: Borrow<F>> RmEpsilonFst<F, B>
 where
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,

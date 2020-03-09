@@ -1,28 +1,19 @@
 use std::borrow::Borrow;
 use std::cell::RefCell;
-use std::cell::UnsafeCell;
 use std::collections::HashMap;
 use std::fmt;
-use std::iter::repeat;
-use std::iter::Map;
-use std::iter::Repeat;
-use std::iter::Zip;
 use std::marker::PhantomData;
-use std::rc::Rc;
-use std::slice::Iter as IterSlice;
 
 use failure::Fallible;
-use itertools::izip;
 
 use bitflags::bitflags;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::arc::Arc;
-use crate::fst_traits::{ArcIterator, FstIterData, FstIterator, StateIterator};
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::{Label, StateId};
-use crate::{SymbolTable, KDELTA};
+use crate::KDELTA;
 use crate::algorithms::dynamic_fst::DynamicFst;
 
 bitflags! {
@@ -301,7 +292,7 @@ where
 /// States and transitions will be added as necessary. The algorithm is a
 /// generalization to arbitrary weights of the second step of the input
 /// epsilon-normalization algorithm. This version is a Delayed FST.
-pub type FactorWeightFst<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>>=DynamicFst<FactorWeightImpl<F,B,FI>>;
+pub type FactorWeightFst<F, B, FI>=DynamicFst<FactorWeightImpl<F,B,FI>>;
 
 impl<'a, F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> FactorWeightFst<F, B, FI>
 where

@@ -18,7 +18,6 @@ use crate::semirings::{
     SemiringProperties, StringWeightLeft, StringWeightRestrict, WeaklyDivisibleSemiring,
     WeightQuantize,
 };
-use failure::_core::fmt::{Formatter, Error};
 
 /// Determinization type.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]

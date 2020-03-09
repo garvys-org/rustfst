@@ -1,27 +1,18 @@
 use std::borrow::Borrow;
-use std::cell::UnsafeCell;
 use std::collections::hash_map::Entry;
 use std::collections::{BTreeSet, HashMap};
-use std::fmt;
 use std::hash::Hash;
-use std::iter::repeat;
-use std::iter::Map;
-use std::iter::Repeat;
-use std::iter::Zip;
 use std::marker::PhantomData;
-use std::rc::Rc;
-use std::slice::Iter as IterSlice;
 
 use failure::{bail, Fallible};
-use itertools::izip;
 use itertools::Itertools;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::fst_traits::{
-    ArcIterator, CoreFst, ExpandedFst, Fst, FstIterData, FstIterator, MutableFst, StateIterator,
+    CoreFst, ExpandedFst, Fst, MutableFst,
 };
 use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, SymbolTable, EPS_LABEL};
+use crate::{Arc, Label, StateId, EPS_LABEL};
 use crate::algorithms::dynamic_fst::DynamicFst;
 
 /// This specifies what labels to output on the call or return arc.
@@ -521,4 +512,3 @@ where
         Ok(Self::from_impl(fst, isymt, osymt))
     }
 }
-
