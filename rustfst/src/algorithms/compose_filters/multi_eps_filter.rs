@@ -3,8 +3,8 @@ use failure::Fallible;
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::{Arc, NO_LABEL};
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct MultiEpsFilter<F> {
@@ -12,12 +12,8 @@ pub struct MultiEpsFilter<F> {
     keep_multi_eps: bool,
 }
 
-impl<
-        'fst,
-        F1: Fst + 'fst,
-        F2: Fst<W = F1::W> + 'fst,
-        F: ComposeFilter<'fst, F1, F2>,
-    > ComposeFilter<'fst, F1, F2> for MultiEpsFilter<F>
+impl<'fst, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst, F: ComposeFilter<'fst, F1, F2>>
+    ComposeFilter<'fst, F1, F2> for MultiEpsFilter<F>
 {
     type M1 = F::M1;
     type M2 = F::M2;

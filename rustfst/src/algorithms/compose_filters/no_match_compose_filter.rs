@@ -3,11 +3,11 @@ use std::rc::Rc;
 
 use failure::Fallible;
 
-use crate::{Arc, EPS_LABEL};
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::filter_states::{FilterState, TrivialFilterState};
-use crate::algorithms::matchers::{Matcher, MatchType};
+use crate::algorithms::matchers::{MatchType, Matcher};
 use crate::fst_traits::{CoreFst, Fst};
+use crate::{Arc, EPS_LABEL};
 
 #[derive(Debug)]
 pub struct NoMatchComposeFilter<M1, M2> {

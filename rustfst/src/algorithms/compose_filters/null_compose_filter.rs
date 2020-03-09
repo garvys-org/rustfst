@@ -6,8 +6,8 @@ use crate::algorithms::filter_states::TrivialFilterState;
 use crate::algorithms::matchers::{MatchType, Matcher};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::{Arc, NO_LABEL};
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct NullComposeFilter<M1, M2> {
