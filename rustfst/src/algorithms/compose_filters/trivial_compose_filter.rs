@@ -15,13 +15,12 @@ pub struct TrivialComposeFilter<M1, M2> {
 }
 
 impl<
-        'matcher,
-        'fst: 'matcher,
+        'fst,
         F1: Fst + 'fst,
         F2: Fst<W = F1::W> + 'fst,
-        M1: Matcher<'matcher, 'fst, F1>,
-        M2: Matcher<'matcher, 'fst, F2>,
-    > ComposeFilter<'matcher, 'fst, F1, F2> for TrivialComposeFilter<M1, M2>
+        M1: Matcher<'fst, F1>,
+        M2: Matcher<'fst, F2>,
+    > ComposeFilter<'fst, F1, F2> for TrivialComposeFilter<M1, M2>
 {
     type M1 = M1;
     type M2 = M2;

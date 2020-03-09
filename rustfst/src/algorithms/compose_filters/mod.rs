@@ -25,11 +25,11 @@ use std::fmt::Debug;
 // mod sequence_compose_filter;
 mod trivial_compose_filter;
 
-pub trait ComposeFilter<'iter, 'fst: 'iter, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst>:
-    Debug + PartialEq
+pub trait ComposeFilter<'fst, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst>:
+    Debug
 {
-    type M1: Matcher<'iter, 'fst, F1>;
-    type M2: Matcher<'iter, 'fst, F2>;
+    type M1: Matcher<'fst, F1>;
+    type M2: Matcher<'fst, F2>;
     type FS: FilterState;
 
     fn new(fst1: &'fst F1, fst2: &'fst F2) -> Fallible<Self>
