@@ -11,6 +11,14 @@ pub struct StateTable<T: Hash + Eq + Clone> {
     pub(crate) table: RefCell<BiHashMap<StateId, T>>,
 }
 
+impl<T: Hash + Eq + Clone> Default for StateTable<T> {
+    fn default() -> Self {
+        Self {
+            table: RefCell::new(BiHashMap::new())
+        }
+    }
+}
+
 impl<T: Hash + Eq + Clone + fmt::Debug> fmt::Debug for StateTable<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "StateTable {{ table : {:?} }}", self.table.borrow())

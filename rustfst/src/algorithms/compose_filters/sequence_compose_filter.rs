@@ -37,11 +37,22 @@ impl<
     type M2 = M2;
     type FS = CharFilterState;
 
-    fn new(fst1: &'fst F1, fst2: &'fst F2) -> Fallible<Self> {
+    fn new<IM1: Into<Option<Self::M1>>, IM2: Into<Option<Self::M2>>>(
+        fst1: &'fst F1,
+        fst2: &'fst F2,
+        m1: IM1,
+        m2: IM2,
+    ) -> Fallible<Self> {
         Ok(Self {
             fst1,
-            matcher1: Rc::new(RefCell::new(Self::M1::new(fst1, MatchType::MatchOutput)?)),
-            matcher2: Rc::new(RefCell::new(Self::M2::new(fst2, MatchType::MatchInput)?)),
+            matcher1: Rc::new(RefCell::new(
+                m1.into()
+                    .unwrap_or_else(|| Self::M1::new(fst1, MatchType::MatchOutput).unwrap()),
+            )),
+            matcher2: Rc::new(RefCell::new(
+                m2.into()
+                    .unwrap_or_else(|| Self::M2::new(fst2, MatchType::MatchInput).unwrap()),
+            )),
             s1: NO_STATE_ID,
             s2: NO_STATE_ID,
             fs: Self::FS::default(),

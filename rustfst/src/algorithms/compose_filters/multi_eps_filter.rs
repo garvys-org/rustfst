@@ -19,9 +19,14 @@ impl<'fst, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst, F: ComposeFilter<'fst, F1,
     type M2 = F::M2;
     type FS = F::FS;
 
-    fn new(fst1: &'fst F1, fst2: &'fst F2) -> Fallible<Self> {
+    fn new<IM1: Into<Option<Self::M1>>, IM2: Into<Option<Self::M2>>>(
+        fst1: &'fst F1,
+        fst2: &'fst F2,
+        m1: IM1,
+        m2: IM2,
+    ) -> Fallible<Self> {
         Ok(Self {
-            filter: F::new(fst1, fst2)?,
+            filter: F::new(fst1, fst2, m1, m2)?,
             keep_multi_eps: false,
         })
     }

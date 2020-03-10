@@ -101,6 +101,6 @@ pub use self::factor_weight::{
 pub mod compose_filters;
 mod compose_revamp;
 pub mod filter_states;
-pub mod matchers;
-pub mod lookahead_matchers;
 pub mod lookahead_filters;
+pub mod lookahead_matchers;
+pub mod matchers;

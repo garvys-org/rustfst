@@ -1,9 +1,9 @@
 use failure::Fallible;
 
-use crate::algorithms::matchers::{Matcher, MatcherFlags, MatchType};
-use crate::fst_traits::{Fst, CoreFst};
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
-use crate::{StateId, Label};
+use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
+use crate::fst_traits::{CoreFst, Fst};
+use crate::{Label, StateId};
 
 #[derive(Debug)]
 struct ArcLookAheadMatcher<M> {
@@ -16,10 +16,13 @@ struct ArcLookAheadMatcher<M> {
 impl<'fst, F: Fst + 'fst, M: Matcher<'fst, F>> Matcher<'fst, F> for ArcLookAheadMatcher<M> {
     type Iter = M::Iter;
 
-    fn new(fst: &'fst F, match_type: MatchType) -> Fallible<Self>{
+    fn new(fst: &'fst F, match_type: MatchType) -> Fallible<Self> {
         Ok(Self {
             matcher: M::new(fst, match_type)?,
-            flags: MatcherFlags::LOOKAHEAD_NON_EPSILONS | MatcherFlags::LOOKAHEAD_EPSILONS | MatcherFlags::LOOKAHEAD_WEIGHT | MatcherFlags::LOOKAHEAD_PREFIX,
+            flags: MatcherFlags::LOOKAHEAD_NON_EPSILONS
+                | MatcherFlags::LOOKAHEAD_EPSILONS
+                | MatcherFlags::LOOKAHEAD_WEIGHT
+                | MatcherFlags::LOOKAHEAD_PREFIX,
         })
     }
 
@@ -36,12 +39,17 @@ impl<'fst, F: Fst + 'fst, M: Matcher<'fst, F>> Matcher<'fst, F> for ArcLookAhead
     }
 
     fn flags(&self) -> MatcherFlags {
-        self.matcher.flags() | MatcherFlags::INPUT_LOOKAHEAD_MATCHER | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER | self.flags
+        self.matcher.flags()
+            | MatcherFlags::INPUT_LOOKAHEAD_MATCHER
+            | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER
+            | self.flags
     }
 }
 
-impl<'fst, F: Fst + 'fst, M: Matcher<'fst, F>> LookaheadMatcher<'fst, F> for ArcLookAheadMatcher<M> {
-    fn lookahead_fst<LF: Fst<W=F::W>>(&self, state: StateId, lfst: &LF) -> bool {
+impl<'fst, F: Fst + 'fst, M: Matcher<'fst, F>> LookaheadMatcher<'fst, F>
+    for ArcLookAheadMatcher<M>
+{
+    fn lookahead_fst<LF: Fst<W = F::W>>(&self, state: StateId, lfst: &LF) -> bool {
         let mut result = false;
         unimplemented!()
     }

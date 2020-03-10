@@ -30,7 +30,12 @@ pub trait ComposeFilter<'fst, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst>: Debug 
     type M2: Matcher<'fst, F2>;
     type FS: FilterState;
 
-    fn new(fst1: &'fst F1, fst2: &'fst F2) -> Fallible<Self>
+    fn new<IM1: Into<Option<Self::M1>>, IM2: Into<Option<Self::M2>>>(
+        fst1: &'fst F1,
+        fst2: &'fst F2,
+        m1: IM1,
+        m2: IM2,
+    ) -> Fallible<Self>
     where
         Self: std::marker::Sized;
 

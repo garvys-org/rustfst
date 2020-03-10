@@ -1,22 +1,22 @@
 use failure::Fallible;
 
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
-use crate::algorithms::matchers::{Matcher, MatcherFlags, MatchType};
+use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
-use crate::{StateId, Label};
+use crate::{Label, StateId};
 
 #[derive(Debug)]
 struct TrivialLookAheadMatcher<M> {
-    matcher: M
+    matcher: M,
 }
 
 impl<'fst, F: Fst + 'fst, M: Matcher<'fst, F>> Matcher<'fst, F> for TrivialLookAheadMatcher<M> {
     type Iter = M::Iter;
 
-    fn new(fst: &'fst F, match_type: MatchType) -> Fallible<Self>{
+    fn new(fst: &'fst F, match_type: MatchType) -> Fallible<Self> {
         Ok(Self {
-            matcher: M::new(fst, match_type)?
+            matcher: M::new(fst, match_type)?,
         })
     }
 
@@ -33,12 +33,16 @@ impl<'fst, F: Fst + 'fst, M: Matcher<'fst, F>> Matcher<'fst, F> for TrivialLookA
     }
 
     fn flags(&self) -> MatcherFlags {
-        self.matcher.flags() | MatcherFlags::INPUT_LOOKAHEAD_MATCHER | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER
+        self.matcher.flags()
+            | MatcherFlags::INPUT_LOOKAHEAD_MATCHER
+            | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER
     }
 }
 
-impl<'fst, F: Fst + 'fst, M: Matcher<'fst, F>> LookaheadMatcher<'fst, F> for TrivialLookAheadMatcher<M> {
-    fn lookahead_fst<LF: Fst<W=F::W>>(&self, state: StateId, lfst: &LF) -> bool {
+impl<'fst, F: Fst + 'fst, M: Matcher<'fst, F>> LookaheadMatcher<'fst, F>
+    for TrivialLookAheadMatcher<M>
+{
+    fn lookahead_fst<LF: Fst<W = F::W>>(&self, state: StateId, lfst: &LF) -> bool {
         true
     }
 

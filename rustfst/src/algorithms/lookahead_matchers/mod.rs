@@ -1,17 +1,16 @@
 use failure::Fallible;
 
-use crate::{Label, StateId};
 use crate::algorithms::matchers::Matcher;
 use crate::fst_traits::Fst;
+use crate::{Label, StateId};
 
-mod trivial_lookahead_matcher;
 mod arc_lookahead_matcher;
+mod trivial_lookahead_matcher;
 
 pub trait LookaheadMatcher<'fst, F: Fst + 'fst>: Matcher<'fst, F> {
-
     // Are there paths from a state in the lookahead FST that can be read from
     // the curent matcher state?
-    fn lookahead_fst<LF: Fst<W=F::W>>(&self, state: StateId, lfst: &LF) -> bool;
+    fn lookahead_fst<LF: Fst<W = F::W>>(&self, state: StateId, lfst: &LF) -> bool;
 
     // Can the label be read from the current matcher state after possibly
     // following epsilon transitions?

@@ -16,6 +16,78 @@ use crate::fst_traits::{CoreFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Arc, StateId, EPS_LABEL, NO_LABEL};
 
+#[derive(Default)]
+pub struct ComposeFstOptions<M, CF, ST> {
+    matcher1: Option<M>,
+    matcher2: Option<M>,
+    filter: Option<CF>,
+    state_table: Option<ST>,
+}
+
+impl<M, CF, ST> ComposeFstOptions<M, CF, ST> {
+    pub fn new<
+        IM1: Into<Option<M>>,
+        IM2: Into<Option<M>>,
+        ICF: Into<Option<CF>>,
+        IST: Into<Option<ST>>,
+    >(
+        matcher1: IM1,
+        matcher2: IM2,
+        filter: ICF,
+        state_table: IST,
+    ) -> Self {
+        Self {
+            matcher1: matcher1.into(),
+            matcher2: matcher2.into(),
+            filter: filter.into(),
+            state_table: state_table.into(),
+        }
+    }
+}
+
+pub struct ComposeFstImplOptions<M1, M2, CF, ST> {
+    matcher1: Option<M1>,
+    matcher2: Option<M2>,
+    filter: Option<CF>,
+    state_table: Option<ST>,
+    allow_noncommute: bool,
+}
+
+impl<M1, M2, CF, ST> Default for ComposeFstImplOptions<M1, M2, CF, ST> {
+    fn default() -> Self {
+        Self {
+            matcher1: None,
+            matcher2: None,
+            filter: None,
+            state_table: None,
+            allow_noncommute: false
+        }
+    }
+}
+
+impl<M1, M2, CF, ST> ComposeFstImplOptions<M1, M2, CF, ST> {
+    pub fn new<
+        IM1: Into<Option<M1>>,
+        IM2: Into<Option<M2>>,
+        ICF: Into<Option<CF>>,
+        IST: Into<Option<ST>>,
+    >(
+        matcher1: IM1,
+        matcher2: IM2,
+        filter: ICF,
+        state_table: IST,
+        allow_noncommute: bool,
+    ) -> Self {
+        Self {
+            matcher1: matcher1.into(),
+            matcher2: matcher2.into(),
+            filter: filter.into(),
+            state_table: state_table.into(),
+            allow_noncommute,
+        }
+    }
+}
+
 #[derive(Default, PartialEq, Eq, Clone, Hash, PartialOrd, Debug)]
 struct ComposeStateTuple<FS> {
     fs: FS,
@@ -45,8 +117,25 @@ impl<'fst, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst, CF: ComposeFilter<'fst, F1
 where
     <F1 as CoreFst>::W: 'static,
 {
-    fn new(fst1: &'fst F1, fst2: &'fst F2) -> Fallible<Self> {
-        let compose_filter = CF::new(fst1, fst2)?;
+    // Compose specifying two matcher types Matcher1 and Matcher2. Requires input
+    // FST (of the same Arc type, but o.w. arbitrary) match the corresponding
+    // matcher FST types). Recommended only for advanced use in demanding or
+    // specialized applications due to potential code bloat and matcher
+    // incompatibilities.
+    fn new2(fst1: &'fst F1, fst2: &'fst F2) -> Fallible<Self> {
+        unimplemented!()
+    }
+
+    fn new(
+        fst1: &'fst F1,
+        fst2: &'fst F2,
+        opts: ComposeFstImplOptions<CF::M1, CF::M2, CF, StateTable<ComposeStateTuple<CF::FS>>>,
+    ) -> Fallible<Self> {
+        let opts_matcher1 = opts.matcher1;
+        let opts_matcher2 = opts.matcher2;
+        let compose_filter = opts
+            .filter
+            .unwrap_or_else(|| CF::new(fst1, fst2, opts_matcher1, opts_matcher2).unwrap());
         let matcher1 = compose_filter.matcher1();
         let matcher2 = compose_filter.matcher2();
         Ok(Self {
@@ -54,7 +143,7 @@ where
             fst2,
             compose_filter,
             cache_impl: CacheImpl::new(),
-            state_table: StateTable::new(),
+            state_table: opts.state_table.unwrap_or_else(StateTable::new),
             match_type: Self::match_type(&matcher1, &matcher2)?,
             matcher1,
             matcher2,
@@ -271,6 +360,22 @@ pub enum ComposeFilterEnum {
 
 pub type ComposeFst<'fst, F1, F2, CF> = DynamicFst<ComposeFstImpl<'fst, F1, F2, CF>>;
 
+
+fn create_base_2<
+    'fst,
+    F1: Fst + 'fst,
+    F2: Fst<W = F1::W> + 'fst,
+    CF: ComposeFilter<'fst, F1, F2>,
+>(
+    fst1: &'fst F1,
+    fst2: &'fst F2,
+    opts: ComposeFstImplOptions<CF::M1, CF::M2, CF, StateTable<ComposeStateTuple<CF::FS>>>,
+) -> Fallible<ComposeFstImpl<'fst, F1, F2, CF>>
+where F1::W: 'static
+{
+    ComposeFstImpl::new(fst1, fst2, opts)
+}
+
 impl<'fst, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst, CF: ComposeFilter<'fst, F1, F2>>
     ComposeFst<'fst, F1, F2, CF>
 where
@@ -279,9 +384,17 @@ where
     pub fn new(fst1: &'fst F1, fst2: &'fst F2) -> Fallible<Self> {
         let isymt = fst1.input_symbols();
         let osymt = fst2.output_symbols();
-        let compose_impl = ComposeFstImpl::new(fst1, fst2)?;
+        let compose_impl = create_base_2(fst1, fst2, ComposeFstImplOptions::default())?;
         Ok(Self::from_impl(compose_impl, isymt, osymt))
     }
+
+    // pub fn new_with_options(fst1: &'fst F1, fst2: &'fst F2, opts: ComposeFstOptions) -> Fallible<Self> {
+    //     unimplemented!()
+    // }
+    //
+    // pub fn new_with_impl_optins(fst1: &'fst F1, fst2: &'fst F2: opts: ComposeFstImplOptions) -> Fallible<Self> {
+    //     unimplemented!()
+    // }
 }
 
 #[derive(PartialOrd, PartialEq, Debug, Clone, Copy)]

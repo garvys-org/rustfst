@@ -5,10 +5,10 @@ use failure::Fallible;
 use bitflags::bitflags;
 pub use sorted_matcher::SortedMatcher;
 
-use crate::{Arc, EPS_LABEL, NO_LABEL};
-use crate::{Label, StateId};
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
+use crate::{Arc, EPS_LABEL, NO_LABEL};
+use crate::{Label, StateId};
 
 mod sorted_matcher;
 
