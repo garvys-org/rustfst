@@ -1,7 +1,10 @@
 use failure::Fallible;
 
+use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::{Matcher, MatcherFlags, MatchType};
 use crate::fst_traits::Fst;
+use crate::semirings::Semiring;
+use crate::{StateId, Label};
 
 #[derive(Debug)]
 struct TrivialLookAheadMatcher<M> {
@@ -31,5 +34,23 @@ impl<'fst, F: Fst + 'fst, M: Matcher<'fst, F>> Matcher<'fst, F> for TrivialLookA
 
     fn flags(&self) -> MatcherFlags {
         self.matcher.flags() | MatcherFlags::INPUT_LOOKAHEAD_MATCHER | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER
+    }
+}
+
+impl<'fst, F: Fst + 'fst, M: Matcher<'fst, F>> LookaheadMatcher<'fst, F> for TrivialLookAheadMatcher<M> {
+    fn lookahead_fst<LF: Fst<W=F::W>>(&self, state: StateId, lfst: &LF) -> bool {
+        true
+    }
+
+    fn lookahead_label(&self, state: StateId, label: Label) -> Fallible<bool> {
+        Ok(true)
+    }
+
+    fn lookahead_prefix(&self) -> bool {
+        false
+    }
+
+    fn lookahead_weight(&self) -> F::W {
+        F::W::one()
     }
 }
