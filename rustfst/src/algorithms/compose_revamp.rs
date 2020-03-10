@@ -308,7 +308,12 @@ where
     F1::W: 'static,
 {
     let mut ofst: F3 = match config.compose_filter {
-        ComposeFilterEnum::AutoFilter => unimplemented!(),
+        ComposeFilterEnum::AutoFilter => {
+            ComposeFst::<_, _, SequenceComposeFilter<_, SortedMatcher<_>, SortedMatcher<_>>>::new(
+                fst1, fst2,
+            )?
+            .compute()?
+        }
         ComposeFilterEnum::NullFilter => {
             ComposeFst::<_, _, NullComposeFilter<SortedMatcher<_>, SortedMatcher<_>>>::new(
                 fst1, fst2,

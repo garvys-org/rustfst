@@ -1,20 +1,27 @@
+use std::fmt::Debug;
+
 use failure::Fallible;
 
+use bitflags::bitflags;
 pub use sorted_matcher::SortedMatcher;
 
-use crate::fst_traits::Fst;
 use crate::{Arc, EPS_LABEL, NO_LABEL};
 use crate::{Label, StateId};
+use crate::fst_traits::Fst;
+use crate::semirings::Semiring;
 
 mod sorted_matcher;
 
-use crate::semirings::Semiring;
-use bitflags::bitflags;
-use std::fmt::Debug;
-
 bitflags! {
     pub struct MatcherFlags: u32 {
-        const REQUIRE_MATCH =  0b00001;
+        const REQUIRE_MATCH =  1u32 << 0;
+        const INPUT_LOOKAHEAD_MATCHER =  1u32 << 1;
+        const OUTPUT_LOOKAHEAD_MATCHER =  1u32 << 2;
+        const LOOKAHEAD_WEIGHT =  1u32 << 3;
+        const LOOKAHEAD_PREFIX =  1u32 << 4;
+        const LOOKAHEAD_NON_EPSILONS =  1u32 << 5;
+        const LOOKAHEAD_EPSILONS =  1u32 << 6;
+        const LOOKAHEAD_NON_EPSILON_PREFIX =  1u32 << 7;
     }
 }
 
