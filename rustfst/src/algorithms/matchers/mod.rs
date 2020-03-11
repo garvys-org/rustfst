@@ -68,14 +68,16 @@ pub fn eps_loop<W: Semiring>(state: StateId, match_type: MatchType) -> Fallible<
 /// simplest form, these are just some associative map or search keyed on labels.
 /// More generally, they may implement matching special labels that represent
 /// sets of labels such as sigma (all), rho (rest), or phi (fail).
-pub trait Matcher<'fst, F: Fst + 'fst>: Debug {
-    type Iter: Iterator<Item = IterItemMatcher<'fst, F::W>>;
+pub trait Matcher<'fst, W: Semiring + 'fst>: Debug {
+    type F: Fst<W=W> + 'fst;
 
-    fn new(fst: &'fst F, match_type: MatchType) -> Fallible<Self>
+    type Iter: Iterator<Item = IterItemMatcher<'fst, W>>;
+
+    fn new(fst: &'fst Self::F, match_type: MatchType) -> Fallible<Self>
     where
         Self: std::marker::Sized;
     fn iter(&self, state: StateId, label: Label) -> Fallible<Self::Iter>;
-    fn final_weight(&self, state: StateId) -> Fallible<Option<&'fst F::W>>;
+    fn final_weight(&self, state: StateId) -> Fallible<Option<&'fst W>>;
     fn match_type(&self) -> MatchType;
     fn flags(&self) -> MatcherFlags;
 }

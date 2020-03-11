@@ -7,6 +7,7 @@ use crate::fst_traits::{CoreFst, Fst};
 use crate::Arc;
 use failure::_core::cell::RefCell;
 use std::rc::Rc;
+use crate::semirings::Semiring;
 
 #[derive(Debug, PartialEq)]
 pub struct TrivialComposeFilter<M1, M2> {
@@ -16,19 +17,18 @@ pub struct TrivialComposeFilter<M1, M2> {
 
 impl<
         'fst,
-        F1: Fst + 'fst,
-        F2: Fst<W = F1::W> + 'fst,
-        M1: Matcher<'fst, F1>,
-        M2: Matcher<'fst, F2>,
-    > ComposeFilter<'fst, F1, F2> for TrivialComposeFilter<M1, M2>
+        W: Semiring + 'fst,
+        M1: Matcher<'fst, W>,
+        M2: Matcher<'fst, W>,
+    > ComposeFilter<'fst, W> for TrivialComposeFilter<M1, M2>
 {
     type M1 = M1;
     type M2 = M2;
     type FS = TrivialFilterState;
 
     fn new<IM1: Into<Option<Self::M1>>, IM2: Into<Option<Self::M2>>>(
-        fst1: &'fst F1,
-        fst2: &'fst F2,
+        fst1: &'fst <Self::M1 as Matcher<'fst, W>>::F,
+        fst2: &'fst <Self::M2 as Matcher<'fst, W>>::F,
         m1: IM1,
         m2: IM2,
     ) -> Fallible<Self> {
@@ -52,13 +52,13 @@ impl<
 
     fn filter_arc(
         &self,
-        _arc1: &mut Arc<<F1 as CoreFst>::W>,
-        _arc2: &mut Arc<<F2 as CoreFst>::W>,
+        _arc1: &mut Arc<W>,
+        _arc2: &mut Arc<W>,
     ) -> Option<Self::FS> {
         Some(Self::FS::new(true))
     }
 
-    fn filter_final(&self, _w1: &mut <F1 as CoreFst>::W, _w2: &mut <F2 as CoreFst>::W) {}
+    fn filter_final(&self, _w1: &mut W, _w2: &mut W) {}
 
     fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
         Rc::clone(&self.matcher1)

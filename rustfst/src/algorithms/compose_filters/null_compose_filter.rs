@@ -19,8 +19,8 @@ impl<
         'fst,
         F1: Fst + 'fst,
         F2: Fst<W = F1::W> + 'fst,
-        M1: Matcher<'fst, F1>,
-        M2: Matcher<'fst, F2>,
+        M1: Matcher<'fst, F1::W>,
+        M2: Matcher<'fst, F2::W>,
     > ComposeFilter<'fst, F1, F2> for NullComposeFilter<M1, M2>
 {
     type M1 = M1;

@@ -12,8 +12,9 @@ pub struct SortedMatcher<'fst, F: Fst> {
     match_type: MatchType,
 }
 
-impl<'fst, F: Fst> Matcher<'fst, F> for SortedMatcher<'fst, F> {
-    type Iter = IteratorSortedMatcher<'fst, F::W>;
+impl<'fst, W: Semiring +'fst, F: Fst<W=W>> Matcher<'fst, W> for SortedMatcher<'fst, F> {
+    type F = F;
+    type Iter = IteratorSortedMatcher<'fst, W>;
 
     fn new(fst: &'fst F, match_type: MatchType) -> Fallible<Self> {
         Ok(Self { fst, match_type })
@@ -27,7 +28,7 @@ impl<'fst, F: Fst> Matcher<'fst, F> for SortedMatcher<'fst, F> {
         ))
     }
 
-    fn final_weight(&self, state: usize) -> Fallible<Option<&'fst <F as CoreFst>::W>> {
+    fn final_weight(&self, state: usize) -> Fallible<Option<&'fst W>> {
         self.fst.final_weight(state)
     }
 

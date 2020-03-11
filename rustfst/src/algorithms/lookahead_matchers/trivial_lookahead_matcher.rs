@@ -11,10 +11,10 @@ struct TrivialLookAheadMatcher<M> {
     matcher: M,
 }
 
-impl<'fst, F: Fst + 'fst, M: Matcher<'fst, F>> Matcher<'fst, F> for TrivialLookAheadMatcher<M> {
+impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W> for TrivialLookAheadMatcher<M> {
     type Iter = M::Iter;
 
-    fn new(fst: &'fst F, match_type: MatchType) -> Fallible<Self> {
+    fn new<F: Fst<W=W>>(fst: &'fst F, match_type: MatchType) -> Fallible<Self> {
         Ok(Self {
             matcher: M::new(fst, match_type)?,
         })
@@ -24,7 +24,7 @@ impl<'fst, F: Fst + 'fst, M: Matcher<'fst, F>> Matcher<'fst, F> for TrivialLookA
         self.matcher.iter(state, label)
     }
 
-    fn final_weight(&self, state: usize) -> Fallible<Option<&'fst F::W>> {
+    fn final_weight(&self, state: usize) -> Fallible<Option<&'fst W>> {
         self.matcher.final_weight(state)
     }
 
@@ -39,10 +39,10 @@ impl<'fst, F: Fst + 'fst, M: Matcher<'fst, F>> Matcher<'fst, F> for TrivialLookA
     }
 }
 
-impl<'fst, F: Fst + 'fst, M: Matcher<'fst, F>> LookaheadMatcher<'fst, F>
+impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
     for TrivialLookAheadMatcher<M>
 {
-    fn lookahead_fst<LF: Fst<W = F::W>>(&self, state: StateId, lfst: &LF) -> bool {
+    fn lookahead_fst<LF: Fst<W = W>>(&self, state: StateId, lfst: &LF) -> bool {
         true
     }
 
@@ -54,7 +54,7 @@ impl<'fst, F: Fst + 'fst, M: Matcher<'fst, F>> LookaheadMatcher<'fst, F>
         false
     }
 
-    fn lookahead_weight(&self) -> F::W {
-        F::W::one()
+    fn lookahead_weight(&self) -> W {
+        W::one()
     }
 }

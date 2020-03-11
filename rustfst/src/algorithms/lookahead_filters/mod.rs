@@ -1,13 +1,12 @@
 use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::Fst;
+use crate::semirings::Semiring;
 
 pub fn lookahead_match_type<
-    'fst1,
-    'fst2,
-    F1: Fst + 'fst1,
-    F2: Fst + 'fst2,
-    M1: Matcher<'fst1, F1>,
-    M2: Matcher<'fst2, F2>,
+    'fst,
+    W: Semiring + 'fst,
+    M1: Matcher<'fst, W>,
+    M2: Matcher<'fst, W>,
 >(
     m1: &M1,
     m2: &M2,

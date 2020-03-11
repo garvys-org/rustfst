@@ -5,16 +5,17 @@ use std::rc::Rc;
 use failure::Fallible;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
-use crate::algorithms::compose_filters::{
-    AltSequenceComposeFilter, ComposeFilter, MatchComposeFilter, NoMatchComposeFilter,
-    NullComposeFilter, SequenceComposeFilter, TrivialComposeFilter,
-};
+// use crate::algorithms::compose_filters::{
+//     AltSequenceComposeFilter, ComposeFilter, MatchComposeFilter, NoMatchComposeFilter,
+//     NullComposeFilter, SequenceComposeFilter, TrivialComposeFilter,
+// };
 use crate::algorithms::dynamic_fst::DynamicFst;
 use crate::algorithms::matchers::{MatchType, SortedMatcher};
 use crate::algorithms::matchers::{Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Arc, StateId, EPS_LABEL, NO_LABEL};
+use crate::algorithms::compose_filters::{TrivialComposeFilter, ComposeFilter};
 
 #[derive(Default)]
 pub struct ComposeFstOptions<M, CF, ST> {
@@ -95,40 +96,37 @@ struct ComposeStateTuple<FS> {
     s2: StateId,
 }
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, Debug)]
 pub struct ComposeFstImpl<
     'fst,
-    F1: Fst + 'fst,
-    F2: Fst<W = F1::W> + 'fst,
-    CF: ComposeFilter<'fst, F1, F2>,
+    W: Semiring + 'fst,
+    CF: ComposeFilter<'fst, W>,
 > {
-    fst1: &'fst F1,
-    fst2: &'fst F2,
+    fst1: &'fst <CF::M1 as Matcher<'fst, W>>::F,
+    fst2: &'fst <CF::M2 as Matcher<'fst, W>>::F,
     matcher1: Rc<RefCell<CF::M1>>,
     matcher2: Rc<RefCell<CF::M2>>,
     compose_filter: CF,
-    cache_impl: CacheImpl<F1::W>,
+    cache_impl: CacheImpl<W>,
     state_table: StateTable<ComposeStateTuple<CF::FS>>,
     match_type: MatchType,
 }
 
-impl<'fst, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst, CF: ComposeFilter<'fst, F1, F2>>
-    ComposeFstImpl<'fst, F1, F2, CF>
-where
-    <F1 as CoreFst>::W: 'static,
+impl<'fst, W: Semiring + 'fst, CF: ComposeFilter<'fst, W>>
+    ComposeFstImpl<'fst, W, CF>
 {
     // Compose specifying two matcher types Matcher1 and Matcher2. Requires input
     // FST (of the same Arc type, but o.w. arbitrary) match the corresponding
     // matcher FST types). Recommended only for advanced use in demanding or
     // specialized applications due to potential code bloat and matcher
     // incompatibilities.
-    fn new2(fst1: &'fst F1, fst2: &'fst F2) -> Fallible<Self> {
-        unimplemented!()
-    }
+    // fn new2(fst1: &'fst F1, fst2: &'fst F2) -> Fallible<Self> {
+    //     unimplemented!()
+    // }
 
     fn new(
-        fst1: &'fst F1,
-        fst2: &'fst F2,
+        fst1: &'fst <CF::M1 as Matcher<'fst, W>>::F,
+        fst2: &'fst <CF::M2 as Matcher<'fst, W>>::F,
         opts: ComposeFstImplOptions<CF::M1, CF::M2, CF, StateTable<ComposeStateTuple<CF::FS>>>,
     ) -> Fallible<Self> {
         let opts_matcher1 = opts.matcher1;
@@ -193,7 +191,7 @@ where
         }
     }
 
-    fn ordered_expand<'b, FA: Fst<W = F1::W> + 'b, FB: Fst<W = FA::W> + 'b, M: Matcher<'b, FA>>(
+    fn ordered_expand<'b,FA: Fst<W = W> + 'b,  FB: Fst<W = W> + 'b, M: Matcher<'b, W, F=FA>>(
         &mut self,
         s: StateId,
         sa: StateId,
@@ -201,11 +199,11 @@ where
         sb: StateId,
         matchera: Rc<RefCell<M>>,
         match_input: bool,
-    ) -> Fallible<()> {
+    ) -> Fallible<()> where W: 'b{
         let arc_loop = if match_input {
-            Arc::new(EPS_LABEL, NO_LABEL, FA::W::one(), sb)
+            Arc::new(EPS_LABEL, NO_LABEL, W::one(), sb)
         } else {
-            Arc::new(NO_LABEL, EPS_LABEL, FA::W::one(), sb)
+            Arc::new(NO_LABEL, EPS_LABEL, W::one(), sb)
         };
         self.match_arc(s, sa, Rc::clone(&matchera), &arc_loop, match_input)?;
         for arc in fstb.arcs_iter(sb)? {
@@ -217,8 +215,8 @@ where
     fn add_arc(
         &mut self,
         s: StateId,
-        mut arc1: Arc<F1::W>,
-        arc2: Arc<F1::W>,
+        mut arc1: Arc<W>,
+        arc2: Arc<W>,
         fs: CF::FS,
     ) -> Fallible<()> {
         let tuple = ComposeStateTuple {
@@ -240,14 +238,14 @@ where
         Ok(())
     }
 
-    fn match_arc<'b, F: Fst<W = F1::W> + 'b, M: Matcher<'b, F>>(
+    fn match_arc<'b, M: Matcher<'b, W>>(
         &mut self,
         s: StateId,
         sa: StateId,
         matchera: Rc<RefCell<M>>,
-        arc: &Arc<F::W>,
+        arc: &Arc<W>,
         match_input: bool,
-    ) -> Fallible<()> {
+    ) -> Fallible<()> where W: 'b{
         let label = if match_input { arc.olabel } else { arc.ilabel };
 
         for arca in matchera.borrow().iter(sa, label)? {
@@ -277,12 +275,10 @@ where
     }
 }
 
-impl<'fst, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst, CF: ComposeFilter<'fst, F1, F2>> FstImpl
-    for ComposeFstImpl<'fst, F1, F2, CF>
-where
-    <F1 as CoreFst>::W: 'static,
+impl<'fst, W: Semiring + 'fst + 'static, CF: ComposeFilter<'fst, W>> FstImpl
+    for ComposeFstImpl<'fst, W, CF>
 {
-    type W = F1::W;
+    type W = W;
 
     fn cache_impl_mut(&mut self) -> &mut CacheImpl<Self::W> {
         &mut self.cache_impl
@@ -358,30 +354,42 @@ pub enum ComposeFilterEnum {
     NoMatchFilter,
 }
 
-pub type ComposeFst<'fst, F1, F2, CF> = DynamicFst<ComposeFstImpl<'fst, F1, F2, CF>>;
+pub type ComposeFst<'fst, W, CF> = DynamicFst<ComposeFstImpl<'fst, W, CF>>;
 
 
 fn create_base_2<
     'fst,
-    F1: Fst + 'fst,
-    F2: Fst<W = F1::W> + 'fst,
-    CF: ComposeFilter<'fst, F1, F2>,
+    W: Semiring + 'fst,
+    CF: ComposeFilter<'fst, W>,
 >(
-    fst1: &'fst F1,
-    fst2: &'fst F2,
+    fst1: &'fst <CF::M1 as Matcher<'fst, W>>::F,
+    fst2: &'fst <CF::M2 as Matcher<'fst, W>>::F,
     opts: ComposeFstImplOptions<CF::M1, CF::M2, CF, StateTable<ComposeStateTuple<CF::FS>>>,
-) -> Fallible<ComposeFstImpl<'fst, F1, F2, CF>>
-where F1::W: 'static
+) -> Fallible<ComposeFstImpl<'fst, W, CF>>
 {
     ComposeFstImpl::new(fst1, fst2, opts)
 }
 
-impl<'fst, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst, CF: ComposeFilter<'fst, F1, F2>>
-    ComposeFst<'fst, F1, F2, CF>
-where
-    <F1 as CoreFst>::W: 'static,
+// fn create_base_1<
+//     'fst,
+//     F1: Fst + 'fst,
+//     F2: Fst<W = F1::W> + 'fst,
+//     CF: ComposeFilter<'fst, F1, F2>,
+// >(
+//     fst1: &'fst F1,
+//     fst2: &'fst F2,
+//     opts: ComposeFstImplOptions<CF::M1, CF::M2, CF, StateTable<ComposeStateTuple<CF::FS>>>,
+// ) -> Fallible<ComposeFstImpl<'fst, F1, F2, CF>>
+//     where F1::W: 'static
+// {
+//     ComposeFstImpl::new(fst1, fst2, opts)
+// }
+
+impl<'fst, W: Semiring + 'fst, CF: ComposeFilter<'fst, W>>
+    ComposeFst<'fst, W, CF>
 {
-    pub fn new(fst1: &'fst F1, fst2: &'fst F2) -> Fallible<Self> {
+    // TODO: Change API, no really user friendly
+    pub fn new(fst1: &'fst <CF::M1 as Matcher<'fst, W>>::F, fst2: &'fst <CF::M2 as Matcher<'fst, W>>::F) -> Fallible<Self> where W: 'static {
         let isymt = fst1.input_symbols();
         let osymt = fst2.output_symbols();
         let compose_impl = create_base_2(fst1, fst2, ComposeFstImplOptions::default())?;
@@ -422,43 +430,50 @@ where
 {
     let mut ofst: F3 = match config.compose_filter {
         ComposeFilterEnum::AutoFilter => {
-            ComposeFst::<_, _, SequenceComposeFilter<_, SortedMatcher<_>, SortedMatcher<_>>>::new(
-                fst1, fst2,
-            )?
-            .compute()?
+            // ComposeFst::<_, _, SequenceComposeFilter<_, SortedMatcher<_>, SortedMatcher<_>>>::new(
+            //     fst1, fst2,
+            // )?
+            // .compute()?
+            unimplemented!()
         }
         ComposeFilterEnum::NullFilter => {
-            ComposeFst::<_, _, NullComposeFilter<SortedMatcher<_>, SortedMatcher<_>>>::new(
-                fst1, fst2,
-            )?
-            .compute()?
+            // ComposeFst::<_, _, NullComposeFilter<SortedMatcher<_>, SortedMatcher<_>>>::new(
+            //     fst1, fst2,
+            // )?
+            // .compute()?
+            unimplemented!()
         }
         ComposeFilterEnum::SequenceFilter => {
-            ComposeFst::<_, _, SequenceComposeFilter<_, SortedMatcher<_>, SortedMatcher<_>>>::new(
-                fst1, fst2,
-            )?
-            .compute()?
+            // ComposeFst::<_, _, SequenceComposeFilter<_, SortedMatcher<_>, SortedMatcher<_>>>::new(
+            //     fst1, fst2,
+            // )?
+            // .compute()?
+            unimplemented!()
         }
-        ComposeFilterEnum::AltSequenceFilter => ComposeFst::<
-            _,
-            _,
-            AltSequenceComposeFilter<_, SortedMatcher<_>, SortedMatcher<_>>,
-        >::new(fst1, fst2)?
-        .compute()?,
+        ComposeFilterEnum::AltSequenceFilter =>
+        //     ComposeFst::<
+        //     _,
+        //     _,
+        //     AltSequenceComposeFilter<_, SortedMatcher<_>, SortedMatcher<_>>,
+        // >::new(fst1, fst2)?
+        // .compute()?,
+        unimplemented!(),
         ComposeFilterEnum::MatchFilter => {
-            ComposeFst::<_, _, MatchComposeFilter<_, _, SortedMatcher<_>, SortedMatcher<_>>>::new(
-                fst1, fst2,
-            )?
-            .compute()?
+            // ComposeFst::<_, _, MatchComposeFilter<_, _, SortedMatcher<_>, SortedMatcher<_>>>::new(
+            //     fst1, fst2,
+            // )?
+            // .compute()?
+            unimplemented!()
         }
         ComposeFilterEnum::NoMatchFilter => {
-            ComposeFst::<_, _, NoMatchComposeFilter<SortedMatcher<_>, SortedMatcher<_>>>::new(
-                fst1, fst2,
-            )?
-            .compute()?
+            // ComposeFst::<_, _, NoMatchComposeFilter<SortedMatcher<_>, SortedMatcher<_>>>::new(
+            //     fst1, fst2,
+            // )?
+            // .compute()?
+            unimplemented!()
         }
         ComposeFilterEnum::TrivialFilter => {
-            ComposeFst::<_, _, TrivialComposeFilter<SortedMatcher<_>, SortedMatcher<_>>>::new(
+            ComposeFst::<_, TrivialComposeFilter<SortedMatcher<_>, SortedMatcher<_>>>::new(
                 fst1, fst2,
             )?
             .compute()?
