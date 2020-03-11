@@ -2,7 +2,7 @@ use failure::Fallible;
 use superslice::Ext;
 
 use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
-use crate::fst_traits::{CoreFst, Fst};
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{Arc, Label, EPS_LABEL};
 
@@ -12,7 +12,7 @@ pub struct SortedMatcher<'fst, F: Fst> {
     match_type: MatchType,
 }
 
-impl<'fst, W: Semiring +'fst, F: Fst<W=W>> Matcher<'fst, W> for SortedMatcher<'fst, F> {
+impl<'fst, W: Semiring + 'fst, F: Fst<W = W>> Matcher<'fst, W> for SortedMatcher<'fst, F> {
     type F = F;
     type Iter = IteratorSortedMatcher<'fst, W>;
 

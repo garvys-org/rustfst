@@ -3,11 +3,10 @@ use failure::Fallible;
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::filter_states::{FilterState, TrivialFilterState};
 use crate::algorithms::matchers::{MatchType, Matcher};
-use crate::fst_traits::{CoreFst, Fst};
+use crate::semirings::Semiring;
 use crate::Arc;
 use failure::_core::cell::RefCell;
 use std::rc::Rc;
-use crate::semirings::Semiring;
 
 #[derive(Debug, PartialEq)]
 pub struct TrivialComposeFilter<M1, M2> {
@@ -15,12 +14,8 @@ pub struct TrivialComposeFilter<M1, M2> {
     matcher2: Rc<RefCell<M2>>,
 }
 
-impl<
-        'fst,
-        W: Semiring + 'fst,
-        M1: Matcher<'fst, W>,
-        M2: Matcher<'fst, W>,
-    > ComposeFilter<'fst, W> for TrivialComposeFilter<M1, M2>
+impl<'fst, W: Semiring + 'fst, M1: Matcher<'fst, W>, M2: Matcher<'fst, W>> ComposeFilter<'fst, W>
+    for TrivialComposeFilter<M1, M2>
 {
     type M1 = M1;
     type M2 = M2;
@@ -50,11 +45,7 @@ impl<
 
     fn set_state(&mut self, _s1: usize, _s2: usize, _filter_state: &Self::FS) {}
 
-    fn filter_arc(
-        &self,
-        _arc1: &mut Arc<W>,
-        _arc2: &mut Arc<W>,
-    ) -> Option<Self::FS> {
+    fn filter_arc(&self, _arc1: &mut Arc<W>, _arc2: &mut Arc<W>) -> Option<Self::FS> {
         Some(Self::FS::new(true))
     }
 

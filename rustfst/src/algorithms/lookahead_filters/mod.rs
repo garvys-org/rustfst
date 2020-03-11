@@ -25,3 +25,12 @@ pub fn lookahead_match_type<
         MatchType::MatchNone
     }
 }
+
+pub fn lookahead_match_type_2<
+    'fst,
+    W: Semiring + 'fst,
+    F1: Fst<W = W> + 'fst,
+    F2: Fst<W = W> + 'fst,
+>() -> MatchType {
+    unimplemented!()
+}

@@ -4,6 +4,7 @@ use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::filter_states::{CharFilterState, FilterState};
 use crate::algorithms::matchers::{MatchType, Matcher};
 use crate::fst_traits::{CoreFst, Fst};
+use crate::semirings::Semiring;
 use crate::{Arc, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -30,21 +31,16 @@ pub struct MatchComposeFilter<'fst, F1, F2, M1, M2> {
     noeps2: bool,
 }
 
-impl<
-        'fst,
-        F1: Fst + 'fst,
-        F2: Fst<W = F1::W> + 'fst,
-        M1: Matcher<'fst, F1::W>,
-        M2: Matcher<'fst, F2::W>,
-    > ComposeFilter<'fst, F1, F2> for MatchComposeFilter<'fst, F1, F2, M1, M2>
+impl<'fst, W: Semiring + 'fst, M1: Matcher<'fst, W>, M2: Matcher<'fst, W>> ComposeFilter<'fst, W>
+    for MatchComposeFilter<'fst, M1::F, M2::F, M1, M2>
 {
     type M1 = M1;
     type M2 = M2;
     type FS = CharFilterState;
 
     fn new<IM1: Into<Option<Self::M1>>, IM2: Into<Option<Self::M2>>>(
-        fst1: &'fst F1,
-        fst2: &'fst F2,
+        fst1: &'fst <Self::M1 as Matcher<'fst, W>>::F,
+        fst2: &'fst <Self::M2 as Matcher<'fst, W>>::F,
         m1: IM1,
         m2: IM2,
     ) -> Fallible<Self> {
@@ -96,11 +92,7 @@ impl<
         }
     }
 
-    fn filter_arc(
-        &self,
-        arc1: &mut Arc<<F1 as CoreFst>::W>,
-        arc2: &mut Arc<<F2 as CoreFst>::W>,
-    ) -> Option<Self::FS> {
+    fn filter_arc(&self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Option<Self::FS> {
         if arc2.ilabel == NO_LABEL {
             // EPSILON in FST1
             if self.fs == Self::FS::new(0) {
@@ -148,7 +140,7 @@ impl<
         }
     }
 
-    fn filter_final(&self, _w1: &mut <F1 as CoreFst>::W, _w2: &mut <F2 as CoreFst>::W) {}
+    fn filter_final(&self, _w1: &mut W, _w2: &mut W) {}
 
     fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
         Rc::clone(&self.matcher1)

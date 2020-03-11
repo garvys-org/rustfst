@@ -1,10 +1,12 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use failure::Fallible;
 
 use crate::algorithms::compose_filters::ComposeFilter;
-use crate::fst_traits::{CoreFst, Fst};
+use crate::algorithms::matchers::Matcher;
+use crate::semirings::Semiring;
 use crate::{Arc, NO_LABEL};
-use std::cell::RefCell;
-use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct MultiEpsFilter<F> {
@@ -12,16 +14,16 @@ pub struct MultiEpsFilter<F> {
     keep_multi_eps: bool,
 }
 
-impl<'fst, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst, F: ComposeFilter<'fst, F1, F2>>
-    ComposeFilter<'fst, F1, F2> for MultiEpsFilter<F>
+impl<'fst, W: Semiring + 'fst, F: ComposeFilter<'fst, W>> ComposeFilter<'fst, W>
+    for MultiEpsFilter<F>
 {
     type M1 = F::M1;
     type M2 = F::M2;
     type FS = F::FS;
 
     fn new<IM1: Into<Option<Self::M1>>, IM2: Into<Option<Self::M2>>>(
-        fst1: &'fst F1,
-        fst2: &'fst F2,
+        fst1: &'fst <Self::M1 as Matcher<'fst, W>>::F,
+        fst2: &'fst <Self::M2 as Matcher<'fst, W>>::F,
         m1: IM1,
         m2: IM2,
     ) -> Fallible<Self> {
@@ -39,11 +41,7 @@ impl<'fst, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst, F: ComposeFilter<'fst, F1,
         self.filter.set_state(s1, s2, filter_state)
     }
 
-    fn filter_arc(
-        &self,
-        arc1: &mut Arc<<F1 as CoreFst>::W>,
-        arc2: &mut Arc<<F2 as CoreFst>::W>,
-    ) -> Option<Self::FS> {
+    fn filter_arc(&self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Option<Self::FS> {
         let opt_fs = self.filter.filter_arc(arc1, arc2);
         if self.keep_multi_eps {
             if arc1.olabel == NO_LABEL {
@@ -57,7 +55,7 @@ impl<'fst, F1: Fst + 'fst, F2: Fst<W = F1::W> + 'fst, F: ComposeFilter<'fst, F1,
         opt_fs
     }
 
-    fn filter_final(&self, w1: &mut <F1 as CoreFst>::W, w2: &mut <F2 as CoreFst>::W) {
+    fn filter_final(&self, w1: &mut W, w2: &mut W) {
         self.filter.filter_final(w1, w2)
     }
 

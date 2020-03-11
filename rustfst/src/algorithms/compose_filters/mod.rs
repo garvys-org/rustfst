@@ -1,29 +1,28 @@
+use std::fmt::Debug;
 use std::rc::Rc;
 
 use failure::Fallible;
+use failure::_core::cell::RefCell;
 
-// pub use alt_sequence_compose_filter::AltSequenceComposeFilter;
-// pub use match_compose_filter::MatchComposeFilter;
-// pub use multi_eps_filter::MultiEpsFilter;
-// pub use no_match_compose_filter::NoMatchComposeFilter;
-// pub use null_compose_filter::NullComposeFilter;
-// pub use sequence_compose_filter::SequenceComposeFilter;
+pub use alt_sequence_compose_filter::AltSequenceComposeFilter;
+pub use match_compose_filter::MatchComposeFilter;
+pub use multi_eps_filter::MultiEpsFilter;
+pub use no_match_compose_filter::NoMatchComposeFilter;
+pub use null_compose_filter::NullComposeFilter;
+pub use sequence_compose_filter::SequenceComposeFilter;
 pub use trivial_compose_filter::TrivialComposeFilter;
 
 use crate::algorithms::filter_states::FilterState;
 use crate::algorithms::matchers::Matcher;
-use crate::fst_traits::Fst;
-use crate::{Arc, StateId};
-use failure::_core::cell::RefCell;
-use std::fmt::Debug;
 use crate::semirings::Semiring;
+use crate::{Arc, StateId};
 
-// mod alt_sequence_compose_filter;
-// mod match_compose_filter;
-// mod multi_eps_filter;
-// mod no_match_compose_filter;
-// mod null_compose_filter;
-// mod sequence_compose_filter;
+mod alt_sequence_compose_filter;
+mod match_compose_filter;
+mod multi_eps_filter;
+mod no_match_compose_filter;
+mod null_compose_filter;
+mod sequence_compose_filter;
 mod trivial_compose_filter;
 
 pub trait ComposeFilter<'fst, W: Semiring + 'fst>: Debug {

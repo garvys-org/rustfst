@@ -14,7 +14,7 @@ pub struct StateTable<T: Hash + Eq + Clone> {
 impl<T: Hash + Eq + Clone> Default for StateTable<T> {
     fn default() -> Self {
         Self {
-            table: RefCell::new(BiHashMap::new())
+            table: RefCell::new(BiHashMap::new()),
         }
     }
 }
