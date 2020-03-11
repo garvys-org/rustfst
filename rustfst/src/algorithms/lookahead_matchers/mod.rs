@@ -2,16 +2,21 @@ use failure::Fallible;
 
 use crate::algorithms::matchers::Matcher;
 use crate::fst_traits::Fst;
-use crate::{Label, StateId};
 use crate::semirings::Semiring;
+use crate::{Arc, Label, StateId, NO_STATE_ID};
 
 mod arc_lookahead_matcher;
-mod trivial_lookahead_matcher;
+// mod trivial_lookahead_matcher;
 
 pub trait LookaheadMatcher<'fst, W: Semiring + 'fst>: Matcher<'fst, W> {
     // Are there paths from a state in the lookahead FST that can be read from
     // the curent matcher state?
-    fn lookahead_fst<LF: Fst<W = W>>(&self, state: StateId, lfst: &LF) -> bool;
+    fn lookahead_fst<LF: Fst<W = W>>(
+        &mut self,
+        matcher_state: StateId,
+        lfst: &LF,
+        lfst_state: StateId,
+    ) -> Fallible<bool>;
 
     // Can the label be read from the current matcher state after possibly
     // following epsilon transitions?
@@ -22,4 +27,20 @@ pub trait LookaheadMatcher<'fst, W: Semiring + 'fst>: Matcher<'fst, W> {
     // and matcher FSTs for the last call to LookAheadFst. Non-trivial
     // implementations are useful for weight-pushing in composition.
     fn lookahead_weight(&self) -> W;
+
+    fn prefix_arc_mut(&mut self) -> &mut Arc<W>;
+    fn weight_mut(&mut self) -> &mut W;
+
+    fn clear_lookahead_weight(&mut self) {
+        *self.weight_mut() = W::one();
+    }
+    fn set_lookahead_weight(&mut self, weight: W) {
+        *self.weight_mut() = weight;
+    }
+    fn clear_lookahead_prefix(&mut self) {
+        self.prefix_arc_mut().nextstate = NO_STATE_ID;
+    }
+    fn set_lookahead_prefix(&mut self, arc: Arc<W>) {
+        *self.prefix_arc_mut() = arc;
+    }
 }

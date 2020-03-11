@@ -4,14 +4,16 @@ use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
-use crate::{Label, StateId};
+use crate::{Arc, Label, StateId};
 
 #[derive(Debug)]
 struct TrivialLookAheadMatcher<M> {
     matcher: M,
 }
 
-impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W> for TrivialLookAheadMatcher<M> {
+impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W>
+    for TrivialLookAheadMatcher<M>
+{
     type F = M::F;
     type Iter = M::Iter;
 
@@ -43,8 +45,13 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W> for Trivial
 impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
     for TrivialLookAheadMatcher<M>
 {
-    fn lookahead_fst<LF: Fst<W = W>>(&self, state: StateId, lfst: &LF) -> bool {
-        true
+    fn lookahead_fst<LF: Fst<W = W>>(
+        &mut self,
+        matcher_state: StateId,
+        lfst: &LF,
+        s: StateId,
+    ) -> Fallible<bool> {
+        Ok(true)
     }
 
     fn lookahead_label(&self, state: StateId, label: Label) -> Fallible<bool> {
@@ -57,5 +64,13 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
 
     fn lookahead_weight(&self) -> W {
         W::one()
+    }
+
+    fn prefix_arc_mut(&mut self) -> &mut Arc<W> {
+        unreachable!()
+    }
+
+    fn weight_mut(&mut self) -> &mut W {
+        unreachable!()
     }
 }
