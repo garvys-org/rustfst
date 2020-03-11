@@ -15,9 +15,10 @@ struct ArcLookAheadMatcher<M> {
 }
 
 impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W> for ArcLookAheadMatcher<M> {
+    type F = M::F;
     type Iter = M::Iter;
 
-    fn new<F: Fst<W=W>>(fst: &'fst F, match_type: MatchType) -> Fallible<Self> {
+    fn new(fst: &'fst Self::F, match_type: MatchType) -> Fallible<Self> {
         Ok(Self {
             matcher: M::new(fst, match_type)?,
             flags: MatcherFlags::LOOKAHEAD_NON_EPSILONS
