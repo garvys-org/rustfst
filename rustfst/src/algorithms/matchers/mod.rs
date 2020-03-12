@@ -66,7 +66,6 @@ pub fn eps_loop<W: Semiring>(state: StateId, match_type: MatchType) -> Fallible<
     Ok(arc)
 }
 
-use std::iter::Peekable;
 /// Matchers find and iterate through requested labels at FST states. In the
 /// simplest form, these are just some associative map or search keyed on labels.
 /// More generally, they may implement matching special labels that represent
