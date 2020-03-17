@@ -1,8 +1,8 @@
 use num_traits::PrimInt;
+use std::collections::HashSet;
 use std::slice::Iter as IterSlice;
 use superslice::Ext;
 use unsafe_unwrap::UnsafeUnwrap;
-use std::collections::HashSet;
 
 /// Half-open integral interval [a, b) of signed integers of type T.
 #[derive(PartialOrd, PartialEq, Clone, Ord, Eq)]
@@ -110,16 +110,16 @@ impl IntervalSet {
         let mut intervals_indexes_to_keep = HashSet::new();
         let mut i = 0;
         while i < n_intervals {
-            let (intervals_0_i, intervals_ip1_end) = intervals.split_at_mut(i+1);
-            let inti = unsafe {intervals_0_i.get_unchecked_mut(i)};
+            let (intervals_0_i, intervals_ip1_end) = intervals.split_at_mut(i + 1);
+            let inti = unsafe { intervals_0_i.get_unchecked_mut(i) };
             let inti_index = i;
             if inti.begin == inti.end {
-                continue
+                continue;
             }
-            for j in i+1..n_intervals {
-                let intj = unsafe {intervals_ip1_end.get_unchecked_mut(j - (i + 1))};
+            for j in i + 1..n_intervals {
+                let intj = unsafe { intervals_ip1_end.get_unchecked_mut(j - (i + 1)) };
                 if intj.begin > inti.end {
-                    break
+                    break;
                 }
                 if intj.end > inti.end {
                     inti.end = intj.end;
@@ -134,6 +134,8 @@ impl IntervalSet {
         }
 
         let mut index = 0;
-        self.intervals.intervals.retain(|_| (intervals_indexes_to_keep.contains(&index), index += 1).0);
+        self.intervals
+            .intervals
+            .retain(|_| (intervals_indexes_to_keep.contains(&index), index += 1).0);
     }
 }
