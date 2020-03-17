@@ -7,8 +7,8 @@ use unsafe_unwrap::UnsafeUnwrap;
 /// Half-open integral interval [a, b) of signed integers of type T.
 #[derive(PartialOrd, PartialEq, Clone, Ord, Eq)]
 pub struct IntInterval {
-    begin: usize,
-    end: usize,
+    pub(crate) begin: usize,
+    pub(crate) end: usize,
 }
 
 impl IntInterval {
@@ -21,7 +21,7 @@ impl IntInterval {
 /// all intervals.
 #[derive(Clone, PartialOrd, PartialEq)]
 pub struct VectorIntervalStore {
-    intervals: Vec<IntInterval>,
+    pub(crate) intervals: Vec<IntInterval>,
     count: Option<usize>,
 }
 
@@ -57,9 +57,9 @@ impl VectorIntervalStore {
     }
 }
 
-#[derive(PartialOrd, PartialEq)]
+#[derive(PartialOrd, PartialEq, Default)]
 pub struct IntervalSet {
-    intervals: VectorIntervalStore,
+    pub(crate) intervals: VectorIntervalStore,
 }
 
 impl IntervalSet {

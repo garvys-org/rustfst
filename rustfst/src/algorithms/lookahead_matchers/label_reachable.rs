@@ -41,7 +41,7 @@ impl<W: Semiring + 'static> LabelReachable<W> {
 
         let nstates = label_reachable.fst.num_states();
         label_reachable.transform_fst();
-        // label_reachable.find_intervals(nstates);
+        label_reachable.find_intervals(nstates);
 
         label_reachable
     }
@@ -117,5 +117,9 @@ impl<W: Semiring + 'static> LabelReachable<W> {
                 };
             }
         }
+    }
+
+    fn find_intervals(&mut self, ins: StateId) {
+        todo!()
     }
 }
