@@ -69,7 +69,7 @@ impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
 
     /// Invoked when forward or cross arc to black/finished state examined.
     fn forward_or_cross_arc(&mut self, s: StateId, arc: &Arc<F::W>) -> bool {
-        self.isets[s].union(&self.isets[arc.nextstate]);
+        union_vec_isets_unordered(&mut self.isets, s, arc.nextstate);
         true
     }
 
@@ -82,10 +82,27 @@ impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
         }
         self.isets[s].normalize();
         if let Some(p) = parent {
-            self.isets[p].union(&self.isets[s]);
+            union_vec_isets_unordered(&mut self.isets, p, s);
         }
     }
 
     /// Invoked after DFS visit.
     fn finish_visit(&mut self) {}
+}
+
+fn union_vec_isets_ordered(isets: &mut Vec<IntervalSet>, i_inf: usize, i_sup: usize) {
+    let (v_0_isupm1, v_isup1_end) = isets.split_at_mut(i_sup);
+    v_0_isupm1[i_inf].union(&v_isup1_end[0])
+}
+
+// Perform the union of two IntervalSet stored in a vec. Utils to fix issue with borrow checker.
+fn union_vec_isets_unordered(isets: &mut Vec<IntervalSet>, i: usize, j: usize) {
+    if i < j {
+        union_vec_isets_ordered(isets, i, j)
+    } else if j > i {
+        union_vec_isets_ordered(isets, j, i)
+    } else {
+        // Useless
+        unreachable!()
+    }
 }
