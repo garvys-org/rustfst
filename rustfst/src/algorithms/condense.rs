@@ -10,7 +10,7 @@ use failure::Fallible;
 // a single state with transitions between SCCs retained and within SCCs
 // dropped. Also populates 'scc' with a mapping from input to output states.
 pub fn condense<FI: Fst + ExpandedFst, FO: MutableFst<W = FI::W>>(
-    ifst: &mut FI,
+    ifst: &FI,
 ) -> Fallible<(Vec<i32>, FO)> {
     let mut visitor = SccVisitor::new(ifst, true, false);
     dfs_visit(ifst, &mut visitor, &AnyArcFilter {}, false);

@@ -57,7 +57,7 @@ impl VectorIntervalStore {
     }
 }
 
-#[derive(PartialOrd, PartialEq, Default)]
+#[derive(PartialOrd, PartialEq, Default, Clone)]
 pub struct IntervalSet {
     pub(crate) intervals: VectorIntervalStore,
 }
