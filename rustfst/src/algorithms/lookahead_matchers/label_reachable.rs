@@ -1,10 +1,13 @@
 use crate::algorithms::lookahead_matchers::interval_set::IntervalSet;
+use crate::algorithms::lookahead_matchers::state_reachable::StateReachable;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, MutableArcIterator, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+
+use failure::Fallible;
 
 pub struct LabelReachableData {
     reach_input: bool,
@@ -31,7 +34,7 @@ pub struct LabelReachable<W: Semiring> {
 }
 
 impl<W: Semiring + 'static> LabelReachable<W> {
-    pub fn new(fst: VectorFst<W>, reach_input: bool) -> Self {
+    pub fn new(fst: VectorFst<W>, reach_input: bool) -> Fallible<Self> {
         // TODO: In OpenFst, the Fst is converted to a VectorFst
         let mut label_reachable = Self {
             fst,
@@ -41,9 +44,9 @@ impl<W: Semiring + 'static> LabelReachable<W> {
 
         let nstates = label_reachable.fst.num_states();
         label_reachable.transform_fst();
-        label_reachable.find_intervals(nstates);
+        label_reachable.find_intervals(nstates)?;
 
-        label_reachable
+        Ok(label_reachable)
     }
 
     // Redirects labeled arcs (input or output labels determined by ReachInput())
@@ -119,7 +122,20 @@ impl<W: Semiring + 'static> LabelReachable<W> {
         }
     }
 
-    fn find_intervals(&mut self, ins: StateId) {
-        todo!()
+    fn find_intervals(&mut self, ins: StateId) -> Fallible<()> {
+        let state_reachable = StateReachable::new(&self.fst)?;
+        let state2index = &state_reachable.state2index;
+        let interval_sets = &mut self.data.interval_sets;
+        *interval_sets = state_reachable.isets;
+        interval_sets.resize_with(ins, IntervalSet::default);
+        let label2index = &mut self.data.label2index;
+        for (label, state) in self.label2state.iter() {
+            let i = state2index[*state];
+            if *label == NO_LABEL {
+                self.data.final_label = i;
+            }
+        }
+        self.label2state.clear();
+        Ok(())
     }
 }

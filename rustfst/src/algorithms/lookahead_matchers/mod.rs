@@ -9,7 +9,7 @@ mod arc_lookahead_matcher;
 pub(crate) mod interval_set;
 mod label_lookahead_matcher;
 mod label_reachable;
-mod state_reachable;
+pub(crate) mod state_reachable;
 // mod trivial_lookahead_matcher;
 
 pub trait LookaheadMatcher<'fst, W: Semiring + 'fst>: Matcher<'fst, W> {

@@ -8,30 +8,35 @@ use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::StateId;
 
+use crate::fst_properties::FstProperties;
+use failure::Fallible;
+
 static UNASSIGNED: usize = std::usize::MAX;
 
 // Tests reachability of final states from a given state. To test for
 // reachability from a state s, first do SetState(s). Then a final state f can
 // be reached from state s of FST iff Reach(f) is true. The input can be cyclic,
 // but no cycle may contain a final state.
-struct StateReachable {
-    isets: Vec<IntervalSet>,
-    state2index: Vec<usize>,
+pub struct StateReachable {
+    pub(crate) isets: Vec<IntervalSet>,
+    pub(crate) state2index: Vec<usize>,
 }
 
 impl StateReachable {
-    fn new<F: ExpandedFst>(fst: &F, acyclic: bool) -> Self
+    pub fn new<F: ExpandedFst>(fst: &F) -> Fallible<Self>
     where
         F::W: 'static,
     {
+        let props = fst.properties()?;
+        let acyclic = props.contains(FstProperties::ACYCLIC);
         if acyclic {
-            Self::new_acyclic(fst)
+            Ok(Self::new_acyclic(fst))
         } else {
-            Self::new_cyclic(fst)
+            Ok(Self::new_cyclic(fst))
         }
     }
 
-    fn new_cyclic<F: ExpandedFst>(fst: &F) -> Self
+    pub fn new_cyclic<F: ExpandedFst>(fst: &F) -> Self
     where
         F::W: 'static,
     {
@@ -67,7 +72,7 @@ impl StateReachable {
         Self { isets, state2index }
     }
 
-    fn new_acyclic<F: ExpandedFst>(fst: &F) -> Self {
+    pub fn new_acyclic<F: ExpandedFst>(fst: &F) -> Self {
         let mut reach_visitor = IntervalReachVisitor::new(fst);
         dfs_visit(fst, &mut reach_visitor, &AnyArcFilter {}, false);
         Self {
@@ -77,7 +82,7 @@ impl StateReachable {
     }
 
     // Can reach this final state from current state?
-    fn reach(&self, current_state: StateId, s: StateId) -> bool {
+    pub fn reach(&self, current_state: StateId, s: StateId) -> bool {
         if let Some(i) = self.state2index.get(s) {
             self.isets[current_state].member(*i)
         } else {
