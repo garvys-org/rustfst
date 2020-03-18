@@ -7,6 +7,7 @@ pub(crate) mod arc_unique;
 mod closure;
 mod composition;
 mod concat;
+mod condense;
 mod connect;
 mod determinize;
 pub(crate) mod dfs_visit;
@@ -70,6 +71,7 @@ pub use self::{
     closure::{closure, ClosureFst, ClosureType},
     compose_revamp::{compose, compose_with_config, ComposeFilterEnum, ComposeFst},
     concat::{concat, ConcatFst},
+    condense::condense,
     connect::connect,
     determinize::{determinize, determinize_with_distance, DeterminizeType},
     encode::{decode, encode},
