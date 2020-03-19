@@ -2,17 +2,19 @@ use failure::Fallible;
 use superslice::Ext;
 
 use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
-use crate::fst_traits::Fst;
+use crate::fst_traits::{Fst, ExpandedFst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, EPS_LABEL};
+use crate::fst_properties::FstProperties;
+use serde::de::Unexpected::Map;
 
 #[derive(Debug)]
-pub struct SortedMatcher<'fst, F: Fst> {
+pub struct SortedMatcher<'fst, F: ExpandedFst> {
     fst: &'fst F,
     match_type: MatchType,
 }
 
-impl<'fst, W: Semiring + 'fst, F: Fst<W = W>> Matcher<'fst, W> for SortedMatcher<'fst, F> {
+impl<'fst, W: Semiring + 'fst, F: ExpandedFst<W = W>> Matcher<'fst, W> for SortedMatcher<'fst, F> {
     type F = F;
     type Iter = IteratorSortedMatcher<'fst, W>;
 
@@ -33,7 +35,30 @@ impl<'fst, W: Semiring + 'fst, F: Fst<W = W>> Matcher<'fst, W> for SortedMatcher
     }
 
     fn match_type(&self) -> MatchType {
-        unimplemented!()
+        if self.match_type == MatchType::MatchNone {
+            return self.match_type;
+        }
+        let true_prop = if self.match_type == MatchType::MatchInput {
+            FstProperties::I_LABEL_SORTED
+        } else {
+            FstProperties::O_LABEL_SORTED
+        };
+
+        let false_prop = if self.match_type == MatchType::MatchInput {
+            FstProperties::NOT_I_LABEL_SORTED
+        } else {
+            FstProperties::NOT_O_LABEL_SORTED
+        };
+
+        let props = self.fst.properties().unwrap();
+
+        if props.contains(true_prop) {
+            self.match_type
+        } else if props.contains(false_prop) {
+            MatchType::MatchNone
+        } else {
+            MatchType::MatchUnknown
+        }
     }
 
     fn flags(&self) -> MatcherFlags {

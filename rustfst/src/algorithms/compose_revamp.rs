@@ -12,7 +12,7 @@ use crate::algorithms::compose_filters::{
 use crate::algorithms::dynamic_fst::DynamicFst;
 use crate::algorithms::matchers::{GenericMatcher, MatchType, SortedMatcher};
 use crate::algorithms::matchers::{Matcher, MatcherFlags};
-use crate::fst_traits::{CoreFst, Fst, MutableFst};
+use crate::fst_traits::{CoreFst, Fst, MutableFst, ExpandedFst};
 use crate::semirings::Semiring;
 use crate::{Arc, StateId, EPS_LABEL, NO_LABEL};
 
@@ -147,7 +147,7 @@ impl<'fst, W: Semiring + 'fst, CF: ComposeFilter<'fst, W>> ComposeFstImpl<'fst, 
         match self.match_type {
             MatchType::MatchInput => true,
             MatchType::MatchOutput => false,
-            _ => unimplemented!(),
+            _ => panic!(),
         }
     }
 
@@ -316,7 +316,7 @@ pub enum ComposeFilterEnum {
 
 pub type ComposeFst<'fst, W, CF> = DynamicFst<ComposeFstImpl<'fst, W, CF>>;
 
-fn create_base<'fst, W: Semiring + 'fst, F1: Fst<W = W> + 'fst, F2: Fst<W = W> + 'fst>(
+fn create_base<'fst, W: Semiring + 'fst, F1: ExpandedFst<W = W> + 'fst, F2: ExpandedFst<W = W> + 'fst>(
     fst1: &'fst F1,
     fst2: &'fst F2,
 ) -> Fallible<
@@ -364,7 +364,7 @@ impl<'fst, W: Semiring + 'fst, CF: ComposeFilter<'fst, W>> ComposeFst<'fst, W, C
     }
 }
 
-impl<'fst, W: Semiring + 'fst + 'static, F1: Fst<W = W>, F2: Fst<W = W>>
+impl<'fst, W: Semiring + 'fst + 'static, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>>
     ComposeFst<
         'fst,
         W,
@@ -394,7 +394,7 @@ impl Default for ComposeConfig {
     }
 }
 
-pub fn compose_with_config<F1: Fst, F2: Fst<W = F1::W>, F3: MutableFst<W = F1::W>>(
+pub fn compose_with_config<F1: ExpandedFst, F2: ExpandedFst<W = F1::W>, F3: MutableFst<W = F1::W>>(
     fst1: &F1,
     fst2: &F2,
     config: ComposeConfig,
@@ -442,7 +442,7 @@ where
     Ok(ofst)
 }
 
-pub fn compose<F1: Fst, F2: Fst<W = F1::W>, F3: MutableFst<W = F1::W>>(
+pub fn compose<F1: ExpandedFst, F2: ExpandedFst<W = F1::W>, F3: MutableFst<W = F1::W>>(
     fst1: &F1,
     fst2: &F2,
 ) -> Fallible<F3>
