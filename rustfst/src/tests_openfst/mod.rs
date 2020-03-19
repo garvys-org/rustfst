@@ -65,6 +65,7 @@ use self::algorithms::{
     topsort::test_topsort,
     union::{UnionOperationResult, UnionTestData},
     weight_pushing::{test_weight_pushing_final, test_weight_pushing_initial},
+    compose::{test_compose, test_compose_dynamic}
 };
 use self::fst_impls::const_fst::test_const_fst_convert_convert;
 use self::fst_impls::test_fst_into_iterator::{
@@ -89,6 +90,7 @@ use crate::tests_openfst::io::vector_fst_bin_serializer::{
 use crate::tests_openfst::io::vector_fst_text_serialization::{
     test_vector_fst_text_serialization, test_vector_fst_text_serialization_with_symt,
 };
+use crate::tests_openfst::algorithms::compose::{ComposeOperationResult, ComposeTestData};
 
 #[macro_use]
 mod macros;
@@ -161,6 +163,7 @@ pub struct ParsedFstTestData {
     closure_star: SimpleStaticDynamicOperationResult,
     raw_vector_with_symt_bin_path: String,
     matcher: Vec<MatcherOperationResult>,
+    compose: Vec<ComposeOperationResult>
 }
 
 pub struct FstTestData<F: SerializableFst>
@@ -212,6 +215,7 @@ where
     pub closure_star: SimpleStaticDynamicTestData<F>,
     pub raw_vector_with_symt_bin_path: PathBuf,
     pub matcher: Vec<MatcherTestData<F>>,
+    pub compose: Vec<ComposeTestData<F>>
 }
 
 impl<F: SerializableFst> FstTestData<F>
@@ -284,6 +288,7 @@ where
                 .join(&data.raw_vector_with_symt_bin_path)
                 .to_path_buf(),
             matcher: data.matcher.iter().map(|v| v.parse()).collect(),
+            compose: data.compose.iter().map(|v| v.parse()).collect()
         }
     }
 }
@@ -731,6 +736,18 @@ macro_rules! test_fst {
                 do_run!(test_sorted_matcher, $fst_name);
                 Ok(())
             }
+
+            #[test]
+            fn test_fst_compose_openfst() -> Fallible<()> {
+                do_run!(test_compose, $fst_name);
+                Ok(())
+            }
+
+            // #[test]
+            // fn test_fst_compose_dynamic_openfst() -> Fallible<()> {
+            //     do_run!(test_compose_dynamic, $fst_name);
+            //     Ok(())
+            // }
         }
     };
 }
