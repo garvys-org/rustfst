@@ -45,8 +45,8 @@ impl<'fst, W: Semiring + 'fst, M1: Matcher<'fst, W>, M2: Matcher<'fst, W>> Compo
 
     fn set_state(&mut self, _s1: usize, _s2: usize, _filter_state: &Self::FS) {}
 
-    fn filter_arc(&self, _arc1: &mut Arc<W>, _arc2: &mut Arc<W>) -> Option<Self::FS> {
-        Some(Self::FS::new(true))
+    fn filter_arc(&self, _arc1: &mut Arc<W>, _arc2: &mut Arc<W>) -> Self::FS {
+        Self::FS::new(true)
     }
 
     fn filter_final(&self, _w1: &mut W, _w2: &mut W) {}

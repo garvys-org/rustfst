@@ -13,6 +13,7 @@ pub trait FilterState: Default + PartialEq + Clone + Eq + Hash + Debug {
     type Type;
 
     fn new(value: Self::Type) -> Self;
+    fn new_no_state() -> Self;
     fn state(&self) -> Option<&Self::Type>;
 }
 

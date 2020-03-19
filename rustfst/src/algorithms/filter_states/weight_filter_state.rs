@@ -14,6 +14,10 @@ impl<W: Semiring> FilterState for WeightFilterState<W> {
         Self { state: Some(value) }
     }
 
+    fn new_no_state() -> Self {
+        unimplemented!()
+    }
+
     fn state(&self) -> Option<&Self::Type> {
         self.state.as_ref()
     }

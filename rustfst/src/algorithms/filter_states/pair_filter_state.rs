@@ -13,6 +13,10 @@ impl<FS1: FilterState, FS2: FilterState> FilterState for PairFilterState<FS1, FS
         Self { state: Some(value) }
     }
 
+    fn new_no_state() -> Self {
+        unimplemented!()
+    }
+
     fn state(&self) -> Option<&Self::Type> {
         self.state.as_ref()
     }

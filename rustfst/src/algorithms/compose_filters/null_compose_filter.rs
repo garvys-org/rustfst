@@ -46,11 +46,11 @@ impl<'fst, W: Semiring + 'fst, M1: Matcher<'fst, W>, M2: Matcher<'fst, W>> Compo
 
     fn set_state(&mut self, _s1: usize, _s2: usize, _filter_state: &Self::FS) {}
 
-    fn filter_arc(&self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Option<Self::FS> {
+    fn filter_arc(&self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
         if arc1.olabel == NO_LABEL || arc2.ilabel == NO_LABEL {
-            None
+            Self::FS::new_no_state()
         } else {
-            Some(Self::FS::new(true))
+            Self::FS::new(true)
         }
     }
 

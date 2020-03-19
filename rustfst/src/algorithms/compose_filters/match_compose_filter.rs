@@ -92,51 +92,51 @@ impl<'fst, W: Semiring + 'fst, M1: Matcher<'fst, W>, M2: Matcher<'fst, W>> Compo
         }
     }
 
-    fn filter_arc(&self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Option<Self::FS> {
+    fn filter_arc(&self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
         if arc2.ilabel == NO_LABEL {
             // EPSILON in FST1
             if self.fs == Self::FS::new(0) {
                 if self.noeps2 {
-                    Some(Self::FS::new(0))
+                    Self::FS::new(0)
                 } else if self.alleps2 {
-                    None
+                    Self::FS::new_no_state()
                 } else {
-                    Some(Self::FS::new(1))
+                    Self::FS::new(1)
                 }
             } else {
                 if self.fs == Self::FS::new(1) {
-                    Some(Self::FS::new(1))
+                    Self::FS::new(1)
                 } else {
-                    None
+                    Self::FS::new_no_state()
                 }
             }
         } else if arc1.olabel == NO_LABEL {
             // Epsilon in FST2
             if self.fs == Self::FS::new(0) {
                 if self.noeps1 {
-                    Some(Self::FS::new(0))
+                    Self::FS::new(0)
                 } else if self.alleps1 {
-                    None
+                    Self::FS::new_no_state()
                 } else {
-                    Some(Self::FS::new(2))
+                    Self::FS::new(2)
                 }
             } else {
                 if self.fs == Self::FS::new(2) {
-                    Some(Self::FS::new(2))
+                    Self::FS::new(2)
                 } else {
-                    None
+                    Self::FS::new_no_state()
                 }
             }
         } else if arc1.olabel == EPS_LABEL {
             // Epsilon in both
             if self.fs == Self::FS::new(0) {
-                Some(Self::FS::new(0))
+                Self::FS::new(0)
             } else {
-                None
+                Self::FS::new_no_state()
             }
         } else {
             // Both are non-epsilons
-            Some(Self::FS::new(0))
+            Self::FS::new(0)
         }
     }
 

@@ -17,6 +17,10 @@ impl<T: Num + Clone + Eq + Hash + Debug> FilterState for ListFilterState<T> {
         Self { state: Some(value) }
     }
 
+    fn new_no_state() -> Self {
+        unimplemented!()
+    }
+
     fn state(&self) -> Option<&Self::Type> {
         self.state.as_ref()
     }

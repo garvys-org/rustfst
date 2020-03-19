@@ -1,7 +1,7 @@
 use failure::Fallible;
 
 use crate::algorithms::compose_filters::ComposeFilter;
-use crate::algorithms::filter_states::{CharFilterState, FilterState};
+use crate::algorithms::filter_states::{CharFilterState, FilterState, IntegerFilterState};
 use crate::algorithms::matchers::{MatchType, Matcher};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
@@ -10,6 +10,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 #[derive(Debug)]
+/// This filter requires epsilons on FST1 to be read before epsilons on FST2.
 pub struct SequenceComposeFilter<
     'fst,
     W: Semiring + 'fst,
@@ -24,7 +25,7 @@ pub struct SequenceComposeFilter<
     /// Current fst2 state
     s2: StateId,
     /// Current filter state
-    fs: CharFilterState,
+    fs: IntegerFilterState<usize>,
     /// Only epsilons (and non-final) leaving s1 ?
     alleps1: bool,
     /// No epsilons leaving s1 ?
@@ -36,7 +37,7 @@ impl<'fst, W: Semiring + 'fst, M1: Matcher<'fst, W>, M2: Matcher<'fst, W>> Compo
 {
     type M1 = M1;
     type M2 = M2;
-    type FS = CharFilterState;
+    type FS = IntegerFilterState<usize>;
 
     fn new<IM1: Into<Option<Self::M1>>, IM2: Into<Option<Self::M2>>>(
         fst1: &'fst M1::F,
@@ -56,7 +57,7 @@ impl<'fst, W: Semiring + 'fst, M1: Matcher<'fst, W>, M2: Matcher<'fst, W>> Compo
             )),
             s1: NO_STATE_ID,
             s2: NO_STATE_ID,
-            fs: Self::FS::default(),
+            fs: Self::FS::new(NO_STATE_ID),
             alleps1: false,
             noeps1: false,
         })
@@ -80,26 +81,26 @@ impl<'fst, W: Semiring + 'fst, M1: Matcher<'fst, W>, M2: Matcher<'fst, W>> Compo
         }
     }
 
-    fn filter_arc(&self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Option<Self::FS> {
+    fn filter_arc(&self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
         if arc1.olabel == NO_LABEL {
             if self.alleps1 {
-                None
+                Self::FS::new_no_state()
             } else if self.noeps1 {
-                Some(Self::FS::new(0))
+                Self::FS::new(0)
             } else {
-                Some(Self::FS::new(1))
+                Self::FS::new(1)
             }
         } else if arc2.ilabel == NO_LABEL {
             if self.fs != Self::FS::new(0) {
-                None
+                Self::FS::new_no_state()
             } else {
-                Some(Self::FS::new(0))
+                Self::FS::new(0)
             }
         } else {
             if arc1.olabel == EPS_LABEL {
-                None
+                Self::FS::new_no_state()
             } else {
-                Some(Self::FS::new(0))
+                Self::FS::new(0)
             }
         }
     }

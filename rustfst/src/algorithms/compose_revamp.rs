@@ -15,6 +15,7 @@ use crate::algorithms::matchers::{Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, Fst, MutableFst, ExpandedFst};
 use crate::semirings::Semiring;
 use crate::{Arc, StateId, EPS_LABEL, NO_LABEL};
+use crate::algorithms::filter_states::FilterState;
 
 pub struct ComposeFstImplOptions<M1, M2, CF, ST> {
     matcher1: Option<M1>,
@@ -233,13 +234,13 @@ impl<'fst, W: Semiring + 'fst, CF: ComposeFilter<'fst, W>> ComposeFstImpl<'fst, 
             )?;
             let mut arcb = arc.clone();
             if match_input {
-                let opt_fs = self.compose_filter.filter_arc(&mut arcb, &mut arca);
-                if let Some(fs) = opt_fs {
+                let fs = self.compose_filter.filter_arc(&mut arcb, &mut arca);
+                if fs != CF::FS::new_no_state() {
                     self.add_arc(s, arcb, arca, fs)?;
                 }
             } else {
-                let opt_fs = self.compose_filter.filter_arc(&mut arca, &mut arcb);
-                if let Some(fs) = opt_fs {
+                let fs = self.compose_filter.filter_arc(&mut arca, &mut arcb);
+                if fs != CF::FS::new_no_state() {
                     self.add_arc(s, arca, arcb, fs)?;
                 }
             }

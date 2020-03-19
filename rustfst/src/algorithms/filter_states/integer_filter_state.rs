@@ -15,6 +15,7 @@ impl<T: Num + Clone + Eq + Hash + Debug> FilterState for IntegerFilterState<T> {
     fn new(value: Self::Type) -> Self {
         Self { state: Some(value) }
     }
+    fn new_no_state() -> Self {Self{state: None}}
 
     fn state(&self) -> Option<&Self::Type> {
         self.state.as_ref()

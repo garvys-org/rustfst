@@ -13,6 +13,10 @@ impl FilterState for TrivialFilterState {
         Self { state: value }
     }
 
+    fn new_no_state() -> Self {
+        unimplemented!()
+    }
+
     fn state(&self) -> Option<&Self::Type> {
         Some(&self.state)
     }

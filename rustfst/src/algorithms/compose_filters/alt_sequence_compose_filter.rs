@@ -75,26 +75,26 @@ impl<'fst, W: Semiring + 'fst, M1: Matcher<'fst, W>, M2: Matcher<'fst, W>> Compo
         }
     }
 
-    fn filter_arc(&self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Option<Self::FS> {
+    fn filter_arc(&self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
         if arc1.olabel == NO_LABEL {
             if self.alleps2 {
-                None
+                Self::FS::new_no_state()
             } else if self.noeps2 {
-                Some(Self::FS::new(0))
+                Self::FS::new(0)
             } else {
-                Some(Self::FS::new(1))
+                Self::FS::new(1)
             }
         } else if arc2.ilabel == NO_LABEL {
             if self.fs != Self::FS::new(0) {
-                None
+                Self::FS::new_no_state()
             } else {
-                Some(Self::FS::new(0))
+                Self::FS::new(0)
             }
         } else {
             if arc1.olabel == EPS_LABEL {
-                None
+                Self::FS::new_no_state()
             } else {
-                Some(Self::FS::new(0))
+                Self::FS::new(0)
             }
         }
     }
