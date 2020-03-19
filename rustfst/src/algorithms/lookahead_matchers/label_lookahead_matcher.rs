@@ -53,4 +53,8 @@ impl<'fst, W: Semiring, M: Matcher<'fst, W>> Matcher<'fst, W>
     fn flags(&self) -> MatcherFlags {
         unimplemented!()
     }
+
+    fn priority(&self, state: usize) -> Fallible<usize> {
+        self.matcher.priority(state)
+    }
 }

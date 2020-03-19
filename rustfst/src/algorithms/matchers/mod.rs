@@ -27,6 +27,8 @@ bitflags! {
     }
 }
 
+pub static REQUIRE_PRIORITY : usize = std::usize::MAX;
+
 #[derive(Copy, Debug, PartialOrd, PartialEq, Clone)]
 /// Specifies matcher action
 pub enum MatchType {
@@ -82,4 +84,10 @@ pub trait Matcher<'fst, W: Semiring + 'fst>: Debug {
     fn final_weight(&self, state: StateId) -> Fallible<Option<&'fst W>>;
     fn match_type(&self) -> MatchType;
     fn flags(&self) -> MatcherFlags;
+
+    /// Indicates preference for being the side used for matching in
+    /// composition. If the value is kRequirePriority, then it is
+    /// mandatory that it be used. Calling this method without passing the
+    /// current state of the matcher invalidates the state of the matcher.
+    fn priority(&self, state: StateId) -> Fallible<usize>;
 }

@@ -10,7 +10,7 @@ use crate::algorithms::compose_filters::{
     NullComposeFilter, SequenceComposeFilter, TrivialComposeFilter,
 };
 use crate::algorithms::dynamic_fst::DynamicFst;
-use crate::algorithms::matchers::{GenericMatcher, MatchType, SortedMatcher};
+use crate::algorithms::matchers::{GenericMatcher, MatchType, SortedMatcher, REQUIRE_PRIORITY};
 use crate::algorithms::matchers::{Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, Fst, MutableFst, ExpandedFst};
 use crate::semirings::Semiring;
@@ -143,11 +143,25 @@ impl<'fst, W: Semiring + 'fst, CF: ComposeFilter<'fst, W>> ComposeFstImpl<'fst, 
         Ok(mt)
     }
 
-    fn match_input(&self, _s1: StateId, _s2: StateId) -> bool {
+    fn match_input(&self, s1: StateId, s2: StateId) -> Fallible<bool> {
         match self.match_type {
-            MatchType::MatchInput => true,
-            MatchType::MatchOutput => false,
-            _ => panic!(),
+            MatchType::MatchInput => Ok(true),
+            MatchType::MatchOutput => Ok(false),
+            _ => {
+                // Match both
+                let priority1 = self.matcher1.borrow().priority(s1)?;
+                let priority2 = self.matcher2.borrow().priority(s2)?;
+                if priority1 == REQUIRE_PRIORITY && priority2 == REQUIRE_PRIORITY {
+                    bail!("Both sides can't require match")
+                }
+                if priority1 == REQUIRE_PRIORITY {
+                    return Ok(false);
+                }
+                if priority2 == REQUIRE_PRIORITY {
+                    return Ok(true);
+                }
+                Ok(priority1 <= priority2)
+            },
         }
     }
 
@@ -254,7 +268,7 @@ impl<'fst, W: Semiring + 'fst + 'static, CF: ComposeFilter<'fst, W>> FstImpl
         let s2 = tuple.s2;
         self.compose_filter.set_state(s1, s2, &tuple.fs);
         drop(tuple);
-        if self.match_input(s1, s2) {
+        if self.match_input(s1, s2)? {
             self.ordered_expand(state, s2, self.fst1, s1, Rc::clone(&self.matcher2), true)?;
         } else {
             self.ordered_expand(state, s1, self.fst2, s2, Rc::clone(&self.matcher1), false)?;

@@ -56,6 +56,10 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W>
             | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER
             | self.flags
     }
+
+    fn priority(&self, state: usize) -> Fallible<usize> {
+        self.matcher.priority(state)
+    }
 }
 
 impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>

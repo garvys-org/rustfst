@@ -4,9 +4,8 @@ use superslice::Ext;
 use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{Fst, ExpandedFst};
 use crate::semirings::Semiring;
-use crate::{Arc, Label, EPS_LABEL};
+use crate::{Arc, Label, EPS_LABEL, StateId};
 use crate::fst_properties::FstProperties;
-use serde::de::Unexpected::Map;
 
 #[derive(Debug)]
 pub struct SortedMatcher<'fst, F: ExpandedFst> {
@@ -63,6 +62,10 @@ impl<'fst, W: Semiring + 'fst, F: ExpandedFst<W = W>> Matcher<'fst, W> for Sorte
 
     fn flags(&self) -> MatcherFlags {
         MatcherFlags::empty()
+    }
+
+    fn priority(&self, state: StateId) -> Fallible<usize> {
+        self.fst.num_arcs(state)
     }
 }
 
