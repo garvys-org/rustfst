@@ -32,6 +32,22 @@ public:
         return f;
     }
 
+    fst::VectorFst<MyArc> get_fst_compose() const {
+        fst::VectorFst<MyArc> fst_2;
+        fst_2.AddState();
+        fst_2.AddState();
+        fst_2.AddState();
+        fst_2.AddState();
+        fst_2.SetStart(0);
+        fst_2.SetFinal(3, MyWeight(1.2));
+        fst_2.AddArc(0, MyArc(12, 2, MyWeight(1.4), 1));
+        fst_2.AddArc(1, MyArc(13, 3, MyWeight(1.6), 2));
+        fst_2.AddArc(1, MyArc(13, 4, MyWeight(1.8), 2));
+        fst_2.AddArc(2, MyArc(14, 4, MyWeight(2.7), 3));
+        fst_2.AddArc(2, MyArc(14, 5, MyWeight(0.7), 3));
+        return fst_2;
+    }
+
     MyWeight get_weight_plus_mapper() const {
         return MyWeight(1.5);
     }

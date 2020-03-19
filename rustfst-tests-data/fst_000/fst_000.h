@@ -39,6 +39,16 @@ public:
         return get_fst_concat();
     }
 
+    fst::VectorFst<MyArc> get_fst_compose() const {
+        fst::VectorFst<MyArc> fst_2;
+        fst_2.AddState();
+        fst_2.AddState();
+        fst_2.SetStart(0);
+        fst_2.SetFinal(1, MyWeight(1.2));
+        fst_2.AddArc(0, MyArc(4, 2, MyWeight(1.7), 1));
+        return fst_2;
+    }
+
     MyWeight random_weight() const {
         return MyWeight(custom_random_float());
     }

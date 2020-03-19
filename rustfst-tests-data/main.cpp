@@ -767,6 +767,25 @@ void compute_fst_matcher(const F& raw_fst, json& j) {
 }
 
 template<class F>
+void compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2) {
+    using Weight = typename F::Weight;
+    using Arc = typename F::Arc;
+    j["compose"] = {};
+
+    auto res_dynamic = fst::VectorFst<Arc>(fst::ComposeFst<Arc>(raw_fst, fst_2));
+
+    fst::VectorFst<Arc> static_fst;
+    fst::Compose(raw_fst, fst_2, &static_fst);
+
+    json j2;
+    j2["fst_2"] = fst_to_string(fst_2);
+    j2["result_static"] = fst_to_string(static_fst);
+    j2["result_dynamic"] = fst_to_string(res_dynamic);
+
+    j["compose"].push_back(j2);
+}
+
+template<class F>
 void compute_fst_data(const F& fst_test_data, const string fst_name) {
     std::cout << "FST :" << fst_name << std::endl;
     json data;
@@ -908,6 +927,9 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
 
     std::cout << "Matcher" << std::endl;
     compute_fst_matcher(raw_fst, data);
+
+    std::cout << "Compose" << std::endl;
+    compute_fst_compose(raw_fst, data, fst_test_data.get_fst_compose());
 
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;
