@@ -1,7 +1,7 @@
 use failure::Fallible;
 
 use crate::algorithms::compose_filters::ComposeFilter;
-use crate::algorithms::filter_states::{CharFilterState, FilterState, IntegerFilterState};
+use crate::algorithms::filter_states::{FilterState, IntegerFilterState};
 use crate::algorithms::matchers::{MatchType, Matcher};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
@@ -25,7 +25,7 @@ pub struct SequenceComposeFilter<
     /// Current fst2 state
     s2: StateId,
     /// Current filter state
-    fs: IntegerFilterState<usize>,
+    fs: IntegerFilterState,
     /// Only epsilons (and non-final) leaving s1 ?
     alleps1: bool,
     /// No epsilons leaving s1 ?
@@ -37,7 +37,7 @@ impl<'fst, W: Semiring + 'fst, M1: Matcher<'fst, W>, M2: Matcher<'fst, W>> Compo
 {
     type M1 = M1;
     type M2 = M2;
-    type FS = IntegerFilterState<usize>;
+    type FS = IntegerFilterState;
 
     fn new<IM1: Into<Option<Self::M1>>, IM2: Into<Option<Self::M2>>>(
         fst1: &'fst M1::F,

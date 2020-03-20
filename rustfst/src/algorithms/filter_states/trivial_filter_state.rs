@@ -17,13 +17,7 @@ impl FilterState for TrivialFilterState {
         unimplemented!()
     }
 
-    fn state(&self) -> Option<&Self::Type> {
-        Some(&self.state)
-    }
-}
-
-impl Default for TrivialFilterState {
-    fn default() -> Self {
-        Self { state: false }
+    fn state(&self) -> &Self::Type {
+        unimplemented!()
     }
 }

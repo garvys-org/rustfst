@@ -1,7 +1,7 @@
 use failure::Fallible;
 
 use crate::algorithms::compose_filters::ComposeFilter;
-use crate::algorithms::filter_states::{CharFilterState, FilterState};
+use crate::algorithms::filter_states::{FilterState, IntegerFilterState};
 use crate::algorithms::matchers::{MatchType, Matcher};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
@@ -19,7 +19,7 @@ pub struct AltSequenceComposeFilter<'fst, F2, M1, M2> {
     /// Current fst2 state
     s2: StateId,
     /// Current filter state
-    fs: CharFilterState,
+    fs: IntegerFilterState,
     /// Only epsilons (and non-final) leaving s2 ?
     alleps2: bool,
     /// No epsilons leaving s2 ?
@@ -31,7 +31,7 @@ impl<'fst, W: Semiring + 'fst, M1: Matcher<'fst, W>, M2: Matcher<'fst, W>> Compo
 {
     type M1 = M1;
     type M2 = M2;
-    type FS = CharFilterState;
+    type FS = IntegerFilterState;
 
     fn new<IM1: Into<Option<Self::M1>>, IM2: Into<Option<Self::M2>>>(
         fst1: &'fst <Self::M1 as Matcher<'fst, W>>::F,
@@ -51,7 +51,7 @@ impl<'fst, W: Semiring + 'fst, M1: Matcher<'fst, W>, M2: Matcher<'fst, W>> Compo
             )),
             s1: NO_STATE_ID,
             s2: NO_STATE_ID,
-            fs: Self::FS::default(),
+            fs: Self::FS::new(NO_STATE_ID),
             alleps2: false,
             noeps2: false,
         })

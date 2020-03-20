@@ -21,13 +21,7 @@ impl<T: Num + Clone + Eq + Hash + Debug> FilterState for ListFilterState<T> {
         unimplemented!()
     }
 
-    fn state(&self) -> Option<&Self::Type> {
-        self.state.as_ref()
-    }
-}
-
-impl<T: Num + Clone> Default for ListFilterState<T> {
-    fn default() -> Self {
-        Self { state: None }
+    fn state(&self) -> &Self::Type {
+        unimplemented!()
     }
 }

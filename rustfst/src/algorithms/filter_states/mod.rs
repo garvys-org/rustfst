@@ -1,5 +1,5 @@
 pub use integer_filter_state::{
-    CharFilterState, IntFilterState, IntegerFilterState, ShortFilterState,
+    IntegerFilterState,
 };
 pub use list_filter_state::ListFilterState;
 pub use pair_filter_state::PairFilterState;
@@ -9,12 +9,12 @@ pub use trivial_filter_state::TrivialFilterState;
 pub use weight_filter_state::WeightFilterState;
 
 /// The filter state interface represents the state of a (e.g., composition) filter.
-pub trait FilterState: Default + PartialEq + Clone + Eq + Hash + Debug {
+pub trait FilterState: PartialEq + Clone + Eq + Hash + Debug {
     type Type;
 
     fn new(value: Self::Type) -> Self;
     fn new_no_state() -> Self;
-    fn state(&self) -> Option<&Self::Type>;
+    fn state(&self) -> &Self::Type;
 }
 
 mod integer_filter_state;

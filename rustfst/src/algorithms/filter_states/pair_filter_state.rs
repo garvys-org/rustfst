@@ -17,13 +17,7 @@ impl<FS1: FilterState, FS2: FilterState> FilterState for PairFilterState<FS1, FS
         unimplemented!()
     }
 
-    fn state(&self) -> Option<&Self::Type> {
-        self.state.as_ref()
-    }
-}
-
-impl<FS1: FilterState, FS2: FilterState> Default for PairFilterState<FS1, FS2> {
-    fn default() -> Self {
-        Self { state: None }
+    fn state(&self) -> &Self::Type {
+        unimplemented!()
     }
 }

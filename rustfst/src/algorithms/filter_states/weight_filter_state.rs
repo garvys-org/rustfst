@@ -18,13 +18,7 @@ impl<W: Semiring> FilterState for WeightFilterState<W> {
         unimplemented!()
     }
 
-    fn state(&self) -> Option<&Self::Type> {
-        self.state.as_ref()
-    }
-}
-
-impl<W: Semiring> Default for WeightFilterState<W> {
-    fn default() -> Self {
-        Self { state: None }
+    fn state(&self) -> &Self::Type {
+        unimplemented!()
     }
 }
