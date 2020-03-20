@@ -117,7 +117,7 @@ impl<'fst, W: Semiring + 'fst, CF: ComposeFilter<'fst, W>> ComposeFstImpl<'fst, 
             .borrow()
             .flags()
             .contains(MatcherFlags::REQUIRE_MATCH)
-            && matcher1.borrow().match_type() == MatchType::MatchOutput
+            && matcher1.borrow().match_type() != MatchType::MatchOutput
         {
             bail!("ComposeFst: 1st argument cannot perform required matching (sort?)")
         }
@@ -125,7 +125,7 @@ impl<'fst, W: Semiring + 'fst, CF: ComposeFilter<'fst, W>> ComposeFstImpl<'fst, 
             .borrow()
             .flags()
             .contains(MatcherFlags::REQUIRE_MATCH)
-            && matcher2.borrow().match_type() == MatchType::MatchInput
+            && matcher2.borrow().match_type() != MatchType::MatchInput
         {
             bail!("ComposeFst: 2nd argument cannot perform required matching (sort?)")
         }
