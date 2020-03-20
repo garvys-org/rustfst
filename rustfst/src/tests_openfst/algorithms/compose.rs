@@ -1,7 +1,7 @@
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::algorithms::{compose, ComposeFst};
+use crate::algorithms::{compose, ComposeFst, ComposeConfig, compose_with_config};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
@@ -45,7 +45,9 @@ pub fn test_compose<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
         W::ReverseWeight: 'static,
 {
     for compose_test_data in &test_data.compose {
-        let fst_res_static : VectorFst<_> = compose(&test_data.raw, &compose_test_data.fst_2)?;
+        let mut config = ComposeConfig::default();
+        config.connect = false;
+        let fst_res_static : VectorFst<_> = compose_with_config(&test_data.raw, &compose_test_data.fst_2, config)?;
 
         assert_eq!(
             compose_test_data.result_static,

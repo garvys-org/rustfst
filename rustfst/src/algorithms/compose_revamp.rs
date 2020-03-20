@@ -396,8 +396,8 @@ impl<'fst, W: Semiring + 'fst + 'static, F1: ExpandedFst<W = W>, F2: ExpandedFst
 
 #[derive(PartialOrd, PartialEq, Debug, Clone, Copy)]
 pub struct ComposeConfig {
-    compose_filter: ComposeFilterEnum,
-    connect: bool,
+    pub compose_filter: ComposeFilterEnum,
+    pub connect: bool,
 }
 
 impl Default for ComposeConfig {

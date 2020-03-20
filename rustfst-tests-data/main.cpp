@@ -774,8 +774,10 @@ void compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typenam
 
     auto res_dynamic = fst::VectorFst<Arc>(fst::ComposeFst<Arc>(raw_fst, fst_2));
 
+    auto opts = fst::ComposeOptions();
+    opts.connect = false;
     fst::VectorFst<Arc> static_fst;
-    fst::Compose(raw_fst, fst_2, &static_fst);
+    fst::Compose(raw_fst, fst_2, &static_fst, opts);
 
     json j2;
     j2["fst_2"] = fst_to_string(fst_2);
