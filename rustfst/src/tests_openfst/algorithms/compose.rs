@@ -13,6 +13,8 @@ pub struct ComposeOperationResult {
     fst_2: String,
     result_static: String,
     result_dynamic: String,
+    connect: bool,
+    filter_name: String
 }
 
 pub struct ComposeTestData<F>
@@ -23,6 +25,8 @@ where
     pub fst_2: F,
     pub result_static: F,
     pub result_dynamic: F,
+    pub connect: bool,
+    pub filter_name: String,
 }
 
 impl ComposeOperationResult {
@@ -35,6 +39,8 @@ impl ComposeOperationResult {
             fst_2: F::from_text_string(self.fst_2.as_str()).unwrap(),
             result_static: F::from_text_string(self.result_static.as_str()).unwrap(),
             result_dynamic: F::from_text_string(self.result_dynamic.as_str()).unwrap(),
+            connect: self.connect,
+            filter_name: self.filter_name.clone()
         }
     }
 }
@@ -46,7 +52,7 @@ where
 {
     for compose_test_data in &test_data.compose {
         let mut config = ComposeConfig::default();
-        config.connect = false;
+        config.connect = compose_test_data.connect;
         let fst_res_static: VectorFst<_> =
             compose_with_config(&test_data.raw, &compose_test_data.fst_2, config)?;
 
@@ -57,7 +63,7 @@ where
             error_message_fst!(
                 compose_test_data.result_static,
                 fst_res_static,
-                format!("Compose failed")
+                format!("Compose failed : connect = {} filter_name = {}", compose_test_data.connect, compose_test_data.filter_name)
             )
         );
     }

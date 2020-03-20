@@ -6,15 +6,15 @@ use std::hash::Hash;
 
 /// Filter state is a list of signed integer types T. Order matters for equality.
 #[derive(Debug, PartialEq, Clone, Eq, Hash)]
-pub struct ListFilterState<T: Num> {
-    state: Option<Vec<T>>,
+pub struct ListFilterState {
+    state: Vec<usize>,
 }
 
-impl<T: Num + Clone + Eq + Hash + Debug> FilterState for ListFilterState<T> {
-    type Type = Vec<T>;
+impl FilterState for ListFilterState {
+    type Type = Vec<usize>;
 
     fn new(value: Self::Type) -> Self {
-        Self { state: Some(value) }
+        unimplemented!()
     }
 
     fn new_no_state() -> Self {
