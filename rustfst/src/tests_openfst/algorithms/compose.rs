@@ -1,7 +1,7 @@
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::algorithms::{compose, ComposeFst, ComposeConfig, compose_with_config};
+use crate::algorithms::{compose, compose_with_config, ComposeConfig, ComposeFst};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
@@ -16,9 +16,9 @@ pub struct ComposeOperationResult {
 }
 
 pub struct ComposeTestData<F>
-    where
-        F: SerializableFst,
-        F::W: SerializableSemiring,
+where
+    F: SerializableFst,
+    F::W: SerializableSemiring,
 {
     pub fst_2: F,
     pub result_static: F,
@@ -27,9 +27,9 @@ pub struct ComposeTestData<F>
 
 impl ComposeOperationResult {
     pub fn parse<F>(&self) -> ComposeTestData<F>
-        where
-            F: SerializableFst,
-            F::W: SerializableSemiring,
+    where
+        F: SerializableFst,
+        F::W: SerializableSemiring,
     {
         ComposeTestData {
             fst_2: F::from_text_string(self.fst_2.as_str()).unwrap(),
@@ -40,14 +40,15 @@ impl ComposeOperationResult {
 }
 
 pub fn test_compose<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
-    where
-        W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-        W::ReverseWeight: 'static,
+where
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+    W::ReverseWeight: 'static,
 {
     for compose_test_data in &test_data.compose {
         let mut config = ComposeConfig::default();
         config.connect = false;
-        let fst_res_static : VectorFst<_> = compose_with_config(&test_data.raw, &compose_test_data.fst_2, config)?;
+        let fst_res_static: VectorFst<_> =
+            compose_with_config(&test_data.raw, &compose_test_data.fst_2, config)?;
 
         assert_eq!(
             compose_test_data.result_static,
@@ -64,9 +65,9 @@ pub fn test_compose<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 }
 
 pub fn test_compose_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
-    where
-        W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-        W::ReverseWeight: 'static,
+where
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+    W::ReverseWeight: 'static,
 {
     unimplemented!()
     // for compose_test_data in &test_data.compose {

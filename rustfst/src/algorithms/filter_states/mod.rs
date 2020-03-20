@@ -1,6 +1,4 @@
-pub use integer_filter_state::{
-    IntegerFilterState,
-};
+pub use integer_filter_state::IntegerFilterState;
 pub use list_filter_state::ListFilterState;
 pub use pair_filter_state::PairFilterState;
 use std::fmt::Debug;

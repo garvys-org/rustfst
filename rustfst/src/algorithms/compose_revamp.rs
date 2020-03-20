@@ -10,12 +10,12 @@ use crate::algorithms::compose_filters::{
     NullComposeFilter, SequenceComposeFilter, TrivialComposeFilter,
 };
 use crate::algorithms::dynamic_fst::DynamicFst;
+use crate::algorithms::filter_states::FilterState;
 use crate::algorithms::matchers::{GenericMatcher, MatchType, SortedMatcher, REQUIRE_PRIORITY};
 use crate::algorithms::matchers::{Matcher, MatcherFlags};
-use crate::fst_traits::{CoreFst, Fst, MutableFst, ExpandedFst};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Arc, StateId, EPS_LABEL, NO_LABEL};
-use crate::algorithms::filter_states::FilterState;
 
 pub struct ComposeFstImplOptions<M1, M2, CF, ST> {
     matcher1: Option<M1>,
@@ -145,7 +145,7 @@ impl<'fst, W: Semiring + 'fst, CF: ComposeFilter<'fst, W>> ComposeFstImpl<'fst, 
     }
 
     fn match_input(&self, s1: StateId, s2: StateId) -> Fallible<bool> {
-        match self.match_type {
+        match std::dbg!(self.match_type) {
             MatchType::MatchInput => Ok(true),
             MatchType::MatchOutput => Ok(false),
             _ => {
@@ -161,8 +161,8 @@ impl<'fst, W: Semiring + 'fst, CF: ComposeFilter<'fst, W>> ComposeFstImpl<'fst, 
                 if priority2 == REQUIRE_PRIORITY {
                     return Ok(true);
                 }
-                Ok(priority1 <= priority2)
-            },
+                Ok(std::dbg!(priority1) <= std::dbg!(priority2))
+            }
         }
     }
 
@@ -222,7 +222,8 @@ impl<'fst, W: Semiring + 'fst, CF: ComposeFilter<'fst, W>> ComposeFstImpl<'fst, 
         W: 'b,
     {
         let label = if match_input { arc.olabel } else { arc.ilabel };
-
+        println!("Match arc : sa={}, label={}", sa, label);
+        std::dbg!("Matcher : {:?}", &matchera);
         for arca in matchera.borrow().iter(sa, label)? {
             let mut arca = arca.into_arc(
                 sa,
@@ -232,14 +233,15 @@ impl<'fst, W: Semiring + 'fst, CF: ComposeFilter<'fst, W>> ComposeFstImpl<'fst, 
                     MatchType::MatchOutput
                 },
             )?;
+            std::dbg!(&arca);
             let mut arcb = arc.clone();
-            if match_input {
-                let fs = self.compose_filter.filter_arc(&mut arcb, &mut arca);
+            if std::dbg!(match_input) {
+                let fs = std::dbg!(self.compose_filter.filter_arc(&mut arcb, &mut arca));
                 if fs != CF::FS::new_no_state() {
                     self.add_arc(s, arcb, arca, fs)?;
                 }
             } else {
-                let fs = self.compose_filter.filter_arc(&mut arca, &mut arcb);
+                let fs = std::dbg!(self.compose_filter.filter_arc(&mut arca, &mut arcb));
                 if fs != CF::FS::new_no_state() {
                     self.add_arc(s, arca, arcb, fs)?;
                 }
@@ -264,16 +266,18 @@ impl<'fst, W: Semiring + 'fst + 'static, CF: ComposeFilter<'fst, W>> FstImpl
     }
 
     fn expand(&mut self, state: usize) -> Fallible<()> {
+        println!("[EXPAND - START] Expanding state : {}", state);
         let tuple = self.state_table.find_tuple(state);
         let s1 = tuple.s1;
         let s2 = tuple.s2;
         self.compose_filter.set_state(s1, s2, &tuple.fs);
         drop(tuple);
-        if self.match_input(s1, s2)? {
+        if std::dbg!(self.match_input(s1, s2)?) {
             self.ordered_expand(state, s2, self.fst1, s1, Rc::clone(&self.matcher2), true)?;
         } else {
             self.ordered_expand(state, s1, self.fst2, s2, Rc::clone(&self.matcher1), false)?;
         }
+        println!("[EXPAND - END] Expanding state : {}", state);
         Ok(())
     }
 
@@ -331,7 +335,12 @@ pub enum ComposeFilterEnum {
 
 pub type ComposeFst<'fst, W, CF> = DynamicFst<ComposeFstImpl<'fst, W, CF>>;
 
-fn create_base<'fst, W: Semiring + 'fst, F1: ExpandedFst<W = W> + 'fst, F2: ExpandedFst<W = W> + 'fst>(
+fn create_base<
+    'fst,
+    W: Semiring + 'fst,
+    F1: ExpandedFst<W = W> + 'fst,
+    F2: ExpandedFst<W = W> + 'fst,
+>(
     fst1: &'fst F1,
     fst2: &'fst F2,
 ) -> Fallible<

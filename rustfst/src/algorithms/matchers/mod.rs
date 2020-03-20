@@ -27,7 +27,7 @@ bitflags! {
     }
 }
 
-pub static REQUIRE_PRIORITY : usize = std::usize::MAX;
+pub static REQUIRE_PRIORITY: usize = std::usize::MAX;
 
 #[derive(Copy, Debug, PartialOrd, PartialEq, Clone)]
 /// Specifies matcher action

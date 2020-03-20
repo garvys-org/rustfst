@@ -25,7 +25,6 @@ mod null_compose_filter;
 mod sequence_compose_filter;
 mod trivial_compose_filter;
 
-
 /// Composition filters determine which matches are allowed to proceed. The
 /// filter's state is represented by the type ComposeFilter::FS.
 pub trait ComposeFilter<'fst, W: Semiring + 'fst>: Debug {

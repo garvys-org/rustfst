@@ -2,10 +2,10 @@ use failure::Fallible;
 use superslice::Ext;
 
 use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
-use crate::fst_traits::{Fst, ExpandedFst};
-use crate::semirings::Semiring;
-use crate::{Arc, Label, EPS_LABEL, StateId};
 use crate::fst_properties::FstProperties;
+use crate::fst_traits::{ExpandedFst, Fst};
+use crate::semirings::Semiring;
+use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL};
 
 #[derive(Debug)]
 pub struct SortedMatcher<'fst, F: ExpandedFst> {
@@ -81,6 +81,14 @@ impl<'fst, W: Semiring> IteratorSortedMatcher<'fst, W> {
     pub fn new(arcs: Vec<&'fst Arc<W>>, match_label: Label, match_type: MatchType) -> Self {
         // If we have to match epsilon, an epsilon loop is added
         let current_loop = match_label == EPS_LABEL;
+
+        // NoLabel matches any non-consuming transitions, e.g., epsilon
+        // transitions, which do not require a matching symbol.
+        let match_label = if match_label == NO_LABEL {
+            EPS_LABEL
+        } else {
+            match_label
+        };
 
         // When matching epsilon, the first arc is supposed to be labeled as such
         let pos = if current_loop {

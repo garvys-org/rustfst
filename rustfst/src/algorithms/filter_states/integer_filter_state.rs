@@ -1,8 +1,8 @@
 use self::super::FilterState;
+use crate::NO_STATE_ID;
 use num_traits::Num;
 use std::fmt::Debug;
 use std::hash::Hash;
-use crate::NO_STATE_ID;
 
 /// Filter state that is a signed integral type.
 #[derive(Debug, PartialEq, Clone, Eq, Hash)]
@@ -16,7 +16,9 @@ impl FilterState for IntegerFilterState {
     fn new(value: Self::Type) -> Self {
         Self { state: value }
     }
-    fn new_no_state() -> Self {Self{state: NO_STATE_ID}}
+    fn new_no_state() -> Self {
+        Self { state: NO_STATE_ID }
+    }
 
     fn state(&self) -> &Self::Type {
         &self.state
