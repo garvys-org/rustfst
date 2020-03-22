@@ -14,10 +14,10 @@ impl FilterState for TrivialFilterState {
     }
 
     fn new_no_state() -> Self {
-        unimplemented!()
+        Self::new(false)
     }
 
     fn state(&self) -> &Self::Type {
-        unimplemented!()
+        &self.state
     }
 }
