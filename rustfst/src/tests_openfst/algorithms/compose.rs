@@ -1,7 +1,14 @@
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::algorithms::{compose, compose_with_config, ComposeConfig, ComposeFst, ComposeFilterEnum};
+use crate::algorithms::compose_filters::{
+    AltSequenceComposeFilter, MatchComposeFilter, NoMatchComposeFilter, NullComposeFilter,
+    SequenceComposeFilter, TrivialComposeFilter,
+};
+use crate::algorithms::matchers::SortedMatcher;
+use crate::algorithms::{
+    compose, compose_with_config, ComposeConfig, ComposeFilterEnum, ComposeFst,
+};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
@@ -14,7 +21,7 @@ pub struct ComposeOperationResult {
     result_static: String,
     result_dynamic: String,
     connect: bool,
-    filter_name: String
+    filter_name: String,
 }
 
 pub struct ComposeTestData<F>
@@ -48,8 +55,8 @@ impl ComposeOperationResult {
                 "alt_sequence" => ComposeFilterEnum::SequenceFilter,
                 "match" => ComposeFilterEnum::MatchFilter,
                 "no_match" => ComposeFilterEnum::NoMatchFilter,
-                _ => panic!("Not supported : {}", &self.filter_name)
-            }
+                _ => panic!("Not supported : {}", &self.filter_name),
+            },
         }
     }
 }
@@ -74,7 +81,10 @@ where
             error_message_fst!(
                 compose_test_data.result_static,
                 fst_res_static,
-                format!("Compose failed : connect = {} filter_name = {:?}", compose_test_data.connect, compose_test_data.filter)
+                format!(
+                    "Compose failed : connect = {} filter_name = {:?}",
+                    compose_test_data.connect, compose_test_data.filter
+                )
             )
         );
     }
@@ -86,14 +96,62 @@ where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
-    unimplemented!()
-    // for compose_test_data in &test_data.compose {
-    //     let compose_dynamic_fst =
-    //         ComposeFst::new_auto(&test_data.raw, &compose_test_data.fst_2)?;
-    //
-    //     compare_fst_static_dynamic(&compose_test_data.result_dynamic, &compose_dynamic_fst)?;
-    // }
-    // Ok(())
+    // unimplemented!()
+    for compose_test_data in &test_data.compose {
+        let compose_dynamic_fst = ComposeFst::new_auto(&test_data.raw, &compose_test_data.fst_2)?;
+        let fst1 = &test_data.raw;
+        let fst2 = &compose_test_data.fst_2;
+
+        match compose_test_data.filter {
+            ComposeFilterEnum::AutoFilter => {
+                let dyn_fst = ComposeFst::new_auto(fst1, fst2)?;
+
+                compare_fst_static_dynamic(&compose_test_data.result_dynamic.clone(), &dyn_fst)?;
+            }
+            ComposeFilterEnum::NullFilter => {
+                let dyn_fst =
+                    ComposeFst::<_, NullComposeFilter<SortedMatcher<_>, SortedMatcher<_>>>::new(
+                        fst1, fst2,
+                    )?;
+
+                compare_fst_static_dynamic(&compose_test_data.result_dynamic, &dyn_fst)?;
+            }
+            ComposeFilterEnum::SequenceFilter => {
+                let dyn_fst = ComposeFst::<
+                    _,
+                    SequenceComposeFilter<_, SortedMatcher<_>, SortedMatcher<_>>,
+                >::new(fst1, fst2)?;
+                compare_fst_static_dynamic(&compose_test_data.result_dynamic, &dyn_fst)?;
+            }
+            ComposeFilterEnum::AltSequenceFilter => {
+                let dyn_fst = ComposeFst::<
+                    _,
+                    AltSequenceComposeFilter<_, SortedMatcher<_>, SortedMatcher<_>>,
+                >::new(fst1, fst2)?;
+                compare_fst_static_dynamic(&compose_test_data.result_dynamic, &dyn_fst)?;
+            }
+            ComposeFilterEnum::MatchFilter => {
+                let dyn_fst = ComposeFst::<
+                    _,
+                    MatchComposeFilter<_, _, SortedMatcher<_>, SortedMatcher<_>>,
+                >::new(fst1, fst2)?;
+                compare_fst_static_dynamic(&compose_test_data.result_dynamic, &dyn_fst)?;
+            }
+            ComposeFilterEnum::NoMatchFilter => {
+                let dyn_fst = ComposeFst::<
+                    _,
+                    NoMatchComposeFilter<SortedMatcher<_>, SortedMatcher<_>>,
+                >::new(fst1, fst2)?;
+                compare_fst_static_dynamic(&compose_test_data.result_dynamic, &dyn_fst)?;
+            }
+            ComposeFilterEnum::TrivialFilter => {
+                let dyn_fst = ComposeFst::<
+                    _,
+                    TrivialComposeFilter<SortedMatcher<_>, SortedMatcher<_>>,
+                >::new(fst1, fst2)?;
+                compare_fst_static_dynamic(&compose_test_data.result_dynamic, &dyn_fst)?;
+            }
+        };
+    }
+    Ok(())
 }
-
-

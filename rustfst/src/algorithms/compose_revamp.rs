@@ -249,7 +249,7 @@ impl<'fst, W: Semiring + 'fst, CF: ComposeFilter<'fst, W>> ComposeFstImpl<'fst, 
     }
 }
 
-impl<'fst, W: Semiring + 'fst + 'static, CF: ComposeFilter<'fst, W>> FstImpl
+impl<'fst, W: Semiring + 'static, CF: ComposeFilter<'fst, W>> FstImpl
     for ComposeFstImpl<'fst, W, CF>
 {
     type W = W;
@@ -383,7 +383,7 @@ impl<'fst, W: Semiring + 'fst, CF: ComposeFilter<'fst, W>> ComposeFst<'fst, W, C
     }
 }
 
-impl<'fst, W: Semiring + 'fst + 'static, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>>
+impl<'fst, W: Semiring + 'static, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>>
     ComposeFst<
         'fst,
         W,

@@ -766,8 +766,8 @@ void compute_fst_matcher(const F& raw_fst, json& j) {
     }
 }
 
-template<class F, class FILTER>
-void do_compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2, bool connect, FILTER filter, string filter_name) {
+template<class F, class FILTER, class OPTS>
+void do_compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2, bool connect, FILTER filter, string filter_name, OPTS dyn_opts) {
     using Arc = typename F::Arc;
 
     auto opts = fst::ComposeOptions();
@@ -779,13 +779,12 @@ void do_compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<type
     fst::Compose(raw_fst, fst_2, &static_fst, opts);
 
     // dynamic
-
-    auto res_dynamic = fst::VectorFst<Arc>(fst::ComposeFst<Arc>(raw_fst, fst_2));
+    auto res_dynamic = fst::VectorFst<Arc>(fst::ComposeFst<Arc>(raw_fst, fst_2, dyn_opts));
 
     json j2;
     j2["fst_2"] = fst_to_string(fst_2);
     j2["result_static"] = fst_to_string(static_fst);
-    j2["result_dynamic"] = "";
+    j2["result_dynamic"] = fst_to_string(res_dynamic);
     j2["filter_name"] = filter_name;
     j2["connect"] = connect;
 
@@ -796,15 +795,16 @@ template<class F>
 void compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2) {
     using Weight = typename F::Weight;
     using Arc = typename F::Arc;
+    using M = fst::Matcher<fst::Fst<Arc>>;
     j["compose"] = {};
 
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::AUTO_FILTER, "auto");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NULL_FILTER, "null");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::TRIVIAL_FILTER, "trivial");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::SEQUENCE_FILTER, "sequence");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::ALT_SEQUENCE_FILTER, "alt_sequence");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::MATCH_FILTER, "match");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NO_MATCH_FILTER, "no_match");
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::AUTO_FILTER, "auto", fst::CacheOptions());
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NULL_FILTER, "null", fst::ComposeFstOptions<Arc, M, fst::NullComposeFilter<M>>());
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::TRIVIAL_FILTER, "trivial", fst::ComposeFstOptions<Arc, M, fst::TrivialComposeFilter<M>>());
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::SEQUENCE_FILTER, "sequence", fst::ComposeFstOptions<Arc, M, fst::SequenceComposeFilter<M>>());
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::ALT_SEQUENCE_FILTER, "alt_sequence", fst::ComposeFstOptions<Arc, M, fst::AltSequenceComposeFilter<M>>());
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::MATCH_FILTER, "match", fst::ComposeFstOptions<Arc, M, fst::MatchComposeFilter<M>>());
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NO_MATCH_FILTER, "no_match", fst::ComposeFstOptions<Arc, M, fst::NoMatchComposeFilter<M>>());
 }
 
 template<class F>
