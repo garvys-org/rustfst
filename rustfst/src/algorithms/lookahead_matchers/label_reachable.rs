@@ -192,6 +192,30 @@ impl LabelReachable {
         Ok(())
     }
 
+    // Returns relabeling pairs (cf. relabel.h::Relabel()). If avoid_collisions is
+    // true, extra pairs are added to ensure no collisions when relabeling
+    // automata that have labels unseen here.
+    pub fn relabel_pairs(&self, avoid_collisions: bool) -> Vec<(Label, Label)> {
+        let mut pairs = vec![];
+        let label2index = self.data.label2index();
+        for (key, val) in label2index.iter() {
+            if *val != self.data.final_label() {
+                pairs.push((*key, *val));
+            }
+        }
+
+        if avoid_collisions {
+            for i in 1..=label2index.len() {
+                let it = label2index.get(&i);
+                if it.is_none() || it.unwrap() == &self.data.final_label() {
+                    pairs.push((i, label2index.len() + 1));
+                }
+            }
+        }
+
+        pairs
+    }
+
     pub fn reach_init<F: ExpandedFst>(&mut self, fst: &F, reach_input: bool) -> Fallible<()> {
         self.reach_fst_input = reach_input;
         let props = fst.properties()?;
