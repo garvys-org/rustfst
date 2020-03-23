@@ -1,13 +1,14 @@
 use crate::algorithms::lookahead_matchers::interval_set::IntervalSet;
 use crate::algorithms::lookahead_matchers::state_reachable::StateReachable;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{CoreFst, ExpandedFst, MutableArcIterator, MutableFst};
+use crate::fst_traits::{CoreFst, ExpandedFst, MutableArcIterator, MutableFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
 use failure::Fallible;
+use crate::fst_properties::FstProperties;
 
 pub struct LabelReachableData {
     reach_input: bool,
@@ -25,28 +26,36 @@ impl LabelReachableData {
             interval_sets: Vec::new(),
         }
     }
+
+    pub fn interval_set(&self, s: StateId) -> Fallible<&IntervalSet> {
+        self.interval_sets.get(s).ok_or_else(|| format_err!("Missing state {}", s))
+    }
 }
 
-pub struct LabelReachable<W: Semiring> {
-    fst: VectorFst<W>,
+pub struct LabelReachable {
     data: LabelReachableData,
     label2state: HashMap<Label, StateId>,
+    reach_fst_input: bool
 }
 
-impl<W: Semiring + 'static> LabelReachable<W> {
-    pub fn new(fst: VectorFst<W>, reach_input: bool) -> Fallible<Self> {
+impl LabelReachable {
+    pub fn new<W: Semiring + 'static>(mut fst: VectorFst<W>, reach_input: bool) -> Fallible<Self> {
         // TODO: In OpenFst, the Fst is converted to a VectorFst
         let mut label_reachable = Self {
-            fst,
             data: LabelReachableData::new(reach_input),
             label2state: HashMap::new(),
+            reach_fst_input: false
         };
 
-        let nstates = label_reachable.fst.num_states();
-        label_reachable.transform_fst();
-        label_reachable.find_intervals(nstates)?;
+        let nstates = fst.num_states();
+        label_reachable.transform_fst(&mut fst);
+        label_reachable.find_intervals(&fst, nstates)?;
 
         Ok(label_reachable)
+    }
+
+    pub fn reach_input(&self) -> bool {
+        self.data.reach_input
     }
 
     // Redirects labeled arcs (input or output labels determined by ReachInput())
@@ -54,13 +63,13 @@ impl<W: Semiring + 'static> LabelReachable<W> {
     // redirected via a transition labeled with kNoLabel to a new
     // kNoLabel-specific final state. Creates super-initial state for all states
     // with zero in-degree.
-    fn transform_fst(&mut self) {
-        let ins = self.fst.num_states();
+    fn transform_fst<W: Semiring + 'static>(&mut self, fst: &mut VectorFst<W>) {
+        let ins = fst.num_states();
         let mut ons = ins;
         let mut indeg = vec![0; ins];
         // Redirects labeled arcs to new final states.
         for s in 0..ins {
-            for arc in unsafe { self.fst.arcs_iter_unchecked_mut(s) } {
+            for arc in unsafe { fst.arcs_iter_unchecked_mut(s) } {
                 let label = if self.data.reach_input {
                     arc.ilabel
                 } else {
@@ -80,7 +89,7 @@ impl<W: Semiring + 'static> LabelReachable<W> {
                 indeg[arc.nextstate] += 1;
             }
 
-            if let Some(final_weight) = unsafe { self.fst.final_weight_unchecked(s) } {
+            if let Some(final_weight) = unsafe { fst.final_weight_unchecked(s) } {
                 if !final_weight.is_zero() {
                     let nextstate = match self.label2state.entry(NO_LABEL) {
                         Entry::Vacant(e) => {
@@ -92,38 +101,38 @@ impl<W: Semiring + 'static> LabelReachable<W> {
                         Entry::Occupied(e) => *e.get(),
                     };
                     unsafe {
-                        self.fst.add_arc_unchecked(
+                        fst.add_arc_unchecked(
                             s,
                             Arc::new(NO_LABEL, NO_LABEL, final_weight.clone(), nextstate),
                         )
                     };
                     indeg[nextstate] += 1;
-                    unsafe { self.fst.delete_final_weight_unchecked(s) }
+                    unsafe { fst.delete_final_weight_unchecked(s) }
                 }
             }
         }
 
         // Adds new final states to the FST.
-        while self.fst.num_states() < ons {
-            let s = self.fst.add_state();
-            unsafe { self.fst.set_final_unchecked(s, W::one()) };
+        while fst.num_states() < ons {
+            let s = fst.add_state();
+            unsafe { fst.set_final_unchecked(s, W::one()) };
         }
 
         // Creates a super-initial state for all states with zero in-degree.
-        let start = self.fst.add_state();
-        unsafe { self.fst.set_start_unchecked(start) };
+        let start = fst.add_state();
+        unsafe { fst.set_start_unchecked(start) };
         for s in 0..start {
             if indeg[s] == 0 {
                 unsafe {
-                    self.fst
+                    fst
                         .add_arc_unchecked(start, Arc::new(0, 0, W::one(), s))
                 };
             }
         }
     }
 
-    fn find_intervals(&mut self, ins: StateId) -> Fallible<()> {
-        let state_reachable = StateReachable::new(&self.fst)?;
+    fn find_intervals<W: Semiring + 'static>(&mut self, fst: &VectorFst<W>, ins: StateId) -> Fallible<()> {
+        let state_reachable = StateReachable::new(fst)?;
         let state2index = &state_reachable.state2index;
         let interval_sets = &mut self.data.interval_sets;
         *interval_sets = state_reachable.isets;
@@ -137,5 +146,28 @@ impl<W: Semiring + 'static> LabelReachable<W> {
         }
         self.label2state.clear();
         Ok(())
+    }
+
+    pub fn reach_init<F: ExpandedFst>(&mut self, fst: &F, reach_input: bool) -> Fallible<()> {
+        self.reach_fst_input = reach_input;
+        let props = fst.properties()?;
+
+        let true_prop = if self.reach_fst_input {
+            FstProperties::I_LABEL_SORTED
+        } else {
+            FstProperties::O_LABEL_SORTED
+        };
+
+        if !props.contains(true_prop) {
+            bail!("LabelReachable::ReachInit: Fst is not sorted")
+        }
+        Ok(())
+    }
+
+    pub fn reach_label(&self, current_state: StateId, label: Label) -> Fallible<bool> {
+        if label == EPS_LABEL {
+            return Ok(false);
+        }
+        Ok(self.data.interval_set(current_state)?.member(label))
     }
 }
