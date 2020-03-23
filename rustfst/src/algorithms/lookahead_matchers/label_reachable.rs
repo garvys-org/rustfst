@@ -30,6 +30,10 @@ impl LabelReachableData {
     pub fn interval_set(&self, s: StateId) -> Fallible<&IntervalSet> {
         self.interval_sets.get(s).ok_or_else(|| format_err!("Missing state {}", s))
     }
+
+    pub fn final_label(&self) -> Label {
+        self.final_label
+    }
 }
 
 pub struct LabelReachable {
@@ -164,10 +168,17 @@ impl LabelReachable {
         Ok(())
     }
 
+    // Can reach this label from current state?
+    // Original labels must be transformed by the Relabel methods above.
     pub fn reach_label(&self, current_state: StateId, label: Label) -> Fallible<bool> {
         if label == EPS_LABEL {
             return Ok(false);
         }
         Ok(self.data.interval_set(current_state)?.member(label))
+    }
+
+    // Can reach final state (via epsilon transitions) from this state?
+    pub fn reach_final(&self, current_state: StateId) -> Fallible<bool> {
+        Ok(self.data.interval_set(current_state)?.member(self.data.final_label()))
     }
 }
