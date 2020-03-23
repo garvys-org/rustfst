@@ -1,16 +1,17 @@
+use crate::algorithms::arc_compares::{ilabel_compare, olabel_compare};
+use crate::algorithms::arc_sort;
 use crate::algorithms::lookahead_matchers::interval_set::IntervalSet;
 use crate::algorithms::lookahead_matchers::state_reachable::StateReachable;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{CoreFst, ExpandedFst, MutableArcIterator, MutableFst, Fst, ArcIterator};
+use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, MutableArcIterator, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL};
+use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, UNASSIGNED};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use crate::algorithms::arc_sort;
-use crate::algorithms::arc_compares::{ilabel_compare, olabel_compare};
 
-use failure::Fallible;
 use crate::fst_properties::FstProperties;
+use failure::Fallible;
+use itertools::Itertools;
 
 pub struct LabelReachableData {
     reach_input: bool,
@@ -30,7 +31,9 @@ impl LabelReachableData {
     }
 
     pub fn interval_set(&self, s: StateId) -> Fallible<&IntervalSet> {
-        self.interval_sets.get(s).ok_or_else(|| format_err!("Missing state {}", s))
+        self.interval_sets
+            .get(s)
+            .ok_or_else(|| format_err!("Missing state {}", s))
     }
 
     pub fn final_label(&self) -> Label {
@@ -45,7 +48,7 @@ impl LabelReachableData {
 pub struct LabelReachable {
     data: LabelReachableData,
     label2state: HashMap<Label, StateId>,
-    reach_fst_input: bool
+    reach_fst_input: bool,
 }
 
 impl LabelReachable {
@@ -54,7 +57,7 @@ impl LabelReachable {
         let mut label_reachable = Self {
             data: LabelReachableData::new(reach_input),
             label2state: HashMap::new(),
-            reach_fst_input: false
+            reach_fst_input: false,
         };
 
         let nstates = fst.num_states();
@@ -133,15 +136,16 @@ impl LabelReachable {
         unsafe { fst.set_start_unchecked(start) };
         for s in 0..start {
             if indeg[s] == 0 {
-                unsafe {
-                    fst
-                        .add_arc_unchecked(start, Arc::new(0, 0, W::one(), s))
-                };
+                unsafe { fst.add_arc_unchecked(start, Arc::new(0, 0, W::one(), s)) };
             }
         }
     }
 
-    fn find_intervals<W: Semiring + 'static>(&mut self, fst: &VectorFst<W>, ins: StateId) -> Fallible<()> {
+    fn find_intervals<W: Semiring + 'static>(
+        &mut self,
+        fst: &VectorFst<W>,
+        ins: StateId,
+    ) -> Fallible<()> {
         let state_reachable = StateReachable::new(fst)?;
         let state2index = &state_reachable.state2index;
         let interval_sets = &mut self.data.interval_sets;
@@ -243,10 +247,86 @@ impl LabelReachable {
 
     // Can reach final state (via epsilon transitions) from this state?
     pub fn reach_final(&self, current_state: StateId) -> Fallible<bool> {
-        Ok(self.data.interval_set(current_state)?.member(self.data.final_label()))
+        Ok(self
+            .data
+            .interval_set(current_state)?
+            .member(self.data.final_label()))
     }
 
-    // pub fn reach<'a, W: Semiring + 'a>(&self, aiter: impl Iterator<Item = &'a Arc<W>>) {
-    //     unimplemented!()
-    // }
+    pub fn reach<'a, W: Semiring + 'a>(&self, current_state: StateId, aiter: impl Iterator<Item = &'a Arc<W>>, aiter_begin: usize, aiter_end: usize, compute_weight: bool) -> Fallible<Option<(usize, usize, W)>> {
+
+        let mut reach_begin = UNASSIGNED;
+        let mut reach_end = UNASSIGNED;
+        let mut reach_weight = W::zero();
+        let interval_set = self.data.interval_set(current_state)?;
+        if 2*(aiter_end-aiter_begin) < interval_set.len() {
+            let aiter = aiter.skip(aiter_begin);
+            let mut reach_label = NO_LABEL;
+            for (pos, arc) in aiter.take(aiter_end).enumerate() {
+                let aiter_pos = aiter_begin + pos;
+                let label = if self.reach_fst_input {
+                    arc.ilabel
+                } else {
+                    arc.olabel
+                };
+                if label == reach_label || self.reach_label(current_state, label)? {
+                    reach_label = label;
+                    if reach_begin == UNASSIGNED {
+                        reach_begin = aiter_pos;
+                    }
+                    reach_end = aiter_pos + 1;
+                    if compute_weight {
+                        reach_weight.plus_assign(&arc.weight)?;
+                    }
+                }
+            }
+        } else {
+            let begin_low = aiter_begin;
+            let end_low = aiter_begin;
+
+            let arcs = aiter.collect_vec();
+            for interval in interval_set.iter() {
+                let begin_low = self.lower_bound(arcs.as_slice(), end_low, aiter_end, interval.begin);
+                let end_low = self.lower_bound(arcs.as_slice(), begin_low, aiter_end, interval.end);
+                if end_low - begin_low > 0 {
+                    if reach_begin == UNASSIGNED {
+                        reach_begin = begin_low;
+                    }
+                    reach_end = end_low;
+                    if compute_weight {
+                        for i in begin_low..end_low {
+                            reach_weight.plus_assign(&arcs[i].weight)?;
+                        }
+                    }
+                }
+            }
+        }
+
+        if reach_begin != UNASSIGNED {
+            Ok(Some((reach_begin, reach_begin, reach_weight)))
+        } else {
+            Ok(None)
+        }
+    }
+
+    fn lower_bound<W: Semiring>(&self, arcs: &[&Arc<W>], aiter_begin: usize, aiter_end: usize, match_label: Label) -> usize {
+        let mut low = aiter_begin;
+        let mut high = aiter_end;
+        while low < high {
+            let mid = low + (high - low) / 2;
+            let arc = arcs[mid];
+            let label = if self.reach_fst_input {
+                arc.ilabel
+            } else {
+                arc.olabel
+            };
+            if label < match_label {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
+        }
+
+        low
+    }
 }
