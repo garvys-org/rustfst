@@ -58,7 +58,10 @@ pub struct LabelReachable {
 }
 
 impl LabelReachable {
-    pub fn new<F: Fst>(fst: &F, reach_input: bool) -> Fallible<Self> {
+    pub fn new<F: Fst>(fst: &F, reach_input: bool) -> Fallible<Self>
+    where
+        F::W: 'static,
+    {
         let mut fst: VectorFst<_> = fst_convert_from_ref(fst);
 
         let mut label_reachable = Self {

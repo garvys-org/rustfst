@@ -3,13 +3,13 @@ use failure::Fallible;
 use crate::algorithms::lookahead_matchers::label_reachable::{LabelReachable, LabelReachableData};
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
-use crate::fst_traits::{CoreFst, Fst};
+use crate::fst_traits::{CoreFst, Fst, ExpandedFst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 use unsafe_unwrap::UnsafeUnwrap;
 
 #[derive(Debug)]
-struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>> {
+struct LabelLookAheadMatcher<'fst, 'lfst, W: Semiring, M: Matcher<'fst, W>, LFST> {
     // matcher fst
     fst: &'fst M::F,
     matcher: M,
@@ -19,15 +19,19 @@ struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>> {
     // Flags to customize the behaviour
     flags: MatcherFlags,
     reachable: Option<LabelReachable>,
+    lfst: Option<&'lfst LFST>
 }
 
-impl<'fst, W: Semiring, M: Matcher<'fst, W>> LabelLookAheadMatcher<'fst, W, M> {
+impl<'fst, 'lfst, W: Semiring, M: Matcher<'fst, W>, LFST> LabelLookAheadMatcher<'fst, 'lfst, W, M, LFST> {
     pub fn new_with_flags(
         fst: &'fst M::F,
         match_type: MatchType,
         matcher_flags: MatcherFlags,
         data: Option<&LabelReachableData>,
-    ) -> Fallible<Self> {
+    ) -> Fallible<Self>
+    where
+        W: 'static,
+    {
         if !matcher_flags.contains(
             MatcherFlags::INPUT_LOOKAHEAD_MATCHER | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER,
         ) {
@@ -56,12 +60,13 @@ impl<'fst, W: Semiring, M: Matcher<'fst, W>> LabelLookAheadMatcher<'fst, W, M> {
             prefix_arc: Arc::new(0, 0, W::one(), NO_STATE_ID),
             lookahead_weight: W::one(),
             reachable,
+            lfst: None
         })
     }
 }
 
-impl<'fst, W: Semiring, M: Matcher<'fst, W>> Matcher<'fst, W>
-    for LabelLookAheadMatcher<'fst, W, M>
+impl<'fst, 'lfst, W: Semiring, M: Matcher<'fst, W>, LFST : ExpandedFst<W=W>> Matcher<'fst, W>
+    for LabelLookAheadMatcher<'fst, 'lfst,  W, M, LFST>
 {
     type F = M::F;
     type Iter = M::Iter;
@@ -94,7 +99,15 @@ impl<'fst, W: Semiring, M: Matcher<'fst, W>> Matcher<'fst, W>
     }
 
     fn flags(&self) -> MatcherFlags {
-        unimplemented!()
+        if let Some(reachable) = &self.reachable {
+            if reachable.reach_input() {
+                self.matcher.flags() | self.flags | MatcherFlags::INPUT_LOOKAHEAD_MATCHER
+            } else {
+                self.matcher.flags() | self.flags | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER
+            }
+        } else {
+            self.matcher.flags()
+        }
     }
 
     fn priority(&self, state: usize) -> Fallible<usize> {
@@ -102,39 +115,84 @@ impl<'fst, W: Semiring, M: Matcher<'fst, W>> Matcher<'fst, W>
     }
 }
 
-impl<'fst, W: Semiring, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
-    for LabelLookAheadMatcher<'fst, W, M>
+impl<'fst, 'lfst, W: Semiring, M: Matcher<'fst, W>, LFST : ExpandedFst<W=W>> LookaheadMatcher<'fst, W>
+    for LabelLookAheadMatcher<'fst, 'lfst, W, M, LFST>
 {
-    fn lookahead_fst<LF: Fst<W = W>>(
+    fn lookahead_fst<LF : ExpandedFst<W=W>>(
         &mut self,
         matcher_state: usize,
         lfst: &LF,
         lfst_state: usize,
-    ) -> Fallible<bool> {
-        unimplemented!()
+    ) -> Fallible<bool>{
+        // InitLookAheadFst
+        // FIXME: Add caching
+        panic!("Add caching");
+        let reach_input = self.match_type() == MatchType::MatchOutput;
+        if let Some(reachable) = &mut self.reachable {
+            reachable.reach_init(lfst, reach_input)?;
+        }
+
+        // LookAheadFst
+        self.clear_lookahead_weight();
+        self.clear_lookahead_weight();
+        if let Some(reachable) = &self.reachable {
+            let mut compute_weight = self.flags.contains(MatcherFlags::LOOKAHEAD_WEIGHT);
+            let compute_prefix = self.flags.contains(MatcherFlags::LOOKAHEAD_PREFIX);
+            let aiter = lfst.arcs_iter(lfst_state)?;
+            let reach_arc = reachable.reach(matcher_state, aiter, 0, lfst.num_arcs(lfst_state)?, compute_weight)?;
+            let reach_arc_bool = reach_arc.is_some();
+            let lfinal = lfst.final_weight(lfst_state)?;
+            let reach_final = lfinal.is_some() && reachable.reach_final(matcher_state)?;
+            if let Some((reach_begin, reach_end, reach_weight)) = reach_arc {
+                if compute_prefix && reach_end - reach_begin == 1 && !reach_final {
+                    let arc = lfst.arcs_iter(lfst_state)?.skip(reach_begin).next().unwrap();
+                    self.set_lookahead_prefix(arc.clone());
+                    compute_weight = false;
+                } else {
+                    self.set_lookahead_weight(reach_weight);
+                }
+            }
+            if reach_final && compute_weight {
+                if reach_arc_bool {
+                    self.lookahead_weight_mut().plus_assign(lfinal.unwrap())?;
+                } else {
+                    self.set_lookahead_weight(lfinal.unwrap().clone());
+                }
+            }
+            Ok(reach_arc_bool || reach_final)
+        } else {
+            Ok(true)
+        }
     }
 
-    fn lookahead_label(&self, state: usize, label: usize) -> Fallible<bool> {
-        unimplemented!()
+    fn lookahead_label(&self, current_state: usize, label: usize) -> Fallible<bool> {
+        if label == EPS_LABEL {
+            return Ok(true);
+        }
+        if let Some(reachable) = &self.reachable {
+            reachable.reach_label(current_state, label)
+        } else {
+            Ok(true)
+        }
     }
 
     fn lookahead_prefix(&self, arc: &mut Arc<W>) -> bool {
-        unimplemented!()
+        self.default_lookahead_prefix(arc)
     }
 
     fn lookahead_weight(&self) -> &W {
-        unimplemented!()
+        &self.lookahead_weight
     }
 
     fn prefix_arc(&self) -> &Arc<W> {
-        unimplemented!()
+        &self.prefix_arc
     }
 
     fn prefix_arc_mut(&mut self) -> &mut Arc<W> {
-        unimplemented!()
+        &mut self.prefix_arc
     }
 
     fn lookahead_weight_mut(&mut self) -> &mut W {
-        unimplemented!()
+        &mut self.lookahead_weight
     }
 }

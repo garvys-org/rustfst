@@ -1,4 +1,4 @@
-use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst, Fst};
+use crate::fst_traits::{AllocableFst, ExpandedFst, Fst, MutableFst};
 
 /// Generic method to convert an Fst into any other types implementing the MutableFst trait.
 pub fn fst_convert_from_ref<F1, F2>(ifst: &F1) -> F2

@@ -1,7 +1,7 @@
 use failure::Fallible;
 
 use crate::algorithms::matchers::Matcher;
-use crate::fst_traits::Fst;
+use crate::fst_traits::{Fst, ExpandedFst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, NO_STATE_ID};
 
@@ -16,7 +16,7 @@ pub(crate) mod state_reachable;
 pub trait LookaheadMatcher<'fst, W: Semiring + 'fst>: Matcher<'fst, W> {
     // Are there paths from a state in the lookahead FST that can be read from
     // the curent matcher state?
-    fn lookahead_fst<LF: Fst<W = W>>(
+    fn lookahead_fst<LF: ExpandedFst<W = W>>(
         &mut self,
         matcher_state: StateId,
         lfst: &LF,
