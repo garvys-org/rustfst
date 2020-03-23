@@ -14,7 +14,7 @@ use std::rc::Rc;
 pub struct SequenceComposeFilter<
     'fst1,
     'fst2,
-    W: Semiring+'fst2,
+    W: Semiring + 'fst2,
     M1: Matcher<'fst1, W>,
     M2: Matcher<'fst2, W>,
 > {
@@ -34,8 +34,8 @@ pub struct SequenceComposeFilter<
     noeps1: bool,
 }
 
-impl<'fst1, 'fst2, W: Semiring +'fst2, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>> ComposeFilter<'fst1, 'fst2, W>
-    for SequenceComposeFilter<'fst1, 'fst2, W, M1, M2>
+impl<'fst1, 'fst2, W: Semiring + 'fst2, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>>
+    ComposeFilter<'fst1, 'fst2, W> for SequenceComposeFilter<'fst1, 'fst2, W, M1, M2>
 {
     type M1 = M1;
     type M2 = M2;

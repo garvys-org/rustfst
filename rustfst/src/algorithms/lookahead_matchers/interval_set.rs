@@ -76,6 +76,10 @@ impl IntervalSet {
         self.intervals.clear()
     }
 
+    pub fn iter(&self) -> IterSlice<IntInterval> {
+        self.intervals.iter()
+    }
+
     // Adds an interval set to the set. The result may not be normalized.
     pub fn union(&mut self, iset: &Self) {
         self.intervals

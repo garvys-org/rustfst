@@ -172,3 +172,4 @@ mod proptest_fst;
 
 pub(crate) static NO_LABEL: Label = std::usize::MAX;
 pub(crate) static NO_STATE_ID: StateId = std::usize::MAX;
+pub(crate) static UNASSIGNED: usize = std::usize::MAX;

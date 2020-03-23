@@ -1,12 +1,12 @@
 use failure::Fallible;
 
+use crate::algorithms::lookahead_matchers::label_reachable::LabelReachable;
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 use unsafe_unwrap::UnsafeUnwrap;
-use crate::algorithms::lookahead_matchers::label_reachable::LabelReachable;
 
 #[derive(Debug)]
 struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>> {
@@ -63,8 +63,15 @@ impl<'fst, W: Semiring, M: Matcher<'fst, W>> Matcher<'fst, W>
     }
 }
 
-impl<'fst, W: Semiring, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W> for LabelLookAheadMatcher<'fst, W, M> {
-    fn lookahead_fst<LF: Fst<W=W>>(&mut self, matcher_state: usize, lfst: &LF, lfst_state: usize) -> Fallible<bool> {
+impl<'fst, W: Semiring, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
+    for LabelLookAheadMatcher<'fst, W, M>
+{
+    fn lookahead_fst<LF: Fst<W = W>>(
+        &mut self,
+        matcher_state: usize,
+        lfst: &LF,
+        lfst_state: usize,
+    ) -> Fallible<bool> {
         unimplemented!()
     }
 

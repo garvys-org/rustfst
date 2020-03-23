@@ -15,8 +15,8 @@ pub struct NullComposeFilter<M1, M2> {
     matcher2: Rc<RefCell<M2>>,
 }
 
-impl<'fst1, 'fst2, W: Semiring+'fst1+'fst2, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>> ComposeFilter<'fst1, 'fst2, W>
-    for NullComposeFilter<M1, M2>
+impl<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>>
+    ComposeFilter<'fst1, 'fst2, W> for NullComposeFilter<M1, M2>
 {
     type M1 = M1;
     type M2 = M2;

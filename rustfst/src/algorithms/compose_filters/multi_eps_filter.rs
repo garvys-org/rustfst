@@ -14,8 +14,8 @@ pub struct MultiEpsFilter<F> {
     keep_multi_eps: bool,
 }
 
-impl<'fst1, 'fst2, W: Semiring +'fst1+'fst2, F: ComposeFilter<'fst1, 'fst2, W>> ComposeFilter<'fst1, 'fst2, W>
-    for MultiEpsFilter<F>
+impl<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, F: ComposeFilter<'fst1, 'fst2, W>>
+    ComposeFilter<'fst1, 'fst2, W> for MultiEpsFilter<F>
 {
     type M1 = F::M1;
     type M2 = F::M2;

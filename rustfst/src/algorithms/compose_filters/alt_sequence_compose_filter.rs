@@ -26,8 +26,8 @@ pub struct AltSequenceComposeFilter<'fst2, F2, M1, M2> {
     noeps2: bool,
 }
 
-impl<'fst1, 'fst2, W: Semiring +'fst1, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>> ComposeFilter<'fst1, 'fst2, W>
-    for AltSequenceComposeFilter<'fst2, M2::F, M1, M2>
+impl<'fst1, 'fst2, W: Semiring + 'fst1, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>>
+    ComposeFilter<'fst1, 'fst2, W> for AltSequenceComposeFilter<'fst2, M2::F, M1, M2>
 {
     type M1 = M1;
     type M2 = M2;

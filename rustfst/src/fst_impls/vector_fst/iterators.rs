@@ -105,7 +105,7 @@ impl<'a, W: Semiring + 'static> FstIteratorMut<'a> for VectorFst<W> {
         Box<
             dyn FnMut(
                 (StateId, &'a mut VectorFstState<W>),
-            ) -> FstIterData<&'a mut W, Self::ArcsIter>
+            ) -> FstIterData<&'a mut W, Self::ArcsIter>,
         >,
     >;
 
@@ -119,8 +119,8 @@ impl<'a, W: Semiring + 'static> FstIteratorMut<'a> for VectorFst<W> {
                     state_id,
                     arcs: fst_state.arcs.iter_mut(),
                     final_weight: fst_state.final_weight.as_mut(),
-                    num_arcs: n
-            }
+                    num_arcs: n,
+                }
             }))
     }
 }
