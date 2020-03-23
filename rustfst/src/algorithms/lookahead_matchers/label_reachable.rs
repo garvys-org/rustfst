@@ -1,11 +1,13 @@
 use crate::algorithms::lookahead_matchers::interval_set::IntervalSet;
 use crate::algorithms::lookahead_matchers::state_reachable::StateReachable;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{CoreFst, ExpandedFst, MutableArcIterator, MutableFst, Fst};
+use crate::fst_traits::{CoreFst, ExpandedFst, MutableArcIterator, MutableFst, Fst, ArcIterator};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use crate::algorithms::arc_sort;
+use crate::algorithms::arc_compares::{ilabel_compare, olabel_compare};
 
 use failure::Fallible;
 use crate::fst_properties::FstProperties;
@@ -33,6 +35,10 @@ impl LabelReachableData {
 
     pub fn final_label(&self) -> Label {
         self.final_label
+    }
+
+    pub fn label2index(&self) -> &HashMap<Label, Label> {
+        &self.label2index
     }
 }
 
@@ -152,6 +158,40 @@ impl LabelReachable {
         Ok(())
     }
 
+    pub fn relabel(&self, label: Label) -> Label {
+        if label == EPS_LABEL {
+            return EPS_LABEL;
+        }
+        let label2index = self.data.label2index();
+        let mut relabel = label2index[&label];
+        if relabel == EPS_LABEL {
+            relabel = label2index.len() + 1; // Adds a new label
+        }
+        relabel
+    }
+
+    pub fn relabel_fst<F: MutableFst>(&self, fst: &mut F, relabel_input: bool) -> Fallible<()> {
+        for fst_data in fst.fst_iter_mut() {
+            for arc in fst_data.arcs {
+                if relabel_input {
+                    arc.ilabel = self.relabel(arc.ilabel);
+                } else {
+                    arc.olabel = self.relabel(arc.olabel);
+                }
+            }
+        }
+
+        if relabel_input {
+            arc_sort(fst, ilabel_compare);
+            fst.unset_input_symbols();
+        } else {
+            arc_sort(fst, olabel_compare);
+            fst.unset_output_symbols();
+        }
+
+        Ok(())
+    }
+
     pub fn reach_init<F: ExpandedFst>(&mut self, fst: &F, reach_input: bool) -> Fallible<()> {
         self.reach_fst_input = reach_input;
         let props = fst.properties()?;
@@ -181,4 +221,8 @@ impl LabelReachable {
     pub fn reach_final(&self, current_state: StateId) -> Fallible<bool> {
         Ok(self.data.interval_set(current_state)?.member(self.data.final_label()))
     }
+
+    // pub fn reach<'a, W: Semiring + 'a>(&self, aiter: impl Iterator<Item = &'a Arc<W>>) {
+    //     unimplemented!()
+    // }
 }

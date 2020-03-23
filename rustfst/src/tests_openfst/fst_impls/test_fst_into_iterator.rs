@@ -70,11 +70,11 @@ fn do_test_fst_iterator_mut<F: MutableFst>(mut fst: F) -> Fallible<()> {
     }
 
     let mut fst_data = vec![];
-    for (state_id, arcs, final_weight) in fst.fst_iter_mut() {
+    for data in fst.fst_iter_mut() {
         fst_data.push((
-            state_id,
-            arcs.map(|e| e.clone()).collect_vec(),
-            final_weight.cloned(),
+            data.state_id,
+            data.arcs.map(|v| v.clone()).collect_vec(),
+            data.final_weight.cloned(),
         ));
     }
     assert_eq!(fst_data, fst_data_ref);
