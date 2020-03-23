@@ -9,7 +9,7 @@ use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 use unsafe_unwrap::UnsafeUnwrap;
 
 #[derive(Debug)]
-struct LabelLookAheadMatcher<'fst, 'lfst, W: Semiring, M: Matcher<'fst, W>, LFST> {
+struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>> {
     // matcher fst
     fst: &'fst M::F,
     matcher: M,
@@ -19,10 +19,10 @@ struct LabelLookAheadMatcher<'fst, 'lfst, W: Semiring, M: Matcher<'fst, W>, LFST
     // Flags to customize the behaviour
     flags: MatcherFlags,
     reachable: Option<LabelReachable>,
-    lfst: Option<&'lfst LFST>
+    lfst_ptr: *const u32
 }
 
-impl<'fst, 'lfst, W: Semiring, M: Matcher<'fst, W>, LFST> LabelLookAheadMatcher<'fst, 'lfst, W, M, LFST> {
+impl<'fst, W: Semiring, M: Matcher<'fst, W>> LabelLookAheadMatcher<'fst, W, M> {
     pub fn new_with_flags(
         fst: &'fst M::F,
         match_type: MatchType,
@@ -60,13 +60,13 @@ impl<'fst, 'lfst, W: Semiring, M: Matcher<'fst, W>, LFST> LabelLookAheadMatcher<
             prefix_arc: Arc::new(0, 0, W::one(), NO_STATE_ID),
             lookahead_weight: W::one(),
             reachable,
-            lfst: None
+            lfst_ptr: std::ptr::null()
         })
     }
 }
 
-impl<'fst, 'lfst, W: Semiring, M: Matcher<'fst, W>, LFST : ExpandedFst<W=W>> Matcher<'fst, W>
-    for LabelLookAheadMatcher<'fst, 'lfst,  W, M, LFST>
+impl<'fst, W: Semiring, M: Matcher<'fst, W>> Matcher<'fst, W>
+    for LabelLookAheadMatcher<'fst,  W, M>
 {
     type F = M::F;
     type Iter = M::Iter;
@@ -115,8 +115,8 @@ impl<'fst, 'lfst, W: Semiring, M: Matcher<'fst, W>, LFST : ExpandedFst<W=W>> Mat
     }
 }
 
-impl<'fst, 'lfst, W: Semiring, M: Matcher<'fst, W>, LFST : ExpandedFst<W=W>> LookaheadMatcher<'fst, W>
-    for LabelLookAheadMatcher<'fst, 'lfst, W, M, LFST>
+impl<'fst, W: Semiring, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
+    for LabelLookAheadMatcher<'fst, W, M>
 {
     fn lookahead_fst<LF : ExpandedFst<W=W>>(
         &mut self,
@@ -124,12 +124,15 @@ impl<'fst, 'lfst, W: Semiring, M: Matcher<'fst, W>, LFST : ExpandedFst<W=W>> Loo
         lfst: &LF,
         lfst_state: usize,
     ) -> Fallible<bool>{
+
         // InitLookAheadFst
-        // FIXME: Add caching
-        panic!("Add caching");
-        let reach_input = self.match_type() == MatchType::MatchOutput;
-        if let Some(reachable) = &mut self.reachable {
-            reachable.reach_init(lfst, reach_input)?;
+        let lfst_ptr = lfst as *const LF as *const u32;
+        if lfst_ptr != self.lfst_ptr {
+            self.lfst_ptr = lfst_ptr;
+            let reach_input = self.match_type() == MatchType::MatchOutput;
+            if let Some(reachable) = &mut self.reachable {
+                reachable.reach_init(lfst, reach_input)?;
+            }
         }
 
         // LookAheadFst
