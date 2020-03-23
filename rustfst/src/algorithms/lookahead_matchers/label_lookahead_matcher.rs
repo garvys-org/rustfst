@@ -3,7 +3,7 @@ use failure::Fallible;
 use crate::algorithms::lookahead_matchers::label_reachable::{LabelReachable, LabelReachableData};
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
-use crate::fst_traits::{CoreFst, Fst, ExpandedFst};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 use unsafe_unwrap::UnsafeUnwrap;
@@ -19,7 +19,7 @@ struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>> {
     // Flags to customize the behaviour
     flags: MatcherFlags,
     reachable: Option<LabelReachable>,
-    lfst_ptr: *const u32
+    lfst_ptr: *const u32,
 }
 
 impl<'fst, W: Semiring, M: Matcher<'fst, W>> LabelLookAheadMatcher<'fst, W, M> {
@@ -60,13 +60,13 @@ impl<'fst, W: Semiring, M: Matcher<'fst, W>> LabelLookAheadMatcher<'fst, W, M> {
             prefix_arc: Arc::new(0, 0, W::one(), NO_STATE_ID),
             lookahead_weight: W::one(),
             reachable,
-            lfst_ptr: std::ptr::null()
+            lfst_ptr: std::ptr::null(),
         })
     }
 }
 
 impl<'fst, W: Semiring, M: Matcher<'fst, W>> Matcher<'fst, W>
-    for LabelLookAheadMatcher<'fst,  W, M>
+    for LabelLookAheadMatcher<'fst, W, M>
 {
     type F = M::F;
     type Iter = M::Iter;
@@ -118,13 +118,12 @@ impl<'fst, W: Semiring, M: Matcher<'fst, W>> Matcher<'fst, W>
 impl<'fst, W: Semiring, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
     for LabelLookAheadMatcher<'fst, W, M>
 {
-    fn lookahead_fst<LF : ExpandedFst<W=W>>(
+    fn lookahead_fst<LF: ExpandedFst<W = W>>(
         &mut self,
         matcher_state: usize,
         lfst: &LF,
         lfst_state: usize,
-    ) -> Fallible<bool>{
-
+    ) -> Fallible<bool> {
         // InitLookAheadFst
         let lfst_ptr = lfst as *const LF as *const u32;
         if lfst_ptr != self.lfst_ptr {
@@ -142,13 +141,23 @@ impl<'fst, W: Semiring, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
             let mut compute_weight = self.flags.contains(MatcherFlags::LOOKAHEAD_WEIGHT);
             let compute_prefix = self.flags.contains(MatcherFlags::LOOKAHEAD_PREFIX);
             let aiter = lfst.arcs_iter(lfst_state)?;
-            let reach_arc = reachable.reach(matcher_state, aiter, 0, lfst.num_arcs(lfst_state)?, compute_weight)?;
+            let reach_arc = reachable.reach(
+                matcher_state,
+                aiter,
+                0,
+                lfst.num_arcs(lfst_state)?,
+                compute_weight,
+            )?;
             let reach_arc_bool = reach_arc.is_some();
             let lfinal = lfst.final_weight(lfst_state)?;
             let reach_final = lfinal.is_some() && reachable.reach_final(matcher_state)?;
             if let Some((reach_begin, reach_end, reach_weight)) = reach_arc {
                 if compute_prefix && reach_end - reach_begin == 1 && !reach_final {
-                    let arc = lfst.arcs_iter(lfst_state)?.skip(reach_begin).next().unwrap();
+                    let arc = lfst
+                        .arcs_iter(lfst_state)?
+                        .skip(reach_begin)
+                        .next()
+                        .unwrap();
                     self.set_lookahead_prefix(arc.clone());
                     compute_weight = false;
                 } else {

@@ -1,7 +1,7 @@
 use failure::Fallible;
 
 use crate::algorithms::matchers::Matcher;
-use crate::fst_traits::{Fst, ExpandedFst};
+use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, NO_STATE_ID};
 
