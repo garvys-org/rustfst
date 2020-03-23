@@ -1,13 +1,15 @@
-use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
+use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst, Fst};
 
 /// Generic method to convert an Fst into any other types implementing the MutableFst trait.
 pub fn fst_convert_from_ref<F1, F2>(ifst: &F1) -> F2
 where
-    F1: ExpandedFst,
+    F1: Fst,
     F2: MutableFst<W = F1::W> + AllocableFst,
 {
     let mut ofst = F2::new();
-    ofst.add_states(ifst.num_states());
+
+    // TODO: If ExpandedFst is implemented, use fst.num_states()
+    ofst.add_states(ifst.states_iter().count());
 
     if let Some(start) = ifst.start() {
         unsafe { ofst.set_start_unchecked(start) };

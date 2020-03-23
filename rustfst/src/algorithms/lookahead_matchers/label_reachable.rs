@@ -1,7 +1,7 @@
 use crate::algorithms::arc_compares::{ilabel_compare, olabel_compare};
-use crate::algorithms::arc_sort;
 use crate::algorithms::lookahead_matchers::interval_set::IntervalSet;
 use crate::algorithms::lookahead_matchers::state_reachable::StateReachable;
+use crate::algorithms::{arc_sort, fst_convert_from_ref};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, MutableArcIterator, MutableFst};
 use crate::semirings::Semiring;
@@ -13,6 +13,7 @@ use crate::fst_properties::FstProperties;
 use failure::Fallible;
 use itertools::Itertools;
 
+#[derive(Debug, Clone)]
 pub struct LabelReachableData {
     reach_input: bool,
     final_label: Label,
@@ -43,8 +44,13 @@ impl LabelReachableData {
     pub fn label2index(&self) -> &HashMap<Label, Label> {
         &self.label2index
     }
+
+    pub fn reach_input(&self) -> bool {
+        self.reach_input
+    }
 }
 
+#[derive(Debug)]
 pub struct LabelReachable {
     data: LabelReachableData,
     label2state: HashMap<Label, StateId>,
@@ -52,8 +58,9 @@ pub struct LabelReachable {
 }
 
 impl LabelReachable {
-    pub fn new<W: Semiring + 'static>(mut fst: VectorFst<W>, reach_input: bool) -> Fallible<Self> {
-        // TODO: In OpenFst, the Fst is converted to a VectorFst
+    pub fn new<F: Fst>(fst: &F, reach_input: bool) -> Fallible<Self> {
+        let mut fst: VectorFst<_> = fst_convert_from_ref(fst);
+
         let mut label_reachable = Self {
             data: LabelReachableData::new(reach_input),
             label2state: HashMap::new(),
@@ -65,6 +72,14 @@ impl LabelReachable {
         label_reachable.find_intervals(&fst, nstates)?;
 
         Ok(label_reachable)
+    }
+
+    pub fn new_from_data(data: LabelReachableData) -> Self {
+        Self {
+            data,
+            label2state: HashMap::new(),
+            reach_fst_input: false,
+        }
     }
 
     pub fn reach_input(&self) -> bool {
@@ -253,13 +268,19 @@ impl LabelReachable {
             .member(self.data.final_label()))
     }
 
-    pub fn reach<'a, W: Semiring + 'a>(&self, current_state: StateId, aiter: impl Iterator<Item = &'a Arc<W>>, aiter_begin: usize, aiter_end: usize, compute_weight: bool) -> Fallible<Option<(usize, usize, W)>> {
-
+    pub fn reach<'a, W: Semiring + 'a>(
+        &self,
+        current_state: StateId,
+        aiter: impl Iterator<Item = &'a Arc<W>>,
+        aiter_begin: usize,
+        aiter_end: usize,
+        compute_weight: bool,
+    ) -> Fallible<Option<(usize, usize, W)>> {
         let mut reach_begin = UNASSIGNED;
         let mut reach_end = UNASSIGNED;
         let mut reach_weight = W::zero();
         let interval_set = self.data.interval_set(current_state)?;
-        if 2*(aiter_end-aiter_begin) < interval_set.len() {
+        if 2 * (aiter_end - aiter_begin) < interval_set.len() {
             let aiter = aiter.skip(aiter_begin);
             let mut reach_label = NO_LABEL;
             for (pos, arc) in aiter.take(aiter_end).enumerate() {
@@ -286,7 +307,8 @@ impl LabelReachable {
 
             let arcs = aiter.collect_vec();
             for interval in interval_set.iter() {
-                let begin_low = self.lower_bound(arcs.as_slice(), end_low, aiter_end, interval.begin);
+                let begin_low =
+                    self.lower_bound(arcs.as_slice(), end_low, aiter_end, interval.begin);
                 let end_low = self.lower_bound(arcs.as_slice(), begin_low, aiter_end, interval.end);
                 if end_low - begin_low > 0 {
                     if reach_begin == UNASSIGNED {
@@ -309,7 +331,13 @@ impl LabelReachable {
         }
     }
 
-    fn lower_bound<W: Semiring>(&self, arcs: &[&Arc<W>], aiter_begin: usize, aiter_end: usize, match_label: Label) -> usize {
+    fn lower_bound<W: Semiring>(
+        &self,
+        arcs: &[&Arc<W>],
+        aiter_begin: usize,
+        aiter_end: usize,
+        match_label: Label,
+    ) -> usize {
         let mut low = aiter_begin;
         let mut high = aiter_end;
         while low < high {

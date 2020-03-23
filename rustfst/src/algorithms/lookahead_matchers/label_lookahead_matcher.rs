@@ -1,6 +1,6 @@
 use failure::Fallible;
 
-use crate::algorithms::lookahead_matchers::label_reachable::LabelReachable;
+use crate::algorithms::lookahead_matchers::label_reachable::{LabelReachable, LabelReachableData};
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, Fst};
@@ -18,7 +18,46 @@ struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>> {
 
     // Flags to customize the behaviour
     flags: MatcherFlags,
-    // reachable: LabelReachable<W>
+    reachable: Option<LabelReachable>,
+}
+
+impl<'fst, W: Semiring, M: Matcher<'fst, W>> LabelLookAheadMatcher<'fst, W, M> {
+    pub fn new_with_flags(
+        fst: &'fst M::F,
+        match_type: MatchType,
+        matcher_flags: MatcherFlags,
+        data: Option<&LabelReachableData>,
+    ) -> Fallible<Self> {
+        if !matcher_flags.contains(
+            MatcherFlags::INPUT_LOOKAHEAD_MATCHER | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER,
+        ) {
+            bail!(
+                "LabelLookAheadMatcher : Bad Matcher flags : {:?}",
+                matcher_flags
+            )
+        }
+        let reach_input = match_type == MatchType::MatchInput;
+
+        let mut reachable = None;
+        if let Some(d) = data {
+            if reach_input == d.reach_input() {
+                reachable = Some(LabelReachable::new_from_data(d.clone()));
+            }
+        } else if (reach_input && matcher_flags.contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER))
+            || (!reach_input && matcher_flags.contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
+        {
+            reachable = Some(LabelReachable::new(fst, reach_input)?)
+        }
+
+        Ok(Self {
+            fst,
+            matcher: M::new(fst, match_type)?,
+            flags: matcher_flags,
+            prefix_arc: Arc::new(0, 0, W::one(), NO_STATE_ID),
+            lookahead_weight: W::one(),
+            reachable,
+        })
+    }
 }
 
 impl<'fst, W: Semiring, M: Matcher<'fst, W>> Matcher<'fst, W>

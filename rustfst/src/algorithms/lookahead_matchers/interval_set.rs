@@ -5,7 +5,7 @@ use superslice::Ext;
 use unsafe_unwrap::UnsafeUnwrap;
 
 /// Half-open integral interval [a, b) of signed integers of type T.
-#[derive(PartialOrd, PartialEq, Clone, Ord, Eq)]
+#[derive(PartialOrd, PartialEq, Clone, Ord, Eq, Debug)]
 pub struct IntInterval {
     pub(crate) begin: usize,
     pub(crate) end: usize,
@@ -19,7 +19,7 @@ impl IntInterval {
 
 /// Stores IntIntervals<T> in a vector. In addition, keeps the count of points in
 /// all intervals.
-#[derive(Clone, PartialOrd, PartialEq)]
+#[derive(Clone, PartialOrd, PartialEq, Debug)]
 pub struct VectorIntervalStore {
     pub(crate) intervals: Vec<IntInterval>,
     count: Option<usize>,
@@ -57,7 +57,7 @@ impl VectorIntervalStore {
     }
 }
 
-#[derive(PartialOrd, PartialEq, Default, Clone)]
+#[derive(PartialOrd, PartialEq, Default, Clone, Debug)]
 pub struct IntervalSet {
     pub(crate) intervals: VectorIntervalStore,
 }

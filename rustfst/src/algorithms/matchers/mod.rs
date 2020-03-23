@@ -17,13 +17,20 @@ mod sorted_matcher;
 bitflags! {
     pub struct MatcherFlags: u32 {
         const REQUIRE_MATCH =  1u32 << 0;
-        const INPUT_LOOKAHEAD_MATCHER =  1u32 << 1;
-        const OUTPUT_LOOKAHEAD_MATCHER =  1u32 << 2;
-        const LOOKAHEAD_WEIGHT =  1u32 << 3;
-        const LOOKAHEAD_PREFIX =  1u32 << 4;
-        const LOOKAHEAD_NON_EPSILONS =  1u32 << 5;
-        const LOOKAHEAD_EPSILONS =  1u32 << 6;
-        const LOOKAHEAD_NON_EPSILON_PREFIX =  1u32 << 7;
+        const INPUT_LOOKAHEAD_MATCHER =  1u32 << 4;
+        const OUTPUT_LOOKAHEAD_MATCHER =  1u32 << 5;
+        const LOOKAHEAD_WEIGHT =  1u32 << 6;
+        const LOOKAHEAD_PREFIX =  1u32 << 7;
+        const LOOKAHEAD_NON_EPSILONS =  1u32 << 8;
+        const LOOKAHEAD_EPSILONS =  1u32 << 8;
+        const LOOKAHEAD_NON_EPSILON_PREFIX =  1u32 << 10;
+        const LOOKAHEAD_FLAGS = Self::INPUT_LOOKAHEAD_MATCHER.bits |
+            Self::OUTPUT_LOOKAHEAD_MATCHER.bits |
+            Self::LOOKAHEAD_WEIGHT.bits |
+            Self::LOOKAHEAD_PREFIX.bits |
+            Self::LOOKAHEAD_NON_EPSILONS.bits |
+            Self::LOOKAHEAD_EPSILONS.bits |
+            Self::LOOKAHEAD_NON_EPSILON_PREFIX.bits;
     }
 }
 
