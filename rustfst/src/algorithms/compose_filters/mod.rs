@@ -27,14 +27,14 @@ mod trivial_compose_filter;
 
 /// Composition filters determine which matches are allowed to proceed. The
 /// filter's state is represented by the type ComposeFilter::FS.
-pub trait ComposeFilter<'fst, W: Semiring + 'fst>: Debug {
-    type M1: Matcher<'fst, W>;
-    type M2: Matcher<'fst, W>;
+pub trait ComposeFilter<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2>: Debug {
+    type M1: Matcher<'fst1, W>;
+    type M2: Matcher<'fst2, W>;
     type FS: FilterState;
 
     fn new<IM1: Into<Option<Self::M1>>, IM2: Into<Option<Self::M2>>>(
-        fst1: &'fst <Self::M1 as Matcher<'fst, W>>::F,
-        fst2: &'fst <Self::M2 as Matcher<'fst, W>>::F,
+        fst1: &'fst1 <Self::M1 as Matcher<'fst1, W>>::F,
+        fst2: &'fst2 <Self::M2 as Matcher<'fst2, W>>::F,
         m1: IM1,
         m2: IM2,
     ) -> Fallible<Self>

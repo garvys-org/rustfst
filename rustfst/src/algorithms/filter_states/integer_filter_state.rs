@@ -1,8 +1,9 @@
-use self::super::FilterState;
-use crate::NO_STATE_ID;
-use num_traits::Num;
 use std::fmt::Debug;
 use std::hash::Hash;
+
+use crate::NO_STATE_ID;
+
+use self::super::FilterState;
 
 /// Filter state that is a signed integral type.
 #[derive(Debug, PartialEq, Clone, Eq, Hash)]

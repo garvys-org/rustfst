@@ -1,9 +1,7 @@
-use failure::ensure;
-
-use crate::algorithms::dfs_visit::Visitor;
-use crate::algorithms::lookahead_matchers::interval_set::{IntInterval, IntervalSet};
-use crate::fst_traits::{CoreFst, Fst};
 use crate::{Arc, StateId};
+use crate::algorithms::dfs_visit::Visitor;
+use crate::algorithms::lookahead_matchers::interval_set::{IntervalSet, IntInterval};
+use crate::fst_traits::{CoreFst, Fst};
 
 static UNASSIGNED: usize = std::usize::MAX;
 

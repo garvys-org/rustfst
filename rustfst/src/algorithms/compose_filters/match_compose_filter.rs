@@ -10,9 +10,9 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 #[derive(Debug)]
-pub struct MatchComposeFilter<'fst, F1, F2, M1, M2> {
-    fst1: &'fst F1,
-    fst2: &'fst F2,
+pub struct MatchComposeFilter<'fst1, 'fst2, F1, F2, M1, M2> {
+    fst1: &'fst1 F1,
+    fst2: &'fst2 F2,
     matcher1: Rc<RefCell<M1>>,
     matcher2: Rc<RefCell<M2>>,
     /// Current fst1 state
@@ -31,16 +31,16 @@ pub struct MatchComposeFilter<'fst, F1, F2, M1, M2> {
     noeps2: bool,
 }
 
-impl<'fst, W: Semiring + 'fst, M1: Matcher<'fst, W>, M2: Matcher<'fst, W>> ComposeFilter<'fst, W>
-    for MatchComposeFilter<'fst, M1::F, M2::F, M1, M2>
+impl<'fst1, 'fst2, W: Semiring, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>> ComposeFilter<'fst1, 'fst2, W>
+    for MatchComposeFilter<'fst1, 'fst2, M1::F, M2::F, M1, M2>
 {
     type M1 = M1;
     type M2 = M2;
     type FS = IntegerFilterState;
 
     fn new<IM1: Into<Option<Self::M1>>, IM2: Into<Option<Self::M2>>>(
-        fst1: &'fst <Self::M1 as Matcher<'fst, W>>::F,
-        fst2: &'fst <Self::M2 as Matcher<'fst, W>>::F,
+        fst1: &'fst1 <Self::M1 as Matcher<'fst1, W>>::F,
+        fst2: &'fst2 <Self::M2 as Matcher<'fst2, W>>::F,
         m1: IM1,
         m2: IM2,
     ) -> Fallible<Self> {
