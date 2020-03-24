@@ -8,6 +8,7 @@ use std::rc::Rc;
 
 pub mod lookahead_compose_filter;
 pub mod lookahead_selector;
+pub mod push_labels_compose_filter;
 pub mod push_weights_compose_filter;
 
 pub fn lookahead_match_type<
