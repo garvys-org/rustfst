@@ -100,7 +100,7 @@ where CF::M1: LookaheadMatcher<'fst1, W>, CF::M2: LookaheadMatcher<'fst2, W>
     ) -> Fallible<Self> {
         let filter = CF::new(fst1, fst2, m1, m2)?;
         let lookahead_type = if SMT::match_type() == MatchType::MatchBoth {
-            unimplemented!()
+            lookahead_match_type(filter.matcher1(), filter.matcher2())
         } else {
             SMT::match_type()
         };
@@ -135,7 +135,6 @@ where CF::M1: LookaheadMatcher<'fst1, W>, CF::M2: LookaheadMatcher<'fst2, W>
                 }
             }
         };
-        // let selector = LookAheadSelector::new(filter.matcher1(), filter.matcher2(), lookahead_type);
         Ok(Self {
             filter,
             lookahead_type,
