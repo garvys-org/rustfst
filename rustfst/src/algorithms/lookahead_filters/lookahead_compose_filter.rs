@@ -1,9 +1,9 @@
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::filter_states::FilterState;
-use crate::algorithms::lookahead_filters::lookahead_match_type;
 use crate::algorithms::lookahead_filters::lookahead_selector::{
     selector, selector_match_input, selector_match_output, LookAheadSelector, MatchTypeTrait,
 };
+use crate::algorithms::lookahead_filters::{lookahead_match_type, LookAheadComposeFilterTrait};
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::MatcherFlags;
 use crate::algorithms::matchers::{MatchType, Matcher};
@@ -28,7 +28,7 @@ impl<
         'fst1,
         'fst2,
         W: Semiring + 'fst1 + 'fst2,
-        CF: ComposeFilter<'fst1, 'fst2, W>,
+        CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
         SMT: MatchTypeTrait,
     > LookAheadComposeFilter<W, CF, SMT>
 where
@@ -102,7 +102,7 @@ impl<
         'fst1,
         'fst2,
         W: Semiring + 'fst1 + 'fst2,
-        CF: ComposeFilter<'fst1, 'fst2, W>,
+        CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
         SMT: MatchTypeTrait,
     > ComposeFilter<'fst1, 'fst2, W> for LookAheadComposeFilter<W, CF, SMT>
 where
@@ -197,5 +197,29 @@ where
 
     fn matcher2(&self) -> Rc<RefCell<Self::M2>> {
         self.filter.matcher2()
+    }
+}
+
+impl<
+        'fst1,
+        'fst2,
+        W: Semiring + 'fst1 + 'fst2,
+        CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
+        SMT: MatchTypeTrait,
+    > LookAheadComposeFilterTrait<'fst1, 'fst2, W> for LookAheadComposeFilter<W, CF, SMT>
+where
+    CF::M1: LookaheadMatcher<'fst1, W>,
+    CF::M2: LookaheadMatcher<'fst2, W>,
+{
+    fn lookahead_flags(&self) -> MatcherFlags {
+        self.flags
+    }
+
+    fn lookahead_arc(&self) -> bool {
+        self.lookahead_arc
+    }
+
+    fn lookahead_type(&self) -> MatchType {
+        self.lookahead_type
     }
 }

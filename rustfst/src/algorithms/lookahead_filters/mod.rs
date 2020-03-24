@@ -1,3 +1,5 @@
+use crate::algorithms::compose_filters::ComposeFilter;
+use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
@@ -6,6 +8,7 @@ use std::rc::Rc;
 
 pub mod lookahead_compose_filter;
 pub mod lookahead_selector;
+pub mod push_weights_compose_filter;
 
 pub fn lookahead_match_type<
     'fst1,
@@ -45,4 +48,15 @@ pub fn lookahead_match_type_2<
     F2: Fst<W = W> + 'fst,
 >() -> MatchType {
     unimplemented!()
+}
+
+pub trait LookAheadComposeFilterTrait<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2>:
+    ComposeFilter<'fst1, 'fst2, W>
+where
+    Self::M1: LookaheadMatcher<'fst1, W>,
+    Self::M2: LookaheadMatcher<'fst2, W>,
+{
+    fn lookahead_flags(&self) -> MatcherFlags;
+    fn lookahead_arc(&self) -> bool;
+    fn lookahead_type(&self) -> MatchType;
 }
