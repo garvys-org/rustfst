@@ -6,7 +6,7 @@ use bitflags::bitflags;
 pub use generic_matcher::GenericMatcher;
 pub use sorted_matcher::SortedMatcher;
 
-use crate::fst_traits::{Fst, ExpandedFst};
+use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Arc, EPS_LABEL, NO_LABEL};
 use crate::{Label, StateId};

@@ -8,7 +8,8 @@ pub mod lookahead_compose_filter;
 pub mod lookahead_selector;
 
 pub fn lookahead_match_type<
-    'fst1, 'fst2,
+    'fst1,
+    'fst2,
     W: Semiring + 'fst1 + 'fst2,
     M1: Matcher<'fst1, W>,
     M2: Matcher<'fst2, W>,
@@ -19,11 +20,17 @@ pub fn lookahead_match_type<
     let type1 = m1.borrow().match_type();
     let type2 = m2.borrow().match_type();
     if type1 == MatchType::MatchOutput
-        && m1.borrow().flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER)
+        && m1
+            .borrow()
+            .flags()
+            .contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER)
     {
         MatchType::MatchOutput
     } else if type2 == MatchType::MatchInput
-        && m2.borrow().flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER)
+        && m2
+            .borrow()
+            .flags()
+            .contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER)
     {
         MatchType::MatchInput
     } else {

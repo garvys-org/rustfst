@@ -1,7 +1,10 @@
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::filter_states::FilterState;
 use crate::algorithms::lookahead_filters::lookahead_match_type;
-use crate::algorithms::lookahead_filters::lookahead_selector::{selector_match_input, selector_match_output, LookAheadSelector, MatchTypeTrait, selector};
+use crate::algorithms::lookahead_filters::lookahead_selector::{
+    selector, selector_match_input, selector_match_output, LookAheadSelector, MatchTypeTrait,
+};
+use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::MatcherFlags;
 use crate::algorithms::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;
@@ -10,7 +13,6 @@ use failure::Fallible;
 use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
-use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 
 #[derive(Debug)]
 struct LookAheadComposeFilter<W, CF, SMT> {
@@ -29,7 +31,9 @@ impl<
         CF: ComposeFilter<'fst1, 'fst2, W>,
         SMT: MatchTypeTrait,
     > LookAheadComposeFilter<W, CF, SMT>
-    where CF::M1: LookaheadMatcher<'fst1, W>, CF::M2: LookaheadMatcher<'fst2, W>
+where
+    CF::M1: LookaheadMatcher<'fst1, W>,
+    CF::M2: LookaheadMatcher<'fst2, W>,
 {
     fn lookahead_output(&self) -> bool {
         if SMT::match_type() == MatchType::MatchOutput {
@@ -63,14 +67,29 @@ impl<
         self.lookahead_arc = true;
 
         let fn1 = |selector: LookAheadSelector<<CF::M1 as Matcher<'fst1, W>>::F, CF::M2>| {
-            selector.matcher.borrow_mut().lookahead_fst(arca.nextstate, selector.fst, arcb.nextstate)
+            selector.matcher.borrow_mut().lookahead_fst(
+                arca.nextstate,
+                selector.fst,
+                arcb.nextstate,
+            )
         };
 
         let fn2 = |selector: LookAheadSelector<<CF::M2 as Matcher<'fst2, W>>::F, CF::M1>| {
-            selector.matcher.borrow_mut().lookahead_fst(arca.nextstate, selector.fst, arcb.nextstate)
+            selector.matcher.borrow_mut().lookahead_fst(
+                arca.nextstate,
+                selector.fst,
+                arcb.nextstate,
+            )
         };
 
-        let res = selector(self.matcher1(), self.matcher2(), SMT::match_type(), self.lookahead_type, fn1, fn2)?;
+        let res = selector(
+            self.matcher1(),
+            self.matcher2(),
+            SMT::match_type(),
+            self.lookahead_type,
+            fn1,
+            fn2,
+        )?;
         if res {
             Ok(fs.clone())
         } else {
@@ -86,7 +105,9 @@ impl<
         CF: ComposeFilter<'fst1, 'fst2, W>,
         SMT: MatchTypeTrait,
     > ComposeFilter<'fst1, 'fst2, W> for LookAheadComposeFilter<W, CF, SMT>
-where CF::M1: LookaheadMatcher<'fst1, W>, CF::M2: LookaheadMatcher<'fst2, W>
+where
+    CF::M1: LookaheadMatcher<'fst1, W>,
+    CF::M2: LookaheadMatcher<'fst2, W>,
 {
     type M1 = CF::M1;
     type M2 = CF::M2;

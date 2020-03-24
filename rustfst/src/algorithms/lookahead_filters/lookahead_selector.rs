@@ -108,19 +108,17 @@ pub fn selector<
     match_type: MatchType,
     lookahead_type: MatchType,
     f1: FN1,
-    f2: FN2
+    f2: FN2,
 ) -> T
 where
     FN1: Fn(LookAheadSelector<'fst1, M1::F, M2>) -> T,
     FN2: Fn(LookAheadSelector<'fst2, M2::F, M1>) -> T,
 {
-    match match_type{
-        MatchType::MatchInput => {
-            f1(selector_match_input::<'fst1, 'fst2, W, M1, M2>(lmatcher1, lmatcher2))
-        }
-        MatchType::MatchOutput => {
-            f2(selector_match_output(lmatcher1, lmatcher2))
-        }
+    match match_type {
+        MatchType::MatchInput => f1(selector_match_input::<'fst1, 'fst2, W, M1, M2>(
+            lmatcher1, lmatcher2,
+        )),
+        MatchType::MatchOutput => f2(selector_match_output(lmatcher1, lmatcher2)),
         _ => {
             if lookahead_type == MatchType::MatchOutput {
                 f2(selector_match_output(lmatcher1, lmatcher2))
