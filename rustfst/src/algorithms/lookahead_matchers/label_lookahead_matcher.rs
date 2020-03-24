@@ -113,11 +113,25 @@ impl<'fst, W: Semiring, M: Matcher<'fst, W>> Matcher<'fst, W>
     fn priority(&self, state: usize) -> Fallible<usize> {
         self.matcher.priority(state)
     }
+
+    fn fst(&self) -> &'fst Self::F {
+        self.fst
+    }
 }
 
 impl<'fst, W: Semiring, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
     for LabelLookAheadMatcher<'fst, W, M>
 {
+    fn init_lookahead_fst<LF: ExpandedFst<W=W>>(&mut self, lfst: &LF) -> Fallible<()> {
+        let lfst_ptr = lfst as *const LF as *const u32;
+        self.lfst_ptr = lfst_ptr;
+        let reach_input = self.match_type() == MatchType::MatchOutput;
+        if let Some(reachable) = &mut self.reachable {
+            reachable.reach_init(lfst, reach_input)?;
+        }
+        Ok(())
+    }
+
     fn lookahead_fst<LF: ExpandedFst<W = W>>(
         &mut self,
         matcher_state: usize,
@@ -127,11 +141,7 @@ impl<'fst, W: Semiring, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
         // InitLookAheadFst
         let lfst_ptr = lfst as *const LF as *const u32;
         if lfst_ptr != self.lfst_ptr {
-            self.lfst_ptr = lfst_ptr;
-            let reach_input = self.match_type() == MatchType::MatchOutput;
-            if let Some(reachable) = &mut self.reachable {
-                reachable.reach_init(lfst, reach_input)?;
-            }
+            self.init_lookahead_fst(lfst)?;
         }
 
         // LookAheadFst

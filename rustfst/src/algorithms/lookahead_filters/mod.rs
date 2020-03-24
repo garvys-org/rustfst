@@ -2,6 +2,9 @@ use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 
+pub mod lookahead_compose_filter;
+pub mod lookahead_selector;
+
 pub fn lookahead_match_type<
     'fst,
     W: Semiring + 'fst,

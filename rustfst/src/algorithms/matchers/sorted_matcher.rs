@@ -67,6 +67,10 @@ impl<'fst, W: Semiring + 'fst, F: ExpandedFst<W = W>> Matcher<'fst, W> for Sorte
     fn priority(&self, state: StateId) -> Fallible<usize> {
         self.fst.num_arcs(state)
     }
+
+    fn fst(&self) -> &'fst Self::F {
+        self.fst
+    }
 }
 
 pub struct IteratorSortedMatcher<'fst, W: Semiring> {

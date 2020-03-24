@@ -2,7 +2,7 @@ use failure::Fallible;
 
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
-use crate::fst_traits::{CoreFst, Fst};
+use crate::fst_traits::{CoreFst, Fst, ExpandedFst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 use unsafe_unwrap::UnsafeUnwrap;
@@ -60,11 +60,19 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W>
     fn priority(&self, state: usize) -> Fallible<usize> {
         self.matcher.priority(state)
     }
+
+    fn fst(&self) -> &'fst Self::F {
+        &self.fst
+    }
 }
 
 impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
     for ArcLookAheadMatcher<'fst, W, M>
 {
+    fn init_lookahead_fst<LF: ExpandedFst<W=W>>(&mut self, lfst: &LF) -> Fallible<()> {
+        Ok(())
+    }
+
     fn lookahead_fst<LF: Fst<W = W>>(
         &mut self,
         matcher_state: StateId,

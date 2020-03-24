@@ -97,4 +97,6 @@ pub trait Matcher<'fst, W: Semiring + 'fst>: Debug {
     /// mandatory that it be used. Calling this method without passing the
     /// current state of the matcher invalidates the state of the matcher.
     fn priority(&self, state: StateId) -> Fallible<usize>;
+
+    fn fst(&self) -> &'fst Self::F;
 }

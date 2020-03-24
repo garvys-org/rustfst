@@ -14,6 +14,8 @@ pub(crate) mod state_reachable;
 // mod trivial_lookahead_matcher;
 
 pub trait LookaheadMatcher<'fst, W: Semiring + 'fst>: Matcher<'fst, W> {
+
+    fn init_lookahead_fst<LF: ExpandedFst<W=W>>(&mut self, lfst: &LF) -> Fallible<()>;
     // Are there paths from a state in the lookahead FST that can be read from
     // the curent matcher state?
     fn lookahead_fst<LF: ExpandedFst<W = W>>(
