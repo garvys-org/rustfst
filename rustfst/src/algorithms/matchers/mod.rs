@@ -6,7 +6,7 @@ use bitflags::bitflags;
 pub use generic_matcher::GenericMatcher;
 pub use sorted_matcher::SortedMatcher;
 
-use crate::fst_traits::Fst;
+use crate::fst_traits::{Fst, ExpandedFst};
 use crate::semirings::Semiring;
 use crate::{Arc, EPS_LABEL, NO_LABEL};
 use crate::{Label, StateId};
@@ -80,7 +80,7 @@ pub fn eps_loop<W: Semiring>(state: StateId, match_type: MatchType) -> Fallible<
 /// More generally, they may implement matching special labels that represent
 /// sets of labels such as sigma (all), rho (rest), or phi (fail).
 pub trait Matcher<'fst, W: Semiring + 'fst>: Debug {
-    type F: Fst<W = W> + 'fst;
+    type F: ExpandedFst<W = W> + 'fst;
 
     type Iter: Iterator<Item = IterItemMatcher<'fst, W>>;
 

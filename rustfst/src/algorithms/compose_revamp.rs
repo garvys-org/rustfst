@@ -171,8 +171,8 @@ impl<'fst1, 'fst2, W: Semiring, CF: ComposeFilter<'fst1, 'fst2, W>>
     fn ordered_expand<
         'fa,
         'fb,
-        FA: Fst<W = W> + 'fa,
-        FB: Fst<W = W> + 'fb,
+        FA: ExpandedFst<W = W> + 'fa,
+        FB: ExpandedFst<W = W> + 'fb,
         M: Matcher<'fa, W, F = FA>,
     >(
         &mut self,
