@@ -75,7 +75,7 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1, M1: Matcher<'fst1, W>, M2: Matcher<'fst2
         }
     }
 
-    fn filter_arc(&self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
+    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
         if arc1.olabel == NO_LABEL {
             if self.alleps2 {
                 Self::FS::new_no_state()

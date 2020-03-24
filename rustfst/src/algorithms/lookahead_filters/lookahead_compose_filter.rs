@@ -1,7 +1,7 @@
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;
-use crate::Arc;
+use crate::{Arc, EPS_LABEL};
 use failure::_core::cell::RefCell;
 use std::rc::Rc;
 use failure::Fallible;
@@ -9,18 +9,51 @@ use std::marker::PhantomData;
 use crate::algorithms::lookahead_filters::lookahead_selector::{MatchTypeTrait, LookAheadSelector, selector_match_input, selector_match_output};
 use crate::algorithms::lookahead_filters::lookahead_match_type;
 use crate::algorithms::matchers::MatcherFlags;
+use crate::algorithms::filter_states::FilterState;
 
 #[derive(Debug)]
-struct LookAheadComposeFilter<CF, SMT> {
+struct LookAheadComposeFilter<W, CF, SMT> {
     filter: CF,
     lookahead_type: MatchType,
-    smt: PhantomData<SMT>,
     flags: MatcherFlags,
     lookahead_arc: bool,
+    smt: PhantomData<SMT>,
+    w: PhantomData<W>
+}
+
+impl<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, CF: ComposeFilter<'fst1, 'fst2, W>, SMT: MatchTypeTrait> LookAheadComposeFilter<W, CF, SMT> {
+    fn lookahead_output(&self) -> bool {
+        if SMT::match_type() == MatchType::MatchOutput {
+            true
+        } else if SMT::match_type() == MatchType::MatchInput {
+            false
+        } else if self.lookahead_type == MatchType::MatchOutput {
+            true
+        } else {
+            false
+        }
+    }
+
+    fn lookahead_filter_arc(&mut self, arca: &mut Arc<W>, arcb: &mut Arc<W>, fs: &CF::FS) -> CF::FS {
+        let labela = if self.lookahead_output() {
+            arca.olabel
+        } else {
+            arca.ilabel
+        };
+        if labela != EPS_LABEL && !self.flags.contains(MatcherFlags::LOOKAHEAD_NON_EPSILONS) {
+            return fs.clone();
+        }
+        if labela == EPS_LABEL && !self.flags.contains(MatcherFlags::LOOKAHEAD_EPSILONS) {
+            return fs.clone();
+        }
+        self.lookahead_arc = true;
+
+        unimplemented!()
+    }
 }
 
 impl<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, CF: ComposeFilter<'fst1, 'fst2, W>, SMT: MatchTypeTrait>
-    ComposeFilter<'fst1, 'fst2, W> for LookAheadComposeFilter<CF, SMT>
+    ComposeFilter<'fst1, 'fst2, W> for LookAheadComposeFilter<W, CF, SMT>
 {
     type M1 = CF::M1;
     type M2 = CF::M2;
@@ -69,7 +102,7 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, CF: ComposeFilter<'fst1, 'fst2, 
         };
         // let selector = LookAheadSelector::new(filter.matcher1(), filter.matcher2(), lookahead_type);
         Ok(Self {
-            filter, lookahead_type, flags, smt: PhantomData, lookahead_arc: false
+            filter, lookahead_type, flags, smt: PhantomData, lookahead_arc: false, w: PhantomData
         })
 
     }
@@ -82,8 +115,17 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, CF: ComposeFilter<'fst1, 'fst2, 
         self.filter.set_state(s1, s2, filter_state)
     }
 
-    fn filter_arc(&self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
-        unimplemented!()
+    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
+        self.lookahead_arc = false;
+        let fs = self.filter.filter_arc(arc1, arc2);
+        if fs == CF::FS::new_no_state() {
+            return CF::FS::new_no_state();
+        }
+        if self.lookahead_output() {
+            self.lookahead_filter_arc(arc1, arc2, &fs)
+        } else {
+            self.lookahead_filter_arc(arc2, arc1, &fs)
+        }
     }
 
     fn filter_final(&self, w1: &mut W, w2: &mut W) {

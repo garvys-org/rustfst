@@ -92,7 +92,7 @@ impl<'fst1, 'fst2, W: Semiring, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>>
         }
     }
 
-    fn filter_arc(&self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
+    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
         if arc2.ilabel == NO_LABEL {
             // EPSILON in FST1
             if self.fs == Self::FS::new(0) {
