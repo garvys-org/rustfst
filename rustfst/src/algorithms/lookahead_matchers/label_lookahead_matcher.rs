@@ -122,7 +122,7 @@ impl<'fst, W: Semiring, M: Matcher<'fst, W>> Matcher<'fst, W>
 impl<'fst, W: Semiring, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
     for LabelLookAheadMatcher<'fst, W, M>
 {
-    fn init_lookahead_fst<LF: ExpandedFst<W=W>>(&mut self, lfst: &LF) -> Fallible<()> {
+    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &LF) -> Fallible<()> {
         let lfst_ptr = lfst as *const LF as *const u32;
         self.lfst_ptr = lfst_ptr;
         let reach_input = self.match_type() == MatchType::MatchOutput;
