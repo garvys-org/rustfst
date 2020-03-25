@@ -8,7 +8,7 @@ use failure::Fallible;
 use crate::{Arc, EPS_LABEL, Label, NO_LABEL, NO_STATE_ID};
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::filter_states::{FilterState, IntegerFilterState, PairFilterState};
-use crate::algorithms::lookahead_filters::lookahead_selector::{LookAheadSelector, MatchTypeTrait, selector, selector_2};
+use crate::algorithms::lookahead_filters::lookahead_selector::{LookAheadSelector, MatchTypeTrait, selector};
 use crate::algorithms::lookahead_filters::lookahead_selector::Selector;
 use crate::algorithms::lookahead_filters::LookAheadComposeFilterTrait;
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
@@ -191,29 +191,19 @@ impl<
             if self.narcsa == 1 {
                 self.fs.clone()
             } else {
-                let fn1 = |selector: LookAheadSelector<<CF::M1 as Matcher<'fst1, W>>::F, CF::M2>| {
-                    if selector.matcher.borrow_mut().lookahead_label(arca.nextstate, flabel).unwrap() {
-                        self.fs.clone()
-                    } else {
-                        FilterState::new_no_state()
-                    }
-                };
-
-                let fn2 = |selector: LookAheadSelector<<CF::M2 as Matcher<'fst2, W>>::F, CF::M1>| {
-                    if selector.matcher.borrow_mut().lookahead_label(arca.nextstate, flabel).unwrap() {
-                        self.fs.clone()
-                    } else {
-                        FilterState::new_no_state()
-                    }
-                };
-                selector(
+                if match selector(
                     self.filter.matcher1(),
                     self.filter.matcher2(),
                     SMT::match_type(),
                     self.filter.lookahead_type(),
-                    fn1,
-                    fn2,
-                )
+                ) {
+                    Selector::MatchInput(s) => s.matcher.borrow_mut().lookahead_label(arca.nextstate, flabel).unwrap(),
+                    Selector::MatchOutput(s) => s.matcher.borrow_mut().lookahead_label(arca.nextstate, flabel).unwrap()
+                } {
+                    self.fs.clone()
+                } else {
+                    FilterState::new_no_state()
+                }
             }
         } else {
             FilterState::new_no_state()
@@ -243,7 +233,7 @@ impl<
 
         let mut larc = Arc::new(NO_LABEL, NO_LABEL, W::zero(), NO_STATE_ID);
 
-        let b = match selector_2(
+        let b = match selector(
             self.filter.matcher1(),
             self.filter.matcher2(),
             SMT::match_type(),

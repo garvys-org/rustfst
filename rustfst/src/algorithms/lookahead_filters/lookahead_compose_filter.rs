@@ -1,8 +1,6 @@
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::filter_states::FilterState;
-use crate::algorithms::lookahead_filters::lookahead_selector::{
-    selector, selector_match_input, selector_match_output, LookAheadSelector, MatchTypeTrait,
-};
+use crate::algorithms::lookahead_filters::lookahead_selector::{Selector, selector_match_input, selector_match_output, LookAheadSelector, MatchTypeTrait, selector};
 use crate::algorithms::lookahead_filters::{lookahead_match_type, LookAheadComposeFilterTrait};
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::MatcherFlags;
@@ -54,30 +52,24 @@ where
         }
         self.lookahead_arc = true;
 
-        let fn1 = |selector: LookAheadSelector<<CF::M1 as Matcher<'fst1, W>>::F, CF::M2>| {
-            selector.matcher.borrow_mut().lookahead_fst(
-                arca.nextstate,
-                selector.fst,
-                arcb.nextstate,
-            )
-        };
-
-        let fn2 = |selector: LookAheadSelector<<CF::M2 as Matcher<'fst2, W>>::F, CF::M1>| {
-            selector.matcher.borrow_mut().lookahead_fst(
-                arca.nextstate,
-                selector.fst,
-                arcb.nextstate,
-            )
-        };
-
-        let res = selector(
+        let res = match selector(
             self.matcher1(),
             self.matcher2(),
             SMT::match_type(),
             self.lookahead_type,
-            fn1,
-            fn2,
-        )?;
+        ) {
+            Selector::MatchInput(s) => s.matcher.borrow_mut().lookahead_fst(
+                arca.nextstate,
+                s.fst,
+                arcb.nextstate,
+            ).unwrap(),
+            Selector::MatchOutput(s) => s.matcher.borrow_mut().lookahead_fst(
+                arca.nextstate,
+                s.fst,
+                arcb.nextstate,
+            ).unwrap()
+        };
+
         if res {
             Ok(fs.clone())
         } else {

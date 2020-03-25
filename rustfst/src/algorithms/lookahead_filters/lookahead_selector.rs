@@ -93,37 +93,40 @@ pub fn selector_match_output<
     }
 }
 
+pub enum Selector<
+    'fst1,
+    'fst2,
+    W: Semiring + 'fst1 + 'fst2,
+    M1: Matcher<'fst1, W>,
+    M2: Matcher<'fst2, W>,
+> {
+    MatchInput(LookAheadSelector<'fst1, M1::F, M2>),
+    MatchOutput(LookAheadSelector<'fst2, M2::F, M1>)
+}
+
 pub fn selector<
     'fst1,
     'fst2,
     W: Semiring + 'fst1 + 'fst2,
     M1: Matcher<'fst1, W>,
     M2: Matcher<'fst2, W>,
-    FN1,
-    FN2,
-    T,
 >(
     lmatcher1: Rc<RefCell<M1>>,
     lmatcher2: Rc<RefCell<M2>>,
     match_type: MatchType,
     lookahead_type: MatchType,
-    f1: FN1,
-    f2: FN2,
-) -> T
-where
-    FN1: Fn(LookAheadSelector<'fst1, M1::F, M2>) -> T,
-    FN2: Fn(LookAheadSelector<'fst2, M2::F, M1>) -> T,
+) -> Selector<'fst1, 'fst2, W, M1, M2>
 {
     match match_type {
-        MatchType::MatchInput => f1(selector_match_input::<'fst1, 'fst2, W, M1, M2>(
+        MatchType::MatchInput => Selector::MatchInput(selector_match_input::<'fst1, 'fst2, W, M1, M2>(
             lmatcher1, lmatcher2,
         )),
-        MatchType::MatchOutput => f2(selector_match_output(lmatcher1, lmatcher2)),
+        MatchType::MatchOutput => Selector::MatchOutput(selector_match_output(lmatcher1, lmatcher2)),
         _ => {
             if lookahead_type == MatchType::MatchOutput {
-                f2(selector_match_output(lmatcher1, lmatcher2))
+                Selector::MatchOutput(selector_match_output(lmatcher1, lmatcher2))
             } else {
-                f1(selector_match_input(lmatcher1, lmatcher2))
+                Selector::MatchInput(selector_match_input(lmatcher1, lmatcher2))
             }
         }
     }
