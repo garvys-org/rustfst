@@ -1,19 +1,22 @@
-use crate::algorithms::compose_filters::ComposeFilter;
-use crate::algorithms::filter_states::{FilterState, IntegerFilterState, PairFilterState};
-use crate::algorithms::lookahead_filters::lookahead_selector::{MatchTypeTrait, LookAheadSelector, selector};
-use crate::algorithms::lookahead_filters::LookAheadComposeFilterTrait;
-use crate::algorithms::lookahead_matchers::LookaheadMatcher;
-use crate::algorithms::matchers::multi_eps_matcher::MultiEpsMatcher;
-use crate::algorithms::matchers::MatcherFlags;
-use crate::algorithms::matchers::{MatchType, Matcher};
-use crate::fst_traits::CoreFst;
-use crate::semirings::Semiring;
-use crate::{Arc, NO_LABEL, Label, EPS_LABEL, NO_STATE_ID};
-use bimap::Overwritten::Pair;
-use failure::Fallible;
-use failure::_core::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
+
+use bimap::Overwritten::Pair;
+use failure::_core::cell::RefCell;
+use failure::Fallible;
+
+use crate::{Arc, EPS_LABEL, Label, NO_LABEL, NO_STATE_ID};
+use crate::algorithms::compose_filters::ComposeFilter;
+use crate::algorithms::filter_states::{FilterState, IntegerFilterState, PairFilterState};
+use crate::algorithms::lookahead_filters::lookahead_selector::{LookAheadSelector, MatchTypeTrait, selector, selector_2};
+use crate::algorithms::lookahead_filters::lookahead_selector::Selector;
+use crate::algorithms::lookahead_filters::LookAheadComposeFilterTrait;
+use crate::algorithms::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::matchers::{Matcher, MatchType};
+use crate::algorithms::matchers::MatcherFlags;
+use crate::algorithms::matchers::multi_eps_matcher::MultiEpsMatcher;
+use crate::fst_traits::CoreFst;
+use crate::semirings::Semiring;
 
 #[derive(Debug, Clone)]
 pub struct PushLabelsComposeFilter<
@@ -229,54 +232,41 @@ impl<
         } else {
             arcb.ilabel
         };
+
         if labelb != EPS_LABEL {
             return FilterState::new((fs1.clone(), FilterState::new(NO_LABEL)))
         }
-        // let mut larc = Arc::new(NO_LABEL, NO_LABEL, W::zero(), NO_STATE_ID);
 
-        unimplemented!()
+        if *labela != EPS_LABEL && self.filter.lookahead_flags().contains(MatcherFlags::LOOKAHEAD_NON_EPSILON_PREFIX) {
+            return FilterState::new((fs1.clone(), FilterState::new(NO_LABEL)))
+        }
 
-        // let fn1 = |selector: LookAheadSelector<<CF::M1 as Matcher<'fst1, W>>::F, CF::M2>| {
-        //     if selector.matcher.borrow_mut().lookahead_prefix(&mut larc) {
-        //         *labela = if self.filter.lookahead_output() {
-        //             larc.ilabel
-        //         } else {
-        //             larc.olabel
-        //         };
-        //         arcb.ilabel = larc.ilabel;
-        //         arcb.olabel = larc.olabel;
-        //         arcb.weight.times_assign(&larc.weight).unwrap();
-        //         arcb.nextstate = larc.nextstate;
-        //         FilterState::new((fs1.clone(), FilterState::new(*labela)))
-        //     } else {
-        //         FilterState::new((fs1.clone(), FilterState::new(NO_LABEL)))
-        //     }
-        // };
-        //
-        // let fn2 = |selector: LookAheadSelector<<CF::M2 as Matcher<'fst2, W>>::F, CF::M1>| {
-        //     if selector.matcher.borrow_mut().lookahead_prefix(&mut larc) {
-        //         *labela = if self.filter.lookahead_output() {
-        //             larc.ilabel
-        //         } else {
-        //             larc.olabel
-        //         };
-        //         arcb.ilabel = larc.ilabel;
-        //         arcb.olabel = larc.olabel;
-        //         arcb.weight.times_assign(&larc.weight).unwrap();
-        //         arcb.nextstate = larc.nextstate;
-        //         FilterState::new((fs1.clone(), FilterState::new(*labela)))
-        //     } else {
-        //         FilterState::new((fs1.clone(), FilterState::new(NO_LABEL)))
-        //     }
-        // };
-        // selector(
-        //     self.filter.matcher1(),
-        //     self.filter.matcher2(),
-        //     SMT::match_type(),
-        //     self.filter.lookahead_type(),
-        //     fn1,
-        //     fn2,
-        // )
+        let mut larc = Arc::new(NO_LABEL, NO_LABEL, W::zero(), NO_STATE_ID);
+
+        let b = match selector_2(
+            self.filter.matcher1(),
+            self.filter.matcher2(),
+            SMT::match_type(),
+            self.filter.lookahead_type(),
+        ) {
+            Selector::MatchInput(s) => s.matcher.borrow().lookahead_prefix(&mut larc),
+            Selector::MatchOutput(s) => s.matcher.borrow().lookahead_prefix(&mut larc)
+        };
+
+        if b {
+            *labela = if self.filter.lookahead_output() {
+                larc.ilabel
+            } else {
+                larc.olabel
+            };
+            arcb.ilabel = larc.ilabel;
+            arcb.olabel = larc.olabel;
+            arcb.weight.times_assign(&larc.weight).unwrap();
+            arcb.nextstate = larc.nextstate;
+            FilterState::new((fs1.clone(), FilterState::new(*labela)))
+        } else {
+            FilterState::new((fs1.clone(), FilterState::new(NO_LABEL)))
+        }
     }
 }
 
