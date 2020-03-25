@@ -6,6 +6,7 @@ use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::multi_eps_matcher::MultiEpsMatcher;
 use crate::algorithms::matchers::MatcherFlags;
 use crate::algorithms::matchers::{MatchType, Matcher};
+use crate::fst_traits::CoreFst;
 use crate::semirings::Semiring;
 use crate::{Arc, NO_LABEL};
 use bimap::Overwritten::Pair;
@@ -13,7 +14,6 @@ use failure::Fallible;
 use failure::_core::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
-use crate::fst_traits::CoreFst;
 
 #[derive(Debug, Clone)]
 pub struct PushLabelsComposeFilter<
@@ -73,7 +73,11 @@ where
     fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) {
         self.fs = filter_state.clone();
         self.filter.set_state(s1, s2, filter_state.state1());
-        if !self.filter.lookahead_flags().contains(MatcherFlags::LOOKAHEAD_PREFIX) {
+        if !self
+            .filter
+            .lookahead_flags()
+            .contains(MatcherFlags::LOOKAHEAD_PREFIX)
+        {
             return;
         }
         self.narcsa = if self.filter.lookahead_output() {
@@ -97,7 +101,12 @@ where
 
     fn filter_final(&self, w1: &mut W, w2: &mut W) {
         self.filter.filter_final(w1, w2);
-        if !self.filter.lookahead_flags().contains(MatcherFlags::LOOKAHEAD_PREFIX) || w1.is_zero() {
+        if !self
+            .filter
+            .lookahead_flags()
+            .contains(MatcherFlags::LOOKAHEAD_PREFIX)
+            || w1.is_zero()
+        {
             return;
         }
         let fs2 = self.fs.state2();
@@ -108,7 +117,7 @@ where
     }
 
     fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
-       Rc::clone(&self.matcher1)
+        Rc::clone(&self.matcher1)
     }
 
     fn matcher2(&self) -> Rc<RefCell<Self::M2>> {
