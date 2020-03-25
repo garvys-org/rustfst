@@ -12,6 +12,7 @@ use crate::{Arc, EPS_LABEL, NO_LABEL};
 use crate::{Label, StateId};
 
 mod generic_matcher;
+pub mod multi_eps_matcher;
 mod sorted_matcher;
 
 bitflags! {
@@ -82,7 +83,7 @@ pub fn eps_loop<W: Semiring>(state: StateId, match_type: MatchType) -> Fallible<
 pub trait Matcher<'fst, W: Semiring + 'fst>: Debug {
     type F: ExpandedFst<W = W> + 'fst;
 
-    type Iter: Iterator<Item = IterItemMatcher<'fst, W>>;
+    type Iter: Iterator<Item = IterItemMatcher<'fst, W>> + Clone;
 
     fn new(fst: &'fst Self::F, match_type: MatchType) -> Fallible<Self>
     where

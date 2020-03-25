@@ -73,6 +73,7 @@ impl<'fst, W: Semiring + 'fst, F: ExpandedFst<W = W>> Matcher<'fst, W> for Sorte
     }
 }
 
+#[derive(Clone)]
 pub struct IteratorSortedMatcher<'fst, W: Semiring> {
     arcs: Vec<&'fst Arc<W>>,
     match_label: Label,

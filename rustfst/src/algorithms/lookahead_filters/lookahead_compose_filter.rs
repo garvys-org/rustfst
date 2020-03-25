@@ -139,23 +139,6 @@ where
             )
         }
 
-        panic!("Selector");
-        // Selector logic.
-        match SMT::match_type() {
-            MatchType::MatchInput => {
-                selector_match_input(filter.matcher1(), filter.matcher2());
-            }
-            MatchType::MatchOutput => {
-                selector_match_output(filter.matcher1(), filter.matcher2());
-            }
-            _ => {
-                if lookahead_type == MatchType::MatchOutput {
-                    selector_match_output(filter.matcher1(), filter.matcher2());
-                } else {
-                    selector_match_input(filter.matcher1(), filter.matcher2());
-                }
-            }
-        };
         Ok(Self {
             filter,
             lookahead_type,

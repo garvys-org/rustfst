@@ -32,79 +32,79 @@ pub struct PushLabelsComposeFilter<
     narcsa: usize,
 }
 
-impl<
-        'fst1,
-        'fst2,
-        W: Semiring + 'fst1 + 'fst2,
-        CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
-        SMT: MatchTypeTrait,
-    > ComposeFilter<'fst1, 'fst2, W> for PushLabelsComposeFilter<'fst1, 'fst2, W, CF, SMT>
-where
-    CF::M1: LookaheadMatcher<'fst1, W>,
-    CF::M2: LookaheadMatcher<'fst2, W>,
-{
-    type M1 = ();
-    type M2 = ();
-    type FS = PairFilterState<CF::FS, IntegerFilterState>;
-
-    fn new<IM1: Into<Option<Self::M1>>, IM2: Into<Option<Self::M2>>>(
-        fst1: &'fst1 <Self::M1 as Matcher<'fst1, W>>::F,
-        fst2: &'fst2 <Self::M2 as Matcher<'fst2, W>>::F,
-        m1: IM1,
-        m2: IM2,
-    ) -> Fallible<Self>
-    where
-        Self: std::marker::Sized,
-    {
-        unimplemented!()
-    }
-
-    fn start(&self) -> Self::FS {
-        unimplemented!()
-    }
-
-    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) {
-        unimplemented!()
-    }
-
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
-        unimplemented!()
-    }
-
-    fn filter_final(&self, w1: &mut W, w2: &mut W) {
-        unimplemented!()
-    }
-
-    fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
-        unimplemented!()
-    }
-
-    fn matcher2(&self) -> Rc<RefCell<Self::M2>> {
-        unimplemented!()
-    }
-}
-
-impl<
-        'fst1,
-        'fst2,
-        W: Semiring + 'fst1 + 'fst2,
-        CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
-        SMT: MatchTypeTrait,
-    > LookAheadComposeFilterTrait<'fst1, 'fst2, W>
-    for PushLabelsComposeFilter<'fst1, 'fst2, W, CF, SMT>
-where
-    CF::M1: LookaheadMatcher<'fst1, W>,
-    CF::M2: LookaheadMatcher<'fst2, W>,
-{
-    fn lookahead_flags(&self) -> MatcherFlags {
-        unimplemented!()
-    }
-
-    fn lookahead_arc(&self) -> bool {
-        unimplemented!()
-    }
-
-    fn lookahead_type(&self) -> MatchType {
-        unimplemented!()
-    }
-}
+// impl<
+//         'fst1,
+//         'fst2,
+//         W: Semiring + 'fst1 + 'fst2,
+//         CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
+//         SMT: MatchTypeTrait,
+//     > ComposeFilter<'fst1, 'fst2, W> for PushLabelsComposeFilter<'fst1, 'fst2, W, CF, SMT>
+// where
+//     CF::M1: LookaheadMatcher<'fst1, W>,
+//     CF::M2: LookaheadMatcher<'fst2, W>,
+// {
+//     type M1 = ();
+//     type M2 = ();
+//     type FS = PairFilterState<CF::FS, IntegerFilterState>;
+//
+//     fn new<IM1: Into<Option<Self::M1>>, IM2: Into<Option<Self::M2>>>(
+//         fst1: &'fst1 <Self::M1 as Matcher<'fst1, W>>::F,
+//         fst2: &'fst2 <Self::M2 as Matcher<'fst2, W>>::F,
+//         m1: IM1,
+//         m2: IM2,
+//     ) -> Fallible<Self>
+//     where
+//         Self: std::marker::Sized,
+//     {
+//         unimplemented!()
+//     }
+//
+//     fn start(&self) -> Self::FS {
+//         unimplemented!()
+//     }
+//
+//     fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) {
+//         unimplemented!()
+//     }
+//
+//     fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
+//         unimplemented!()
+//     }
+//
+//     fn filter_final(&self, w1: &mut W, w2: &mut W) {
+//         unimplemented!()
+//     }
+//
+//     fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
+//         unimplemented!()
+//     }
+//
+//     fn matcher2(&self) -> Rc<RefCell<Self::M2>> {
+//         unimplemented!()
+//     }
+// }
+//
+// impl<
+//         'fst1,
+//         'fst2,
+//         W: Semiring + 'fst1 + 'fst2,
+//         CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
+//         SMT: MatchTypeTrait,
+//     > LookAheadComposeFilterTrait<'fst1, 'fst2, W>
+//     for PushLabelsComposeFilter<'fst1, 'fst2, W, CF, SMT>
+// where
+//     CF::M1: LookaheadMatcher<'fst1, W>,
+//     CF::M2: LookaheadMatcher<'fst2, W>,
+// {
+//     fn lookahead_flags(&self) -> MatcherFlags {
+//         unimplemented!()
+//     }
+//
+//     fn lookahead_arc(&self) -> bool {
+//         unimplemented!()
+//     }
+//
+//     fn lookahead_type(&self) -> MatchType {
+//         unimplemented!()
+//     }
+// }
