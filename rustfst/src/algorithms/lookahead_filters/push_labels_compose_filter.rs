@@ -13,6 +13,7 @@ use failure::Fallible;
 use failure::_core::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
+use crate::fst_traits::CoreFst;
 
 #[derive(Debug, Clone)]
 pub struct PushLabelsComposeFilter<
@@ -70,7 +71,24 @@ where
     }
 
     fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) {
-        unimplemented!()
+        self.fs = filter_state.clone();
+        self.filter.set_state(s1, s2, filter_state.state1());
+        if !self.filter.lookahead_flags().contains(MatcherFlags::LOOKAHEAD_PREFIX) {
+            return;
+        }
+        self.narcsa = if self.filter.lookahead_output() {
+            self.fst1.num_arcs(s1).unwrap()
+        } else {
+            self.fst2.num_arcs(s2).unwrap()
+        };
+        let fs2 = filter_state.state2();
+        let flabel = fs2.state();
+        self.matcher1().borrow_mut().clear_multi_eps_labels();
+        self.matcher2().borrow_mut().clear_multi_eps_labels();
+        if *flabel != NO_LABEL {
+            self.matcher1().borrow_mut().add_multi_eps_label(*flabel);
+            self.matcher2().borrow_mut().add_multi_eps_label(*flabel);
+        }
     }
 
     fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
