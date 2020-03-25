@@ -93,6 +93,26 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> MultiEpsMatcher<W, M> {
     pub fn matcher(&self) -> Rc<RefCell<M>> {
         Rc::clone(&self.matcher)
     }
+
+    pub fn clear_multi_eps_labels(&mut self) {
+        self.multi_eps_labels.clear()
+    }
+
+    pub fn add_multi_eps_label(&mut self, label: Label) -> Fallible<()> {
+        if label == EPS_LABEL {
+            bail!("MultiEpsMatcher: Bad multi-eps label: 0")
+        }
+        self.multi_eps_labels.insert(label);
+        Ok(())
+    }
+
+    pub fn remove_multi_eps_label(&mut self, label: Label) -> Fallible<()> {
+        if label == EPS_LABEL {
+            bail!("MultiEpsMatcher: Bad multi-eps label: 0")
+        }
+        self.multi_eps_labels.erase(label);
+        Ok(())
+    }
 }
 
 impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W> for MultiEpsMatcher<W, M> {
