@@ -1,5 +1,5 @@
 use crate::algorithms::compose_filters::ComposeFilter;
-use crate::algorithms::filter_states::{IntegerFilterState, PairFilterState};
+use crate::algorithms::filter_states::{FilterState, IntegerFilterState, PairFilterState};
 use crate::algorithms::lookahead_filters::lookahead_selector::MatchTypeTrait;
 use crate::algorithms::lookahead_filters::LookAheadComposeFilterTrait;
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
@@ -7,7 +7,8 @@ use crate::algorithms::matchers::multi_eps_matcher::MultiEpsMatcher;
 use crate::algorithms::matchers::MatcherFlags;
 use crate::algorithms::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;
-use crate::Arc;
+use crate::{Arc, NO_LABEL};
+use bimap::Overwritten::Pair;
 use failure::Fallible;
 use failure::_core::cell::RefCell;
 use std::marker::PhantomData;
@@ -26,8 +27,8 @@ pub struct PushLabelsComposeFilter<
 {
     fst1: &'fst1 <CF::M1 as Matcher<'fst1, W>>::F,
     fst2: &'fst2 <CF::M2 as Matcher<'fst2, W>>::F,
-    matcher1: Rc<RefCell<CF::M1>>,
-    matcher2: Rc<RefCell<CF::M2>>,
+    matcher1: Rc<RefCell<MultiEpsMatcher<W, CF::M1>>>,
+    matcher2: Rc<RefCell<MultiEpsMatcher<W, CF::M2>>>,
     filter: CF,
     fs: PairFilterState<CF::FS, IntegerFilterState>,
     smt: PhantomData<SMT>,
@@ -62,20 +63,10 @@ where
             m2.into().map(|e| e.borrow().matcher()),
         )?;
         unimplemented!()
-        // let flags_eps_matcher = if {
-        //     filter.l
-        // }
-        // let matcher1 = if
-        // Ok(Self {
-        //     fst1: filter.matcher1().borrow().fst(),
-        //     fst2: filter.matcher2().borrow().fst(),
-        //     filter,
-        //     matcher1:
-        // })
     }
 
     fn start(&self) -> Self::FS {
-        unimplemented!()
+        PairFilterState::new((self.filter.start(), FilterState::new(NO_LABEL)))
     }
 
     fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) {
@@ -87,15 +78,23 @@ where
     }
 
     fn filter_final(&self, w1: &mut W, w2: &mut W) {
-        unimplemented!()
+        self.filter.filter_final(w1, w2);
+        if !self.filter.lookahead_flags().contains(MatcherFlags::LOOKAHEAD_PREFIX) || w1.is_zero() {
+            return;
+        }
+        let fs2 = self.fs.state2();
+        let flabel = fs2.state();
+        if *flabel != NO_LABEL {
+            *w1 = W::zero()
+        }
     }
 
     fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
-        unimplemented!()
+       Rc::clone(&self.matcher1)
     }
 
     fn matcher2(&self) -> Rc<RefCell<Self::M2>> {
-        unimplemented!()
+        Rc::clone(&self.matcher2)
     }
 }
 
