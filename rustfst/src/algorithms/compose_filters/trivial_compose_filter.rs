@@ -21,21 +21,23 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, M1: Matcher<'fst1, W>, M2: Match
     type M2 = M2;
     type FS = TrivialFilterState;
 
-    fn new<IM1: Into<Option<Self::M1>>, IM2: Into<Option<Self::M2>>>(
+    fn new<IM1: Into<Option<Rc<RefCell<Self::M1>>>>, IM2: Into<Option<Rc<RefCell<Self::M2>>>>>(
         fst1: &'fst1 <Self::M1 as Matcher<'fst1, W>>::F,
         fst2: &'fst2 <Self::M2 as Matcher<'fst2, W>>::F,
         m1: IM1,
         m2: IM2,
     ) -> Fallible<Self> {
         Ok(Self {
-            matcher1: Rc::new(RefCell::new(
-                m1.into()
-                    .unwrap_or_else(|| Self::M1::new(fst1, MatchType::MatchOutput).unwrap()),
-            )),
-            matcher2: Rc::new(RefCell::new(
-                m2.into()
-                    .unwrap_or_else(|| Self::M2::new(fst2, MatchType::MatchInput).unwrap()),
-            )),
+            matcher1: m1.into().unwrap_or_else(|| {
+                Rc::new(RefCell::new(
+                    Self::M1::new(fst1, MatchType::MatchOutput).unwrap(),
+                ))
+            }),
+            matcher2: m2.into().unwrap_or_else(|| {
+                Rc::new(RefCell::new(
+                    Self::M2::new(fst2, MatchType::MatchInput).unwrap(),
+                ))
+            }),
         })
     }
 

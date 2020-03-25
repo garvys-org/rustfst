@@ -60,4 +60,5 @@ where
     fn lookahead_flags(&self) -> MatcherFlags;
     fn lookahead_arc(&self) -> bool;
     fn lookahead_type(&self) -> MatchType;
+    fn lookahead_output(&self) -> bool;
 }

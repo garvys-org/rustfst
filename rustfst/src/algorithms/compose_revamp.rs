@@ -18,8 +18,8 @@ use crate::semirings::Semiring;
 use crate::{Arc, StateId, EPS_LABEL, NO_LABEL};
 
 pub struct ComposeFstImplOptions<M1, M2, CF, ST> {
-    matcher1: Option<M1>,
-    matcher2: Option<M2>,
+    matcher1: Option<Rc<RefCell<M1>>>,
+    matcher2: Option<Rc<RefCell<M2>>>,
     filter: Option<CF>,
     state_table: Option<ST>,
 }
@@ -48,8 +48,8 @@ impl<M1, M2, CF, ST> ComposeFstImplOptions<M1, M2, CF, ST> {
         state_table: IST,
     ) -> Self {
         Self {
-            matcher1: matcher1.into(),
-            matcher2: matcher2.into(),
+            matcher1: matcher1.into().map(|e| Rc::new(RefCell::new(e))),
+            matcher2: matcher2.into().map(|e| Rc::new(RefCell::new(e))),
             filter: filter.into(),
             state_table: state_table.into(),
         }

@@ -38,7 +38,7 @@ where
     type M2 = CF::M2;
     type FS = PairFilterState<CF::FS, WeightFilterState<W>>;
 
-    fn new<IM1: Into<Option<Self::M1>>, IM2: Into<Option<Self::M2>>>(
+    fn new<IM1: Into<Option<Rc<RefCell<Self::M1>>>>, IM2: Into<Option<Rc<RefCell<Self::M2>>>>>(
         fst1: &'fst1 <Self::M1 as Matcher<'fst1, W>>::F,
         fst2: &'fst2 <Self::M2 as Matcher<'fst2, W>>::F,
         m1: IM1,
@@ -148,5 +148,9 @@ where
 
     fn lookahead_type(&self) -> MatchType {
         self.filter.lookahead_type()
+    }
+
+    fn lookahead_output(&self) -> bool {
+        self.filter.lookahead_output()
     }
 }

@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 use failure::Fallible;
 use std::iter::Peekable;
-use std::ops::{AddAssign, SubAssign, Add};
+use std::ops::{Add, AddAssign, SubAssign};
 
 use bitflags::bitflags;
 
@@ -23,19 +23,19 @@ bitflags! {
 }
 
 #[derive(Debug)]
-struct MultiEpsMatcher<W, M> {
+pub struct MultiEpsMatcher<W, M> {
     matcher: Rc<RefCell<M>>,
     flags: MultiEpsMatcherFlags,
     w: PhantomData<W>,
     multi_eps_labels: CompactSet<Label>,
 }
 
-struct IteratorMultiEpsMatcher<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> {
+pub struct IteratorMultiEpsMatcher<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> {
     iter_matcher: Option<Peekable<M::Iter>>,
     // iter_labels: Option<Peekable<std::collections::hash_set::Iter<'a, Label>>>,
     matcher: Rc<RefCell<M>>,
     ghost: PhantomData<&'fst W>,
-    done: bool
+    done: bool,
 }
 
 impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Clone for IteratorMultiEpsMatcher<'fst, W, M> {
@@ -89,9 +89,13 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> MultiEpsMatcher<W, M> {
             multi_eps_labels: CompactSet::new(NO_LABEL),
         })
     }
+
+    pub fn matcher(&self) -> Rc<RefCell<M>> {
+        Rc::clone(&self.matcher)
+    }
 }
 
-impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W> for MultiEpsMatcher<W, M>{
+impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W> for MultiEpsMatcher<W, M> {
     type F = M::F;
     type Iter = IteratorMultiEpsMatcher<'fst, W, M>;
 
@@ -106,7 +110,10 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W> for MultiEp
 
     fn iter(&self, state: usize, label: usize) -> Fallible<Self::Iter> {
         let (iter_matcher, iter_labels) = if label == EPS_LABEL {
-            (Some(self.matcher.borrow().iter(state, EPS_LABEL)?.peekable()), None)
+            (
+                Some(self.matcher.borrow().iter(state, EPS_LABEL)?.peekable()),
+                None,
+            )
         } else if label == NO_LABEL {
             if self.flags.contains(MultiEpsMatcherFlags::MULTI_EPS_LIST) {
                 let mut iter_matcher = None;
@@ -123,23 +130,34 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W> for MultiEp
                 if iter_labels.peek().is_some() {
                     (iter_matcher, Some(iter_labels))
                 } else {
-                    (Some(self.matcher.borrow().iter(state, NO_LABEL)?.peekable()), None)
+                    (
+                        Some(self.matcher.borrow().iter(state, NO_LABEL)?.peekable()),
+                        None,
+                    )
                 }
             } else {
-                (Some(self.matcher.borrow().iter(state, NO_LABEL)?.peekable()), None)
+                (
+                    Some(self.matcher.borrow().iter(state, NO_LABEL)?.peekable()),
+                    None,
+                )
             }
-        } else if self.flags.contains(MultiEpsMatcherFlags::MULTI_EPS_LOOP) && self.multi_eps_labels.contains(&label) {
+        } else if self.flags.contains(MultiEpsMatcherFlags::MULTI_EPS_LOOP)
+            && self.multi_eps_labels.contains(&label)
+        {
             // Empty iter
             (None, None)
         } else {
-            (Some(self.matcher.borrow().iter(state, label)?.peekable()), None)
+            (
+                Some(self.matcher.borrow().iter(state, label)?.peekable()),
+                None,
+            )
         };
         Ok(IteratorMultiEpsMatcher {
             iter_matcher,
             // iter_labels,
             matcher: Rc::clone(&self.matcher),
             ghost: PhantomData,
-            done: false
+            done: false,
         })
     }
 
@@ -172,10 +190,13 @@ struct CompactSet<K> {
     no_key: K,
 }
 
-impl<K: Copy + Ord + AddAssign<usize> + SubAssign<usize> + Add<usize, Output=K>> CompactSet<K> {
+impl<K: Copy + Ord + AddAssign<usize> + SubAssign<usize> + Add<usize, Output = K>> CompactSet<K> {
     pub fn new(no_key: K) -> Self {
         Self {
-            set: BTreeSet::new(), min_key: no_key, max_key: no_key, no_key
+            set: BTreeSet::new(),
+            min_key: no_key,
+            max_key: no_key,
+            no_key,
         }
     }
 

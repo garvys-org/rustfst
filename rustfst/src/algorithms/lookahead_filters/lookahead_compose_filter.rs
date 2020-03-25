@@ -35,18 +35,6 @@ where
     CF::M1: LookaheadMatcher<'fst1, W>,
     CF::M2: LookaheadMatcher<'fst2, W>,
 {
-    fn lookahead_output(&self) -> bool {
-        if SMT::match_type() == MatchType::MatchOutput {
-            true
-        } else if SMT::match_type() == MatchType::MatchInput {
-            false
-        } else if self.lookahead_type == MatchType::MatchOutput {
-            true
-        } else {
-            false
-        }
-    }
-
     fn lookahead_filter_arc(
         &mut self,
         arca: &mut Arc<W>,
@@ -113,7 +101,7 @@ where
     type M2 = CF::M2;
     type FS = CF::FS;
 
-    fn new<IM1: Into<Option<Self::M1>>, IM2: Into<Option<Self::M2>>>(
+    fn new<IM1: Into<Option<Rc<RefCell<Self::M1>>>>, IM2: Into<Option<Rc<RefCell<Self::M2>>>>>(
         fst1: &'fst1 <Self::M1 as Matcher<'fst1, W>>::F,
         fst2: &'fst2 <Self::M2 as Matcher<'fst2, W>>::F,
         m1: IM1,
@@ -204,5 +192,17 @@ where
 
     fn lookahead_type(&self) -> MatchType {
         self.lookahead_type
+    }
+
+    fn lookahead_output(&self) -> bool {
+        if SMT::match_type() == MatchType::MatchOutput {
+            true
+        } else if SMT::match_type() == MatchType::MatchInput {
+            false
+        } else if self.lookahead_type == MatchType::MatchOutput {
+            true
+        } else {
+            false
+        }
     }
 }

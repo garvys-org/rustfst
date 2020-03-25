@@ -32,7 +32,7 @@ pub trait ComposeFilter<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2>: Debug {
     type M2: Matcher<'fst2, W>;
     type FS: FilterState;
 
-    fn new<IM1: Into<Option<Self::M1>>, IM2: Into<Option<Self::M2>>>(
+    fn new<IM1: Into<Option<Rc<RefCell<Self::M1>>>>, IM2: Into<Option<Rc<RefCell<Self::M2>>>>>(
         fst1: &'fst1 <Self::M1 as Matcher<'fst1, W>>::F,
         fst2: &'fst2 <Self::M2 as Matcher<'fst2, W>>::F,
         m1: IM1,
