@@ -1,14 +1,16 @@
+use std::marker::PhantomData;
+
 use failure::Fallible;
 
 use crate::algorithms::lookahead_matchers::label_reachable::{LabelReachable, LabelReachableData};
-use crate::algorithms::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::lookahead_matchers::{LookaheadMatcher, MatcherFlagsTrait};
 use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Arc, EPS_LABEL, NO_STATE_ID};
 
 #[derive(Debug)]
-pub struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>> {
+pub struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>, MFT> {
     // matcher fst
     fst: &'fst M::F,
     matcher: M,
@@ -16,73 +18,19 @@ pub struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>> {
     prefix_arc: Arc<W>,
 
     // Flags to customize the behaviour
-    flags: MatcherFlags,
+    mft: PhantomData<MFT>,
     reachable: Option<LabelReachable>,
     lfst_ptr: *const u32,
 }
 
-impl<'fst, W: Semiring, M: Matcher<'fst, W>> LabelLookAheadMatcher<'fst, W, M> {
-    pub fn new_with_flags(
-        fst: &'fst M::F,
-        match_type: MatchType,
-        matcher_flags: MatcherFlags,
-        data: Option<&LabelReachableData>,
-    ) -> Fallible<Self>
-    where
-        W: 'static,
-    {
-        if !matcher_flags.contains(
-            MatcherFlags::INPUT_LOOKAHEAD_MATCHER | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER,
-        ) {
-            bail!(
-                "LabelLookAheadMatcher : Bad Matcher flags : {:?}",
-                matcher_flags
-            )
-        }
-        let reach_input = match_type == MatchType::MatchInput;
-
-        let mut reachable = None;
-        if let Some(d) = data {
-            if reach_input == d.reach_input() {
-                reachable = Some(LabelReachable::new_from_data(d.clone()));
-            }
-        } else if (reach_input && matcher_flags.contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER))
-            || (!reach_input && matcher_flags.contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
-        {
-            reachable = Some(LabelReachable::new(fst, reach_input)?)
-        }
-
-        Ok(Self {
-            fst,
-            matcher: M::new(fst, match_type)?,
-            flags: matcher_flags,
-            prefix_arc: Arc::new(0, 0, W::one(), NO_STATE_ID),
-            lookahead_weight: W::one(),
-            reachable,
-            lfst_ptr: std::ptr::null(),
-        })
-    }
-}
-
-impl<'fst, W: Semiring, M: Matcher<'fst, W>> Matcher<'fst, W>
-    for LabelLookAheadMatcher<'fst, W, M>
+impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait> Matcher<'fst, W>
+    for LabelLookAheadMatcher<'fst, W, M, MFT>
 {
     type F = M::F;
     type Iter = M::Iter;
 
-    fn new(_fst: &'fst Self::F, _match_type: MatchType) -> Fallible<Self> {
-        unimplemented!()
-        // let flags = MatcherFlags::LOOKAHEAD_EPSILONS
-        //     | MatcherFlags::LOOKAHEAD_WEIGHT
-        //     | MatcherFlags::LOOKAHEAD_PREFIX
-        //     | MatcherFlags::LOOKAHEAD_NON_EPSILON_PREFIX;
-        // Ok(Self {
-        //     fst,
-        //     matcher: M::new(fst, match_type)?,
-        //     flags,
-        //     prefix_arc: Arc::new(0, 0, W::one(), NO_STATE_ID),
-        //     lookahead_weight: W::one(),
-        // })
+    fn new(fst: &'fst Self::F, match_type: MatchType) -> Fallible<Self> {
+        Self::new_with_data(fst, match_type, None)
     }
 
     fn iter(&self, state: usize, label: usize) -> Fallible<Self::Iter> {
@@ -100,9 +48,9 @@ impl<'fst, W: Semiring, M: Matcher<'fst, W>> Matcher<'fst, W>
     fn flags(&self) -> MatcherFlags {
         if let Some(reachable) = &self.reachable {
             if reachable.reach_input() {
-                self.matcher.flags() | self.flags | MatcherFlags::INPUT_LOOKAHEAD_MATCHER
+                self.matcher.flags() | MFT::flags() | MatcherFlags::INPUT_LOOKAHEAD_MATCHER
             } else {
-                self.matcher.flags() | self.flags | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER
+                self.matcher.flags() | MFT::flags() | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER
             }
         } else {
             self.matcher.flags()
@@ -118,8 +66,8 @@ impl<'fst, W: Semiring, M: Matcher<'fst, W>> Matcher<'fst, W>
     }
 }
 
-impl<'fst, W: Semiring, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
-    for LabelLookAheadMatcher<'fst, W, M>
+impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
+    LookaheadMatcher<'fst, W> for LabelLookAheadMatcher<'fst, W, M, MFT>
 {
     type MatcherData = LabelReachableData;
 
@@ -129,6 +77,43 @@ impl<'fst, W: Semiring, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
         } else {
             None
         }
+    }
+
+    fn new_with_data(
+        fst: &'fst Self::F,
+        match_type: MatchType,
+        data: Option<Self::MatcherData>,
+    ) -> Fallible<Self> {
+        if !MFT::flags().contains(
+            MatcherFlags::INPUT_LOOKAHEAD_MATCHER | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER,
+        ) {
+            bail!(
+                "LabelLookAheadMatcher : Bad Matcher flags : {:?}",
+                MFT::flags()
+            )
+        }
+        let reach_input = match_type == MatchType::MatchInput;
+
+        let mut reachable = None;
+        if let Some(d) = data {
+            if reach_input == d.reach_input() {
+                reachable = Some(LabelReachable::new_from_data(d.clone()));
+            }
+        } else if (reach_input && MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER))
+            || (!reach_input && MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
+        {
+            reachable = Some(LabelReachable::new(fst, reach_input)?)
+        }
+
+        Ok(Self {
+            fst,
+            matcher: M::new(fst, match_type)?,
+            prefix_arc: Arc::new(0, 0, W::one(), NO_STATE_ID),
+            lookahead_weight: W::one(),
+            reachable,
+            lfst_ptr: std::ptr::null(),
+            mft: PhantomData,
+        })
     }
 
     fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &LF) -> Fallible<()> {
@@ -157,8 +142,8 @@ impl<'fst, W: Semiring, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
         self.clear_lookahead_weight();
         self.clear_lookahead_weight();
         if let Some(reachable) = &self.reachable {
-            let mut compute_weight = self.flags.contains(MatcherFlags::LOOKAHEAD_WEIGHT);
-            let compute_prefix = self.flags.contains(MatcherFlags::LOOKAHEAD_PREFIX);
+            let mut compute_weight = MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT);
+            let compute_prefix = MFT::flags().contains(MatcherFlags::LOOKAHEAD_PREFIX);
             let aiter = lfst.arcs_iter(lfst_state)?;
             let reach_arc = reachable.reach(
                 matcher_state,

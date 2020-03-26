@@ -85,8 +85,8 @@ where
     let fst1: ConstFst<_> = fst_raw.clone().into();
     let fst2: VectorFst<_> = compose_test_data.fst_2.clone();
 
-    type MATCHER1<'a, S> = LabelLookAheadMatcher<'a, S, SortedMatcher<'a, ConstFst<S>>>;
-    type MATCHER2<'a, S> = SortedMatcher<'a, VectorFst<S>>;
+    // type MATCHER1<'a, S> = LabelLookAheadMatcher<'a, S, SortedMatcher<'a, ConstFst<S>>>;
+    // type MATCHER2<'a, S> = SortedMatcher<'a, VectorFst<S>>;
     //
     //     type SEQFILTER<'a, 'b, S> =
     //         AltSequenceComposeFilter<'b, VectorFst<S>, MATCHER1<'a, S>, MATCHER2<'b, S>>;

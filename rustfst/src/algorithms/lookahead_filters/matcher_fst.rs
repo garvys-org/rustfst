@@ -51,6 +51,14 @@ impl<'fst, F: ExpandedFst + 'fst, M: LookaheadMatcher<'fst, F::W, F = F>>
             matcher: PhantomData,
         })
     }
+
+    pub fn init_matcher(&self, match_type: MatchType) -> Fallible<M> {
+        M::new_with_data(
+            self.fst_add_on.fst(),
+            match_type,
+            Some(self.data(match_type).clone()),
+        )
+    }
 }
 
 impl<F: CoreFst, M, T> CoreFst for MatcherFst<F, M, T> {

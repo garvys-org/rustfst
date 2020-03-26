@@ -1,12 +1,15 @@
 use failure::Fallible;
 
+use crate::algorithms::matchers::MatcherFlags;
+
 pub use arc_lookahead_matcher::ArcLookAheadMatcher;
 pub use label_lookahead_matcher::LabelLookAheadMatcher;
 
-use crate::algorithms::matchers::Matcher;
+use crate::algorithms::matchers::{MatchType, Matcher};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, NO_STATE_ID};
+use std::fmt::Debug;
 
 mod arc_lookahead_matcher;
 pub(crate) mod interval_set;
@@ -16,9 +19,21 @@ mod label_reachable;
 pub(crate) mod state_reachable;
 // mod trivial_lookahead_matcher;
 
+pub trait MatcherFlagsTrait: Debug {
+    fn flags() -> MatcherFlags;
+}
+
 pub trait LookaheadMatcher<'fst, W: Semiring + 'fst>: Matcher<'fst, W> {
     type MatcherData: Clone;
     fn data(&self) -> Option<&Self::MatcherData>;
+
+    fn new_with_data(
+        fst: &'fst Self::F,
+        match_type: MatchType,
+        data: Option<Self::MatcherData>,
+    ) -> Fallible<Self>
+    where
+        Self: std::marker::Sized;
 
     fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &LF) -> Fallible<()>;
     // Are there paths from a state in the lookahead FST that can be read from

@@ -1,14 +1,15 @@
 use failure::Fallible;
 
-use crate::algorithms::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::lookahead_matchers::{LookaheadMatcher, MatcherFlagsTrait};
 use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
+use std::marker::PhantomData;
 use unsafe_unwrap::UnsafeUnwrap;
 
 #[derive(Debug)]
-pub struct ArcLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>> {
+pub struct ArcLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>, MFT> {
     // matcher fst
     fst: &'fst M::F,
     matcher: M,
@@ -16,11 +17,11 @@ pub struct ArcLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>> {
     prefix_arc: Arc<W>,
 
     // Flags to customize the behaviour
-    flags: MatcherFlags,
+    mft: PhantomData<MFT>,
 }
 
-impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W>
-    for ArcLookAheadMatcher<'fst, W, M>
+impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait> Matcher<'fst, W>
+    for ArcLookAheadMatcher<'fst, W, M, MFT>
 {
     type F = M::F;
     type Iter = M::Iter;
@@ -29,12 +30,9 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W>
         Ok(Self {
             fst,
             matcher: M::new(fst, match_type)?,
-            flags: MatcherFlags::LOOKAHEAD_NON_EPSILONS
-                | MatcherFlags::LOOKAHEAD_EPSILONS
-                | MatcherFlags::LOOKAHEAD_WEIGHT
-                | MatcherFlags::LOOKAHEAD_PREFIX,
             prefix_arc: Arc::new(0, 0, W::one(), NO_STATE_ID),
             lookahead_weight: W::one(),
+            mft: PhantomData,
         })
     }
 
@@ -54,7 +52,7 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W>
         self.matcher.flags()
             | MatcherFlags::INPUT_LOOKAHEAD_MATCHER
             | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER
-            | self.flags
+            | MFT::flags()
     }
 
     fn priority(&self, state: usize) -> Fallible<usize> {
@@ -66,14 +64,22 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W>
     }
 }
 
-impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
-    for ArcLookAheadMatcher<'fst, W, M>
+impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
+    LookaheadMatcher<'fst, W> for ArcLookAheadMatcher<'fst, W, M, MFT>
 {
     // NullAddon
     type MatcherData = ();
 
     fn data(&self) -> Option<&Self::MatcherData> {
         None
+    }
+
+    fn new_with_data(
+        fst: &'fst Self::F,
+        match_type: MatchType,
+        _data: Option<Self::MatcherData>,
+    ) -> Fallible<Self> {
+        Self::new(fst, match_type)
     }
 
     fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &LF) -> Fallible<()> {
@@ -88,21 +94,20 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
     ) -> Fallible<bool> {
         let mut result = false;
         let mut nprefix = 0;
-        if self.flags.contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
+        if MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
             self.clear_lookahead_weight();
         }
-        if self.flags.contains(MatcherFlags::LOOKAHEAD_PREFIX) {
+        if MFT::flags().contains(MatcherFlags::LOOKAHEAD_PREFIX) {
             self.clear_lookahead_prefix();
         }
         if self.fst.is_final(matcher_state)? && lfst.is_final(lfst_state)? {
-            if !self
-                .flags
+            if !MFT::flags()
                 .contains(MatcherFlags::LOOKAHEAD_WEIGHT | MatcherFlags::LOOKAHEAD_PREFIX)
             {
                 return Ok(true);
             }
             nprefix += 1;
-            if self.flags.contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
+            if MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
                 unsafe {
                     let fw_matcher_state = self
                         .fst
@@ -118,14 +123,13 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
         {
             let mut iter = self.iter(matcher_state, NO_LABEL)?.peekable();
             if iter.peek().is_some() {
-                if !self
-                    .flags
+                if !MFT::flags()
                     .contains(MatcherFlags::LOOKAHEAD_WEIGHT | MatcherFlags::LOOKAHEAD_PREFIX)
                 {
                     return Ok(true);
                 }
                 nprefix += 1;
-                if self.flags.contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
+                if MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
                     for arc in iter {
                         match arc {
                             IterItemMatcher::Arc(a) => {
@@ -149,34 +153,29 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
                 _ => bail!("Bad match type"),
             };
             if label == EPS_LABEL {
-                if !self
-                    .flags
+                if !MFT::flags()
                     .contains(MatcherFlags::LOOKAHEAD_WEIGHT | MatcherFlags::LOOKAHEAD_PREFIX)
                 {
                     return Ok(true);
                 }
-                if !self
-                    .flags
-                    .contains(MatcherFlags::LOOKAHEAD_NON_EPSILON_PREFIX)
-                {
+                if !MFT::flags().contains(MatcherFlags::LOOKAHEAD_NON_EPSILON_PREFIX) {
                     nprefix += 1;
                 }
-                if self.flags.contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
+                if MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
                     self.lookahead_weight.plus_assign(&arc.weight)?;
                 }
                 result = true;
             } else {
                 let mut iter = self.iter(matcher_state, label)?.peekable();
                 if iter.peek().is_some() {
-                    if !self
-                        .flags
+                    if !MFT::flags()
                         .contains(MatcherFlags::LOOKAHEAD_WEIGHT | MatcherFlags::LOOKAHEAD_PREFIX)
                     {
                         return Ok(true);
                     }
                     for matcher_value in iter {
                         nprefix += 1;
-                        if self.flags.contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
+                        if MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
                             match matcher_value {
                                 IterItemMatcher::Arc(a) => self
                                     .lookahead_weight
@@ -186,7 +185,7 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
                                     .plus_assign(arc.weight.times(W::one())?)?,
                             };
                         }
-                        if self.flags.contains(MatcherFlags::LOOKAHEAD_PREFIX) && nprefix == 1 {
+                        if MFT::flags().contains(MatcherFlags::LOOKAHEAD_PREFIX) && nprefix == 1 {
                             self.set_lookahead_prefix(arc.clone());
                         }
                     }
@@ -195,7 +194,7 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
             }
         }
 
-        if self.flags.contains(MatcherFlags::LOOKAHEAD_PREFIX) {
+        if MFT::flags().contains(MatcherFlags::LOOKAHEAD_PREFIX) {
             if nprefix == 1 {
                 self.clear_lookahead_weight();
             } else {
