@@ -69,6 +69,13 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W>
 impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
     for ArcLookAheadMatcher<'fst, W, M>
 {
+    // NullAddon
+    type MatcherData = ();
+
+    fn data(&self) -> Option<&Self::MatcherData> {
+        None
+    }
+
     fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &LF) -> Fallible<()> {
         Ok(())
     }

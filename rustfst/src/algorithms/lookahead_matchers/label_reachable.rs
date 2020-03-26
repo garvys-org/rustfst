@@ -86,6 +86,10 @@ impl LabelReachable {
         }
     }
 
+    pub fn data(&self) -> &LabelReachableData {
+        &self.data
+    }
+
     pub fn reach_input(&self) -> bool {
         self.data.reach_input
     }

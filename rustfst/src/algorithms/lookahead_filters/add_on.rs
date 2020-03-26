@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use failure::Fallible;
 
-use crate::fst_traits::{ArcIterator, CoreFst, Fst, FstIterData, FstIterator, StateIterator};
+use crate::fst_traits::{ArcIterator, CoreFst, Fst, FstIterator, StateIterator};
 use crate::{Arc, SymbolTable};
 
 /// Adds an object of type T to an FST.
@@ -15,6 +15,10 @@ pub struct FstAddOn<F, T> {
 }
 
 impl<F, T> FstAddOn<F, T> {
+    pub fn new(fst: F, add_on: T) -> Self {
+        Self { fst, add_on }
+    }
+
     pub fn fst(&self) -> &F {
         &self.fst
     }
@@ -104,10 +108,10 @@ where
     }
 
     fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>> {
-        self.unset_input_symbols()
+        self.fst.unset_input_symbols()
     }
 
     fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
-        self.unset_output_symbols()
+        self.fst.unset_output_symbols()
     }
 }
