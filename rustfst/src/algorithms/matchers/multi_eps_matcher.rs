@@ -14,7 +14,8 @@ use crate::algorithms::matchers::MatcherFlags;
 use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{Arc, Label, EPS_LABEL, NO_LABEL};
+use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL};
+use itertools::Itertools;
 use nom::lib::std::collections::BTreeSet;
 
 bitflags! {
@@ -34,8 +35,9 @@ pub struct MultiEpsMatcher<W, M> {
 
 pub struct IteratorMultiEpsMatcher<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> {
     iter_matcher: Option<Peekable<M::Iter>>,
-    // iter_labels: Option<Peekable<std::collections::hash_set::Iter<'a, Label>>>,
+    iter_labels: Option<(Vec<usize>, usize)>,
     matcher: Rc<RefCell<M>>,
+    matcher_state: StateId,
     ghost: PhantomData<&'fst W>,
     done: bool,
 }
@@ -62,7 +64,43 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Iterator
         if let Some(ref mut matcher_iter) = &mut self.iter_matcher {
             let res = matcher_iter.next();
             let done = res.is_none();
-            unimplemented!()
+            if done {
+                if let Some((multi_eps_labels, pos_labels)) = &mut self.iter_labels {
+                    if *pos_labels >= multi_eps_labels.len() {
+                        return None;
+                    }
+                    *pos_labels += 1;
+                    while *pos_labels < multi_eps_labels.len() {
+                        let mut it = self
+                            .matcher
+                            .borrow()
+                            .iter(self.matcher_state, multi_eps_labels[*pos_labels])
+                            .unwrap()
+                            .peekable();
+                        if it.peek().is_some() {
+                            *matcher_iter = it;
+                            break;
+                        }
+                        *pos_labels += 1;
+                    }
+                    if *pos_labels < multi_eps_labels.len() {
+                        self.done = false;
+                        res
+                    } else {
+                        *matcher_iter = self
+                            .matcher
+                            .borrow()
+                            .iter(self.matcher_state, NO_LABEL)
+                            .unwrap()
+                            .peekable();
+                        matcher_iter.next()
+                    }
+                } else {
+                    res
+                }
+            } else {
+                res
+            }
         } else {
             if self.done {
                 None
@@ -138,19 +176,26 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W> for MultiEp
             )
         } else if label == NO_LABEL {
             if self.flags.contains(MultiEpsMatcherFlags::MULTI_EPS_LIST) {
+                // TODO: Didn't find a way to store the iterator in IteratorMultiEpsMatcher.
+                let multi_eps_labels = self.multi_eps_labels.iter().cloned().collect_vec();
+
                 let mut iter_matcher = None;
-                let mut iter_labels = self.multi_eps_labels.iter().peekable();
-                while let Some(p) = iter_labels.peek() {
-                    let mut it = self.matcher.borrow().iter(state, **p)?.peekable();
+                let mut pos_labels = 0;
+                while pos_labels < multi_eps_labels.len() {
+                    let mut it = self
+                        .matcher
+                        .borrow()
+                        .iter(state, multi_eps_labels[pos_labels])?
+                        .peekable();
                     if it.peek().is_some() {
                         iter_matcher = Some(it);
                         break;
                     }
-                    iter_labels.next();
+                    pos_labels += 1;
                 }
 
-                if iter_labels.peek().is_some() {
-                    (iter_matcher, Some(iter_labels))
+                if pos_labels < multi_eps_labels.len() {
+                    (iter_matcher, Some((multi_eps_labels, pos_labels)))
                 } else {
                     (
                         Some(self.matcher.borrow().iter(state, NO_LABEL)?.peekable()),
@@ -176,10 +221,11 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W> for MultiEp
         };
         Ok(IteratorMultiEpsMatcher {
             iter_matcher,
-            // iter_labels,
+            iter_labels,
             matcher: Rc::clone(&self.matcher),
             ghost: PhantomData,
             done: false,
+            matcher_state: state,
         })
     }
 
