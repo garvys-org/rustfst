@@ -9,7 +9,7 @@ use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 use unsafe_unwrap::UnsafeUnwrap;
 
 #[derive(Debug)]
-struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>> {
+pub struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>> {
     // matcher fst
     fst: &'fst M::F,
     matcher: M,

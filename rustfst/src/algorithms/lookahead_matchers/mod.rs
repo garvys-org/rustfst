@@ -7,7 +7,7 @@ use crate::{Arc, Label, StateId, NO_STATE_ID};
 
 mod arc_lookahead_matcher;
 pub(crate) mod interval_set;
-mod label_lookahead_matcher;
+pub mod label_lookahead_matcher;
 pub(crate) mod label_lookahead_relabeler;
 mod label_reachable;
 pub(crate) mod state_reachable;

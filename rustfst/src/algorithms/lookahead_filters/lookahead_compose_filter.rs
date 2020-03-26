@@ -16,7 +16,7 @@ use std::marker::PhantomData;
 use std::rc::Rc;
 
 #[derive(Debug)]
-struct LookAheadComposeFilter<
+pub struct LookAheadComposeFilter<
     'fst1,
     'fst2,
     W: Semiring + 'fst1 + 'fst2,
@@ -65,12 +65,7 @@ where
         }
         self.lookahead_arc = true;
 
-        let res = match selector(
-            self.matcher1(),
-            self.matcher2(),
-            SMT::match_type(),
-            self.lookahead_type,
-        ) {
+        let res = match self.selector() {
             Selector::MatchInput(s) => s
                 .matcher
                 .borrow_mut()

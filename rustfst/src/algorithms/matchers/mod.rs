@@ -25,11 +25,24 @@ bitflags! {
         const LOOKAHEAD_NON_EPSILONS =  1u32 << 8;
         const LOOKAHEAD_EPSILONS =  1u32 << 8;
         const LOOKAHEAD_NON_EPSILON_PREFIX =  1u32 << 10;
+
         const LOOKAHEAD_FLAGS = Self::INPUT_LOOKAHEAD_MATCHER.bits |
             Self::OUTPUT_LOOKAHEAD_MATCHER.bits |
             Self::LOOKAHEAD_WEIGHT.bits |
             Self::LOOKAHEAD_PREFIX.bits |
             Self::LOOKAHEAD_NON_EPSILONS.bits |
+            Self::LOOKAHEAD_EPSILONS.bits |
+            Self::LOOKAHEAD_NON_EPSILON_PREFIX.bits;
+
+        const ILABEL_LOOKAHEAD_FLAGS = Self::INPUT_LOOKAHEAD_MATCHER.bits |
+            Self::LOOKAHEAD_WEIGHT.bits |
+            Self::LOOKAHEAD_PREFIX.bits |
+            Self::LOOKAHEAD_EPSILONS.bits |
+            Self::LOOKAHEAD_NON_EPSILON_PREFIX.bits;
+
+        const OLABEL_LOOKAHEAD_FLAGS = Self::OUTPUT_LOOKAHEAD_MATCHER.bits |
+            Self::LOOKAHEAD_WEIGHT.bits |
+            Self::LOOKAHEAD_PREFIX.bits |
             Self::LOOKAHEAD_EPSILONS.bits |
             Self::LOOKAHEAD_NON_EPSILON_PREFIX.bits;
     }
