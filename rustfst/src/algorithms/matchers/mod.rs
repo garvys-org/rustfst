@@ -66,6 +66,7 @@ pub enum MatchType {
 }
 
 // Use this to avoid autoref
+#[derive(Clone)]
 pub enum IterItemMatcher<'a, W: Semiring> {
     Arc(&'a Arc<W>),
     EpsLoop,

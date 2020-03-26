@@ -44,14 +44,14 @@ pub struct IteratorMultiEpsMatcher<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>
 
 impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Clone for IteratorMultiEpsMatcher<'fst, W, M> {
     fn clone(&self) -> Self {
-        unimplemented!()
-        // Self {
-        //     iter_matcher: self.iter_matcher.clone(),
-        //     // iter_labels: self.iter_labels.clone(),
-        //     matcher: Rc::clone(&self.matcher),
-        //     ghost: PhantomData,
-        //     done: self.done
-        // }
+        Self {
+            iter_matcher: self.iter_matcher.clone(),
+            iter_labels: self.iter_labels.clone(),
+            matcher: Rc::clone(&self.matcher),
+            ghost: PhantomData,
+            done: self.done,
+            matcher_state: self.matcher_state,
+        }
     }
 }
 
