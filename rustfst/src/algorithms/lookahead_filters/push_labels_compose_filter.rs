@@ -2,21 +2,23 @@ use std::marker::PhantomData;
 use std::rc::Rc;
 
 use bimap::Overwritten::Pair;
-use failure::_core::cell::RefCell;
 use failure::Fallible;
+use failure::_core::cell::RefCell;
 
-use crate::{Arc, EPS_LABEL, Label, NO_LABEL, NO_STATE_ID};
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::filter_states::{FilterState, IntegerFilterState, PairFilterState};
-use crate::algorithms::lookahead_filters::lookahead_selector::{LookAheadSelector, MatchTypeTrait, selector};
 use crate::algorithms::lookahead_filters::lookahead_selector::Selector;
+use crate::algorithms::lookahead_filters::lookahead_selector::{
+    selector, LookAheadSelector, MatchTypeTrait,
+};
 use crate::algorithms::lookahead_filters::LookAheadComposeFilterTrait;
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
-use crate::algorithms::matchers::{Matcher, MatchType};
+use crate::algorithms::matchers::multi_eps_matcher::{MultiEpsMatcher, MultiEpsMatcherFlags};
 use crate::algorithms::matchers::MatcherFlags;
-use crate::algorithms::matchers::multi_eps_matcher::MultiEpsMatcher;
+use crate::algorithms::matchers::{MatchType, Matcher};
 use crate::fst_traits::CoreFst;
 use crate::semirings::Semiring;
+use crate::{Arc, Label, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
 #[derive(Debug, Clone)]
 pub struct PushLabelsComposeFilter<
@@ -83,7 +85,7 @@ where
         {
             return;
         }
-        self.narcsa = if self.filter.lookahead_output() {
+        self.narcsa = if self.lookahead_output() {
             self.fst1.num_arcs(s1).unwrap()
         } else {
             self.fst2.num_arcs(s2).unwrap()
@@ -93,14 +95,19 @@ where
         self.matcher1().borrow_mut().clear_multi_eps_labels();
         self.matcher2().borrow_mut().clear_multi_eps_labels();
         if *flabel != NO_LABEL {
-            self.matcher1().borrow_mut().add_multi_eps_label(*flabel);
-            self.matcher2().borrow_mut().add_multi_eps_label(*flabel);
+            self.matcher1()
+                .borrow_mut()
+                .add_multi_eps_label(*flabel)
+                .unwrap();
+            self.matcher2()
+                .borrow_mut()
+                .add_multi_eps_label(*flabel)
+                .unwrap();
         }
     }
 
     fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
         if !self
-            .filter
             .lookahead_flags()
             .contains(MatcherFlags::LOOKAHEAD_PREFIX)
         {
@@ -112,7 +119,7 @@ where
         let fs2 = self.fs.state2();
         let flabel = fs2.state();
         if *flabel != NO_LABEL {
-            if self.filter.lookahead_output() {
+            if self.lookahead_output() {
                 return self.pushed_label_filter_arc(arc1, arc2, *flabel);
             } else {
                 return self.pushed_label_filter_arc(arc2, arc1, *flabel);
@@ -122,10 +129,10 @@ where
         if fs1 == FilterState::new_no_state() {
             return FilterState::new_no_state();
         }
-        if !self.filter.lookahead_arc() {
+        if !self.lookahead_arc() {
             return FilterState::new((fs1, FilterState::new(NO_LABEL)));
         }
-        if self.filter.lookahead_output() {
+        if self.lookahead_output() {
             self.push_label_filter_arc(arc1, arc2, &fs1)
         } else {
             self.push_label_filter_arc(arc2, arc1, &fs1)
@@ -135,7 +142,6 @@ where
     fn filter_final(&self, w1: &mut W, w2: &mut W) {
         self.filter.filter_final(w1, w2);
         if !self
-            .filter
             .lookahead_flags()
             .contains(MatcherFlags::LOOKAHEAD_PREFIX)
             || w1.is_zero()
@@ -159,24 +165,29 @@ where
 }
 
 impl<
-    'fst1,
-    'fst2,
-    W: Semiring + 'fst1 + 'fst2,
-    CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
-    SMT: MatchTypeTrait,
-> PushLabelsComposeFilter<'fst1, 'fst2, W, CF, SMT>
-    where
-        CF::M1: LookaheadMatcher<'fst1, W>,
-        CF::M2: LookaheadMatcher<'fst2, W>,
+        'fst1,
+        'fst2,
+        W: Semiring + 'fst1 + 'fst2,
+        CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
+        SMT: MatchTypeTrait,
+    > PushLabelsComposeFilter<'fst1, 'fst2, W, CF, SMT>
+where
+    CF::M1: LookaheadMatcher<'fst1, W>,
+    CF::M2: LookaheadMatcher<'fst2, W>,
 {
     // Consumes an already pushed label.
-    fn pushed_label_filter_arc(&self, arca: &mut Arc<W>, arcb: &mut Arc<W>, flabel: Label) -> <Self as ComposeFilter<'fst1, 'fst2, W>>::FS {
-        let labela = if self.filter.lookahead_output() {
+    fn pushed_label_filter_arc(
+        &self,
+        arca: &mut Arc<W>,
+        arcb: &mut Arc<W>,
+        flabel: Label,
+    ) -> <Self as ComposeFilter<'fst1, 'fst2, W>>::FS {
+        let labela = if self.lookahead_output() {
             &mut arca.olabel
         } else {
             &mut arca.ilabel
         };
-        let labelb = if self.filter.lookahead_output() {
+        let labelb = if self.lookahead_output() {
             arcb.ilabel
         } else {
             arcb.olabel
@@ -191,14 +202,17 @@ impl<
             if self.narcsa == 1 {
                 self.fs.clone()
             } else {
-                if match selector(
-                    self.filter.matcher1(),
-                    self.filter.matcher2(),
-                    SMT::match_type(),
-                    self.filter.lookahead_type(),
-                ) {
-                    Selector::MatchInput(s) => s.matcher.borrow_mut().lookahead_label(arca.nextstate, flabel).unwrap(),
-                    Selector::MatchOutput(s) => s.matcher.borrow_mut().lookahead_label(arca.nextstate, flabel).unwrap()
+                if match self.selector() {
+                    Selector::MatchInput(s) => s
+                        .matcher
+                        .borrow_mut()
+                        .lookahead_label(arca.nextstate, flabel)
+                        .unwrap(),
+                    Selector::MatchOutput(s) => s
+                        .matcher
+                        .borrow_mut()
+                        .lookahead_label(arca.nextstate, flabel)
+                        .unwrap(),
                 } {
                     self.fs.clone()
                 } else {
@@ -211,40 +225,44 @@ impl<
     }
 
     // Pushes a label forward when possible.
-    fn push_label_filter_arc(&self, arca: &mut Arc<W>, arcb: &mut Arc<W>, fs1: &CF::FS) -> <Self as ComposeFilter<'fst1, 'fst2, W>>::FS {
-        let labela = if self.filter.lookahead_output() {
+    fn push_label_filter_arc(
+        &self,
+        arca: &mut Arc<W>,
+        arcb: &mut Arc<W>,
+        fs1: &CF::FS,
+    ) -> <Self as ComposeFilter<'fst1, 'fst2, W>>::FS {
+        let labela = if self.lookahead_output() {
             &mut arca.olabel
         } else {
             &mut arca.ilabel
         };
-        let labelb = if self.filter.lookahead_output() {
+        let labelb = if self.lookahead_output() {
             arcb.olabel
         } else {
             arcb.ilabel
         };
 
         if labelb != EPS_LABEL {
-            return FilterState::new((fs1.clone(), FilterState::new(NO_LABEL)))
+            return FilterState::new((fs1.clone(), FilterState::new(NO_LABEL)));
         }
 
-        if *labela != EPS_LABEL && self.filter.lookahead_flags().contains(MatcherFlags::LOOKAHEAD_NON_EPSILON_PREFIX) {
-            return FilterState::new((fs1.clone(), FilterState::new(NO_LABEL)))
+        if *labela != EPS_LABEL
+            && self
+                .lookahead_flags()
+                .contains(MatcherFlags::LOOKAHEAD_NON_EPSILON_PREFIX)
+        {
+            return FilterState::new((fs1.clone(), FilterState::new(NO_LABEL)));
         }
 
         let mut larc = Arc::new(NO_LABEL, NO_LABEL, W::zero(), NO_STATE_ID);
 
-        let b = match selector(
-            self.filter.matcher1(),
-            self.filter.matcher2(),
-            SMT::match_type(),
-            self.filter.lookahead_type(),
-        ) {
+        let b = match self.selector() {
             Selector::MatchInput(s) => s.matcher.borrow().lookahead_prefix(&mut larc),
-            Selector::MatchOutput(s) => s.matcher.borrow().lookahead_prefix(&mut larc)
+            Selector::MatchOutput(s) => s.matcher.borrow().lookahead_prefix(&mut larc),
         };
 
         if b {
-            *labela = if self.filter.lookahead_output() {
+            *labela = if self.lookahead_output() {
                 larc.ilabel
             } else {
                 larc.olabel
@@ -258,29 +276,61 @@ impl<
             FilterState::new((fs1.clone(), FilterState::new(NO_LABEL)))
         }
     }
-}
 
-// impl<
-//         'fst1,
-//         'fst2,
-//         W: Semiring + 'fst1 + 'fst2,
-//         CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
-//         SMT: MatchTypeTrait,
-//     > LookAheadComposeFilterTrait<'fst1, 'fst2, W>
-//     for PushLabelsComposeFilter<'fst1, 'fst2, W, CF, SMT>
-// where
-//     CF::M1: LookaheadMatcher<'fst1, W>,
-//     CF::M2: LookaheadMatcher<'fst2, W>,
-// {
-//     fn lookahead_flags(&self) -> MatcherFlags {
-//         unimplemented!()
-//     }
-//
-//     fn lookahead_arc(&self) -> bool {
-//         unimplemented!()
-//     }
-//
-//     fn lookahead_type(&self) -> MatchType {
-//         unimplemented!()
-//     }
-// }
+    fn lookahead_output(&self) -> bool {
+        self.filter.lookahead_output()
+    }
+
+    fn lookahead_arc(&self) -> bool {
+        self.filter.lookahead_arc()
+    }
+
+    fn lookahead_flags(&self) -> MatcherFlags {
+        self.filter.lookahead_flags()
+    }
+
+    fn selector(&self) -> &Selector<'fst1, 'fst2, W, CF::M1, CF::M2> {
+        self.filter.selector()
+    }
+
+    fn new<IM1: Into<Option<Rc<RefCell<CF::M1>>>>, IM2: Into<Option<Rc<RefCell<CF::M2>>>>>(
+        fst1: &'fst1 <<Self as ComposeFilter<'fst1, 'fst2, W>>::M1 as Matcher<'fst1, W>>::F,
+        fst2: &'fst2 <<Self as ComposeFilter<'fst1, 'fst2, W>>::M2 as Matcher<'fst2, W>>::F,
+        m1: IM1,
+        m2: IM2,
+    ) -> Fallible<Self> {
+        let filter = CF::new(fst1, fst2, m1, m2)?;
+        let fst1 = filter.matcher1().borrow().fst();
+        let fst2 = filter.matcher2().borrow().fst();
+        let matcher1 = Rc::new(RefCell::new(MultiEpsMatcher::new_with_opts(
+            fst1,
+            MatchType::MatchOutput,
+            if filter.lookahead_output() {
+                MultiEpsMatcherFlags::MULTI_EPS_LIST
+            } else {
+                MultiEpsMatcherFlags::MULTI_EPS_LOOP
+            },
+            filter.matcher1(),
+        )?));
+        let matcher2 = Rc::new(RefCell::new(MultiEpsMatcher::new_with_opts(
+            fst2,
+            MatchType::MatchInput,
+            if filter.lookahead_output() {
+                MultiEpsMatcherFlags::MULTI_EPS_LOOP
+            } else {
+                MultiEpsMatcherFlags::MULTI_EPS_LIST
+            },
+            filter.matcher2(),
+        )?));
+        Ok(Self {
+            fs: FilterState::new_no_state(),
+            fst1,
+            fst2,
+            matcher1,
+            matcher2,
+            filter,
+            narcsa: 0,
+            smt: PhantomData,
+        })
+    }
+}
