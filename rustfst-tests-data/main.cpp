@@ -766,8 +766,8 @@ void compute_fst_matcher(const F& raw_fst, json& j) {
     }
 }
 
-template<class F, class FILTER, class OPTS>
-void do_compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2, bool connect, FILTER filter, string filter_name, OPTS dyn_opts) {
+template<class F, class FILTER>
+void do_compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2, bool connect, FILTER filter, string filter_name) {
     using Arc = typename F::Arc;
 
     auto opts = fst::ComposeOptions();
@@ -778,13 +778,9 @@ void do_compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<type
     fst::VectorFst<Arc> static_fst;
     fst::Compose(raw_fst, fst_2, &static_fst, opts);
 
-    // dynamic
-    auto res_dynamic = fst::VectorFst<Arc>(fst::ComposeFst<Arc>(raw_fst, fst_2, dyn_opts));
-
     json j2;
     j2["fst_2"] = fst_to_string(fst_2);
-    j2["result_static"] = fst_to_string(static_fst);
-    j2["result_dynamic"] = fst_to_string(res_dynamic);
+    j2["result"] = fst_to_string(static_fst);
     j2["filter_name"] = filter_name;
     j2["connect"] = connect;
 
@@ -792,19 +788,72 @@ void do_compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<type
 }
 
 template<class F>
+void do_compute_fst_compose_lookahead(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2) {
+    using Arc = typename F::Arc;
+
+    using MATCHER1 = fst::LabelLookAheadMatcher<fst::SortedMatcher<fst::Fst<Arc>>, fst::olabel_lookahead_flags>;
+    using MATCHER2 = fst::SortedMatcher<fst::Fst<Arc>>;
+
+    using SEQ_FILTER = fst::AltSequenceComposeFilter<MATCHER1, MATCHER2>;
+    using LOOK_FILTER = fst::LookAheadComposeFilter<SEQ_FILTER, MATCHER1, MATCHER2, fst::MATCH_OUTPUT>;
+    using PUSH_WEIGHTS_FILTER = fst::PushWeightsComposeFilter<LOOK_FILTER, MATCHER1, MATCHER2, fst::MATCH_OUTPUT>;
+
+    using PUSH_LABELS_FILTER = fst::PushLabelsComposeFilter<PUSH_WEIGHTS_FILTER,
+                                         MATCHER1,
+                                         MATCHER2,
+                                         fst::MATCH_OUTPUT>;
+    using COMPOSE_FILTER = PUSH_LABELS_FILTER;
+
+    fst::ConstFst<Arc> ifst1(raw_fst);
+    fst::VectorFst<Arc> ifst2(fst_2);
+    fst::CacheOptions cacheOptions;
+
+    fst::MatcherFst<
+      fst::ConstFst<Arc>,
+      fst::LabelLookAheadMatcher<fst::SortedMatcher<fst::Fst<Arc>>, fst::olabel_lookahead_flags>,
+      fst::olabel_lookahead_fst_type,
+      fst::LabelLookAheadRelabeler<Arc>
+    > graph1Look(ifst1);
+
+    fst::LabelLookAheadRelabeler<Arc>::Relabel(
+    &ifst2, graph1Look, true);
+
+    fst::ArcSort(&ifst2, fst::ILabelCompare<Arc>());
+
+    fst::ComposeFstImplOptions<MATCHER1, MATCHER2, COMPOSE_FILTER> composeOptions(
+    cacheOptions);
+    composeOptions.matcher1 = graph1Look.InitMatcher(fst::MATCH_OUTPUT);
+    composeOptions.matcher2 = new MATCHER2(ifst2, fst::MATCH_INPUT);
+
+    auto lol =  new fst::ComposeFst<Arc>(graph1Look, ifst2, composeOptions);
+
+    auto res_dynamic = fst::VectorFst<Arc>(*lol);
+
+    json j2;
+    j2["fst_2"] = fst_to_string(fst_2);
+    j2["result"] = fst_to_string(res_dynamic);
+    j2["filter_name"] = "lookahead";
+
+    j["compose"].push_back(j2);
+}
+
+
+template<class F>
 void compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2) {
     using Weight = typename F::Weight;
     using Arc = typename F::Arc;
-    using M = fst::Matcher<fst::Fst<Arc>>;
     j["compose"] = {};
 
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::AUTO_FILTER, "auto", fst::CacheOptions());
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NULL_FILTER, "null", fst::ComposeFstOptions<Arc, M, fst::NullComposeFilter<M>>());
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::TRIVIAL_FILTER, "trivial", fst::ComposeFstOptions<Arc, M, fst::TrivialComposeFilter<M>>());
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::SEQUENCE_FILTER, "sequence", fst::ComposeFstOptions<Arc, M, fst::SequenceComposeFilter<M>>());
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::ALT_SEQUENCE_FILTER, "alt_sequence", fst::ComposeFstOptions<Arc, M, fst::AltSequenceComposeFilter<M>>());
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::MATCH_FILTER, "match", fst::ComposeFstOptions<Arc, M, fst::MatchComposeFilter<M>>());
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NO_MATCH_FILTER, "no_match", fst::ComposeFstOptions<Arc, M, fst::NoMatchComposeFilter<M>>());
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::AUTO_FILTER, "auto");
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NULL_FILTER, "null");
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::TRIVIAL_FILTER, "trivial");
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::SEQUENCE_FILTER, "sequence");
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::ALT_SEQUENCE_FILTER, "alt_sequence");
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::MATCH_FILTER, "match");
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NO_MATCH_FILTER, "no_match");
+
+    do_compute_fst_compose_lookahead(raw_fst, j, fst_2);
+
 }
 
 template<class F>
