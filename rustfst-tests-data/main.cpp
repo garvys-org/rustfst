@@ -782,7 +782,6 @@ void do_compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<type
     j2["fst_2"] = fst_to_string(fst_2);
     j2["result"] = fst_to_string(static_fst);
     j2["filter_name"] = filter_name;
-    j2["connect"] = connect;
 
     j["compose"].push_back(j2);
 }

@@ -14,7 +14,16 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
+use crate::fst_traits::SerializableFst;
 use crate::semirings::{LogWeight, ProductWeight, SerializableSemiring, TropicalWeight};
+use crate::tests_openfst::algorithms::closure::{
+    test_closure_plus, test_closure_plus_dynamic, test_closure_star, test_closure_star_dynamic,
+    SimpleStaticDynamicOperationResult, SimpleStaticDynamicTestData,
+};
+use crate::tests_openfst::algorithms::compose::{ComposeOperationResult, ComposeTestData};
+use crate::tests_openfst::algorithms::concat::{
+    test_concat, test_concat_dynamic, ConcatOperationResult, ConcatTestData,
+};
 use crate::tests_openfst::algorithms::factor_weight_gallic::test_factor_weight_gallic;
 use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicOperationResult;
 use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicTestData;
@@ -28,6 +37,8 @@ use crate::tests_openfst::algorithms::gallic_encode_decode::test_gallic_encode_d
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicOperationResult;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicTestData;
 use crate::tests_openfst::algorithms::matcher::test_sorted_matcher;
+use crate::tests_openfst::algorithms::matcher::{MatcherOperationResult, MatcherTestData};
+use crate::tests_openfst::algorithms::union::{test_union, test_union_dynamic};
 use crate::tests_openfst::io::const_fst_bin_deserializer::{
     test_const_fst_aligned_bin_deserializer, test_const_fst_bin_deserializer,
 };
@@ -37,6 +48,9 @@ use crate::tests_openfst::io::const_fst_bin_serializer::{
 use crate::tests_openfst::io::const_fst_text_serialization::{
     test_const_fst_text_serialization, test_const_fst_text_serialization_with_symt,
 };
+use crate::tests_openfst::io::const_fst_bin_serializer::test_const_fst_bin_serializer;
+use crate::tests_openfst::io::const_fst_text_serialization::test_const_fst_text_serialization;
+use crate::tests_openfst::io::vector_fst_bin_deserializer::test_vector_fst_bin_with_symt_deserializer;
 
 use self::algorithms::{
     arc_map::{
@@ -46,7 +60,7 @@ use self::algorithms::{
         ArcMapWithWeightTestData,
     },
     arcsort::{test_arcsort_ilabel, test_arcsort_olabel},
-    compose::{test_compose, test_compose_dynamic},
+    compose::test_compose,
     connect::test_connect,
     determinize::{test_determinize, DeterminizeOperationResult, DeterminizeTestData},
     encode::{test_encode, test_encode_decode, EncodeOperationResult, EncodeTestData},
@@ -743,12 +757,6 @@ macro_rules! test_fst {
                 do_run!(test_compose, $fst_name);
                 Ok(())
             }
-
-            // #[test]
-            // fn test_fst_compose_dynamic_openfst() -> Fallible<()> {
-            //     do_run!(test_compose_dynamic, $fst_name);
-            //     Ok(())
-            // }
         }
     };
 }
