@@ -4,8 +4,7 @@ use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::lookahead_matchers::interval_set::IntervalSet;
 use crate::algorithms::visitors::IntervalReachVisitor;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
-use crate::semirings::Semiring;
+use crate::fst_traits::{CoreFst, ExpandedFst};
 use crate::StateId;
 
 use crate::fst_properties::FstProperties;
@@ -45,7 +44,7 @@ impl StateReachable {
         let mut nscc = vec![];
 
         // Gets the number of states per SCC.
-        for (s, &c) in scc.iter().enumerate() {
+        for &c in scc.iter() {
             let c = c as usize;
             while c >= nscc.len() {
                 nscc.push(0);

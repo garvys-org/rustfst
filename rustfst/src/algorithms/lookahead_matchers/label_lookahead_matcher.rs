@@ -2,11 +2,10 @@ use failure::Fallible;
 
 use crate::algorithms::lookahead_matchers::label_reachable::{LabelReachable, LabelReachableData};
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
-use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
+use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
+use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
-use unsafe_unwrap::UnsafeUnwrap;
+use crate::{Arc, EPS_LABEL, NO_STATE_ID};
 
 #[derive(Debug)]
 pub struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>> {
@@ -71,7 +70,7 @@ impl<'fst, W: Semiring, M: Matcher<'fst, W>> Matcher<'fst, W>
     type F = M::F;
     type Iter = M::Iter;
 
-    fn new(fst: &'fst Self::F, match_type: MatchType) -> Fallible<Self> {
+    fn new(_fst: &'fst Self::F, _match_type: MatchType) -> Fallible<Self> {
         unimplemented!()
         // let flags = MatcherFlags::LOOKAHEAD_EPSILONS
         //     | MatcherFlags::LOOKAHEAD_WEIGHT

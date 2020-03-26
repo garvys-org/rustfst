@@ -4,15 +4,16 @@ use failure::Fallible;
 
 use bitflags::bitflags;
 pub use generic_matcher::GenericMatcher;
+pub use multi_eps_matcher::{MultiEpsMatcher, MultiEpsMatcherFlags};
 pub use sorted_matcher::SortedMatcher;
 
-use crate::fst_traits::{ExpandedFst, Fst};
+use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Arc, EPS_LABEL, NO_LABEL};
 use crate::{Label, StateId};
 
 mod generic_matcher;
-pub mod multi_eps_matcher;
+mod multi_eps_matcher;
 mod sorted_matcher;
 
 bitflags! {

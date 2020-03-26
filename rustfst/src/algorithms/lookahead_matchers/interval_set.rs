@@ -1,4 +1,3 @@
-use num_traits::PrimInt;
 use std::collections::HashSet;
 use std::slice::Iter as IterSlice;
 use superslice::Ext;
@@ -141,5 +140,6 @@ impl IntervalSet {
         self.intervals
             .intervals
             .retain(|_| (intervals_indexes_to_keep.contains(&index), index += 1).0);
+        self.intervals.set_count(count)
     }
 }

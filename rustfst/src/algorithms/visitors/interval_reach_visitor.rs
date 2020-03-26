@@ -1,6 +1,6 @@
 use crate::algorithms::dfs_visit::Visitor;
 use crate::algorithms::lookahead_matchers::interval_set::{IntInterval, IntervalSet};
-use crate::fst_traits::{CoreFst, Fst};
+use crate::fst_traits::Fst;
 use crate::{Arc, StateId};
 
 static UNASSIGNED: usize = std::usize::MAX;
@@ -25,10 +25,10 @@ impl<'a, F> IntervalReachVisitor<'a, F> {
 
 impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
     /// Invoked before DFS visit.
-    fn init_visit(&mut self, fst: &'a F) {}
+    fn init_visit(&mut self, _fst: &'a F) {}
 
     /// Invoked when state discovered (2nd arg is DFS tree root).
-    fn init_state(&mut self, s: StateId, root: StateId) -> bool {
+    fn init_state(&mut self, s: StateId, _root: StateId) -> bool {
         while self.isets.len() <= s {
             self.isets.push(IntervalSet::default());
         }
@@ -56,12 +56,12 @@ impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
     }
 
     /// Invoked when tree arc to white/undiscovered state examined.
-    fn tree_arc(&mut self, s: StateId, arc: &Arc<F::W>) -> bool {
+    fn tree_arc(&mut self, _s: StateId, _arc: &Arc<F::W>) -> bool {
         true
     }
 
     /// Invoked when back arc to grey/unfinished state examined.
-    fn back_arc(&mut self, s: StateId, arc: &Arc<F::W>) -> bool {
+    fn back_arc(&mut self, _s: StateId, _arc: &Arc<F::W>) -> bool {
         panic!("Cyclic input")
     }
 
@@ -73,7 +73,7 @@ impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
 
     /// Invoked when state finished ('s' is tree root, 'parent' is kNoStateId,
     /// and 'arc' is nullptr).
-    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, arc: Option<&Arc<F::W>>) {
+    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, _arc: Option<&Arc<F::W>>) {
         if self.index != UNASSIGNED && self.fst.is_final(s).unwrap() {
             let intervals = &mut self.isets[s].intervals.intervals;
             intervals[0].end = self.index;

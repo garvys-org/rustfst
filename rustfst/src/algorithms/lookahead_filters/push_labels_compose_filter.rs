@@ -1,21 +1,18 @@
+use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
 
-use bimap::Overwritten::Pair;
 use failure::Fallible;
-use failure::_core::cell::RefCell;
 
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::filter_states::{FilterState, IntegerFilterState, PairFilterState};
+use crate::algorithms::lookahead_filters::lookahead_selector::MatchTypeTrait;
 use crate::algorithms::lookahead_filters::lookahead_selector::Selector;
-use crate::algorithms::lookahead_filters::lookahead_selector::{
-    selector, LookAheadSelector, MatchTypeTrait,
-};
 use crate::algorithms::lookahead_filters::LookAheadComposeFilterTrait;
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
-use crate::algorithms::matchers::multi_eps_matcher::{MultiEpsMatcher, MultiEpsMatcherFlags};
 use crate::algorithms::matchers::MatcherFlags;
 use crate::algorithms::matchers::{MatchType, Matcher};
+use crate::algorithms::matchers::{MultiEpsMatcher, MultiEpsMatcherFlags};
 use crate::fst_traits::CoreFst;
 use crate::semirings::Semiring;
 use crate::{Arc, Label, EPS_LABEL, NO_LABEL, NO_STATE_ID};
@@ -57,17 +54,11 @@ where
     type FS = PairFilterState<CF::FS, IntegerFilterState>;
 
     fn new<IM1: Into<Option<Rc<RefCell<Self::M1>>>>, IM2: Into<Option<Rc<RefCell<Self::M2>>>>>(
-        fst1: &'fst1 <Self::M1 as Matcher<'fst1, W>>::F,
-        fst2: &'fst2 <Self::M2 as Matcher<'fst2, W>>::F,
-        m1: IM1,
-        m2: IM2,
+        _fst1: &'fst1 <Self::M1 as Matcher<'fst1, W>>::F,
+        _fst2: &'fst2 <Self::M2 as Matcher<'fst2, W>>::F,
+        _m1: IM1,
+        _m2: IM2,
     ) -> Fallible<Self> {
-        let filter = CF::new(
-            fst1,
-            fst2,
-            m1.into().map(|e| e.borrow().matcher()),
-            m2.into().map(|e| e.borrow().matcher()),
-        )?;
         unimplemented!()
     }
 

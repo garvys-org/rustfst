@@ -1,22 +1,19 @@
 use std::cell::RefCell;
-use std::collections::HashSet;
+use std::iter::Peekable;
 use std::marker::PhantomData;
+use std::ops::{Add, AddAssign, SubAssign};
 use std::rc::Rc;
 
 use failure::Fallible;
-use std::iter::Peekable;
-use std::ops::{Add, AddAssign, SubAssign};
+use itertools::Itertools;
+use nom::lib::std::collections::BTreeSet;
 
 use bitflags::bitflags;
 
-use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::MatcherFlags;
 use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher};
-use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL};
-use itertools::Itertools;
-use nom::lib::std::collections::BTreeSet;
+use crate::{Label, StateId, EPS_LABEL, NO_LABEL};
 
 bitflags! {
     pub struct MultiEpsMatcherFlags: u32 {
@@ -300,10 +297,12 @@ impl<K: Copy + Ord + AddAssign<usize> + SubAssign<usize> + Add<usize, Output = K
         self.set.iter()
     }
 
+    #[allow(unused)]
     pub fn lower_bound(&self) -> K {
         self.min_key
     }
 
+    #[allow(unused)]
     pub fn upper_bound(&self) -> K {
         self.max_key
     }

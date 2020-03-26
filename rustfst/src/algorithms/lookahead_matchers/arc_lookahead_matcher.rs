@@ -8,7 +8,7 @@ use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 use unsafe_unwrap::UnsafeUnwrap;
 
 #[derive(Debug)]
-struct ArcLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>> {
+pub struct ArcLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>> {
     // matcher fst
     fst: &'fst M::F,
     matcher: M,
@@ -69,7 +69,7 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W>
 impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
     for ArcLookAheadMatcher<'fst, W, M>
 {
-    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &LF) -> Fallible<()> {
+    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &LF) -> Fallible<()> {
         Ok(())
     }
 

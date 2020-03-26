@@ -1,18 +1,12 @@
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::algorithms::compose_filters::{
-    AltSequenceComposeFilter, MatchComposeFilter, NoMatchComposeFilter, NullComposeFilter,
-    SequenceComposeFilter, TrivialComposeFilter,
-};
+use crate::algorithms::lookahead_matchers::LabelLookAheadMatcher;
 use crate::algorithms::matchers::SortedMatcher;
-use crate::algorithms::{
-    compose, compose_with_config, ComposeConfig, ComposeFilterEnum, ComposeFst,
-};
-use crate::fst_impls::VectorFst;
+use crate::algorithms::{compose_with_config, ComposeConfig, ComposeFilterEnum};
+use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
-use crate::tests_openfst::algorithms::dynamic_fst::compare_fst_static_dynamic;
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -79,6 +73,33 @@ where
     Ok(())
 }
 
+#[allow(unused)]
+fn do_test_compose_lookahead<W>(
+    fst_raw: &VectorFst<W>,
+    compose_test_data: &ComposeTestData<VectorFst<W>>,
+) -> Fallible<()>
+where
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
+    W::ReverseWeight: 'static,
+{
+    let fst1: ConstFst<_> = fst_raw.clone().into();
+    let fst2: VectorFst<_> = compose_test_data.fst_2.clone();
+
+    type MATCHER1<'a, S> = LabelLookAheadMatcher<'a, S, SortedMatcher<'a, ConstFst<S>>>;
+    type MATCHER2<'a, S> = SortedMatcher<'a, VectorFst<S>>;
+    //
+    //     type SEQFILTER<'a, 'b, S> =
+    //         AltSequenceComposeFilter<'b, VectorFst<S>, MATCHER1<'a, S>, MATCHER2<'b, S>>;
+    //     type LOOKFILTER<'a, 'b, S> =
+    //         LookAheadComposeFilter<'a, 'b, S, SEQFILTER<'a, 'b, S>, SMatchOutput>;
+    //     // type PUSHLABELSFILTER<'a, 'b, S> =
+    //     //     PushLabelsComposeFilter<'a, 'b, S, LOOKFILTER<'a, 'b, S>, SMatchOutput>;
+    //
+    //     let composed_fst = ComposeFst::<'fst1, 'fst2, W, LOOKFILTER<'fst1, 'fst2, W>>::new(fst1, fst2)?;
+
+    unimplemented!()
+}
+
 pub fn test_compose<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
@@ -121,6 +142,7 @@ where
                 compose_test_data,
                 ComposeFilterEnum::NoMatchFilter,
             )?,
+            "lookahead" => do_test_compose_lookahead(&test_data.raw, compose_test_data)?,
             _ => panic!("Not supported : {}", &compose_test_data.filter_name),
         }
     }

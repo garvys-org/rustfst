@@ -3,7 +3,7 @@ use superslice::Ext;
 
 use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{ExpandedFst, Fst};
+use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL};
 

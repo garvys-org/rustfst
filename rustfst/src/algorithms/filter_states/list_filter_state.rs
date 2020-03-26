@@ -12,7 +12,7 @@ pub struct ListFilterState {
 impl FilterState for ListFilterState {
     type Type = Vec<usize>;
 
-    fn new(value: Self::Type) -> Self {
+    fn new(_value: Self::Type) -> Self {
         unimplemented!()
     }
 

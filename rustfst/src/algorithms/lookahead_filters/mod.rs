@@ -1,16 +1,21 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
+pub use lookahead_compose_filter::LookAheadComposeFilter;
+pub use push_labels_compose_filter::PushLabelsComposeFilter;
+pub use push_weights_compose_filter::PushWeightsComposeFilter;
+
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::lookahead_filters::lookahead_selector::Selector;
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
-use std::cell::RefCell;
-use std::rc::Rc;
 
-pub mod lookahead_compose_filter;
-pub mod lookahead_selector;
-pub mod push_labels_compose_filter;
-pub mod push_weights_compose_filter;
+mod lookahead_compose_filter;
+mod lookahead_selector;
+mod push_labels_compose_filter;
+mod push_weights_compose_filter;
 
 pub fn lookahead_match_type<
     'fst1,

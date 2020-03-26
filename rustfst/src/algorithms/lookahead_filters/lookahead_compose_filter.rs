@@ -1,8 +1,7 @@
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::filter_states::FilterState;
 use crate::algorithms::lookahead_filters::lookahead_selector::{
-    selector, selector_match_input, selector_match_output, LookAheadSelector, MatchTypeTrait,
-    Selector,
+    selector, MatchTypeTrait, Selector,
 };
 use crate::algorithms::lookahead_filters::{lookahead_match_type, LookAheadComposeFilterTrait};
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;

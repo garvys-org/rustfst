@@ -1,14 +1,12 @@
+use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
 
 use failure::Fallible;
-use failure::_core::cell::RefCell;
 
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::filter_states::{FilterState, PairFilterState, WeightFilterState};
-use crate::algorithms::lookahead_filters::lookahead_selector::{
-    selector, LookAheadSelector, MatchTypeTrait, Selector,
-};
+use crate::algorithms::lookahead_filters::lookahead_selector::{MatchTypeTrait, Selector};
 use crate::algorithms::lookahead_filters::LookAheadComposeFilterTrait;
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::MatcherFlags;

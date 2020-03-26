@@ -1,11 +1,10 @@
-use crate::algorithms::matchers::{MatchType, Matcher};
-
-use crate::fst_traits::Fst;
-use crate::semirings::Semiring;
-use failure::_core::cell::RefCell;
 use std::fmt::Debug;
-use std::marker::PhantomData;
 use std::rc::Rc;
+
+use failure::_core::cell::RefCell;
+
+use crate::algorithms::matchers::{MatchType, Matcher};
+use crate::semirings::Semiring;
 
 #[derive(Debug)]
 pub struct SMatchInput {}
@@ -62,7 +61,7 @@ pub struct LookAheadSelector<'fst, F, M> {
     pub matcher: Rc<RefCell<M>>,
 }
 
-pub fn selector_match_input<
+fn selector_match_input<
     'fst1,
     'fst2,
     W: Semiring + 'fst1 + 'fst2,
@@ -78,7 +77,7 @@ pub fn selector_match_input<
     }
 }
 
-pub fn selector_match_output<
+fn selector_match_output<
     'fst1,
     'fst2,
     W: Semiring + 'fst1 + 'fst2,
@@ -106,7 +105,7 @@ pub enum Selector<
     MatchOutput(LookAheadSelector<'fst2, M2::F, M1>),
 }
 
-pub fn selector<
+pub(crate) fn selector<
     'fst1,
     'fst2,
     W: Semiring + 'fst1 + 'fst2,

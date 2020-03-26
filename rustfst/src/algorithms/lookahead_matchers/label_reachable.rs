@@ -1,17 +1,18 @@
+use std::collections::hash_map::Entry;
+use std::collections::HashMap;
+
+use failure::Fallible;
+use itertools::Itertools;
+
 use crate::algorithms::arc_compares::{ilabel_compare, olabel_compare};
 use crate::algorithms::lookahead_matchers::interval_set::IntervalSet;
 use crate::algorithms::lookahead_matchers::state_reachable::StateReachable;
 use crate::algorithms::{arc_sort, fst_convert_from_ref};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, MutableArcIterator, MutableFst};
+use crate::fst_properties::FstProperties;
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableArcIterator, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, UNASSIGNED};
-use std::collections::hash_map::Entry;
-use std::collections::HashMap;
-
-use crate::fst_properties::FstProperties;
-use failure::Fallible;
-use itertools::Itertools;
 
 #[derive(Debug, Clone)]
 pub struct LabelReachableData {
@@ -172,6 +173,7 @@ impl LabelReachable {
         let label2index = &mut self.data.label2index;
         for (label, state) in self.label2state.iter() {
             let i = state2index[*state];
+            label2index.insert(*label, i);
             if *label == NO_LABEL {
                 self.data.final_label = i;
             }
@@ -305,14 +307,13 @@ impl LabelReachable {
                 }
             }
         } else {
-            let begin_low = aiter_begin;
-            let end_low = aiter_begin;
+            let mut begin_low;
+            let mut end_low = aiter_begin;
 
             let arcs = aiter.collect_vec();
             for interval in interval_set.iter() {
-                let begin_low =
-                    self.lower_bound(arcs.as_slice(), end_low, aiter_end, interval.begin);
-                let end_low = self.lower_bound(arcs.as_slice(), begin_low, aiter_end, interval.end);
+                begin_low = self.lower_bound(arcs.as_slice(), end_low, aiter_end, interval.begin);
+                end_low = self.lower_bound(arcs.as_slice(), begin_low, aiter_end, interval.end);
                 if end_low - begin_low > 0 {
                     if reach_begin == UNASSIGNED {
                         reach_begin = begin_low;
@@ -328,7 +329,7 @@ impl LabelReachable {
         }
 
         if reach_begin != UNASSIGNED {
-            Ok(Some((reach_begin, reach_begin, reach_weight)))
+            Ok(Some((reach_begin, reach_end, reach_weight)))
         } else {
             Ok(None)
         }
