@@ -9,10 +9,12 @@ use std::ops::{Add, AddAssign, SubAssign};
 
 use bitflags::bitflags;
 
+use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::MatcherFlags;
 use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher};
+use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{Label, EPS_LABEL, NO_LABEL};
+use crate::{Arc, Label, EPS_LABEL, NO_LABEL};
 use nom::lib::std::collections::BTreeSet;
 
 bitflags! {
@@ -73,7 +75,7 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Iterator
 }
 
 impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> MultiEpsMatcher<W, M> {
-    pub fn new_with_opts<IM: Into<Option<M>>>(
+    pub fn new_with_opts<IM: Into<Option<Rc<RefCell<M>>>>>(
         fst: &'fst <Self as Matcher<'fst, W>>::F,
         match_type: MatchType,
         flags: MultiEpsMatcherFlags,
@@ -81,9 +83,9 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> MultiEpsMatcher<W, M> {
     ) -> Fallible<Self> {
         let matcher = matcher
             .into()
-            .unwrap_or_else(|| M::new(fst, match_type).unwrap());
+            .unwrap_or_else(|| Rc::new(RefCell::new(M::new(fst, match_type).unwrap())));
         Ok(Self {
-            matcher: Rc::new(RefCell::new(matcher)),
+            matcher,
             flags,
             w: PhantomData,
             multi_eps_labels: CompactSet::new(NO_LABEL),

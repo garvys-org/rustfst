@@ -1,4 +1,5 @@
 use crate::algorithms::compose_filters::ComposeFilter;
+use crate::algorithms::lookahead_filters::lookahead_selector::Selector;
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::Fst;
@@ -61,4 +62,5 @@ where
     fn lookahead_arc(&self) -> bool;
     fn lookahead_type(&self) -> MatchType;
     fn lookahead_output(&self) -> bool;
+    fn selector(&self) -> &Selector<'fst1, 'fst2, W, Self::M1, Self::M2>;
 }

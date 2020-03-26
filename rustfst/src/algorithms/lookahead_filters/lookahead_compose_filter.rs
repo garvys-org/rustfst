@@ -1,6 +1,9 @@
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::filter_states::FilterState;
-use crate::algorithms::lookahead_filters::lookahead_selector::{Selector, selector_match_input, selector_match_output, LookAheadSelector, MatchTypeTrait, selector};
+use crate::algorithms::lookahead_filters::lookahead_selector::{
+    selector, selector_match_input, selector_match_output, LookAheadSelector, MatchTypeTrait,
+    Selector,
+};
 use crate::algorithms::lookahead_filters::{lookahead_match_type, LookAheadComposeFilterTrait};
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::MatcherFlags;
@@ -13,13 +16,23 @@ use std::marker::PhantomData;
 use std::rc::Rc;
 
 #[derive(Debug)]
-struct LookAheadComposeFilter<W, CF, SMT> {
+struct LookAheadComposeFilter<
+    'fst1,
+    'fst2,
+    W: Semiring + 'fst1 + 'fst2,
+    CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
+    SMT: MatchTypeTrait,
+> where
+    CF::M1: LookaheadMatcher<'fst1, W>,
+    CF::M2: LookaheadMatcher<'fst2, W>,
+{
     filter: CF,
     lookahead_type: MatchType,
     flags: MatcherFlags,
     lookahead_arc: bool,
-    smt: PhantomData<SMT>,
-    w: PhantomData<W>,
+    smt: PhantomData<&'fst1 SMT>,
+    w: PhantomData<&'fst2 W>,
+    selector: Selector<'fst1, 'fst2, W, CF::M1, CF::M2>,
 }
 
 impl<
@@ -28,7 +41,7 @@ impl<
         W: Semiring + 'fst1 + 'fst2,
         CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
         SMT: MatchTypeTrait,
-    > LookAheadComposeFilter<W, CF, SMT>
+    > LookAheadComposeFilter<'fst1, 'fst2, W, CF, SMT>
 where
     CF::M1: LookaheadMatcher<'fst1, W>,
     CF::M2: LookaheadMatcher<'fst2, W>,
@@ -58,16 +71,16 @@ where
             SMT::match_type(),
             self.lookahead_type,
         ) {
-            Selector::MatchInput(s) => s.matcher.borrow_mut().lookahead_fst(
-                arca.nextstate,
-                s.fst,
-                arcb.nextstate,
-            ).unwrap(),
-            Selector::MatchOutput(s) => s.matcher.borrow_mut().lookahead_fst(
-                arca.nextstate,
-                s.fst,
-                arcb.nextstate,
-            ).unwrap()
+            Selector::MatchInput(s) => s
+                .matcher
+                .borrow_mut()
+                .lookahead_fst(arca.nextstate, s.fst, arcb.nextstate)
+                .unwrap(),
+            Selector::MatchOutput(s) => s
+                .matcher
+                .borrow_mut()
+                .lookahead_fst(arca.nextstate, s.fst, arcb.nextstate)
+                .unwrap(),
         };
 
         if res {
@@ -84,7 +97,7 @@ impl<
         W: Semiring + 'fst1 + 'fst2,
         CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
         SMT: MatchTypeTrait,
-    > ComposeFilter<'fst1, 'fst2, W> for LookAheadComposeFilter<W, CF, SMT>
+    > ComposeFilter<'fst1, 'fst2, W> for LookAheadComposeFilter<'fst1, 'fst2, W, CF, SMT>
 where
     CF::M1: LookaheadMatcher<'fst1, W>,
     CF::M2: LookaheadMatcher<'fst2, W>,
@@ -120,12 +133,18 @@ where
         }
 
         Ok(Self {
-            filter,
             lookahead_type,
             flags,
             smt: PhantomData,
             lookahead_arc: false,
             w: PhantomData,
+            selector: selector(
+                filter.matcher1(),
+                filter.matcher2(),
+                SMT::match_type(),
+                lookahead_type,
+            ),
+            filter,
         })
     }
 
@@ -169,7 +188,8 @@ impl<
         W: Semiring + 'fst1 + 'fst2,
         CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
         SMT: MatchTypeTrait,
-    > LookAheadComposeFilterTrait<'fst1, 'fst2, W> for LookAheadComposeFilter<W, CF, SMT>
+    > LookAheadComposeFilterTrait<'fst1, 'fst2, W>
+    for LookAheadComposeFilter<'fst1, 'fst2, W, CF, SMT>
 where
     CF::M1: LookaheadMatcher<'fst1, W>,
     CF::M2: LookaheadMatcher<'fst2, W>,
@@ -196,5 +216,9 @@ where
         } else {
             false
         }
+    }
+
+    fn selector(&self) -> &Selector<'fst1, 'fst2, W, Self::M1, Self::M2> {
+        &self.selector
     }
 }

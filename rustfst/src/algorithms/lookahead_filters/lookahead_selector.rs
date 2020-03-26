@@ -56,6 +56,7 @@ impl MatchTypeTrait for SMatchUnknown {
     }
 }
 
+#[derive(Debug)]
 pub struct LookAheadSelector<'fst, F, M> {
     pub fst: &'fst F,
     pub matcher: Rc<RefCell<M>>,
@@ -93,6 +94,7 @@ pub fn selector_match_output<
     }
 }
 
+#[derive(Debug)]
 pub enum Selector<
     'fst1,
     'fst2,
@@ -101,7 +103,7 @@ pub enum Selector<
     M2: Matcher<'fst2, W>,
 > {
     MatchInput(LookAheadSelector<'fst1, M1::F, M2>),
-    MatchOutput(LookAheadSelector<'fst2, M2::F, M1>)
+    MatchOutput(LookAheadSelector<'fst2, M2::F, M1>),
 }
 
 pub fn selector<
@@ -115,13 +117,16 @@ pub fn selector<
     lmatcher2: Rc<RefCell<M2>>,
     match_type: MatchType,
     lookahead_type: MatchType,
-) -> Selector<'fst1, 'fst2, W, M1, M2>
-{
+) -> Selector<'fst1, 'fst2, W, M1, M2> {
     match match_type {
-        MatchType::MatchInput => Selector::MatchInput(selector_match_input::<'fst1, 'fst2, W, M1, M2>(
-            lmatcher1, lmatcher2,
-        )),
-        MatchType::MatchOutput => Selector::MatchOutput(selector_match_output(lmatcher1, lmatcher2)),
+        MatchType::MatchInput => {
+            Selector::MatchInput(selector_match_input::<'fst1, 'fst2, W, M1, M2>(
+                lmatcher1, lmatcher2,
+            ))
+        }
+        MatchType::MatchOutput => {
+            Selector::MatchOutput(selector_match_output(lmatcher1, lmatcher2))
+        }
         _ => {
             if lookahead_type == MatchType::MatchOutput {
                 Selector::MatchOutput(selector_match_output(lmatcher1, lmatcher2))

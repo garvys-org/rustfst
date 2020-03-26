@@ -6,7 +6,9 @@ use failure::_core::cell::RefCell;
 
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::filter_states::{FilterState, PairFilterState, WeightFilterState};
-use crate::algorithms::lookahead_filters::lookahead_selector::{LookAheadSelector, MatchTypeTrait, selector, Selector};
+use crate::algorithms::lookahead_filters::lookahead_selector::{
+    selector, LookAheadSelector, MatchTypeTrait, Selector,
+};
 use crate::algorithms::lookahead_filters::LookAheadComposeFilterTrait;
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::MatcherFlags;
@@ -70,14 +72,9 @@ where
             return FilterState::new((fs1, FilterState::new(W::one())));
         }
         let lweight = if self.filter.lookahead_arc() {
-            match selector(
-                self.matcher1(),
-                self.matcher2(),
-                SMT::match_type(),
-                self.lookahead_type(),
-            ) {
+            match self.selector() {
                 Selector::MatchInput(s) => s.matcher.borrow().lookahead_weight().clone(),
-                Selector::MatchOutput(s) => s.matcher.borrow().lookahead_weight().clone()
+                Selector::MatchOutput(s) => s.matcher.borrow().lookahead_weight().clone(),
             }
         } else {
             W::one()
@@ -144,5 +141,9 @@ where
 
     fn lookahead_output(&self) -> bool {
         self.filter.lookahead_output()
+    }
+
+    fn selector(&self) -> &Selector<'fst1, 'fst2, W, Self::M1, Self::M2> {
+        self.filter.selector()
     }
 }
