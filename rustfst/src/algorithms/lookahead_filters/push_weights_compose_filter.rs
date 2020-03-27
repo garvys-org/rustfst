@@ -15,9 +15,18 @@ use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuan
 use crate::{Arc, KDELTA};
 
 #[derive(Debug, Clone)]
-pub struct PushWeightsComposeFilter<W, FS, CF, SMT> {
+pub struct PushWeightsComposeFilter<
+    'fst1,
+    'fst2,
+    W: Semiring + 'fst1 + 'fst2,
+    CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
+    SMT,
+> where
+    CF::M1: LookaheadMatcher<'fst1, W>,
+    CF::M2: LookaheadMatcher<'fst2, W>,
+{
     filter: CF,
-    fs: PairFilterState<FS, WeightFilterState<W>>,
+    fs: PairFilterState<CF::FS, WeightFilterState<W>>,
     smt: PhantomData<SMT>,
 }
 
@@ -27,7 +36,7 @@ impl<
         W: Semiring + WeaklyDivisibleSemiring + WeightQuantize + 'fst1 + 'fst2,
         CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
         SMT: MatchTypeTrait,
-    > ComposeFilter<'fst1, 'fst2, W> for PushWeightsComposeFilter<W, CF::FS, CF, SMT>
+    > ComposeFilter<'fst1, 'fst2, W> for PushWeightsComposeFilter<'fst1, 'fst2, W, CF, SMT>
 where
     CF::M1: LookaheadMatcher<'fst1, W>,
     CF::M2: LookaheadMatcher<'fst2, W>,
@@ -120,7 +129,8 @@ impl<
         W: Semiring + WeaklyDivisibleSemiring + WeightQuantize + 'fst1 + 'fst2,
         CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
         SMT: MatchTypeTrait,
-    > LookAheadComposeFilterTrait<'fst1, 'fst2, W> for PushWeightsComposeFilter<W, CF::FS, CF, SMT>
+    > LookAheadComposeFilterTrait<'fst1, 'fst2, W>
+    for PushWeightsComposeFilter<'fst1, 'fst2, W, CF, SMT>
 where
     CF::M1: LookaheadMatcher<'fst1, W>,
     CF::M2: LookaheadMatcher<'fst2, W>,

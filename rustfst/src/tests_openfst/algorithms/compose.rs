@@ -1,6 +1,9 @@
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
+use crate::algorithms::compose_filters::AltSequenceComposeFilter;
+use crate::algorithms::lookahead_filters::lookahead_selector::SMatchOutput;
+use crate::algorithms::lookahead_filters::{LookAheadComposeFilter, PushWeightsComposeFilter};
 use crate::algorithms::lookahead_matchers::label_lookahead_relabeler::LabelLookAheadRelabeler;
 use crate::algorithms::lookahead_matchers::label_reachable::LabelReachableData;
 use crate::algorithms::lookahead_matchers::matcher_fst::MatcherFst;
@@ -15,9 +18,6 @@ use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_traits::{CoreFst, Fst, SerializableFst};
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
-use crate::algorithms::compose_filters::AltSequenceComposeFilter;
-use crate::algorithms::lookahead_filters::{LookAheadComposeFilter, PushWeightsComposeFilter};
-use crate::algorithms::lookahead_filters::lookahead_selector::SMatchOutput;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ComposeOperationResult {
@@ -132,9 +132,12 @@ where
     >;
     type MATCHER2<'a, F> = SortedMatcher<'a, F>;
 
-    type SEQFILTER<'fst1, 'fst2, S> = AltSequenceComposeFilter<'fst1, 'fst2, S, MATCHER1<'fst1, S>, MATCHER2<'fst2, S>>;
-    type LOOKFILTER<'fst1, 'fst2, S> = LookAheadComposeFilter<'fst1, 'fst2, S, SEQFILTER<'fst1, 'fst2, S>, SMatchOutput>;
-    // type PUSHWEIGHTSFILTER<'fst1, 'fst2, S> = PushWeightsComposeFilter<'fst1, 'fst2, S, SEQFILTER<'fst1, 'fst2, S>, SMatchOutput>;
+    type SEQFILTER<'fst1, 'fst2, S> =
+        AltSequenceComposeFilter<'fst1, 'fst2, S, MATCHER1<'fst1, S>, MATCHER2<'fst2, S>>;
+    type LOOKFILTER<'fst1, 'fst2, S> =
+        LookAheadComposeFilter<'fst1, 'fst2, S, SEQFILTER<'fst1, 'fst2, S>, SMatchOutput>;
+    type PUSHWEIGHTSFILTER<'fst1, 'fst2, S> =
+        PushWeightsComposeFilter<'fst1, 'fst2, S, SEQFILTER<'fst1, 'fst2, S>, SMatchOutput>;
 
     type COMPOSEFILTER<'fst1, 'fst2, S> = LOOKFILTER<'fst1, 'fst2, S>;
 

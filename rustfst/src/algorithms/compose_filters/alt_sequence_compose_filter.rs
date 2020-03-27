@@ -7,11 +7,17 @@ use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Arc, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 use std::cell::RefCell;
-use std::rc::Rc;
 use std::marker::PhantomData;
+use std::rc::Rc;
 
 #[derive(Debug)]
-pub struct AltSequenceComposeFilter<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>> {
+pub struct AltSequenceComposeFilter<
+    'fst1,
+    'fst2,
+    W: Semiring + 'fst1 + 'fst2,
+    M1: Matcher<'fst1, W>,
+    M2: Matcher<'fst2, W>,
+> {
     fst1: PhantomData<&'fst1 M1::F>,
     fst2: &'fst2 M2::F,
     matcher1: Rc<RefCell<M1>>,
@@ -58,7 +64,7 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1, M1: Matcher<'fst1, W>, M2: Matcher<'fst2
             fs: Self::FS::new(NO_STATE_ID),
             alleps2: false,
             noeps2: false,
-            fst1: PhantomData
+            fst1: PhantomData,
         })
     }
 
