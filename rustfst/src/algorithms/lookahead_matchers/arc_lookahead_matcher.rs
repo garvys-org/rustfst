@@ -82,6 +82,10 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
         Self::new(fst, match_type)
     }
 
+    fn create_data(fst: &Self::F, match_type: MatchType) -> Option<Self::MatcherData> {
+        None
+    }
+
     fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &LF) -> Fallible<()> {
         Ok(())
     }

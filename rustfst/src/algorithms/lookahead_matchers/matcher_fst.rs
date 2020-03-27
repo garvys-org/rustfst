@@ -42,53 +42,28 @@ impl<
         'fst: 'a,
         F: MutableFst + 'fst,
         M: LookaheadMatcher<'a, F::W, F = F, MatcherData = LabelReachableData>,
-    > MatcherFst<&'fst F, M, M::MatcherData>
+    > MatcherFst<F, M, M::MatcherData>
 {
     pub fn new(fst: F) -> Fallible<Self> {
-        // let imatcher = M::new(&fst, MatchType::MatchInput)?;
-        // let omatcher = M::new(&fst, MatchType::MatchOutput)?;
+        let imatcher_data = M::create_data(&fst, MatchType::MatchInput);
+        let omatcher_data = M::create_data(&fst, MatchType::MatchOutput);
 
-        // let add_on = {
-        //     let imatcher = M::new(&*fst, MatchType::MatchInput)?;
-        //     let omatcher = M::new(&*fst, MatchType::MatchOutput)?;
-        //
-        //     let add_on = (imatcher.data().cloned(), omatcher.data().cloned());
-        //
-        //     drop(imatcher);
-        //     drop(omatcher);
-        //     add_on
-        // };
-        //
-        // // let mut fst_add_on = FstAddOn::new(fst, add_on);
-        //
-        // // Relabeler
-        // if add_on.0.is_some() {
-        //     let reachable = LabelReachable::new_from_data(add_on.0.as_ref().unwrap().clone());
-        //     reachable.relabel_fst(fst, true);
-        // } else {
-        //     let reachable = LabelReachable::new_from_data(add_on.1.as_ref().unwrap().clone());
-        //     reachable.relabel_fst(fst, false);
-        // }
-
-        // LabelLookAheadRelabeler::init(&mut fst_add_on)?;
-
-        unimplemented!()
-
-        // panic!("Relabeler");
-        //
-        // Ok(Self {
-        //     fst_add_on,
-        //     matcher: PhantomData,
-        // })
+        let add_on = (imatcher_data, omatcher_data);
+        let mut fst_add_on = FstAddOn::new(fst, add_on);
+        LabelLookAheadRelabeler::init(&mut fst_add_on)?;
+        Ok(Self {
+            fst_add_on,
+            matcher: PhantomData,
+        })
     }
 
-    pub fn init_matcher(&self, match_type: MatchType) -> Fallible<M> {
-        M::new_with_data(
-            &self.fst_add_on.fst,
-            match_type,
-            self.data(match_type).cloned(),
-        )
-    }
+    // pub fn init_matcher(&self, match_type: MatchType) -> Fallible<M> {
+    //     M::new_with_data(
+    //         &self.fst_add_on.fst,
+    //         match_type,
+    //         self.data(match_type).cloned(),
+    //     )
+    // }
 }
 
 impl<F: CoreFst, M, T> CoreFst for MatcherFst<F, M, T> {

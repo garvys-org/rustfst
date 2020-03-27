@@ -99,10 +99,8 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
             if reach_input == d.reach_input() {
                 reachable = Some(LabelReachable::new_from_data(d.clone()));
             }
-        } else if (reach_input && MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER))
-            || (!reach_input && MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
-        {
-            reachable = Some(LabelReachable::new(fst, reach_input)?)
+        } else if let Some(d) = Self::create_data(fst, match_type) {
+            reachable = Some(LabelReachable::new_from_data(d));
         }
 
         Ok(Self {
@@ -114,6 +112,22 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
             lfst_ptr: std::ptr::null(),
             mft: PhantomData,
         })
+    }
+
+    fn create_data(fst: &Self::F, match_type: MatchType) -> Option<Self::MatcherData> {
+        let reach_input = match_type == MatchType::MatchInput;
+        if (reach_input && MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER))
+            || (!reach_input && MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
+        {
+            Some(
+                LabelReachable::new(fst, reach_input)
+                    .unwrap()
+                    .data()
+                    .clone(),
+            )
+        } else {
+            None
+        }
     }
 
     fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &LF) -> Fallible<()> {
