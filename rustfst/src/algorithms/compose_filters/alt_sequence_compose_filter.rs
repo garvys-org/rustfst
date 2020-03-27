@@ -8,10 +8,12 @@ use crate::semirings::Semiring;
 use crate::{Arc, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::marker::PhantomData;
 
 #[derive(Debug)]
-pub struct AltSequenceComposeFilter<'fst2, F2, M1, M2> {
-    fst2: &'fst2 F2,
+pub struct AltSequenceComposeFilter<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>> {
+    fst1: PhantomData<&'fst1 M1::F>,
+    fst2: &'fst2 M2::F,
     matcher1: Rc<RefCell<M1>>,
     matcher2: Rc<RefCell<M2>>,
     /// Current fst1 state
@@ -27,7 +29,7 @@ pub struct AltSequenceComposeFilter<'fst2, F2, M1, M2> {
 }
 
 impl<'fst1, 'fst2, W: Semiring + 'fst1, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>>
-    ComposeFilter<'fst1, 'fst2, W> for AltSequenceComposeFilter<'fst2, M2::F, M1, M2>
+    ComposeFilter<'fst1, 'fst2, W> for AltSequenceComposeFilter<'fst1, 'fst2, W, M1, M2>
 {
     type M1 = M1;
     type M2 = M2;
@@ -56,6 +58,7 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1, M1: Matcher<'fst1, W>, M2: Matcher<'fst2
             fs: Self::FS::new(NO_STATE_ID),
             alleps2: false,
             noeps2: false,
+            fst1: PhantomData
         })
     }
 

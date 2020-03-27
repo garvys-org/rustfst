@@ -15,6 +15,9 @@ use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_traits::{CoreFst, Fst, SerializableFst};
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
+use crate::algorithms::compose_filters::AltSequenceComposeFilter;
+use crate::algorithms::lookahead_filters::{LookAheadComposeFilter, PushWeightsComposeFilter};
+use crate::algorithms::lookahead_filters::lookahead_selector::SMatchOutput;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ComposeOperationResult {
@@ -129,6 +132,12 @@ where
     >;
     type MATCHER2<'a, F> = SortedMatcher<'a, F>;
 
+    type SEQFILTER<'fst1, 'fst2, S> = AltSequenceComposeFilter<'fst1, 'fst2, S, MATCHER1<'fst1, S>, MATCHER2<'fst2, S>>;
+    type LOOKFILTER<'fst1, 'fst2, S> = LookAheadComposeFilter<'fst1, 'fst2, S, SEQFILTER<'fst1, 'fst2, S>, SMatchOutput>;
+    // type PUSHWEIGHTSFILTER<'fst1, 'fst2, S> = PushWeightsComposeFilter<'fst1, 'fst2, S, SEQFILTER<'fst1, 'fst2, S>, SMatchOutput>;
+
+    type COMPOSEFILTER<'fst1, 'fst2, S> = LOOKFILTER<'fst1, 'fst2, S>;
+
     let fst1: VectorFst<_> = fst_raw.clone().into();
     let mut fst2: VectorFst<_> = compose_test_data.fst_2.clone();
 
@@ -142,15 +151,10 @@ where
     let matcher1 = MATCHER1::new(&graph1look, MatchType::MatchOutput)?;
     let matcher2 = MATCHER2::new(&fst2, MatchType::MatchInput)?;
 
-    // let compose_options = ComposeFstImplOptions::new(
-    //     None,
-    //     matcher2,
-    //     None,
-    //     None
-    // );
-
+    // let compose_options = ComposeFstImplOptions::<MATCHER1<_>, MATCHER2<_>, LOOKFILTER<_>, _>::new(matcher1, matcher2, None, None);
+    //
     // let dyn_fst = ComposeFst::<_, _>::new_with_options(&graph1look, &fst2, compose_options)?;
-    // let static_fst : VectorFst<_> = dyn_fst.compute()?;
+    // let static_fst: VectorFst<_> = dyn_fst.compute()?;
 
     //
     //     type SEQFILTER<'a, 'b, S> =

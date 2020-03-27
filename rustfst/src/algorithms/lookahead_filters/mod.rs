@@ -13,7 +13,7 @@ use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 
 mod lookahead_compose_filter;
-mod lookahead_selector;
+pub mod lookahead_selector;
 mod push_labels_compose_filter;
 mod push_weights_compose_filter;
 
