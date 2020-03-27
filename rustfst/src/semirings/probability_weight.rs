@@ -131,6 +131,12 @@ impl_quantize_f32!(ProbabilityWeight);
 
 partial_eq_and_hash_f32!(ProbabilityWeight);
 
+test_semiring_serializable!(
+    tests_probability_weight_serializable,
+    ProbabilityWeight,
+    ProbabilityWeight::one() ProbabilityWeight::zero() ProbabilityWeight::new(0.3) ProbabilityWeight::new(0.5) ProbabilityWeight::new(0.0) ProbabilityWeight::new(1.0)
+);
+
 impl Into<ProbabilityWeight> for f32 {
     fn into(self) -> ProbabilityWeight {
         ProbabilityWeight::new(self)

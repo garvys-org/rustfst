@@ -30,8 +30,12 @@ use crate::tests_openfst::algorithms::gallic_encode_decode::GallicTestData;
 use crate::tests_openfst::io::const_fst_bin_deserializer::{
     test_const_fst_aligned_bin_deserializer, test_const_fst_bin_deserializer,
 };
-use crate::tests_openfst::io::const_fst_bin_serializer::test_const_fst_bin_serializer;
-use crate::tests_openfst::io::const_fst_text_serialization::test_const_fst_text_serialization;
+use crate::tests_openfst::io::const_fst_bin_serializer::{
+    test_const_fst_bin_serializer, test_const_fst_bin_serializer_with_symt
+};
+use crate::tests_openfst::io::const_fst_text_serialization::{
+    test_const_fst_text_serialization, test_const_fst_text_serialization_with_symt
+};
 
 use self::algorithms::{
     arc_map::{
@@ -65,9 +69,9 @@ use self::fst_impls::const_fst::test_const_fst_convert_convert;
 use self::fst_impls::test_fst_into_iterator::{
     test_fst_into_iterator_const, test_fst_into_iterator_vector,
 };
-use self::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
-use self::io::vector_fst_bin_serializer::test_vector_fst_bin_serializer;
-use self::io::vector_fst_text_serialization::test_vector_fst_text_serialization;
+use crate::tests_openfst::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
+use crate::tests_openfst::io::vector_fst_bin_serializer::{ test_vector_fst_bin_serializer, test_vector_fst_bin_serializer_with_symt };
+use crate::tests_openfst::io::vector_fst_text_serialization::{ test_vector_fst_text_serialization, test_vector_fst_text_serialization_with_symt };
 use self::misc::test_del_all_states;
 use crate::fst_traits::SerializableFst;
 use crate::tests_openfst::algorithms::closure::{
@@ -606,8 +610,20 @@ macro_rules! test_fst {
             }
 
             #[test]
+            fn test_vector_fst_text_serialization_with_symt_openfst() -> Fallible<()> {
+                do_run!(test_vector_fst_text_serialization_with_symt, $fst_name);
+                Ok(())
+            }
+
+            #[test]
             fn test_vector_fst_bin_serializer_openfst() -> Fallible<()> {
                 do_run!(test_vector_fst_bin_serializer, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_vector_fst_bin_serializer_with_symt_openfst() -> Fallible<()> {
+                do_run!(test_vector_fst_bin_serializer_with_symt, $fst_name);
                 Ok(())
             }
 
@@ -654,8 +670,20 @@ macro_rules! test_fst {
             }
 
             #[test]
+            fn test_const_fst_bin_serializer_with_symt_openfst() -> Fallible<()> {
+                do_run!(test_const_fst_bin_serializer_with_symt, $fst_name);
+                Ok(())
+            }
+
+            #[test]
             fn test_const_fst_text_serialization_openfst() -> Fallible<()> {
                 do_run!(test_const_fst_text_serialization, $fst_name);
+                Ok(())
+            }
+
+             #[test]
+            fn test_const_fst_text_serialization_with_symt_openfst() -> Fallible<()> {
+                do_run!(test_const_fst_text_serialization_with_symt, $fst_name);
                 Ok(())
             }
 
