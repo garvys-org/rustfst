@@ -2,11 +2,10 @@ use failure::Fallible;
 use tempfile::tempdir;
 
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{Fst, SerializableFst };
+use crate::fst_traits::{Fst, SerializableFst};
 use crate::semirings::SerializableSemiring;
-use crate::tests_openfst::FstTestData;
 use crate::tests_openfst::io::generate_symbol_table;
-
+use crate::tests_openfst::FstTestData;
 
 pub fn test_vector_fst_bin_serializer<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
@@ -28,7 +27,9 @@ where
     Ok(())
 }
 
-pub fn test_vector_fst_bin_serializer_with_symt<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_vector_fst_bin_serializer_with_symt<W>(
+    test_data: &FstTestData<VectorFst<W>>,
+) -> Fallible<()>
 where
     W: SerializableSemiring + 'static,
 {
@@ -48,7 +49,11 @@ where
         raw_with_symt,
         deserialized_fst,
         "{}",
-        error_message_fst!(raw_with_symt, deserialized_fst, "Serializer VectorFst Bin with Generated Symbol Table")
+        error_message_fst!(
+            raw_with_symt,
+            deserialized_fst,
+            "Serializer VectorFst Bin with Generated Symbol Table"
+        )
     );
     Ok(())
 }

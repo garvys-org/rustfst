@@ -47,10 +47,10 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
             .sum();
 
         let mut flags = FstFlags::empty();
-        if self.input_symbols().is_some(){
+        if self.input_symbols().is_some() {
             flags |= FstFlags::HAS_ISYMBOLS;
         }
-        if self.output_symbols().is_some(){
+        if self.output_symbols().is_some() {
             flags |= FstFlags::HAS_OSYMBOLS;
         }
 

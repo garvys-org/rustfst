@@ -3,10 +3,10 @@ use tempfile::tempdir;
 
 use crate::algorithms::fst_convert_from_ref;
 use crate::fst_impls::{ConstFst, VectorFst};
-use crate::fst_traits::{Fst, SerializableFst };
+use crate::fst_traits::{Fst, SerializableFst};
 use crate::semirings::SerializableSemiring;
-use crate::tests_openfst::FstTestData;
 use crate::tests_openfst::io::generate_symbol_table;
+use crate::tests_openfst::FstTestData;
 
 pub fn test_const_fst_text_serialization<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
 where
@@ -45,7 +45,9 @@ where
     Ok(())
 }
 
-pub fn test_const_fst_text_serialization_with_symt<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_const_fst_text_serialization_with_symt<W>(
+    test_data: &FstTestData<VectorFst<W>>,
+) -> Fallible<()>
 where
     W: SerializableSemiring + 'static,
 {
@@ -62,7 +64,7 @@ where
     let deserialized_fst = ConstFst::<W>::read_text(&path_fst_serialized)?;
 
     // Text serialization doesn't include the symbol table.
-    let mut raw_const_without_symt =  raw_const_with_symt;
+    let mut raw_const_without_symt = raw_const_with_symt;
     raw_const_without_symt.unset_input_symbols();
     raw_const_without_symt.unset_output_symbols();
 
@@ -70,8 +72,11 @@ where
         raw_const_without_symt,
         deserialized_fst,
         "{}",
-        error_message_fst!(raw_const_without_symt, deserialized_fst, "Serializer ConstFst Text with Generated Symbol Table")
+        error_message_fst!(
+            raw_const_without_symt,
+            deserialized_fst,
+            "Serializer ConstFst Text with Generated Symbol Table"
+        )
     );
     Ok(())
 }
-

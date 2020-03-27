@@ -5,11 +5,9 @@ pub mod vector_fst_bin_deserializer;
 pub mod vector_fst_bin_serializer;
 pub mod vector_fst_text_serialization;
 
-
+use crate::fst_traits::Fst;
 use crate::symbol_table::SymbolTable;
 use std::rc::Rc;
-use crate::fst_traits::Fst;
-
 
 fn generate_symbol_table<F: Fst>(prefix: &str, fst: &F) -> (Rc<SymbolTable>, Rc<SymbolTable>) {
     let mut input_symt = SymbolTable::new();
@@ -23,12 +21,12 @@ fn generate_symbol_table<F: Fst>(prefix: &str, fst: &F) -> (Rc<SymbolTable>, Rc<
         }
     }
 
-    let input_symbols = (0..(highest_ilabel + 1))
-            .map(|it| format!("{}_input_symbol_{}", prefix, it));
+    let input_symbols =
+        (0..(highest_ilabel + 1)).map(|it| format!("{}_input_symbol_{}", prefix, it));
     input_symt.add_symbols(input_symbols);
 
-     let output_symbols = (0..(highest_olabel + 1))
-            .map(|it| format!("{}_input_symbol_{}", prefix, it));
+    let output_symbols =
+        (0..(highest_olabel + 1)).map(|it| format!("{}_input_symbol_{}", prefix, it));
     output_symt.add_symbols(output_symbols);
     (Rc::new(input_symt), Rc::new(output_symt))
 }

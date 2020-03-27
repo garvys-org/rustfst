@@ -11,7 +11,7 @@ use bitflags::bitflags;
 use crate::parsers::bin_fst::utils_serialization::{
     write_bin_i32, write_bin_i64, write_bin_u32, write_bin_u64,
 };
-use crate::parsers::bin_symt::nom_parser::{ parse_symbol_table_bin, write_bin_symt };
+use crate::parsers::bin_symt::nom_parser::{parse_symbol_table_bin, write_bin_symt};
 use crate::SymbolTable;
 use std::rc::Rc;
 
