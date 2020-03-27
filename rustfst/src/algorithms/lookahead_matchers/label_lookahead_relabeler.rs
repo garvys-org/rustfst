@@ -20,10 +20,10 @@ impl LabelLookAheadRelabeler {
 
         if data.0.is_some() {
             let reachable = LabelReachable::new_from_data(data.0.as_ref().unwrap().clone());
-            reachable.relabel_fst(*mfst, true);
+            reachable.relabel_fst(*mfst, true)?;
         } else {
             let reachable = LabelReachable::new_from_data(data.1.as_ref().unwrap().clone());
-            reachable.relabel_fst(*mfst, false);
+            reachable.relabel_fst(*mfst, false)?;
         }
 
         Ok(())
@@ -31,16 +31,16 @@ impl LabelLookAheadRelabeler {
 
     pub fn relabel<F: MutableFst>(
         fst: &mut F,
-        mfst: &FstAddOn<F, (Option<LabelReachableData>, Option<LabelReachableData>)>,
+        addon: &(Option<LabelReachableData>, Option<LabelReachableData>),
         relabel_input: bool,
-    ) -> Fallible<()> {
-        let data = mfst.add_on();
-        let reachable_data = if data.0.as_ref().is_some() {
-            data.0.as_ref().unwrap().clone()
+    ) -> Fallible<()> { ;
+        let reachable_data = if addon.0.as_ref().is_some() {
+            addon.0.as_ref().unwrap().clone()
         } else {
-            data.1.as_ref().unwrap().clone()
+            addon.1.as_ref().unwrap().clone()
         };
         let reachable = LabelReachable::new_from_data(reachable_data);
         reachable.relabel_fst(fst, relabel_input)
     }
+
 }

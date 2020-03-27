@@ -44,7 +44,10 @@ impl<
         M: LookaheadMatcher<'a, F::W, F = F, MatcherData = LabelReachableData>,
     > MatcherFst<&'fst F, M, M::MatcherData>
 {
-    pub fn new(fst: &'fst mut F) -> Fallible<Self> {
+    pub fn new(fst: F) -> Fallible<Self> {
+        // let imatcher = M::new(&fst, MatchType::MatchInput)?;
+        // let omatcher = M::new(&fst, MatchType::MatchOutput)?;
+
         // let add_on = {
         //     let imatcher = M::new(&*fst, MatchType::MatchInput)?;
         //     let omatcher = M::new(&*fst, MatchType::MatchOutput)?;
