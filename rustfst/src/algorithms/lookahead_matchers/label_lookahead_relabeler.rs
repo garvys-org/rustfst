@@ -1,11 +1,8 @@
-use crate::algorithms::fst_convert_from_ref;
+use failure::Fallible;
+
 use crate::algorithms::lookahead_matchers::add_on::FstAddOn;
 use crate::algorithms::lookahead_matchers::label_reachable::{LabelReachable, LabelReachableData};
-use crate::algorithms::matchers::MatchType;
-use crate::fst_impls::VectorFst;
-use crate::fst_traits::{Fst, MutableFst};
-
-use failure::Fallible;
+use crate::fst_traits::MutableFst;
 
 pub struct LabelLookAheadRelabeler {}
 

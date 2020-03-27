@@ -1,23 +1,25 @@
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
+use crate::algorithms::{arc_compares::ilabel_compare, arc_sort};
+use crate::algorithms::{
+    compose_with_config, ComposeConfig, ComposeFilterEnum,
+};
 use crate::algorithms::compose_filters::AltSequenceComposeFilter;
-use crate::algorithms::lookahead_filters::lookahead_selector::SMatchOutput;
 use crate::algorithms::lookahead_filters::{
     LookAheadComposeFilter, PushLabelsComposeFilter, PushWeightsComposeFilter,
+};
+use crate::algorithms::lookahead_filters::lookahead_selector::SMatchOutput;
+use crate::algorithms::lookahead_matchers::{
+    LabelLookAheadMatcher, LookaheadMatcher, MatcherFlagsTrait,
 };
 use crate::algorithms::lookahead_matchers::label_lookahead_relabeler::LabelLookAheadRelabeler;
 use crate::algorithms::lookahead_matchers::label_reachable::LabelReachableData;
 use crate::algorithms::lookahead_matchers::matcher_fst::MatcherFst;
-use crate::algorithms::lookahead_matchers::{LabelLookAheadMatcher, MatcherFlagsTrait};
+use crate::algorithms::matchers::{Matcher, MatcherFlags, MatchType};
 use crate::algorithms::matchers::SortedMatcher;
-use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
-use crate::algorithms::{arc_compares::ilabel_compare, arc_sort};
-use crate::algorithms::{
-    compose_with_config, ComposeConfig, ComposeFilterEnum, ComposeFst, ComposeFstImplOptions,
-};
-use crate::fst_impls::{ConstFst, VectorFst};
-use crate::fst_traits::{CoreFst, Fst, SerializableFst};
+use crate::fst_impls::VectorFst;
+use crate::fst_traits::{CoreFst, SerializableFst};
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
 
@@ -115,7 +117,7 @@ where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
-    type LA_FST<'fst, F> = MatcherFst<
+    type TLaFst<'fst, F> = MatcherFst<
         F,
         LabelLookAheadMatcher<
             'fst,
@@ -126,37 +128,41 @@ where
         LabelReachableData,
     >;
 
-    type MATCHER1<'a, F> = LabelLookAheadMatcher<
+    type TMatcher1<'a, F> = LabelLookAheadMatcher<
         'a,
         <F as CoreFst>::W,
         SortedMatcher<'a, F>,
         DefaultLabelLookAheadMatcherFlags,
     >;
-    type MATCHER2<'a, F> = SortedMatcher<'a, F>;
+    type TMatcher2<'a, F> = SortedMatcher<'a, F>;
 
-    type SEQFILTER<'fst1, 'fst2, S> =
-        AltSequenceComposeFilter<'fst1, 'fst2, S, MATCHER1<'fst1, S>, MATCHER2<'fst2, S>>;
-    type LOOKFILTER<'fst1, 'fst2, S> =
-        LookAheadComposeFilter<'fst1, 'fst2, S, SEQFILTER<'fst1, 'fst2, S>, SMatchOutput>;
-    type PUSHWEIGHTSFILTER<'fst1, 'fst2, S> =
-        PushWeightsComposeFilter<'fst1, 'fst2, S, LOOKFILTER<'fst1, 'fst2, S>, SMatchOutput>;
-    type PUSHLABELSFILTER<'fst1, 'fst2, S> =
-        PushLabelsComposeFilter<'fst1, 'fst2, S, PUSHWEIGHTSFILTER<'fst1, 'fst2, S>, SMatchOutput>;
+    type TSeqFilter<'fst1, 'fst2, S> =
+        AltSequenceComposeFilter<'fst1, 'fst2, S, TMatcher1<'fst1, S>, TMatcher2<'fst2, S>>;
+    type TLookFilter<'fst1, 'fst2, S> =
+        LookAheadComposeFilter<'fst1, 'fst2, S, TSeqFilter<'fst1, 'fst2, S>, SMatchOutput>;
+    type TPushWeightsFilter<'fst1, 'fst2, S> =
+        PushWeightsComposeFilter<'fst1, 'fst2, S, TLookFilter<'fst1, 'fst2, S>, SMatchOutput>;
+    type TPushLanelsFilter<'fst1, 'fst2, S> =
+        PushLabelsComposeFilter<'fst1, 'fst2, S, TPushWeightsFilter<'fst1, 'fst2, S>, SMatchOutput>;
 
-    type COMPOSEFILTER<'fst1, 'fst2, S> = PUSHLABELSFILTER<'fst1, 'fst2, S>;
+    type TComposeFilter<'fst1, 'fst2, S> = TPushLanelsFilter<'fst1, 'fst2, S>;
 
     let fst1: VectorFst<_> = fst_raw.clone().into();
     let mut fst2: VectorFst<_> = compose_test_data.fst_2.clone();
 
-    let graph1look = LA_FST::new(fst1)?;
+    let graph1look = TLaFst::new(fst1)?;
 
     LabelLookAheadRelabeler::relabel(&mut fst2, graph1look.addon(), true)?;
 
     arc_sort(&mut fst2, ilabel_compare);
 
-    // FIXME: Move to init matcher
-    let matcher1 = MATCHER1::new(&graph1look, MatchType::MatchOutput)?;
-    let matcher2 = MATCHER2::new(&fst2, MatchType::MatchInput)?;
+    // let matcher1 = MATCHER1::new(&graph1look, MatchType::MatchOutput)?;
+    let matcher1 = TMatcher1::new_with_data(
+        &graph1look,
+        MatchType::MatchOutput,
+        graph1look.data(MatchType::MatchOutput).cloned(),
+    );
+    let matcher2 = TMatcher2::new(&fst2, MatchType::MatchInput)?;
 
     // let compose_options = ComposeFstImplOptions::<MATCHER1<_>, MATCHER2<_>, LOOKFILTER<_>, _>::new(matcher1, matcher2, None, None);
     //

@@ -136,10 +136,11 @@ impl LabelReachable {
                         }
                         Entry::Occupied(e) => *e.get(),
                     };
+                    let final_weight = final_weight.clone();
                     unsafe {
                         fst.add_arc_unchecked(
                             s,
-                            Arc::new(NO_LABEL, NO_LABEL, final_weight.clone(), nextstate),
+                            Arc::new(NO_LABEL, NO_LABEL, final_weight, nextstate),
                         )
                     };
                     indeg[nextstate] += 1;

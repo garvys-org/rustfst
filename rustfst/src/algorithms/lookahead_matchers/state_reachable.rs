@@ -80,6 +80,7 @@ impl StateReachable {
         }
     }
 
+    #[allow(unused)]
     // Can reach this final state from current state?
     pub fn reach(&self, current_state: StateId, s: StateId) -> bool {
         if let Some(i) = self.state2index.get(s) {
