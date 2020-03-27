@@ -12,10 +12,8 @@ use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 
-mod add_on;
 mod lookahead_compose_filter;
 mod lookahead_selector;
-mod matcher_fst;
 mod push_labels_compose_filter;
 mod push_weights_compose_filter;
 

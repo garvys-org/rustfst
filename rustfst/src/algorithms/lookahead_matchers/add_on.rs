@@ -10,8 +10,8 @@ use crate::{Arc, SymbolTable};
 /// The resulting type is a new FST implementation.
 #[derive(Debug)]
 pub struct FstAddOn<F, T> {
-    fst: F,
-    add_on: T,
+    pub(crate) fst: F,
+    pub(crate) add_on: T,
 }
 
 impl<F, T> FstAddOn<F, T> {
@@ -21,6 +21,10 @@ impl<F, T> FstAddOn<F, T> {
 
     pub fn fst(&self) -> &F {
         &self.fst
+    }
+
+    pub fn fst_mut(&mut self) -> &mut F {
+        &mut self.fst
     }
 
     pub fn add_on(&self) -> &T {

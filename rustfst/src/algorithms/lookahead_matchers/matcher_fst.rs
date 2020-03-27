@@ -1,15 +1,19 @@
-use crate::algorithms::lookahead_filters::add_on::FstAddOn;
-use crate::algorithms::lookahead_matchers::LookaheadMatcher;
-use crate::algorithms::matchers::MatchType;
-use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, FstIterator, StateIterator};
-use crate::SymbolTable;
-use failure::Fallible;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::rc::Rc;
 
+use failure::Fallible;
+
+use crate::algorithms::lookahead_matchers::add_on::FstAddOn;
+use crate::algorithms::lookahead_matchers::label_lookahead_relabeler::LabelLookAheadRelabeler;
+use crate::algorithms::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::matchers::MatchType;
+use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, FstIterator, StateIterator, MutableFst};
+use crate::SymbolTable;
+use crate::algorithms::lookahead_matchers::label_reachable::{LabelReachableData, LabelReachable};
+
 pub struct MatcherFst<F, M, T> {
-    fst_add_on: FstAddOn<F, (T, T)>,
+    fst_add_on: FstAddOn<F, (Option<T>, Option<T>)>,
     matcher: PhantomData<M>,
 }
 
@@ -20,43 +24,60 @@ impl<F: Debug, M, T: Debug> Debug for MatcherFst<F, M, T> {
 }
 
 impl<F, M, T> MatcherFst<F, M, T> {
-    pub fn data(&self, match_type: MatchType) -> &T {
+    pub fn data(&self, match_type: MatchType) -> Option<&T> {
         let data = self.fst_add_on.add_on();
         if match_type == MatchType::MatchInput {
-            &data.0
+            data.0.as_ref()
         } else {
-            &data.1
+            data.1.as_ref()
         }
     }
 }
 
-impl<'fst, F: ExpandedFst + 'fst, M: LookaheadMatcher<'fst, F::W, F = F>>
+// TODO: To be generalized
+impl<'a, 'fst: 'a, F: MutableFst + 'fst, M: LookaheadMatcher<'a, F::W, F = F, MatcherData=LabelReachableData>>
     MatcherFst<&'fst F, M, M::MatcherData>
 {
-    pub fn new(fst: &'fst F) -> Fallible<Self> {
-        let imatcher = M::new(fst, MatchType::MatchInput)?;
-        let omatcher = M::new(fst, MatchType::MatchOutput)?;
+    pub fn new(fst: &'fst mut F) -> Fallible<Self> {
+        // let add_on = {
+        //     let imatcher = M::new(&*fst, MatchType::MatchInput)?;
+        //     let omatcher = M::new(&*fst, MatchType::MatchOutput)?;
+        //
+        //     let add_on = (imatcher.data().cloned(), omatcher.data().cloned());
+        //
+        //     drop(imatcher);
+        //     drop(omatcher);
+        //     add_on
+        // };
+        //
+        // // let mut fst_add_on = FstAddOn::new(fst, add_on);
+        //
+        // // Relabeler
+        // if add_on.0.is_some() {
+        //     let reachable = LabelReachable::new_from_data(add_on.0.as_ref().unwrap().clone());
+        //     reachable.relabel_fst(fst, true);
+        // } else {
+        //     let reachable = LabelReachable::new_from_data(add_on.1.as_ref().unwrap().clone());
+        //     reachable.relabel_fst(fst, false);
+        // }
 
-        let add_on = (
-            imatcher.data().unwrap().clone(),
-            omatcher.data().unwrap().clone(),
-        );
+        // LabelLookAheadRelabeler::init(&mut fst_add_on)?;
 
-        let fst_add_on = FstAddOn::new(fst, add_on);
+        unimplemented!()
 
-        panic!("Add init -> LookAheadRelabeler");
-
-        Ok(Self {
-            fst_add_on,
-            matcher: PhantomData,
-        })
+        // panic!("Relabeler");
+        //
+        // Ok(Self {
+        //     fst_add_on,
+        //     matcher: PhantomData,
+        // })
     }
 
     pub fn init_matcher(&self, match_type: MatchType) -> Fallible<M> {
         M::new_with_data(
-            self.fst_add_on.fst(),
+            &self.fst_add_on.fst,
             match_type,
-            Some(self.data(match_type).clone()),
+            self.data(match_type).cloned(),
         )
     }
 }

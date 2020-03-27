@@ -18,6 +18,8 @@ pub(crate) mod label_lookahead_relabeler;
 mod label_reachable;
 pub(crate) mod state_reachable;
 // mod trivial_lookahead_matcher;
+mod add_on;
+mod matcher_fst;
 
 pub trait MatcherFlagsTrait: Debug {
     fn flags() -> MatcherFlags;
