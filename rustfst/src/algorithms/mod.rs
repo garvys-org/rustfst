@@ -69,7 +69,10 @@ pub use self::{
     arc_sum::arc_sum,
     arc_unique::arc_unique,
     closure::{closure, ClosureFst, ClosureType},
-    compose_revamp::{compose, compose_with_config, ComposeConfig, ComposeFilterEnum, ComposeFst},
+    compose_revamp::{
+        compose, compose_with_config, ComposeConfig, ComposeFilterEnum, ComposeFst,
+        ComposeFstImplOptions,
+    },
     concat::{concat, ConcatFst},
     condense::condense,
     connect::connect,

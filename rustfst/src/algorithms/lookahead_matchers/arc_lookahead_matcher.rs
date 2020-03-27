@@ -82,7 +82,7 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
         Self::new(fst, match_type)
     }
 
-    fn create_data(fst: &Self::F, match_type: MatchType) -> Option<Self::MatcherData> {
+    fn create_data(_fst: &Self::F, _match_type: MatchType) -> Option<Self::MatcherData> {
         None
     }
 

@@ -9,15 +9,13 @@ use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Arc, EPS_LABEL, NO_STATE_ID};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>, MFT> {
     // matcher fst
     fst: &'fst M::F,
     matcher: M,
     lookahead_weight: W,
     prefix_arc: Arc<W>,
-
-    // Flags to customize the behaviour
     mft: PhantomData<MFT>,
     reachable: Option<LabelReachable>,
     lfst_ptr: *const u32,

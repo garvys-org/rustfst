@@ -3,12 +3,15 @@ use std::rc::Rc;
 
 use failure::Fallible;
 
-use crate::fst_traits::{ArcIterator, CoreFst, Fst, FstIterator, StateIterator};
+use crate::fst_traits::{
+    ArcIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterData, FstIterator,
+    StateIterator,
+};
 use crate::{Arc, SymbolTable};
 
 /// Adds an object of type T to an FST.
 /// The resulting type is a new FST implementation.
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct FstAddOn<F, T> {
     pub(crate) fst: F,
     pub(crate) add_on: T,
@@ -117,5 +120,26 @@ where
 
     fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
         self.fst.unset_output_symbols()
+    }
+}
+
+impl<F: ExpandedFst, T: Debug + Clone + PartialEq> ExpandedFst for FstAddOn<F, T>
+where
+    F::W: 'static,
+{
+    fn num_states(&self) -> usize {
+        self.fst.num_states()
+    }
+}
+
+impl<F: FstIntoIterator, T: Debug> FstIntoIterator for FstAddOn<F, T>
+where
+    F::W: 'static,
+{
+    type ArcsIter = F::ArcsIter;
+    type FstIter = F::FstIter;
+
+    fn fst_into_iter(self) -> Self::FstIter {
+        self.fst.fst_into_iter()
     }
 }

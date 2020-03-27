@@ -1,11 +1,18 @@
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::algorithms::lookahead_matchers::LabelLookAheadMatcher;
+use crate::algorithms::lookahead_matchers::label_lookahead_relabeler::LabelLookAheadRelabeler;
+use crate::algorithms::lookahead_matchers::label_reachable::LabelReachableData;
+use crate::algorithms::lookahead_matchers::matcher_fst::MatcherFst;
+use crate::algorithms::lookahead_matchers::{LabelLookAheadMatcher, MatcherFlagsTrait};
 use crate::algorithms::matchers::SortedMatcher;
-use crate::algorithms::{compose_with_config, ComposeConfig, ComposeFilterEnum};
+use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
+use crate::algorithms::{arc_compares::ilabel_compare, arc_sort};
+use crate::algorithms::{
+    compose_with_config, ComposeConfig, ComposeFilterEnum, ComposeFst, ComposeFstImplOptions,
+};
 use crate::fst_impls::{ConstFst, VectorFst};
-use crate::fst_traits::SerializableFst;
+use crate::fst_traits::{CoreFst, Fst, SerializableFst};
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
 
@@ -73,6 +80,27 @@ where
     Ok(())
 }
 
+#[derive(Debug, Clone, PartialOrd, PartialEq)]
+struct DefaultLabelLookAheadMatcherFlags {}
+
+impl MatcherFlagsTrait for DefaultLabelLookAheadMatcherFlags {
+    fn flags() -> MatcherFlags {
+        MatcherFlags::LOOKAHEAD_EPSILONS
+            | MatcherFlags::LOOKAHEAD_WEIGHT
+            | MatcherFlags::LOOKAHEAD_PREFIX
+            | MatcherFlags::LOOKAHEAD_NON_EPSILON_PREFIX
+    }
+}
+
+#[derive(Debug, Clone, PartialOrd, PartialEq)]
+struct OLabelLookAheadFlags {}
+
+impl MatcherFlagsTrait for OLabelLookAheadFlags {
+    fn flags() -> MatcherFlags {
+        MatcherFlags::OLABEL_LOOKAHEAD_FLAGS
+    }
+}
+
 #[allow(unused)]
 fn do_test_compose_lookahead<W>(
     fst_raw: &VectorFst<W>,
@@ -82,11 +110,48 @@ where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
-    let fst1: ConstFst<_> = fst_raw.clone().into();
-    let fst2: VectorFst<_> = compose_test_data.fst_2.clone();
+    type LA_FST<'fst, F> = MatcherFst<
+        F,
+        LabelLookAheadMatcher<
+            'fst,
+            <F as CoreFst>::W,
+            SortedMatcher<'fst, F>,
+            OLabelLookAheadFlags,
+        >,
+        LabelReachableData,
+    >;
 
-    // type MATCHER1<'a, S> = LabelLookAheadMatcher<'a, S, SortedMatcher<'a, ConstFst<S>>>;
-    // type MATCHER2<'a, S> = SortedMatcher<'a, VectorFst<S>>;
+    type MATCHER1<'a, F> = LabelLookAheadMatcher<
+        'a,
+        <F as CoreFst>::W,
+        SortedMatcher<'a, F>,
+        DefaultLabelLookAheadMatcherFlags,
+    >;
+    type MATCHER2<'a, F> = SortedMatcher<'a, F>;
+
+    let fst1: VectorFst<_> = fst_raw.clone().into();
+    let mut fst2: VectorFst<_> = compose_test_data.fst_2.clone();
+
+    let graph1look = LA_FST::new(fst1)?;
+
+    LabelLookAheadRelabeler::relabel(&mut fst2, graph1look.addon(), true)?;
+
+    arc_sort(&mut fst2, ilabel_compare);
+
+    // FIXME: Move to init matcher
+    let matcher1 = MATCHER1::new(&graph1look, MatchType::MatchOutput)?;
+    let matcher2 = MATCHER2::new(&fst2, MatchType::MatchInput)?;
+
+    // let compose_options = ComposeFstImplOptions::new(
+    //     None,
+    //     matcher2,
+    //     None,
+    //     None
+    // );
+
+    // let dyn_fst = ComposeFst::<_, _>::new_with_options(&graph1look, &fst2, compose_options)?;
+    // let static_fst : VectorFst<_> = dyn_fst.compute()?;
+
     //
     //     type SEQFILTER<'a, 'b, S> =
     //         AltSequenceComposeFilter<'b, VectorFst<S>, MATCHER1<'a, S>, MATCHER2<'b, S>>;

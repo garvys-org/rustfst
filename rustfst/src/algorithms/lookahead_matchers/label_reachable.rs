@@ -14,7 +14,7 @@ use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableArcIterator, MutableFs
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, UNASSIGNED};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LabelReachableData {
     reach_input: bool,
     final_label: Label,
@@ -51,7 +51,7 @@ impl LabelReachableData {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LabelReachable {
     data: LabelReachableData,
     label2state: HashMap<Label, StateId>,

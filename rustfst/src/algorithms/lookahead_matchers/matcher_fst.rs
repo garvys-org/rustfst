@@ -10,22 +10,22 @@ use crate::algorithms::lookahead_matchers::label_reachable::{LabelReachable, Lab
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::MatchType;
 use crate::fst_traits::{
-    ArcIterator, CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator,
+    ArcIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterData, FstIterator, MutableFst,
+    StateIterator,
 };
-use crate::SymbolTable;
+use crate::{Arc, SymbolTable};
 
+#[derive(Clone, PartialEq, Debug)]
 pub struct MatcherFst<F, M, T> {
     fst_add_on: FstAddOn<F, (Option<T>, Option<T>)>,
     matcher: PhantomData<M>,
 }
 
-impl<F: Debug, M, T: Debug> Debug for MatcherFst<F, M, T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        unimplemented!()
-    }
-}
-
 impl<F, M, T> MatcherFst<F, M, T> {
+    pub fn addon(&self) -> &(Option<T>, Option<T>) {
+        self.fst_add_on.add_on()
+    }
+
     pub fn data(&self, match_type: MatchType) -> Option<&T> {
         let data = self.fst_add_on.add_on();
         if match_type == MatchType::MatchInput {
@@ -125,7 +125,7 @@ where
     }
 }
 
-impl<F: Fst, M, T: Debug> Fst for MatcherFst<F, M, T>
+impl<F: Fst, M: Debug, T: Debug> Fst for MatcherFst<F, M, T>
 where
     F::W: 'static,
 {
@@ -151,5 +151,27 @@ where
 
     fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
         self.fst_add_on.unset_output_symbols()
+    }
+}
+
+impl<F: ExpandedFst, M: Debug + Clone + PartialEq, T: Debug + Clone + PartialEq> ExpandedFst
+    for MatcherFst<F, M, T>
+where
+    F::W: 'static,
+{
+    fn num_states(&self) -> usize {
+        self.fst_add_on.num_states()
+    }
+}
+
+impl<F: FstIntoIterator, M, T: Debug> FstIntoIterator for MatcherFst<F, M, T>
+where
+    F::W: 'static,
+{
+    type ArcsIter = F::ArcsIter;
+    type FstIter = F::FstIter;
+
+    fn fst_into_iter(self) -> Self::FstIter {
+        self.fst_add_on.fst_into_iter()
     }
 }

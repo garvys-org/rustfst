@@ -7,7 +7,7 @@ use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct SortedMatcher<'fst, F: ExpandedFst> {
     fst: &'fst F,
     match_type: MatchType,
