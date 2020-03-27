@@ -32,7 +32,7 @@ impl LabelLookAheadRelabeler {
     pub fn relabel<F: MutableFst>(
         fst: &mut F,
         mfst: &FstAddOn<F, (Option<LabelReachableData>, Option<LabelReachableData>)>,
-        relabel_input: bool
+        relabel_input: bool,
     ) -> Fallible<()> {
         let data = mfst.add_on();
         let reachable_data = if data.0.as_ref().is_some() {
@@ -43,5 +43,4 @@ impl LabelLookAheadRelabeler {
         let reachable = LabelReachable::new_from_data(reachable_data);
         reachable.relabel_fst(fst, relabel_input)
     }
-
 }

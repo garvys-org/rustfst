@@ -6,11 +6,13 @@ use failure::Fallible;
 
 use crate::algorithms::lookahead_matchers::add_on::FstAddOn;
 use crate::algorithms::lookahead_matchers::label_lookahead_relabeler::LabelLookAheadRelabeler;
+use crate::algorithms::lookahead_matchers::label_reachable::{LabelReachable, LabelReachableData};
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::MatchType;
-use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, FstIterator, StateIterator, MutableFst};
+use crate::fst_traits::{
+    ArcIterator, CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator,
+};
 use crate::SymbolTable;
-use crate::algorithms::lookahead_matchers::label_reachable::{LabelReachableData, LabelReachable};
 
 pub struct MatcherFst<F, M, T> {
     fst_add_on: FstAddOn<F, (Option<T>, Option<T>)>,
@@ -35,8 +37,12 @@ impl<F, M, T> MatcherFst<F, M, T> {
 }
 
 // TODO: To be generalized
-impl<'a, 'fst: 'a, F: MutableFst + 'fst, M: LookaheadMatcher<'a, F::W, F = F, MatcherData=LabelReachableData>>
-    MatcherFst<&'fst F, M, M::MatcherData>
+impl<
+        'a,
+        'fst: 'a,
+        F: MutableFst + 'fst,
+        M: LookaheadMatcher<'a, F::W, F = F, MatcherData = LabelReachableData>,
+    > MatcherFst<&'fst F, M, M::MatcherData>
 {
     pub fn new(fst: &'fst mut F) -> Fallible<Self> {
         // let add_on = {
