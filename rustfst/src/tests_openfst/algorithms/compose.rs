@@ -3,7 +3,9 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::compose_filters::AltSequenceComposeFilter;
 use crate::algorithms::lookahead_filters::lookahead_selector::SMatchOutput;
-use crate::algorithms::lookahead_filters::{LookAheadComposeFilter, PushWeightsComposeFilter};
+use crate::algorithms::lookahead_filters::{
+    LookAheadComposeFilter, PushLabelsComposeFilter, PushWeightsComposeFilter,
+};
 use crate::algorithms::lookahead_matchers::label_lookahead_relabeler::LabelLookAheadRelabeler;
 use crate::algorithms::lookahead_matchers::label_reachable::LabelReachableData;
 use crate::algorithms::lookahead_matchers::matcher_fst::MatcherFst;
@@ -137,9 +139,11 @@ where
     type LOOKFILTER<'fst1, 'fst2, S> =
         LookAheadComposeFilter<'fst1, 'fst2, S, SEQFILTER<'fst1, 'fst2, S>, SMatchOutput>;
     type PUSHWEIGHTSFILTER<'fst1, 'fst2, S> =
-        PushWeightsComposeFilter<'fst1, 'fst2, S, SEQFILTER<'fst1, 'fst2, S>, SMatchOutput>;
+        PushWeightsComposeFilter<'fst1, 'fst2, S, LOOKFILTER<'fst1, 'fst2, S>, SMatchOutput>;
+    type PUSHLABELSFILTER<'fst1, 'fst2, S> =
+        PushLabelsComposeFilter<'fst1, 'fst2, S, PUSHWEIGHTSFILTER<'fst1, 'fst2, S>, SMatchOutput>;
 
-    type COMPOSEFILTER<'fst1, 'fst2, S> = LOOKFILTER<'fst1, 'fst2, S>;
+    type COMPOSEFILTER<'fst1, 'fst2, S> = PUSHLABELSFILTER<'fst1, 'fst2, S>;
 
     let fst1: VectorFst<_> = fst_raw.clone().into();
     let mut fst2: VectorFst<_> = compose_test_data.fst_2.clone();
