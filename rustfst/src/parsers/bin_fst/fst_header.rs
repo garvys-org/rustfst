@@ -11,7 +11,7 @@ use bitflags::bitflags;
 use crate::parsers::bin_fst::utils_serialization::{
     write_bin_i32, write_bin_i64, write_bin_u32, write_bin_u64,
 };
-use crate::parsers::bin_symt::nom_parser::parse_symbol_table_bin;
+use crate::parsers::bin_symt::nom_parser::{parse_symbol_table_bin, write_bin_symt};
 use crate::SymbolTable;
 use std::rc::Rc;
 
@@ -53,6 +53,14 @@ fn optionally_parse_symt(i: &[u8], parse_symt: bool) -> IResult<&[u8], Option<Sy
         Ok((i, Some(symt)))
     } else {
         Ok((i, None))
+    }
+}
+
+fn optionally_write_symt<W: Write>(file: &mut W, symt: &Option<Rc<SymbolTable>>) -> Fallible<()> {
+    if let Some(symt) = symt {
+        write_bin_symt(file, symt)
+    } else {
+        Ok(())
     }
 }
 
@@ -119,6 +127,8 @@ impl FstHeader {
         write_bin_i64(file, self.num_states)?;
         //num_arcs: i64,
         write_bin_i64(file, self.num_arcs)?;
+        optionally_write_symt(file, &self.isymt)?;
+        optionally_write_symt(file, &self.osymt)?;
         Ok(())
     }
 }

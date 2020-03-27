@@ -46,13 +46,21 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
             .map(|s: usize| unsafe { self.num_arcs_unchecked(s) })
             .sum();
 
+        let mut flags = FstFlags::empty();
+        if self.input_symbols().is_some() {
+            flags |= FstFlags::HAS_ISYMBOLS;
+        }
+        if self.output_symbols().is_some() {
+            flags |= FstFlags::HAS_OSYMBOLS;
+        }
+
         let hdr = FstHeader {
             magic_number: FST_MAGIC_NUMBER,
             fst_type: OpenFstString::new(Self::fst_type()),
             arc_type: OpenFstString::new(Arc::<W>::arc_type()),
             version: 2i32,
             // TODO: Set flags if the content is aligned
-            flags: FstFlags::empty(),
+            flags,
             // TODO: Once the properties are stored, need to read them
             properties: 3u64,
             start: self.start_state.map(|v| v as i64).unwrap_or(-1),

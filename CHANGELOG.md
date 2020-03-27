@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `take_final_weight` and `take_final_weight_unchecked` to MutableFst API.
 - Add `add_super_final_state` algorithm.
 - Add the `ReverseBack` trait that must be implemented for Semiring::ReverseWeight. Allows to avoid using transmute when we have `weight.reverse().reverse()` calls.
+- Implement `SerializableSemiring` for `ProbabilityWeight`
+- Add support for `SymbolTable` serialization while serializing a FST in binary format.
+
 
 ### Changed
 - `fst_convert` now consumes its input. Use `fst_convert_from_ref` to pass a borrow.

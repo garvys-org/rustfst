@@ -44,13 +44,21 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
     fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Fallible<()> {
         let mut file = BufWriter::new(File::create(path_bin_fst)?);
 
+        let mut flags = FstFlags::empty();
+        if self.input_symbols().is_some() {
+            flags |= FstFlags::HAS_ISYMBOLS;
+        }
+        if self.output_symbols().is_some() {
+            flags |= FstFlags::HAS_OSYMBOLS;
+        }
+
         let hdr = FstHeader {
             magic_number: FST_MAGIC_NUMBER,
             fst_type: OpenFstString::new(Self::fst_type()),
             arc_type: OpenFstString::new(Arc::<W>::arc_type()),
             version: CONST_FILE_VERSION,
-            // TODO: Flags are used to check whether or not a symboltable has to be loaded
-            flags: FstFlags::empty(),
+            // TODO: Set flags if the content is aligned
+            flags,
             // TODO: Once the properties are stored, need to read them. kExpanded
             properties: 1u64,
             start: self.start.map(|v| v as i64).unwrap_or(-1),
