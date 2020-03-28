@@ -90,7 +90,7 @@ impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
 
 fn union_vec_isets_ordered(isets: &mut Vec<IntervalSet>, i_inf: usize, i_sup: usize) {
     let (v_0_isupm1, v_isup1_end) = isets.split_at_mut(i_sup);
-    v_0_isupm1[i_inf].union(&v_isup1_end[0])
+    v_0_isupm1[i_inf].union(v_isup1_end[0].clone())
 }
 
 // Perform the union of two IntervalSet stored in a vec. Utils to fix issue with borrow checker.
@@ -100,7 +100,8 @@ fn union_vec_isets_unordered(isets: &mut Vec<IntervalSet>, i: usize, j: usize) {
     } else if j > i {
         union_vec_isets_ordered(isets, j, i)
     } else {
-        // Useless
-        unreachable!()
+        // TODO: Need to investigate if it does something
+        let temp = isets[i].clone();
+        isets[i].union(temp)
     }
 }

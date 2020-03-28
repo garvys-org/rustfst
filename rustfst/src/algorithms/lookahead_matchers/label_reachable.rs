@@ -76,7 +76,7 @@ impl LabelReachable {
         Ok(Self {
             data: Rc::new(data),
             label2state,
-            reach_fst_input: false
+            reach_fst_input: false,
         })
     }
 
@@ -105,7 +105,11 @@ impl LabelReachable {
     // redirected via a transition labeled with kNoLabel to a new
     // kNoLabel-specific final state. Creates super-initial state for all states
     // with zero in-degree.
-    fn transform_fst<W: Semiring + 'static>(fst: &mut VectorFst<W>, data: &mut LabelReachableData, label2state: &mut HashMap<Label, StateId>) {
+    fn transform_fst<W: Semiring + 'static>(
+        fst: &mut VectorFst<W>,
+        data: &mut LabelReachableData,
+        label2state: &mut HashMap<Label, StateId>,
+    ) {
         let ins = fst.num_states();
         let mut ons = ins;
         let mut indeg = vec![0; ins];
@@ -175,7 +179,7 @@ impl LabelReachable {
         fst: &VectorFst<W>,
         ins: StateId,
         data: &mut LabelReachableData,
-        label2state: &mut HashMap<Label, StateId>
+        label2state: &mut HashMap<Label, StateId>,
     ) -> Fallible<()> {
         let state_reachable = StateReachable::new(fst)?;
         let state2index = &state_reachable.state2index;

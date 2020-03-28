@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use std::slice::Iter as IterSlice;
+use std::vec::IntoIter as IntoIterVec;
 use superslice::Ext;
 use unsafe_unwrap::UnsafeUnwrap;
 
@@ -54,6 +55,10 @@ impl VectorIntervalStore {
     pub fn iter(&self) -> IterSlice<IntInterval> {
         self.intervals.iter()
     }
+
+    pub fn into_iter(self) -> IntoIterVec<IntInterval> {
+        self.intervals.into_iter()
+    }
 }
 
 #[derive(PartialOrd, PartialEq, Default, Clone, Debug)]
@@ -79,11 +84,13 @@ impl IntervalSet {
         self.intervals.iter()
     }
 
+    pub fn into_iter(self) -> IntoIterVec<IntInterval> {
+        self.intervals.into_iter()
+    }
+
     // Adds an interval set to the set. The result may not be normalized.
-    pub fn union(&mut self, iset: &Self) {
-        self.intervals
-            .intervals
-            .extend(iset.intervals.iter().cloned())
+    pub fn union(&mut self, iset: Self) {
+        self.intervals.intervals.extend(iset.into_iter())
     }
 
     // Requires intervals be normalized.

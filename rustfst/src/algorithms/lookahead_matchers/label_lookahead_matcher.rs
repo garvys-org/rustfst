@@ -118,12 +118,7 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
         if (reach_input && MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER))
             || (!reach_input && MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
         {
-            Some(
-                LabelReachable::new(fst, reach_input)
-                    .unwrap()
-                    .data()
-                    .clone(),
-            )
+            Some(LabelReachable::new(fst, reach_input).unwrap().shared_data())
         } else {
             None
         }

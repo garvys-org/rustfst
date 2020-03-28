@@ -9,7 +9,13 @@ pub struct LabelLookAheadRelabeler {}
 
 impl LabelLookAheadRelabeler {
     pub fn init<F: MutableFst>(
-        fst_addon: &mut FstAddOn<F, (Option<Rc<LabelReachableData>>, Option<Rc<LabelReachableData>>)>,
+        fst_addon: &mut FstAddOn<
+            F,
+            (
+                Option<Rc<LabelReachableData>>,
+                Option<Rc<LabelReachableData>>,
+            ),
+        >,
     ) -> Fallible<()> {
         let fst = &mut fst_addon.fst;
         let data = &fst_addon.add_on;
@@ -29,7 +35,10 @@ impl LabelLookAheadRelabeler {
 
     pub fn relabel<F: MutableFst>(
         fst: &mut F,
-        addon: &(Option<Rc<LabelReachableData>>, Option<Rc<LabelReachableData>>),
+        addon: &(
+            Option<Rc<LabelReachableData>>,
+            Option<Rc<LabelReachableData>>,
+        ),
         relabel_input: bool,
     ) -> Fallible<()> {
         let reachable_data = if addon.0.as_ref().is_some() {

@@ -6,8 +6,8 @@ use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 use std::marker::PhantomData;
-use unsafe_unwrap::UnsafeUnwrap;
 use std::rc::Rc;
+use unsafe_unwrap::UnsafeUnwrap;
 
 #[derive(Debug)]
 pub struct ArcLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>, MFT> {
