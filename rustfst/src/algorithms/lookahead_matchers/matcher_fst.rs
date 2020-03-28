@@ -16,16 +16,16 @@ use crate::SymbolTable;
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct MatcherFst<F, M, T> {
-    fst_add_on: FstAddOn<F, (Option<T>, Option<T>)>,
+    fst_add_on: FstAddOn<F, (Option<Rc<T>>, Option<Rc<T>>)>,
     matcher: PhantomData<M>,
 }
 
 impl<F, M, T> MatcherFst<F, M, T> {
-    pub fn addon(&self) -> &(Option<T>, Option<T>) {
+    pub fn addon(&self) -> &(Option<Rc<T>>, Option<Rc<T>>) {
         self.fst_add_on.add_on()
     }
 
-    pub fn data(&self, match_type: MatchType) -> Option<&T> {
+    pub fn data(&self, match_type: MatchType) -> Option<&Rc<T>> {
         let data = self.fst_add_on.add_on();
         if match_type == MatchType::MatchInput {
             data.0.as_ref()

@@ -13,6 +13,7 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableArcIterator, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, UNASSIGNED};
+use std::rc::Rc;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelReachableData {
@@ -53,7 +54,7 @@ impl LabelReachableData {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelReachable {
-    data: LabelReachableData,
+    data: Rc<LabelReachableData>,
     label2state: HashMap<Label, StateId>,
     reach_fst_input: bool,
 }
@@ -65,20 +66,21 @@ impl LabelReachable {
     {
         let mut fst: VectorFst<_> = fst_convert_from_ref(fst);
 
-        let mut label_reachable = Self {
-            data: LabelReachableData::new(reach_input),
-            label2state: HashMap::new(),
-            reach_fst_input: false,
-        };
+        let mut data = LabelReachableData::new(reach_input);
+        let mut label2state = HashMap::new();
 
         let nstates = fst.num_states();
-        label_reachable.transform_fst(&mut fst);
-        label_reachable.find_intervals(&fst, nstates)?;
+        Self::transform_fst(&mut fst, &mut data, &mut label2state);
+        Self::find_intervals(&fst, nstates, &mut data, &mut label2state)?;
 
-        Ok(label_reachable)
+        Ok(Self {
+            data: Rc::new(data),
+            label2state,
+            reach_fst_input: false
+        })
     }
 
-    pub fn new_from_data(data: LabelReachableData) -> Self {
+    pub fn new_from_data(data: Rc<LabelReachableData>) -> Self {
         Self {
             data,
             label2state: HashMap::new(),
@@ -86,8 +88,12 @@ impl LabelReachable {
         }
     }
 
-    pub fn data(&self) -> &LabelReachableData {
+    pub fn data(&self) -> &Rc<LabelReachableData> {
         &self.data
+    }
+
+    pub fn shared_data(&self) -> Rc<LabelReachableData> {
+        Rc::clone(&self.data)
     }
 
     pub fn reach_input(&self) -> bool {
@@ -99,20 +105,20 @@ impl LabelReachable {
     // redirected via a transition labeled with kNoLabel to a new
     // kNoLabel-specific final state. Creates super-initial state for all states
     // with zero in-degree.
-    fn transform_fst<W: Semiring + 'static>(&mut self, fst: &mut VectorFst<W>) {
+    fn transform_fst<W: Semiring + 'static>(fst: &mut VectorFst<W>, data: &mut LabelReachableData, label2state: &mut HashMap<Label, StateId>) {
         let ins = fst.num_states();
         let mut ons = ins;
         let mut indeg = vec![0; ins];
         // Redirects labeled arcs to new final states.
         for s in 0..ins {
             for arc in unsafe { fst.arcs_iter_unchecked_mut(s) } {
-                let label = if self.data.reach_input {
+                let label = if data.reach_input {
                     arc.ilabel
                 } else {
                     arc.olabel
                 };
                 if label != EPS_LABEL {
-                    arc.nextstate = match self.label2state.entry(label) {
+                    arc.nextstate = match label2state.entry(label) {
                         Entry::Vacant(e) => {
                             let v = *e.insert(ons);
                             indeg.push(0);
@@ -127,7 +133,7 @@ impl LabelReachable {
 
             if let Some(final_weight) = unsafe { fst.final_weight_unchecked(s) } {
                 if !final_weight.is_zero() {
-                    let nextstate = match self.label2state.entry(NO_LABEL) {
+                    let nextstate = match label2state.entry(NO_LABEL) {
                         Entry::Vacant(e) => {
                             let v = *e.insert(ons);
                             indeg.push(0);
@@ -166,24 +172,25 @@ impl LabelReachable {
     }
 
     fn find_intervals<W: Semiring + 'static>(
-        &mut self,
         fst: &VectorFst<W>,
         ins: StateId,
+        data: &mut LabelReachableData,
+        label2state: &mut HashMap<Label, StateId>
     ) -> Fallible<()> {
         let state_reachable = StateReachable::new(fst)?;
         let state2index = &state_reachable.state2index;
-        let interval_sets = &mut self.data.interval_sets;
+        let interval_sets = &mut data.interval_sets;
         *interval_sets = state_reachable.isets;
         interval_sets.resize_with(ins, IntervalSet::default);
-        let label2index = &mut self.data.label2index;
-        for (label, state) in self.label2state.iter() {
+        let label2index = &mut data.label2index;
+        for (label, state) in label2state.iter() {
             let i = state2index[*state];
             label2index.insert(*label, i);
             if *label == NO_LABEL {
-                self.data.final_label = i;
+                data.final_label = i;
             }
         }
-        self.label2state.clear();
+        label2state.clear();
         Ok(())
     }
 

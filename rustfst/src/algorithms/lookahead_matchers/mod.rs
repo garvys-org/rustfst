@@ -10,6 +10,7 @@ use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, NO_STATE_ID};
 use std::fmt::Debug;
+use std::rc::Rc;
 
 mod arc_lookahead_matcher;
 pub(crate) mod interval_set;
@@ -32,12 +33,12 @@ pub trait LookaheadMatcher<'fst, W: Semiring + 'fst>: Matcher<'fst, W> {
     fn new_with_data(
         fst: &'fst Self::F,
         match_type: MatchType,
-        data: Option<Self::MatcherData>,
+        data: Option<Rc<Self::MatcherData>>,
     ) -> Fallible<Self>
     where
         Self: std::marker::Sized;
 
-    fn create_data(fst: &Self::F, match_type: MatchType) -> Option<Self::MatcherData>;
+    fn create_data(fst: &Self::F, match_type: MatchType) -> Option<Rc<Self::MatcherData>>;
 
     fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &LF) -> Fallible<()>;
     // Are there paths from a state in the lookahead FST that can be read from

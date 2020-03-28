@@ -7,6 +7,7 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL};
+use std::rc::Rc;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SortedMatcher<'fst, F: ExpandedFst> {
@@ -156,7 +157,7 @@ impl<'fst, F: ExpandedFst + 'fst> LookaheadMatcher<'fst, F::W> for SortedMatcher
     fn new_with_data(
         _fst: &'fst Self::F,
         _match_type: MatchType,
-        _data: Option<Self::MatcherData>,
+        _data: Option<Rc<Self::MatcherData>>,
     ) -> Fallible<Self>
     where
         Self: std::marker::Sized,
@@ -164,7 +165,7 @@ impl<'fst, F: ExpandedFst + 'fst> LookaheadMatcher<'fst, F::W> for SortedMatcher
         unreachable!()
     }
 
-    fn create_data(_fst: &Self::F, _match_type: MatchType) -> Option<Self::MatcherData> {
+    fn create_data(_fst: &Self::F, _match_type: MatchType) -> Option<Rc<Self::MatcherData>> {
         unreachable!()
     }
 

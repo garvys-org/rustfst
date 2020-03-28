@@ -7,6 +7,7 @@ use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 use std::marker::PhantomData;
 use unsafe_unwrap::UnsafeUnwrap;
+use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct ArcLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>, MFT> {
@@ -77,12 +78,12 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
     fn new_with_data(
         fst: &'fst Self::F,
         match_type: MatchType,
-        _data: Option<Self::MatcherData>,
+        _data: Option<Rc<Self::MatcherData>>,
     ) -> Fallible<Self> {
         Self::new(fst, match_type)
     }
 
-    fn create_data(_fst: &Self::F, _match_type: MatchType) -> Option<Self::MatcherData> {
+    fn create_data(_fst: &Self::F, _match_type: MatchType) -> Option<Rc<Self::MatcherData>> {
         None
     }
 

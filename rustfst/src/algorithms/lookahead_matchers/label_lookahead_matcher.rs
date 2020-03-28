@@ -8,6 +8,7 @@ use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Arc, EPS_LABEL, NO_STATE_ID};
+use std::rc::Rc;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>, MFT> {
@@ -80,7 +81,7 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
     fn new_with_data(
         fst: &'fst Self::F,
         match_type: MatchType,
-        data: Option<Self::MatcherData>,
+        data: Option<Rc<Self::MatcherData>>,
     ) -> Fallible<Self> {
         if !(MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER)
             | MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
@@ -112,7 +113,7 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
         })
     }
 
-    fn create_data(fst: &Self::F, match_type: MatchType) -> Option<Self::MatcherData> {
+    fn create_data(fst: &Self::F, match_type: MatchType) -> Option<Rc<Self::MatcherData>> {
         let reach_input = match_type == MatchType::MatchInput;
         if (reach_input && MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER))
             || (!reach_input && MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
