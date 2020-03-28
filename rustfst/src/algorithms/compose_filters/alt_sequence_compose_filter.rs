@@ -1,14 +1,18 @@
+use std::cell::RefCell;
+use std::marker::PhantomData;
+use std::rc::Rc;
+
 use failure::Fallible;
 
 use crate::algorithms::compose_filters::ComposeFilter;
 use crate::algorithms::filter_states::{FilterState, IntegerFilterState};
-use crate::algorithms::matchers::{MatchType, Matcher};
+use crate::algorithms::lookahead_filters::lookahead_selector::Selector;
+use crate::algorithms::lookahead_filters::LookAheadComposeFilterTrait;
+use crate::algorithms::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Arc, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
-use std::cell::RefCell;
-use std::marker::PhantomData;
-use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct AltSequenceComposeFilter<
@@ -118,5 +122,35 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1, M1: Matcher<'fst1, W>, M2: Matcher<'fst2
 
     fn matcher2(&self) -> Rc<RefCell<Self::M2>> {
         Rc::clone(&self.matcher2)
+    }
+}
+
+impl<
+        'fst1,
+        'fst2,
+        W: Semiring + 'fst1 + 'fst2,
+        M1: LookaheadMatcher<'fst1, W>,
+        M2: LookaheadMatcher<'fst2, W>,
+    > LookAheadComposeFilterTrait<'fst1, 'fst2, W>
+    for AltSequenceComposeFilter<'fst1, 'fst2, W, M1, M2>
+{
+    fn lookahead_flags(&self) -> MatcherFlags {
+        unreachable!()
+    }
+
+    fn lookahead_arc(&self) -> bool {
+        unreachable!()
+    }
+
+    fn lookahead_type(&self) -> MatchType {
+        unreachable!()
+    }
+
+    fn lookahead_output(&self) -> bool {
+        unreachable!()
+    }
+
+    fn selector(&self) -> &Selector<'fst1, 'fst2, W, Self::M1, Self::M2> {
+        unreachable!()
     }
 }

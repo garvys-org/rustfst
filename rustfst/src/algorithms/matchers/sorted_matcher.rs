@@ -1,9 +1,10 @@
 use failure::Fallible;
 use superslice::Ext;
 
+use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::ExpandedFst;
+use crate::fst_traits::{CoreFst, ExpandedFst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL};
 
@@ -145,31 +146,62 @@ impl<'fst, W: Semiring> Iterator for IteratorSortedMatcher<'fst, W> {
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use crate::fst_impls::VectorFst;
-//     use crate::fst_traits::MutableFst;
-//     use crate::semirings::TropicalWeight;
-//
-//     use super::*;
-//
-//     #[test]
-//     fn lol() -> Fallible<()> {
-//         let mut fst = VectorFst::<TropicalWeight>::new();
-//         fst.add_states(2);
-//         fst.set_start(0)?;
-//         fst.set_final(1, TropicalWeight::one())?;
-//         fst.emplace_arc(0, 1, 2, 1.2, 1)?;
-//         fst.emplace_arc(0, 2, 3, 1.2, 1)?;
-//         fst.emplace_arc(0, 3, 4, 1.2, 1)?;
-//         fst.emplace_arc(0, 4, 5, 1.2, 1)?;
-//
-//         let mut matcher = SortedMatcher::new(&fst, MatchType::MatchInput);
-//
-//         for arc in matcher.iter(0, 2)? {
-//             println!("{:?}", arc);
-//         }
-//
-//         Ok(())
-//     }
-// }
+impl<'fst, F: ExpandedFst + 'fst> LookaheadMatcher<'fst, F::W> for SortedMatcher<'fst, F> {
+    type MatcherData = ();
+
+    fn data(&self) -> Option<&Self::MatcherData> {
+        unreachable!()
+    }
+
+    fn new_with_data(
+        _fst: &'fst Self::F,
+        _match_type: MatchType,
+        _data: Option<Self::MatcherData>,
+    ) -> Fallible<Self>
+    where
+        Self: std::marker::Sized,
+    {
+        unreachable!()
+    }
+
+    fn create_data(_fst: &Self::F, _match_type: MatchType) -> Option<Self::MatcherData> {
+        unreachable!()
+    }
+
+    fn init_lookahead_fst<LF: ExpandedFst<W = F::W>>(&mut self, _lfst: &LF) -> Fallible<()> {
+        unreachable!()
+    }
+
+    fn lookahead_fst<LF: ExpandedFst<W = F::W>>(
+        &mut self,
+        _matcher_state: usize,
+        _lfst: &LF,
+        _lfst_state: usize,
+    ) -> Fallible<bool> {
+        unreachable!()
+    }
+
+    fn lookahead_label(&self, _state: usize, _label: usize) -> Fallible<bool> {
+        unreachable!()
+    }
+
+    fn lookahead_prefix(&self, _arc: &mut Arc<<F as CoreFst>::W>) -> bool {
+        unreachable!()
+    }
+
+    fn lookahead_weight(&self) -> &<F as CoreFst>::W {
+        unreachable!()
+    }
+
+    fn prefix_arc(&self) -> &Arc<<F as CoreFst>::W> {
+        unreachable!()
+    }
+
+    fn prefix_arc_mut(&mut self) -> &mut Arc<<F as CoreFst>::W> {
+        unreachable!()
+    }
+
+    fn lookahead_weight_mut(&mut self) -> &mut <F as CoreFst>::W {
+        unreachable!()
+    }
+}

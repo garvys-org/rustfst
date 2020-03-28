@@ -3,11 +3,10 @@ use std::rc::Rc;
 
 use failure::Fallible;
 
-use crate::SymbolTable;
 use crate::fst_traits::{
-    ArcIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator,
-    StateIterator,
+    ArcIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator,
 };
+use crate::SymbolTable;
 
 /// Adds an object of type T to an FST.
 /// The resulting type is a new FST implementation.

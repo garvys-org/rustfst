@@ -37,7 +37,7 @@ impl<IMPL: FstImpl> DynamicFst<IMPL> {
         fst_impl.num_known_states()
     }
 
-    pub fn compute<F: MutableFst<W = IMPL::W>>(&mut self) -> Fallible<F> {
+    pub fn compute<F: MutableFst<W = IMPL::W>>(&self) -> Fallible<F> {
         let ptr = self.fst_impl.get();
         let fst_impl = unsafe { ptr.as_mut().unwrap() };
         let mut fst: F = fst_impl.compute()?;

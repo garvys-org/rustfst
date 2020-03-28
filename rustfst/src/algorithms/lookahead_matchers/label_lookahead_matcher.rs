@@ -82,9 +82,9 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
         match_type: MatchType,
         data: Option<Self::MatcherData>,
     ) -> Fallible<Self> {
-        if !MFT::flags().contains(
-            MatcherFlags::INPUT_LOOKAHEAD_MATCHER | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER,
-        ) {
+        if !(MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER)
+            | MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
+        {
             bail!(
                 "LabelLookAheadMatcher : Bad Matcher flags : {:?}",
                 MFT::flags()

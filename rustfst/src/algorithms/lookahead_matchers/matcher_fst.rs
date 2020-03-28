@@ -4,16 +4,15 @@ use std::rc::Rc;
 
 use failure::Fallible;
 
-use crate::SymbolTable;
 use crate::algorithms::lookahead_matchers::add_on::FstAddOn;
 use crate::algorithms::lookahead_matchers::label_lookahead_relabeler::LabelLookAheadRelabeler;
 use crate::algorithms::lookahead_matchers::label_reachable::LabelReachableData;
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::matchers::MatchType;
 use crate::fst_traits::{
-    ArcIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, MutableFst,
-    StateIterator,
+    ArcIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, MutableFst, StateIterator,
 };
+use crate::SymbolTable;
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct MatcherFst<F, M, T> {
