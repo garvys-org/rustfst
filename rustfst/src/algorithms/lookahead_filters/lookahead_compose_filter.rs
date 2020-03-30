@@ -68,13 +68,11 @@ where
             Selector::MatchInput(s) => s
                 .matcher
                 .borrow_mut()
-                .lookahead_fst(arca.nextstate, s.fst, arcb.nextstate)
-                .unwrap(),
+                .lookahead_fst(arca.nextstate, s.fst, arcb.nextstate)?,
             Selector::MatchOutput(s) => s
                 .matcher
                 .borrow_mut()
-                .lookahead_fst(arca.nextstate, s.fst, arcb.nextstate)
-                .unwrap(),
+                .lookahead_fst(arca.nextstate, s.fst, arcb.nextstate)?,
         };
 
         if res {
@@ -151,19 +149,14 @@ where
     }
 
     fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS> {
-        println!("Arc1: {:?}", &arc1);
-        println!("Arc2: {:?}", &arc1);
         self.lookahead_arc = false;
         let fs = self.filter.filter_arc(arc1, arc2)?;
         if fs == CF::FS::new_no_state() {
-            println!("Filtered by underlying matcher");
             return Ok(CF::FS::new_no_state());
         }
         if self.lookahead_output() {
-            println!("A");
             self.lookahead_filter_arc(arc1, arc2, &fs)
         } else {
-            println!("B");
             self.lookahead_filter_arc(arc2, arc1, &fs)
         }
     }

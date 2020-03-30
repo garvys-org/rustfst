@@ -21,6 +21,10 @@ pub struct MatcherFst<F, M, T> {
 }
 
 impl<F, M, T> MatcherFst<F, M, T> {
+    pub fn fst(&self) -> &F {
+        self.fst_add_on.fst()
+    }
+
     pub fn addon(&self) -> &(Option<Rc<T>>, Option<Rc<T>>) {
         self.fst_add_on.add_on()
     }

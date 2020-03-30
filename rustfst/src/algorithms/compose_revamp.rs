@@ -147,7 +147,7 @@ impl<'fst1, 'fst2, W: Semiring, CF: ComposeFilter<'fst1, 'fst2, W>>
     }
 
     fn match_input(&self, s1: StateId, s2: StateId) -> Fallible<bool> {
-        match self.match_type {
+        match std::dbg!(self.match_type) {
             MatchType::MatchInput => Ok(true),
             MatchType::MatchOutput => Ok(false),
             _ => {
@@ -230,6 +230,7 @@ impl<'fst1, 'fst2, W: Semiring, CF: ComposeFilter<'fst1, 'fst2, W>>
         W: 'b,
     {
         let label = if match_input { arc.olabel } else { arc.ilabel };
+        std::dbg!(match_input);
         for arca in matchera.borrow().iter(sa, label)? {
             let mut arca = arca.into_arc(
                 sa,
@@ -240,6 +241,8 @@ impl<'fst1, 'fst2, W: Semiring, CF: ComposeFilter<'fst1, 'fst2, W>>
                 },
             )?;
             let mut arcb = arc.clone();
+            println!("[MATCH ARC] Arc a : {:?}", &arca);
+            println!("[MATCH ARC] Arc b : {:?}", &arcb);
             if match_input {
                 let fs = self.compose_filter.filter_arc(&mut arcb, &mut arca)?;
                 if fs != CF::FS::new_no_state() {
@@ -271,12 +274,13 @@ impl<'fst1, 'fst2, W: Semiring + 'static, CF: ComposeFilter<'fst1, 'fst2, W>> Fs
     }
 
     fn expand(&mut self, state: usize) -> Fallible<()> {
+        println!("[EXPAND] Expanding state = {:?}", state);
         let tuple = self.state_table.find_tuple(state);
         let s1 = tuple.s1;
         let s2 = tuple.s2;
         self.compose_filter.set_state(s1, s2, &tuple.fs);
         drop(tuple);
-        if self.match_input(s1, s2)? {
+        if std::dbg!(self.match_input(s1, s2)?) {
             self.ordered_expand(state, s2, self.fst1, s1, Rc::clone(&self.matcher2), true)?;
         } else {
             self.ordered_expand(state, s1, self.fst2, s2, Rc::clone(&self.matcher1), false)?;
