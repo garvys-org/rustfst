@@ -152,7 +152,7 @@ where
         SMatchOutput,
     >;
 
-    type TComposeFilter<'fst1, 'fst2, S, F1, F2> = TPushWeightsFilter<'fst1, 'fst2, S, F1, F2>;
+    type TComposeFilter<'fst1, 'fst2, S, F1, F2> = TLookFilter<'fst1, 'fst2, S, F1, F2>;
 
     let fst1: VectorFst<_> = fst_raw.clone().into();
     let mut fst2: VectorFst<_> = compose_test_data.fst_2.clone();

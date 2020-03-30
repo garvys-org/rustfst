@@ -36,7 +36,7 @@ impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
             self.state2index.push(UNASSIGNED);
         }
         if self.fst.is_final(s).unwrap() {
-            let intervals = &mut self.isets[s].intervals.intervals;
+            let interval_set = &mut self.isets[s];
             if self.index == UNASSIGNED {
                 if self.fst.num_arcs(s).unwrap() > 0 {
                     panic!("IntervalReachVisitor: state2index map must be empty for this FST")
@@ -45,9 +45,9 @@ impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
                 if index == UNASSIGNED {
                     panic!("IntervalReachVisitor: state2index map incomplete")
                 }
-                intervals.push(IntInterval::new(index, index + 1));
+                interval_set.push(IntInterval::new(index, index + 1));
             } else {
-                intervals.push(IntInterval::new(self.index, self.index + 1));
+                interval_set.push(IntInterval::new(self.index, self.index + 1));
                 self.state2index[s] = self.index;
                 self.index += 1;
             }
@@ -99,9 +99,5 @@ fn union_vec_isets_unordered(isets: &mut Vec<IntervalSet>, i: usize, j: usize) {
         union_vec_isets_ordered(isets, i, j)
     } else if j > i {
         union_vec_isets_ordered(isets, j, i)
-    } else {
-        // TODO: Need to investigate if it does something
-        let temp = isets[i].clone();
-        isets[i].union(temp)
     }
 }

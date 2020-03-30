@@ -1,3 +1,4 @@
+use failure::_core::cmp::Ordering;
 use std::collections::HashSet;
 use std::slice::Iter as IterSlice;
 use std::vec::IntoIter as IntoIterVec;
@@ -5,10 +6,10 @@ use superslice::Ext;
 use unsafe_unwrap::UnsafeUnwrap;
 
 /// Half-open integral interval [a, b) of signed integers of type T.
-#[derive(PartialOrd, PartialEq, Clone, Ord, Eq, Debug)]
+#[derive(PartialEq, Clone, Eq, Debug)]
 pub struct IntInterval {
-    pub(crate) begin: usize,
-    pub(crate) end: usize,
+    pub begin: usize,
+    pub end: usize,
 }
 
 impl IntInterval {
@@ -17,7 +18,35 @@ impl IntInterval {
     }
 }
 
-/// Stores IntIntervals<T> in a vector. In addition, keeps the count of points in
+// Not using default implementation to make sure that begin is compared first
+// as it plays a role in the normalize function
+impl PartialOrd for IntInterval {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for IntInterval {
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self.begin < other.begin {
+            Ordering::Less
+        } else if self.begin > other.begin {
+            Ordering::Greater
+        } else {
+            // self.begin == other.begin
+            if self.end < other.end {
+                Ordering::Greater
+            } else if self.end > other.end {
+                Ordering::Less
+            } else {
+                // self.end == other.end
+                Ordering::Equal
+            }
+        }
+    }
+}
+
+/// Stores IntIntervals in a vector. In addition, keeps the count of points in
 /// all intervals.
 #[derive(Clone, PartialOrd, PartialEq, Debug)]
 pub struct VectorIntervalStore {
@@ -37,6 +66,10 @@ impl Default for VectorIntervalStore {
 impl VectorIntervalStore {
     pub fn len(&self) -> usize {
         self.intervals.len()
+    }
+
+    pub fn push(&mut self, interval: IntInterval) {
+        self.intervals.push(interval)
     }
 
     pub fn clear(&mut self) {
@@ -69,6 +102,10 @@ pub struct IntervalSet {
 impl IntervalSet {
     pub fn len(&self) -> usize {
         self.intervals.len()
+    }
+
+    pub fn push(&mut self, interval: IntInterval) {
+        self.intervals.push(interval)
     }
 
     // Number of points in the intervals (undefined if not normalized).
@@ -124,11 +161,13 @@ impl IntervalSet {
             let inti = unsafe { intervals_0_i.get_unchecked_mut(i) };
             let inti_index = i;
             if inti.begin == inti.end {
+                // Empty interval
                 continue;
             }
-            for j in i + 1..n_intervals {
-                let intj = unsafe { intervals_ip1_end.get_unchecked_mut(j - (i + 1)) };
+            for j in (inti_index + 1)..n_intervals {
+                let intj = unsafe { intervals_ip1_end.get_unchecked_mut(j - (inti_index + 1)) };
                 if intj.begin > inti.end {
+                    // No overlap between the two intervals
                     break;
                 }
                 if intj.end > inti.end {
@@ -148,5 +187,88 @@ impl IntervalSet {
             .intervals
             .retain(|_| (intervals_indexes_to_keep.contains(&index), index += 1).0);
         self.intervals.set_count(count)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use failure::Fallible;
+
+    #[test]
+    fn test_normalize_interval_set() -> Fallible<()> {
+        let mut interval_set = IntervalSet::default();
+
+        assert!(!interval_set.singleton());
+        assert!(!interval_set.member(3));
+
+        interval_set.push(IntInterval::new(0, 5));
+
+        interval_set.push(IntInterval::new(3, 10));
+
+        interval_set.normalize();
+
+        assert!(interval_set.member(3));
+
+        {
+            let mut ref_interval_set = IntervalSet::default();
+            ref_interval_set.push(IntInterval::new(0, 10));
+            ref_interval_set.intervals.set_count(10);
+
+            assert_eq!(interval_set, ref_interval_set);
+        }
+
+        let mut interval_set_2 = IntervalSet::default();
+        interval_set_2.push(IntInterval::new(12, 13));
+        assert!(interval_set_2.singleton());
+
+        interval_set.union(interval_set_2);
+        interval_set.normalize();
+
+        {
+            let mut ref_interval_set = IntervalSet::default();
+            ref_interval_set.push(IntInterval::new(0, 10));
+            ref_interval_set.push(IntInterval::new(12, 13));
+            ref_interval_set.intervals.set_count(11);
+
+            assert_eq!(interval_set, ref_interval_set);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_ord_intinterval() -> Fallible<()> {
+        {
+            let interval_1 = IntInterval::new(1, 4);
+            let interval_2 = IntInterval::new(2, 3);
+            assert_eq!(interval_1.cmp(&interval_2), Ordering::Less);
+        }
+
+        {
+            let interval_1 = IntInterval::new(1, 4);
+            let interval_2 = IntInterval::new(1, 4);
+            assert_eq!(interval_1.cmp(&interval_2), Ordering::Equal);
+        }
+
+        {
+            let interval_1 = IntInterval::new(3, 4);
+            let interval_2 = IntInterval::new(2, 3);
+            assert_eq!(interval_1.cmp(&interval_2), Ordering::Greater);
+        }
+
+        {
+            let interval_1 = IntInterval::new(1, 4);
+            let interval_2 = IntInterval::new(1, 3);
+            assert_eq!(interval_1.cmp(&interval_2), Ordering::Less);
+        }
+
+        {
+            let interval_1 = IntInterval::new(1, 4);
+            let interval_2 = IntInterval::new(1, 5);
+            assert_eq!(interval_1.cmp(&interval_2), Ordering::Greater);
+        }
+
+        Ok(())
     }
 }
