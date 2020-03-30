@@ -43,7 +43,7 @@ pub trait ComposeFilter<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2>: Debug {
 
     fn start(&self) -> Self::FS;
 
-    fn set_state(&mut self, s1: StateId, s2: StateId, filter_state: &Self::FS);
+    fn set_state(&mut self, s1: StateId, s2: StateId, filter_state: &Self::FS) -> Fallible<()>;
 
     fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS>;
 

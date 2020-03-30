@@ -65,14 +65,16 @@ where
         self.lookahead_arc = true;
 
         let res = match self.selector() {
-            Selector::MatchInput(s) => s
-                .matcher
-                .borrow_mut()
-                .lookahead_fst(arca.nextstate, s.fst, arcb.nextstate)?,
-            Selector::MatchOutput(s) => s
-                .matcher
-                .borrow_mut()
-                .lookahead_fst(arca.nextstate, s.fst, arcb.nextstate)?,
+            Selector::MatchInput(s) => {
+                s.matcher
+                    .borrow_mut()
+                    .lookahead_fst(arca.nextstate, s.fst, arcb.nextstate)?
+            }
+            Selector::MatchOutput(s) => {
+                s.matcher
+                    .borrow_mut()
+                    .lookahead_fst(arca.nextstate, s.fst, arcb.nextstate)?
+            }
         };
 
         if res {
@@ -144,7 +146,7 @@ where
         self.filter.start()
     }
 
-    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) {
+    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Fallible<()> {
         self.filter.set_state(s1, s2, filter_state)
     }
 

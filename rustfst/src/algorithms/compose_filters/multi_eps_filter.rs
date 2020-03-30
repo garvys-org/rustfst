@@ -37,7 +37,7 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, F: ComposeFilter<'fst1, 'fst2, W
         self.filter.start()
     }
 
-    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) {
+    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Fallible<()> {
         self.filter.set_state(s1, s2, filter_state)
     }
 

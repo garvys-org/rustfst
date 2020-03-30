@@ -278,7 +278,7 @@ impl<'fst1, 'fst2, W: Semiring + 'static, CF: ComposeFilter<'fst1, 'fst2, W>> Fs
         let tuple = self.state_table.find_tuple(state);
         let s1 = tuple.s1;
         let s2 = tuple.s2;
-        self.compose_filter.set_state(s1, s2, &tuple.fs);
+        self.compose_filter.set_state(s1, s2, &tuple.fs)?;
         drop(tuple);
         if std::dbg!(self.match_input(s1, s2)?) {
             self.ordered_expand(state, s2, self.fst1, s1, Rc::clone(&self.matcher2), true)?;
@@ -321,7 +321,7 @@ impl<'fst1, 'fst2, W: Semiring + 'static, CF: ComposeFilter<'fst1, 'fst2, W>> Fs
         }
         let mut final2 = final2.unwrap().clone();
 
-        self.compose_filter.set_state(s1, s2, &tuple.fs);
+        self.compose_filter.set_state(s1, s2, &tuple.fs)?;
         self.compose_filter.filter_final(&mut final1, &mut final2)?;
 
         final1.times_assign(&final2)?;

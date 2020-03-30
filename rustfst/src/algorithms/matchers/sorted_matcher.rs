@@ -4,12 +4,12 @@ use std::rc::Rc;
 use failure::Fallible;
 use superslice::Ext;
 
-use crate::{Arc, EPS_LABEL, Label, NO_LABEL, StateId};
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
-use crate::algorithms::matchers::{IterItemMatcher, Matcher, MatcherFlags, MatchType};
+use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst};
 use crate::semirings::Semiring;
+use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SortedMatcher<'fst, F: ExpandedFst> {
@@ -167,7 +167,10 @@ impl<'fst, F: ExpandedFst + 'fst> LookaheadMatcher<'fst, F::W> for SortedMatcher
         unreachable!()
     }
 
-    fn create_data(_fst: &Self::F, _match_type: MatchType) -> Option<Rc<RefCell<Self::MatcherData>>> {
+    fn create_data(
+        _fst: &Self::F,
+        _match_type: MatchType,
+    ) -> Option<Rc<RefCell<Self::MatcherData>>> {
         unreachable!()
     }
 

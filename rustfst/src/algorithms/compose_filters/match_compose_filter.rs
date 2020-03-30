@@ -71,20 +71,20 @@ impl<'fst1, 'fst2, W: Semiring, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>>
         Self::FS::new(0)
     }
 
-    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) {
+    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Fallible<()> {
         if !(self.s1 == s1 && self.s2 == s2 && &self.fs == filter_state) {
             self.s1 = s1;
             self.s2 = s2;
             self.fs = filter_state.clone();
 
-            let na1 = self.fst1.num_arcs(s1).unwrap();
-            let na2 = self.fst2.num_arcs(s2).unwrap();
+            let na1 = self.fst1.num_arcs(s1)?;
+            let na2 = self.fst2.num_arcs(s2)?;
 
-            let ne1 = self.fst1.num_output_epsilons(s1).unwrap();
-            let ne2 = self.fst2.num_input_epsilons(s2).unwrap();
+            let ne1 = self.fst1.num_output_epsilons(s1)?;
+            let ne2 = self.fst2.num_input_epsilons(s2)?;
 
-            let f1 = self.fst1.is_final(s1).unwrap();
-            let f2 = self.fst2.is_final(s2).unwrap();
+            let f1 = self.fst1.is_final(s1)?;
+            let f2 = self.fst2.is_final(s2)?;
 
             self.alleps1 = na1 == ne1 && !f1;
             self.alleps2 = na2 == ne2 && !f2;
@@ -92,6 +92,7 @@ impl<'fst1, 'fst2, W: Semiring, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>>
             self.noeps1 = ne1 == 0;
             self.noeps2 = ne2 == 0;
         }
+        Ok(())
     }
 
     fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS> {

@@ -42,7 +42,9 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, M1: Matcher<'fst1, W>, M2: Match
         Self::FS::new(true)
     }
 
-    fn set_state(&mut self, _s1: usize, _s2: usize, _filter_state: &Self::FS) {}
+    fn set_state(&mut self, _s1: usize, _s2: usize, _filter_state: &Self::FS) -> Fallible<()> {
+        Ok(())
+    }
 
     fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS> {
         let res = if arc1.olabel == NO_LABEL || arc2.ilabel == NO_LABEL {

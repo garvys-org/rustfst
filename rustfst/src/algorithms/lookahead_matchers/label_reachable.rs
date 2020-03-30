@@ -6,15 +6,15 @@ use std::rc::Rc;
 use failure::Fallible;
 use itertools::Itertools;
 
-use crate::{Arc, EPS_LABEL, Label, NO_LABEL, StateId, UNASSIGNED};
-use crate::algorithms::{arc_sort, fst_convert_from_ref};
 use crate::algorithms::arc_compares::{ilabel_compare, olabel_compare};
 use crate::algorithms::lookahead_matchers::interval_set::IntervalSet;
 use crate::algorithms::lookahead_matchers::state_reachable::StateReachable;
+use crate::algorithms::{arc_sort, fst_convert_from_ref};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableArcIterator, MutableFst};
 use crate::semirings::Semiring;
+use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, UNASSIGNED};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelReachableData {
@@ -278,13 +278,18 @@ impl LabelReachable {
         if label == EPS_LABEL {
             return Ok(false);
         }
-        Ok(self.data.borrow().interval_set(current_state)?.member(label))
+        Ok(self
+            .data
+            .borrow()
+            .interval_set(current_state)?
+            .member(label))
     }
 
     // Can reach final state (via epsilon transitions) from this state?
     pub fn reach_final(&self, current_state: StateId) -> Fallible<bool> {
         Ok(self
-            .data.borrow()
+            .data
+            .borrow()
             .interval_set(current_state)?
             .member(self.data.borrow().final_label()))
     }

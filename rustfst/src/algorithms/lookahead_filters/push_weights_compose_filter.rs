@@ -62,7 +62,7 @@ where
         Self::FS::new((self.filter.start(), WeightFilterState::new(W::one())))
     }
 
-    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) {
+    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Fallible<()> {
         self.fs = filter_state.clone();
         self.filter.set_state(s1, s2, filter_state.state1())
     }

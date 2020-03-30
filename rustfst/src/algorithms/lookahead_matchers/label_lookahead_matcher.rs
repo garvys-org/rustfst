@@ -8,8 +8,8 @@ use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Arc, EPS_LABEL, NO_STATE_ID};
-use std::rc::Rc;
 use failure::_core::cell::RefCell;
+use std::rc::Rc;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>, MFT> {

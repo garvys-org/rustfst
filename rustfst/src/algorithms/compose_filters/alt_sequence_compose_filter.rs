@@ -76,18 +76,19 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1, M1: Matcher<'fst1, W>, M2: Matcher<'fst2
         Self::FS::new(0)
     }
 
-    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) {
+    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Fallible<()> {
         if !(self.s1 == s1 && self.s2 == s2 && &self.fs == filter_state) {
             self.s1 = s1;
             self.s2 = s2;
             self.fs = filter_state.clone();
             // TODO: Could probably use unchecked here as the state should exist.
-            let na2 = self.fst2.num_arcs(self.s2).unwrap();
-            let ne2 = self.fst2.num_input_epsilons(self.s2).unwrap();
-            let fin2 = self.fst2.is_final(self.s2).unwrap();
+            let na2 = self.fst2.num_arcs(self.s2)?;
+            let ne2 = self.fst2.num_input_epsilons(self.s2)?;
+            let fin2 = self.fst2.is_final(self.s2)?;
             self.alleps2 = na2 == ne2 && !fin2;
             self.noeps2 = ne2 == 0;
         }
+        Ok(())
     }
 
     fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS> {

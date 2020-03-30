@@ -5,11 +5,11 @@ use std::rc::Rc;
 use failure::Fallible;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::{Arc, EPS_LABEL, Label, NO_LABEL, NO_STATE_ID, StateId};
 use crate::algorithms::lookahead_matchers::{LookaheadMatcher, MatcherFlagsTrait};
-use crate::algorithms::matchers::{IterItemMatcher, Matcher, MatcherFlags, MatchType};
+use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::semirings::Semiring;
+use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
 #[derive(Debug)]
 pub struct ArcLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>, MFT> {
@@ -85,7 +85,10 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
         Self::new(fst, match_type)
     }
 
-    fn create_data(_fst: &Self::F, _match_type: MatchType) -> Option<Rc<RefCell<Self::MatcherData>>> {
+    fn create_data(
+        _fst: &Self::F,
+        _match_type: MatchType,
+    ) -> Option<Rc<RefCell<Self::MatcherData>>> {
         None
     }
 

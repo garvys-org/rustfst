@@ -7,11 +7,11 @@ use failure::Fallible;
 pub use arc_lookahead_matcher::ArcLookAheadMatcher;
 pub use label_lookahead_matcher::LabelLookAheadMatcher;
 
-use crate::{Arc, Label, NO_STATE_ID, StateId};
-use crate::algorithms::matchers::{Matcher, MatchType};
 use crate::algorithms::matchers::MatcherFlags;
+use crate::algorithms::matchers::{MatchType, Matcher};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
+use crate::{Arc, Label, StateId, NO_STATE_ID};
 
 mod arc_lookahead_matcher;
 pub(crate) mod interval_set;
