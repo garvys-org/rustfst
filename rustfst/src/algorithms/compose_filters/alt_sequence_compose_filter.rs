@@ -90,8 +90,8 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1, M1: Matcher<'fst1, W>, M2: Matcher<'fst2
         }
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
-        if arc1.olabel == NO_LABEL {
+    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS> {
+        let res = if arc1.olabel == NO_LABEL {
             if self.alleps2 {
                 Self::FS::new_no_state()
             } else if self.noeps2 {
@@ -111,10 +111,13 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1, M1: Matcher<'fst1, W>, M2: Matcher<'fst2
             } else {
                 Self::FS::new(0)
             }
-        }
+        };
+        Ok(res)
     }
 
-    fn filter_final(&self, _w1: &mut W, _w2: &mut W) {}
+    fn filter_final(&self, _w1: &mut W, _w2: &mut W) -> Fallible<()> {
+        Ok(())
+    }
 
     fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
         Rc::clone(&self.matcher1)

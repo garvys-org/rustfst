@@ -41,8 +41,8 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, F: ComposeFilter<'fst1, 'fst2, W
         self.filter.set_state(s1, s2, filter_state)
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
-        let opt_fs = self.filter.filter_arc(arc1, arc2);
+    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS> {
+        let opt_fs = self.filter.filter_arc(arc1, arc2)?;
         if self.keep_multi_eps {
             if arc1.olabel == NO_LABEL {
                 arc1.ilabel = arc2.ilabel;
@@ -52,10 +52,10 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, F: ComposeFilter<'fst1, 'fst2, W
                 arc2.olabel = arc1.olabel;
             }
         }
-        opt_fs
+        Ok(opt_fs)
     }
 
-    fn filter_final(&self, w1: &mut W, w2: &mut W) {
+    fn filter_final(&self, w1: &mut W, w2: &mut W) -> Fallible<()> {
         self.filter.filter_final(w1, w2)
     }
 

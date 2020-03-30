@@ -44,15 +44,18 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, M1: Matcher<'fst1, W>, M2: Match
 
     fn set_state(&mut self, _s1: usize, _s2: usize, _filter_state: &Self::FS) {}
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
-        if arc1.olabel == NO_LABEL || arc2.ilabel == NO_LABEL {
+    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS> {
+        let res = if arc1.olabel == NO_LABEL || arc2.ilabel == NO_LABEL {
             Self::FS::new_no_state()
         } else {
             Self::FS::new(true)
-        }
+        };
+        Ok(res)
     }
 
-    fn filter_final(&self, _w1: &mut W, _w2: &mut W) {}
+    fn filter_final(&self, _w1: &mut W, _w2: &mut W) -> Fallible<()> {
+        Ok(())
+    }
 
     fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
         Rc::clone(&self.matcher1)

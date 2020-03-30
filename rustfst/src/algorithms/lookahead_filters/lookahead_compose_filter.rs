@@ -150,20 +150,25 @@ where
         self.filter.set_state(s1, s2, filter_state)
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
+    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS> {
+        println!("Arc1: {:?}", &arc1);
+        println!("Arc2: {:?}", &arc1);
         self.lookahead_arc = false;
-        let fs = self.filter.filter_arc(arc1, arc2);
+        let fs = self.filter.filter_arc(arc1, arc2)?;
         if fs == CF::FS::new_no_state() {
-            return CF::FS::new_no_state();
+            println!("Filtered by underlying matcher");
+            return Ok(CF::FS::new_no_state());
         }
         if self.lookahead_output() {
-            self.lookahead_filter_arc(arc1, arc2, &fs).unwrap()
+            println!("A");
+            self.lookahead_filter_arc(arc1, arc2, &fs)
         } else {
-            self.lookahead_filter_arc(arc2, arc1, &fs).unwrap()
+            println!("B");
+            self.lookahead_filter_arc(arc2, arc1, &fs)
         }
     }
 
-    fn filter_final(&self, w1: &mut W, w2: &mut W) {
+    fn filter_final(&self, w1: &mut W, w2: &mut W) -> Fallible<()> {
         self.filter.filter_final(w1, w2)
     }
 

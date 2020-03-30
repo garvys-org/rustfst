@@ -94,8 +94,8 @@ impl<'fst1, 'fst2, W: Semiring, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>>
         }
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
-        if arc2.ilabel == NO_LABEL {
+    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS> {
+        let res = if arc2.ilabel == NO_LABEL {
             // EPSILON in FST1
             if self.fs == Self::FS::new(0) {
                 if self.noeps2 {
@@ -139,10 +139,13 @@ impl<'fst1, 'fst2, W: Semiring, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>>
         } else {
             // Both are non-epsilons
             Self::FS::new(0)
-        }
+        };
+        Ok(res)
     }
 
-    fn filter_final(&self, _w1: &mut W, _w2: &mut W) {}
+    fn filter_final(&self, _w1: &mut W, _w2: &mut W) -> Fallible<()> {
+        Ok(())
+    }
 
     fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
         Rc::clone(&self.matcher1)

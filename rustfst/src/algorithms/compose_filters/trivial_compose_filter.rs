@@ -47,11 +47,13 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, M1: Matcher<'fst1, W>, M2: Match
 
     fn set_state(&mut self, _s1: usize, _s2: usize, _filter_state: &Self::FS) {}
 
-    fn filter_arc(&mut self, _arc1: &mut Arc<W>, _arc2: &mut Arc<W>) -> Self::FS {
-        Self::FS::new(true)
+    fn filter_arc(&mut self, _arc1: &mut Arc<W>, _arc2: &mut Arc<W>) -> Fallible<Self::FS> {
+        Ok(Self::FS::new(true))
     }
 
-    fn filter_final(&self, _w1: &mut W, _w2: &mut W) {}
+    fn filter_final(&self, _w1: &mut W, _w2: &mut W) -> Fallible<()> {
+        Ok(())
+    }
 
     fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
         Rc::clone(&self.matcher1)

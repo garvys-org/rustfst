@@ -97,15 +97,15 @@ where
         }
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Self::FS {
+    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS> {
         if !self
             .lookahead_flags()
             .contains(MatcherFlags::LOOKAHEAD_PREFIX)
         {
-            return FilterState::new((
-                self.filter.filter_arc(arc1, arc2),
+            return Ok(FilterState::new((
+                self.filter.filter_arc(arc1, arc2)?,
                 FilterState::new(NO_LABEL),
-            ));
+            )));
         }
         let fs2 = self.fs.state2();
         let flabel = fs2.state();
@@ -116,12 +116,12 @@ where
                 return self.pushed_label_filter_arc(arc2, arc1, *flabel);
             }
         }
-        let fs1 = self.filter.filter_arc(arc1, arc2);
+        let fs1 = self.filter.filter_arc(arc1, arc2)?;
         if fs1 == FilterState::new_no_state() {
-            return FilterState::new_no_state();
+            return Ok(FilterState::new_no_state());
         }
         if !self.lookahead_arc() {
-            return FilterState::new((fs1, FilterState::new(NO_LABEL)));
+            return Ok(FilterState::new((fs1, FilterState::new(NO_LABEL))));
         }
         if self.lookahead_output() {
             self.push_label_filter_arc(arc1, arc2, &fs1)
@@ -130,20 +130,21 @@ where
         }
     }
 
-    fn filter_final(&self, w1: &mut W, w2: &mut W) {
-        self.filter.filter_final(w1, w2);
+    fn filter_final(&self, w1: &mut W, w2: &mut W) -> Fallible<()> {
+        self.filter.filter_final(w1, w2)?;
         if !self
             .lookahead_flags()
             .contains(MatcherFlags::LOOKAHEAD_PREFIX)
             || w1.is_zero()
         {
-            return;
+            return Ok(());
         }
         let fs2 = self.fs.state2();
         let flabel = fs2.state();
         if *flabel != NO_LABEL {
             *w1 = W::zero()
         }
+        Ok(())
     }
 
     fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
@@ -172,7 +173,7 @@ where
         arca: &mut Arc<W>,
         arcb: &mut Arc<W>,
         flabel: Label,
-    ) -> <Self as ComposeFilter<'fst1, 'fst2, W>>::FS {
+    ) -> Fallible<<Self as ComposeFilter<'fst1, 'fst2, W>>::FS> {
         let labela = if self.lookahead_output() {
             &mut arca.olabel
         } else {
@@ -184,7 +185,7 @@ where
             arcb.olabel
         };
 
-        if labelb != NO_LABEL {
+        let res = if labelb != NO_LABEL {
             FilterState::new_no_state()
         } else if *labela == flabel {
             *labela = EPS_LABEL;
@@ -197,13 +198,11 @@ where
                     Selector::MatchInput(s) => s
                         .matcher
                         .borrow_mut()
-                        .lookahead_label(arca.nextstate, flabel)
-                        .unwrap(),
+                        .lookahead_label(arca.nextstate, flabel)?,
                     Selector::MatchOutput(s) => s
                         .matcher
                         .borrow_mut()
-                        .lookahead_label(arca.nextstate, flabel)
-                        .unwrap(),
+                        .lookahead_label(arca.nextstate, flabel)?,
                 } {
                     self.fs.clone()
                 } else {
@@ -212,7 +211,8 @@ where
             }
         } else {
             FilterState::new_no_state()
-        }
+        };
+        Ok(res)
     }
 
     // Pushes a label forward when possible.
@@ -221,7 +221,7 @@ where
         arca: &mut Arc<W>,
         arcb: &mut Arc<W>,
         fs1: &CF::FS,
-    ) -> <Self as ComposeFilter<'fst1, 'fst2, W>>::FS {
+    ) -> Fallible<<Self as ComposeFilter<'fst1, 'fst2, W>>::FS> {
         let labela = if self.lookahead_output() {
             &mut arca.olabel
         } else {
@@ -234,7 +234,7 @@ where
         };
 
         if labelb != EPS_LABEL {
-            return FilterState::new((fs1.clone(), FilterState::new(NO_LABEL)));
+            return Ok(FilterState::new((fs1.clone(), FilterState::new(NO_LABEL))));
         }
 
         if *labela != EPS_LABEL
@@ -242,7 +242,7 @@ where
                 .lookahead_flags()
                 .contains(MatcherFlags::LOOKAHEAD_NON_EPSILON_PREFIX)
         {
-            return FilterState::new((fs1.clone(), FilterState::new(NO_LABEL)));
+            return Ok(FilterState::new((fs1.clone(), FilterState::new(NO_LABEL))));
         }
 
         let mut larc = Arc::new(NO_LABEL, NO_LABEL, W::zero(), NO_STATE_ID);
@@ -260,11 +260,11 @@ where
             };
             arcb.ilabel = larc.ilabel;
             arcb.olabel = larc.olabel;
-            arcb.weight.times_assign(&larc.weight).unwrap();
+            arcb.weight.times_assign(&larc.weight)?;
             arcb.nextstate = larc.nextstate;
-            FilterState::new((fs1.clone(), FilterState::new(*labela)))
+            Ok(FilterState::new((fs1.clone(), FilterState::new(*labela))))
         } else {
-            FilterState::new((fs1.clone(), FilterState::new(NO_LABEL)))
+            Ok(FilterState::new((fs1.clone(), FilterState::new(NO_LABEL))))
         }
     }
 

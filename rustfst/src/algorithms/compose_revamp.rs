@@ -241,12 +241,12 @@ impl<'fst1, 'fst2, W: Semiring, CF: ComposeFilter<'fst1, 'fst2, W>>
             )?;
             let mut arcb = arc.clone();
             if match_input {
-                let fs = self.compose_filter.filter_arc(&mut arcb, &mut arca);
+                let fs = self.compose_filter.filter_arc(&mut arcb, &mut arca)?;
                 if fs != CF::FS::new_no_state() {
                     self.add_arc(s, arcb, arca, fs)?;
                 }
             } else {
-                let fs = self.compose_filter.filter_arc(&mut arca, &mut arcb);
+                let fs = self.compose_filter.filter_arc(&mut arca, &mut arcb)?;
                 if fs != CF::FS::new_no_state() {
                     self.add_arc(s, arca, arcb, fs)?;
                 }
@@ -318,7 +318,7 @@ impl<'fst1, 'fst2, W: Semiring + 'static, CF: ComposeFilter<'fst1, 'fst2, W>> Fs
         let mut final2 = final2.unwrap().clone();
 
         self.compose_filter.set_state(s1, s2, &tuple.fs);
-        self.compose_filter.filter_final(&mut final1, &mut final2);
+        self.compose_filter.filter_final(&mut final1, &mut final2)?;
 
         final1.times_assign(&final2)?;
         Ok(Some(final1))
