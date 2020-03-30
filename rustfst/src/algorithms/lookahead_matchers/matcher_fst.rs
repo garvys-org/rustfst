@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -16,7 +17,7 @@ use crate::SymbolTable;
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct MatcherFst<F, M, T> {
-    fst_add_on: FstAddOn<F, (Option<Rc<T>>, Option<Rc<T>>)>,
+    fst_add_on: FstAddOn<F, (Option<Rc<RefCell<T>>>, Option<Rc<RefCell<T>>>)>,
     matcher: PhantomData<M>,
 }
 
@@ -25,11 +26,11 @@ impl<F, M, T> MatcherFst<F, M, T> {
         self.fst_add_on.fst()
     }
 
-    pub fn addon(&self) -> &(Option<Rc<T>>, Option<Rc<T>>) {
+    pub fn addon(&self) -> &(Option<Rc<RefCell<T>>>, Option<Rc<RefCell<T>>>) {
         self.fst_add_on.add_on()
     }
 
-    pub fn data(&self, match_type: MatchType) -> Option<&Rc<T>> {
+    pub fn data(&self, match_type: MatchType) -> Option<&Rc<RefCell<T>>> {
         let data = self.fst_add_on.add_on();
         if match_type == MatchType::MatchInput {
             data.0.as_ref()

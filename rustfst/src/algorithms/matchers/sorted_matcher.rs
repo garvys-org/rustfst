@@ -1,13 +1,15 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use failure::Fallible;
 use superslice::Ext;
 
+use crate::{Arc, EPS_LABEL, Label, NO_LABEL, StateId};
 use crate::algorithms::lookahead_matchers::LookaheadMatcher;
-use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
+use crate::algorithms::matchers::{IterItemMatcher, Matcher, MatcherFlags, MatchType};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst};
 use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL};
-use std::rc::Rc;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SortedMatcher<'fst, F: ExpandedFst> {
@@ -150,14 +152,14 @@ impl<'fst, W: Semiring> Iterator for IteratorSortedMatcher<'fst, W> {
 impl<'fst, F: ExpandedFst + 'fst> LookaheadMatcher<'fst, F::W> for SortedMatcher<'fst, F> {
     type MatcherData = ();
 
-    fn data(&self) -> Option<&Self::MatcherData> {
+    fn data(&self) -> Option<&Rc<RefCell<Self::MatcherData>>> {
         unreachable!()
     }
 
     fn new_with_data(
         _fst: &'fst Self::F,
         _match_type: MatchType,
-        _data: Option<Rc<Self::MatcherData>>,
+        _data: Option<Rc<RefCell<Self::MatcherData>>>,
     ) -> Fallible<Self>
     where
         Self: std::marker::Sized,
@@ -165,7 +167,7 @@ impl<'fst, F: ExpandedFst + 'fst> LookaheadMatcher<'fst, F::W> for SortedMatcher
         unreachable!()
     }
 
-    fn create_data(_fst: &Self::F, _match_type: MatchType) -> Option<Rc<Self::MatcherData>> {
+    fn create_data(_fst: &Self::F, _match_type: MatchType) -> Option<Rc<RefCell<Self::MatcherData>>> {
         unreachable!()
     }
 

@@ -1,9 +1,11 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use failure::Fallible;
 
 use crate::algorithms::lookahead_matchers::add_on::FstAddOn;
 use crate::algorithms::lookahead_matchers::label_reachable::{LabelReachable, LabelReachableData};
 use crate::fst_traits::MutableFst;
-use std::rc::Rc;
 
 pub struct LabelLookAheadRelabeler {}
 
@@ -12,8 +14,8 @@ impl LabelLookAheadRelabeler {
         fst_addon: &mut FstAddOn<
             F,
             (
-                Option<Rc<LabelReachableData>>,
-                Option<Rc<LabelReachableData>>,
+                Option<Rc<RefCell<LabelReachableData>>>,
+                Option<Rc<RefCell<LabelReachableData>>>,
             ),
         >,
     ) -> Fallible<()> {
@@ -36,8 +38,8 @@ impl LabelLookAheadRelabeler {
     pub fn relabel<F: MutableFst>(
         fst: &mut F,
         addon: &(
-            Option<Rc<LabelReachableData>>,
-            Option<Rc<LabelReachableData>>,
+            Option<Rc<RefCell<LabelReachableData>>>,
+            Option<Rc<RefCell<LabelReachableData>>>,
         ),
         relabel_input: bool,
     ) -> Fallible<()> {

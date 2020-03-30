@@ -1,19 +1,20 @@
+use std::cell::RefCell;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 use failure::Fallible;
 use itertools::Itertools;
 
+use crate::{Arc, EPS_LABEL, Label, NO_LABEL, StateId, UNASSIGNED};
+use crate::algorithms::{arc_sort, fst_convert_from_ref};
 use crate::algorithms::arc_compares::{ilabel_compare, olabel_compare};
 use crate::algorithms::lookahead_matchers::interval_set::IntervalSet;
 use crate::algorithms::lookahead_matchers::state_reachable::StateReachable;
-use crate::algorithms::{arc_sort, fst_convert_from_ref};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableArcIterator, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, UNASSIGNED};
-use std::rc::Rc;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelReachableData {
@@ -54,7 +55,7 @@ impl LabelReachableData {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelReachable {
-    data: Rc<LabelReachableData>,
+    data: Rc<RefCell<LabelReachableData>>,
     label2state: HashMap<Label, StateId>,
     reach_fst_input: bool,
 }
@@ -74,13 +75,13 @@ impl LabelReachable {
         Self::find_intervals(&fst, nstates, &mut data, &mut label2state)?;
 
         Ok(Self {
-            data: Rc::new(data),
+            data: Rc::new(RefCell::new(data)),
             label2state,
             reach_fst_input: false,
         })
     }
 
-    pub fn new_from_data(data: Rc<LabelReachableData>) -> Self {
+    pub fn new_from_data(data: Rc<RefCell<LabelReachableData>>) -> Self {
         Self {
             data,
             label2state: HashMap::new(),
@@ -88,16 +89,16 @@ impl LabelReachable {
         }
     }
 
-    pub fn data(&self) -> &Rc<LabelReachableData> {
+    pub fn data(&self) -> &Rc<RefCell<LabelReachableData>> {
         &self.data
     }
 
-    pub fn shared_data(&self) -> Rc<LabelReachableData> {
+    pub fn shared_data(&self) -> Rc<RefCell<LabelReachableData>> {
         Rc::clone(&self.data)
     }
 
     pub fn reach_input(&self) -> bool {
-        self.data.reach_input
+        self.data.borrow().reach_input
     }
 
     // Redirects labeled arcs (input or output labels determined by ReachInput())
@@ -202,12 +203,10 @@ impl LabelReachable {
         if label == EPS_LABEL {
             return EPS_LABEL;
         }
-        let label2index = self.data.label2index();
-        let mut relabel = label2index[&label];
-        if relabel == EPS_LABEL {
-            relabel = label2index.len() + 1; // Adds a new label
-        }
-        relabel
+        let mut data = self.data.borrow_mut();
+        let label2index = &mut data.label2index;
+        let n = label2index.len();
+        *label2index.entry(label).or_insert_with(|| n + 1)
     }
 
     pub fn relabel_fst<F: MutableFst>(&self, fst: &mut F, relabel_input: bool) -> Fallible<()> {
@@ -237,9 +236,10 @@ impl LabelReachable {
     // automata that have labels unseen here.
     pub fn relabel_pairs(&self, avoid_collisions: bool) -> Vec<(Label, Label)> {
         let mut pairs = vec![];
-        let label2index = self.data.label2index();
+        let data = self.data.borrow();
+        let label2index = data.label2index();
         for (key, val) in label2index.iter() {
-            if *val != self.data.final_label() {
+            if *val != data.final_label() {
                 pairs.push((*key, *val));
             }
         }
@@ -247,7 +247,7 @@ impl LabelReachable {
         if avoid_collisions {
             for i in 1..=label2index.len() {
                 let it = label2index.get(&i);
-                if it.is_none() || it.unwrap() == &self.data.final_label() {
+                if it.is_none() || it.unwrap() == &data.final_label() {
                     pairs.push((i, label2index.len() + 1));
                 }
             }
@@ -278,15 +278,15 @@ impl LabelReachable {
         if label == EPS_LABEL {
             return Ok(false);
         }
-        Ok(self.data.interval_set(current_state)?.member(label))
+        Ok(self.data.borrow().interval_set(current_state)?.member(label))
     }
 
     // Can reach final state (via epsilon transitions) from this state?
     pub fn reach_final(&self, current_state: StateId) -> Fallible<bool> {
         Ok(self
-            .data
+            .data.borrow()
             .interval_set(current_state)?
-            .member(self.data.final_label()))
+            .member(self.data.borrow().final_label()))
     }
 
     pub fn reach<'a, W: Semiring + 'a>(
@@ -300,7 +300,8 @@ impl LabelReachable {
         let mut reach_begin = UNASSIGNED;
         let mut reach_end = UNASSIGNED;
         let mut reach_weight = W::zero();
-        let interval_set = self.data.interval_set(current_state)?;
+        let data = self.data.borrow();
+        let interval_set = data.interval_set(current_state)?;
         if 2 * (aiter_end - aiter_begin) < interval_set.len() {
             let aiter = aiter.skip(aiter_begin);
             let mut reach_label = NO_LABEL;

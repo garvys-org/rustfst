@@ -9,6 +9,7 @@ use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Arc, EPS_LABEL, NO_STATE_ID};
 use std::rc::Rc;
+use failure::_core::cell::RefCell;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>, MFT> {
@@ -70,7 +71,7 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
 {
     type MatcherData = LabelReachableData;
 
-    fn data(&self) -> Option<&Self::MatcherData> {
+    fn data(&self) -> Option<&Rc<RefCell<Self::MatcherData>>> {
         if let Some(reachable) = &self.reachable {
             Some(reachable.data())
         } else {
@@ -81,7 +82,7 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
     fn new_with_data(
         fst: &'fst Self::F,
         match_type: MatchType,
-        data: Option<Rc<Self::MatcherData>>,
+        data: Option<Rc<RefCell<Self::MatcherData>>>,
     ) -> Fallible<Self> {
         if !(MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER)
             | MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
@@ -95,7 +96,7 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
 
         let mut reachable = None;
         if let Some(d) = data {
-            if reach_input == d.reach_input() {
+            if reach_input == d.borrow().reach_input() {
                 reachable = Some(LabelReachable::new_from_data(d.clone()));
             }
         } else if let Some(d) = Self::create_data(fst, match_type) {
@@ -113,7 +114,7 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
         })
     }
 
-    fn create_data(fst: &Self::F, match_type: MatchType) -> Option<Rc<Self::MatcherData>> {
+    fn create_data(fst: &Self::F, match_type: MatchType) -> Option<Rc<RefCell<Self::MatcherData>>> {
         let reach_input = match_type == MatchType::MatchInput;
         if (reach_input && MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER))
             || (!reach_input && MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))

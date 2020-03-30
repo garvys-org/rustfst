@@ -1,13 +1,15 @@
-use failure::Fallible;
-
-use crate::algorithms::lookahead_matchers::{LookaheadMatcher, MatcherFlagsTrait};
-use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
-use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
+use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
+
+use failure::Fallible;
 use unsafe_unwrap::UnsafeUnwrap;
+
+use crate::{Arc, EPS_LABEL, Label, NO_LABEL, NO_STATE_ID, StateId};
+use crate::algorithms::lookahead_matchers::{LookaheadMatcher, MatcherFlagsTrait};
+use crate::algorithms::matchers::{IterItemMatcher, Matcher, MatcherFlags, MatchType};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
+use crate::semirings::Semiring;
 
 #[derive(Debug)]
 pub struct ArcLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>, MFT> {
@@ -71,19 +73,19 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
     // NullAddon
     type MatcherData = ();
 
-    fn data(&self) -> Option<&Self::MatcherData> {
+    fn data(&self) -> Option<&Rc<RefCell<Self::MatcherData>>> {
         None
     }
 
     fn new_with_data(
         fst: &'fst Self::F,
         match_type: MatchType,
-        _data: Option<Rc<Self::MatcherData>>,
+        _data: Option<Rc<RefCell<Self::MatcherData>>>,
     ) -> Fallible<Self> {
         Self::new(fst, match_type)
     }
 
-    fn create_data(_fst: &Self::F, _match_type: MatchType) -> Option<Rc<Self::MatcherData>> {
+    fn create_data(_fst: &Self::F, _match_type: MatchType) -> Option<Rc<RefCell<Self::MatcherData>>> {
         None
     }
 
