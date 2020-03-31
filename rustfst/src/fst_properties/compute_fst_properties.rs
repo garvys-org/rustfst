@@ -42,7 +42,11 @@ pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Fallible<FstProp
         comp_props &= !FstProperties::ACYCLIC;
 
         if let Some(start) = fst.start() {
-            if sccs.iter().any(|s| sccs[*s as usize] == sccs[start]) {
+            if sccs
+                .iter()
+                .filter(|s| **s != start as i32)
+                .any(|s| sccs[*s as usize] == sccs[start])
+            {
                 // if the start state is not alone in its scc, then it is initial cyclic.
                 comp_props |= FstProperties::INITIAL_CYCLIC;
                 comp_props &= !FstProperties::INITIAL_ACYCLIC;
