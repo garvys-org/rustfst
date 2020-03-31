@@ -2,6 +2,7 @@ use crate::algorithms::compose::{IntInterval, IntervalSet};
 use crate::algorithms::dfs_visit::Visitor;
 use crate::fst_traits::Fst;
 use crate::{Arc, StateId};
+use crate::semirings::Semiring;
 
 static UNASSIGNED: usize = std::usize::MAX;
 
@@ -35,21 +36,23 @@ impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
         while self.state2index.len() <= s {
             self.state2index.push(UNASSIGNED);
         }
-        if self.fst.is_final(s).unwrap() {
-            let interval_set = &mut self.isets[s];
-            if self.index == UNASSIGNED {
-                if self.fst.num_arcs(s).unwrap() > 0 {
-                    panic!("IntervalReachVisitor: state2index map must be empty for this FST")
+        if let Some(final_weight) = self.fst.final_weight(s).unwrap() {
+            if !final_weight.is_zero() {
+                let interval_set = &mut self.isets[s];
+                if self.index == UNASSIGNED {
+                    if self.fst.num_arcs(s).unwrap() > 0 {
+                        panic!("IntervalReachVisitor: state2index map must be empty for this FST")
+                    }
+                    let index = self.state2index[s];
+                    if index == UNASSIGNED {
+                        panic!("IntervalReachVisitor: state2index map incomplete")
+                    }
+                    interval_set.push(IntInterval::new(index, index + 1));
+                } else {
+                    interval_set.push(IntInterval::new(self.index, self.index + 1));
+                    self.state2index[s] = self.index;
+                    self.index += 1;
                 }
-                let index = self.state2index[s];
-                if index == UNASSIGNED {
-                    panic!("IntervalReachVisitor: state2index map incomplete")
-                }
-                interval_set.push(IntInterval::new(index, index + 1));
-            } else {
-                interval_set.push(IntInterval::new(self.index, self.index + 1));
-                self.state2index[s] = self.index;
-                self.index += 1;
             }
         }
         true
@@ -74,7 +77,7 @@ impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
     /// Invoked when state finished ('s' is tree root, 'parent' is kNoStateId,
     /// and 'arc' is nullptr).
     fn finish_state(&mut self, s: StateId, parent: Option<StateId>, _arc: Option<&Arc<F::W>>) {
-        if self.index != UNASSIGNED && self.fst.is_final(s).unwrap() {
+        if self.index != UNASSIGNED && self.fst.is_final(s).unwrap() && !self.fst.final_weight(s).unwrap().unwrap().is_zero() {
             let intervals = &mut self.isets[s].intervals.intervals;
             intervals[0].end = self.index;
         }
@@ -89,6 +92,7 @@ impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
 }
 
 fn union_vec_isets_ordered(isets: &mut Vec<IntervalSet>, i_inf: usize, i_sup: usize) {
+    debug_assert!(i_inf < i_sup);
     let (v_0_isupm1, v_isup1_end) = isets.split_at_mut(i_sup);
     v_0_isupm1[i_inf].union(v_isup1_end[0].clone())
 }
@@ -97,7 +101,7 @@ fn union_vec_isets_ordered(isets: &mut Vec<IntervalSet>, i_inf: usize, i_sup: us
 fn union_vec_isets_unordered(isets: &mut Vec<IntervalSet>, i: usize, j: usize) {
     if i < j {
         union_vec_isets_ordered(isets, i, j)
-    } else if j > i {
+    } else if i > j {
         union_vec_isets_ordered(isets, j, i)
     }
 }

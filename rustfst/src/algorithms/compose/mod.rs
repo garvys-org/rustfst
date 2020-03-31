@@ -3,11 +3,11 @@ pub use self::composition::{
     compose, compose_with_config, ComposeConfig, ComposeFilterEnum, ComposeFst,
     ComposeFstImplOptions,
 };
-use self::interval_reach_visitor::IntervalReachVisitor;
-use self::interval_set::{IntInterval, IntervalSet};
+pub(crate) use self::interval_reach_visitor::IntervalReachVisitor;
+pub(crate) use self::interval_set::{IntInterval, IntervalSet};
 pub use self::label_reachable::{LabelReachable, LabelReachableData};
 pub use self::matcher_fst::MatcherFst;
-use self::state_reachable::StateReachable;
+pub(crate) use self::state_reachable::StateReachable;
 
 pub mod compose_filters;
 mod composition;
