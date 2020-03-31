@@ -3,8 +3,8 @@ use std::rc::Rc;
 
 use failure::Fallible;
 
-use crate::algorithms::compose_filters::ComposeFilter;
-use crate::algorithms::matchers::Matcher;
+use crate::algorithms::compose::compose_filters::ComposeFilter;
+use crate::algorithms::compose::matchers::Matcher;
 use crate::semirings::Semiring;
 use crate::{Arc, NO_LABEL};
 

@@ -5,8 +5,8 @@ use std::rc::Rc;
 use failure::Fallible;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::lookahead_matchers::{LookaheadMatcher, MatcherFlagsTrait};
-use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
+use crate::algorithms::compose::lookahead_matchers::{LookaheadMatcher, MatcherFlagsTrait};
+use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
@@ -88,8 +88,8 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
     fn create_data(
         _fst: &Self::F,
         _match_type: MatchType,
-    ) -> Option<Rc<RefCell<Self::MatcherData>>> {
-        None
+    ) -> Fallible<Option<Rc<RefCell<Self::MatcherData>>>> {
+        Ok(None)
     }
 
     fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &LF) -> Fallible<()> {

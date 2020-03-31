@@ -4,8 +4,8 @@ use std::rc::Rc;
 use failure::Fallible;
 use superslice::Ext;
 
-use crate::algorithms::lookahead_matchers::LookaheadMatcher;
-use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
+use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst};
 use crate::semirings::Semiring;
@@ -170,7 +170,7 @@ impl<'fst, F: ExpandedFst + 'fst> LookaheadMatcher<'fst, F::W> for SortedMatcher
     fn create_data(
         _fst: &Self::F,
         _match_type: MatchType,
-    ) -> Option<Rc<RefCell<Self::MatcherData>>> {
+    ) -> Fallible<Option<Rc<RefCell<Self::MatcherData>>>> {
         unreachable!()
     }
 

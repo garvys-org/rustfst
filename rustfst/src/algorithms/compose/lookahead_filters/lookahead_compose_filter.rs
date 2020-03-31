@@ -1,18 +1,22 @@
-use crate::algorithms::compose_filters::ComposeFilter;
-use crate::algorithms::filter_states::FilterState;
-use crate::algorithms::lookahead_filters::lookahead_selector::{
-    selector, MatchTypeTrait, Selector,
-};
-use crate::algorithms::lookahead_filters::{lookahead_match_type, LookAheadComposeFilterTrait};
-use crate::algorithms::lookahead_matchers::LookaheadMatcher;
-use crate::algorithms::matchers::MatcherFlags;
-use crate::algorithms::matchers::{MatchType, Matcher};
-use crate::semirings::Semiring;
-use crate::{Arc, EPS_LABEL};
-use failure::Fallible;
 use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
+
+use failure::Fallible;
+
+use crate::algorithms::compose::compose_filters::ComposeFilter;
+use crate::algorithms::compose::filter_states::FilterState;
+use crate::algorithms::compose::lookahead_filters::lookahead_selector::{
+    selector, MatchTypeTrait, Selector,
+};
+use crate::algorithms::compose::lookahead_filters::{
+    lookahead_match_type, LookAheadComposeFilterTrait,
+};
+use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::compose::matchers::MatcherFlags;
+use crate::algorithms::compose::matchers::{MatchType, Matcher};
+use crate::semirings::Semiring;
+use crate::{Arc, EPS_LABEL};
 
 #[derive(Debug)]
 pub struct LookAheadComposeFilter<

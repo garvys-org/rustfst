@@ -4,15 +4,15 @@ use std::rc::Rc;
 
 use failure::Fallible;
 
-use crate::algorithms::compose_filters::ComposeFilter;
-use crate::algorithms::filter_states::{FilterState, IntegerFilterState, PairFilterState};
-use crate::algorithms::lookahead_filters::lookahead_selector::MatchTypeTrait;
-use crate::algorithms::lookahead_filters::lookahead_selector::Selector;
-use crate::algorithms::lookahead_filters::LookAheadComposeFilterTrait;
-use crate::algorithms::lookahead_matchers::LookaheadMatcher;
-use crate::algorithms::matchers::MatcherFlags;
-use crate::algorithms::matchers::{MatchType, Matcher};
-use crate::algorithms::matchers::{MultiEpsMatcher, MultiEpsMatcherFlags};
+use crate::algorithms::compose::compose_filters::ComposeFilter;
+use crate::algorithms::compose::filter_states::{FilterState, IntegerFilterState, PairFilterState};
+use crate::algorithms::compose::lookahead_filters::lookahead_selector::MatchTypeTrait;
+use crate::algorithms::compose::lookahead_filters::lookahead_selector::Selector;
+use crate::algorithms::compose::lookahead_filters::LookAheadComposeFilterTrait;
+use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::compose::matchers::MatcherFlags;
+use crate::algorithms::compose::matchers::{MatchType, Matcher};
+use crate::algorithms::compose::matchers::{MultiEpsMatcher, MultiEpsMatcherFlags};
 use crate::fst_traits::CoreFst;
 use crate::semirings::Semiring;
 use crate::{Arc, Label, EPS_LABEL, NO_LABEL, NO_STATE_ID};

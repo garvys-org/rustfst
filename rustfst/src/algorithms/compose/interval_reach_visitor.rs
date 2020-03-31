@@ -1,5 +1,5 @@
+use crate::algorithms::compose::{IntInterval, IntervalSet};
 use crate::algorithms::dfs_visit::Visitor;
-use crate::algorithms::lookahead_matchers::interval_set::{IntInterval, IntervalSet};
 use crate::fst_traits::Fst;
 use crate::{Arc, StateId};
 

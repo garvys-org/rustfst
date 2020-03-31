@@ -5,11 +5,10 @@ use std::rc::Rc;
 
 use failure::Fallible;
 
-use crate::algorithms::lookahead_matchers::add_on::FstAddOn;
-use crate::algorithms::lookahead_matchers::label_lookahead_relabeler::LabelLookAheadRelabeler;
-use crate::algorithms::lookahead_matchers::label_reachable::LabelReachableData;
-use crate::algorithms::lookahead_matchers::LookaheadMatcher;
-use crate::algorithms::matchers::MatchType;
+use crate::algorithms::compose::lookahead_matchers::{LabelLookAheadRelabeler, LookaheadMatcher};
+use crate::algorithms::compose::matchers::MatchType;
+use crate::algorithms::compose::FstAddOn;
+use crate::algorithms::compose::LabelReachableData;
 use crate::fst_traits::{
     ArcIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, MutableFst, StateIterator,
 };
@@ -49,8 +48,8 @@ impl<
     > MatcherFst<F, M, M::MatcherData>
 {
     pub fn new(fst: F) -> Fallible<Self> {
-        let imatcher_data = M::create_data(&fst, MatchType::MatchInput);
-        let omatcher_data = M::create_data(&fst, MatchType::MatchOutput);
+        let imatcher_data = M::create_data(&fst, MatchType::MatchInput)?;
+        let omatcher_data = M::create_data(&fst, MatchType::MatchOutput)?;
 
         let add_on = (imatcher_data, omatcher_data);
         let mut fst_add_on = FstAddOn::new(fst, add_on);

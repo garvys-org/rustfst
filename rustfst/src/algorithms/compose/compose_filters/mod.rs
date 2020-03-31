@@ -12,8 +12,8 @@ pub use null_compose_filter::NullComposeFilter;
 pub use sequence_compose_filter::SequenceComposeFilter;
 pub use trivial_compose_filter::TrivialComposeFilter;
 
-use crate::algorithms::filter_states::FilterState;
-use crate::algorithms::matchers::Matcher;
+use crate::algorithms::compose::filter_states::FilterState;
+use crate::algorithms::compose::matchers::Matcher;
 use crate::semirings::Semiring;
 use crate::{Arc, StateId};
 

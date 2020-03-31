@@ -5,14 +5,16 @@ use std::rc::Rc;
 use failure::Fallible;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
-use crate::algorithms::compose_filters::{
+use crate::algorithms::compose::compose_filters::{
     AltSequenceComposeFilter, ComposeFilter, MatchComposeFilter, NoMatchComposeFilter,
     NullComposeFilter, SequenceComposeFilter, TrivialComposeFilter,
 };
+use crate::algorithms::compose::filter_states::FilterState;
+use crate::algorithms::compose::matchers::{
+    GenericMatcher, MatchType, SortedMatcher, REQUIRE_PRIORITY,
+};
+use crate::algorithms::compose::matchers::{Matcher, MatcherFlags};
 use crate::algorithms::dynamic_fst::DynamicFst;
-use crate::algorithms::filter_states::FilterState;
-use crate::algorithms::matchers::{GenericMatcher, MatchType, SortedMatcher, REQUIRE_PRIORITY};
-use crate::algorithms::matchers::{Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Arc, StateId, EPS_LABEL, NO_LABEL};
@@ -490,6 +492,30 @@ where
     Ok(ofst)
 }
 
+/// This operation computes the composition of two transducers.
+/// If `A` transduces string `x` to `y` with weight `a` and `B` transduces `y` to `z`
+/// with weight `b`, then their composition transduces string `x` to `z` with weight `a ⊗ b`.
+///
+/// # Example
+/// ```
+/// # #[macro_use] extern crate rustfst;
+/// # use failure::Fallible;
+/// # use rustfst::utils::transducer;
+/// # use rustfst::semirings::{Semiring, IntegerWeight};
+/// # use rustfst::fst_impls::VectorFst;
+/// # use rustfst::algorithms::compose;
+/// # fn main() -> Fallible<()> {
+/// let fst_1 : VectorFst<IntegerWeight> = fst![1,2 => 2,3];
+///
+/// let fst_2 : VectorFst<IntegerWeight> = fst![2,3 => 3,4];
+///
+/// let fst_ref : VectorFst<IntegerWeight> = fst![1,2 => 3,4];
+///
+/// let composed_fst : VectorFst<_> = compose(&fst_1, &fst_2)?;
+/// assert_eq!(composed_fst, fst_ref);
+/// # Ok(())
+/// # }
+/// ```
 pub fn compose<F1: ExpandedFst, F2: ExpandedFst<W = F1::W>, F3: MutableFst<W = F1::W>>(
     fst1: &F1,
     fst2: &F2,

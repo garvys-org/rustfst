@@ -4,21 +4,23 @@ use std::rc::Rc;
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::algorithms::compose_filters::{AltSequenceComposeFilter, ComposeFilter};
-use crate::algorithms::lookahead_filters::lookahead_selector::SMatchOutput;
-use crate::algorithms::lookahead_filters::{
+use crate::algorithms::compose::compose_filters::{AltSequenceComposeFilter, ComposeFilter};
+use crate::algorithms::compose::lookahead_filters::lookahead_selector::SMatchOutput;
+use crate::algorithms::compose::lookahead_filters::{
     LookAheadComposeFilter, PushLabelsComposeFilter, PushWeightsComposeFilter,
 };
-use crate::algorithms::lookahead_matchers::label_lookahead_relabeler::LabelLookAheadRelabeler;
-use crate::algorithms::lookahead_matchers::label_reachable::LabelReachableData;
-use crate::algorithms::lookahead_matchers::matcher_fst::MatcherFst;
-use crate::algorithms::lookahead_matchers::{
+use crate::algorithms::compose::lookahead_matchers::label_lookahead_relabeler::LabelLookAheadRelabeler;
+use crate::algorithms::compose::lookahead_matchers::{
     LabelLookAheadMatcher, LookaheadMatcher, MatcherFlagsTrait,
 };
-use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
-use crate::algorithms::matchers::{MultiEpsMatcher, SortedMatcher};
-use crate::algorithms::{arc_compares::ilabel_compare, arc_sort, ComposeFstImplOptions};
-use crate::algorithms::{compose_with_config, ComposeConfig, ComposeFilterEnum, ComposeFst};
+use crate::algorithms::compose::matchers::SortedMatcher;
+use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
+use crate::algorithms::compose::LabelReachableData;
+use crate::algorithms::compose::MatcherFst;
+use crate::algorithms::compose::{
+    compose_with_config, ComposeConfig, ComposeFilterEnum, ComposeFst, ComposeFstImplOptions,
+};
+use crate::algorithms::{arc_compares::ilabel_compare, arc_sort};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, SerializableFst};
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};

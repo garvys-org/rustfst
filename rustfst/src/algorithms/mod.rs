@@ -5,7 +5,7 @@ mod arc_sort;
 mod arc_sum;
 pub(crate) mod arc_unique;
 mod closure;
-mod composition;
+pub mod compose;
 mod concat;
 mod condense;
 mod connect;
@@ -69,10 +69,7 @@ pub use self::{
     arc_sum::arc_sum,
     arc_unique::arc_unique,
     closure::{closure, ClosureFst, ClosureType},
-    compose_revamp::{
-        compose, compose_with_config, ComposeConfig, ComposeFilterEnum, ComposeFst,
-        ComposeFstImplOptions,
-    },
+    compose::compose,
     concat::{concat, ConcatFst},
     condense::condense,
     connect::connect,
@@ -102,10 +99,3 @@ pub use self::{
 pub use self::factor_weight::{
     factor_weight, FactorIterator, FactorWeightFst, FactorWeightOptions, FactorWeightType,
 };
-
-pub mod compose_filters;
-mod compose_revamp;
-pub mod filter_states;
-pub mod lookahead_filters;
-pub mod lookahead_matchers;
-pub mod matchers;

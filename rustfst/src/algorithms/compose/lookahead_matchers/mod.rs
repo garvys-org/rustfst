@@ -6,22 +6,18 @@ use failure::Fallible;
 
 pub use arc_lookahead_matcher::ArcLookAheadMatcher;
 pub use label_lookahead_matcher::LabelLookAheadMatcher;
+pub use label_lookahead_relabeler::LabelLookAheadRelabeler;
 
-use crate::algorithms::matchers::MatcherFlags;
-use crate::algorithms::matchers::{MatchType, Matcher};
+use crate::algorithms::compose::matchers::MatcherFlags;
+use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, NO_STATE_ID};
 
 mod arc_lookahead_matcher;
-pub(crate) mod interval_set;
 mod label_lookahead_matcher;
 pub mod label_lookahead_relabeler;
-pub mod label_reachable;
-pub(crate) mod state_reachable;
 // mod trivial_lookahead_matcher;
-pub mod add_on;
-pub mod matcher_fst;
 
 pub trait MatcherFlagsTrait: Debug {
     fn flags() -> MatcherFlags;
@@ -39,7 +35,10 @@ pub trait LookaheadMatcher<'fst, W: Semiring + 'fst>: Matcher<'fst, W> {
     where
         Self: std::marker::Sized;
 
-    fn create_data(fst: &Self::F, match_type: MatchType) -> Option<Rc<RefCell<Self::MatcherData>>>;
+    fn create_data(
+        fst: &Self::F,
+        match_type: MatchType,
+    ) -> Fallible<Option<Rc<RefCell<Self::MatcherData>>>>;
 
     fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &LF) -> Fallible<()>;
     // Are there paths from a state in the lookahead FST that can be read from

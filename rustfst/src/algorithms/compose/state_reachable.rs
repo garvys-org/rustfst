@@ -1,8 +1,8 @@
 use crate::algorithms::arc_filters::AnyArcFilter;
+use crate::algorithms::compose::IntervalReachVisitor;
+use crate::algorithms::compose::IntervalSet;
 use crate::algorithms::condense;
 use crate::algorithms::dfs_visit::dfs_visit;
-use crate::algorithms::lookahead_matchers::interval_set::IntervalSet;
-use crate::algorithms::visitors::IntervalReachVisitor;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, ExpandedFst};
 use crate::StateId;

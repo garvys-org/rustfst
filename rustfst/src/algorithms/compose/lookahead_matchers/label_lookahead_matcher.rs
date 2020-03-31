@@ -2,9 +2,9 @@ use std::marker::PhantomData;
 
 use failure::Fallible;
 
-use crate::algorithms::lookahead_matchers::label_reachable::{LabelReachable, LabelReachableData};
-use crate::algorithms::lookahead_matchers::{LookaheadMatcher, MatcherFlagsTrait};
-use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
+use crate::algorithms::compose::lookahead_matchers::{LookaheadMatcher, MatcherFlagsTrait};
+use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
+use crate::algorithms::compose::{LabelReachable, LabelReachableData};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Arc, EPS_LABEL, NO_STATE_ID};
@@ -99,7 +99,7 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
             if reach_input == d.borrow().reach_input() {
                 reachable = Some(LabelReachable::new_from_data(d.clone()));
             }
-        } else if let Some(d) = Self::create_data(fst, match_type) {
+        } else if let Some(d) = Self::create_data(fst, match_type)? {
             reachable = Some(LabelReachable::new_from_data(d));
         }
 
@@ -114,14 +114,17 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
         })
     }
 
-    fn create_data(fst: &Self::F, match_type: MatchType) -> Option<Rc<RefCell<Self::MatcherData>>> {
+    fn create_data(
+        fst: &Self::F,
+        match_type: MatchType,
+    ) -> Fallible<Option<Rc<RefCell<Self::MatcherData>>>> {
         let reach_input = match_type == MatchType::MatchInput;
         if (reach_input && MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER))
             || (!reach_input && MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
         {
-            Some(LabelReachable::new(fst, reach_input).unwrap().shared_data())
+            Ok(Some(LabelReachable::new(fst, reach_input)?.shared_data()))
         } else {
-            None
+            Ok(None)
         }
     }
 

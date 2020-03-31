@@ -1,21 +1,22 @@
-use failure::Fallible;
-
-use crate::algorithms::compose_filters::ComposeFilter;
-use crate::algorithms::filter_states::{FilterState, TrivialFilterState};
-use crate::algorithms::matchers::{MatchType, Matcher};
-use crate::semirings::Semiring;
-use crate::Arc;
-use failure::_core::cell::RefCell;
+use std::cell::RefCell;
 use std::rc::Rc;
 
-#[derive(Debug, PartialEq)]
-pub struct TrivialComposeFilter<M1, M2> {
+use failure::Fallible;
+
+use crate::algorithms::compose::compose_filters::ComposeFilter;
+use crate::algorithms::compose::filter_states::{FilterState, TrivialFilterState};
+use crate::algorithms::compose::matchers::{MatchType, Matcher};
+use crate::semirings::Semiring;
+use crate::{Arc, EPS_LABEL};
+
+#[derive(Debug)]
+pub struct NoMatchComposeFilter<M1, M2> {
     matcher1: Rc<RefCell<M1>>,
     matcher2: Rc<RefCell<M2>>,
 }
 
 impl<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>>
-    ComposeFilter<'fst1, 'fst2, W> for TrivialComposeFilter<M1, M2>
+    ComposeFilter<'fst1, 'fst2, W> for NoMatchComposeFilter<M1, M2>
 {
     type M1 = M1;
     type M2 = M2;
@@ -49,8 +50,10 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, M1: Matcher<'fst1, W>, M2: Match
         Ok(())
     }
 
-    fn filter_arc(&mut self, _arc1: &mut Arc<W>, _arc2: &mut Arc<W>) -> Fallible<Self::FS> {
-        Ok(Self::FS::new(true))
+    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS> {
+        Ok(Self::FS::new(
+            arc1.olabel != EPS_LABEL || arc2.ilabel != EPS_LABEL,
+        ))
     }
 
     fn filter_final(&self, _w1: &mut W, _w2: &mut W) -> Fallible<()> {

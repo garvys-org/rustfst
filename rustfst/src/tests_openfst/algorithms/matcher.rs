@@ -1,13 +1,14 @@
+use failure::Fallible;
+use itertools::Itertools;
+use serde_derive::{Deserialize, Serialize};
+
 use crate::algorithms::arc_compares::{ilabel_compare, olabel_compare};
 use crate::algorithms::arc_sort;
-use crate::algorithms::matchers::{MatchType, Matcher, SortedMatcher};
+use crate::algorithms::compose::matchers::{MatchType, Matcher, SortedMatcher};
 use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
 use crate::{Arc, Label, StateId, NO_LABEL, NO_STATE_ID};
-use failure::Fallible;
-use itertools::Itertools;
-use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct SerializedArc {

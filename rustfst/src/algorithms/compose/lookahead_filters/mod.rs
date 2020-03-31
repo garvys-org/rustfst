@@ -5,10 +5,10 @@ pub use lookahead_compose_filter::LookAheadComposeFilter;
 pub use push_labels_compose_filter::PushLabelsComposeFilter;
 pub use push_weights_compose_filter::PushWeightsComposeFilter;
 
-use crate::algorithms::compose_filters::ComposeFilter;
-use crate::algorithms::lookahead_filters::lookahead_selector::Selector;
-use crate::algorithms::lookahead_matchers::LookaheadMatcher;
-use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
+use crate::algorithms::compose::compose_filters::ComposeFilter;
+use crate::algorithms::compose::lookahead_filters::lookahead_selector::Selector;
+use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 

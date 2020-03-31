@@ -7,8 +7,7 @@ use failure::Fallible;
 use itertools::Itertools;
 
 use crate::algorithms::arc_compares::{ilabel_compare, olabel_compare};
-use crate::algorithms::lookahead_matchers::interval_set::IntervalSet;
-use crate::algorithms::lookahead_matchers::state_reachable::StateReachable;
+use crate::algorithms::compose::{IntervalSet, StateReachable};
 use crate::algorithms::{arc_sort, fst_convert_from_ref};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;

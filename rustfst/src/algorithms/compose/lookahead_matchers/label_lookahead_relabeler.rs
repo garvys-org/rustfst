@@ -3,8 +3,8 @@ use std::rc::Rc;
 
 use failure::Fallible;
 
-use crate::algorithms::lookahead_matchers::add_on::FstAddOn;
-use crate::algorithms::lookahead_matchers::label_reachable::{LabelReachable, LabelReachableData};
+use crate::algorithms::compose::FstAddOn;
+use crate::algorithms::compose::{LabelReachable, LabelReachableData};
 use crate::fst_traits::MutableFst;
 
 pub struct LabelLookAheadRelabeler {}

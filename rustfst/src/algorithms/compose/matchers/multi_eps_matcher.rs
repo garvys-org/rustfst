@@ -10,8 +10,7 @@ use nom::lib::std::collections::BTreeSet;
 
 use bitflags::bitflags;
 
-use crate::algorithms::matchers::MatcherFlags;
-use crate::algorithms::matchers::{IterItemMatcher, MatchType, Matcher};
+use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::semirings::Semiring;
 use crate::{Label, StateId, EPS_LABEL, NO_LABEL};
 
