@@ -40,7 +40,7 @@ impl StateReachable {
         F::W: 'static,
     {
         let (scc, cfst): (_, VectorFst<_>) = condense(fst).unwrap();
-        let reachable = StateReachable::new_acyclic(fst);
+        let reachable = StateReachable::new_acyclic(&cfst);
         let mut nscc = vec![];
 
         // Gets the number of states per SCC.
