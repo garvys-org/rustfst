@@ -7,6 +7,7 @@ use failure::Fallible;
 pub use arc_lookahead_matcher::ArcLookAheadMatcher;
 pub use label_lookahead_matcher::LabelLookAheadMatcher;
 pub use label_lookahead_relabeler::LabelLookAheadRelabeler;
+pub use trivial_lookahead_matcher::TrivialLookAheadMatcher;
 
 use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
@@ -17,7 +18,7 @@ use crate::{Arc, Label, StateId, NO_STATE_ID};
 mod arc_lookahead_matcher;
 mod label_lookahead_matcher;
 pub mod label_lookahead_relabeler;
-// mod trivial_lookahead_matcher;
+mod trivial_lookahead_matcher;
 
 pub trait MatcherFlagsTrait: Debug {
     fn flags() -> MatcherFlags;
