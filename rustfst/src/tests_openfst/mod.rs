@@ -24,6 +24,9 @@ use crate::tests_openfst::algorithms::compose::{ComposeOperationResult, ComposeT
 use crate::tests_openfst::algorithms::concat::{
     test_concat, test_concat_dynamic, ConcatOperationResult, ConcatTestData,
 };
+use crate::tests_openfst::algorithms::condense::{
+    test_condense, CondenseOperationResult, CondenseTestData,
+};
 use crate::tests_openfst::algorithms::factor_weight_gallic::test_factor_weight_gallic;
 use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicOperationResult;
 use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicTestData;
@@ -140,6 +143,7 @@ pub struct ParsedFstTestData {
     raw: FstOperationResult,
     project_output: FstOperationResult,
     connect: FstOperationResult,
+    condense: CondenseOperationResult,
     weight_pushing_initial: FstOperationResult,
     weight_pushing_final: FstOperationResult,
     project_input: FstOperationResult,
@@ -192,6 +196,7 @@ where
     pub raw: F,
     pub project_output: F,
     pub connect: F,
+    pub condense: CondenseTestData<F>,
     pub weight_pushing_initial: F,
     pub weight_pushing_final: F,
     pub project_input: F,
@@ -245,6 +250,7 @@ where
             raw: data.raw.parse(),
             project_output: data.project_output.parse(),
             connect: data.connect.parse(),
+            condense: data.condense.parse(),
             weight_pushing_initial: data.weight_pushing_initial.parse(),
             weight_pushing_final: data.weight_pushing_final.parse(),
             project_input: data.project_input.parse(),
@@ -759,6 +765,12 @@ macro_rules! test_fst {
             #[test]
             fn test_fst_compose_openfst() -> Fallible<()> {
                 do_run!(test_compose, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_fst_condense_openfst() -> Fallible<()> {
+                do_run!(test_condense, $fst_name);
                 Ok(())
             }
         }

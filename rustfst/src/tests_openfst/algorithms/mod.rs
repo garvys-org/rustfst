@@ -3,6 +3,7 @@ pub mod arcsort;
 pub mod closure;
 pub mod compose;
 pub mod concat;
+pub mod condense;
 pub mod connect;
 pub mod determinize;
 pub mod dynamic_fst;

@@ -101,6 +101,20 @@ void compute_fst_connect(const F& raw_fst, json& j) {
 }
 
 template<class F>
+void compute_fst_condense(const F& raw_fst, json& j) {
+    auto fst_in = *raw_fst.Copy();
+    std::vector<typename F::Arc::StateId> scc;
+    F fst_out;
+    fst::Condense(fst_in, &fst_out, &scc);
+    std::vector<string> sccs;
+    for (auto e: scc) {
+        sccs.push_back(std::to_string(e));
+    }
+    j["condense"]["sccs"] = sccs;
+    j["condense"]["result"] = fst_to_string(fst_out);
+}
+
+template<class F>
 void compute_fst_shortest_distance(const F& raw_fst, json& j) {
     j["shortest_distance"] = {};
     std::vector<bool> v = {true, false};
@@ -922,6 +936,9 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
 
     std::cout << "Connect" << std::endl;
     compute_fst_connect(raw_fst, data);
+
+    std::cout << "Condense" << std::endl;
+    compute_fst_condense(raw_fst, data);
 
     std::cout << "Shortest distance" << std::endl;
     compute_fst_shortest_distance(raw_fst, data);
