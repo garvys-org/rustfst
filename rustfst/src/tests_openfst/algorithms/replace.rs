@@ -52,40 +52,41 @@ where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
-    for replace_test_data in &test_data.replace {
-        let mut fst_list = vec![];
-        fst_list.push((replace_test_data.root, test_data.raw.clone()));
-        fst_list.extend_from_slice(replace_test_data.label_fst_pairs.as_slice());
-        let replaced_fst: VectorFst<_> = replace(
-            fst_list.clone(),
-            replace_test_data.root,
-            replace_test_data.epsilon_on_replace,
-        )?;
-
-        // Try givinf borrowed fst as parameters.
-        let fst_list_2: Vec<(usize, &VectorFst<W>)> =
-            fst_list.iter().map(|v| (v.0, &v.1)).collect();
-        let _replaced_fst_2: VectorFst<W> = replace::<VectorFst<_>, _, _>(
-            fst_list_2,
-            replace_test_data.root,
-            replace_test_data.epsilon_on_replace,
-        )?;
-
-        assert_eq!(
-            replace_test_data.result,
-            replaced_fst,
-            "{}",
-            error_message_fst!(
-                replace_test_data.result,
-                replaced_fst,
-                format!(
-                    "Replace failed with parameters root={:?} epsilon_on_replace={:?}",
-                    replace_test_data.root, replace_test_data.epsilon_on_replace
-                )
-            )
-        );
-    }
-    Ok(())
+    unimplemented!()
+    // for replace_test_data in &test_data.replace {
+    //     let mut fst_list = vec![];
+    //     fst_list.push((replace_test_data.root, test_data.raw.clone()));
+    //     fst_list.extend_from_slice(replace_test_data.label_fst_pairs.as_slice());
+    //     let replaced_fst: VectorFst<_> = replace(
+    //         fst_list.clone(),
+    //         replace_test_data.root,
+    //         replace_test_data.epsilon_on_replace,
+    //     )?;
+    //
+    //     // Try givinf borrowed fst as parameters.
+    //     let fst_list_2: Vec<(usize, &VectorFst<W>)> =
+    //         fst_list.iter().map(|v| (v.0, &v.1)).collect();
+    //     let _replaced_fst_2: VectorFst<W> = replace::<VectorFst<_>, _, _>(
+    //         fst_list_2,
+    //         replace_test_data.root,
+    //         replace_test_data.epsilon_on_replace,
+    //     )?;
+    //
+    //     assert_eq!(
+    //         replace_test_data.result,
+    //         replaced_fst,
+    //         "{}",
+    //         error_message_fst!(
+    //             replace_test_data.result,
+    //             replaced_fst,
+    //             format!(
+    //                 "Replace failed with parameters root={:?} epsilon_on_replace={:?}",
+    //                 replace_test_data.root, replace_test_data.epsilon_on_replace
+    //             )
+    //         )
+    //     );
+    // }
+    // Ok(())
 }
 
 pub fn test_replace_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
@@ -93,26 +94,27 @@ where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
-    for replace_test_data in &test_data.replace {
-        let mut fst_list = vec![];
-        fst_list.push((replace_test_data.root, test_data.raw.clone()));
-        fst_list.extend_from_slice(replace_test_data.label_fst_pairs.as_slice());
-
-        let fst_list_2: Vec<(usize, &VectorFst<W>)> =
-            fst_list.iter().map(|v| (v.0, &v.1)).collect();
-        let replaced_static_fst: VectorFst<_> = replace::<VectorFst<_>, _, _>(
-            fst_list_2,
-            replace_test_data.root,
-            replace_test_data.epsilon_on_replace,
-        )?;
-
-        let replaced_dynamic_fst = ReplaceFst::new(
-            fst_list,
-            replace_test_data.root,
-            replace_test_data.epsilon_on_replace,
-        )?;
-
-        compare_fst_static_dynamic(&replaced_static_fst, &replaced_dynamic_fst)?;
-    }
-    Ok(())
+    unimplemented!()
+    // for replace_test_data in &test_data.replace {
+    //     let mut fst_list = vec![];
+    //     fst_list.push((replace_test_data.root, test_data.raw.clone()));
+    //     fst_list.extend_from_slice(replace_test_data.label_fst_pairs.as_slice());
+    //
+    //     let fst_list_2: Vec<(usize, &VectorFst<W>)> =
+    //         fst_list.iter().map(|v| (v.0, &v.1)).collect();
+    //     let replaced_static_fst: VectorFst<_> = replace::<VectorFst<_>, _, _>(
+    //         fst_list_2,
+    //         replace_test_data.root,
+    //         replace_test_data.epsilon_on_replace,
+    //     )?;
+    //
+    //     let replaced_dynamic_fst = ReplaceFst::new(
+    //         fst_list,
+    //         replace_test_data.root,
+    //         replace_test_data.epsilon_on_replace,
+    //     )?;
+    //
+    //     compare_fst_static_dynamic(&replaced_static_fst, &replaced_dynamic_fst)?;
+    // }
+    // Ok(())
 }

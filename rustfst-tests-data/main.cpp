@@ -24,6 +24,8 @@
 #include "fst_009/fst_009.h"
 #include "fst_010/fst_010.h"
 #include "fst_011/fst_011.h"
+#include "fst_012/fst_012.h"
+#include "fst_013/fst_013.h"
 
 #include "symt_000/symt_000.h"
 #include "symt_001/symt_001.h"
@@ -526,6 +528,7 @@ void do_compute_fst_replace(
 
     vector<pair<typename Arc::Label, string > > label_fst_pairs_serialized;
 
+
     for (auto &e: label_fst_pairs) {
         auto label = e.first;
         auto fst = e.second;
@@ -953,8 +956,8 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     compute_fst_state_map(raw_fst, data, "state_map_arc_sum", fst::ArcSumMapper<typename F::MyArc>(raw_fst));
     compute_fst_state_map(raw_fst, data, "state_map_arc_unique", fst::ArcUniqueMapper<typename F::MyArc>(raw_fst));
 
-    std::cout << "Determinization" << std::endl;
-    compute_fst_determinization(raw_fst, data);
+//    std::cout << "Determinization" << std::endl;
+//    compute_fst_determinization(raw_fst, data);
 
     std::cout << "TopSort" << std::endl;
     compute_fst_topsort(raw_fst, data);
@@ -980,8 +983,8 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     std::cout << "Push" << std::endl;
     compute_fst_push(raw_fst, data);
 
-    std::cout << "Replace" << std::endl;
-    compute_fst_replace(raw_fst, data, fst_test_data);
+//    std::cout << "Replace" << std::endl;
+//    compute_fst_replace(raw_fst, data, fst_test_data);
 
     std::cout << "Union" << std::endl;
     compute_fst_union(raw_fst, data, fst_test_data.get_fst_union());
@@ -995,8 +998,8 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     std::cout << "Closure Star" << std::endl;
     compute_fst_closure_star(raw_fst, data);
 
-    std::cout << "Matcher" << std::endl;
-    compute_fst_matcher(raw_fst, data);
+//    std::cout << "Matcher" << std::endl;
+//    compute_fst_matcher(raw_fst, data);
 
     std::cout << "Compose" << std::endl;
     compute_fst_compose(raw_fst, data, fst_test_data.get_fst_compose());
@@ -1064,6 +1067,8 @@ int main() {
     compute_fst_data(FstTestData009(), "fst_009");
     compute_fst_data(FstTestData010(), "fst_010");
     compute_fst_data(FstTestData011(), "fst_011");
+    compute_fst_data(FstTestData012(), "fst_012");
+    compute_fst_data(FstTestData013(), "fst_013");
 
     compute_symt_data(compute_symt_000(), "symt_000");
     compute_symt_data(compute_symt_001(), "symt_001");
