@@ -1,7 +1,10 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use failure::Fallible;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::algorithms::compose_filters::AltSequenceComposeFilter;
+use crate::algorithms::compose_filters::{AltSequenceComposeFilter, ComposeFilter};
 use crate::algorithms::lookahead_filters::lookahead_selector::SMatchOutput;
 use crate::algorithms::lookahead_filters::{
     LookAheadComposeFilter, PushLabelsComposeFilter, PushWeightsComposeFilter,
@@ -12,8 +15,8 @@ use crate::algorithms::lookahead_matchers::matcher_fst::MatcherFst;
 use crate::algorithms::lookahead_matchers::{
     LabelLookAheadMatcher, LookaheadMatcher, MatcherFlagsTrait,
 };
-use crate::algorithms::matchers::SortedMatcher;
 use crate::algorithms::matchers::{MatchType, Matcher, MatcherFlags};
+use crate::algorithms::matchers::{MultiEpsMatcher, SortedMatcher};
 use crate::algorithms::{arc_compares::ilabel_compare, arc_sort, ComposeFstImplOptions};
 use crate::algorithms::{compose_with_config, ComposeConfig, ComposeFilterEnum, ComposeFst};
 use crate::fst_impls::VectorFst;
@@ -153,7 +156,7 @@ where
         SMatchOutput,
     >;
 
-    type TComposeFilter<'fst1, 'fst2, S, F1, F2> = TPushWeightsFilter<'fst1, 'fst2, S, F1, F2>;
+    type TComposeFilter<'fst1, 'fst2, S, F1, F2> = TPushLabelsFilter<'fst1, 'fst2, S, F1, F2>;
 
     let fst1: VectorFst<_> = fst_raw.clone().into();
     let mut fst2: VectorFst<_> = compose_test_data.fst_2.clone();
@@ -178,10 +181,19 @@ where
     )?;
     let matcher2 = TMatcher2::new(&fst2, MatchType::MatchInput)?;
 
-    let compose_options =
-        ComposeFstImplOptions::<TMatcher1<_>, TMatcher2<_>, TComposeFilter<_, _, _>, _>::new(
-            matcher1, matcher2, None, None,
-        );
+    let compose_filter = TPushLabelsFilter::new_2(
+        &graph1look,
+        &fst2,
+        Rc::new(RefCell::new(matcher1)),
+        Rc::new(RefCell::new(matcher2)),
+    )?;
+
+    let compose_options = ComposeFstImplOptions::<_, _, TComposeFilter<_, _, _>, _>::new(
+        compose_filter.matcher1(),
+        compose_filter.matcher2(),
+        compose_filter,
+        None,
+    );
 
     let dyn_fst = ComposeFst::new_with_options(&graph1look, &fst2, compose_options)?;
     let static_fst: VectorFst<_> = dyn_fst.compute()?;

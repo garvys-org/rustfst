@@ -37,8 +37,8 @@ impl<M1, M2, CF, ST> Default for ComposeFstImplOptions<M1, M2, CF, ST> {
 
 impl<M1, M2, CF, ST> ComposeFstImplOptions<M1, M2, CF, ST> {
     pub fn new<
-        IM1: Into<Option<M1>>,
-        IM2: Into<Option<M2>>,
+        IM1: Into<Option<Rc<RefCell<M1>>>>,
+        IM2: Into<Option<Rc<RefCell<M2>>>>,
         ICF: Into<Option<CF>>,
         IST: Into<Option<ST>>,
     >(
@@ -48,8 +48,8 @@ impl<M1, M2, CF, ST> ComposeFstImplOptions<M1, M2, CF, ST> {
         state_table: IST,
     ) -> Self {
         Self {
-            matcher1: matcher1.into().map(|e| Rc::new(RefCell::new(e))),
-            matcher2: matcher2.into().map(|e| Rc::new(RefCell::new(e))),
+            matcher1: matcher1.into(),
+            matcher2: matcher2.into(),
             filter: filter.into(),
             state_table: state_table.into(),
         }
