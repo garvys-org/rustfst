@@ -24,7 +24,7 @@ bitflags! {
         const LOOKAHEAD_WEIGHT =  1u32 << 6;
         const LOOKAHEAD_PREFIX =  1u32 << 7;
         const LOOKAHEAD_NON_EPSILONS =  1u32 << 8;
-        const LOOKAHEAD_EPSILONS =  1u32 << 8;
+        const LOOKAHEAD_EPSILONS =  1u32 << 9;
         const LOOKAHEAD_NON_EPSILON_PREFIX =  1u32 << 10;
 
         const LOOKAHEAD_FLAGS = Self::INPUT_LOOKAHEAD_MATCHER.bits |
