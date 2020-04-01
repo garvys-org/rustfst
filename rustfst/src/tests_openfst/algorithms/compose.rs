@@ -100,6 +100,8 @@ impl MatcherFlagsTrait for DefaultLabelLookAheadMatcherFlags {
         MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER
             | MatcherFlags::LOOKAHEAD_WEIGHT
             | MatcherFlags::LOOKAHEAD_PREFIX
+            | MatcherFlags::LOOKAHEAD_EPSILONS
+            | MatcherFlags::LOOKAHEAD_NON_EPSILON_PREFIX
     }
 }
 
