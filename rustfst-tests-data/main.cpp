@@ -115,6 +115,58 @@ void compute_fst_condense(const F& raw_fst, json& j) {
 }
 
 template<class F>
+void compute_fst_label_reachable(const F& raw_fst, json& j) {
+    using Arc = typename F::Arc;
+    using Weight = typename F::Weight;
+    using StateId = typename Arc::StateId;
+    auto fst_in = *raw_fst.Copy();
+
+    std::vector<bool> v = {true, false};
+
+    j["label_reachable"] = {};
+    for (auto reach_input: v) {
+        json j2 = {};
+        j2["reach_input"] = bool(reach_input);
+
+        fst::LabelReachable<Arc> reachable(fst_in, reach_input);
+
+        std::set<int> labels;
+        for (fst::StateIterator<F> siter(fst_in); !siter.Done(); siter.Next()) {
+            StateId state_id = siter.Value();
+            for (fst::ArcIterator<F> aiter(fst_in, state_id); !aiter.Done(); aiter.Next()) {
+                const Arc &arc = aiter.Value();
+                if (reach_input) {
+                    labels.insert(arc.ilabel);
+                } else {
+                    labels.insert(arc.olabel);
+                }
+            }
+        }
+
+        j2["result"] = {};
+        for(int state=0; state<fst_in.NumStates(); state++) {
+            for(auto label: labels) {
+                reachable.SetState(state);
+                auto r = reachable.Relabel(label);
+                auto res = reachable.Reach(r);
+
+                json j3;
+                j3["state"] = state;
+                j3["label"] = label;
+                j3["label_relabeled"] = r;
+                j3["reachable"] = res;
+                j3["reach_final"] = reachable.ReachFinal();
+                j2["result"].push_back(j3);
+            }
+        }
+        if (fst_in.NumStates() == 0) {
+            j2["result"] = std::vector<int>();
+        }
+        j["label_reachable"].push_back(j2);
+    }
+}
+
+template<class F>
 void compute_fst_state_reachable(const F& raw_fst, json& j) {
     using Arc = typename F::Arc;
     using Weight = typename F::Weight;
@@ -1067,6 +1119,9 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
 
     std::cout << "State Reachable" << std::endl;
     compute_fst_state_reachable(raw_fst, data);
+
+    std::cout << "Label Reachable" << std::endl;
+    compute_fst_label_reachable(raw_fst, data);
 
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;
