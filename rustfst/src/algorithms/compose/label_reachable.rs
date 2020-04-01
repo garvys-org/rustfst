@@ -186,7 +186,9 @@ impl LabelReachable {
         let interval_sets = &mut data.interval_sets;
         *interval_sets = state_reachable.isets;
         interval_sets.resize_with(ins, IntervalSet::default);
+
         let label2index = &mut data.label2index;
+
         for (label, state) in label2state.iter() {
             let i = state2index[*state];
             label2index.insert(*label, i);
@@ -306,6 +308,10 @@ impl LabelReachable {
         let mut reach_weight = W::zero();
         let data = self.data.borrow();
         let interval_set = data.interval_set(current_state)?;
+        std::dbg!(aiter_begin);
+        std::dbg!(aiter_end);
+        std::dbg!(compute_weight);
+        std::dbg!(interval_set.len());
         if 2 * (aiter_end - aiter_begin) < interval_set.len() {
             let aiter = aiter.skip(aiter_begin);
             let mut reach_label = NO_LABEL;
@@ -332,9 +338,13 @@ impl LabelReachable {
             let mut end_low = aiter_begin;
 
             let arcs = aiter.collect_vec();
+            std::dbg!(&arcs);
             for interval in interval_set.iter() {
+                std::dbg!(interval);
                 begin_low = self.lower_bound(arcs.as_slice(), end_low, aiter_end, interval.begin);
                 end_low = self.lower_bound(arcs.as_slice(), begin_low, aiter_end, interval.end);
+                std::dbg!(begin_low);
+                std::dbg!(end_low);
                 if end_low - begin_low > 0 {
                     if reach_begin == UNASSIGNED {
                         reach_begin = begin_low;
@@ -369,7 +379,7 @@ impl LabelReachable {
         while low < high {
             let mid = low + (high - low) / 2;
             let arc = arcs[mid];
-            let label = if self.reach_fst_input {
+            let label = if std::dbg!(self.reach_fst_input) {
                 arc.ilabel
             } else {
                 arc.olabel

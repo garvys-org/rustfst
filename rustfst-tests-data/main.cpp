@@ -119,7 +119,17 @@ void compute_fst_label_reachable(const F& raw_fst, json& j) {
     using Arc = typename F::Arc;
     using Weight = typename F::Weight;
     using StateId = typename Arc::StateId;
-    auto fst_in = *raw_fst.Copy();
+
+    fst::ConstFst<Arc> ifst(raw_fst);
+
+    using P = fst::MatcherFst<
+                    fst::ConstFst<Arc>,
+                    fst::LabelLookAheadMatcher<fst::SortedMatcher<fst::Fst<Arc>>, fst::olabel_lookahead_flags>,
+                    fst::olabel_lookahead_fst_type,
+                    fst::LabelLookAheadRelabeler<Arc>
+                  >;
+
+    P fst_in(ifst);
 
     std::vector<bool> v = {true, false};
 
@@ -130,10 +140,34 @@ void compute_fst_label_reachable(const F& raw_fst, json& j) {
 
         fst::LabelReachable<Arc> reachable(fst_in, reach_input);
 
+        auto data = reachable.GetData();
+        j2["final_label"] = data->FinalLabel();
+
+        j2["interval_sets"] = {};
+        for (int s = 0; s < data->NumIntervalSets(); s++) {
+            auto interval_set = data->GetIntervalSet(s);
+            auto intervals = interval_set.Intervals();
+            json j_interval_set = {};
+            for (int idx = 0; idx < interval_set.Size(); idx++) {
+                auto interval = intervals[idx];
+                json j_interval = {};
+                j_interval["begin"] = interval.begin;
+                j_interval["end"] = interval.end;
+                j_interval_set.push_back(j_interval);
+            }
+            if (interval_set.Size() == 0) {
+                j_interval_set = std::vector<int>();
+            }
+            j2["interval_sets"].push_back(j_interval_set);
+        }
+        if (data->NumIntervalSets() == 0) {
+            j2["interval_sets"] = std::vector<int>();
+        }
+
         std::set<int> labels;
-        for (fst::StateIterator<F> siter(fst_in); !siter.Done(); siter.Next()) {
+        for (fst::StateIterator<P> siter(fst_in); !siter.Done(); siter.Next()) {
             StateId state_id = siter.Value();
-            for (fst::ArcIterator<F> aiter(fst_in, state_id); !aiter.Done(); aiter.Next()) {
+            for (fst::ArcIterator<P> aiter(fst_in, state_id); !aiter.Done(); aiter.Next()) {
                 const Arc &arc = aiter.Value();
                 if (reach_input) {
                     labels.insert(arc.ilabel);

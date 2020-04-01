@@ -39,6 +39,7 @@ impl StateReachable {
     where
         F::W: 'static,
     {
+        println!("StatReachable::new_cyclic");
         let (scc, cfst): (_, VectorFst<_>) = condense(fst).unwrap();
         let reachable = StateReachable::new_acyclic(&cfst);
         let mut nscc = vec![];
@@ -72,8 +73,10 @@ impl StateReachable {
     }
 
     pub fn new_acyclic<F: ExpandedFst>(fst: &F) -> Self {
+        println!("StatReachable::new_acyclic");
         let mut reach_visitor = IntervalReachVisitor::new(fst);
         dfs_visit(fst, &mut reach_visitor, &AnyArcFilter {}, false);
+        std::dbg!(&reach_visitor.isets);
         Self {
             isets: reach_visitor.isets,
             state2index: reach_visitor.state2index,

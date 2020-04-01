@@ -106,7 +106,7 @@ impl MatcherFlagsTrait for DefaultLabelLookAheadMatcherFlags {
 }
 
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
-struct OLabelLookAheadFlags {}
+pub struct OLabelLookAheadFlags {}
 
 impl MatcherFlagsTrait for OLabelLookAheadFlags {
     fn flags() -> MatcherFlags {
@@ -194,7 +194,8 @@ where
     // )?;
 
     let compose_filter = TComposeFilter::new(
-        &graph1look, &fst2,
+        &graph1look,
+        &fst2,
         Rc::new(RefCell::new(matcher1)),
         Rc::new(RefCell::new(matcher2)),
     )?;

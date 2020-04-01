@@ -4,13 +4,19 @@ use failure::Fallible;
 use itertools::Itertools;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::algorithms::compose::{StateReachable, LabelReachable};
+use crate::algorithms::compose::lookahead_matchers::LabelLookAheadMatcher;
+use crate::algorithms::compose::matchers::SortedMatcher;
+use crate::algorithms::compose::{
+    IntInterval, LabelReachable, LabelReachableData, MatcherFst, StateReachable,
+};
 use crate::algorithms::condense;
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{MutableFst, SerializableFst};
+use crate::fst_traits::{CoreFst, MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
+use crate::tests_openfst::algorithms::compose::OLabelLookAheadFlags;
 use crate::tests_openfst::FstTestData;
+use crate::NO_LABEL;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ReachabilityTestResult {
@@ -18,18 +24,22 @@ pub struct ReachabilityTestResult {
     label: usize,
     label_relabeled: usize,
     reach_final: bool,
-    reachable: bool
+    reachable: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LabelReachableOperationResult {
     result: Vec<ReachabilityTestResult>,
-    reach_input: bool
+    reach_input: bool,
+    final_label: i32,
+    interval_sets: Vec<Vec<IntInterval>>,
 }
 
 pub struct LabelReachableTestData {
     pub result: Vec<ReachabilityTestResult>,
-    pub reach_input: bool
+    pub reach_input: bool,
+    pub final_label: usize,
+    pub interval_sets: Vec<Vec<IntInterval>>,
 }
 
 impl LabelReachableOperationResult {
@@ -37,17 +47,52 @@ impl LabelReachableOperationResult {
         LabelReachableTestData {
             result: self.result.clone(),
             reach_input: self.reach_input,
+            final_label: if self.final_label == -1 {
+                NO_LABEL
+            } else {
+                self.final_label as usize
+            },
+            interval_sets: self.interval_sets.clone(),
         }
     }
 }
 
 pub fn test_label_reachable<F>(test_data: &FstTestData<F>) -> Fallible<()>
-    where
-        F: MutableFst + Display + SerializableFst,
-        F::W: SerializableSemiring + 'static,
+where
+    F: MutableFst + Display + SerializableFst,
+    F::W: SerializableSemiring + 'static,
 {
+    type TLaFst<'fst, F> = MatcherFst<
+        F,
+        LabelLookAheadMatcher<
+            'fst,
+            <F as CoreFst>::W,
+            SortedMatcher<'fst, F>,
+            OLabelLookAheadFlags,
+        >,
+        LabelReachableData,
+    >;
+
+    let fst = TLaFst::new(test_data.raw.clone())?;
+
     for label_reachable_test_data in &test_data.label_reachable {
-        let reachable = LabelReachable::new(&test_data.raw, label_reachable_test_data.reach_input)?;
+        let reachable = LabelReachable::new(&fst, label_reachable_test_data.reach_input)?;
+
+        let reachable_data = reachable.data().borrow();
+        assert_eq!(
+            reachable_data.final_label(),
+            label_reachable_test_data.final_label
+        );
+
+        for i in 0..label_reachable_test_data.interval_sets.len() {
+            let interval_set = reachable_data.interval_set(i)?;
+            assert_eq!(
+                interval_set.intervals.intervals,
+                label_reachable_test_data.interval_sets[i]
+            );
+        }
+
+        drop(reachable_data);
 
         for data in &label_reachable_test_data.result {
             let current_state = data.state;

@@ -144,12 +144,8 @@ where
         );
 
         match &mut selector {
-            Selector::MatchInput(l) => {
-                l.matcher.borrow_mut().init_lookahead_fst(l.fst)?
-            },
-            Selector::MatchOutput(l) => {
-                l.matcher.borrow_mut().init_lookahead_fst(l.fst)?
-            }
+            Selector::MatchInput(l) => l.matcher.borrow_mut().init_lookahead_fst(l.fst)?,
+            Selector::MatchOutput(l) => l.matcher.borrow_mut().init_lookahead_fst(l.fst)?,
         };
 
         Ok(Self {

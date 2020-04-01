@@ -1,4 +1,5 @@
 use failure::_core::cmp::Ordering;
+use serde_derive::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::slice::Iter as IterSlice;
 use std::vec::IntoIter as IntoIterVec;
@@ -6,7 +7,7 @@ use superslice::Ext;
 use unsafe_unwrap::UnsafeUnwrap;
 
 /// Half-open integral interval [a, b) of signed integers of type T.
-#[derive(PartialEq, Clone, Eq, Debug)]
+#[derive(PartialEq, Clone, Eq, Debug, Serialize, Deserialize)]
 pub struct IntInterval {
     pub begin: usize,
     pub end: usize,
