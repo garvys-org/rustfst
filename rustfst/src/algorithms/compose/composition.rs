@@ -3,6 +3,7 @@ use std::hash::Hash;
 use std::rc::Rc;
 
 use failure::Fallible;
+use itertools::Itertools;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::compose::compose_filters::{
@@ -233,7 +234,9 @@ impl<'fst1, 'fst2, W: Semiring, CF: ComposeFilter<'fst1, 'fst2, W>>
     {
         let label = if match_input { arc.olabel } else { arc.ilabel };
         std::dbg!(match_input);
-        for arca in matchera.borrow().iter(sa, label)? {
+        // Collect necessary here because need to borrow_mut a matcher later. To investigate.
+        let temp = matchera.borrow().iter(sa, label)?.collect_vec();
+        for arca in temp {
             let mut arca = arca.into_arc(
                 sa,
                 if match_input {
@@ -243,7 +246,7 @@ impl<'fst1, 'fst2, W: Semiring, CF: ComposeFilter<'fst1, 'fst2, W>>
                 },
             )?;
             let mut arcb = arc.clone();
-            println!("[MATCH ARC] Arc a : {:?}", &arca);
+            println!("\n[MATCH ARC] Arc a : {:?}", &arca);
             println!("[MATCH ARC] Arc b : {:?}", &arcb);
             if match_input {
                 let fs = self.compose_filter.filter_arc(&mut arcb, &mut arca)?;
@@ -252,6 +255,7 @@ impl<'fst1, 'fst2, W: Semiring, CF: ComposeFilter<'fst1, 'fst2, W>>
                 }
             } else {
                 let fs = self.compose_filter.filter_arc(&mut arca, &mut arcb)?;
+                println!("[Composition] Fs : {:?}", &fs);
                 if fs != CF::FS::new_no_state() {
                     self.add_arc(s, arca, arcb, fs)?;
                 }

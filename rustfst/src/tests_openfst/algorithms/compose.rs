@@ -166,8 +166,8 @@ where
     let fst1: VectorFst<_> = fst_raw.clone().into();
     let mut fst2: VectorFst<_> = compose_test_data.fst_2.clone();
 
-    println!("FST1 = \n{}", &fst1);
-    println!("FST2 = \n{}", &fst2);
+    // println!("FST1 = \n{}", &fst1);
+    // println!("FST2 = \n{}", &fst2);
 
     let graph1look = TLaFst::new(fst1)?;
 
@@ -175,8 +175,8 @@ where
 
     arc_sort(&mut fst2, ilabel_compare);
 
-    println!("FST1 relabeled = \n{}", &graph1look.fst());
-    println!("FST2 relabeled = \n{}", &fst2);
+    // println!("FST1 relabeled = \n{}", &graph1look.fst());
+    // println!("FST2 relabeled = \n{}", &fst2);
 
     // let matcher1 = MATCHER1::new(&graph1look, MatchType::MatchOutput)?;
     let matcher1 = TMatcher1::new_with_data(

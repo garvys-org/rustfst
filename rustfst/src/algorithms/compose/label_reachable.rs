@@ -309,7 +309,7 @@ impl LabelReachable {
         if 2 * (aiter_end - aiter_begin) < interval_set.len() {
             let aiter = aiter.skip(aiter_begin);
             let mut reach_label = NO_LABEL;
-            for (pos, arc) in aiter.take(aiter_end).enumerate() {
+            for (pos, arc) in aiter.take(aiter_end - aiter_begin).enumerate() {
                 let aiter_pos = aiter_begin + pos;
                 let label = if self.reach_fst_input {
                     arc.ilabel
@@ -363,6 +363,7 @@ impl LabelReachable {
         aiter_end: usize,
         match_label: Label,
     ) -> usize {
+        debug_assert!(match_label != NO_LABEL);
         let mut low = aiter_begin;
         let mut high = aiter_end;
         while low < high {
@@ -373,6 +374,7 @@ impl LabelReachable {
             } else {
                 arc.olabel
             };
+            debug_assert!(label != NO_LABEL);
             if label < match_label {
                 low = mid + 1;
             } else {
