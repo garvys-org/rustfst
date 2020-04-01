@@ -31,11 +31,11 @@ impl StateReachable {
         if acyclic {
             Ok(Self::new_acyclic(fst))
         } else {
-            Ok(Self::new_cyclic(fst))
+            Self::new_cyclic(fst)
         }
     }
 
-    pub fn new_cyclic<F: ExpandedFst>(fst: &F) -> Self
+    pub fn new_cyclic<F: ExpandedFst>(fst: &F) -> Fallible<Self>
     where
         F::W: 'static,
     {
@@ -65,10 +65,10 @@ impl StateReachable {
             // Checks that each final state in an input FST is not contained in a
             // cycle (i.e., not in a non-trivial SCC).
             if unsafe { cfst.is_final_unchecked(c) } && nscc[c] > 1 {
-                panic!("StateReachable: Final state contained in a cycle")
+                bail!("StateReachable: Final state contained in a cycle")
             }
         }
-        Self { isets, state2index }
+        Ok(Self { isets, state2index })
     }
 
     pub fn new_acyclic<F: ExpandedFst>(fst: &F) -> Self {
@@ -80,13 +80,12 @@ impl StateReachable {
         }
     }
 
-    #[allow(unused)]
     // Can reach this final state from current state?
-    pub fn reach(&self, current_state: StateId, s: StateId) -> bool {
+    pub fn reach(&self, current_state: StateId, s: StateId) -> Fallible<bool> {
         if let Some(i) = self.state2index.get(s) {
-            self.isets[current_state].member(*i)
+            Ok(self.isets[current_state].member(*i))
         } else {
-            false
+            bail!("StateReachable: State non-final {}", s)
         }
     }
 }

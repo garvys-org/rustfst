@@ -9,7 +9,7 @@ use crate::algorithms::visitors::SccVisitor;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
-use crate::{Arc, NO_STATE_ID};
+use crate::Arc;
 
 /// Computes all the FstProperties of the FST bit don't attach them to the FST.
 pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Fallible<FstProperties> {

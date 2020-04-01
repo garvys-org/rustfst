@@ -1,13 +1,13 @@
 use std::fmt::Display;
 
-use failure::{Fallible, format_err};
+use failure::{format_err, Fallible};
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{isomorphic, shortest_path};
 use crate::fst_traits::{CoreFst, MutableFst, SerializableFst};
-use crate::semirings::{Semiring, SerializableSemiring};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
+use crate::semirings::{Semiring, SerializableSemiring};
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]

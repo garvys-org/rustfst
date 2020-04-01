@@ -115,6 +115,50 @@ void compute_fst_condense(const F& raw_fst, json& j) {
 }
 
 template<class F>
+void compute_fst_state_reachable(const F& raw_fst, json& j) {
+    using Arc = typename F::Arc;
+    using Weight = typename F::Weight;
+    auto fst_in = *raw_fst.Copy();
+    fst::StateReachable<Arc> reachable(fst_in);
+
+    j["state_reachable"]["result"] = {};
+    auto error = reachable.Error();
+    j["state_reachable"]["error"] = error;
+
+    if (!error) {
+        std::vector<int> final_states;
+        for (int i = 0; i < fst_in.NumStates(); i++) {
+            if (fst_in.Final(i) != Weight::Zero()) {
+                final_states.push_back(i);
+            }
+        }
+
+        for (int state = 0; state < fst_in.NumStates(); state++) {
+            for(auto final_state: final_states) {
+                json j2;
+                j2["state"] = state;
+                j2["final_state"] = final_state;
+
+                reachable.SetState(state);
+                auto res = reachable.Reach(final_state);
+                auto error_reach = reachable.Error();
+
+                j2["reachable"] = res;
+                j2["error"] = error_reach;
+                j["state_reachable"]["result"].push_back(j2);
+                if (error_reach) {
+                    return;
+                }
+            }
+        }
+    }
+
+    if ((fst_in.NumStates() == 0) || error) {
+        j["state_reachable"]["result"] = std::vector<int>();
+    }
+}
+
+template<class F>
 void compute_fst_shortest_distance(const F& raw_fst, json& j) {
     j["shortest_distance"] = {};
     std::vector<bool> v = {true, false};
@@ -1020,6 +1064,9 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
 
     std::cout << "Compose" << std::endl;
     compute_fst_compose(raw_fst, data, fst_test_data.get_fst_compose());
+
+    std::cout << "State Reachable" << std::endl;
+    compute_fst_state_reachable(raw_fst, data);
 
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;

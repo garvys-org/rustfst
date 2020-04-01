@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use failure::{Fallible, format_err, ResultExt};
+use failure::{format_err, Fallible, ResultExt};
 use pretty_assertions::assert_eq;
 use serde_derive::{Deserialize, Serialize};
 

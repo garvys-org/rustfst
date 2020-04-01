@@ -1,0 +1,69 @@
+use std::fmt::Display;
+
+use failure::Fallible;
+use itertools::Itertools;
+use serde_derive::{Deserialize, Serialize};
+
+use crate::algorithms::compose::StateReachable;
+use crate::algorithms::condense;
+use crate::fst_impls::VectorFst;
+use crate::fst_properties::FstProperties;
+use crate::fst_traits::{MutableFst, SerializableFst};
+use crate::semirings::SerializableSemiring;
+use crate::tests_openfst::FstTestData;
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ReachabilityTestResult {
+    state: usize,
+    final_state: usize,
+    reachable: bool,
+    error: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct StateReachableOperationResult {
+    result: Vec<ReachabilityTestResult>,
+    error: bool,
+}
+
+pub struct StateReachableTestData {
+    pub result: Vec<ReachabilityTestResult>,
+    pub error: bool,
+}
+
+impl StateReachableOperationResult {
+    pub fn parse(&self) -> StateReachableTestData {
+        StateReachableTestData {
+            result: self.result.clone(),
+            error: self.error,
+        }
+    }
+}
+
+pub fn test_state_reachable<F>(test_data: &FstTestData<F>) -> Fallible<()>
+where
+    F: MutableFst + Display + SerializableFst,
+    F::W: SerializableSemiring + 'static,
+{
+    let state_reachable_test_data = &test_data.state_reachable;
+    let reachable = StateReachable::new(&test_data.raw);
+    if state_reachable_test_data.error {
+        assert!(reachable.is_err());
+        return Ok(());
+    }
+    let reachable = reachable?;
+    for reachability_test in &test_data.state_reachable.result {
+        let res = reachable.reach(reachability_test.state, reachability_test.final_state);
+        if reachability_test.error {
+            assert!(res.is_err());
+            continue;
+        }
+        let res = res?;
+        assert_eq!(
+            res, reachability_test.reachable,
+            "State Reachable test failing : state = {} final_state = {}",
+            reachability_test.state, reachability_test.final_state
+        );
+    }
+    Ok(())
+}

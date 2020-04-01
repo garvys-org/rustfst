@@ -24,6 +24,7 @@ pub mod rm_epsilon;
 pub mod shortest_distance;
 pub mod shortest_path;
 pub mod state_map;
+pub mod state_reachable;
 pub mod topsort;
 pub mod union;
 pub mod weight_pushing;

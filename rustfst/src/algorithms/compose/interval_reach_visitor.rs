@@ -1,8 +1,8 @@
 use crate::algorithms::compose::{IntInterval, IntervalSet};
 use crate::algorithms::dfs_visit::Visitor;
 use crate::fst_traits::Fst;
-use crate::{Arc, StateId};
 use crate::semirings::Semiring;
+use crate::{Arc, StateId};
 
 static UNASSIGNED: usize = std::usize::MAX;
 
@@ -77,7 +77,10 @@ impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
     /// Invoked when state finished ('s' is tree root, 'parent' is kNoStateId,
     /// and 'arc' is nullptr).
     fn finish_state(&mut self, s: StateId, parent: Option<StateId>, _arc: Option<&Arc<F::W>>) {
-        if self.index != UNASSIGNED && self.fst.is_final(s).unwrap() && !self.fst.final_weight(s).unwrap().unwrap().is_zero() {
+        if self.index != UNASSIGNED
+            && self.fst.is_final(s).unwrap()
+            && !self.fst.final_weight(s).unwrap().unwrap().is_zero()
+        {
             let intervals = &mut self.isets[s].intervals.intervals;
             intervals[0].end = self.index;
         }

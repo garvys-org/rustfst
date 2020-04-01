@@ -41,6 +41,9 @@ use crate::tests_openfst::algorithms::gallic_encode_decode::GallicOperationResul
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicTestData;
 use crate::tests_openfst::algorithms::matcher::test_sorted_matcher;
 use crate::tests_openfst::algorithms::matcher::{MatcherOperationResult, MatcherTestData};
+use crate::tests_openfst::algorithms::state_reachable::{
+    test_state_reachable, StateReachableOperationResult, StateReachableTestData,
+};
 use crate::tests_openfst::algorithms::union::{test_union, test_union_dynamic};
 use crate::tests_openfst::io::const_fst_bin_deserializer::{
     test_const_fst_aligned_bin_deserializer, test_const_fst_bin_deserializer,
@@ -183,6 +186,7 @@ pub struct ParsedFstTestData {
     raw_vector_with_symt_bin_path: String,
     // matcher: Vec<MatcherOperationResult>,
     compose: Vec<ComposeOperationResult>,
+    state_reachable: StateReachableOperationResult,
 }
 
 pub struct FstTestData<F: SerializableFst>
@@ -236,6 +240,7 @@ where
     pub raw_vector_with_symt_bin_path: PathBuf,
     // pub matcher: Vec<MatcherTestData<F>>,
     pub compose: Vec<ComposeTestData<F>>,
+    pub state_reachable: StateReachableTestData,
 }
 
 impl<F: SerializableFst> FstTestData<F>
@@ -310,6 +315,7 @@ where
                 .to_path_buf(),
             // matcher: data.matcher.iter().map(|v| v.parse()).collect(),
             compose: data.compose.iter().map(|v| v.parse()).collect(),
+            state_reachable: data.state_reachable.parse(),
         }
     }
 }
@@ -771,6 +777,12 @@ macro_rules! test_fst {
             #[test]
             fn test_fst_condense_openfst() -> Fallible<()> {
                 do_run!(test_condense, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_fst_state_reachable_openfst() -> Fallible<()> {
+                do_run!(test_state_reachable, $fst_name);
                 Ok(())
             }
         }
