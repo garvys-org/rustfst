@@ -152,7 +152,7 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
 
         // LookAheadFst
         self.clear_lookahead_weight();
-        self.clear_lookahead_weight();
+        self.clear_lookahead_prefix();
         if let Some(reachable) = &self.reachable {
             let mut compute_weight = MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT);
             let compute_prefix = MFT::flags().contains(MatcherFlags::LOOKAHEAD_PREFIX);
@@ -166,9 +166,9 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
             )?;
             let reach_arc_bool = reach_arc.is_some();
             let lfinal = lfst.final_weight(lfst_state)?;
-            let reach_final = lfinal.is_some() && reachable.reach_final(matcher_state)?;
+            let reach_final = lfinal.is_some() && !lfinal.unwrap().is_zero() && reachable.reach_final(matcher_state)?;
             if let Some((reach_begin, reach_end, reach_weight)) = reach_arc {
-                if compute_prefix && reach_end - reach_begin == 1 && !reach_final {
+                if compute_prefix && (reach_end - reach_begin) == 1 && !reach_final {
                     let arc = lfst
                         .arcs_iter(lfst_state)?
                         .skip(reach_begin)
