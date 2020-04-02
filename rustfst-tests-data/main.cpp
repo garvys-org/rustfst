@@ -1149,14 +1149,14 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
 //    std::cout << "Matcher" << std::endl;
 //    compute_fst_matcher(raw_fst, data);
 
-    std::cout << "State Reachable" << std::endl;
-    compute_fst_state_reachable(raw_fst, data);
-
     std::cout << "Label Reachable" << std::endl;
     compute_fst_label_reachable(raw_fst, data);
 
     std::cout << "Compose" << std::endl;
     compute_fst_compose(raw_fst, data, fst_test_data.get_fst_compose());
+
+    std::cout << "State Reachable" << std::endl;
+    compute_fst_state_reachable(raw_fst, data);
 
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;
