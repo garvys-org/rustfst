@@ -51,15 +51,18 @@ use crate::tests_openfst::algorithms::union::{test_union, test_union_dynamic};
 use crate::tests_openfst::io::const_fst_bin_deserializer::{
     test_const_fst_aligned_bin_deserializer, test_const_fst_bin_deserializer,
 };
-use crate::tests_openfst::io::const_fst_bin_serializer::{
-    test_const_fst_bin_serializer, test_const_fst_bin_serializer_with_symt,
-};
-use crate::tests_openfst::io::const_fst_text_serialization::{
-    test_const_fst_text_serialization, test_const_fst_text_serialization_with_symt,
-};
 use crate::tests_openfst::io::const_fst_bin_serializer::test_const_fst_bin_serializer;
+use crate::tests_openfst::io::const_fst_bin_serializer::test_const_fst_bin_serializer_with_symt;
 use crate::tests_openfst::io::const_fst_text_serialization::test_const_fst_text_serialization;
+use crate::tests_openfst::io::const_fst_text_serialization::test_const_fst_text_serialization_with_symt;
+use crate::tests_openfst::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
 use crate::tests_openfst::io::vector_fst_bin_deserializer::test_vector_fst_bin_with_symt_deserializer;
+use crate::tests_openfst::io::vector_fst_bin_serializer::{
+    test_vector_fst_bin_serializer, test_vector_fst_bin_serializer_with_symt,
+};
+use crate::tests_openfst::io::vector_fst_text_serialization::{
+    test_vector_fst_text_serialization, test_vector_fst_text_serialization_with_symt,
+};
 
 use self::algorithms::{
     arc_map::{
@@ -95,26 +98,6 @@ use self::fst_impls::test_fst_into_iterator::{
     test_fst_into_iterator_const, test_fst_into_iterator_vector,
 };
 use self::misc::test_del_all_states;
-use crate::fst_traits::SerializableFst;
-use crate::tests_openfst::algorithms::closure::{
-    test_closure_plus, test_closure_plus_dynamic, test_closure_star, test_closure_star_dynamic,
-    SimpleStaticDynamicOperationResult, SimpleStaticDynamicTestData,
-};
-use crate::tests_openfst::algorithms::compose::{ComposeOperationResult, ComposeTestData};
-use crate::tests_openfst::algorithms::concat::{
-    test_concat, test_concat_dynamic, ConcatOperationResult, ConcatTestData,
-};
-use crate::tests_openfst::algorithms::matcher::{MatcherOperationResult, MatcherTestData};
-use crate::tests_openfst::algorithms::union::{test_union, test_union_dynamic};
-use crate::tests_openfst::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
-use crate::tests_openfst::io::vector_fst_bin_deserializer::test_vector_fst_bin_with_symt_deserializer;
-use crate::tests_openfst::io::vector_fst_bin_serializer::{
-    test_vector_fst_bin_serializer, test_vector_fst_bin_serializer_with_symt,
-};
-use crate::tests_openfst::io::vector_fst_text_serialization::{
-    test_vector_fst_text_serialization, test_vector_fst_text_serialization_with_symt,
-};
-use crate::tests_openfst::algorithms::compose::{ComposeOperationResult, ComposeTestData};
 
 #[macro_use]
 mod macros;

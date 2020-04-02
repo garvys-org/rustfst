@@ -4,7 +4,7 @@ pub use self::composition::{
     ComposeFstImplOptions,
 };
 pub(crate) use self::interval_reach_visitor::IntervalReachVisitor;
-pub(crate) use self::interval_set::{IntervalSet, IntInterval};
+pub(crate) use self::interval_set::{IntInterval, IntervalSet};
 pub use self::label_reachable::{LabelReachable, LabelReachableData};
 pub use self::matcher_fst::MatcherFst;
 pub(crate) use self::state_reachable::StateReachable;
