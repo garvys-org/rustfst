@@ -26,6 +26,7 @@
 #include "fst_011/fst_011.h"
 #include "fst_012/fst_012.h"
 #include "fst_013/fst_013.h"
+#include "fst_014/fst_014.h"
 
 #include "symt_000/symt_000.h"
 #include "symt_001/symt_001.h"
@@ -1295,4 +1296,5 @@ int main() {
     compute_fst_data(FstTestData011(), "fst_011");
     compute_fst_data(FstTestData012(), "fst_012");
     compute_fst_data(FstTestData013(), "fst_013");
+    compute_fst_data(FstTestData014(), "fst_014");
 }

@@ -59,14 +59,6 @@ impl<
             matcher: PhantomData,
         })
     }
-
-    // pub fn init_matcher(&self, match_type: MatchType) -> Fallible<M> {
-    //     M::new_with_data(
-    //         &self.fst_add_on.fst,
-    //         match_type,
-    //         self.data(match_type).cloned(),
-    //     )
-    // }
 }
 
 impl<F: CoreFst, M, T> CoreFst for MatcherFst<F, M, T> {

@@ -1,10 +1,10 @@
-use self::add_on::FstAddOn;
+pub(crate) use self::add_on::FstAddOn;
 pub use self::composition::{
     compose, compose_with_config, ComposeConfig, ComposeFilterEnum, ComposeFst,
     ComposeFstImplOptions,
 };
 pub(crate) use self::interval_reach_visitor::IntervalReachVisitor;
-pub(crate) use self::interval_set::{IntInterval, IntervalSet};
+pub(crate) use self::interval_set::{IntervalSet, IntInterval};
 pub use self::label_reachable::{LabelReachable, LabelReachableData};
 pub use self::matcher_fst::MatcherFst;
 pub(crate) use self::state_reachable::StateReachable;
