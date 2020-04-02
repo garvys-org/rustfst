@@ -129,7 +129,7 @@ where
             'fst,
             <F as CoreFst>::W,
             SortedMatcher<'fst, F>,
-            OLabelLookAheadFlags,
+            DefaultLabelLookAheadMatcherFlags,
         >,
         LabelReachableData,
     >;
@@ -161,7 +161,7 @@ where
         SMatchOutput,
     >;
 
-    type TComposeFilter<'fst1, 'fst2, S, F1, F2> = TLookFilter<'fst1, 'fst2, S, F1, F2>;
+    type TComposeFilter<'fst1, 'fst2, S, F1, F2> = TPushLabelsFilter<'fst1, 'fst2, S, F1, F2>;
 
     let fst1: VectorFst<_> = fst_raw.clone().into();
     let mut fst2: VectorFst<_> = compose_test_data.fst_2.clone();
@@ -186,19 +186,19 @@ where
     )?;
     let matcher2 = TMatcher2::new(&fst2, MatchType::MatchInput)?;
 
-    // let compose_filter = TPushLabelsFilter::new_2(
-    //     &graph1look,
-    //     &fst2,
-    //     Rc::new(RefCell::new(matcher1)),
-    //     Rc::new(RefCell::new(matcher2)),
-    // )?;
-
-    let compose_filter = TComposeFilter::new(
+    let compose_filter = TPushLabelsFilter::new_2(
         &graph1look,
         &fst2,
         Rc::new(RefCell::new(matcher1)),
         Rc::new(RefCell::new(matcher2)),
     )?;
+
+    // let compose_filter = TComposeFilter::new(
+    //     &graph1look,
+    //     &fst2,
+    //     Rc::new(RefCell::new(matcher1)),
+    //     Rc::new(RefCell::new(matcher2)),
+    // )?;
 
     let compose_options = ComposeFstImplOptions::<_, _, TComposeFilter<_, _, _>, _>::new(
         compose_filter.matcher1(),

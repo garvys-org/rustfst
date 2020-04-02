@@ -76,7 +76,6 @@ impl StateReachable {
         println!("StatReachable::new_acyclic");
         let mut reach_visitor = IntervalReachVisitor::new(fst);
         dfs_visit(fst, &mut reach_visitor, &AnyArcFilter {}, false);
-        std::dbg!(&reach_visitor.isets);
         Self {
             isets: reach_visitor.isets,
             state2index: reach_visitor.state2index,

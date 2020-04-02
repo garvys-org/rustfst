@@ -164,13 +164,14 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
                 lfst.num_arcs(lfst_state)?,
                 compute_weight,
             )?;
-            std::dbg!(&reach_arc);
             let reach_arc_bool = reach_arc.is_some();
             let lfinal = lfst.final_weight(lfst_state)?;
             let reach_final = lfinal.is_some()
                 && !lfinal.unwrap().is_zero()
                 && reachable.reach_final(matcher_state)?;
             if let Some((reach_begin, reach_end, reach_weight)) = reach_arc {
+                std::dbg!(compute_prefix);
+                std::dbg!(reach_final);
                 if compute_prefix && (reach_end - reach_begin) == 1 && !reach_final {
                     let arc = lfst
                         .arcs_iter(lfst_state)?

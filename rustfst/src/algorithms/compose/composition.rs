@@ -331,7 +331,11 @@ impl<'fst1, 'fst2, W: Semiring + 'static, CF: ComposeFilter<'fst1, 'fst2, W>> Fs
         self.compose_filter.filter_final(&mut final1, &mut final2)?;
 
         final1.times_assign(&final2)?;
-        Ok(Some(final1))
+        if final1.is_zero() {
+            Ok(None)
+        } else {
+            Ok(Some(final1))
+        }
     }
 }
 

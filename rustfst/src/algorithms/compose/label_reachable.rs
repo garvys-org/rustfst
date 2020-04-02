@@ -338,7 +338,6 @@ impl LabelReachable {
             let mut end_low = aiter_begin;
 
             let arcs = aiter.collect_vec();
-            std::dbg!(&arcs);
             for interval in interval_set.iter() {
                 std::dbg!(interval);
                 begin_low = self.lower_bound(arcs.as_slice(), end_low, aiter_end, interval.begin);
@@ -379,7 +378,7 @@ impl LabelReachable {
         while low < high {
             let mid = low + (high - low) / 2;
             let arc = arcs[mid];
-            let label = if std::dbg!(self.reach_fst_input) {
+            let label = if self.reach_fst_input {
                 arc.ilabel
             } else {
                 arc.olabel

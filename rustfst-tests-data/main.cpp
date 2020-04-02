@@ -1148,14 +1148,14 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
 //    std::cout << "Matcher" << std::endl;
 //    compute_fst_matcher(raw_fst, data);
 
-    std::cout << "Compose" << std::endl;
-    compute_fst_compose(raw_fst, data, fst_test_data.get_fst_compose());
-
     std::cout << "State Reachable" << std::endl;
     compute_fst_state_reachable(raw_fst, data);
 
     std::cout << "Label Reachable" << std::endl;
     compute_fst_label_reachable(raw_fst, data);
+
+    std::cout << "Compose" << std::endl;
+    compute_fst_compose(raw_fst, data, fst_test_data.get_fst_compose());
 
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;
@@ -1208,20 +1208,6 @@ void compute_weight_data(const W& w1, const W& w2, const string weight_name) {
 int main() {
     srand (time(NULL));
     FLAGS_fst_error_fatal = false;
-    compute_fst_data(FstTestData000(), "fst_000");
-    compute_fst_data(FstTestData001(), "fst_001");
-    compute_fst_data(FstTestData002(), "fst_002");
-    compute_fst_data(FstTestData003(), "fst_003");
-    compute_fst_data(FstTestData004(), "fst_004");
-    compute_fst_data(FstTestData005(), "fst_005");
-    compute_fst_data(FstTestData006(), "fst_006");
-    compute_fst_data(FstTestData007(), "fst_007");
-    compute_fst_data(FstTestData008(), "fst_008");
-    compute_fst_data(FstTestData009(), "fst_009");
-    compute_fst_data(FstTestData010(), "fst_010");
-    compute_fst_data(FstTestData011(), "fst_011");
-    compute_fst_data(FstTestData012(), "fst_012");
-    compute_fst_data(FstTestData013(), "fst_013");
 
     compute_symt_data(compute_symt_000(), "symt_000");
     compute_symt_data(compute_symt_001(), "symt_001");
@@ -1294,4 +1280,19 @@ int main() {
         auto w2 = GW(SW(2), W(3.1));
         compute_weight_data(w1, w2, "weight_012");
     }
+
+    compute_fst_data(FstTestData000(), "fst_000");
+    compute_fst_data(FstTestData001(), "fst_001");
+    compute_fst_data(FstTestData002(), "fst_002");
+    compute_fst_data(FstTestData003(), "fst_003");
+    compute_fst_data(FstTestData004(), "fst_004");
+    compute_fst_data(FstTestData005(), "fst_005");
+    compute_fst_data(FstTestData006(), "fst_006");
+    compute_fst_data(FstTestData007(), "fst_007");
+    compute_fst_data(FstTestData008(), "fst_008");
+    compute_fst_data(FstTestData009(), "fst_009");
+    compute_fst_data(FstTestData010(), "fst_010");
+    compute_fst_data(FstTestData011(), "fst_011");
+    compute_fst_data(FstTestData012(), "fst_012");
+    compute_fst_data(FstTestData013(), "fst_013");
 }
