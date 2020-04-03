@@ -3,7 +3,7 @@ use std::marker::PhantomData;
 use failure::Fallible;
 
 use crate::algorithms::compose::lookahead_matchers::{LookaheadMatcher, MatcherFlagsTrait};
-use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
+use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::algorithms::compose::{LabelReachable, LabelReachableData};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
@@ -12,9 +12,9 @@ use failure::_core::cell::RefCell;
 use std::rc::Rc;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>, MFT> {
+pub struct LabelLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
     // matcher fst
-    fst: &'fst M::F,
+    fst: Rc<M::F>,
     matcher: M,
     lookahead_weight: W,
     prefix_arc: Arc<W>,
@@ -23,13 +23,13 @@ pub struct LabelLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>, MFT> {
     lfst_ptr: *const u32,
 }
 
-impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait> Matcher<'fst, W>
-    for LabelLookAheadMatcher<'fst, W, M, MFT>
+impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
+    for LabelLookAheadMatcher<W, M, MFT>
 {
     type F = M::F;
     type Iter = M::Iter;
 
-    fn new(fst: &'fst Self::F, match_type: MatchType) -> Fallible<Self> {
+    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Fallible<Self> {
         Self::new_with_data(fst, match_type, None)
     }
 
@@ -37,7 +37,7 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait> M
         self.matcher.iter(state, label)
     }
 
-    fn final_weight(&self, state: usize) -> Fallible<Option<&'fst W>> {
+    fn final_weight(&self, state: usize) -> Fallible<Option<*const W>> {
         self.matcher.final_weight(state)
     }
 
@@ -61,13 +61,13 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait> M
         self.matcher.priority(state)
     }
 
-    fn fst(&self) -> &'fst Self::F {
-        self.fst
+    fn fst(&self) -> Rc<Self::F> {
+        Rc::clone(&self.fst)
     }
 }
 
-impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
-    LookaheadMatcher<'fst, W> for LabelLookAheadMatcher<'fst, W, M, MFT>
+impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
+    for LabelLookAheadMatcher<W, M, MFT>
 {
     type MatcherData = LabelReachableData;
 
@@ -80,7 +80,7 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
     }
 
     fn new_with_data(
-        fst: &'fst Self::F,
+        fst: Rc<Self::F>,
         match_type: MatchType,
         data: Option<Rc<RefCell<Self::MatcherData>>>,
     ) -> Fallible<Self> {
@@ -99,12 +99,12 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
             if reach_input == d.borrow().reach_input() {
                 reachable = Some(LabelReachable::new_from_data(d.clone()));
             }
-        } else if let Some(d) = Self::create_data(fst, match_type)? {
+        } else if let Some(d) = Self::create_data(&fst, match_type)? {
             reachable = Some(LabelReachable::new_from_data(d));
         }
 
         Ok(Self {
-            fst,
+            fst: Rc::clone(&fst),
             matcher: M::new(fst, match_type)?,
             prefix_arc: Arc::new(0, 0, W::one(), NO_STATE_ID),
             lookahead_weight: W::one(),
@@ -114,8 +114,8 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
         })
     }
 
-    fn create_data(
-        fst: &Self::F,
+    fn create_data<F: ExpandedFst<W = W>>(
+        fst: &F,
         match_type: MatchType,
     ) -> Fallible<Option<Rc<RefCell<Self::MatcherData>>>> {
         let reach_input = match_type == MatchType::MatchInput;
@@ -128,8 +128,8 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
         }
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &LF) -> Fallible<()> {
-        let lfst_ptr = lfst as *const LF as *const u32;
+    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &Rc<LF>) -> Fallible<()> {
+        let lfst_ptr = Rc::into_raw(Rc::clone(lfst)) as *const LF as *const u32;
         self.lfst_ptr = lfst_ptr;
         let reach_input = self.match_type() == MatchType::MatchOutput;
         if let Some(reachable) = &mut self.reachable {
@@ -141,11 +141,11 @@ impl<'fst, W: Semiring + 'static, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
     fn lookahead_fst<LF: ExpandedFst<W = W>>(
         &mut self,
         matcher_state: usize,
-        lfst: &LF,
+        lfst: &Rc<LF>,
         lfst_state: usize,
     ) -> Fallible<bool> {
         // InitLookAheadFst
-        let lfst_ptr = lfst as *const LF as *const u32;
+        let lfst_ptr = Rc::into_raw(Rc::clone(&lfst)) as *const LF as *const u32;
         if lfst_ptr != self.lfst_ptr {
             self.init_lookahead_fst(lfst)?;
         }

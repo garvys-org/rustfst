@@ -257,7 +257,10 @@ impl LabelReachable {
         pairs
     }
 
-    pub fn reach_init<F: ExpandedFst>(&mut self, fst: &F, reach_input: bool) -> Fallible<()> {
+    pub fn reach_init<F: ExpandedFst>(&mut self, fst: &Rc<F>, reach_input: bool) -> Fallible<()>
+    where
+        F::W: 'static,
+    {
         self.reach_fst_input = reach_input;
         let props = fst.properties()?;
 

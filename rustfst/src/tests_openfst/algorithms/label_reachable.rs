@@ -62,14 +62,9 @@ where
     F: MutableFst + Display + SerializableFst,
     F::W: SerializableSemiring + 'static,
 {
-    type TLaFst<'fst, F> = MatcherFst<
+    type TLaFst<F> = MatcherFst<
         F,
-        LabelLookAheadMatcher<
-            'fst,
-            <F as CoreFst>::W,
-            SortedMatcher<'fst, F>,
-            OLabelLookAheadFlags,
-        >,
+        LabelLookAheadMatcher<<F as CoreFst>::W, SortedMatcher<F>, OLabelLookAheadFlags>,
         LabelReachableData,
     >;
 

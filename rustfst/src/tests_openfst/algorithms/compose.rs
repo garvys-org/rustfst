@@ -123,65 +123,52 @@ where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
-    type TLaFst<'fst, F> = MatcherFst<
+    type TLaFst<F> = MatcherFst<
         F,
         LabelLookAheadMatcher<
-            'fst,
             <F as CoreFst>::W,
-            SortedMatcher<'fst, F>,
+            SortedMatcher<F>,
             DefaultLabelLookAheadMatcherFlags,
         >,
         LabelReachableData,
     >;
 
-    type TMatcher1<'a, F> = LabelLookAheadMatcher<
-        'a,
+    type TMatcher1<F> = LabelLookAheadMatcher<
         <F as CoreFst>::W,
-        SortedMatcher<'a, F>,
+        SortedMatcher<F>,
         DefaultLabelLookAheadMatcherFlags,
     >;
-    type TMatcher2<'a, F> = SortedMatcher<'a, F>;
+    type TMatcher2<F> = SortedMatcher<F>;
 
-    type TSeqFilter<'fst1, 'fst2, S, F1, F2> =
-        AltSequenceComposeFilter<'fst1, 'fst2, S, TMatcher1<'fst1, F1>, TMatcher2<'fst2, F2>>;
-    type TLookFilter<'fst1, 'fst2, S, F1, F2> =
-        LookAheadComposeFilter<'fst1, 'fst2, S, TSeqFilter<'fst1, 'fst2, S, F1, F2>, SMatchOutput>;
-    type TPushWeightsFilter<'fst1, 'fst2, S, F1, F2> = PushWeightsComposeFilter<
-        'fst1,
-        'fst2,
-        S,
-        TLookFilter<'fst1, 'fst2, S, F1, F2>,
-        SMatchOutput,
-    >;
-    type TPushLabelsFilter<'fst1, 'fst2, S, F1, F2> = PushLabelsComposeFilter<
-        'fst1,
-        'fst2,
-        S,
-        TPushWeightsFilter<'fst1, 'fst2, S, F1, F2>,
-        SMatchOutput,
-    >;
+    type TSeqFilter<S, F1, F2> = AltSequenceComposeFilter<S, TMatcher1<F1>, TMatcher2<F2>>;
+    type TLookFilter<S, F1, F2> = LookAheadComposeFilter<S, TSeqFilter<S, F1, F2>, SMatchOutput>;
+    type TPushWeightsFilter<S, F1, F2> =
+        PushWeightsComposeFilter<S, TLookFilter<S, F1, F2>, SMatchOutput>;
+    type TPushLabelsFilter<S, F1, F2> =
+        PushLabelsComposeFilter<S, TPushWeightsFilter<S, F1, F2>, SMatchOutput>;
 
-    type TComposeFilter<'fst1, 'fst2, S, F1, F2> = TPushLabelsFilter<'fst1, 'fst2, S, F1, F2>;
+    type TComposeFilter<S, F1, F2> = TPushLabelsFilter<S, F1, F2>;
 
     let fst1: VectorFst<_> = fst_raw.clone().into();
     let mut fst2: VectorFst<_> = compose_test_data.fst_2.clone();
 
-    let graph1look = TLaFst::new(fst1)?;
+    let graph1look = Rc::new(TLaFst::new(fst1)?);
 
     LabelLookAheadRelabeler::relabel(&mut fst2, graph1look.addon(), true)?;
 
     arc_sort(&mut fst2, ilabel_compare);
+    let fst2 = Rc::new(fst2);
 
     let matcher1 = TMatcher1::new_with_data(
-        &graph1look,
+        Rc::clone(&graph1look),
         MatchType::MatchOutput,
         graph1look.data(MatchType::MatchOutput).cloned(),
     )?;
-    let matcher2 = TMatcher2::new(&fst2, MatchType::MatchInput)?;
+    let matcher2 = TMatcher2::new(Rc::clone(&fst2), MatchType::MatchInput)?;
 
     let compose_filter = TPushLabelsFilter::new_2(
-        &graph1look,
-        &fst2,
+        Rc::clone(&graph1look),
+        Rc::clone(&fst2),
         Rc::new(RefCell::new(matcher1)),
         Rc::new(RefCell::new(matcher2)),
     )?;
@@ -200,7 +187,7 @@ where
         None,
     );
 
-    let dyn_fst = ComposeFst::new_with_options(&graph1look, &fst2, compose_options)?;
+    let dyn_fst = ComposeFst::new_with_options(graph1look, fst2, compose_options)?;
     let static_fst: VectorFst<_> = dyn_fst.compute()?;
 
     assert_eq!(

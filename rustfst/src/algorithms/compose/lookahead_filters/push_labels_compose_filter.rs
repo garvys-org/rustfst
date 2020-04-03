@@ -19,17 +19,15 @@ use crate::{Arc, Label, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
 #[derive(Debug, Clone)]
 pub struct PushLabelsComposeFilter<
-    'fst1,
-    'fst2,
-    W: Semiring + 'fst1 + 'fst2,
-    CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
+    W: Semiring,
+    CF: LookAheadComposeFilterTrait<W>,
     SMT: MatchTypeTrait,
 > where
-    CF::M1: LookaheadMatcher<'fst1, W>,
-    CF::M2: LookaheadMatcher<'fst2, W>,
+    CF::M1: LookaheadMatcher<W>,
+    CF::M2: LookaheadMatcher<W>,
 {
-    fst1: &'fst1 <CF::M1 as Matcher<'fst1, W>>::F,
-    fst2: &'fst2 <CF::M2 as Matcher<'fst2, W>>::F,
+    fst1: Rc<<CF::M1 as Matcher<W>>::F>,
+    fst2: Rc<<CF::M2 as Matcher<W>>::F>,
     matcher1: Rc<RefCell<MultiEpsMatcher<W, CF::M1>>>,
     matcher2: Rc<RefCell<MultiEpsMatcher<W, CF::M2>>>,
     filter: CF,
@@ -38,24 +36,19 @@ pub struct PushLabelsComposeFilter<
     narcsa: usize,
 }
 
-impl<
-        'fst1,
-        'fst2,
-        W: Semiring + 'fst1 + 'fst2,
-        CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
-        SMT: MatchTypeTrait,
-    > ComposeFilter<'fst1, 'fst2, W> for PushLabelsComposeFilter<'fst1, 'fst2, W, CF, SMT>
+impl<W: Semiring, CF: LookAheadComposeFilterTrait<W>, SMT: MatchTypeTrait> ComposeFilter<W>
+    for PushLabelsComposeFilter<W, CF, SMT>
 where
-    CF::M1: LookaheadMatcher<'fst1, W>,
-    CF::M2: LookaheadMatcher<'fst2, W>,
+    CF::M1: LookaheadMatcher<W>,
+    CF::M2: LookaheadMatcher<W>,
 {
     type M1 = MultiEpsMatcher<W, CF::M1>;
     type M2 = MultiEpsMatcher<W, CF::M2>;
     type FS = PairFilterState<CF::FS, IntegerFilterState>;
 
     fn new<IM1: Into<Option<Rc<RefCell<Self::M1>>>>, IM2: Into<Option<Rc<RefCell<Self::M2>>>>>(
-        _fst1: &'fst1 <Self::M1 as Matcher<'fst1, W>>::F,
-        _fst2: &'fst2 <Self::M2 as Matcher<'fst2, W>>::F,
+        _fst1: Rc<<Self::M1 as Matcher<W>>::F>,
+        _fst2: Rc<<Self::M2 as Matcher<W>>::F>,
         _m1: IM1,
         _m2: IM2,
     ) -> Fallible<Self> {
@@ -151,16 +144,11 @@ where
     }
 }
 
-impl<
-        'fst1,
-        'fst2,
-        W: Semiring + 'fst1 + 'fst2,
-        CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
-        SMT: MatchTypeTrait,
-    > PushLabelsComposeFilter<'fst1, 'fst2, W, CF, SMT>
+impl<W: Semiring, CF: LookAheadComposeFilterTrait<W>, SMT: MatchTypeTrait>
+    PushLabelsComposeFilter<W, CF, SMT>
 where
-    CF::M1: LookaheadMatcher<'fst1, W>,
-    CF::M2: LookaheadMatcher<'fst2, W>,
+    CF::M1: LookaheadMatcher<W>,
+    CF::M2: LookaheadMatcher<W>,
 {
     // Consumes an already pushed label.
     fn pushed_label_filter_arc(
@@ -168,7 +156,7 @@ where
         arca: &mut Arc<W>,
         arcb: &mut Arc<W>,
         flabel: Label,
-    ) -> Fallible<<Self as ComposeFilter<'fst1, 'fst2, W>>::FS> {
+    ) -> Fallible<<Self as ComposeFilter<W>>::FS> {
         let labela = if self.lookahead_output() {
             &mut arca.olabel
         } else {
@@ -216,7 +204,7 @@ where
         arca: &mut Arc<W>,
         arcb: &mut Arc<W>,
         fs1: &CF::FS,
-    ) -> Fallible<<Self as ComposeFilter<'fst1, 'fst2, W>>::FS> {
+    ) -> Fallible<<Self as ComposeFilter<W>>::FS> {
         let labela = if self.lookahead_output() {
             &mut arca.olabel
         } else {
@@ -275,13 +263,13 @@ where
         self.filter.lookahead_flags()
     }
 
-    fn selector(&self) -> &Selector<'fst1, 'fst2, W, CF::M1, CF::M2> {
+    fn selector(&self) -> &Selector<W, CF::M1, CF::M2> {
         self.filter.selector()
     }
 
     pub fn new_2<IM1: Into<Option<Rc<RefCell<CF::M1>>>>, IM2: Into<Option<Rc<RefCell<CF::M2>>>>>(
-        fst1: &'fst1 <<Self as ComposeFilter<'fst1, 'fst2, W>>::M1 as Matcher<'fst1, W>>::F,
-        fst2: &'fst2 <<Self as ComposeFilter<'fst1, 'fst2, W>>::M2 as Matcher<'fst2, W>>::F,
+        fst1: Rc<<<Self as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
+        fst2: Rc<<<Self as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
         m1: IM1,
         m2: IM2,
     ) -> Fallible<Self> {
@@ -289,7 +277,7 @@ where
         let fst1 = filter.matcher1().borrow().fst();
         let fst2 = filter.matcher2().borrow().fst();
         let matcher1 = Rc::new(RefCell::new(MultiEpsMatcher::new_with_opts(
-            fst1,
+            Rc::clone(&fst1),
             MatchType::MatchOutput,
             if filter.lookahead_output() {
                 MultiEpsMatcherFlags::MULTI_EPS_LIST
@@ -299,7 +287,7 @@ where
             filter.matcher1(),
         )?));
         let matcher2 = Rc::new(RefCell::new(MultiEpsMatcher::new_with_opts(
-            fst2,
+            Rc::clone(&fst2),
             MatchType::MatchInput,
             if filter.lookahead_output() {
                 MultiEpsMatcherFlags::MULTI_EPS_LOOP

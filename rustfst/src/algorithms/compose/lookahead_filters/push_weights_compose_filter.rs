@@ -15,15 +15,10 @@ use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuan
 use crate::{Arc, KDELTA};
 
 #[derive(Debug, Clone)]
-pub struct PushWeightsComposeFilter<
-    'fst1,
-    'fst2,
-    W: Semiring + 'fst1 + 'fst2,
-    CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
-    SMT,
-> where
-    CF::M1: LookaheadMatcher<'fst1, W>,
-    CF::M2: LookaheadMatcher<'fst2, W>,
+pub struct PushWeightsComposeFilter<W: Semiring, CF: LookAheadComposeFilterTrait<W>, SMT>
+where
+    CF::M1: LookaheadMatcher<W>,
+    CF::M2: LookaheadMatcher<W>,
 {
     filter: CF,
     fs: PairFilterState<CF::FS, WeightFilterState<W>>,
@@ -31,23 +26,21 @@ pub struct PushWeightsComposeFilter<
 }
 
 impl<
-        'fst1,
-        'fst2,
-        W: Semiring + WeaklyDivisibleSemiring + WeightQuantize + 'fst1 + 'fst2,
-        CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
+        W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
+        CF: LookAheadComposeFilterTrait<W>,
         SMT: MatchTypeTrait,
-    > ComposeFilter<'fst1, 'fst2, W> for PushWeightsComposeFilter<'fst1, 'fst2, W, CF, SMT>
+    > ComposeFilter<W> for PushWeightsComposeFilter<W, CF, SMT>
 where
-    CF::M1: LookaheadMatcher<'fst1, W>,
-    CF::M2: LookaheadMatcher<'fst2, W>,
+    CF::M1: LookaheadMatcher<W>,
+    CF::M2: LookaheadMatcher<W>,
 {
     type M1 = CF::M1;
     type M2 = CF::M2;
     type FS = PairFilterState<CF::FS, WeightFilterState<W>>;
 
     fn new<IM1: Into<Option<Rc<RefCell<Self::M1>>>>, IM2: Into<Option<Rc<RefCell<Self::M2>>>>>(
-        fst1: &'fst1 <Self::M1 as Matcher<'fst1, W>>::F,
-        fst2: &'fst2 <Self::M2 as Matcher<'fst2, W>>::F,
+        fst1: Rc<<Self::M1 as Matcher<W>>::F>,
+        fst2: Rc<<Self::M2 as Matcher<W>>::F>,
         m1: IM1,
         m2: IM2,
     ) -> Fallible<Self> {
@@ -125,16 +118,13 @@ where
 }
 
 impl<
-        'fst1,
-        'fst2,
-        W: Semiring + WeaklyDivisibleSemiring + WeightQuantize + 'fst1 + 'fst2,
-        CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
+        W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
+        CF: LookAheadComposeFilterTrait<W>,
         SMT: MatchTypeTrait,
-    > LookAheadComposeFilterTrait<'fst1, 'fst2, W>
-    for PushWeightsComposeFilter<'fst1, 'fst2, W, CF, SMT>
+    > LookAheadComposeFilterTrait<W> for PushWeightsComposeFilter<W, CF, SMT>
 where
-    CF::M1: LookaheadMatcher<'fst1, W>,
-    CF::M2: LookaheadMatcher<'fst2, W>,
+    CF::M1: LookaheadMatcher<W>,
+    CF::M2: LookaheadMatcher<W>,
 {
     fn lookahead_flags(&self) -> MatcherFlags {
         self.filter.lookahead_flags()
@@ -152,7 +142,7 @@ where
         self.filter.lookahead_output()
     }
 
-    fn selector(&self) -> &Selector<'fst1, 'fst2, W, Self::M1, Self::M2> {
+    fn selector(&self) -> &Selector<W, Self::M1, Self::M2> {
         self.filter.selector()
     }
 }

@@ -12,9 +12,9 @@ use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
 #[derive(Debug)]
-pub struct ArcLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>, MFT> {
+pub struct ArcLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
     // matcher fst
-    fst: &'fst M::F,
+    fst: Rc<M::F>,
     matcher: M,
     lookahead_weight: W,
     prefix_arc: Arc<W>,
@@ -23,15 +23,15 @@ pub struct ArcLookAheadMatcher<'fst, W: Semiring, M: Matcher<'fst, W>, MFT> {
     mft: PhantomData<MFT>,
 }
 
-impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait> Matcher<'fst, W>
-    for ArcLookAheadMatcher<'fst, W, M, MFT>
+impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
+    for ArcLookAheadMatcher<W, M, MFT>
 {
     type F = M::F;
     type Iter = M::Iter;
 
-    fn new(fst: &'fst Self::F, match_type: MatchType) -> Fallible<Self> {
+    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Fallible<Self> {
         Ok(Self {
-            fst,
+            fst: Rc::clone(&fst),
             matcher: M::new(fst, match_type)?,
             prefix_arc: Arc::new(0, 0, W::one(), NO_STATE_ID),
             lookahead_weight: W::one(),
@@ -43,7 +43,7 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait> Matc
         self.matcher.iter(state, label)
     }
 
-    fn final_weight(&self, state: usize) -> Fallible<Option<&'fst W>> {
+    fn final_weight(&self, state: usize) -> Fallible<Option<*const W>> {
         self.matcher.final_weight(state)
     }
 
@@ -62,13 +62,13 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait> Matc
         self.matcher.priority(state)
     }
 
-    fn fst(&self) -> &'fst Self::F {
-        &self.fst
+    fn fst(&self) -> Rc<Self::F> {
+        Rc::clone(&self.fst)
     }
 }
 
-impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
-    LookaheadMatcher<'fst, W> for ArcLookAheadMatcher<'fst, W, M, MFT>
+impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
+    for ArcLookAheadMatcher<W, M, MFT>
 {
     // NullAddon
     type MatcherData = ();
@@ -78,28 +78,28 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
     }
 
     fn new_with_data(
-        fst: &'fst Self::F,
+        fst: Rc<Self::F>,
         match_type: MatchType,
         _data: Option<Rc<RefCell<Self::MatcherData>>>,
     ) -> Fallible<Self> {
         Self::new(fst, match_type)
     }
 
-    fn create_data(
-        _fst: &Self::F,
+    fn create_data<F: ExpandedFst<W = W>>(
+        _fst: &F,
         _match_type: MatchType,
     ) -> Fallible<Option<Rc<RefCell<Self::MatcherData>>>> {
         Ok(None)
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &LF) -> Fallible<()> {
+    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &Rc<LF>) -> Fallible<()> {
         Ok(())
     }
 
     fn lookahead_fst<LF: Fst<W = W>>(
         &mut self,
         matcher_state: StateId,
-        lfst: &LF,
+        lfst: &Rc<LF>,
         lfst_state: StateId,
     ) -> Fallible<bool> {
         let mut result = false;
@@ -143,6 +143,7 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
                     for arc in iter {
                         match arc {
                             IterItemMatcher::Arc(a) => {
+                                let a = unsafe { &*a };
                                 self.lookahead_weight.plus_assign(&a.weight)?
                             }
                             IterItemMatcher::EpsLoop => {
@@ -187,9 +188,11 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>, MFT: MatcherFlagsTrait>
                         nprefix += 1;
                         if MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
                             match matcher_value {
-                                IterItemMatcher::Arc(a) => self
-                                    .lookahead_weight
-                                    .plus_assign(arc.weight.times(&a.weight)?)?,
+                                IterItemMatcher::Arc(a) => {
+                                    let a = unsafe { &*a };
+                                    self.lookahead_weight
+                                        .plus_assign(arc.weight.times(&a.weight)?)?
+                                }
                                 IterItemMatcher::EpsLoop => self
                                     .lookahead_weight
                                     .plus_assign(arc.weight.times(W::one())?)?,

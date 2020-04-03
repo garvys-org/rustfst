@@ -1,7 +1,7 @@
 use failure::Fallible;
 
 use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
-use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
+use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, NO_STATE_ID};
@@ -15,13 +15,11 @@ pub struct TrivialLookAheadMatcher<W, M> {
     prefix_arc: Arc<W>,
 }
 
-impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W>
-    for TrivialLookAheadMatcher<W, M>
-{
+impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
     type F = M::F;
     type Iter = M::Iter;
 
-    fn new(fst: &'fst Self::F, match_type: MatchType) -> Fallible<Self> {
+    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Fallible<Self> {
         Ok(Self {
             matcher: M::new(fst, match_type)?,
             prefix_arc: Arc::new(0, 0, W::one(), NO_STATE_ID),
@@ -33,7 +31,7 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W>
         self.matcher.iter(state, label)
     }
 
-    fn final_weight(&self, state: usize) -> Fallible<Option<&'fst W>> {
+    fn final_weight(&self, state: usize) -> Fallible<Option<*const W>> {
         self.matcher.final_weight(state)
     }
 
@@ -51,14 +49,12 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W>
         self.matcher.priority(state)
     }
 
-    fn fst(&self) -> &'fst Self::F {
+    fn fst(&self) -> Rc<Self::F> {
         self.matcher.fst()
     }
 }
 
-impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
-    for TrivialLookAheadMatcher<W, M>
-{
+impl<W: Semiring, M: Matcher<W>> LookaheadMatcher<W> for TrivialLookAheadMatcher<W, M> {
     type MatcherData = ();
 
     fn data(&self) -> Option<&Rc<RefCell<Self::MatcherData>>> {
@@ -66,28 +62,28 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> LookaheadMatcher<'fst, W>
     }
 
     fn new_with_data(
-        fst: &'fst Self::F,
+        fst: Rc<Self::F>,
         match_type: MatchType,
         _data: Option<Rc<RefCell<Self::MatcherData>>>,
     ) -> Fallible<Self> {
         Self::new(fst, match_type)
     }
 
-    fn create_data(
-        _fst: &Self::F,
+    fn create_data<F: ExpandedFst<W = W>>(
+        _fst: &F,
         _match_type: MatchType,
     ) -> Fallible<Option<Rc<RefCell<Self::MatcherData>>>> {
         Ok(None)
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &LF) -> Fallible<()> {
+    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &Rc<LF>) -> Fallible<()> {
         Ok(())
     }
 
     fn lookahead_fst<LF: Fst<W = W>>(
         &mut self,
         _matcher_state: StateId,
-        _lfst: &LF,
+        _lfst: &Rc<LF>,
         _s: StateId,
     ) -> Fallible<bool> {
         Ok(true)

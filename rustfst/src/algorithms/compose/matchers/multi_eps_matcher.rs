@@ -29,32 +29,31 @@ pub struct MultiEpsMatcher<W, M> {
     multi_eps_labels: CompactSet<Label>,
 }
 
-pub struct IteratorMultiEpsMatcher<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> {
+pub struct IteratorMultiEpsMatcher<W: Semiring, M: Matcher<W>> {
     iter_matcher: Option<Peekable<M::Iter>>,
     iter_labels: Option<(Vec<usize>, usize)>,
     matcher: Rc<RefCell<M>>,
     matcher_state: StateId,
-    ghost: PhantomData<&'fst W>,
+    ghost: PhantomData<W>,
     done: bool,
 }
 
-impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Clone for IteratorMultiEpsMatcher<'fst, W, M> {
+impl<W: Semiring, M: Matcher<W>> Clone for IteratorMultiEpsMatcher<W, M> {
     fn clone(&self) -> Self {
-        Self {
-            iter_matcher: self.iter_matcher.clone(),
-            iter_labels: self.iter_labels.clone(),
-            matcher: Rc::clone(&self.matcher),
-            ghost: PhantomData,
-            done: self.done,
-            matcher_state: self.matcher_state,
-        }
+        unimplemented!()
+        // Self {
+        //     iter_matcher: self.iter_matcher.clone(),
+        //     iter_labels: self.iter_labels.clone(),
+        //     matcher: Rc::clone(&self.matcher),
+        //     ghost: PhantomData,
+        //     done: self.done,
+        //     matcher_state: self.matcher_state,
+        // }
     }
 }
 
-impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Iterator
-    for IteratorMultiEpsMatcher<'fst, W, M>
-{
-    type Item = IterItemMatcher<'fst, W>;
+impl<W: Semiring, M: Matcher<W>> Iterator for IteratorMultiEpsMatcher<W, M> {
+    type Item = IterItemMatcher<W>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(ref mut matcher_iter) = &mut self.iter_matcher {
@@ -108,9 +107,9 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Iterator
     }
 }
 
-impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> MultiEpsMatcher<W, M> {
+impl<W: Semiring, M: Matcher<W>> MultiEpsMatcher<W, M> {
     pub fn new_with_opts<IM: Into<Option<Rc<RefCell<M>>>>>(
-        fst: &'fst <Self as Matcher<'fst, W>>::F,
+        fst: Rc<<Self as Matcher<W>>::F>,
         match_type: MatchType,
         flags: MultiEpsMatcherFlags,
         matcher: IM,
@@ -151,11 +150,11 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> MultiEpsMatcher<W, M> {
     }
 }
 
-impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W> for MultiEpsMatcher<W, M> {
+impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
     type F = M::F;
-    type Iter = IteratorMultiEpsMatcher<'fst, W, M>;
+    type Iter = IteratorMultiEpsMatcher<W, M>;
 
-    fn new(fst: &'fst Self::F, match_type: MatchType) -> Fallible<Self> {
+    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Fallible<Self> {
         Self::new_with_opts(
             fst,
             match_type,
@@ -225,7 +224,7 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W> for MultiEp
         })
     }
 
-    fn final_weight(&self, state: usize) -> Fallible<Option<&'fst W>> {
+    fn final_weight(&self, state: usize) -> Fallible<Option<*const W>> {
         self.matcher.borrow().final_weight(state)
     }
 
@@ -241,7 +240,7 @@ impl<'fst, W: Semiring + 'fst, M: Matcher<'fst, W>> Matcher<'fst, W> for MultiEp
         self.matcher.borrow().priority(state)
     }
 
-    fn fst(&self) -> &'fst Self::F {
+    fn fst(&self) -> Rc<Self::F> {
         self.matcher.borrow().fst()
     }
 }

@@ -40,12 +40,8 @@ impl<F, M, T> MatcherFst<F, M, T> {
 }
 
 // TODO: To be generalized
-impl<
-        'a,
-        'fst: 'a,
-        F: MutableFst + 'fst,
-        M: LookaheadMatcher<'a, F::W, F = F, MatcherData = LabelReachableData>,
-    > MatcherFst<F, M, M::MatcherData>
+impl<F: MutableFst, M: LookaheadMatcher<F::W, F = F, MatcherData = LabelReachableData>>
+    MatcherFst<F, M, M::MatcherData>
 {
     pub fn new(fst: F) -> Fallible<Self> {
         let imatcher_data = M::create_data(&fst, MatchType::MatchInput)?;

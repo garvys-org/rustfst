@@ -15,15 +15,9 @@ use crate::semirings::Semiring;
 use crate::{Arc, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
 #[derive(Debug)]
-pub struct AltSequenceComposeFilter<
-    'fst1,
-    'fst2,
-    W: Semiring + 'fst1 + 'fst2,
-    M1: Matcher<'fst1, W>,
-    M2: Matcher<'fst2, W>,
-> {
-    fst1: PhantomData<&'fst1 M1::F>,
-    fst2: &'fst2 M2::F,
+pub struct AltSequenceComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
+    fst1: PhantomData<M1::F>,
+    fst2: Rc<M2::F>,
     matcher1: Rc<RefCell<M1>>,
     matcher2: Rc<RefCell<M2>>,
     /// Current fst1 state
@@ -38,21 +32,21 @@ pub struct AltSequenceComposeFilter<
     noeps2: bool,
 }
 
-impl<'fst1, 'fst2, W: Semiring + 'fst1, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>>
-    ComposeFilter<'fst1, 'fst2, W> for AltSequenceComposeFilter<'fst1, 'fst2, W, M1, M2>
+impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
+    for AltSequenceComposeFilter<W, M1, M2>
 {
     type M1 = M1;
     type M2 = M2;
     type FS = IntegerFilterState;
 
     fn new<IM1: Into<Option<Rc<RefCell<Self::M1>>>>, IM2: Into<Option<Rc<RefCell<Self::M2>>>>>(
-        fst1: &'fst1 <Self::M1 as Matcher<'fst1, W>>::F,
-        fst2: &'fst2 <Self::M2 as Matcher<'fst2, W>>::F,
+        fst1: Rc<<Self::M1 as Matcher<W>>::F>,
+        fst2: Rc<<Self::M2 as Matcher<W>>::F>,
         m1: IM1,
         m2: IM2,
     ) -> Fallible<Self> {
         Ok(Self {
-            fst2,
+            fst2: Rc::clone(&fst2),
             matcher1: m1.into().unwrap_or_else(|| {
                 Rc::new(RefCell::new(
                     Self::M1::new(fst1, MatchType::MatchOutput).unwrap(),
@@ -129,14 +123,8 @@ impl<'fst1, 'fst2, W: Semiring + 'fst1, M1: Matcher<'fst1, W>, M2: Matcher<'fst2
     }
 }
 
-impl<
-        'fst1,
-        'fst2,
-        W: Semiring + 'fst1 + 'fst2,
-        M1: LookaheadMatcher<'fst1, W>,
-        M2: LookaheadMatcher<'fst2, W>,
-    > LookAheadComposeFilterTrait<'fst1, 'fst2, W>
-    for AltSequenceComposeFilter<'fst1, 'fst2, W, M1, M2>
+impl<W: Semiring + 'static, M1: LookaheadMatcher<W>, M2: LookaheadMatcher<W>>
+    LookAheadComposeFilterTrait<W> for AltSequenceComposeFilter<W, M1, M2>
 {
     fn lookahead_flags(&self) -> MatcherFlags {
         unreachable!()
@@ -154,7 +142,7 @@ impl<
         unreachable!()
     }
 
-    fn selector(&self) -> &Selector<'fst1, 'fst2, W, Self::M1, Self::M2> {
+    fn selector(&self) -> &Selector<W, Self::M1, Self::M2> {
         unreachable!()
     }
 }

@@ -24,30 +24,30 @@ pub trait MatcherFlagsTrait: Debug {
     fn flags() -> MatcherFlags;
 }
 
-pub trait LookaheadMatcher<'fst, W: Semiring + 'fst>: Matcher<'fst, W> {
+pub trait LookaheadMatcher<W: Semiring>: Matcher<W> {
     type MatcherData: Clone;
     fn data(&self) -> Option<&Rc<RefCell<Self::MatcherData>>>;
 
     fn new_with_data(
-        fst: &'fst Self::F,
+        fst: Rc<Self::F>,
         match_type: MatchType,
         data: Option<Rc<RefCell<Self::MatcherData>>>,
     ) -> Fallible<Self>
     where
         Self: std::marker::Sized;
 
-    fn create_data(
-        fst: &Self::F,
+    fn create_data<F: ExpandedFst<W = W>>(
+        fst: &F,
         match_type: MatchType,
     ) -> Fallible<Option<Rc<RefCell<Self::MatcherData>>>>;
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &LF) -> Fallible<()>;
+    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &Rc<LF>) -> Fallible<()>;
     // Are there paths from a state in the lookahead FST that can be read from
     // the curent matcher state?
     fn lookahead_fst<LF: ExpandedFst<W = W>>(
         &mut self,
         matcher_state: StateId,
-        lfst: &LF,
+        lfst: &Rc<LF>,
         lfst_state: StateId,
     ) -> Fallible<bool>;
 

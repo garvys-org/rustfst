@@ -11,6 +11,7 @@ use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Arc, EPS_LABEL, NO_LABEL};
 use crate::{Label, StateId};
+use std::rc::Rc;
 
 mod generic_matcher;
 mod multi_eps_matcher;
@@ -68,15 +69,15 @@ pub enum MatchType {
 
 // Use this to avoid autoref
 #[derive(Clone)]
-pub enum IterItemMatcher<'a, W: Semiring> {
-    Arc(&'a Arc<W>),
+pub enum IterItemMatcher<W: Semiring> {
+    Arc(*const Arc<W>),
     EpsLoop,
 }
 
-impl<'a, W: Semiring> IterItemMatcher<'a, W> {
+impl<W: Semiring> IterItemMatcher<W> {
     pub fn into_arc(self, state: StateId, match_type: MatchType) -> Fallible<Arc<W>> {
         match self {
-            IterItemMatcher::Arc(arc) => Ok(arc.clone()),
+            IterItemMatcher::Arc(arc) => Ok(unsafe { (*arc).clone() }),
             IterItemMatcher::EpsLoop => eps_loop(state, match_type),
         }
     }
@@ -91,20 +92,29 @@ pub fn eps_loop<W: Semiring>(state: StateId, match_type: MatchType) -> Fallible<
     Ok(arc)
 }
 
+use multi_eps_matcher::IteratorMultiEpsMatcher;
+use sorted_matcher::IteratorSortedMatcher;
+
+// The use of this enum can be removed once GAT are available.
+// pub enum IterMatcher<'fst, W: Semiring> {
+//     SortedMatcher(IteratorSortedMatcher<'fst, W>),
+//     MultiEpsMatcher(IteratorMultiEpsMatcher<>)
+// }
+
 /// Matchers find and iterate through requested labels at FST states. In the
 /// simplest form, these are just some associative map or search keyed on labels.
 /// More generally, they may implement matching special labels that represent
 /// sets of labels such as sigma (all), rho (rest), or phi (fail).
-pub trait Matcher<'fst, W: Semiring + 'fst>: Debug {
-    type F: ExpandedFst<W = W> + 'fst;
+pub trait Matcher<W: Semiring>: Debug {
+    type F: ExpandedFst<W = W>;
 
-    type Iter: Iterator<Item = IterItemMatcher<'fst, W>> + Clone;
+    type Iter: Iterator<Item = IterItemMatcher<W>> + Clone;
 
-    fn new(fst: &'fst Self::F, match_type: MatchType) -> Fallible<Self>
+    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Fallible<Self>
     where
         Self: std::marker::Sized;
     fn iter(&self, state: StateId, label: Label) -> Fallible<Self::Iter>;
-    fn final_weight(&self, state: StateId) -> Fallible<Option<&'fst W>>;
+    fn final_weight(&self, state: StateId) -> Fallible<Option<*const W>>;
     fn match_type(&self) -> MatchType;
     fn flags(&self) -> MatcherFlags;
 
@@ -114,5 +124,5 @@ pub trait Matcher<'fst, W: Semiring + 'fst>: Debug {
     /// current state of the matcher invalidates the state of the matcher.
     fn priority(&self, state: StateId) -> Fallible<usize>;
 
-    fn fst(&self) -> &'fst Self::F;
+    fn fst(&self) -> Rc<Self::F>;
 }

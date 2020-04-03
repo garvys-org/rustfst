@@ -56,37 +56,25 @@ impl MatchTypeTrait for SMatchUnknown {
 }
 
 #[derive(Debug)]
-pub struct LookAheadSelector<'fst, F, M> {
-    pub fst: &'fst F,
+pub struct LookAheadSelector<F, M> {
+    pub fst: Rc<F>,
     pub matcher: Rc<RefCell<M>>,
 }
 
-fn selector_match_input<
-    'fst1,
-    'fst2,
-    W: Semiring + 'fst1 + 'fst2,
-    M1: Matcher<'fst1, W>,
-    M2: Matcher<'fst2, W>,
->(
+fn selector_match_input<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
     lmatcher1: Rc<RefCell<M1>>,
     lmatcher2: Rc<RefCell<M2>>,
-) -> LookAheadSelector<'fst1, M1::F, M2> {
+) -> LookAheadSelector<M1::F, M2> {
     LookAheadSelector {
         fst: lmatcher1.borrow().fst(),
         matcher: lmatcher2,
     }
 }
 
-fn selector_match_output<
-    'fst1,
-    'fst2,
-    W: Semiring + 'fst1 + 'fst2,
-    M1: Matcher<'fst1, W>,
-    M2: Matcher<'fst2, W>,
->(
+fn selector_match_output<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
     lmatcher1: Rc<RefCell<M1>>,
     lmatcher2: Rc<RefCell<M2>>,
-) -> LookAheadSelector<'fst2, M2::F, M1> {
+) -> LookAheadSelector<M2::F, M1> {
     LookAheadSelector {
         fst: lmatcher2.borrow().fst(),
         matcher: lmatcher1,
@@ -94,34 +82,20 @@ fn selector_match_output<
 }
 
 #[derive(Debug)]
-pub enum Selector<
-    'fst1,
-    'fst2,
-    W: Semiring + 'fst1 + 'fst2,
-    M1: Matcher<'fst1, W>,
-    M2: Matcher<'fst2, W>,
-> {
-    MatchInput(LookAheadSelector<'fst1, M1::F, M2>),
-    MatchOutput(LookAheadSelector<'fst2, M2::F, M1>),
+pub enum Selector<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
+    MatchInput(LookAheadSelector<M1::F, M2>),
+    MatchOutput(LookAheadSelector<M2::F, M1>),
 }
 
-pub(crate) fn selector<
-    'fst1,
-    'fst2,
-    W: Semiring + 'fst1 + 'fst2,
-    M1: Matcher<'fst1, W>,
-    M2: Matcher<'fst2, W>,
->(
+pub(crate) fn selector<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
     lmatcher1: Rc<RefCell<M1>>,
     lmatcher2: Rc<RefCell<M2>>,
     match_type: MatchType,
     lookahead_type: MatchType,
-) -> Selector<'fst1, 'fst2, W, M1, M2> {
+) -> Selector<W, M1, M2> {
     match match_type {
         MatchType::MatchInput => {
-            Selector::MatchInput(selector_match_input::<'fst1, 'fst2, W, M1, M2>(
-                lmatcher1, lmatcher2,
-            ))
+            Selector::MatchInput(selector_match_input::<W, M1, M2>(lmatcher1, lmatcher2))
         }
         MatchType::MatchOutput => {
             Selector::MatchOutput(selector_match_output(lmatcher1, lmatcher2))

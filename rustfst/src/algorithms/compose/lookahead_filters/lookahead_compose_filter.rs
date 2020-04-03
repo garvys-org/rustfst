@@ -20,34 +20,27 @@ use crate::{Arc, EPS_LABEL};
 
 #[derive(Debug)]
 pub struct LookAheadComposeFilter<
-    'fst1,
-    'fst2,
-    W: Semiring + 'fst1 + 'fst2,
-    CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
+    W: Semiring,
+    CF: LookAheadComposeFilterTrait<W>,
     SMT: MatchTypeTrait,
 > where
-    CF::M1: LookaheadMatcher<'fst1, W>,
-    CF::M2: LookaheadMatcher<'fst2, W>,
+    CF::M1: LookaheadMatcher<W>,
+    CF::M2: LookaheadMatcher<W>,
 {
     filter: CF,
     lookahead_type: MatchType,
     flags: MatcherFlags,
     lookahead_arc: bool,
-    smt: PhantomData<&'fst1 SMT>,
-    w: PhantomData<&'fst2 W>,
-    selector: Selector<'fst1, 'fst2, W, CF::M1, CF::M2>,
+    smt: PhantomData<SMT>,
+    w: PhantomData<W>,
+    selector: Selector<W, CF::M1, CF::M2>,
 }
 
-impl<
-        'fst1,
-        'fst2,
-        W: Semiring + 'fst1 + 'fst2,
-        CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
-        SMT: MatchTypeTrait,
-    > LookAheadComposeFilter<'fst1, 'fst2, W, CF, SMT>
+impl<W: Semiring, CF: LookAheadComposeFilterTrait<W>, SMT: MatchTypeTrait>
+    LookAheadComposeFilter<W, CF, SMT>
 where
-    CF::M1: LookaheadMatcher<'fst1, W>,
-    CF::M2: LookaheadMatcher<'fst2, W>,
+    CF::M1: LookaheadMatcher<W>,
+    CF::M2: LookaheadMatcher<W>,
 {
     fn lookahead_filter_arc(
         &mut self,
@@ -77,12 +70,12 @@ where
             Selector::MatchInput(s) => {
                 s.matcher
                     .borrow_mut()
-                    .lookahead_fst(arca.nextstate, s.fst, arcb.nextstate)?
+                    .lookahead_fst(arca.nextstate, &s.fst, arcb.nextstate)?
             }
             Selector::MatchOutput(s) => {
                 s.matcher
                     .borrow_mut()
-                    .lookahead_fst(arca.nextstate, s.fst, arcb.nextstate)?
+                    .lookahead_fst(arca.nextstate, &s.fst, arcb.nextstate)?
             }
         };
 
@@ -94,24 +87,19 @@ where
     }
 }
 
-impl<
-        'fst1,
-        'fst2,
-        W: Semiring + 'fst1 + 'fst2,
-        CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
-        SMT: MatchTypeTrait,
-    > ComposeFilter<'fst1, 'fst2, W> for LookAheadComposeFilter<'fst1, 'fst2, W, CF, SMT>
+impl<W: Semiring, CF: LookAheadComposeFilterTrait<W>, SMT: MatchTypeTrait> ComposeFilter<W>
+    for LookAheadComposeFilter<W, CF, SMT>
 where
-    CF::M1: LookaheadMatcher<'fst1, W>,
-    CF::M2: LookaheadMatcher<'fst2, W>,
+    CF::M1: LookaheadMatcher<W>,
+    CF::M2: LookaheadMatcher<W>,
 {
     type M1 = CF::M1;
     type M2 = CF::M2;
     type FS = CF::FS;
 
     fn new<IM1: Into<Option<Rc<RefCell<Self::M1>>>>, IM2: Into<Option<Rc<RefCell<Self::M2>>>>>(
-        fst1: &'fst1 <Self::M1 as Matcher<'fst1, W>>::F,
-        fst2: &'fst2 <Self::M2 as Matcher<'fst2, W>>::F,
+        fst1: Rc<<Self::M1 as Matcher<W>>::F>,
+        fst2: Rc<<Self::M2 as Matcher<W>>::F>,
         m1: IM1,
         m2: IM2,
     ) -> Fallible<Self> {
@@ -144,8 +132,8 @@ where
         );
 
         match &mut selector {
-            Selector::MatchInput(l) => l.matcher.borrow_mut().init_lookahead_fst(l.fst)?,
-            Selector::MatchOutput(l) => l.matcher.borrow_mut().init_lookahead_fst(l.fst)?,
+            Selector::MatchInput(l) => l.matcher.borrow_mut().init_lookahead_fst(&l.fst)?,
+            Selector::MatchOutput(l) => l.matcher.borrow_mut().init_lookahead_fst(&l.fst)?,
         };
 
         Ok(Self {
@@ -193,17 +181,11 @@ where
     }
 }
 
-impl<
-        'fst1,
-        'fst2,
-        W: Semiring + 'fst1 + 'fst2,
-        CF: LookAheadComposeFilterTrait<'fst1, 'fst2, W>,
-        SMT: MatchTypeTrait,
-    > LookAheadComposeFilterTrait<'fst1, 'fst2, W>
-    for LookAheadComposeFilter<'fst1, 'fst2, W, CF, SMT>
+impl<W: Semiring, CF: LookAheadComposeFilterTrait<W>, SMT: MatchTypeTrait>
+    LookAheadComposeFilterTrait<W> for LookAheadComposeFilter<W, CF, SMT>
 where
-    CF::M1: LookaheadMatcher<'fst1, W>,
-    CF::M2: LookaheadMatcher<'fst2, W>,
+    CF::M1: LookaheadMatcher<W>,
+    CF::M2: LookaheadMatcher<W>,
 {
     fn lookahead_flags(&self) -> MatcherFlags {
         self.flags
@@ -229,7 +211,7 @@ where
         }
     }
 
-    fn selector(&self) -> &Selector<'fst1, 'fst2, W, Self::M1, Self::M2> {
+    fn selector(&self) -> &Selector<W, Self::M1, Self::M2> {
         &self.selector
     }
 }

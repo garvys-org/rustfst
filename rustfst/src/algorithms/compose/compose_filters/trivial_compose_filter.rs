@@ -14,16 +14,16 @@ pub struct TrivialComposeFilter<M1, M2> {
     matcher2: Rc<RefCell<M2>>,
 }
 
-impl<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>>
-    ComposeFilter<'fst1, 'fst2, W> for TrivialComposeFilter<M1, M2>
+impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
+    for TrivialComposeFilter<M1, M2>
 {
     type M1 = M1;
     type M2 = M2;
     type FS = TrivialFilterState;
 
     fn new<IM1: Into<Option<Rc<RefCell<Self::M1>>>>, IM2: Into<Option<Rc<RefCell<Self::M2>>>>>(
-        fst1: &'fst1 <Self::M1 as Matcher<'fst1, W>>::F,
-        fst2: &'fst2 <Self::M2 as Matcher<'fst2, W>>::F,
+        fst1: Rc<<Self::M1 as Matcher<W>>::F>,
+        fst2: Rc<<Self::M2 as Matcher<W>>::F>,
         m1: IM1,
         m2: IM2,
     ) -> Fallible<Self> {

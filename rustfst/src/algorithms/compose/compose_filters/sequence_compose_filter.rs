@@ -11,15 +11,9 @@ use std::rc::Rc;
 
 #[derive(Debug)]
 /// This filter requires epsilons on FST1 to be read before epsilons on FST2.
-pub struct SequenceComposeFilter<
-    'fst1,
-    'fst2,
-    W: Semiring + 'fst2,
-    M1: Matcher<'fst1, W>,
-    M2: Matcher<'fst2, W>,
-> {
-    fst1: &'fst1 M1::F,
-    fst2: &'fst2 M2::F,
+pub struct SequenceComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
+    fst1: Rc<M1::F>,
+    fst2: Rc<M2::F>,
     matcher1: Rc<RefCell<M1>>,
     matcher2: Rc<RefCell<M2>>,
     /// Current fst1 state
@@ -34,22 +28,22 @@ pub struct SequenceComposeFilter<
     noeps1: bool,
 }
 
-impl<'fst1, 'fst2, W: Semiring + 'fst2, M1: Matcher<'fst1, W>, M2: Matcher<'fst2, W>>
-    ComposeFilter<'fst1, 'fst2, W> for SequenceComposeFilter<'fst1, 'fst2, W, M1, M2>
+impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
+    for SequenceComposeFilter<W, M1, M2>
 {
     type M1 = M1;
     type M2 = M2;
     type FS = IntegerFilterState;
 
     fn new<IM1: Into<Option<Rc<RefCell<Self::M1>>>>, IM2: Into<Option<Rc<RefCell<Self::M2>>>>>(
-        fst1: &'fst1 M1::F,
-        fst2: &'fst2 M2::F,
+        fst1: Rc<M1::F>,
+        fst2: Rc<M2::F>,
         m1: IM1,
         m2: IM2,
     ) -> Fallible<Self> {
         Ok(Self {
-            fst1,
-            fst2,
+            fst1: Rc::clone(&fst1),
+            fst2: Rc::clone(&fst2),
             matcher1: m1.into().unwrap_or_else(|| {
                 Rc::new(RefCell::new(
                     Self::M1::new(fst1, MatchType::MatchOutput).unwrap(),

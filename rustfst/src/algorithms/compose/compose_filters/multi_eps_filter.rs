@@ -14,16 +14,14 @@ pub struct MultiEpsFilter<F> {
     keep_multi_eps: bool,
 }
 
-impl<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2, F: ComposeFilter<'fst1, 'fst2, W>>
-    ComposeFilter<'fst1, 'fst2, W> for MultiEpsFilter<F>
-{
+impl<W: Semiring, F: ComposeFilter<W>> ComposeFilter<W> for MultiEpsFilter<F> {
     type M1 = F::M1;
     type M2 = F::M2;
     type FS = F::FS;
 
     fn new<IM1: Into<Option<Rc<RefCell<Self::M1>>>>, IM2: Into<Option<Rc<RefCell<Self::M2>>>>>(
-        fst1: &'fst1 <Self::M1 as Matcher<'fst1, W>>::F,
-        fst2: &'fst2 <Self::M2 as Matcher<'fst2, W>>::F,
+        fst1: Rc<<Self::M1 as Matcher<W>>::F>,
+        fst2: Rc<<Self::M2 as Matcher<W>>::F>,
         m1: IM1,
         m2: IM2,
     ) -> Fallible<Self> {

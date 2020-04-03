@@ -2,9 +2,9 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 pub use lookahead_compose_filter::LookAheadComposeFilter;
+pub use lookahead_selector::{SMatchBoth, SMatchInput, SMatchNone, SMatchOutput, SMatchUnknown};
 pub use push_labels_compose_filter::PushLabelsComposeFilter;
 pub use push_weights_compose_filter::PushWeightsComposeFilter;
-pub use lookahead_selector::{SMatchOutput, SMatchInput, SMatchUnknown, SMatchBoth, SMatchNone};
 
 use crate::algorithms::compose::compose_filters::ComposeFilter;
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::Selector;
@@ -18,13 +18,7 @@ pub mod lookahead_selector;
 mod push_labels_compose_filter;
 mod push_weights_compose_filter;
 
-pub fn lookahead_match_type<
-    'fst1,
-    'fst2,
-    W: Semiring + 'fst1 + 'fst2,
-    M1: Matcher<'fst1, W>,
-    M2: Matcher<'fst2, W>,
->(
+pub fn lookahead_match_type<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
     m1: Rc<RefCell<M1>>,
     m2: Rc<RefCell<M2>>,
 ) -> MatchType {
@@ -58,15 +52,14 @@ pub fn lookahead_match_type_2<
     unimplemented!()
 }
 
-pub trait LookAheadComposeFilterTrait<'fst1, 'fst2, W: Semiring + 'fst1 + 'fst2>:
-    ComposeFilter<'fst1, 'fst2, W>
+pub trait LookAheadComposeFilterTrait<W: Semiring>: ComposeFilter<W>
 where
-    Self::M1: LookaheadMatcher<'fst1, W>,
-    Self::M2: LookaheadMatcher<'fst2, W>,
+    Self::M1: LookaheadMatcher<W>,
+    Self::M2: LookaheadMatcher<W>,
 {
     fn lookahead_flags(&self) -> MatcherFlags;
     fn lookahead_arc(&self) -> bool;
     fn lookahead_type(&self) -> MatchType;
     fn lookahead_output(&self) -> bool;
-    fn selector(&self) -> &Selector<'fst1, 'fst2, W, Self::M1, Self::M2>;
+    fn selector(&self) -> &Selector<W, Self::M1, Self::M2>;
 }

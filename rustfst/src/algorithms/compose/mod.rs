@@ -8,6 +8,8 @@ pub(crate) use self::interval_set::{IntInterval, IntervalSet};
 pub use self::label_reachable::{LabelReachable, LabelReachableData};
 pub use self::matcher_fst::MatcherFst;
 pub(crate) use self::state_reachable::StateReachable;
+use crate::fst_traits::ExpandedFst;
+use std::rc::Rc;
 
 pub mod compose_filters;
 mod composition;
