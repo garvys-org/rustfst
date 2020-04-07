@@ -781,6 +781,7 @@ macro_rules! test_fst {
             }
 
             #[test]
+            #[ignore]
             fn test_fst_label_reachable_openfst() -> Fallible<()> {
                 do_run!(test_label_reachable, $fst_name);
                 Ok(())
