@@ -48,7 +48,6 @@ where
         arcb: &mut Arc<W>,
         fs: &CF::FS,
     ) -> Fallible<CF::FS> {
-
         let labela = if self.lookahead_output() {
             arca.olabel
         } else {

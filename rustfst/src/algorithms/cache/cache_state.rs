@@ -1,6 +1,6 @@
+use crate::algorithms::cache::CacheFlags;
 use std::slice::Iter as IterSlice;
 use std::slice::IterMut as IterSliceMut;
-use crate::algorithms::cache::CacheFlags;
 
 use crate::Arc;
 
@@ -16,7 +16,7 @@ impl<W> CacheState<W> {
         Self {
             arcs: Vec::new(),
             final_weight: None,
-            flags: CacheFlags::empty()
+            flags: CacheFlags::empty(),
         }
     }
 
