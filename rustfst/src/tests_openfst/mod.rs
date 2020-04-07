@@ -436,6 +436,7 @@ macro_rules! test_fst {
             }
 
             #[test]
+            #[ignore]
             fn test_arcsort_ilabel_openfst() -> Fallible<()> {
                 do_run!(test_arcsort_ilabel, $fst_name);
                 Ok(())
