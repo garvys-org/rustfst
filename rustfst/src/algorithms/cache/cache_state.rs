@@ -1,5 +1,6 @@
 use std::slice::Iter as IterSlice;
 use std::slice::IterMut as IterSliceMut;
+use crate::algorithms::cache::CacheFlags;
 
 use crate::Arc;
 
@@ -7,8 +8,7 @@ use crate::Arc;
 pub struct CacheState<W> {
     arcs: Vec<Arc<W>>,
     final_weight: Option<W>,
-    expanded: bool,
-    has_final: bool,
+    flags: CacheFlags,
 }
 
 impl<W> CacheState<W> {
@@ -16,26 +16,25 @@ impl<W> CacheState<W> {
         Self {
             arcs: Vec::new(),
             final_weight: None,
-            expanded: false,
-            has_final: false,
+            flags: CacheFlags::empty()
         }
     }
 
     pub fn has_final(&self) -> bool {
-        self.has_final
+        self.flags.contains(CacheFlags::CACHE_FINAL)
     }
 
     pub fn expanded(&self) -> bool {
-        self.expanded
+        self.flags.contains(CacheFlags::CACHE_ARCS)
     }
 
     pub fn mark_expanded(&mut self) {
-        self.expanded = true;
+        self.flags |= CacheFlags::CACHE_ARCS;
     }
 
     pub fn set_final_weight(&mut self, final_weight: Option<W>) {
         self.final_weight = final_weight;
-        self.has_final = true;
+        self.flags |= CacheFlags::CACHE_FINAL;
     }
 
     pub fn final_weight(&self) -> Option<&W> {
