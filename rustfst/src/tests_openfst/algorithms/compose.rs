@@ -16,11 +16,9 @@ use crate::algorithms::compose::lookahead_matchers::{
 };
 use crate::algorithms::compose::matchers::SortedMatcher;
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
-use crate::algorithms::compose::LabelReachableData;
 use crate::algorithms::compose::MatcherFst;
-use crate::algorithms::compose::{
-    compose_with_config, ComposeConfig, ComposeFilterEnum, ComposeFst, ComposeFstImplOptions,
-};
+use crate::algorithms::compose::{compose_with_config, ComposeConfig, LabelReachableData};
+use crate::algorithms::compose::{ComposeFilterEnum, ComposeFst, ComposeFstImplOptions};
 use crate::algorithms::{arc_compares::ilabel_compare, arc_sort};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, SerializableFst};
@@ -67,27 +65,30 @@ where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
-    println!("Skipping simple compose for debugging");
-    // let mut config = ComposeConfig::default();
-    // config.connect = false;
-    // config.compose_filter = filter;
-    //
-    // let fst_res_static: VectorFst<_> =
-    //     compose_with_config(fst_raw, &compose_test_data.fst_2, config)?;
-    //
-    // assert_eq!(
-    //     compose_test_data.result,
-    //     fst_res_static,
-    //     "{}",
-    //     error_message_fst!(
-    //         compose_test_data.result,
-    //         fst_res_static,
-    //         format!(
-    //             "Compose failed : filter_name = {:?}",
-    //             compose_test_data.filter_name
-    //         )
-    //     )
-    // );
+    // println!("Skipping simple compose for debugging");
+    let mut config = ComposeConfig::default();
+    config.connect = false;
+    config.compose_filter = filter;
+
+    let fst_res_static: VectorFst<_> = compose_with_config(
+        Rc::new(fst_raw.clone()),
+        Rc::new(compose_test_data.fst_2.clone()),
+        config,
+    )?;
+
+    assert_eq!(
+        compose_test_data.result,
+        fst_res_static,
+        "{}",
+        error_message_fst!(
+            compose_test_data.result,
+            fst_res_static,
+            format!(
+                "Compose failed : filter_name = {:?}",
+                compose_test_data.filter_name
+            )
+        )
+    );
 
     Ok(())
 }

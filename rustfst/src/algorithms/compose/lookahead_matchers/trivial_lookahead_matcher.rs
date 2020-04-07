@@ -1,12 +1,13 @@
+use std::rc::Rc;
+
 use failure::Fallible;
+use failure::_core::cell::RefCell;
 
 use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
-use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
+use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Arc, Label, StateId, NO_STATE_ID};
-use failure::_core::cell::RefCell;
-use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct TrivialLookAheadMatcher<W, M> {

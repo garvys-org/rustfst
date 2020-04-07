@@ -311,10 +311,6 @@ impl LabelReachable {
         let mut reach_weight = W::zero();
         let data = self.data.borrow();
         let interval_set = data.interval_set(current_state)?;
-        std::dbg!(aiter_begin);
-        std::dbg!(aiter_end);
-        std::dbg!(compute_weight);
-        std::dbg!(interval_set.len());
         if 2 * (aiter_end - aiter_begin) < interval_set.len() {
             let aiter = aiter.skip(aiter_begin);
             let mut reach_label = NO_LABEL;
@@ -342,11 +338,8 @@ impl LabelReachable {
 
             let arcs = aiter.collect_vec();
             for interval in interval_set.iter() {
-                std::dbg!(interval);
                 begin_low = self.lower_bound(arcs.as_slice(), end_low, aiter_end, interval.begin);
                 end_low = self.lower_bound(arcs.as_slice(), begin_low, aiter_end, interval.end);
-                std::dbg!(begin_low);
-                std::dbg!(end_low);
                 if end_low - begin_low > 0 {
                     if reach_begin == UNASSIGNED {
                         reach_begin = begin_low;

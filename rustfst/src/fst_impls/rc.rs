@@ -1,13 +1,12 @@
-use std::ops::{Deref, DerefMut};
+use std::ops::Deref;
 use std::rc::Rc;
 
 use failure::Fallible;
 
 use crate::fst_traits::{
-    ArcIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterData, FstIterator,
-    StateIterator,
+    ArcIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator,
 };
-use crate::{Arc, SymbolTable};
+use crate::SymbolTable;
 
 impl<F: Fst> Fst for Rc<F>
 where
@@ -21,11 +20,11 @@ where
         self.deref().output_symbols()
     }
 
-    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_input_symbols(&mut self, _symt: Rc<SymbolTable>) {
         unimplemented!()
     }
 
-    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_output_symbols(&mut self, _symt: Rc<SymbolTable>) {
         unimplemented!()
     }
 

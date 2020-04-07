@@ -1,17 +1,11 @@
 use std::fmt::Display;
 
 use failure::Fallible;
-use itertools::Itertools;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::compose::lookahead_matchers::LabelLookAheadMatcher;
 use crate::algorithms::compose::matchers::SortedMatcher;
-use crate::algorithms::compose::{
-    IntInterval, LabelReachable, LabelReachableData, MatcherFst, StateReachable,
-};
-use crate::algorithms::condense;
-use crate::fst_impls::VectorFst;
-use crate::fst_properties::FstProperties;
+use crate::algorithms::compose::{IntInterval, LabelReachable, LabelReachableData, MatcherFst};
 use crate::fst_traits::{CoreFst, MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::algorithms::compose::OLabelLookAheadFlags;

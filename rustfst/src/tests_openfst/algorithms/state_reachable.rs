@@ -1,13 +1,9 @@
 use std::fmt::Display;
 
 use failure::Fallible;
-use itertools::Itertools;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::compose::StateReachable;
-use crate::algorithms::condense;
-use crate::fst_impls::VectorFst;
-use crate::fst_properties::FstProperties;
 use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;

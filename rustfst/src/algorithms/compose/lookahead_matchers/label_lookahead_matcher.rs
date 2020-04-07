@@ -1,15 +1,15 @@
 use std::marker::PhantomData;
+use std::rc::Rc;
 
 use failure::Fallible;
+use failure::_core::cell::RefCell;
 
 use crate::algorithms::compose::lookahead_matchers::{LookaheadMatcher, MatcherFlagsTrait};
-use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
+use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::algorithms::compose::{LabelReachable, LabelReachableData};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Arc, EPS_LABEL, NO_STATE_ID};
-use failure::_core::cell::RefCell;
-use std::rc::Rc;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
@@ -170,8 +170,6 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
                 && !lfinal.unwrap().is_zero()
                 && reachable.reach_final(matcher_state)?;
             if let Some((reach_begin, reach_end, reach_weight)) = reach_arc {
-                std::dbg!(compute_prefix);
-                std::dbg!(reach_final);
                 if compute_prefix && (reach_end - reach_begin) == 1 && !reach_final {
                     let arc = lfst
                         .arcs_iter(lfst_state)?
@@ -191,8 +189,6 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
                     self.set_lookahead_weight(lfinal.unwrap().clone());
                 }
             }
-            std::dbg!(reach_arc_bool);
-            std::dbg!(reach_final);
             Ok(reach_arc_bool || reach_final)
         } else {
             Ok(true)

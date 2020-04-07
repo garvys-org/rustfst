@@ -5,8 +5,6 @@ use itertools::Itertools;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::condense;
-use crate::fst_impls::VectorFst;
-use crate::fst_properties::FstProperties;
 use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
@@ -45,7 +43,7 @@ where
     F::W: SerializableSemiring,
 {
     // Connect
-    let mut fst_in = test_data.raw.clone();
+    let fst_in = test_data.raw.clone();
     let (sccs, fst_condensed): (_, F) = condense(&fst_in)?;
 
     assert_eq!(sccs, test_data.condense.sccs);

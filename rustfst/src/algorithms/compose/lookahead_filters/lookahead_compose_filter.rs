@@ -48,8 +48,6 @@ where
         arcb: &mut Arc<W>,
         fs: &CF::FS,
     ) -> Fallible<CF::FS> {
-        println!("Arc a : {:?}", arca);
-        println!("Arc b : {:?}", arcb);
 
         let labela = if self.lookahead_output() {
             arca.olabel
@@ -57,11 +55,9 @@ where
             arca.ilabel
         };
         if labela != EPS_LABEL && !self.flags.contains(MatcherFlags::LOOKAHEAD_NON_EPSILONS) {
-            println!("Early exit 1");
             return Ok(fs.clone());
         }
         if labela == EPS_LABEL && !self.flags.contains(MatcherFlags::LOOKAHEAD_EPSILONS) {
-            println!("Early exit 2");
             return Ok(fs.clone());
         }
         self.lookahead_arc = true;
@@ -110,12 +106,11 @@ where
             SMT::match_type()
         };
 
-        let flags = if std::dbg!(lookahead_type == MatchType::MatchOutput) {
+        let flags = if lookahead_type == MatchType::MatchOutput {
             filter.matcher1().borrow().flags()
         } else {
             filter.matcher2().borrow().flags()
         };
-        std::dbg!(flags);
 
         if lookahead_type == MatchType::MatchNone {
             bail!(
@@ -157,11 +152,11 @@ where
 
     fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS> {
         self.lookahead_arc = false;
-        let fs = std::dbg!(self.filter.filter_arc(arc1, arc2)?);
+        let fs = self.filter.filter_arc(arc1, arc2)?;
         if fs == CF::FS::new_no_state() {
             return Ok(CF::FS::new_no_state());
         }
-        if std::dbg!(self.lookahead_output()) {
+        if self.lookahead_output() {
             self.lookahead_filter_arc(arc1, arc2, &fs)
         } else {
             self.lookahead_filter_arc(arc2, arc1, &fs)

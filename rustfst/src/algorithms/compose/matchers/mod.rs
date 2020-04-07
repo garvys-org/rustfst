@@ -92,15 +92,6 @@ pub fn eps_loop<W: Semiring>(state: StateId, match_type: MatchType) -> Fallible<
     Ok(arc)
 }
 
-use multi_eps_matcher::IteratorMultiEpsMatcher;
-use sorted_matcher::IteratorSortedMatcher;
-
-// The use of this enum can be removed once GAT are available.
-// pub enum IterMatcher<'fst, W: Semiring> {
-//     SortedMatcher(IteratorSortedMatcher<'fst, W>),
-//     MultiEpsMatcher(IteratorMultiEpsMatcher<>)
-// }
-
 /// Matchers find and iterate through requested labels at FST states. In the
 /// simplest form, these are just some associative map or search keyed on labels.
 /// More generally, they may implement matching special labels that represent

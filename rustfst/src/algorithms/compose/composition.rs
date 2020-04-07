@@ -154,7 +154,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
     }
 
     fn match_input(&self, s1: StateId, s2: StateId) -> Fallible<bool> {
-        match std::dbg!(self.match_type) {
+        match self.match_type {
             MatchType::MatchInput => Ok(true),
             MatchType::MatchOutput => Ok(false),
             _ => {
@@ -225,7 +225,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
         match_input: bool,
     ) -> Fallible<()> {
         let label = if match_input { arc.olabel } else { arc.ilabel };
-        std::dbg!(match_input);
+
         // Collect necessary here because need to borrow_mut a matcher later. To investigate.
         let temp = matchera.borrow().iter(sa, label)?.collect_vec();
         for arca in temp {
@@ -238,8 +238,6 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
                 },
             )?;
             let mut arcb = arc.clone();
-            println!("\n[MATCH ARC] Arc a : {:?}", &arca);
-            println!("[MATCH ARC] Arc b : {:?}", &arcb);
             if match_input {
                 let fs = self.compose_filter.filter_arc(&mut arcb, &mut arca)?;
                 if fs != CF::FS::new_no_state() {
@@ -247,7 +245,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
                 }
             } else {
                 let fs = self.compose_filter.filter_arc(&mut arca, &mut arcb)?;
-                println!("[Composition] Fs : {:?}", &fs);
+
                 if fs != CF::FS::new_no_state() {
                     self.add_arc(s, arca, arcb, fs)?;
                 }
@@ -270,13 +268,12 @@ impl<W: Semiring + 'static, CF: ComposeFilter<W>> FstImpl for ComposeFstImpl<W, 
     }
 
     fn expand(&mut self, state: usize) -> Fallible<()> {
-        println!("[EXPAND] Expanding state = {:?}", state);
         let tuple = self.state_table.find_tuple(state);
         let s1 = tuple.s1;
         let s2 = tuple.s2;
         self.compose_filter.set_state(s1, s2, &tuple.fs)?;
         drop(tuple);
-        if std::dbg!(self.match_input(s1, s2)?) {
+        if self.match_input(s1, s2)? {
             self.ordered_expand(
                 state,
                 s2,
@@ -487,6 +484,7 @@ where
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::compose;
+/// # use std::rc::Rc;
 /// # fn main() -> Fallible<()> {
 /// let fst_1 : VectorFst<IntegerWeight> = fst![1,2 => 2,3];
 ///
@@ -494,7 +492,7 @@ where
 ///
 /// let fst_ref : VectorFst<IntegerWeight> = fst![1,2 => 3,4];
 ///
-/// let composed_fst : VectorFst<_> = compose(&fst_1, &fst_2)?;
+/// let composed_fst : VectorFst<_> = compose(Rc::new(fst_1), Rc::new(fst_2))?;
 /// assert_eq!(composed_fst, fst_ref);
 /// # Ok(())
 /// # }
