@@ -256,12 +256,12 @@ impl AcyclicMinimizer {
             // For now uses the crate `stable_bst` which is quite old but seems to do the job
             // TODO: Bench the performances of the implementation. Maybe re-write it.
             let mut equiv_classes =
-                TreeMap::<StateId, i32, _>::with_comparator(|a: &usize, b: &usize| {
+                TreeMap::<StateId, StateId, _>::with_comparator(|a: &usize, b: &usize| {
                     state_cmp.compare(*a, *b).unwrap()
                 });
 
             let it_partition: Vec<_> = self.partition.iter(h).collect();
-            equiv_classes.insert(it_partition[0], h as i32);
+            equiv_classes.insert(it_partition[0], h);
 
             let mut classes_to_add = vec![];
             for e in it_partition.iter().skip(1) {
@@ -275,7 +275,7 @@ impl AcyclicMinimizer {
             }
 
             for v in classes_to_add {
-                equiv_classes.insert(*v, self.partition.add_class() as i32);
+                equiv_classes.insert(*v, self.partition.add_class());
             }
 
             for s in it_partition {

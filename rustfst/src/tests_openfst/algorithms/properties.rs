@@ -151,7 +151,7 @@ where
     let ref_props = test_data.fst_properties;
     let props = test_data.raw.properties()?;
 
-    assert_eq!(ref_props, props);
+    assert_eq!(props, ref_props);
 
     Ok(())
 }

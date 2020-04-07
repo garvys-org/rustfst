@@ -8,7 +8,6 @@ use crate::fst_traits::{CoreFst, MutableFst, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
 use crate::semirings::{Semiring, SerializableSemiring};
-
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]

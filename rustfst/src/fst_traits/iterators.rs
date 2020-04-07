@@ -71,6 +71,6 @@ where
     Self::W: 'a,
 {
     type ArcsIter: Iterator<Item = &'a mut Arc<Self::W>>;
-    type FstIter: Iterator<Item = (StateId, Self::ArcsIter, Option<&'a mut Self::W>)>;
+    type FstIter: Iterator<Item = FstIterData<&'a mut Self::W, Self::ArcsIter>>;
     fn fst_iter_mut(&'a mut self) -> Self::FstIter;
 }

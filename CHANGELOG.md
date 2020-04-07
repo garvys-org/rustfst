@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add the `ReverseBack` trait that must be implemented for Semiring::ReverseWeight. Allows to avoid using transmute when we have `weight.reverse().reverse()` calls.
 - Implement `SerializableSemiring` for `ProbabilityWeight`
 - Add support for `SymbolTable` serialization while serializing a FST in binary format.
-
+- Implement Composition operation. Added support to LookAhead filter.
 
 ### Changed
 - `fst_convert` now consumes its input. Use `fst_convert_from_ref` to pass a borrow.
@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fix olabel display while drawing a FST if no symbol table is provided
+- Fix computation of FstProperties. There was an issue with the ACYCLIC field.
 
 ## [0.5.0] - 2020-02-04
 

@@ -1,5 +1,6 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use std::fmt::Debug;
 use std::marker::PhantomData;
 
 use failure::Fallible;
@@ -30,10 +31,11 @@ pub enum DeterminizeType {
     DeterminizeDisambiguate,
 }
 
-pub trait CommonDivisor<W: Semiring> {
+pub trait CommonDivisor<W: Semiring>: PartialEq + Debug {
     fn common_divisor(w1: &W, w2: &W) -> Fallible<W>;
 }
 
+#[derive(PartialEq, Debug)]
 struct DefaultCommonDivisor {}
 
 impl<W: Semiring> CommonDivisor<W> for DefaultCommonDivisor {
@@ -42,6 +44,7 @@ impl<W: Semiring> CommonDivisor<W> for DefaultCommonDivisor {
     }
 }
 
+#[derive(PartialEq, Debug)]
 struct LabelCommonDivisor {}
 
 macro_rules! impl_label_common_divisor {
@@ -76,6 +79,7 @@ macro_rules! impl_label_common_divisor {
 impl_label_common_divisor!(StringWeightLeft);
 impl_label_common_divisor!(StringWeightRestrict);
 
+#[derive(Debug, PartialEq)]
 struct GallicCommonDivisor {}
 
 macro_rules! impl_gallic_common_divisor {
@@ -161,10 +165,8 @@ impl<W: Semiring> DeterminizeArc<W> {
     }
 }
 
-struct DeterminizeFsaImpl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>>
-where
-    F::W: WeaklyDivisibleSemiring + WeightQuantize,
-{
+#[derive(PartialEq, Debug)]
+struct DeterminizeFsaImpl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>> {
     fst: &'a F,
     cache_impl: CacheImpl<F::W>,
     state_table: StateTable<DeterminizeStateTuple<F::W>>,

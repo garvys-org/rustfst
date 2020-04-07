@@ -3,13 +3,14 @@ use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::Arc;
 use crate::{StateId, NO_STATE_ID};
 
+use crate::fst_properties::FstProperties;
 use unsafe_unwrap::UnsafeUnwrap;
 
 pub struct SccVisitor<'a, F: Fst> {
     pub scc: Option<Vec<i32>>,
     pub access: Option<Vec<bool>>,
     pub coaccess: Vec<bool>,
-    start: i32,
+    start: StateId,
     fst: &'a F,
     nstates: usize,
     dfnumber: Vec<i32>,
@@ -17,11 +18,21 @@ pub struct SccVisitor<'a, F: Fst> {
     onstack: Vec<bool>,
     scc_stack: Vec<StateId>,
     pub nscc: i32,
+    pub props: FstProperties,
 }
 
 impl<'a, F: 'a + Fst + ExpandedFst> SccVisitor<'a, F> {
     pub fn new(fst: &'a F, compute_scc: bool, compute_acess: bool) -> Self {
         let n = fst.num_states();
+        let mut props = FstProperties::empty();
+        props |= FstProperties::ACYCLIC
+            | FstProperties::INITIAL_ACYCLIC
+            | FstProperties::ACCESSIBLE
+            | FstProperties::COACCESSIBLE;
+        props &= !(FstProperties::CYCLIC
+            | FstProperties::INITIAL_CYCLIC
+            | FstProperties::NOT_ACCESSIBLE
+            | FstProperties::NOT_COACCESSIBLE);
         Self {
             scc: if compute_scc { Some(vec![-1; n]) } else { None },
             access: if compute_acess {
@@ -30,7 +41,7 @@ impl<'a, F: 'a + Fst + ExpandedFst> SccVisitor<'a, F> {
                 None
             },
             coaccess: vec![false; n],
-            start: fst.start().map(|v| v as i32).unwrap_or(NO_STATE_ID),
+            start: fst.start().unwrap_or(NO_STATE_ID),
             fst,
             nstates: 0,
             dfnumber: vec![-1; n],
@@ -38,6 +49,7 @@ impl<'a, F: 'a + Fst + ExpandedFst> SccVisitor<'a, F> {
             onstack: vec![false; n],
             scc_stack: vec![],
             nscc: 0,
+            props,
         }
     }
 }
@@ -51,7 +63,11 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         self.lowlink[s] = self.nstates as i32;
         self.onstack[s] = true;
         if let Some(ref mut access) = self.access {
-            access[s] = root as i32 == self.start;
+            access[s] = root == self.start;
+            if root != self.start {
+                self.props |= FstProperties::NOT_ACCESSIBLE;
+                self.props &= !FstProperties::ACCESSIBLE;
+            }
         }
         self.nstates += 1;
         true
@@ -68,6 +84,12 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         }
         if self.coaccess[t] {
             self.coaccess[s] = true;
+        }
+        self.props |= FstProperties::CYCLIC;
+        self.props &= !FstProperties::ACYCLIC;
+        if t == self.start {
+            self.props |= FstProperties::INITIAL_CYCLIC;
+            self.props &= !FstProperties::INITIAL_ACYCLIC;
         }
         true
     }
@@ -123,6 +145,10 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
                 if s == t {
                     break;
                 }
+            }
+            if !scc_coaccess {
+                self.props |= FstProperties::NOT_COACCESSIBLE;
+                self.props &= !FstProperties::COACCESSIBLE;
             }
             self.nscc += 1;
         }

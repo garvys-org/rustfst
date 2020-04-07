@@ -115,8 +115,6 @@ doc_comment!(include_str!("../../README.md"));
 #[cfg(test)]
 mod tests_openfst;
 
-pub(crate) static NO_STATE_ID: i32 = -1;
-
 mod symbol_table;
 
 /// Type used for the input label and output label of an arc in a wFST -> usize
@@ -171,3 +169,7 @@ pub mod prelude {
 }
 
 mod proptest_fst;
+
+pub(crate) static NO_LABEL: Label = std::usize::MAX;
+pub(crate) static NO_STATE_ID: StateId = std::usize::MAX;
+pub(crate) static UNASSIGNED: usize = std::usize::MAX;

@@ -16,39 +16,21 @@ pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Fallible<FstProp
     let states: Vec<_> = fst.states_iter().collect();
     let mut comp_props = FstProperties::empty();
 
+    let dfs_props = FstProperties::ACYCLIC
+        | FstProperties::CYCLIC
+        | FstProperties::INITIAL_ACYCLIC
+        | FstProperties::INITIAL_CYCLIC
+        | FstProperties::ACCESSIBLE
+        | FstProperties::NOT_ACCESSIBLE
+        | FstProperties::COACCESSIBLE
+        | FstProperties::NOT_COACCESSIBLE;
+
     let mut visitor = SccVisitor::new(fst, true, true);
     dfs_visit(fst, &mut visitor, &AnyArcFilter {}, false);
     let sccs = unsafe { &visitor.scc.unsafe_unwrap() };
 
-    comp_props |= FstProperties::ACCESSIBLE;
-    if unsafe { visitor.access.unsafe_unwrap().iter().any(|v| !*v) } {
-        // All states are not accessible
-        comp_props |= FstProperties::NOT_ACCESSIBLE;
-        comp_props &= !FstProperties::ACCESSIBLE;
-    }
-
-    comp_props |= FstProperties::COACCESSIBLE;
-    if visitor.coaccess.iter().any(|v| !*v) {
-        // All states are not coaccessible
-        comp_props |= FstProperties::NOT_COACCESSIBLE;
-        comp_props &= !FstProperties::COACCESSIBLE;
-    }
-
-    comp_props |= FstProperties::ACYCLIC;
-    comp_props |= FstProperties::INITIAL_ACYCLIC;
-    if (visitor.nscc as usize) < states.len() {
-        // Cycles
-        comp_props |= FstProperties::CYCLIC;
-        comp_props &= !FstProperties::ACYCLIC;
-
-        if let Some(start) = fst.start() {
-            if sccs.iter().any(|s| sccs[*s as usize] == sccs[start]) {
-                // if the start state is not alone in its scc, then it is initial cyclic.
-                comp_props |= FstProperties::INITIAL_CYCLIC;
-                comp_props &= !FstProperties::INITIAL_ACYCLIC;
-            }
-        }
-    }
+    // Retrieves props computed in the DFS.
+    comp_props |= dfs_props & visitor.props;
 
     comp_props |= FstProperties::ACCEPTOR
         | FstProperties::NO_EPSILONS
@@ -127,11 +109,6 @@ pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Fallible<FstProp
             if arc.nextstate <= state {
                 comp_props |= FstProperties::NOT_TOP_SORTED;
                 comp_props &= !FstProperties::TOP_SORTED;
-            }
-
-            if state == arc.nextstate {
-                comp_props |= FstProperties::CYCLIC;
-                comp_props &= !FstProperties::ACYCLIC;
             }
 
             if arc.nextstate != state + 1 {

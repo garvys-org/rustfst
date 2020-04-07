@@ -24,6 +24,9 @@
 #include "fst_009/fst_009.h"
 #include "fst_010/fst_010.h"
 #include "fst_011/fst_011.h"
+#include "fst_012/fst_012.h"
+#include "fst_013/fst_013.h"
+#include "fst_014/fst_014.h"
 
 #include "symt_000/symt_000.h"
 #include "symt_001/symt_001.h"
@@ -96,6 +99,150 @@ void compute_fst_connect(const F& raw_fst, json& j) {
     auto fst_out = *raw_fst.Copy();
     fst::Connect(&fst_out);
     j["connect"]["result"] = fst_to_string(fst_out);
+}
+
+template<class F>
+void compute_fst_condense(const F& raw_fst, json& j) {
+    auto fst_in = *raw_fst.Copy();
+    std::vector<typename F::Arc::StateId> scc;
+    F fst_out;
+    fst::Condense(fst_in, &fst_out, &scc);
+    std::vector<string> sccs;
+    for (auto e: scc) {
+        sccs.push_back(std::to_string(e));
+    }
+    j["condense"]["sccs"] = sccs;
+    j["condense"]["result"] = fst_to_string(fst_out);
+}
+
+template<class F>
+void compute_fst_label_reachable(const F& raw_fst, json& j) {
+    using Arc = typename F::Arc;
+    using Weight = typename F::Weight;
+    using StateId = typename Arc::StateId;
+
+    fst::ConstFst<Arc> ifst(raw_fst);
+
+    using P = fst::MatcherFst<
+                    fst::ConstFst<Arc>,
+                    fst::LabelLookAheadMatcher<fst::SortedMatcher<fst::Fst<Arc>>, fst::olabel_lookahead_flags>,
+                    fst::olabel_lookahead_fst_type,
+                    fst::LabelLookAheadRelabeler<Arc>
+                  >;
+
+    P fst_in(ifst);
+
+    std::vector<bool> v = {true, false};
+
+    j["label_reachable"] = {};
+    for (auto reach_input: v) {
+        json j2 = {};
+        j2["reach_input"] = bool(reach_input);
+
+        fst::LabelReachable<Arc> reachable(fst_in, reach_input);
+
+        auto data = reachable.GetData();
+        j2["final_label"] = data->FinalLabel();
+
+        j2["interval_sets"] = {};
+        for (int s = 0; s < data->NumIntervalSets(); s++) {
+            auto interval_set = data->GetIntervalSet(s);
+            auto intervals = interval_set.Intervals();
+            json j_interval_set = {};
+            for (int idx = 0; idx < interval_set.Size(); idx++) {
+                auto interval = intervals[idx];
+                json j_interval = {};
+                j_interval["begin"] = interval.begin;
+                j_interval["end"] = interval.end;
+                j_interval_set.push_back(j_interval);
+            }
+            if (interval_set.Size() == 0) {
+                j_interval_set = std::vector<int>();
+            }
+            j2["interval_sets"].push_back(j_interval_set);
+        }
+        if (data->NumIntervalSets() == 0) {
+            j2["interval_sets"] = std::vector<int>();
+        }
+
+        std::set<int> labels;
+        for (fst::StateIterator<P> siter(fst_in); !siter.Done(); siter.Next()) {
+            StateId state_id = siter.Value();
+            for (fst::ArcIterator<P> aiter(fst_in, state_id); !aiter.Done(); aiter.Next()) {
+                const Arc &arc = aiter.Value();
+                if (reach_input) {
+                    labels.insert(arc.ilabel);
+                } else {
+                    labels.insert(arc.olabel);
+                }
+            }
+        }
+
+        j2["result"] = {};
+        for(int state=0; state<fst_in.NumStates(); state++) {
+            for(auto label: labels) {
+                reachable.SetState(state);
+                auto r = reachable.Relabel(label);
+                auto res = reachable.Reach(r);
+
+                json j3;
+                j3["state"] = state;
+                j3["label"] = label;
+                j3["label_relabeled"] = r;
+                j3["reachable"] = res;
+                j3["reach_final"] = reachable.ReachFinal();
+                j2["result"].push_back(j3);
+            }
+        }
+        if (fst_in.NumStates() == 0) {
+            j2["result"] = std::vector<int>();
+        }
+        j["label_reachable"].push_back(j2);
+    }
+}
+
+template<class F>
+void compute_fst_state_reachable(const F& raw_fst, json& j) {
+    using Arc = typename F::Arc;
+    using Weight = typename F::Weight;
+    auto fst_in = *raw_fst.Copy();
+    fst::StateReachable<Arc> reachable(fst_in);
+
+    j["state_reachable"]["result"] = {};
+    auto error = reachable.Error();
+    j["state_reachable"]["error"] = error;
+
+    if (!error) {
+        std::vector<int> final_states;
+        for (int i = 0; i < fst_in.NumStates(); i++) {
+            if (fst_in.Final(i) != Weight::Zero()) {
+                final_states.push_back(i);
+            }
+        }
+
+        for (int state = 0; state < fst_in.NumStates(); state++) {
+            for(auto final_state: final_states) {
+                json j2;
+                j2["state"] = state;
+                j2["final_state"] = final_state;
+
+                reachable.SetState(state);
+                auto res = reachable.Reach(final_state);
+                auto error_reach = reachable.Error();
+
+                j2["reachable"] = res;
+                j2["error"] = error_reach;
+                j["state_reachable"]["result"].push_back(j2);
+                if (error_reach) {
+                    return;
+                }
+            }
+        }
+    }
+
+    if ((fst_in.NumStates() == 0) || error) {
+        j["state_reachable"]["result"] = std::vector<int>();
+    }
 }
 
 template<class F>
@@ -526,6 +673,7 @@ void do_compute_fst_replace(
 
     vector<pair<typename Arc::Label, string > > label_fst_pairs_serialized;
 
+
     for (auto &e: label_fst_pairs) {
         auto label = e.first;
         auto fst = e.second;
@@ -710,6 +858,152 @@ void compute_fst_closure_star(const F& raw_fst, json& j) {
 }
 
 template<class F>
+void compute_fst_matcher(const F& raw_fst, json& j) {
+    fst::vector<fst::MatchType> match_types = {fst::MATCH_INPUT, fst::MATCH_OUTPUT};
+    j["matcher"] = {};
+
+    auto num_states = raw_fst.NumStates();
+
+    if (num_states == 0) {
+        j["matcher"] = std::vector<int>();
+    }
+
+    std::set<int> labels;
+    labels.insert(0);
+    for (int state = 0; state < num_states; state++) {
+        for (fst::ArcIterator<F> aiter(raw_fst, state); !aiter.Done(); aiter.Next()) {
+            const auto &arc = aiter.Value();
+            labels.insert(arc.ilabel);
+            labels.insert(arc.olabel);
+        }
+    }
+
+    for (auto match_type: match_types) {
+        auto fst_sorted = fst::VectorFst<typename F::Arc>(raw_fst);
+        if (match_type == fst::MATCH_INPUT) {
+            fst::ArcSort(&fst_sorted, fst::ILabelCompare<typename F::Arc>());
+        } else if (match_type == fst::MATCH_OUTPUT) {
+            fst::ArcSort(&fst_sorted, fst::OLabelCompare<typename F::Arc>());
+        }
+        fst::SortedMatcher<F> matcher(fst_sorted, match_type);
+        for (int state = 0; state < num_states; state++) {
+            matcher.SetState(state);
+            for (int label: labels) {
+                json j2 = {};
+                if (matcher.Find(label)) {
+                    for (; !matcher.Done(); matcher.Next()) {
+                    auto &arc = matcher.Value();
+                        json j3;
+                        j3["ilabel"] = arc.ilabel;
+                        j3["olabel"] = arc.olabel;
+                        j3["weight"] = weight_to_string(arc.weight);
+                        j3["nextstate"] = arc.nextstate;
+                        j2.push_back(j3);
+                    }
+                } else {
+                    j2 = vector<int>();
+                }
+                json j1;
+                j1["state"] = state;
+                j1["label"] = label;
+                j1["arcs"] = j2;
+                j1["match_type"] = match_type;
+                j["matcher"].push_back(j1);
+            }
+        }
+    }
+}
+
+template<class F, class FILTER>
+void do_compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2, bool connect, FILTER filter, string filter_name) {
+    using Arc = typename F::Arc;
+
+    auto opts = fst::ComposeOptions();
+    opts.connect = connect;
+    opts.filter_type = filter;
+
+    // static
+    fst::VectorFst<Arc> static_fst;
+    fst::Compose(raw_fst, fst_2, &static_fst, opts);
+
+    json j2;
+    j2["fst_2"] = fst_to_string(fst_2);
+    j2["result"] = fst_to_string(static_fst);
+    j2["filter_name"] = filter_name;
+
+    j["compose"].push_back(j2);
+}
+
+template<class F>
+void do_compute_fst_compose_lookahead(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2) {
+    using Arc = typename F::Arc;
+
+    using MATCHER1 = fst::LabelLookAheadMatcher<fst::SortedMatcher<fst::Fst<Arc>>, fst::olabel_lookahead_flags>;
+    using MATCHER2 = fst::SortedMatcher<fst::Fst<Arc>>;
+
+    using SEQ_FILTER = fst::AltSequenceComposeFilter<MATCHER1, MATCHER2>;
+    using LOOK_FILTER = fst::LookAheadComposeFilter<SEQ_FILTER, MATCHER1, MATCHER2, fst::MATCH_OUTPUT>;
+    using PUSH_WEIGHTS_FILTER = fst::PushWeightsComposeFilter<LOOK_FILTER, MATCHER1, MATCHER2, fst::MATCH_OUTPUT>;
+
+    using PUSH_LABELS_FILTER = fst::PushLabelsComposeFilter<PUSH_WEIGHTS_FILTER,
+                                         MATCHER1,
+                                         MATCHER2,
+                                         fst::MATCH_OUTPUT>;
+    using COMPOSE_FILTER = PUSH_LABELS_FILTER;
+
+    fst::ConstFst<Arc> ifst1(raw_fst);
+    fst::VectorFst<Arc> ifst2(fst_2);
+    fst::CacheOptions cacheOptions;
+
+    fst::MatcherFst<
+      fst::ConstFst<Arc>,
+      fst::LabelLookAheadMatcher<fst::SortedMatcher<fst::Fst<Arc>>, fst::olabel_lookahead_flags>,
+      fst::olabel_lookahead_fst_type,
+      fst::LabelLookAheadRelabeler<Arc>
+    > graph1Look(ifst1);
+
+    fst::LabelLookAheadRelabeler<Arc>::Relabel(
+    &ifst2, graph1Look, true);
+
+    fst::ArcSort(&ifst2, fst::ILabelCompare<Arc>());
+
+    fst::ComposeFstImplOptions<MATCHER1, MATCHER2, COMPOSE_FILTER> composeOptions(
+    cacheOptions);
+    composeOptions.matcher1 = graph1Look.InitMatcher(fst::MATCH_OUTPUT);
+    composeOptions.matcher2 = new MATCHER2(ifst2, fst::MATCH_INPUT);
+
+    auto lol =  new fst::ComposeFst<Arc>(graph1Look, ifst2, composeOptions);
+
+    auto res_dynamic = fst::VectorFst<Arc>(*lol);
+
+    json j2;
+    j2["fst_2"] = fst_to_string(fst_2);
+    j2["result"] = fst_to_string(res_dynamic);
+    j2["filter_name"] = "lookahead";
+
+    j["compose"].push_back(j2);
+}
+
+
+template<class F>
+void compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2) {
+    using Weight = typename F::Weight;
+    using Arc = typename F::Arc;
+    j["compose"] = {};
+
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::AUTO_FILTER, "auto");
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NULL_FILTER, "null");
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::TRIVIAL_FILTER, "trivial");
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::SEQUENCE_FILTER, "sequence");
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::ALT_SEQUENCE_FILTER, "alt_sequence");
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::MATCH_FILTER, "match");
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NO_MATCH_FILTER, "no_match");
+
+    do_compute_fst_compose_lookahead(raw_fst, j, fst_2);
+
+}
+
+template<class F>
 void compute_fst_data(const F& fst_test_data, const string fst_name) {
     std::cout << "FST :" << fst_name << std::endl;
     json data;
@@ -774,6 +1068,9 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     std::cout << "Connect" << std::endl;
     compute_fst_connect(raw_fst, data);
 
+    std::cout << "Condense" << std::endl;
+    compute_fst_condense(raw_fst, data);
+
     std::cout << "Shortest distance" << std::endl;
     compute_fst_shortest_distance(raw_fst, data);
 
@@ -807,8 +1104,8 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     compute_fst_state_map(raw_fst, data, "state_map_arc_sum", fst::ArcSumMapper<typename F::MyArc>(raw_fst));
     compute_fst_state_map(raw_fst, data, "state_map_arc_unique", fst::ArcUniqueMapper<typename F::MyArc>(raw_fst));
 
-    std::cout << "Determinization" << std::endl;
-    compute_fst_determinization(raw_fst, data);
+//    std::cout << "Determinization" << std::endl;
+//    compute_fst_determinization(raw_fst, data);
 
     std::cout << "TopSort" << std::endl;
     compute_fst_topsort(raw_fst, data);
@@ -834,8 +1131,8 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     std::cout << "Push" << std::endl;
     compute_fst_push(raw_fst, data);
 
-    std::cout << "Replace" << std::endl;
-    compute_fst_replace(raw_fst, data, fst_test_data);
+//    std::cout << "Replace" << std::endl;
+//    compute_fst_replace(raw_fst, data, fst_test_data);
 
     std::cout << "Union" << std::endl;
     compute_fst_union(raw_fst, data, fst_test_data.get_fst_union());
@@ -848,6 +1145,18 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
 
     std::cout << "Closure Star" << std::endl;
     compute_fst_closure_star(raw_fst, data);
+
+//    std::cout << "Matcher" << std::endl;
+//    compute_fst_matcher(raw_fst, data);
+
+    std::cout << "Label Reachable" << std::endl;
+    compute_fst_label_reachable(raw_fst, data);
+
+    std::cout << "Compose" << std::endl;
+    compute_fst_compose(raw_fst, data, fst_test_data.get_fst_compose());
+
+    std::cout << "State Reachable" << std::endl;
+    compute_fst_state_reachable(raw_fst, data);
 
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;
@@ -900,18 +1209,6 @@ void compute_weight_data(const W& w1, const W& w2, const string weight_name) {
 int main() {
     srand (time(NULL));
     FLAGS_fst_error_fatal = false;
-    compute_fst_data(FstTestData000(), "fst_000");
-    compute_fst_data(FstTestData001(), "fst_001");
-    compute_fst_data(FstTestData002(), "fst_002");
-    compute_fst_data(FstTestData003(), "fst_003");
-    compute_fst_data(FstTestData004(), "fst_004");
-    compute_fst_data(FstTestData005(), "fst_005");
-    compute_fst_data(FstTestData006(), "fst_006");
-    compute_fst_data(FstTestData007(), "fst_007");
-    compute_fst_data(FstTestData008(), "fst_008");
-    compute_fst_data(FstTestData009(), "fst_009");
-    compute_fst_data(FstTestData010(), "fst_010");
-    compute_fst_data(FstTestData011(), "fst_011");
 
     compute_symt_data(compute_symt_000(), "symt_000");
     compute_symt_data(compute_symt_001(), "symt_001");
@@ -984,4 +1281,20 @@ int main() {
         auto w2 = GW(SW(2), W(3.1));
         compute_weight_data(w1, w2, "weight_012");
     }
+
+    compute_fst_data(FstTestData000(), "fst_000");
+    compute_fst_data(FstTestData001(), "fst_001");
+    compute_fst_data(FstTestData002(), "fst_002");
+    compute_fst_data(FstTestData003(), "fst_003");
+    compute_fst_data(FstTestData004(), "fst_004");
+    compute_fst_data(FstTestData005(), "fst_005");
+    compute_fst_data(FstTestData006(), "fst_006");
+    compute_fst_data(FstTestData007(), "fst_007");
+    compute_fst_data(FstTestData008(), "fst_008");
+    compute_fst_data(FstTestData009(), "fst_009");
+    compute_fst_data(FstTestData010(), "fst_010");
+    compute_fst_data(FstTestData011(), "fst_011");
+    compute_fst_data(FstTestData012(), "fst_012");
+    compute_fst_data(FstTestData013(), "fst_013");
+    compute_fst_data(FstTestData014(), "fst_014");
 }

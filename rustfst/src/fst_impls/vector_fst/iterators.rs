@@ -105,7 +105,7 @@ impl<'a, W: Semiring + 'static> FstIteratorMut<'a> for VectorFst<W> {
         Box<
             dyn FnMut(
                 (StateId, &'a mut VectorFstState<W>),
-            ) -> (StateId, Self::ArcsIter, Option<&'a mut W>),
+            ) -> FstIterData<&'a mut W, Self::ArcsIter>,
         >,
     >;
 
@@ -114,11 +114,13 @@ impl<'a, W: Semiring + 'static> FstIteratorMut<'a> for VectorFst<W> {
             .iter_mut()
             .enumerate()
             .map(Box::new(|(state_id, fst_state)| {
-                (
+                let n = fst_state.arcs.len();
+                FstIterData {
                     state_id,
-                    fst_state.arcs.iter_mut(),
-                    fst_state.final_weight.as_mut(),
-                )
+                    arcs: fst_state.arcs.iter_mut(),
+                    final_weight: fst_state.final_weight.as_mut(),
+                    num_arcs: n,
+                }
             }))
     }
 }

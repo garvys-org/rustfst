@@ -1,10 +1,6 @@
-use std::cell::UnsafeCell;
+use std::borrow::Borrow;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use std::fmt;
-use std::iter::{repeat, Map, Repeat, Zip};
-use std::rc::Rc;
-use std::slice::Iter as IterSlice;
 
 use failure::Fallible;
 use unsafe_unwrap::UnsafeUnwrap;
@@ -12,19 +8,17 @@ use unsafe_unwrap::UnsafeUnwrap;
 use crate::algorithms::arc_filters::{ArcFilter, EpsilonArcFilter};
 use crate::algorithms::cache::{CacheImpl, FstImpl};
 use crate::algorithms::dfs_visit::dfs_visit;
+use crate::algorithms::dynamic_fst::DynamicFst;
 use crate::algorithms::queues::{AutoQueue, FifoQueue};
 use crate::algorithms::shortest_distance::{ShortestDistanceConfig, ShortestDistanceState};
 use crate::algorithms::top_sort::TopOrderVisitor;
 use crate::algorithms::visitors::SccVisitor;
 use crate::algorithms::Queue;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{ArcIterator, CoreFst, Fst, FstIterData};
-use crate::fst_traits::{FstIterator, MutableFst, StateIterator};
+use crate::fst_traits::CoreFst;
+use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, SymbolTable, EPS_LABEL};
-use std::borrow::Borrow;
-
-use itertools::izip;
+use crate::{Arc, Label, StateId, EPS_LABEL};
 
 pub struct RmEpsilonConfig<W: Semiring, Q: Queue> {
     sd_opts: ShortestDistanceConfig<W, Q, EpsilonArcFilter>,
@@ -234,7 +228,7 @@ struct Element {
     nextstate: StateId,
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, Eq)]
 struct RmEpsilonState<F: MutableFst, B: Borrow<F>, Q: Queue> {
     visited: Vec<bool>,
     visited_states: Vec<StateId>,
@@ -247,6 +241,16 @@ impl<F: MutableFst, B: Borrow<F>, Q: Queue> std::fmt::Debug for RmEpsilonState<F
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "RmEpsilonState {{ visited : {:?}, visited_states : {:?}, element_map : {:?}, expand_id : {:?}, sd_state : {:?} }}",
         self.visited, self.visited_states, self.element_map, self.expand_id, self.sd_state)
+    }
+}
+
+impl<F: MutableFst, B: Borrow<F>, Q: Queue + PartialEq> PartialEq for RmEpsilonState<F, B, Q> {
+    fn eq(&self, other: &Self) -> bool {
+        self.visited.eq(&other.visited)
+            && self.visited_states.eq(&other.visited_states)
+            && self.element_map.eq(&other.element_map)
+            && self.expand_id.eq(&other.expand_id)
+            && self.sd_state.eq(&other.sd_state)
     }
 }
 
@@ -344,8 +348,8 @@ where
     }
 }
 
-#[derive(Clone, PartialEq, Eq)]
-pub(crate) struct RmEpsilonImpl<F: MutableFst, B: Borrow<F>> {
+#[derive(Clone, Eq)]
+pub struct RmEpsilonImpl<F: MutableFst, B: Borrow<F>> {
     rmeps_state: RmEpsilonState<F, B, FifoQueue>,
     cache_impl: CacheImpl<F::W>,
 }
@@ -357,6 +361,12 @@ impl<F: MutableFst, B: Borrow<F>> std::fmt::Debug for RmEpsilonImpl<F, B> {
             "RmEpsilonImpl {{ rmeps_state : {:?}, cache_impl : {:?} }}",
             self.rmeps_state, self.cache_impl
         )
+    }
+}
+
+impl<F: MutableFst, B: Borrow<F>> PartialEq for RmEpsilonImpl<F, B> {
+    fn eq(&self, other: &Self) -> bool {
+        self.rmeps_state.eq(&other.rmeps_state) && self.cache_impl.eq(&other.cache_impl)
     }
 }
 
@@ -422,25 +432,15 @@ where
 /// Removes epsilon-transitions (when both the input and output label are an
 /// epsilon) from a transducer. The result will be an equivalent FST that has no
 /// such epsilon transitions. This version is a delayed FST.
-pub struct RmEpsilonFst<F: MutableFst, B: Borrow<F>> {
-    pub(crate) fst_impl: UnsafeCell<RmEpsilonImpl<F, B>>,
-    pub(crate) isymt: Option<Rc<SymbolTable>>,
-    pub(crate) osymt: Option<Rc<SymbolTable>>,
-}
-
+pub type RmEpsilonFst<F, B> = DynamicFst<RmEpsilonImpl<F, B>>;
 impl<F: MutableFst, B: Borrow<F>> RmEpsilonFst<F, B>
 where
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
+    F::W: 'static,
 {
     pub fn new(fst: B) -> Self {
         let isymt = fst.borrow().input_symbols();
         let osymt = fst.borrow().output_symbols();
-        Self {
-            fst_impl: UnsafeCell::new(RmEpsilonImpl::new(fst)),
-            isymt,
-            osymt,
-        }
+        Self::from_impl(RmEpsilonImpl::new(fst), isymt, osymt)
     }
 }
-
-dynamic_fst!("RmEpsilonFst", RmEpsilonFst<F, B>, [F => MutableFst] [B => Borrow<F>]);

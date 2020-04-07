@@ -5,12 +5,12 @@ mod arc_sort;
 mod arc_sum;
 pub(crate) mod arc_unique;
 mod closure;
-mod composition;
+pub mod compose;
 mod concat;
+mod condense;
 mod connect;
 mod determinize;
 pub(crate) mod dfs_visit;
-#[macro_use]
 pub(crate) mod dynamic_fst;
 mod encode;
 mod factor_weight;
@@ -69,8 +69,9 @@ pub use self::{
     arc_sum::arc_sum,
     arc_unique::arc_unique,
     closure::{closure, ClosureFst, ClosureType},
-    composition::compose,
+    compose::compose,
     concat::{concat, ConcatFst},
+    condense::condense,
     connect::connect,
     determinize::{determinize, determinize_with_distance, DeterminizeType},
     encode::{decode, encode},

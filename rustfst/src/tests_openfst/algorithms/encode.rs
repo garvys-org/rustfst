@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use failure::{format_err, Fallible, ResultExt};
+use pretty_assertions::assert_eq;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{decode, encode};

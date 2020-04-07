@@ -36,7 +36,7 @@ impl<W: Semiring, Q: Queue, A: ArcFilter<W>> ShortestDistanceConfig<W, Q, A> {
     }
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, Eq)]
 pub struct ShortestDistanceState<Q: Queue, F: ExpandedFst, B: Borrow<F>, A: ArcFilter<F::W>> {
     pub fst: B,
     state_queue: Q,
@@ -49,6 +49,24 @@ pub struct ShortestDistanceState<Q: Queue, F: ExpandedFst, B: Borrow<F>, A: ArcF
     sources: Vec<Option<StateId>>,
     retain: bool,
     source_id: usize,
+}
+
+impl<Q: Queue + PartialEq, F: ExpandedFst, B: Borrow<F>, A: ArcFilter<F::W>> PartialEq
+    for ShortestDistanceState<Q, F, B, A>
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.fst.borrow().eq(&other.fst.borrow())
+            && self.state_queue.eq(&other.state_queue)
+            && self.arc_filter.eq(&other.arc_filter)
+            && self.first_path.eq(&other.first_path)
+            && self.enqueued.eq(&other.enqueued)
+            && self.distance.eq(&other.distance)
+            && self.adder.eq(&other.adder)
+            && self.radder.eq(&other.radder)
+            && self.sources.eq(&other.sources)
+            && self.retain.eq(&other.retain)
+            && self.source_id.eq(&other.source_id)
+    }
 }
 
 impl<Q: Queue, F: ExpandedFst, B: Borrow<F>, A: ArcFilter<F::W>> std::fmt::Debug
