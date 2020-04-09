@@ -26,12 +26,6 @@ impl<W> CacheStore<W> for VectorCacheStore<W> {
         self.cache_states.resize_with(new_len, CacheState::new);
     }
 
-    fn resize_if_necessary(&mut self, new_len: usize) {
-        if self.cache_states.len() < new_len {
-            self.resize(new_len)
-        }
-    }
-
     fn final_weight_unchecked(&self, state: StateId) -> Option<&W> {
         self.get_cache_state_unchecked(state).final_weight()
     }

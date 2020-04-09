@@ -9,6 +9,7 @@ pub struct CacheState<W> {
     arcs: Vec<Arc<W>>,
     final_weight: Option<W>,
     flags: CacheFlags,
+    ref_count: usize,
 }
 
 impl<W> CacheState<W> {
@@ -17,6 +18,7 @@ impl<W> CacheState<W> {
             arcs: Vec::new(),
             final_weight: None,
             flags: CacheFlags::empty(),
+            ref_count: 0,
         }
     }
 
@@ -67,5 +69,30 @@ impl<W> CacheState<W> {
 
     pub fn arcs_iter_mut(&mut self) -> IterSliceMut<Arc<W>> {
         self.arcs.iter_mut()
+    }
+
+    pub fn delete_arcs(&mut self) {
+        self.arcs.clear();
+    }
+
+    pub fn flags(&self) -> CacheFlags {
+        self.flags
+    }
+
+    pub fn set_flags(&mut self, flags: CacheFlags, mask: CacheFlags) {
+        self.flags &= !mask;
+        self.flags |= flags;
+    }
+
+    pub fn incr_ref_count(&mut self) {
+        self.ref_count += 1;
+    }
+
+    pub fn decr_ref_count(&mut self) {
+        self.ref_count -= 1;
+    }
+
+    pub fn ref_count(&self) -> usize {
+        self.ref_count
     }
 }
