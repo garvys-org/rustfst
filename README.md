@@ -43,10 +43,10 @@ Implementation heavily inspired from Mehryar Mohri's, Cyril Allauzen's and Micha
 ## Example
 
 ```rust
-use failure::Fallible;
+use anyhow::Result;
 use rustfst::prelude::*;
 
-fn main() -> Fallible<()> {
+fn main() -> Result<()> {
     // Creates a empty wFST
     let mut fst = VectorFst::<TropicalWeight>::new();
 
