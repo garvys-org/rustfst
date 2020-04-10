@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::compose::compose_filters::ComposeFilter;
 use crate::algorithms::compose::filter_states::{FilterState, IntegerFilterState, PairFilterState};
@@ -51,7 +51,7 @@ where
         _fst2: Rc<<Self::M2 as Matcher<W>>::F>,
         _m1: IM1,
         _m2: IM2,
-    ) -> Fallible<Self> {
+    ) -> Result<Self> {
         unimplemented!()
     }
 
@@ -59,7 +59,7 @@ where
         PairFilterState::new((self.filter.start(), FilterState::new(NO_LABEL)))
     }
 
-    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Fallible<()> {
+    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Result<()> {
         self.fs = filter_state.clone();
         self.filter.set_state(s1, s2, filter_state.state1())?;
         if !self
@@ -85,7 +85,7 @@ where
         Ok(())
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS> {
+    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Result<Self::FS> {
         if !self
             .lookahead_flags()
             .contains(MatcherFlags::LOOKAHEAD_PREFIX)
@@ -118,7 +118,7 @@ where
         }
     }
 
-    fn filter_final(&self, w1: &mut W, w2: &mut W) -> Fallible<()> {
+    fn filter_final(&self, w1: &mut W, w2: &mut W) -> Result<()> {
         self.filter.filter_final(w1, w2)?;
         if !self
             .lookahead_flags()
@@ -156,7 +156,7 @@ where
         arca: &mut Arc<W>,
         arcb: &mut Arc<W>,
         flabel: Label,
-    ) -> Fallible<<Self as ComposeFilter<W>>::FS> {
+    ) -> Result<<Self as ComposeFilter<W>>::FS> {
         let labela = if self.lookahead_output() {
             &mut arca.olabel
         } else {
@@ -204,7 +204,7 @@ where
         arca: &mut Arc<W>,
         arcb: &mut Arc<W>,
         fs1: &CF::FS,
-    ) -> Fallible<<Self as ComposeFilter<W>>::FS> {
+    ) -> Result<<Self as ComposeFilter<W>>::FS> {
         let labela = if self.lookahead_output() {
             &mut arca.olabel
         } else {
@@ -272,7 +272,7 @@ where
         fst2: Rc<<<Self as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
         m1: IM1,
         m2: IM2,
-    ) -> Fallible<Self> {
+    ) -> Result<Self> {
         let filter = CF::new(fst1, fst2, m1, m2)?;
         let fst1 = filter.matcher1().borrow().fst();
         let fst2 = filter.matcher2().borrow().fst();

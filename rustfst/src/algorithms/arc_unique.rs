@@ -43,12 +43,12 @@ mod test {
     use crate::fst_traits::MutableFst;
     use crate::semirings::{ProbabilityWeight, Semiring};
     use crate::Arc;
-    use failure::Fallible;
+    use anyhow::Result;
 
     use super::*;
 
     #[test]
-    fn test_arc_map_unique() -> Fallible<()> {
+    fn test_arc_map_unique() -> Result<()> {
         let mut fst_in = VectorFst::<ProbabilityWeight>::new();
 
         let s1 = fst_in.add_state();

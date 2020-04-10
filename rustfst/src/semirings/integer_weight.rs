@@ -1,7 +1,7 @@
 use std::borrow::Borrow;
 use std::i32;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::semirings::{CompleteSemiring, ReverseBack, Semiring, SemiringProperties, StarSemiring};
 
@@ -26,12 +26,12 @@ impl Semiring for IntegerWeight {
         IntegerWeight { value }
     }
 
-    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         self.value += rhs.borrow().value;
         Ok(())
     }
 
-    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         self.value *= rhs.borrow().value;
         Ok(())
     }
@@ -48,7 +48,7 @@ impl Semiring for IntegerWeight {
         self.value = value
     }
 
-    fn reverse(&self) -> Fallible<Self::ReverseWeight> {
+    fn reverse(&self) -> Result<Self::ReverseWeight> {
         Ok(*self)
     }
 
@@ -60,7 +60,7 @@ impl Semiring for IntegerWeight {
 }
 
 impl ReverseBack<IntegerWeight> for IntegerWeight {
-    fn reverse_back(&self) -> Fallible<IntegerWeight> {
+    fn reverse_back(&self) -> Result<IntegerWeight> {
         Ok(self.clone())
     }
 }

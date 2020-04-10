@@ -3,7 +3,7 @@ use std::fmt;
 use std::fmt::Debug;
 use std::io::Write;
 
-use failure::Fallible;
+use anyhow::Result;
 use nom::IResult;
 
 use crate::semirings::{
@@ -57,13 +57,13 @@ where
         Self { weight }
     }
 
-    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         self.weight.0.plus_assign(&rhs.borrow().weight.0)?;
         self.weight.1.plus_assign(&rhs.borrow().weight.1)?;
         Ok(())
     }
 
-    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         self.weight.0.times_assign(&rhs.borrow().weight.0)?;
         self.weight.1.times_assign(&rhs.borrow().weight.1)?;
         Ok(())
@@ -82,7 +82,7 @@ where
         self.set_value2(value.1);
     }
 
-    fn reverse(&self) -> Fallible<Self::ReverseWeight> {
+    fn reverse(&self) -> Result<Self::ReverseWeight> {
         Ok((self.value1().reverse()?, self.value2().reverse()?).into())
     }
 
@@ -99,7 +99,7 @@ where
 impl<W1: Semiring, W2: Semiring> ReverseBack<ProductWeight<W1, W2>>
     for <ProductWeight<W1, W2> as Semiring>::ReverseWeight
 {
-    fn reverse_back(&self) -> Fallible<ProductWeight<W1, W2>> {
+    fn reverse_back(&self) -> Result<ProductWeight<W1, W2>> {
         Ok((self.value1().reverse_back()?, self.value2().reverse_back()?).into())
     }
 }
@@ -141,7 +141,7 @@ where
     W1: WeaklyDivisibleSemiring,
     W2: WeaklyDivisibleSemiring,
 {
-    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
+    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Result<()> {
         self.weight.0.divide_assign(&rhs.weight.0, divide_type)?;
         self.weight.1.divide_assign(&rhs.weight.1, divide_type)?;
         Ok(())
@@ -153,7 +153,7 @@ where
     W1: WeightQuantize,
     W2: WeightQuantize,
 {
-    fn quantize_assign(&mut self, delta: f32) -> Fallible<()> {
+    fn quantize_assign(&mut self, delta: f32) -> Result<()> {
         self.set_value1(self.value1().quantize(delta)?);
         self.set_value2(self.value2().quantize(delta)?);
         Ok(())
@@ -186,7 +186,7 @@ where
         Ok((i, Self::new((weight_1, weight_2))))
     }
 
-    fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()> {
+    fn write_binary<F: Write>(&self, file: &mut F) -> Result<()> {
         self.value1().write_binary(file)?;
         self.value2().write_binary(file)?;
         Ok(())

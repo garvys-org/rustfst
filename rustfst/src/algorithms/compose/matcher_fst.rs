@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::compose::lookahead_matchers::{LabelLookAheadRelabeler, LookaheadMatcher};
 use crate::algorithms::compose::matchers::MatchType;
@@ -43,7 +43,7 @@ impl<F, M, T> MatcherFst<F, M, T> {
 impl<F: MutableFst, M: LookaheadMatcher<F::W, F = F, MatcherData = LabelReachableData>>
     MatcherFst<F, M, M::MatcherData>
 {
-    pub fn new(fst: F) -> Fallible<Self> {
+    pub fn new(fst: F) -> Result<Self> {
         let imatcher_data = M::create_data(&fst, MatchType::MatchInput)?;
         let omatcher_data = M::create_data(&fst, MatchType::MatchOutput)?;
 
@@ -64,7 +64,7 @@ impl<F: CoreFst, M, T> CoreFst for MatcherFst<F, M, T> {
         self.fst_add_on.start()
     }
 
-    fn final_weight(&self, state_id: usize) -> Fallible<Option<&Self::W>> {
+    fn final_weight(&self, state_id: usize) -> Result<Option<&Self::W>> {
         self.fst_add_on.final_weight(state_id)
     }
 
@@ -72,7 +72,7 @@ impl<F: CoreFst, M, T> CoreFst for MatcherFst<F, M, T> {
         self.fst_add_on.final_weight_unchecked(state_id)
     }
 
-    fn num_arcs(&self, s: usize) -> Fallible<usize> {
+    fn num_arcs(&self, s: usize) -> Result<usize> {
         self.fst_add_on.num_arcs(s)
     }
 
@@ -95,7 +95,7 @@ where
 {
     type Iter = <F as ArcIterator<'a>>::Iter;
 
-    fn arcs_iter(&'a self, state_id: usize) -> Fallible<Self::Iter> {
+    fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
         self.fst_add_on.arcs_iter(state_id)
     }
 

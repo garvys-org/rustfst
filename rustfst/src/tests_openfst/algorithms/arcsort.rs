@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::arc_compares::{ilabel_compare, olabel_compare};
 use crate::algorithms::arc_sort;
@@ -10,7 +10,7 @@ use crate::semirings::SerializableSemiring;
 use crate::semirings::WeightQuantize;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_arcsort_ilabel<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_arcsort_ilabel<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,
@@ -33,7 +33,7 @@ where
     Ok(())
 }
 
-pub fn test_arcsort_olabel<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_arcsort_olabel<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,

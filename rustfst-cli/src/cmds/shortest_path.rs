@@ -1,7 +1,7 @@
 use rustfst::prelude::*;
 
 use crate::unary_fst_algorithm::UnaryFstAlgorithm;
-use failure::Fallible;
+use anyhow::Result;
 
 pub struct ShortestPathAlgorithm {
     path_in: String,
@@ -23,7 +23,7 @@ impl UnaryFstAlgorithm for ShortestPathAlgorithm {
         "shortest path".to_string()
     }
 
-    fn run_algorithm(&self, fst: VectorFst<TropicalWeight>) -> Fallible<VectorFst<TropicalWeight>> {
+    fn run_algorithm(&self, fst: VectorFst<TropicalWeight>) -> Result<VectorFst<TropicalWeight>> {
         shortest_path(&fst, self.nshortest, self.unique)
     }
 }

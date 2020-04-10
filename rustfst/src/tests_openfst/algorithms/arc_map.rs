@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use failure::Fallible;
+use anyhow::Result;
 use pretty_assertions::assert_eq;
 use serde_derive::{Deserialize, Serialize};
 
@@ -42,7 +42,7 @@ impl ArcMapWithWeightOperationResult {
     }
 }
 
-pub fn test_arc_map_identity<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_arc_map_identity<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,
@@ -64,7 +64,7 @@ where
     Ok(())
 }
 
-pub fn test_arc_map_invert<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_arc_map_invert<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
@@ -86,7 +86,7 @@ where
     Ok(())
 }
 
-pub fn test_arc_map_input_epsilon<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_arc_map_input_epsilon<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,
@@ -107,7 +107,7 @@ where
     Ok(())
 }
 
-pub fn test_arc_map_output_epsilon<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_arc_map_output_epsilon<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,
@@ -128,7 +128,7 @@ where
     Ok(())
 }
 
-pub fn test_arc_map_plus<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_arc_map_plus<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,
@@ -149,7 +149,7 @@ where
     Ok(())
 }
 
-pub fn test_arc_map_times<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_arc_map_times<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,
@@ -170,7 +170,7 @@ where
     Ok(())
 }
 
-pub fn test_arc_map_quantize<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_arc_map_quantize<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,
@@ -191,7 +191,7 @@ where
     Ok(())
 }
 
-pub fn test_arc_map_rmweight<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_arc_map_rmweight<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,

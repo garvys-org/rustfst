@@ -3,7 +3,7 @@ use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 
 use crate::SymbolTable;
-use failure::{format_err, Fallible};
+use anyhow::{format_err, Result};
 use std::rc::Rc;
 
 impl<W: Semiring + 'static> Fst for ConstFst<W> {
@@ -39,7 +39,7 @@ impl<W: Semiring> CoreFst for ConstFst<W> {
         self.start
     }
 
-    fn final_weight(&self, state_id: usize) -> Fallible<Option<&Self::W>> {
+    fn final_weight(&self, state_id: usize) -> Result<Option<&Self::W>> {
         let s = self
             .states
             .get(state_id)
@@ -51,7 +51,7 @@ impl<W: Semiring> CoreFst for ConstFst<W> {
         self.states.get_unchecked(state_id).final_weight.as_ref()
     }
 
-    fn num_arcs(&self, s: usize) -> Fallible<usize> {
+    fn num_arcs(&self, s: usize) -> Result<usize> {
         let const_state = self
             .states
             .get(s)

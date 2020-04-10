@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use failure::Fallible;
+use anyhow::Result;
 use nom::bytes::complete::take;
 use nom::combinator::{map_res, verify};
 use nom::number::complete::{le_i32, le_i64, le_u32, le_u64};
@@ -56,7 +56,7 @@ fn optionally_parse_symt(i: &[u8], parse_symt: bool) -> IResult<&[u8], Option<Sy
     }
 }
 
-fn optionally_write_symt<W: Write>(file: &mut W, symt: &Option<Rc<SymbolTable>>) -> Fallible<()> {
+fn optionally_write_symt<W: Write>(file: &mut W, symt: &Option<Rc<SymbolTable>>) -> Result<()> {
     if let Some(symt) = symt {
         write_bin_symt(file, symt)
     } else {
@@ -108,7 +108,7 @@ impl FstHeader {
         ))
     }
 
-    pub(crate) fn write<W: Write>(&self, file: &mut W) -> Fallible<()> {
+    pub(crate) fn write<W: Write>(&self, file: &mut W) -> Result<()> {
         //magic_number: i32,
         write_bin_i32(file, self.magic_number)?;
         //fst_type: OpenFstString,
@@ -153,7 +153,7 @@ impl OpenFstString {
         ))
     }
 
-    pub(crate) fn write<W: Write>(&self, file: &mut W) -> Fallible<()> {
+    pub(crate) fn write<W: Write>(&self, file: &mut W) -> Result<()> {
         write_bin_i32(file, self.n)?;
         file.write_all(self.s.as_bytes()).map_err(|e| e.into())
     }

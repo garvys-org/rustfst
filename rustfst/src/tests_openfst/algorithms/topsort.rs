@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::top_sort;
 use crate::fst_properties::FstProperties;
@@ -8,7 +8,7 @@ use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_topsort<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_topsort<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring,

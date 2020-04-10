@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::arc::Arc;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
@@ -26,7 +26,7 @@ use crate::EPS_LABEL;
 ///
 /// ![reverse_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/reverse_out.svg?sanitize=true)
 ///
-pub fn reverse<W, F1, F2>(ifst: &F1) -> Fallible<F2>
+pub fn reverse<W, F1, F2>(ifst: &F1) -> Result<F2>
 where
     W: Semiring,
     F1: ExpandedFst<W = W>,

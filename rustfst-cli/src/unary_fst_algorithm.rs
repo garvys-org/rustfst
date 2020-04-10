@@ -4,7 +4,7 @@ use std::time::{Duration, Instant};
 
 use clap::ArgMatches;
 use colored::Colorize;
-use failure::Fallible;
+use anyhow::Result;
 use log::{debug, info};
 
 use rustfst::prelude::*;
@@ -27,17 +27,17 @@ pub trait UnaryFstAlgorithm {
     fn get_path_out(&self) -> &str;
     fn get_algorithm_name(&self) -> String;
 
-    fn read(&self) -> Fallible<VectorFst<TropicalWeight>> {
+    fn read(&self) -> Result<VectorFst<TropicalWeight>> {
         VectorFst::<TropicalWeight>::read(self.get_path_in())
     }
 
-    fn run_algorithm(&self, fst: VectorFst<TropicalWeight>) -> Fallible<VectorFst<TropicalWeight>>;
+    fn run_algorithm(&self, fst: VectorFst<TropicalWeight>) -> Result<VectorFst<TropicalWeight>>;
 
-    fn write(&self, fst: &VectorFst<TropicalWeight>) -> Fallible<()> {
+    fn write(&self, fst: &VectorFst<TropicalWeight>) -> Result<()> {
         fst.write(self.get_path_out())
     }
 
-    fn run_cli_or_bench(&self, m: &ArgMatches) -> Fallible<()> {
+    fn run_cli_or_bench(&self, m: &ArgMatches) -> Result<()> {
         if m.is_present("bench") {
             // Run bench
             self.run_bench(
@@ -51,7 +51,7 @@ pub trait UnaryFstAlgorithm {
         }
     }
 
-    fn run_cli(&self) -> Fallible<()> {
+    fn run_cli(&self) -> Result<()> {
         info!("Running {} algorithm", self.get_algorithm_name().blue());
         // Parsing
         debug!("Parsing...");
@@ -82,7 +82,7 @@ pub trait UnaryFstAlgorithm {
         n_warm_ups: usize,
         n_iters: usize,
         path_markdown_report: Option<&str>,
-    ) -> Fallible<()> {
+    ) -> Result<()> {
         println!(
             "Running benchmark for algorithm {}",
             self.get_algorithm_name().blue()

@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::arc_filters::AnyArcFilter;
@@ -19,8 +19,8 @@ use crate::NO_STATE_ID;
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::connect;
 /// # use rustfst::fst_traits::MutableFst;
-/// # use failure::Fallible;
-/// # fn main() -> Fallible<()> {
+/// # use anyhow::Result;
+/// # fn main() -> Result<()> {
 /// let fst : VectorFst<IntegerWeight> = fst![2 => 3];
 ///
 /// // Add a state not on a successful path
@@ -45,7 +45,7 @@ use crate::NO_STATE_ID;
 ///
 /// ![connect_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/connect_out.svg?sanitize=true)
 ///
-pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Fallible<()> {
+pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
     let mut visitor = ConnectVisitor::new(fst);
     dfs_visit(fst, &mut visitor, &AnyArcFilter {}, false);
     let mut dstates = Vec::with_capacity(visitor.access.len());

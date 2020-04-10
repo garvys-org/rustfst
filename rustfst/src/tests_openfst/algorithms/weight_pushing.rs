@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::{push_weights, ReweightType};
 use crate::fst_traits::{CoreFst, MutableFst, SerializableFst};
@@ -8,7 +8,7 @@ use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::{Semiring, SerializableSemiring};
 use crate::tests_openfst::FstTestData;
 
-pub fn test_weight_pushing_initial<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_weight_pushing_initial<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeaklyDivisibleSemiring + 'static,
@@ -34,7 +34,7 @@ where
     Ok(())
 }
 
-pub fn test_weight_pushing_final<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_weight_pushing_final<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeaklyDivisibleSemiring + 'static,

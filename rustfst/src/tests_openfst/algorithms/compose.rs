@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 use pretty_assertions::assert_eq;
 use serde_derive::{Deserialize, Serialize};
 
@@ -60,7 +60,7 @@ fn do_test_compose<W>(
     fst_raw: &VectorFst<W>,
     compose_test_data: &ComposeTestData<VectorFst<W>>,
     filter: ComposeFilterEnum,
-) -> Fallible<()>
+) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
@@ -119,7 +119,7 @@ impl MatcherFlagsTrait for OLabelLookAheadFlags {
 fn do_test_compose_lookahead<W>(
     fst_raw: &VectorFst<W>,
     compose_test_data: &ComposeTestData<VectorFst<W>>,
-) -> Fallible<()>
+) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
@@ -205,7 +205,7 @@ where
     Ok(())
 }
 
-pub fn test_compose<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_compose<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,

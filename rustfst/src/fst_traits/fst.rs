@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::arc_filters::{ArcFilter, InputEpsilonArcFilter, OutputEpsilonArcFilter};
 use crate::fst_traits::iterators::{ArcIterator, StateIterator};
@@ -52,7 +52,7 @@ pub trait CoreFst {
     /// assert_eq!(fst.final_weight(s2).unwrap(), Some(&BooleanWeight::one()));
     /// assert!(fst.final_weight(s2 + 1).is_err());
     /// ```
-    fn final_weight(&self, state_id: StateId) -> Fallible<Option<&<Self as CoreFst>::W>>;
+    fn final_weight(&self, state_id: StateId) -> Result<Option<&<Self as CoreFst>::W>>;
     unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<&<Self as CoreFst>::W>;
 
     /// Number of arcs leaving a specific state in the wFST.
@@ -72,7 +72,7 @@ pub trait CoreFst {
     /// fst.add_arc(s1, Arc::new(3, 5, BooleanWeight::new(true), s2));
     /// assert_eq!(fst.num_arcs(s1).unwrap(), 1);
     /// ```
-    fn num_arcs(&self, s: StateId) -> Fallible<usize>;
+    fn num_arcs(&self, s: StateId) -> Result<usize>;
     unsafe fn num_arcs_unchecked(&self, s: StateId) -> usize;
 
     /// Returns whether or not the state with identifier passed as parameters is a final state.
@@ -95,7 +95,7 @@ pub trait CoreFst {
     /// assert!(fst.is_final(s2 + 1).is_err());
     /// ```
     #[inline]
-    fn is_final(&self, state_id: StateId) -> Fallible<bool> {
+    fn is_final(&self, state_id: StateId) -> Result<bool> {
         let w = self.final_weight(state_id)?;
         Ok(w.is_some())
     }
@@ -138,7 +138,7 @@ pub trait Fst:
     /// assert_eq!(fst.num_input_epsilons(s0).unwrap(), 2);
     /// assert_eq!(fst.num_input_epsilons(s1).unwrap(), 0);
     /// ```
-    fn num_input_epsilons(&self, state: StateId) -> Fallible<usize> {
+    fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
         let filter = InputEpsilonArcFilter {};
         Ok(self.arcs_iter(state)?.filter(|v| filter.keep(v)).count())
     }
@@ -165,7 +165,7 @@ pub trait Fst:
     /// assert_eq!(fst.num_output_epsilons(s0).unwrap(), 1);
     /// assert_eq!(fst.num_output_epsilons(s1).unwrap(), 0);
     /// ```
-    fn num_output_epsilons(&self, state: StateId) -> Fallible<usize> {
+    fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
         let filter = OutputEpsilonArcFilter {};
         Ok(self.arcs_iter(state)?.filter(|v| filter.keep(v)).count())
     }

@@ -2,8 +2,8 @@ use std::fs::{read, File};
 use std::io::BufWriter;
 use std::path::Path;
 
-use failure::Fallible;
-use failure::ResultExt;
+use anyhow::Result;
+use anyhow::Context;
 use nom::multi::count;
 use nom::number::complete::le_i64;
 use nom::IResult;
@@ -25,8 +25,8 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
         "vector".to_string()
     }
 
-    fn read<P: AsRef<Path>>(path_bin_fst: P) -> Fallible<Self> {
-        let data = read(path_bin_fst.as_ref()).with_context(|_| {
+    fn read<P: AsRef<Path>>(path_bin_fst: P) -> Result<Self> {
+        let data = read(path_bin_fst.as_ref()).with_context(|| {
             format!(
                 "Can't open VectorFst binary file : {:?}",
                 path_bin_fst.as_ref()
@@ -39,7 +39,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
         Ok(parsed_fst)
     }
 
-    fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Fallible<()> {
+    fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Result<()> {
         let mut file = BufWriter::new(File::create(path_bin_fst)?);
 
         let num_arcs: usize = (0..self.num_states())
@@ -89,7 +89,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
         Ok(())
     }
 
-    fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst<W>) -> Fallible<Self> {
+    fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst<W>) -> Result<Self> {
         let start_state = parsed_fst_text.start();
         let num_states = parsed_fst_text.num_states();
 

@@ -1,7 +1,7 @@
 use std::ops::Deref;
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::fst_traits::{
     ArcIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator,
@@ -53,7 +53,7 @@ impl<F: CoreFst> CoreFst for Rc<F> {
         self.deref().start()
     }
 
-    fn final_weight(&self, state_id: usize) -> Fallible<Option<&Self::W>> {
+    fn final_weight(&self, state_id: usize) -> Result<Option<&Self::W>> {
         self.deref().final_weight(state_id)
     }
 
@@ -61,7 +61,7 @@ impl<F: CoreFst> CoreFst for Rc<F> {
         self.deref().final_weight_unchecked(state_id)
     }
 
-    fn num_arcs(&self, s: usize) -> Fallible<usize> {
+    fn num_arcs(&self, s: usize) -> Result<usize> {
         self.deref().num_arcs(s)
     }
 
@@ -88,7 +88,7 @@ where
 {
     type Iter = F::Iter;
 
-    fn arcs_iter(&'a self, state_id: usize) -> Fallible<Self::Iter> {
+    fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
         self.deref().arcs_iter(state_id)
     }
 

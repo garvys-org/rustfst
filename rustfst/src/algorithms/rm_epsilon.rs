@@ -2,7 +2,7 @@ use std::borrow::Borrow;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
-use failure::Fallible;
+use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::arc_filters::{ArcFilter, EpsilonArcFilter};
@@ -59,8 +59,8 @@ impl<W: Semiring, Q: Queue> RmEpsilonConfig<W, Q> {
 /// # use rustfst::algorithms::rm_epsilon;
 /// # use rustfst::Arc;
 /// # use rustfst::EPS_LABEL;
-/// # use failure::Fallible;
-/// # fn main() -> Fallible<()> {
+/// # use anyhow::Result;
+/// # fn main() -> Result<()> {
 /// let mut fst = VectorFst::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
@@ -96,7 +96,7 @@ impl<W: Semiring, Q: Queue> RmEpsilonConfig<W, Q> {
 ///
 /// ![rmepsilon_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/rmepsilon_out.svg?sanitize=true)
 ///
-pub fn rm_epsilon<F: MutableFst>(fst: &mut F) -> Fallible<()>
+pub fn rm_epsilon<F: MutableFst>(fst: &mut F) -> Result<()>
 where
     F::W: 'static,
 {
@@ -108,7 +108,7 @@ where
 pub fn rm_epsilon_with_config<F: MutableFst, Q: Queue>(
     fst: &mut F,
     opts: RmEpsilonConfig<F::W, Q>,
-) -> Fallible<()>
+) -> Result<()>
 where
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
     F::W: 'static,
@@ -268,7 +268,7 @@ where
         }
     }
 
-    pub fn expand(&mut self, source: StateId) -> Fallible<(Vec<Arc<F::W>>, F::W)> {
+    pub fn expand(&mut self, source: StateId) -> Result<(Vec<Arc<F::W>>, F::W)> {
         let zero = F::W::zero();
         let distance = self.sd_state.shortest_distance(Some(source))?;
 
@@ -399,7 +399,7 @@ where
         &self.cache_impl
     }
 
-    fn expand(&mut self, state: usize) -> Fallible<()> {
+    fn expand(&mut self, state: usize) -> Result<()> {
         let (arcs, final_weight) = self.rmeps_state.expand(state)?;
         let zero = F::W::zero();
 
@@ -416,11 +416,11 @@ where
         Ok(())
     }
 
-    fn compute_start(&mut self) -> Fallible<Option<usize>> {
+    fn compute_start(&mut self) -> Result<Option<usize>> {
         Ok(self.rmeps_state.sd_state.fst.borrow().start())
     }
 
-    fn compute_final(&mut self, state: usize) -> Fallible<Option<Self::W>> {
+    fn compute_final(&mut self, state: usize) -> Result<Option<Self::W>> {
         // A bit hacky as the final weight is computed inside the expand function.
         // Should in theory never be called
         self.expand(state)?;

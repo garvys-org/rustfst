@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{replace, ReplaceFst};
@@ -47,7 +47,7 @@ impl ReplaceOperationResult {
     }
 }
 
-pub fn test_replace<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_replace<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
@@ -89,7 +89,7 @@ where
     // Ok(())
 }
 
-pub fn test_replace_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_replace_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,

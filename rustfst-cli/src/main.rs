@@ -1,7 +1,7 @@
 use std::process;
 
 use clap::{App, Arg, SubCommand};
-use failure::format_err;
+use anyhow::{format_err, Result};
 use log::error;
 
 use crate::cmds::arcsort::ArcsortAlgorithm;
@@ -15,11 +15,9 @@ use crate::cmds::reverse::ReverseAlgorithm;
 use crate::cmds::rm_final_epsilon::RmFinalEpsilonAlgorithm;
 use crate::cmds::shortest_path::ShortestPathAlgorithm;
 use crate::cmds::topsort::TopsortAlgorithm;
-use crate::pretty_errors::ExitFailure;
 use crate::unary_fst_algorithm::UnaryFstAlgorithm;
 
 pub mod cmds;
-pub mod pretty_errors;
 pub mod unary_fst_algorithm;
 
 fn main() {
@@ -154,7 +152,7 @@ fn main() {
 }
 
 /// Handles the command-line input.
-fn handle(matches: clap::ArgMatches) -> Result<(), ExitFailure> {
+fn handle(matches: clap::ArgMatches) -> Result<()> {
     match matches.subcommand() {
         ("minimize", Some(m)) => MinimizeAlgorithm::new(
             m.value_of("in.fst").unwrap(),

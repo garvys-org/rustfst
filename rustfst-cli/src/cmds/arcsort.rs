@@ -1,4 +1,4 @@
-use failure::{bail, Fallible};
+use anyhow::{bail, Result};
 
 use rustfst::prelude::*;
 
@@ -26,7 +26,7 @@ impl UnaryFstAlgorithm for ArcsortAlgorithm {
     fn run_algorithm(
         &self,
         mut fst: VectorFst<TropicalWeight>,
-    ) -> Fallible<VectorFst<TropicalWeight>> {
+    ) -> Result<VectorFst<TropicalWeight>> {
         let cmp = match self.sort_type.as_str() {
             "ilabel" => ilabel_compare,
             "olabel" => olabel_compare,

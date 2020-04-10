@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use bitflags::bitflags;
 
@@ -37,7 +37,7 @@ pub fn push_weights<F>(
     fst: &mut F,
     reweight_type: ReweightType,
     remove_total_weight: bool,
-) -> Fallible<()>
+) -> Result<()>
 where
     F: MutableFst,
     F::W: WeaklyDivisibleSemiring + 'static,
@@ -59,7 +59,7 @@ where
     Ok(())
 }
 
-fn compute_total_weight<F>(fst: &F, dist: &[F::W], reverse: bool) -> Fallible<F::W>
+fn compute_total_weight<F>(fst: &F, dist: &[F::W], reverse: bool) -> Result<F::W>
 where
     F: ExpandedFst,
 {
@@ -85,7 +85,7 @@ where
     }
 }
 
-fn remove_weight<F>(fst: &mut F, weight: F::W, at_final: bool) -> Fallible<()>
+fn remove_weight<F>(fst: &mut F, weight: F::W, at_final: bool) -> Result<()>
 where
     F: MutableFst,
     F::W: WeaklyDivisibleSemiring,
@@ -161,7 +161,7 @@ macro_rules! m_labels_pushing {
 
 /// Pushes the weights and/or labels of the input FST into the output
 /// mutable FST by pushing weights and/or labels towards the initial state or final states.
-pub fn push<F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType) -> Fallible<F2>
+pub fn push<F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType) -> Result<F2>
 where
     F1: ExpandedFst,
     F1::W: WeaklyDivisibleSemiring + WeightQuantize,

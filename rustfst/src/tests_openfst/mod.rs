@@ -6,7 +6,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::string::String;
 
-use failure::{bail, Fail, Fallible};
+use anyhow::{bail, Result};
 use path_abs::PathAbs;
 use path_abs::PathInfo;
 use path_abs::PathMut;
@@ -309,40 +309,11 @@ where
     }
 }
 
-pub(crate) fn get_path_folder(test_name: &str) -> Fallible<PathBuf> {
+pub(crate) fn get_path_folder(test_name: &str) -> Result<PathBuf> {
     let mut path_repo = PathAbs::new(PathBuf::from(env!("CARGO_MANIFEST_DIR")).parent().unwrap())?;
     path_repo.append("rustfst-tests-data")?;
     path_repo.append(test_name)?;
     Ok(path_repo.as_path().to_path_buf())
-}
-
-pub(crate) struct ExitFailure(failure::Error);
-
-/// Prints a list of causes for this Error, along with any backtrace
-/// information collected by the Error (if RUST_BACKTRACE=1).
-impl std::fmt::Debug for ExitFailure {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let fail = self.0.as_fail();
-
-        writeln!(f, "{}", &fail)?;
-
-        let mut x: &dyn Fail = fail;
-        while let Some(cause) = x.cause() {
-            writeln!(f, " -> caused by: {}", &cause)?;
-            x = cause;
-        }
-        if let Some(backtrace) = x.backtrace() {
-            writeln!(f, "{:?}", backtrace)?;
-        }
-
-        Ok(())
-    }
-}
-
-impl<T: Into<failure::Error>> From<T> for ExitFailure {
-    fn from(t: T) -> Self {
-        ExitFailure(t.into())
-    }
 }
 
 macro_rules! do_run {
@@ -382,407 +353,407 @@ macro_rules! test_fst {
             use super::*;
 
             #[test]
-            fn test_union_openfst() -> Fallible<()> {
+            fn test_union_openfst() -> Result<()> {
                 do_run!(test_union, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_arc_map_identity_openfst() -> Fallible<()> {
+            fn test_arc_map_identity_openfst() -> Result<()> {
                 do_run!(test_arc_map_identity, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_arc_map_invert_openfst() -> Fallible<()> {
+            fn test_arc_map_invert_openfst() -> Result<()> {
                 do_run!(test_arc_map_invert, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_arc_map_input_epsilon_openfst() -> Fallible<()> {
+            fn test_arc_map_input_epsilon_openfst() -> Result<()> {
                 do_run!(test_arc_map_input_epsilon, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_arc_map_output_epsilon_openfst() -> Fallible<()> {
+            fn test_arc_map_output_epsilon_openfst() -> Result<()> {
                 do_run!(test_arc_map_output_epsilon, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_arc_map_plus_openfst() -> Fallible<()> {
+            fn test_arc_map_plus_openfst() -> Result<()> {
                 do_run!(test_arc_map_plus, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_arc_map_times_openfst() -> Fallible<()> {
+            fn test_arc_map_times_openfst() -> Result<()> {
                 do_run!(test_arc_map_times, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_arc_map_quantize_openfst() -> Fallible<()> {
+            fn test_arc_map_quantize_openfst() -> Result<()> {
                 do_run!(test_arc_map_quantize, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_arc_map_rmweight_openfst() -> Fallible<()> {
+            fn test_arc_map_rmweight_openfst() -> Result<()> {
                 do_run!(test_arc_map_rmweight, $fst_name);
                 Ok(())
             }
 
             #[test]
             #[ignore]
-            fn test_arcsort_ilabel_openfst() -> Fallible<()> {
+            fn test_arcsort_ilabel_openfst() -> Result<()> {
                 do_run!(test_arcsort_ilabel, $fst_name);
                 Ok(())
             }
 
             #[test]
             #[ignore]
-            fn test_arcsort_olabel_openfst() -> Fallible<()> {
+            fn test_arcsort_olabel_openfst() -> Result<()> {
                 do_run!(test_arcsort_olabel, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_closure_plus_openfst() -> Fallible<()> {
+            fn test_closure_plus_openfst() -> Result<()> {
                 do_run!(test_closure_plus, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_closure_star_openfst() -> Fallible<()> {
+            fn test_closure_star_openfst() -> Result<()> {
                 do_run!(test_closure_star, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_closure_plus_dynamic_openfst() -> Fallible<()> {
+            fn test_closure_plus_dynamic_openfst() -> Result<()> {
                 do_run!(test_closure_plus_dynamic, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_closure_star_dynamic_openfst() -> Fallible<()> {
+            fn test_closure_star_dynamic_openfst() -> Result<()> {
                 do_run!(test_closure_star_dynamic, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_concat_openfst() -> Fallible<()> {
+            fn test_concat_openfst() -> Result<()> {
                 do_run!(test_concat, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_concat_dynamic_openfst() -> Fallible<()> {
+            fn test_concat_dynamic_openfst() -> Result<()> {
                 do_run!(test_concat_dynamic, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_connect_openfst() -> Fallible<()> {
+            fn test_connect_openfst() -> Result<()> {
                 do_run!(test_connect, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_factor_weight_identity_openfst() -> Fallible<()> {
+            fn test_factor_weight_identity_openfst() -> Result<()> {
                 do_run!(test_factor_weight_identity, $fst_name);
                 Ok(())
             }
 
             // #[test]
             // #[ignore]
-            // fn test_determinize_openfst() -> Fallible<()> {
+            // fn test_determinize_openfst() -> Result<()> {
             //     do_run!(test_determinize, $fst_name);
             //     Ok(())
             // }
 
             #[test]
-            fn test_encode_decode_openfst() -> Fallible<()> {
+            fn test_encode_decode_openfst() -> Result<()> {
                 do_run!(test_encode_decode, $fst_name);
                 Ok(())
             }
 
             #[test]
             #[ignore]
-            fn test_encode_openfst() -> Fallible<()> {
+            fn test_encode_openfst() -> Result<()> {
                 do_run!(test_encode, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_factor_weight_gallic_openfst() -> Fallible<()> {
+            fn test_factor_weight_gallic_openfst() -> Result<()> {
                 do_run!(test_factor_weight_gallic, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_factor_weight_identity_dynamic_openfst() -> Fallible<()> {
+            fn test_factor_weight_identity_dynamic_openfst() -> Result<()> {
                 do_run!(test_factor_weight_identity_dynamic, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_gallic_encode_decode_openfst() -> Fallible<()> {
+            fn test_gallic_encode_decode_openfst() -> Result<()> {
                 do_run!(test_gallic_encode_decode, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_invert_openfst() -> Fallible<()> {
+            fn test_invert_openfst() -> Result<()> {
                 do_run!(test_invert, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_minimize_openfst() -> Fallible<()> {
+            fn test_minimize_openfst() -> Result<()> {
                 do_run!(test_minimize, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_project_output_openfst() -> Fallible<()> {
+            fn test_project_output_openfst() -> Result<()> {
                 do_run!(test_project_output, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_project_input_openfst() -> Fallible<()> {
+            fn test_project_input_openfst() -> Result<()> {
                 do_run!(test_project_input, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_fst_properties_openfst() -> Fallible<()> {
+            fn test_fst_properties_openfst() -> Result<()> {
                 do_run!(test_fst_properties, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_push_openfst() -> Fallible<()> {
+            fn test_push_openfst() -> Result<()> {
                 do_run!(test_push, $fst_name);
                 Ok(())
             }
 
             // #[test]
             // #[ignore]
-            // fn test_replace_openfst() -> Fallible<()> {
+            // fn test_replace_openfst() -> Result<()> {
             //     do_run!(test_replace, $fst_name);
             //     Ok(())
             // }
             //
             // #[test]
             // #[ignore]
-            // fn test_replace_dynamic_openfst() -> Fallible<()> {
+            // fn test_replace_dynamic_openfst() -> Result<()> {
             //     do_run!(test_replace_dynamic, $fst_name);
             //     Ok(())
             // }
 
             #[test]
-            fn test_reverse_openfst() -> Fallible<()> {
+            fn test_reverse_openfst() -> Result<()> {
                 do_run!(test_reverse, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_shortest_distance_openfst() -> Fallible<()> {
+            fn test_shortest_distance_openfst() -> Result<()> {
                 do_run!(test_shortest_distance, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_state_map_arc_unique_openfst() -> Fallible<()> {
+            fn test_state_map_arc_unique_openfst() -> Result<()> {
                 do_run!(test_state_map_arc_unique, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_state_map_arc_sum_openfst() -> Fallible<()> {
+            fn test_state_map_arc_sum_openfst() -> Result<()> {
                 do_run!(test_state_map_arc_sum, $fst_name);
                 Ok(())
             }
 
             #[test]
             #[ignore]
-            fn test_shortest_path_openfst() -> Fallible<()> {
+            fn test_shortest_path_openfst() -> Result<()> {
                 do_run!(test_shortest_path, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_topsort_openfst() -> Fallible<()> {
+            fn test_topsort_openfst() -> Result<()> {
                 do_run!(test_topsort, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_union_dynamic_openfst() -> Fallible<()> {
+            fn test_union_dynamic_openfst() -> Result<()> {
                 do_run!(test_union_dynamic, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_weight_pushing_initial_openfst() -> Fallible<()> {
+            fn test_weight_pushing_initial_openfst() -> Result<()> {
                 do_run!(test_weight_pushing_initial, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_del_all_states_openfst() -> Fallible<()> {
+            fn test_del_all_states_openfst() -> Result<()> {
                 do_run!(test_del_all_states, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_vector_fst_text_serialization_openfst() -> Fallible<()> {
+            fn test_vector_fst_text_serialization_openfst() -> Result<()> {
                 do_run!(test_vector_fst_text_serialization, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_vector_fst_text_serialization_with_symt_openfst() -> Fallible<()> {
+            fn test_vector_fst_text_serialization_with_symt_openfst() -> Result<()> {
                 do_run!(test_vector_fst_text_serialization_with_symt, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_vector_fst_bin_serializer_openfst() -> Fallible<()> {
+            fn test_vector_fst_bin_serializer_openfst() -> Result<()> {
                 do_run!(test_vector_fst_bin_serializer, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_vector_fst_bin_serializer_with_symt_openfst() -> Fallible<()> {
+            fn test_vector_fst_bin_serializer_with_symt_openfst() -> Result<()> {
                 do_run!(test_vector_fst_bin_serializer_with_symt, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_vector_fst_bin_with_symt_deserializer_openfst() -> Fallible<()> {
+            fn test_vector_fst_bin_with_symt_deserializer_openfst() -> Result<()> {
                 do_run!(test_vector_fst_bin_with_symt_deserializer, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_vector_fst_bin_deserializer_openfst() -> Fallible<()> {
+            fn test_vector_fst_bin_deserializer_openfst() -> Result<()> {
                 do_run!(test_vector_fst_bin_deserializer, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_weight_pushing_final_openfst() -> Fallible<()> {
+            fn test_weight_pushing_final_openfst() -> Result<()> {
                 do_run!(test_weight_pushing_final, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_const_fst_convert_convert_openfst() -> Fallible<()> {
+            fn test_const_fst_convert_convert_openfst() -> Result<()> {
                 do_run!(test_const_fst_convert_convert, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_const_fst_bin_deserializer_openfst() -> Fallible<()> {
+            fn test_const_fst_bin_deserializer_openfst() -> Result<()> {
                 do_run!(test_const_fst_bin_deserializer, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_const_fst_aligned_bin_deserializer_openfst() -> Fallible<()> {
+            fn test_const_fst_aligned_bin_deserializer_openfst() -> Result<()> {
                 do_run!(test_const_fst_aligned_bin_deserializer, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_const_fst_bin_serializer_openfst() -> Fallible<()> {
+            fn test_const_fst_bin_serializer_openfst() -> Result<()> {
                 do_run!(test_const_fst_bin_serializer, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_const_fst_bin_serializer_with_symt_openfst() -> Fallible<()> {
+            fn test_const_fst_bin_serializer_with_symt_openfst() -> Result<()> {
                 do_run!(test_const_fst_bin_serializer_with_symt, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_const_fst_text_serialization_openfst() -> Fallible<()> {
+            fn test_const_fst_text_serialization_openfst() -> Result<()> {
                 do_run!(test_const_fst_text_serialization, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_const_fst_text_serialization_with_symt_openfst() -> Fallible<()> {
+            fn test_const_fst_text_serialization_with_symt_openfst() -> Result<()> {
                 do_run!(test_const_fst_text_serialization_with_symt, $fst_name);
                 Ok(())
             }
 
             #[test]
             #[ignore]
-            fn test_rmepsilon_openfst() -> Fallible<()> {
+            fn test_rmepsilon_openfst() -> Result<()> {
                 do_run!(test_rmepsilon, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_rmepsilon_dynamic_openfst() -> Fallible<()> {
+            fn test_rmepsilon_dynamic_openfst() -> Result<()> {
                 do_run!(test_rmepsilon_dynamic, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_fst_into_iterator_const_openfst() -> Fallible<()> {
+            fn test_fst_into_iterator_const_openfst() -> Result<()> {
                 do_run!(test_fst_into_iterator_const, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_fst_into_iterator_vector_openfst() -> Fallible<()> {
+            fn test_fst_into_iterator_vector_openfst() -> Result<()> {
                 do_run!(test_fst_into_iterator_vector, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_fst_convert_openfst() -> Fallible<()> {
+            fn test_fst_convert_openfst() -> Result<()> {
                 do_run!(test_fst_convert, $fst_name);
                 Ok(())
             }
 
             // #[test]
             // #[ignore]
-            // fn test_fst_sorted_matcher_openfst() -> Fallible<()> {
+            // fn test_fst_sorted_matcher_openfst() -> Result<()> {
             //     do_run!(test_sorted_matcher, $fst_name);
             //     Ok(())
             // }
 
             #[test]
-            fn test_fst_compose_openfst() -> Fallible<()> {
+            fn test_fst_compose_openfst() -> Result<()> {
                 do_run!(test_compose, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_fst_condense_openfst() -> Fallible<()> {
+            fn test_fst_condense_openfst() -> Result<()> {
                 do_run!(test_condense, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_fst_state_reachable_openfst() -> Fallible<()> {
+            fn test_fst_state_reachable_openfst() -> Result<()> {
                 do_run!(test_state_reachable, $fst_name);
                 Ok(())
             }
 
             #[test]
             #[ignore]
-            fn test_fst_label_reachable_openfst() -> Fallible<()> {
+            fn test_fst_label_reachable_openfst() -> Result<()> {
                 do_run!(test_label_reachable, $fst_name);
                 Ok(())
             }

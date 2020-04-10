@@ -1,8 +1,8 @@
+use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
 
-use failure::Fallible;
-use failure::_core::cell::RefCell;
+use anyhow::Result;
 
 use crate::algorithms::compose::lookahead_matchers::{LookaheadMatcher, MatcherFlagsTrait};
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
@@ -29,15 +29,15 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
     type F = M::F;
     type Iter = M::Iter;
 
-    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Fallible<Self> {
+    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Result<Self> {
         Self::new_with_data(fst, match_type, None)
     }
 
-    fn iter(&self, state: usize, label: usize) -> Fallible<Self::Iter> {
+    fn iter(&self, state: usize, label: usize) -> Result<Self::Iter> {
         self.matcher.iter(state, label)
     }
 
-    fn final_weight(&self, state: usize) -> Fallible<Option<*const W>> {
+    fn final_weight(&self, state: usize) -> Result<Option<*const W>> {
         self.matcher.final_weight(state)
     }
 
@@ -57,7 +57,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
         }
     }
 
-    fn priority(&self, state: usize) -> Fallible<usize> {
+    fn priority(&self, state: usize) -> Result<usize> {
         self.matcher.priority(state)
     }
 
@@ -83,7 +83,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         fst: Rc<Self::F>,
         match_type: MatchType,
         data: Option<Rc<RefCell<Self::MatcherData>>>,
-    ) -> Fallible<Self> {
+    ) -> Result<Self> {
         if !(MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER)
             | MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
         {
@@ -117,7 +117,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
     fn create_data<F: ExpandedFst<W = W>>(
         fst: &F,
         match_type: MatchType,
-    ) -> Fallible<Option<Rc<RefCell<Self::MatcherData>>>> {
+    ) -> Result<Option<Rc<RefCell<Self::MatcherData>>>> {
         let reach_input = match_type == MatchType::MatchInput;
         if (reach_input && MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER))
             || (!reach_input && MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
@@ -128,7 +128,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         }
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &Rc<LF>) -> Fallible<()> {
+    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &Rc<LF>) -> Result<()> {
         let lfst_ptr = Rc::into_raw(Rc::clone(lfst)) as *const LF as *const u32;
         self.lfst_ptr = lfst_ptr;
         let reach_input = self.match_type() == MatchType::MatchOutput;
@@ -143,7 +143,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         matcher_state: usize,
         lfst: &Rc<LF>,
         lfst_state: usize,
-    ) -> Fallible<bool> {
+    ) -> Result<bool> {
         // InitLookAheadFst
         let lfst_ptr = Rc::into_raw(Rc::clone(&lfst)) as *const LF as *const u32;
         if lfst_ptr != self.lfst_ptr {
@@ -195,7 +195,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         }
     }
 
-    fn lookahead_label(&self, current_state: usize, label: usize) -> Fallible<bool> {
+    fn lookahead_label(&self, current_state: usize, label: usize) -> Result<bool> {
         if label == EPS_LABEL {
             return Ok(true);
         }

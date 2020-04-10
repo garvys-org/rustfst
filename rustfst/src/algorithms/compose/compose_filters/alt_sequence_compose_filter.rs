@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::compose::compose_filters::ComposeFilter;
 use crate::algorithms::compose::filter_states::{FilterState, IntegerFilterState};
@@ -44,7 +44,7 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         fst2: Rc<<Self::M2 as Matcher<W>>::F>,
         m1: IM1,
         m2: IM2,
-    ) -> Fallible<Self> {
+    ) -> Result<Self> {
         Ok(Self {
             fst2: Rc::clone(&fst2),
             matcher1: m1.into().unwrap_or_else(|| {
@@ -70,7 +70,7 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Self::FS::new(0)
     }
 
-    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Fallible<()> {
+    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Result<()> {
         if !(self.s1 == s1 && self.s2 == s2 && &self.fs == filter_state) {
             self.s1 = s1;
             self.s2 = s2;
@@ -85,7 +85,7 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(())
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS> {
+    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Result<Self::FS> {
         let res = if arc2.ilabel == NO_LABEL {
             if self.alleps2 {
                 Self::FS::new_no_state()
@@ -110,7 +110,7 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(res)
     }
 
-    fn filter_final(&self, _w1: &mut W, _w2: &mut W) -> Fallible<()> {
+    fn filter_final(&self, _w1: &mut W, _w2: &mut W) -> Result<()> {
         Ok(())
     }
 

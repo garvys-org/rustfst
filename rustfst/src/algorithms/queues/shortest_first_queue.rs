@@ -1,32 +1,31 @@
 use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::fmt::Formatter;
-use std::fmt::Result;
 
 use binary_heap_plus::{BinaryHeap, FnComparator};
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::{Queue, QueueType};
 use crate::semirings::Semiring;
 use crate::StateId;
 
 #[derive(Clone)]
-pub struct StateWeightCompare<W: Semiring, C: Clone + Fn(&W, &W) -> Fallible<bool>> {
+pub struct StateWeightCompare<W: Semiring, C: Clone + Fn(&W, &W) -> Result<bool>> {
     less: C,
     weights: Vec<W>,
 }
 
-impl<W: Semiring, C: Clone + Fn(&W, &W) -> Fallible<bool>> StateWeightCompare<W, C> {
+impl<W: Semiring, C: Clone + Fn(&W, &W) -> Result<bool>> StateWeightCompare<W, C> {
     pub fn new(weights: Vec<W>, less: C) -> Self {
         Self { less, weights }
     }
 
-    pub fn compare(&self, s1: StateId, s2: StateId) -> Fallible<bool> {
+    pub fn compare(&self, s1: StateId, s2: StateId) -> Result<bool> {
         (self.less)(&self.weights[s1], &self.weights[s2])
     }
 }
 
-pub fn natural_less<W: Semiring>(w1: &W, w2: &W) -> Fallible<bool> {
+pub fn natural_less<W: Semiring>(w1: &W, w2: &W) -> Result<bool> {
     Ok((&w1.plus(w2)? == w1) && (w1 != w2))
 }
 
@@ -36,7 +35,7 @@ pub struct ShortestFirstQueue<C: Clone + FnMut(&StateId, &StateId) -> Ordering> 
 }
 
 impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> Debug for ShortestFirstQueue<C> {
-    fn fmt(&self, f: &mut Formatter) -> Result {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         f.write_str(format!("ShortestFirstQueue {{ heap: {:?} }}", self.heap).as_str())
     }
 }

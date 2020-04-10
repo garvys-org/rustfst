@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, Fst};
@@ -40,7 +40,7 @@ impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
         self.start_state
     }
 
-    fn final_weight(&self, state_id: StateId) -> Fallible<Option<&W>> {
+    fn final_weight(&self, state_id: StateId) -> Result<Option<&W>> {
         let s = self
             .states
             .get(state_id)
@@ -53,7 +53,7 @@ impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
         self.states.get_unchecked(state_id).final_weight.as_ref()
     }
 
-    fn num_arcs(&self, s: StateId) -> Fallible<usize> {
+    fn num_arcs(&self, s: StateId) -> Result<usize> {
         if let Some(vector_fst_state) = self.states.get(s) {
             Ok(vector_fst_state.num_arcs())
         } else {

@@ -6,7 +6,7 @@ macro_rules! test_semiring_serializable {
             use super::*;
 
             #[test]
-            fn test_serializable_binary() -> Fallible<()> {
+            fn test_serializable_binary() -> Result<()> {
                 for weight in &[ $( $weight ),* ] {
                     let weight = weight.clone();
                     let mut serialization = vec![];
@@ -23,7 +23,7 @@ macro_rules! test_semiring_serializable {
             }
 
             #[test]
-            fn test_serializable_text() -> Fallible<()> {
+            fn test_serializable_text() -> Result<()> {
                 for weight in &[ $( $weight ),* ] {
                     let weight = weight.clone();
                     let serialization = format!("{}", weight);

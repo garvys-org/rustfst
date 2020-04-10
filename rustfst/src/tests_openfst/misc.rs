@@ -1,10 +1,10 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_del_all_states<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_del_all_states<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: MutableFst + SerializableFst,
     F::W: SerializableSemiring,

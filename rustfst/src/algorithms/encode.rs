@@ -1,6 +1,7 @@
+use std::cell::RefCell;
 use std::collections::hash_map::{Entry, HashMap};
 
-use failure::{Fallible, ResultExt};
+use anyhow::{Result, Context};
 
 use crate::algorithms::{rm_final_epsilon, ArcMapper, FinalArc, MapFinalAction};
 use crate::fst_traits::{ExpandedFst, MutableFst};
@@ -8,7 +9,6 @@ use crate::semirings::Semiring;
 use crate::Arc;
 use crate::Label;
 use crate::EPS_LABEL;
-use failure::_core::cell::RefCell;
 
 #[derive(PartialEq, Eq, Hash, Clone)]
 pub struct EncodeTuple<W: Semiring> {
@@ -108,7 +108,7 @@ impl<W: Semiring> EncodeMapper<W> {
 }
 
 impl<W: Semiring> ArcMapper<W> for EncodeMapper<W> {
-    fn arc_map(&self, arc: &mut Arc<W>) -> Fallible<()> {
+    fn arc_map(&self, arc: &mut Arc<W>) -> Result<()> {
         let tuple = self.encode_table.0.borrow().arc_to_tuple(arc);
         let label = self.encode_table.0.borrow_mut().encode(tuple);
         arc.ilabel = label;
@@ -121,7 +121,7 @@ impl<W: Semiring> ArcMapper<W> for EncodeMapper<W> {
         Ok(())
     }
 
-    fn final_arc_map(&self, final_arc: &mut FinalArc<W>) -> Fallible<()> {
+    fn final_arc_map(&self, final_arc: &mut FinalArc<W>) -> Result<()> {
         if self.encode_table.0.borrow().encode_weights {
             let tuple = self.encode_table.0.borrow().final_arc_to_tuple(final_arc);
             let label = self.encode_table.0.borrow_mut().encode(tuple);
@@ -156,7 +156,7 @@ impl<W: Semiring> DecodeMapper<W> {
 }
 
 impl<W: Semiring> ArcMapper<W> for DecodeMapper<W> {
-    fn arc_map(&self, arc: &mut Arc<W>) -> Fallible<()> {
+    fn arc_map(&self, arc: &mut Arc<W>) -> Result<()> {
         let tuple = self
             .encode_table
             .0
@@ -174,7 +174,7 @@ impl<W: Semiring> ArcMapper<W> for DecodeMapper<W> {
         Ok(())
     }
 
-    fn final_arc_map(&self, _final_arc: &mut FinalArc<W>) -> Fallible<()> {
+    fn final_arc_map(&self, _final_arc: &mut FinalArc<W>) -> Result<()> {
         Ok(())
     }
 
@@ -195,25 +195,25 @@ pub fn encode<F>(
     fst: &mut F,
     encode_labels: bool,
     encode_weights: bool,
-) -> Fallible<EncodeTable<F::W>>
+) -> Result<EncodeTable<F::W>>
 where
     F: MutableFst,
 {
     let mut encode_mapper = EncodeMapper::new(encode_labels, encode_weights);
     fst.arc_map(&mut encode_mapper)
-        .with_context(|_| format_err!("Error calling ArcMap with EncodeMapper."))?;
+        .with_context(|| format_err!("Error calling ArcMap with EncodeMapper."))?;
     Ok(encode_mapper.encode_table)
 }
 
 /// The `decode` operation takes as input an encoded FST and the corresponding `EncodeTable` object
 /// and reverts the encoding.
-pub fn decode<F>(fst: &mut F, encode_table: EncodeTable<F::W>) -> Fallible<()>
+pub fn decode<F>(fst: &mut F, encode_table: EncodeTable<F::W>) -> Result<()>
 where
     F: MutableFst + ExpandedFst,
 {
     let mut decode_mapper = DecodeMapper::new(encode_table);
     fst.arc_map(&mut decode_mapper)
-        .with_context(|_| format_err!("Error calling ArcMap with EncodeMapper."))?;
+        .with_context(|| format_err!("Error calling ArcMap with EncodeMapper."))?;
     rm_final_epsilon(fst)?;
     Ok(())
 }

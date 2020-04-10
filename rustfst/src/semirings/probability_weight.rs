@@ -8,7 +8,7 @@ use crate::semirings::{
     StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::KDELTA;
-use failure::Fallible;
+use anyhow::Result;
 use nom::number::complete::{float, le_f32};
 use nom::IResult;
 use ordered_float::OrderedFloat;
@@ -41,12 +41,12 @@ impl Semiring for ProbabilityWeight {
         }
     }
 
-    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         self.value.0 += rhs.borrow().value.0;
         Ok(())
     }
 
-    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         self.value.0 *= rhs.borrow().value.0;
         Ok(())
     }
@@ -63,7 +63,7 @@ impl Semiring for ProbabilityWeight {
         self.value.0 = value
     }
 
-    fn reverse(&self) -> Fallible<Self::ReverseWeight> {
+    fn reverse(&self) -> Result<Self::ReverseWeight> {
         Ok(*self)
     }
 
@@ -75,7 +75,7 @@ impl Semiring for ProbabilityWeight {
 }
 
 impl ReverseBack<ProbabilityWeight> for ProbabilityWeight {
-    fn reverse_back(&self) -> Fallible<ProbabilityWeight> {
+    fn reverse_back(&self) -> Result<ProbabilityWeight> {
         unimplemented!()
     }
 }
@@ -100,7 +100,7 @@ impl SerializableSemiring for ProbabilityWeight {
         Ok((i, Self::new(weight)))
     }
 
-    fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()> {
+    fn write_binary<F: Write>(&self, file: &mut F) -> Result<()> {
         write_bin_f32(file, *self.value())
     }
 
@@ -117,7 +117,7 @@ impl StarSemiring for ProbabilityWeight {
 }
 
 impl WeaklyDivisibleSemiring for ProbabilityWeight {
-    fn divide_assign(&mut self, rhs: &Self, _divide_type: DivideType) -> Fallible<()> {
+    fn divide_assign(&mut self, rhs: &Self, _divide_type: DivideType) -> Result<()> {
         // May panic if rhs.value == 0.0
         if rhs.value.0 == 0.0 {
             bail!("Division by 0")

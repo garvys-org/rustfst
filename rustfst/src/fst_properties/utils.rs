@@ -19,10 +19,10 @@ pub fn compat_properties(props1: FstProperties, props2: FstProperties) -> bool {
 #[cfg(test)]
 mod test {
     use super::*;
-    use failure::Fallible;
+    use anyhow::Result;
 
     #[test]
-    fn test_known_properties() -> Fallible<()> {
+    fn test_known_properties() -> Result<()> {
         let props = FstProperties::ACCEPTOR | FstProperties::ACCESSIBLE;
         let ref_known_props = FstProperties::ACCEPTOR
             | FstProperties::NOT_ACCEPTOR

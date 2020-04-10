@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::arc::Arc;
 use crate::fst_traits::CoreFst;
@@ -40,7 +40,7 @@ where
     /// Iterator used to iterate over the arcs leaving a state of an FST.
     type Iter: Iterator<Item = &'a Arc<Self::W>> + Clone;
 
-    fn arcs_iter(&'a self, state_id: StateId) -> Fallible<Self::Iter>;
+    fn arcs_iter(&'a self, state_id: StateId) -> Result<Self::Iter>;
     unsafe fn arcs_iter_unchecked(&'a self, state_id: StateId) -> Self::Iter;
 }
 

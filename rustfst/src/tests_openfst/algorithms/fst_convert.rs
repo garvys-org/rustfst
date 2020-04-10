@@ -5,9 +5,9 @@ use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring};
 use crate::tests_openfst::FstTestData;
 
-use failure::Fallible;
+use anyhow::Result;
 
-pub fn test_fst_convert<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_fst_convert<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display + AllocableFst,
     F::W: SerializableSemiring + WeaklyDivisibleSemiring,

@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 use tempfile::tempdir;
 
 use crate::fst_impls::{ConstFst, VectorFst};
@@ -7,7 +7,7 @@ use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::io::generate_symbol_table;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_const_fst_bin_serializer<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_const_fst_bin_serializer<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + 'static,
 {
@@ -31,7 +31,7 @@ where
 
 pub fn test_const_fst_bin_serializer_with_symt<W>(
     test_data: &FstTestData<VectorFst<W>>,
-) -> Fallible<()>
+) -> Result<()>
 where
     W: SerializableSemiring + 'static,
 {

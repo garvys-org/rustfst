@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{closure, ClosureFst, ClosureType};
@@ -36,7 +36,7 @@ impl SimpleStaticDynamicOperationResult {
     }
 }
 
-pub fn test_closure_plus<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_closure_plus<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
@@ -58,7 +58,7 @@ where
     Ok(())
 }
 
-pub fn test_closure_star<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_closure_star<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
@@ -80,7 +80,7 @@ where
     Ok(())
 }
 
-pub fn test_closure_plus_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_closure_plus_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
@@ -93,7 +93,7 @@ where
     Ok(())
 }
 
-pub fn test_closure_star_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_closure_star_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,

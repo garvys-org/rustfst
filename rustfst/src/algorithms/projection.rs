@@ -16,12 +16,12 @@ pub enum ProjectType {
 /// ## Project input
 /// ```
 /// # #[macro_use] extern crate rustfst;
-/// # use failure::Fallible;
+/// # use anyhow::Result;
 /// # use rustfst::utils::{acceptor, transducer};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::{project, ProjectType};
-/// # fn main() -> Fallible<()> {
+/// # fn main() -> Result<()> {
 /// let mut fst : VectorFst<IntegerWeight> = fst![2 => 3];
 /// project(&mut fst, ProjectType::ProjectInput);
 /// assert_eq!(fst, fst![2]);
@@ -33,12 +33,12 @@ pub enum ProjectType {
 ///
 /// ```rust
 /// # #[macro_use] extern crate rustfst;
-/// # use failure::Fallible;
+/// # use anyhow::Result;
 /// # use rustfst::utils::{acceptor, transducer};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::{project, ProjectType};
-/// # fn main() -> Fallible<()> {
+/// # fn main() -> Result<()> {
 /// let mut fst : VectorFst<IntegerWeight> = fst![2 => 3];
 /// project(&mut fst, ProjectType::ProjectOutput);
 /// assert_eq!(fst, fst![3]);

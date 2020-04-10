@@ -4,14 +4,14 @@ use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::algorithms::arc_filters::AnyArcFilter;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::semirings::Semiring;
-use failure::Fallible;
+use anyhow::Result;
 
 // Returns an acyclic FST where each SCC in the input FST has been condensed to
 // a single state with transitions between SCCs retained and within SCCs
 // dropped. Also populates 'scc' with a mapping from input to output states.
 pub fn condense<FI: Fst + ExpandedFst, FO: MutableFst<W = FI::W>>(
     ifst: &FI,
-) -> Fallible<(Vec<i32>, FO)> {
+) -> Result<(Vec<i32>, FO)> {
     let mut visitor = SccVisitor::new(ifst, true, false);
     dfs_visit(ifst, &mut visitor, &AnyArcFilter {}, false);
     let scc = visitor.scc.unwrap();

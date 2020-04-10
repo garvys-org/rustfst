@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::fst_properties::compute_fst_properties;
 use crate::fst_properties::FstProperties;
@@ -30,7 +30,7 @@ pub trait ExpandedFst: Fst + Clone + PartialEq + FstIntoIterator {
     fn num_states(&self) -> usize;
 
     /// Compute the properties verified by the Fst.
-    fn properties(&self) -> Fallible<FstProperties> {
+    fn properties(&self) -> Result<FstProperties> {
         compute_fst_properties(self)
     }
 }

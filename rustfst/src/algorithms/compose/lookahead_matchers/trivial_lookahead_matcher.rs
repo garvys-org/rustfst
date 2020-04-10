@@ -1,7 +1,7 @@
+use std::cell::RefCell;
 use std::rc::Rc;
 
-use failure::Fallible;
-use failure::_core::cell::RefCell;
+use anyhow::Result;
 
 use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
@@ -20,7 +20,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
     type F = M::F;
     type Iter = M::Iter;
 
-    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Fallible<Self> {
+    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Result<Self> {
         Ok(Self {
             matcher: M::new(fst, match_type)?,
             prefix_arc: Arc::new(0, 0, W::one(), NO_STATE_ID),
@@ -28,11 +28,11 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
         })
     }
 
-    fn iter(&self, state: usize, label: usize) -> Fallible<Self::Iter> {
+    fn iter(&self, state: usize, label: usize) -> Result<Self::Iter> {
         self.matcher.iter(state, label)
     }
 
-    fn final_weight(&self, state: usize) -> Fallible<Option<*const W>> {
+    fn final_weight(&self, state: usize) -> Result<Option<*const W>> {
         self.matcher.final_weight(state)
     }
 
@@ -46,7 +46,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
             | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER
     }
 
-    fn priority(&self, state: usize) -> Fallible<usize> {
+    fn priority(&self, state: usize) -> Result<usize> {
         self.matcher.priority(state)
     }
 
@@ -66,18 +66,18 @@ impl<W: Semiring, M: Matcher<W>> LookaheadMatcher<W> for TrivialLookAheadMatcher
         fst: Rc<Self::F>,
         match_type: MatchType,
         _data: Option<Rc<RefCell<Self::MatcherData>>>,
-    ) -> Fallible<Self> {
+    ) -> Result<Self> {
         Self::new(fst, match_type)
     }
 
     fn create_data<F: ExpandedFst<W = W>>(
         _fst: &F,
         _match_type: MatchType,
-    ) -> Fallible<Option<Rc<RefCell<Self::MatcherData>>>> {
+    ) -> Result<Option<Rc<RefCell<Self::MatcherData>>>> {
         Ok(None)
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &Rc<LF>) -> Fallible<()> {
+    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &Rc<LF>) -> Result<()> {
         Ok(())
     }
 
@@ -86,11 +86,11 @@ impl<W: Semiring, M: Matcher<W>> LookaheadMatcher<W> for TrivialLookAheadMatcher
         _matcher_state: StateId,
         _lfst: &Rc<LF>,
         _s: StateId,
-    ) -> Fallible<bool> {
+    ) -> Result<bool> {
         Ok(true)
     }
 
-    fn lookahead_label(&self, _state: StateId, _label: Label) -> Fallible<bool> {
+    fn lookahead_label(&self, _state: StateId, _label: Label) -> Result<bool> {
         Ok(true)
     }
 

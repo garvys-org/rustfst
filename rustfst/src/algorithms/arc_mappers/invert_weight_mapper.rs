@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction, WeightConverter};
 use crate::semirings::{DivideType, WeaklyDivisibleSemiring};
@@ -8,17 +8,17 @@ use crate::Arc;
 pub struct InvertWeightMapper {}
 
 #[inline]
-pub fn map_weight<W: WeaklyDivisibleSemiring>(weight: &mut W) -> Fallible<()> {
+pub fn map_weight<W: WeaklyDivisibleSemiring>(weight: &mut W) -> Result<()> {
     weight.set_value(W::one().divide(weight, DivideType::DivideAny)?.take_value());
     Ok(())
 }
 
 impl<S: WeaklyDivisibleSemiring> ArcMapper<S> for InvertWeightMapper {
-    fn arc_map(&self, arc: &mut Arc<S>) -> Fallible<()> {
+    fn arc_map(&self, arc: &mut Arc<S>) -> Result<()> {
         map_weight(&mut arc.weight)
     }
 
-    fn final_arc_map(&self, final_arc: &mut FinalArc<S>) -> Fallible<()> {
+    fn final_arc_map(&self, final_arc: &mut FinalArc<S>) -> Result<()> {
         map_weight(&mut final_arc.weight)
     }
 

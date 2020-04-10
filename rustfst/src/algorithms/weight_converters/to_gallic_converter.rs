@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::{FinalArc, MapFinalAction, WeightConverter};
 use crate::semirings::{
@@ -16,7 +16,7 @@ macro_rules! impl_to_gallic_converter {
         where
             W: Semiring,
         {
-            fn arc_map(&mut self, arc: &Arc<W>) -> Fallible<Arc<$gallic<W>>> {
+            fn arc_map(&mut self, arc: &Arc<W>) -> Result<Arc<$gallic<W>>> {
                 let new_arc = if arc.olabel == EPS_LABEL {
                     let w = ($string_weight::one(), arc.weight.clone());
                     Arc::new(arc.ilabel, arc.ilabel, w, arc.nextstate)
@@ -27,7 +27,7 @@ macro_rules! impl_to_gallic_converter {
                 Ok(new_arc)
             }
 
-            fn final_arc_map(&mut self, final_arc: &FinalArc<W>) -> Fallible<FinalArc<$gallic<W>>> {
+            fn final_arc_map(&mut self, final_arc: &FinalArc<W>) -> Result<FinalArc<$gallic<W>>> {
                 if final_arc.weight.is_zero() {
                     bail!("Shouldn't happen")
                 }

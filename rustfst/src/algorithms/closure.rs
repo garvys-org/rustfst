@@ -6,7 +6,7 @@ use crate::fst_traits::{
 };
 use crate::semirings::Semiring;
 use crate::{SymbolTable, EPS_LABEL};
-use failure::Fallible;
+use anyhow::Result;
 use std::rc::Rc;
 
 /// Defines the different types of closure : Star or Plus.
@@ -92,7 +92,7 @@ where
 {
     //TODO: Use a borrow and not a move
     //TODO: Allow fsts of different types
-    pub fn new(fst: F, closure_type: ClosureType) -> Fallible<Self> {
+    pub fn new(fst: F, closure_type: ClosureType) -> Result<Self> {
         let mut rfst = F::new();
         if let Some(isymt) = fst.input_symbols() {
             rfst.set_input_symbols(isymt);
@@ -137,7 +137,7 @@ where
         self.0.start()
     }
 
-    fn final_weight(&self, state_id: usize) -> Fallible<Option<&Self::W>> {
+    fn final_weight(&self, state_id: usize) -> Result<Option<&Self::W>> {
         self.0.final_weight(state_id)
     }
 
@@ -145,7 +145,7 @@ where
         self.0.final_weight_unchecked(state_id)
     }
 
-    fn num_arcs(&self, s: usize) -> Fallible<usize> {
+    fn num_arcs(&self, s: usize) -> Result<usize> {
         self.0.num_arcs(s)
     }
 
@@ -171,7 +171,7 @@ where
 {
     type Iter = <ReplaceFst<F, F> as ArcIterator<'a>>::Iter;
 
-    fn arcs_iter(&'a self, state_id: usize) -> Fallible<Self::Iter> {
+    fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
         self.0.arcs_iter(state_id)
     }
 

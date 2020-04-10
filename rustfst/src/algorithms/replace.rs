@@ -4,7 +4,7 @@ use std::collections::{BTreeSet, HashMap};
 use std::hash::Hash;
 use std::marker::PhantomData;
 
-use failure::{bail, Fallible};
+use anyhow::{bail, Result};
 use itertools::Itertools;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
@@ -97,7 +97,7 @@ pub fn replace<F1, F2, B>(
     fst_list: Vec<(Label, B)>,
     root: Label,
     epsilon_on_replace: bool,
-) -> Fallible<F2>
+) -> Result<F2>
 where
     F1: Fst,
     F1::W: Semiring + 'static,
@@ -204,7 +204,7 @@ where
         &self.cache_impl
     }
 
-    fn expand(&mut self, state: usize) -> Fallible<()> {
+    fn expand(&mut self, state: usize) -> Result<()> {
         let tuple = self.state_table.tuple_table.find_tuple(state).clone();
         if let Some(fst_state) = tuple.fst_state {
             if let Some(arc) = self.compute_final_arc(state) {
@@ -226,7 +226,7 @@ where
         Ok(())
     }
 
-    fn compute_start(&mut self) -> Fallible<Option<usize>> {
+    fn compute_start(&mut self) -> Result<Option<usize>> {
         if self.fst_array.is_empty() {
             Ok(None)
         } else if let Some(fst_start) = self.fst_array[self.root].borrow().start() {
@@ -242,7 +242,7 @@ where
         }
     }
 
-    fn compute_final(&mut self, state: usize) -> Fallible<Option<F::W>> {
+    fn compute_final(&mut self, state: usize) -> Result<Option<F::W>> {
         let tuple = self.state_table.tuple_table.find_tuple(state);
         if tuple.prefix_id == 0 {
             self.fst_array
@@ -258,7 +258,7 @@ where
 }
 
 impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
-    fn new(fst_list: Vec<(Label, B)>, opts: ReplaceFstOptions) -> Fallible<Self> {
+    fn new(fst_list: Vec<(Label, B)>, opts: ReplaceFstOptions) -> Result<Self> {
         let mut replace_fst_impl = Self {
             cache_impl: CacheImpl::new(),
             call_label_type_: opts.call_label_type,
@@ -511,7 +511,7 @@ where
     F::W: 'static,
     B: 'static,
 {
-    pub fn new(fst_list: Vec<(Label, B)>, root: Label, epsilon_on_replace: bool) -> Fallible<Self> {
+    pub fn new(fst_list: Vec<(Label, B)>, root: Label, epsilon_on_replace: bool) -> Result<Self> {
         let mut isymt = None;
         let mut osymt = None;
         if let Some(first_elt) = fst_list.first() {

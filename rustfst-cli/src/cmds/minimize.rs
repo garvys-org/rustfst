@@ -1,7 +1,7 @@
 use rustfst::prelude::*;
 
 use crate::unary_fst_algorithm::UnaryFstAlgorithm;
-use failure::Fallible;
+use anyhow::Result;
 
 pub struct MinimizeAlgorithm {
     path_in: String,
@@ -25,7 +25,7 @@ impl UnaryFstAlgorithm for MinimizeAlgorithm {
     fn run_algorithm(
         &self,
         mut fst: VectorFst<TropicalWeight>,
-    ) -> Fallible<VectorFst<TropicalWeight>> {
+    ) -> Result<VectorFst<TropicalWeight>> {
         minimize(&mut fst, self.allow_nondet)?;
         Ok(fst)
     }

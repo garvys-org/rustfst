@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use failure::{format_err, Fallible};
+use anyhow::{format_err, Result};
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{isomorphic, shortest_path};
@@ -24,7 +24,7 @@ where
 {
     unique: bool,
     nshortest: usize,
-    result: Fallible<F>,
+    result: Result<F>,
 }
 
 impl ShorestPathOperationResult {
@@ -44,7 +44,7 @@ impl ShorestPathOperationResult {
     }
 }
 
-pub fn test_shortest_path<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_shortest_path<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize + 'static,
@@ -57,7 +57,7 @@ where
         //            "ShortestPath : unique = {} and nshortest = {}",
         //            data.unique, data.nshortest
         //        );
-        let fst_res: Fallible<F> = shortest_path(&test_data.raw, data.nshortest, data.unique);
+        let fst_res: Result<F> = shortest_path(&test_data.raw, data.nshortest, data.unique);
         match (&data.result, &fst_res) {
             (Ok(fst_expected), Ok(ref fst_shortest)) => {
                 let a = isomorphic(fst_expected, fst_shortest)?;

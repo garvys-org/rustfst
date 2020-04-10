@@ -1,6 +1,6 @@
 use crate::fst_traits::Fst;
 use crate::StateId;
-use failure::Fallible;
+use anyhow::Result;
 
 /// Trait defining the methods to control allocation for a wFST
 pub trait AllocableFst: Fst {
@@ -8,7 +8,7 @@ pub trait AllocableFst: Fst {
     /// The FST may reserve more space to avoid frequent allocation.
     /// After calling `reserve_arcs`, the capacity will be greater or equal to `num_arcs` + `additionnal`
     /// This method has no effects if the capacity is already sufficient
-    fn reserve_arcs(&mut self, source: StateId, additional: usize) -> Fallible<()>;
+    fn reserve_arcs(&mut self, source: StateId, additional: usize) -> Result<()>;
     unsafe fn reserve_arcs_unchecked(&mut self, source: StateId, additional: usize);
 
     /// Reserve capacity for at least additional states.
@@ -27,12 +27,12 @@ pub trait AllocableFst: Fst {
 
     /// Shrinks the capacity of the leaving arcs for the given state as much as possible.
     /// It will drop down as close as possible to theleaving arcs
-    fn shrink_to_fit_arcs(&mut self, source: StateId) -> Fallible<()>;
+    fn shrink_to_fit_arcs(&mut self, source: StateId) -> Result<()>;
     unsafe fn shrink_to_fit_arcs_unchecked(&mut self, source: StateId);
 
     /// Returns the number of states the FST can hold without reallocating.
     fn states_capacity(&self) -> usize;
     /// Returns the number of arcs for a given state the FST can hold without reallocating.
-    fn arcs_capacity(&self, source: StateId) -> Fallible<usize>;
+    fn arcs_capacity(&self, source: StateId) -> Result<usize>;
     unsafe fn arcs_capacity_unchecked(&self, source: StateId) -> usize;
 }

@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::fst_traits::CoreFst;
 use crate::fst_traits::ExpandedFst;
@@ -17,8 +17,8 @@ use crate::semirings::{Semiring, StarSemiring};
 /// # use rustfst::fst_traits::MutableFst;
 /// # use rustfst::algorithms::all_pairs_shortest_distance;
 /// # use rustfst::Arc;
-/// # use failure::Fallible;
-/// # fn main() -> Fallible<()> {
+/// # use anyhow::Result;
+/// # fn main() -> Result<()> {
 /// let mut fst = VectorFst::<IntegerWeight>::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
@@ -38,7 +38,7 @@ use crate::semirings::{Semiring, StarSemiring};
 /// # Ok(())
 /// # }
 /// ```
-pub fn all_pairs_shortest_distance<F>(fst: &F) -> Fallible<Vec<Vec<F::W>>>
+pub fn all_pairs_shortest_distance<F>(fst: &F) -> Result<Vec<Vec<F::W>>>
 where
     F: Fst + ExpandedFst,
     F::W: StarSemiring,

@@ -5,7 +5,7 @@ use std::fs::{read, File};
 use std::io::{BufWriter, LineWriter, Write};
 use std::path::Path;
 
-use failure::{Fallible, ResultExt};
+use anyhow::{Result, Context};
 use itertools::Itertools;
 
 use crate::parsers::bin_symt::nom_parser::{parse_symbol_table_bin, write_bin_symt};
@@ -224,7 +224,7 @@ impl SymbolTable {
         }
     }
 
-    fn from_parsed_symt_text(parsed_symt_text: ParsedTextSymt) -> Fallible<Self> {
+    fn from_parsed_symt_text(parsed_symt_text: ParsedTextSymt) -> Result<Self> {
         let mut label_to_symbol: HashMap<Label, Symbol> = HashMap::new();
         let mut symbol_to_label: HashMap<Symbol, Label> = HashMap::new();
         for (symbol, label) in parsed_symt_text.pairs.into_iter() {
@@ -238,17 +238,17 @@ impl SymbolTable {
         })
     }
 
-    pub fn from_text_string(symt_string: &str) -> Fallible<Self> {
+    pub fn from_text_string(symt_string: &str) -> Result<Self> {
         let parsed_symt = ParsedTextSymt::from_string(symt_string)?;
         Self::from_parsed_symt_text(parsed_symt)
     }
 
-    pub fn read_text<P: AsRef<Path>>(path_text_symt: P) -> Fallible<Self> {
+    pub fn read_text<P: AsRef<Path>>(path_text_symt: P) -> Result<Self> {
         let parsed_symt = ParsedTextSymt::from_path(path_text_symt)?;
         Self::from_parsed_symt_text(parsed_symt)
     }
 
-    pub fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Fallible<()> {
+    pub fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Result<()> {
         let buffer = File::create(path_output.as_ref())?;
         let mut writer = BufWriter::new(LineWriter::new(buffer));
 
@@ -257,8 +257,8 @@ impl SymbolTable {
         Ok(())
     }
 
-    pub fn read<P: AsRef<Path>>(path_bin_symt: P) -> Fallible<Self> {
-        let data = read(path_bin_symt.as_ref()).with_context(|_| {
+    pub fn read<P: AsRef<Path>>(path_bin_symt: P) -> Result<Self> {
+        let data = read(path_bin_symt.as_ref()).with_context(|| {
             format!(
                 "Can't open SymbolTable binary file : {:?}",
                 path_bin_symt.as_ref()
@@ -271,7 +271,7 @@ impl SymbolTable {
         Ok(symt)
     }
 
-    pub fn write<P: AsRef<Path>>(&self, path_bin_symt: P) -> Fallible<()> {
+    pub fn write<P: AsRef<Path>>(&self, path_bin_symt: P) -> Result<()> {
         let buffer = File::create(path_bin_symt.as_ref())?;
         let mut writer = BufWriter::new(LineWriter::new(buffer));
 
@@ -281,7 +281,7 @@ impl SymbolTable {
     }
 
     /// Writes the text_fst representation of the symbol table into a String.
-    pub fn text(&self) -> Fallible<String> {
+    pub fn text(&self) -> Result<String> {
         let buffer = Vec::<u8>::new();
         let mut writer = BufWriter::new(LineWriter::new(buffer));
         write!(writer, "{}", self)?;

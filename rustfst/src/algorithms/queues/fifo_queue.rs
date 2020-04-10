@@ -38,10 +38,10 @@ impl Queue for FifoQueue {
 #[cfg(test)]
 mod test {
     use super::*;
-    use failure::Fallible;
+    use anyhow::Result;
 
     #[test]
-    fn test_fifo_queue() -> Fallible<()> {
+    fn test_fifo_queue() -> Result<()> {
         let mut queue = FifoQueue::default();
 
         assert_eq!(queue.head(), None);

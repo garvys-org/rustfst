@@ -1,6 +1,6 @@
 use rustfst::prelude::*;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::unary_fst_algorithm::UnaryFstAlgorithm;
 
@@ -22,7 +22,7 @@ impl UnaryFstAlgorithm for ReverseAlgorithm {
         "reverse".to_string()
     }
 
-    fn run_algorithm(&self, fst: VectorFst<TropicalWeight>) -> Fallible<VectorFst<TropicalWeight>> {
+    fn run_algorithm(&self, fst: VectorFst<TropicalWeight>) -> Result<VectorFst<TropicalWeight>> {
         reverse(&fst)
     }
 }

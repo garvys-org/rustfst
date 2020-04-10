@@ -2,10 +2,10 @@ use crate::fst_impls::vector_fst::VectorFst;
 use crate::fst_traits::AllocableFst;
 use crate::semirings::Semiring;
 use crate::StateId;
-use failure::Fallible;
+use anyhow::Result;
 
 impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
-    fn reserve_arcs(&mut self, source: usize, additional: usize) -> Fallible<()> {
+    fn reserve_arcs(&mut self, source: usize, additional: usize) -> Result<()> {
         self.states
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
@@ -39,7 +39,7 @@ impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
         self.states.shrink_to_fit()
     }
 
-    fn shrink_to_fit_arcs(&mut self, source: StateId) -> Fallible<()> {
+    fn shrink_to_fit_arcs(&mut self, source: StateId) -> Result<()> {
         self.states
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
@@ -58,7 +58,7 @@ impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
         self.states.capacity()
     }
 
-    fn arcs_capacity(&self, source: StateId) -> Fallible<usize> {
+    fn arcs_capacity(&self, source: StateId) -> Result<usize> {
         Ok(self
             .states
             .get(source)

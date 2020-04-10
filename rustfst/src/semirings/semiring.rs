@@ -5,7 +5,7 @@ use std::hash::Hash;
 
 use bitflags::bitflags;
 
-use failure::Fallible;
+use anyhow::Result;
 use nom::IResult;
 use std::io::Write;
 
@@ -41,19 +41,19 @@ pub trait Semiring: Clone + PartialEq + PartialOrd + Debug + Hash + Eq {
 
     fn new(value: Self::Type) -> Self;
 
-    fn plus<P: Borrow<Self>>(&self, rhs: P) -> Fallible<Self> {
+    fn plus<P: Borrow<Self>>(&self, rhs: P) -> Result<Self> {
         let mut w = self.clone();
         w.plus_assign(rhs)?;
         Ok(w)
     }
-    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()>;
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()>;
 
-    fn times<P: Borrow<Self>>(&self, rhs: P) -> Fallible<Self> {
+    fn times<P: Borrow<Self>>(&self, rhs: P) -> Result<Self> {
         let mut w = self.clone();
         w.times_assign(rhs)?;
         Ok(w)
     }
-    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()>;
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()>;
 
     /// Borrow underneath value.
     fn value(&self) -> &Self::Type;
@@ -66,12 +66,12 @@ pub trait Semiring: Clone + PartialEq + PartialOrd + Debug + Hash + Eq {
     fn is_zero(&self) -> bool {
         *self == Self::zero()
     }
-    fn reverse(&self) -> Fallible<Self::ReverseWeight>;
+    fn reverse(&self) -> Result<Self::ReverseWeight>;
     fn properties() -> SemiringProperties;
 }
 
 pub trait ReverseBack<W> {
-    fn reverse_back(&self) -> Fallible<W>;
+    fn reverse_back(&self) -> Result<W>;
 }
 
 /// Determines direction of division.
@@ -92,8 +92,8 @@ pub enum DivideType {
 /// there exists at least one `z` such that `x = (x+y)*z`.
 /// For more information : `https://cs.nyu.edu/~mohri/pub/hwa.pdf`
 pub trait WeaklyDivisibleSemiring: Semiring {
-    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()>;
-    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Fallible<Self> {
+    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Result<()>;
+    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Result<Self> {
         let mut w = self.clone();
         w.divide_assign(rhs, divide_type)?;
         Ok(w)
@@ -117,8 +117,8 @@ pub trait StarSemiring: Semiring {
 }
 
 pub trait WeightQuantize: Semiring {
-    fn quantize_assign(&mut self, delta: f32) -> Fallible<()>;
-    fn quantize(&self, delta: f32) -> Fallible<Self> {
+    fn quantize_assign(&mut self, delta: f32) -> Result<()>;
+    fn quantize(&self, delta: f32) -> Result<Self> {
         let mut w = self.clone();
         w.quantize_assign(delta)?;
         Ok(w)
@@ -128,7 +128,7 @@ pub trait WeightQuantize: Semiring {
 macro_rules! impl_quantize_f32 {
     ($semiring: ident) => {
         impl WeightQuantize for $semiring {
-            fn quantize_assign(&mut self, delta: f32) -> Fallible<()> {
+            fn quantize_assign(&mut self, delta: f32) -> Result<()> {
                 let v = *self.value();
                 if v == f32::INFINITY || v == f32::NEG_INFINITY {
                     return Ok(());
@@ -171,10 +171,10 @@ macro_rules! partial_eq_and_hash_f32 {
 pub trait SerializableSemiring: Semiring + Display {
     fn weight_type() -> String;
     fn parse_binary(i: &[u8]) -> IResult<&[u8], Self>;
-    fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()>;
+    fn write_binary<F: Write>(&self, file: &mut F) -> Result<()>;
 
     fn parse_text(i: &str) -> IResult<&str, Self>;
-    fn write_text<F: Write>(&self, file: &mut F) -> Fallible<()> {
+    fn write_text<F: Write>(&self, file: &mut F) -> Result<()> {
         // Use implementation of Display trait.
         write!(file, "{}", self)?;
         Ok(())

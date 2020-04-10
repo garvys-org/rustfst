@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::compose::compose_filters::ComposeFilter;
 use crate::algorithms::compose::filter_states::{FilterState, TrivialFilterState};
@@ -25,7 +25,7 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W> for NullCompo
         fst2: Rc<<Self::M2 as Matcher<W>>::F>,
         m1: IM1,
         m2: IM2,
-    ) -> Fallible<Self> {
+    ) -> Result<Self> {
         Ok(Self {
             matcher1: m1.into().unwrap_or_else(|| {
                 Rc::new(RefCell::new(M1::new(fst1, MatchType::MatchOutput).unwrap()))
@@ -40,11 +40,11 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W> for NullCompo
         Self::FS::new(true)
     }
 
-    fn set_state(&mut self, _s1: usize, _s2: usize, _filter_state: &Self::FS) -> Fallible<()> {
+    fn set_state(&mut self, _s1: usize, _s2: usize, _filter_state: &Self::FS) -> Result<()> {
         Ok(())
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS> {
+    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Result<Self::FS> {
         let res = if arc1.olabel == NO_LABEL || arc2.ilabel == NO_LABEL {
             Self::FS::new_no_state()
         } else {
@@ -53,7 +53,7 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W> for NullCompo
         Ok(res)
     }
 
-    fn filter_final(&self, _w1: &mut W, _w2: &mut W) -> Fallible<()> {
+    fn filter_final(&self, _w1: &mut W, _w2: &mut W) -> Result<()> {
         Ok(())
     }
 

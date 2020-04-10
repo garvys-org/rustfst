@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::factor_iterators::IdentityFactor;
@@ -43,7 +43,7 @@ impl FwIdentityOperationResult {
     }
 }
 
-pub fn test_factor_weight_identity<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_factor_weight_identity<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + 'static,
 {
@@ -67,7 +67,7 @@ where
     Ok(())
 }
 
-pub fn test_factor_weight_identity_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_factor_weight_identity_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + 'static,
 {

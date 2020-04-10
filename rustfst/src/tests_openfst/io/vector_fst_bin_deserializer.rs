@@ -1,11 +1,11 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{Fst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_vector_fst_bin_deserializer<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_vector_fst_bin_deserializer<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + 'static,
 {
@@ -22,7 +22,7 @@ where
 
 pub fn test_vector_fst_bin_with_symt_deserializer<W>(
     test_data: &FstTestData<VectorFst<W>>,
-) -> Fallible<()>
+) -> Result<()>
 where
     W: SerializableSemiring + 'static,
 {

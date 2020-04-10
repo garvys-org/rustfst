@@ -1,7 +1,7 @@
 use std::fs::read_to_string;
 use std::path::Path;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::parsers::text_symt::nom_parser::parse_text_symt;
 use crate::{Label, Symbol};
@@ -12,13 +12,13 @@ pub(crate) struct ParsedTextSymt {
 }
 
 impl ParsedTextSymt {
-    pub(crate) fn from_string(symt_string: &str) -> Fallible<Self> {
+    pub(crate) fn from_string(symt_string: &str) -> Result<Self> {
         let (_, parsed_symt) = parse_text_symt(symt_string)
             .map_err(|_| format_err!("Error while parsing text symt"))?;
         Ok(parsed_symt)
     }
 
-    pub(crate) fn from_path<P: AsRef<Path>>(path_symt_text: P) -> Fallible<Self> {
+    pub(crate) fn from_path<P: AsRef<Path>>(path_symt_text: P) -> Result<Self> {
         let symt_string = read_to_string(path_symt_text)?;
         Self::from_string(&symt_string)
     }
@@ -30,7 +30,7 @@ mod tests {
     use crate::symbol_table::SymbolTable;
 
     #[test]
-    fn test_parse_text_symt() -> Fallible<()> {
+    fn test_parse_text_symt() -> Result<()> {
         let mut symt = SymbolTable::new();
         symt.add_symbol("a");
         symt.add_symbol("b");

@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::fst_traits::{ExpandedFst, FinalStatesIterator};
 use crate::parsers::text_fst::ParsedTextFst;
@@ -21,29 +21,29 @@ where
     // BINARY
 
     /// Loads an FST from a file in binary format.
-    fn read<P: AsRef<Path>>(path_bin_fst: P) -> Fallible<Self>;
+    fn read<P: AsRef<Path>>(path_bin_fst: P) -> Result<Self>;
     /// Writes the FST to a file in binary format.
-    fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Fallible<()>;
+    fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Result<()>;
 
     // TEXT
 
     /// Turns a generic wFST format into the one of the wFST.
-    fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst<Self::W>) -> Fallible<Self>;
+    fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst<Self::W>) -> Result<Self>;
 
     /// Deserializes a wFST in text from a path and returns a loaded wFST.
-    fn from_text_string(fst_string: &str) -> Fallible<Self> {
+    fn from_text_string(fst_string: &str) -> Result<Self> {
         let parsed_text_fst = ParsedTextFst::from_string(fst_string)?;
         Self::from_parsed_fst_text(parsed_text_fst)
     }
 
     /// Deserializes a wFST in text from a path and returns a loaded wFST.
-    fn read_text<P: AsRef<Path>>(path_text_fst: P) -> Fallible<Self> {
+    fn read_text<P: AsRef<Path>>(path_text_fst: P) -> Result<Self> {
         let parsed_text_fst = ParsedTextFst::from_path(path_text_fst)?;
         Self::from_parsed_fst_text(parsed_text_fst)
     }
 
     /// Serializes the FST as a text file in a format compatible with OpenFST.
-    fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Fallible<()> {
+    fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Result<()> {
         let buffer = File::create(path_output.as_ref())?;
         let mut line_writer = LineWriter::new(buffer);
         write_fst!(self, line_writer, true);
@@ -51,7 +51,7 @@ where
     }
 
     /// Writes the text representation of the FST into a String.
-    fn text(&self) -> Fallible<String> {
+    fn text(&self) -> Result<String> {
         let buffer = Vec::<u8>::new();
         let mut line_writer = LineWriter::new(buffer);
         write_fst!(self, line_writer, true);
@@ -59,7 +59,7 @@ where
     }
 
     /// Serializes the FST as a DOT file compatible with GraphViz binaries.
-    fn draw<P: AsRef<Path>>(&self, path_output: P, config: &DrawingConfig) -> Fallible<()> {
+    fn draw<P: AsRef<Path>>(&self, path_output: P, config: &DrawingConfig) -> Result<()> {
         let buffer = File::create(path_output.as_ref())?;
         let mut f = BufWriter::new(LineWriter::new(buffer));
 
@@ -113,7 +113,7 @@ fn draw_single_fst_state<F: SerializableFst, W: Write>(
     writer: &mut W,
     state_id: StateId,
     config: &DrawingConfig,
-) -> Fallible<()>
+) -> Result<()>
 where
     F::W: SerializableSemiring,
 {

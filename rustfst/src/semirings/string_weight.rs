@@ -2,7 +2,7 @@ use std::borrow::Borrow;
 use std::fmt;
 use std::io::Write;
 
-use failure::Fallible;
+use anyhow::Result;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::multi::{count, separated_list};
@@ -56,7 +56,7 @@ macro_rules! string_semiring {
         }
 
         impl ReverseBack<$semiring> for <$semiring as Semiring>::ReverseWeight {
-            fn reverse_back(&self) -> Fallible<$semiring> {
+            fn reverse_back(&self) -> Result<$semiring> {
                 self.reverse()
             }
         }
@@ -81,7 +81,7 @@ macro_rules! string_semiring {
                 Self { value }
             }
 
-            fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+            fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
                 if self.is_zero() {
                     self.set_value(rhs.borrow().value().clone());
                 } else if rhs.borrow().is_zero() {
@@ -126,7 +126,7 @@ macro_rules! string_semiring {
                 };
                 Ok(())
             }
-            fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+            fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
                 if let StringWeightVariant::Labels(ref mut labels_left) = self.value {
                     if let StringWeightVariant::Labels(ref labels_right) = rhs.borrow().value {
                         for l in labels_right {
@@ -151,7 +151,7 @@ macro_rules! string_semiring {
                 self.value = value;
             }
 
-            fn reverse(&self) -> Fallible<Self::ReverseWeight> {
+            fn reverse(&self) -> Result<Self::ReverseWeight> {
                 Ok(self.value().reverse().into())
             }
 
@@ -204,7 +204,7 @@ macro_rules! string_semiring {
         }
 
         impl WeightQuantize for $semiring {
-            fn quantize_assign(&mut self, _delta: f32) -> Fallible<()> {
+            fn quantize_assign(&mut self, _delta: f32) -> Result<()> {
                 // Nothing to do
                 Ok(())
             }
@@ -273,7 +273,7 @@ macro_rules! string_semiring {
                 Ok((i, weight))
             }
 
-            fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()> {
+            fn write_binary<F: Write>(&self, file: &mut F) -> Result<()> {
                 match &self.value {
                     StringWeightVariant::Infinity => {
                         write_bin_i32(file, 1 as i32)?;
@@ -336,7 +336,7 @@ fn divide_right(w1: &StringWeightVariant, w2: &StringWeightVariant) -> StringWei
 }
 
 impl WeaklyDivisibleSemiring for StringWeightLeft {
-    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
+    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Result<()> {
         if divide_type != DivideType::DivideLeft {
             bail!("Only left division is defined.");
         }
@@ -346,7 +346,7 @@ impl WeaklyDivisibleSemiring for StringWeightLeft {
 }
 
 impl WeaklyDivisibleSemiring for StringWeightRight {
-    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
+    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Result<()> {
         if divide_type != DivideType::DivideRight {
             bail!("Only right division is defined.");
         }
@@ -356,7 +356,7 @@ impl WeaklyDivisibleSemiring for StringWeightRight {
 }
 
 impl WeaklyDivisibleSemiring for StringWeightRestrict {
-    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
+    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Result<()> {
         self.value = match divide_type {
             DivideType::DivideLeft => divide_left(&self.value, &rhs.value),
             DivideType::DivideRight => divide_right(&self.value, &rhs.value),

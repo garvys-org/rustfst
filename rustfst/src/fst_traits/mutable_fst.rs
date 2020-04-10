@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::{ArcMapper, ClosureType};
 use crate::arc::Arc;
@@ -36,7 +36,7 @@ pub trait MutableFst:
     /// fst.set_start(s2);
     /// assert_eq!(fst.start(), Some(s2));
     /// ```
-    fn set_start(&mut self, state_id: StateId) -> Fallible<()>;
+    fn set_start(&mut self, state_id: StateId) -> Result<()>;
     unsafe fn set_start_unchecked(&mut self, state_id: StateId);
 
     /// The state with identifier `state_id` is now a final state with a weight `final_weight`.
@@ -62,7 +62,7 @@ pub trait MutableFst:
     /// assert_eq!(fst.final_weight(s1).unwrap(), Some(&BooleanWeight::one()));
     /// assert_eq!(fst.final_weight(s2).unwrap(), Some(&BooleanWeight::one()));
     /// ```
-    fn set_final<S: Into<Self::W>>(&mut self, state_id: StateId, final_weight: S) -> Fallible<()>;
+    fn set_final<S: Into<Self::W>>(&mut self, state_id: StateId, final_weight: S) -> Result<()>;
     unsafe fn set_final_unchecked<S: Into<Self::W>>(&mut self, state_id: StateId, final_weight: S);
 
     /// Adds a new state to the current FST. The identifier of the new state is returned
@@ -109,7 +109,7 @@ pub trait MutableFst:
     /// assert_eq!(fst.states_iter().count(), 0);
     ///
     /// ```
-    fn del_state(&mut self, state_id: StateId) -> Fallible<()>;
+    fn del_state(&mut self, state_id: StateId) -> Result<()>;
 
     // TODO: Need to define a correct behaviour is the same state is present multiple times in the iterator
     /// Removes multiple states from an FST. If one of the states doesn't exist, an error is raised.
@@ -140,7 +140,7 @@ pub trait MutableFst:
     /// assert_eq!(fst.states_iter().count(), 0);
     ///
     /// ```
-    fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) -> Fallible<()>;
+    fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) -> Result<()>;
 
     /// Remove all the states in the FST. As a result, all the arcs are also removed,
     /// as well as the start state and all the fina states.
@@ -182,8 +182,8 @@ pub trait MutableFst:
     /// # use rustfst::fst_impls::VectorFst;
     /// # use rustfst::semirings::{ProbabilityWeight, Semiring};
     /// # use rustfst::Arc;
-    /// # use failure::Fallible;
-    /// # fn main() -> Fallible<()> {
+    /// # use anyhow::Result;
+    /// # fn main() -> Result<()> {
     /// let mut fst = VectorFst::<ProbabilityWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
@@ -194,7 +194,7 @@ pub trait MutableFst:
     /// # Ok(())
     /// # }
     /// ```
-    fn add_arc(&mut self, source: StateId, arc: Arc<Self::W>) -> Fallible<()>;
+    fn add_arc(&mut self, source: StateId, arc: Arc<Self::W>) -> Result<()>;
     unsafe fn add_arc_unchecked(&mut self, source: StateId, arc: Arc<Self::W>);
 
     /// Adds an arc to the FST. The arc will start in the state `source`.
@@ -210,8 +210,8 @@ pub trait MutableFst:
     /// # use rustfst::fst_impls::VectorFst;
     /// # use rustfst::semirings::{Semiring, ProbabilityWeight};
     /// # use rustfst::Arc;
-    /// # use failure::Fallible;
-    /// # fn main() -> Fallible<()> {
+    /// # use anyhow::Result;
+    /// # fn main() -> Result<()> {
     /// let mut fst = VectorFst::<ProbabilityWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
@@ -229,7 +229,7 @@ pub trait MutableFst:
         olabel: Label,
         weight: S,
         nextstate: StateId,
-    ) -> Fallible<()> {
+    ) -> Result<()> {
         self.add_arc(source, Arc::new(ilabel, olabel, weight, nextstate))
     }
 
@@ -247,21 +247,21 @@ pub trait MutableFst:
     unsafe fn set_arcs_unchecked(&mut self, source: StateId, arcs: Vec<Arc<Self::W>>);
 
     /// Remove the final weight of a specific state.
-    fn delete_final_weight(&mut self, source: StateId) -> Fallible<()>;
+    fn delete_final_weight(&mut self, source: StateId) -> Result<()>;
     unsafe fn delete_final_weight_unchecked(&mut self, source: StateId);
 
     /// Deletes all the arcs leaving a state.
-    fn delete_arcs(&mut self, source: StateId) -> Fallible<()>;
+    fn delete_arcs(&mut self, source: StateId) -> Result<()>;
 
     /// Remove all arcs leaving a state and return them.
-    fn pop_arcs(&mut self, source: StateId) -> Fallible<Vec<Arc<Self::W>>>;
+    fn pop_arcs(&mut self, source: StateId) -> Result<Vec<Arc<Self::W>>>;
     unsafe fn pop_arcs_unchecked(&mut self, source: StateId) -> Vec<Arc<Self::W>>;
 
     /// Retrieves a mutable reference to the final weight of a state (if the state is a final one).
     fn final_weight_mut(
         &mut self,
         state_id: StateId,
-    ) -> Fallible<Option<&mut <Self as CoreFst>::W>>;
+    ) -> Result<Option<&mut <Self as CoreFst>::W>>;
 
     unsafe fn final_weight_unchecked_mut(
         &mut self,
@@ -281,8 +281,8 @@ pub trait MutableFst:
     /// # use rustfst::fst_impls::VectorFst;
     /// # use rustfst::semirings::{Semiring, ProbabilityWeight};
     /// # use rustfst::Arc;
-    /// # use failure::Fallible;
-    /// # fn main() -> Fallible<()> {
+    /// # use anyhow::Result;
+    /// # fn main() -> Result<()> {
     /// let mut fst = VectorFst::<ProbabilityWeight>::new();
     /// let s1 = fst.add_state();
     /// fst.set_final(s1, 1.2)?;
@@ -294,7 +294,7 @@ pub trait MutableFst:
     /// # Ok(())
     /// # }
     /// ```
-    fn take_final_weight(&mut self, state_id: StateId) -> Fallible<Option<Self::W>>;
+    fn take_final_weight(&mut self, state_id: StateId) -> Result<Option<Self::W>>;
 
     /// Takes the final weight out of the fst, leaving a None in its place.
     /// This version leads to `undefined behaviour` if the state doesn't exist.
@@ -306,8 +306,8 @@ pub trait MutableFst:
     /// # use rustfst::fst_impls::VectorFst;
     /// # use rustfst::semirings::{Semiring, ProbabilityWeight};
     /// # use rustfst::Arc;
-    /// # use failure::Fallible;
-    /// # fn main() -> Fallible<()> {
+    /// # use anyhow::Result;
+    /// # fn main() -> Result<()> {
     /// let mut fst = VectorFst::<ProbabilityWeight>::new();
     /// let s1 = fst.add_state();
     /// fst.set_final(s1, 1.2)?;
@@ -341,7 +341,7 @@ pub trait MutableFst:
     }
 
     /// Maps an arc using a `ArcMapper` object.
-    fn arc_map<M: ArcMapper<Self::W>>(&mut self, mapper: &mut M) -> Fallible<()> {
+    fn arc_map<M: ArcMapper<Self::W>>(&mut self, mapper: &mut M) -> Result<()> {
         crate::algorithms::arc_map(self, mapper)
     }
 }
@@ -352,6 +352,6 @@ where
     Self::W: 'a,
 {
     type IterMut: Iterator<Item = &'a mut Arc<Self::W>>;
-    fn arcs_iter_mut(&'a mut self, state_id: StateId) -> Fallible<Self::IterMut>;
+    fn arcs_iter_mut(&'a mut self, state_id: StateId) -> Result<Self::IterMut>;
     unsafe fn arcs_iter_unchecked_mut(&'a mut self, state_id: StateId) -> Self::IterMut;
 }

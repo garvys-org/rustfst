@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use failure::{format_err, Fallible, ResultExt};
+use anyhow::{format_err, Result, Context};
 use pretty_assertions::assert_eq;
 use serde_derive::{Deserialize, Serialize};
 
@@ -41,7 +41,7 @@ impl EncodeOperationResult {
     }
 }
 
-pub fn test_encode_decode<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_encode_decode<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring,
@@ -49,7 +49,7 @@ where
     for encode_test_data in &test_data.encode_decode {
         let mut fst_encoded = test_data.raw.clone();
         let encode_table = encode(&mut fst_encoded, encode_test_data.encode_labels, encode_test_data.encode_weights)
-            .with_context(|_| format_err!(
+            .with_context(|| format_err!(
             "Error when running test_encode_decode with parameters encode_labels={:?} and encode_weights={:?}.",
             encode_test_data.encode_labels, encode_test_data.encode_weights))?;
         decode(&mut fst_encoded, encode_table)?;
@@ -70,7 +70,7 @@ where
     Ok(())
 }
 
-pub fn test_encode<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_encode<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring,
@@ -78,7 +78,7 @@ where
     for encode_test_data in &test_data.encode {
         let mut fst_encoded = test_data.raw.clone();
         encode(&mut fst_encoded, encode_test_data.encode_labels, encode_test_data.encode_weights)
-            .with_context(|_| format_err!(
+            .with_context(|| format_err!(
             "Error when running test_encode with parameters encode_labels={:?} and encode_weights={:?}.",
             encode_test_data.encode_labels, encode_test_data.encode_weights))?;
         if encode_test_data.encode_labels {

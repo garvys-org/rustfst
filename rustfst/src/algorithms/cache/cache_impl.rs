@@ -1,6 +1,6 @@
 use std::slice::Iter as IterSlice;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::cache::VectorCacheState;
 use crate::Arc;
@@ -34,28 +34,28 @@ impl<W> CacheImpl<W> {
         }
     }
 
-    pub fn start(&self) -> Fallible<Option<StateId>> {
+    pub fn start(&self) -> Result<Option<StateId>> {
         if !self.has_start {
             bail!("Can't call start() before set_start()");
         }
         Ok(self.cache_start_state)
     }
 
-    pub fn set_final_weight(&mut self, state: StateId, final_weight: Option<W>) -> Fallible<()> {
+    pub fn set_final_weight(&mut self, state: StateId, final_weight: Option<W>) -> Result<()> {
         self.vector_cache_states.resize_if_necessary(state + 1);
         self.vector_cache_states
             .set_final_weight_unchecked(state, final_weight);
         Ok(())
     }
 
-    pub fn final_weight(&self, state: StateId) -> Fallible<Option<&W>> {
+    pub fn final_weight(&self, state: StateId) -> Result<Option<&W>> {
         if !self.vector_cache_states.has_final(state) {
             bail!("Can't call final_weight() before set_final_weight()")
         }
         Ok(self.vector_cache_states.final_weight_unchecked(state))
     }
 
-    pub fn push_arc(&mut self, state: StateId, arc: Arc<W>) -> Fallible<()> {
+    pub fn push_arc(&mut self, state: StateId, arc: Arc<W>) -> Result<()> {
         if self.vector_cache_states.expanded(state) {
             bail!("Can't add arcs to a fully expanded state")
         }
@@ -66,7 +66,7 @@ impl<W> CacheImpl<W> {
         Ok(())
     }
 
-    pub fn num_arcs(&self, state: StateId) -> Fallible<usize> {
+    pub fn num_arcs(&self, state: StateId) -> Result<usize> {
         if !self.vector_cache_states.expanded(state) {
             bail!("Can't call num_arcs on a state that is not fully expanded");
         }
@@ -86,7 +86,7 @@ impl<W> CacheImpl<W> {
         self.vector_cache_states.mark_expanded_unchecked(state)
     }
 
-    pub fn arcs_iter(&self, state: StateId) -> Fallible<IterSlice<Arc<W>>> {
+    pub fn arcs_iter(&self, state: StateId) -> Result<IterSlice<Arc<W>>> {
         if !self.vector_cache_states.expanded(state) {
             bail!("Can't iterate arcs on a not fully expanded state")
         }
@@ -104,7 +104,7 @@ mod tests {
     use crate::semirings::Semiring;
     use crate::semirings::TropicalWeight;
 
-    fn test_cache_impl_start() -> Fallible<()> {
+    fn test_cache_impl_start() -> Result<()> {
         let mut cache_impl = CacheImpl::<TropicalWeight>::new();
         assert!(!cache_impl.has_start());
         assert_eq!(cache_impl.num_known_states(), 0);
@@ -115,7 +115,7 @@ mod tests {
         Ok(())
     }
 
-    fn test_cache_expanded() -> Fallible<()> {
+    fn test_cache_expanded() -> Result<()> {
         let mut cache_impl = CacheImpl::<TropicalWeight>::new();
         cache_impl.set_start(Some(1));
         assert!(!cache_impl.expanded(2));

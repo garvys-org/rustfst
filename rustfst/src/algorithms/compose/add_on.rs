@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::fst_traits::{
     ArcIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator,
@@ -41,7 +41,7 @@ impl<F: CoreFst, T> CoreFst for FstAddOn<F, T> {
         self.fst.start()
     }
 
-    fn final_weight(&self, state_id: usize) -> Fallible<Option<&Self::W>> {
+    fn final_weight(&self, state_id: usize) -> Result<Option<&Self::W>> {
         self.fst.final_weight(state_id)
     }
 
@@ -49,7 +49,7 @@ impl<F: CoreFst, T> CoreFst for FstAddOn<F, T> {
         self.fst.final_weight_unchecked(state_id)
     }
 
-    fn num_arcs(&self, s: usize) -> Fallible<usize> {
+    fn num_arcs(&self, s: usize) -> Result<usize> {
         self.fst.num_arcs(s)
     }
 
@@ -72,7 +72,7 @@ where
 {
     type Iter = <F as ArcIterator<'a>>::Iter;
 
-    fn arcs_iter(&'a self, state_id: usize) -> Fallible<Self::Iter> {
+    fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
         self.fst.arcs_iter(state_id)
     }
 

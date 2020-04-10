@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use failure::Fallible;
+use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::arc_filters::AnyArcFilter;
@@ -12,7 +12,7 @@ use crate::semirings::Semiring;
 use crate::Arc;
 
 /// Computes all the FstProperties of the FST bit don't attach them to the FST.
-pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Fallible<FstProperties> {
+pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Result<FstProperties> {
     let states: Vec<_> = fst.states_iter().collect();
     let mut comp_props = FstProperties::empty();
 

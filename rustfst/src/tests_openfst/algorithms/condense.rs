@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use failure::Fallible;
+use anyhow::Result;
 use itertools::Itertools;
 use serde_derive::{Deserialize, Serialize};
 
@@ -37,7 +37,7 @@ impl CondenseOperationResult {
     }
 }
 
-pub fn test_condense<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_condense<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: MutableFst + Display + SerializableFst,
     F::W: SerializableSemiring,

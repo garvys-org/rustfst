@@ -8,7 +8,7 @@ use crate::fst_traits::{CoreFst, ExpandedFst};
 use crate::StateId;
 
 use crate::fst_properties::FstProperties;
-use failure::Fallible;
+use anyhow::Result;
 
 static UNASSIGNED: usize = std::usize::MAX;
 
@@ -22,7 +22,7 @@ pub struct StateReachable {
 }
 
 impl StateReachable {
-    pub fn new<F: ExpandedFst>(fst: &F) -> Fallible<Self>
+    pub fn new<F: ExpandedFst>(fst: &F) -> Result<Self>
     where
         F::W: 'static,
     {
@@ -35,7 +35,7 @@ impl StateReachable {
         }
     }
 
-    pub fn new_cyclic<F: ExpandedFst>(fst: &F) -> Fallible<Self>
+    pub fn new_cyclic<F: ExpandedFst>(fst: &F) -> Result<Self>
     where
         F::W: 'static,
     {
@@ -82,7 +82,7 @@ impl StateReachable {
 
     #[allow(unused)]
     // Can reach this final state from current state?
-    pub fn reach(&self, current_state: StateId, s: StateId) -> Fallible<bool> {
+    pub fn reach(&self, current_state: StateId, s: StateId) -> Result<bool> {
         if let Some(i) = self.state2index.get(s) {
             Ok(self.isets[current_state].member(*i))
         } else {

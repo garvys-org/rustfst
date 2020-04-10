@@ -1,9 +1,9 @@
 use std::borrow::Borrow;
-use std::fmt::{Display, Formatter, Result};
+use std::fmt::{Display, Formatter};
 use std::io::Write;
 use std::marker::PhantomData;
 
-use failure::Fallible;
+use anyhow::Result;
 use nom::IResult;
 
 use crate::semirings::Semiring;
@@ -40,7 +40,7 @@ pub struct GallicWeightMin<W>(ProductWeight<StringWeightRestrict, W>)
 where
     W: Semiring;
 
-fn natural_less<W: Semiring>(w1: &W, w2: &W) -> Fallible<bool> {
+fn natural_less<W: Semiring>(w1: &W, w2: &W) -> Result<bool> {
     Ok((&w1.plus(w2)? == w1) && (w1 != w2))
 }
 
@@ -72,7 +72,7 @@ macro_rules! gallic_weight {
         }
 
         impl<W: Semiring> ReverseBack<$semiring> for <$semiring as Semiring>::ReverseWeight {
-            fn reverse_back(&self) -> Fallible<$semiring> {
+            fn reverse_back(&self) -> Result<$semiring> {
                 Ok(<$semiring>::new(self.0.reverse_back()?))
             }
         }
@@ -96,7 +96,7 @@ macro_rules! gallic_weight {
                 Self(value)
             }
 
-            fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+            fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
                 match $gallic_type {
                     GallicType::GallicLeft => self.0.plus_assign(&rhs.borrow().0)?,
                     GallicType::GallicRight => self.0.plus_assign(&rhs.borrow().0)?,
@@ -110,7 +110,7 @@ macro_rules! gallic_weight {
                 Ok(())
             }
 
-            fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+            fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
                 self.0.times_assign(&rhs.borrow().0)
             }
 
@@ -126,7 +126,7 @@ macro_rules! gallic_weight {
                 self.0 = value;
             }
 
-            fn reverse(&self) -> Fallible<Self::ReverseWeight> {
+            fn reverse(&self) -> Result<Self::ReverseWeight> {
                 Ok(Self::ReverseWeight::new(self.0.reverse()?))
             }
 
@@ -189,7 +189,7 @@ macro_rules! gallic_weight {
         where
             W: WeaklyDivisibleSemiring,
         {
-            fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
+            fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Result<()> {
                 self.0
                     .weight
                     .0
@@ -206,7 +206,7 @@ macro_rules! gallic_weight {
         where
             W: WeightQuantize,
         {
-            fn quantize_assign(&mut self, delta: f32) -> Fallible<()> {
+            fn quantize_assign(&mut self, delta: f32) -> Result<()> {
                 self.0.quantize_assign(delta)
             }
         }
@@ -226,7 +226,7 @@ macro_rules! gallic_weight {
                 Ok((i, Self(w)))
             }
 
-            fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()> {
+            fn write_binary<F: Write>(&self, file: &mut F) -> Result<()> {
                 self.0.write_binary(file)
             }
 
@@ -308,7 +308,7 @@ impl<W: Semiring> UnionWeightOption<GallicWeightRestrict<W>>
     fn merge(
         w1: &GallicWeightRestrict<W>,
         w2: &GallicWeightRestrict<W>,
-    ) -> Fallible<GallicWeightRestrict<W>> {
+    ) -> Result<GallicWeightRestrict<W>> {
         let p = ProductWeight::new((w1.0.value1().clone(), w1.0.value2().plus(w2.0.value2())?));
         Ok(GallicWeightRestrict(p))
     }
@@ -326,7 +326,7 @@ impl<W> Display for GallicWeight<W>
 where
     W: SerializableSemiring,
 {
-    fn fmt(&self, f: &mut Formatter) -> Result {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         self.0.fmt(f)
     }
 }
@@ -356,11 +356,11 @@ impl<W: Semiring> Semiring for GallicWeight<W> {
         Self(UnionWeight::new(value))
     }
 
-    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         self.0.plus_assign(&rhs.borrow().0)
     }
 
-    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         self.0.times_assign(&rhs.borrow().0)
     }
 
@@ -376,7 +376,7 @@ impl<W: Semiring> Semiring for GallicWeight<W> {
         self.0.set_value(value)
     }
 
-    fn reverse(&self) -> Fallible<Self::ReverseWeight> {
+    fn reverse(&self) -> Result<Self::ReverseWeight> {
         Ok(GallicWeight(self.0.reverse()?))
     }
 
@@ -386,7 +386,7 @@ impl<W: Semiring> Semiring for GallicWeight<W> {
 }
 
 impl<W: Semiring> ReverseBack<GallicWeight<W>> for <GallicWeight<W> as Semiring>::ReverseWeight {
-    fn reverse_back(&self) -> Fallible<GallicWeight<W>> {
+    fn reverse_back(&self) -> Result<GallicWeight<W>> {
         Ok(GallicWeight(self.0.reverse_back()?))
     }
 }
@@ -452,7 +452,7 @@ impl<W> WeaklyDivisibleSemiring for GallicWeight<W>
 where
     W: WeaklyDivisibleSemiring,
 {
-    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
+    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Result<()> {
         self.0.divide_assign(&rhs.0, divide_type)?;
         Ok(())
     }
@@ -462,7 +462,7 @@ impl<W> WeightQuantize for GallicWeight<W>
 where
     W: WeightQuantize,
 {
-    fn quantize_assign(&mut self, delta: f32) -> Fallible<()> {
+    fn quantize_assign(&mut self, delta: f32) -> Result<()> {
         self.0.quantize_assign(delta)
     }
 }
@@ -480,7 +480,7 @@ impl<W: SerializableSemiring> SerializableSemiring for GallicWeight<W> {
         Ok((i, Self(w)))
     }
 
-    fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()> {
+    fn write_binary<F: Write>(&self, file: &mut F) -> Result<()> {
         self.0.write_binary(file)
     }
 

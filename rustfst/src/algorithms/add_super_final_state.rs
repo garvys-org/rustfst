@@ -64,10 +64,10 @@ mod tests {
     use crate::fst_impls::VectorFst;
     use crate::fst_traits::{CoreFst, ExpandedFst};
     use crate::semirings::TropicalWeight;
-    use failure::Fallible;
+    use anyhow::Result;
 
     #[test]
-    fn test_add_super_final_states() -> Fallible<()> {
+    fn test_add_super_final_states() -> Result<()> {
         let mut fst = VectorFst::<TropicalWeight>::new();
         let s0 = fst.add_state();
         let s1 = fst.add_state();
@@ -98,7 +98,7 @@ mod tests {
     }
 
     #[test]
-    fn test_add_super_final_states_1() -> Fallible<()> {
+    fn test_add_super_final_states_1() -> Result<()> {
         let mut fst = VectorFst::<TropicalWeight>::new();
         let s0 = fst.add_state();
         let s1 = fst.add_state();
@@ -122,7 +122,7 @@ mod tests {
     }
 
     #[test]
-    fn test_add_super_final_states_2() -> Fallible<()> {
+    fn test_add_super_final_states_2() -> Result<()> {
         let mut fst = VectorFst::<TropicalWeight>::new();
         let s0 = fst.add_state();
         let s1 = fst.add_state();
@@ -150,7 +150,7 @@ mod tests {
     }
 
     #[test]
-    fn test_add_super_final_states_3() -> Fallible<()> {
+    fn test_add_super_final_states_3() -> Result<()> {
         let mut fst = VectorFst::<TropicalWeight>::new();
         let s0 = fst.add_state();
         let s1 = fst.add_state();

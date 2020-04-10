@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use failure::{format_err, Fallible};
+use anyhow::{format_err, Result};
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::minimize;
@@ -22,7 +22,7 @@ where
     F::W: SerializableSemiring,
 {
     allow_nondet: bool,
-    result: Fallible<F>,
+    result: Result<F>,
 }
 
 impl MinimizeOperationResult {
@@ -41,7 +41,7 @@ impl MinimizeOperationResult {
     }
 }
 
-pub fn test_minimize<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_minimize<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + AllocableFst + Display,
     F::W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize + 'static,
@@ -49,7 +49,7 @@ where
     for minimize_data in &test_data.minimize {
         //        println!("Minimize : allow_nondet = {}", minimize_data.allow_nondet);
         let mut fst_raw = test_data.raw.clone();
-        let fst_res: Fallible<F> =
+        let fst_res: Result<F> =
             minimize(&mut fst_raw, minimize_data.allow_nondet).map(|_| fst_raw);
 
         match (&minimize_data.result, fst_res) {

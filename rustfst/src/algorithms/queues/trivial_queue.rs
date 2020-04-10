@@ -41,10 +41,10 @@ impl Queue for TrivialQueue {
 mod test {
     use super::*;
 
-    use failure::Fallible;
+    use anyhow::Result;
 
     #[test]
-    fn test_trivial_queue() -> Fallible<()> {
+    fn test_trivial_queue() -> Result<()> {
         let mut queue = TrivialQueue::default();
 
         assert_eq!(queue.head(), None);
