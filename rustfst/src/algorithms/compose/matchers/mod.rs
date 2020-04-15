@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use bitflags::bitflags;
 pub use generic_matcher::GenericMatcher;
@@ -75,7 +75,7 @@ pub enum IterItemMatcher<W: Semiring> {
 }
 
 impl<W: Semiring> IterItemMatcher<W> {
-    pub fn into_arc(self, state: StateId, match_type: MatchType) -> Fallible<Arc<W>> {
+    pub fn into_arc(self, state: StateId, match_type: MatchType) -> Result<Arc<W>> {
         match self {
             IterItemMatcher::Arc(arc) => Ok(unsafe { (*arc).clone() }),
             IterItemMatcher::EpsLoop => eps_loop(state, match_type),
@@ -83,7 +83,7 @@ impl<W: Semiring> IterItemMatcher<W> {
     }
 }
 
-pub fn eps_loop<W: Semiring>(state: StateId, match_type: MatchType) -> Fallible<Arc<W>> {
+pub fn eps_loop<W: Semiring>(state: StateId, match_type: MatchType) -> Result<Arc<W>> {
     let arc = match match_type {
         MatchType::MatchInput => Arc::new(NO_LABEL, EPS_LABEL, W::one(), state),
         MatchType::MatchOutput => Arc::new(EPS_LABEL, NO_LABEL, W::one(), state),
@@ -101,11 +101,11 @@ pub trait Matcher<W: Semiring>: Debug {
 
     type Iter: Iterator<Item = IterItemMatcher<W>> + Clone;
 
-    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Fallible<Self>
+    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Result<Self>
     where
         Self: std::marker::Sized;
-    fn iter(&self, state: StateId, label: Label) -> Fallible<Self::Iter>;
-    fn final_weight(&self, state: StateId) -> Fallible<Option<*const W>>;
+    fn iter(&self, state: StateId, label: Label) -> Result<Self::Iter>;
+    fn final_weight(&self, state: StateId) -> Result<Option<*const W>>;
     fn match_type(&self) -> MatchType;
     fn flags(&self) -> MatcherFlags;
 
@@ -113,7 +113,7 @@ pub trait Matcher<W: Semiring>: Debug {
     /// composition. If the value is kRequirePriority, then it is
     /// mandatory that it be used. Calling this method without passing the
     /// current state of the matcher invalidates the state of the matcher.
-    fn priority(&self, state: StateId) -> Fallible<usize>;
+    fn priority(&self, state: StateId) -> Result<usize>;
 
     fn fst(&self) -> Rc<Self::F>;
 }

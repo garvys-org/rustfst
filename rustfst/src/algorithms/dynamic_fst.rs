@@ -4,7 +4,7 @@ use std::iter::{repeat, Map, Repeat, Zip};
 use std::rc::Rc;
 use std::slice::Iter as IterSlice;
 
-use failure::Fallible;
+use anyhow::Result;
 use itertools::izip;
 
 use crate::algorithms::cache::FstImpl;
@@ -37,7 +37,7 @@ impl<IMPL: FstImpl> DynamicFst<IMPL> {
         fst_impl.num_known_states()
     }
 
-    pub fn compute<F: MutableFst<W = IMPL::W>>(&self) -> Fallible<F> {
+    pub fn compute<F: MutableFst<W = IMPL::W>>(&self) -> Result<F> {
         let ptr = self.fst_impl.get();
         let fst_impl = unsafe { ptr.as_mut().unwrap() };
         let mut fst: F = fst_impl.compute()?;
@@ -60,7 +60,7 @@ impl<IMPL: FstImpl> CoreFst for DynamicFst<IMPL> {
         fst_impl.start().unwrap()
     }
 
-    fn final_weight(&self, state_id: usize) -> Fallible<Option<&Self::W>> {
+    fn final_weight(&self, state_id: usize) -> Result<Option<&Self::W>> {
         let ptr = self.fst_impl.get();
         let fst_impl = unsafe { ptr.as_mut().unwrap() };
         fst_impl.final_weight(state_id)
@@ -70,7 +70,7 @@ impl<IMPL: FstImpl> CoreFst for DynamicFst<IMPL> {
         self.final_weight(state_id).unwrap()
     }
 
-    fn num_arcs(&self, s: usize) -> Fallible<usize> {
+    fn num_arcs(&self, s: usize) -> Result<usize> {
         let ptr = self.fst_impl.get();
         let fst_impl = unsafe { ptr.as_mut().unwrap() };
         fst_impl.num_arcs(s)
@@ -84,7 +84,7 @@ impl<IMPL: FstImpl> CoreFst for DynamicFst<IMPL> {
 impl<'a, IMPL: FstImpl> ArcIterator<'a> for DynamicFst<IMPL> {
     type Iter = IterSlice<'a, Arc<IMPL::W>>;
 
-    fn arcs_iter(&'a self, state_id: usize) -> Fallible<Self::Iter> {
+    fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
         let ptr = self.fst_impl.get();
         let fst_impl = unsafe { ptr.as_mut().unwrap() };
         fst_impl.arcs_iter(state_id)

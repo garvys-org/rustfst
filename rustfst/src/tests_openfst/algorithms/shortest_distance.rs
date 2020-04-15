@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::shortest_distance;
@@ -37,7 +37,7 @@ impl ShorestDistanceOperationResult {
     }
 }
 
-pub fn test_shortest_distance<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_shortest_distance<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst,
     F::W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize + 'static,

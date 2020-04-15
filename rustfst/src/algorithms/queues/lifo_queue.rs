@@ -36,10 +36,10 @@ impl Queue for LifoQueue {
 #[cfg(test)]
 mod test {
     use super::*;
-    use failure::Fallible;
+    use anyhow::Result;
 
     #[test]
-    fn test_lifo_queue() -> Fallible<()> {
+    fn test_lifo_queue() -> Result<()> {
         let mut queue = LifoQueue::default();
 
         assert_eq!(queue.head(), None);

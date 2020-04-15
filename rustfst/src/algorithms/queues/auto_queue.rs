@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::arc_filters::ArcFilter;
 use crate::algorithms::dfs_visit::dfs_visit;
@@ -23,7 +23,7 @@ impl AutoQueue {
         fst: &F,
         distance: Option<&Vec<F::W>>,
         arc_filter: &A,
-    ) -> Fallible<Self>
+    ) -> Result<Self>
     where
         F::W: 'static,
     {
@@ -102,7 +102,7 @@ impl AutoQueue {
 
     pub fn scc_queue_type<
         F: ExpandedFst,
-        C: Fn(&F::W, &F::W) -> Fallible<bool>,
+        C: Fn(&F::W, &F::W) -> Result<bool>,
         A: ArcFilter<F::W>,
     >(
         fst: &F,
@@ -112,7 +112,7 @@ impl AutoQueue {
         all_trivial: &mut bool,
         unweighted: &mut bool,
         arc_filter: &A,
-    ) -> Fallible<()> {
+    ) -> Result<()> {
         *all_trivial = true;
         *unweighted = true;
 

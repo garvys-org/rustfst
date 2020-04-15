@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::factor_iterators::{GallicFactor, GallicFactorMin, GallicFactorRestrict};
@@ -32,14 +32,14 @@ pub enum DeterminizeType {
 }
 
 pub trait CommonDivisor<W: Semiring>: PartialEq + Debug {
-    fn common_divisor(w1: &W, w2: &W) -> Fallible<W>;
+    fn common_divisor(w1: &W, w2: &W) -> Result<W>;
 }
 
 #[derive(PartialEq, Debug)]
 struct DefaultCommonDivisor {}
 
 impl<W: Semiring> CommonDivisor<W> for DefaultCommonDivisor {
-    fn common_divisor(w1: &W, w2: &W) -> Fallible<W> {
+    fn common_divisor(w1: &W, w2: &W) -> Result<W> {
         w1.plus(w2)
     }
 }
@@ -53,7 +53,7 @@ macro_rules! impl_label_common_divisor {
             fn common_divisor(
                 w1: &$string_semiring,
                 w2: &$string_semiring,
-            ) -> Fallible<$string_semiring> {
+            ) -> Result<$string_semiring> {
                 let mut iter1 = w1.iter();
                 let mut iter2 = w2.iter();
                 if w1.value.is_empty_list() || w2.value.is_empty_list() {
@@ -85,7 +85,7 @@ struct GallicCommonDivisor {}
 macro_rules! impl_gallic_common_divisor {
     ($gallic: ident) => {
         impl<W: Semiring> CommonDivisor<$gallic<W>> for GallicCommonDivisor {
-            fn common_divisor(w1: &$gallic<W>, w2: &$gallic<W>) -> Fallible<$gallic<W>> {
+            fn common_divisor(w1: &$gallic<W>, w2: &$gallic<W>) -> Result<$gallic<W>> {
                 let v1 = LabelCommonDivisor::common_divisor(w1.value1(), w2.value1())?;
                 let v2 = DefaultCommonDivisor::common_divisor(w1.value2(), w2.value2())?;
                 Ok((v1, v2).into())
@@ -99,7 +99,7 @@ impl_gallic_common_divisor!(GallicWeightRestrict);
 impl_gallic_common_divisor!(GallicWeightMin);
 
 impl<W: Semiring> CommonDivisor<GallicWeight<W>> for GallicCommonDivisor {
-    fn common_divisor(w1: &GallicWeight<W>, w2: &GallicWeight<W>) -> Fallible<GallicWeight<W>> {
+    fn common_divisor(w1: &GallicWeight<W>, w2: &GallicWeight<W>) -> Result<GallicWeight<W>> {
         let mut weight = GallicWeightRestrict::zero();
         for w in w1.iter().chain(w2.iter()) {
             weight = GallicCommonDivisor::common_divisor(&weight, w)?;
@@ -187,7 +187,7 @@ where
         &self.cache_impl
     }
 
-    fn expand(&mut self, state: usize) -> Fallible<()> {
+    fn expand(&mut self, state: usize) -> Result<()> {
         // GetLabelMap
         let mut label_map: HashMap<Label, DeterminizeArc<F::W>> = HashMap::new();
         let src_tuple = self.state_table.find_tuple(state);
@@ -227,7 +227,7 @@ where
         Ok(())
     }
 
-    fn compute_start(&mut self) -> Fallible<Option<usize>> {
+    fn compute_start(&mut self) -> Result<Option<usize>> {
         if let Some(start_state) = self.fst.start() {
             let elt = DeterminizeElement::new(start_state, F::W::one());
             let tuple = DeterminizeStateTuple {
@@ -239,7 +239,7 @@ where
         Ok(None)
     }
 
-    fn compute_final(&mut self, state: usize) -> Fallible<Option<<F as CoreFst>::W>> {
+    fn compute_final(&mut self, state: usize) -> Result<Option<<F as CoreFst>::W>> {
         let zero = F::W::zero();
         let tuple = self.state_table.find_tuple(state);
         let mut final_weight = F::W::zero();
@@ -264,7 +264,7 @@ impl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>> DeterminizeFsaImpl<'a, 'b, F, CD>
 where
     F::W: WeaklyDivisibleSemiring + WeightQuantize,
 {
-    pub fn new(fst: &'a F, in_dist: Option<&'b [F::W]>) -> Fallible<Self> {
+    pub fn new(fst: &'a F, in_dist: Option<&'b [F::W]>) -> Result<Self> {
         if !fst.is_acceptor() {
             bail!("DeterminizeFsaImpl : expected acceptor as argument");
         }
@@ -278,7 +278,7 @@ where
         })
     }
 
-    fn add_arc(&mut self, state: StateId, det_arc: &DeterminizeArc<F::W>) -> Fallible<()> {
+    fn add_arc(&mut self, state: StateId, det_arc: &DeterminizeArc<F::W>) -> Result<()> {
         let arc = Arc::new(
             det_arc.label,
             det_arc.label,
@@ -288,7 +288,7 @@ where
         self.cache_impl.push_arc(state, arc)
     }
 
-    fn norm_arc(&mut self, det_arc: &mut DeterminizeArc<F::W>) -> Fallible<()> {
+    fn norm_arc(&mut self, det_arc: &mut DeterminizeArc<F::W>) -> Result<()> {
         det_arc
             .dest_tuple
             .subset
@@ -323,7 +323,7 @@ where
         Ok(())
     }
 
-    fn find_state(&mut self, tuple: &DeterminizeStateTuple<F::W>) -> Fallible<StateId> {
+    fn find_state(&mut self, tuple: &DeterminizeStateTuple<F::W>) -> Result<StateId> {
         let s = self.state_table.find_id_from_ref(&tuple);
         if let Some(_in_dist) = self.in_dist.as_ref() {
             if self.out_dist.len() <= s {
@@ -333,7 +333,7 @@ where
         Ok(s)
     }
 
-    fn compute_distance(&self, subset: &WeightedSubset<F::W>) -> Fallible<F::W> {
+    fn compute_distance(&self, subset: &WeightedSubset<F::W>) -> Result<F::W> {
         let mut outd = F::W::zero();
         let weight_zero = F::W::zero();
         for element in subset.iter() {
@@ -349,7 +349,7 @@ where
 
     pub fn compute_with_distance<F2: MutableFst<W = F::W> + ExpandedFst<W = F::W>>(
         &mut self,
-    ) -> Fallible<(F2, Vec<F2::W>)>
+    ) -> Result<(F2, Vec<F2::W>)>
     where
         F::W: 'static,
     {
@@ -359,7 +359,7 @@ where
     }
 }
 
-pub fn determinize_with_distance<W, F1, F2>(ifst: &F1, in_dist: &[W]) -> Fallible<(F2, Vec<W>)>
+pub fn determinize_with_distance<W, F1, F2>(ifst: &F1, in_dist: &[W]) -> Result<(F2, Vec<W>)>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
     F1: ExpandedFst<W = W>,
@@ -373,7 +373,7 @@ where
     det_fsa_impl.compute_with_distance()
 }
 
-pub fn determinize_fsa<W, F1, F2, CD>(fst_in: &F1) -> Fallible<F2>
+pub fn determinize_fsa<W, F1, F2, CD>(fst_in: &F1) -> Result<F2>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
     F1: Fst<W = W>,
@@ -387,7 +387,7 @@ where
     det_fsa_impl.compute()
 }
 
-pub fn determinize_fst<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Fallible<F2>
+pub fn determinize_fst<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Result<F2>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
     F1: ExpandedFst<W = W>,
@@ -461,7 +461,7 @@ where
 ///
 /// ![determinize_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/determinize_out.svg?sanitize=true)
 ///
-pub fn determinize<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Fallible<F2>
+pub fn determinize<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Result<F2>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
     F1: ExpandedFst<W = W>,
@@ -486,7 +486,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_determinize() -> Fallible<()> {
+    fn test_determinize() -> Result<()> {
         let mut input_fst = VectorFst::<TropicalWeight>::new();
         let s0 = input_fst.add_state();
         let s1 = input_fst.add_state();
@@ -515,7 +515,7 @@ mod tests {
     }
 
     #[test]
-    fn test_determinize_2() -> Fallible<()> {
+    fn test_determinize_2() -> Result<()> {
         let mut input_fst = VectorFst::<TropicalWeight>::new();
         let s0 = input_fst.add_state();
         let s1 = input_fst.add_state();

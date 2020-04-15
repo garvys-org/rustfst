@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::hash::Hash;
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 use itertools::Itertools;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
@@ -84,7 +84,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
     // matcher FST types). Recommended only for advanced use in demanding or
     // specialized applications due to potential code bloat and matcher
     // incompatibilities.
-    // fn new2(fst1: &'fst F1, fst2: &'fst F2) -> Fallible<Self> {
+    // fn new2(fst1: &'fst F1, fst2: &'fst F2) -> Result<Self> {
     //     unimplemented!()
     // }
 
@@ -92,7 +92,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
         fst1: Rc<<CF::M1 as Matcher<W>>::F>,
         fst2: Rc<<CF::M2 as Matcher<W>>::F>,
         opts: ComposeFstImplOptions<CF::M1, CF::M2, CF, StateTable<ComposeStateTuple<CF::FS>>>,
-    ) -> Fallible<Self> {
+    ) -> Result<Self> {
         let opts_matcher1 = opts.matcher1;
         let opts_matcher2 = opts.matcher2;
         let compose_filter = opts.filter.unwrap_or_else(|| {
@@ -121,7 +121,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
     fn match_type(
         matcher1: &Rc<RefCell<CF::M1>>,
         matcher2: &Rc<RefCell<CF::M2>>,
-    ) -> Fallible<MatchType> {
+    ) -> Result<MatchType> {
         if matcher1
             .borrow()
             .flags()
@@ -153,7 +153,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
         Ok(mt)
     }
 
-    fn match_input(&self, s1: StateId, s2: StateId) -> Fallible<bool> {
+    fn match_input(&self, s1: StateId, s2: StateId) -> Result<bool> {
         match self.match_type {
             MatchType::MatchInput => Ok(true),
             MatchType::MatchOutput => Ok(false),
@@ -183,7 +183,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
         sb: StateId,
         matchera: Rc<RefCell<M>>,
         match_input: bool,
-    ) -> Fallible<()> {
+    ) -> Result<()> {
         let arc_loop = if match_input {
             Arc::new(EPS_LABEL, NO_LABEL, W::one(), sb)
         } else {
@@ -196,7 +196,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
         Ok(())
     }
 
-    fn add_arc(&mut self, s: StateId, mut arc1: Arc<W>, arc2: Arc<W>, fs: CF::FS) -> Fallible<()> {
+    fn add_arc(&mut self, s: StateId, mut arc1: Arc<W>, arc2: Arc<W>, fs: CF::FS) -> Result<()> {
         let tuple = ComposeStateTuple {
             fs,
             s1: arc1.nextstate,
@@ -223,7 +223,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
         matchera: Rc<RefCell<M>>,
         arc: &Arc<W>,
         match_input: bool,
-    ) -> Fallible<()> {
+    ) -> Result<()> {
         let label = if match_input { arc.olabel } else { arc.ilabel };
 
         // Collect necessary here because need to borrow_mut a matcher later. To investigate.
@@ -267,7 +267,7 @@ impl<W: Semiring + 'static, CF: ComposeFilter<W>> FstImpl for ComposeFstImpl<W, 
         &self.cache_impl
     }
 
-    fn expand(&mut self, state: usize) -> Fallible<()> {
+    fn expand(&mut self, state: usize) -> Result<()> {
         let tuple = self.state_table.find_tuple(state);
         let s1 = tuple.s1;
         let s2 = tuple.s2;
@@ -295,7 +295,7 @@ impl<W: Semiring + 'static, CF: ComposeFilter<W>> FstImpl for ComposeFstImpl<W, 
         Ok(())
     }
 
-    fn compute_start(&mut self) -> Fallible<Option<StateId>> {
+    fn compute_start(&mut self) -> Result<Option<StateId>> {
         let s1 = self.fst1.start();
         if s1.is_none() {
             return Ok(None);
@@ -311,7 +311,7 @@ impl<W: Semiring + 'static, CF: ComposeFilter<W>> FstImpl for ComposeFstImpl<W, 
         Ok(Some(self.state_table.find_id(tuple)))
     }
 
-    fn compute_final(&mut self, state: usize) -> Fallible<Option<Self::W>> {
+    fn compute_final(&mut self, state: usize) -> Result<Option<Self::W>> {
         let tuple = self.state_table.find_tuple(state);
 
         let s1 = tuple.s1;
@@ -359,7 +359,7 @@ pub type ComposeFst<W, CF> = DynamicFst<ComposeFstImpl<W, CF>>;
 fn create_base<W: Semiring + 'static, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>>(
     fst1: Rc<F1>,
     fst2: Rc<F2>,
-) -> Fallible<ComposeFstImpl<W, SequenceComposeFilter<W, GenericMatcher<F1>, GenericMatcher<F2>>>> {
+) -> Result<ComposeFstImpl<W, SequenceComposeFilter<W, GenericMatcher<F1>, GenericMatcher<F2>>>> {
     // TODO: change this once Lookahead matchers are supported.
     let opts = ComposeFstImplOptions::<
         GenericMatcher<_>,
@@ -376,7 +376,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFst<W, CF> {
         fst1: Rc<<CF::M1 as Matcher<W>>::F>,
         fst2: Rc<<CF::M2 as Matcher<W>>::F>,
         opts: ComposeFstImplOptions<CF::M1, CF::M2, CF, StateTable<ComposeStateTuple<CF::FS>>>,
-    ) -> Fallible<Self>
+    ) -> Result<Self>
     where
         W: 'static,
     {
@@ -390,7 +390,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFst<W, CF> {
     pub fn new(
         fst1: Rc<<CF::M1 as Matcher<W>>::F>,
         fst2: Rc<<CF::M2 as Matcher<W>>::F>,
-    ) -> Fallible<Self>
+    ) -> Result<Self>
     where
         W: 'static,
     {
@@ -401,7 +401,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFst<W, CF> {
 impl<W: Semiring + 'static, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>>
     ComposeFst<W, SequenceComposeFilter<W, GenericMatcher<F1>, GenericMatcher<F2>>>
 {
-    pub fn new_auto(fst1: Rc<F1>, fst2: Rc<F2>) -> Fallible<Self> {
+    pub fn new_auto(fst1: Rc<F1>, fst2: Rc<F2>) -> Result<Self> {
         let isymt = fst1.input_symbols();
         let osymt = fst2.output_symbols();
         let compose_impl = create_base(fst1, fst2)?;
@@ -428,7 +428,7 @@ pub fn compose_with_config<F1: ExpandedFst, F2: ExpandedFst<W = F1::W>, F3: Muta
     fst1: Rc<F1>,
     fst2: Rc<F2>,
     config: ComposeConfig,
-) -> Fallible<F3>
+) -> Result<F3>
 where
     F1::W: 'static,
 {
@@ -479,13 +479,13 @@ where
 /// # Example
 /// ```
 /// # #[macro_use] extern crate rustfst;
-/// # use failure::Fallible;
+/// # use anyhow::Result;
 /// # use rustfst::utils::transducer;
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::compose;
 /// # use std::rc::Rc;
-/// # fn main() -> Fallible<()> {
+/// # fn main() -> Result<()> {
 /// let fst_1 : VectorFst<IntegerWeight> = fst![1,2 => 2,3];
 ///
 /// let fst_2 : VectorFst<IntegerWeight> = fst![2,3 => 3,4];
@@ -500,7 +500,7 @@ where
 pub fn compose<F1: ExpandedFst, F2: ExpandedFst<W = F1::W>, F3: MutableFst<W = F1::W>>(
     fst1: Rc<F1>,
     fst2: Rc<F2>,
-) -> Fallible<F3>
+) -> Result<F3>
 where
     F1::W: 'static,
 {

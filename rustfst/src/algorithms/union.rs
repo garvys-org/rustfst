@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::ReplaceFst;
@@ -19,7 +19,7 @@ use crate::{SymbolTable, EPS_LABEL};
 /// # Example 1
 /// ```
 /// # #[macro_use] extern crate rustfst;
-/// # use failure::Fallible;
+/// # use anyhow::Result;
 /// # use rustfst::utils::transducer;
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
@@ -27,7 +27,7 @@ use crate::{SymbolTable, EPS_LABEL};
 /// # use rustfst::FstPath;
 /// # use rustfst::algorithms::union;
 /// # use std::collections::HashSet;
-/// # fn main() -> Fallible<()> {
+/// # fn main() -> Result<()> {
 /// let mut fst_a : VectorFst<IntegerWeight> = fst![2 => 3];
 /// let fst_b : VectorFst<IntegerWeight> = fst![6 => 5];
 ///
@@ -57,7 +57,7 @@ use crate::{SymbolTable, EPS_LABEL};
 ///
 /// ![union_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/union_out.svg?sanitize=true)
 ///
-pub fn union<W, F1, F2>(fst_1: &mut F1, fst_2: &F2) -> Fallible<()>
+pub fn union<W, F1, F2>(fst_1: &mut F1, fst_2: &F2) -> Result<()>
 where
     W: Semiring,
     F1: AllocableFst<W = W> + MutableFst<W = W>,
@@ -131,7 +131,7 @@ where
 {
     //TODO: Use a borrow and not a move
     //TODO: Allow fsts of different types
-    pub fn new(fst1: F, fst2: F) -> Fallible<Self> {
+    pub fn new(fst1: F, fst2: F) -> Result<Self> {
         let mut rfst = F::new();
         rfst.add_states(2);
         rfst.set_start(0)?;
@@ -167,7 +167,7 @@ where
         self.0.start()
     }
 
-    fn final_weight(&self, state_id: usize) -> Fallible<Option<&Self::W>> {
+    fn final_weight(&self, state_id: usize) -> Result<Option<&Self::W>> {
         self.0.final_weight(state_id)
     }
 
@@ -175,7 +175,7 @@ where
         self.0.final_weight_unchecked(state_id)
     }
 
-    fn num_arcs(&self, s: usize) -> Fallible<usize> {
+    fn num_arcs(&self, s: usize) -> Result<usize> {
         self.0.num_arcs(s)
     }
 
@@ -201,7 +201,7 @@ where
 {
     type Iter = <ReplaceFst<F, F> as ArcIterator<'a>>::Iter;
 
-    fn arcs_iter(&'a self, state_id: usize) -> Fallible<Self::Iter> {
+    fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
         self.0.arcs_iter(state_id)
     }
 

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{MutableFst, SerializableFst};
@@ -143,7 +143,7 @@ pub fn parse_fst_properties(mapping: &HashMap<String, bool>) -> FstProperties {
     props
 }
 
-pub fn test_fst_properties<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_fst_properties<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst,
     F::W: SerializableSemiring + WeightQuantize,

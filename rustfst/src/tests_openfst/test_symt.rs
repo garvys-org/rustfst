@@ -1,13 +1,13 @@
 use std::fs::read_to_string;
 
-use failure::Fallible;
+use anyhow::Result;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::SymbolTable;
 
 use tempfile::tempdir;
 
-use self::super::{get_path_folder, ExitFailure};
+use self::super::get_path_folder;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ParsedSymtTestData {
@@ -17,7 +17,7 @@ pub struct ParsedSymtTestData {
     symt_text: String,
 }
 
-fn run_test_openfst_symt(test_name: &str) -> Fallible<()> {
+fn run_test_openfst_symt(test_name: &str) -> Result<()> {
     let absolute_path_folder = get_path_folder(test_name)?;
     let mut path_metadata = absolute_path_folder.clone();
     path_metadata.push("metadata.json");
@@ -70,16 +70,16 @@ fn run_test_openfst_symt(test_name: &str) -> Fallible<()> {
 }
 
 #[test]
-fn test_openfst_symt_000() -> Result<(), ExitFailure> {
+fn test_openfst_symt_000() -> Result<()> {
     run_test_openfst_symt("symt_000").map_err(|v| v.into())
 }
 
 #[test]
-fn test_openfst_symt_001() -> Result<(), ExitFailure> {
+fn test_openfst_symt_001() -> Result<()> {
     run_test_openfst_symt("symt_001").map_err(|v| v.into())
 }
 
 #[test]
-fn test_openfst_symt_002() -> Result<(), ExitFailure> {
+fn test_openfst_symt_002() -> Result<()> {
     run_test_openfst_symt("symt_002").map_err(|v| v.into())
 }

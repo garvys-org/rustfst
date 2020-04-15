@@ -3,7 +3,7 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 use itertools::Itertools;
 
 use crate::algorithms::arc_compares::{ilabel_compare, olabel_compare};
@@ -33,7 +33,7 @@ impl LabelReachableData {
         }
     }
 
-    pub fn interval_set(&self, s: StateId) -> Fallible<&IntervalSet> {
+    pub fn interval_set(&self, s: StateId) -> Result<&IntervalSet> {
         self.interval_sets
             .get(s)
             .ok_or_else(|| format_err!("Missing state {}", s))
@@ -60,7 +60,7 @@ pub struct LabelReachable {
 }
 
 impl LabelReachable {
-    pub fn new<F: Fst>(fst: &F, reach_input: bool) -> Fallible<Self>
+    pub fn new<F: Fst>(fst: &F, reach_input: bool) -> Result<Self>
     where
         F::W: 'static,
     {
@@ -180,7 +180,7 @@ impl LabelReachable {
         ins: StateId,
         data: &mut LabelReachableData,
         label2state: &mut HashMap<Label, StateId>,
-    ) -> Fallible<()> {
+    ) -> Result<()> {
         let state_reachable = StateReachable::new(fst)?;
         let state2index = &state_reachable.state2index;
         let interval_sets = &mut data.interval_sets;
@@ -210,7 +210,7 @@ impl LabelReachable {
         *label2index.entry(label).or_insert_with(|| n + 1)
     }
 
-    pub fn relabel_fst<F: MutableFst>(&self, fst: &mut F, relabel_input: bool) -> Fallible<()> {
+    pub fn relabel_fst<F: MutableFst>(&self, fst: &mut F, relabel_input: bool) -> Result<()> {
         for fst_data in fst.fst_iter_mut() {
             for arc in fst_data.arcs {
                 if relabel_input {
@@ -257,7 +257,7 @@ impl LabelReachable {
         pairs
     }
 
-    pub fn reach_init<F: ExpandedFst>(&mut self, fst: &Rc<F>, reach_input: bool) -> Fallible<()>
+    pub fn reach_init<F: ExpandedFst>(&mut self, fst: &Rc<F>, reach_input: bool) -> Result<()>
     where
         F::W: 'static,
     {
@@ -278,7 +278,7 @@ impl LabelReachable {
 
     // Can reach this label from current state?
     // Original labels must be transformed by the Relabel methods above.
-    pub fn reach_label(&self, current_state: StateId, label: Label) -> Fallible<bool> {
+    pub fn reach_label(&self, current_state: StateId, label: Label) -> Result<bool> {
         if label == EPS_LABEL {
             return Ok(false);
         }
@@ -290,7 +290,7 @@ impl LabelReachable {
     }
 
     // Can reach final state (via epsilon transitions) from this state?
-    pub fn reach_final(&self, current_state: StateId) -> Fallible<bool> {
+    pub fn reach_final(&self, current_state: StateId) -> Result<bool> {
         Ok(self
             .data
             .borrow()
@@ -305,7 +305,7 @@ impl LabelReachable {
         aiter_begin: usize,
         aiter_end: usize,
         compute_weight: bool,
-    ) -> Fallible<Option<(usize, usize, W)>> {
+    ) -> Result<Option<(usize, usize, W)>> {
         let mut reach_begin = UNASSIGNED;
         let mut reach_end = UNASSIGNED;
         let mut reach_weight = W::zero();

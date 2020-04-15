@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
@@ -42,18 +42,18 @@ pub enum MapFinalAction {
 /// arcs.
 pub trait ArcMapper<S: Semiring> {
     /// How to modify the arcs.
-    fn arc_map(&self, arc: &mut Arc<S>) -> Fallible<()>;
+    fn arc_map(&self, arc: &mut Arc<S>) -> Result<()>;
 
     /// The mapper will be passed final weights as arcs of the form
     /// `FinalArc(EPS_LABEL, EPS_LABEL, weight)`.
-    fn final_arc_map(&self, final_arc: &mut FinalArc<S>) -> Fallible<()>;
+    fn final_arc_map(&self, final_arc: &mut FinalArc<S>) -> Result<()>;
 
     /// Specifies final action the mapper requires (see above).
     fn final_action(&self) -> MapFinalAction;
 }
 
 /// Maps every arc in the FST using an `ArcMapper` object.
-pub fn arc_map<F, M>(ifst: &mut F, mapper: &M) -> Fallible<()>
+pub fn arc_map<F, M>(ifst: &mut F, mapper: &M) -> Result<()>
 where
     F: MutableFst,
     M: ArcMapper<F::W>,

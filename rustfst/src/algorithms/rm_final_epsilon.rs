@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use failure::Fallible;
+use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::arc_filters::AnyArcFilter;
@@ -12,7 +12,7 @@ use crate::semirings::Semiring;
 use crate::EPS_LABEL;
 
 /// Removes final states that have epsilon-only input arcs.
-pub fn rm_final_epsilon<F>(ifst: &mut F) -> Fallible<()>
+pub fn rm_final_epsilon<F>(ifst: &mut F) -> Result<()>
 where
     F: MutableFst,
 {

@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 
 use binary_heap_plus::BinaryHeap;
-use failure::Fallible;
+use anyhow::Result;
 use stable_bst::TreeMap;
 
 use crate::algorithms::arc_compares::ilabel_compare;
@@ -37,7 +37,7 @@ use crate::NO_STATE_ID;
 /// In place minimization of deterministic weighted automata and transducers,
 /// and also non-deterministic ones if they use an idempotent semiring.
 /// For transducers, the algorithm produces a compact factorization of the minimal transducer.
-pub fn minimize<F>(ifst: &mut F, allow_nondet: bool) -> Fallible<()>
+pub fn minimize<F>(ifst: &mut F, allow_nondet: bool) -> Result<()>
 where
     F: MutableFst + ExpandedFst + AllocableFst,
     F::W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
@@ -102,7 +102,7 @@ where
 fn acceptor_minimize<F: MutableFst + ExpandedFst>(
     ifst: &mut F,
     allow_acyclic_minimization: bool,
-) -> Fallible<()>
+) -> Result<()>
 where
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
     F::W: 'static,
@@ -133,7 +133,7 @@ where
     Ok(())
 }
 
-fn merge_states<F: MutableFst + ExpandedFst>(partition: Partition, fst: &mut F) -> Fallible<()> {
+fn merge_states<F: MutableFst + ExpandedFst>(partition: Partition, fst: &mut F) -> Result<()> {
     let mut state_map = vec![None; partition.num_classes()];
     for (i, s) in state_map
         .iter_mut()
@@ -177,7 +177,7 @@ pub fn fst_depth<F: Fst>(
     accessible_states: &mut HashSet<StateId>,
     fully_examined_states: &mut HashSet<StateId>,
     heights: &mut Vec<i32>,
-) -> Fallible<()> {
+) -> Result<()> {
     accessible_states.insert(state_id_cour);
 
     for _ in heights.len()..=state_id_cour {
@@ -212,7 +212,7 @@ struct AcyclicMinimizer {
 }
 
 impl AcyclicMinimizer {
-    pub fn new<F: MutableFst + ExpandedFst>(fst: &mut F) -> Fallible<Self> {
+    pub fn new<F: MutableFst + ExpandedFst>(fst: &mut F) -> Result<Self> {
         let mut c = Self {
             partition: Partition::empty_new(),
         };
@@ -221,7 +221,7 @@ impl AcyclicMinimizer {
         Ok(c)
     }
 
-    fn initialize<F: MutableFst + ExpandedFst>(&mut self, fst: &mut F) -> Fallible<()> {
+    fn initialize<F: MutableFst + ExpandedFst>(&mut self, fst: &mut F) -> Result<()> {
         let mut accessible_state = HashSet::new();
         let mut fully_examined_states = HashSet::new();
         let mut heights = Vec::new();
@@ -305,7 +305,7 @@ struct StateComparator<'a, F: MutableFst + ExpandedFst> {
 }
 
 impl<'a, F: MutableFst + ExpandedFst> StateComparator<'a, F> {
-    fn do_compare(&self, x: StateId, y: StateId) -> Fallible<bool> {
+    fn do_compare(&self, x: StateId, y: StateId) -> Result<bool> {
         let zero = F::W::zero();
         let xfinal = self.fst.final_weight(x)?.unwrap_or_else(|| &zero);
         let yfinal = self.fst.final_weight(y)?.unwrap_or_else(|| &zero);
@@ -345,7 +345,7 @@ impl<'a, F: MutableFst + ExpandedFst> StateComparator<'a, F> {
         Ok(false)
     }
 
-    pub fn compare(&self, x: StateId, y: StateId) -> Fallible<Ordering> {
+    pub fn compare(&self, x: StateId, y: StateId) -> Result<Ordering> {
         if x == y {
             return Ok(Ordering::Equal);
         }
@@ -412,7 +412,7 @@ fn pre_partition<W: Semiring, F: MutableFst<W = W> + ExpandedFst<W = W>>(
 
 fn cyclic_minimize<W: Semiring, F: MutableFst<W = W> + ExpandedFst<W = W>>(
     fst: &mut F,
-) -> Fallible<Partition>
+) -> Result<Partition>
 where
     W: 'static,
     <W as Semiring>::ReverseWeight: 'static,

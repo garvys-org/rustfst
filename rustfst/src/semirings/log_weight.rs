@@ -2,7 +2,7 @@ use std::borrow::Borrow;
 use std::f32;
 use std::hash::{Hash, Hasher};
 
-use failure::Fallible;
+use anyhow::Result;
 
 use ordered_float::OrderedFloat;
 
@@ -47,7 +47,7 @@ impl Semiring for LogWeight {
         }
     }
 
-    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         let f1 = self.value();
         let f2 = rhs.borrow().value();
         self.value.0 = if f1.eq(&f32::INFINITY) {
@@ -62,7 +62,7 @@ impl Semiring for LogWeight {
         Ok(())
     }
 
-    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         let f1 = self.value();
         let f2 = rhs.borrow().value();
         if f1.eq(&f32::INFINITY) {
@@ -86,7 +86,7 @@ impl Semiring for LogWeight {
         self.value.0 = value
     }
 
-    fn reverse(&self) -> Fallible<Self::ReverseWeight> {
+    fn reverse(&self) -> Result<Self::ReverseWeight> {
         Ok(*self)
     }
 
@@ -98,7 +98,7 @@ impl Semiring for LogWeight {
 }
 
 impl ReverseBack<LogWeight> for LogWeight {
-    fn reverse_back(&self) -> Fallible<LogWeight> {
+    fn reverse_back(&self) -> Result<LogWeight> {
         Ok(self.clone())
     }
 }
@@ -124,7 +124,7 @@ impl StarSemiring for LogWeight {
 }
 
 impl WeaklyDivisibleSemiring for LogWeight {
-    fn divide_assign(&mut self, rhs: &Self, _divide_type: DivideType) -> Fallible<()> {
+    fn divide_assign(&mut self, rhs: &Self, _divide_type: DivideType) -> Result<()> {
         self.value.0 -= rhs.value.0;
         Ok(())
     }
@@ -144,7 +144,7 @@ impl SerializableSemiring for LogWeight {
         Ok((i, Self::new(weight)))
     }
 
-    fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()> {
+    fn write_binary<F: Write>(&self, file: &mut F) -> Result<()> {
         write_bin_f32(file, *self.value())
     }
 

@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::fst_convert_from_ref;
 use crate::fst_impls::{ConstFst, VectorFst};
@@ -9,7 +9,7 @@ use crate::semirings::{SerializableSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
 use crate::SymbolTable;
 
-pub fn test_const_fst_convert_convert<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_const_fst_convert_convert<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + 'static,
 {

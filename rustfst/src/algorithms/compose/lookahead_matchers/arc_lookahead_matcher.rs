@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::compose::lookahead_matchers::{LookaheadMatcher, MatcherFlagsTrait};
@@ -29,7 +29,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
     type F = M::F;
     type Iter = M::Iter;
 
-    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Fallible<Self> {
+    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Result<Self> {
         Ok(Self {
             fst: Rc::clone(&fst),
             matcher: M::new(fst, match_type)?,
@@ -39,11 +39,11 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
         })
     }
 
-    fn iter(&self, state: usize, label: usize) -> Fallible<Self::Iter> {
+    fn iter(&self, state: usize, label: usize) -> Result<Self::Iter> {
         self.matcher.iter(state, label)
     }
 
-    fn final_weight(&self, state: usize) -> Fallible<Option<*const W>> {
+    fn final_weight(&self, state: usize) -> Result<Option<*const W>> {
         self.matcher.final_weight(state)
     }
 
@@ -58,7 +58,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
             | MFT::flags()
     }
 
-    fn priority(&self, state: usize) -> Fallible<usize> {
+    fn priority(&self, state: usize) -> Result<usize> {
         self.matcher.priority(state)
     }
 
@@ -81,18 +81,18 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
         fst: Rc<Self::F>,
         match_type: MatchType,
         _data: Option<Rc<RefCell<Self::MatcherData>>>,
-    ) -> Fallible<Self> {
+    ) -> Result<Self> {
         Self::new(fst, match_type)
     }
 
     fn create_data<F: ExpandedFst<W = W>>(
         _fst: &F,
         _match_type: MatchType,
-    ) -> Fallible<Option<Rc<RefCell<Self::MatcherData>>>> {
+    ) -> Result<Option<Rc<RefCell<Self::MatcherData>>>> {
         Ok(None)
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &Rc<LF>) -> Fallible<()> {
+    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &Rc<LF>) -> Result<()> {
         Ok(())
     }
 
@@ -101,7 +101,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
         matcher_state: StateId,
         lfst: &Rc<LF>,
         lfst_state: StateId,
-    ) -> Fallible<bool> {
+    ) -> Result<bool> {
         let mut result = false;
         let mut nprefix = 0;
         if MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
@@ -218,7 +218,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
         Ok(result)
     }
 
-    fn lookahead_label(&self, state: StateId, label: Label) -> Fallible<bool> {
+    fn lookahead_label(&self, state: StateId, label: Label) -> Result<bool> {
         let mut it = self.matcher.iter(state, label)?;
         Ok(it.next().is_some())
     }

@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::{rm_epsilon, RmEpsilonFst};
 use crate::fst_impls::VectorFst;
@@ -11,7 +11,7 @@ use crate::semirings::WeaklyDivisibleSemiring;
 use crate::tests_openfst::algorithms::dynamic_fst::compare_fst_static_dynamic;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_rmepsilon<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_rmepsilon<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + ExpandedFst + Display,
     F::W: 'static + SerializableSemiring + WeaklyDivisibleSemiring,
@@ -35,7 +35,7 @@ where
     Ok(())
 }
 
-pub fn test_rmepsilon_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_rmepsilon_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + 'static,
     W::ReverseWeight: 'static,

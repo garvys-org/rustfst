@@ -1,12 +1,12 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
-use failure::{bail, format_err, Fallible, ResultExt};
+use anyhow::{bail, format_err, Result, Context};
 
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::StateId;
 
-fn iterator_to_hashmap<I>(pairs: I) -> Fallible<HashMap<StateId, StateId>>
+fn iterator_to_hashmap<I>(pairs: I) -> Result<HashMap<StateId, StateId>>
 where
     I: IntoIterator<Item = (StateId, StateId)>,
 {
@@ -35,8 +35,8 @@ where
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::relabel_pairs;
-/// # use failure::Fallible;
-/// # fn main() -> Fallible<()> {
+/// # use anyhow::Result;
+/// # fn main() -> Result<()> {
 /// let mut fst : VectorFst<IntegerWeight> = fst![2 => 3];
 /// relabel_pairs(&mut fst, vec![(2,5)], vec![(3,4)])?;
 ///
@@ -44,17 +44,17 @@ where
 /// # Ok(())
 /// # }
 /// ```
-pub fn relabel_pairs<F, I, J>(fst: &mut F, ipairs: I, opairs: J) -> Fallible<()>
+pub fn relabel_pairs<F, I, J>(fst: &mut F, ipairs: I, opairs: J) -> Result<()>
 where
     F: ExpandedFst + MutableFst,
     I: IntoIterator<Item = (StateId, StateId)>,
     J: IntoIterator<Item = (StateId, StateId)>,
 {
     let map_ilabels = iterator_to_hashmap(ipairs)
-        .with_context(|_| format_err!("Error while creating the HashMap for ipairs"))?;
+        .with_context(|| format_err!("Error while creating the HashMap for ipairs"))?;
 
     let map_olabels = iterator_to_hashmap(opairs)
-        .with_context(|_| format_err!("Error while creating the HashMap for opairs"))?;
+        .with_context(|| format_err!("Error while creating the HashMap for opairs"))?;
 
     let states: Vec<_> = fst.states_iter().collect();
     for state_id in states {
@@ -79,7 +79,7 @@ mod tests {
     use crate::semirings::{IntegerWeight, Semiring};
 
     #[test]
-    fn test_projection_input_generic() -> Fallible<()> {
+    fn test_projection_input_generic() -> Result<()> {
         // Initial FST
         let mut fst = VectorFst::<IntegerWeight>::new();
         let s0 = fst.add_state();

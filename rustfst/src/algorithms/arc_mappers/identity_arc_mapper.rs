@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction, WeightConverter};
 use crate::semirings::Semiring;
@@ -8,11 +8,11 @@ use crate::Arc;
 pub struct IdentityArcMapper {}
 
 impl<S: Semiring> ArcMapper<S> for IdentityArcMapper {
-    fn arc_map(&self, _arc_to_map: &mut Arc<S>) -> Fallible<()> {
+    fn arc_map(&self, _arc_to_map: &mut Arc<S>) -> Result<()> {
         Ok(())
     }
 
-    fn final_arc_map(&self, _final_arc: &mut FinalArc<S>) -> Fallible<()> {
+    fn final_arc_map(&self, _final_arc: &mut FinalArc<S>) -> Result<()> {
         Ok(())
     }
 

@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::{project, ProjectType};
 use crate::fst_traits::{MutableFst, SerializableFst};
@@ -8,7 +8,7 @@ use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_project_output<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_project_output<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeaklyDivisibleSemiring,
@@ -29,7 +29,7 @@ where
     Ok(())
 }
 
-pub fn test_project_input<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_project_input<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeaklyDivisibleSemiring,

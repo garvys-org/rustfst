@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use failure::Fallible;
+use anyhow::Result;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::compose::StateReachable;
@@ -36,7 +36,7 @@ impl StateReachableOperationResult {
     }
 }
 
-pub fn test_state_reachable<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_state_reachable<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: MutableFst + Display + SerializableFst,
     F::W: SerializableSemiring + 'static,

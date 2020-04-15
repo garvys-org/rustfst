@@ -1,8 +1,8 @@
-use failure::_core::cmp::Ordering;
-use serde_derive::{Deserialize, Serialize};
+use std::cmp::Ordering;
 use std::collections::HashSet;
 use std::slice::Iter as IterSlice;
 use std::vec::IntoIter as IntoIterVec;
+use serde_derive::{Deserialize, Serialize};
 use superslice::Ext;
 use unsafe_unwrap::UnsafeUnwrap;
 
@@ -194,10 +194,10 @@ impl IntervalSet {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use failure::Fallible;
+    use anyhow::Result;
 
     #[test]
-    fn test_normalize_interval_set() -> Fallible<()> {
+    fn test_normalize_interval_set() -> Result<()> {
         let mut interval_set = IntervalSet::default();
 
         assert!(!interval_set.singleton());
@@ -239,7 +239,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ord_intinterval() -> Fallible<()> {
+    fn test_ord_intinterval() -> Result<()> {
         {
             let interval_1 = IntInterval::new(1, 4);
             let interval_2 = IntInterval::new(2, 3);

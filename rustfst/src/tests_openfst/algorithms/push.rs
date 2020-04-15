@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{push, PushType, ReweightType};
@@ -47,7 +47,7 @@ impl PushOperationResult {
     }
 }
 
-pub fn test_push<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_push<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,

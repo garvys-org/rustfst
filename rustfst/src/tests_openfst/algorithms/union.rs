@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{union, UnionFst};
@@ -39,7 +39,7 @@ impl UnionOperationResult {
     }
 }
 
-pub fn test_union<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_union<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
@@ -62,7 +62,7 @@ where
     Ok(())
 }
 
-pub fn test_union_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_union_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,

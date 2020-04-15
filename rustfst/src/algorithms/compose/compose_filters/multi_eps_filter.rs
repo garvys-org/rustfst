@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::compose::compose_filters::ComposeFilter;
 use crate::algorithms::compose::matchers::Matcher;
@@ -24,7 +24,7 @@ impl<W: Semiring, F: ComposeFilter<W>> ComposeFilter<W> for MultiEpsFilter<F> {
         fst2: Rc<<Self::M2 as Matcher<W>>::F>,
         m1: IM1,
         m2: IM2,
-    ) -> Fallible<Self> {
+    ) -> Result<Self> {
         Ok(Self {
             filter: F::new(fst1, fst2, m1, m2)?,
             keep_multi_eps: false,
@@ -35,11 +35,11 @@ impl<W: Semiring, F: ComposeFilter<W>> ComposeFilter<W> for MultiEpsFilter<F> {
         self.filter.start()
     }
 
-    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Fallible<()> {
+    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Result<()> {
         self.filter.set_state(s1, s2, filter_state)
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS> {
+    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Result<Self::FS> {
         let opt_fs = self.filter.filter_arc(arc1, arc2)?;
         if self.keep_multi_eps {
             if arc1.olabel == NO_LABEL {
@@ -53,7 +53,7 @@ impl<W: Semiring, F: ComposeFilter<W>> ComposeFilter<W> for MultiEpsFilter<F> {
         Ok(opt_fs)
     }
 
-    fn filter_final(&self, w1: &mut W, w2: &mut W) -> Fallible<()> {
+    fn filter_final(&self, w1: &mut W, w2: &mut W) -> Result<()> {
         self.filter.filter_final(w1, w2)
     }
 

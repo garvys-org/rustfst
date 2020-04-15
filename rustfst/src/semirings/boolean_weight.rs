@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::semirings::{CompleteSemiring, ReverseBack, Semiring, SemiringProperties, StarSemiring};
 use std::borrow::Borrow;
@@ -23,11 +23,11 @@ impl Semiring for BooleanWeight {
         BooleanWeight { value }
     }
 
-    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         self.value |= rhs.borrow().value;
         Ok(())
     }
-    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         self.value &= rhs.borrow().value;
         Ok(())
     }
@@ -44,7 +44,7 @@ impl Semiring for BooleanWeight {
         self.value = value
     }
 
-    fn reverse(&self) -> Fallible<Self::ReverseWeight> {
+    fn reverse(&self) -> Result<Self::ReverseWeight> {
         Ok(*self)
     }
 
@@ -58,7 +58,7 @@ impl Semiring for BooleanWeight {
 }
 
 impl ReverseBack<BooleanWeight> for BooleanWeight {
-    fn reverse_back(&self) -> Fallible<BooleanWeight> {
+    fn reverse_back(&self) -> Result<BooleanWeight> {
         Ok(self.clone())
     }
 }
@@ -84,7 +84,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_boolean_weight() -> Fallible<()> {
+    fn test_boolean_weight() -> Result<()> {
         let b_true = BooleanWeight::new(true);
         let b_false = BooleanWeight::new(false);
 

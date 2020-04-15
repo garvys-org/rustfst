@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::weight_convert;
@@ -41,7 +41,7 @@ impl GallicOperationResult {
     }
 }
 
-pub fn test_gallic_encode_decode<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_gallic_encode_decode<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: 'static + SerializableSemiring,
 {

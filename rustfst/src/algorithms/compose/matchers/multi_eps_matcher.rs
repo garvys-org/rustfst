@@ -4,7 +4,7 @@ use std::marker::PhantomData;
 use std::ops::{Add, AddAssign, SubAssign};
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 use itertools::Itertools;
 use nom::lib::std::collections::BTreeSet;
 
@@ -113,7 +113,7 @@ impl<W: Semiring, M: Matcher<W>> MultiEpsMatcher<W, M> {
         match_type: MatchType,
         flags: MultiEpsMatcherFlags,
         matcher: IM,
-    ) -> Fallible<Self> {
+    ) -> Result<Self> {
         let matcher = matcher
             .into()
             .unwrap_or_else(|| Rc::new(RefCell::new(M::new(fst, match_type).unwrap())));
@@ -133,7 +133,7 @@ impl<W: Semiring, M: Matcher<W>> MultiEpsMatcher<W, M> {
         self.multi_eps_labels.clear()
     }
 
-    pub fn add_multi_eps_label(&mut self, label: Label) -> Fallible<()> {
+    pub fn add_multi_eps_label(&mut self, label: Label) -> Result<()> {
         if label == EPS_LABEL {
             bail!("MultiEpsMatcher: Bad multi-eps label: 0")
         }
@@ -141,7 +141,7 @@ impl<W: Semiring, M: Matcher<W>> MultiEpsMatcher<W, M> {
         Ok(())
     }
 
-    pub fn remove_multi_eps_label(&mut self, label: Label) -> Fallible<()> {
+    pub fn remove_multi_eps_label(&mut self, label: Label) -> Result<()> {
         if label == EPS_LABEL {
             bail!("MultiEpsMatcher: Bad multi-eps label: 0")
         }
@@ -154,7 +154,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
     type F = M::F;
     type Iter = IteratorMultiEpsMatcher<W, M>;
 
-    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Fallible<Self> {
+    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Result<Self> {
         Self::new_with_opts(
             fst,
             match_type,
@@ -163,7 +163,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
         )
     }
 
-    fn iter(&self, state: usize, label: usize) -> Fallible<Self::Iter> {
+    fn iter(&self, state: usize, label: usize) -> Result<Self::Iter> {
         let (iter_matcher, iter_labels) = if label == EPS_LABEL {
             (
                 Some(self.matcher.borrow().iter(state, EPS_LABEL)?.peekable()),
@@ -224,7 +224,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
         })
     }
 
-    fn final_weight(&self, state: usize) -> Fallible<Option<*const W>> {
+    fn final_weight(&self, state: usize) -> Result<Option<*const W>> {
         self.matcher.borrow().final_weight(state)
     }
 
@@ -236,7 +236,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
         self.matcher.borrow().flags()
     }
 
-    fn priority(&self, state: usize) -> Fallible<usize> {
+    fn priority(&self, state: usize) -> Result<usize> {
         self.matcher.borrow().priority(state)
     }
 

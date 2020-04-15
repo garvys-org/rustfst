@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use rustfst::prelude::*;
 
@@ -25,7 +25,7 @@ impl UnaryFstAlgorithm for InvertAlgorithm {
     fn run_algorithm(
         &self,
         mut fst: VectorFst<TropicalWeight>,
-    ) -> Fallible<VectorFst<TropicalWeight>> {
+    ) -> Result<VectorFst<TropicalWeight>> {
         invert(&mut fst);
         Ok(fst)
     }

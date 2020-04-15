@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::arc_filters::{AnyArcFilter, ArcFilter};
 use crate::algorithms::queues::AutoQueue;
@@ -150,7 +150,7 @@ impl<Q: Queue, F: ExpandedFst, B: Borrow<F>, A: ArcFilter<F::W>> ShortestDistanc
         }
     }
 
-    pub fn shortest_distance(&mut self, source: Option<StateId>) -> Fallible<Vec<F::W>> {
+    pub fn shortest_distance(&mut self, source: Option<StateId>) -> Result<Vec<F::W>> {
         let start_state = match self.fst.borrow().start() {
             Some(start_state) => start_state,
             None => return Ok(vec![]),
@@ -241,7 +241,7 @@ pub fn shortest_distance_with_config<
 >(
     fst: &F,
     opts: ShortestDistanceConfig<W, Q, A>,
-) -> Fallible<Vec<W>> {
+) -> Result<Vec<W>> {
     let source = opts.source;
     let mut sd_state = ShortestDistanceState::<_, F, _, _>::new_from_config(fst, opts, false);
     sd_state.shortest_distance(source)
@@ -258,8 +258,8 @@ pub fn shortest_distance_with_config<
 /// # use rustfst::fst_traits::MutableFst;
 /// # use rustfst::algorithms::shortest_distance;
 /// # use rustfst::Arc;
-/// # use failure::Fallible;
-/// fn main() -> Fallible<()> {
+/// # use anyhow::Result;
+/// fn main() -> Result<()> {
 /// let mut fst = VectorFst::<IntegerWeight>::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
@@ -280,7 +280,7 @@ pub fn shortest_distance_with_config<
 /// # Ok(())
 /// # }
 /// ```
-pub fn shortest_distance<F: ExpandedFst>(fst: &F, reverse: bool) -> Fallible<Vec<F::W>>
+pub fn shortest_distance<F: ExpandedFst>(fst: &F, reverse: bool) -> Result<Vec<F::W>>
 where
     F::W: 'static,
 {
@@ -306,7 +306,7 @@ where
 #[allow(unused)]
 /// Return the sum of the weight of all successful paths in an FST, i.e., the
 /// shortest-distance from the initial state to the final states..
-fn shortest_distance_3<F: MutableFst>(fst: &F) -> Fallible<F::W>
+fn shortest_distance_3<F: MutableFst>(fst: &F) -> Result<F::W>
 where
     F::W: 'static,
 {

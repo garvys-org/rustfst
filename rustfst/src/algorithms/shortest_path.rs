@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 
 use binary_heap_plus::BinaryHeap;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use unsafe_unwrap::UnsafeUnwrap;
 
@@ -35,7 +35,7 @@ use crate::StateId;
 ///
 /// ![shortestpath_out_n_2](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/shortestpath_out_n_2.svg?sanitize=true)
 ///
-pub fn shortest_path<FI, FO>(ifst: &FI, nshortest: usize, unique: bool) -> Fallible<FO>
+pub fn shortest_path<FI, FO>(ifst: &FI, nshortest: usize, unique: bool) -> Result<FO>
 where
     FI: ExpandedFst,
     FO: MutableFst<W = FI::W>,
@@ -98,7 +98,7 @@ fn single_shortest_path<F>(
     distance: &mut Vec<F::W>,
     f_parent: &mut Option<StateId>,
     parent: &mut Vec<Option<(StateId, usize)>>,
-) -> Fallible<()>
+) -> Result<()>
 where
     F: ExpandedFst,
     F::W: 'static,
@@ -172,7 +172,7 @@ fn single_shortest_path_backtrace<FI, FO>(
     ifst: &FI,
     f_parent: &Option<StateId>,
     parent: &[Option<(StateId, usize)>],
-) -> Fallible<FO>
+) -> Result<FO>
 where
     FI: ExpandedFst,
     FO: MutableFst<W = FI::W>,
@@ -208,7 +208,7 @@ where
     Ok(ofst)
 }
 
-pub fn natural_less<W: Semiring>(w1: &W, w2: &W) -> Fallible<bool> {
+pub fn natural_less<W: Semiring>(w1: &W, w2: &W) -> Result<bool> {
     Ok((&w1.plus(w2)? == w1) && (w1 != w2))
 }
 
@@ -257,7 +257,7 @@ impl<'a, 'b, W: Semiring> ShortestPathCompare<'a, 'b, W> {
     }
 }
 
-fn n_shortest_path<W, FI, FO>(ifst: &FI, distance: &[W], nshortest: usize) -> Fallible<FO>
+fn n_shortest_path<W, FI, FO>(ifst: &FI, distance: &[W], nshortest: usize) -> Result<FO>
 where
     W: Semiring,
     FI: ExpandedFst<W = W::ReverseWeight> + MutableFst<W = W::ReverseWeight>,

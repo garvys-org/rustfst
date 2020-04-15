@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::connect;
 use crate::fst_properties::FstProperties;
@@ -8,7 +8,7 @@ use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_connect<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_connect<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: MutableFst + Display + SerializableFst,
     F::W: SerializableSemiring,

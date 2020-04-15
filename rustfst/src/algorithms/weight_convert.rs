@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::{FinalArc, MapFinalAction};
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
@@ -9,14 +9,14 @@ use unsafe_unwrap::UnsafeUnwrap;
 /// The WeightConverter interfaces defines how a weight should be turned into another one.
 /// Useful for changing the semiring of an FST.
 pub trait WeightConverter<SI: Semiring, SO: Semiring> {
-    fn arc_map(&mut self, arc: &Arc<SI>) -> Fallible<Arc<SO>>;
-    fn final_arc_map(&mut self, final_arc: &FinalArc<SI>) -> Fallible<FinalArc<SO>>;
+    fn arc_map(&mut self, arc: &Arc<SI>) -> Result<Arc<SO>>;
+    fn final_arc_map(&mut self, final_arc: &FinalArc<SI>) -> Result<FinalArc<SO>>;
     fn final_action(&self) -> MapFinalAction;
 }
 
 /// Convert an FST in a given Semiring to another Semiring using a WeightConverter
 /// to specify how the conversion should be performed.
-pub fn weight_convert<F1, F2, M>(fst_in: &F1, mapper: &mut M) -> Fallible<F2>
+pub fn weight_convert<F1, F2, M>(fst_in: &F1, mapper: &mut M) -> Result<F2>
 where
     F1: ExpandedFst,
     F2: MutableFst + AllocableFst,

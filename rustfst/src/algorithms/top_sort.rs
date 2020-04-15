@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::arc_filters::AnyArcFilter;
 use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
@@ -71,7 +71,7 @@ impl<'a, F: 'a + Fst> Visitor<'a, F> for TopOrderVisitor {
 ///
 /// ![topsort_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_out.svg?sanitize=true)
 ///
-pub fn top_sort<F>(fst: &mut F) -> Fallible<()>
+pub fn top_sort<F>(fst: &mut F) -> Result<()>
 where
     F: MutableFst + ExpandedFst,
 {

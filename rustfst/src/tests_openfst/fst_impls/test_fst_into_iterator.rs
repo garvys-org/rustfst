@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 use itertools::Itertools;
 
 use crate::fst_impls::{ConstFst, VectorFst};
@@ -6,7 +6,7 @@ use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::{SerializableSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
 
-fn do_test_fst_into_iterator<F: ExpandedFst>(fst: F) -> Fallible<()> {
+fn do_test_fst_into_iterator<F: ExpandedFst>(fst: F) -> Result<()> {
     let mut fst_data_ref = vec![];
 
     for state in 0..fst.num_states() {
@@ -32,7 +32,7 @@ fn do_test_fst_into_iterator<F: ExpandedFst>(fst: F) -> Fallible<()> {
     Ok(())
 }
 
-fn do_test_fst_iterator<F: ExpandedFst>(fst: &F) -> Fallible<()> {
+fn do_test_fst_iterator<F: ExpandedFst>(fst: &F) -> Result<()> {
     let mut fst_data_ref = vec![];
 
     for state in 0..fst.num_states() {
@@ -58,7 +58,7 @@ fn do_test_fst_iterator<F: ExpandedFst>(fst: &F) -> Fallible<()> {
     Ok(())
 }
 
-fn do_test_fst_iterator_mut<F: MutableFst>(mut fst: F) -> Fallible<()> {
+fn do_test_fst_iterator_mut<F: MutableFst>(mut fst: F) -> Result<()> {
     let mut fst_data_ref = vec![];
 
     for state in 0..fst.num_states() {
@@ -82,7 +82,7 @@ fn do_test_fst_iterator_mut<F: MutableFst>(mut fst: F) -> Fallible<()> {
     Ok(())
 }
 
-pub fn test_fst_into_iterator_const<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_fst_into_iterator_const<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + 'static,
 {
@@ -94,7 +94,7 @@ where
     Ok(())
 }
 
-pub fn test_fst_into_iterator_vector<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_fst_into_iterator_vector<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + 'static,
 {

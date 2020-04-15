@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::fmt::Debug;
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 
 pub use arc_lookahead_matcher::ArcLookAheadMatcher;
 pub use label_lookahead_matcher::LabelLookAheadMatcher;
@@ -32,16 +32,16 @@ pub trait LookaheadMatcher<W: Semiring>: Matcher<W> {
         fst: Rc<Self::F>,
         match_type: MatchType,
         data: Option<Rc<RefCell<Self::MatcherData>>>,
-    ) -> Fallible<Self>
+    ) -> Result<Self>
     where
         Self: std::marker::Sized;
 
     fn create_data<F: ExpandedFst<W = W>>(
         fst: &F,
         match_type: MatchType,
-    ) -> Fallible<Option<Rc<RefCell<Self::MatcherData>>>>;
+    ) -> Result<Option<Rc<RefCell<Self::MatcherData>>>>;
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &Rc<LF>) -> Fallible<()>;
+    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &Rc<LF>) -> Result<()>;
     // Are there paths from a state in the lookahead FST that can be read from
     // the curent matcher state?
     fn lookahead_fst<LF: ExpandedFst<W = W>>(
@@ -49,11 +49,11 @@ pub trait LookaheadMatcher<W: Semiring>: Matcher<W> {
         matcher_state: StateId,
         lfst: &Rc<LF>,
         lfst_state: StateId,
-    ) -> Fallible<bool>;
+    ) -> Result<bool>;
 
     // Can the label be read from the current matcher state after possibly
     // following epsilon transitions?
-    fn lookahead_label(&self, state: StateId, label: Label) -> Fallible<bool>;
+    fn lookahead_label(&self, state: StateId, label: Label) -> Result<bool>;
     fn lookahead_prefix(&self, arc: &mut Arc<W>) -> bool;
 
     // Gives an estimate of the combined weight of the paths in the lookahead

@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::ReplaceFst;
 use crate::arc::Arc;
@@ -22,9 +22,9 @@ use std::rc::Rc;
 /// # use rustfst::fst_traits::PathsIterator;
 /// # use rustfst::FstPath;
 /// # use rustfst::algorithms::concat;
-/// # use failure::Fallible;
+/// # use anyhow::Result;
 /// # use std::collections::HashSet;
-/// # fn main() -> Fallible<()> {
+/// # fn main() -> Result<()> {
 /// let mut fst_a : VectorFst<IntegerWeight> = fst![2 => 3];
 /// let fst_b : VectorFst<IntegerWeight> = fst![6 => 5];
 ///
@@ -53,7 +53,7 @@ use std::rc::Rc;
 ///
 /// ![concat_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/concat_out.svg?sanitize=true)
 ///
-pub fn concat<W, F1, F2>(fst_1: &mut F1, fst_2: &F2) -> Fallible<()>
+pub fn concat<W, F1, F2>(fst_1: &mut F1, fst_2: &F2) -> Result<()>
 where
     W: Semiring,
     F1: ExpandedFst<W = W> + MutableFst<W = W> + AllocableFst<W = W>,
@@ -113,7 +113,7 @@ where
 {
     //TODO: Use a borrow and not a move
     //TODO: Allow fsts of different types
-    pub fn new(fst1: F, fst2: F) -> Fallible<Self> {
+    pub fn new(fst1: F, fst2: F) -> Result<Self> {
         let mut rfst = F::new();
         rfst.add_states(3);
         unsafe { rfst.set_start_unchecked(0) };
@@ -148,7 +148,7 @@ where
         self.0.start()
     }
 
-    fn final_weight(&self, state_id: usize) -> Fallible<Option<&Self::W>> {
+    fn final_weight(&self, state_id: usize) -> Result<Option<&Self::W>> {
         self.0.final_weight(state_id)
     }
 
@@ -156,7 +156,7 @@ where
         self.0.final_weight_unchecked(state_id)
     }
 
-    fn num_arcs(&self, s: usize) -> Fallible<usize> {
+    fn num_arcs(&self, s: usize) -> Result<usize> {
         self.0.num_arcs(s)
     }
 
@@ -182,7 +182,7 @@ where
 {
     type Iter = <ReplaceFst<F, F> as ArcIterator<'a>>::Iter;
 
-    fn arcs_iter(&'a self, state_id: usize) -> Fallible<Self::Iter> {
+    fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
         self.0.arcs_iter(state_id)
     }
 

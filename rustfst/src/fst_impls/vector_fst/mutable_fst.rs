@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::arc_unique::arc_compare;
 use crate::fst_impls::vector_fst::{VectorFst, VectorFstState};
@@ -26,7 +26,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         }
     }
 
-    fn set_start(&mut self, state_id: StateId) -> Fallible<()> {
+    fn set_start(&mut self, state_id: StateId) -> Result<()> {
         ensure!(
             self.states.get(state_id).is_some(),
             "The state {:?} doesn't exist",
@@ -40,7 +40,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         self.start_state = Some(state_id);
     }
 
-    fn set_final<S: Into<W>>(&mut self, state_id: StateId, final_weight: S) -> Fallible<()> {
+    fn set_final<S: Into<W>>(&mut self, state_id: StateId, final_weight: S) -> Result<()> {
         if let Some(state) = self.states.get_mut(state_id) {
             state.final_weight = Some(final_weight.into());
             Ok(())
@@ -64,7 +64,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         self.states.resize_with(len + n, VectorFstState::new);
     }
 
-    fn del_state(&mut self, state_to_remove: StateId) -> Fallible<()> {
+    fn del_state(&mut self, state_to_remove: StateId) -> Result<()> {
         // Remove the state from the vector
         // Check the arcs for arcs going to this state
 
@@ -77,7 +77,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         self.del_states(v.into_iter())
     }
 
-    fn del_states<T: IntoIterator<Item = StateId>>(&mut self, dstates: T) -> Fallible<()> {
+    fn del_states<T: IntoIterator<Item = StateId>>(&mut self, dstates: T) -> Result<()> {
         let mut new_id = vec![0 as i32; self.states.len()];
 
         for s in dstates {
@@ -140,7 +140,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         }
     }
 
-    fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Fallible<()> {
+    fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()> {
         self.states
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
@@ -157,7 +157,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         self.states.get_unchecked_mut(source).arcs = arcs
     }
 
-    fn delete_final_weight(&mut self, source: usize) -> Fallible<()> {
+    fn delete_final_weight(&mut self, source: usize) -> Result<()> {
         self.states
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
@@ -169,7 +169,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         self.states.get_unchecked_mut(source).final_weight = None;
     }
 
-    fn delete_arcs(&mut self, source: usize) -> Fallible<()> {
+    fn delete_arcs(&mut self, source: usize) -> Result<()> {
         self.states
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
@@ -178,7 +178,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(())
     }
 
-    fn pop_arcs(&mut self, source: usize) -> Fallible<Vec<Arc<Self::W>>> {
+    fn pop_arcs(&mut self, source: usize) -> Result<Vec<Arc<Self::W>>> {
         let v = self
             .states
             .get_mut(source)
@@ -197,7 +197,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
             .collect()
     }
 
-    fn final_weight_mut(&mut self, state_id: StateId) -> Fallible<Option<&mut W>> {
+    fn final_weight_mut(&mut self, state_id: StateId) -> Result<Option<&mut W>> {
         let s = self
             .states
             .get_mut(state_id)
@@ -212,7 +212,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
             .as_mut()
     }
 
-    fn take_final_weight(&mut self, state_id: usize) -> Fallible<Option<Self::W>> {
+    fn take_final_weight(&mut self, state_id: usize) -> Result<Option<Self::W>> {
         let s = self
             .states
             .get_mut(state_id)

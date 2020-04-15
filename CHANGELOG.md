@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `set_input_symbols`, `set_output_symbols`, `unset_input_symbols`, `unset_output_symbols` and `set_symts_from_fst` methods have been moved from `MutableFst` to `Fst`.
 - Remove `MutableFst` trait bound from input of `shortest_path`.
 - `ArcMap` now takes an immutable mapper as parameter.
+- Use anyhow instead of failure for errors.
 
 ### Fixed
 - Fix olabel display while drawing a FST if no symbol table is provided

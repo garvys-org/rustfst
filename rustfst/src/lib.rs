@@ -31,10 +31,10 @@
 //! ## Example
 //!
 //! ```rust
-//! use failure::Fallible;
+//! use anyhow::Result;
 //! use rustfst::prelude::*;
 //!
-//! fn main() -> Fallible<()> {
+//! fn main() -> Result<()> {
 //!     // Creates a empty wFST
 //!     let mut fst = VectorFst::<TropicalWeight>::new();
 //!
@@ -91,7 +91,7 @@
 #[cfg(test)]
 extern crate counter;
 #[macro_use]
-extern crate failure;
+extern crate anyhow;
 #[cfg(test)]
 extern crate rand;
 #[cfg(test)]

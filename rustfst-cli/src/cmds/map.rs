@@ -1,4 +1,4 @@
-use failure::{bail, Fallible};
+use anyhow::{bail, Result};
 use unsafe_unwrap::UnsafeUnwrap;
 
 use rustfst::prelude::*;
@@ -28,7 +28,7 @@ impl UnaryFstAlgorithm for MapAlgorithm {
     fn run_algorithm(
         &self,
         mut fst: VectorFst<TropicalWeight>,
-    ) -> Fallible<VectorFst<TropicalWeight>> {
+    ) -> Result<VectorFst<TropicalWeight>> {
         match self.map_type.as_str() {
             "arc_sum" => {
                 arc_sum(&mut fst);

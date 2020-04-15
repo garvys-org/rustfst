@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 use itertools::Itertools;
 use serde_derive::{Deserialize, Serialize};
 
@@ -85,7 +85,7 @@ impl MatcherOperationResult {
     }
 }
 
-pub fn test_sorted_matcher<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_sorted_matcher<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + AllocableFst,
     F::W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize + 'static,

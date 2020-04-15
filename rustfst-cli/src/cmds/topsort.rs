@@ -1,6 +1,6 @@
 use rustfst::prelude::*;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::unary_fst_algorithm::UnaryFstAlgorithm;
 
@@ -25,7 +25,7 @@ impl UnaryFstAlgorithm for TopsortAlgorithm {
     fn run_algorithm(
         &self,
         mut fst: VectorFst<TropicalWeight>,
-    ) -> Fallible<VectorFst<TropicalWeight>> {
+    ) -> Result<VectorFst<TropicalWeight>> {
         top_sort(&mut fst)?;
         Ok(fst)
     }

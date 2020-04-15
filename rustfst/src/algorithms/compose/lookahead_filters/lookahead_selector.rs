@@ -1,7 +1,6 @@
+use std::cell::RefCell;
 use std::fmt::Debug;
 use std::rc::Rc;
-
-use failure::_core::cell::RefCell;
 
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;

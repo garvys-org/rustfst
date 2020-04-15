@@ -1,7 +1,7 @@
 use std::fs::read_to_string;
 use std::path::Path;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::parsers::text_fst::nom_parser::vec_rows_parsed;
 use crate::semirings::SerializableSemiring;
@@ -84,7 +84,7 @@ impl<W: SerializableSemiring> ParsedTextFst<W> {
     /// 4   5   5   5   0.31
     /// 3   0.67
     /// ```
-    pub fn from_string(fst_string: &str) -> Fallible<Self> {
+    pub fn from_string(fst_string: &str) -> Result<Self> {
         let (_, vec_rows_parsed) =
             vec_rows_parsed(fst_string).map_err(|_| format_err!("Error while parsing text fst"))?;
 
@@ -133,7 +133,7 @@ impl<W: SerializableSemiring> ParsedTextFst<W> {
     /// 4   5   5   5   0.31
     /// 3   0.67
     /// ```
-    pub fn from_path<P: AsRef<Path>>(path_fst_text: P) -> Fallible<Self> {
+    pub fn from_path<P: AsRef<Path>>(path_fst_text: P) -> Result<Self> {
         let fst_string = read_to_string(path_fst_text)?;
         Self::from_string(&fst_string)
     }
@@ -186,7 +186,7 @@ mod tests {
     use crate::semirings::{Semiring, TropicalWeight};
 
     #[test]
-    fn test_parse_text_fst_not_contiguous() -> Fallible<()> {
+    fn test_parse_text_fst_not_contiguous() -> Result<()> {
         // Check that parsing transitions, then final states then transition is working
         let parsed_fst =
             ParsedTextFst::<TropicalWeight>::from_string("0\t2\t0\t0\n1\n2\t1\t12\t25\n")?;
@@ -210,7 +210,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_text_fst_not_finishing_with_eol() -> Fallible<()> {
+    fn test_parse_text_fst_not_finishing_with_eol() -> Result<()> {
         // Check that parsing transitions, then final states then transition is working
         let parsed_fst = ParsedTextFst::<TropicalWeight>::from_string("0\t1\t0\t0\n1")?;
 
@@ -232,7 +232,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_text_fst_infinity_final_states() -> Fallible<()> {
+    fn test_parse_text_fst_infinity_final_states() -> Result<()> {
         let parsed_fst =
             ParsedTextFst::<TropicalWeight>::from_string("0\t1\t12\t25\t0.3\n1\tInfinity\n0\t0\n")?;
 

@@ -4,7 +4,7 @@ use crate::semirings::{
     Semiring, StringWeightVariant,
 };
 use crate::{Arc, Label, EPS_LABEL};
-use failure::Fallible;
+use anyhow::Result;
 
 /// Mapper from GallicWeight<W> to W.
 pub struct FromGallicConverter {
@@ -31,23 +31,23 @@ macro_rules! impl_extract_gallic_weight {
     }};
 }
 
-fn extract_restrict<W: Semiring>(gw: &GallicWeightRestrict<W>) -> Fallible<(W, Label)> {
+fn extract_restrict<W: Semiring>(gw: &GallicWeightRestrict<W>) -> Result<(W, Label)> {
     impl_extract_gallic_weight!(gw)
 }
 
-fn extract_left<W: Semiring>(gw: &GallicWeightLeft<W>) -> Fallible<(W, Label)> {
+fn extract_left<W: Semiring>(gw: &GallicWeightLeft<W>) -> Result<(W, Label)> {
     impl_extract_gallic_weight!(gw)
 }
 
-fn extract_right<W: Semiring>(gw: &GallicWeightRight<W>) -> Fallible<(W, Label)> {
+fn extract_right<W: Semiring>(gw: &GallicWeightRight<W>) -> Result<(W, Label)> {
     impl_extract_gallic_weight!(gw)
 }
 
-fn extract_min<W: Semiring>(gw: &GallicWeightMin<W>) -> Fallible<(W, Label)> {
+fn extract_min<W: Semiring>(gw: &GallicWeightMin<W>) -> Result<(W, Label)> {
     impl_extract_gallic_weight!(gw)
 }
 
-fn extract_gallic<W: Semiring>(gw: &GallicWeight<W>) -> Fallible<(W, Label)> {
+fn extract_gallic<W: Semiring>(gw: &GallicWeight<W>) -> Result<(W, Label)> {
     if gw.len() > 1 {
         bail!("error")
     }
@@ -63,7 +63,7 @@ fn extract_gallic<W: Semiring>(gw: &GallicWeight<W>) -> Fallible<(W, Label)> {
 macro_rules! impl_weight_converter_gallic {
     ($gallic: ident, $fextract: ident) => {
         impl<W: Semiring> WeightConverter<$gallic<W>, W> for FromGallicConverter {
-            fn arc_map(&mut self, arc: &Arc<$gallic<W>>) -> Fallible<Arc<W>> {
+            fn arc_map(&mut self, arc: &Arc<$gallic<W>>) -> Result<Arc<W>> {
                 let (extracted_w, extracted_l) = $fextract(&arc.weight)?;
                 if arc.ilabel != arc.olabel {
                     bail!("Unrepresentable weight : {:?}", &arc);
@@ -78,7 +78,7 @@ macro_rules! impl_weight_converter_gallic {
                 Ok(new_arc)
             }
 
-            fn final_arc_map(&mut self, final_arc: &FinalArc<$gallic<W>>) -> Fallible<FinalArc<W>> {
+            fn final_arc_map(&mut self, final_arc: &FinalArc<$gallic<W>>) -> Result<FinalArc<W>> {
                 let (extracted_w, extracted_l) = $fextract(&final_arc.weight).expect("Fail");
                 if final_arc.ilabel != final_arc.olabel {
                     panic!("Unrepresentable weight : {:?}", &final_arc);

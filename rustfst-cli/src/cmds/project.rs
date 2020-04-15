@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use rustfst::prelude::*;
 
@@ -26,7 +26,7 @@ impl UnaryFstAlgorithm for ProjectFstAlgorithm {
     fn run_algorithm(
         &self,
         mut fst: VectorFst<TropicalWeight>,
-    ) -> Fallible<VectorFst<TropicalWeight>> {
+    ) -> Result<VectorFst<TropicalWeight>> {
         project(&mut fst, self.project_type);
         Ok(fst)
     }

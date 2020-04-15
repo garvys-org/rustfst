@@ -1,8 +1,8 @@
+use std::cell::RefCell;
 use std::fmt::Debug;
 use std::rc::Rc;
 
-use failure::Fallible;
-use failure::_core::cell::RefCell;
+use anyhow::Result;
 
 pub use alt_sequence_compose_filter::AltSequenceComposeFilter;
 pub use match_compose_filter::MatchComposeFilter;
@@ -37,17 +37,17 @@ pub trait ComposeFilter<W: Semiring>: Debug {
         fst2: Rc<<Self::M2 as Matcher<W>>::F>,
         m1: IM1,
         m2: IM2,
-    ) -> Fallible<Self>
+    ) -> Result<Self>
     where
         Self: std::marker::Sized;
 
     fn start(&self) -> Self::FS;
 
-    fn set_state(&mut self, s1: StateId, s2: StateId, filter_state: &Self::FS) -> Fallible<()>;
+    fn set_state(&mut self, s1: StateId, s2: StateId, filter_state: &Self::FS) -> Result<()>;
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS>;
+    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Result<Self::FS>;
 
-    fn filter_final(&self, w1: &mut W, w2: &mut W) -> Fallible<()>;
+    fn filter_final(&self, w1: &mut W, w2: &mut W) -> Result<()>;
 
     fn matcher1(&self) -> Rc<RefCell<Self::M1>>;
 

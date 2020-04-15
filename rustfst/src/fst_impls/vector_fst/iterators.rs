@@ -3,7 +3,7 @@ use std::iter::Map;
 use std::ops::Range;
 use std::slice;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
@@ -24,7 +24,7 @@ impl<'a, W: Semiring> StateIterator<'a> for VectorFst<W> {
 
 impl<'a, W: 'static + Semiring> ArcIterator<'a> for VectorFst<W> {
     type Iter = slice::Iter<'a, Arc<W>>;
-    fn arcs_iter(&'a self, state_id: StateId) -> Fallible<Self::Iter> {
+    fn arcs_iter(&'a self, state_id: StateId) -> Result<Self::Iter> {
         let state = self
             .states
             .get(state_id)
@@ -39,7 +39,7 @@ impl<'a, W: 'static + Semiring> ArcIterator<'a> for VectorFst<W> {
 
 impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
     type IterMut = slice::IterMut<'a, Arc<W>>;
-    fn arcs_iter_mut(&'a mut self, state_id: StateId) -> Fallible<Self::IterMut> {
+    fn arcs_iter_mut(&'a mut self, state_id: StateId) -> Result<Self::IterMut> {
         let state = self
             .states
             .get_mut(state_id)

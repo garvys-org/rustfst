@@ -2,7 +2,7 @@
 mod tests {
     use rand::{rngs::StdRng, Rng, SeedableRng};
 
-    use failure::Fallible;
+    use anyhow::Result;
 
     use crate::arc::Arc;
     use crate::fst_impls::VectorFst;
@@ -15,7 +15,7 @@ mod tests {
     use std::rc::Rc;
 
     #[test]
-    fn test_small_fst() -> Fallible<()> {
+    fn test_small_fst() -> Result<()> {
         let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         // States
@@ -56,7 +56,7 @@ mod tests {
     }
 
     #[test]
-    fn test_mutable_iter_arcs_small() -> Fallible<()> {
+    fn test_mutable_iter_arcs_small() -> Result<()> {
         let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         // States
@@ -92,7 +92,7 @@ mod tests {
     }
 
     #[test]
-    fn test_start_states() -> Fallible<()> {
+    fn test_start_states() -> Result<()> {
         let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         let n_states = 1000;
@@ -115,7 +115,7 @@ mod tests {
     }
 
     #[test]
-    fn test_only_final_states() -> Fallible<()> {
+    fn test_only_final_states() -> Result<()> {
         let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         let n_states = 1000;
@@ -138,7 +138,7 @@ mod tests {
     }
 
     #[test]
-    fn test_final_weight() -> Fallible<()> {
+    fn test_final_weight() -> Result<()> {
         let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         let n_states = 1000;
@@ -177,7 +177,7 @@ mod tests {
     }
 
     #[test]
-    fn test_del_state_arcs() -> Fallible<()> {
+    fn test_del_state_arcs() -> Result<()> {
         let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         let s1 = fst.add_state();
@@ -202,7 +202,7 @@ mod tests {
     }
 
     #[test]
-    fn test_deleting_twice_same_state() -> Fallible<()> {
+    fn test_deleting_twice_same_state() -> Result<()> {
         let mut fst1 = VectorFst::<ProbabilityWeight>::new();
 
         let s = fst1.add_state();
@@ -239,7 +239,7 @@ mod tests {
     }
 
     #[test]
-    fn test_del_states_big() -> Fallible<()> {
+    fn test_del_states_big() -> Result<()> {
         let n_states = 1000;
         let n_states_to_delete = 300;
 
@@ -264,7 +264,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_single_final_state() -> Fallible<()> {
+    fn test_parse_single_final_state() -> Result<()> {
         let parsed_fst = VectorFst::<TropicalWeight>::from_text_string("0\tInfinity\n")?;
 
         let mut fst_ref: VectorFst<TropicalWeight> = VectorFst::new();
@@ -278,7 +278,7 @@ mod tests {
     }
 
     #[test]
-    fn test_del_all_states() -> Fallible<()> {
+    fn test_del_all_states() -> Result<()> {
         let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         let s1 = fst.add_state();
@@ -299,7 +299,7 @@ mod tests {
     }
 
     #[test]
-    fn test_attach_symt() -> Fallible<()> {
+    fn test_attach_symt() -> Result<()> {
         let mut fst = VectorFst::<ProbabilityWeight>::new();
 
         let s1 = fst.add_state();

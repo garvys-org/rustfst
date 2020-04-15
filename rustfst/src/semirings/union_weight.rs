@@ -1,12 +1,12 @@
 use std::borrow::Borrow;
 use std::cmp::Ordering;
 use std::fmt::Debug;
-use std::fmt::{Display, Formatter, Result};
+use std::fmt::{Display, Formatter};
 use std::hash::Hash;
 use std::io::Write;
 use std::marker::PhantomData;
 
-use failure::Fallible;
+use anyhow::Result;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::multi::{count, separated_list};
@@ -22,7 +22,7 @@ use crate::semirings::{
 pub trait UnionWeightOption<W: Semiring>: Debug + Hash + Clone + PartialOrd + Eq {
     type ReverseOptions: UnionWeightOption<W::ReverseWeight>;
     fn compare(w1: &W, w2: &W) -> bool;
-    fn merge(w1: &W, w2: &W) -> Fallible<W>;
+    fn merge(w1: &W, w2: &W) -> Result<W>;
 }
 
 /// Semiring that uses Times() and One() from W and union and the empty set
@@ -69,7 +69,7 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
         }
     }
 
-    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         if self.is_zero() {
             self.set_value(rhs.borrow().value().clone());
         } else if rhs.borrow().is_zero() {
@@ -107,7 +107,7 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
         Ok(())
     }
 
-    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         if self.is_zero() || rhs.borrow().is_zero() {
             self.set_value(Self::zero().take_value());
         } else {
@@ -137,7 +137,7 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
         self.list = value;
     }
 
-    fn reverse(&self) -> Fallible<Self::ReverseWeight> {
+    fn reverse(&self) -> Result<Self::ReverseWeight> {
         let mut rw = Self::ReverseWeight::zero();
         for v in self.iter() {
             rw.push_back(v.reverse()?, false)?;
@@ -162,7 +162,7 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
 }
 
 impl<W: Semiring, O: UnionWeightOption<W>> UnionWeight<W, O> {
-    fn push_back(&mut self, weight: W, sorted: bool) -> Fallible<()> {
+    fn push_back(&mut self, weight: W, sorted: bool) -> Result<()> {
         if self.list.is_empty() {
             self.list.push(weight);
         } else if sorted {
@@ -204,7 +204,7 @@ where
     W: WeaklyDivisibleSemiring,
     O: UnionWeightOption<W>,
 {
-    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Fallible<()> {
+    fn divide_assign(&mut self, rhs: &Self, divide_type: DivideType) -> Result<()> {
         if self.is_zero() || rhs.is_zero() {
             self.list.clear();
         }
@@ -230,7 +230,7 @@ where
     W: WeightQuantize,
     O: UnionWeightOption<W>,
 {
-    fn quantize_assign(&mut self, delta: f32) -> Fallible<()> {
+    fn quantize_assign(&mut self, delta: f32) -> Result<()> {
         let v: Vec<_> = self.list.drain(..).collect();
         for mut e in v {
             e.quantize_assign(delta)?;
@@ -261,7 +261,7 @@ where
     W: SerializableSemiring,
     O: UnionWeightOption<W>,
 {
-    fn fmt(&self, f: &mut Formatter) -> Result {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         if self.is_empty() {
             write!(f, "EmptySet")?;
         } else {
@@ -291,7 +291,7 @@ where
         Ok((i, Self::new(labels)))
     }
 
-    fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()> {
+    fn write_binary<F: Write>(&self, file: &mut F) -> Result<()> {
         write_bin_i32(file, self.list.len() as i32)?;
         for w in self.list.iter() {
             w.write_binary(file)?;
@@ -308,7 +308,7 @@ where
 impl<W: Semiring, O: UnionWeightOption<W>> ReverseBack<UnionWeight<W, O>>
     for <UnionWeight<W, O> as Semiring>::ReverseWeight
 {
-    fn reverse_back(&self) -> Fallible<UnionWeight<W, O>> {
+    fn reverse_back(&self) -> Result<UnionWeight<W, O>> {
         let res = self.reverse()?;
         // TODO: Find a way to avoid this transmute. For the moment, it is necessary because of the compare function.
         unsafe { Ok(std::mem::transmute(res)) }

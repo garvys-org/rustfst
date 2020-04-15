@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use rustfst::prelude::*;
 
@@ -25,7 +25,7 @@ impl UnaryFstAlgorithm for RmFinalEpsilonAlgorithm {
     fn run_algorithm(
         &self,
         mut fst: VectorFst<TropicalWeight>,
-    ) -> Fallible<VectorFst<TropicalWeight>> {
+    ) -> Result<VectorFst<TropicalWeight>> {
         rm_final_epsilon(&mut fst)?;
         Ok(fst)
     }

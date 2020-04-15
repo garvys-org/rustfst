@@ -1,6 +1,6 @@
 use std::fs::read_to_string;
 
-use failure::Fallible;
+use anyhow::Result;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::semirings::{
@@ -56,7 +56,7 @@ pub struct ParsedWeightTestData<W> {
 
 fn do_run_test_openfst_weight<W: SerializableSemiring>(
     test_data: ParsedWeightTestData<W>,
-) -> Fallible<()> {
+) -> Result<()> {
     assert_eq!(W::one(), test_data.one);
     assert_eq!(W::zero(), test_data.zero);
     assert_eq!(
@@ -78,7 +78,7 @@ fn do_run_test_openfst_weight<W: SerializableSemiring>(
     Ok(())
 }
 
-fn run_test_openfst_weight(test_name: &str) -> Fallible<()> {
+fn run_test_openfst_weight(test_name: &str) -> Result<()> {
     let absolute_path_folder = get_path_folder("weights")?;
     let mut path_metadata = absolute_path_folder.clone();
     path_metadata.push(format!("{}.json", test_name));
@@ -154,61 +154,61 @@ fn run_test_openfst_weight(test_name: &str) -> Fallible<()> {
 }
 
 #[test]
-fn test_openfst_weight_001() -> Fallible<()> {
+fn test_openfst_weight_001() -> Result<()> {
     run_test_openfst_weight("weight_001").map_err(|v| v.into())
 }
 
 #[test]
-fn test_openfst_weight_002() -> Fallible<()> {
+fn test_openfst_weight_002() -> Result<()> {
     run_test_openfst_weight("weight_002").map_err(|v| v.into())
 }
 
 #[test]
-fn test_openfst_weight_003() -> Fallible<()> {
+fn test_openfst_weight_003() -> Result<()> {
     run_test_openfst_weight("weight_003").map_err(|v| v.into())
 }
 
 #[test]
-fn test_openfst_weight_004() -> Fallible<()> {
+fn test_openfst_weight_004() -> Result<()> {
     run_test_openfst_weight("weight_004").map_err(|v| v.into())
 }
 
 #[test]
-fn test_openfst_weight_005() -> Fallible<()> {
+fn test_openfst_weight_005() -> Result<()> {
     run_test_openfst_weight("weight_005").map_err(|v| v.into())
 }
 
 #[test]
-fn test_openfst_weight_006() -> Fallible<()> {
+fn test_openfst_weight_006() -> Result<()> {
     run_test_openfst_weight("weight_006").map_err(|v| v.into())
 }
 
 #[test]
-fn test_openfst_weight_007() -> Fallible<()> {
+fn test_openfst_weight_007() -> Result<()> {
     run_test_openfst_weight("weight_007").map_err(|v| v.into())
 }
 
 #[test]
-fn test_openfst_weight_008() -> Fallible<()> {
+fn test_openfst_weight_008() -> Result<()> {
     run_test_openfst_weight("weight_008").map_err(|v| v.into())
 }
 
 #[test]
-fn test_openfst_weight_009() -> Fallible<()> {
+fn test_openfst_weight_009() -> Result<()> {
     run_test_openfst_weight("weight_009").map_err(|v| v.into())
 }
 
 #[test]
-fn test_openfst_weight_010() -> Fallible<()> {
+fn test_openfst_weight_010() -> Result<()> {
     run_test_openfst_weight("weight_010").map_err(|v| v.into())
 }
 
 #[test]
-fn test_openfst_weight_011() -> Fallible<()> {
+fn test_openfst_weight_011() -> Result<()> {
     run_test_openfst_weight("weight_011").map_err(|v| v.into())
 }
 
 #[test]
-fn test_openfst_weight_012() -> Fallible<()> {
+fn test_openfst_weight_012() -> Result<()> {
     run_test_openfst_weight("weight_012").map_err(|v| v.into())
 }

@@ -114,10 +114,10 @@ impl<'a> Iterator for StringWeightVariantIterator<'a> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use failure::Fallible;
+    use anyhow::Result;
 
     #[test]
-    fn test_string_variant_iterator_inf() -> Fallible<()> {
+    fn test_string_variant_iterator_inf() -> Result<()> {
         let w = StringWeightVariant::Infinity;
         let mut it = w.iter();
 
@@ -131,7 +131,7 @@ mod test {
     }
 
     #[test]
-    fn test_string_variant_iterator_labels() -> Fallible<()> {
+    fn test_string_variant_iterator_labels() -> Result<()> {
         let w = StringWeightVariant::Labels(vec![1, 2]);
         let mut it = w.iter();
 

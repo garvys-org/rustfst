@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::compose::compose_filters::ComposeFilter;
 use crate::algorithms::compose::filter_states::{FilterState, PairFilterState, WeightFilterState};
@@ -43,7 +43,7 @@ where
         fst2: Rc<<Self::M2 as Matcher<W>>::F>,
         m1: IM1,
         m2: IM2,
-    ) -> Fallible<Self> {
+    ) -> Result<Self> {
         Ok(Self {
             filter: CF::new(fst1, fst2, m1, m2)?,
             fs: Self::FS::new_no_state(),
@@ -55,12 +55,12 @@ where
         Self::FS::new((self.filter.start(), WeightFilterState::new(W::one())))
     }
 
-    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Fallible<()> {
+    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Result<()> {
         self.fs = filter_state.clone();
         self.filter.set_state(s1, s2, filter_state.state1())
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Fallible<Self::FS> {
+    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Result<Self::FS> {
         let fs1 = self.filter.filter_arc(arc1, arc2)?;
         if fs1 == CF::FS::new_no_state() {
             return Ok(FilterState::new_no_state());
@@ -94,7 +94,7 @@ where
         )))
     }
 
-    fn filter_final(&self, w1: &mut W, w2: &mut W) -> Fallible<()> {
+    fn filter_final(&self, w1: &mut W, w2: &mut W) -> Result<()> {
         self.filter.filter_final(w1, w2)?;
         if !self
             .lookahead_flags()

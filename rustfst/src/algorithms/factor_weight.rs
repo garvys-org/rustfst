@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::fmt;
 use std::marker::PhantomData;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use bitflags::bitflags;
 
@@ -144,7 +144,7 @@ where
         &self.cache_impl
     }
 
-    fn expand(&mut self, state: usize) -> Fallible<()> {
+    fn expand(&mut self, state: usize) -> Result<()> {
         let elt = self.state_table.find_tuple(state).clone();
         if let Some(old_state) = elt.state {
             for arc in self.fst.borrow().arcs_iter(old_state)? {
@@ -195,7 +195,7 @@ where
         Ok(())
     }
 
-    fn compute_start(&mut self) -> Fallible<Option<usize>> {
+    fn compute_start(&mut self) -> Result<Option<usize>> {
         match self.fst.borrow().start() {
             None => Ok(None),
             Some(s) => {
@@ -208,7 +208,7 @@ where
         }
     }
 
-    fn compute_final(&mut self, state: usize) -> Fallible<Option<<F as CoreFst>::W>> {
+    fn compute_final(&mut self, state: usize) -> Result<Option<<F as CoreFst>::W>> {
         let zero = F::W::zero();
         let elt = self.state_table.find_tuple(state);
         let weight = match elt.state {
@@ -231,7 +231,7 @@ impl<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> FactorWeightImpl<F, B, FI>
 where
     F::W: WeightQuantize + 'static,
 {
-    pub fn new(fst: B, opts: FactorWeightOptions) -> Fallible<Self> {
+    pub fn new(fst: B, opts: FactorWeightOptions) -> Result<Self> {
         if opts.mode.is_empty() {
             bail!("Factoring neither arc weights nor final weights");
         }
@@ -281,7 +281,7 @@ where
 /// States and transitions will be added as necessary. The algorithm is a
 /// generalization to arbitrary weights of the second step of the input
 /// epsilon-normalization algorithm.
-pub fn factor_weight<F1, B, F2, FI>(fst_in: B, opts: FactorWeightOptions) -> Fallible<F2>
+pub fn factor_weight<F1, B, F2, FI>(fst_in: B, opts: FactorWeightOptions) -> Result<F2>
 where
     F1: Fst,
     B: Borrow<F1>,
@@ -304,7 +304,7 @@ impl<'a, F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> FactorWeightFst<F, B, F
 where
     F::W: WeightQuantize + 'static,
 {
-    pub fn new(fst: B, opts: FactorWeightOptions) -> Fallible<Self> {
+    pub fn new(fst: B, opts: FactorWeightOptions) -> Result<Self> {
         let isymt = fst.borrow().input_symbols();
         let osymt = fst.borrow().output_symbols();
         Ok(Self::from_impl(

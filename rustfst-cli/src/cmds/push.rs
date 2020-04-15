@@ -1,4 +1,4 @@
-use failure::Fallible;
+use anyhow::Result;
 
 use rustfst::prelude::*;
 
@@ -24,7 +24,7 @@ impl UnaryFstAlgorithm for PushAlgorithm {
         "push".to_string()
     }
 
-    fn run_algorithm(&self, fst: VectorFst<TropicalWeight>) -> Fallible<VectorFst<TropicalWeight>> {
+    fn run_algorithm(&self, fst: VectorFst<TropicalWeight>) -> Result<VectorFst<TropicalWeight>> {
         push(&fst, self.reweight_type, self.push_type)
     }
 }

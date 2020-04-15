@@ -6,7 +6,7 @@ use std::iter::Zip;
 use std::ops::Range;
 use std::slice;
 
-use failure::Fallible;
+use anyhow::Result;
 use itertools::Itertools;
 use itertools::{izip, repeat_n, RepeatN};
 
@@ -30,7 +30,7 @@ impl<W> ConstFst<W> {
 
 impl<'a, W: 'static + Semiring> ArcIterator<'a> for ConstFst<W> {
     type Iter = slice::Iter<'a, Arc<W>>;
-    fn arcs_iter(&'a self, state_id: StateId) -> Fallible<Self::Iter> {
+    fn arcs_iter(&'a self, state_id: StateId) -> Result<Self::Iter> {
         let state = self
             .states
             .get(state_id)

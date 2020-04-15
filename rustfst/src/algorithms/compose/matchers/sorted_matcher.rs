@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 use superslice::Ext;
 
 use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
@@ -21,11 +21,11 @@ impl<W: Semiring + 'static, F: ExpandedFst<W = W>> Matcher<W> for SortedMatcher<
     type F = F;
     type Iter = IteratorSortedMatcher<W>;
 
-    fn new(fst: Rc<F>, match_type: MatchType) -> Fallible<Self> {
+    fn new(fst: Rc<F>, match_type: MatchType) -> Result<Self> {
         Ok(Self { fst, match_type })
     }
 
-    fn iter(&self, state: usize, label: usize) -> Fallible<Self::Iter> {
+    fn iter(&self, state: usize, label: usize) -> Result<Self::Iter> {
         Ok(IteratorSortedMatcher::new(
             self.fst
                 .arcs_iter(state)?
@@ -36,7 +36,7 @@ impl<W: Semiring + 'static, F: ExpandedFst<W = W>> Matcher<W> for SortedMatcher<
         ))
     }
 
-    fn final_weight(&self, state: usize) -> Fallible<Option<*const W>> {
+    fn final_weight(&self, state: usize) -> Result<Option<*const W>> {
         let final_weight = self.fst.final_weight(state)?;
         let final_weight = final_weight.map(|e| e as *const W);
         Ok(final_weight)
@@ -73,7 +73,7 @@ impl<W: Semiring + 'static, F: ExpandedFst<W = W>> Matcher<W> for SortedMatcher<
         MatcherFlags::empty()
     }
 
-    fn priority(&self, state: StateId) -> Fallible<usize> {
+    fn priority(&self, state: StateId) -> Result<usize> {
         self.fst.num_arcs(state)
     }
 
@@ -173,7 +173,7 @@ where
         _fst: Rc<Self::F>,
         _match_type: MatchType,
         _data: Option<Rc<RefCell<Self::MatcherData>>>,
-    ) -> Fallible<Self>
+    ) -> Result<Self>
     where
         Self: std::marker::Sized,
     {
@@ -183,11 +183,11 @@ where
     fn create_data<G: ExpandedFst<W = F::W>>(
         _fst: &G,
         _match_type: MatchType,
-    ) -> Fallible<Option<Rc<RefCell<Self::MatcherData>>>> {
+    ) -> Result<Option<Rc<RefCell<Self::MatcherData>>>> {
         unreachable!()
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = F::W>>(&mut self, _lfst: &Rc<LF>) -> Fallible<()> {
+    fn init_lookahead_fst<LF: ExpandedFst<W = F::W>>(&mut self, _lfst: &Rc<LF>) -> Result<()> {
         unreachable!()
     }
 
@@ -196,11 +196,11 @@ where
         _matcher_state: usize,
         _lfst: &Rc<LF>,
         _lfst_state: usize,
-    ) -> Fallible<bool> {
+    ) -> Result<bool> {
         unreachable!()
     }
 
-    fn lookahead_label(&self, _state: usize, _label: usize) -> Fallible<bool> {
+    fn lookahead_label(&self, _state: usize, _label: usize) -> Result<bool> {
         unreachable!()
     }
 

@@ -3,7 +3,7 @@ use std::f32;
 use std::hash::{Hash, Hasher};
 use std::io::Write;
 
-use failure::Fallible;
+use anyhow::Result;
 use nom::number::complete::{float, le_f32};
 use nom::IResult;
 use ordered_float::OrderedFloat;
@@ -44,14 +44,14 @@ impl Semiring for TropicalWeight {
         }
     }
 
-    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn plus_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         if rhs.borrow().value < self.value {
             self.value = rhs.borrow().value;
         }
         Ok(())
     }
 
-    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Fallible<()> {
+    fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         let f1 = self.value();
         let f2 = rhs.borrow().value();
         if f1.eq(&f32::INFINITY) {
@@ -75,7 +75,7 @@ impl Semiring for TropicalWeight {
         self.value.0 = value
     }
 
-    fn reverse(&self) -> Fallible<Self::ReverseWeight> {
+    fn reverse(&self) -> Result<Self::ReverseWeight> {
         Ok(*self)
     }
 
@@ -89,7 +89,7 @@ impl Semiring for TropicalWeight {
 }
 
 impl ReverseBack<TropicalWeight> for TropicalWeight {
-    fn reverse_back(&self) -> Fallible<TropicalWeight> {
+    fn reverse_back(&self) -> Result<TropicalWeight> {
         Ok(self.clone())
     }
 }
@@ -115,7 +115,7 @@ impl StarSemiring for TropicalWeight {
 }
 
 impl WeaklyDivisibleSemiring for TropicalWeight {
-    fn divide_assign(&mut self, rhs: &Self, _divide_type: DivideType) -> Fallible<()> {
+    fn divide_assign(&mut self, rhs: &Self, _divide_type: DivideType) -> Result<()> {
         self.value.0 -= rhs.value.0;
         Ok(())
     }
@@ -135,7 +135,7 @@ impl SerializableSemiring for TropicalWeight {
         Ok((i, Self::new(weight)))
     }
 
-    fn write_binary<F: Write>(&self, file: &mut F) -> Fallible<()> {
+    fn write_binary<F: Write>(&self, file: &mut F) -> Result<()> {
         write_bin_f32(file, *self.value())
     }
 

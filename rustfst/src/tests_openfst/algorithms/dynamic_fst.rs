@@ -1,10 +1,10 @@
 use counter::Counter;
-use failure::Fallible;
+use anyhow::Result;
 use itertools::Itertools;
 
 use crate::fst_traits::{ExpandedFst, Fst};
 
-pub fn compare_fst_static_dynamic<FS, FD>(fst_static: &FS, fst_dynamic: &FD) -> Fallible<()>
+pub fn compare_fst_static_dynamic<FS, FD>(fst_static: &FS, fst_dynamic: &FD) -> Result<()>
 where
     FS: ExpandedFst,
     FD: Fst<W = FS::W>,

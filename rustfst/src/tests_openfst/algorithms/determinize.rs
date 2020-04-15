@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use failure::{format_err, Fallible};
+use anyhow::{format_err, Result};
 use serde_derive::{Deserialize, Serialize};
 
 use crate::algorithms::{determinize, isomorphic, DeterminizeType};
@@ -23,7 +23,7 @@ where
     F::W: SerializableSemiring,
 {
     det_type: DeterminizeType,
-    result: Fallible<F>,
+    result: Result<F>,
 }
 
 impl DeterminizeOperationResult {
@@ -47,7 +47,7 @@ impl DeterminizeOperationResult {
     }
 }
 
-pub fn test_determinize<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_determinize<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + AllocableFst + Display,
     F::W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize + 'static,
@@ -56,7 +56,7 @@ where
     // for determinize_data in &test_data.determinize {
     //     //        println!("det_type = {:?}", determinize_data.det_type);
     //     let fst_raw = test_data.raw.clone();
-    //     let fst_res: Fallible<F> = determinize(&fst_raw, determinize_data.det_type.clone());
+    //     let fst_res: Result<F> = determinize(&fst_raw, determinize_data.det_type.clone());
     //
     //     match (&determinize_data.result, fst_res) {
     //         (Ok(fst_expected), Ok(ref fst_determinized)) => {

@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::FinalArc;
 use crate::algorithms::MapFinalAction;
@@ -21,14 +21,14 @@ where
     SI: Semiring,
     SO: Semiring,
 {
-    fn arc_map(&mut self, arc: &Arc<SI>) -> Fallible<Arc<SO>> {
+    fn arc_map(&mut self, arc: &Arc<SI>) -> Result<Arc<SO>> {
         let w = &arc.weight;
         let rw = unsafe { std::mem::transmute::<&SI, &SO>(w).clone() };
 
         Ok(Arc::new(arc.ilabel, arc.olabel, rw, arc.nextstate))
     }
 
-    fn final_arc_map(&mut self, final_arc: &FinalArc<SI>) -> Fallible<FinalArc<SO>> {
+    fn final_arc_map(&mut self, final_arc: &FinalArc<SI>) -> Result<FinalArc<SO>> {
         let w = &final_arc.weight;
         let rw = unsafe { std::mem::transmute::<&SI, &SO>(w).clone() };
         Ok(FinalArc {
@@ -43,7 +43,7 @@ where
     }
 }
 
-pub fn test_reverse<F>(test_data: &FstTestData<F>) -> Fallible<()>
+pub fn test_reverse<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + AllocableFst + Display,
     F::W: 'static + SerializableSemiring + WeaklyDivisibleSemiring,

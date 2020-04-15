@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use failure::Fallible;
+use anyhow::Result;
 
 use crate::algorithms::compose::FstAddOn;
 use crate::algorithms::compose::{LabelReachable, LabelReachableData};
@@ -18,7 +18,7 @@ impl LabelLookAheadRelabeler {
                 Option<Rc<RefCell<LabelReachableData>>>,
             ),
         >,
-    ) -> Fallible<()> {
+    ) -> Result<()> {
         let fst = &mut fst_addon.fst;
         let data = &fst_addon.add_on;
 
@@ -42,7 +42,7 @@ impl LabelLookAheadRelabeler {
             Option<Rc<RefCell<LabelReachableData>>>,
         ),
         relabel_input: bool,
-    ) -> Fallible<()> {
+    ) -> Result<()> {
         let reachable_data = if addon.0.as_ref().is_some() {
             Rc::clone(addon.0.as_ref().unwrap())
         } else {

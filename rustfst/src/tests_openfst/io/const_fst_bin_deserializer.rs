@@ -1,17 +1,17 @@
-use failure::Fallible;
-use failure::ResultExt;
+use anyhow::Result;
+use anyhow::Context;
 
 use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_traits::SerializableFst;
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_const_fst_bin_deserializer<W>(test_data: &FstTestData<VectorFst<W>>) -> Fallible<()>
+pub fn test_const_fst_bin_deserializer<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + 'static,
 {
     let parsed_fst_bin = ConstFst::<W>::read(&test_data.raw_const_bin_path)
-        .with_context(|_| format_err!("Failed parsing ConstFst Aligned"))?;
+        .with_context(|| format_err!("Failed parsing ConstFst Aligned"))?;
     let raw_const: ConstFst<_> = test_data.raw.clone().into();
 
     assert_eq!(
@@ -25,12 +25,12 @@ where
 
 pub fn test_const_fst_aligned_bin_deserializer<W>(
     test_data: &FstTestData<VectorFst<W>>,
-) -> Fallible<()>
+) -> Result<()>
 where
     W: SerializableSemiring + 'static,
 {
     let parsed_fst_bin = ConstFst::<W>::read(&test_data.raw_const_aligned_bin_path)
-        .with_context(|_| format_err!("Failed parsing ConstFst Aligned Bin"))?;
+        .with_context(|| format_err!("Failed parsing ConstFst Aligned Bin"))?;
     let raw_const: ConstFst<_> = test_data.raw.clone().into();
 
     assert_eq!(
