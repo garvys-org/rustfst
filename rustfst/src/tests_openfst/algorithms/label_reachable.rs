@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use anyhow::Result;
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use crate::algorithms::compose::lookahead_matchers::LabelLookAheadMatcher;
 use crate::algorithms::compose::matchers::SortedMatcher;

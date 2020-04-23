@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use anyhow::{format_err, Result, Context};
 use pretty_assertions::assert_eq;
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use crate::algorithms::{decode, encode};
 use crate::fst_properties::FstProperties;

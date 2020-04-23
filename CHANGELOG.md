@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fix olabel display while drawing a FST if no symbol table is provided
 - Fix computation of FstProperties. There was an issue with the ACYCLIC field.
+- Use loose dependencies
 
 ## [0.5.0] - 2020-02-04
 

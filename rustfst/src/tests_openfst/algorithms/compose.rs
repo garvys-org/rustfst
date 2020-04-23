@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use anyhow::Result;
 use pretty_assertions::assert_eq;
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use crate::algorithms::compose::compose_filters::{AltSequenceComposeFilter, ComposeFilter};
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::SMatchOutput;

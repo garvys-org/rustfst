@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use anyhow::{format_err, Result};
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use crate::algorithms::minimize;
 use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};

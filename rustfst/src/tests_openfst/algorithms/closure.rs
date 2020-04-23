@@ -1,5 +1,5 @@
 use anyhow::Result;
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use crate::algorithms::{closure, ClosureFst, ClosureType};
 use crate::fst_impls::VectorFst;

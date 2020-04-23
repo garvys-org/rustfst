@@ -1,5 +1,5 @@
 use anyhow::Result;
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use crate::algorithms::{union, UnionFst};
 use crate::fst_impls::VectorFst;

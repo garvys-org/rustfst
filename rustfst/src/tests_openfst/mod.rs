@@ -10,7 +10,7 @@ use anyhow::{bail, Result};
 use path_abs::PathAbs;
 use path_abs::PathInfo;
 use path_abs::PathMut;
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;

@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 use std::collections::HashSet;
 use std::slice::Iter as IterSlice;
 use std::vec::IntoIter as IntoIterVec;
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use superslice::Ext;
 use unsafe_unwrap::UnsafeUnwrap;
 

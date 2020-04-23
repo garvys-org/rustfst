@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use anyhow::Result;
 use pretty_assertions::assert_eq;
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use crate::algorithms::arc_mappers::{
     IdentityArcMapper, InputEpsilonMapper, InvertWeightMapper, OutputEpsilonMapper, PlusMapper,
