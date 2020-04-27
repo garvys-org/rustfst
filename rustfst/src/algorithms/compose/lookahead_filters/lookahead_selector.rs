@@ -5,19 +5,19 @@ use std::rc::Rc;
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct SMatchInput {}
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct SMatchOutput {}
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct SMatchBoth {}
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct SMatchNone {}
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct SMatchUnknown {}
 
 pub trait MatchTypeTrait: Debug {
@@ -54,7 +54,7 @@ impl MatchTypeTrait for SMatchUnknown {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct LookAheadSelector<F, M> {
     pub fst: Rc<F>,
     pub matcher: Rc<RefCell<M>>,
@@ -80,7 +80,7 @@ fn selector_match_output<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Selector<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
     MatchInput(LookAheadSelector<M1::F, M2>),
     MatchOutput(LookAheadSelector<M2::F, M1>),

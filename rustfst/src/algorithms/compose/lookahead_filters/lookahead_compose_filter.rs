@@ -18,7 +18,7 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;
 use crate::{Arc, EPS_LABEL};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct LookAheadComposeFilter<
     W: Semiring,
     CF: LookAheadComposeFilterTrait<W>,
