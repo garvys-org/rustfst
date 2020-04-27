@@ -1,5 +1,5 @@
 use anyhow::Result;
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use crate::algorithms::factor_iterators::IdentityFactor;
 use crate::algorithms::factor_weight;
