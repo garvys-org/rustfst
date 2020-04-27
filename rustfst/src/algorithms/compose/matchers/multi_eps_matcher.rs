@@ -21,7 +21,7 @@ bitflags! {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct MultiEpsMatcher<W, M> {
     matcher: Rc<RefCell<M>>,
     flags: MultiEpsMatcherFlags,
@@ -245,7 +245,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct CompactSet<K> {
     set: BTreeSet<K>,
     min_key: K,

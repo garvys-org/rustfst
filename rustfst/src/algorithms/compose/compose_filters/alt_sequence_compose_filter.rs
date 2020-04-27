@@ -14,7 +14,7 @@ use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Arc, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct AltSequenceComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
     fst1: PhantomData<M1::F>,
     fst2: Rc<M2::F>,
