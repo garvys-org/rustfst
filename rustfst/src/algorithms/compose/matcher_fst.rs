@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::rc::Rc;
+use std::sync;
 
 use anyhow::Result;
 
@@ -120,27 +121,27 @@ impl<F: Fst, M: Debug, T: Debug> Fst for MatcherFst<F, M, T>
 where
     F::W: 'static,
 {
-    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn input_symbols(&self) -> Option<sync::Arc<SymbolTable>> {
         self.fst_add_on.input_symbols()
     }
 
-    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn output_symbols(&self) -> Option<sync::Arc<SymbolTable>> {
         self.fst_add_on.output_symbols()
     }
 
-    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_input_symbols(&mut self, symt: sync::Arc<SymbolTable>) {
         self.fst_add_on.set_input_symbols(symt)
     }
 
-    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_output_symbols(&mut self, symt: sync::Arc<SymbolTable>) {
         self.fst_add_on.set_output_symbols(symt)
     }
 
-    fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+    fn unset_input_symbols(&mut self) -> Option<sync::Arc<SymbolTable>> {
         self.fst_add_on.unset_input_symbols()
     }
 
-    fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+    fn unset_output_symbols(&mut self) -> Option<sync::Arc<SymbolTable>> {
         self.fst_add_on.unset_output_symbols()
     }
 }

@@ -1,8 +1,8 @@
 use std::cell::UnsafeCell;
 use std::fmt;
 use std::iter::{repeat, Map, Repeat, Zip};
-use std::rc::Rc;
 use std::slice::Iter as IterSlice;
+use std::sync;
 
 use anyhow::Result;
 use itertools::izip;
@@ -14,15 +14,15 @@ use crate::{Arc, StateId, SymbolTable};
 
 pub struct DynamicFst<IMPL> {
     fst_impl: UnsafeCell<IMPL>,
-    isymt: Option<Rc<SymbolTable>>,
-    osymt: Option<Rc<SymbolTable>>,
+    isymt: Option<sync::Arc<SymbolTable>>,
+    osymt: Option<sync::Arc<SymbolTable>>,
 }
 
 impl<IMPL: FstImpl> DynamicFst<IMPL> {
     pub(crate) fn from_impl(
         fst_impl: IMPL,
-        isymt: Option<Rc<SymbolTable>>,
-        osymt: Option<Rc<SymbolTable>>,
+        isymt: Option<sync::Arc<SymbolTable>>,
+        osymt: Option<sync::Arc<SymbolTable>>,
     ) -> Self {
         Self {
             fst_impl: UnsafeCell::new(fst_impl),
@@ -42,10 +42,10 @@ impl<IMPL: FstImpl> DynamicFst<IMPL> {
         let fst_impl = unsafe { ptr.as_mut().unwrap() };
         let mut fst: F = fst_impl.compute()?;
         if let Some(isymt) = &self.isymt {
-            fst.set_input_symbols(Rc::clone(isymt));
+            fst.set_input_symbols(sync::Arc::clone(isymt));
         }
         if let Some(osymt) = &self.osymt {
-            fst.set_output_symbols(Rc::clone(osymt));
+            fst.set_output_symbols(sync::Arc::clone(osymt));
         }
         Ok(fst)
     }
@@ -127,27 +127,27 @@ impl<'a, IMPL: FstImpl + 'a> StateIterator<'a> for DynamicFst<IMPL> {
 }
 
 impl<IMPL: FstImpl + 'static> Fst for DynamicFst<IMPL> {
-    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn input_symbols(&self) -> Option<sync::Arc<SymbolTable>> {
         self.isymt.clone()
     }
 
-    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn output_symbols(&self) -> Option<sync::Arc<SymbolTable>> {
         self.osymt.clone()
     }
 
-    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
-        self.isymt = Some(Rc::clone(&symt))
+    fn set_input_symbols(&mut self, symt: sync::Arc<SymbolTable>) {
+        self.isymt = Some(sync::Arc::clone(&symt))
     }
 
-    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
-        self.osymt = Some(Rc::clone(&symt));
+    fn set_output_symbols(&mut self, symt: sync::Arc<SymbolTable>) {
+        self.osymt = Some(sync::Arc::clone(&symt));
     }
 
-    fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+    fn unset_input_symbols(&mut self) -> Option<sync::Arc<SymbolTable>> {
         self.isymt.take()
     }
 
-    fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+    fn unset_output_symbols(&mut self) -> Option<sync::Arc<SymbolTable>> {
         self.osymt.take()
     }
 }

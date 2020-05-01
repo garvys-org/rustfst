@@ -7,7 +7,7 @@ use crate::fst_traits::{
 use crate::semirings::Semiring;
 use crate::{SymbolTable, EPS_LABEL};
 use anyhow::Result;
-use std::rc::Rc;
+use std::sync;
 
 /// Defines the different types of closure : Star or Plus.
 #[derive(Clone, Debug, Copy, PartialEq)]
@@ -184,27 +184,27 @@ impl<F: Fst + 'static> Fst for ClosureFst<F>
 where
     F::W: 'static,
 {
-    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn input_symbols(&self) -> Option<sync::Arc<SymbolTable>> {
         self.0.input_symbols()
     }
 
-    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn output_symbols(&self) -> Option<sync::Arc<SymbolTable>> {
         self.0.output_symbols()
     }
 
-    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_input_symbols(&mut self, symt: sync::Arc<SymbolTable>) {
         self.0.set_input_symbols(symt)
     }
 
-    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_output_symbols(&mut self, symt: sync::Arc<SymbolTable>) {
         self.0.set_output_symbols(symt)
     }
 
-    fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+    fn unset_input_symbols(&mut self) -> Option<sync::Arc<SymbolTable>> {
         self.0.unset_input_symbols()
     }
 
-    fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+    fn unset_output_symbols(&mut self) -> Option<sync::Arc<SymbolTable>> {
         self.0.unset_output_symbols()
     }
 }

@@ -4,7 +4,7 @@ use crate::arc::Arc;
 use crate::semirings::Semiring;
 use crate::symbol_table::SymbolTable;
 use crate::StateId;
-use std::rc::Rc;
+use std::sync;
 
 /// Simple concrete, mutable FST whose states and arcs are stored in standard vectors.
 ///
@@ -14,8 +14,8 @@ use std::rc::Rc;
 pub struct VectorFst<W> {
     pub(crate) states: Vec<VectorFstState<W>>,
     pub(crate) start_state: Option<StateId>,
-    pub(crate) isymt: Option<Rc<SymbolTable>>,
-    pub(crate) osymt: Option<Rc<SymbolTable>>,
+    pub(crate) isymt: Option<sync::Arc<SymbolTable>>,
+    pub(crate) osymt: Option<sync::Arc<SymbolTable>>,
 }
 
 // In my opinion, it is not a good idea to store values like num_arcs, num_input_epsilons

@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync;
 
 use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
@@ -214,27 +214,27 @@ impl<F: Fst + 'static> Fst for UnionFst<F>
 where
     F::W: 'static,
 {
-    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn input_symbols(&self) -> Option<sync::Arc<SymbolTable>> {
         self.0.input_symbols()
     }
 
-    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn output_symbols(&self) -> Option<sync::Arc<SymbolTable>> {
         self.0.output_symbols()
     }
 
-    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_input_symbols(&mut self, symt: sync::Arc<SymbolTable>) {
         self.0.set_input_symbols(symt)
     }
 
-    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_output_symbols(&mut self, symt: sync::Arc<SymbolTable>) {
         self.0.set_output_symbols(symt)
     }
 
-    fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+    fn unset_input_symbols(&mut self) -> Option<sync::Arc<SymbolTable>> {
         self.0.unset_input_symbols()
     }
 
-    fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+    fn unset_output_symbols(&mut self) -> Option<sync::Arc<SymbolTable>> {
         self.0.unset_output_symbols()
     }
 }

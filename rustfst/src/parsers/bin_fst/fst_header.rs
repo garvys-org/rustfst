@@ -1,4 +1,5 @@
 use std::io::Write;
+use std::sync;
 
 use anyhow::Result;
 use nom::bytes::complete::take;
@@ -13,7 +14,6 @@ use crate::parsers::bin_fst::utils_serialization::{
 };
 use crate::parsers::bin_symt::nom_parser::{parse_symbol_table_bin, write_bin_symt};
 use crate::SymbolTable;
-use std::rc::Rc;
 
 // Identifies stream data as an FST (and its endianity).
 pub(crate) static FST_MAGIC_NUMBER: i32 = 2_125_659_606;
@@ -37,8 +37,8 @@ pub(crate) struct FstHeader {
     pub(crate) start: i64,
     pub(crate) num_states: i64,
     pub(crate) num_arcs: i64,
-    pub(crate) isymt: Option<Rc<SymbolTable>>,
-    pub(crate) osymt: Option<Rc<SymbolTable>>,
+    pub(crate) isymt: Option<sync::Arc<SymbolTable>>,
+    pub(crate) osymt: Option<sync::Arc<SymbolTable>>,
 }
 
 #[derive(Debug)]
@@ -56,7 +56,10 @@ fn optionally_parse_symt(i: &[u8], parse_symt: bool) -> IResult<&[u8], Option<Sy
     }
 }
 
-fn optionally_write_symt<W: Write>(file: &mut W, symt: &Option<Rc<SymbolTable>>) -> Result<()> {
+fn optionally_write_symt<W: Write>(
+    file: &mut W,
+    symt: &Option<sync::Arc<SymbolTable>>,
+) -> Result<()> {
     if let Some(symt) = symt {
         write_bin_symt(file, symt)
     } else {
@@ -102,8 +105,8 @@ impl FstHeader {
                 start,
                 num_states,
                 num_arcs,
-                isymt: isymt.map(Rc::new),
-                osymt: osymt.map(Rc::new),
+                isymt: isymt.map(sync::Arc::new),
+                osymt: osymt.map(sync::Arc::new),
             },
         ))
     }
