@@ -7,9 +7,9 @@ pub mod vector_fst_text_serialization;
 
 use crate::fst_traits::Fst;
 use crate::symbol_table::SymbolTable;
-use std::rc::Rc;
+use std::sync;
 
-fn generate_symbol_table<F: Fst>(prefix: &str, fst: &F) -> (Rc<SymbolTable>, Rc<SymbolTable>) {
+fn generate_symbol_table<F: Fst>(prefix: &str, fst: &F) -> (sync::Arc<SymbolTable>, sync::Arc<SymbolTable>) {
     let mut input_symt = SymbolTable::new();
     let mut output_symt = SymbolTable::new();
     let mut highest_ilabel = 0;
@@ -28,5 +28,5 @@ fn generate_symbol_table<F: Fst>(prefix: &str, fst: &F) -> (Rc<SymbolTable>, Rc<
     let output_symbols =
         (0..(highest_olabel + 1)).map(|it| format!("{}_input_symbol_{}", prefix, it));
     output_symt.add_symbols(output_symbols);
-    (Rc::new(input_symt), Rc::new(output_symt))
+    (sync::Arc::new(input_symt), sync::Arc::new(output_symt))
 }
