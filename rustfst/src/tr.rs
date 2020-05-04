@@ -22,12 +22,12 @@ impl<W> Tr<W> {
     /// ```
     /// # use rustfst::Tr;
     /// # use rustfst::semirings::{TropicalWeight, Semiring};
-    /// let tr = Tr::<TropicalWeight>::new(0, 1, 1.3, 2);
+    /// let transition = Tr::<TropicalWeight>::new(0, 1, 1.3, 2);
     ///
-    /// assert_eq!(tr.ilabel, 0);
-    /// assert_eq!(tr.olabel, 1);
-    /// assert_eq!(tr.weight, TropicalWeight::new(1.3));
-    /// assert_eq!(tr.nextstate, 2);
+    /// assert_eq!(transition.ilabel, 0);
+    /// assert_eq!(transition.olabel, 1);
+    /// assert_eq!(transition.weight, TropicalWeight::new(1.3));
+    /// assert_eq!(transition.nextstate, 2);
     ///
     /// ```
     pub fn new<S: Into<W>>(ilabel: Label, olabel: Label, weight: S, nextstate: StateId) -> Self {

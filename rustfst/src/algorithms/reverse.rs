@@ -9,9 +9,9 @@ use crate::EPS_LABEL;
 /// If A transduces string x to y with weight a, then the reverse of A
 /// transduces the reverse of x to the reverse of y with weight a.Reverse().
 ///
-/// Typically, a = a.Reverse() and an tr is its own reverse (e.g., for
+/// Typically, a = a.Reverse() and a transition is its own reverse (e.g., for
 /// TropicalWeight or LogWeight). In general, e.g., when the weights only form a
-/// left or right semiring, the output tr type must match the input tr type
+/// left or right semiring, the output transition type must match the input transition type
 /// except having the reversed Weight type.
 ///
 /// A superinitial state is always created.

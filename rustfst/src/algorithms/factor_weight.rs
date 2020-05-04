@@ -45,11 +45,11 @@ impl FactorWeightType {
 pub struct FactorWeightOptions {
     /// Quantization delta
     pub delta: f32,
-    /// Factor tr weights and/or final weights
+    /// Factor transition weights and/or final weights
     pub mode: FactorWeightType,
-    /// Input label of tr when factoring final weights.
+    /// Input label of transition when factoring final weights.
     pub final_ilabel: Label,
-    /// Output label of tr when factoring final weights.
+    /// Output label of transition when factoring final weights.
     pub final_olabel: Label,
     /// When factoring final w' results in > 1 trs at state, increments ilabels to make distinct ?
     pub increment_final_ilabel: bool,

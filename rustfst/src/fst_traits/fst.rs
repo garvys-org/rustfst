@@ -171,7 +171,7 @@ pub trait Fst:
     }
 
     /// Returns true if the Fst is an acceptor. False otherwise.
-    /// Acceptor means for all tr, tr.ilabel == tr.olabel
+    /// Acceptor means for all transition, transition.ilabel == transition.olabel
     fn is_acceptor(&self) -> bool {
         let states: Vec<_> = self.states_iter().collect();
         for state in states {

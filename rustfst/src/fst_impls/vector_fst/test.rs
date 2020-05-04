@@ -73,7 +73,7 @@ mod tests {
 
         let new_tr_1 = Tr::new(15, 29, 33.0, s2 + 55);
 
-        // Modify first tr leaving s1
+        // Modify first transition leaving s1
         fst.tr_iter_mut(s1)?
             .next()
             .ok_or_else(|| format_err!("Missing tr"))?

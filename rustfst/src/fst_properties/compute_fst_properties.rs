@@ -51,13 +51,13 @@ pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Result<FstProper
         let mut olabels = HashSet::new();
         let mut prev_tr: Option<&Tr<F::W>> = None;
         for tr in fst.tr_iter(state)? {
-            // There is already an outgoing tr with this ilabel
+            // There is already an outgoing transition with this ilabel
             if ilabels.contains(&tr.ilabel) {
                 comp_props |= FstProperties::NOT_I_DETERMINISTIC;
                 comp_props &= !FstProperties::I_DETERMINISTIC;
             }
 
-            // There is already an outgoing tr with this olabel
+            // There is already an outgoing transition with this olabel
             if olabels.contains(&tr.olabel) {
                 comp_props |= FstProperties::NOT_O_DETERMINISTIC;
                 comp_props &= !FstProperties::O_DETERMINISTIC;
@@ -83,7 +83,7 @@ pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Result<FstProper
                 comp_props &= !FstProperties::NO_O_EPSILONS;
             }
 
-            // Not first tr
+            // Not first transition
             if let Some(_prev_tr) = prev_tr {
                 if tr.ilabel < _prev_tr.ilabel {
                     comp_props |= FstProperties::NOT_I_LABEL_SORTED;

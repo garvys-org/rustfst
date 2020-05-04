@@ -10,7 +10,7 @@ pub enum ProjectType {
 }
 
 /// This operation projects an FST onto its domain or range by either copying
-/// each tr's input label to its output label or vice versa.
+/// each transition input label to its output label or vice versa.
 /// # Example 1
 ///
 /// ## Project input

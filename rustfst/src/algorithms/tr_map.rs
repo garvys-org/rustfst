@@ -5,7 +5,7 @@ use crate::semirings::Semiring;
 use crate::Tr;
 use crate::{Label, StateId, EPS_LABEL};
 
-/// Struct used to map final weights when performing an tr mapping.
+/// Struct used to map final weights when performing a transition mapping.
 /// It will always be of the form `(EPS_LABEL, EPS_LABEL, final_weight)`
 /// where `final_weight` is the `final_weight` of the current state.
 ///
@@ -27,11 +27,11 @@ pub enum MapFinalAction {
     /// A final weight is mapped into a final weight. An error is raised if this
     /// is not possible.
     MapNoSuperfinal,
-    /// A final weight is mapped to an tr to the superfinal state when the result
+    /// A final weight is mapped to a transition to the superfinal state when the result
     /// cannot be represented as a final weight. The superfinal state will be
     /// added only if it is needed.
     MapAllowSuperfinal,
-    /// A final weight is mapped to an tr to the superfinal state unless the
+    /// A final weight is mapped to a transition to the superfinal state unless the
     /// result can be represented as a final weight of weight Zero(). The
     /// superfinal state is always added (if the input is not the empty FST).
     MapRequireSuperfinal,
@@ -52,7 +52,7 @@ pub trait TrMapper<S: Semiring> {
     fn final_action(&self) -> MapFinalAction;
 }
 
-/// Maps every tr in the FST using an `TrMapper` object.
+/// Maps every transition in the FST using an `TrMapper` object.
 pub fn tr_map<F, M>(ifst: &mut F, mapper: &M) -> Result<()>
 where
     F: MutableFst,

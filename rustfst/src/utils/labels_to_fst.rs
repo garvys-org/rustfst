@@ -142,7 +142,7 @@ pub fn acceptor<F: MutableFst>(labels: &[Label], weight: F::W) -> F {
 ///
 /// - Create an unweighted linear acceptor :
 ///
-/// This will return a linear FST with one tr for each label given
+/// This will return a linear FST with one transition for each label given
 /// (same input and output, weight one).
 ///
 /// ```
@@ -180,7 +180,7 @@ pub fn acceptor<F: MutableFst>(labels: &[Label], weight: F::W) -> F {
 ///
 /// - Create a weighted linear acceptor :
 ///
-/// This will return a linear FST with one tr for each label given
+/// This will return a linear FST with one transition for each label given
 /// (same input and output, weight one).
 ///
 /// ```

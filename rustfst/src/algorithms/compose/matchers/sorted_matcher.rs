@@ -104,7 +104,7 @@ impl<W: Semiring> IteratorSortedMatcher<W> {
             match_label
         };
 
-        // When matching epsilon, the first tr is supposed to be labeled as such
+        // When matching epsilon, the first transition is supposed to be labeled as such
         let pos = if current_loop {
             0
         } else {

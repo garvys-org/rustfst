@@ -169,7 +169,7 @@ pub trait MutableFst:
 
     unsafe fn del_trs_id_sorted_unchecked(&mut self, state: StateId, to_del: &Vec<usize>);
 
-    /// Adds an tr to the FST. The tr will start in the state `source`.
+    /// Adds a transition to the FST. The transition will start in the state `source`.
     ///
     /// # Errors
     ///
@@ -197,7 +197,7 @@ pub trait MutableFst:
     fn add_tr(&mut self, source: StateId, tr: Tr<Self::W>) -> Result<()>;
     unsafe fn add_tr_unchecked(&mut self, source: StateId, tr: Tr<Self::W>);
 
-    /// Adds an tr to the FST. The tr will start in the state `source`.
+    /// Adds a transition to the FST. The transition will start in the state `source`.
     ///
     /// # Errors
     ///
@@ -337,7 +337,7 @@ pub trait MutableFst:
         crate::algorithms::closure(self, closure_type)
     }
 
-    /// Maps an tr using a `TrMapper` object.
+    /// Maps a transition using a `TrMapper` object.
     fn tr_map<M: TrMapper<Self::W>>(&mut self, mapper: &mut M) -> Result<()> {
         crate::algorithms::tr_map(self, mapper)
     }

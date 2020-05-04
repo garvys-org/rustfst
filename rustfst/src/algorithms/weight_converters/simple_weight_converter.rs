@@ -5,7 +5,7 @@ use crate::semirings::Semiring;
 use crate::Tr;
 
 /// Mapper that leaves labels and nextstate unchanged and constructs a new weight
-/// from the underlying value of the tr weight.
+/// from the underlying value of the transition weight.
 pub struct SimpleWeightConverter {}
 
 impl<SI, SO> WeightConverter<SI, SO> for SimpleWeightConverter

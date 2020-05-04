@@ -13,7 +13,7 @@ use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, EPS_LABEL};
 
-/// This specifies what labels to output on the call or return tr.
+/// This specifies what labels to output on the call or return transition.
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug, Eq)]
 enum ReplaceLabelType {
     /// Epsilon labels on both input and output.
@@ -31,14 +31,14 @@ enum ReplaceLabelType {
 struct ReplaceFstOptions {
     /// Index of root rule for expansion.
     root: Label,
-    /// How to label call tr.
+    /// How to label call transition.
     call_label_type: ReplaceLabelType,
-    /// How to label return tr.
+    /// How to label return transition.
     return_label_type: ReplaceLabelType,
-    /// Specifies output label to put on call tr; if `None`, use existing label
-    /// on call tr. Otherwise, use this field as the output label.
+    /// Specifies output label to put on call transition; if `None`, use existing label
+    /// on call transition. Otherwise, use this field as the output label.
     call_output_label: Option<Label>,
-    /// Specifies label to put on return tr.
+    /// Specifies label to put on return transition.
     return_label: Label,
 }
 
@@ -65,7 +65,7 @@ impl ReplaceFstOptions {
 /// represents the root (or topology) machine. The root FST refers to other FSTs
 /// by recursively replacing trs labeled as non-terminals with the matching
 /// non-terminal FST. Currently Replace uses the output symbols of the trs to
-/// determine whether the tr is a non-terminal tr or not. A non-terminal can be
+/// determine whether the transition is a non-terminal transition or not. A non-terminal can be
 /// any label that is not a non-zero terminal label in the output alphabet.
 ///
 /// Note that input argument is a vector of pairs. These correspond to the tuple
@@ -109,12 +109,12 @@ where
     fst.compute()
 }
 
-/// Returns true if label type on tr results in epsilon input label.
+/// Returns true if label type on transition results in epsilon input label.
 fn epsilon_on_input(label_type: ReplaceLabelType) -> bool {
     label_type == ReplaceLabelType::Neither || label_type == ReplaceLabelType::Output
 }
 
-/// Returns true if label type on tr results in epsilon input label.
+/// Returns true if label type on transition results in epsilon input label.
 fn epsilon_on_output(label_type: ReplaceLabelType) -> bool {
     label_type == ReplaceLabelType::Neither || label_type == ReplaceLabelType::Input
 }

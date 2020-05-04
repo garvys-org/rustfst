@@ -23,13 +23,13 @@ pub trait Visitor<'a, F: Fst> {
     /// Invoked when state discovered (2nd arg is DFS tree root).
     fn init_state(&mut self, s: StateId, root: StateId) -> bool;
 
-    /// Invoked when tree tr to white/undiscovered state examined.
+    /// Invoked when tree transition to white/undiscovered state examined.
     fn tree_tr(&mut self, s: StateId, tr: &Tr<F::W>) -> bool;
 
-    /// Invoked when back tr to grey/unfinished state examined.
+    /// Invoked when back transition to grey/unfinished state examined.
     fn back_tr(&mut self, s: StateId, tr: &Tr<F::W>) -> bool;
 
-    /// Invoked when forward or cross tr to black/finished state examined.
+    /// Invoked when forward or cross transition to black/finished state examined.
     fn forward_or_cross_tr(&mut self, s: StateId, tr: &Tr<F::W>) -> bool;
 
     /// Invoked when state finished ('s' is tree root, 'parent' is kNoStateId,

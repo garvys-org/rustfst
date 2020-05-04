@@ -16,7 +16,7 @@ pub enum ReweightType {
 /// The weight must be left distributive when reweighting towards the initial
 /// state and right distributive when reweighting towards the final states.
 ///
-/// An tr of weight w, with an origin state of potential p and destination state
+/// A transition of weight w, with an origin state of potential p and destination state
 /// of potential q, is reweighted by p^-1 \otimes (w \otimes q) when reweighting
 /// torwards the initial state, and by (p \otimes w) \otimes q^-1 when
 /// reweighting towards the final states.
