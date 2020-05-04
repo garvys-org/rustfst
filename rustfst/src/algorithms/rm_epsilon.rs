@@ -439,8 +439,8 @@ where
     F::W: 'static,
 {
     pub fn new(fst: B) -> Self {
-        let isymt = fst.borrow().input_symbols();
-        let osymt = fst.borrow().output_symbols();
+        let isymt = fst.borrow().input_symbols().cloned();
+        let osymt = fst.borrow().output_symbols().cloned();
         Self::from_impl(RmEpsilonImpl::new(fst), isymt, osymt)
     }
 }

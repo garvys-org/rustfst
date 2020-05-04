@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::Result;
 
@@ -14,8 +14,8 @@ impl LabelLookAheadRelabeler {
         fst_addon: &mut FstAddOn<
             F,
             (
-                Option<Rc<RefCell<LabelReachableData>>>,
-                Option<Rc<RefCell<LabelReachableData>>>,
+                Option<Arc<RefCell<LabelReachableData>>>,
+                Option<Arc<RefCell<LabelReachableData>>>,
             ),
         >,
     ) -> Result<()> {
@@ -25,10 +25,10 @@ impl LabelLookAheadRelabeler {
         let mfst = fst;
 
         if data.0.is_some() {
-            let reachable = LabelReachable::new_from_data(Rc::clone(data.0.as_ref().unwrap()));
+            let reachable = LabelReachable::new_from_data(Arc::clone(data.0.as_ref().unwrap()));
             reachable.relabel_fst(mfst, true)?;
         } else {
-            let reachable = LabelReachable::new_from_data(Rc::clone(data.1.as_ref().unwrap()));
+            let reachable = LabelReachable::new_from_data(Arc::clone(data.1.as_ref().unwrap()));
             reachable.relabel_fst(mfst, false)?;
         }
 
@@ -38,15 +38,15 @@ impl LabelLookAheadRelabeler {
     pub fn relabel<F: MutableFst>(
         fst: &mut F,
         addon: &(
-            Option<Rc<RefCell<LabelReachableData>>>,
-            Option<Rc<RefCell<LabelReachableData>>>,
+            Option<Arc<RefCell<LabelReachableData>>>,
+            Option<Arc<RefCell<LabelReachableData>>>,
         ),
         relabel_input: bool,
     ) -> Result<()> {
         let reachable_data = if addon.0.as_ref().is_some() {
-            Rc::clone(addon.0.as_ref().unwrap())
+            Arc::clone(addon.0.as_ref().unwrap())
         } else {
-            Rc::clone(addon.1.as_ref().unwrap())
+            Arc::clone(addon.1.as_ref().unwrap())
         };
         let reachable = LabelReachable::new_from_data(reachable_data);
         reachable.relabel_fst(fst, relabel_input)

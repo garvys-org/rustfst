@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::marker::PhantomData;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::Result;
 
@@ -14,7 +14,7 @@ use crate::{Tr, EPS_LABEL, NO_STATE_ID};
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
     // matcher fst
-    fst: Rc<M::F>,
+    fst: Arc<M::F>,
     matcher: M,
     lookahead_weight: W,
     prefix_tr: Tr<W>,
@@ -29,7 +29,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
     type F = M::F;
     type Iter = M::Iter;
 
-    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Result<Self> {
+    fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self> {
         Self::new_with_data(fst, match_type, None)
     }
 
@@ -61,8 +61,8 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
         self.matcher.priority(state)
     }
 
-    fn fst(&self) -> Rc<Self::F> {
-        Rc::clone(&self.fst)
+    fn fst(&self) -> Arc<Self::F> {
+        Arc::clone(&self.fst)
     }
 }
 
@@ -71,7 +71,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
 {
     type MatcherData = LabelReachableData;
 
-    fn data(&self) -> Option<&Rc<RefCell<Self::MatcherData>>> {
+    fn data(&self) -> Option<&Arc<RefCell<Self::MatcherData>>> {
         if let Some(reachable) = &self.reachable {
             Some(reachable.data())
         } else {
@@ -80,9 +80,9 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
     }
 
     fn new_with_data(
-        fst: Rc<Self::F>,
+        fst: Arc<Self::F>,
         match_type: MatchType,
-        data: Option<Rc<RefCell<Self::MatcherData>>>,
+        data: Option<Arc<RefCell<Self::MatcherData>>>,
     ) -> Result<Self> {
         if !(MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER)
             | MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
@@ -104,7 +104,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         }
 
         Ok(Self {
-            fst: Rc::clone(&fst),
+            fst: Arc::clone(&fst),
             matcher: M::new(fst, match_type)?,
             prefix_tr: Tr::new(0, 0, W::one(), NO_STATE_ID),
             lookahead_weight: W::one(),
@@ -117,7 +117,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
     fn create_data<F: ExpandedFst<W = W>>(
         fst: &F,
         match_type: MatchType,
-    ) -> Result<Option<Rc<RefCell<Self::MatcherData>>>> {
+    ) -> Result<Option<Arc<RefCell<Self::MatcherData>>>> {
         let reach_input = match_type == MatchType::MatchInput;
         if (reach_input && MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER))
             || (!reach_input && MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
@@ -128,8 +128,8 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         }
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &Rc<LF>) -> Result<()> {
-        let lfst_ptr = Rc::into_raw(Rc::clone(lfst)) as *const LF as *const u32;
+    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &Arc<LF>) -> Result<()> {
+        let lfst_ptr = Arc::into_raw(Arc::clone(lfst)) as *const LF as *const u32;
         self.lfst_ptr = lfst_ptr;
         let reach_input = self.match_type() == MatchType::MatchOutput;
         if let Some(reachable) = &mut self.reachable {
@@ -141,11 +141,11 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
     fn lookahead_fst<LF: ExpandedFst<W = W>>(
         &mut self,
         matcher_state: usize,
-        lfst: &Rc<LF>,
+        lfst: &Arc<LF>,
         lfst_state: usize,
     ) -> Result<bool> {
         // InitLookAheadFst
-        let lfst_ptr = Rc::into_raw(Rc::clone(&lfst)) as *const LF as *const u32;
+        let lfst_ptr = Arc::into_raw(Arc::clone(&lfst)) as *const LF as *const u32;
         if lfst_ptr != self.lfst_ptr {
             self.init_lookahead_fst(lfst)?;
         }

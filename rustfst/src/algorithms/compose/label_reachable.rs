@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::Result;
 use itertools::Itertools;
@@ -54,7 +54,7 @@ impl LabelReachableData {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelReachable {
-    data: Rc<RefCell<LabelReachableData>>,
+    data: Arc<RefCell<LabelReachableData>>,
     label2state: HashMap<Label, StateId>,
     reach_fst_input: bool,
 }
@@ -74,13 +74,13 @@ impl LabelReachable {
         Self::find_intervals(&fst, nstates, &mut data, &mut label2state)?;
 
         Ok(Self {
-            data: Rc::new(RefCell::new(data)),
+            data: Arc::new(RefCell::new(data)),
             label2state,
             reach_fst_input: false,
         })
     }
 
-    pub fn new_from_data(data: Rc<RefCell<LabelReachableData>>) -> Self {
+    pub fn new_from_data(data: Arc<RefCell<LabelReachableData>>) -> Self {
         Self {
             data,
             label2state: HashMap::new(),
@@ -88,12 +88,12 @@ impl LabelReachable {
         }
     }
 
-    pub fn data(&self) -> &Rc<RefCell<LabelReachableData>> {
+    pub fn data(&self) -> &Arc<RefCell<LabelReachableData>> {
         &self.data
     }
 
-    pub fn shared_data(&self) -> Rc<RefCell<LabelReachableData>> {
-        Rc::clone(&self.data)
+    pub fn shared_data(&self) -> Arc<RefCell<LabelReachableData>> {
+        Arc::clone(&self.data)
     }
 
     pub fn reach_input(&self) -> bool {
@@ -223,10 +223,10 @@ impl LabelReachable {
 
         if relabel_input {
             tr_sort(fst, ilabel_compare);
-            fst.unset_input_symbols();
+            fst.take_input_symbols();
         } else {
             tr_sort(fst, olabel_compare);
-            fst.unset_output_symbols();
+            fst.take_output_symbols();
         }
 
         Ok(())
@@ -257,7 +257,7 @@ impl LabelReachable {
         pairs
     }
 
-    pub fn reach_init<F: ExpandedFst>(&mut self, fst: &Rc<F>, reach_input: bool) -> Result<()>
+    pub fn reach_init<F: ExpandedFst>(&mut self, fst: &Arc<F>, reach_input: bool) -> Result<()>
     where
         F::W: 'static,
     {

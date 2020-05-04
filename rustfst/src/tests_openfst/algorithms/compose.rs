@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::Result;
 use pretty_assertions::assert_eq;
@@ -71,8 +71,8 @@ where
     config.compose_filter = filter;
 
     let fst_res_static: VectorFst<_> = compose_with_config(
-        Rc::new(fst_raw.clone()),
-        Rc::new(compose_test_data.fst_2.clone()),
+        Arc::new(fst_raw.clone()),
+        Arc::new(compose_test_data.fst_2.clone()),
         config,
     )?;
 
@@ -153,32 +153,32 @@ where
     let fst1: VectorFst<_> = fst_raw.clone().into();
     let mut fst2: VectorFst<_> = compose_test_data.fst_2.clone();
 
-    let graph1look = Rc::new(TLaFst::new(fst1)?);
+    let graph1look = Arc::new(TLaFst::new(fst1)?);
 
     LabelLookAheadRelabeler::relabel(&mut fst2, graph1look.addon(), true)?;
 
     tr_sort(&mut fst2, ilabel_compare);
-    let fst2 = Rc::new(fst2);
+    let fst2 = Arc::new(fst2);
 
     let matcher1 = TMatcher1::new_with_data(
-        Rc::clone(&graph1look),
+        Arc::clone(&graph1look),
         MatchType::MatchOutput,
         graph1look.data(MatchType::MatchOutput).cloned(),
     )?;
-    let matcher2 = TMatcher2::new(Rc::clone(&fst2), MatchType::MatchInput)?;
+    let matcher2 = TMatcher2::new(Arc::clone(&fst2), MatchType::MatchInput)?;
 
     let compose_filter = TPushLabelsFilter::new_2(
-        Rc::clone(&graph1look),
-        Rc::clone(&fst2),
-        Rc::new(RefCell::new(matcher1)),
-        Rc::new(RefCell::new(matcher2)),
+        Arc::clone(&graph1look),
+        Arc::clone(&fst2),
+        Arc::new(RefCell::new(matcher1)),
+        Arc::new(RefCell::new(matcher2)),
     )?;
 
     // let compose_filter = TComposeFilter::new(
     //     &graph1look,
     //     &fst2,
-    //     Rc::new(RefCell::new(matcher1)),
-    //     Rc::new(RefCell::new(matcher2)),
+    //     Arc::new(RefCell::new(matcher1)),
+    //     Arc::new(RefCell::new(matcher2)),
     // )?;
 
     let compose_options = ComposeFstImplOptions::<_, _, TComposeFilter<_, _, _>, _>::new(

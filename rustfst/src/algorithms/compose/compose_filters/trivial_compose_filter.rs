@@ -6,12 +6,12 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;
 use crate::Tr;
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Debug, PartialEq)]
 pub struct TrivialComposeFilter<M1, M2> {
-    matcher1: Rc<RefCell<M1>>,
-    matcher2: Rc<RefCell<M2>>,
+    matcher1: Arc<RefCell<M1>>,
+    matcher2: Arc<RefCell<M2>>,
 }
 
 impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
@@ -21,20 +21,20 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
     type M2 = M2;
     type FS = TrivialFilterState;
 
-    fn new<IM1: Into<Option<Rc<RefCell<Self::M1>>>>, IM2: Into<Option<Rc<RefCell<Self::M2>>>>>(
-        fst1: Rc<<Self::M1 as Matcher<W>>::F>,
-        fst2: Rc<<Self::M2 as Matcher<W>>::F>,
+    fn new<IM1: Into<Option<Arc<RefCell<Self::M1>>>>, IM2: Into<Option<Arc<RefCell<Self::M2>>>>>(
+        fst1: Arc<<Self::M1 as Matcher<W>>::F>,
+        fst2: Arc<<Self::M2 as Matcher<W>>::F>,
         m1: IM1,
         m2: IM2,
     ) -> Result<Self> {
         Ok(Self {
             matcher1: m1.into().unwrap_or_else(|| {
-                Rc::new(RefCell::new(
+                Arc::new(RefCell::new(
                     Self::M1::new(fst1, MatchType::MatchOutput).unwrap(),
                 ))
             }),
             matcher2: m2.into().unwrap_or_else(|| {
-                Rc::new(RefCell::new(
+                Arc::new(RefCell::new(
                     Self::M2::new(fst2, MatchType::MatchInput).unwrap(),
                 ))
             }),
@@ -57,11 +57,11 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(())
     }
 
-    fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
-        Rc::clone(&self.matcher1)
+    fn matcher1(&self) -> Arc<RefCell<Self::M1>> {
+        Arc::clone(&self.matcher1)
     }
 
-    fn matcher2(&self) -> Rc<RefCell<Self::M2>> {
-        Rc::clone(&self.matcher2)
+    fn matcher2(&self) -> Arc<RefCell<Self::M2>> {
+        Arc::clone(&self.matcher2)
     }
 }

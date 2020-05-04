@@ -7,15 +7,15 @@ use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Debug)]
 /// This filter requires epsilons on FST1 to be read before epsilons on FST2.
 pub struct SequenceComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
-    fst1: Rc<M1::F>,
-    fst2: Rc<M2::F>,
-    matcher1: Rc<RefCell<M1>>,
-    matcher2: Rc<RefCell<M2>>,
+    fst1: Arc<M1::F>,
+    fst2: Arc<M2::F>,
+    matcher1: Arc<RefCell<M1>>,
+    matcher2: Arc<RefCell<M2>>,
     /// Current fst1 state
     s1: StateId,
     /// Current fst2 state
@@ -35,22 +35,22 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
     type M2 = M2;
     type FS = IntegerFilterState;
 
-    fn new<IM1: Into<Option<Rc<RefCell<Self::M1>>>>, IM2: Into<Option<Rc<RefCell<Self::M2>>>>>(
-        fst1: Rc<M1::F>,
-        fst2: Rc<M2::F>,
+    fn new<IM1: Into<Option<Arc<RefCell<Self::M1>>>>, IM2: Into<Option<Arc<RefCell<Self::M2>>>>>(
+        fst1: Arc<M1::F>,
+        fst2: Arc<M2::F>,
         m1: IM1,
         m2: IM2,
     ) -> Result<Self> {
         Ok(Self {
-            fst1: Rc::clone(&fst1),
-            fst2: Rc::clone(&fst2),
+            fst1: Arc::clone(&fst1),
+            fst2: Arc::clone(&fst2),
             matcher1: m1.into().unwrap_or_else(|| {
-                Rc::new(RefCell::new(
+                Arc::new(RefCell::new(
                     Self::M1::new(fst1, MatchType::MatchOutput).unwrap(),
                 ))
             }),
             matcher2: m2.into().unwrap_or_else(|| {
-                Rc::new(RefCell::new(
+                Arc::new(RefCell::new(
                     Self::M2::new(fst2, MatchType::MatchInput).unwrap(),
                 ))
             }),
@@ -110,11 +110,11 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(())
     }
 
-    fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
-        Rc::clone(&self.matcher1)
+    fn matcher1(&self) -> Arc<RefCell<Self::M1>> {
+        Arc::clone(&self.matcher1)
     }
 
-    fn matcher2(&self) -> Rc<RefCell<Self::M2>> {
-        Rc::clone(&self.matcher2)
+    fn matcher2(&self) -> Arc<RefCell<Self::M2>> {
+        Arc::clone(&self.matcher2)
     }
 }

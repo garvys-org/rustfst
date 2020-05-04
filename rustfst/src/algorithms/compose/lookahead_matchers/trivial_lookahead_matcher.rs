@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::Result;
 
@@ -20,7 +20,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
     type F = M::F;
     type Iter = M::Iter;
 
-    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Result<Self> {
+    fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self> {
         Ok(Self {
             matcher: M::new(fst, match_type)?,
             prefix_tr: Tr::new(0, 0, W::one(), NO_STATE_ID),
@@ -50,7 +50,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
         self.matcher.priority(state)
     }
 
-    fn fst(&self) -> Rc<Self::F> {
+    fn fst(&self) -> Arc<Self::F> {
         self.matcher.fst()
     }
 }
@@ -58,14 +58,14 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
 impl<W: Semiring, M: Matcher<W>> LookaheadMatcher<W> for TrivialLookAheadMatcher<W, M> {
     type MatcherData = ();
 
-    fn data(&self) -> Option<&Rc<RefCell<Self::MatcherData>>> {
+    fn data(&self) -> Option<&Arc<RefCell<Self::MatcherData>>> {
         None
     }
 
     fn new_with_data(
-        fst: Rc<Self::F>,
+        fst: Arc<Self::F>,
         match_type: MatchType,
-        _data: Option<Rc<RefCell<Self::MatcherData>>>,
+        _data: Option<Arc<RefCell<Self::MatcherData>>>,
     ) -> Result<Self> {
         Self::new(fst, match_type)
     }
@@ -73,18 +73,18 @@ impl<W: Semiring, M: Matcher<W>> LookaheadMatcher<W> for TrivialLookAheadMatcher
     fn create_data<F: ExpandedFst<W = W>>(
         _fst: &F,
         _match_type: MatchType,
-    ) -> Result<Option<Rc<RefCell<Self::MatcherData>>>> {
+    ) -> Result<Option<Arc<RefCell<Self::MatcherData>>>> {
         Ok(None)
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &Rc<LF>) -> Result<()> {
+    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
         Ok(())
     }
 
     fn lookahead_fst<LF: Fst<W = W>>(
         &mut self,
         _matcher_state: StateId,
-        _lfst: &Rc<LF>,
+        _lfst: &Arc<LF>,
         _s: StateId,
     ) -> Result<bool> {
         Ok(true)

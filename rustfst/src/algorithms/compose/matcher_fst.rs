@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::marker::PhantomData;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::Result;
 
@@ -16,7 +16,7 @@ use crate::SymbolTable;
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct MatcherFst<F, M, T> {
-    fst_add_on: FstAddOn<F, (Option<Rc<RefCell<T>>>, Option<Rc<RefCell<T>>>)>,
+    fst_add_on: FstAddOn<F, (Option<Arc<RefCell<T>>>, Option<Arc<RefCell<T>>>)>,
     matcher: PhantomData<M>,
 }
 
@@ -25,11 +25,11 @@ impl<F, M, T> MatcherFst<F, M, T> {
         self.fst_add_on.fst()
     }
 
-    pub fn addon(&self) -> &(Option<Rc<RefCell<T>>>, Option<Rc<RefCell<T>>>) {
+    pub fn addon(&self) -> &(Option<Arc<RefCell<T>>>, Option<Arc<RefCell<T>>>) {
         self.fst_add_on.add_on()
     }
 
-    pub fn data(&self, match_type: MatchType) -> Option<&Rc<RefCell<T>>> {
+    pub fn data(&self, match_type: MatchType) -> Option<&Arc<RefCell<T>>> {
         let data = self.fst_add_on.add_on();
         if match_type == MatchType::MatchInput {
             data.0.as_ref()
@@ -120,28 +120,28 @@ impl<F: Fst, M: Debug, T: Debug> Fst for MatcherFst<F, M, T>
 where
     F::W: 'static,
 {
-    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.fst_add_on.input_symbols()
     }
 
-    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn output_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.fst_add_on.output_symbols()
     }
 
-    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_input_symbols(&mut self, symt: Arc<SymbolTable>) {
         self.fst_add_on.set_input_symbols(symt)
     }
 
-    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_output_symbols(&mut self, symt: Arc<SymbolTable>) {
         self.fst_add_on.set_output_symbols(symt)
     }
 
-    fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>> {
-        self.fst_add_on.unset_input_symbols()
+    fn take_input_symbols(&mut self) -> Option<Arc<SymbolTable>> {
+        self.fst_add_on.take_input_symbols()
     }
 
-    fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
-        self.fst_add_on.unset_output_symbols()
+    fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
+        self.fst_add_on.take_output_symbols()
     }
 }
 

@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed Arc as Tr (for transition)
 - Renamed DynamicFst as LazyFst
 - Semiring impls are required to be 'static
+- SymbolTable are now wrapped in std::sync::Arc (instead of Rc)
+- renamed unset_input_symbols and unset_output_symbols to take_*_symbols
+- static FST struct are now Send and Sync
 
 ### Fixed
 - Fix olabel display while drawing a FST if no symbol table is provided

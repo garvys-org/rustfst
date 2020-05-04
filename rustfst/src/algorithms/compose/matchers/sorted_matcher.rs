@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::Result;
 use superslice::Ext;
@@ -13,7 +13,7 @@ use crate::{Label, StateId, Tr, EPS_LABEL, NO_LABEL};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SortedMatcher<F: ExpandedFst> {
-    fst: Rc<F>,
+    fst: Arc<F>,
     match_type: MatchType,
 }
 
@@ -21,7 +21,7 @@ impl<W: Semiring + 'static, F: ExpandedFst<W = W>> Matcher<W> for SortedMatcher<
     type F = F;
     type Iter = IteratorSortedMatcher<W>;
 
-    fn new(fst: Rc<F>, match_type: MatchType) -> Result<Self> {
+    fn new(fst: Arc<F>, match_type: MatchType) -> Result<Self> {
         Ok(Self { fst, match_type })
     }
 
@@ -77,8 +77,8 @@ impl<W: Semiring + 'static, F: ExpandedFst<W = W>> Matcher<W> for SortedMatcher<
         self.fst.num_trs(state)
     }
 
-    fn fst(&self) -> Rc<Self::F> {
-        Rc::clone(&self.fst)
+    fn fst(&self) -> Arc<Self::F> {
+        Arc::clone(&self.fst)
     }
 }
 
@@ -165,14 +165,14 @@ where
 {
     type MatcherData = ();
 
-    fn data(&self) -> Option<&Rc<RefCell<Self::MatcherData>>> {
+    fn data(&self) -> Option<&Arc<RefCell<Self::MatcherData>>> {
         unreachable!()
     }
 
     fn new_with_data(
-        _fst: Rc<Self::F>,
+        _fst: Arc<Self::F>,
         _match_type: MatchType,
-        _data: Option<Rc<RefCell<Self::MatcherData>>>,
+        _data: Option<Arc<RefCell<Self::MatcherData>>>,
     ) -> Result<Self>
     where
         Self: std::marker::Sized,
@@ -183,18 +183,18 @@ where
     fn create_data<G: ExpandedFst<W = F::W>>(
         _fst: &G,
         _match_type: MatchType,
-    ) -> Result<Option<Rc<RefCell<Self::MatcherData>>>> {
+    ) -> Result<Option<Arc<RefCell<Self::MatcherData>>>> {
         unreachable!()
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = F::W>>(&mut self, _lfst: &Rc<LF>) -> Result<()> {
+    fn init_lookahead_fst<LF: ExpandedFst<W = F::W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
         unreachable!()
     }
 
     fn lookahead_fst<LF: ExpandedFst<W = F::W>>(
         &mut self,
         _matcher_state: usize,
-        _lfst: &Rc<LF>,
+        _lfst: &Arc<LF>,
         _lfst_state: usize,
     ) -> Result<bool> {
         unreachable!()

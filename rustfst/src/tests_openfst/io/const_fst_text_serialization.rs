@@ -65,8 +65,8 @@ where
 
     // Text serialization doesn't include the symbol table.
     let mut raw_const_without_symt = raw_const_with_symt;
-    raw_const_without_symt.unset_input_symbols();
-    raw_const_without_symt.unset_output_symbols();
+    raw_const_without_symt.take_input_symbols();
+    raw_const_without_symt.take_output_symbols();
 
     assert_eq!(
         raw_const_without_symt,

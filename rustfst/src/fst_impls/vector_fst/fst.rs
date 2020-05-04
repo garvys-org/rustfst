@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::Result;
 
@@ -8,28 +8,28 @@ use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable};
 
 impl<W: 'static + Semiring> Fst for VectorFst<W> {
-    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
-        // Rc is incremented, SymbolTable is not duplicated
-        self.isymt.clone()
+    fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
+        // Arc is incremented, SymbolTable is not duplicated
+        self.isymt.as_ref()
     }
 
-    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
-        self.osymt.clone()
+    fn output_symbols(&self) -> Option<&Arc<SymbolTable>> {
+        self.osymt.as_ref()
     }
 
-    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
-        self.isymt = Some(Rc::clone(&symt))
+    fn set_input_symbols(&mut self, symt: Arc<SymbolTable>) {
+        self.isymt = Some(symt)
     }
 
-    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
-        self.osymt = Some(Rc::clone(&symt));
+    fn set_output_symbols(&mut self, symt: Arc<SymbolTable>) {
+        self.osymt = Some(symt)
     }
 
-    fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+    fn take_input_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.isymt.take()
     }
 
-    fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+    fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.osymt.take()
     }
 }

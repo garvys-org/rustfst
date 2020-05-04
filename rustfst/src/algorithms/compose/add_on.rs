@@ -1,5 +1,5 @@
 use std::fmt::Debug;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::Result;
 
@@ -97,28 +97,28 @@ impl<F: Fst, T: Debug> Fst for FstAddOn<F, T>
 where
     F::W: 'static,
 {
-    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.fst.input_symbols()
     }
 
-    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn output_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.fst.output_symbols()
     }
 
-    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_input_symbols(&mut self, symt: Arc<SymbolTable>) {
         self.fst.set_input_symbols(symt)
     }
 
-    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_output_symbols(&mut self, symt: Arc<SymbolTable>) {
         self.fst.set_output_symbols(symt)
     }
 
-    fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>> {
-        self.fst.unset_input_symbols()
+    fn take_input_symbols(&mut self) -> Option<Arc<SymbolTable>> {
+        self.fst.take_input_symbols()
     }
 
-    fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
-        self.fst.unset_output_symbols()
+    fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
+        self.fst.take_output_symbols()
     }
 }
 

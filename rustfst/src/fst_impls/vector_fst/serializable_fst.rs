@@ -64,8 +64,8 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
             start: self.start_state.map(|v| v as i64).unwrap_or(-1),
             num_states: self.num_states() as i64,
             num_trs: num_trs as i64,
-            isymt: self.input_symbols(),
-            osymt: self.output_symbols(),
+            isymt: self.input_symbols().cloned(),
+            osymt: self.output_symbols().cloned(),
         };
         hdr.write(&mut file)?;
 

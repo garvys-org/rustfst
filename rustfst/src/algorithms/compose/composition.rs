@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::hash::Hash;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::Result;
 use itertools::Itertools;
@@ -21,8 +21,8 @@ use crate::semirings::Semiring;
 use crate::{StateId, Tr, EPS_LABEL, NO_LABEL};
 
 pub struct ComposeFstImplOptions<M1, M2, CF, ST> {
-    matcher1: Option<Rc<RefCell<M1>>>,
-    matcher2: Option<Rc<RefCell<M2>>>,
+    matcher1: Option<Arc<RefCell<M1>>>,
+    matcher2: Option<Arc<RefCell<M2>>>,
     filter: Option<CF>,
     state_table: Option<ST>,
 }
@@ -40,8 +40,8 @@ impl<M1, M2, CF, ST> Default for ComposeFstImplOptions<M1, M2, CF, ST> {
 
 impl<M1, M2, CF, ST> ComposeFstImplOptions<M1, M2, CF, ST> {
     pub fn new<
-        IM1: Into<Option<Rc<RefCell<M1>>>>,
-        IM2: Into<Option<Rc<RefCell<M2>>>>,
+        IM1: Into<Option<Arc<RefCell<M1>>>>,
+        IM2: Into<Option<Arc<RefCell<M2>>>>,
         ICF: Into<Option<CF>>,
         IST: Into<Option<ST>>,
     >(
@@ -68,10 +68,10 @@ pub struct ComposeStateTuple<FS> {
 
 #[derive(Clone, Debug)]
 pub struct ComposeFstImpl<W: Semiring, CF: ComposeFilter<W>> {
-    fst1: Rc<<CF::M1 as Matcher<W>>::F>,
-    fst2: Rc<<CF::M2 as Matcher<W>>::F>,
-    matcher1: Rc<RefCell<CF::M1>>,
-    matcher2: Rc<RefCell<CF::M2>>,
+    fst1: Arc<<CF::M1 as Matcher<W>>::F>,
+    fst2: Arc<<CF::M2 as Matcher<W>>::F>,
+    matcher1: Arc<RefCell<CF::M1>>,
+    matcher2: Arc<RefCell<CF::M2>>,
     compose_filter: CF,
     cache_impl: CacheImpl<W>,
     state_table: StateTable<ComposeStateTuple<CF::FS>>,
@@ -89,16 +89,16 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
     // }
 
     fn new(
-        fst1: Rc<<CF::M1 as Matcher<W>>::F>,
-        fst2: Rc<<CF::M2 as Matcher<W>>::F>,
+        fst1: Arc<<CF::M1 as Matcher<W>>::F>,
+        fst2: Arc<<CF::M2 as Matcher<W>>::F>,
         opts: ComposeFstImplOptions<CF::M1, CF::M2, CF, StateTable<ComposeStateTuple<CF::FS>>>,
     ) -> Result<Self> {
         let opts_matcher1 = opts.matcher1;
         let opts_matcher2 = opts.matcher2;
         let compose_filter = opts.filter.unwrap_or_else(|| {
             CF::new(
-                Rc::clone(&fst1),
-                Rc::clone(&fst2),
+                Arc::clone(&fst1),
+                Arc::clone(&fst2),
                 opts_matcher1,
                 opts_matcher2,
             )
@@ -119,8 +119,8 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
     }
 
     fn match_type(
-        matcher1: &Rc<RefCell<CF::M1>>,
-        matcher2: &Rc<RefCell<CF::M2>>,
+        matcher1: &Arc<RefCell<CF::M1>>,
+        matcher2: &Arc<RefCell<CF::M2>>,
     ) -> Result<MatchType> {
         if matcher1
             .borrow()
@@ -179,9 +179,9 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
         &mut self,
         s: StateId,
         sa: StateId,
-        fstb: Rc<FB>,
+        fstb: Arc<FB>,
         sb: StateId,
-        matchera: Rc<RefCell<M>>,
+        matchera: Arc<RefCell<M>>,
         match_input: bool,
     ) -> Result<()> {
         let tr_loop = if match_input {
@@ -189,9 +189,9 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
         } else {
             Tr::new(NO_LABEL, EPS_LABEL, W::one(), sb)
         };
-        self.match_tr(s, sa, Rc::clone(&matchera), &tr_loop, match_input)?;
+        self.match_tr(s, sa, Arc::clone(&matchera), &tr_loop, match_input)?;
         for tr in fstb.tr_iter(sb)? {
-            self.match_tr(s, sa, Rc::clone(&matchera), tr, match_input)?;
+            self.match_tr(s, sa, Arc::clone(&matchera), tr, match_input)?;
         }
         Ok(())
     }
@@ -220,7 +220,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
         &mut self,
         s: StateId,
         sa: StateId,
-        matchera: Rc<RefCell<M>>,
+        matchera: Arc<RefCell<M>>,
         tr: &Tr<W>,
         match_input: bool,
     ) -> Result<()> {
@@ -277,18 +277,18 @@ impl<W: Semiring + 'static, CF: ComposeFilter<W>> FstImpl for ComposeFstImpl<W, 
             self.ordered_expand(
                 state,
                 s2,
-                Rc::clone(&self.fst1),
+                Arc::clone(&self.fst1),
                 s1,
-                Rc::clone(&self.matcher2),
+                Arc::clone(&self.matcher2),
                 true,
             )?;
         } else {
             self.ordered_expand(
                 state,
                 s1,
-                Rc::clone(&self.fst2),
+                Arc::clone(&self.fst2),
                 s2,
-                Rc::clone(&self.matcher1),
+                Arc::clone(&self.matcher1),
                 false,
             )?;
         }
@@ -357,8 +357,8 @@ pub enum ComposeFilterEnum {
 pub type ComposeFst<W, CF> = LazyFst<ComposeFstImpl<W, CF>>;
 
 fn create_base<W: Semiring + 'static, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>>(
-    fst1: Rc<F1>,
-    fst2: Rc<F2>,
+    fst1: Arc<F1>,
+    fst2: Arc<F2>,
 ) -> Result<ComposeFstImpl<W, SequenceComposeFilter<W, GenericMatcher<F1>, GenericMatcher<F2>>>> {
     // TODO: change this once Lookahead matchers are supported.
     let opts = ComposeFstImplOptions::<
@@ -373,23 +373,23 @@ fn create_base<W: Semiring + 'static, F1: ExpandedFst<W = W>, F2: ExpandedFst<W 
 
 impl<W: Semiring, CF: ComposeFilter<W>> ComposeFst<W, CF> {
     pub fn new_with_options(
-        fst1: Rc<<CF::M1 as Matcher<W>>::F>,
-        fst2: Rc<<CF::M2 as Matcher<W>>::F>,
+        fst1: Arc<<CF::M1 as Matcher<W>>::F>,
+        fst2: Arc<<CF::M2 as Matcher<W>>::F>,
         opts: ComposeFstImplOptions<CF::M1, CF::M2, CF, StateTable<ComposeStateTuple<CF::FS>>>,
     ) -> Result<Self>
     where
         W: 'static,
     {
-        let isymt = fst1.input_symbols();
-        let osymt = fst2.output_symbols();
+        let isymt = fst1.input_symbols().cloned();
+        let osymt = fst2.output_symbols().cloned();
         let compose_impl = ComposeFstImpl::new(fst1, fst2, opts)?;
         Ok(Self::from_impl(compose_impl, isymt, osymt))
     }
 
     // TODO: Change API, no really user friendly
     pub fn new(
-        fst1: Rc<<CF::M1 as Matcher<W>>::F>,
-        fst2: Rc<<CF::M2 as Matcher<W>>::F>,
+        fst1: Arc<<CF::M1 as Matcher<W>>::F>,
+        fst2: Arc<<CF::M2 as Matcher<W>>::F>,
     ) -> Result<Self>
     where
         W: 'static,
@@ -401,9 +401,9 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFst<W, CF> {
 impl<W: Semiring + 'static, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>>
     ComposeFst<W, SequenceComposeFilter<W, GenericMatcher<F1>, GenericMatcher<F2>>>
 {
-    pub fn new_auto(fst1: Rc<F1>, fst2: Rc<F2>) -> Result<Self> {
-        let isymt = fst1.input_symbols();
-        let osymt = fst2.output_symbols();
+    pub fn new_auto(fst1: Arc<F1>, fst2: Arc<F2>) -> Result<Self> {
+        let isymt = fst1.input_symbols().cloned();
+        let osymt = fst2.output_symbols().cloned();
         let compose_impl = create_base(fst1, fst2)?;
         Ok(Self::from_impl(compose_impl, isymt, osymt))
     }
@@ -425,8 +425,8 @@ impl Default for ComposeConfig {
 }
 
 pub fn compose_with_config<F1: ExpandedFst, F2: ExpandedFst<W = F1::W>, F3: MutableFst<W = F1::W>>(
-    fst1: Rc<F1>,
-    fst2: Rc<F2>,
+    fst1: Arc<F1>,
+    fst2: Arc<F2>,
     config: ComposeConfig,
 ) -> Result<F3>
 where
@@ -484,7 +484,7 @@ where
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::algorithms::compose;
-/// # use std::rc::Rc;
+/// # use std::sync::Arc;
 /// # fn main() -> Result<()> {
 /// let fst_1 : VectorFst<IntegerWeight> = fst![1,2 => 2,3];
 ///
@@ -492,14 +492,14 @@ where
 ///
 /// let fst_ref : VectorFst<IntegerWeight> = fst![1,2 => 3,4];
 ///
-/// let composed_fst : VectorFst<_> = compose(Rc::new(fst_1), Rc::new(fst_2))?;
+/// let composed_fst : VectorFst<_> = compose(Arc::new(fst_1), Arc::new(fst_2))?;
 /// assert_eq!(composed_fst, fst_ref);
 /// # Ok(())
 /// # }
 /// ```
 pub fn compose<F1: ExpandedFst, F2: ExpandedFst<W = F1::W>, F3: MutableFst<W = F1::W>>(
-    fst1: Rc<F1>,
-    fst2: Rc<F2>,
+    fst1: Arc<F1>,
+    fst2: Arc<F2>,
 ) -> Result<F3>
 where
     F1::W: 'static,
