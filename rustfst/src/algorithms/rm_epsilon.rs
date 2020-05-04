@@ -8,7 +8,7 @@ use unsafe_unwrap::UnsafeUnwrap;
 use crate::algorithms::tr_filters::{TrFilter, EpsilonTrFilter};
 use crate::algorithms::cache::{CacheImpl, FstImpl};
 use crate::algorithms::dfs_visit::dfs_visit;
-use crate::algorithms::dynamic_fst::DynamicFst;
+use crate::algorithms::lazy_fst::LazyFst;
 use crate::algorithms::queues::{AutoQueue, FifoQueue};
 use crate::algorithms::shortest_distance::{ShortestDistanceConfig, ShortestDistanceState};
 use crate::algorithms::top_sort::TopOrderVisitor;
@@ -432,7 +432,7 @@ where
 /// Removes epsilon-transitions (when both the input and output label are an
 /// epsilon) from a transducer. The result will be an equivalent FST that has no
 /// such epsilon transitions. This version is a delayed FST.
-pub type RmEpsilonFst<F, B> = DynamicFst<RmEpsilonImpl<F, B>>;
+pub type RmEpsilonFst<F, B> = LazyFst<RmEpsilonImpl<F, B>>;
 impl<F: MutableFst, B: Borrow<F>> RmEpsilonFst<F, B>
 where
     <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,

@@ -11,7 +11,7 @@ mod condense;
 mod connect;
 mod determinize;
 pub(crate) mod dfs_visit;
-pub(crate) mod dynamic_fst;
+pub(crate) mod lazy_fst;
 mod encode;
 mod factor_weight;
 mod fst_convert;

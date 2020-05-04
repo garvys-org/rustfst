@@ -9,7 +9,7 @@ use anyhow::Result;
 use bitflags::bitflags;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
-use crate::algorithms::dynamic_fst::DynamicFst;
+use crate::algorithms::lazy_fst::LazyFst;
 use crate::tr::Tr;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
@@ -298,7 +298,7 @@ where
 /// States and transitions will be added as necessary. The algorithm is a
 /// generalization to arbitrary weights of the second step of the input
 /// epsilon-normalization algorithm. This version is a Delayed FST.
-pub type FactorWeightFst<F, B, FI> = DynamicFst<FactorWeightImpl<F, B, FI>>;
+pub type FactorWeightFst<F, B, FI> = LazyFst<FactorWeightImpl<F, B, FI>>;
 
 impl<'a, F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> FactorWeightFst<F, B, FI>
 where

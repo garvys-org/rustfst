@@ -8,7 +8,7 @@ use anyhow::{bail, Result};
 use itertools::Itertools;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
-use crate::algorithms::dynamic_fst::DynamicFst;
+use crate::algorithms::lazy_fst::LazyFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Tr, Label, StateId, EPS_LABEL};
@@ -501,10 +501,10 @@ impl ReplaceStateTable {
     }
 }
 
-/// ReplaceFst supports dynamic replacement of arcs in one FST with another FST.
+/// ReplaceFst supports lazy replacement of arcs in one FST with another FST.
 /// This replacement is recursive. ReplaceFst can be used to support a variety of
 /// delayed constructions such as recursive transition networks, union, or closure.
-pub type ReplaceFst<F, B> = DynamicFst<ReplaceFstImpl<F, B>>;
+pub type ReplaceFst<F, B> = LazyFst<ReplaceFstImpl<F, B>>;
 
 impl<F: Fst, B: Borrow<F>> ReplaceFst<F, B>
 where

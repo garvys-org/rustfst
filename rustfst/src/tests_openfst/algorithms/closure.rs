@@ -5,33 +5,33 @@ use crate::algorithms::{closure, ClosureFst, ClosureType};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
-use crate::tests_openfst::algorithms::dynamic_fst::compare_fst_static_dynamic;
+use crate::tests_openfst::algorithms::lazy_fst::compare_fst_static_lazy;
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct SimpleStaticDynamicOperationResult {
+pub struct SimpleStaticLazyOperationResult {
     result_static: String,
-    result_dynamic: String,
+    result_lazy: String,
 }
 
-pub struct SimpleStaticDynamicTestData<F>
+pub struct SimpleStaticLazyTestData<F>
 where
     F: SerializableFst,
     F::W: SerializableSemiring,
 {
     pub result_static: F,
-    pub result_dynamic: F,
+    pub result_lazy: F,
 }
 
-impl SimpleStaticDynamicOperationResult {
-    pub fn parse<F>(&self) -> SimpleStaticDynamicTestData<F>
+impl SimpleStaticLazyOperationResult {
+    pub fn parse<F>(&self) -> SimpleStaticLazyTestData<F>
     where
         F: SerializableFst,
         F::W: SerializableSemiring,
     {
-        SimpleStaticDynamicTestData {
+        SimpleStaticLazyTestData {
             result_static: F::from_text_string(self.result_static.as_str()).unwrap(),
-            result_dynamic: F::from_text_string(self.result_dynamic.as_str()).unwrap(),
+            result_lazy: F::from_text_string(self.result_lazy.as_str()).unwrap(),
         }
     }
 }
@@ -80,28 +80,28 @@ where
     Ok(())
 }
 
-pub fn test_closure_plus_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_closure_plus_lazy<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
     let closure_test_data = &test_data.closure_plus;
-    let closure_dynamic_fst_openfst = &closure_test_data.result_dynamic;
-    let closure_dynamic_fst = ClosureFst::new(test_data.raw.clone(), ClosureType::ClosurePlus)?;
+    let closure_lazy_fst_openfst = &closure_test_data.result_lazy;
+    let closure_lazy_fst = ClosureFst::new(test_data.raw.clone(), ClosureType::ClosurePlus)?;
 
-    compare_fst_static_dynamic(closure_dynamic_fst_openfst, &closure_dynamic_fst)?;
+    compare_fst_static_lazy(closure_lazy_fst_openfst, &closure_lazy_fst)?;
     Ok(())
 }
 
-pub fn test_closure_star_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_closure_star_lazy<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
     let closure_test_data = &test_data.closure_star;
-    let closure_dynamic_fst_openfst = &closure_test_data.result_dynamic;
-    let closure_dynamic_fst = ClosureFst::new(test_data.raw.clone(), ClosureType::ClosureStar)?;
+    let closure_lazy_fst_openfst = &closure_test_data.result_lazy;
+    let closure_lazy_fst = ClosureFst::new(test_data.raw.clone(), ClosureType::ClosureStar)?;
 
-    compare_fst_static_dynamic(closure_dynamic_fst_openfst, &closure_dynamic_fst)?;
+    compare_fst_static_lazy(closure_lazy_fst_openfst, &closure_lazy_fst)?;
     Ok(())
 }

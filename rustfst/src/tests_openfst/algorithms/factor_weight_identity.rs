@@ -10,7 +10,7 @@ use crate::semirings::SerializableSemiring;
 use crate::semirings::WeightQuantize;
 use crate::tests_openfst::FstTestData;
 
-use super::dynamic_fst::compare_fst_static_dynamic;
+use super::lazy_fst::compare_fst_static_lazy;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FwIdentityOperationResult {
@@ -67,7 +67,7 @@ where
     Ok(())
 }
 
-pub fn test_factor_weight_identity_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_factor_weight_identity_lazy<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + 'static,
 {
@@ -78,10 +78,10 @@ where
         let fst_res_static: VectorFst<_> =
             factor_weight::<VectorFst<_>, _, _, IdentityFactor<_>>(&test_data.raw, opts.clone())?;
 
-        let fst_res_dynamic =
+        let fst_res_lazy =
             FactorWeightFst::<_, _, IdentityFactor<_>>::new(test_data.raw.clone(), opts)?;
 
-        compare_fst_static_dynamic(&fst_res_static, &fst_res_dynamic)?;
+        compare_fst_static_lazy(&fst_res_static, &fst_res_lazy)?;
     }
 
     Ok(())

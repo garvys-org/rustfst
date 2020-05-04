@@ -15,7 +15,7 @@ use crate::algorithms::compose::matchers::{
     GenericMatcher, MatchType, SortedMatcher, REQUIRE_PRIORITY,
 };
 use crate::algorithms::compose::matchers::{Matcher, MatcherFlags};
-use crate::algorithms::dynamic_fst::DynamicFst;
+use crate::algorithms::lazy_fst::LazyFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Tr, StateId, EPS_LABEL, NO_LABEL};
@@ -354,7 +354,7 @@ pub enum ComposeFilterEnum {
     NoMatchFilter,
 }
 
-pub type ComposeFst<W, CF> = DynamicFst<ComposeFstImpl<W, CF>>;
+pub type ComposeFst<W, CF> = LazyFst<ComposeFstImpl<W, CF>>;
 
 fn create_base<W: Semiring + 'static, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>>(
     fst1: Rc<F1>,

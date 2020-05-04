@@ -5,14 +5,14 @@ use crate::algorithms::{union, UnionFst};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
-use crate::tests_openfst::algorithms::dynamic_fst::compare_fst_static_dynamic;
+use crate::tests_openfst::algorithms::lazy_fst::compare_fst_static_lazy;
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UnionOperationResult {
     fst_2: String,
     result_static: String,
-    result_dynamic: String,
+    result_lazy: String,
 }
 
 pub struct UnionTestData<F>
@@ -22,7 +22,7 @@ where
 {
     pub fst_2: F,
     pub result_static: F,
-    pub result_dynamic: F,
+    pub result_lazy: F,
 }
 
 impl UnionOperationResult {
@@ -34,7 +34,7 @@ impl UnionOperationResult {
         UnionTestData {
             fst_2: F::from_text_string(self.fst_2.as_str()).unwrap(),
             result_static: F::from_text_string(self.result_static.as_str()).unwrap(),
-            result_dynamic: F::from_text_string(self.result_dynamic.as_str()).unwrap(),
+            result_lazy: F::from_text_string(self.result_lazy.as_str()).unwrap(),
         }
     }
 }
@@ -62,17 +62,17 @@ where
     Ok(())
 }
 
-pub fn test_union_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_union_lazy<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
 {
     for union_test_data in &test_data.union {
-        let union_dynamic_fst_openfst = &union_test_data.result_dynamic;
-        let union_dynamic_fst =
+        let union_lazy_fst_openfst = &union_test_data.result_lazy;
+        let union_lazy_fst =
             UnionFst::new(test_data.raw.clone(), union_test_data.fst_2.clone())?;
 
-        compare_fst_static_dynamic(union_dynamic_fst_openfst, &union_dynamic_fst)?;
+        compare_fst_static_lazy(union_lazy_fst_openfst, &union_lazy_fst)?;
     }
     Ok(())
 }

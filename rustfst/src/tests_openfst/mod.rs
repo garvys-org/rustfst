@@ -17,12 +17,12 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{LogWeight, ProductWeight, SerializableSemiring, TropicalWeight};
 use crate::tests_openfst::algorithms::closure::{
-    test_closure_plus, test_closure_plus_dynamic, test_closure_star, test_closure_star_dynamic,
-    SimpleStaticDynamicOperationResult, SimpleStaticDynamicTestData,
+    test_closure_plus, test_closure_plus_lazy, test_closure_star, test_closure_star_lazy,
+    SimpleStaticLazyOperationResult, SimpleStaticLazyTestData,
 };
 use crate::tests_openfst::algorithms::compose::{ComposeOperationResult, ComposeTestData};
 use crate::tests_openfst::algorithms::concat::{
-    test_concat, test_concat_dynamic, ConcatOperationResult, ConcatTestData,
+    test_concat, test_concat_lazy, ConcatOperationResult, ConcatTestData,
 };
 use crate::tests_openfst::algorithms::condense::{
     test_condense, CondenseOperationResult, CondenseTestData,
@@ -33,7 +33,7 @@ use crate::tests_openfst::algorithms::factor_weight_gallic::FwGallicTestData;
 use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityOperationResult;
 use crate::tests_openfst::algorithms::factor_weight_identity::FwIdentityTestData;
 use crate::tests_openfst::algorithms::factor_weight_identity::{
-    test_factor_weight_identity, test_factor_weight_identity_dynamic,
+    test_factor_weight_identity, test_factor_weight_identity_lazy,
 };
 use crate::tests_openfst::algorithms::fst_convert::test_fst_convert;
 use crate::tests_openfst::algorithms::gallic_encode_decode::test_gallic_encode_decode;
@@ -47,7 +47,7 @@ use crate::tests_openfst::algorithms::label_reachable::{
 use crate::tests_openfst::algorithms::state_reachable::{
     test_state_reachable, StateReachableOperationResult, StateReachableTestData,
 };
-use crate::tests_openfst::algorithms::union::{test_union, test_union_dynamic};
+use crate::tests_openfst::algorithms::union::{test_union, test_union_lazy};
 use crate::tests_openfst::io::const_fst_bin_deserializer::{
     test_const_fst_aligned_bin_deserializer, test_const_fst_bin_deserializer,
 };
@@ -81,9 +81,9 @@ use self::algorithms::{
     project::{test_project_input, test_project_output},
     properties::{parse_fst_properties, test_fst_properties},
     push::{test_push, PushOperationResult, PushTestData},
-    // replace::{test_replace, test_replace_dynamic, ReplaceOperationResult, ReplaceTestData},
+    // replace::{test_replace, test_replace_lazy, ReplaceOperationResult, ReplaceTestData},
     reverse::test_reverse,
-    rm_epsilon::{test_rmepsilon, test_rmepsilon_dynamic},
+    rm_epsilon::{test_rmepsilon, test_rmepsilon_lazy},
     shortest_distance::{
         test_shortest_distance, ShorestDistanceOperationResult, ShortestDistanceTestData,
     },
@@ -125,7 +125,7 @@ impl FstOperationResult {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ParsedFstTestData {
-    rmepsilon: SimpleStaticDynamicOperationResult,
+    rmepsilon: SimpleStaticLazyOperationResult,
     name: String,
     invert: FstOperationResult,
     weight_type: String,
@@ -167,8 +167,8 @@ pub struct ParsedFstTestData {
     // replace: Vec<ReplaceOperationResult>,
     union: Vec<UnionOperationResult>,
     concat: Vec<ConcatOperationResult>,
-    closure_plus: SimpleStaticDynamicOperationResult,
-    closure_star: SimpleStaticDynamicOperationResult,
+    closure_plus: SimpleStaticLazyOperationResult,
+    closure_star: SimpleStaticLazyOperationResult,
     raw_vector_with_symt_bin_path: String,
     // matcher: Vec<MatcherOperationResult>,
     compose: Vec<ComposeOperationResult>,
@@ -180,7 +180,7 @@ pub struct FstTestData<F: SerializableFst>
 where
     F::W: SerializableSemiring,
 {
-    pub rmepsilon: SimpleStaticDynamicTestData<F>,
+    pub rmepsilon: SimpleStaticLazyTestData<F>,
     #[allow(unused)]
     pub name: String,
     pub invert: F,
@@ -222,8 +222,8 @@ where
     // pub replace: Vec<ReplaceTestData<F>>,
     pub union: Vec<UnionTestData<F>>,
     pub concat: Vec<ConcatTestData<F>>,
-    pub closure_plus: SimpleStaticDynamicTestData<F>,
-    pub closure_star: SimpleStaticDynamicTestData<F>,
+    pub closure_plus: SimpleStaticLazyTestData<F>,
+    pub closure_star: SimpleStaticLazyTestData<F>,
     pub raw_vector_with_symt_bin_path: PathBuf,
     // pub matcher: Vec<MatcherTestData<F>>,
     pub compose: Vec<ComposeTestData<F>>,
@@ -433,14 +433,14 @@ macro_rules! test_fst {
             }
 
             #[test]
-            fn test_closure_plus_dynamic_openfst() -> Result<()> {
-                do_run!(test_closure_plus_dynamic, $fst_name);
+            fn test_closure_plus_lazy_openfst() -> Result<()> {
+                do_run!(test_closure_plus_lazy, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_closure_star_dynamic_openfst() -> Result<()> {
-                do_run!(test_closure_star_dynamic, $fst_name);
+            fn test_closure_star_lazy_openfst() -> Result<()> {
+                do_run!(test_closure_star_lazy, $fst_name);
                 Ok(())
             }
 
@@ -451,8 +451,8 @@ macro_rules! test_fst {
             }
 
             #[test]
-            fn test_concat_dynamic_openfst() -> Result<()> {
-                do_run!(test_concat_dynamic, $fst_name);
+            fn test_concat_lazy_openfst() -> Result<()> {
+                do_run!(test_concat_lazy, $fst_name);
                 Ok(())
             }
 
@@ -495,8 +495,8 @@ macro_rules! test_fst {
             }
 
             #[test]
-            fn test_factor_weight_identity_dynamic_openfst() -> Result<()> {
-                do_run!(test_factor_weight_identity_dynamic, $fst_name);
+            fn test_factor_weight_identity_lazy_openfst() -> Result<()> {
+                do_run!(test_factor_weight_identity_lazy, $fst_name);
                 Ok(())
             }
 
@@ -551,8 +551,8 @@ macro_rules! test_fst {
             //
             // #[test]
             // #[ignore]
-            // fn test_replace_dynamic_openfst() -> Result<()> {
-            //     do_run!(test_replace_dynamic, $fst_name);
+            // fn test_replace_lazy_openfst() -> Result<()> {
+            //     do_run!(test_replace_lazy, $fst_name);
             //     Ok(())
             // }
 
@@ -594,8 +594,8 @@ macro_rules! test_fst {
             }
 
             #[test]
-            fn test_union_dynamic_openfst() -> Result<()> {
-                do_run!(test_union_dynamic, $fst_name);
+            fn test_union_lazy_openfst() -> Result<()> {
+                do_run!(test_union_lazy, $fst_name);
                 Ok(())
             }
 
@@ -703,8 +703,8 @@ macro_rules! test_fst {
             }
 
             #[test]
-            fn test_rmepsilon_dynamic_openfst() -> Result<()> {
-                do_run!(test_rmepsilon_dynamic, $fst_name);
+            fn test_rmepsilon_lazy_openfst() -> Result<()> {
+                do_run!(test_rmepsilon_lazy, $fst_name);
                 Ok(())
             }
 

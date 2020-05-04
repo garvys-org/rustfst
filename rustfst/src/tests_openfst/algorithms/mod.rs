@@ -6,7 +6,7 @@ pub mod concat;
 pub mod condense;
 pub mod connect;
 // pub mod determinize;
-pub mod dynamic_fst;
+pub mod lazy_fst;
 pub mod encode;
 pub mod factor_weight_gallic;
 pub mod factor_weight_identity;

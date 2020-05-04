@@ -56,7 +56,7 @@ pub trait FstImpl: Debug {
         self.cache_impl_ref().num_trs(state)
     }
 
-    /// Turns the Dynamic FST into a static one.
+    /// Turns the Lazy FST into a static one.
     fn compute<F2: MutableFst<W = Self::W> + ExpandedFst<W = Self::W>>(&mut self) -> Result<F2> {
         let start_state = self.start()?;
         let mut fst_out = F2::new();

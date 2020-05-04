@@ -8,7 +8,7 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ExpandedFst, MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
-use crate::tests_openfst::algorithms::dynamic_fst::compare_fst_static_dynamic;
+use crate::tests_openfst::algorithms::lazy_fst::compare_fst_static_lazy;
 use crate::tests_openfst::FstTestData;
 
 pub fn test_rmepsilon<F>(test_data: &FstTestData<F>) -> Result<()>
@@ -35,14 +35,14 @@ where
     Ok(())
 }
 
-pub fn test_rmepsilon_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_rmepsilon_lazy<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + 'static,
     W::ReverseWeight: 'static,
 {
-    let rmepsilon_dynamic_fst_openfst = &test_data.rmepsilon.result_dynamic;
-    let rmepsilon_dynamic_fst = RmEpsilonFst::new(test_data.raw.clone());
-    compare_fst_static_dynamic(rmepsilon_dynamic_fst_openfst, &rmepsilon_dynamic_fst)?;
+    let rmepsilon_lazy_fst_openfst = &test_data.rmepsilon.result_lazy;
+    let rmepsilon_lazy_fst = RmEpsilonFst::new(test_data.raw.clone());
+    compare_fst_static_lazy(rmepsilon_lazy_fst_openfst, &rmepsilon_lazy_fst)?;
 
     Ok(())
 }
