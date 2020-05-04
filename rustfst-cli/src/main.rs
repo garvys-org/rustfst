@@ -43,6 +43,7 @@ fn main() {
     // Trsort
     let tr_sort_cmd = SubCommand::with_name("tr_sort")
         .about("Trsort algorithm.")
+        .alias("arcsort")
         .arg(
             Arg::with_name("sort_type")
                 .help("Comparison method.")
@@ -82,6 +83,8 @@ fn main() {
             Arg::with_name("map_type")
                 .long("map_type")
                 .possible_values(&[
+                    "arc_sum",
+                    "arc_unique",
                     "tr_sum",
                     "tr_unique",
                     "identity",

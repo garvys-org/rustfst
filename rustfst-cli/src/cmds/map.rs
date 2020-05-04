@@ -30,11 +30,11 @@ impl UnaryFstAlgorithm for MapAlgorithm {
         mut fst: VectorFst<TropicalWeight>,
     ) -> Result<VectorFst<TropicalWeight>> {
         match self.map_type.as_str() {
-            "tr_sum" => {
+            "tr_sum" | "arc_sum" => {
                 tr_sum(&mut fst);
                 Ok(fst)
             }
-            "tr_unique" => {
+            "tr_unique" | "arc_unique" => {
                 tr_unique(&mut fst);
                 Ok(fst)
             }
