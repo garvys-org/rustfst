@@ -5,7 +5,7 @@ use crate::algorithms::compose::filter_states::{FilterState, IntegerFilterState}
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
-use crate::{Arc, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
+use crate::{StateId, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -72,7 +72,7 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
             self.s2 = s2;
             self.fs = filter_state.clone();
             // TODO: Could probably use unchecked here as the state should exist.
-            let na1 = self.fst1.num_arcs(self.s1)?;
+            let na1 = self.fst1.num_trs(self.s1)?;
             let ne1 = self.fst1.num_output_epsilons(self.s1)?;
             let fin1 = self.fst1.is_final(self.s1)?;
             self.alleps1 = na1 == ne1 && !fin1;
@@ -81,7 +81,7 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(())
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Result<Self::FS> {
+    fn filter_tr(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
         let res = if arc1.olabel == NO_LABEL {
             if self.alleps1 {
                 Self::FS::new_no_state()

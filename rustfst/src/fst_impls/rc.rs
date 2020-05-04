@@ -4,7 +4,7 @@ use std::rc::Rc;
 use anyhow::Result;
 
 use crate::fst_traits::{
-    ArcIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator,
+    CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator, TrIterator,
 };
 use crate::SymbolTable;
 
@@ -61,12 +61,12 @@ impl<F: CoreFst> CoreFst for Rc<F> {
         self.deref().final_weight_unchecked(state_id)
     }
 
-    fn num_arcs(&self, s: usize) -> Result<usize> {
-        self.deref().num_arcs(s)
+    fn num_trs(&self, s: usize) -> Result<usize> {
+        self.deref().num_trs(s)
     }
 
-    unsafe fn num_arcs_unchecked(&self, s: usize) -> usize {
-        self.deref().num_arcs_unchecked(s)
+    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+        self.deref().num_trs_unchecked(s)
     }
 }
 
@@ -74,7 +74,7 @@ impl<'a, F: FstIterator<'a>> FstIterator<'a> for Rc<F>
 where
     F::W: 'a,
 {
-    type ArcsIter = F::ArcsIter;
+    type TrsIter = F::TrsIter;
     type FstIter = F::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
@@ -82,7 +82,7 @@ where
     }
 }
 
-impl<'a, F: ArcIterator<'a>> ArcIterator<'a> for Rc<F>
+impl<'a, F: TrIterator<'a>> TrIterator<'a> for Rc<F>
 where
     F::W: 'a,
 {
@@ -106,7 +106,7 @@ impl<'a, F: StateIterator<'a>> StateIterator<'a> for Rc<F> {
 }
 
 impl<F: FstIntoIterator> FstIntoIterator for Rc<F> {
-    type ArcsIter = F::ArcsIter;
+    type TrsIter = F::TrsIter;
     type FstIter = F::FstIter;
 
     fn fst_into_iter(self) -> Self::FstIter {

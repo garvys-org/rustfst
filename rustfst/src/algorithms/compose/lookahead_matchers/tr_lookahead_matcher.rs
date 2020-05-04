@@ -9,22 +9,22 @@ use crate::algorithms::compose::lookahead_matchers::{LookaheadMatcher, MatcherFl
 use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
+use crate::{Label, StateId, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
 #[derive(Debug)]
-pub struct ArcLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
+pub struct TrLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
     // matcher fst
     fst: Rc<M::F>,
     matcher: M,
     lookahead_weight: W,
-    prefix_arc: Arc<W>,
+    prefix_tr: Tr<W>,
 
     // Flags to customize the behaviour
     mft: PhantomData<MFT>,
 }
 
 impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
-    for ArcLookAheadMatcher<W, M, MFT>
+    for TrLookAheadMatcher<W, M, MFT>
 {
     type F = M::F;
     type Iter = M::Iter;
@@ -33,7 +33,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
         Ok(Self {
             fst: Rc::clone(&fst),
             matcher: M::new(fst, match_type)?,
-            prefix_arc: Arc::new(0, 0, W::one(), NO_STATE_ID),
+            prefix_tr: Tr::new(0, 0, W::one(), NO_STATE_ID),
             lookahead_weight: W::one(),
             mft: PhantomData,
         })
@@ -68,7 +68,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
 }
 
 impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
-    for ArcLookAheadMatcher<W, M, MFT>
+    for TrLookAheadMatcher<W, M, MFT>
 {
     // NullAddon
     type MatcherData = ();
@@ -142,7 +142,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
                 if MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
                     for arc in iter {
                         match arc {
-                            IterItemMatcher::Arc(a) => {
+                            IterItemMatcher::Tr(a) => {
                                 let a = unsafe { &*a };
                                 self.lookahead_weight.plus_assign(&a.weight)?
                             }
@@ -188,7 +188,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
                         nprefix += 1;
                         if MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
                             match matcher_value {
-                                IterItemMatcher::Arc(a) => {
+                                IterItemMatcher::Tr(a) => {
                                     let a = unsafe { &*a };
                                     self.lookahead_weight
                                         .plus_assign(arc.weight.times(&a.weight)?)?
@@ -223,7 +223,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
         Ok(it.next().is_some())
     }
 
-    fn lookahead_prefix(&self, arc: &mut Arc<W>) -> bool {
+    fn lookahead_prefix(&self, arc: &mut Tr<W>) -> bool {
         self.default_lookahead_prefix(arc)
     }
 
@@ -231,12 +231,12 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
         &self.lookahead_weight
     }
 
-    fn prefix_arc(&self) -> &Arc<W> {
-        &self.prefix_arc
+    fn prefix_tr(&self) -> &Tr<W> {
+        &self.prefix_tr
     }
 
-    fn prefix_arc_mut(&mut self) -> &mut Arc<W> {
-        &mut self.prefix_arc
+    fn prefix_tr_mut(&mut self) -> &mut Tr<W> {
+        &mut self.prefix_tr
     }
 
     fn lookahead_weight_mut(&mut self) -> &mut W {

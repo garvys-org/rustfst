@@ -7,16 +7,16 @@ use anyhow::Result;
 
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::arc_filters::AnyArcFilter;
 use crate::algorithms::queues::AutoQueue;
+use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::algorithms::{connect, determinize_with_distance, reverse, shortest_distance, Queue};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, MutableFst};
+use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst, TrIterator};
 use crate::semirings::{
     ReverseBack, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::Arc;
 use crate::StateId;
+use crate::Tr;
 
 /// Creates an FST containing the n-shortest paths in the input FST. The n-shortest paths are the
 /// n-lowest weight paths w.r.t. the natural semiring order.
@@ -110,7 +110,7 @@ where
         return Ok(());
     }
     let mut enqueued = vec![];
-    let mut queue = AutoQueue::new(ifst, None, &AnyArcFilter {})?;
+    let mut queue = AutoQueue::new(ifst, None, &AnyTrFilter {})?;
     let source = unsafe { start.unsafe_unwrap() };
     let mut f_distance = F::W::zero();
     distance.clear();
@@ -194,7 +194,7 @@ where
             let pos = parent[d.unwrap()].unwrap().1;
             let mut arc = ifst.arcs_iter(state)?.nth(pos).unwrap().clone();
             arc.nextstate = d_p.unwrap();
-            ofst.add_arc(s_p.unwrap(), arc)?;
+            ofst.add_tr(s_p.unwrap(), arc)?;
         }
 
         // Next iteration
@@ -306,7 +306,7 @@ where
         }
         r[p_first_real as usize] += 1;
         if p.0.is_none() {
-            ofst.add_arc(ofst.start().unwrap(), Arc::new(0, 0, W::one(), state))?;
+            ofst.add_tr(ofst.start().unwrap(), Tr::new(0, 0, W::one(), state))?;
         }
         if p.0.is_none() && r[p_first_real as usize] == nshortest {
             break;
@@ -318,7 +318,7 @@ where
             continue;
         }
         for rarc in ifst.arcs_iter(p.0.unwrap())? {
-            let mut arc: Arc<W> = Arc::new(
+            let mut arc: Tr<W> = Tr::new(
                 rarc.ilabel,
                 rarc.olabel,
                 rarc.weight.reverse_back()?,
@@ -328,7 +328,7 @@ where
             let next = ofst.add_state();
             pairs.borrow_mut().push((Some(arc.nextstate), weight));
             arc.nextstate = state;
-            ofst.add_arc(next, arc)?;
+            ofst.add_tr(next, arc)?;
             heap.push(next);
         }
         let final_weight = ifst.final_weight(p.0.unwrap())?;
@@ -338,7 +338,7 @@ where
                 let weight = p.1.times(&r_final_weight)?;
                 let next = ofst.add_state();
                 pairs.borrow_mut().push((None, weight));
-                ofst.add_arc(next, Arc::new(0, 0, r_final_weight, state))?;
+                ofst.add_tr(next, Tr::new(0, 0, r_final_weight, state))?;
                 heap.push(next);
             }
         }

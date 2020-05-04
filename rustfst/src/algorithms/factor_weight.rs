@@ -9,17 +9,17 @@ use anyhow::Result;
 use bitflags::bitflags;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
-use crate::algorithms::dynamic_fst::DynamicFst;
-use crate::arc::Arc;
+use crate::algorithms::lazy_fst::LazyFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
+use crate::tr::Tr;
 use crate::KDELTA;
 use crate::{Label, StateId};
 
 bitflags! {
-    /// What kind of weight should be factored ? Arc weight ? Final weights ?
+    /// What kind of weight should be factored ? Tr weight ? Final weights ?
     pub struct FactorWeightType: u32 {
-        /// Factor weights located on the Arcs.
+        /// Factor weights located on the Trs.
         const FACTOR_FINAL_WEIGHTS = 0b01;
         /// Factor weights located in the final states.
         const FACTOR_ARC_WEIGHTS = 0b10;
@@ -28,8 +28,8 @@ bitflags! {
 
 #[cfg(test)]
 impl FactorWeightType {
-    pub fn from_bools(factor_final_weights: bool, factor_arc_weights: bool) -> FactorWeightType {
-        match (factor_final_weights, factor_arc_weights) {
+    pub fn from_bools(factor_final_weights: bool, factor_tr_weights: bool) -> FactorWeightType {
+        match (factor_final_weights, factor_tr_weights) {
             (true, true) => {
                 FactorWeightType::FACTOR_FINAL_WEIGHTS | FactorWeightType::FACTOR_ARC_WEIGHTS
             }
@@ -150,10 +150,10 @@ where
             for arc in self.fst.borrow().arcs_iter(old_state)? {
                 let weight = elt.weight.times(&arc.weight).unwrap();
                 let factor_it = FI::new(weight.clone());
-                if !self.factor_arc_weights() || factor_it.done() {
+                if !self.factor_tr_weights() || factor_it.done() {
                     let dest = self.find_state(&Element::new(Some(arc.nextstate), F::W::one()));
                     self.cache_impl
-                        .push_arc(state, Arc::new(arc.ilabel, arc.olabel, weight, dest))?;
+                        .push_tr(state, Tr::new(arc.ilabel, arc.olabel, weight, dest))?;
                 } else {
                     for (p_f, p_s) in factor_it {
                         let dest = self.find_state(&Element::new(
@@ -161,7 +161,7 @@ where
                             p_s.quantize(self.opts.delta)?,
                         ));
                         self.cache_impl
-                            .push_arc(state, Arc::new(arc.ilabel, arc.olabel, p_f, dest))?;
+                            .push_tr(state, Tr::new(arc.ilabel, arc.olabel, p_f, dest))?;
                     }
                 }
             }
@@ -183,7 +183,7 @@ where
             for (p_f, p_s) in factor_it {
                 let dest = self.find_state(&Element::new(None, p_s.quantize(self.opts.delta)?));
                 self.cache_impl
-                    .push_arc(state, Arc::new(ilabel, olabel, p_f, dest))?;
+                    .push_tr(state, Tr::new(ilabel, olabel, p_f, dest))?;
                 if self.opts.increment_final_ilabel {
                     ilabel += 1;
                 }
@@ -245,7 +245,7 @@ where
         })
     }
 
-    pub fn factor_arc_weights(&self) -> bool {
+    pub fn factor_tr_weights(&self) -> bool {
         self.opts
             .mode
             .intersects(FactorWeightType::FACTOR_ARC_WEIGHTS)
@@ -258,7 +258,7 @@ where
     }
 
     fn find_state(&self, elt: &Element<F::W>) -> StateId {
-        if !self.factor_arc_weights() && elt.weight.is_one() && elt.state.is_some() {
+        if !self.factor_tr_weights() && elt.weight.is_one() && elt.state.is_some() {
             let old_state = elt.state.unwrap();
             if !self.unfactored.borrow().contains_key(&elt.state.unwrap()) {
                 // FIXME: Avoid leaking internal implementation
@@ -298,7 +298,7 @@ where
 /// States and transitions will be added as necessary. The algorithm is a
 /// generalization to arbitrary weights of the second step of the input
 /// epsilon-normalization algorithm. This version is a Delayed FST.
-pub type FactorWeightFst<F, B, FI> = DynamicFst<FactorWeightImpl<F, B, FI>>;
+pub type FactorWeightFst<F, B, FI> = LazyFst<FactorWeightImpl<F, B, FI>>;
 
 impl<'a, F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> FactorWeightFst<F, B, FI>
 where

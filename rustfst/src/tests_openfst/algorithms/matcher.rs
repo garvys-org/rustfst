@@ -2,16 +2,16 @@ use anyhow::Result;
 use itertools::Itertools;
 use serde_derive::{Deserialize, Serialize};
 
-use crate::algorithms::arc_compares::{ilabel_compare, olabel_compare};
-use crate::algorithms::arc_sort;
+use crate::algorithms::tr_compares::{ilabel_compare, olabel_compare};
+use crate::algorithms::tr_sort;
 use crate::algorithms::compose::matchers::{MatchType, Matcher, SortedMatcher};
 use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
-use crate::{Arc, Label, StateId, NO_LABEL, NO_STATE_ID};
+use crate::{Tr, Label, StateId, NO_LABEL, NO_STATE_ID};
 
 #[derive(Serialize, Deserialize, Debug)]
-struct SerializedArc {
+struct SerializedTr {
     ilabel: i32,
     olabel: i32,
     weight: String,
@@ -23,7 +23,7 @@ pub struct MatcherOperationResult {
     state: usize,
     label: usize,
     match_type: usize,
-    arcs: Vec<SerializedArc>,
+    arcs: Vec<SerializedTr>,
 }
 
 pub struct MatcherTestData<F>
@@ -34,7 +34,7 @@ where
     label: Label,
     state: StateId,
     match_type: MatchType,
-    arcs: Vec<Arc<F::W>>,
+    arcs: Vec<Tr<F::W>>,
 }
 
 impl MatcherOperationResult {
@@ -73,7 +73,7 @@ impl MatcherOperationResult {
                         s.nextstate as usize
                     };
 
-                    Arc::new(
+                    Tr::new(
                         ilabel,
                         olabel,
                         F::W::parse_text(s.weight.as_str()).unwrap().1,
@@ -92,10 +92,10 @@ where
 {
     unimplemented!()
     // let mut fst_isorted = test_data.raw.clone();
-    // arc_sort(&mut fst_isorted, ilabel_compare);
+    // tr_sort(&mut fst_isorted, ilabel_compare);
     //
     // let mut fst_osorted = test_data.raw.clone();
-    // arc_sort(&mut fst_osorted, olabel_compare);
+    // tr_sort(&mut fst_osorted, olabel_compare);
     //
     // for matcher_data in &test_data.matcher {
     //     let fst = match matcher_data.match_type {
@@ -105,10 +105,10 @@ where
     //     };
     //
     //     let matcher = SortedMatcher::new(fst, matcher_data.match_type)?;
-    //     let arcs: Vec<Arc<_>> = matcher
+    //     let arcs: Vec<Tr<_>> = matcher
     //         .iter(matcher_data.state, matcher_data.label)?
     //         .map(|f| {
-    //             f.into_arc(matcher_data.state, matcher_data.match_type)
+    //             f.into_tr(matcher_data.state, matcher_data.match_type)
     //                 .unwrap()
     //         })
     //         .collect();

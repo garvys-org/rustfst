@@ -7,7 +7,7 @@ use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
 
-use super::dynamic_fst::compare_fst_static_dynamic;
+use super::lazy_fst::compare_fst_static_lazy;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ReplaceOperationResult {
@@ -89,7 +89,7 @@ where
     // Ok(())
 }
 
-pub fn test_replace_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_replace_lazy<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
     W::ReverseWeight: 'static,
@@ -108,13 +108,13 @@ where
     //         replace_test_data.epsilon_on_replace,
     //     )?;
     //
-    //     let replaced_dynamic_fst = ReplaceFst::new(
+    //     let replaced_lazy_fst = ReplaceFst::new(
     //         fst_list,
     //         replace_test_data.root,
     //         replace_test_data.epsilon_on_replace,
     //     )?;
     //
-    //     compare_fst_static_dynamic(&replaced_static_fst, &replaced_dynamic_fst)?;
+    //     compare_fst_static_lazy(&replaced_static_fst, &replaced_lazy_fst)?;
     // }
     // Ok(())
 }

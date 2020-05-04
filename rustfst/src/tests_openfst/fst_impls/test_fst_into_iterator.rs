@@ -14,7 +14,7 @@ fn do_test_fst_into_iterator<F: ExpandedFst>(fst: F) -> Result<()> {
             state,
             fst.arcs_iter(state)?.cloned().collect_vec(),
             fst.final_weight(state)?.cloned(),
-            fst.num_arcs(state)?,
+            fst.num_trs(state)?,
         ));
     }
 
@@ -24,7 +24,7 @@ fn do_test_fst_into_iterator<F: ExpandedFst>(fst: F) -> Result<()> {
             fst_iter_data.state_id,
             fst_iter_data.arcs.collect_vec(),
             fst_iter_data.final_weight,
-            fst_iter_data.num_arcs,
+            fst_iter_data.num_trs,
         ));
     }
     assert_eq!(fst_data, fst_data_ref);
@@ -40,7 +40,7 @@ fn do_test_fst_iterator<F: ExpandedFst>(fst: &F) -> Result<()> {
             state,
             fst.arcs_iter(state)?.collect_vec(),
             fst.final_weight(state)?,
-            fst.num_arcs(state)?,
+            fst.num_trs(state)?,
         ));
     }
 
@@ -50,7 +50,7 @@ fn do_test_fst_iterator<F: ExpandedFst>(fst: &F) -> Result<()> {
             data.state_id,
             data.arcs.collect_vec(),
             data.final_weight,
-            data.num_arcs,
+            data.num_trs,
         ));
     }
     assert_eq!(fst_data, fst_data_ref);

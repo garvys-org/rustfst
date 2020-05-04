@@ -2,8 +2,8 @@ use nom::number::complete::le_i32;
 use nom::IResult;
 
 use crate::semirings::SerializableSemiring;
-use crate::Arc;
 use crate::StateId;
+use crate::Tr;
 use crate::NO_STATE_ID;
 
 #[inline]
@@ -26,14 +26,14 @@ pub(crate) fn parse_final_weight<W: SerializableSemiring>(weight: W) -> Option<W
     }
 }
 
-pub(crate) fn parse_fst_arc<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], Arc<W>> {
+pub(crate) fn parse_fst_tr<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], Tr<W>> {
     let (i, ilabel) = le_i32(i)?;
     let (i, olabel) = le_i32(i)?;
     let (i, weight) = W::parse_binary(i)?;
     let (i, nextstate) = le_i32(i)?;
     Ok((
         i,
-        Arc {
+        Tr {
             ilabel: ilabel as usize,
             olabel: olabel as usize,
             weight,

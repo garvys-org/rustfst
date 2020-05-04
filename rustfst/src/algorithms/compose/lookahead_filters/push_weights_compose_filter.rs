@@ -12,7 +12,7 @@ use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
-use crate::{Arc, KDELTA};
+use crate::{Tr, KDELTA};
 
 #[derive(Debug, Clone)]
 pub struct PushWeightsComposeFilter<W: Semiring, CF: LookAheadComposeFilterTrait<W>, SMT>
@@ -60,8 +60,8 @@ where
         self.filter.set_state(s1, s2, filter_state.state1())
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Result<Self::FS> {
-        let fs1 = self.filter.filter_arc(arc1, arc2)?;
+    fn filter_tr(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
+        let fs1 = self.filter.filter_tr(arc1, arc2)?;
         if fs1 == CF::FS::new_no_state() {
             return Ok(FilterState::new_no_state());
         }
@@ -71,7 +71,7 @@ where
         {
             return Ok(FilterState::new((fs1, FilterState::new(W::one()))));
         }
-        let lweight = if self.filter.lookahead_arc() {
+        let lweight = if self.filter.lookahead_tr() {
             match self.selector() {
                 Selector::MatchInput(s) => s.matcher.borrow().lookahead_weight().clone(),
                 Selector::MatchOutput(s) => s.matcher.borrow().lookahead_weight().clone(),
@@ -130,8 +130,8 @@ where
         self.filter.lookahead_flags()
     }
 
-    fn lookahead_arc(&self) -> bool {
-        self.filter.lookahead_arc()
+    fn lookahead_tr(&self) -> bool {
+        self.filter.lookahead_tr()
     }
 
     fn lookahead_type(&self) -> MatchType {

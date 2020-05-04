@@ -10,7 +10,7 @@ use crate::algorithms::compose::matchers::MatchType;
 use crate::algorithms::compose::FstAddOn;
 use crate::algorithms::compose::LabelReachableData;
 use crate::fst_traits::{
-    ArcIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, MutableFst, StateIterator,
+    CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, MutableFst, StateIterator, TrIterator,
 };
 use crate::SymbolTable;
 
@@ -72,12 +72,12 @@ impl<F: CoreFst, M, T> CoreFst for MatcherFst<F, M, T> {
         self.fst_add_on.final_weight_unchecked(state_id)
     }
 
-    fn num_arcs(&self, s: usize) -> Result<usize> {
-        self.fst_add_on.num_arcs(s)
+    fn num_trs(&self, s: usize) -> Result<usize> {
+        self.fst_add_on.num_trs(s)
     }
 
-    unsafe fn num_arcs_unchecked(&self, s: usize) -> usize {
-        self.fst_add_on.num_arcs_unchecked(s)
+    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+        self.fst_add_on.num_trs_unchecked(s)
     }
 }
 
@@ -89,11 +89,11 @@ impl<'a, F: StateIterator<'a>, M, T> StateIterator<'a> for MatcherFst<F, M, T> {
     }
 }
 
-impl<'a, F: ArcIterator<'a>, M, T> ArcIterator<'a> for MatcherFst<F, M, T>
+impl<'a, F: TrIterator<'a>, M, T> TrIterator<'a> for MatcherFst<F, M, T>
 where
     F::W: 'a,
 {
-    type Iter = <F as ArcIterator<'a>>::Iter;
+    type Iter = <F as TrIterator<'a>>::Iter;
 
     fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
         self.fst_add_on.arcs_iter(state_id)
@@ -108,7 +108,7 @@ impl<'a, F: FstIterator<'a>, M, T> FstIterator<'a> for MatcherFst<F, M, T>
 where
     F::W: 'a,
 {
-    type ArcsIter = F::ArcsIter;
+    type TrsIter = F::TrsIter;
     type FstIter = F::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
@@ -159,7 +159,7 @@ impl<F: FstIntoIterator, M, T: Debug> FstIntoIterator for MatcherFst<F, M, T>
 where
     F::W: 'static,
 {
-    type ArcsIter = F::ArcsIter;
+    type TrsIter = F::TrsIter;
     type FstIter = F::FstIter;
 
     fn fst_into_iter(self) -> Self::FstIter {

@@ -1,6 +1,6 @@
 use crate::fst_traits::{FinalStatesIterator, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Arc, StateId, EPS_LABEL};
+use crate::{StateId, Tr, EPS_LABEL};
 use unsafe_unwrap::UnsafeUnwrap;
 
 /// Add, if needed, a super final state to the given FST. The super final state
@@ -43,9 +43,9 @@ pub fn add_super_final_state<F: MutableFst>(ifst: &mut F) -> StateId {
                 .unsafe_unwrap()
         };
         unsafe {
-            ifst.add_arc_unchecked(
+            ifst.add_tr_unchecked(
                 final_state,
-                Arc {
+                Tr {
                     ilabel: EPS_LABEL,
                     olabel: EPS_LABEL,
                     weight,
@@ -75,9 +75,9 @@ mod tests {
         let s3 = fst.add_state();
 
         fst.set_start(s0)?;
-        fst.emplace_arc(s0, 1, 0, 1.0, s1)?;
-        fst.emplace_arc(s1, 1, 0, 1.0, s2)?;
-        fst.emplace_arc(s1, 1, 0, 1.0, s3)?;
+        fst.emplace_tr(s0, 1, 0, 1.0, s1)?;
+        fst.emplace_tr(s1, 1, 0, 1.0, s2)?;
+        fst.emplace_tr(s1, 1, 0, 1.0, s3)?;
 
         fst.set_final(s2, 1.0)?;
         fst.set_final(s3, 1.0)?;
@@ -87,9 +87,9 @@ mod tests {
         let super_final_state = add_super_final_state(&mut fst);
         assert_eq!(num_states, super_final_state);
         assert!(!fst.is_final(s2)?);
-        assert_eq!(1, fst.num_arcs(s2)?);
+        assert_eq!(1, fst.num_trs(s2)?);
         assert!(!fst.is_final(s3)?);
-        assert_eq!(1, fst.num_arcs(s3)?);
+        assert_eq!(1, fst.num_trs(s3)?);
         assert_eq!(
             Some(&TropicalWeight::one()),
             fst.final_weight(super_final_state)?
@@ -106,9 +106,9 @@ mod tests {
         let s3 = fst.add_state();
 
         fst.set_start(s0)?;
-        fst.emplace_arc(s0, 1, 0, 1.0, s1)?;
-        fst.emplace_arc(s1, 1, 0, 1.0, s2)?;
-        fst.emplace_arc(s2, 1, 0, 1.0, s3)?;
+        fst.emplace_tr(s0, 1, 0, 1.0, s1)?;
+        fst.emplace_tr(s1, 1, 0, 1.0, s2)?;
+        fst.emplace_tr(s2, 1, 0, 1.0, s3)?;
 
         fst.set_final(s3, TropicalWeight::one())?;
 
@@ -130,9 +130,9 @@ mod tests {
         let s3 = fst.add_state();
 
         fst.set_start(s0)?;
-        fst.emplace_arc(s0, 1, 0, 1.0, s1)?;
-        fst.emplace_arc(s1, 1, 0, 1.0, s2)?;
-        fst.emplace_arc(s2, 1, 0, 1.0, s3)?;
+        fst.emplace_tr(s0, 1, 0, 1.0, s1)?;
+        fst.emplace_tr(s1, 1, 0, 1.0, s2)?;
+        fst.emplace_tr(s2, 1, 0, 1.0, s3)?;
 
         fst.set_final(s3, 2.0)?;
 
@@ -141,7 +141,7 @@ mod tests {
         let super_final_state = add_super_final_state(&mut fst);
         assert_eq!(num_states, super_final_state);
         assert!(!fst.is_final(s3)?);
-        assert_eq!(1, fst.num_arcs(s3)?);
+        assert_eq!(1, fst.num_trs(s3)?);
         assert_eq!(
             Some(&TropicalWeight::one()),
             fst.final_weight(super_final_state)?
@@ -158,9 +158,9 @@ mod tests {
         let s3 = fst.add_state();
 
         fst.set_start(s0)?;
-        fst.emplace_arc(s0, 1, 0, 1.0, s1)?;
-        fst.emplace_arc(s1, 1, 0, 1.0, s2)?;
-        fst.emplace_arc(s2, 1, 0, 1.0, s3)?;
+        fst.emplace_tr(s0, 1, 0, 1.0, s1)?;
+        fst.emplace_tr(s1, 1, 0, 1.0, s2)?;
+        fst.emplace_tr(s2, 1, 0, 1.0, s3)?;
 
         let num_states = fst.num_states();
 

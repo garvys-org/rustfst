@@ -58,7 +58,7 @@ where
     Self::M2: LookaheadMatcher<W>,
 {
     fn lookahead_flags(&self) -> MatcherFlags;
-    fn lookahead_arc(&self) -> bool;
+    fn lookahead_tr(&self) -> bool;
     fn lookahead_type(&self) -> MatchType;
     fn lookahead_output(&self) -> bool;
     fn selector(&self) -> &Selector<W, Self::M1, Self::M2>;

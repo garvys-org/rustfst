@@ -81,10 +81,10 @@ mod tests {
 
     use counter::Counter;
 
-    use crate::arc::Arc;
     use crate::fst_impls::VectorFst;
     use crate::fst_traits::MutableFst;
     use crate::semirings::{IntegerWeight, Semiring};
+    use crate::tr::Tr;
     use crate::utils::acceptor;
 
     #[test]
@@ -138,15 +138,15 @@ mod tests {
         fst.set_start(s1).unwrap();
         fst.set_final(s4, IntegerWeight::new(18)).unwrap();
 
-        fst.add_arc(s1, Arc::new(1, 1, IntegerWeight::new(1), s2))
+        fst.add_tr(s1, Tr::new(1, 1, IntegerWeight::new(1), s2))
             .unwrap();
-        fst.add_arc(s1, Arc::new(2, 2, IntegerWeight::new(2), s3))
+        fst.add_tr(s1, Tr::new(2, 2, IntegerWeight::new(2), s3))
             .unwrap();
-        fst.add_arc(s1, Arc::new(3, 3, IntegerWeight::new(3), s4))
+        fst.add_tr(s1, Tr::new(3, 3, IntegerWeight::new(3), s4))
             .unwrap();
-        fst.add_arc(s2, Arc::new(4, 4, IntegerWeight::new(4), s4))
+        fst.add_tr(s2, Tr::new(4, 4, IntegerWeight::new(4), s4))
             .unwrap();
-        fst.add_arc(s3, Arc::new(5, 5, IntegerWeight::new(5), s4))
+        fst.add_tr(s3, Tr::new(5, 5, IntegerWeight::new(5), s4))
             .unwrap();
 
         assert_eq!(fst.paths_iter().count(), 3);
@@ -188,15 +188,15 @@ mod tests {
         fst.set_final(s3, IntegerWeight::new(53)).unwrap();
         fst.set_final(s4, IntegerWeight::new(185)).unwrap();
 
-        fst.add_arc(s1, Arc::new(1, 1, IntegerWeight::new(1), s2))
+        fst.add_tr(s1, Tr::new(1, 1, IntegerWeight::new(1), s2))
             .unwrap();
-        fst.add_arc(s1, Arc::new(2, 2, IntegerWeight::new(2), s3))
+        fst.add_tr(s1, Tr::new(2, 2, IntegerWeight::new(2), s3))
             .unwrap();
-        fst.add_arc(s1, Arc::new(3, 3, IntegerWeight::new(3), s4))
+        fst.add_tr(s1, Tr::new(3, 3, IntegerWeight::new(3), s4))
             .unwrap();
-        fst.add_arc(s2, Arc::new(4, 4, IntegerWeight::new(4), s4))
+        fst.add_tr(s2, Tr::new(4, 4, IntegerWeight::new(4), s4))
             .unwrap();
-        fst.add_arc(s3, Arc::new(5, 5, IntegerWeight::new(5), s4))
+        fst.add_tr(s3, Tr::new(5, 5, IntegerWeight::new(5), s4))
             .unwrap();
 
         assert_eq!(fst.paths_iter().count(), 6);

@@ -1,16 +1,16 @@
 use anyhow::Result;
 
-use crate::algorithms::{FinalArc, MapFinalAction};
+use crate::algorithms::{FinalTr, MapFinalAction};
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Arc, EPS_LABEL};
+use crate::{Tr, EPS_LABEL};
 use unsafe_unwrap::UnsafeUnwrap;
 
 /// The WeightConverter interfaces defines how a weight should be turned into another one.
 /// Useful for changing the semiring of an FST.
 pub trait WeightConverter<SI: Semiring, SO: Semiring> {
-    fn arc_map(&mut self, arc: &Arc<SI>) -> Result<Arc<SO>>;
-    fn final_arc_map(&mut self, final_arc: &FinalArc<SI>) -> Result<FinalArc<SO>>;
+    fn tr_map(&mut self, arc: &Tr<SI>) -> Result<Tr<SO>>;
+    fn final_tr_map(&mut self, final_tr: &FinalTr<SI>) -> Result<FinalTr<SO>>;
     fn final_action(&self) -> MapFinalAction;
 }
 
@@ -55,62 +55,60 @@ where
 
     let states: Vec<_> = fst_in.states_iter().collect();
     for state in states {
-        fst_out.reserve_arcs(state, fst_in.num_arcs(state)?)?;
+        fst_out.reserve_trs(state, fst_in.num_trs(state)?)?;
         for arc in fst_in.arcs_iter(state)? {
-            fst_out.add_arc(state, mapper.arc_map(arc)?)?;
+            fst_out.add_tr(state, mapper.tr_map(arc)?)?;
         }
         if let Some(w) = unsafe { fst_in.final_weight_unchecked(state) } {
-            let final_arc = FinalArc {
+            let final_tr = FinalTr {
                 ilabel: EPS_LABEL,
                 olabel: EPS_LABEL,
                 weight: w.clone(),
             };
-            let mapped_final_arc = mapper.final_arc_map(&final_arc)?;
+            let mapped_final_tr = mapper.final_tr_map(&final_tr)?;
             match final_action {
                 MapFinalAction::MapNoSuperfinal => {
-                    if mapped_final_arc.ilabel != EPS_LABEL || mapped_final_arc.olabel != EPS_LABEL
-                    {
-                        bail!("ArcMap: Non-zero arc labels for superfinal arc")
+                    if mapped_final_tr.ilabel != EPS_LABEL || mapped_final_tr.olabel != EPS_LABEL {
+                        bail!("TrMap: Non-zero arc labels for superfinal arc")
                     }
 
-                    fst_out.set_final(state, mapped_final_arc.weight).unwrap();
+                    fst_out.set_final(state, mapped_final_tr.weight).unwrap();
                 }
                 MapFinalAction::MapAllowSuperfinal => {
-                    if mapped_final_arc.ilabel != EPS_LABEL || mapped_final_arc.olabel != EPS_LABEL
-                    {
+                    if mapped_final_tr.ilabel != EPS_LABEL || mapped_final_tr.olabel != EPS_LABEL {
                         if superfinal.is_none() {
                             let superfinal_id = fst_out.add_state();
                             superfinal = Some(superfinal_id);
                             fst_out.set_final(superfinal_id, F2::W::one()).unwrap();
                         }
 
-                        fst_out.add_arc(
+                        fst_out.add_tr(
                             state,
-                            Arc::new(
-                                mapped_final_arc.ilabel,
-                                mapped_final_arc.olabel,
-                                mapped_final_arc.weight,
+                            Tr::new(
+                                mapped_final_tr.ilabel,
+                                mapped_final_tr.olabel,
+                                mapped_final_tr.weight,
                                 unsafe { superfinal.unsafe_unwrap() },
                             ),
                         )?;
 
                         fst_out.delete_final_weight(state)?;
                     } else {
-                        fst_out.set_final(state, mapped_final_arc.weight)?;
+                        fst_out.set_final(state, mapped_final_tr.weight)?;
                     }
                 }
                 MapFinalAction::MapRequireSuperfinal => {
-                    if mapped_final_arc.ilabel != EPS_LABEL
-                        || mapped_final_arc.olabel != EPS_LABEL
-                        || !mapped_final_arc.weight.is_zero()
+                    if mapped_final_tr.ilabel != EPS_LABEL
+                        || mapped_final_tr.olabel != EPS_LABEL
+                        || !mapped_final_tr.weight.is_zero()
                     {
                         fst_out
-                            .add_arc(
+                            .add_tr(
                                 state,
-                                Arc::new(
-                                    mapped_final_arc.ilabel,
-                                    mapped_final_arc.olabel,
-                                    mapped_final_arc.weight,
+                                Tr::new(
+                                    mapped_final_tr.ilabel,
+                                    mapped_final_tr.olabel,
+                                    mapped_final_tr.weight,
                                     superfinal.unwrap(),
                                 ),
                             )

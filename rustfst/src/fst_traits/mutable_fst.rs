@@ -2,14 +2,14 @@ use std::cmp::Ordering;
 
 use anyhow::Result;
 
-use crate::algorithms::{ArcMapper, ClosureType};
-use crate::arc::Arc;
+use crate::algorithms::{ClosureType, TrMapper};
 use crate::fst_traits::{CoreFst, ExpandedFst, FstIteratorMut};
+use crate::tr::Tr;
 use crate::{Label, StateId};
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst:
-    ExpandedFst + for<'a> MutableArcIterator<'a> + for<'b> FstIteratorMut<'b>
+    ExpandedFst + for<'a> MutableTrIterator<'a> + for<'b> FstIteratorMut<'b>
 {
     /// Creates an empty wFST.
     fn new() -> Self;
@@ -23,7 +23,7 @@ pub trait MutableFst:
     /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
     /// # use rustfst::fst_impls::VectorFst;
     /// # use rustfst::semirings::{BooleanWeight, Semiring};
-    /// # use rustfst::Arc;
+    /// # use rustfst::Tr;
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
@@ -46,7 +46,7 @@ pub trait MutableFst:
     /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
     /// # use rustfst::fst_impls::VectorFst;
     /// # use rustfst::semirings::{BooleanWeight, Semiring};
-    /// # use rustfst::Arc;
+    /// # use rustfst::Tr;
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
@@ -167,7 +167,7 @@ pub trait MutableFst:
     /// ```
     fn del_all_states(&mut self);
 
-    unsafe fn del_arcs_id_sorted_unchecked(&mut self, state: StateId, to_del: &Vec<usize>);
+    unsafe fn del_trs_id_sorted_unchecked(&mut self, state: StateId, to_del: &Vec<usize>);
 
     /// Adds an arc to the FST. The arc will start in the state `source`.
     ///
@@ -181,21 +181,21 @@ pub trait MutableFst:
     /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
     /// # use rustfst::fst_impls::VectorFst;
     /// # use rustfst::semirings::{ProbabilityWeight, Semiring};
-    /// # use rustfst::Arc;
+    /// # use rustfst::Tr;
     /// # use anyhow::Result;
     /// # fn main() -> Result<()> {
     /// let mut fst = VectorFst::<ProbabilityWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
     ///
-    /// assert_eq!(fst.num_arcs(s1)?, 0);
-    /// fst.add_arc(s1, Arc::new(3, 5, 1.2, s2));
-    /// assert_eq!(fst.num_arcs(s1)?, 1);
+    /// assert_eq!(fst.num_trs(s1)?, 0);
+    /// fst.add_tr(s1, Tr::new(3, 5, 1.2, s2));
+    /// assert_eq!(fst.num_trs(s1)?, 1);
     /// # Ok(())
     /// # }
     /// ```
-    fn add_arc(&mut self, source: StateId, arc: Arc<Self::W>) -> Result<()>;
-    unsafe fn add_arc_unchecked(&mut self, source: StateId, arc: Arc<Self::W>);
+    fn add_tr(&mut self, source: StateId, arc: Tr<Self::W>) -> Result<()>;
+    unsafe fn add_tr_unchecked(&mut self, source: StateId, arc: Tr<Self::W>);
 
     /// Adds an arc to the FST. The arc will start in the state `source`.
     ///
@@ -209,20 +209,20 @@ pub trait MutableFst:
     /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
     /// # use rustfst::fst_impls::VectorFst;
     /// # use rustfst::semirings::{Semiring, ProbabilityWeight};
-    /// # use rustfst::Arc;
+    /// # use rustfst::Tr;
     /// # use anyhow::Result;
     /// # fn main() -> Result<()> {
     /// let mut fst = VectorFst::<ProbabilityWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
     ///
-    /// assert_eq!(fst.num_arcs(s1)?, 0);
-    /// fst.emplace_arc(s1, 3, 5, 1.2, s2);
-    /// assert_eq!(fst.num_arcs(s1)?, 1);
+    /// assert_eq!(fst.num_trs(s1)?, 0);
+    /// fst.emplace_tr(s1, 3, 5, 1.2, s2);
+    /// assert_eq!(fst.num_trs(s1)?, 1);
     /// # Ok(())
     /// # }
     /// ```
-    fn emplace_arc<S: Into<Self::W>>(
+    fn emplace_tr<S: Into<Self::W>>(
         &mut self,
         source: StateId,
         ilabel: Label,
@@ -230,10 +230,10 @@ pub trait MutableFst:
         weight: S,
         nextstate: StateId,
     ) -> Result<()> {
-        self.add_arc(source, Arc::new(ilabel, olabel, weight, nextstate))
+        self.add_tr(source, Tr::new(ilabel, olabel, weight, nextstate))
     }
 
-    unsafe fn emplace_arc_unchecked<S: Into<Self::W>>(
+    unsafe fn emplace_tr_unchecked<S: Into<Self::W>>(
         &mut self,
         source: StateId,
         ilabel: Label,
@@ -241,27 +241,24 @@ pub trait MutableFst:
         weight: S,
         nextstate: StateId,
     ) {
-        self.add_arc_unchecked(source, Arc::new(ilabel, olabel, weight, nextstate))
+        self.add_tr_unchecked(source, Tr::new(ilabel, olabel, weight, nextstate))
     }
 
-    unsafe fn set_arcs_unchecked(&mut self, source: StateId, arcs: Vec<Arc<Self::W>>);
+    unsafe fn set_trs_unchecked(&mut self, source: StateId, arcs: Vec<Tr<Self::W>>);
 
     /// Remove the final weight of a specific state.
     fn delete_final_weight(&mut self, source: StateId) -> Result<()>;
     unsafe fn delete_final_weight_unchecked(&mut self, source: StateId);
 
     /// Deletes all the arcs leaving a state.
-    fn delete_arcs(&mut self, source: StateId) -> Result<()>;
+    fn delete_trs(&mut self, source: StateId) -> Result<()>;
 
     /// Remove all arcs leaving a state and return them.
-    fn pop_arcs(&mut self, source: StateId) -> Result<Vec<Arc<Self::W>>>;
-    unsafe fn pop_arcs_unchecked(&mut self, source: StateId) -> Vec<Arc<Self::W>>;
+    fn pop_trs(&mut self, source: StateId) -> Result<Vec<Tr<Self::W>>>;
+    unsafe fn pop_trs_unchecked(&mut self, source: StateId) -> Vec<Tr<Self::W>>;
 
     /// Retrieves a mutable reference to the final weight of a state (if the state is a final one).
-    fn final_weight_mut(
-        &mut self,
-        state_id: StateId,
-    ) -> Result<Option<&mut <Self as CoreFst>::W>>;
+    fn final_weight_mut(&mut self, state_id: StateId) -> Result<Option<&mut <Self as CoreFst>::W>>;
 
     unsafe fn final_weight_unchecked_mut(
         &mut self,
@@ -280,7 +277,7 @@ pub trait MutableFst:
     /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
     /// # use rustfst::fst_impls::VectorFst;
     /// # use rustfst::semirings::{Semiring, ProbabilityWeight};
-    /// # use rustfst::Arc;
+    /// # use rustfst::Tr;
     /// # use anyhow::Result;
     /// # fn main() -> Result<()> {
     /// let mut fst = VectorFst::<ProbabilityWeight>::new();
@@ -305,7 +302,7 @@ pub trait MutableFst:
     /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
     /// # use rustfst::fst_impls::VectorFst;
     /// # use rustfst::semirings::{Semiring, ProbabilityWeight};
-    /// # use rustfst::Arc;
+    /// # use rustfst::Tr;
     /// # use anyhow::Result;
     /// # fn main() -> Result<()> {
     /// let mut fst = VectorFst::<ProbabilityWeight>::new();
@@ -321,15 +318,15 @@ pub trait MutableFst:
     /// ```
     unsafe fn take_final_weight_unchecked(&mut self, state_id: StateId) -> Option<Self::W>;
 
-    fn sort_arcs_unchecked<F: Fn(&Arc<Self::W>, &Arc<Self::W>) -> Ordering>(
+    fn sort_trs_unchecked<F: Fn(&Tr<Self::W>, &Tr<Self::W>) -> Ordering>(
         &mut self,
         state: StateId,
         f: F,
     );
 
-    unsafe fn unique_arcs_unchecked(&mut self, state: StateId);
+    unsafe fn unique_trs_unchecked(&mut self, state: StateId);
 
-    unsafe fn sum_arcs_unchecked(&mut self, state: StateId);
+    unsafe fn sum_trs_unchecked(&mut self, state: StateId);
 
     /// This operation computes the concatenative closure.
     /// If A transduces string `x` to `y` with weight `a`,
@@ -340,18 +337,18 @@ pub trait MutableFst:
         crate::algorithms::closure(self, closure_type)
     }
 
-    /// Maps an arc using a `ArcMapper` object.
-    fn arc_map<M: ArcMapper<Self::W>>(&mut self, mapper: &mut M) -> Result<()> {
-        crate::algorithms::arc_map(self, mapper)
+    /// Maps an arc using a `TrMapper` object.
+    fn tr_map<M: TrMapper<Self::W>>(&mut self, mapper: &mut M) -> Result<()> {
+        crate::algorithms::tr_map(self, mapper)
     }
 }
 
 /// Iterate over mutable arcs in a wFST.
-pub trait MutableArcIterator<'a>: CoreFst
+pub trait MutableTrIterator<'a>: CoreFst
 where
     Self::W: 'a,
 {
-    type IterMut: Iterator<Item = &'a mut Arc<Self::W>>;
+    type IterMut: Iterator<Item = &'a mut Tr<Self::W>>;
     fn arcs_iter_mut(&'a mut self, state_id: StateId) -> Result<Self::IterMut>;
     unsafe fn arcs_iter_unchecked_mut(&'a mut self, state_id: StateId) -> Self::IterMut;
 }

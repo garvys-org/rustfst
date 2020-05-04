@@ -1,7 +1,7 @@
 use anyhow::Result;
 
-use crate::arc::Arc;
 use crate::fst_traits::CoreFst;
+use crate::tr::Tr;
 use crate::StateId;
 
 /// Trait to iterate over the states of a wFST.
@@ -33,12 +33,12 @@ pub trait StateIterator<'a> {
 }
 
 /// Trait to iterate over the outgoing arcs of a particular state in a wFST
-pub trait ArcIterator<'a>: CoreFst
+pub trait TrIterator<'a>: CoreFst
 where
     Self::W: 'a,
 {
     /// Iterator used to iterate over the arcs leaving a state of an FST.
-    type Iter: Iterator<Item = &'a Arc<Self::W>> + Clone;
+    type Iter: Iterator<Item = &'a Tr<Self::W>> + Clone;
 
     fn arcs_iter(&'a self, state_id: StateId) -> Result<Self::Iter>;
     unsafe fn arcs_iter_unchecked(&'a self, state_id: StateId) -> Self::Iter;
@@ -48,12 +48,12 @@ pub struct FstIterData<W, I> {
     pub state_id: StateId,
     pub final_weight: Option<W>,
     pub arcs: I,
-    pub num_arcs: usize,
+    pub num_trs: usize,
 }
 
 pub trait FstIntoIterator: CoreFst {
-    type ArcsIter: Iterator<Item = Arc<Self::W>>;
-    type FstIter: Iterator<Item = FstIterData<Self::W, Self::ArcsIter>>;
+    type TrsIter: Iterator<Item = Tr<Self::W>>;
+    type FstIter: Iterator<Item = FstIterData<Self::W, Self::TrsIter>>;
     fn fst_into_iter(self) -> Self::FstIter;
 }
 
@@ -61,8 +61,8 @@ pub trait FstIterator<'a>: CoreFst
 where
     Self::W: 'a,
 {
-    type ArcsIter: Iterator<Item = &'a Arc<Self::W>>;
-    type FstIter: Iterator<Item = FstIterData<&'a Self::W, Self::ArcsIter>>;
+    type TrsIter: Iterator<Item = &'a Tr<Self::W>>;
+    type FstIter: Iterator<Item = FstIterData<&'a Self::W, Self::TrsIter>>;
     fn fst_iter(&'a self) -> Self::FstIter;
 }
 
@@ -70,7 +70,7 @@ pub trait FstIteratorMut<'a>: CoreFst
 where
     Self::W: 'a,
 {
-    type ArcsIter: Iterator<Item = &'a mut Arc<Self::W>>;
-    type FstIter: Iterator<Item = FstIterData<&'a mut Self::W, Self::ArcsIter>>;
+    type TrsIter: Iterator<Item = &'a mut Tr<Self::W>>;
+    type FstIter: Iterator<Item = FstIterData<&'a mut Self::W, Self::TrsIter>>;
     fn fst_iter_mut(&'a mut self) -> Self::FstIter;
 }

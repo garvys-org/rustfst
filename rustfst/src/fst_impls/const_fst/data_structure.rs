@@ -1,11 +1,11 @@
-use crate::{Arc, StateId, SymbolTable};
+use crate::{StateId, SymbolTable, Tr};
 use std::rc::Rc;
 
 /// Immutable FST whose states and arcs each implemented by single arrays,
 #[derive(Debug, PartialEq, Clone)]
 pub struct ConstFst<W> {
     pub(crate) states: Vec<ConstState<W>>,
-    pub(crate) arcs: Vec<Arc<W>>,
+    pub(crate) arcs: Vec<Tr<W>>,
     pub(crate) start: Option<StateId>,
     pub(crate) isymt: Option<Rc<SymbolTable>>,
     pub(crate) osymt: Option<Rc<SymbolTable>>,

@@ -15,10 +15,10 @@ use crate::algorithms::compose::matchers::{
     GenericMatcher, MatchType, SortedMatcher, REQUIRE_PRIORITY,
 };
 use crate::algorithms::compose::matchers::{Matcher, MatcherFlags};
-use crate::algorithms::dynamic_fst::DynamicFst;
+use crate::algorithms::lazy_fst::LazyFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Arc, StateId, EPS_LABEL, NO_LABEL};
+use crate::{StateId, Tr, EPS_LABEL, NO_LABEL};
 
 pub struct ComposeFstImplOptions<M1, M2, CF, ST> {
     matcher1: Option<Rc<RefCell<M1>>>,
@@ -80,7 +80,7 @@ pub struct ComposeFstImpl<W: Semiring, CF: ComposeFilter<W>> {
 
 impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
     // Compose specifying two matcher types Matcher1 and Matcher2. Requires input
-    // FST (of the same Arc type, but o.w. arbitrary) match the corresponding
+    // FST (of the same Tr type, but o.w. arbitrary) match the corresponding
     // matcher FST types). Recommended only for advanced use in demanding or
     // specialized applications due to potential code bloat and matcher
     // incompatibilities.
@@ -184,28 +184,28 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
         matchera: Rc<RefCell<M>>,
         match_input: bool,
     ) -> Result<()> {
-        let arc_loop = if match_input {
-            Arc::new(EPS_LABEL, NO_LABEL, W::one(), sb)
+        let tr_loop = if match_input {
+            Tr::new(EPS_LABEL, NO_LABEL, W::one(), sb)
         } else {
-            Arc::new(NO_LABEL, EPS_LABEL, W::one(), sb)
+            Tr::new(NO_LABEL, EPS_LABEL, W::one(), sb)
         };
-        self.match_arc(s, sa, Rc::clone(&matchera), &arc_loop, match_input)?;
+        self.match_tr(s, sa, Rc::clone(&matchera), &tr_loop, match_input)?;
         for arc in fstb.arcs_iter(sb)? {
-            self.match_arc(s, sa, Rc::clone(&matchera), arc, match_input)?;
+            self.match_tr(s, sa, Rc::clone(&matchera), arc, match_input)?;
         }
         Ok(())
     }
 
-    fn add_arc(&mut self, s: StateId, mut arc1: Arc<W>, arc2: Arc<W>, fs: CF::FS) -> Result<()> {
+    fn add_tr(&mut self, s: StateId, mut arc1: Tr<W>, arc2: Tr<W>, fs: CF::FS) -> Result<()> {
         let tuple = ComposeStateTuple {
             fs,
             s1: arc1.nextstate,
             s2: arc2.nextstate,
         };
         arc1.weight.times_assign(arc2.weight)?;
-        self.cache_impl.push_arc(
+        self.cache_impl.push_tr(
             s,
-            Arc::new(
+            Tr::new(
                 arc1.ilabel,
                 arc2.olabel,
                 arc1.weight,
@@ -216,12 +216,12 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
         Ok(())
     }
 
-    fn match_arc<M: Matcher<W>>(
+    fn match_tr<M: Matcher<W>>(
         &mut self,
         s: StateId,
         sa: StateId,
         matchera: Rc<RefCell<M>>,
-        arc: &Arc<W>,
+        arc: &Tr<W>,
         match_input: bool,
     ) -> Result<()> {
         let label = if match_input { arc.olabel } else { arc.ilabel };
@@ -229,7 +229,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
         // Collect necessary here because need to borrow_mut a matcher later. To investigate.
         let temp = matchera.borrow().iter(sa, label)?.collect_vec();
         for arca in temp {
-            let mut arca = arca.into_arc(
+            let mut arca = arca.into_tr(
                 sa,
                 if match_input {
                     MatchType::MatchInput
@@ -239,15 +239,15 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
             )?;
             let mut arcb = arc.clone();
             if match_input {
-                let fs = self.compose_filter.filter_arc(&mut arcb, &mut arca)?;
+                let fs = self.compose_filter.filter_tr(&mut arcb, &mut arca)?;
                 if fs != CF::FS::new_no_state() {
-                    self.add_arc(s, arcb, arca, fs)?;
+                    self.add_tr(s, arcb, arca, fs)?;
                 }
             } else {
-                let fs = self.compose_filter.filter_arc(&mut arca, &mut arcb)?;
+                let fs = self.compose_filter.filter_tr(&mut arca, &mut arcb)?;
 
                 if fs != CF::FS::new_no_state() {
-                    self.add_arc(s, arca, arcb, fs)?;
+                    self.add_tr(s, arca, arcb, fs)?;
                 }
             }
         }
@@ -354,7 +354,7 @@ pub enum ComposeFilterEnum {
     NoMatchFilter,
 }
 
-pub type ComposeFst<W, CF> = DynamicFst<ComposeFstImpl<W, CF>>;
+pub type ComposeFst<W, CF> = LazyFst<ComposeFstImpl<W, CF>>;
 
 fn create_base<W: Semiring + 'static, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>>(
     fst1: Rc<F1>,

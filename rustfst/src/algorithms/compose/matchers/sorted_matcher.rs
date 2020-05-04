@@ -9,7 +9,7 @@ use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, 
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst};
 use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL};
+use crate::{Label, StateId, Tr, EPS_LABEL, NO_LABEL};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SortedMatcher<F: ExpandedFst> {
@@ -29,7 +29,7 @@ impl<W: Semiring + 'static, F: ExpandedFst<W = W>> Matcher<W> for SortedMatcher<
         Ok(IteratorSortedMatcher::new(
             self.fst
                 .arcs_iter(state)?
-                .map(|a| a as *const Arc<W>)
+                .map(|a| a as *const Tr<W>)
                 .collect(),
             label,
             self.match_type,
@@ -74,7 +74,7 @@ impl<W: Semiring + 'static, F: ExpandedFst<W = W>> Matcher<W> for SortedMatcher<
     }
 
     fn priority(&self, state: StateId) -> Result<usize> {
-        self.fst.num_arcs(state)
+        self.fst.num_trs(state)
     }
 
     fn fst(&self) -> Rc<Self::F> {
@@ -84,7 +84,7 @@ impl<W: Semiring + 'static, F: ExpandedFst<W = W>> Matcher<W> for SortedMatcher<
 
 #[derive(Clone)]
 pub struct IteratorSortedMatcher<W: Semiring> {
-    arcs: Vec<*const Arc<W>>,
+    arcs: Vec<*const Tr<W>>,
     match_label: Label,
     pos: usize,
     current_loop: bool,
@@ -92,7 +92,7 @@ pub struct IteratorSortedMatcher<W: Semiring> {
 }
 
 impl<W: Semiring> IteratorSortedMatcher<W> {
-    pub fn new(arcs: Vec<*const Arc<W>>, match_label: Label, match_type: MatchType) -> Self {
+    pub fn new(arcs: Vec<*const Tr<W>>, match_label: Label, match_type: MatchType) -> Self {
         // If we have to match epsilon, an epsilon loop is added
         let current_loop = match_label == EPS_LABEL;
 
@@ -128,7 +128,7 @@ impl<W: Semiring> IteratorSortedMatcher<W> {
         }
     }
 
-    fn get_label(&self, arc: &Arc<W>) -> Label {
+    fn get_label(&self, arc: &Tr<W>) -> Label {
         match self.match_type {
             MatchType::MatchInput => arc.ilabel,
             MatchType::MatchOutput => arc.olabel,
@@ -149,7 +149,7 @@ impl<W: Semiring> Iterator for IteratorSortedMatcher<W> {
             let arc = unsafe { &**arc };
             if self.get_label(arc) == self.match_label {
                 self.pos += 1;
-                Some(IterItemMatcher::Arc(arc))
+                Some(IterItemMatcher::Tr(arc))
             } else {
                 None
             }
@@ -204,7 +204,7 @@ where
         unreachable!()
     }
 
-    fn lookahead_prefix(&self, _arc: &mut Arc<<F as CoreFst>::W>) -> bool {
+    fn lookahead_prefix(&self, _tr: &mut Tr<<F as CoreFst>::W>) -> bool {
         unreachable!()
     }
 
@@ -212,11 +212,11 @@ where
         unreachable!()
     }
 
-    fn prefix_arc(&self) -> &Arc<<F as CoreFst>::W> {
+    fn prefix_tr(&self) -> &Tr<<F as CoreFst>::W> {
         unreachable!()
     }
 
-    fn prefix_arc_mut(&mut self) -> &mut Arc<<F as CoreFst>::W> {
+    fn prefix_tr_mut(&mut self) -> &mut Tr<<F as CoreFst>::W> {
         unreachable!()
     }
 

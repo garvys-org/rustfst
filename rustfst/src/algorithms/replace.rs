@@ -8,10 +8,10 @@ use anyhow::{bail, Result};
 use itertools::Itertools;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
-use crate::algorithms::dynamic_fst::DynamicFst;
+use crate::algorithms::lazy_fst::LazyFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, EPS_LABEL};
+use crate::{Label, StateId, Tr, EPS_LABEL};
 
 /// This specifies what labels to output on the call or return arc.
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug, Eq)]
@@ -207,8 +207,8 @@ where
     fn expand(&mut self, state: usize) -> Result<()> {
         let tuple = self.state_table.tuple_table.find_tuple(state).clone();
         if let Some(fst_state) = tuple.fst_state {
-            if let Some(arc) = self.compute_final_arc(state) {
-                self.cache_impl.push_arc(state, arc)?;
+            if let Some(arc) = self.compute_final_tr(state) {
+                self.cache_impl.push_tr(state, arc)?;
             }
 
             for arc in self
@@ -218,8 +218,8 @@ where
                 .borrow()
                 .arcs_iter(fst_state)?
             {
-                if let Some(new_arc) = self.compute_arc(&tuple, arc) {
-                    self.cache_impl.push_arc(state, new_arc)?;
+                if let Some(new_tr) = self.compute_tr(&tuple, arc) {
+                    self.cache_impl.push_tr(state, new_tr)?;
                 }
             }
         }
@@ -304,7 +304,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
         Ok(replace_fst_impl)
     }
 
-    fn compute_final_arc(&mut self, state: StateId) -> Option<Arc<F::W>> {
+    fn compute_final_tr(&mut self, state: StateId) -> Option<Tr<F::W>> {
         let tuple = self.state_table.tuple_table.find_tuple(state);
         let fst_state = tuple.fst_state?;
         if self
@@ -351,7 +351,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
                 .final_weight(fst_state)
                 .unwrap()
             {
-                return Some(Arc::new(ilabel, olabel, weight.clone(), nextstate));
+                return Some(Tr::new(ilabel, olabel, weight.clone(), nextstate));
             }
             None
         } else {
@@ -378,7 +378,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
         self.get_prefix_id(prefix)
     }
 
-    fn compute_arc<W: Semiring>(&self, tuple: &ReplaceStateTuple, arc: &Arc<W>) -> Option<Arc<W>> {
+    fn compute_tr<W: Semiring>(&self, tuple: &ReplaceStateTuple, arc: &Tr<W>) -> Option<Tr<W>> {
         if arc.olabel == EPS_LABEL
             || arc.olabel < *self.nonterminal_set.iter().next().unwrap()
             || arc.olabel > *self.nonterminal_set.iter().rev().next().unwrap()
@@ -386,7 +386,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
             let state_tuple =
                 ReplaceStateTuple::new(tuple.prefix_id, tuple.fst_id, Some(arc.nextstate));
             let nextstate = self.state_table.tuple_table.find_id(state_tuple);
-            Some(Arc::new(
+            Some(Tr::new(
                 arc.ilabel,
                 arc.olabel,
                 arc.weight.clone(),
@@ -415,7 +415,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
                     } else {
                         self.call_output_label_.unwrap_or(arc.olabel)
                     };
-                    Some(Arc::new(ilabel, olabel, arc.weight.clone(), nt_nextstate))
+                    Some(Tr::new(ilabel, olabel, arc.weight.clone(), nt_nextstate))
                 } else {
                     None
                 }
@@ -425,7 +425,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
                     tuple.fst_id,
                     Some(arc.nextstate),
                 ));
-                Some(Arc::new(
+                Some(Tr::new(
                     arc.ilabel,
                     arc.olabel,
                     arc.weight.clone(),
@@ -501,10 +501,10 @@ impl ReplaceStateTable {
     }
 }
 
-/// ReplaceFst supports dynamic replacement of arcs in one FST with another FST.
+/// ReplaceFst supports lazy replacement of arcs in one FST with another FST.
 /// This replacement is recursive. ReplaceFst can be used to support a variety of
 /// delayed constructions such as recursive transition networks, union, or closure.
-pub type ReplaceFst<F, B> = DynamicFst<ReplaceFstImpl<F, B>>;
+pub type ReplaceFst<F, B> = LazyFst<ReplaceFstImpl<F, B>>;
 
 impl<F: Fst, B: Borrow<F>> ReplaceFst<F, B>
 where

@@ -3,8 +3,8 @@ use std::slice::Iter as IterSlice;
 use anyhow::Result;
 
 use crate::algorithms::cache::VectorCacheState;
-use crate::Arc;
 use crate::StateId;
+use crate::Tr;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct CacheImpl<W> {
@@ -55,22 +55,22 @@ impl<W> CacheImpl<W> {
         Ok(self.vector_cache_states.final_weight_unchecked(state))
     }
 
-    pub fn push_arc(&mut self, state: StateId, arc: Arc<W>) -> Result<()> {
+    pub fn push_tr(&mut self, state: StateId, arc: Tr<W>) -> Result<()> {
         if self.vector_cache_states.expanded(state) {
             bail!("Can't add arcs to a fully expanded state")
         }
         self.vector_cache_states.resize_if_necessary(state + 1);
         self.vector_cache_states
             .resize_if_necessary(arc.nextstate + 1);
-        self.vector_cache_states.push_arc(state, arc);
+        self.vector_cache_states.push_tr(state, arc);
         Ok(())
     }
 
-    pub fn num_arcs(&self, state: StateId) -> Result<usize> {
+    pub fn num_trs(&self, state: StateId) -> Result<usize> {
         if !self.vector_cache_states.expanded(state) {
-            bail!("Can't call num_arcs on a state that is not fully expanded");
+            bail!("Can't call num_trs on a state that is not fully expanded");
         }
-        Ok(self.vector_cache_states.num_arcs(state))
+        Ok(self.vector_cache_states.num_trs(state))
     }
 
     pub fn expanded(&self, state: StateId) -> bool {
@@ -86,7 +86,7 @@ impl<W> CacheImpl<W> {
         self.vector_cache_states.mark_expanded_unchecked(state)
     }
 
-    pub fn arcs_iter(&self, state: StateId) -> Result<IterSlice<Arc<W>>> {
+    pub fn arcs_iter(&self, state: StateId) -> Result<IterSlice<Tr<W>>> {
         if !self.vector_cache_states.expanded(state) {
             bail!("Can't iterate arcs on a not fully expanded state")
         }
@@ -122,7 +122,7 @@ mod tests {
         cache_impl.mark_expanded(2);
         assert!(cache_impl.expanded(2));
 
-        cache_impl.push_arc(1, Arc::new(2, 3, TropicalWeight::new(2.3), 3));
+        cache_impl.push_tr(1, Tr::new(2, 3, TropicalWeight::new(2.3), 3));
 
         assert!(!cache_impl.expanded(3));
         cache_impl.mark_expanded(3);

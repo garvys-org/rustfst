@@ -67,7 +67,7 @@ impl<W: SerializableSemiring> ParsedTextFst<W> {
     ///
     /// ## Specification:
     ///
-    /// Arc format: `src dest ilabel olabel [weight]`
+    /// Tr format: `src dest ilabel olabel [weight]`
     ///
     /// Final state format: `state [weight]`
     ///
@@ -116,7 +116,7 @@ impl<W: SerializableSemiring> ParsedTextFst<W> {
     /// # Format:
     ///
     /// ## Specification:
-    /// Arc format: `src dest ilabel olabel [weight]`
+    /// Tr format: `src dest ilabel olabel [weight]`
     ///
     /// Final state format: `state [weight]`
     ///

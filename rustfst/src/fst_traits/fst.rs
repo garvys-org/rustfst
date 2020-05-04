@@ -3,8 +3,8 @@ use std::rc::Rc;
 
 use anyhow::Result;
 
-use crate::algorithms::arc_filters::{ArcFilter, InputEpsilonArcFilter, OutputEpsilonArcFilter};
-use crate::fst_traits::iterators::{ArcIterator, StateIterator};
+use crate::algorithms::tr_filters::{InputEpsilonTrFilter, OutputEpsilonTrFilter, TrFilter};
+use crate::fst_traits::iterators::{StateIterator, TrIterator};
 use crate::fst_traits::FstIterator;
 use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable};
@@ -63,17 +63,17 @@ pub trait CoreFst {
     /// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst};
     /// # use rustfst::fst_impls::VectorFst;
     /// # use rustfst::semirings::{BooleanWeight, Semiring};
-    /// # use rustfst::Arc;
+    /// # use rustfst::Tr;
     /// let mut fst = VectorFst::<BooleanWeight>::new();
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
     ///
-    /// assert_eq!(fst.num_arcs(s1).unwrap(), 0);
-    /// fst.add_arc(s1, Arc::new(3, 5, BooleanWeight::new(true), s2));
-    /// assert_eq!(fst.num_arcs(s1).unwrap(), 1);
+    /// assert_eq!(fst.num_trs(s1).unwrap(), 0);
+    /// fst.add_tr(s1, Tr::new(3, 5, BooleanWeight::new(true), s2));
+    /// assert_eq!(fst.num_trs(s1).unwrap(), 1);
     /// ```
-    fn num_arcs(&self, s: StateId) -> Result<usize>;
-    unsafe fn num_arcs_unchecked(&self, s: StateId) -> usize;
+    fn num_trs(&self, s: StateId) -> Result<usize>;
+    unsafe fn num_trs_unchecked(&self, s: StateId) -> usize;
 
     /// Returns whether or not the state with identifier passed as parameters is a final state.
     ///
@@ -113,7 +113,7 @@ pub trait CoreFst {
 
 /// Trait defining the minimum interface necessary for a wFST.
 pub trait Fst:
-    CoreFst + for<'a> ArcIterator<'a> + for<'b> StateIterator<'b> + for<'c> FstIterator<'c> + Debug
+    CoreFst + for<'a> TrIterator<'a> + for<'b> StateIterator<'b> + for<'c> FstIterator<'c> + Debug
 {
     // TODO: Move niepsilons and noepsilons to required methods.
     /// Returns the number of arcs with epsilon input labels leaving a state.
@@ -124,22 +124,22 @@ pub trait Fst:
     /// # use rustfst::fst_impls::VectorFst;
     /// # use rustfst::semirings::{Semiring, IntegerWeight};
     /// # use rustfst::EPS_LABEL;
-    /// # use rustfst::Arc;
+    /// # use rustfst::Tr;
     /// let mut fst = VectorFst::<IntegerWeight>::new();
     /// let s0 = fst.add_state();
     /// let s1 = fst.add_state();
     ///
-    /// fst.add_arc(s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
-    /// fst.add_arc(s0, Arc::new(76, EPS_LABEL, IntegerWeight::one(), s1));
-    /// fst.add_arc(s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
-    /// fst.add_arc(s0, Arc::new(45, 18, IntegerWeight::one(), s0));
-    /// fst.add_arc(s1, Arc::new(76, 18, IntegerWeight::one(), s1));
+    /// fst.add_tr(s0, Tr::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_tr(s0, Tr::new(76, EPS_LABEL, IntegerWeight::one(), s1));
+    /// fst.add_tr(s0, Tr::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_tr(s0, Tr::new(45, 18, IntegerWeight::one(), s0));
+    /// fst.add_tr(s1, Tr::new(76, 18, IntegerWeight::one(), s1));
     ///
     /// assert_eq!(fst.num_input_epsilons(s0).unwrap(), 2);
     /// assert_eq!(fst.num_input_epsilons(s1).unwrap(), 0);
     /// ```
     fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
-        let filter = InputEpsilonArcFilter {};
+        let filter = InputEpsilonTrFilter {};
         Ok(self.arcs_iter(state)?.filter(|v| filter.keep(v)).count())
     }
 
@@ -151,22 +151,22 @@ pub trait Fst:
     /// # use rustfst::fst_impls::VectorFst;
     /// # use rustfst::semirings::{Semiring, IntegerWeight};
     /// # use rustfst::EPS_LABEL;
-    /// # use rustfst::Arc;
+    /// # use rustfst::Tr;
     /// let mut fst = VectorFst::<IntegerWeight>::new();
     /// let s0 = fst.add_state();
     /// let s1 = fst.add_state();
     ///
-    /// fst.add_arc(s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
-    /// fst.add_arc(s0, Arc::new(76, EPS_LABEL, IntegerWeight::one(), s1));
-    /// fst.add_arc(s0, Arc::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
-    /// fst.add_arc(s0, Arc::new(45, 18, IntegerWeight::one(), s0));
-    /// fst.add_arc(s1, Arc::new(76, 18, IntegerWeight::one(), s1));
+    /// fst.add_tr(s0, Tr::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_tr(s0, Tr::new(76, EPS_LABEL, IntegerWeight::one(), s1));
+    /// fst.add_tr(s0, Tr::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_tr(s0, Tr::new(45, 18, IntegerWeight::one(), s0));
+    /// fst.add_tr(s1, Tr::new(76, 18, IntegerWeight::one(), s1));
     ///
     /// assert_eq!(fst.num_output_epsilons(s0).unwrap(), 1);
     /// assert_eq!(fst.num_output_epsilons(s1).unwrap(), 0);
     /// ```
     fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
-        let filter = OutputEpsilonArcFilter {};
+        let filter = OutputEpsilonTrFilter {};
         Ok(self.arcs_iter(state)?.filter(|v| filter.keep(v)).count())
     }
 

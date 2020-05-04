@@ -4,7 +4,7 @@ use std::rc::Rc;
 use anyhow::Result;
 
 use crate::fst_traits::{
-    ArcIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator,
+    CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator, TrIterator,
 };
 use crate::SymbolTable;
 
@@ -49,12 +49,12 @@ impl<F: CoreFst, T> CoreFst for FstAddOn<F, T> {
         self.fst.final_weight_unchecked(state_id)
     }
 
-    fn num_arcs(&self, s: usize) -> Result<usize> {
-        self.fst.num_arcs(s)
+    fn num_trs(&self, s: usize) -> Result<usize> {
+        self.fst.num_trs(s)
     }
 
-    unsafe fn num_arcs_unchecked(&self, s: usize) -> usize {
-        self.fst.num_arcs_unchecked(s)
+    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+        self.fst.num_trs_unchecked(s)
     }
 }
 
@@ -66,11 +66,11 @@ impl<'a, F: StateIterator<'a>, T> StateIterator<'a> for FstAddOn<F, T> {
     }
 }
 
-impl<'a, F: ArcIterator<'a>, T> ArcIterator<'a> for FstAddOn<F, T>
+impl<'a, F: TrIterator<'a>, T> TrIterator<'a> for FstAddOn<F, T>
 where
     F::W: 'a,
 {
-    type Iter = <F as ArcIterator<'a>>::Iter;
+    type Iter = <F as TrIterator<'a>>::Iter;
 
     fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
         self.fst.arcs_iter(state_id)
@@ -85,7 +85,7 @@ impl<'a, F: FstIterator<'a>, T> FstIterator<'a> for FstAddOn<F, T>
 where
     F::W: 'a,
 {
-    type ArcsIter = F::ArcsIter;
+    type TrsIter = F::TrsIter;
     type FstIter = F::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
@@ -135,7 +135,7 @@ impl<F: FstIntoIterator, T: Debug> FstIntoIterator for FstAddOn<F, T>
 where
     F::W: 'static,
 {
-    type ArcsIter = F::ArcsIter;
+    type TrsIter = F::TrsIter;
     type FstIter = F::FstIter;
 
     fn fst_into_iter(self) -> Self::FstIter {

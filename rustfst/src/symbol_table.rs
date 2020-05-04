@@ -5,7 +5,7 @@ use std::fs::{read, File};
 use std::io::{BufWriter, LineWriter, Write};
 use std::path::Path;
 
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use itertools::Itertools;
 
 use crate::parsers::bin_symt::nom_parser::{parse_symbol_table_bin, write_bin_symt};

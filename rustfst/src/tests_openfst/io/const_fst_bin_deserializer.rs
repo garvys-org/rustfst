@@ -1,5 +1,5 @@
-use anyhow::Result;
 use anyhow::Context;
+use anyhow::Result;
 
 use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_traits::SerializableFst;

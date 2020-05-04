@@ -3,7 +3,7 @@ use crate::{Label, StateId};
 
 /// Structure representing a transition from a state to another state in a FST.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Hash)]
-pub struct Arc<W> {
+pub struct Tr<W> {
     /// Input label.
     pub ilabel: Label,
     /// Output label.
@@ -14,15 +14,15 @@ pub struct Arc<W> {
     pub nextstate: StateId,
 }
 
-impl<W> Arc<W> {
-    /// Creates a new Arc.
+impl<W> Tr<W> {
+    /// Creates a new Tr.
     ///
     /// # Example
     ///
     /// ```
-    /// # use rustfst::Arc;
+    /// # use rustfst::Tr;
     /// # use rustfst::semirings::{TropicalWeight, Semiring};
-    /// let arc = Arc::<TropicalWeight>::new(0, 1, 1.3, 2);
+    /// let arc = Tr::<TropicalWeight>::new(0, 1, 1.3, 2);
     ///
     /// assert_eq!(arc.ilabel, 0);
     /// assert_eq!(arc.olabel, 1);
@@ -31,7 +31,7 @@ impl<W> Arc<W> {
     ///
     /// ```
     pub fn new<S: Into<W>>(ilabel: Label, olabel: Label, weight: S, nextstate: StateId) -> Self {
-        Arc {
+        Tr {
             ilabel,
             olabel,
             weight: weight.into(),
@@ -39,22 +39,22 @@ impl<W> Arc<W> {
         }
     }
 
-    /// Updates the values of the attributes of the Arc from another Arc.
+    /// Updates the values of the attributes of the Tr from another Tr.
     ///
     /// # Example
     ///
     /// ```
-    /// # use rustfst::Arc;
+    /// # use rustfst::Tr;
     /// # use rustfst::semirings::{Semiring, TropicalWeight};
-    /// let mut arc_1 = Arc::<TropicalWeight>::new(0, 1, 1.3, 2);
-    /// let arc_2 = Arc::new(1, 2, 1.2, 3);
+    /// let mut tr_1 = Tr::<TropicalWeight>::new(0, 1, 1.3, 2);
+    /// let tr_2 = Tr::new(1, 2, 1.2, 3);
     ///
-    /// arc_1.set_value(&arc_2);
+    /// tr_1.set_value(&tr_2);
     ///
-    /// assert_eq!(arc_1, arc_2);
+    /// assert_eq!(tr_1, tr_2);
     /// ```
     #[inline]
-    pub fn set_value(&mut self, arc: &Arc<W>)
+    pub fn set_value(&mut self, arc: &Tr<W>)
     where
         W: std::clone::Clone,
     {
@@ -65,8 +65,8 @@ impl<W> Arc<W> {
     }
 }
 
-impl<W: SerializableSemiring> Arc<W> {
-    pub fn arc_type() -> String {
+impl<W: SerializableSemiring> Tr<W> {
+    pub fn tr_type() -> String {
         let weight_type = W::weight_type();
         if weight_type.as_str() == "tropical" {
             "standard".to_string()

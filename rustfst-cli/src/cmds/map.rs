@@ -30,57 +30,57 @@ impl UnaryFstAlgorithm for MapAlgorithm {
         mut fst: VectorFst<TropicalWeight>,
     ) -> Result<VectorFst<TropicalWeight>> {
         match self.map_type.as_str() {
-            "arc_sum" => {
-                arc_sum(&mut fst);
+            "tr_sum" | "arc_sum" => {
+                tr_sum(&mut fst);
                 Ok(fst)
             }
-            "arc_unique" => {
-                arc_unique(&mut fst);
+            "tr_unique" | "arc_unique" => {
+                tr_unique(&mut fst);
                 Ok(fst)
             }
             "identity" => {
-                let mut mapper = arc_mappers::IdentityArcMapper {};
-                arc_map(&mut fst, &mut mapper)?;
+                let mut mapper = tr_mappers::IdentityTrMapper {};
+                tr_map(&mut fst, &mut mapper)?;
                 Ok(fst)
             }
             "input_epsilon" => {
-                let mut mapper = arc_mappers::InputEpsilonMapper {};
-                arc_map(&mut fst, &mut mapper)?;
+                let mut mapper = tr_mappers::InputEpsilonMapper {};
+                tr_map(&mut fst, &mut mapper)?;
                 Ok(fst)
             }
             "invert" => {
-                let mut mapper = arc_mappers::InvertWeightMapper {};
-                arc_map(&mut fst, &mut mapper)?;
+                let mut mapper = tr_mappers::InvertWeightMapper {};
+                tr_map(&mut fst, &mut mapper)?;
                 Ok(fst)
             }
             "output_epsilon" => {
-                let mut mapper = arc_mappers::OutputEpsilonMapper {};
-                arc_map(&mut fst, &mut mapper)?;
+                let mut mapper = tr_mappers::OutputEpsilonMapper {};
+                tr_map(&mut fst, &mut mapper)?;
                 Ok(fst)
             }
             "plus" => {
                 // Safe because there is a check at parsing time.
                 let mut mapper =
-                    arc_mappers::PlusMapper::new(unsafe { self.weight.unsafe_unwrap() });
-                arc_map(&mut fst, &mut mapper)?;
+                    tr_mappers::PlusMapper::new(unsafe { self.weight.unsafe_unwrap() });
+                tr_map(&mut fst, &mut mapper)?;
                 Ok(fst)
             }
             "quantize" => {
                 // TODO: Handle the delta parameter
-                let mut mapper = arc_mappers::QuantizeMapper {};
-                arc_map(&mut fst, &mut mapper)?;
+                let mut mapper = tr_mappers::QuantizeMapper {};
+                tr_map(&mut fst, &mut mapper)?;
                 Ok(fst)
             }
             "rmweight" => {
-                let mut mapper = arc_mappers::RmWeightMapper {};
-                arc_map(&mut fst, &mut mapper)?;
+                let mut mapper = tr_mappers::RmWeightMapper {};
+                tr_map(&mut fst, &mut mapper)?;
                 Ok(fst)
             }
             "times" => {
                 // Safe because there is a check at parsing time.
                 let mut mapper =
-                    arc_mappers::TimesMapper::new(unsafe { self.weight.unsafe_unwrap() });
-                arc_map(&mut fst, &mut mapper)?;
+                    tr_mappers::TimesMapper::new(unsafe { self.weight.unsafe_unwrap() });
+                tr_map(&mut fst, &mut mapper)?;
                 Ok(fst)
             }
             _ => bail!(

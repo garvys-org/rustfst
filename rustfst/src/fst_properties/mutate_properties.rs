@@ -1,8 +1,8 @@
 use crate::algorithms::ProjectType;
 use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
-use crate::Arc;
 use crate::StateId;
+use crate::Tr;
 
 pub fn set_start_properties(inprops: FstProperties) -> FstProperties {
     let mut outprops = inprops & FstProperties::SET_START_PROPERTIES;
@@ -24,11 +24,11 @@ pub fn add_state_properties(inprops: FstProperties) -> FstProperties {
     inprops & FstProperties::ADD_STATE_PROPERTIES
 }
 
-pub fn add_arc_properties<W: Semiring>(
+pub fn add_tr_properties<W: Semiring>(
     _inprops: FstProperties,
     _state: StateId,
-    _old_arc: Arc<W>,
-    _new_arc: Arc<W>,
+    _old_tr: Tr<W>,
+    _new_tr: Tr<W>,
 ) -> FstProperties {
     unimplemented!()
 }
@@ -41,7 +41,7 @@ pub fn delete_all_states_properties(_inprops: FstProperties) -> FstProperties {
     unimplemented!()
 }
 
-pub fn delete_arcs_properties(inprops: FstProperties) -> FstProperties {
+pub fn delete_trs_properties(inprops: FstProperties) -> FstProperties {
     inprops & FstProperties::DELETE_ARCS_PROPERTIES
 }
 

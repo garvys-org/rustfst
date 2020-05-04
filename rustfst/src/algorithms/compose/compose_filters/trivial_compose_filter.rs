@@ -4,7 +4,7 @@ use crate::algorithms::compose::compose_filters::ComposeFilter;
 use crate::algorithms::compose::filter_states::{FilterState, TrivialFilterState};
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;
-use crate::Arc;
+use crate::Tr;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -49,7 +49,7 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(())
     }
 
-    fn filter_arc(&mut self, _arc1: &mut Arc<W>, _arc2: &mut Arc<W>) -> Result<Self::FS> {
+    fn filter_tr(&mut self, _tr1: &mut Tr<W>, _tr2: &mut Tr<W>) -> Result<Self::FS> {
         Ok(Self::FS::new(true))
     }
 

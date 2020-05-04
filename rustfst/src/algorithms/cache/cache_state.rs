@@ -1,11 +1,11 @@
 use std::slice::Iter as IterSlice;
 use std::slice::IterMut as IterSliceMut;
 
-use crate::Arc;
+use crate::Tr;
 
 #[derive(Clone, Debug, PartialOrd, PartialEq, Eq)]
 pub struct CacheState<W> {
-    arcs: Vec<Arc<W>>,
+    arcs: Vec<Tr<W>>,
     final_weight: Option<W>,
     expanded: bool,
     has_final: bool,
@@ -42,31 +42,31 @@ impl<W> CacheState<W> {
         self.final_weight.as_ref()
     }
 
-    pub fn push_arc(&mut self, arc: Arc<W>) {
+    pub fn push_tr(&mut self, arc: Tr<W>) {
         self.arcs.push(arc);
     }
 
-    pub fn reserve_arcs(&mut self, n: usize) {
+    pub fn reserve_trs(&mut self, n: usize) {
         self.arcs.reserve(n);
     }
 
-    pub fn num_arcs(&self) -> usize {
+    pub fn num_trs(&self) -> usize {
         self.arcs.len()
     }
 
-    pub fn get_arc_unchecked(&self, n: usize) -> &Arc<W> {
+    pub fn get_tr_unchecked(&self, n: usize) -> &Tr<W> {
         unsafe { self.arcs.get_unchecked(n) }
     }
 
-    pub fn get_arc_unchecked_mut(&mut self, n: usize) -> &mut Arc<W> {
+    pub fn get_tr_unchecked_mut(&mut self, n: usize) -> &mut Tr<W> {
         unsafe { self.arcs.get_unchecked_mut(n) }
     }
 
-    pub fn arcs_iter(&self) -> IterSlice<Arc<W>> {
+    pub fn arcs_iter(&self) -> IterSlice<Tr<W>> {
         self.arcs.iter()
     }
 
-    pub fn arcs_iter_mut(&mut self) -> IterSliceMut<Arc<W>> {
+    pub fn arcs_iter_mut(&mut self) -> IterSliceMut<Tr<W>> {
         self.arcs.iter_mut()
     }
 }

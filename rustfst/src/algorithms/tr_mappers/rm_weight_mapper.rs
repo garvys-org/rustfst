@@ -1,8 +1,8 @@
 use anyhow::Result;
 
-use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction, WeightConverter};
+use crate::algorithms::{FinalTr, MapFinalAction, TrMapper, WeightConverter};
 use crate::semirings::Semiring;
-use crate::Arc;
+use crate::Tr;
 
 /// Mapper to map all non-Zero() weights to One().
 pub struct RmWeightMapper {}
@@ -13,14 +13,14 @@ pub fn map_weight<W: Semiring>(weight: &mut W) {
     }
 }
 
-impl<S: Semiring> ArcMapper<S> for RmWeightMapper {
-    fn arc_map(&self, arc: &mut Arc<S>) -> Result<()> {
+impl<S: Semiring> TrMapper<S> for RmWeightMapper {
+    fn tr_map(&self, arc: &mut Tr<S>) -> Result<()> {
         map_weight(&mut arc.weight);
         Ok(())
     }
 
-    fn final_arc_map(&self, final_arc: &mut FinalArc<S>) -> Result<()> {
-        map_weight(&mut final_arc.weight);
+    fn final_tr_map(&self, final_tr: &mut FinalTr<S>) -> Result<()> {
+        map_weight(&mut final_tr.weight);
         Ok(())
     }
 
@@ -29,4 +29,4 @@ impl<S: Semiring> ArcMapper<S> for RmWeightMapper {
     }
 }
 
-arc_mapper_to_weight_convert_mapper!(RmWeightMapper);
+tr_mapper_to_weight_convert_mapper!(RmWeightMapper);

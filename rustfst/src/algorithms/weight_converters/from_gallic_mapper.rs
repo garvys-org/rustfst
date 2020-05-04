@@ -1,9 +1,9 @@
-use crate::algorithms::{FinalArc, MapFinalAction, WeightConverter};
+use crate::algorithms::{FinalTr, MapFinalAction, WeightConverter};
 use crate::semirings::{
     GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, GallicWeightRight,
     Semiring, StringWeightVariant,
 };
-use crate::{Arc, Label, EPS_LABEL};
+use crate::{Label, Tr, EPS_LABEL};
 use anyhow::Result;
 
 /// Mapper from GallicWeight<W> to W.
@@ -63,41 +63,41 @@ fn extract_gallic<W: Semiring>(gw: &GallicWeight<W>) -> Result<(W, Label)> {
 macro_rules! impl_weight_converter_gallic {
     ($gallic: ident, $fextract: ident) => {
         impl<W: Semiring> WeightConverter<$gallic<W>, W> for FromGallicConverter {
-            fn arc_map(&mut self, arc: &Arc<$gallic<W>>) -> Result<Arc<W>> {
+            fn tr_map(&mut self, arc: &Tr<$gallic<W>>) -> Result<Tr<W>> {
                 let (extracted_w, extracted_l) = $fextract(&arc.weight)?;
                 if arc.ilabel != arc.olabel {
                     bail!("Unrepresentable weight : {:?}", &arc);
                 }
 
-                let new_arc = Arc {
+                let new_tr = Tr {
                     ilabel: arc.ilabel,
                     olabel: extracted_l,
                     weight: extracted_w,
                     nextstate: arc.nextstate,
                 };
-                Ok(new_arc)
+                Ok(new_tr)
             }
 
-            fn final_arc_map(&mut self, final_arc: &FinalArc<$gallic<W>>) -> Result<FinalArc<W>> {
-                let (extracted_w, extracted_l) = $fextract(&final_arc.weight).expect("Fail");
-                if final_arc.ilabel != final_arc.olabel {
-                    panic!("Unrepresentable weight : {:?}", &final_arc);
+            fn final_tr_map(&mut self, final_tr: &FinalTr<$gallic<W>>) -> Result<FinalTr<W>> {
+                let (extracted_w, extracted_l) = $fextract(&final_tr.weight).expect("Fail");
+                if final_tr.ilabel != final_tr.olabel {
+                    panic!("Unrepresentable weight : {:?}", &final_tr);
                 }
 
-                let new_final_arc = if final_arc.ilabel == EPS_LABEL && extracted_l != EPS_LABEL {
-                    FinalArc {
+                let new_final_tr = if final_tr.ilabel == EPS_LABEL && extracted_l != EPS_LABEL {
+                    FinalTr {
                         ilabel: self.superfinal_label,
                         olabel: extracted_l,
                         weight: extracted_w,
                     }
                 } else {
-                    FinalArc {
-                        ilabel: final_arc.ilabel,
+                    FinalTr {
+                        ilabel: final_tr.ilabel,
                         olabel: extracted_l,
                         weight: extracted_w,
                     }
                 };
-                Ok(new_final_arc)
+                Ok(new_final_tr)
             }
 
             fn final_action(&self) -> MapFinalAction {

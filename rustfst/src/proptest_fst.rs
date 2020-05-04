@@ -5,7 +5,7 @@ use proptest::prelude::*;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::MutableFst;
 use crate::semirings::{Semiring, TropicalWeight};
-use crate::Arc;
+use crate::Tr;
 
 static MAX_NUM_STATES: usize = 100;
 static MAX_ILABEL: usize = 100;
@@ -19,7 +19,7 @@ fn proptest_weight() -> impl Strategy<Value = Option<TropicalWeight>> {
     ]
 }
 
-fn proptest_arcs(nstates: usize) -> impl Strategy<Value = Vec<(usize, Arc<TropicalWeight>)>> {
+fn proptest_trs(nstates: usize) -> impl Strategy<Value = Vec<(usize, Tr<TropicalWeight>)>> {
     proptest::collection::vec(
         (
             0..nstates,
@@ -36,7 +36,7 @@ fn proptest_arcs(nstates: usize) -> impl Strategy<Value = Vec<(usize, Arc<Tropic
             .map(|(state, ilabel, olabel, weight, nextstate)| {
                 (
                     state,
-                    Arc {
+                    Tr {
                         ilabel,
                         olabel,
                         weight: weight.unwrap_or_else(TropicalWeight::one),
@@ -57,8 +57,8 @@ pub(crate) fn proptest_fst() -> impl Strategy<Value = VectorFst<TropicalWeight>>
                 Just(nstates),
                 // Start state.
                 (0..nstates),
-                // List of states : Vec<State, Arc>.
-                proptest_arcs(nstates),
+                // List of states : Vec<State, Tr>.
+                proptest_trs(nstates),
                 // List of final weight.
                 proptest::collection::vec(proptest_weight(), nstates..=nstates),
             )
@@ -74,7 +74,7 @@ pub(crate) fn proptest_fst() -> impl Strategy<Value = VectorFst<TropicalWeight>>
 
             // Add arcs.
             for (state, arc) in arcs.into_iter() {
-                unsafe { fst.add_arc_unchecked(state, arc) };
+                unsafe { fst.add_tr_unchecked(state, arc) };
             }
 
             // Set final weights.

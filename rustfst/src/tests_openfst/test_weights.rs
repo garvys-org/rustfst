@@ -8,14 +8,14 @@ use crate::semirings::{
     LogWeight, ProductWeight, ReverseBack, SerializableSemiring, StringWeightLeft,
     StringWeightRestrict, StringWeightRight, TropicalWeight,
 };
-use crate::Arc;
+use crate::Tr;
 
 use self::super::get_path_folder;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ParsedWeightOperationResult {
     name: String,
-    arc_type: String,
+    tr_type: String,
     weight_type: String,
     weight_1: String,
     weight_2: String,
@@ -30,7 +30,7 @@ impl ParsedWeightOperationResult {
         ParsedWeightTestData {
             name: self.name,
             weight_type: self.weight_type,
-            arc_type: self.arc_type,
+            tr_type: self.tr_type,
             weight_1: W::parse_text(self.weight_1.as_str()).unwrap().1,
             weight_2: W::parse_text(self.weight_2.as_str()).unwrap().1,
             one: W::parse_text(self.one.as_str()).unwrap().1,
@@ -45,7 +45,7 @@ pub struct ParsedWeightTestData<W> {
     #[allow(unused)]
     name: String,
     weight_type: String,
-    arc_type: String,
+    tr_type: String,
     weight_1: W,
     weight_2: W,
     one: W,
@@ -68,7 +68,7 @@ fn do_run_test_openfst_weight<W: SerializableSemiring>(
         test_data.plus
     );
     assert_eq!(W::weight_type(), test_data.weight_type);
-    assert_eq!(Arc::<W>::arc_type(), test_data.arc_type);
+    assert_eq!(Tr::<W>::tr_type(), test_data.tr_type);
 
     assert_eq!(
         test_data.weight_1.reverse()?.reverse_back()?,

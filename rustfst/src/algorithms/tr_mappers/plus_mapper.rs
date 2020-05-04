@@ -1,8 +1,8 @@
 use anyhow::Result;
 
-use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction, WeightConverter};
+use crate::algorithms::{FinalTr, MapFinalAction, TrMapper, WeightConverter};
 use crate::semirings::Semiring;
-use crate::Arc;
+use crate::Tr;
 
 /// Mapper to add a constant to all weights.
 pub struct PlusMapper<W: Semiring> {
@@ -25,13 +25,13 @@ impl<W: Semiring> PlusMapper<W> {
     }
 }
 
-impl<S: Semiring> ArcMapper<S> for PlusMapper<S> {
-    fn arc_map(&self, arc: &mut Arc<S>) -> Result<()> {
+impl<S: Semiring> TrMapper<S> for PlusMapper<S> {
+    fn tr_map(&self, arc: &mut Tr<S>) -> Result<()> {
         self.map_weight(&mut arc.weight)
     }
 
-    fn final_arc_map(&self, final_arc: &mut FinalArc<S>) -> Result<()> {
-        self.map_weight(&mut final_arc.weight)
+    fn final_tr_map(&self, final_tr: &mut FinalTr<S>) -> Result<()> {
+        self.map_weight(&mut final_tr.weight)
     }
 
     fn final_action(&self) -> MapFinalAction {
@@ -39,4 +39,4 @@ impl<S: Semiring> ArcMapper<S> for PlusMapper<S> {
     }
 }
 
-arc_mapper_to_weight_convert_mapper!(PlusMapper<S>);
+tr_mapper_to_weight_convert_mapper!(PlusMapper<S>);

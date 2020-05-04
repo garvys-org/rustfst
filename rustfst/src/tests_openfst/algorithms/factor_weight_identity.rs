@@ -10,12 +10,12 @@ use crate::semirings::SerializableSemiring;
 use crate::semirings::WeightQuantize;
 use crate::tests_openfst::FstTestData;
 
-use super::dynamic_fst::compare_fst_static_dynamic;
+use super::lazy_fst::compare_fst_static_lazy;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FwIdentityOperationResult {
     factor_final_weights: bool,
-    factor_arc_weights: bool,
+    factor_tr_weights: bool,
     result: String,
 }
 
@@ -25,7 +25,7 @@ where
     F::W: SerializableSemiring,
 {
     pub factor_final_weights: bool,
-    pub factor_arc_weights: bool,
+    pub factor_tr_weights: bool,
     pub result: F,
 }
 
@@ -37,7 +37,7 @@ impl FwIdentityOperationResult {
     {
         FwIdentityTestData {
             factor_final_weights: self.factor_final_weights,
-            factor_arc_weights: self.factor_arc_weights,
+            factor_tr_weights: self.factor_tr_weights,
             result: F::from_text_string(self.result.as_str()).unwrap(),
         }
     }
@@ -48,7 +48,7 @@ where
     W: SerializableSemiring + WeightQuantize + 'static,
 {
     for data in &test_data.factor_weight_identity {
-        let mode = FactorWeightType::from_bools(data.factor_final_weights, data.factor_arc_weights);
+        let mode = FactorWeightType::from_bools(data.factor_final_weights, data.factor_tr_weights);
         let opts = FactorWeightOptions::new(mode);
 
         let fst_res: VectorFst<_> =
@@ -58,8 +58,8 @@ where
         data.result,
         fst_res,
         format!(
-            "Factor weight identity failing with factor_final_weights={:?} and factor_arc_weights={:?}",
-            data.factor_final_weights, data.factor_arc_weights
+            "Factor weight identity failing with factor_final_weights={:?} and factor_tr_weights={:?}",
+            data.factor_final_weights, data.factor_tr_weights
         )
     );
     }
@@ -67,21 +67,21 @@ where
     Ok(())
 }
 
-pub fn test_factor_weight_identity_dynamic<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_factor_weight_identity_lazy<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + 'static,
 {
     for data in &test_data.factor_weight_identity {
-        let mode = FactorWeightType::from_bools(data.factor_final_weights, data.factor_arc_weights);
+        let mode = FactorWeightType::from_bools(data.factor_final_weights, data.factor_tr_weights);
         let opts = FactorWeightOptions::new(mode);
 
         let fst_res_static: VectorFst<_> =
             factor_weight::<VectorFst<_>, _, _, IdentityFactor<_>>(&test_data.raw, opts.clone())?;
 
-        let fst_res_dynamic =
+        let fst_res_lazy =
             FactorWeightFst::<_, _, IdentityFactor<_>>::new(test_data.raw.clone(), opts)?;
 
-        compare_fst_static_dynamic(&fst_res_static, &fst_res_dynamic)?;
+        compare_fst_static_lazy(&fst_res_static, &fst_res_lazy)?;
     }
 
     Ok(())

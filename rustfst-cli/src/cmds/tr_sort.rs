@@ -4,13 +4,13 @@ use rustfst::prelude::*;
 
 use crate::unary_fst_algorithm::UnaryFstAlgorithm;
 
-pub struct ArcsortAlgorithm {
+pub struct TrsortAlgorithm {
     path_in: String,
     sort_type: String,
     path_out: String,
 }
 
-impl UnaryFstAlgorithm for ArcsortAlgorithm {
+impl UnaryFstAlgorithm for TrsortAlgorithm {
     fn get_path_in(&self) -> &str {
         self.path_in.as_str()
     }
@@ -20,7 +20,7 @@ impl UnaryFstAlgorithm for ArcsortAlgorithm {
     }
 
     fn get_algorithm_name(&self) -> String {
-        "arcsort".to_string()
+        "tr_sort".to_string()
     }
 
     fn run_algorithm(
@@ -32,12 +32,12 @@ impl UnaryFstAlgorithm for ArcsortAlgorithm {
             "olabel" => olabel_compare,
             _ => bail!("Unknow sort_type : {}", self.sort_type),
         };
-        arc_sort(&mut fst, cmp);
+        tr_sort(&mut fst, cmp);
         Ok(fst)
     }
 }
 
-impl ArcsortAlgorithm {
+impl TrsortAlgorithm {
     pub fn new(path_in: &str, sort_type: &str, path_out: &str) -> Self {
         Self {
             path_in: path_in.to_string(),

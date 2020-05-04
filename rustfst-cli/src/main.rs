@@ -1,10 +1,9 @@
 use std::process;
 
-use clap::{App, Arg, SubCommand};
 use anyhow::{format_err, Result};
+use clap::{App, Arg, SubCommand};
 use log::error;
 
-use crate::cmds::arcsort::ArcsortAlgorithm;
 use crate::cmds::connect::ConnectAlgorithm;
 use crate::cmds::invert::InvertAlgorithm;
 use crate::cmds::map::MapAlgorithm;
@@ -15,6 +14,7 @@ use crate::cmds::reverse::ReverseAlgorithm;
 use crate::cmds::rm_final_epsilon::RmFinalEpsilonAlgorithm;
 use crate::cmds::shortest_path::ShortestPathAlgorithm;
 use crate::cmds::topsort::TopsortAlgorithm;
+use crate::cmds::tr_sort::TrsortAlgorithm;
 use crate::unary_fst_algorithm::UnaryFstAlgorithm;
 
 pub mod cmds;
@@ -40,9 +40,10 @@ fn main() {
     let connect_cmd = SubCommand::with_name("connect").about("Connect algorithm.");
     app = app.subcommand(one_in_one_out_options(connect_cmd));
 
-    // Arcsort
-    let arcsort_cmd = SubCommand::with_name("arcsort")
-        .about("Arcsort algorithm.")
+    // Trsort
+    let tr_sort_cmd = SubCommand::with_name("tr_sort")
+        .about("Trsort algorithm.")
+        .alias("arcsort")
         .arg(
             Arg::with_name("sort_type")
                 .help("Comparison method.")
@@ -51,7 +52,7 @@ fn main() {
                 .possible_values(&["ilabel", "olabel"])
                 .default_value("ilabel"),
         );
-    app = app.subcommand(one_in_one_out_options(arcsort_cmd));
+    app = app.subcommand(one_in_one_out_options(tr_sort_cmd));
 
     // Project
     let project_cmd = SubCommand::with_name("project")
@@ -84,6 +85,8 @@ fn main() {
                 .possible_values(&[
                     "arc_sum",
                     "arc_unique",
+                    "tr_sum",
+                    "tr_unique",
                     "identity",
                     "input_epsilon",
                     "invert",
@@ -165,7 +168,7 @@ fn handle(matches: clap::ArgMatches) -> Result<()> {
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
-        ("arcsort", Some(m)) => ArcsortAlgorithm::new(
+        ("tr_sort", Some(m)) => TrsortAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("sort_type").unwrap(),
             m.value_of("out.fst").unwrap(),

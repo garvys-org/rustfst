@@ -7,7 +7,7 @@ use anyhow::Result;
 use crate::algorithms::cache::CacheImpl;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Arc, StateId};
+use crate::{StateId, Tr};
 
 pub trait FstImpl: Debug {
     type W: Semiring + 'static;
@@ -38,7 +38,7 @@ pub trait FstImpl: Debug {
         self.cache_impl_ref().final_weight(state)
     }
 
-    fn arcs_iter(&mut self, state: StateId) -> Result<IterSlice<Arc<Self::W>>> {
+    fn arcs_iter(&mut self, state: StateId) -> Result<IterSlice<Tr<Self::W>>> {
         self.expand_if_necessary(state)?;
         self.cache_impl_ref().arcs_iter(state)
     }
@@ -51,12 +51,12 @@ pub trait FstImpl: Debug {
         Ok(())
     }
 
-    fn num_arcs(&mut self, state: StateId) -> Result<usize> {
+    fn num_trs(&mut self, state: StateId) -> Result<usize> {
         self.expand_if_necessary(state)?;
-        self.cache_impl_ref().num_arcs(state)
+        self.cache_impl_ref().num_trs(state)
     }
 
-    /// Turns the Dynamic FST into a static one.
+    /// Turns the Lazy FST into a static one.
     fn compute<F2: MutableFst<W = Self::W> + ExpandedFst<W = Self::W>>(&mut self) -> Result<F2> {
         let start_state = self.start()?;
         let mut fst_out = F2::new();
@@ -83,7 +83,7 @@ pub trait FstImpl: Debug {
                 for _ in n..=arc.nextstate {
                     fst_out.add_state();
                 }
-                fst_out.add_arc(s, arc.clone())?;
+                fst_out.add_tr(s, arc.clone())?;
             }
             if let Some(f_w) = self.final_weight(s)? {
                 fst_out.set_final(s, f_w.clone())?;

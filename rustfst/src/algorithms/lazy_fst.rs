@@ -8,17 +8,17 @@ use anyhow::Result;
 use itertools::izip;
 
 use crate::algorithms::cache::FstImpl;
-use crate::fst_traits::{ArcIterator, Fst, FstIterData, FstIterator, MutableFst, StateIterator};
+use crate::fst_traits::{Fst, FstIterData, FstIterator, MutableFst, StateIterator, TrIterator};
 use crate::prelude::CoreFst;
-use crate::{Arc, StateId, SymbolTable};
+use crate::{StateId, SymbolTable, Tr};
 
-pub struct DynamicFst<IMPL> {
+pub struct LazyFst<IMPL> {
     fst_impl: UnsafeCell<IMPL>,
     isymt: Option<Rc<SymbolTable>>,
     osymt: Option<Rc<SymbolTable>>,
 }
 
-impl<IMPL: FstImpl> DynamicFst<IMPL> {
+impl<IMPL: FstImpl> LazyFst<IMPL> {
     pub(crate) fn from_impl(
         fst_impl: IMPL,
         isymt: Option<Rc<SymbolTable>>,
@@ -51,7 +51,7 @@ impl<IMPL: FstImpl> DynamicFst<IMPL> {
     }
 }
 
-impl<IMPL: FstImpl> CoreFst for DynamicFst<IMPL> {
+impl<IMPL: FstImpl> CoreFst for LazyFst<IMPL> {
     type W = IMPL::W;
 
     fn start(&self) -> Option<usize> {
@@ -70,19 +70,19 @@ impl<IMPL: FstImpl> CoreFst for DynamicFst<IMPL> {
         self.final_weight(state_id).unwrap()
     }
 
-    fn num_arcs(&self, s: usize) -> Result<usize> {
+    fn num_trs(&self, s: usize) -> Result<usize> {
         let ptr = self.fst_impl.get();
         let fst_impl = unsafe { ptr.as_mut().unwrap() };
-        fst_impl.num_arcs(s)
+        fst_impl.num_trs(s)
     }
 
-    unsafe fn num_arcs_unchecked(&self, s: usize) -> usize {
-        self.num_arcs(s).unwrap()
+    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+        self.num_trs(s).unwrap()
     }
 }
 
-impl<'a, IMPL: FstImpl> ArcIterator<'a> for DynamicFst<IMPL> {
-    type Iter = IterSlice<'a, Arc<IMPL::W>>;
+impl<'a, IMPL: FstImpl> TrIterator<'a> for LazyFst<IMPL> {
+    type Iter = IterSlice<'a, Tr<IMPL::W>>;
 
     fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
         let ptr = self.fst_impl.get();
@@ -96,12 +96,12 @@ impl<'a, IMPL: FstImpl> ArcIterator<'a> for DynamicFst<IMPL> {
 }
 
 #[derive(Clone)]
-pub struct StatesIteratorDynamicFst<'a, T> {
+pub struct StatesIteratorLazyFst<'a, T> {
     pub(crate) fst: &'a T,
     pub(crate) s: usize,
 }
 
-impl<'a, IMPL: FstImpl> Iterator for StatesIteratorDynamicFst<'a, DynamicFst<IMPL>> {
+impl<'a, IMPL: FstImpl> Iterator for StatesIteratorLazyFst<'a, LazyFst<IMPL>> {
     type Item = StateId;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -117,16 +117,16 @@ impl<'a, IMPL: FstImpl> Iterator for StatesIteratorDynamicFst<'a, DynamicFst<IMP
     }
 }
 
-impl<'a, IMPL: FstImpl + 'a> StateIterator<'a> for DynamicFst<IMPL> {
-    type Iter = StatesIteratorDynamicFst<'a, DynamicFst<IMPL>>;
+impl<'a, IMPL: FstImpl + 'a> StateIterator<'a> for LazyFst<IMPL> {
+    type Iter = StatesIteratorLazyFst<'a, LazyFst<IMPL>>;
 
     fn states_iter(&'a self) -> Self::Iter {
         self.start();
-        StatesIteratorDynamicFst { fst: &self, s: 0 }
+        StatesIteratorLazyFst { fst: &self, s: 0 }
     }
 }
 
-impl<IMPL: FstImpl + 'static> Fst for DynamicFst<IMPL> {
+impl<IMPL: FstImpl + 'static> Fst for LazyFst<IMPL> {
     fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
         self.isymt.clone()
     }
@@ -152,19 +152,19 @@ impl<IMPL: FstImpl + 'static> Fst for DynamicFst<IMPL> {
     }
 }
 
-impl<IMPL: FstImpl> std::fmt::Debug for DynamicFst<IMPL> {
+impl<IMPL: FstImpl> std::fmt::Debug for LazyFst<IMPL> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let ptr = self.fst_impl.get();
         let fst_impl = unsafe { ptr.as_ref().unwrap() };
-        write!(f, "DynamicFst {{ {:?} }}", &fst_impl)
+        write!(f, "LazyFst {{ {:?} }}", &fst_impl)
     }
 }
 
-impl<'a, IMPL: FstImpl + 'a> FstIterator<'a> for DynamicFst<IMPL> {
-    type ArcsIter = <DynamicFst<IMPL> as ArcIterator<'a>>::Iter;
+impl<'a, IMPL: FstImpl + 'a> FstIterator<'a> for LazyFst<IMPL> {
+    type TrsIter = <LazyFst<IMPL> as TrIterator<'a>>::Iter;
     type FstIter = Map<
-        Zip<<DynamicFst<IMPL> as StateIterator<'a>>::Iter, Repeat<&'a Self>>,
-        Box<dyn FnMut((StateId, &'a Self)) -> FstIterData<&'a IMPL::W, Self::ArcsIter>>,
+        Zip<<LazyFst<IMPL> as StateIterator<'a>>::Iter, Repeat<&'a Self>>,
+        Box<dyn FnMut((StateId, &'a Self)) -> FstIterData<&'a IMPL::W, Self::TrsIter>>,
     >;
 
     fn fst_iter(&'a self) -> Self::FstIter {
@@ -174,13 +174,13 @@ impl<'a, IMPL: FstImpl + 'a> FstIterator<'a> for DynamicFst<IMPL> {
                 state_id,
                 arcs: p.arcs_iter(state_id).unwrap(),
                 final_weight: p.final_weight(state_id).unwrap(),
-                num_arcs: p.num_arcs(state_id).unwrap(),
+                num_trs: p.num_trs(state_id).unwrap(),
             }
         }))
     }
 }
 
-impl<IMPL: FstImpl + PartialEq> PartialEq for DynamicFst<IMPL> {
+impl<IMPL: FstImpl + PartialEq> PartialEq for LazyFst<IMPL> {
     fn eq(&self, other: &Self) -> bool {
         let ptr = self.fst_impl.get();
         let fst_impl = unsafe { ptr.as_ref().unwrap() };
@@ -192,7 +192,7 @@ impl<IMPL: FstImpl + PartialEq> PartialEq for DynamicFst<IMPL> {
     }
 }
 
-impl<IMPL: FstImpl + Clone + 'static> Clone for DynamicFst<IMPL> {
+impl<IMPL: FstImpl + Clone + 'static> Clone for LazyFst<IMPL> {
     fn clone(&self) -> Self {
         let ptr = self.fst_impl.get();
         let fst_impl = unsafe { ptr.as_ref().unwrap() };

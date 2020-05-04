@@ -6,7 +6,7 @@ use crate::semirings::Semiring;
 impl<W: Semiring + 'static> From<VectorFst<W>> for ConstFst<W> {
     fn from(ifst: VectorFst<W>) -> Self {
         let mut const_states = Vec::with_capacity(ifst.num_states());
-        let mut const_arcs = Vec::with_capacity(ifst.states.iter().map(|s| s.arcs.len()).sum());
+        let mut const_trs = Vec::with_capacity(ifst.states.iter().map(|s| s.arcs.len()).sum());
         let mut pos = 0;
         for s in ifst.states.into_iter() {
             let niepsilons = s.num_input_epsilons();
@@ -21,12 +21,12 @@ impl<W: Semiring + 'static> From<VectorFst<W>> for ConstFst<W> {
 
             pos += s.arcs.len();
 
-            const_arcs.extend(s.arcs.into_iter());
+            const_trs.extend(s.arcs.into_iter());
         }
 
         ConstFst {
             states: const_states,
-            arcs: const_arcs,
+            arcs: const_trs,
             start: ifst.start_state,
             isymt: ifst.isymt,
             osymt: ifst.osymt,

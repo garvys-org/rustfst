@@ -7,7 +7,7 @@ use crate::algorithms::compose::compose_filters::ComposeFilter;
 use crate::algorithms::compose::filter_states::{FilterState, TrivialFilterState};
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;
-use crate::{Arc, NO_LABEL};
+use crate::{Tr, NO_LABEL};
 
 #[derive(Debug)]
 pub struct NullComposeFilter<M1, M2> {
@@ -44,7 +44,7 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W> for NullCompo
         Ok(())
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Result<Self::FS> {
+    fn filter_tr(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
         let res = if arc1.olabel == NO_LABEL || arc2.ilabel == NO_LABEL {
             Self::FS::new_no_state()
         } else {

@@ -53,16 +53,16 @@ impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
         self.states.get_unchecked(state_id).final_weight.as_ref()
     }
 
-    fn num_arcs(&self, s: StateId) -> Result<usize> {
+    fn num_trs(&self, s: StateId) -> Result<usize> {
         if let Some(vector_fst_state) = self.states.get(s) {
-            Ok(vector_fst_state.num_arcs())
+            Ok(vector_fst_state.num_trs())
         } else {
             bail!("State {:?} doesn't exist", s);
         }
     }
 
     #[inline]
-    unsafe fn num_arcs_unchecked(&self, s: usize) -> usize {
-        self.states.get_unchecked(s).num_arcs()
+    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+        self.states.get_unchecked(s).num_trs()
     }
 }

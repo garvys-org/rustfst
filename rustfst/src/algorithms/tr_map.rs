@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
-use crate::Arc;
+use crate::Tr;
 use crate::{Label, StateId, EPS_LABEL};
 
 /// Struct used to map final weights when performing an arc mapping.
@@ -12,7 +12,7 @@ use crate::{Label, StateId, EPS_LABEL};
 /// If the mapper modifies the input label or output one,
 /// a super final state will need to be created.
 #[derive(Clone, Debug)]
-pub struct FinalArc<W: Semiring> {
+pub struct FinalTr<W: Semiring> {
     /// Input label. Default to `EPS_LABEL`.
     pub ilabel: Label,
     /// Output label. Default to `EPS_LABEL`.
@@ -37,26 +37,26 @@ pub enum MapFinalAction {
     MapRequireSuperfinal,
 }
 
-/// The ArcMapper interfaces defines how arcs and final weights are mapped.
+/// The TrMapper interfaces defines how arcs and final weights are mapped.
 /// This is useful for implementing operations that do not change the number of
 /// arcs.
-pub trait ArcMapper<S: Semiring> {
+pub trait TrMapper<S: Semiring> {
     /// How to modify the arcs.
-    fn arc_map(&self, arc: &mut Arc<S>) -> Result<()>;
+    fn tr_map(&self, arc: &mut Tr<S>) -> Result<()>;
 
     /// The mapper will be passed final weights as arcs of the form
-    /// `FinalArc(EPS_LABEL, EPS_LABEL, weight)`.
-    fn final_arc_map(&self, final_arc: &mut FinalArc<S>) -> Result<()>;
+    /// `FinalTr(EPS_LABEL, EPS_LABEL, weight)`.
+    fn final_tr_map(&self, final_tr: &mut FinalTr<S>) -> Result<()>;
 
     /// Specifies final action the mapper requires (see above).
     fn final_action(&self) -> MapFinalAction;
 }
 
-/// Maps every arc in the FST using an `ArcMapper` object.
-pub fn arc_map<F, M>(ifst: &mut F, mapper: &M) -> Result<()>
+/// Maps every arc in the FST using an `TrMapper` object.
+pub fn tr_map<F, M>(ifst: &mut F, mapper: &M) -> Result<()>
 where
     F: MutableFst,
-    M: ArcMapper<F::W>,
+    M: TrMapper<F::W>,
 {
     if ifst.start().is_none() {
         return Ok(());
@@ -75,28 +75,28 @@ where
     let states: Vec<_> = ifst.states_iter().collect();
     for state in states {
         for arc in unsafe { ifst.arcs_iter_unchecked_mut(state) } {
-            mapper.arc_map(arc)?;
+            mapper.tr_map(arc)?;
         }
 
         if let Some(w) = unsafe { ifst.final_weight_unchecked_mut(state) } {
-            let mut final_arc = FinalArc {
+            let mut final_tr = FinalTr {
                 ilabel: EPS_LABEL,
                 olabel: EPS_LABEL,
                 weight: w.clone(),
             };
-            mapper.final_arc_map(&mut final_arc)?;
+            mapper.final_tr_map(&mut final_tr)?;
             match final_action {
                 MapFinalAction::MapNoSuperfinal => {
-                    if final_arc.ilabel != EPS_LABEL || final_arc.olabel != EPS_LABEL {
-                        bail!("ArcMap: Non-zero arc labels for superfinal arc")
+                    if final_tr.ilabel != EPS_LABEL || final_tr.olabel != EPS_LABEL {
+                        bail!("TrMap: Non-zero arc labels for superfinal arc")
                     }
                     unsafe {
-                        ifst.set_final_unchecked(state, final_arc.weight);
+                        ifst.set_final_unchecked(state, final_tr.weight);
                     }
                 }
                 MapFinalAction::MapAllowSuperfinal => {
                     if Some(state) != superfinal {
-                        if final_arc.ilabel != EPS_LABEL || final_arc.olabel != EPS_LABEL {
+                        if final_tr.ilabel != EPS_LABEL || final_tr.olabel != EPS_LABEL {
                             if superfinal.is_none() {
                                 let superfinal_id = ifst.add_state();
                                 superfinal = Some(superfinal_id);
@@ -107,12 +107,12 @@ where
                             }
                             unsafe {
                                 // Checked
-                                ifst.add_arc_unchecked(
+                                ifst.add_tr_unchecked(
                                     state,
-                                    Arc::new(
-                                        final_arc.ilabel,
-                                        final_arc.olabel,
-                                        final_arc.weight,
+                                    Tr::new(
+                                        final_tr.ilabel,
+                                        final_tr.olabel,
+                                        final_tr.weight,
                                         superfinal.unwrap(), // Checked
                                     ),
                                 );
@@ -121,25 +121,25 @@ where
                         } else {
                             unsafe {
                                 // Checked
-                                ifst.set_final_unchecked(state, final_arc.weight);
+                                ifst.set_final_unchecked(state, final_tr.weight);
                             }
                         }
                     }
                 }
                 MapFinalAction::MapRequireSuperfinal => {
                     if Some(state) != superfinal {
-                        if final_arc.ilabel != EPS_LABEL
-                            || final_arc.olabel != EPS_LABEL
-                            || !final_arc.weight.is_zero()
+                        if final_tr.ilabel != EPS_LABEL
+                            || final_tr.olabel != EPS_LABEL
+                            || !final_tr.weight.is_zero()
                         {
                             unsafe {
                                 // checked
-                                ifst.add_arc_unchecked(
+                                ifst.add_tr_unchecked(
                                     state,
-                                    Arc::new(
-                                        final_arc.ilabel,
-                                        final_arc.olabel,
-                                        final_arc.weight,
+                                    Tr::new(
+                                        final_tr.ilabel,
+                                        final_tr.olabel,
+                                        final_tr.weight,
                                         superfinal.unwrap(),
                                     ),
                                 );

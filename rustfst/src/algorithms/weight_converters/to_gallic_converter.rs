@@ -1,13 +1,13 @@
 use anyhow::Result;
 
-use crate::algorithms::{FinalArc, MapFinalAction, WeightConverter};
+use crate::algorithms::{FinalTr, MapFinalAction, WeightConverter};
 use crate::semirings::{
     GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, GallicWeightRight,
     Semiring, StringWeightLeft, StringWeightRestrict, StringWeightRight,
 };
-use crate::{Arc, EPS_LABEL};
+use crate::{Tr, EPS_LABEL};
 
-/// Mapper from W to GallicArc<W>.
+/// Mapper from W to GallicTr<W>.
 pub struct ToGallicConverter {}
 
 macro_rules! impl_to_gallic_converter {
@@ -16,23 +16,23 @@ macro_rules! impl_to_gallic_converter {
         where
             W: Semiring,
         {
-            fn arc_map(&mut self, arc: &Arc<W>) -> Result<Arc<$gallic<W>>> {
-                let new_arc = if arc.olabel == EPS_LABEL {
+            fn tr_map(&mut self, arc: &Tr<W>) -> Result<Tr<$gallic<W>>> {
+                let new_tr = if arc.olabel == EPS_LABEL {
                     let w = ($string_weight::one(), arc.weight.clone());
-                    Arc::new(arc.ilabel, arc.ilabel, w, arc.nextstate)
+                    Tr::new(arc.ilabel, arc.ilabel, w, arc.nextstate)
                 } else {
                     let w = (arc.olabel, arc.weight.clone());
-                    Arc::new(arc.ilabel, arc.ilabel, w, arc.nextstate)
+                    Tr::new(arc.ilabel, arc.ilabel, w, arc.nextstate)
                 };
-                Ok(new_arc)
+                Ok(new_tr)
             }
 
-            fn final_arc_map(&mut self, final_arc: &FinalArc<W>) -> Result<FinalArc<$gallic<W>>> {
-                if final_arc.weight.is_zero() {
+            fn final_tr_map(&mut self, final_tr: &FinalTr<W>) -> Result<FinalTr<$gallic<W>>> {
+                if final_tr.weight.is_zero() {
                     bail!("Shouldn't happen")
                 }
-                let w = ($string_weight::one(), final_arc.weight.clone());
-                Ok(FinalArc {
+                let w = ($string_weight::one(), final_tr.weight.clone());
+                Ok(FinalTr {
                     ilabel: EPS_LABEL,
                     olabel: EPS_LABEL,
                     weight: w.into(),

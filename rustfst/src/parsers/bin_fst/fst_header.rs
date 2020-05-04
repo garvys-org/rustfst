@@ -30,13 +30,13 @@ bitflags! {
 pub(crate) struct FstHeader {
     pub(crate) magic_number: i32,
     pub(crate) fst_type: OpenFstString,
-    pub(crate) arc_type: OpenFstString,
+    pub(crate) tr_type: OpenFstString,
     pub(crate) version: i32,
     pub(crate) flags: FstFlags,
     pub(crate) properties: u64,
     pub(crate) start: i64,
     pub(crate) num_states: i64,
-    pub(crate) num_arcs: i64,
+    pub(crate) num_trs: i64,
     pub(crate) isymt: Option<Rc<SymbolTable>>,
     pub(crate) osymt: Option<Rc<SymbolTable>>,
 }
@@ -69,14 +69,14 @@ impl FstHeader {
         i: &[u8],
         min_file_version: i32,
         fst_loading_type: S1,
-        arc_loading_type: S2,
+        tr_loading_type: S2,
     ) -> IResult<&[u8], FstHeader> {
         let (i, magic_number) = verify(le_i32, |v: &i32| *v == FST_MAGIC_NUMBER)(i)?;
         let (i, fst_type) = verify(OpenFstString::parse, |v| {
             v.s.as_str() == fst_loading_type.as_ref()
         })(i)?;
-        let (i, arc_type) = verify(OpenFstString::parse, |v| {
-            v.s.as_str() == arc_loading_type.as_ref()
+        let (i, tr_type) = verify(OpenFstString::parse, |v| {
+            v.s.as_str() == tr_loading_type.as_ref()
         })(i)?;
         let (i, version) = verify(le_i32, |v: &i32| *v >= min_file_version)(i)?;
         let (i, flags) = map_res(le_u32, |v: u32| {
@@ -85,7 +85,7 @@ impl FstHeader {
         let (i, properties) = le_u64(i)?;
         let (i, start) = le_i64(i)?;
         let (i, num_states) = le_i64(i)?;
-        let (i, num_arcs) = le_i64(i)?;
+        let (i, num_trs) = le_i64(i)?;
 
         let (i, isymt) = optionally_parse_symt(i, flags.contains(FstFlags::HAS_ISYMBOLS))?;
         let (i, osymt) = optionally_parse_symt(i, flags.contains(FstFlags::HAS_OSYMBOLS))?;
@@ -95,13 +95,13 @@ impl FstHeader {
             FstHeader {
                 magic_number,
                 fst_type,
-                arc_type,
+                tr_type,
                 version,
                 flags,
                 properties,
                 start,
                 num_states,
-                num_arcs,
+                num_trs,
                 isymt: isymt.map(Rc::new),
                 osymt: osymt.map(Rc::new),
             },
@@ -113,8 +113,8 @@ impl FstHeader {
         write_bin_i32(file, self.magic_number)?;
         //fst_type: OpenFstString,
         self.fst_type.write(file)?;
-        //arc_type: OpenFstString,
-        self.arc_type.write(file)?;
+        //tr_type: OpenFstString,
+        self.tr_type.write(file)?;
         //version: i32,
         write_bin_i32(file, self.version)?;
         //flags: i32,
@@ -125,8 +125,8 @@ impl FstHeader {
         write_bin_i64(file, self.start)?;
         //num_states: i64,
         write_bin_i64(file, self.num_states)?;
-        //num_arcs: i64,
-        write_bin_i64(file, self.num_arcs)?;
+        //num_trs: i64,
+        write_bin_i64(file, self.num_trs)?;
         optionally_write_symt(file, &self.isymt)?;
         optionally_write_symt(file, &self.osymt)?;
         Ok(())

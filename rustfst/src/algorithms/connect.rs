@@ -1,12 +1,12 @@
 use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::arc_filters::AnyArcFilter;
 use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
+use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::fst_traits::Fst;
 use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
-use crate::Arc;
 use crate::StateId;
+use crate::Tr;
 use crate::NO_STATE_ID;
 
 /// This operation trims an FST, removing states and arcs that are not on successful paths.
@@ -47,7 +47,7 @@ use crate::NO_STATE_ID;
 ///
 pub fn connect<F: ExpandedFst + MutableFst>(fst: &mut F) -> Result<()> {
     let mut visitor = ConnectVisitor::new(fst);
-    dfs_visit(fst, &mut visitor, &AnyArcFilter {}, false);
+    dfs_visit(fst, &mut visitor, &AnyTrFilter {}, false);
     let mut dstates = Vec::with_capacity(visitor.access.len());
     for s in 0..visitor.access.len() {
         if !visitor.access[s] || !visitor.coaccess[s] {
@@ -100,11 +100,11 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for ConnectVisitor<'a, F> {
         true
     }
 
-    fn tree_arc(&mut self, _s: usize, _arc: &Arc<<F as CoreFst>::W>) -> bool {
+    fn tree_tr(&mut self, _s: usize, _tr: &Tr<<F as CoreFst>::W>) -> bool {
         true
     }
 
-    fn back_arc(&mut self, s: usize, arc: &Arc<<F as CoreFst>::W>) -> bool {
+    fn back_tr(&mut self, s: usize, arc: &Tr<<F as CoreFst>::W>) -> bool {
         let t = arc.nextstate;
         if self.dfnumber[t] < self.lowlink[s] {
             self.lowlink[s] = self.dfnumber[t];
@@ -115,7 +115,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for ConnectVisitor<'a, F> {
         true
     }
 
-    fn forward_or_cross_arc(&mut self, s: usize, arc: &Arc<<F as CoreFst>::W>) -> bool {
+    fn forward_or_cross_tr(&mut self, s: usize, arc: &Tr<<F as CoreFst>::W>) -> bool {
         let t = arc.nextstate;
         if self.dfnumber[t] < self.dfnumber[s]
             && self.onstack[t]
@@ -134,7 +134,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for ConnectVisitor<'a, F> {
         &mut self,
         s: usize,
         parent: Option<usize>,
-        _arc: Option<&Arc<<F as CoreFst>::W>>,
+        _tr: Option<&Tr<<F as CoreFst>::W>>,
     ) {
         if unsafe { self.fst.is_final_unchecked(s) } {
             self.coaccess[s] = true;

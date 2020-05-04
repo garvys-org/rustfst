@@ -2,8 +2,8 @@ use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::fmt::Formatter;
 
-use binary_heap_plus::{BinaryHeap, FnComparator};
 use anyhow::Result;
+use binary_heap_plus::{BinaryHeap, FnComparator};
 
 use crate::algorithms::{Queue, QueueType};
 use crate::semirings::Semiring;
