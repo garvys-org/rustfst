@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use anyhow instead of failure for errors.
 - Renamed Arc as Tr (for transition)
 - Renamed DynamicFst as LazyFst
+- Semiring impls are required to be 'static
 
 ### Fixed
 - Fix olabel display while drawing a FST if no symbol table is provided
