@@ -1,6 +1,6 @@
 use crate::algorithms::dfs_visit::Visitor;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
-use crate::Arc;
+use crate::Tr;
 use crate::{StateId, NO_STATE_ID};
 
 use crate::fst_properties::FstProperties;
@@ -73,11 +73,11 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         true
     }
 
-    fn tree_arc(&mut self, _s: usize, _arc: &Arc<<F as CoreFst>::W>) -> bool {
+    fn tree_arc(&mut self, _s: usize, _arc: &Tr<<F as CoreFst>::W>) -> bool {
         true
     }
 
-    fn back_arc(&mut self, s: usize, arc: &Arc<<F as CoreFst>::W>) -> bool {
+    fn back_arc(&mut self, s: usize, arc: &Tr<<F as CoreFst>::W>) -> bool {
         let t = arc.nextstate;
         if self.dfnumber[t] < self.lowlink[s] {
             self.lowlink[s] = self.dfnumber[t];
@@ -94,7 +94,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         true
     }
 
-    fn forward_or_cross_arc(&mut self, s: usize, arc: &Arc<<F as CoreFst>::W>) -> bool {
+    fn forward_or_cross_arc(&mut self, s: usize, arc: &Tr<<F as CoreFst>::W>) -> bool {
         let t = arc.nextstate;
         if self.dfnumber[t] < self.dfnumber[s]
             && self.onstack[t]
@@ -113,7 +113,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         &mut self,
         s: usize,
         parent: Option<usize>,
-        _arc: Option<&Arc<<F as CoreFst>::W>>,
+        _arc: Option<&Tr<<F as CoreFst>::W>>,
     ) {
         if unsafe { self.fst.is_final_unchecked(s) } {
             self.coaccess[s] = true;

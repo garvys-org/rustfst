@@ -1,20 +1,20 @@
 use anyhow::Result;
 
-use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction, WeightConverter};
+use crate::algorithms::{TrMapper, FinalTr, MapFinalAction, WeightConverter};
 use crate::semirings::Semiring;
-use crate::Arc;
+use crate::Tr;
 use crate::EPS_LABEL;
 
 /// Mapper that converts all output symbols to epsilon.
 pub struct OutputEpsilonMapper {}
 
-impl<S: Semiring> ArcMapper<S> for OutputEpsilonMapper {
-    fn arc_map(&self, arc: &mut Arc<S>) -> Result<()> {
+impl<S: Semiring> TrMapper<S> for OutputEpsilonMapper {
+    fn arc_map(&self, arc: &mut Tr<S>) -> Result<()> {
         arc.olabel = EPS_LABEL;
         Ok(())
     }
 
-    fn final_arc_map(&self, _final_arc: &mut FinalArc<S>) -> Result<()> {
+    fn final_arc_map(&self, _final_arc: &mut FinalTr<S>) -> Result<()> {
         Ok(())
     }
 

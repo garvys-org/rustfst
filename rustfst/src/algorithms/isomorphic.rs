@@ -5,7 +5,7 @@ use anyhow::Result;
 
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{Arc, StateId};
+use crate::{Tr, StateId};
 
 struct Isomorphism<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> {
     fst_1: &'a F1,
@@ -15,7 +15,7 @@ struct Isomorphism<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = 
 }
 
 /// Compare arcs in the order input label, output label, weight and nextstate.
-pub fn arc_compare<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> Ordering {
+pub fn arc_compare<W: Semiring>(arc_1: &Tr<W>, arc_2: &Tr<W>) -> Ordering {
     if arc_1.ilabel < arc_2.ilabel {
         return Ordering::Less;
     }
@@ -156,7 +156,7 @@ mod test {
     use crate::fst_impls::VectorFst;
     use crate::fst_traits::{MutableFst, SerializableFst};
     use crate::semirings::{LogWeight, Semiring};
-    use crate::Arc;
+    use crate::Tr;
 
     #[test]
     fn test_isomorphic_1() -> Result<()> {
@@ -168,7 +168,7 @@ mod test {
         let mut fst_2 = fst_1.clone();
         assert!(isomorphic(&fst_1, &fst_2)?);
 
-        fst_2.add_arc(0, Arc::new(33, 45, LogWeight::new(0.3), 1))?;
+        fst_2.add_arc(0, Tr::new(33, 45, LogWeight::new(0.3), 1))?;
         assert!(!isomorphic(&fst_1, &fst_2)?);
 
         Ok(())

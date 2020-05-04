@@ -3,7 +3,7 @@ use std::slice::Iter as IterSlice;
 use anyhow::Result;
 
 use crate::algorithms::cache::VectorCacheState;
-use crate::Arc;
+use crate::Tr;
 use crate::StateId;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
@@ -55,7 +55,7 @@ impl<W> CacheImpl<W> {
         Ok(self.vector_cache_states.final_weight_unchecked(state))
     }
 
-    pub fn push_arc(&mut self, state: StateId, arc: Arc<W>) -> Result<()> {
+    pub fn push_arc(&mut self, state: StateId, arc: Tr<W>) -> Result<()> {
         if self.vector_cache_states.expanded(state) {
             bail!("Can't add arcs to a fully expanded state")
         }
@@ -86,7 +86,7 @@ impl<W> CacheImpl<W> {
         self.vector_cache_states.mark_expanded_unchecked(state)
     }
 
-    pub fn arcs_iter(&self, state: StateId) -> Result<IterSlice<Arc<W>>> {
+    pub fn arcs_iter(&self, state: StateId) -> Result<IterSlice<Tr<W>>> {
         if !self.vector_cache_states.expanded(state) {
             bail!("Can't iterate arcs on a not fully expanded state")
         }
@@ -122,7 +122,7 @@ mod tests {
         cache_impl.mark_expanded(2);
         assert!(cache_impl.expanded(2));
 
-        cache_impl.push_arc(1, Arc::new(2, 3, TropicalWeight::new(2.3), 3));
+        cache_impl.push_arc(1, Tr::new(2, 3, TropicalWeight::new(2.3), 3));
 
         assert!(!cache_impl.expanded(3));
         cache_impl.mark_expanded(3);

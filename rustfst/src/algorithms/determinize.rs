@@ -9,7 +9,7 @@ use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::factor_iterators::{GallicFactor, GallicFactorMin, GallicFactorRestrict};
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::algorithms::{factor_weight, weight_convert, FactorWeightOptions, FactorWeightType};
-use crate::arc::Arc;
+use crate::arc::Tr;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{
@@ -146,14 +146,14 @@ struct DeterminizeStateTuple<W: Semiring> {
 }
 
 #[derive(Default, PartialEq, Eq, Clone, Hash, PartialOrd, Debug)]
-struct DeterminizeArc<W: Semiring> {
+struct DeterminizeTr<W: Semiring> {
     label: Label,
     weight: W,
     dest_tuple: DeterminizeStateTuple<W>,
 }
 
-impl<W: Semiring> DeterminizeArc<W> {
-    pub fn from_arc(arc: &Arc<W>, filter_state: StateId) -> Self {
+impl<W: Semiring> DeterminizeTr<W> {
+    pub fn from_arc(arc: &Tr<W>, filter_state: StateId) -> Self {
         Self {
             label: arc.ilabel,
             weight: W::zero(),
@@ -189,7 +189,7 @@ where
 
     fn expand(&mut self, state: usize) -> Result<()> {
         // GetLabelMap
-        let mut label_map: HashMap<Label, DeterminizeArc<F::W>> = HashMap::new();
+        let mut label_map: HashMap<Label, DeterminizeTr<F::W>> = HashMap::new();
         let src_tuple = self.state_table.find_tuple(state);
         for src_elt in src_tuple.subset.iter() {
             for arc in self.fst.arcs_iter(src_elt.state)? {
@@ -197,11 +197,11 @@ where
 
                 let dest_elt = DeterminizeElement::new(arc.nextstate, r);
 
-                // Filter Arc
+                // Filter Tr
                 match label_map.entry(arc.ilabel) {
                     Entry::Occupied(_) => {}
                     Entry::Vacant(e) => {
-                        e.insert(DeterminizeArc::from_arc(arc, 0));
+                        e.insert(DeterminizeTr::from_arc(arc, 0));
                     }
                 };
 
@@ -278,8 +278,8 @@ where
         })
     }
 
-    fn add_arc(&mut self, state: StateId, det_arc: &DeterminizeArc<F::W>) -> Result<()> {
-        let arc = Arc::new(
+    fn add_arc(&mut self, state: StateId, det_arc: &DeterminizeTr<F::W>) -> Result<()> {
+        let arc = Tr::new(
             det_arc.label,
             det_arc.label,
             det_arc.weight.clone(),
@@ -288,7 +288,7 @@ where
         self.cache_impl.push_arc(state, arc)
     }
 
-    fn norm_arc(&mut self, det_arc: &mut DeterminizeArc<F::W>) -> Result<()> {
+    fn norm_arc(&mut self, det_arc: &mut DeterminizeTr<F::W>) -> Result<()> {
         det_arc
             .dest_tuple
             .subset
@@ -479,7 +479,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::arc::Arc;
+    use crate::arc::Tr;
     use crate::fst_impls::VectorFst;
     use crate::semirings::TropicalWeight;
 
@@ -494,9 +494,9 @@ mod tests {
         input_fst.set_start(s0)?;
         input_fst.set_final(s1, TropicalWeight::one())?;
 
-        input_fst.add_arc(s0, Arc::new(1, 1, 2.0, s1))?;
-        input_fst.add_arc(s0, Arc::new(1, 1, 2.0, s1))?;
-        input_fst.add_arc(s0, Arc::new(1, 1, 2.0, s1))?;
+        input_fst.add_arc(s0, Tr::new(1, 1, 2.0, s1))?;
+        input_fst.add_arc(s0, Tr::new(1, 1, 2.0, s1))?;
+        input_fst.add_arc(s0, Tr::new(1, 1, 2.0, s1))?;
 
         let mut ref_fst = VectorFst::new();
         let s0 = ref_fst.add_state();
@@ -505,7 +505,7 @@ mod tests {
         ref_fst.set_start(s0)?;
         ref_fst.set_final(s1, TropicalWeight::one())?;
 
-        ref_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
+        ref_fst.add_arc(s0, Tr::new(1, 1, TropicalWeight::new(2.0), s1))?;
 
         let determinized_fst: VectorFst<TropicalWeight> =
             determinize(&ref_fst, DeterminizeType::DeterminizeFunctional)?;
@@ -525,11 +525,11 @@ mod tests {
         input_fst.set_start(s0)?;
         input_fst.set_final(s3, TropicalWeight::one())?;
 
-        input_fst.add_arc(s0, Arc::new(1, 1, 2.0, s1))?;
-        input_fst.add_arc(s0, Arc::new(1, 1, 3.0, s2))?;
+        input_fst.add_arc(s0, Tr::new(1, 1, 2.0, s1))?;
+        input_fst.add_arc(s0, Tr::new(1, 1, 3.0, s2))?;
 
-        input_fst.add_arc(s1, Arc::new(2, 2, 4.0, s3))?;
-        input_fst.add_arc(s2, Arc::new(2, 2, 3.0, s3))?;
+        input_fst.add_arc(s1, Tr::new(2, 2, 4.0, s3))?;
+        input_fst.add_arc(s2, Tr::new(2, 2, 3.0, s3))?;
 
         let mut ref_fst = VectorFst::new();
         let s0 = ref_fst.add_state();
@@ -539,8 +539,8 @@ mod tests {
         ref_fst.set_start(s0)?;
         ref_fst.set_final(s2, TropicalWeight::one())?;
 
-        ref_fst.add_arc(s0, Arc::new(1, 1, TropicalWeight::new(2.0), s1))?;
-        ref_fst.add_arc(s1, Arc::new(2, 2, TropicalWeight::new(4.0), s2))?;
+        ref_fst.add_arc(s0, Tr::new(1, 1, TropicalWeight::new(2.0), s1))?;
+        ref_fst.add_arc(s1, Tr::new(2, 2, TropicalWeight::new(4.0), s2))?;
 
         let determinized_fst: VectorFst<TropicalWeight> =
             determinize(&ref_fst, DeterminizeType::DeterminizeFunctional)?;

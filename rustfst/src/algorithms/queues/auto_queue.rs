@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::algorithms::arc_filters::ArcFilter;
+use crate::algorithms::arc_filters::TrFilter;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::visitors::SccVisitor;
 use crate::algorithms::{Queue, QueueType};
@@ -19,7 +19,7 @@ pub struct AutoQueue {
 }
 
 impl AutoQueue {
-    pub fn new<F: ExpandedFst, A: ArcFilter<F::W>>(
+    pub fn new<F: ExpandedFst, A: TrFilter<F::W>>(
         fst: &F,
         distance: Option<&Vec<F::W>>,
         arc_filter: &A,
@@ -103,7 +103,7 @@ impl AutoQueue {
     pub fn scc_queue_type<
         F: ExpandedFst,
         C: Fn(&F::W, &F::W) -> Result<bool>,
-        A: ArcFilter<F::W>,
+        A: TrFilter<F::W>,
     >(
         fst: &F,
         sccs: &[usize],

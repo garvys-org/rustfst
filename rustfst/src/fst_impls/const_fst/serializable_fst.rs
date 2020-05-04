@@ -20,7 +20,7 @@ use crate::parsers::bin_fst::utils_parsing::{
 use crate::parsers::bin_fst::utils_serialization::write_bin_i32;
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::SerializableSemiring;
-use crate::{Arc, EPS_LABEL};
+use crate::{Tr, EPS_LABEL};
 
 impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
     fn fst_type() -> String {
@@ -55,7 +55,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
         let hdr = FstHeader {
             magic_number: FST_MAGIC_NUMBER,
             fst_type: OpenFstString::new(Self::fst_type()),
-            arc_type: OpenFstString::new(Arc::<W>::arc_type()),
+            arc_type: OpenFstString::new(Tr::<W>::arc_type()),
             version: CONST_FILE_VERSION,
             // TODO: Set flags if the content is aligned
             flags,
@@ -118,7 +118,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
             let mut noepsilons = 0;
             const_arcs.extend(arcs_iterator.map(|v| {
                 debug_assert_eq!(_state, v.state);
-                let arc = Arc {
+                let arc = Tr {
                     ilabel: v.ilabel,
                     olabel: v.olabel,
                     weight: v.weight.unwrap_or_else(W::one),
@@ -199,7 +199,7 @@ fn parse_const_fst<W: SerializableSemiring + 'static>(i: &[u8]) -> IResult<&[u8]
         i,
         CONST_MIN_FILE_VERSION,
         ConstFst::<W>::fst_type(),
-        Arc::<W>::arc_type(),
+        Tr::<W>::arc_type(),
     )?;
     let aligned = hdr.version == CONST_ALIGNED_FILE_VERSION;
     let pos = stream_len - i.len();

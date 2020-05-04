@@ -15,7 +15,7 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::algorithms::compose::matchers::{MultiEpsMatcher, MultiEpsMatcherFlags};
 use crate::fst_traits::CoreFst;
 use crate::semirings::Semiring;
-use crate::{Arc, Label, EPS_LABEL, NO_LABEL, NO_STATE_ID};
+use crate::{Tr, Label, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
 #[derive(Debug, Clone)]
 pub struct PushLabelsComposeFilter<
@@ -85,7 +85,7 @@ where
         Ok(())
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Result<Self::FS> {
+    fn filter_arc(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
         if !self
             .lookahead_flags()
             .contains(MatcherFlags::LOOKAHEAD_PREFIX)
@@ -153,8 +153,8 @@ where
     // Consumes an already pushed label.
     fn pushed_label_filter_arc(
         &self,
-        arca: &mut Arc<W>,
-        arcb: &mut Arc<W>,
+        arca: &mut Tr<W>,
+        arcb: &mut Tr<W>,
         flabel: Label,
     ) -> Result<<Self as ComposeFilter<W>>::FS> {
         let labela = if self.lookahead_output() {
@@ -201,8 +201,8 @@ where
     // Pushes a label forward when possible.
     fn push_label_filter_arc(
         &self,
-        arca: &mut Arc<W>,
-        arcb: &mut Arc<W>,
+        arca: &mut Tr<W>,
+        arcb: &mut Tr<W>,
         fs1: &CF::FS,
     ) -> Result<<Self as ComposeFilter<W>>::FS> {
         let labela = if self.lookahead_output() {
@@ -228,7 +228,7 @@ where
             return Ok(FilterState::new((fs1.clone(), FilterState::new(NO_LABEL))));
         }
 
-        let mut larc = Arc::new(NO_LABEL, NO_LABEL, W::zero(), NO_STATE_ID);
+        let mut larc = Tr::new(NO_LABEL, NO_LABEL, W::zero(), NO_STATE_ID);
 
         let b = match self.selector() {
             Selector::MatchInput(s) => s.matcher.borrow().lookahead_prefix(&mut larc),

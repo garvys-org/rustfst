@@ -1,6 +1,6 @@
 use crate::fst_traits::{FinalStatesIterator, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Arc, StateId, EPS_LABEL};
+use crate::{Tr, StateId, EPS_LABEL};
 use unsafe_unwrap::UnsafeUnwrap;
 
 /// Add, if needed, a super final state to the given FST. The super final state
@@ -45,7 +45,7 @@ pub fn add_super_final_state<F: MutableFst>(ifst: &mut F) -> StateId {
         unsafe {
             ifst.add_arc_unchecked(
                 final_state,
-                Arc {
+                Tr {
                     ilabel: EPS_LABEL,
                     olabel: EPS_LABEL,
                     weight,

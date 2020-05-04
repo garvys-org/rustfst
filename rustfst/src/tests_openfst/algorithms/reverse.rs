@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use anyhow::Result;
 
-use crate::algorithms::FinalArc;
+use crate::algorithms::FinalTr;
 use crate::algorithms::MapFinalAction;
 use crate::algorithms::WeightConverter;
 use crate::algorithms::{reverse, weight_convert};
@@ -10,7 +10,7 @@ use crate::fst_impls::VectorFst;
 use crate::fst_traits::{AllocableFst, CoreFst, MutableFst, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::{Semiring, SerializableSemiring};
-use crate::Arc;
+use crate::Tr;
 
 use crate::tests_openfst::FstTestData;
 
@@ -21,17 +21,17 @@ where
     SI: Semiring,
     SO: Semiring,
 {
-    fn arc_map(&mut self, arc: &Arc<SI>) -> Result<Arc<SO>> {
+    fn arc_map(&mut self, arc: &Tr<SI>) -> Result<Tr<SO>> {
         let w = &arc.weight;
         let rw = unsafe { std::mem::transmute::<&SI, &SO>(w).clone() };
 
-        Ok(Arc::new(arc.ilabel, arc.olabel, rw, arc.nextstate))
+        Ok(Tr::new(arc.ilabel, arc.olabel, rw, arc.nextstate))
     }
 
-    fn final_arc_map(&mut self, final_arc: &FinalArc<SI>) -> Result<FinalArc<SO>> {
+    fn final_arc_map(&mut self, final_arc: &FinalTr<SI>) -> Result<FinalTr<SO>> {
         let w = &final_arc.weight;
         let rw = unsafe { std::mem::transmute::<&SI, &SO>(w).clone() };
-        Ok(FinalArc {
+        Ok(FinalTr {
             ilabel: final_arc.ilabel,
             olabel: final_arc.olabel,
             weight: rw,

@@ -16,7 +16,7 @@ use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;
-use crate::{Arc, EPS_LABEL};
+use crate::{Tr, EPS_LABEL};
 
 #[derive(Clone, Debug)]
 pub struct LookAheadComposeFilter<
@@ -44,8 +44,8 @@ where
 {
     fn lookahead_filter_arc(
         &mut self,
-        arca: &mut Arc<W>,
-        arcb: &mut Arc<W>,
+        arca: &mut Tr<W>,
+        arcb: &mut Tr<W>,
         fs: &CF::FS,
     ) -> Result<CF::FS> {
 
@@ -150,7 +150,7 @@ where
         self.filter.set_state(s1, s2, filter_state)
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Result<Self::FS> {
+    fn filter_arc(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
         self.lookahead_arc = false;
         let fs = self.filter.filter_arc(arc1, arc2)?;
         if fs == CF::FS::new_no_state() {

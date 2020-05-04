@@ -10,16 +10,16 @@ use bitflags::bitflags;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::dynamic_fst::DynamicFst;
-use crate::arc::Arc;
+use crate::arc::Tr;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::KDELTA;
 use crate::{Label, StateId};
 
 bitflags! {
-    /// What kind of weight should be factored ? Arc weight ? Final weights ?
+    /// What kind of weight should be factored ? Tr weight ? Final weights ?
     pub struct FactorWeightType: u32 {
-        /// Factor weights located on the Arcs.
+        /// Factor weights located on the Trs.
         const FACTOR_FINAL_WEIGHTS = 0b01;
         /// Factor weights located in the final states.
         const FACTOR_ARC_WEIGHTS = 0b10;
@@ -153,7 +153,7 @@ where
                 if !self.factor_arc_weights() || factor_it.done() {
                     let dest = self.find_state(&Element::new(Some(arc.nextstate), F::W::one()));
                     self.cache_impl
-                        .push_arc(state, Arc::new(arc.ilabel, arc.olabel, weight, dest))?;
+                        .push_arc(state, Tr::new(arc.ilabel, arc.olabel, weight, dest))?;
                 } else {
                     for (p_f, p_s) in factor_it {
                         let dest = self.find_state(&Element::new(
@@ -161,7 +161,7 @@ where
                             p_s.quantize(self.opts.delta)?,
                         ));
                         self.cache_impl
-                            .push_arc(state, Arc::new(arc.ilabel, arc.olabel, p_f, dest))?;
+                            .push_arc(state, Tr::new(arc.ilabel, arc.olabel, p_f, dest))?;
                     }
                 }
             }
@@ -183,7 +183,7 @@ where
             for (p_f, p_s) in factor_it {
                 let dest = self.find_state(&Element::new(None, p_s.quantize(self.opts.delta)?));
                 self.cache_impl
-                    .push_arc(state, Arc::new(ilabel, olabel, p_f, dest))?;
+                    .push_arc(state, Tr::new(ilabel, olabel, p_f, dest))?;
                 if self.opts.increment_final_ilabel {
                     ilabel += 1;
                 }

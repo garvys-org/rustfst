@@ -5,7 +5,7 @@ use crate::algorithms::compose::filter_states::{FilterState, IntegerFilterState}
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
-use crate::{Arc, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
+use crate::{Tr, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -95,7 +95,7 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(())
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Result<Self::FS> {
+    fn filter_arc(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
         let res = if arc2.ilabel == NO_LABEL {
             // EPSILON in FST1
             if self.fs == Self::FS::new(0) {

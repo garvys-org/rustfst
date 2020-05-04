@@ -1,10 +1,10 @@
 use anyhow::Result;
 
-use crate::algorithms::arc_filters::AnyArcFilter;
+use crate::algorithms::arc_filters::AnyTrFilter;
 use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
 use crate::algorithms::state_sort;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
-use crate::Arc;
+use crate::Tr;
 use crate::StateId;
 
 pub struct TopOrderVisitor {
@@ -30,20 +30,20 @@ impl<'a, F: 'a + Fst> Visitor<'a, F> for TopOrderVisitor {
         true
     }
 
-    fn tree_arc(&mut self, _s: StateId, _arc: &Arc<F::W>) -> bool {
+    fn tree_arc(&mut self, _s: StateId, _arc: &Tr<F::W>) -> bool {
         true
     }
 
-    fn back_arc(&mut self, _s: StateId, _arc: &Arc<F::W>) -> bool {
+    fn back_arc(&mut self, _s: StateId, _arc: &Tr<F::W>) -> bool {
         self.acyclic = false;
         false
     }
 
-    fn forward_or_cross_arc(&mut self, _s: StateId, _arc: &Arc<F::W>) -> bool {
+    fn forward_or_cross_arc(&mut self, _s: StateId, _arc: &Tr<F::W>) -> bool {
         true
     }
 
-    fn finish_state(&mut self, s: StateId, _parent: Option<StateId>, _arc: Option<&Arc<F::W>>) {
+    fn finish_state(&mut self, s: StateId, _parent: Option<StateId>, _arc: Option<&Tr<F::W>>) {
         self.finish.push(s)
     }
 
@@ -76,7 +76,7 @@ where
     F: MutableFst + ExpandedFst,
 {
     let mut visitor = TopOrderVisitor::new();
-    dfs_visit(fst, &mut visitor, &AnyArcFilter {}, false);
+    dfs_visit(fst, &mut visitor, &AnyTrFilter {}, false);
     if visitor.acyclic {
         state_sort(fst, &visitor.order)?;
     }

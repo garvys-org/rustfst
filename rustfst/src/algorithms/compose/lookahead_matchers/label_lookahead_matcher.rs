@@ -9,7 +9,7 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::algorithms::compose::{LabelReachable, LabelReachableData};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{Arc, EPS_LABEL, NO_STATE_ID};
+use crate::{Tr, EPS_LABEL, NO_STATE_ID};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
@@ -17,7 +17,7 @@ pub struct LabelLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
     fst: Rc<M::F>,
     matcher: M,
     lookahead_weight: W,
-    prefix_arc: Arc<W>,
+    prefix_arc: Tr<W>,
     mft: PhantomData<MFT>,
     reachable: Option<LabelReachable>,
     lfst_ptr: *const u32,
@@ -106,7 +106,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         Ok(Self {
             fst: Rc::clone(&fst),
             matcher: M::new(fst, match_type)?,
-            prefix_arc: Arc::new(0, 0, W::one(), NO_STATE_ID),
+            prefix_arc: Tr::new(0, 0, W::one(), NO_STATE_ID),
             lookahead_weight: W::one(),
             reachable,
             lfst_ptr: std::ptr::null(),
@@ -206,7 +206,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         }
     }
 
-    fn lookahead_prefix(&self, arc: &mut Arc<W>) -> bool {
+    fn lookahead_prefix(&self, arc: &mut Tr<W>) -> bool {
         self.default_lookahead_prefix(arc)
     }
 
@@ -214,11 +214,11 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         &self.lookahead_weight
     }
 
-    fn prefix_arc(&self) -> &Arc<W> {
+    fn prefix_arc(&self) -> &Tr<W> {
         &self.prefix_arc
     }
 
-    fn prefix_arc_mut(&mut self) -> &mut Arc<W> {
+    fn prefix_arc_mut(&mut self) -> &mut Tr<W> {
         &mut self.prefix_arc
     }
 

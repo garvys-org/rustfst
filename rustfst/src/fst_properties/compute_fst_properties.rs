@@ -3,13 +3,13 @@ use std::collections::HashSet;
 use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::arc_filters::AnyArcFilter;
+use crate::algorithms::arc_filters::AnyTrFilter;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::visitors::SccVisitor;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
-use crate::Arc;
+use crate::Tr;
 
 /// Computes all the FstProperties of the FST bit don't attach them to the FST.
 pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Result<FstProperties> {
@@ -26,7 +26,7 @@ pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Result<FstProper
         | FstProperties::NOT_COACCESSIBLE;
 
     let mut visitor = SccVisitor::new(fst, true, true);
-    dfs_visit(fst, &mut visitor, &AnyArcFilter {}, false);
+    dfs_visit(fst, &mut visitor, &AnyTrFilter {}, false);
     let sccs = unsafe { &visitor.scc.unsafe_unwrap() };
 
     // Retrieves props computed in the DFS.
@@ -49,7 +49,7 @@ pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Result<FstProper
     for state in states {
         let mut ilabels = HashSet::new();
         let mut olabels = HashSet::new();
-        let mut prev_arc: Option<&Arc<F::W>> = None;
+        let mut prev_arc: Option<&Tr<F::W>> = None;
         for arc in fst.arcs_iter(state)? {
             // There is already an outgoing arc with this ilabel
             if ilabels.contains(&arc.ilabel) {

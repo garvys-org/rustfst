@@ -9,7 +9,7 @@ pub use sorted_matcher::SortedMatcher;
 
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{Arc, EPS_LABEL, NO_LABEL};
+use crate::{Tr, EPS_LABEL, NO_LABEL};
 use crate::{Label, StateId};
 use std::rc::Rc;
 
@@ -70,23 +70,23 @@ pub enum MatchType {
 // Use this to avoid autoref
 #[derive(Clone)]
 pub enum IterItemMatcher<W: Semiring> {
-    Arc(*const Arc<W>),
+    Tr(*const Tr<W>),
     EpsLoop,
 }
 
 impl<W: Semiring> IterItemMatcher<W> {
-    pub fn into_arc(self, state: StateId, match_type: MatchType) -> Result<Arc<W>> {
+    pub fn into_arc(self, state: StateId, match_type: MatchType) -> Result<Tr<W>> {
         match self {
-            IterItemMatcher::Arc(arc) => Ok(unsafe { (*arc).clone() }),
+            IterItemMatcher::Tr(arc) => Ok(unsafe { (*arc).clone() }),
             IterItemMatcher::EpsLoop => eps_loop(state, match_type),
         }
     }
 }
 
-pub fn eps_loop<W: Semiring>(state: StateId, match_type: MatchType) -> Result<Arc<W>> {
+pub fn eps_loop<W: Semiring>(state: StateId, match_type: MatchType) -> Result<Tr<W>> {
     let arc = match match_type {
-        MatchType::MatchInput => Arc::new(NO_LABEL, EPS_LABEL, W::one(), state),
-        MatchType::MatchOutput => Arc::new(EPS_LABEL, NO_LABEL, W::one(), state),
+        MatchType::MatchInput => Tr::new(NO_LABEL, EPS_LABEL, W::one(), state),
+        MatchType::MatchOutput => Tr::new(EPS_LABEL, NO_LABEL, W::one(), state),
         _ => bail!("Unsupported match_type : {:?}", match_type),
     };
     Ok(arc)

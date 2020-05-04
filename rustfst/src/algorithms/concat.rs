@@ -1,9 +1,9 @@
 use anyhow::Result;
 
 use crate::algorithms::ReplaceFst;
-use crate::arc::Arc;
+use crate::arc::Tr;
 use crate::fst_traits::{
-    AllocableFst, ArcIterator, CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator,
+    AllocableFst, TrIterator, CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator,
 };
 use crate::semirings::Semiring;
 use crate::{SymbolTable, EPS_LABEL};
@@ -87,7 +87,7 @@ where
                 unsafe {
                     fst_1.add_arc_unchecked(
                         s1,
-                        Arc::new(EPS_LABEL, EPS_LABEL, weight, _start2 + numstates1),
+                        Tr::new(EPS_LABEL, EPS_LABEL, weight, _start2 + numstates1),
                     )
                 };
             }
@@ -124,9 +124,9 @@ where
         if let Some(osymt) = fst1.output_symbols() {
             rfst.set_output_symbols(osymt);
         }
-        unsafe { rfst.add_arc_unchecked(0, Arc::new(EPS_LABEL, std::usize::MAX, F::W::one(), 1)) };
+        unsafe { rfst.add_arc_unchecked(0, Tr::new(EPS_LABEL, std::usize::MAX, F::W::one(), 1)) };
         unsafe {
-            rfst.add_arc_unchecked(1, Arc::new(EPS_LABEL, std::usize::MAX - 1, F::W::one(), 2))
+            rfst.add_arc_unchecked(1, Tr::new(EPS_LABEL, std::usize::MAX - 1, F::W::one(), 2))
         };
 
         let mut fst_tuples = Vec::with_capacity(3);
@@ -176,11 +176,11 @@ where
     }
 }
 
-impl<'a, F: Fst + 'static> ArcIterator<'a> for ConcatFst<F>
+impl<'a, F: Fst + 'static> TrIterator<'a> for ConcatFst<F>
 where
     F::W: 'static,
 {
-    type Iter = <ReplaceFst<F, F> as ArcIterator<'a>>::Iter;
+    type Iter = <ReplaceFst<F, F> as TrIterator<'a>>::Iter;
 
     fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
         self.0.arcs_iter(state_id)
@@ -224,7 +224,7 @@ impl<'a, F: Fst + 'static> FstIterator<'a> for ConcatFst<F>
 where
     F::W: 'static,
 {
-    type ArcsIter = <ReplaceFst<F, F> as FstIterator<'a>>::ArcsIter;
+    type TrsIter = <ReplaceFst<F, F> as FstIterator<'a>>::TrsIter;
     type FstIter = <ReplaceFst<F, F> as FstIterator<'a>>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {

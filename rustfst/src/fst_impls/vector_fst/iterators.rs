@@ -9,10 +9,10 @@ use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::FstIterData;
 use crate::fst_traits::{
-    ArcIterator, FstIntoIterator, FstIterator, FstIteratorMut, MutableArcIterator, StateIterator,
+    TrIterator, FstIntoIterator, FstIterator, FstIteratorMut, MutableTrIterator, StateIterator,
 };
 use crate::semirings::Semiring;
-use crate::Arc;
+use crate::Tr;
 use crate::StateId;
 
 impl<'a, W: Semiring> StateIterator<'a> for VectorFst<W> {
@@ -22,8 +22,8 @@ impl<'a, W: Semiring> StateIterator<'a> for VectorFst<W> {
     }
 }
 
-impl<'a, W: 'static + Semiring> ArcIterator<'a> for VectorFst<W> {
-    type Iter = slice::Iter<'a, Arc<W>>;
+impl<'a, W: 'static + Semiring> TrIterator<'a> for VectorFst<W> {
+    type Iter = slice::Iter<'a, Tr<W>>;
     fn arcs_iter(&'a self, state_id: StateId) -> Result<Self::Iter> {
         let state = self
             .states
@@ -37,8 +37,8 @@ impl<'a, W: 'static + Semiring> ArcIterator<'a> for VectorFst<W> {
     }
 }
 
-impl<'a, W: 'static + Semiring> MutableArcIterator<'a> for VectorFst<W> {
-    type IterMut = slice::IterMut<'a, Arc<W>>;
+impl<'a, W: 'static + Semiring> MutableTrIterator<'a> for VectorFst<W> {
+    type IterMut = slice::IterMut<'a, Tr<W>>;
     fn arcs_iter_mut(&'a mut self, state_id: StateId) -> Result<Self::IterMut> {
         let state = self
             .states
@@ -57,12 +57,12 @@ impl<W: Semiring> FstIntoIterator for VectorFst<W>
 where
     W: 'static,
 {
-    type ArcsIter = std::vec::IntoIter<Arc<W>>;
+    type TrsIter = std::vec::IntoIter<Tr<W>>;
 
     // TODO: Change this to impl once the feature has been stabilized
     // #![feature(type_alias_impl_trait)]
     // https://github.com/rust-lang/rust/issues/63063)
-    type FstIter = Box<dyn Iterator<Item = FstIterData<W, Self::ArcsIter>>>;
+    type FstIter = Box<dyn Iterator<Item = FstIterData<W, Self::TrsIter>>>;
 
     fn fst_into_iter(self) -> Self::FstIter {
         Box::new(
@@ -80,10 +80,10 @@ where
 }
 
 impl<'a, W: Semiring + 'static> FstIterator<'a> for VectorFst<W> {
-    type ArcsIter = std::slice::Iter<'a, Arc<W>>;
+    type TrsIter = std::slice::Iter<'a, Tr<W>>;
     type FstIter = Map<
         Enumerate<std::slice::Iter<'a, VectorFstState<W>>>,
-        Box<dyn FnMut((StateId, &'a VectorFstState<W>)) -> FstIterData<&'a W, Self::ArcsIter>>,
+        Box<dyn FnMut((StateId, &'a VectorFstState<W>)) -> FstIterData<&'a W, Self::TrsIter>>,
     >;
     fn fst_iter(&'a self) -> Self::FstIter {
         self.states
@@ -99,13 +99,13 @@ impl<'a, W: Semiring + 'static> FstIterator<'a> for VectorFst<W> {
 }
 
 impl<'a, W: Semiring + 'static> FstIteratorMut<'a> for VectorFst<W> {
-    type ArcsIter = std::slice::IterMut<'a, Arc<W>>;
+    type TrsIter = std::slice::IterMut<'a, Tr<W>>;
     type FstIter = Map<
         Enumerate<std::slice::IterMut<'a, VectorFstState<W>>>,
         Box<
             dyn FnMut(
                 (StateId, &'a mut VectorFstState<W>),
-            ) -> FstIterData<&'a mut W, Self::ArcsIter>,
+            ) -> FstIterData<&'a mut W, Self::TrsIter>,
         >,
     >;
 

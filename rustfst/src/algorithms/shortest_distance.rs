@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use anyhow::Result;
 
-use crate::algorithms::arc_filters::{AnyArcFilter, ArcFilter};
+use crate::algorithms::arc_filters::{AnyTrFilter, TrFilter};
 use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::Queue;
 use crate::fst_impls::VectorFst;
@@ -11,7 +11,7 @@ use crate::semirings::{ReverseBack, Semiring, SemiringProperties};
 use crate::StateId;
 use std::borrow::Borrow;
 
-pub struct ShortestDistanceConfig<W: Semiring, Q: Queue, A: ArcFilter<W>> {
+pub struct ShortestDistanceConfig<W: Semiring, Q: Queue, A: TrFilter<W>> {
     pub arc_filter: A,
     pub state_queue: Q,
     pub source: Option<StateId>,
@@ -20,7 +20,7 @@ pub struct ShortestDistanceConfig<W: Semiring, Q: Queue, A: ArcFilter<W>> {
     weight: PhantomData<W>,
 }
 
-impl<W: Semiring, Q: Queue, A: ArcFilter<W>> ShortestDistanceConfig<W, Q, A> {
+impl<W: Semiring, Q: Queue, A: TrFilter<W>> ShortestDistanceConfig<W, Q, A> {
     pub fn new(arc_filter: A, state_queue: Q, source: Option<StateId>, first_path: bool) -> Self {
         Self {
             arc_filter,
@@ -37,7 +37,7 @@ impl<W: Semiring, Q: Queue, A: ArcFilter<W>> ShortestDistanceConfig<W, Q, A> {
 }
 
 #[derive(Clone, Eq)]
-pub struct ShortestDistanceState<Q: Queue, F: ExpandedFst, B: Borrow<F>, A: ArcFilter<F::W>> {
+pub struct ShortestDistanceState<Q: Queue, F: ExpandedFst, B: Borrow<F>, A: TrFilter<F::W>> {
     pub fst: B,
     state_queue: Q,
     arc_filter: A,
@@ -51,7 +51,7 @@ pub struct ShortestDistanceState<Q: Queue, F: ExpandedFst, B: Borrow<F>, A: ArcF
     source_id: usize,
 }
 
-impl<Q: Queue + PartialEq, F: ExpandedFst, B: Borrow<F>, A: ArcFilter<F::W>> PartialEq
+impl<Q: Queue + PartialEq, F: ExpandedFst, B: Borrow<F>, A: TrFilter<F::W>> PartialEq
     for ShortestDistanceState<Q, F, B, A>
 {
     fn eq(&self, other: &Self) -> bool {
@@ -69,7 +69,7 @@ impl<Q: Queue + PartialEq, F: ExpandedFst, B: Borrow<F>, A: ArcFilter<F::W>> Par
     }
 }
 
-impl<Q: Queue, F: ExpandedFst, B: Borrow<F>, A: ArcFilter<F::W>> std::fmt::Debug
+impl<Q: Queue, F: ExpandedFst, B: Borrow<F>, A: TrFilter<F::W>> std::fmt::Debug
     for ShortestDistanceState<Q, F, B, A>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -109,7 +109,7 @@ macro_rules! ensure_source_index_is_valid {
     };
 }
 
-impl<Q: Queue, F: ExpandedFst, B: Borrow<F>, A: ArcFilter<F::W>> ShortestDistanceState<Q, F, B, A> {
+impl<Q: Queue, F: ExpandedFst, B: Borrow<F>, A: TrFilter<F::W>> ShortestDistanceState<Q, F, B, A> {
     pub fn new(fst: B, state_queue: Q, arc_filter: A, first_path: bool, retain: bool) -> Self {
         Self {
             state_queue,
@@ -236,7 +236,7 @@ impl<Q: Queue, F: ExpandedFst, B: Borrow<F>, A: ArcFilter<F::W>> ShortestDistanc
 pub fn shortest_distance_with_config<
     W: Semiring,
     Q: Queue,
-    A: ArcFilter<W>,
+    A: TrFilter<W>,
     F: ExpandedFst<W = W>,
 >(
     fst: &F,
@@ -257,7 +257,7 @@ pub fn shortest_distance_with_config<
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::fst_traits::MutableFst;
 /// # use rustfst::algorithms::shortest_distance;
-/// # use rustfst::Arc;
+/// # use rustfst::Tr;
 /// # use anyhow::Result;
 /// fn main() -> Result<()> {
 /// let mut fst = VectorFst::<IntegerWeight>::new();
@@ -266,9 +266,9 @@ pub fn shortest_distance_with_config<
 /// let s2 = fst.add_state();
 ///
 /// fst.set_start(s0).unwrap();
-/// fst.add_arc(s0, Arc::new(32, 23, 18, s1));
-/// fst.add_arc(s0, Arc::new(32, 23, 21, s2));
-/// fst.add_arc(s1, Arc::new(32, 23, 55, s2));
+/// fst.add_arc(s0, Tr::new(32, 23, 18, s1));
+/// fst.add_arc(s0, Tr::new(32, 23, 21, s2));
+/// fst.add_arc(s1, Tr::new(32, 23, 55, s2));
 ///
 /// let dists = shortest_distance(&fst, false)?;
 ///
@@ -285,12 +285,12 @@ where
     F::W: 'static,
 {
     if !reverse {
-        let arc_filter = AnyArcFilter {};
+        let arc_filter = AnyTrFilter {};
         let queue = AutoQueue::new(fst, None, &arc_filter)?;
         let config = ShortestDistanceConfig::new_with_default(arc_filter, queue);
         shortest_distance_with_config(fst, config)
     } else {
-        let arc_filter = AnyArcFilter {};
+        let arc_filter = AnyTrFilter {};
         let rfst: VectorFst<_> = crate::algorithms::reverse(fst)?;
         let state_queue = AutoQueue::new(&rfst, None, &arc_filter)?;
         let ropts = ShortestDistanceConfig::new_with_default(arc_filter, state_queue);

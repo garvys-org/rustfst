@@ -6,7 +6,7 @@ use anyhow::Result;
 use crate::algorithms::compose::compose_filters::ComposeFilter;
 use crate::algorithms::compose::matchers::Matcher;
 use crate::semirings::Semiring;
-use crate::{Arc, NO_LABEL};
+use crate::{Tr, NO_LABEL};
 
 #[derive(Debug)]
 pub struct MultiEpsFilter<F> {
@@ -39,7 +39,7 @@ impl<W: Semiring, F: ComposeFilter<W>> ComposeFilter<W> for MultiEpsFilter<F> {
         self.filter.set_state(s1, s2, filter_state)
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Result<Self::FS> {
+    fn filter_arc(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
         let opt_fs = self.filter.filter_arc(arc1, arc2)?;
         if self.keep_multi_eps {
             if arc1.olabel == NO_LABEL {

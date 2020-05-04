@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::arc_filters::{ArcFilter, EpsilonArcFilter};
+use crate::algorithms::arc_filters::{TrFilter, EpsilonTrFilter};
 use crate::algorithms::cache::{CacheImpl, FstImpl};
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::dynamic_fst::DynamicFst;
@@ -18,10 +18,10 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::CoreFst;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, EPS_LABEL};
+use crate::{Tr, Label, StateId, EPS_LABEL};
 
 pub struct RmEpsilonConfig<W: Semiring, Q: Queue> {
-    sd_opts: ShortestDistanceConfig<W, Q, EpsilonArcFilter>,
+    sd_opts: ShortestDistanceConfig<W, Q, EpsilonTrFilter>,
     connect: bool,
     weight_threshold: W,
     state_threshold: Option<StateId>,
@@ -35,7 +35,7 @@ impl<W: Semiring, Q: Queue> RmEpsilonConfig<W, Q> {
         state_threshold: Option<StateId>,
     ) -> Self {
         Self {
-            sd_opts: ShortestDistanceConfig::new_with_default(EpsilonArcFilter {}, queue),
+            sd_opts: ShortestDistanceConfig::new_with_default(EpsilonTrFilter {}, queue),
             connect,
             weight_threshold,
             state_threshold,
@@ -57,15 +57,15 @@ impl<W: Semiring, Q: Queue> RmEpsilonConfig<W, Q> {
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::fst_traits::MutableFst;
 /// # use rustfst::algorithms::rm_epsilon;
-/// # use rustfst::Arc;
+/// # use rustfst::Tr;
 /// # use rustfst::EPS_LABEL;
 /// # use anyhow::Result;
 /// # fn main() -> Result<()> {
 /// let mut fst = VectorFst::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
-/// fst.add_arc(s0, Arc::new(32, 25, IntegerWeight::new(78), s1));
-/// fst.add_arc(s1, Arc::new(EPS_LABEL, EPS_LABEL, IntegerWeight::new(13), s0));
+/// fst.add_arc(s0, Tr::new(32, 25, IntegerWeight::new(78), s1));
+/// fst.add_arc(s1, Tr::new(EPS_LABEL, EPS_LABEL, IntegerWeight::new(13), s0));
 /// fst.set_start(s0)?;
 /// fst.set_final(s0, IntegerWeight::new(5))?;
 ///
@@ -75,8 +75,8 @@ impl<W: Semiring, Q: Queue> RmEpsilonConfig<W, Q> {
 /// let mut fst_no_epsilon_ref = VectorFst::<IntegerWeight>::new();
 /// let s0 = fst_no_epsilon_ref.add_state();
 /// let s1 = fst_no_epsilon_ref.add_state();
-/// fst_no_epsilon_ref.add_arc(s0, Arc::new(32, 25, 78, s1));
-/// fst_no_epsilon_ref.add_arc(s1, Arc::new(32, 25, 78 * 13, s1));
+/// fst_no_epsilon_ref.add_arc(s0, Tr::new(32, 25, 78, s1));
+/// fst_no_epsilon_ref.add_arc(s1, Tr::new(32, 25, 78 * 13, s1));
 /// fst_no_epsilon_ref.set_start(s0)?;
 /// fst_no_epsilon_ref.set_final(s0, 5)?;
 /// fst_no_epsilon_ref.set_final(s1, 5 * 13)?;
@@ -100,7 +100,7 @@ pub fn rm_epsilon<F: MutableFst>(fst: &mut F) -> Result<()>
 where
     F::W: 'static,
 {
-    let arc_filter = EpsilonArcFilter {};
+    let arc_filter = EpsilonTrFilter {};
     let queue = AutoQueue::new(fst, None, &arc_filter)?;
     let opts = RmEpsilonConfig::new_with_default(queue);
     rm_epsilon_with_config(fst, opts)
@@ -146,14 +146,14 @@ where
         states = (0..fst.num_states()).collect();
     } else if fst_props.contains(FstProperties::TOP_SORTED) {
         let mut visitor = TopOrderVisitor::new();
-        dfs_visit(fst, &mut visitor, &EpsilonArcFilter {}, false);
+        dfs_visit(fst, &mut visitor, &EpsilonTrFilter {}, false);
 
         for i in 0..visitor.order.len() {
             states[visitor.order[i]] = i;
         }
     } else {
         let mut visitor = SccVisitor::new(fst, true, false);
-        dfs_visit(fst, &mut visitor, &EpsilonArcFilter {}, false);
+        dfs_visit(fst, &mut visitor, &EpsilonTrFilter {}, false);
 
         let scc = visitor.scc.as_ref().unwrap();
 
@@ -234,7 +234,7 @@ struct RmEpsilonState<F: MutableFst, B: Borrow<F>, Q: Queue> {
     visited_states: Vec<StateId>,
     element_map: HashMap<Element, (StateId, usize)>,
     expand_id: usize,
-    sd_state: ShortestDistanceState<Q, F, B, EpsilonArcFilter>,
+    sd_state: ShortestDistanceState<Q, F, B, EpsilonTrFilter>,
 }
 
 impl<F: MutableFst, B: Borrow<F>, Q: Queue> std::fmt::Debug for RmEpsilonState<F, B, Q> {
@@ -268,11 +268,11 @@ where
         }
     }
 
-    pub fn expand(&mut self, source: StateId) -> Result<(Vec<Arc<F::W>>, F::W)> {
+    pub fn expand(&mut self, source: StateId) -> Result<(Vec<Tr<F::W>>, F::W)> {
         let zero = F::W::zero();
         let distance = self.sd_state.shortest_distance(Some(source))?;
 
-        let arc_filter = EpsilonArcFilter {};
+        let arc_filter = EpsilonTrFilter {};
 
         let mut eps_queue = vec![source];
 

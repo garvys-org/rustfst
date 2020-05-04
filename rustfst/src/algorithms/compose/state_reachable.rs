@@ -1,4 +1,4 @@
-use crate::algorithms::arc_filters::AnyArcFilter;
+use crate::algorithms::arc_filters::AnyTrFilter;
 use crate::algorithms::compose::IntervalReachVisitor;
 use crate::algorithms::compose::IntervalSet;
 use crate::algorithms::condense;
@@ -73,7 +73,7 @@ impl StateReachable {
 
     pub fn new_acyclic<F: ExpandedFst>(fst: &F) -> Self {
         let mut reach_visitor = IntervalReachVisitor::new(fst);
-        dfs_visit(fst, &mut reach_visitor, &AnyArcFilter {}, false);
+        dfs_visit(fst, &mut reach_visitor, &AnyTrFilter {}, false);
         Self {
             isets: reach_visitor.isets,
             state2index: reach_visitor.state2index,

@@ -47,10 +47,10 @@
 //!     fst.set_start(s0)?;
 //!
 //!     // Add an arc from s0 to s1
-//!     fst.add_arc(s0, Arc::new(3, 5, 10.0, s1))?;
+//!     fst.add_arc(s0, Tr::new(3, 5, 10.0, s1))?;
 //!
 //!     // Add an arc from s0 to s2
-//!     fst.add_arc(s0, Arc::new(5, 7, 18.0, s2))?;
+//!     fst.add_arc(s0, Tr::new(5, 7, 18.0, s2))?;
 //!
 //!     // Set s1 and s2 as final states
 //!     fst.set_final(s1, 31.0)?;
@@ -103,7 +103,7 @@ pub use crate::drawing_config::DrawingConfig;
 pub use crate::fst_path::FstPath;
 pub use crate::symbol_table::SymbolTable;
 
-pub use self::arc::Arc;
+pub use self::arc::Tr;
 
 #[cfg(test)]
 use doc_comment::doc_comment;
@@ -162,7 +162,7 @@ pub const KDELTA: f32 = 1.0f32 / 1024.0f32;
 pub mod prelude {
     pub use crate::algorithms::arc_compares::*;
     pub use crate::algorithms::*;
-    pub use crate::arc::Arc;
+    pub use crate::arc::Tr;
     pub use crate::fst_impls::*;
     pub use crate::fst_traits::*;
     pub use crate::semirings::*;

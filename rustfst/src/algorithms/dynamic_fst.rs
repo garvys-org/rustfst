@@ -8,9 +8,9 @@ use anyhow::Result;
 use itertools::izip;
 
 use crate::algorithms::cache::FstImpl;
-use crate::fst_traits::{ArcIterator, Fst, FstIterData, FstIterator, MutableFst, StateIterator};
+use crate::fst_traits::{TrIterator, Fst, FstIterData, FstIterator, MutableFst, StateIterator};
 use crate::prelude::CoreFst;
-use crate::{Arc, StateId, SymbolTable};
+use crate::{Tr, StateId, SymbolTable};
 
 pub struct DynamicFst<IMPL> {
     fst_impl: UnsafeCell<IMPL>,
@@ -81,8 +81,8 @@ impl<IMPL: FstImpl> CoreFst for DynamicFst<IMPL> {
     }
 }
 
-impl<'a, IMPL: FstImpl> ArcIterator<'a> for DynamicFst<IMPL> {
-    type Iter = IterSlice<'a, Arc<IMPL::W>>;
+impl<'a, IMPL: FstImpl> TrIterator<'a> for DynamicFst<IMPL> {
+    type Iter = IterSlice<'a, Tr<IMPL::W>>;
 
     fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
         let ptr = self.fst_impl.get();
@@ -161,10 +161,10 @@ impl<IMPL: FstImpl> std::fmt::Debug for DynamicFst<IMPL> {
 }
 
 impl<'a, IMPL: FstImpl + 'a> FstIterator<'a> for DynamicFst<IMPL> {
-    type ArcsIter = <DynamicFst<IMPL> as ArcIterator<'a>>::Iter;
+    type TrsIter = <DynamicFst<IMPL> as TrIterator<'a>>::Iter;
     type FstIter = Map<
         Zip<<DynamicFst<IMPL> as StateIterator<'a>>::Iter, Repeat<&'a Self>>,
-        Box<dyn FnMut((StateId, &'a Self)) -> FstIterData<&'a IMPL::W, Self::ArcsIter>>,
+        Box<dyn FnMut((StateId, &'a Self)) -> FstIterData<&'a IMPL::W, Self::TrsIter>>,
     >;
 
     fn fst_iter(&'a self) -> Self::FstIter {

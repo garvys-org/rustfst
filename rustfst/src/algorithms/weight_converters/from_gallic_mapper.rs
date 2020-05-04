@@ -1,9 +1,9 @@
-use crate::algorithms::{FinalArc, MapFinalAction, WeightConverter};
+use crate::algorithms::{FinalTr, MapFinalAction, WeightConverter};
 use crate::semirings::{
     GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, GallicWeightRight,
     Semiring, StringWeightVariant,
 };
-use crate::{Arc, Label, EPS_LABEL};
+use crate::{Tr, Label, EPS_LABEL};
 use anyhow::Result;
 
 /// Mapper from GallicWeight<W> to W.
@@ -63,13 +63,13 @@ fn extract_gallic<W: Semiring>(gw: &GallicWeight<W>) -> Result<(W, Label)> {
 macro_rules! impl_weight_converter_gallic {
     ($gallic: ident, $fextract: ident) => {
         impl<W: Semiring> WeightConverter<$gallic<W>, W> for FromGallicConverter {
-            fn arc_map(&mut self, arc: &Arc<$gallic<W>>) -> Result<Arc<W>> {
+            fn arc_map(&mut self, arc: &Tr<$gallic<W>>) -> Result<Tr<W>> {
                 let (extracted_w, extracted_l) = $fextract(&arc.weight)?;
                 if arc.ilabel != arc.olabel {
                     bail!("Unrepresentable weight : {:?}", &arc);
                 }
 
-                let new_arc = Arc {
+                let new_arc = Tr {
                     ilabel: arc.ilabel,
                     olabel: extracted_l,
                     weight: extracted_w,
@@ -78,20 +78,20 @@ macro_rules! impl_weight_converter_gallic {
                 Ok(new_arc)
             }
 
-            fn final_arc_map(&mut self, final_arc: &FinalArc<$gallic<W>>) -> Result<FinalArc<W>> {
+            fn final_arc_map(&mut self, final_arc: &FinalTr<$gallic<W>>) -> Result<FinalTr<W>> {
                 let (extracted_w, extracted_l) = $fextract(&final_arc.weight).expect("Fail");
                 if final_arc.ilabel != final_arc.olabel {
                     panic!("Unrepresentable weight : {:?}", &final_arc);
                 }
 
                 let new_final_arc = if final_arc.ilabel == EPS_LABEL && extracted_l != EPS_LABEL {
-                    FinalArc {
+                    FinalTr {
                         ilabel: self.superfinal_label,
                         olabel: extracted_l,
                         weight: extracted_w,
                     }
                 } else {
-                    FinalArc {
+                    FinalTr {
                         ilabel: final_arc.ilabel,
                         olabel: extracted_l,
                         weight: extracted_w,

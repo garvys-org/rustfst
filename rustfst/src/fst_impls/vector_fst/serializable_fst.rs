@@ -10,7 +10,7 @@ use nom::IResult;
 
 use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{ArcIterator, CoreFst, ExpandedFst, Fst, MutableFst, SerializableFst};
+use crate::fst_traits::{TrIterator, CoreFst, ExpandedFst, Fst, MutableFst, SerializableFst};
 use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FST_MAGIC_NUMBER};
 use crate::parsers::bin_fst::utils_parsing::{
     parse_final_weight, parse_fst_arc, parse_start_state,
@@ -18,7 +18,7 @@ use crate::parsers::bin_fst::utils_parsing::{
 use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64};
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::SerializableSemiring;
-use crate::Arc;
+use crate::Tr;
 
 impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
     fn fst_type() -> String {
@@ -57,7 +57,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
         let hdr = FstHeader {
             magic_number: FST_MAGIC_NUMBER,
             fst_type: OpenFstString::new(Self::fst_type()),
-            arc_type: OpenFstString::new(Arc::<W>::arc_type()),
+            arc_type: OpenFstString::new(Tr::<W>::arc_type()),
             version: 2i32,
             // TODO: Set flags if the content is aligned
             flags,
@@ -104,7 +104,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
 
         for transition in parsed_fst_text.transitions.into_iter() {
             let weight = transition.weight.unwrap_or_else(W::one);
-            let arc = Arc::new(
+            let arc = Tr::new(
                 transition.ilabel,
                 transition.olabel,
                 weight,
@@ -150,7 +150,7 @@ fn parse_vector_fst<W: SerializableSemiring + 'static>(i: &[u8]) -> IResult<&[u8
         i,
         VECTOR_MIN_FILE_VERSION,
         VectorFst::<W>::fst_type(),
-        Arc::<W>::arc_type(),
+        Tr::<W>::arc_type(),
     )?;
     let (i, states) = count(parse_vector_fst_state, header.num_states as usize)(i)?;
     Ok((

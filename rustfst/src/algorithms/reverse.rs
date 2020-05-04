@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::arc::Arc;
+use crate::arc::Tr;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::EPS_LABEL;
@@ -55,13 +55,13 @@ where
         }
         let weight = unsafe { ifst.final_weight_unchecked(is) };
         if let Some(w) = weight {
-            states_arcs[0].push(Arc::new(EPS_LABEL, EPS_LABEL, w.reverse()?, os));
+            states_arcs[0].push(Tr::new(EPS_LABEL, EPS_LABEL, w.reverse()?, os));
         }
 
         for iarc in unsafe { ifst.arcs_iter_unchecked(is) } {
             let nos = iarc.nextstate + 1;
             let weight = iarc.weight.reverse()?;
-            let w = Arc::new(iarc.ilabel, iarc.olabel, weight, os);
+            let w = Tr::new(iarc.ilabel, iarc.olabel, weight, os);
             states_arcs[nos].push(w);
         }
     }

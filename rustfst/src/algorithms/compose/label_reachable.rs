@@ -11,9 +11,9 @@ use crate::algorithms::compose::{IntervalSet, StateReachable};
 use crate::algorithms::{arc_sort, fst_convert_from_ref};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableArcIterator, MutableFst};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableTrIterator, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, EPS_LABEL, NO_LABEL, UNASSIGNED};
+use crate::{Tr, Label, StateId, EPS_LABEL, NO_LABEL, UNASSIGNED};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelReachableData {
@@ -150,7 +150,7 @@ impl LabelReachable {
                     unsafe {
                         fst.add_arc_unchecked(
                             s,
-                            Arc::new(NO_LABEL, NO_LABEL, final_weight, nextstate),
+                            Tr::new(NO_LABEL, NO_LABEL, final_weight, nextstate),
                         )
                     };
                     indeg[nextstate] += 1;
@@ -170,7 +170,7 @@ impl LabelReachable {
         unsafe { fst.set_start_unchecked(start) };
         for s in 0..start {
             if indeg[s] == 0 {
-                unsafe { fst.add_arc_unchecked(start, Arc::new(0, 0, W::one(), s)) };
+                unsafe { fst.add_arc_unchecked(start, Tr::new(0, 0, W::one(), s)) };
             }
         }
     }
@@ -301,7 +301,7 @@ impl LabelReachable {
     pub fn reach<'a, W: Semiring + 'a>(
         &self,
         current_state: StateId,
-        aiter: impl Iterator<Item = &'a Arc<W>>,
+        aiter: impl Iterator<Item = &'a Tr<W>>,
         aiter_begin: usize,
         aiter_end: usize,
         compute_weight: bool,
@@ -363,7 +363,7 @@ impl LabelReachable {
 
     fn lower_bound<W: Semiring>(
         &self,
-        arcs: &[&Arc<W>],
+        arcs: &[&Tr<W>],
         aiter_begin: usize,
         aiter_end: usize,
         match_label: Label,

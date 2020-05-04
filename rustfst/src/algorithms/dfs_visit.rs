@@ -1,9 +1,9 @@
-use crate::arc::Arc;
-use crate::fst_traits::{ArcIterator, ExpandedFst, Fst};
+use crate::arc::Tr;
+use crate::fst_traits::{TrIterator, ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::StateId;
 
-use crate::algorithms::arc_filters::ArcFilter;
+use crate::algorithms::arc_filters::TrFilter;
 use unsafe_unwrap::UnsafeUnwrap;
 
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
@@ -24,17 +24,17 @@ pub trait Visitor<'a, F: Fst> {
     fn init_state(&mut self, s: StateId, root: StateId) -> bool;
 
     /// Invoked when tree arc to white/undiscovered state examined.
-    fn tree_arc(&mut self, s: StateId, arc: &Arc<F::W>) -> bool;
+    fn tree_arc(&mut self, s: StateId, arc: &Tr<F::W>) -> bool;
 
     /// Invoked when back arc to grey/unfinished state examined.
-    fn back_arc(&mut self, s: StateId, arc: &Arc<F::W>) -> bool;
+    fn back_arc(&mut self, s: StateId, arc: &Tr<F::W>) -> bool;
 
     /// Invoked when forward or cross arc to black/finished state examined.
-    fn forward_or_cross_arc(&mut self, s: StateId, arc: &Arc<F::W>) -> bool;
+    fn forward_or_cross_arc(&mut self, s: StateId, arc: &Tr<F::W>) -> bool;
 
     /// Invoked when state finished ('s' is tree root, 'parent' is kNoStateId,
     /// and 'arc' is nullptr).
-    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, arc: Option<&Arc<F::W>>);
+    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, arc: Option<&Tr<F::W>>);
 
     /// Invoked after DFS visit.
     fn finish_visit(&mut self);
@@ -43,7 +43,7 @@ pub trait Visitor<'a, F: Fst> {
 struct DfsState<'a, W, AI>
 where
     W: Semiring + 'a,
-    AI: Iterator<Item = &'a Arc<W>> + Clone,
+    AI: Iterator<Item = &'a Tr<W>> + Clone,
 {
     state_id: StateId,
     arc_iter: OpenFstIterator<AI>,
@@ -52,10 +52,10 @@ where
 impl<'a, W, AI> DfsState<'a, W, AI>
 where
     W: Semiring + 'a,
-    AI: Iterator<Item = &'a Arc<W>> + Clone,
+    AI: Iterator<Item = &'a Tr<W>> + Clone,
 {
     #[inline]
-    pub fn new<F: ArcIterator<'a, Iter = AI, W = W>>(fst: &'a F, s: StateId) -> Self {
+    pub fn new<F: TrIterator<'a, Iter = AI, W = W>>(fst: &'a F, s: StateId) -> Self {
         Self {
             state_id: s,
             arc_iter: OpenFstIterator::new(unsafe { fst.arcs_iter_unchecked(s) }),
@@ -91,7 +91,7 @@ impl<I: Iterator> OpenFstIterator<I> {
     }
 }
 
-pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>, A: ArcFilter<F::W>>(
+pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>, A: TrFilter<F::W>>(
     fst: &'a F,
     visitor: &mut V,
     arc_filter: &A,

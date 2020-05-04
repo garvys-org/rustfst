@@ -7,13 +7,13 @@ use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, NO_STATE_ID};
+use crate::{Tr, Label, StateId, NO_STATE_ID};
 
 #[derive(Debug)]
 pub struct TrivialLookAheadMatcher<W, M> {
     matcher: M,
     lookahead_weight: W,
-    prefix_arc: Arc<W>,
+    prefix_arc: Tr<W>,
 }
 
 impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
@@ -23,7 +23,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
     fn new(fst: Rc<Self::F>, match_type: MatchType) -> Result<Self> {
         Ok(Self {
             matcher: M::new(fst, match_type)?,
-            prefix_arc: Arc::new(0, 0, W::one(), NO_STATE_ID),
+            prefix_arc: Tr::new(0, 0, W::one(), NO_STATE_ID),
             lookahead_weight: W::one(),
         })
     }
@@ -94,7 +94,7 @@ impl<W: Semiring, M: Matcher<W>> LookaheadMatcher<W> for TrivialLookAheadMatcher
         Ok(true)
     }
 
-    fn lookahead_prefix(&self, _arc: &mut Arc<W>) -> bool {
+    fn lookahead_prefix(&self, _arc: &mut Tr<W>) -> bool {
         false
     }
 
@@ -102,11 +102,11 @@ impl<W: Semiring, M: Matcher<W>> LookaheadMatcher<W> for TrivialLookAheadMatcher
         &self.lookahead_weight
     }
 
-    fn prefix_arc(&self) -> &Arc<W> {
+    fn prefix_arc(&self) -> &Tr<W> {
         &self.prefix_arc
     }
 
-    fn prefix_arc_mut(&mut self) -> &mut Arc<W> {
+    fn prefix_arc_mut(&mut self) -> &mut Tr<W> {
         &mut self.prefix_arc
     }
 

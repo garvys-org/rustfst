@@ -23,7 +23,7 @@ where
         error_message_fst!(
             test_data.state_map_arc_sum,
             fst_state_map,
-            "StateMap : ArcSum"
+            "StateMap : TrSum"
         )
     );
 
@@ -45,7 +45,7 @@ where
         error_message_fst!(
             test_data.state_map_arc_unique,
             fst_state_map,
-            "StateMap : ArcUnique"
+            "StateMap : TrUnique"
         )
     );
 

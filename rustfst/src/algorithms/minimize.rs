@@ -23,12 +23,12 @@ use crate::algorithms::{
 };
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::ArcIterator;
+use crate::fst_traits::TrIterator;
 use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{
     GallicWeightLeft, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::Arc;
+use crate::Tr;
 use crate::StateId;
 use crate::EPS_LABEL;
 use crate::KDELTA;
@@ -431,7 +431,7 @@ where
 
         // TODO: Avoid this clone :o
         // Here we need to pointer to the partition that is valid even if the partition changes.
-        let comp = ArcIterCompare {
+        let comp = TrIterCompare {
             partition: partition.clone(),
         };
         let mut aiter_queue = BinaryHeap::new_by(|v1, v2| {
@@ -445,7 +445,7 @@ where
         // Split
         for s in partition.iter(c) {
             if tr.num_arcs(s + 1)? > 0 {
-                aiter_queue.push(ArcsIterCollected {
+                aiter_queue.push(TrsIterCollected {
                     idx: 0,
                     arcs: tr.arcs_iter(s + 1)?.collect(),
                 });
@@ -482,13 +482,13 @@ where
     Ok(partition)
 }
 
-struct ArcsIterCollected<'a, W: Semiring> {
+struct TrsIterCollected<'a, W: Semiring> {
     idx: usize,
-    arcs: Vec<&'a Arc<W>>,
+    arcs: Vec<&'a Tr<W>>,
 }
 
-impl<'a, W: Semiring> ArcsIterCollected<'a, W> {
-    fn peek(&self) -> Option<&&Arc<W>> {
+impl<'a, W: Semiring> TrsIterCollected<'a, W> {
+    fn peek(&self) -> Option<&&Tr<W>> {
         self.arcs.get(self.idx)
     }
 
@@ -502,12 +502,12 @@ impl<'a, W: Semiring> ArcsIterCollected<'a, W> {
 }
 
 #[derive(Clone)]
-struct ArcIterCompare {
+struct TrIterCompare {
     partition: Partition,
 }
 
-impl ArcIterCompare {
-    fn compare<'a, 'b, W>(&self, x: &ArcsIterCollected<'a, W>, y: &ArcsIterCollected<'b, W>) -> bool
+impl TrIterCompare {
+    fn compare<'a, 'b, W>(&self, x: &TrsIterCollected<'a, W>, y: &TrsIterCollected<'b, W>) -> bool
     where
         W: Semiring + 'static,
     {

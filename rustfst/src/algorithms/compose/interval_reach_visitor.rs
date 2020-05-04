@@ -2,7 +2,7 @@ use crate::algorithms::compose::{IntInterval, IntervalSet};
 use crate::algorithms::dfs_visit::Visitor;
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
-use crate::{Arc, StateId};
+use crate::{Tr, StateId};
 
 static UNASSIGNED: usize = std::usize::MAX;
 
@@ -59,24 +59,24 @@ impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
     }
 
     /// Invoked when tree arc to white/undiscovered state examined.
-    fn tree_arc(&mut self, _s: StateId, _arc: &Arc<F::W>) -> bool {
+    fn tree_arc(&mut self, _s: StateId, _arc: &Tr<F::W>) -> bool {
         true
     }
 
     /// Invoked when back arc to grey/unfinished state examined.
-    fn back_arc(&mut self, _s: StateId, _arc: &Arc<F::W>) -> bool {
+    fn back_arc(&mut self, _s: StateId, _arc: &Tr<F::W>) -> bool {
         panic!("Cyclic input")
     }
 
     /// Invoked when forward or cross arc to black/finished state examined.
-    fn forward_or_cross_arc(&mut self, s: StateId, arc: &Arc<F::W>) -> bool {
+    fn forward_or_cross_arc(&mut self, s: StateId, arc: &Tr<F::W>) -> bool {
         union_vec_isets_unordered(&mut self.isets, s, arc.nextstate);
         true
     }
 
     /// Invoked when state finished ('s' is tree root, 'parent' is kNoStateId,
     /// and 'arc' is nullptr).
-    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, _arc: Option<&Arc<F::W>>) {
+    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, _arc: Option<&Tr<F::W>>) {
         if self.index != UNASSIGNED
             && self.fst.is_final(s).unwrap()
             && !self.fst.final_weight(s).unwrap().unwrap().is_zero()

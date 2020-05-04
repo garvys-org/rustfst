@@ -4,7 +4,7 @@ use clap::{App, Arg, SubCommand};
 use anyhow::{format_err, Result};
 use log::error;
 
-use crate::cmds::arcsort::ArcsortAlgorithm;
+use crate::cmds::arcsort::TrsortAlgorithm;
 use crate::cmds::connect::ConnectAlgorithm;
 use crate::cmds::invert::InvertAlgorithm;
 use crate::cmds::map::MapAlgorithm;
@@ -40,9 +40,9 @@ fn main() {
     let connect_cmd = SubCommand::with_name("connect").about("Connect algorithm.");
     app = app.subcommand(one_in_one_out_options(connect_cmd));
 
-    // Arcsort
+    // Trsort
     let arcsort_cmd = SubCommand::with_name("arcsort")
-        .about("Arcsort algorithm.")
+        .about("Trsort algorithm.")
         .arg(
             Arg::with_name("sort_type")
                 .help("Comparison method.")
@@ -165,7 +165,7 @@ fn handle(matches: clap::ArgMatches) -> Result<()> {
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
-        ("arcsort", Some(m)) => ArcsortAlgorithm::new(
+        ("arcsort", Some(m)) => TrsortAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("sort_type").unwrap(),
             m.value_of("out.fst").unwrap(),

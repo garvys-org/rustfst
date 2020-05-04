@@ -1,4 +1,4 @@
-use crate::algorithms::arc_filters::ArcFilter;
+use crate::algorithms::arc_filters::TrFilter;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::top_sort::TopOrderVisitor;
 use crate::algorithms::{Queue, QueueType};
@@ -16,7 +16,7 @@ pub struct TopOrderQueue {
 }
 
 impl TopOrderQueue {
-    pub fn new<F: ExpandedFst, A: ArcFilter<F::W>>(fst: &F, arc_filter: &A) -> Self {
+    pub fn new<F: ExpandedFst, A: TrFilter<F::W>>(fst: &F, arc_filter: &A) -> Self {
         let mut visitor = TopOrderVisitor::new();
         dfs_visit(fst, &mut visitor, arc_filter, false);
         if !visitor.acyclic {

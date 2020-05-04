@@ -27,7 +27,7 @@ where
         error_message_fst!(
             test_data.arc_map_output_epsilon,
             fst_arcsort,
-            "ArcSort ilabel"
+            "TrSort ilabel"
         )
     );
     Ok(())
@@ -50,7 +50,7 @@ where
         error_message_fst!(
             test_data.arc_map_output_epsilon,
             fst_arcsort,
-            "ArcSort olabel"
+            "TrSort olabel"
         )
     );
     Ok(())

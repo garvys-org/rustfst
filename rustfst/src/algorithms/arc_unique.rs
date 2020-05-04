@@ -3,9 +3,9 @@ use std::cmp::Ordering;
 use crate::fst_traits::ExpandedFst;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
-use crate::Arc;
+use crate::Tr;
 
-pub(crate) fn arc_compare<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> Ordering {
+pub(crate) fn arc_compare<W: Semiring>(arc_1: &Tr<W>, arc_2: &Tr<W>) -> Ordering {
     if arc_1.ilabel < arc_2.ilabel {
         return Ordering::Less;
     }
@@ -42,7 +42,7 @@ mod test {
     use crate::fst_impls::VectorFst;
     use crate::fst_traits::MutableFst;
     use crate::semirings::{ProbabilityWeight, Semiring};
-    use crate::Arc;
+    use crate::Tr;
     use anyhow::Result;
 
     use super::*;
@@ -54,11 +54,11 @@ mod test {
         let s1 = fst_in.add_state();
         let s2 = fst_in.add_state();
 
-        fst_in.add_arc(s1, Arc::new(0, 0, ProbabilityWeight::new(0.3), s2))?;
-        fst_in.add_arc(s1, Arc::new(0, 1, ProbabilityWeight::new(0.3), s2))?;
-        fst_in.add_arc(s1, Arc::new(1, 0, ProbabilityWeight::new(0.3), s2))?;
-        fst_in.add_arc(s1, Arc::new(0, 0, ProbabilityWeight::new(0.3), s2))?;
-        fst_in.add_arc(s1, Arc::new(0, 0, ProbabilityWeight::new(0.1), s2))?;
+        fst_in.add_arc(s1, Tr::new(0, 0, ProbabilityWeight::new(0.3), s2))?;
+        fst_in.add_arc(s1, Tr::new(0, 1, ProbabilityWeight::new(0.3), s2))?;
+        fst_in.add_arc(s1, Tr::new(1, 0, ProbabilityWeight::new(0.3), s2))?;
+        fst_in.add_arc(s1, Tr::new(0, 0, ProbabilityWeight::new(0.3), s2))?;
+        fst_in.add_arc(s1, Tr::new(0, 0, ProbabilityWeight::new(0.1), s2))?;
 
         fst_in.set_start(s1)?;
         fst_in.set_final(s2, ProbabilityWeight::one())?;
@@ -68,10 +68,10 @@ mod test {
         let s1 = fst_out.add_state();
         let s2 = fst_out.add_state();
 
-        fst_out.add_arc(s1, Arc::new(0, 0, ProbabilityWeight::new(0.3), s2))?;
-        fst_out.add_arc(s1, Arc::new(0, 0, ProbabilityWeight::new(0.1), s2))?;
-        fst_out.add_arc(s1, Arc::new(0, 1, ProbabilityWeight::new(0.3), s2))?;
-        fst_out.add_arc(s1, Arc::new(1, 0, ProbabilityWeight::new(0.3), s2))?;
+        fst_out.add_arc(s1, Tr::new(0, 0, ProbabilityWeight::new(0.3), s2))?;
+        fst_out.add_arc(s1, Tr::new(0, 0, ProbabilityWeight::new(0.1), s2))?;
+        fst_out.add_arc(s1, Tr::new(0, 1, ProbabilityWeight::new(0.3), s2))?;
+        fst_out.add_arc(s1, Tr::new(1, 0, ProbabilityWeight::new(0.3), s2))?;
 
         fst_out.set_start(s1)?;
         fst_out.set_final(s2, ProbabilityWeight::one())?;

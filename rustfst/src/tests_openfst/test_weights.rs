@@ -8,7 +8,7 @@ use crate::semirings::{
     LogWeight, ProductWeight, ReverseBack, SerializableSemiring, StringWeightLeft,
     StringWeightRestrict, StringWeightRight, TropicalWeight,
 };
-use crate::Arc;
+use crate::Tr;
 
 use self::super::get_path_folder;
 
@@ -68,7 +68,7 @@ fn do_run_test_openfst_weight<W: SerializableSemiring>(
         test_data.plus
     );
     assert_eq!(W::weight_type(), test_data.weight_type);
-    assert_eq!(Arc::<W>::arc_type(), test_data.arc_type);
+    assert_eq!(Tr::<W>::arc_type(), test_data.arc_type);
 
     assert_eq!(
         test_data.weight_1.reverse()?.reverse_back()?,

@@ -8,5 +8,5 @@ fi
 
 cd openfst-1.7.2
 CXXFLAGS=-O3 CFLAGS=-O3 ./configure --prefix=`pwd` --enable-static
-make
+make -j 32
 make install

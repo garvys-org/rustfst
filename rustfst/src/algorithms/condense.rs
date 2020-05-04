@@ -1,7 +1,7 @@
 use crate::algorithms::visitors::SccVisitor;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 
-use crate::algorithms::arc_filters::AnyArcFilter;
+use crate::algorithms::arc_filters::AnyTrFilter;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::semirings::Semiring;
 use anyhow::Result;
@@ -13,7 +13,7 @@ pub fn condense<FI: Fst + ExpandedFst, FO: MutableFst<W = FI::W>>(
     ifst: &FI,
 ) -> Result<(Vec<i32>, FO)> {
     let mut visitor = SccVisitor::new(ifst, true, false);
-    dfs_visit(ifst, &mut visitor, &AnyArcFilter {}, false);
+    dfs_visit(ifst, &mut visitor, &AnyTrFilter {}, false);
     let scc = visitor.scc.unwrap();
     let mut ofst = FO::new();
     if let Some(max) = scc.iter().max() {

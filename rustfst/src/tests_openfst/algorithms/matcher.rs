@@ -8,10 +8,10 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher, SortedMatcher};
 use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
-use crate::{Arc, Label, StateId, NO_LABEL, NO_STATE_ID};
+use crate::{Tr, Label, StateId, NO_LABEL, NO_STATE_ID};
 
 #[derive(Serialize, Deserialize, Debug)]
-struct SerializedArc {
+struct SerializedTr {
     ilabel: i32,
     olabel: i32,
     weight: String,
@@ -23,7 +23,7 @@ pub struct MatcherOperationResult {
     state: usize,
     label: usize,
     match_type: usize,
-    arcs: Vec<SerializedArc>,
+    arcs: Vec<SerializedTr>,
 }
 
 pub struct MatcherTestData<F>
@@ -34,7 +34,7 @@ where
     label: Label,
     state: StateId,
     match_type: MatchType,
-    arcs: Vec<Arc<F::W>>,
+    arcs: Vec<Tr<F::W>>,
 }
 
 impl MatcherOperationResult {
@@ -73,7 +73,7 @@ impl MatcherOperationResult {
                         s.nextstate as usize
                     };
 
-                    Arc::new(
+                    Tr::new(
                         ilabel,
                         olabel,
                         F::W::parse_text(s.weight.as_str()).unwrap().1,
@@ -105,7 +105,7 @@ where
     //     };
     //
     //     let matcher = SortedMatcher::new(fst, matcher_data.match_type)?;
-    //     let arcs: Vec<Arc<_>> = matcher
+    //     let arcs: Vec<Tr<_>> = matcher
     //         .iter(matcher_data.state, matcher_data.label)?
     //         .map(|f| {
     //             f.into_arc(matcher_data.state, matcher_data.match_type)

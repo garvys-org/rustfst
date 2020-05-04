@@ -39,7 +39,7 @@ impl UnaryFstAlgorithm for MapAlgorithm {
                 Ok(fst)
             }
             "identity" => {
-                let mut mapper = arc_mappers::IdentityArcMapper {};
+                let mut mapper = arc_mappers::IdentityTrMapper {};
                 arc_map(&mut fst, &mut mapper)?;
                 Ok(fst)
             }

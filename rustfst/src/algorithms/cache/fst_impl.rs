@@ -7,7 +7,7 @@ use anyhow::Result;
 use crate::algorithms::cache::CacheImpl;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Arc, StateId};
+use crate::{Tr, StateId};
 
 pub trait FstImpl: Debug {
     type W: Semiring + 'static;
@@ -38,7 +38,7 @@ pub trait FstImpl: Debug {
         self.cache_impl_ref().final_weight(state)
     }
 
-    fn arcs_iter(&mut self, state: StateId) -> Result<IterSlice<Arc<Self::W>>> {
+    fn arcs_iter(&mut self, state: StateId) -> Result<IterSlice<Tr<Self::W>>> {
         self.expand_if_necessary(state)?;
         self.cache_impl_ref().arcs_iter(state)
     }

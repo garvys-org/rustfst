@@ -3,10 +3,10 @@ use std::collections::hash_map::{Entry, HashMap};
 
 use anyhow::{Result, Context};
 
-use crate::algorithms::{rm_final_epsilon, ArcMapper, FinalArc, MapFinalAction};
+use crate::algorithms::{rm_final_epsilon, TrMapper, FinalTr, MapFinalAction};
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
-use crate::Arc;
+use crate::Tr;
 use crate::Label;
 use crate::EPS_LABEL;
 
@@ -37,7 +37,7 @@ impl<W: Semiring> EncodeTableMut<W> {
         }
     }
 
-    pub fn arc_to_tuple(&self, arc: &Arc<W>) -> EncodeTuple<W> {
+    pub fn arc_to_tuple(&self, arc: &Tr<W>) -> EncodeTuple<W> {
         EncodeTuple {
             ilabel: arc.ilabel,
             olabel: if self.encode_labels {
@@ -53,7 +53,7 @@ impl<W: Semiring> EncodeTableMut<W> {
         }
     }
 
-    pub fn final_arc_to_tuple(&self, arc: &FinalArc<W>) -> EncodeTuple<W> {
+    pub fn final_arc_to_tuple(&self, arc: &FinalTr<W>) -> EncodeTuple<W> {
         EncodeTuple {
             ilabel: arc.ilabel,
             olabel: if self.encode_labels {
@@ -107,8 +107,8 @@ impl<W: Semiring> EncodeMapper<W> {
     }
 }
 
-impl<W: Semiring> ArcMapper<W> for EncodeMapper<W> {
-    fn arc_map(&self, arc: &mut Arc<W>) -> Result<()> {
+impl<W: Semiring> TrMapper<W> for EncodeMapper<W> {
+    fn arc_map(&self, arc: &mut Tr<W>) -> Result<()> {
         let tuple = self.encode_table.0.borrow().arc_to_tuple(arc);
         let label = self.encode_table.0.borrow_mut().encode(tuple);
         arc.ilabel = label;
@@ -121,7 +121,7 @@ impl<W: Semiring> ArcMapper<W> for EncodeMapper<W> {
         Ok(())
     }
 
-    fn final_arc_map(&self, final_arc: &mut FinalArc<W>) -> Result<()> {
+    fn final_arc_map(&self, final_arc: &mut FinalTr<W>) -> Result<()> {
         if self.encode_table.0.borrow().encode_weights {
             let tuple = self.encode_table.0.borrow().final_arc_to_tuple(final_arc);
             let label = self.encode_table.0.borrow_mut().encode(tuple);
@@ -155,8 +155,8 @@ impl<W: Semiring> DecodeMapper<W> {
     }
 }
 
-impl<W: Semiring> ArcMapper<W> for DecodeMapper<W> {
-    fn arc_map(&self, arc: &mut Arc<W>) -> Result<()> {
+impl<W: Semiring> TrMapper<W> for DecodeMapper<W> {
+    fn arc_map(&self, arc: &mut Tr<W>) -> Result<()> {
         let tuple = self
             .encode_table
             .0
@@ -174,7 +174,7 @@ impl<W: Semiring> ArcMapper<W> for DecodeMapper<W> {
         Ok(())
     }
 
-    fn final_arc_map(&self, _final_arc: &mut FinalArc<W>) -> Result<()> {
+    fn final_arc_map(&self, _final_arc: &mut FinalTr<W>) -> Result<()> {
         Ok(())
     }
 
@@ -201,7 +201,7 @@ where
 {
     let mut encode_mapper = EncodeMapper::new(encode_labels, encode_weights);
     fst.arc_map(&mut encode_mapper)
-        .with_context(|| format_err!("Error calling ArcMap with EncodeMapper."))?;
+        .with_context(|| format_err!("Error calling TrMap with EncodeMapper."))?;
     Ok(encode_mapper.encode_table)
 }
 
@@ -213,7 +213,7 @@ where
 {
     let mut decode_mapper = DecodeMapper::new(encode_table);
     fst.arc_map(&mut decode_mapper)
-        .with_context(|| format_err!("Error calling ArcMap with EncodeMapper."))?;
+        .with_context(|| format_err!("Error calling TrMap with EncodeMapper."))?;
     rm_final_epsilon(fst)?;
     Ok(())
 }

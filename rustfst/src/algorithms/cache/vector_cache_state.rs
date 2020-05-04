@@ -2,7 +2,7 @@ use std::slice::Iter as IterSlice;
 
 use crate::algorithms::cache::CacheState;
 use crate::semirings::Semiring;
-use crate::Arc;
+use crate::Tr;
 use crate::StateId;
 
 #[derive(Clone, Debug, PartialOrd, PartialEq, Eq)]
@@ -44,11 +44,11 @@ impl<W> VectorCacheState<W> {
             .set_final_weight(final_weight);
     }
 
-    pub fn push_arc(&mut self, state: StateId, arc: Arc<W>) {
+    pub fn push_arc(&mut self, state: StateId, arc: Tr<W>) {
         self.get_cache_state_unchecked_mut(state).push_arc(arc)
     }
 
-    pub fn arcs_iter_unchecked(&self, state: StateId) -> IterSlice<Arc<W>> {
+    pub fn arcs_iter_unchecked(&self, state: StateId) -> IterSlice<Tr<W>> {
         self.get_cache_state_unchecked(state).arcs_iter()
     }
 

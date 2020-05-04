@@ -5,7 +5,7 @@ use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 
 use crate::algorithms::arc_mappers::{
-    IdentityArcMapper, InputEpsilonMapper, InvertWeightMapper, OutputEpsilonMapper, PlusMapper,
+    IdentityTrMapper, InputEpsilonMapper, InvertWeightMapper, OutputEpsilonMapper, PlusMapper,
     QuantizeMapper, RmWeightMapper, TimesMapper,
 };
 use crate::fst_traits::{MutableFst, SerializableFst};
@@ -15,12 +15,12 @@ use crate::semirings::WeightQuantize;
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct ArcMapWithWeightOperationResult {
+pub struct TrMapWithWeightOperationResult {
     weight: String,
     result: String,
 }
 
-pub struct ArcMapWithWeightTestData<F>
+pub struct TrMapWithWeightTestData<F>
 where
     F: SerializableFst,
     F::W: SerializableSemiring,
@@ -29,13 +29,13 @@ where
     pub result: F,
 }
 
-impl ArcMapWithWeightOperationResult {
-    pub fn parse<F>(&self) -> ArcMapWithWeightTestData<F>
+impl TrMapWithWeightOperationResult {
+    pub fn parse<F>(&self) -> TrMapWithWeightTestData<F>
     where
         F: SerializableFst,
         F::W: SerializableSemiring,
     {
-        ArcMapWithWeightTestData {
+        TrMapWithWeightTestData {
             weight: F::W::parse_text(self.weight.as_str()).unwrap().1,
             result: F::from_text_string(self.result.as_str()).unwrap(),
         }
@@ -47,9 +47,9 @@ where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,
 {
-    // ArcMap IdentityMapper
+    // TrMap IdentityMapper
     let mut fst_arc_map_identity = test_data.raw.clone();
-    let mut identity_mapper = IdentityArcMapper {};
+    let mut identity_mapper = IdentityTrMapper {};
     fst_arc_map_identity.arc_map(&mut identity_mapper)?;
     assert_eq!(
         test_data.arc_map_identity,
@@ -58,7 +58,7 @@ where
         error_message_fst!(
             test_data.arc_map_identity,
             fst_arc_map_identity,
-            "ArcMap identity"
+            "TrMap identity"
         )
     );
     Ok(())
@@ -69,7 +69,7 @@ where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
-    // ArcMap InvertWeightMapper
+    // TrMap InvertWeightMapper
     let mut fst_arc_map_invert = test_data.raw.clone();
     let mut invertweight_mapper = InvertWeightMapper {};
     fst_arc_map_invert.arc_map(&mut invertweight_mapper)?;
@@ -80,7 +80,7 @@ where
         error_message_fst!(
             test_data.arc_map_invert,
             fst_arc_map_invert,
-            "ArcMap InvertWeight"
+            "TrMap InvertWeight"
         )
     );
     Ok(())
@@ -101,7 +101,7 @@ where
         error_message_fst!(
             test_data.arc_map_input_epsilon,
             fst_arc_map,
-            "ArcMap InputEpsilonMapper"
+            "TrMap InputEpsilonMapper"
         )
     );
     Ok(())
@@ -122,7 +122,7 @@ where
         error_message_fst!(
             test_data.arc_map_output_epsilon,
             fst_arc_map,
-            "ArcMap OutputEpsilonMapper"
+            "TrMap OutputEpsilonMapper"
         )
     );
     Ok(())
@@ -143,7 +143,7 @@ where
         error_message_fst!(
             test_data.arc_map_plus.result,
             fst_arc_map,
-            "ArcMap PlusMapper"
+            "TrMap PlusMapper"
         )
     );
     Ok(())
@@ -164,7 +164,7 @@ where
         error_message_fst!(
             test_data.arc_map_times.result,
             fst_arc_map,
-            "ArcMap TimesMapper"
+            "TrMap TimesMapper"
         )
     );
     Ok(())
@@ -185,7 +185,7 @@ where
         error_message_fst!(
             test_data.arc_map_quantize,
             fst_arc_map,
-            "ArcMap QuantizeMapper"
+            "TrMap QuantizeMapper"
         )
     );
     Ok(())
@@ -196,7 +196,7 @@ where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,
 {
-    // ArcMap RmWeightMapper
+    // TrMap RmWeightMapper
     let mut fst_arc_map_rmweight = test_data.raw.clone();
     let mut rmweight_mapper = RmWeightMapper {};
     fst_arc_map_rmweight.arc_map(&mut rmweight_mapper)?;
@@ -207,7 +207,7 @@ where
         error_message_fst!(
             test_data.arc_map_rmweight,
             fst_arc_map_rmweight,
-            "ArcMap RmWeight"
+            "TrMap RmWeight"
         )
     );
     Ok(())

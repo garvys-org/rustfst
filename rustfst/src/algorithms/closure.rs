@@ -1,7 +1,7 @@
 use crate::algorithms::ReplaceFst;
-use crate::arc::Arc;
+use crate::arc::Tr;
 use crate::fst_traits::{
-    AllocableFst, ArcIterator, CoreFst, FinalStatesIterator, Fst, FstIterator, MutableFst,
+    AllocableFst, TrIterator, CoreFst, FinalStatesIterator, Fst, FstIterator, MutableFst,
     StateIterator,
 };
 use crate::semirings::Semiring;
@@ -45,7 +45,7 @@ where
             unsafe {
                 fst.add_arc_unchecked(
                     final_state_id,
-                    Arc::new(EPS_LABEL, EPS_LABEL, final_weight, start_state),
+                    Tr::new(EPS_LABEL, EPS_LABEL, final_weight, start_state),
                 )
             };
         }
@@ -59,7 +59,7 @@ where
             unsafe {
                 fst.add_arc_unchecked(
                     nstart,
-                    Arc::new(
+                    Tr::new(
                         EPS_LABEL,
                         EPS_LABEL,
                         <F as CoreFst>::W::one(),
@@ -106,7 +106,7 @@ where
                 unsafe {
                     rfst.set_start_unchecked(0);
                     rfst.set_final_unchecked(0, F::W::one());
-                    rfst.add_arc_unchecked(0, Arc::new(EPS_LABEL, std::usize::MAX, F::W::one(), 0));
+                    rfst.add_arc_unchecked(0, Tr::new(EPS_LABEL, std::usize::MAX, F::W::one(), 0));
                 }
             }
             ClosureType::ClosurePlus => {
@@ -114,8 +114,8 @@ where
                 unsafe {
                     rfst.set_start_unchecked(0);
                     rfst.set_final_unchecked(1, F::W::one());
-                    rfst.add_arc_unchecked(0, Arc::new(EPS_LABEL, std::usize::MAX, F::W::one(), 1));
-                    rfst.add_arc_unchecked(1, Arc::new(EPS_LABEL, EPS_LABEL, F::W::one(), 0));
+                    rfst.add_arc_unchecked(0, Tr::new(EPS_LABEL, std::usize::MAX, F::W::one(), 1));
+                    rfst.add_arc_unchecked(1, Tr::new(EPS_LABEL, EPS_LABEL, F::W::one(), 0));
                 }
             }
         };
@@ -165,11 +165,11 @@ where
     }
 }
 
-impl<'a, F: Fst + 'static> ArcIterator<'a> for ClosureFst<F>
+impl<'a, F: Fst + 'static> TrIterator<'a> for ClosureFst<F>
 where
     F::W: 'static,
 {
-    type Iter = <ReplaceFst<F, F> as ArcIterator<'a>>::Iter;
+    type Iter = <ReplaceFst<F, F> as TrIterator<'a>>::Iter;
 
     fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
         self.0.arcs_iter(state_id)
@@ -213,7 +213,7 @@ impl<'a, F: Fst + 'static> FstIterator<'a> for ClosureFst<F>
 where
     F::W: 'static,
 {
-    type ArcsIter = <ReplaceFst<F, F> as FstIterator<'a>>::ArcsIter;
+    type TrsIter = <ReplaceFst<F, F> as FstIterator<'a>>::TrsIter;
     type FstIter = <ReplaceFst<F, F> as FstIterator<'a>>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {

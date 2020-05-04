@@ -4,10 +4,10 @@ mod tests {
 
     use anyhow::Result;
 
-    use crate::arc::Arc;
+    use crate::arc::Tr;
     use crate::fst_impls::VectorFst;
     use crate::fst_traits::{
-        ArcIterator, CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableArcIterator,
+        TrIterator, CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableTrIterator,
         MutableFst, SerializableFst, StateIterator,
     };
     use crate::semirings::{ProbabilityWeight, Semiring, TropicalWeight};
@@ -24,13 +24,13 @@ mod tests {
 
         fst.set_start(s1)?;
 
-        // Arcs
-        let arc_1 = Arc::new(3, 5, 10.0, s2);
+        // Trs
+        let arc_1 = Tr::new(3, 5, 10.0, s2);
         fst.add_arc(s1, arc_1.clone())?;
 
         assert_eq!(fst.num_arcs(s1).unwrap(), 1);
 
-        let arc_2 = Arc::new(5, 7, 18.0, s2);
+        let arc_2 = Tr::new(5, 7, 18.0, s2);
         fst.add_arc(s1, arc_2.clone())?;
         assert_eq!(fst.num_arcs(s1).unwrap(), 2);
         assert_eq!(fst.arcs_iter(s1)?.count(), 2);
@@ -65,13 +65,13 @@ mod tests {
 
         fst.set_start(s1)?;
 
-        // Arcs
-        let arc_1 = Arc::new(3, 5, 10.0, s2);
+        // Trs
+        let arc_1 = Tr::new(3, 5, 10.0, s2);
         fst.add_arc(s1, arc_1.clone())?;
-        let arc_2 = Arc::new(5, 7, 18.0, s2);
+        let arc_2 = Tr::new(5, 7, 18.0, s2);
         fst.add_arc(s1, arc_2.clone())?;
 
-        let new_arc_1 = Arc::new(15, 29, 33.0, s2 + 55);
+        let new_arc_1 = Tr::new(15, 29, 33.0, s2 + 55);
 
         // Modify first arc leaving s1
         fst.arcs_iter_mut(s1)?
@@ -183,9 +183,9 @@ mod tests {
         let s1 = fst.add_state();
         let s2 = fst.add_state();
 
-        fst.add_arc(s1, Arc::new(0, 0, ProbabilityWeight::one(), s2))?;
-        fst.add_arc(s2, Arc::new(0, 0, ProbabilityWeight::one(), s1))?;
-        fst.add_arc(s2, Arc::new(0, 0, ProbabilityWeight::one(), s2))?;
+        fst.add_arc(s1, Tr::new(0, 0, ProbabilityWeight::one(), s2))?;
+        fst.add_arc(s2, Tr::new(0, 0, ProbabilityWeight::one(), s1))?;
+        fst.add_arc(s2, Tr::new(0, 0, ProbabilityWeight::one(), s2))?;
 
         assert_eq!(fst.num_arcs(s1)?, 1);
         assert_eq!(fst.num_arcs(s2)?, 2);
@@ -284,9 +284,9 @@ mod tests {
         let s1 = fst.add_state();
         let s2 = fst.add_state();
 
-        fst.add_arc(s1, Arc::new(0, 0, ProbabilityWeight::one(), s2))?;
-        fst.add_arc(s2, Arc::new(0, 0, ProbabilityWeight::one(), s1))?;
-        fst.add_arc(s2, Arc::new(0, 0, ProbabilityWeight::one(), s2))?;
+        fst.add_arc(s1, Tr::new(0, 0, ProbabilityWeight::one(), s2))?;
+        fst.add_arc(s2, Tr::new(0, 0, ProbabilityWeight::one(), s1))?;
+        fst.add_arc(s2, Tr::new(0, 0, ProbabilityWeight::one(), s2))?;
 
         fst.set_start(s1)?;
         fst.set_final(s2, ProbabilityWeight::one())?;
@@ -305,9 +305,9 @@ mod tests {
         let s1 = fst.add_state();
         let s2 = fst.add_state();
 
-        fst.add_arc(s1, Arc::new(1, 0, ProbabilityWeight::one(), s2))?;
-        fst.add_arc(s2, Arc::new(2, 0, ProbabilityWeight::one(), s1))?;
-        fst.add_arc(s2, Arc::new(3, 0, ProbabilityWeight::one(), s2))?;
+        fst.add_arc(s1, Tr::new(1, 0, ProbabilityWeight::one(), s2))?;
+        fst.add_arc(s2, Tr::new(2, 0, ProbabilityWeight::one(), s1))?;
+        fst.add_arc(s2, Tr::new(3, 0, ProbabilityWeight::one(), s2))?;
 
         fst.set_start(s1)?;
         fst.set_final(s2, ProbabilityWeight::one())?;

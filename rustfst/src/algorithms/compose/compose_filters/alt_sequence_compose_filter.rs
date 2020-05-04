@@ -12,7 +12,7 @@ use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
-use crate::{Arc, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
+use crate::{Tr, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
 #[derive(Clone, Debug)]
 pub struct AltSequenceComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
@@ -85,7 +85,7 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(())
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Result<Self::FS> {
+    fn filter_arc(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
         let res = if arc2.ilabel == NO_LABEL {
             if self.alleps2 {
                 Self::FS::new_no_state()

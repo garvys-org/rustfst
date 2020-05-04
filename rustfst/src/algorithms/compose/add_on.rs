@@ -4,7 +4,7 @@ use std::rc::Rc;
 use anyhow::Result;
 
 use crate::fst_traits::{
-    ArcIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator,
+    TrIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator,
 };
 use crate::SymbolTable;
 
@@ -66,11 +66,11 @@ impl<'a, F: StateIterator<'a>, T> StateIterator<'a> for FstAddOn<F, T> {
     }
 }
 
-impl<'a, F: ArcIterator<'a>, T> ArcIterator<'a> for FstAddOn<F, T>
+impl<'a, F: TrIterator<'a>, T> TrIterator<'a> for FstAddOn<F, T>
 where
     F::W: 'a,
 {
-    type Iter = <F as ArcIterator<'a>>::Iter;
+    type Iter = <F as TrIterator<'a>>::Iter;
 
     fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
         self.fst.arcs_iter(state_id)
@@ -85,7 +85,7 @@ impl<'a, F: FstIterator<'a>, T> FstIterator<'a> for FstAddOn<F, T>
 where
     F::W: 'a,
 {
-    type ArcsIter = F::ArcsIter;
+    type TrsIter = F::TrsIter;
     type FstIter = F::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
@@ -135,7 +135,7 @@ impl<F: FstIntoIterator, T: Debug> FstIntoIterator for FstAddOn<F, T>
 where
     F::W: 'static,
 {
-    type ArcsIter = F::ArcsIter;
+    type TrsIter = F::TrsIter;
     type FstIter = F::FstIter;
 
     fn fst_into_iter(self) -> Self::FstIter {

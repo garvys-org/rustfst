@@ -7,7 +7,7 @@ use crate::algorithms::compose::compose_filters::ComposeFilter;
 use crate::algorithms::compose::filter_states::{FilterState, TrivialFilterState};
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;
-use crate::{Arc, EPS_LABEL};
+use crate::{Tr, EPS_LABEL};
 
 #[derive(Debug)]
 pub struct NoMatchComposeFilter<M1, M2> {
@@ -50,7 +50,7 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(())
     }
 
-    fn filter_arc(&mut self, arc1: &mut Arc<W>, arc2: &mut Arc<W>) -> Result<Self::FS> {
+    fn filter_arc(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
         Ok(Self::FS::new(
             arc1.olabel != EPS_LABEL || arc2.ilabel != EPS_LABEL,
         ))

@@ -1,7 +1,7 @@
 use crate::algorithms::ProjectType;
 use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
-use crate::Arc;
+use crate::Tr;
 use crate::StateId;
 
 pub fn set_start_properties(inprops: FstProperties) -> FstProperties {
@@ -27,8 +27,8 @@ pub fn add_state_properties(inprops: FstProperties) -> FstProperties {
 pub fn add_arc_properties<W: Semiring>(
     _inprops: FstProperties,
     _state: StateId,
-    _old_arc: Arc<W>,
-    _new_arc: Arc<W>,
+    _old_arc: Tr<W>,
+    _new_arc: Tr<W>,
 ) -> FstProperties {
     unimplemented!()
 }

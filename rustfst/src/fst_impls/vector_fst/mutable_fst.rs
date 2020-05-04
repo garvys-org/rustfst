@@ -5,12 +5,12 @@ use anyhow::Result;
 use crate::algorithms::arc_unique::arc_compare;
 use crate::fst_impls::vector_fst::{VectorFst, VectorFstState};
 use crate::fst_traits::MutableFst;
-use crate::fst_traits::{CoreFst, MutableArcIterator};
+use crate::fst_traits::{CoreFst, MutableTrIterator};
 use crate::semirings::Semiring;
-use crate::{Arc, StateId};
+use crate::{Tr, StateId};
 
 #[inline]
-fn equal_arc<W: Semiring>(arc_1: &Arc<W>, arc_2: &Arc<W>) -> bool {
+fn equal_arc<W: Semiring>(arc_1: &Tr<W>, arc_2: &Tr<W>) -> bool {
     arc_1.ilabel == arc_2.ilabel
         && arc_1.olabel == arc_2.olabel
         && arc_1.nextstate == arc_2.nextstate
@@ -140,7 +140,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         }
     }
 
-    fn add_arc(&mut self, source: StateId, arc: Arc<<Self as CoreFst>::W>) -> Result<()> {
+    fn add_arc(&mut self, source: StateId, arc: Tr<<Self as CoreFst>::W>) -> Result<()> {
         self.states
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
@@ -149,11 +149,11 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(())
     }
 
-    unsafe fn add_arc_unchecked(&mut self, source: usize, arc: Arc<Self::W>) {
+    unsafe fn add_arc_unchecked(&mut self, source: usize, arc: Tr<Self::W>) {
         self.states.get_unchecked_mut(source).arcs.push(arc)
     }
 
-    unsafe fn set_arcs_unchecked(&mut self, source: usize, arcs: Vec<Arc<Self::W>>) {
+    unsafe fn set_arcs_unchecked(&mut self, source: usize, arcs: Vec<Tr<Self::W>>) {
         self.states.get_unchecked_mut(source).arcs = arcs
     }
 
@@ -178,7 +178,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(())
     }
 
-    fn pop_arcs(&mut self, source: usize) -> Result<Vec<Arc<Self::W>>> {
+    fn pop_arcs(&mut self, source: usize) -> Result<Vec<Tr<Self::W>>> {
         let v = self
             .states
             .get_mut(source)
@@ -189,7 +189,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(v)
     }
 
-    unsafe fn pop_arcs_unchecked(&mut self, source: usize) -> Vec<Arc<Self::W>> {
+    unsafe fn pop_arcs_unchecked(&mut self, source: usize) -> Vec<Tr<Self::W>> {
         self.states
             .get_unchecked_mut(source)
             .arcs
@@ -224,7 +224,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         self.states.get_unchecked_mut(state_id).final_weight.take()
     }
 
-    fn sort_arcs_unchecked<F: Fn(&Arc<Self::W>, &Arc<Self::W>) -> Ordering>(
+    fn sort_arcs_unchecked<F: Fn(&Tr<Self::W>, &Tr<Self::W>) -> Ordering>(
         &mut self,
         state: StateId,
         f: F,

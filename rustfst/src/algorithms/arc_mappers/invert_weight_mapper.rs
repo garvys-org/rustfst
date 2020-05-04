@@ -1,8 +1,8 @@
 use anyhow::Result;
 
-use crate::algorithms::{ArcMapper, FinalArc, MapFinalAction, WeightConverter};
+use crate::algorithms::{TrMapper, FinalTr, MapFinalAction, WeightConverter};
 use crate::semirings::{DivideType, WeaklyDivisibleSemiring};
-use crate::Arc;
+use crate::Tr;
 
 /// Mapper to reciprocate all non-Zero() weights.
 pub struct InvertWeightMapper {}
@@ -13,12 +13,12 @@ pub fn map_weight<W: WeaklyDivisibleSemiring>(weight: &mut W) -> Result<()> {
     Ok(())
 }
 
-impl<S: WeaklyDivisibleSemiring> ArcMapper<S> for InvertWeightMapper {
-    fn arc_map(&self, arc: &mut Arc<S>) -> Result<()> {
+impl<S: WeaklyDivisibleSemiring> TrMapper<S> for InvertWeightMapper {
+    fn arc_map(&self, arc: &mut Tr<S>) -> Result<()> {
         map_weight(&mut arc.weight)
     }
 
-    fn final_arc_map(&self, final_arc: &mut FinalArc<S>) -> Result<()> {
+    fn final_arc_map(&self, final_arc: &mut FinalTr<S>) -> Result<()> {
         map_weight(&mut final_arc.weight)
     }
 

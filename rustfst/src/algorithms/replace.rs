@@ -11,7 +11,7 @@ use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::dynamic_fst::DynamicFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Arc, Label, StateId, EPS_LABEL};
+use crate::{Tr, Label, StateId, EPS_LABEL};
 
 /// This specifies what labels to output on the call or return arc.
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug, Eq)]
@@ -304,7 +304,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
         Ok(replace_fst_impl)
     }
 
-    fn compute_final_arc(&mut self, state: StateId) -> Option<Arc<F::W>> {
+    fn compute_final_arc(&mut self, state: StateId) -> Option<Tr<F::W>> {
         let tuple = self.state_table.tuple_table.find_tuple(state);
         let fst_state = tuple.fst_state?;
         if self
@@ -351,7 +351,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
                 .final_weight(fst_state)
                 .unwrap()
             {
-                return Some(Arc::new(ilabel, olabel, weight.clone(), nextstate));
+                return Some(Tr::new(ilabel, olabel, weight.clone(), nextstate));
             }
             None
         } else {
@@ -378,7 +378,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
         self.get_prefix_id(prefix)
     }
 
-    fn compute_arc<W: Semiring>(&self, tuple: &ReplaceStateTuple, arc: &Arc<W>) -> Option<Arc<W>> {
+    fn compute_arc<W: Semiring>(&self, tuple: &ReplaceStateTuple, arc: &Tr<W>) -> Option<Tr<W>> {
         if arc.olabel == EPS_LABEL
             || arc.olabel < *self.nonterminal_set.iter().next().unwrap()
             || arc.olabel > *self.nonterminal_set.iter().rev().next().unwrap()
@@ -386,7 +386,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
             let state_tuple =
                 ReplaceStateTuple::new(tuple.prefix_id, tuple.fst_id, Some(arc.nextstate));
             let nextstate = self.state_table.tuple_table.find_id(state_tuple);
-            Some(Arc::new(
+            Some(Tr::new(
                 arc.ilabel,
                 arc.olabel,
                 arc.weight.clone(),
@@ -415,7 +415,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
                     } else {
                         self.call_output_label_.unwrap_or(arc.olabel)
                     };
-                    Some(Arc::new(ilabel, olabel, arc.weight.clone(), nt_nextstate))
+                    Some(Tr::new(ilabel, olabel, arc.weight.clone(), nt_nextstate))
                 } else {
                     None
                 }
@@ -425,7 +425,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
                     tuple.fst_id,
                     Some(arc.nextstate),
                 ));
-                Some(Arc::new(
+                Some(Tr::new(
                     arc.ilabel,
                     arc.olabel,
                     arc.weight.clone(),

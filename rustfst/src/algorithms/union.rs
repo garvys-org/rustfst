@@ -4,10 +4,10 @@ use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::ReplaceFst;
-use crate::arc::Arc;
+use crate::arc::Tr;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{
-    AllocableFst, ArcIterator, CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator,
+    AllocableFst, TrIterator, CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator,
 };
 use crate::semirings::Semiring;
 use crate::{SymbolTable, EPS_LABEL};
@@ -97,19 +97,19 @@ where
         unsafe {
             fst_1.add_arc_unchecked(
                 start1,
-                Arc::new(EPS_LABEL, EPS_LABEL, W::one(), start2 + numstates1),
+                Tr::new(EPS_LABEL, EPS_LABEL, W::one(), start2 + numstates1),
             )
         };
     } else {
         let nstart1 = fst_1.add_state();
         unsafe { fst_1.set_start_unchecked(nstart1) };
         unsafe {
-            fst_1.add_arc_unchecked(nstart1, Arc::new(EPS_LABEL, EPS_LABEL, W::one(), start1))
+            fst_1.add_arc_unchecked(nstart1, Tr::new(EPS_LABEL, EPS_LABEL, W::one(), start1))
         };
         unsafe {
             fst_1.add_arc_unchecked(
                 nstart1,
-                Arc::new(EPS_LABEL, EPS_LABEL, W::one(), start2 + numstates1),
+                Tr::new(EPS_LABEL, EPS_LABEL, W::one(), start2 + numstates1),
             )
         };
     }
@@ -143,9 +143,9 @@ where
             rfst.set_output_symbols(osymt);
         }
         unsafe { rfst.reserve_arcs_unchecked(0, 2) };
-        unsafe { rfst.add_arc_unchecked(0, Arc::new(EPS_LABEL, std::usize::MAX, F::W::one(), 1)) };
+        unsafe { rfst.add_arc_unchecked(0, Tr::new(EPS_LABEL, std::usize::MAX, F::W::one(), 1)) };
         unsafe {
-            rfst.add_arc_unchecked(0, Arc::new(EPS_LABEL, std::usize::MAX - 1, F::W::one(), 1))
+            rfst.add_arc_unchecked(0, Tr::new(EPS_LABEL, std::usize::MAX - 1, F::W::one(), 1))
         };
 
         let mut fst_tuples = Vec::with_capacity(3);
@@ -195,11 +195,11 @@ where
     }
 }
 
-impl<'a, F: Fst + 'static> ArcIterator<'a> for UnionFst<F>
+impl<'a, F: Fst + 'static> TrIterator<'a> for UnionFst<F>
 where
     F::W: 'static,
 {
-    type Iter = <ReplaceFst<F, F> as ArcIterator<'a>>::Iter;
+    type Iter = <ReplaceFst<F, F> as TrIterator<'a>>::Iter;
 
     fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
         self.0.arcs_iter(state_id)
@@ -243,7 +243,7 @@ impl<'a, F: Fst + 'static> FstIterator<'a> for UnionFst<F>
 where
     F::W: 'static,
 {
-    type ArcsIter = <ReplaceFst<F, F> as FstIterator<'a>>::ArcsIter;
+    type TrsIter = <ReplaceFst<F, F> as FstIterator<'a>>::TrsIter;
     type FstIter = <ReplaceFst<F, F> as FstIterator<'a>>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
