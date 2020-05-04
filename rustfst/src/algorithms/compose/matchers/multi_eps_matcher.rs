@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::iter::Peekable;
 use std::marker::PhantomData;
 use std::ops::{Add, AddAssign, SubAssign};
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::Result;
 use itertools::Itertools;
@@ -23,7 +23,7 @@ bitflags! {
 
 #[derive(Clone, Debug)]
 pub struct MultiEpsMatcher<W, M> {
-    matcher: Rc<RefCell<M>>,
+    matcher: Arc<RefCell<M>>,
     flags: MultiEpsMatcherFlags,
     w: PhantomData<W>,
     multi_eps_labels: CompactSet<Label>,
@@ -32,7 +32,7 @@ pub struct MultiEpsMatcher<W, M> {
 pub struct IteratorMultiEpsMatcher<W: Semiring, M: Matcher<W>> {
     iter_matcher: Option<Peekable<M::Iter>>,
     iter_labels: Option<(Vec<usize>, usize)>,
-    matcher: Rc<RefCell<M>>,
+    matcher: Arc<RefCell<M>>,
     matcher_state: StateId,
     ghost: PhantomData<W>,
     done: bool,
@@ -44,7 +44,7 @@ impl<W: Semiring, M: Matcher<W>> Clone for IteratorMultiEpsMatcher<W, M> {
         // Self {
         //     iter_matcher: self.iter_matcher.clone(),
         //     iter_labels: self.iter_labels.clone(),
-        //     matcher: Rc::clone(&self.matcher),
+        //     matcher: Arc::clone(&self.matcher),
         //     ghost: PhantomData,
         //     done: self.done,
         //     matcher_state: self.matcher_state,
@@ -108,15 +108,15 @@ impl<W: Semiring, M: Matcher<W>> Iterator for IteratorMultiEpsMatcher<W, M> {
 }
 
 impl<W: Semiring, M: Matcher<W>> MultiEpsMatcher<W, M> {
-    pub fn new_with_opts<IM: Into<Option<Rc<RefCell<M>>>>>(
-        fst: Rc<<Self as Matcher<W>>::F>,
+    pub fn new_with_opts<IM: Into<Option<Arc<RefCell<M>>>>>(
+        fst: Arc<<Self as Matcher<W>>::F>,
         match_type: MatchType,
         flags: MultiEpsMatcherFlags,
         matcher: IM,
     ) -> Result<Self> {
         let matcher = matcher
             .into()
-            .unwrap_or_else(|| Rc::new(RefCell::new(M::new(fst, match_type).unwrap())));
+            .unwrap_or_else(|| Arc::new(RefCell::new(M::new(fst, match_type).unwrap())));
         Ok(Self {
             matcher,
             flags,
@@ -125,8 +125,8 @@ impl<W: Semiring, M: Matcher<W>> MultiEpsMatcher<W, M> {
         })
     }
 
-    pub fn matcher(&self) -> Rc<RefCell<M>> {
-        Rc::clone(&self.matcher)
+    pub fn matcher(&self) -> Arc<RefCell<M>> {
+        Arc::clone(&self.matcher)
     }
 
     pub fn clear_multi_eps_labels(&mut self) {
@@ -154,7 +154,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
     type F = M::F;
     type Iter = IteratorMultiEpsMatcher<W, M>;
 
-    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Result<Self> {
+    fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self> {
         Self::new_with_opts(
             fst,
             match_type,
@@ -217,7 +217,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
         Ok(IteratorMultiEpsMatcher {
             iter_matcher,
             iter_labels,
-            matcher: Rc::clone(&self.matcher),
+            matcher: Arc::clone(&self.matcher),
             ghost: PhantomData,
             done: false,
             matcher_state: state,
@@ -240,7 +240,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
         self.matcher.borrow().priority(state)
     }
 
-    fn fst(&self) -> Rc<Self::F> {
+    fn fst(&self) -> Arc<Self::F> {
         self.matcher.borrow().fst()
     }
 }

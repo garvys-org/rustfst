@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::fmt::Debug;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::Result;
 
@@ -26,12 +26,12 @@ pub trait MatcherFlagsTrait: Debug {
 
 pub trait LookaheadMatcher<W: Semiring>: Matcher<W> {
     type MatcherData: Clone;
-    fn data(&self) -> Option<&Rc<RefCell<Self::MatcherData>>>;
+    fn data(&self) -> Option<&Arc<RefCell<Self::MatcherData>>>;
 
     fn new_with_data(
-        fst: Rc<Self::F>,
+        fst: Arc<Self::F>,
         match_type: MatchType,
-        data: Option<Rc<RefCell<Self::MatcherData>>>,
+        data: Option<Arc<RefCell<Self::MatcherData>>>,
     ) -> Result<Self>
     where
         Self: std::marker::Sized;
@@ -39,15 +39,15 @@ pub trait LookaheadMatcher<W: Semiring>: Matcher<W> {
     fn create_data<F: ExpandedFst<W = W>>(
         fst: &F,
         match_type: MatchType,
-    ) -> Result<Option<Rc<RefCell<Self::MatcherData>>>>;
+    ) -> Result<Option<Arc<RefCell<Self::MatcherData>>>>;
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &Rc<LF>) -> Result<()>;
+    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &Arc<LF>) -> Result<()>;
     // Are there paths from a state in the lookahead FST that can be read from
     // the curent matcher state?
     fn lookahead_fst<LF: ExpandedFst<W = W>>(
         &mut self,
         matcher_state: StateId,
-        lfst: &Rc<LF>,
+        lfst: &Arc<LF>,
         lfst_state: StateId,
     ) -> Result<bool>;
 

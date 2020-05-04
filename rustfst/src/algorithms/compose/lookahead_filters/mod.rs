@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::Arc;
 
 pub use lookahead_compose_filter::LookAheadComposeFilter;
 pub use lookahead_selector::{SMatchBoth, SMatchInput, SMatchNone, SMatchOutput, SMatchUnknown};
@@ -19,8 +19,8 @@ mod push_labels_compose_filter;
 mod push_weights_compose_filter;
 
 pub fn lookahead_match_type<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
-    m1: Rc<RefCell<M1>>,
-    m2: Rc<RefCell<M2>>,
+    m1: Arc<RefCell<M1>>,
+    m2: Arc<RefCell<M2>>,
 ) -> MatchType {
     let type1 = m1.borrow().match_type();
     let type2 = m2.borrow().match_type();

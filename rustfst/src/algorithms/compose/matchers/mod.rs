@@ -11,7 +11,7 @@ use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Label, StateId};
 use crate::{Tr, EPS_LABEL, NO_LABEL};
-use std::rc::Rc;
+use std::sync::Arc;
 
 mod generic_matcher;
 mod multi_eps_matcher;
@@ -101,7 +101,7 @@ pub trait Matcher<W: Semiring>: Debug {
 
     type Iter: Iterator<Item = IterItemMatcher<W>> + Clone;
 
-    fn new(fst: Rc<Self::F>, match_type: MatchType) -> Result<Self>
+    fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self>
     where
         Self: std::marker::Sized;
     fn iter(&self, state: StateId, label: Label) -> Result<Self::Iter>;
@@ -115,5 +115,5 @@ pub trait Matcher<W: Semiring>: Debug {
     /// current state of the matcher invalidates the state of the matcher.
     fn priority(&self, state: StateId) -> Result<usize>;
 
-    fn fst(&self) -> Rc<Self::F>;
+    fn fst(&self) -> Arc<Self::F>;
 }

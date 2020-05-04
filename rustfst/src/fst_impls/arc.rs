@@ -1,5 +1,4 @@
 use std::ops::Deref;
-use std::rc::Rc;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -9,7 +8,7 @@ use crate::fst_traits::{
 };
 use crate::SymbolTable;
 
-impl<F: Fst> Fst for Rc<F>
+impl<F: Fst> Fst for Arc<F>
 where
     F::W: 'static,
 {
@@ -38,7 +37,7 @@ where
     }
 }
 
-impl<F: ExpandedFst> ExpandedFst for Rc<F>
+impl<F: ExpandedFst> ExpandedFst for Arc<F>
 where
     F::W: 'static,
 {
@@ -47,7 +46,7 @@ where
     }
 }
 
-impl<F: CoreFst> CoreFst for Rc<F> {
+impl<F: CoreFst> CoreFst for Arc<F> {
     type W = F::W;
 
     fn start(&self) -> Option<usize> {
@@ -71,7 +70,7 @@ impl<F: CoreFst> CoreFst for Rc<F> {
     }
 }
 
-impl<'a, F: FstIterator<'a>> FstIterator<'a> for Rc<F>
+impl<'a, F: FstIterator<'a>> FstIterator<'a> for Arc<F>
 where
     F::W: 'a,
 {
@@ -83,7 +82,7 @@ where
     }
 }
 
-impl<'a, F: TrIterator<'a>> TrIterator<'a> for Rc<F>
+impl<'a, F: TrIterator<'a>> TrIterator<'a> for Arc<F>
 where
     F::W: 'a,
 {
@@ -98,7 +97,7 @@ where
     }
 }
 
-impl<'a, F: StateIterator<'a>> StateIterator<'a> for Rc<F> {
+impl<'a, F: StateIterator<'a>> StateIterator<'a> for Arc<F> {
     type Iter = F::Iter;
 
     fn states_iter(&'a self) -> Self::Iter {
@@ -106,7 +105,7 @@ impl<'a, F: StateIterator<'a>> StateIterator<'a> for Rc<F> {
     }
 }
 
-impl<F: FstIntoIterator> FstIntoIterator for Rc<F> {
+impl<F: FstIntoIterator> FstIntoIterator for Arc<F> {
     type TrsIter = F::TrsIter;
     type FstIter = F::FstIter;
 

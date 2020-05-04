@@ -193,11 +193,11 @@ pub trait Fst:
     fn output_symbols(&self) -> Option<&Arc<SymbolTable>>;
 
     /// Attaches an output `SymbolTable` to the Fst.
-    /// The `SymbolTable` is not duplicated with the use of Rc.
+    /// The `SymbolTable` is not duplicated with the use of Arc.
     fn set_input_symbols(&mut self, symt: Arc<SymbolTable>);
 
     /// Attaches an output `SymbolTable` to the Fst.
-    /// The `SymbolTable` is not duplicated with the use of Rc.
+    /// The `SymbolTable` is not duplicated with the use of Arc.
     fn set_output_symbols(&mut self, symt: Arc<SymbolTable>);
 
     /// Removes the input symbol table from the Fst and retrieves it.

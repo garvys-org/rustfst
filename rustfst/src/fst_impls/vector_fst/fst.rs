@@ -9,7 +9,7 @@ use crate::{StateId, SymbolTable};
 
 impl<W: 'static + Semiring> Fst for VectorFst<W> {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
-        // Rc is incremented, SymbolTable is not duplicated
+        // Arc is incremented, SymbolTable is not duplicated
         self.isymt.as_ref()
     }
 

@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::fmt::Debug;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;
@@ -56,13 +56,13 @@ impl MatchTypeTrait for SMatchUnknown {
 
 #[derive(Clone, Debug)]
 pub struct LookAheadSelector<F, M> {
-    pub fst: Rc<F>,
-    pub matcher: Rc<RefCell<M>>,
+    pub fst: Arc<F>,
+    pub matcher: Arc<RefCell<M>>,
 }
 
 fn selector_match_input<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
-    lmatcher1: Rc<RefCell<M1>>,
-    lmatcher2: Rc<RefCell<M2>>,
+    lmatcher1: Arc<RefCell<M1>>,
+    lmatcher2: Arc<RefCell<M2>>,
 ) -> LookAheadSelector<M1::F, M2> {
     LookAheadSelector {
         fst: lmatcher1.borrow().fst(),
@@ -71,8 +71,8 @@ fn selector_match_input<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
 }
 
 fn selector_match_output<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
-    lmatcher1: Rc<RefCell<M1>>,
-    lmatcher2: Rc<RefCell<M2>>,
+    lmatcher1: Arc<RefCell<M1>>,
+    lmatcher2: Arc<RefCell<M2>>,
 ) -> LookAheadSelector<M2::F, M1> {
     LookAheadSelector {
         fst: lmatcher2.borrow().fst(),
@@ -87,8 +87,8 @@ pub enum Selector<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
 }
 
 pub(crate) fn selector<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
-    lmatcher1: Rc<RefCell<M1>>,
-    lmatcher2: Rc<RefCell<M2>>,
+    lmatcher1: Arc<RefCell<M1>>,
+    lmatcher2: Arc<RefCell<M2>>,
     match_type: MatchType,
     lookahead_type: MatchType,
 ) -> Selector<W, M1, M2> {

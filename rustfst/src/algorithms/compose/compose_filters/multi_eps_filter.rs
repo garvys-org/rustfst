@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::Result;
 
@@ -19,9 +19,9 @@ impl<W: Semiring, F: ComposeFilter<W>> ComposeFilter<W> for MultiEpsFilter<F> {
     type M2 = F::M2;
     type FS = F::FS;
 
-    fn new<IM1: Into<Option<Rc<RefCell<Self::M1>>>>, IM2: Into<Option<Rc<RefCell<Self::M2>>>>>(
-        fst1: Rc<<Self::M1 as Matcher<W>>::F>,
-        fst2: Rc<<Self::M2 as Matcher<W>>::F>,
+    fn new<IM1: Into<Option<Arc<RefCell<Self::M1>>>>, IM2: Into<Option<Arc<RefCell<Self::M2>>>>>(
+        fst1: Arc<<Self::M1 as Matcher<W>>::F>,
+        fst2: Arc<<Self::M2 as Matcher<W>>::F>,
         m1: IM1,
         m2: IM2,
     ) -> Result<Self> {
@@ -57,11 +57,11 @@ impl<W: Semiring, F: ComposeFilter<W>> ComposeFilter<W> for MultiEpsFilter<F> {
         self.filter.filter_final(w1, w2)
     }
 
-    fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
-        Rc::clone(&self.filter.matcher1())
+    fn matcher1(&self) -> Arc<RefCell<Self::M1>> {
+        Arc::clone(&self.filter.matcher1())
     }
 
-    fn matcher2(&self) -> Rc<RefCell<Self::M2>> {
-        Rc::clone(&self.filter.matcher2())
+    fn matcher2(&self) -> Arc<RefCell<Self::M2>> {
+        Arc::clone(&self.filter.matcher2())
     }
 }

@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::fmt::Debug;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::Result;
 
@@ -32,9 +32,9 @@ pub trait ComposeFilter<W: Semiring>: Debug {
     type M2: Matcher<W>;
     type FS: FilterState;
 
-    fn new<IM1: Into<Option<Rc<RefCell<Self::M1>>>>, IM2: Into<Option<Rc<RefCell<Self::M2>>>>>(
-        fst1: Rc<<Self::M1 as Matcher<W>>::F>,
-        fst2: Rc<<Self::M2 as Matcher<W>>::F>,
+    fn new<IM1: Into<Option<Arc<RefCell<Self::M1>>>>, IM2: Into<Option<Arc<RefCell<Self::M2>>>>>(
+        fst1: Arc<<Self::M1 as Matcher<W>>::F>,
+        fst2: Arc<<Self::M2 as Matcher<W>>::F>,
         m1: IM1,
         m2: IM2,
     ) -> Result<Self>
@@ -49,7 +49,7 @@ pub trait ComposeFilter<W: Semiring>: Debug {
 
     fn filter_final(&self, w1: &mut W, w2: &mut W) -> Result<()>;
 
-    fn matcher1(&self) -> Rc<RefCell<Self::M1>>;
+    fn matcher1(&self) -> Arc<RefCell<Self::M1>>;
 
-    fn matcher2(&self) -> Rc<RefCell<Self::M2>>;
+    fn matcher2(&self) -> Arc<RefCell<Self::M2>>;
 }

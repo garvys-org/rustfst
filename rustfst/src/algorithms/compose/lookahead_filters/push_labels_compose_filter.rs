@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::marker::PhantomData;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::Result;
 
@@ -26,10 +26,10 @@ pub struct PushLabelsComposeFilter<
     CF::M1: LookaheadMatcher<W>,
     CF::M2: LookaheadMatcher<W>,
 {
-    fst1: Rc<<CF::M1 as Matcher<W>>::F>,
-    fst2: Rc<<CF::M2 as Matcher<W>>::F>,
-    matcher1: Rc<RefCell<MultiEpsMatcher<W, CF::M1>>>,
-    matcher2: Rc<RefCell<MultiEpsMatcher<W, CF::M2>>>,
+    fst1: Arc<<CF::M1 as Matcher<W>>::F>,
+    fst2: Arc<<CF::M2 as Matcher<W>>::F>,
+    matcher1: Arc<RefCell<MultiEpsMatcher<W, CF::M1>>>,
+    matcher2: Arc<RefCell<MultiEpsMatcher<W, CF::M2>>>,
     filter: CF,
     fs: PairFilterState<CF::FS, IntegerFilterState>,
     smt: PhantomData<SMT>,
@@ -46,9 +46,9 @@ where
     type M2 = MultiEpsMatcher<W, CF::M2>;
     type FS = PairFilterState<CF::FS, IntegerFilterState>;
 
-    fn new<IM1: Into<Option<Rc<RefCell<Self::M1>>>>, IM2: Into<Option<Rc<RefCell<Self::M2>>>>>(
-        _fst1: Rc<<Self::M1 as Matcher<W>>::F>,
-        _fst2: Rc<<Self::M2 as Matcher<W>>::F>,
+    fn new<IM1: Into<Option<Arc<RefCell<Self::M1>>>>, IM2: Into<Option<Arc<RefCell<Self::M2>>>>>(
+        _fst1: Arc<<Self::M1 as Matcher<W>>::F>,
+        _fst2: Arc<<Self::M2 as Matcher<W>>::F>,
         _m1: IM1,
         _m2: IM2,
     ) -> Result<Self> {
@@ -135,12 +135,12 @@ where
         Ok(())
     }
 
-    fn matcher1(&self) -> Rc<RefCell<Self::M1>> {
-        Rc::clone(&self.matcher1)
+    fn matcher1(&self) -> Arc<RefCell<Self::M1>> {
+        Arc::clone(&self.matcher1)
     }
 
-    fn matcher2(&self) -> Rc<RefCell<Self::M2>> {
-        Rc::clone(&self.matcher2)
+    fn matcher2(&self) -> Arc<RefCell<Self::M2>> {
+        Arc::clone(&self.matcher2)
     }
 }
 
@@ -267,17 +267,17 @@ where
         self.filter.selector()
     }
 
-    pub fn new_2<IM1: Into<Option<Rc<RefCell<CF::M1>>>>, IM2: Into<Option<Rc<RefCell<CF::M2>>>>>(
-        fst1: Rc<<<Self as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
-        fst2: Rc<<<Self as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
+    pub fn new_2<IM1: Into<Option<Arc<RefCell<CF::M1>>>>, IM2: Into<Option<Arc<RefCell<CF::M2>>>>>(
+        fst1: Arc<<<Self as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
+        fst2: Arc<<<Self as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
         m1: IM1,
         m2: IM2,
     ) -> Result<Self> {
         let filter = CF::new(fst1, fst2, m1, m2)?;
         let fst1 = filter.matcher1().borrow().fst();
         let fst2 = filter.matcher2().borrow().fst();
-        let matcher1 = Rc::new(RefCell::new(MultiEpsMatcher::new_with_opts(
-            Rc::clone(&fst1),
+        let matcher1 = Arc::new(RefCell::new(MultiEpsMatcher::new_with_opts(
+            Arc::clone(&fst1),
             MatchType::MatchOutput,
             if filter.lookahead_output() {
                 MultiEpsMatcherFlags::MULTI_EPS_LIST
@@ -286,8 +286,8 @@ where
             },
             filter.matcher1(),
         )?));
-        let matcher2 = Rc::new(RefCell::new(MultiEpsMatcher::new_with_opts(
-            Rc::clone(&fst2),
+        let matcher2 = Arc::new(RefCell::new(MultiEpsMatcher::new_with_opts(
+            Arc::clone(&fst2),
             MatchType::MatchInput,
             if filter.lookahead_output() {
                 MultiEpsMatcherFlags::MULTI_EPS_LOOP
