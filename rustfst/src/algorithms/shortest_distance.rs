@@ -191,9 +191,9 @@ impl<Q: Queue, F: ExpandedFst, B: Borrow<F>, A: TrFilter<F::W>> ShortestDistance
             self.enqueued[state] = false;
             let r = self.radder[state].clone();
             self.radder[state] = F::W::zero();
-            for arc in self.fst.borrow().arcs_iter(state)? {
-                let nextstate = arc.nextstate;
-                if !self.tr_filter.keep(arc) {
+            for tr in self.fst.borrow().tr_iter(state)? {
+                let nextstate = tr.nextstate;
+                if !self.tr_filter.keep(tr) {
                     continue;
                 }
 
@@ -213,7 +213,7 @@ impl<Q: Queue, F: ExpandedFst, B: Borrow<F>, A: TrFilter<F::W>> ShortestDistance
                 let nd = self.distance.get_mut(nextstate).unwrap();
                 let na = self.adder.get_mut(nextstate).unwrap();
                 let nr = self.radder.get_mut(nextstate).unwrap();
-                let weight = r.times(&arc.weight)?;
+                let weight = r.times(&tr.weight)?;
                 if *nd != nd.plus(&weight)? {
                     na.plus_assign(&weight)?;
                     *nd = na.clone();

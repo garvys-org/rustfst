@@ -9,8 +9,8 @@ use crate::EPS_LABEL;
 pub struct OutputEpsilonMapper {}
 
 impl<S: Semiring> TrMapper<S> for OutputEpsilonMapper {
-    fn tr_map(&self, arc: &mut Tr<S>) -> Result<()> {
-        arc.olabel = EPS_LABEL;
+    fn tr_map(&self, tr: &mut Tr<S>) -> Result<()> {
+        tr.olabel = EPS_LABEL;
         Ok(())
     }
 

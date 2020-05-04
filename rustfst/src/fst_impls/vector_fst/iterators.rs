@@ -24,7 +24,7 @@ impl<'a, W: Semiring> StateIterator<'a> for VectorFst<W> {
 
 impl<'a, W: 'static + Semiring> TrIterator<'a> for VectorFst<W> {
     type Iter = slice::Iter<'a, Tr<W>>;
-    fn arcs_iter(&'a self, state_id: StateId) -> Result<Self::Iter> {
+    fn tr_iter(&'a self, state_id: StateId) -> Result<Self::Iter> {
         let state = self
             .states
             .get(state_id)
@@ -32,14 +32,14 @@ impl<'a, W: 'static + Semiring> TrIterator<'a> for VectorFst<W> {
         Ok(state.arcs.iter())
     }
 
-    unsafe fn arcs_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
+    unsafe fn tr_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
         self.states.get_unchecked(state_id).arcs.iter()
     }
 }
 
 impl<'a, W: 'static + Semiring> MutableTrIterator<'a> for VectorFst<W> {
     type IterMut = slice::IterMut<'a, Tr<W>>;
-    fn arcs_iter_mut(&'a mut self, state_id: StateId) -> Result<Self::IterMut> {
+    fn tr_iter_mut(&'a mut self, state_id: StateId) -> Result<Self::IterMut> {
         let state = self
             .states
             .get_mut(state_id)
@@ -48,7 +48,7 @@ impl<'a, W: 'static + Semiring> MutableTrIterator<'a> for VectorFst<W> {
     }
 
     #[inline]
-    unsafe fn arcs_iter_unchecked_mut(&'a mut self, state_id: usize) -> Self::IterMut {
+    unsafe fn tr_iter_unchecked_mut(&'a mut self, state_id: usize) -> Self::IterMut {
         self.states.get_unchecked_mut(state_id).arcs.iter_mut()
     }
 }

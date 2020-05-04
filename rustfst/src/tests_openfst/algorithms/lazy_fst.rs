@@ -30,10 +30,10 @@ where
         };
 
         let mut arcs_lazy: Counter<_, usize> = Counter::new();
-        arcs_lazy.update(fst_lazy.arcs_iter(i)?.cloned());
+        arcs_lazy.update(fst_lazy.tr_iter(i)?.cloned());
 
         let mut arcs_static: Counter<_, usize> = Counter::new();
-        arcs_static.update(fst_static.arcs_iter(i)?.cloned());
+        arcs_static.update(fst_static.tr_iter(i)?.cloned());
 
         assert_eq!(arcs_lazy, arcs_static);
     }

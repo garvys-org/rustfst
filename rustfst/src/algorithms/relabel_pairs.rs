@@ -58,13 +58,13 @@ where
 
     let states: Vec<_> = fst.states_iter().collect();
     for state_id in states {
-        for arc in fst.arcs_iter_mut(state_id)? {
-            if let Some(v) = map_ilabels.get(&arc.ilabel) {
-                arc.ilabel = *v;
+        for tr in fst.tr_iter_mut(state_id)? {
+            if let Some(v) = map_ilabels.get(&tr.ilabel) {
+                tr.ilabel = *v;
             }
 
-            if let Some(v) = map_olabels.get(&arc.olabel) {
-                arc.olabel = *v;
+            if let Some(v) = map_olabels.get(&tr.olabel) {
+                tr.olabel = *v;
             }
         }
     }

@@ -77,8 +77,8 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         true
     }
 
-    fn back_tr(&mut self, s: usize, arc: &Tr<<F as CoreFst>::W>) -> bool {
-        let t = arc.nextstate;
+    fn back_tr(&mut self, s: usize, tr: &Tr<<F as CoreFst>::W>) -> bool {
+        let t = tr.nextstate;
         if self.dfnumber[t] < self.lowlink[s] {
             self.lowlink[s] = self.dfnumber[t];
         }
@@ -94,8 +94,8 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         true
     }
 
-    fn forward_or_cross_tr(&mut self, s: usize, arc: &Tr<<F as CoreFst>::W>) -> bool {
-        let t = arc.nextstate;
+    fn forward_or_cross_tr(&mut self, s: usize, tr: &Tr<<F as CoreFst>::W>) -> bool {
+        let t = tr.nextstate;
         if self.dfnumber[t] < self.dfnumber[s]
             && self.onstack[t]
             && self.dfnumber[t] < self.lowlink[s]

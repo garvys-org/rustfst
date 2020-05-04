@@ -78,11 +78,11 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
             write_bin_i32(&mut file, const_state.noepsilons as i32)?;
         }
 
-        for arc in &self.arcs {
-            write_bin_i32(&mut file, arc.ilabel as i32)?;
-            write_bin_i32(&mut file, arc.olabel as i32)?;
-            arc.weight.write_binary(&mut file)?;
-            write_bin_i32(&mut file, arc.nextstate as i32)?;
+        for tr in &self.arcs {
+            write_bin_i32(&mut file, tr.ilabel as i32)?;
+            write_bin_i32(&mut file, tr.olabel as i32)?;
+            tr.weight.write_binary(&mut file)?;
+            write_bin_i32(&mut file, tr.nextstate as i32)?;
         }
 
         Ok(())
@@ -97,7 +97,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
         let mut const_trs = Vec::with_capacity(num_trs);
 
         parsed_fst_text.transitions.sort_by_key(|v| v.state);
-        for (_state, arcs_iterator) in parsed_fst_text
+        for (_state, tr_iterator) in parsed_fst_text
             .transitions
             .into_iter()
             .group_by(|v| v.state)
@@ -114,21 +114,21 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
             });
             let mut niepsilons = 0;
             let mut noepsilons = 0;
-            const_trs.extend(arcs_iterator.map(|v| {
+            const_trs.extend(tr_iterator.map(|v| {
                 debug_assert_eq!(_state, v.state);
-                let arc = Tr {
+                let tr = Tr {
                     ilabel: v.ilabel,
                     olabel: v.olabel,
                     weight: v.weight.unwrap_or_else(W::one),
                     nextstate: v.nextstate,
                 };
-                if arc.ilabel == EPS_LABEL {
+                if tr.ilabel == EPS_LABEL {
                     niepsilons += 1;
                 }
-                if arc.olabel == EPS_LABEL {
+                if tr.olabel == EPS_LABEL {
                     noepsilons += 1;
                 }
-                arc
+                tr
             }));
             let num_trs_this_state = const_trs.len() - pos;
             const_states.push(ConstState::<W> {

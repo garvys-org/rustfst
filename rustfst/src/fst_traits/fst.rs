@@ -140,7 +140,7 @@ pub trait Fst:
     /// ```
     fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
         let filter = InputEpsilonTrFilter {};
-        Ok(self.arcs_iter(state)?.filter(|v| filter.keep(v)).count())
+        Ok(self.tr_iter(state)?.filter(|v| filter.keep(v)).count())
     }
 
     /// Returns the number of arcs with epsilon output labels leaving a state.
@@ -167,16 +167,16 @@ pub trait Fst:
     /// ```
     fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
         let filter = OutputEpsilonTrFilter {};
-        Ok(self.arcs_iter(state)?.filter(|v| filter.keep(v)).count())
+        Ok(self.tr_iter(state)?.filter(|v| filter.keep(v)).count())
     }
 
     /// Returns true if the Fst is an acceptor. False otherwise.
-    /// Acceptor means for all arc, arc.ilabel == arc.olabel
+    /// Acceptor means for all tr, tr.ilabel == tr.olabel
     fn is_acceptor(&self) -> bool {
         let states: Vec<_> = self.states_iter().collect();
         for state in states {
-            for arc in self.arcs_iter(state).unwrap() {
-                if arc.ilabel != arc.olabel {
+            for tr in self.tr_iter(state).unwrap() {
+                if tr.ilabel != tr.olabel {
                     return false;
                 }
             }

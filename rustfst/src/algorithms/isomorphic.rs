@@ -77,8 +77,8 @@ impl<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> Isomorphis
             return Ok(false);
         }
 
-        let mut arcs1: Vec<_> = self.fst_1.arcs_iter(s1)?.collect();
-        let mut arcs2: Vec<_> = self.fst_2.arcs_iter(s2)?.collect();
+        let mut arcs1: Vec<_> = self.fst_1.tr_iter(s1)?.collect();
+        let mut arcs2: Vec<_> = self.fst_2.tr_iter(s2)?.collect();
 
         arcs1.sort_by(|a, b| tr_compare(a, b));
         arcs2.sort_by(|a, b| tr_compare(a, b));

@@ -56,12 +56,12 @@ where
         while !self.queue.is_empty() {
             let (state_id, mut path) = self.queue.pop_front().unwrap();
 
-            for arc in unsafe { self.fst.arcs_iter_unchecked(state_id) } {
+            for tr in unsafe { self.fst.tr_iter_unchecked(state_id) } {
                 let mut new_path = path.clone();
                 new_path
-                    .add_to_path(arc.ilabel, arc.olabel, &arc.weight)
+                    .add_to_path(tr.ilabel, tr.olabel, &tr.weight)
                     .expect("Error add_to_path in PathsIterator");
-                self.queue.push_back((arc.nextstate, new_path));
+                self.queue.push_back((tr.nextstate, new_path));
             }
 
             if let Some(final_weight) = unsafe { self.fst.final_weight_unchecked(state_id) } {

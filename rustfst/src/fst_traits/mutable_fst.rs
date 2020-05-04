@@ -169,7 +169,7 @@ pub trait MutableFst:
 
     unsafe fn del_trs_id_sorted_unchecked(&mut self, state: StateId, to_del: &Vec<usize>);
 
-    /// Adds an arc to the FST. The arc will start in the state `source`.
+    /// Adds an tr to the FST. The tr will start in the state `source`.
     ///
     /// # Errors
     ///
@@ -194,10 +194,10 @@ pub trait MutableFst:
     /// # Ok(())
     /// # }
     /// ```
-    fn add_tr(&mut self, source: StateId, arc: Tr<Self::W>) -> Result<()>;
-    unsafe fn add_tr_unchecked(&mut self, source: StateId, arc: Tr<Self::W>);
+    fn add_tr(&mut self, source: StateId, tr: Tr<Self::W>) -> Result<()>;
+    unsafe fn add_tr_unchecked(&mut self, source: StateId, tr: Tr<Self::W>);
 
-    /// Adds an arc to the FST. The arc will start in the state `source`.
+    /// Adds an tr to the FST. The tr will start in the state `source`.
     ///
     /// # Errors
     ///
@@ -337,7 +337,7 @@ pub trait MutableFst:
         crate::algorithms::closure(self, closure_type)
     }
 
-    /// Maps an arc using a `TrMapper` object.
+    /// Maps an tr using a `TrMapper` object.
     fn tr_map<M: TrMapper<Self::W>>(&mut self, mapper: &mut M) -> Result<()> {
         crate::algorithms::tr_map(self, mapper)
     }
@@ -349,6 +349,6 @@ where
     Self::W: 'a,
 {
     type IterMut: Iterator<Item = &'a mut Tr<Self::W>>;
-    fn arcs_iter_mut(&'a mut self, state_id: StateId) -> Result<Self::IterMut>;
-    unsafe fn arcs_iter_unchecked_mut(&'a mut self, state_id: StateId) -> Self::IterMut;
+    fn tr_iter_mut(&'a mut self, state_id: StateId) -> Result<Self::IterMut>;
+    unsafe fn tr_iter_unchecked_mut(&'a mut self, state_id: StateId) -> Self::IterMut;
 }

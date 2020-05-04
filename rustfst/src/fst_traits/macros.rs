@@ -1,17 +1,17 @@
 macro_rules! display_single_state {
     ($fst:expr, $state_id:expr, $f: expr, $show_weight_one: expr) => {
-        for arc in $fst.arcs_iter($state_id).unwrap() {
-            if arc.weight.is_one() && !$show_weight_one {
+        for tr in $fst.tr_iter($state_id).unwrap() {
+            if tr.weight.is_one() && !$show_weight_one {
                 writeln!(
                     $f,
                     "{}\t{}\t{}\t{}",
-                    $state_id, &arc.nextstate, &arc.ilabel, &arc.olabel
+                    $state_id, &tr.nextstate, &tr.ilabel, &tr.olabel
                 )?;
             } else {
                 writeln!(
                     $f,
                     "{}\t{}\t{}\t{}\t{}",
-                    $state_id, &arc.nextstate, &arc.ilabel, &arc.olabel, &arc.weight
+                    $state_id, &tr.nextstate, &tr.ilabel, &tr.olabel, &tr.weight
                 )?;
             }
         }

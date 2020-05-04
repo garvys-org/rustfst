@@ -46,10 +46,10 @@
 //!     // Set s0 as the start state
 //!     fst.set_start(s0)?;
 //!
-//!     // Add an arc from s0 to s1
+//!     // Add an tr from s0 to s1
 //!     fst.add_tr(s0, Tr::new(3, 5, 10.0, s1))?;
 //!
-//!     // Add an arc from s0 to s2
+//!     // Add an tr from s0 to s2
 //!     fst.add_tr(s0, Tr::new(5, 7, 18.0, s2))?;
 //!
 //!     // Set s1 and s2 as final states

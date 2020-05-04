@@ -12,7 +12,7 @@ use crate::parsers::bin_symt::nom_parser::{parse_symbol_table_bin, write_bin_sym
 use crate::parsers::text_symt::parsed_text_symt::ParsedTextSymt;
 use crate::{Label, Symbol, EPS_SYMBOL};
 
-/// A symbol table stores a bidirectional mapping between arc labels and "symbols" (strings).
+/// A symbol table stores a bidirectional mapping between tr labels and "symbols" (strings).
 #[derive(PartialEq, Debug, Clone, Default)]
 pub struct SymbolTable {
     label_to_symbol: HashMap<Label, Symbol>,

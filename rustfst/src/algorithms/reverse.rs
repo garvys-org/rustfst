@@ -9,9 +9,9 @@ use crate::EPS_LABEL;
 /// If A transduces string x to y with weight a, then the reverse of A
 /// transduces the reverse of x to the reverse of y with weight a.Reverse().
 ///
-/// Typically, a = a.Reverse() and an arc is its own reverse (e.g., for
+/// Typically, a = a.Reverse() and an tr is its own reverse (e.g., for
 /// TropicalWeight or LogWeight). In general, e.g., when the weights only form a
-/// left or right semiring, the output arc type must match the input arc type
+/// left or right semiring, the output tr type must match the input tr type
 /// except having the reversed Weight type.
 ///
 /// A superinitial state is always created.
@@ -41,7 +41,7 @@ where
 
     let mut c_trs = vec![0; ifst.num_states() + 1];
     for is in 0..ifst.num_states() {
-        for iarc in unsafe { ifst.arcs_iter_unchecked(is) } {
+        for iarc in unsafe { ifst.tr_iter_unchecked(is) } {
             c_trs[iarc.nextstate + 1] += 1;
         }
     }
@@ -58,7 +58,7 @@ where
             states_trs[0].push(Tr::new(EPS_LABEL, EPS_LABEL, w.reverse()?, os));
         }
 
-        for iarc in unsafe { ifst.arcs_iter_unchecked(is) } {
+        for iarc in unsafe { ifst.tr_iter_unchecked(is) } {
             let nos = iarc.nextstate + 1;
             let weight = iarc.weight.reverse()?;
             let w = Tr::new(iarc.ilabel, iarc.olabel, weight, os);

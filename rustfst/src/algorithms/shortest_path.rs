@@ -67,7 +67,7 @@ where
 
     let rfst: VectorFst<_> = reverse(ifst)?;
     let mut d = FI::W::zero();
-    for rarc in rfst.arcs_iter(0)? {
+    for rarc in rfst.tr_iter(0)? {
         let state = rarc.nextstate - 1;
         if state < distance.len() {
             let rweight: FI::W = rarc.weight.reverse_back()?;
@@ -145,22 +145,22 @@ where
             }
         }
 
-        for (pos, arc) in unsafe { ifst.arcs_iter_unchecked(s).enumerate() } {
-            while distance.len() <= arc.nextstate {
+        for (pos, tr) in unsafe { ifst.tr_iter_unchecked(s).enumerate() } {
+            while distance.len() <= tr.nextstate {
                 distance.push(F::W::zero());
                 enqueued.push(false);
                 parent.push(None)
             }
-            let nd = &mut distance[arc.nextstate];
-            let weight = sd.times(&arc.weight)?;
+            let nd = &mut distance[tr.nextstate];
+            let weight = sd.times(&tr.weight)?;
             if *nd != nd.plus(&weight)? {
                 *nd = nd.plus(&weight)?;
-                parent[arc.nextstate] = Some((s, pos));
-                if !enqueued[arc.nextstate] {
-                    queue.enqueue(arc.nextstate);
-                    enqueued[arc.nextstate] = true;
+                parent[tr.nextstate] = Some((s, pos));
+                if !enqueued[tr.nextstate] {
+                    queue.enqueue(tr.nextstate);
+                    enqueued[tr.nextstate] = true;
                 } else {
-                    queue.update(arc.nextstate);
+                    queue.update(tr.nextstate);
                 }
             }
         }
@@ -192,9 +192,9 @@ where
             }
         } else {
             let pos = parent[d.unwrap()].unwrap().1;
-            let mut arc = ifst.arcs_iter(state)?.nth(pos).unwrap().clone();
-            arc.nextstate = d_p.unwrap();
-            ofst.add_tr(s_p.unwrap(), arc)?;
+            let mut tr = ifst.tr_iter(state)?.nth(pos).unwrap().clone();
+            tr.nextstate = d_p.unwrap();
+            ofst.add_tr(s_p.unwrap(), tr)?;
         }
 
         // Next iteration
@@ -317,18 +317,18 @@ where
         if p.0.is_none() {
             continue;
         }
-        for rarc in ifst.arcs_iter(p.0.unwrap())? {
-            let mut arc: Tr<W> = Tr::new(
+        for rarc in ifst.tr_iter(p.0.unwrap())? {
+            let mut tr: Tr<W> = Tr::new(
                 rarc.ilabel,
                 rarc.olabel,
                 rarc.weight.reverse_back()?,
                 rarc.nextstate,
             );
-            let weight = p.1.times(&arc.weight)?;
+            let weight = p.1.times(&tr.weight)?;
             let next = ofst.add_state();
-            pairs.borrow_mut().push((Some(arc.nextstate), weight));
-            arc.nextstate = state;
-            ofst.add_tr(next, arc)?;
+            pairs.borrow_mut().push((Some(tr.nextstate), weight));
+            tr.nextstate = state;
+            ofst.add_tr(next, tr)?;
             heap.push(next);
         }
         let final_weight = ifst.final_weight(p.0.unwrap())?;

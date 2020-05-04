@@ -63,17 +63,17 @@ fn extract_gallic<W: Semiring>(gw: &GallicWeight<W>) -> Result<(W, Label)> {
 macro_rules! impl_weight_converter_gallic {
     ($gallic: ident, $fextract: ident) => {
         impl<W: Semiring> WeightConverter<$gallic<W>, W> for FromGallicConverter {
-            fn tr_map(&mut self, arc: &Tr<$gallic<W>>) -> Result<Tr<W>> {
-                let (extracted_w, extracted_l) = $fextract(&arc.weight)?;
-                if arc.ilabel != arc.olabel {
-                    bail!("Unrepresentable weight : {:?}", &arc);
+            fn tr_map(&mut self, tr: &Tr<$gallic<W>>) -> Result<Tr<W>> {
+                let (extracted_w, extracted_l) = $fextract(&tr.weight)?;
+                if tr.ilabel != tr.olabel {
+                    bail!("Unrepresentable weight : {:?}", &tr);
                 }
 
                 let new_tr = Tr {
-                    ilabel: arc.ilabel,
+                    ilabel: tr.ilabel,
                     olabel: extracted_l,
                     weight: extracted_w,
-                    nextstate: arc.nextstate,
+                    nextstate: tr.nextstate,
                 };
                 Ok(new_tr)
             }

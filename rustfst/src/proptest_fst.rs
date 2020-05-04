@@ -73,8 +73,8 @@ pub(crate) fn proptest_fst() -> impl Strategy<Value = VectorFst<TropicalWeight>>
             fst.set_start(start_state).unwrap();
 
             // Add arcs.
-            for (state, arc) in arcs.into_iter() {
-                unsafe { fst.add_tr_unchecked(state, arc) };
+            for (state, tr) in arcs.into_iter() {
+                unsafe { fst.add_tr_unchecked(state, tr) };
             }
 
             // Set final weights.

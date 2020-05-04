@@ -22,12 +22,12 @@ impl<W> Tr<W> {
     /// ```
     /// # use rustfst::Tr;
     /// # use rustfst::semirings::{TropicalWeight, Semiring};
-    /// let arc = Tr::<TropicalWeight>::new(0, 1, 1.3, 2);
+    /// let tr = Tr::<TropicalWeight>::new(0, 1, 1.3, 2);
     ///
-    /// assert_eq!(arc.ilabel, 0);
-    /// assert_eq!(arc.olabel, 1);
-    /// assert_eq!(arc.weight, TropicalWeight::new(1.3));
-    /// assert_eq!(arc.nextstate, 2);
+    /// assert_eq!(tr.ilabel, 0);
+    /// assert_eq!(tr.olabel, 1);
+    /// assert_eq!(tr.weight, TropicalWeight::new(1.3));
+    /// assert_eq!(tr.nextstate, 2);
     ///
     /// ```
     pub fn new<S: Into<W>>(ilabel: Label, olabel: Label, weight: S, nextstate: StateId) -> Self {
@@ -54,14 +54,14 @@ impl<W> Tr<W> {
     /// assert_eq!(tr_1, tr_2);
     /// ```
     #[inline]
-    pub fn set_value(&mut self, arc: &Tr<W>)
+    pub fn set_value(&mut self, tr: &Tr<W>)
     where
         W: std::clone::Clone,
     {
-        self.ilabel = arc.ilabel;
-        self.olabel = arc.olabel;
-        self.weight = arc.weight.clone();
-        self.nextstate = arc.nextstate;
+        self.ilabel = tr.ilabel;
+        self.olabel = tr.olabel;
+        self.weight = tr.weight.clone();
+        self.nextstate = tr.nextstate;
     }
 }
 

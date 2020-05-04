@@ -84,14 +84,14 @@ impl<IMPL: FstImpl> CoreFst for LazyFst<IMPL> {
 impl<'a, IMPL: FstImpl> TrIterator<'a> for LazyFst<IMPL> {
     type Iter = IterSlice<'a, Tr<IMPL::W>>;
 
-    fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
+    fn tr_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
         let ptr = self.fst_impl.get();
         let fst_impl = unsafe { ptr.as_mut().unwrap() };
-        fst_impl.arcs_iter(state_id)
+        fst_impl.tr_iter(state_id)
     }
 
-    unsafe fn arcs_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
-        self.arcs_iter(state_id).unwrap()
+    unsafe fn tr_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
+        self.tr_iter(state_id).unwrap()
     }
 }
 
@@ -108,7 +108,7 @@ impl<'a, IMPL: FstImpl> Iterator for StatesIteratorLazyFst<'a, LazyFst<IMPL>> {
         if self.s < self.fst.num_known_states() {
             let s_cur = self.s;
             // Force expansion of the state
-            self.fst.arcs_iter(s_cur).unwrap();
+            self.fst.tr_iter(s_cur).unwrap();
             self.s += 1;
             Some(s_cur)
         } else {
@@ -172,7 +172,7 @@ impl<'a, IMPL: FstImpl + 'a> FstIterator<'a> for LazyFst<IMPL> {
         izip!(self.states_iter(), it).map(Box::new(|(state_id, p): (StateId, &'a Self)| {
             FstIterData {
                 state_id,
-                arcs: p.arcs_iter(state_id).unwrap(),
+                arcs: p.tr_iter(state_id).unwrap(),
                 final_weight: p.final_weight(state_id).unwrap(),
                 num_trs: p.num_trs(state_id).unwrap(),
             }

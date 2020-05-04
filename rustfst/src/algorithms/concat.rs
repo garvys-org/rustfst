@@ -72,8 +72,8 @@ where
             unsafe { fst_1.set_final_unchecked(s1, final_weight.clone()) };
         }
         unsafe { fst_1.reserve_trs_unchecked(s1, fst_2.num_trs_unchecked(s2)) };
-        for arc in unsafe { fst_2.arcs_iter_unchecked(s2) } {
-            let mut new_tr = arc.clone();
+        for tr in unsafe { fst_2.tr_iter_unchecked(s2) } {
+            let mut new_tr = tr.clone();
             new_tr.nextstate += numstates1;
             unsafe { fst_1.add_tr_unchecked(s1, new_tr) };
         }
@@ -182,12 +182,12 @@ where
 {
     type Iter = <ReplaceFst<F, F> as TrIterator<'a>>::Iter;
 
-    fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
-        self.0.arcs_iter(state_id)
+    fn tr_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
+        self.0.tr_iter(state_id)
     }
 
-    unsafe fn arcs_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
-        self.0.arcs_iter_unchecked(state_id)
+    unsafe fn tr_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
+        self.0.tr_iter_unchecked(state_id)
     }
 }
 

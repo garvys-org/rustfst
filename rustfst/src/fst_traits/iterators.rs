@@ -40,8 +40,8 @@ where
     /// Iterator used to iterate over the arcs leaving a state of an FST.
     type Iter: Iterator<Item = &'a Tr<Self::W>> + Clone;
 
-    fn arcs_iter(&'a self, state_id: StateId) -> Result<Self::Iter>;
-    unsafe fn arcs_iter_unchecked(&'a self, state_id: StateId) -> Self::Iter;
+    fn tr_iter(&'a self, state_id: StateId) -> Result<Self::Iter>;
+    unsafe fn tr_iter_unchecked(&'a self, state_id: StateId) -> Self::Iter;
 }
 
 pub struct FstIterData<W, I> {

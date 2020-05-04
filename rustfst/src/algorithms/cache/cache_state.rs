@@ -42,8 +42,8 @@ impl<W> CacheState<W> {
         self.final_weight.as_ref()
     }
 
-    pub fn push_tr(&mut self, arc: Tr<W>) {
-        self.arcs.push(arc);
+    pub fn push_tr(&mut self, tr: Tr<W>) {
+        self.arcs.push(tr);
     }
 
     pub fn reserve_trs(&mut self, n: usize) {
@@ -62,11 +62,11 @@ impl<W> CacheState<W> {
         unsafe { self.arcs.get_unchecked_mut(n) }
     }
 
-    pub fn arcs_iter(&self) -> IterSlice<Tr<W>> {
+    pub fn tr_iter(&self) -> IterSlice<Tr<W>> {
         self.arcs.iter()
     }
 
-    pub fn arcs_iter_mut(&mut self) -> IterSliceMut<Tr<W>> {
+    pub fn tr_iter_mut(&mut self) -> IterSliceMut<Tr<W>> {
         self.arcs.iter_mut()
     }
 }

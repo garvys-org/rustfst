@@ -129,9 +129,9 @@ where
     noneps_in[start_state] = true;
 
     for state in 0..fst.num_states() {
-        for arc in fst.arcs_iter(state)? {
-            if arc.ilabel != EPS_LABEL || arc.olabel != EPS_LABEL {
-                noneps_in[arc.nextstate] = true;
+        for tr in fst.tr_iter(state)? {
+            if tr.ilabel != EPS_LABEL || tr.olabel != EPS_LABEL {
+                noneps_in[tr.nextstate] = true;
             }
         }
     }
@@ -287,41 +287,41 @@ where
             }
             self.visited[state] = true;
             self.visited_states.push(state);
-            for arc in self.sd_state.fst.borrow().arcs_iter(state)? {
+            for tr in self.sd_state.fst.borrow().tr_iter(state)? {
                 // TODO: Remove this clone
-                let mut arc = arc.clone();
-                arc.weight = distance[state].times(&arc.weight)?;
-                if tr_filter.keep(&arc) {
-                    while self.visited.len() <= arc.nextstate {
+                let mut tr = tr.clone();
+                tr.weight = distance[state].times(&tr.weight)?;
+                if tr_filter.keep(&tr) {
+                    while self.visited.len() <= tr.nextstate {
                         self.visited.push(false);
                     }
-                    if !self.visited[arc.nextstate] {
-                        eps_queue.push(arc.nextstate);
+                    if !self.visited[tr.nextstate] {
+                        eps_queue.push(tr.nextstate);
                     }
                 } else {
                     let elt = Element {
-                        ilabel: arc.ilabel,
-                        olabel: arc.olabel,
-                        nextstate: arc.nextstate,
+                        ilabel: tr.ilabel,
+                        olabel: tr.olabel,
+                        nextstate: tr.nextstate,
                     };
                     let val = (self.expand_id, arcs.len());
 
                     match self.element_map.entry(elt) {
                         Entry::Vacant(e) => {
                             e.insert(val);
-                            arcs.push(arc);
+                            arcs.push(tr);
                         }
                         Entry::Occupied(mut e) => {
                             if e.get().0 == self.expand_id {
                                 unsafe {
                                     arcs.get_unchecked_mut(e.get().1)
                                         .weight
-                                        .plus_assign(&arc.weight)?;
+                                        .plus_assign(&tr.weight)?;
                                 }
                             } else {
                                 e.get_mut().0 = self.expand_id;
                                 e.get_mut().1 = arcs.len();
-                                arcs.push(arc);
+                                arcs.push(tr);
                             }
                         }
                     };
@@ -403,8 +403,8 @@ where
         let (arcs, final_weight) = self.rmeps_state.expand(state)?;
         let zero = F::W::zero();
 
-        for arc in arcs.into_iter().rev() {
-            self.cache_impl.push_tr(state, arc)?;
+        for tr in arcs.into_iter().rev() {
+            self.cache_impl.push_tr(state, tr)?;
         }
         if final_weight != zero {
             self.cache_impl

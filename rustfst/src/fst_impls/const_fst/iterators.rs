@@ -30,7 +30,7 @@ impl<W> ConstFst<W> {
 
 impl<'a, W: 'static + Semiring> TrIterator<'a> for ConstFst<W> {
     type Iter = slice::Iter<'a, Tr<W>>;
-    fn arcs_iter(&'a self, state_id: StateId) -> Result<Self::Iter> {
+    fn tr_iter(&'a self, state_id: StateId) -> Result<Self::Iter> {
         let state = self
             .states
             .get(state_id)
@@ -38,7 +38,7 @@ impl<'a, W: 'static + Semiring> TrIterator<'a> for ConstFst<W> {
         Ok(self.arcs[self.tr_range(state)].iter())
     }
 
-    unsafe fn arcs_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
+    unsafe fn tr_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
         let state = self.states.get_unchecked(state_id);
         self.arcs[self.tr_range(state)].iter()
     }

@@ -153,9 +153,9 @@ struct DeterminizeTr<W: Semiring> {
 }
 
 impl<W: Semiring> DeterminizeTr<W> {
-    pub fn from_tr(arc: &Tr<W>, filter_state: StateId) -> Self {
+    pub fn from_tr(tr: &Tr<W>, filter_state: StateId) -> Self {
         Self {
-            label: arc.ilabel,
+            label: tr.ilabel,
             weight: W::zero(),
             dest_tuple: DeterminizeStateTuple {
                 subset: WeightedSubset::from_vec(vec![]),
@@ -192,21 +192,21 @@ where
         let mut label_map: HashMap<Label, DeterminizeTr<F::W>> = HashMap::new();
         let src_tuple = self.state_table.find_tuple(state);
         for src_elt in src_tuple.subset.iter() {
-            for arc in self.fst.arcs_iter(src_elt.state)? {
-                let r = src_elt.weight.times(&arc.weight)?;
+            for tr in self.fst.tr_iter(src_elt.state)? {
+                let r = src_elt.weight.times(&tr.weight)?;
 
-                let dest_elt = DeterminizeElement::new(arc.nextstate, r);
+                let dest_elt = DeterminizeElement::new(tr.nextstate, r);
 
                 // Filter Tr
-                match label_map.entry(arc.ilabel) {
+                match label_map.entry(tr.ilabel) {
                     Entry::Occupied(_) => {}
                     Entry::Vacant(e) => {
-                        e.insert(DeterminizeTr::from_tr(arc, 0));
+                        e.insert(DeterminizeTr::from_tr(tr, 0));
                     }
                 };
 
                 label_map
-                    .get_mut(&arc.ilabel)
+                    .get_mut(&tr.ilabel)
                     .unwrap()
                     .dest_tuple
                     .subset
@@ -279,13 +279,13 @@ where
     }
 
     fn add_tr(&mut self, state: StateId, det_tr: &DeterminizeTr<F::W>) -> Result<()> {
-        let arc = Tr::new(
+        let tr = Tr::new(
             det_tr.label,
             det_tr.label,
             det_tr.weight.clone(),
             self.find_state(&det_tr.dest_tuple)?,
         );
-        self.cache_impl.push_tr(state, arc)
+        self.cache_impl.push_tr(state, tr)
     }
 
     fn norm_tr(&mut self, det_tr: &mut DeterminizeTr<F::W>) -> Result<()> {

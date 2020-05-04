@@ -44,12 +44,12 @@ impl<W> VectorCacheState<W> {
             .set_final_weight(final_weight);
     }
 
-    pub fn push_tr(&mut self, state: StateId, arc: Tr<W>) {
-        self.get_cache_state_unchecked_mut(state).push_tr(arc)
+    pub fn push_tr(&mut self, state: StateId, tr: Tr<W>) {
+        self.get_cache_state_unchecked_mut(state).push_tr(tr)
     }
 
-    pub fn arcs_iter_unchecked(&self, state: StateId) -> IterSlice<Tr<W>> {
-        self.get_cache_state_unchecked(state).arcs_iter()
+    pub fn tr_iter_unchecked(&self, state: StateId) -> IterSlice<Tr<W>> {
+        self.get_cache_state_unchecked(state).tr_iter()
     }
 
     pub fn mark_expanded_unchecked(&mut self, state: StateId) {

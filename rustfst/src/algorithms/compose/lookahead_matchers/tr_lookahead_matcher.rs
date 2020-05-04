@@ -140,8 +140,8 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
                 }
                 nprefix += 1;
                 if MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
-                    for arc in iter {
-                        match arc {
+                    for tr in iter {
+                        match tr {
                             IterItemMatcher::Tr(a) => {
                                 let a = unsafe { &*a };
                                 self.lookahead_weight.plus_assign(&a.weight)?
@@ -157,10 +157,10 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
         }
 
         let match_type = self.match_type();
-        for arc in lfst.arcs_iter(lfst_state)? {
+        for tr in lfst.tr_iter(lfst_state)? {
             let label = match match_type {
-                MatchType::MatchInput => arc.olabel,
-                MatchType::MatchOutput => arc.ilabel,
+                MatchType::MatchInput => tr.olabel,
+                MatchType::MatchOutput => tr.ilabel,
                 _ => bail!("Bad match type"),
             };
             if label == EPS_LABEL {
@@ -173,7 +173,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
                     nprefix += 1;
                 }
                 if MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
-                    self.lookahead_weight.plus_assign(&arc.weight)?;
+                    self.lookahead_weight.plus_assign(&tr.weight)?;
                 }
                 result = true;
             } else {
@@ -191,15 +191,15 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
                                 IterItemMatcher::Tr(a) => {
                                     let a = unsafe { &*a };
                                     self.lookahead_weight
-                                        .plus_assign(arc.weight.times(&a.weight)?)?
+                                        .plus_assign(tr.weight.times(&a.weight)?)?
                                 }
                                 IterItemMatcher::EpsLoop => self
                                     .lookahead_weight
-                                    .plus_assign(arc.weight.times(W::one())?)?,
+                                    .plus_assign(tr.weight.times(W::one())?)?,
                             };
                         }
                         if MFT::flags().contains(MatcherFlags::LOOKAHEAD_PREFIX) && nprefix == 1 {
-                            self.set_lookahead_prefix(arc.clone());
+                            self.set_lookahead_prefix(tr.clone());
                         }
                     }
                     result = true;
@@ -223,8 +223,8 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
         Ok(it.next().is_some())
     }
 
-    fn lookahead_prefix(&self, arc: &mut Tr<W>) -> bool {
-        self.default_lookahead_prefix(arc)
+    fn lookahead_prefix(&self, tr: &mut Tr<W>) -> bool {
+        self.default_lookahead_prefix(tr)
     }
 
     fn lookahead_weight(&self) -> &W {

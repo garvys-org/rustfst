@@ -98,10 +98,10 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
 
         for s in 0..self.states.len() {
             let mut to_delete = vec![];
-            for (idx, arc) in unsafe { self.arcs_iter_unchecked_mut(s).enumerate() } {
-                let t = new_id[arc.nextstate];
+            for (idx, tr) in unsafe { self.tr_iter_unchecked_mut(s).enumerate() } {
+                let t = new_id[tr.nextstate];
                 if t != -1 {
-                    arc.nextstate = t as usize;
+                    tr.nextstate = t as usize;
                 } else {
                     to_delete.push(idx);
                 }
@@ -138,17 +138,17 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         }
     }
 
-    fn add_tr(&mut self, source: StateId, arc: Tr<<Self as CoreFst>::W>) -> Result<()> {
+    fn add_tr(&mut self, source: StateId, tr: Tr<<Self as CoreFst>::W>) -> Result<()> {
         self.states
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
             .arcs
-            .push(arc);
+            .push(tr);
         Ok(())
     }
 
-    unsafe fn add_tr_unchecked(&mut self, source: usize, arc: Tr<Self::W>) {
-        self.states.get_unchecked_mut(source).arcs.push(arc)
+    unsafe fn add_tr_unchecked(&mut self, source: usize, tr: Tr<Self::W>) {
+        self.states.get_unchecked_mut(source).arcs.push(tr)
     }
 
     unsafe fn set_trs_unchecked(&mut self, source: usize, arcs: Vec<Tr<Self::W>>) {

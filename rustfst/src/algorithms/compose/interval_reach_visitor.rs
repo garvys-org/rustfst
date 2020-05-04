@@ -58,24 +58,24 @@ impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
         true
     }
 
-    /// Invoked when tree arc to white/undiscovered state examined.
+    /// Invoked when tree tr to white/undiscovered state examined.
     fn tree_tr(&mut self, _s: StateId, _tr: &Tr<F::W>) -> bool {
         true
     }
 
-    /// Invoked when back arc to grey/unfinished state examined.
+    /// Invoked when back tr to grey/unfinished state examined.
     fn back_tr(&mut self, _s: StateId, _tr: &Tr<F::W>) -> bool {
         panic!("Cyclic input")
     }
 
-    /// Invoked when forward or cross arc to black/finished state examined.
-    fn forward_or_cross_tr(&mut self, s: StateId, arc: &Tr<F::W>) -> bool {
-        union_vec_isets_unordered(&mut self.isets, s, arc.nextstate);
+    /// Invoked when forward or cross tr to black/finished state examined.
+    fn forward_or_cross_tr(&mut self, s: StateId, tr: &Tr<F::W>) -> bool {
+        union_vec_isets_unordered(&mut self.isets, s, tr.nextstate);
         true
     }
 
     /// Invoked when state finished ('s' is tree root, 'parent' is kNoStateId,
-    /// and 'arc' is nullptr).
+    /// and 'tr' is nullptr).
     fn finish_state(&mut self, s: StateId, parent: Option<StateId>, _tr: Option<&Tr<F::W>>) {
         if self.index != UNASSIGNED
             && self.fst.is_final(s).unwrap()

@@ -31,10 +31,10 @@ pub fn condense<FI: Fst + ExpandedFst, FO: MutableFst<W = FI::W>>(
                         None => ofst.set_final_unchecked(c, final_weight.clone()),
                     };
                 }
-                for arc in ifst.arcs_iter_unchecked(s) {
-                    let nextc = scc[arc.nextstate] as usize;
+                for tr in ifst.tr_iter_unchecked(s) {
+                    let nextc = scc[tr.nextstate] as usize;
                     if nextc != c {
-                        let mut condensed_tr = arc.clone();
+                        let mut condensed_tr = tr.clone();
                         condensed_tr.nextstate = nextc;
                         ofst.add_tr_unchecked(c, condensed_tr);
                     }

@@ -55,14 +55,14 @@ impl<W> CacheImpl<W> {
         Ok(self.vector_cache_states.final_weight_unchecked(state))
     }
 
-    pub fn push_tr(&mut self, state: StateId, arc: Tr<W>) -> Result<()> {
+    pub fn push_tr(&mut self, state: StateId, tr: Tr<W>) -> Result<()> {
         if self.vector_cache_states.expanded(state) {
             bail!("Can't add arcs to a fully expanded state")
         }
         self.vector_cache_states.resize_if_necessary(state + 1);
         self.vector_cache_states
-            .resize_if_necessary(arc.nextstate + 1);
-        self.vector_cache_states.push_tr(state, arc);
+            .resize_if_necessary(tr.nextstate + 1);
+        self.vector_cache_states.push_tr(state, tr);
         Ok(())
     }
 
@@ -86,11 +86,11 @@ impl<W> CacheImpl<W> {
         self.vector_cache_states.mark_expanded_unchecked(state)
     }
 
-    pub fn arcs_iter(&self, state: StateId) -> Result<IterSlice<Tr<W>>> {
+    pub fn tr_iter(&self, state: StateId) -> Result<IterSlice<Tr<W>>> {
         if !self.vector_cache_states.expanded(state) {
             bail!("Can't iterate arcs on a not fully expanded state")
         }
-        Ok(self.vector_cache_states.arcs_iter_unchecked(state))
+        Ok(self.vector_cache_states.tr_iter_unchecked(state))
     }
 
     pub fn has_start(&self) -> bool {

@@ -78,7 +78,7 @@ fn main() {
 
     // Map
     let map_cmd = SubCommand::with_name("map")
-        .about("Applies an operation to each arc of an FST.")
+        .about("Applies an operation to each tr of an FST.")
         .arg(
             Arg::with_name("map_type")
                 .long("map_type")

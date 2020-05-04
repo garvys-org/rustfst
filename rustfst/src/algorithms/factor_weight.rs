@@ -45,11 +45,11 @@ impl FactorWeightType {
 pub struct FactorWeightOptions {
     /// Quantization delta
     pub delta: f32,
-    /// Factor arc weights and/or final weights
+    /// Factor tr weights and/or final weights
     pub mode: FactorWeightType,
-    /// Input label of arc when factoring final weights.
+    /// Input label of tr when factoring final weights.
     pub final_ilabel: Label,
-    /// Output label of arc when factoring final weights.
+    /// Output label of tr when factoring final weights.
     pub final_olabel: Label,
     /// When factoring final w' results in > 1 arcs at state, increments ilabels to make distinct ?
     pub increment_final_ilabel: bool,
@@ -147,21 +147,21 @@ where
     fn expand(&mut self, state: usize) -> Result<()> {
         let elt = self.state_table.find_tuple(state).clone();
         if let Some(old_state) = elt.state {
-            for arc in self.fst.borrow().arcs_iter(old_state)? {
-                let weight = elt.weight.times(&arc.weight).unwrap();
+            for tr in self.fst.borrow().tr_iter(old_state)? {
+                let weight = elt.weight.times(&tr.weight).unwrap();
                 let factor_it = FI::new(weight.clone());
                 if !self.factor_tr_weights() || factor_it.done() {
-                    let dest = self.find_state(&Element::new(Some(arc.nextstate), F::W::one()));
+                    let dest = self.find_state(&Element::new(Some(tr.nextstate), F::W::one()));
                     self.cache_impl
-                        .push_tr(state, Tr::new(arc.ilabel, arc.olabel, weight, dest))?;
+                        .push_tr(state, Tr::new(tr.ilabel, tr.olabel, weight, dest))?;
                 } else {
                     for (p_f, p_s) in factor_it {
                         let dest = self.find_state(&Element::new(
-                            Some(arc.nextstate),
+                            Some(tr.nextstate),
                             p_s.quantize(self.opts.delta)?,
                         ));
                         self.cache_impl
-                            .push_tr(state, Tr::new(arc.ilabel, arc.olabel, p_f, dest))?;
+                            .push_tr(state, Tr::new(tr.ilabel, tr.olabel, p_f, dest))?;
                     }
                 }
             }
@@ -233,7 +233,7 @@ where
 {
     pub fn new(fst: B, opts: FactorWeightOptions) -> Result<Self> {
         if opts.mode.is_empty() {
-            bail!("Factoring neither arc weights nor final weights");
+            bail!("Factoring neither tr weights nor final weights");
         }
         Ok(Self {
             opts,

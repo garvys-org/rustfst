@@ -12,7 +12,7 @@ fn do_test_fst_into_iterator<F: ExpandedFst>(fst: F) -> Result<()> {
     for state in 0..fst.num_states() {
         fst_data_ref.push((
             state,
-            fst.arcs_iter(state)?.cloned().collect_vec(),
+            fst.tr_iter(state)?.cloned().collect_vec(),
             fst.final_weight(state)?.cloned(),
             fst.num_trs(state)?,
         ));
@@ -38,7 +38,7 @@ fn do_test_fst_iterator<F: ExpandedFst>(fst: &F) -> Result<()> {
     for state in 0..fst.num_states() {
         fst_data_ref.push((
             state,
-            fst.arcs_iter(state)?.collect_vec(),
+            fst.tr_iter(state)?.collect_vec(),
             fst.final_weight(state)?,
             fst.num_trs(state)?,
         ));
@@ -64,7 +64,7 @@ fn do_test_fst_iterator_mut<F: MutableFst>(mut fst: F) -> Result<()> {
     for state in 0..fst.num_states() {
         fst_data_ref.push((
             state,
-            fst.arcs_iter(state)?.cloned().collect_vec(),
+            fst.tr_iter(state)?.cloned().collect_vec(),
             fst.final_weight(state)?.cloned(),
         ));
     }

@@ -1,7 +1,7 @@
 macro_rules! tr_mapper_to_weight_convert_mapper_methods {
     ($semiring: ty) => {
-        fn tr_map(&mut self, arc: &Tr<$semiring>) -> Result<Tr<$semiring>> {
-            let mut mapped_tr = arc.clone();
+        fn tr_map(&mut self, tr: &Tr<$semiring>) -> Result<Tr<$semiring>> {
+            let mut mapped_tr = tr.clone();
             (self as &mut dyn TrMapper<$semiring>).tr_map(&mut mapped_tr)?;
             Ok(mapped_tr)
         }

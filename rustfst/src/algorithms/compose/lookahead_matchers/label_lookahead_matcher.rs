@@ -156,7 +156,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         if let Some(reachable) = &self.reachable {
             let mut compute_weight = MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT);
             let compute_prefix = MFT::flags().contains(MatcherFlags::LOOKAHEAD_PREFIX);
-            let aiter = lfst.arcs_iter(lfst_state)?;
+            let aiter = lfst.tr_iter(lfst_state)?;
             let reach_tr = reachable.reach(
                 matcher_state,
                 aiter,
@@ -171,12 +171,12 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
                 && reachable.reach_final(matcher_state)?;
             if let Some((reach_begin, reach_end, reach_weight)) = reach_tr {
                 if compute_prefix && (reach_end - reach_begin) == 1 && !reach_final {
-                    let arc = lfst
-                        .arcs_iter(lfst_state)?
+                    let tr = lfst
+                        .tr_iter(lfst_state)?
                         .skip(reach_begin)
                         .next()
                         .unwrap();
-                    self.set_lookahead_prefix(arc.clone());
+                    self.set_lookahead_prefix(tr.clone());
                     compute_weight = false;
                 } else {
                     self.set_lookahead_weight(reach_weight);
@@ -206,8 +206,8 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         }
     }
 
-    fn lookahead_prefix(&self, arc: &mut Tr<W>) -> bool {
-        self.default_lookahead_prefix(arc)
+    fn lookahead_prefix(&self, tr: &mut Tr<W>) -> bool {
+        self.default_lookahead_prefix(tr)
     }
 
     fn lookahead_weight(&self) -> &W {

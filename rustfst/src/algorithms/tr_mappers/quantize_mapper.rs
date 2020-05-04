@@ -13,8 +13,8 @@ pub fn map_weight<W: WeightQuantize>(weight: &mut W) -> Result<()> {
 }
 
 impl<S: WeightQuantize + Semiring> TrMapper<S> for QuantizeMapper {
-    fn tr_map(&self, arc: &mut Tr<S>) -> Result<()> {
-        map_weight(&mut arc.weight)
+    fn tr_map(&self, tr: &mut Tr<S>) -> Result<()> {
+        map_weight(&mut tr.weight)
     }
 
     fn final_tr_map(&self, final_tr: &mut FinalTr<S>) -> Result<()> {

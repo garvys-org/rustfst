@@ -25,8 +25,8 @@ where
         if unsafe { ifst.is_final_unchecked(s) } {
             let mut future_coaccess = false;
 
-            for arc in unsafe { ifst.arcs_iter_unchecked(s) } {
-                if visitors.coaccess[arc.nextstate] {
+            for tr in unsafe { ifst.tr_iter_unchecked(s) } {
+                if visitors.coaccess[tr.nextstate] {
                     future_coaccess = true;
                     break;
                 }
@@ -43,8 +43,8 @@ where
         let mut weight = None;
         arcs_to_del.clear();
 
-        for (idx, arc) in unsafe { ifst.arcs_iter_unchecked(state).enumerate() } {
-            if finals.contains(&arc.nextstate) && arc.ilabel == EPS_LABEL && arc.olabel == EPS_LABEL
+        for (idx, tr) in unsafe { ifst.tr_iter_unchecked(state).enumerate() } {
+            if finals.contains(&tr.nextstate) && tr.ilabel == EPS_LABEL && tr.olabel == EPS_LABEL
             {
                 unsafe {
                     if weight.is_none() {
@@ -55,9 +55,9 @@ where
                         );
                     }
                     weight.as_mut().unsafe_unwrap().plus_assign(
-                        ifst.final_weight_unchecked(arc.nextstate)
+                        ifst.final_weight_unchecked(tr.nextstate)
                             .unsafe_unwrap()
-                            .times(&arc.weight)?,
+                            .times(&tr.weight)?,
                     )?
                 };
                 arcs_to_del.push(idx);

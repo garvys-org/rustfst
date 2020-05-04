@@ -77,19 +77,19 @@ pub enum IterItemMatcher<W: Semiring> {
 impl<W: Semiring> IterItemMatcher<W> {
     pub fn into_tr(self, state: StateId, match_type: MatchType) -> Result<Tr<W>> {
         match self {
-            IterItemMatcher::Tr(arc) => Ok(unsafe { (*arc).clone() }),
+            IterItemMatcher::Tr(tr) => Ok(unsafe { (*tr).clone() }),
             IterItemMatcher::EpsLoop => eps_loop(state, match_type),
         }
     }
 }
 
 pub fn eps_loop<W: Semiring>(state: StateId, match_type: MatchType) -> Result<Tr<W>> {
-    let arc = match match_type {
+    let tr = match match_type {
         MatchType::MatchInput => Tr::new(NO_LABEL, EPS_LABEL, W::one(), state),
         MatchType::MatchOutput => Tr::new(EPS_LABEL, NO_LABEL, W::one(), state),
         _ => bail!("Unsupported match_type : {:?}", match_type),
     };
-    Ok(arc)
+    Ok(tr)
 }
 
 /// Matchers find and iterate through requested labels at FST states. In the

@@ -50,9 +50,9 @@ where
 
     // Iterator over the wFST to add the weight of the arcs
     for state_id in fst.states_iter() {
-        for arc in fst.arcs_iter(state_id)? {
-            let nextstate = arc.nextstate;
-            let weight = &arc.weight;
+        for tr in fst.tr_iter(state_id)? {
+            let nextstate = tr.nextstate;
+            let weight = &tr.weight;
 
             d[state_id][nextstate].plus_assign(weight)?;
         }

@@ -139,24 +139,24 @@ where
 
     writeln!(writer, " fontsize = {}]", config.fontsize)?;
 
-    for arc in fst.arcs_iter(state_id).unwrap() {
-        write!(writer, "\t{} -> {}", state_id, arc.nextstate)?;
+    for tr in fst.tr_iter(state_id).unwrap() {
+        write!(writer, "\t{} -> {}", state_id, tr.nextstate)?;
 
         let ilabel = opt_isymt.clone().map_or_else(
-            || Ok(format!("{}", arc.ilabel)),
+            || Ok(format!("{}", tr.ilabel)),
             |symt| {
-                symt.get_symbol(arc.ilabel)
+                symt.get_symbol(tr.ilabel)
                     .map(|v| v.to_string())
-                    .ok_or_else(|| format_err!("Missing {} in input SymbolTable", arc.ilabel))
+                    .ok_or_else(|| format_err!("Missing {} in input SymbolTable", tr.ilabel))
             },
         )?;
 
         let olabel = opt_osymt.clone().map_or_else(
-            || Ok(format!("{}", arc.olabel)),
+            || Ok(format!("{}", tr.olabel)),
             |symt| {
-                symt.get_symbol(arc.olabel)
+                symt.get_symbol(tr.olabel)
                     .map(|v| v.to_string())
-                    .ok_or_else(|| format_err!("Missing {} in output SymbolTable", arc.olabel))
+                    .ok_or_else(|| format_err!("Missing {} in output SymbolTable", tr.olabel))
             },
         )?;
 
@@ -165,8 +165,8 @@ where
             write!(writer, ":{}", olabel)?;
         }
 
-        if config.print_weight && (config.show_weight_one || !arc.weight.is_one()) {
-            write!(writer, "/{}", arc.weight)?;
+        if config.print_weight && (config.show_weight_one || !tr.weight.is_one()) {
+            write!(writer, "/{}", tr.weight)?;
         }
         writeln!(writer, "\", fontsize = {}];", config.fontsize)?;
     }

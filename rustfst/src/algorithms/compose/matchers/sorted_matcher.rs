@@ -28,7 +28,7 @@ impl<W: Semiring + 'static, F: ExpandedFst<W = W>> Matcher<W> for SortedMatcher<
     fn iter(&self, state: usize, label: usize) -> Result<Self::Iter> {
         Ok(IteratorSortedMatcher::new(
             self.fst
-                .arcs_iter(state)?
+                .tr_iter(state)?
                 .map(|a| a as *const Tr<W>)
                 .collect(),
             label,
@@ -104,7 +104,7 @@ impl<W: Semiring> IteratorSortedMatcher<W> {
             match_label
         };
 
-        // When matching epsilon, the first arc is supposed to be labeled as such
+        // When matching epsilon, the first tr is supposed to be labeled as such
         let pos = if current_loop {
             0
         } else {
@@ -128,10 +128,10 @@ impl<W: Semiring> IteratorSortedMatcher<W> {
         }
     }
 
-    fn get_label(&self, arc: &Tr<W>) -> Label {
+    fn get_label(&self, tr: &Tr<W>) -> Label {
         match self.match_type {
-            MatchType::MatchInput => arc.ilabel,
-            MatchType::MatchOutput => arc.olabel,
+            MatchType::MatchInput => tr.ilabel,
+            MatchType::MatchOutput => tr.olabel,
             _ => panic!("Shouldn't happen : {:?}", self.match_type),
         }
     }
@@ -145,11 +145,11 @@ impl<W: Semiring> Iterator for IteratorSortedMatcher<W> {
             self.current_loop = false;
             return Some(IterItemMatcher::EpsLoop);
         }
-        if let Some(arc) = self.arcs.get(self.pos) {
-            let arc = unsafe { &**arc };
-            if self.get_label(arc) == self.match_label {
+        if let Some(tr) = self.arcs.get(self.pos) {
+            let tr = unsafe { &**tr };
+            if self.get_label(tr) == self.match_label {
                 self.pos += 1;
-                Some(IterItemMatcher::Tr(arc))
+                Some(IterItemMatcher::Tr(tr))
             } else {
                 None
             }

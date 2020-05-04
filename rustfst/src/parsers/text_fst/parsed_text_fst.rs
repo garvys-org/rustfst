@@ -24,21 +24,21 @@ pub struct ParsedTextFst<W: SerializableSemiring> {
     pub start_state: Option<StateId>,
 }
 
-/// A transition is a five-tuple. There is one for each arc in the graph.
-/// It contains, the `state` from which the arc is leaving and a `nextstate` which is the target.
-/// Also there are both labels and weight stored on the arc.
+/// A transition is a five-tuple. There is one for each tr in the graph.
+/// It contains, the `state` from which the tr is leaving and a `nextstate` which is the target.
+/// Also there are both labels and weight stored on the tr.
 /// Transitions without weight have a one weight in the Semiring.
 #[derive(Debug, PartialEq)]
 pub struct Transition<W: SerializableSemiring> {
-    /// state from which the arc is leaving.
+    /// state from which the tr is leaving.
     pub state: StateId,
-    /// Input label of the arc.
+    /// Input label of the tr.
     pub ilabel: Label,
-    /// Output label of the arc.
+    /// Output label of the tr.
     pub olabel: Label,
-    /// Weight on the arc.
+    /// Weight on the tr.
     pub weight: Option<W>,
-    /// state reached by the arc.
+    /// state reached by the tr.
     pub nextstate: StateId,
 }
 
