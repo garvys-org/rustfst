@@ -38,9 +38,9 @@ pub trait FstImpl: Debug {
         self.cache_impl_ref().final_weight(state)
     }
 
-    fn arcs_iter(&mut self, state: StateId) -> Result<IterSlice<Tr<Self::W>>> {
+    fn tr_iter(&mut self, state: StateId) -> Result<IterSlice<Tr<Self::W>>> {
         self.expand_if_necessary(state)?;
-        self.cache_impl_ref().arcs_iter(state)
+        self.cache_impl_ref().tr_iter(state)
     }
 
     fn expand_if_necessary(&mut self, state: StateId) -> Result<()> {
@@ -74,16 +74,16 @@ pub trait FstImpl: Debug {
         queue.push_back(start_state);
         while !queue.is_empty() {
             let s = queue.pop_front().unwrap();
-            for arc in self.arcs_iter(s)? {
-                if !visited_states.contains(&arc.nextstate) {
-                    queue.push_back(arc.nextstate);
-                    visited_states.insert(arc.nextstate);
+            for tr in self.tr_iter(s)? {
+                if !visited_states.contains(&tr.nextstate) {
+                    queue.push_back(tr.nextstate);
+                    visited_states.insert(tr.nextstate);
                 }
                 let n = fst_out.num_states();
-                for _ in n..=arc.nextstate {
+                for _ in n..=tr.nextstate {
                     fst_out.add_state();
                 }
-                fst_out.add_tr(s, arc.clone())?;
+                fst_out.add_tr(s, tr.clone())?;
             }
             if let Some(f_w) = self.final_weight(s)? {
                 fst_out.set_final(s, f_w.clone())?;

@@ -10,7 +10,7 @@ pub enum ProjectType {
 }
 
 /// This operation projects an FST onto its domain or range by either copying
-/// each arc's input label to its output label or vice versa.
+/// each transition input label to its output label or vice versa.
 /// # Example 1
 ///
 /// ## Project input
@@ -63,15 +63,15 @@ pub fn project<F: MutableFst>(fst: &mut F, project_type: ProjectType) {
     match project_type {
         ProjectType::ProjectInput => {
             for state in 0..fst.num_states() {
-                for arc in unsafe { fst.arcs_iter_unchecked_mut(state) } {
-                    arc.olabel = arc.ilabel;
+                for tr in unsafe { fst.tr_iter_unchecked_mut(state) } {
+                    tr.olabel = tr.ilabel;
                 }
             }
         }
         ProjectType::ProjectOutput => {
             for state in 0..fst.num_states() {
-                for arc in unsafe { fst.arcs_iter_unchecked_mut(state) } {
-                    arc.ilabel = arc.olabel;
+                for tr in unsafe { fst.tr_iter_unchecked_mut(state) } {
+                    tr.ilabel = tr.olabel;
                 }
             }
         }

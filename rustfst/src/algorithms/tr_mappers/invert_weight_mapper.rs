@@ -14,8 +14,8 @@ pub fn map_weight<W: WeaklyDivisibleSemiring>(weight: &mut W) -> Result<()> {
 }
 
 impl<S: WeaklyDivisibleSemiring> TrMapper<S> for InvertWeightMapper {
-    fn tr_map(&self, arc: &mut Tr<S>) -> Result<()> {
-        map_weight(&mut arc.weight)
+    fn tr_map(&self, tr: &mut Tr<S>) -> Result<()> {
+        map_weight(&mut tr.weight)
     }
 
     fn final_tr_map(&self, final_tr: &mut FinalTr<S>) -> Result<()> {

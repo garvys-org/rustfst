@@ -33,7 +33,7 @@ pub struct PushLabelsComposeFilter<
     filter: CF,
     fs: PairFilterState<CF::FS, IntegerFilterState>,
     smt: PhantomData<SMT>,
-    narcsa: usize,
+    ntrsa: usize,
 }
 
 impl<W: Semiring, CF: LookAheadComposeFilterTrait<W>, SMT: MatchTypeTrait> ComposeFilter<W>
@@ -69,7 +69,7 @@ where
         {
             return Ok(());
         }
-        self.narcsa = if self.lookahead_output() {
+        self.ntrsa = if self.lookahead_output() {
             self.fst1.num_trs(s1)?
         } else {
             self.fst2.num_trs(s2)?
@@ -174,7 +174,7 @@ where
             *labela = EPS_LABEL;
             self.start()
         } else if *labela == EPS_LABEL {
-            if self.narcsa == 1 {
+            if self.ntrsa == 1 {
                 self.fs.clone()
             } else {
                 if match self.selector() {
@@ -303,7 +303,7 @@ where
             matcher1,
             matcher2,
             filter,
-            narcsa: 0,
+            ntrsa: 0,
             smt: PhantomData,
         })
     }

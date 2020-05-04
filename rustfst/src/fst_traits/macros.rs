@@ -1,17 +1,17 @@
 macro_rules! display_single_state {
     ($fst:expr, $state_id:expr, $f: expr, $show_weight_one: expr) => {
-        for arc in $fst.arcs_iter($state_id).unwrap() {
-            if arc.weight.is_one() && !$show_weight_one {
+        for tr in $fst.tr_iter($state_id).unwrap() {
+            if tr.weight.is_one() && !$show_weight_one {
                 writeln!(
                     $f,
                     "{}\t{}\t{}\t{}",
-                    $state_id, &arc.nextstate, &arc.ilabel, &arc.olabel
+                    $state_id, &tr.nextstate, &tr.ilabel, &tr.olabel
                 )?;
             } else {
                 writeln!(
                     $f,
                     "{}\t{}\t{}\t{}\t{}",
-                    $state_id, &arc.nextstate, &arc.ilabel, &arc.olabel, &arc.weight
+                    $state_id, &tr.nextstate, &tr.ilabel, &tr.olabel, &tr.weight
                 )?;
             }
         }
@@ -21,10 +21,10 @@ macro_rules! display_single_state {
 macro_rules! write_fst {
     ($fst:expr, $f:expr, $show_weight_one: expr) => {
         if let Some(start_state) = $fst.start() {
-            // Firstly print the arcs leaving the start state
+            // Firstly print the trs leaving the start state
             display_single_state!($fst, start_state, $f, $show_weight_one);
 
-            // Secondly, print the arcs leaving all the other states
+            // Secondly, print the trs leaving all the other states
             for state_id in $fst.states_iter() {
                 if state_id != start_state {
                     display_single_state!($fst, state_id, $f, $show_weight_one);

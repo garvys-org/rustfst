@@ -56,10 +56,10 @@ impl<W: Semiring> CoreFst for ConstFst<W> {
             .states
             .get(s)
             .ok_or_else(|| format_err!("State doesn't exist"))?;
-        Ok(const_state.narcs)
+        Ok(const_state.ntrs)
     }
 
     unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
-        self.states.get_unchecked(s).narcs
+        self.states.get_unchecked(s).ntrs
     }
 }

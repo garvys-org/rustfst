@@ -32,22 +32,22 @@ pub trait StateIterator<'a> {
     fn states_iter(&'a self) -> Self::Iter;
 }
 
-/// Trait to iterate over the outgoing arcs of a particular state in a wFST
+/// Trait to iterate over the outgoing trs of a particular state in a wFST
 pub trait TrIterator<'a>: CoreFst
 where
     Self::W: 'a,
 {
-    /// Iterator used to iterate over the arcs leaving a state of an FST.
+    /// Iterator used to iterate over the trs leaving a state of an FST.
     type Iter: Iterator<Item = &'a Tr<Self::W>> + Clone;
 
-    fn arcs_iter(&'a self, state_id: StateId) -> Result<Self::Iter>;
-    unsafe fn arcs_iter_unchecked(&'a self, state_id: StateId) -> Self::Iter;
+    fn tr_iter(&'a self, state_id: StateId) -> Result<Self::Iter>;
+    unsafe fn tr_iter_unchecked(&'a self, state_id: StateId) -> Self::Iter;
 }
 
 pub struct FstIterData<W, I> {
     pub state_id: StateId,
     pub final_weight: Option<W>,
-    pub arcs: I,
+    pub trs: I,
     pub num_trs: usize,
 }
 

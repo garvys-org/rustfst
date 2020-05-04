@@ -11,7 +11,7 @@ use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::EPS_LABEL;
 
-/// Removes final states that have epsilon-only input arcs.
+/// Removes final states that have epsilon-only input trs.
 pub fn rm_final_epsilon<F>(ifst: &mut F) -> Result<()>
 where
     F: MutableFst,
@@ -25,8 +25,8 @@ where
         if unsafe { ifst.is_final_unchecked(s) } {
             let mut future_coaccess = false;
 
-            for arc in unsafe { ifst.arcs_iter_unchecked(s) } {
-                if visitors.coaccess[arc.nextstate] {
+            for tr in unsafe { ifst.tr_iter_unchecked(s) } {
+                if visitors.coaccess[tr.nextstate] {
                     future_coaccess = true;
                     break;
                 }
@@ -38,14 +38,13 @@ where
         }
     }
 
-    let mut arcs_to_del = vec![];
+    let mut trs_to_del = vec![];
     for state in 0..ifst.num_states() {
         let mut weight = None;
-        arcs_to_del.clear();
+        trs_to_del.clear();
 
-        for (idx, arc) in unsafe { ifst.arcs_iter_unchecked(state).enumerate() } {
-            if finals.contains(&arc.nextstate) && arc.ilabel == EPS_LABEL && arc.olabel == EPS_LABEL
-            {
+        for (idx, tr) in unsafe { ifst.tr_iter_unchecked(state).enumerate() } {
+            if finals.contains(&tr.nextstate) && tr.ilabel == EPS_LABEL && tr.olabel == EPS_LABEL {
                 unsafe {
                     if weight.is_none() {
                         weight = Some(
@@ -55,21 +54,21 @@ where
                         );
                     }
                     weight.as_mut().unsafe_unwrap().plus_assign(
-                        ifst.final_weight_unchecked(arc.nextstate)
+                        ifst.final_weight_unchecked(tr.nextstate)
                             .unsafe_unwrap()
-                            .times(&arc.weight)?,
+                            .times(&tr.weight)?,
                     )?
                 };
-                arcs_to_del.push(idx);
+                trs_to_del.push(idx);
             }
         }
 
-        if !arcs_to_del.is_empty() {
+        if !trs_to_del.is_empty() {
             let w = unsafe { weight.unsafe_unwrap() };
             if !w.is_zero() {
                 unsafe { ifst.set_final_unchecked(state, w) };
             }
-            unsafe { ifst.del_trs_id_sorted_unchecked(state, &arcs_to_del) };
+            unsafe { ifst.del_trs_id_sorted_unchecked(state, &trs_to_del) };
         }
     }
 

@@ -37,32 +37,32 @@ impl<W: Semiring> EncodeTableMut<W> {
         }
     }
 
-    pub fn tr_to_tuple(&self, arc: &Tr<W>) -> EncodeTuple<W> {
+    pub fn tr_to_tuple(&self, tr: &Tr<W>) -> EncodeTuple<W> {
         EncodeTuple {
-            ilabel: arc.ilabel,
+            ilabel: tr.ilabel,
             olabel: if self.encode_labels {
-                arc.olabel
+                tr.olabel
             } else {
                 EPS_LABEL
             },
             weight: if self.encode_weights {
-                arc.weight.clone()
+                tr.weight.clone()
             } else {
                 W::one()
             },
         }
     }
 
-    pub fn final_tr_to_tuple(&self, arc: &FinalTr<W>) -> EncodeTuple<W> {
+    pub fn final_tr_to_tuple(&self, tr: &FinalTr<W>) -> EncodeTuple<W> {
         EncodeTuple {
-            ilabel: arc.ilabel,
+            ilabel: tr.ilabel,
             olabel: if self.encode_labels {
-                arc.olabel
+                tr.olabel
             } else {
                 EPS_LABEL
             },
             weight: if self.encode_weights {
-                arc.weight.clone()
+                tr.weight.clone()
             } else {
                 W::one()
             },
@@ -108,15 +108,15 @@ impl<W: Semiring> EncodeMapper<W> {
 }
 
 impl<W: Semiring> TrMapper<W> for EncodeMapper<W> {
-    fn tr_map(&self, arc: &mut Tr<W>) -> Result<()> {
-        let tuple = self.encode_table.0.borrow().tr_to_tuple(arc);
+    fn tr_map(&self, tr: &mut Tr<W>) -> Result<()> {
+        let tuple = self.encode_table.0.borrow().tr_to_tuple(tr);
         let label = self.encode_table.0.borrow_mut().encode(tuple);
-        arc.ilabel = label;
+        tr.ilabel = label;
         if self.encode_table.0.borrow().encode_labels {
-            arc.olabel = label;
+            tr.olabel = label;
         }
         if self.encode_table.0.borrow().encode_weights {
-            arc.weight.set_value(W::one().take_value());
+            tr.weight.set_value(W::one().take_value());
         }
         Ok(())
     }
@@ -156,20 +156,20 @@ impl<W: Semiring> DecodeMapper<W> {
 }
 
 impl<W: Semiring> TrMapper<W> for DecodeMapper<W> {
-    fn tr_map(&self, arc: &mut Tr<W>) -> Result<()> {
+    fn tr_map(&self, tr: &mut Tr<W>) -> Result<()> {
         let tuple = self
             .encode_table
             .0
             .borrow_mut()
-            .decode(arc.ilabel)
+            .decode(tr.ilabel)
             .unwrap()
             .clone();
-        arc.ilabel = tuple.ilabel;
+        tr.ilabel = tuple.ilabel;
         if self.encode_table.0.borrow().encode_labels {
-            arc.olabel = tuple.olabel;
+            tr.olabel = tuple.olabel;
         }
         if self.encode_table.0.borrow().encode_weights {
-            arc.weight = tuple.weight;
+            tr.weight = tuple.weight;
         }
         Ok(())
     }

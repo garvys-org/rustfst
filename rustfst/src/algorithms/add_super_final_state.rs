@@ -19,7 +19,7 @@ use unsafe_unwrap::UnsafeUnwrap;
 /// final state.
 ///
 /// Otherwise, a final super state will be added to the input FST. Any final state will
-/// point to this final super state where the arc weight will be their final weight.
+/// point to this final super state where the transition weight will be their final weight.
 ///
 pub fn add_super_final_state<F: MutableFst>(ifst: &mut F) -> StateId {
     let final_states = ifst

@@ -16,13 +16,13 @@ macro_rules! impl_to_gallic_converter {
         where
             W: Semiring,
         {
-            fn tr_map(&mut self, arc: &Tr<W>) -> Result<Tr<$gallic<W>>> {
-                let new_tr = if arc.olabel == EPS_LABEL {
-                    let w = ($string_weight::one(), arc.weight.clone());
-                    Tr::new(arc.ilabel, arc.ilabel, w, arc.nextstate)
+            fn tr_map(&mut self, tr: &Tr<W>) -> Result<Tr<$gallic<W>>> {
+                let new_tr = if tr.olabel == EPS_LABEL {
+                    let w = ($string_weight::one(), tr.weight.clone());
+                    Tr::new(tr.ilabel, tr.ilabel, w, tr.nextstate)
                 } else {
-                    let w = (arc.olabel, arc.weight.clone());
-                    Tr::new(arc.ilabel, arc.ilabel, w, arc.nextstate)
+                    let w = (tr.olabel, tr.weight.clone());
+                    Tr::new(tr.ilabel, tr.ilabel, w, tr.nextstate)
                 };
                 Ok(new_tr)
             }

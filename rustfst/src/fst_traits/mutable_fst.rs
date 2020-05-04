@@ -87,7 +87,7 @@ pub trait MutableFst:
     fn add_state(&mut self) -> StateId;
     fn add_states(&mut self, n: usize);
 
-    /// Removes a state from an FST. It also removes all the arcs starting from another state and
+    /// Removes a state from an FST. It also removes all the trs starting from another state and
     /// reaching this state. An error is raised if the state `state_id` doesn't exist.
     ///
     /// # Example
@@ -142,7 +142,7 @@ pub trait MutableFst:
     /// ```
     fn del_states<T: IntoIterator<Item = StateId>>(&mut self, states: T) -> Result<()>;
 
-    /// Remove all the states in the FST. As a result, all the arcs are also removed,
+    /// Remove all the states in the FST. As a result, all the trs are also removed,
     /// as well as the start state and all the fina states.
     ///
     /// # Example
@@ -169,7 +169,7 @@ pub trait MutableFst:
 
     unsafe fn del_trs_id_sorted_unchecked(&mut self, state: StateId, to_del: &Vec<usize>);
 
-    /// Adds an arc to the FST. The arc will start in the state `source`.
+    /// Adds a transition to the FST. The transition will start in the state `source`.
     ///
     /// # Errors
     ///
@@ -194,10 +194,10 @@ pub trait MutableFst:
     /// # Ok(())
     /// # }
     /// ```
-    fn add_tr(&mut self, source: StateId, arc: Tr<Self::W>) -> Result<()>;
-    unsafe fn add_tr_unchecked(&mut self, source: StateId, arc: Tr<Self::W>);
+    fn add_tr(&mut self, source: StateId, tr: Tr<Self::W>) -> Result<()>;
+    unsafe fn add_tr_unchecked(&mut self, source: StateId, tr: Tr<Self::W>);
 
-    /// Adds an arc to the FST. The arc will start in the state `source`.
+    /// Adds a transition to the FST. The transition will start in the state `source`.
     ///
     /// # Errors
     ///
@@ -244,16 +244,16 @@ pub trait MutableFst:
         self.add_tr_unchecked(source, Tr::new(ilabel, olabel, weight, nextstate))
     }
 
-    unsafe fn set_trs_unchecked(&mut self, source: StateId, arcs: Vec<Tr<Self::W>>);
+    unsafe fn set_trs_unchecked(&mut self, source: StateId, trs: Vec<Tr<Self::W>>);
 
     /// Remove the final weight of a specific state.
     fn delete_final_weight(&mut self, source: StateId) -> Result<()>;
     unsafe fn delete_final_weight_unchecked(&mut self, source: StateId);
 
-    /// Deletes all the arcs leaving a state.
+    /// Deletes all the trs leaving a state.
     fn delete_trs(&mut self, source: StateId) -> Result<()>;
 
-    /// Remove all arcs leaving a state and return them.
+    /// Remove all trs leaving a state and return them.
     fn pop_trs(&mut self, source: StateId) -> Result<Vec<Tr<Self::W>>>;
     unsafe fn pop_trs_unchecked(&mut self, source: StateId) -> Vec<Tr<Self::W>>;
 
@@ -337,18 +337,18 @@ pub trait MutableFst:
         crate::algorithms::closure(self, closure_type)
     }
 
-    /// Maps an arc using a `TrMapper` object.
+    /// Maps a transition using a `TrMapper` object.
     fn tr_map<M: TrMapper<Self::W>>(&mut self, mapper: &mut M) -> Result<()> {
         crate::algorithms::tr_map(self, mapper)
     }
 }
 
-/// Iterate over mutable arcs in a wFST.
+/// Iterate over mutable trs in a wFST.
 pub trait MutableTrIterator<'a>: CoreFst
 where
     Self::W: 'a,
 {
     type IterMut: Iterator<Item = &'a mut Tr<Self::W>>;
-    fn arcs_iter_mut(&'a mut self, state_id: StateId) -> Result<Self::IterMut>;
-    unsafe fn arcs_iter_unchecked_mut(&'a mut self, state_id: StateId) -> Self::IterMut;
+    fn tr_iter_mut(&'a mut self, state_id: StateId) -> Result<Self::IterMut>;
+    unsafe fn tr_iter_unchecked_mut(&'a mut self, state_id: StateId) -> Self::IterMut;
 }

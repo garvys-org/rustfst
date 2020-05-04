@@ -14,9 +14,9 @@ bitflags! {
     /// individual positive and negative bit pairs should be adjacent with the
     /// positive bit at an odd and lower position.
     pub struct FstProperties: u32 {
-        /// ilabel == olabel for each arc.
+        /// ilabel == olabel for each transition.
         const ACCEPTOR = 0b1;
-        /// ilabel != olabel for some arc.
+        /// ilabel != olabel for some transition.
         const NOT_ACCEPTOR = 0b1 << 1;
 
         /// ilabels unique leaving each state.
@@ -54,9 +54,9 @@ bitflags! {
         /// olabels not sorted wrt < for some state.
         const NOT_O_LABEL_SORTED = 0b1 << 15;
 
-        /// Non-trivial arc or final weights.
+        /// Non-trivial transition or final weights.
         const WEIGHTED = 0b1 << 16;
-        /// Only trivial arc and final weights.
+        /// Only trivial transition and final weights.
         const UNWEIGHTED = 0b1 << 17;
 
         /// FST has cycles.
@@ -172,7 +172,7 @@ bitflags! {
             Self::NOT_TOP_SORTED.bits | Self::NOT_ACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits |
             Self::NOT_STRING.bits | Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
 
-        /// Properties that are preserved when an FST arc is added.
+        /// Properties that are preserved when an FST transition is added.
         const ADD_ARC_PROPERTIES =
             Self::NOT_ACCEPTOR.bits | Self::NOT_I_DETERMINISTIC.bits |
             Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::I_EPSILONS.bits |
@@ -181,7 +181,7 @@ bitflags! {
             Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits | Self::COACCESSIBLE.bits |
             Self::WEIGHTED_CYCLES.bits;
 
-        /// Properties that are preserved when an FST arc is set.
+        /// Properties that are preserved when an FST transition is set.
         const SET_ARC_PROPERTIES = 0b0;
 
         /// Properties that are preserved when FST states are deleted.
@@ -192,7 +192,7 @@ bitflags! {
             Self::UNWEIGHTED.bits | Self::ACYCLIC.bits | Self::INITIAL_ACYCLIC.bits |
             Self::TOP_SORTED.bits | Self::UNWEIGHTED_CYCLES.bits;
 
-        /// Properties that are preserved when FST arcs are deleted.
+        /// Properties that are preserved when FST trs are deleted.
         const DELETE_ARCS_PROPERTIES =
             Self::ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
             Self::O_DETERMINISTIC.bits | Self::NO_EPSILONS.bits | Self::NO_I_EPSILONS.bits |
@@ -214,7 +214,7 @@ bitflags! {
             Self::NOT_ACCESSIBLE.bits | Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits |
             Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
 
-        /// Properties that are preserved when an FST's arcs are reordered.
+        /// Properties that are preserved when an FST's trs are reordered.
         const ARCSORT_PROPERTIES =
             Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
             Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |

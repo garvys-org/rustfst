@@ -38,7 +38,7 @@ mod weight_convert;
 /// Module that provides different structures implementing the `Queue` trait.
 pub mod queues;
 
-/// Function objects to restrict which arcs are traversed in an FST.
+/// Function objects to restrict which trs are traversed in an FST.
 pub mod tr_filters;
 
 /// Module that provides structures implementing the `TrMapper` trait.

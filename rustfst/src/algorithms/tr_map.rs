@@ -5,7 +5,7 @@ use crate::semirings::Semiring;
 use crate::Tr;
 use crate::{Label, StateId, EPS_LABEL};
 
-/// Struct used to map final weights when performing an arc mapping.
+/// Struct used to map final weights when performing a transition mapping.
 /// It will always be of the form `(EPS_LABEL, EPS_LABEL, final_weight)`
 /// where `final_weight` is the `final_weight` of the current state.
 ///
@@ -27,24 +27,24 @@ pub enum MapFinalAction {
     /// A final weight is mapped into a final weight. An error is raised if this
     /// is not possible.
     MapNoSuperfinal,
-    /// A final weight is mapped to an arc to the superfinal state when the result
+    /// A final weight is mapped to a transition to the superfinal state when the result
     /// cannot be represented as a final weight. The superfinal state will be
     /// added only if it is needed.
     MapAllowSuperfinal,
-    /// A final weight is mapped to an arc to the superfinal state unless the
+    /// A final weight is mapped to a transition to the superfinal state unless the
     /// result can be represented as a final weight of weight Zero(). The
     /// superfinal state is always added (if the input is not the empty FST).
     MapRequireSuperfinal,
 }
 
-/// The TrMapper interfaces defines how arcs and final weights are mapped.
+/// The TrMapper interfaces defines how trs and final weights are mapped.
 /// This is useful for implementing operations that do not change the number of
-/// arcs.
+/// trs.
 pub trait TrMapper<S: Semiring> {
-    /// How to modify the arcs.
-    fn tr_map(&self, arc: &mut Tr<S>) -> Result<()>;
+    /// How to modify the trs.
+    fn tr_map(&self, tr: &mut Tr<S>) -> Result<()>;
 
-    /// The mapper will be passed final weights as arcs of the form
+    /// The mapper will be passed final weights as trs of the form
     /// `FinalTr(EPS_LABEL, EPS_LABEL, weight)`.
     fn final_tr_map(&self, final_tr: &mut FinalTr<S>) -> Result<()>;
 
@@ -52,7 +52,7 @@ pub trait TrMapper<S: Semiring> {
     fn final_action(&self) -> MapFinalAction;
 }
 
-/// Maps every arc in the FST using an `TrMapper` object.
+/// Maps every transition in the FST using an `TrMapper` object.
 pub fn tr_map<F, M>(ifst: &mut F, mapper: &M) -> Result<()>
 where
     F: MutableFst,
@@ -74,8 +74,8 @@ where
     // TODO: Remove this collect
     let states: Vec<_> = ifst.states_iter().collect();
     for state in states {
-        for arc in unsafe { ifst.arcs_iter_unchecked_mut(state) } {
-            mapper.tr_map(arc)?;
+        for tr in unsafe { ifst.tr_iter_unchecked_mut(state) } {
+            mapper.tr_map(tr)?;
         }
 
         if let Some(w) = unsafe { ifst.final_weight_unchecked_mut(state) } {
@@ -88,7 +88,7 @@ where
             match final_action {
                 MapFinalAction::MapNoSuperfinal => {
                     if final_tr.ilabel != EPS_LABEL || final_tr.olabel != EPS_LABEL {
-                        bail!("TrMap: Non-zero arc labels for superfinal arc")
+                        bail!("TrMap: Non-zero tr labels for superfinal tr")
                     }
                     unsafe {
                         ifst.set_final_unchecked(state, final_tr.weight);

@@ -146,20 +146,20 @@ fn merge_states<F: MutableFst + ExpandedFst>(partition: Partition, fst: &mut F) 
     for c in 0..partition.num_classes() {
         for s in partition.iter(c) {
             if s == state_map[c].unwrap() {
-                for arc in fst.arcs_iter_mut(s)? {
-                    arc.nextstate = state_map[partition.get_class_id(arc.nextstate)].unwrap();
+                for tr in fst.tr_iter_mut(s)? {
+                    tr.nextstate = state_map[partition.get_class_id(tr.nextstate)].unwrap();
                 }
             } else {
-                let arcs: Vec<_> = fst
-                    .arcs_iter(s)?
+                let trs: Vec<_> = fst
+                    .tr_iter(s)?
                     .cloned()
-                    .map(|mut arc| {
-                        arc.nextstate = state_map[partition.get_class_id(arc.nextstate)].unwrap();
-                        arc
+                    .map(|mut tr| {
+                        tr.nextstate = state_map[partition.get_class_id(tr.nextstate)].unwrap();
+                        tr
                     })
                     .collect();
-                for arc in arcs.into_iter() {
-                    fst.add_tr(state_map[c].unwrap(), arc)?;
+                for tr in trs.into_iter() {
+                    fst.add_tr(state_map[c].unwrap(), tr)?;
                 }
             }
         }
@@ -185,8 +185,8 @@ pub fn fst_depth<F: Fst>(
     }
 
     let mut height_cur_state = 0;
-    for arc in fst.arcs_iter(state_id_cour)? {
-        let nextstate = arc.nextstate;
+    for tr in fst.tr_iter(state_id_cour)? {
+        let nextstate = tr.nextstate;
 
         if !accessible_states.contains(&nextstate) {
             fst_depth(
@@ -323,8 +323,8 @@ impl<'a, F: MutableFst + ExpandedFst> StateComparator<'a, F> {
             return Ok(false);
         }
 
-        let it_x = self.fst.arcs_iter(x)?;
-        let it_y = self.fst.arcs_iter(y)?;
+        let it_x = self.fst.tr_iter(x)?;
+        let it_y = self.fst.tr_iter(y)?;
 
         for (arc1, arc2) in it_x.zip(it_y) {
             if arc1.ilabel < arc2.ilabel {
@@ -378,8 +378,8 @@ fn pre_partition<W: Semiring, F: MutableFst<W = W> + ExpandedFst<W = W>>(
         let mut hash_to_class_final = HashMap::<Vec<usize>, StateId>::new();
 
         for s in 0..num_states {
-            let ilabels: Vec<usize> = unsafe { fst.arcs_iter_unchecked(s) }
-                .map(|arc| arc.ilabel)
+            let ilabels: Vec<usize> = unsafe { fst.tr_iter_unchecked(s) }
+                .map(|tr| tr.ilabel)
                 .collect();
 
             let this_map = if unsafe { fst.is_final_unchecked(s) } {
@@ -447,7 +447,7 @@ where
             if tr.num_trs(s + 1)? > 0 {
                 aiter_queue.push(TrsIterCollected {
                     idx: 0,
-                    arcs: tr.arcs_iter(s + 1)?.collect(),
+                    trs: tr.tr_iter(s + 1)?.collect(),
                 });
             }
         }
@@ -458,9 +458,9 @@ where
             if aiter.done() {
                 continue;
             }
-            let arc = aiter.peek().unwrap();
-            let from_state = arc.nextstate - 1;
-            let from_label = arc.ilabel;
+            let tr = aiter.peek().unwrap();
+            let from_state = tr.nextstate - 1;
+            let from_label = tr.ilabel;
             if prev_label != from_label as i32 {
                 partition.finalize_split(&mut Some(&mut queue));
             }
@@ -484,16 +484,16 @@ where
 
 struct TrsIterCollected<'a, W: Semiring> {
     idx: usize,
-    arcs: Vec<&'a Tr<W>>,
+    trs: Vec<&'a Tr<W>>,
 }
 
 impl<'a, W: Semiring> TrsIterCollected<'a, W> {
     fn peek(&self) -> Option<&&Tr<W>> {
-        self.arcs.get(self.idx)
+        self.trs.get(self.idx)
     }
 
     fn done(&self) -> bool {
-        self.idx >= self.arcs.len()
+        self.idx >= self.trs.len()
     }
 
     fn next(&mut self) {

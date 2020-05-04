@@ -171,12 +171,12 @@ where
 {
     type Iter = <ReplaceFst<F, F> as TrIterator<'a>>::Iter;
 
-    fn arcs_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
-        self.0.arcs_iter(state_id)
+    fn tr_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
+        self.0.tr_iter(state_id)
     }
 
-    unsafe fn arcs_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
-        self.0.arcs_iter_unchecked(state_id)
+    unsafe fn tr_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
+        self.0.tr_iter_unchecked(state_id)
     }
 }
 

@@ -76,11 +76,11 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
             f_weight.write_binary(&mut file)?;
             write_bin_i64(&mut file, unsafe { self.num_trs_unchecked(state) } as i64)?;
 
-            for arc in unsafe { self.arcs_iter_unchecked(state) } {
-                write_bin_i32(&mut file, arc.ilabel as i32)?;
-                write_bin_i32(&mut file, arc.olabel as i32)?;
-                arc.weight.write_binary(&mut file)?;
-                write_bin_i32(&mut file, arc.nextstate as i32)?;
+            for tr in unsafe { self.tr_iter_unchecked(state) } {
+                write_bin_i32(&mut file, tr.ilabel as i32)?;
+                write_bin_i32(&mut file, tr.olabel as i32)?;
+                tr.weight.write_binary(&mut file)?;
+                write_bin_i32(&mut file, tr.nextstate as i32)?;
             }
         }
 
@@ -102,13 +102,13 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
 
         for transition in parsed_fst_text.transitions.into_iter() {
             let weight = transition.weight.unwrap_or_else(W::one);
-            let arc = Tr::new(
+            let tr = Tr::new(
                 transition.ilabel,
                 transition.olabel,
                 weight,
                 transition.nextstate,
             );
-            fst.add_tr(transition.state, arc)?;
+            fst.add_tr(transition.state, tr)?;
         }
 
         for final_state in parsed_fst_text.final_states.into_iter() {
@@ -133,12 +133,12 @@ struct Transition {
 fn parse_vector_fst_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFstState<W>> {
     let (i, final_weight) = W::parse_binary(i)?;
     let (i, num_trs) = le_i64(i)?;
-    let (i, arcs) = count(parse_fst_tr, num_trs as usize)(i)?;
+    let (i, trs) = count(parse_fst_tr, num_trs as usize)(i)?;
     Ok((
         i,
         VectorFstState {
             final_weight: parse_final_weight(final_weight),
-            arcs,
+            trs,
         },
     ))
 }

@@ -29,13 +29,13 @@ where
             )
         };
 
-        let mut arcs_lazy: Counter<_, usize> = Counter::new();
-        arcs_lazy.update(fst_lazy.arcs_iter(i)?.cloned());
+        let mut trs_lazy: Counter<_, usize> = Counter::new();
+        trs_lazy.update(fst_lazy.tr_iter(i)?.cloned());
 
-        let mut arcs_static: Counter<_, usize> = Counter::new();
-        arcs_static.update(fst_static.arcs_iter(i)?.cloned());
+        let mut trs_static: Counter<_, usize> = Counter::new();
+        trs_static.update(fst_static.tr_iter(i)?.cloned());
 
-        assert_eq!(arcs_lazy, arcs_static);
+        assert_eq!(trs_lazy, trs_static);
     }
 
     let fst_data_static = fst_static
@@ -43,7 +43,7 @@ where
         .map(|data| {
             (
                 data.state_id,
-                data.arcs.collect_vec(),
+                data.trs.collect_vec(),
                 data.final_weight,
                 data.num_trs,
             )
@@ -54,7 +54,7 @@ where
         .map(|data| {
             (
                 data.state_id,
-                data.arcs.collect_vec(),
+                data.trs.collect_vec(),
                 data.final_weight,
                 data.num_trs,
             )

@@ -18,8 +18,8 @@ where
             unsafe {
                 ofst.reserve_trs_unchecked(data.state_id, data.num_trs);
             }
-            for arc in data.arcs {
-                unsafe { ofst.add_tr_unchecked(data.state_id, arc.clone()) };
+            for tr in data.trs {
+                unsafe { ofst.add_tr_unchecked(data.state_id, tr.clone()) };
             }
 
             if let Some(final_weight) = data.final_weight {
@@ -51,8 +51,8 @@ where
             unsafe {
                 ofst.reserve_trs_unchecked(fst_iter_data.state_id, fst_iter_data.num_trs);
             }
-            for arc in fst_iter_data.arcs {
-                unsafe { ofst.add_tr_unchecked(fst_iter_data.state_id, arc) }
+            for tr in fst_iter_data.trs {
+                unsafe { ofst.add_tr_unchecked(fst_iter_data.state_id, tr) }
             }
 
             if let Some(w) = fst_iter_data.final_weight {

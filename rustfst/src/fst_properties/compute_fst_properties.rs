@@ -50,75 +50,75 @@ pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Result<FstProper
         let mut ilabels = HashSet::new();
         let mut olabels = HashSet::new();
         let mut prev_tr: Option<&Tr<F::W>> = None;
-        for arc in fst.arcs_iter(state)? {
-            // There is already an outgoing arc with this ilabel
-            if ilabels.contains(&arc.ilabel) {
+        for tr in fst.tr_iter(state)? {
+            // There is already an outgoing transition with this ilabel
+            if ilabels.contains(&tr.ilabel) {
                 comp_props |= FstProperties::NOT_I_DETERMINISTIC;
                 comp_props &= !FstProperties::I_DETERMINISTIC;
             }
 
-            // There is already an outgoing arc with this olabel
-            if olabels.contains(&arc.olabel) {
+            // There is already an outgoing transition with this olabel
+            if olabels.contains(&tr.olabel) {
                 comp_props |= FstProperties::NOT_O_DETERMINISTIC;
                 comp_props &= !FstProperties::O_DETERMINISTIC;
             }
 
-            if arc.ilabel != arc.olabel {
+            if tr.ilabel != tr.olabel {
                 comp_props |= FstProperties::NOT_ACCEPTOR;
                 comp_props &= !FstProperties::ACCEPTOR;
             }
 
-            if arc.ilabel == 0 && arc.olabel == 0 {
+            if tr.ilabel == 0 && tr.olabel == 0 {
                 comp_props |= FstProperties::EPSILONS;
                 comp_props &= !FstProperties::NO_EPSILONS;
             }
 
-            if arc.ilabel == 0 {
+            if tr.ilabel == 0 {
                 comp_props |= FstProperties::I_EPSILONS;
                 comp_props &= !FstProperties::NO_I_EPSILONS;
             }
 
-            if arc.olabel == 0 {
+            if tr.olabel == 0 {
                 comp_props |= FstProperties::O_EPSILONS;
                 comp_props &= !FstProperties::NO_O_EPSILONS;
             }
 
-            // Not first arc
+            // Not first transition
             if let Some(_prev_tr) = prev_tr {
-                if arc.ilabel < _prev_tr.ilabel {
+                if tr.ilabel < _prev_tr.ilabel {
                     comp_props |= FstProperties::NOT_I_LABEL_SORTED;
                     comp_props &= !FstProperties::I_LABEL_SORTED;
                 }
 
-                if arc.olabel < _prev_tr.olabel {
+                if tr.olabel < _prev_tr.olabel {
                     comp_props |= FstProperties::NOT_O_LABEL_SORTED;
                     comp_props &= !FstProperties::O_LABEL_SORTED;
                 }
             }
 
-            if !arc.weight.is_one() && !arc.weight.is_zero() {
+            if !tr.weight.is_one() && !tr.weight.is_zero() {
                 comp_props |= FstProperties::WEIGHTED;
                 comp_props &= !FstProperties::UNWEIGHTED;
 
-                if sccs[state] == sccs[arc.nextstate] {
+                if sccs[state] == sccs[tr.nextstate] {
                     comp_props |= FstProperties::WEIGHTED_CYCLES;
                     comp_props &= !FstProperties::UNWEIGHTED_CYCLES;
                 }
             }
 
-            if arc.nextstate <= state {
+            if tr.nextstate <= state {
                 comp_props |= FstProperties::NOT_TOP_SORTED;
                 comp_props &= !FstProperties::TOP_SORTED;
             }
 
-            if arc.nextstate != state + 1 {
+            if tr.nextstate != state + 1 {
                 comp_props |= FstProperties::NOT_STRING;
                 comp_props &= !FstProperties::STRING;
             }
 
-            prev_tr = Some(arc);
-            ilabels.insert(arc.ilabel);
-            olabels.insert(arc.olabel);
+            prev_tr = Some(tr);
+            ilabels.insert(tr.ilabel);
+            olabels.insert(tr.olabel);
         }
 
         if nfinal > 0 {

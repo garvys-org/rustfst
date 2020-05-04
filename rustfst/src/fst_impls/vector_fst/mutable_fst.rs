@@ -64,7 +64,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
 
     fn del_state(&mut self, state_to_remove: StateId) -> Result<()> {
         // Remove the state from the vector
-        // Check the arcs for arcs going to this state
+        // Check the trs for trs going to this state
 
         ensure!(
             state_to_remove < self.states.len(),
@@ -98,16 +98,16 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
 
         for s in 0..self.states.len() {
             let mut to_delete = vec![];
-            for (idx, arc) in unsafe { self.arcs_iter_unchecked_mut(s).enumerate() } {
-                let t = new_id[arc.nextstate];
+            for (idx, tr) in unsafe { self.tr_iter_unchecked_mut(s).enumerate() } {
+                let t = new_id[tr.nextstate];
                 if t != -1 {
-                    arc.nextstate = t as usize;
+                    tr.nextstate = t as usize;
                 } else {
                     to_delete.push(idx);
                 }
             }
             for i in to_delete.iter().rev() {
-                self.states[s].arcs.remove(*i);
+                self.states[s].trs.remove(*i);
             }
         }
 
@@ -127,32 +127,32 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         // Ensure the start state is no longer affected to a destroyed state
         self.start_state = None;
 
-        // Remove all the states and thus the arcs
+        // Remove all the states and thus the trs
         self.states.clear();
     }
 
     unsafe fn del_trs_id_sorted_unchecked(&mut self, state: usize, to_del: &Vec<usize>) {
-        let arcs = &mut self.states.get_unchecked_mut(state).arcs;
+        let trs = &mut self.states.get_unchecked_mut(state).trs;
         for i in to_del.iter().rev() {
-            arcs.remove(*i);
+            trs.remove(*i);
         }
     }
 
-    fn add_tr(&mut self, source: StateId, arc: Tr<<Self as CoreFst>::W>) -> Result<()> {
+    fn add_tr(&mut self, source: StateId, tr: Tr<<Self as CoreFst>::W>) -> Result<()> {
         self.states
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
-            .arcs
-            .push(arc);
+            .trs
+            .push(tr);
         Ok(())
     }
 
-    unsafe fn add_tr_unchecked(&mut self, source: usize, arc: Tr<Self::W>) {
-        self.states.get_unchecked_mut(source).arcs.push(arc)
+    unsafe fn add_tr_unchecked(&mut self, source: usize, tr: Tr<Self::W>) {
+        self.states.get_unchecked_mut(source).trs.push(tr)
     }
 
-    unsafe fn set_trs_unchecked(&mut self, source: usize, arcs: Vec<Tr<Self::W>>) {
-        self.states.get_unchecked_mut(source).arcs = arcs
+    unsafe fn set_trs_unchecked(&mut self, source: usize, trs: Vec<Tr<Self::W>>) {
+        self.states.get_unchecked_mut(source).trs = trs
     }
 
     fn delete_final_weight(&mut self, source: usize) -> Result<()> {
@@ -171,7 +171,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         self.states
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
-            .arcs
+            .trs
             .clear();
         Ok(())
     }
@@ -181,7 +181,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
             .states
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
-            .arcs
+            .trs
             .drain(..)
             .collect();
         Ok(v)
@@ -190,7 +190,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
     unsafe fn pop_trs_unchecked(&mut self, source: usize) -> Vec<Tr<Self::W>> {
         self.states
             .get_unchecked_mut(source)
-            .arcs
+            .trs
             .drain(..)
             .collect()
     }
@@ -227,32 +227,32 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         state: StateId,
         f: F,
     ) {
-        unsafe { self.states.get_unchecked_mut(state).arcs.sort_by(f) }
+        unsafe { self.states.get_unchecked_mut(state).trs.sort_by(f) }
     }
 
     unsafe fn unique_trs_unchecked(&mut self, state: usize) {
-        let arcs = &mut self.states.get_unchecked_mut(state).arcs;
-        arcs.sort_by(tr_compare);
-        arcs.dedup();
+        let trs = &mut self.states.get_unchecked_mut(state).trs;
+        trs.sort_by(tr_compare);
+        trs.dedup();
     }
 
     unsafe fn sum_trs_unchecked(&mut self, state: usize) {
-        let arcs = &mut self.states.get_unchecked_mut(state).arcs;
-        arcs.sort_by(tr_compare);
+        let trs = &mut self.states.get_unchecked_mut(state).trs;
+        trs.sort_by(tr_compare);
         let mut n_trs: usize = 0;
-        for i in 0..arcs.len() {
-            if n_trs > 0 && equal_tr(&arcs[i], &arcs[n_trs - 1]) {
-                let (left, right) = arcs.split_at_mut(i);
+        for i in 0..trs.len() {
+            if n_trs > 0 && equal_tr(&trs[i], &trs[n_trs - 1]) {
+                let (left, right) = trs.split_at_mut(i);
                 left[n_trs - 1]
                     .weight
                     .plus_assign(&right[0].weight)
                     .unwrap();
             } else {
-                arcs.swap(n_trs, i);
+                trs.swap(n_trs, i);
                 n_trs += 1;
             }
         }
-        arcs.truncate(n_trs);
+        trs.truncate(n_trs);
         // Truncate doesn't modify the capacity of the vector. Maybe a shrink_to_fit ?
     }
 }

@@ -39,28 +39,28 @@ where
         }
         let mut final1 = unsafe { fst.final_weight_unchecked(s1) }.cloned();
         let mut final2 = None;
-        let mut arcsa: Vec<_> = fst.arcs_iter(s1)?.cloned().collect();
-        let mut arcsb = vec![];
+        let mut trsa: Vec<_> = fst.tr_iter(s1)?.cloned().collect();
+        let mut trsb = vec![];
         while !done[s1] {
             let s2 = order[s1];
             if !done[s2] {
                 final2 = unsafe { fst.final_weight_unchecked(s2) }.cloned();
-                arcsb = fst.arcs_iter(s2)?.cloned().collect();
+                trsb = fst.tr_iter(s2)?.cloned().collect();
             }
             match final1 {
                 None => fst.delete_final_weight(s2)?,
                 Some(v) => fst.set_final(s2, v.clone())?,
             };
             fst.delete_trs(s2)?;
-            for arc in arcsa.iter() {
-                let mut arc = arc.clone();
-                arc.nextstate = order[arc.nextstate];
-                fst.add_tr(s2, arc)?;
+            for tr in trsa.iter() {
+                let mut tr = tr.clone();
+                tr.nextstate = order[tr.nextstate];
+                fst.add_tr(s2, tr)?;
             }
             done[s1] = true;
 
             // next
-            swap(&mut arcsa, &mut arcsb);
+            swap(&mut trsa, &mut trsb);
             final1 = final2.clone();
             s1 = s2;
         }

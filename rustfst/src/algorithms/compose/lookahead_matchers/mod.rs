@@ -54,7 +54,7 @@ pub trait LookaheadMatcher<W: Semiring>: Matcher<W> {
     // Can the label be read from the current matcher state after possibly
     // following epsilon transitions?
     fn lookahead_label(&self, state: StateId, label: Label) -> Result<bool>;
-    fn lookahead_prefix(&self, arc: &mut Tr<W>) -> bool;
+    fn lookahead_prefix(&self, tr: &mut Tr<W>) -> bool;
 
     // Gives an estimate of the combined weight of the paths in the lookahead
     // and matcher FSTs for the last call to LookAheadFst. Non-trivial
@@ -74,14 +74,14 @@ pub trait LookaheadMatcher<W: Semiring>: Matcher<W> {
     fn clear_lookahead_prefix(&mut self) {
         self.prefix_tr_mut().nextstate = NO_STATE_ID;
     }
-    fn set_lookahead_prefix(&mut self, arc: Tr<W>) {
-        *self.prefix_tr_mut() = arc;
+    fn set_lookahead_prefix(&mut self, tr: Tr<W>) {
+        *self.prefix_tr_mut() = tr;
     }
 
-    fn default_lookahead_prefix(&self, arc: &mut Tr<W>) -> bool {
+    fn default_lookahead_prefix(&self, tr: &mut Tr<W>) -> bool {
         let prefix_tr = self.prefix_tr();
         if prefix_tr.nextstate != NO_STATE_ID {
-            *arc = prefix_tr.clone();
+            *tr = prefix_tr.clone();
             true
         } else {
             false

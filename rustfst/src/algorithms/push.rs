@@ -100,8 +100,8 @@ where
             }
         }
     } else if let Some(start) = fst.start() {
-        for arc in unsafe { fst.arcs_iter_unchecked_mut(start) } {
-            arc.weight.divide_assign(&weight, DivideType::DivideLeft)?;
+        for tr in unsafe { fst.tr_iter_unchecked_mut(start) } {
+            tr.weight.divide_assign(&weight, DivideType::DivideLeft)?;
         }
         if let Some(final_weight) = unsafe { fst.final_weight_unchecked_mut(start) } {
             final_weight.divide_assign(&weight, DivideType::DivideLeft)?;

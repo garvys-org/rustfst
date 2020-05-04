@@ -6,10 +6,10 @@ use crate::tr::Tr;
 use crate::StateId;
 use std::rc::Rc;
 
-/// Simple concrete, mutable FST whose states and arcs are stored in standard vectors.
+/// Simple concrete, mutable FST whose states and trs are stored in standard vectors.
 ///
 /// All states are stored in a vector of states.
-/// In each state, there is a vector of arcs containing the outgoing transitions.
+/// In each state, there is a vector of trs containing the outgoing transitions.
 #[derive(Debug, PartialEq, Clone)]
 pub struct VectorFst<W> {
     pub(crate) states: Vec<VectorFstState<W>>,
@@ -25,29 +25,29 @@ pub struct VectorFst<W> {
 #[derive(Debug, Clone, PartialEq)]
 pub struct VectorFstState<W> {
     pub(crate) final_weight: Option<W>,
-    pub(crate) arcs: Vec<Tr<W>>,
+    pub(crate) trs: Vec<Tr<W>>,
 }
 
 impl<W> VectorFstState<W> {
     pub fn new() -> Self {
         Self {
             final_weight: None,
-            arcs: vec![],
+            trs: vec![],
         }
     }
     pub fn num_trs(&self) -> usize {
-        self.arcs.len()
+        self.trs.len()
     }
 }
 
 impl<W: Semiring> VectorFstState<W> {
     pub fn num_input_epsilons(&self) -> usize {
         let filter = InputEpsilonTrFilter {};
-        self.arcs.iter().filter(|v| filter.keep(v)).count()
+        self.trs.iter().filter(|v| filter.keep(v)).count()
     }
 
     pub fn num_output_epsilons(&self) -> usize {
         let filter = OutputEpsilonTrFilter {};
-        self.arcs.iter().filter(|v| filter.keep(v)).count()
+        self.trs.iter().filter(|v| filter.keep(v)).count()
     }
 }

@@ -55,7 +55,7 @@ pub trait CoreFst {
     fn final_weight(&self, state_id: StateId) -> Result<Option<&<Self as CoreFst>::W>>;
     unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<&<Self as CoreFst>::W>;
 
-    /// Number of arcs leaving a specific state in the wFST.
+    /// Number of trs leaving a specific state in the wFST.
     ///
     /// # Example
     ///
@@ -116,7 +116,7 @@ pub trait Fst:
     CoreFst + for<'a> TrIterator<'a> + for<'b> StateIterator<'b> + for<'c> FstIterator<'c> + Debug
 {
     // TODO: Move niepsilons and noepsilons to required methods.
-    /// Returns the number of arcs with epsilon input labels leaving a state.
+    /// Returns the number of trs with epsilon input labels leaving a state.
     ///
     /// # Example :
     /// ```
@@ -140,10 +140,10 @@ pub trait Fst:
     /// ```
     fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
         let filter = InputEpsilonTrFilter {};
-        Ok(self.arcs_iter(state)?.filter(|v| filter.keep(v)).count())
+        Ok(self.tr_iter(state)?.filter(|v| filter.keep(v)).count())
     }
 
-    /// Returns the number of arcs with epsilon output labels leaving a state.
+    /// Returns the number of trs with epsilon output labels leaving a state.
     ///
     /// # Example :
     /// ```
@@ -167,16 +167,16 @@ pub trait Fst:
     /// ```
     fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
         let filter = OutputEpsilonTrFilter {};
-        Ok(self.arcs_iter(state)?.filter(|v| filter.keep(v)).count())
+        Ok(self.tr_iter(state)?.filter(|v| filter.keep(v)).count())
     }
 
     /// Returns true if the Fst is an acceptor. False otherwise.
-    /// Acceptor means for all arc, arc.ilabel == arc.olabel
+    /// Acceptor means for all transition, transition.ilabel == transition.olabel
     fn is_acceptor(&self) -> bool {
         let states: Vec<_> = self.states_iter().collect();
         for state in states {
-            for arc in self.arcs_iter(state).unwrap() {
-                if arc.ilabel != arc.olabel {
+            for tr in self.tr_iter(state).unwrap() {
+                if tr.ilabel != tr.olabel {
                     return false;
                 }
             }

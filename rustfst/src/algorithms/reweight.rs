@@ -16,7 +16,7 @@ pub enum ReweightType {
 /// The weight must be left distributive when reweighting towards the initial
 /// state and right distributive when reweighting towards the final states.
 ///
-/// An arc of weight w, with an origin state of potential p and destination state
+/// A transition of weight w, with an origin state of potential p and destination state
 /// of potential q, is reweighted by p^-1 \otimes (w \otimes q) when reweighting
 /// torwards the initial state, and by (p \otimes w) \otimes q^-1 when
 /// reweighting towards the final states.
@@ -53,19 +53,19 @@ where
             continue;
         }
 
-        for arc in fst.arcs_iter_mut(state)? {
-            let d_ns = potentials.get(arc.nextstate).unwrap_or(&zero);
+        for tr in fst.tr_iter_mut(state)? {
+            let d_ns = potentials.get(tr.nextstate).unwrap_or(&zero);
 
             if d_ns.is_zero() {
                 continue;
             }
 
-            arc.weight = match reweight_type {
+            tr.weight = match reweight_type {
                 ReweightType::ReweightToInitial => {
-                    (&arc.weight.times(d_ns)?).divide(d_s, DivideType::DivideLeft)?
+                    (&tr.weight.times(d_ns)?).divide(d_s, DivideType::DivideLeft)?
                 }
                 ReweightType::ReweightToFinal => {
-                    (d_s.times(&arc.weight)?).divide(&d_ns, DivideType::DivideRight)?
+                    (d_s.times(&tr.weight)?).divide(&d_ns, DivideType::DivideRight)?
                 }
             };
         }
@@ -94,11 +94,11 @@ where
         let d_s = potentials.get(start_state).unwrap_or(&zero);
 
         if !d_s.is_one() && !d_s.is_zero() {
-            for arc in fst.arcs_iter_mut(start_state)? {
-                arc.weight = match reweight_type {
-                    ReweightType::ReweightToInitial => d_s.times(&arc.weight)?,
+            for tr in fst.tr_iter_mut(start_state)? {
+                tr.weight = match reweight_type {
+                    ReweightType::ReweightToInitial => d_s.times(&tr.weight)?,
                     ReweightType::ReweightToFinal => {
-                        (F::W::one().divide(&d_s, DivideType::DivideRight)?).times(&arc.weight)?
+                        (F::W::one().divide(&d_s, DivideType::DivideRight)?).times(&tr.weight)?
                     }
                 };
             }

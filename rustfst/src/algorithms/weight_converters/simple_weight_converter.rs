@@ -5,7 +5,7 @@ use crate::semirings::Semiring;
 use crate::Tr;
 
 /// Mapper that leaves labels and nextstate unchanged and constructs a new weight
-/// from the underlying value of the arc weight.
+/// from the underlying value of the transition weight.
 pub struct SimpleWeightConverter {}
 
 impl<SI, SO> WeightConverter<SI, SO> for SimpleWeightConverter
@@ -13,12 +13,12 @@ where
     SI: Semiring,
     SO: Semiring<Type = SI::Type>,
 {
-    fn tr_map(&mut self, arc: &Tr<SI>) -> Result<Tr<SO>> {
+    fn tr_map(&mut self, tr: &Tr<SI>) -> Result<Tr<SO>> {
         Ok(Tr::new(
-            arc.ilabel,
-            arc.olabel,
-            SO::new(arc.weight.value().clone()),
-            arc.nextstate,
+            tr.ilabel,
+            tr.olabel,
+            SO::new(tr.weight.value().clone()),
+            tr.nextstate,
         ))
     }
 

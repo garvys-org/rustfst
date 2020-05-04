@@ -17,9 +17,9 @@ pub struct DrawingConfig {
     pub fontsize: u32,
     /// Input in acceptor format.
     pub acceptor: bool,
-    /// Print/draw arc weights and final weights equal to Weight::ONE.
+    /// Print/draw transition weights and final weights equal to Weight::ONE.
     pub show_weight_one: bool,
-    /// Print/draw arc weights and final weights.
+    /// Print/draw transition weights and final weights.
     pub print_weight: bool,
 }
 

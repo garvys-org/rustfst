@@ -14,8 +14,8 @@ pub fn map_weight<W: Semiring>(weight: &mut W) {
 }
 
 impl<S: Semiring> TrMapper<S> for RmWeightMapper {
-    fn tr_map(&self, arc: &mut Tr<S>) -> Result<()> {
-        map_weight(&mut arc.weight);
+    fn tr_map(&self, tr: &mut Tr<S>) -> Result<()> {
+        map_weight(&mut tr.weight);
         Ok(())
     }
 

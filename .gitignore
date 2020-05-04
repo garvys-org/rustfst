@@ -23,6 +23,12 @@ rustfst-tests-data/a.out
 rustfst-tests-data/json.hpp
 proptest-regressions/lib.txt
 
+openfst_benchmark
+report.md
+report2.md
+
+rustfst-python-bench
+venv3
 
 .idea
 pynini-2.0.7/

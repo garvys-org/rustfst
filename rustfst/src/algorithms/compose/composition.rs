@@ -190,8 +190,8 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
             Tr::new(NO_LABEL, EPS_LABEL, W::one(), sb)
         };
         self.match_tr(s, sa, Rc::clone(&matchera), &tr_loop, match_input)?;
-        for arc in fstb.arcs_iter(sb)? {
-            self.match_tr(s, sa, Rc::clone(&matchera), arc, match_input)?;
+        for tr in fstb.tr_iter(sb)? {
+            self.match_tr(s, sa, Rc::clone(&matchera), tr, match_input)?;
         }
         Ok(())
     }
@@ -221,10 +221,10 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
         s: StateId,
         sa: StateId,
         matchera: Rc<RefCell<M>>,
-        arc: &Tr<W>,
+        tr: &Tr<W>,
         match_input: bool,
     ) -> Result<()> {
-        let label = if match_input { arc.olabel } else { arc.ilabel };
+        let label = if match_input { tr.olabel } else { tr.ilabel };
 
         // Collect necessary here because need to borrow_mut a matcher later. To investigate.
         let temp = matchera.borrow().iter(sa, label)?.collect_vec();
@@ -237,7 +237,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
                     MatchType::MatchOutput
                 },
             )?;
-            let mut arcb = arc.clone();
+            let mut arcb = tr.clone();
             if match_input {
                 let fs = self.compose_filter.filter_tr(&mut arcb, &mut arca)?;
                 if fs != CF::FS::new_no_state() {

@@ -9,7 +9,7 @@ use unsafe_unwrap::UnsafeUnwrap;
 /// The WeightConverter interfaces defines how a weight should be turned into another one.
 /// Useful for changing the semiring of an FST.
 pub trait WeightConverter<SI: Semiring, SO: Semiring> {
-    fn tr_map(&mut self, arc: &Tr<SI>) -> Result<Tr<SO>>;
+    fn tr_map(&mut self, tr: &Tr<SI>) -> Result<Tr<SO>>;
     fn final_tr_map(&mut self, final_tr: &FinalTr<SI>) -> Result<FinalTr<SO>>;
     fn final_action(&self) -> MapFinalAction;
 }
@@ -56,8 +56,8 @@ where
     let states: Vec<_> = fst_in.states_iter().collect();
     for state in states {
         fst_out.reserve_trs(state, fst_in.num_trs(state)?)?;
-        for arc in fst_in.arcs_iter(state)? {
-            fst_out.add_tr(state, mapper.tr_map(arc)?)?;
+        for tr in fst_in.tr_iter(state)? {
+            fst_out.add_tr(state, mapper.tr_map(tr)?)?;
         }
         if let Some(w) = unsafe { fst_in.final_weight_unchecked(state) } {
             let final_tr = FinalTr {
@@ -69,7 +69,7 @@ where
             match final_action {
                 MapFinalAction::MapNoSuperfinal => {
                     if mapped_final_tr.ilabel != EPS_LABEL || mapped_final_tr.olabel != EPS_LABEL {
-                        bail!("TrMap: Non-zero arc labels for superfinal arc")
+                        bail!("TrMap: Non-zero tr labels for superfinal tr")
                     }
 
                     fst_out.set_final(state, mapped_final_tr.weight).unwrap();

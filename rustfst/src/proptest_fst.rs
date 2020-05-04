@@ -28,7 +28,7 @@ fn proptest_trs(nstates: usize) -> impl Strategy<Value = Vec<(usize, Tr<Tropical
             proptest_weight(),
             0..nstates,
         ),
-        // Number of arcs
+        // Number of trs
         0..MAX_NUM_ARCS,
     )
     .prop_map(|v| {
@@ -63,7 +63,7 @@ pub(crate) fn proptest_fst() -> impl Strategy<Value = VectorFst<TropicalWeight>>
                 proptest::collection::vec(proptest_weight(), nstates..=nstates),
             )
         })
-        .prop_map(|(nstates, start_state, arcs, final_weights)| {
+        .prop_map(|(nstates, start_state, trs, final_weights)| {
             let mut fst = VectorFst::new();
 
             // Create all states.
@@ -72,9 +72,9 @@ pub(crate) fn proptest_fst() -> impl Strategy<Value = VectorFst<TropicalWeight>>
             // Set start state.
             fst.set_start(start_state).unwrap();
 
-            // Add arcs.
-            for (state, arc) in arcs.into_iter() {
-                unsafe { fst.add_tr_unchecked(state, arc) };
+            // Add trs.
+            for (state, tr) in trs.into_iter() {
+                unsafe { fst.add_tr_unchecked(state, tr) };
             }
 
             // Set final weights.

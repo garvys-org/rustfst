@@ -13,7 +13,7 @@ use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, EPS_LABEL};
 
-/// This specifies what labels to output on the call or return arc.
+/// This specifies what labels to output on the call or return transition.
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug, Eq)]
 enum ReplaceLabelType {
     /// Epsilon labels on both input and output.
@@ -31,14 +31,14 @@ enum ReplaceLabelType {
 struct ReplaceFstOptions {
     /// Index of root rule for expansion.
     root: Label,
-    /// How to label call arc.
+    /// How to label call transition.
     call_label_type: ReplaceLabelType,
-    /// How to label return arc.
+    /// How to label return transition.
     return_label_type: ReplaceLabelType,
-    /// Specifies output label to put on call arc; if `None`, use existing label
-    /// on call arc. Otherwise, use this field as the output label.
+    /// Specifies output label to put on call transition; if `None`, use existing label
+    /// on call transition. Otherwise, use this field as the output label.
     call_output_label: Option<Label>,
-    /// Specifies label to put on return arc.
+    /// Specifies label to put on return transition.
     return_label: Label,
 }
 
@@ -58,14 +58,14 @@ impl ReplaceFstOptions {
     }
 }
 
-/// Recursively replaces arcs in the root FSTs with other FSTs.
+/// Recursively replaces trs in the root FSTs with other FSTs.
 ///
-/// Replace supports replacement of arcs in one Fst with another FST. This
+/// Replace supports replacement of trs in one Fst with another FST. This
 /// replacement is recursive. Replace takes an array of FST(s). One FST
 /// represents the root (or topology) machine. The root FST refers to other FSTs
-/// by recursively replacing arcs labeled as non-terminals with the matching
-/// non-terminal FST. Currently Replace uses the output symbols of the arcs to
-/// determine whether the arc is a non-terminal arc or not. A non-terminal can be
+/// by recursively replacing trs labeled as non-terminals with the matching
+/// non-terminal FST. Currently Replace uses the output symbols of the trs to
+/// determine whether the transition is a non-terminal transition or not. A non-terminal can be
 /// any label that is not a non-zero terminal label in the output alphabet.
 ///
 /// Note that input argument is a vector of pairs. These correspond to the tuple
@@ -109,12 +109,12 @@ where
     fst.compute()
 }
 
-/// Returns true if label type on arc results in epsilon input label.
+/// Returns true if label type on transition results in epsilon input label.
 fn epsilon_on_input(label_type: ReplaceLabelType) -> bool {
     label_type == ReplaceLabelType::Neither || label_type == ReplaceLabelType::Output
 }
 
-/// Returns true if label type on arc results in epsilon input label.
+/// Returns true if label type on transition results in epsilon input label.
 fn epsilon_on_output(label_type: ReplaceLabelType) -> bool {
     label_type == ReplaceLabelType::Neither || label_type == ReplaceLabelType::Input
 }
@@ -207,18 +207,18 @@ where
     fn expand(&mut self, state: usize) -> Result<()> {
         let tuple = self.state_table.tuple_table.find_tuple(state).clone();
         if let Some(fst_state) = tuple.fst_state {
-            if let Some(arc) = self.compute_final_tr(state) {
-                self.cache_impl.push_tr(state, arc)?;
+            if let Some(tr) = self.compute_final_tr(state) {
+                self.cache_impl.push_tr(state, tr)?;
             }
 
-            for arc in self
+            for tr in self
                 .fst_array
                 .get(tuple.fst_id.unwrap())
                 .unwrap()
                 .borrow()
-                .arcs_iter(fst_state)?
+                .tr_iter(fst_state)?
             {
-                if let Some(new_tr) = self.compute_tr(&tuple, arc) {
+                if let Some(new_tr) = self.compute_tr(&tuple, tr) {
                     self.cache_impl.push_tr(state, new_tr)?;
                 }
             }
@@ -378,29 +378,24 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
         self.get_prefix_id(prefix)
     }
 
-    fn compute_tr<W: Semiring>(&self, tuple: &ReplaceStateTuple, arc: &Tr<W>) -> Option<Tr<W>> {
-        if arc.olabel == EPS_LABEL
-            || arc.olabel < *self.nonterminal_set.iter().next().unwrap()
-            || arc.olabel > *self.nonterminal_set.iter().rev().next().unwrap()
+    fn compute_tr<W: Semiring>(&self, tuple: &ReplaceStateTuple, tr: &Tr<W>) -> Option<Tr<W>> {
+        if tr.olabel == EPS_LABEL
+            || tr.olabel < *self.nonterminal_set.iter().next().unwrap()
+            || tr.olabel > *self.nonterminal_set.iter().rev().next().unwrap()
         {
             let state_tuple =
-                ReplaceStateTuple::new(tuple.prefix_id, tuple.fst_id, Some(arc.nextstate));
+                ReplaceStateTuple::new(tuple.prefix_id, tuple.fst_id, Some(tr.nextstate));
             let nextstate = self.state_table.tuple_table.find_id(state_tuple);
-            Some(Tr::new(
-                arc.ilabel,
-                arc.olabel,
-                arc.weight.clone(),
-                nextstate,
-            ))
+            Some(Tr::new(tr.ilabel, tr.olabel, tr.weight.clone(), nextstate))
         } else {
             // Checks for non-terminal
-            if let Some(nonterminal) = self.nonterminal_hash.get(&arc.olabel) {
+            if let Some(nonterminal) = self.nonterminal_hash.get(&tr.olabel) {
                 let p = self
                     .state_table
                     .prefix_table
                     .find_tuple(tuple.prefix_id)
                     .clone();
-                let nt_prefix = self.push_prefix(p, tuple.fst_id, Some(arc.nextstate));
+                let nt_prefix = self.push_prefix(p, tuple.fst_id, Some(tr.nextstate));
                 if let Some(nt_start) = self.fst_array.get(*nonterminal).unwrap().borrow().start() {
                     let nt_nextstate = self.state_table.tuple_table.find_id(
                         ReplaceStateTuple::new(nt_prefix, Some(*nonterminal), Some(nt_start)),
@@ -408,14 +403,14 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
                     let ilabel = if epsilon_on_input(self.call_label_type_) {
                         0
                     } else {
-                        arc.ilabel
+                        tr.ilabel
                     };
                     let olabel = if epsilon_on_output(self.call_label_type_) {
                         0
                     } else {
-                        self.call_output_label_.unwrap_or(arc.olabel)
+                        self.call_output_label_.unwrap_or(tr.olabel)
                     };
-                    Some(Tr::new(ilabel, olabel, arc.weight.clone(), nt_nextstate))
+                    Some(Tr::new(ilabel, olabel, tr.weight.clone(), nt_nextstate))
                 } else {
                     None
                 }
@@ -423,14 +418,9 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
                 let nextstate = self.state_table.tuple_table.find_id(ReplaceStateTuple::new(
                     tuple.prefix_id,
                     tuple.fst_id,
-                    Some(arc.nextstate),
+                    Some(tr.nextstate),
                 ));
-                Some(Tr::new(
-                    arc.ilabel,
-                    arc.olabel,
-                    arc.weight.clone(),
-                    nextstate,
-                ))
+                Some(Tr::new(tr.ilabel, tr.olabel, tr.weight.clone(), nextstate))
             }
         }
     }
@@ -501,7 +491,7 @@ impl ReplaceStateTable {
     }
 }
 
-/// ReplaceFst supports lazy replacement of arcs in one FST with another FST.
+/// ReplaceFst supports lazy replacement of trs in one FST with another FST.
 /// This replacement is recursive. ReplaceFst can be used to support a variety of
 /// delayed constructions such as recursive transition networks, union, or closure.
 pub type ReplaceFst<F, B> = LazyFst<ReplaceFstImpl<F, B>>;

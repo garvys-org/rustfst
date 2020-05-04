@@ -9,7 +9,7 @@ use crate::StateId;
 use crate::Tr;
 use crate::NO_STATE_ID;
 
-/// This operation trims an FST, removing states and arcs that are not on successful paths.
+/// This operation trims an FST, removing states and trs that are not on successful paths.
 ///
 /// # Example 1
 /// ```
@@ -104,8 +104,8 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for ConnectVisitor<'a, F> {
         true
     }
 
-    fn back_tr(&mut self, s: usize, arc: &Tr<<F as CoreFst>::W>) -> bool {
-        let t = arc.nextstate;
+    fn back_tr(&mut self, s: usize, tr: &Tr<<F as CoreFst>::W>) -> bool {
+        let t = tr.nextstate;
         if self.dfnumber[t] < self.lowlink[s] {
             self.lowlink[s] = self.dfnumber[t];
         }
@@ -115,8 +115,8 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for ConnectVisitor<'a, F> {
         true
     }
 
-    fn forward_or_cross_tr(&mut self, s: usize, arc: &Tr<<F as CoreFst>::W>) -> bool {
-        let t = arc.nextstate;
+    fn forward_or_cross_tr(&mut self, s: usize, tr: &Tr<<F as CoreFst>::W>) -> bool {
+        let t = tr.nextstate;
         if self.dfnumber[t] < self.dfnumber[s]
             && self.onstack[t]
             && self.dfnumber[t] < self.lowlink[s]

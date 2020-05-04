@@ -121,19 +121,19 @@ impl AutoQueue {
             .for_each(|v| *v = QueueType::TrivialQueue);
 
         for state in 0..fst.num_states() {
-            for arc in unsafe { fst.arcs_iter_unchecked(state) } {
-                if !tr_filter.keep(arc) {
+            for tr in unsafe { fst.tr_iter_unchecked(state) } {
+                if !tr_filter.keep(tr) {
                     continue;
                 }
-                if sccs[state] == sccs[arc.nextstate] {
+                if sccs[state] == sccs[tr.nextstate] {
                     let queue_type = unsafe { queue_types.get_unchecked_mut(sccs[state]) };
-                    if compare.is_none() || compare.as_ref().unwrap()(&arc.weight, &F::W::one())? {
+                    if compare.is_none() || compare.as_ref().unwrap()(&tr.weight, &F::W::one())? {
                         *queue_type = QueueType::FifoQueue;
                     } else if *queue_type == QueueType::TrivialQueue
                         || *queue_type == QueueType::LifoQueue
                     {
                         if !F::W::properties().contains(SemiringProperties::IDEMPOTENT)
-                            || (!arc.weight.is_zero() && !arc.weight.is_one())
+                            || (!tr.weight.is_zero() && !tr.weight.is_one())
                         {
                             *queue_type = QueueType::ShortestFirstQueue;
                         } else {
@@ -147,7 +147,7 @@ impl AutoQueue {
                 }
 
                 if !F::W::properties().contains(SemiringProperties::IDEMPOTENT)
-                    || (!arc.weight.is_zero() && !arc.weight.is_one())
+                    || (!tr.weight.is_zero() && !tr.weight.is_one())
                 {
                     *unweighted = false;
                 }

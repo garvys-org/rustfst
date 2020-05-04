@@ -9,8 +9,8 @@ use crate::EPS_LABEL;
 pub struct InputEpsilonMapper {}
 
 impl<S: Semiring> TrMapper<S> for InputEpsilonMapper {
-    fn tr_map(&self, arc: &mut Tr<S>) -> Result<()> {
-        arc.ilabel = EPS_LABEL;
+    fn tr_map(&self, tr: &mut Tr<S>) -> Result<()> {
+        tr.ilabel = EPS_LABEL;
         Ok(())
     }
 

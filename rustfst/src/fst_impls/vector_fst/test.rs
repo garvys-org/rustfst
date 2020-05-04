@@ -33,22 +33,22 @@ mod tests {
         let tr_2 = Tr::new(5, 7, 18.0, s2);
         fst.add_tr(s1, tr_2.clone())?;
         assert_eq!(fst.num_trs(s1).unwrap(), 2);
-        assert_eq!(fst.arcs_iter(s1)?.count(), 2);
+        assert_eq!(fst.tr_iter(s1)?.count(), 2);
 
-        // Iterates on arcs leaving s1
-        let mut it_s1 = fst.arcs_iter(s1)?;
+        // Iterates on trs leaving s1
+        let mut it_s1 = fst.tr_iter(s1)?;
 
-        let arc = it_s1.next().ok_or_else(|| format_err!("Missing arc"))?;
-        assert_eq!(tr_1, *arc);
+        let tr = it_s1.next().ok_or_else(|| format_err!("Missing tr"))?;
+        assert_eq!(tr_1, *tr);
 
-        let arc = it_s1.next().ok_or_else(|| format_err!("Missing arc"))?;
-        assert_eq!(tr_2, *arc);
+        let tr = it_s1.next().ok_or_else(|| format_err!("Missing tr"))?;
+        assert_eq!(tr_2, *tr);
 
-        let arc = it_s1.next();
-        assert!(arc.is_none());
+        let tr = it_s1.next();
+        assert!(tr.is_none());
 
-        // Iterates on arcs leaving s2
-        let mut it_s2 = fst.arcs_iter(s2)?;
+        // Iterates on trs leaving s2
+        let mut it_s2 = fst.tr_iter(s2)?;
 
         let d = it_s2.next();
         assert!(d.is_none());
@@ -73,19 +73,19 @@ mod tests {
 
         let new_tr_1 = Tr::new(15, 29, 33.0, s2 + 55);
 
-        // Modify first arc leaving s1
-        fst.arcs_iter_mut(s1)?
+        // Modify first transition leaving s1
+        fst.tr_iter_mut(s1)?
             .next()
-            .ok_or_else(|| format_err!("Missing arc"))?
+            .ok_or_else(|| format_err!("Missing tr"))?
             .set_value(&new_tr_1);
 
-        let mut it_s1 = fst.arcs_iter(s1)?;
+        let mut it_s1 = fst.tr_iter(s1)?;
 
-        let arc = it_s1.next().ok_or_else(|| format_err!("Missing arc"))?;
-        assert_eq!(new_tr_1, *arc);
+        let tr = it_s1.next().ok_or_else(|| format_err!("Missing tr"))?;
+        assert_eq!(new_tr_1, *tr);
 
-        let arc = it_s1.next().ok_or_else(|| format_err!("Missing arc"))?;
-        assert_eq!(tr_2, *arc);
+        let tr = it_s1.next().ok_or_else(|| format_err!("Missing tr"))?;
+        assert_eq!(tr_2, *tr);
 
         assert!(it_s1.next().is_none());
         Ok(())
@@ -189,15 +189,15 @@ mod tests {
 
         assert_eq!(fst.num_trs(s1)?, 1);
         assert_eq!(fst.num_trs(s2)?, 2);
-        assert_eq!(fst.arcs_iter(s1)?.count(), 1);
-        assert_eq!(fst.arcs_iter(s2)?.count(), 2);
+        assert_eq!(fst.tr_iter(s1)?.count(), 1);
+        assert_eq!(fst.tr_iter(s2)?.count(), 2);
 
         fst.del_state(s1)?;
 
         assert_eq!(fst.num_trs(0)?, 1);
 
         let only_state = fst.states_iter().next().unwrap();
-        assert_eq!(fst.arcs_iter(only_state)?.count(), 1);
+        assert_eq!(fst.tr_iter(only_state)?.count(), 1);
         Ok(())
     }
 

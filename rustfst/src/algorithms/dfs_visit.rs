@@ -23,18 +23,18 @@ pub trait Visitor<'a, F: Fst> {
     /// Invoked when state discovered (2nd arg is DFS tree root).
     fn init_state(&mut self, s: StateId, root: StateId) -> bool;
 
-    /// Invoked when tree arc to white/undiscovered state examined.
-    fn tree_tr(&mut self, s: StateId, arc: &Tr<F::W>) -> bool;
+    /// Invoked when tree transition to white/undiscovered state examined.
+    fn tree_tr(&mut self, s: StateId, tr: &Tr<F::W>) -> bool;
 
-    /// Invoked when back arc to grey/unfinished state examined.
-    fn back_tr(&mut self, s: StateId, arc: &Tr<F::W>) -> bool;
+    /// Invoked when back transition to grey/unfinished state examined.
+    fn back_tr(&mut self, s: StateId, tr: &Tr<F::W>) -> bool;
 
-    /// Invoked when forward or cross arc to black/finished state examined.
-    fn forward_or_cross_tr(&mut self, s: StateId, arc: &Tr<F::W>) -> bool;
+    /// Invoked when forward or cross transition to black/finished state examined.
+    fn forward_or_cross_tr(&mut self, s: StateId, tr: &Tr<F::W>) -> bool;
 
     /// Invoked when state finished ('s' is tree root, 'parent' is kNoStateId,
-    /// and 'arc' is nullptr).
-    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, arc: Option<&Tr<F::W>>);
+    /// and 'tr' is nullptr).
+    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, tr: Option<&Tr<F::W>>);
 
     /// Invoked after DFS visit.
     fn finish_visit(&mut self);
@@ -58,7 +58,7 @@ where
     pub fn new<F: TrIterator<'a, Iter = AI, W = W>>(fst: &'a F, s: StateId) -> Self {
         Self {
             state_id: s,
-            tr_iter: OpenFstIterator::new(unsafe { fst.arcs_iter_unchecked(s) }),
+            tr_iter: OpenFstIterator::new(unsafe { fst.tr_iter_unchecked(s) }),
         }
     }
 }
@@ -137,28 +137,28 @@ pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>, A: TrFilter<F::W>>
                 }
                 continue;
             }
-            let arc = aiter.value();
-            let next_color = state_color[arc.nextstate];
-            if !(tr_filter.keep(arc)) {
+            let tr = aiter.value();
+            let next_color = state_color[tr.nextstate];
+            if !(tr_filter.keep(tr)) {
                 aiter.next();
                 continue;
             }
             match next_color {
                 DfsStateColor::White => {
-                    dfs = visitor.tree_tr(s, arc);
+                    dfs = visitor.tree_tr(s, tr);
                     if !dfs {
                         break;
                     }
-                    state_color[arc.nextstate] = DfsStateColor::Grey;
-                    state_stack_next = Some(DfsState::new(fst, arc.nextstate));
-                    dfs = visitor.init_state(arc.nextstate, root);
+                    state_color[tr.nextstate] = DfsStateColor::Grey;
+                    state_stack_next = Some(DfsState::new(fst, tr.nextstate));
+                    dfs = visitor.init_state(tr.nextstate, root);
                 }
                 DfsStateColor::Grey => {
-                    dfs = visitor.back_tr(s, arc);
+                    dfs = visitor.back_tr(s, tr);
                     aiter.next();
                 }
                 DfsStateColor::Black => {
-                    dfs = visitor.forward_or_cross_tr(s, arc);
+                    dfs = visitor.forward_or_cross_tr(s, tr);
                     aiter.next();
                 }
             };
