@@ -184,17 +184,17 @@ where
         if !noneps_in[state] {
             continue;
         }
-        let (arcs, final_weight) = rmeps_state.expand(state)?;
+        let (trs, final_weight) = rmeps_state.expand(state)?;
 
         // Copy everything, not great ...
-        v.push((state, (arcs, final_weight)));
+        v.push((state, (trs, final_weight)));
     }
 
-    for (state, (arcs, final_weight)) in v.into_iter() {
+    for (state, (trs, final_weight)) in v.into_iter() {
         unsafe {
-            // TODO: Use these arcs instead of cloning
+            // TODO: Use these trs instead of cloning
             fst.pop_trs_unchecked(state);
-            fst.set_trs_unchecked(state, arcs.into_iter().rev().collect());
+            fst.set_trs_unchecked(state, trs.into_iter().rev().collect());
             if final_weight != zero {
                 fst.set_final_unchecked(state, final_weight);
             } else {
@@ -276,7 +276,7 @@ where
 
         let mut eps_queue = vec![source];
 
-        let mut arcs = vec![];
+        let mut trs = vec![];
         let mut final_weight = F::W::zero();
         while let Some(state) = eps_queue.pop() {
             while self.visited.len() <= state {
@@ -304,24 +304,24 @@ where
                         olabel: tr.olabel,
                         nextstate: tr.nextstate,
                     };
-                    let val = (self.expand_id, arcs.len());
+                    let val = (self.expand_id, trs.len());
 
                     match self.element_map.entry(elt) {
                         Entry::Vacant(e) => {
                             e.insert(val);
-                            arcs.push(tr);
+                            trs.push(tr);
                         }
                         Entry::Occupied(mut e) => {
                             if e.get().0 == self.expand_id {
                                 unsafe {
-                                    arcs.get_unchecked_mut(e.get().1)
+                                    trs.get_unchecked_mut(e.get().1)
                                         .weight
                                         .plus_assign(&tr.weight)?;
                                 }
                             } else {
                                 e.get_mut().0 = self.expand_id;
-                                e.get_mut().1 = arcs.len();
-                                arcs.push(tr);
+                                e.get_mut().1 = trs.len();
+                                trs.push(tr);
                             }
                         }
                     };
@@ -344,7 +344,7 @@ where
 
         self.expand_id += 1;
 
-        Ok((arcs, final_weight))
+        Ok((trs, final_weight))
     }
 }
 
@@ -400,10 +400,10 @@ where
     }
 
     fn expand(&mut self, state: usize) -> Result<()> {
-        let (arcs, final_weight) = self.rmeps_state.expand(state)?;
+        let (trs, final_weight) = self.rmeps_state.expand(state)?;
         let zero = F::W::zero();
 
-        for tr in arcs.into_iter().rev() {
+        for tr in trs.into_iter().rev() {
             self.cache_impl.push_tr(state, tr)?;
         }
         if final_weight != zero {

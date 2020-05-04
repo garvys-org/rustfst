@@ -29,11 +29,11 @@ impl<'a, W: 'static + Semiring> TrIterator<'a> for VectorFst<W> {
             .states
             .get(state_id)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
-        Ok(state.arcs.iter())
+        Ok(state.trs.iter())
     }
 
     unsafe fn tr_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
-        self.states.get_unchecked(state_id).arcs.iter()
+        self.states.get_unchecked(state_id).trs.iter()
     }
 }
 
@@ -44,12 +44,12 @@ impl<'a, W: 'static + Semiring> MutableTrIterator<'a> for VectorFst<W> {
             .states
             .get_mut(state_id)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
-        Ok(state.arcs.iter_mut())
+        Ok(state.trs.iter_mut())
     }
 
     #[inline]
     unsafe fn tr_iter_unchecked_mut(&'a mut self, state_id: usize) -> Self::IterMut {
-        self.states.get_unchecked_mut(state_id).arcs.iter_mut()
+        self.states.get_unchecked_mut(state_id).trs.iter_mut()
     }
 }
 
@@ -71,8 +71,8 @@ where
                 .enumerate()
                 .map(|(state_id, fst_state)| FstIterData {
                     state_id,
-                    num_trs: fst_state.arcs.len(),
-                    arcs: fst_state.arcs.into_iter(),
+                    num_trs: fst_state.trs.len(),
+                    trs: fst_state.trs.into_iter(),
                     final_weight: fst_state.final_weight,
                 }),
         )
@@ -91,9 +91,9 @@ impl<'a, W: Semiring + 'static> FstIterator<'a> for VectorFst<W> {
             .enumerate()
             .map(Box::new(|(state_id, fst_state)| FstIterData {
                 state_id,
-                arcs: fst_state.arcs.iter(),
+                trs: fst_state.trs.iter(),
                 final_weight: fst_state.final_weight.as_ref(),
-                num_trs: fst_state.arcs.len(),
+                num_trs: fst_state.trs.len(),
             }))
     }
 }
@@ -114,10 +114,10 @@ impl<'a, W: Semiring + 'static> FstIteratorMut<'a> for VectorFst<W> {
             .iter_mut()
             .enumerate()
             .map(Box::new(|(state_id, fst_state)| {
-                let n = fst_state.arcs.len();
+                let n = fst_state.trs.len();
                 FstIterData {
                     state_id,
-                    arcs: fst_state.arcs.iter_mut(),
+                    trs: fst_state.trs.iter_mut(),
                     final_weight: fst_state.final_weight.as_mut(),
                     num_trs: n,
                 }

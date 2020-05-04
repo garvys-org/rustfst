@@ -21,10 +21,10 @@ macro_rules! display_single_state {
 macro_rules! write_fst {
     ($fst:expr, $f:expr, $show_weight_one: expr) => {
         if let Some(start_state) = $fst.start() {
-            // Firstly print the arcs leaving the start state
+            // Firstly print the trs leaving the start state
             display_single_state!($fst, start_state, $f, $show_weight_one);
 
-            // Secondly, print the arcs leaving all the other states
+            // Secondly, print the trs leaving all the other states
             for state_id in $fst.states_iter() {
                 if state_id != start_state {
                     display_single_state!($fst, state_id, $f, $show_weight_one);

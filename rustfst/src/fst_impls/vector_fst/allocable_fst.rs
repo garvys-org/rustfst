@@ -9,7 +9,7 @@ impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
         self.states
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
-            .arcs
+            .trs
             .reserve(additional);
         Ok(())
     }
@@ -18,7 +18,7 @@ impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
     unsafe fn reserve_trs_unchecked(&mut self, source: usize, additional: usize) {
         self.states
             .get_unchecked_mut(source)
-            .arcs
+            .trs
             .reserve(additional)
     }
 
@@ -30,7 +30,7 @@ impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
     fn shrink_to_fit(&mut self) {
         self.states.shrink_to_fit();
         for state in self.states.iter_mut() {
-            state.arcs.shrink_to_fit();
+            state.trs.shrink_to_fit();
         }
     }
 
@@ -43,14 +43,14 @@ impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
         self.states
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
-            .arcs
+            .trs
             .shrink_to_fit();
         Ok(())
     }
 
     #[inline]
     unsafe fn shrink_to_fit_trs_unchecked(&mut self, source: StateId) {
-        self.states.get_unchecked_mut(source).arcs.shrink_to_fit()
+        self.states.get_unchecked_mut(source).trs.shrink_to_fit()
     }
 
     #[inline]
@@ -63,12 +63,12 @@ impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
             .states
             .get(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
-            .arcs
+            .trs
             .capacity())
     }
 
     #[inline]
     unsafe fn arcs_capacity_unchecked(&self, source: StateId) -> usize {
-        self.states.get_unchecked(source).arcs.capacity()
+        self.states.get_unchecked(source).trs.capacity()
     }
 }

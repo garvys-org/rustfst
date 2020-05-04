@@ -84,7 +84,7 @@ impl<W: Semiring + 'static, F: ExpandedFst<W = W>> Matcher<W> for SortedMatcher<
 
 #[derive(Clone)]
 pub struct IteratorSortedMatcher<W: Semiring> {
-    arcs: Vec<*const Tr<W>>,
+    trs: Vec<*const Tr<W>>,
     match_label: Label,
     pos: usize,
     current_loop: bool,
@@ -92,7 +92,7 @@ pub struct IteratorSortedMatcher<W: Semiring> {
 }
 
 impl<W: Semiring> IteratorSortedMatcher<W> {
-    pub fn new(arcs: Vec<*const Tr<W>>, match_label: Label, match_type: MatchType) -> Self {
+    pub fn new(trs: Vec<*const Tr<W>>, match_label: Label, match_type: MatchType) -> Self {
         // If we have to match epsilon, an epsilon loop is added
         let current_loop = match_label == EPS_LABEL;
 
@@ -110,17 +110,17 @@ impl<W: Semiring> IteratorSortedMatcher<W> {
         } else {
             match match_type {
                 MatchType::MatchInput => {
-                    arcs.lower_bound_by(|x| (unsafe { &**x }).ilabel.cmp(&match_label))
+                    trs.lower_bound_by(|x| (unsafe { &**x }).ilabel.cmp(&match_label))
                 }
                 MatchType::MatchOutput => {
-                    arcs.lower_bound_by(|x| (unsafe { &**x }).olabel.cmp(&match_label))
+                    trs.lower_bound_by(|x| (unsafe { &**x }).olabel.cmp(&match_label))
                 }
                 _ => panic!("Shouldn't happen : {:?}", match_type),
             }
         };
 
         Self {
-            arcs,
+            trs,
             match_label,
             pos,
             current_loop,
@@ -145,7 +145,7 @@ impl<W: Semiring> Iterator for IteratorSortedMatcher<W> {
             self.current_loop = false;
             return Some(IterItemMatcher::EpsLoop);
         }
-        if let Some(tr) = self.arcs.get(self.pos) {
+        if let Some(tr) = self.trs.get(self.pos) {
             let tr = unsafe { &**tr };
             if self.get_label(tr) == self.match_label {
                 self.pos += 1;

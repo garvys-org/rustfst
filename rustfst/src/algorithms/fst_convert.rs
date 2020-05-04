@@ -18,7 +18,7 @@ where
             unsafe {
                 ofst.reserve_trs_unchecked(data.state_id, data.num_trs);
             }
-            for tr in data.arcs {
+            for tr in data.trs {
                 unsafe { ofst.add_tr_unchecked(data.state_id, tr.clone()) };
             }
 
@@ -51,7 +51,7 @@ where
             unsafe {
                 ofst.reserve_trs_unchecked(fst_iter_data.state_id, fst_iter_data.num_trs);
             }
-            for tr in fst_iter_data.arcs {
+            for tr in fst_iter_data.trs {
                 unsafe { ofst.add_tr_unchecked(fst_iter_data.state_id, tr) }
             }
 

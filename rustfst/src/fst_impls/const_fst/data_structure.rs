@@ -1,11 +1,11 @@
 use crate::{StateId, SymbolTable, Tr};
 use std::rc::Rc;
 
-/// Immutable FST whose states and arcs each implemented by single arrays,
+/// Immutable FST whose states and trs each implemented by single arrays,
 #[derive(Debug, PartialEq, Clone)]
 pub struct ConstFst<W> {
     pub(crate) states: Vec<ConstState<W>>,
-    pub(crate) arcs: Vec<Tr<W>>,
+    pub(crate) trs: Vec<Tr<W>>,
     pub(crate) start: Option<StateId>,
     pub(crate) isymt: Option<Rc<SymbolTable>>,
     pub(crate) osymt: Option<Rc<SymbolTable>>,
@@ -15,9 +15,9 @@ pub struct ConstFst<W> {
 pub struct ConstState<W> {
     /// Final Weight
     pub(crate) final_weight: Option<W>,
-    /// Start of state's arcs in `arcs`.
+    /// Start of state's trs in `trs`.
     pub(crate) pos: usize,
-    /// Number of arcs (per state).
+    /// Number of trs (per state).
     pub(crate) narcs: usize,
     /// Number of input epsilons
     pub(crate) niepsilons: usize,

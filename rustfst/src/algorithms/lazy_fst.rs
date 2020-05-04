@@ -172,7 +172,7 @@ impl<'a, IMPL: FstImpl + 'a> FstIterator<'a> for LazyFst<IMPL> {
         izip!(self.states_iter(), it).map(Box::new(|(state_id, p): (StateId, &'a Self)| {
             FstIterData {
                 state_id,
-                arcs: p.tr_iter(state_id).unwrap(),
+                trs: p.tr_iter(state_id).unwrap(),
                 final_weight: p.final_weight(state_id).unwrap(),
                 num_trs: p.num_trs(state_id).unwrap(),
             }

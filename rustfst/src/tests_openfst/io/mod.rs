@@ -15,7 +15,7 @@ fn generate_symbol_table<F: Fst>(prefix: &str, fst: &F) -> (Rc<SymbolTable>, Rc<
     let mut highest_ilabel = 0;
     let mut highest_olabel = 0;
     for state in fst.fst_iter() {
-        for tr_out in state.arcs {
+        for tr_out in state.trs {
             highest_ilabel = highest_ilabel.max(tr_out.ilabel);
             highest_olabel = highest_olabel.max(tr_out.olabel);
         }

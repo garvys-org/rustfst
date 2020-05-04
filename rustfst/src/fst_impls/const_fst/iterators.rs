@@ -35,12 +35,12 @@ impl<'a, W: 'static + Semiring> TrIterator<'a> for ConstFst<W> {
             .states
             .get(state_id)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
-        Ok(self.arcs[self.tr_range(state)].iter())
+        Ok(self.trs[self.tr_range(state)].iter())
     }
 
     unsafe fn tr_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
         let state = self.states.get_unchecked(state_id);
-        self.arcs[self.tr_range(state)].iter()
+        self.trs[self.tr_range(state)].iter()
     }
 }
 
@@ -56,20 +56,20 @@ where
     type FstIter = Box<dyn Iterator<Item = FstIterData<W, Self::TrsIter>>>;
 
     fn fst_into_iter(mut self) -> Self::FstIter {
-        // Here the contiguous arcs are moved into multiple vectors in order to be able to create
+        // Here the contiguous trs are moved into multiple vectors in order to be able to create
         // iterator for each states.
         // TODO: Find a way to avoid this allocation.
-        let mut arcs = Vec::with_capacity(self.states.len());
+        let mut trs = Vec::with_capacity(self.states.len());
         for const_state in &self.states {
-            arcs.push(self.arcs.drain(0..const_state.narcs).collect_vec())
+            trs.push(self.trs.drain(0..const_state.narcs).collect_vec())
         }
 
         Box::new(
-            izip!(self.states.into_iter(), arcs.into_iter())
+            izip!(self.states.into_iter(), trs.into_iter())
                 .enumerate()
                 .map(|(state_id, (const_state, arcs_from_state))| FstIterData {
                     state_id,
-                    arcs: arcs_from_state.into_iter(),
+                    trs: arcs_from_state.into_iter(),
                     final_weight: const_state.final_weight,
                     num_trs: const_state.narcs,
                 }),
@@ -95,12 +95,12 @@ impl<'a, W: Semiring + 'static> FstIterator<'a> for ConstFst<W> {
         >,
     >;
     fn fst_iter(&'a self) -> Self::FstIter {
-        let it = repeat_n(&self.arcs, self.states.len());
+        let it = repeat_n(&self.trs, self.states.len());
         izip!(self.states.iter(), it).enumerate().map(Box::new(
-            |(state_id, (fst_state, arcs)): (StateId, (&'a ConstState<W>, &'a Vec<Tr<W>>))| {
+            |(state_id, (fst_state, trs)): (StateId, (&'a ConstState<W>, &'a Vec<Tr<W>>))| {
                 FstIterData {
                     state_id,
-                    arcs: arcs.iter().skip(fst_state.pos).take(fst_state.narcs),
+                    trs: trs.iter().skip(fst_state.pos).take(fst_state.narcs),
                     final_weight: fst_state.final_weight.as_ref(),
                     num_trs: fst_state.narcs,
                 }

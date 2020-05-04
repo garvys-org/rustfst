@@ -133,12 +133,12 @@ struct Transition {
 fn parse_vector_fst_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFstState<W>> {
     let (i, final_weight) = W::parse_binary(i)?;
     let (i, num_trs) = le_i64(i)?;
-    let (i, arcs) = count(parse_fst_tr, num_trs as usize)(i)?;
+    let (i, trs) = count(parse_fst_tr, num_trs as usize)(i)?;
     Ok((
         i,
         VectorFstState {
             final_weight: parse_final_weight(final_weight),
-            arcs,
+            trs,
         },
     ))
 }

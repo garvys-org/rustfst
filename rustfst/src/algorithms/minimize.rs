@@ -150,7 +150,7 @@ fn merge_states<F: MutableFst + ExpandedFst>(partition: Partition, fst: &mut F) 
                     tr.nextstate = state_map[partition.get_class_id(tr.nextstate)].unwrap();
                 }
             } else {
-                let arcs: Vec<_> = fst
+                let trs: Vec<_> = fst
                     .tr_iter(s)?
                     .cloned()
                     .map(|mut tr| {
@@ -158,7 +158,7 @@ fn merge_states<F: MutableFst + ExpandedFst>(partition: Partition, fst: &mut F) 
                         tr
                     })
                     .collect();
-                for tr in arcs.into_iter() {
+                for tr in trs.into_iter() {
                     fst.add_tr(state_map[c].unwrap(), tr)?;
                 }
             }
@@ -447,7 +447,7 @@ where
             if tr.num_trs(s + 1)? > 0 {
                 aiter_queue.push(TrsIterCollected {
                     idx: 0,
-                    arcs: tr.tr_iter(s + 1)?.collect(),
+                    trs: tr.tr_iter(s + 1)?.collect(),
                 });
             }
         }
@@ -484,16 +484,16 @@ where
 
 struct TrsIterCollected<'a, W: Semiring> {
     idx: usize,
-    arcs: Vec<&'a Tr<W>>,
+    trs: Vec<&'a Tr<W>>,
 }
 
 impl<'a, W: Semiring> TrsIterCollected<'a, W> {
     fn peek(&self) -> Option<&&Tr<W>> {
-        self.arcs.get(self.idx)
+        self.trs.get(self.idx)
     }
 
     fn done(&self) -> bool {
-        self.idx >= self.arcs.len()
+        self.idx >= self.trs.len()
     }
 
     fn next(&mut self) {

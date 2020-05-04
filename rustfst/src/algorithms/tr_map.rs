@@ -37,14 +37,14 @@ pub enum MapFinalAction {
     MapRequireSuperfinal,
 }
 
-/// The TrMapper interfaces defines how arcs and final weights are mapped.
+/// The TrMapper interfaces defines how trs and final weights are mapped.
 /// This is useful for implementing operations that do not change the number of
-/// arcs.
+/// trs.
 pub trait TrMapper<S: Semiring> {
-    /// How to modify the arcs.
+    /// How to modify the trs.
     fn tr_map(&self, tr: &mut Tr<S>) -> Result<()>;
 
-    /// The mapper will be passed final weights as arcs of the form
+    /// The mapper will be passed final weights as trs of the form
     /// `FinalTr(EPS_LABEL, EPS_LABEL, weight)`.
     fn final_tr_map(&self, final_tr: &mut FinalTr<S>) -> Result<()>;
 

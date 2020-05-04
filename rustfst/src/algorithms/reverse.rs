@@ -68,7 +68,7 @@ where
     states_trs
         .into_iter()
         .enumerate()
-        .for_each(|(s, arcs)| unsafe { ofst.set_trs_unchecked(s, arcs) });
+        .for_each(|(s, trs)| unsafe { ofst.set_trs_unchecked(s, trs) });
     ofst.set_start(ostart)?;
 
     ofst.set_symts_from_fst(ifst);

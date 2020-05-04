@@ -35,7 +35,7 @@ mod tests {
         assert_eq!(fst.num_trs(s1).unwrap(), 2);
         assert_eq!(fst.tr_iter(s1)?.count(), 2);
 
-        // Iterates on arcs leaving s1
+        // Iterates on trs leaving s1
         let mut it_s1 = fst.tr_iter(s1)?;
 
         let tr = it_s1.next().ok_or_else(|| format_err!("Missing tr"))?;
@@ -47,7 +47,7 @@ mod tests {
         let tr = it_s1.next();
         assert!(tr.is_none());
 
-        // Iterates on arcs leaving s2
+        // Iterates on trs leaving s2
         let mut it_s2 = fst.tr_iter(s2)?;
 
         let d = it_s2.next();

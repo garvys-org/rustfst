@@ -100,7 +100,7 @@ impl LabelReachable {
         self.data.borrow().reach_input
     }
 
-    // Redirects labeled arcs (input or output labels determined by ReachInput())
+    // Redirects labeled trs (input or output labels determined by ReachInput())
     // to new label-specific final states. Each original final state is
     // redirected via a transition labeled with kNoLabel to a new
     // kNoLabel-specific final state. Creates super-initial state for all states
@@ -113,7 +113,7 @@ impl LabelReachable {
         let ins = fst.num_states();
         let mut ons = ins;
         let mut indeg = vec![0; ins];
-        // Redirects labeled arcs to new final states.
+        // Redirects labeled trs to new final states.
         for s in 0..ins {
             for tr in unsafe { fst.tr_iter_unchecked_mut(s) } {
                 let label = if data.reach_input {
@@ -212,7 +212,7 @@ impl LabelReachable {
 
     pub fn relabel_fst<F: MutableFst>(&self, fst: &mut F, relabel_input: bool) -> Result<()> {
         for fst_data in fst.fst_iter_mut() {
-            for tr in fst_data.arcs {
+            for tr in fst_data.trs {
                 if relabel_input {
                     tr.ilabel = self.relabel(tr.ilabel);
                 } else {
@@ -336,10 +336,10 @@ impl LabelReachable {
             let mut begin_low;
             let mut end_low = aiter_begin;
 
-            let arcs = aiter.collect_vec();
+            let trs = aiter.collect_vec();
             for interval in interval_set.iter() {
-                begin_low = self.lower_bound(arcs.as_slice(), end_low, aiter_end, interval.begin);
-                end_low = self.lower_bound(arcs.as_slice(), begin_low, aiter_end, interval.end);
+                begin_low = self.lower_bound(trs.as_slice(), end_low, aiter_end, interval.begin);
+                end_low = self.lower_bound(trs.as_slice(), begin_low, aiter_end, interval.end);
                 if end_low - begin_low > 0 {
                     if reach_begin == UNASSIGNED {
                         reach_begin = begin_low;
@@ -347,7 +347,7 @@ impl LabelReachable {
                     reach_end = end_low;
                     if compute_weight {
                         for i in begin_low..end_low {
-                            reach_weight.plus_assign(&arcs[i].weight)?;
+                            reach_weight.plus_assign(&trs[i].weight)?;
                         }
                     }
                 }
@@ -363,7 +363,7 @@ impl LabelReachable {
 
     fn lower_bound<W: Semiring>(
         &self,
-        arcs: &[&Tr<W>],
+        trs: &[&Tr<W>],
         aiter_begin: usize,
         aiter_end: usize,
         match_label: Label,
@@ -373,7 +373,7 @@ impl LabelReachable {
         let mut high = aiter_end;
         while low < high {
             let mid = low + (high - low) / 2;
-            let tr = arcs[mid];
+            let tr = trs[mid];
             let label = if self.reach_fst_input {
                 tr.ilabel
             } else {

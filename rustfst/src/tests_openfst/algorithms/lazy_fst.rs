@@ -43,7 +43,7 @@ where
         .map(|data| {
             (
                 data.state_id,
-                data.arcs.collect_vec(),
+                data.trs.collect_vec(),
                 data.final_weight,
                 data.num_trs,
             )
@@ -54,7 +54,7 @@ where
         .map(|data| {
             (
                 data.state_id,
-                data.arcs.collect_vec(),
+                data.trs.collect_vec(),
                 data.final_weight,
                 data.num_trs,
             )

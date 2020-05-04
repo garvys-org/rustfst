@@ -23,7 +23,7 @@ pub struct MatcherOperationResult {
     state: usize,
     label: usize,
     match_type: usize,
-    arcs: Vec<SerializedTr>,
+    trs: Vec<SerializedTr>,
 }
 
 pub struct MatcherTestData<F>
@@ -34,7 +34,7 @@ where
     label: Label,
     state: StateId,
     match_type: MatchType,
-    arcs: Vec<Tr<F::W>>,
+    trs: Vec<Tr<F::W>>,
 }
 
 impl MatcherOperationResult {
@@ -51,8 +51,8 @@ impl MatcherOperationResult {
                 2 => MatchType::MatchOutput,
                 _ => panic!("Unsupported match_type : {:?}", self.match_type),
             },
-            arcs: self
-                .arcs
+            trs: self
+                .trs
                 .iter()
                 .map(|s| {
                     let ilabel = if s.ilabel == -1 {
@@ -105,7 +105,7 @@ where
     //     };
     //
     //     let matcher = SortedMatcher::new(fst, matcher_data.match_type)?;
-    //     let arcs: Vec<Tr<_>> = matcher
+    //     let trs: Vec<Tr<_>> = matcher
     //         .iter(matcher_data.state, matcher_data.label)?
     //         .map(|f| {
     //             f.into_tr(matcher_data.state, matcher_data.match_type)
@@ -114,8 +114,8 @@ where
     //         .collect();
     //
     //     assert_eq!(
-    //         arcs,
-    //         matcher_data.arcs.iter().cloned().collect_vec(),
+    //         trs,
+    //         matcher_data.trs.iter().cloned().collect_vec(),
     //         "Test matcher failed {:?} {:?} {:?}",
     //         matcher_data.state,
     //         matcher_data.label,

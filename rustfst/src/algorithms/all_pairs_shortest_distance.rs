@@ -48,7 +48,7 @@ where
     // Distance between all states are initialized to zero
     let mut d = vec![vec![<F as CoreFst>::W::zero(); num_states]; num_states];
 
-    // Iterator over the wFST to add the weight of the arcs
+    // Iterator over the wFST to add the weight of the trs
     for state_id in fst.states_iter() {
         for tr in fst.tr_iter(state_id)? {
             let nextstate = tr.nextstate;

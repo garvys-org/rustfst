@@ -51,9 +51,9 @@ pub struct FactorWeightOptions {
     pub final_ilabel: Label,
     /// Output label of tr when factoring final weights.
     pub final_olabel: Label,
-    /// When factoring final w' results in > 1 arcs at state, increments ilabels to make distinct ?
+    /// When factoring final w' results in > 1 trs at state, increments ilabels to make distinct ?
     pub increment_final_ilabel: bool,
-    /// When factoring final w' results in > 1 arcs at state, increments olabels to make distinct ?
+    /// When factoring final w' results in > 1 trs at state, increments olabels to make distinct ?
     pub increment_final_olabel: bool,
 }
 

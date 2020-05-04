@@ -9,7 +9,7 @@ use crate::StateId;
 use crate::Tr;
 use crate::NO_STATE_ID;
 
-/// This operation trims an FST, removing states and arcs that are not on successful paths.
+/// This operation trims an FST, removing states and trs that are not on successful paths.
 ///
 /// # Example 1
 /// ```

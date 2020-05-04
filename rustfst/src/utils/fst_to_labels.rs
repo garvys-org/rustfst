@@ -4,7 +4,7 @@ use crate::fst_path::FstPath;
 use crate::fst_traits::{Fst, PathsIterator};
 
 /// Decode a linear FST to retrieves the only path recognized by it. A path is composed of the
-/// input symbols, the output symbols and the weight (multiplication of the weights of the arcs
+/// input symbols, the output symbols and the weight (multiplication of the weights of the trs
 /// of the path).
 ///
 /// # Example

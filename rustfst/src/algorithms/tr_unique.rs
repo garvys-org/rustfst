@@ -27,7 +27,7 @@ pub(crate) fn tr_compare<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> Ordering {
     Ordering::Equal
 }
 
-/// Keep a single instance of arcs leaving the same state, going to the same state and
+/// Keep a single instance of trs leaving the same state, going to the same state and
 /// with the same input labels, output labels and weight.
 pub fn tr_unique<F: MutableFst + ExpandedFst>(ifst: &mut F) {
     unsafe {

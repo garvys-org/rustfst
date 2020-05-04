@@ -58,13 +58,13 @@ impl ReplaceFstOptions {
     }
 }
 
-/// Recursively replaces arcs in the root FSTs with other FSTs.
+/// Recursively replaces trs in the root FSTs with other FSTs.
 ///
-/// Replace supports replacement of arcs in one Fst with another FST. This
+/// Replace supports replacement of trs in one Fst with another FST. This
 /// replacement is recursive. Replace takes an array of FST(s). One FST
 /// represents the root (or topology) machine. The root FST refers to other FSTs
-/// by recursively replacing arcs labeled as non-terminals with the matching
-/// non-terminal FST. Currently Replace uses the output symbols of the arcs to
+/// by recursively replacing trs labeled as non-terminals with the matching
+/// non-terminal FST. Currently Replace uses the output symbols of the trs to
 /// determine whether the tr is a non-terminal tr or not. A non-terminal can be
 /// any label that is not a non-zero terminal label in the output alphabet.
 ///
@@ -501,7 +501,7 @@ impl ReplaceStateTable {
     }
 }
 
-/// ReplaceFst supports lazy replacement of arcs in one FST with another FST.
+/// ReplaceFst supports lazy replacement of trs in one FST with another FST.
 /// This replacement is recursive. ReplaceFst can be used to support a variety of
 /// delayed constructions such as recursive transition networks, union, or closure.
 pub type ReplaceFst<F, B> = LazyFst<ReplaceFstImpl<F, B>>;

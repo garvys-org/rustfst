@@ -61,7 +61,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
             properties: 1u64,
             start: self.start.map(|v| v as i64).unwrap_or(-1),
             num_states: self.num_states() as i64,
-            num_trs: self.arcs.len() as i64,
+            num_trs: self.trs.len() as i64,
             isymt: self.input_symbols(),
             osymt: self.output_symbols(),
         };
@@ -78,7 +78,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
             write_bin_i32(&mut file, const_state.noepsilons as i32)?;
         }
 
-        for tr in &self.arcs {
+        for tr in &self.trs {
             write_bin_i32(&mut file, tr.ilabel as i32)?;
             write_bin_i32(&mut file, tr.olabel as i32)?;
             tr.weight.write_binary(&mut file)?;
@@ -104,7 +104,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
             .into_iter()
         {
             let pos = const_trs.len();
-            // Some states might not have outgoing arcs.
+            // Some states might not have outgoing trs.
             const_states.resize_with(_state, || ConstState {
                 final_weight: None,
                 pos,
@@ -158,7 +158,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
 
         Ok(ConstFst {
             states: const_states,
-            arcs: const_trs,
+            trs: const_trs,
             start: start_state,
             isymt: None,
             osymt: None,
@@ -220,7 +220,7 @@ fn parse_const_fst<W: SerializableSemiring + 'static>(i: &[u8]) -> IResult<&[u8]
         ConstFst {
             start: parse_start_state(hdr.start),
             states: const_states,
-            arcs: const_trs,
+            trs: const_trs,
             isymt: hdr.isymt,
             osymt: hdr.osymt,
         },

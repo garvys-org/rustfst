@@ -11,7 +11,7 @@ use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::EPS_LABEL;
 
-/// Removes final states that have epsilon-only input arcs.
+/// Removes final states that have epsilon-only input trs.
 pub fn rm_final_epsilon<F>(ifst: &mut F) -> Result<()>
 where
     F: MutableFst,
