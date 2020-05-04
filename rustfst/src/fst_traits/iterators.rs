@@ -32,12 +32,9 @@ pub trait StateIterator<'a> {
     fn states_iter(&'a self) -> Self::Iter;
 }
 
-/// Trait to iterate over the outgoing trs of a particular state in a wFST
-pub trait TrIterator<'a>: CoreFst
-where
-    Self::W: 'a,
-{
-    /// Iterator used to iterate over the trs leaving a state of an FST.
+/// Trait to iterate over the outgoing transitions of a particular state in a wFST.
+pub trait TrIterator<'a>: CoreFst {
+    /// Iterator used to iterate over the transitions leaving a state of an FST.
     type Iter: Iterator<Item = &'a Tr<Self::W>> + Clone;
 
     fn tr_iter(&'a self, state_id: StateId) -> Result<Self::Iter>;
@@ -57,19 +54,13 @@ pub trait FstIntoIterator: CoreFst {
     fn fst_into_iter(self) -> Self::FstIter;
 }
 
-pub trait FstIterator<'a>: CoreFst
-where
-    Self::W: 'a,
-{
+pub trait FstIterator<'a>: CoreFst {
     type TrsIter: Iterator<Item = &'a Tr<Self::W>>;
     type FstIter: Iterator<Item = FstIterData<&'a Self::W, Self::TrsIter>>;
     fn fst_iter(&'a self) -> Self::FstIter;
 }
 
-pub trait FstIteratorMut<'a>: CoreFst
-where
-    Self::W: 'a,
-{
+pub trait FstIteratorMut<'a>: CoreFst {
     type TrsIter: Iterator<Item = &'a mut Tr<Self::W>>;
     type FstIter: Iterator<Item = FstIterData<&'a mut Self::W, Self::TrsIter>>;
     fn fst_iter_mut(&'a mut self) -> Self::FstIter;
