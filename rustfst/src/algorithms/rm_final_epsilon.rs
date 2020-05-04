@@ -44,8 +44,7 @@ where
         trs_to_del.clear();
 
         for (idx, tr) in unsafe { ifst.tr_iter_unchecked(state).enumerate() } {
-            if finals.contains(&tr.nextstate) && tr.ilabel == EPS_LABEL && tr.olabel == EPS_LABEL
-            {
+            if finals.contains(&tr.nextstate) && tr.ilabel == EPS_LABEL && tr.olabel == EPS_LABEL {
                 unsafe {
                     if weight.is_none() {
                         weight = Some(

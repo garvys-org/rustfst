@@ -386,12 +386,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
             let state_tuple =
                 ReplaceStateTuple::new(tuple.prefix_id, tuple.fst_id, Some(tr.nextstate));
             let nextstate = self.state_table.tuple_table.find_id(state_tuple);
-            Some(Tr::new(
-                tr.ilabel,
-                tr.olabel,
-                tr.weight.clone(),
-                nextstate,
-            ))
+            Some(Tr::new(tr.ilabel, tr.olabel, tr.weight.clone(), nextstate))
         } else {
             // Checks for non-terminal
             if let Some(nonterminal) = self.nonterminal_hash.get(&tr.olabel) {
@@ -425,12 +420,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
                     tuple.fst_id,
                     Some(tr.nextstate),
                 ));
-                Some(Tr::new(
-                    tr.ilabel,
-                    tr.olabel,
-                    tr.weight.clone(),
-                    nextstate,
-                ))
+                Some(Tr::new(tr.ilabel, tr.olabel, tr.weight.clone(), nextstate))
             }
         }
     }

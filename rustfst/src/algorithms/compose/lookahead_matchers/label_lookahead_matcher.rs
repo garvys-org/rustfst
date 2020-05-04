@@ -171,11 +171,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
                 && reachable.reach_final(matcher_state)?;
             if let Some((reach_begin, reach_end, reach_weight)) = reach_tr {
                 if compute_prefix && (reach_end - reach_begin) == 1 && !reach_final {
-                    let tr = lfst
-                        .tr_iter(lfst_state)?
-                        .skip(reach_begin)
-                        .next()
-                        .unwrap();
+                    let tr = lfst.tr_iter(lfst_state)?.skip(reach_begin).next().unwrap();
                     self.set_lookahead_prefix(tr.clone());
                     compute_weight = false;
                 } else {
