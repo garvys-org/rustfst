@@ -4,30 +4,30 @@ use crate::semirings::Semiring;
 
 use crate::SymbolTable;
 use anyhow::{format_err, Result};
-use std::rc::Rc;
+use std::sync::Arc;
 
 impl<W: Semiring + 'static> Fst for ConstFst<W> {
-    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
-        self.isymt.clone()
+    fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
+        self.isymt.as_ref()
     }
 
-    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
-        self.osymt.clone()
+    fn output_symbols(&self) -> Option<&Arc<SymbolTable>> {
+        self.osymt.as_ref()
     }
 
-    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
-        self.isymt = Some(Rc::clone(&symt))
+    fn set_input_symbols(&mut self, symt: Arc<SymbolTable>) {
+        self.isymt = Some(symt)
     }
 
-    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
-        self.osymt = Some(Rc::clone(&symt));
+    fn set_output_symbols(&mut self, symt: Arc<SymbolTable>) {
+        self.osymt = Some(symt);
     }
 
-    fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+    fn take_input_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.isymt.take()
     }
 
-    fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+    fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.osymt.take()
     }
 }

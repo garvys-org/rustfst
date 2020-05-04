@@ -1,7 +1,7 @@
 use std::cell::UnsafeCell;
 use std::fmt;
 use std::iter::{repeat, Map, Repeat, Zip};
-use std::rc::Rc;
+use std::sync::Arc;
 use std::slice::Iter as IterSlice;
 
 use anyhow::Result;
@@ -14,15 +14,15 @@ use crate::{StateId, SymbolTable, Tr};
 
 pub struct LazyFst<IMPL> {
     fst_impl: UnsafeCell<IMPL>,
-    isymt: Option<Rc<SymbolTable>>,
-    osymt: Option<Rc<SymbolTable>>,
+    isymt: Option<Arc<SymbolTable>>,
+    osymt: Option<Arc<SymbolTable>>,
 }
 
 impl<IMPL: FstImpl> LazyFst<IMPL> {
     pub(crate) fn from_impl(
         fst_impl: IMPL,
-        isymt: Option<Rc<SymbolTable>>,
-        osymt: Option<Rc<SymbolTable>>,
+        isymt: Option<Arc<SymbolTable>>,
+        osymt: Option<Arc<SymbolTable>>,
     ) -> Self {
         Self {
             fst_impl: UnsafeCell::new(fst_impl),
@@ -42,10 +42,10 @@ impl<IMPL: FstImpl> LazyFst<IMPL> {
         let fst_impl = unsafe { ptr.as_mut().unwrap() };
         let mut fst: F = fst_impl.compute()?;
         if let Some(isymt) = &self.isymt {
-            fst.set_input_symbols(Rc::clone(isymt));
+            fst.set_input_symbols(Arc::clone(isymt));
         }
         if let Some(osymt) = &self.osymt {
-            fst.set_output_symbols(Rc::clone(osymt));
+            fst.set_output_symbols(Arc::clone(osymt));
         }
         Ok(fst)
     }
@@ -127,27 +127,27 @@ impl<'a, IMPL: FstImpl + 'a> StateIterator<'a> for LazyFst<IMPL> {
 }
 
 impl<IMPL: FstImpl + 'static> Fst for LazyFst<IMPL> {
-    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
-        self.isymt.clone()
+    fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
+        self.isymt.as_ref()
     }
 
-    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
-        self.osymt.clone()
+    fn output_symbols(&self) -> Option<&Arc<SymbolTable>> {
+        self.osymt.as_ref()
     }
 
-    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
-        self.isymt = Some(Rc::clone(&symt))
+    fn set_input_symbols(&mut self, symt: Arc<SymbolTable>) {
+        self.isymt = Some(symt)
     }
 
-    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
-        self.osymt = Some(Rc::clone(&symt));
+    fn set_output_symbols(&mut self, symt: Arc<SymbolTable>) {
+        self.osymt = Some(symt);
     }
 
-    fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+    fn take_input_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.isymt.take()
     }
 
-    fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
+    fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.osymt.take()
     }
 }
@@ -198,8 +198,8 @@ impl<IMPL: FstImpl + Clone + 'static> Clone for LazyFst<IMPL> {
         let fst_impl = unsafe { ptr.as_ref().unwrap() };
         Self {
             fst_impl: UnsafeCell::new(fst_impl.clone()),
-            isymt: self.input_symbols(),
-            osymt: self.output_symbols(),
+            isymt: self.input_symbols().cloned(),
+            osymt: self.output_symbols().cloned(),
         }
     }
 }

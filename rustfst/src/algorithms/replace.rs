@@ -505,8 +505,8 @@ where
         let mut isymt = None;
         let mut osymt = None;
         if let Some(first_elt) = fst_list.first() {
-            isymt = first_elt.1.borrow().input_symbols();
-            osymt = first_elt.1.borrow().output_symbols();
+            isymt = first_elt.1.borrow().input_symbols().cloned();
+            osymt = first_elt.1.borrow().output_symbols().cloned();
         }
         let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
         let fst = ReplaceFstImpl::new(fst_list, opts)?;

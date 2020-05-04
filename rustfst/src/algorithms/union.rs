@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
@@ -135,10 +135,10 @@ where
         rfst.set_start(0)?;
         unsafe { rfst.set_final_unchecked(1, F::W::one()) };
         if let Some(isymt) = fst1.input_symbols() {
-            rfst.set_input_symbols(isymt);
+            rfst.set_input_symbols(Arc::clone(isymt));
         }
         if let Some(osymt) = fst1.output_symbols() {
-            rfst.set_output_symbols(osymt);
+            rfst.set_output_symbols(Arc::clone(osymt));
         }
         unsafe { rfst.reserve_trs_unchecked(0, 2) };
         unsafe { rfst.add_tr_unchecked(0, Tr::new(EPS_LABEL, std::usize::MAX, F::W::one(), 1)) };
@@ -212,28 +212,28 @@ impl<F: Fst + 'static> Fst for UnionFst<F>
 where
     F::W: 'static,
 {
-    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.0.input_symbols()
     }
 
-    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn output_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.0.output_symbols()
     }
 
-    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_input_symbols(&mut self, symt: Arc<SymbolTable>) {
         self.0.set_input_symbols(symt)
     }
 
-    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_output_symbols(&mut self, symt: Arc<SymbolTable>) {
         self.0.set_output_symbols(symt)
     }
 
-    fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>> {
-        self.0.unset_input_symbols()
+    fn take_input_symbols(&mut self) -> Option<Arc<SymbolTable>> {
+        self.0.take_input_symbols()
     }
 
-    fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
-        self.0.unset_output_symbols()
+    fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
+        self.0.take_output_symbols()
     }
 }
 

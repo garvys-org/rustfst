@@ -380,8 +380,8 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFst<W, CF> {
     where
         W: 'static,
     {
-        let isymt = fst1.input_symbols();
-        let osymt = fst2.output_symbols();
+        let isymt = fst1.input_symbols().cloned();
+        let osymt = fst2.output_symbols().cloned();
         let compose_impl = ComposeFstImpl::new(fst1, fst2, opts)?;
         Ok(Self::from_impl(compose_impl, isymt, osymt))
     }
@@ -402,8 +402,8 @@ impl<W: Semiring + 'static, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>>
     ComposeFst<W, SequenceComposeFilter<W, GenericMatcher<F1>, GenericMatcher<F2>>>
 {
     pub fn new_auto(fst1: Rc<F1>, fst2: Rc<F2>) -> Result<Self> {
-        let isymt = fst1.input_symbols();
-        let osymt = fst2.output_symbols();
+        let isymt = fst1.input_symbols().cloned();
+        let osymt = fst2.output_symbols().cloned();
         let compose_impl = create_base(fst1, fst2)?;
         Ok(Self::from_impl(compose_impl, isymt, osymt))
     }

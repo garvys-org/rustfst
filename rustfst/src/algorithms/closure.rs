@@ -7,7 +7,7 @@ use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::{SymbolTable, EPS_LABEL};
 use anyhow::Result;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Defines the different types of closure : Star or Plus.
 #[derive(Clone, Debug, Copy, PartialEq)]
@@ -95,10 +95,10 @@ where
     pub fn new(fst: F, closure_type: ClosureType) -> Result<Self> {
         let mut rfst = F::new();
         if let Some(isymt) = fst.input_symbols() {
-            rfst.set_input_symbols(isymt);
+            rfst.set_input_symbols(Arc::clone(isymt));
         }
         if let Some(osymt) = fst.output_symbols() {
-            rfst.set_output_symbols(osymt);
+            rfst.set_output_symbols(Arc::clone(osymt));
         }
         match closure_type {
             ClosureType::ClosureStar => {
@@ -184,28 +184,28 @@ impl<F: Fst + 'static> Fst for ClosureFst<F>
 where
     F::W: 'static,
 {
-    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.0.input_symbols()
     }
 
-    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn output_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.0.output_symbols()
     }
 
-    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_input_symbols(&mut self, symt: Arc<SymbolTable>) {
         self.0.set_input_symbols(symt)
     }
 
-    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_output_symbols(&mut self, symt: Arc<SymbolTable>) {
         self.0.set_output_symbols(symt)
     }
 
-    fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>> {
-        self.0.unset_input_symbols()
+    fn take_input_symbols(&mut self) -> Option<Arc<SymbolTable>> {
+        self.0.take_input_symbols()
     }
 
-    fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
-        self.0.unset_output_symbols()
+    fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
+        self.0.take_output_symbols()
     }
 }
 

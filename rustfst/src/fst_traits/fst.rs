@@ -1,5 +1,5 @@
 use std::fmt::Debug;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::Result;
 
@@ -186,36 +186,36 @@ pub trait Fst:
 
     /// Retrieves the input `SymbolTable` associated to the Fst.
     /// If no SymbolTable has been previously attached then `None` is returned.
-    fn input_symbols(&self) -> Option<Rc<SymbolTable>>;
+    fn input_symbols(&self) -> Option<&Arc<SymbolTable>>;
 
     /// Retrieves the output `SymbolTable` associated to the Fst.
     /// If no SymbolTable has been previously attached then `None` is returned.
-    fn output_symbols(&self) -> Option<Rc<SymbolTable>>;
+    fn output_symbols(&self) -> Option<&Arc<SymbolTable>>;
 
     /// Attaches an output `SymbolTable` to the Fst.
     /// The `SymbolTable` is not duplicated with the use of Rc.
-    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>);
+    fn set_input_symbols(&mut self, symt: Arc<SymbolTable>);
 
     /// Attaches an output `SymbolTable` to the Fst.
     /// The `SymbolTable` is not duplicated with the use of Rc.
-    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>);
+    fn set_output_symbols(&mut self, symt: Arc<SymbolTable>);
 
     /// Removes the input symbol table from the Fst and retrieves it.
-    fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>>;
+    fn take_input_symbols(&mut self) -> Option<Arc<SymbolTable>>;
     /// Removes the output symbol table from the Fst and retrieves it.
-    fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>>;
+    fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>>;
 
     fn set_symts_from_fst<OF: Fst>(&mut self, other_fst: &OF) {
         if let Some(symt) = other_fst.input_symbols() {
-            self.set_input_symbols(symt);
+            self.set_input_symbols(Arc::clone(symt));
         } else {
-            self.unset_input_symbols();
+            self.take_input_symbols();
         }
 
         if let Some(symt) = other_fst.output_symbols() {
-            self.set_output_symbols(symt);
+            self.set_output_symbols(Arc::clone(symt));
         } else {
-            self.unset_output_symbols();
+            self.take_output_symbols();
         }
     }
 }

@@ -12,7 +12,7 @@ mod tests {
     use crate::semirings::{ProbabilityWeight, Semiring, TropicalWeight};
     use crate::tr::Tr;
     use crate::SymbolTable;
-    use std::rc::Rc;
+    use std::sync::Arc;
 
     #[test]
     fn test_small_fst() -> Result<()> {
@@ -319,7 +319,7 @@ mod tests {
             symt.add_symbol("b"); // 2
             symt.add_symbol("c"); // 3
 
-            fst.set_input_symbols(Rc::new(symt));
+            fst.set_input_symbols(Arc::new(symt));
         }
         {
             let symt = fst.input_symbols();
@@ -331,7 +331,7 @@ mod tests {
         // Test output symbol table
         {
             let symt = SymbolTable::new();
-            fst.set_output_symbols(Rc::new(symt));
+            fst.set_output_symbols(Arc::new(symt));
         }
         {
             let symt = fst.output_symbols();

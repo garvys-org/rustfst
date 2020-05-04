@@ -28,8 +28,8 @@ where
 {
     let mut parsed_fst_bin = VectorFst::<W>::read(&test_data.raw_vector_with_symt_bin_path)?;
 
-    parsed_fst_bin.unset_input_symbols();
-    parsed_fst_bin.unset_output_symbols();
+    parsed_fst_bin.take_input_symbols();
+    parsed_fst_bin.take_output_symbols();
 
     assert_eq!(
         test_data.raw,

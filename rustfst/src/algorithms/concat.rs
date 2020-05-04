@@ -7,7 +7,7 @@ use crate::fst_traits::{
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::{SymbolTable, EPS_LABEL};
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Performs the concatenation of two wFSTs. If `A` transduces string `x` to `y` with weight `a`
 /// and `B` transduces string `w` to `v` with weight `b`, then their concatenation
@@ -119,10 +119,10 @@ where
         unsafe { rfst.set_start_unchecked(0) };
         unsafe { rfst.set_final_unchecked(2, F::W::one()) };
         if let Some(isymt) = fst1.input_symbols() {
-            rfst.set_input_symbols(isymt);
+            rfst.set_input_symbols(Arc::clone(isymt));
         }
         if let Some(osymt) = fst1.output_symbols() {
-            rfst.set_output_symbols(osymt);
+            rfst.set_output_symbols(Arc::clone(osymt));
         }
         unsafe { rfst.add_tr_unchecked(0, Tr::new(EPS_LABEL, std::usize::MAX, F::W::one(), 1)) };
         unsafe {
@@ -195,28 +195,28 @@ impl<F: Fst + 'static> Fst for ConcatFst<F>
 where
     F::W: 'static,
 {
-    fn input_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.0.input_symbols()
     }
 
-    fn output_symbols(&self) -> Option<Rc<SymbolTable>> {
+    fn output_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.0.output_symbols()
     }
 
-    fn set_input_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_input_symbols(&mut self, symt: Arc<SymbolTable>) {
         self.0.set_input_symbols(symt)
     }
 
-    fn set_output_symbols(&mut self, symt: Rc<SymbolTable>) {
+    fn set_output_symbols(&mut self, symt: Arc<SymbolTable>) {
         self.0.set_output_symbols(symt)
     }
 
-    fn unset_input_symbols(&mut self) -> Option<Rc<SymbolTable>> {
-        self.0.unset_input_symbols()
+    fn take_input_symbols(&mut self) -> Option<Arc<SymbolTable>> {
+        self.0.take_input_symbols()
     }
 
-    fn unset_output_symbols(&mut self) -> Option<Rc<SymbolTable>> {
-        self.0.unset_output_symbols()
+    fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
+        self.0.take_output_symbols()
     }
 }
 

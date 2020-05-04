@@ -305,8 +305,8 @@ where
     F::W: WeightQuantize + 'static,
 {
     pub fn new(fst: B, opts: FactorWeightOptions) -> Result<Self> {
-        let isymt = fst.borrow().input_symbols();
-        let osymt = fst.borrow().output_symbols();
+        let isymt = fst.borrow().input_symbols().cloned();
+        let osymt = fst.borrow().output_symbols().cloned();
         Ok(Self::from_impl(
             FactorWeightImpl::new(fst, opts)?,
             isymt,

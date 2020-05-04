@@ -223,10 +223,10 @@ impl LabelReachable {
 
         if relabel_input {
             tr_sort(fst, ilabel_compare);
-            fst.unset_input_symbols();
+            fst.take_input_symbols();
         } else {
             tr_sort(fst, olabel_compare);
-            fst.unset_output_symbols();
+            fst.take_output_symbols();
         }
 
         Ok(())
