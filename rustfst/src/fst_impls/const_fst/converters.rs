@@ -14,7 +14,7 @@ impl<W: Semiring + 'static> From<VectorFst<W>> for ConstFst<W> {
             const_states.push(ConstState {
                 final_weight: s.final_weight,
                 pos,
-                narcs: s.trs.len(),
+                ntrs: s.trs.len(),
                 niepsilons,
                 noepsilons,
             });

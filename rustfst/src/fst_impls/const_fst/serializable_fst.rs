@@ -73,7 +73,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
             f_weight.write_binary(&mut file)?;
 
             write_bin_i32(&mut file, const_state.pos as i32)?;
-            write_bin_i32(&mut file, const_state.narcs as i32)?;
+            write_bin_i32(&mut file, const_state.ntrs as i32)?;
             write_bin_i32(&mut file, const_state.niepsilons as i32)?;
             write_bin_i32(&mut file, const_state.noepsilons as i32)?;
         }
@@ -108,7 +108,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
             const_states.resize_with(_state, || ConstState {
                 final_weight: None,
                 pos,
-                narcs: 0,
+                ntrs: 0,
                 niepsilons: 0,
                 noepsilons: 0,
             });
@@ -134,7 +134,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
             const_states.push(ConstState::<W> {
                 final_weight: None,
                 pos,
-                narcs: num_trs_this_state,
+                ntrs: num_trs_this_state,
                 niepsilons,
                 noepsilons,
             })
@@ -142,7 +142,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
         const_states.resize_with(num_states, || ConstState {
             final_weight: None,
             pos: const_trs.len(),
-            narcs: 0,
+            ntrs: 0,
             niepsilons: 0,
             noepsilons: 0,
         });
@@ -174,7 +174,7 @@ static CONST_ARCH_ALIGNMENT: usize = 16;
 fn parse_const_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], ConstState<W>> {
     let (i, final_weight) = W::parse_binary(i)?;
     let (i, pos) = le_i32(i)?;
-    let (i, narcs) = le_i32(i)?;
+    let (i, ntrs) = le_i32(i)?;
     let (i, niepsilons) = le_i32(i)?;
     let (i, noepsilons) = le_i32(i)?;
 
@@ -183,7 +183,7 @@ fn parse_const_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], ConstS
         ConstState {
             final_weight: parse_final_weight(final_weight),
             pos: pos as usize,
-            narcs: narcs as usize,
+            ntrs: ntrs as usize,
             niepsilons: niepsilons as usize,
             noepsilons: noepsilons as usize,
         },

@@ -33,6 +33,6 @@ pub trait AllocableFst: Fst {
     /// Returns the number of states the FST can hold without reallocating.
     fn states_capacity(&self) -> usize;
     /// Returns the number of trs for a given state the FST can hold without reallocating.
-    fn arcs_capacity(&self, source: StateId) -> Result<usize>;
-    unsafe fn arcs_capacity_unchecked(&self, source: StateId) -> usize;
+    fn trs_capacity(&self, source: StateId) -> Result<usize>;
+    unsafe fn trs_capacity_unchecked(&self, source: StateId) -> usize;
 }

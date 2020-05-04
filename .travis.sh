@@ -15,7 +15,7 @@ cargo doc --all --no-deps
 
 ./build_bench.sh
 python3 --version
-virtualenv venv3 -p python3.6
+virtualenv venv3 -p python3.7
 . venv3/bin/activate
 pip install -e rustfst-python-bench
 # Run benches on a small FST to check that the script is working fine.

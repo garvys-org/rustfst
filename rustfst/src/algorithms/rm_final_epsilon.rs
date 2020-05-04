@@ -38,10 +38,10 @@ where
         }
     }
 
-    let mut arcs_to_del = vec![];
+    let mut trs_to_del = vec![];
     for state in 0..ifst.num_states() {
         let mut weight = None;
-        arcs_to_del.clear();
+        trs_to_del.clear();
 
         for (idx, tr) in unsafe { ifst.tr_iter_unchecked(state).enumerate() } {
             if finals.contains(&tr.nextstate) && tr.ilabel == EPS_LABEL && tr.olabel == EPS_LABEL
@@ -60,16 +60,16 @@ where
                             .times(&tr.weight)?,
                     )?
                 };
-                arcs_to_del.push(idx);
+                trs_to_del.push(idx);
             }
         }
 
-        if !arcs_to_del.is_empty() {
+        if !trs_to_del.is_empty() {
             let w = unsafe { weight.unsafe_unwrap() };
             if !w.is_zero() {
                 unsafe { ifst.set_final_unchecked(state, w) };
             }
-            unsafe { ifst.del_trs_id_sorted_unchecked(state, &arcs_to_del) };
+            unsafe { ifst.del_trs_id_sorted_unchecked(state, &trs_to_del) };
         }
     }
 

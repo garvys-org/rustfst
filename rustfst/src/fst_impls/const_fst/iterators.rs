@@ -24,7 +24,7 @@ impl<W> ConstFst<W> {
     }
 
     fn tr_range(&self, state: &ConstState<W>) -> Range<usize> {
-        state.pos..state.pos + state.narcs
+        state.pos..state.pos + state.ntrs
     }
 }
 
@@ -61,17 +61,17 @@ where
         // TODO: Find a way to avoid this allocation.
         let mut trs = Vec::with_capacity(self.states.len());
         for const_state in &self.states {
-            trs.push(self.trs.drain(0..const_state.narcs).collect_vec())
+            trs.push(self.trs.drain(0..const_state.ntrs).collect_vec())
         }
 
         Box::new(
             izip!(self.states.into_iter(), trs.into_iter())
                 .enumerate()
-                .map(|(state_id, (const_state, arcs_from_state))| FstIterData {
+                .map(|(state_id, (const_state, trs_from_state))| FstIterData {
                     state_id,
-                    trs: arcs_from_state.into_iter(),
+                    trs: trs_from_state.into_iter(),
                     final_weight: const_state.final_weight,
-                    num_trs: const_state.narcs,
+                    num_trs: const_state.ntrs,
                 }),
         )
     }
@@ -100,9 +100,9 @@ impl<'a, W: Semiring + 'static> FstIterator<'a> for ConstFst<W> {
             |(state_id, (fst_state, trs)): (StateId, (&'a ConstState<W>, &'a Vec<Tr<W>>))| {
                 FstIterData {
                     state_id,
-                    trs: trs.iter().skip(fst_state.pos).take(fst_state.narcs),
+                    trs: trs.iter().skip(fst_state.pos).take(fst_state.ntrs),
                     final_weight: fst_state.final_weight.as_ref(),
-                    num_trs: fst_state.narcs,
+                    num_trs: fst_state.ntrs,
                 }
             },
         ))

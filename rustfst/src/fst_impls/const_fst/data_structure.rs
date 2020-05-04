@@ -18,7 +18,7 @@ pub struct ConstState<W> {
     /// Start of state's trs in `trs`.
     pub(crate) pos: usize,
     /// Number of trs (per state).
-    pub(crate) narcs: usize,
+    pub(crate) ntrs: usize,
     /// Number of input epsilons
     pub(crate) niepsilons: usize,
     /// Number of output epsilons

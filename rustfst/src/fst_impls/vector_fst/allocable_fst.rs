@@ -58,7 +58,7 @@ impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
         self.states.capacity()
     }
 
-    fn arcs_capacity(&self, source: StateId) -> Result<usize> {
+    fn trs_capacity(&self, source: StateId) -> Result<usize> {
         Ok(self
             .states
             .get(source)
@@ -68,7 +68,7 @@ impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
     }
 
     #[inline]
-    unsafe fn arcs_capacity_unchecked(&self, source: StateId) -> usize {
+    unsafe fn trs_capacity_unchecked(&self, source: StateId) -> usize {
         self.states.get_unchecked(source).trs.capacity()
     }
 }
