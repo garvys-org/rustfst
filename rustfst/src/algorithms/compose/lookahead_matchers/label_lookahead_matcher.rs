@@ -17,7 +17,7 @@ pub struct LabelLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
     fst: Rc<M::F>,
     matcher: M,
     lookahead_weight: W,
-    prefix_arc: Tr<W>,
+    prefix_tr: Tr<W>,
     mft: PhantomData<MFT>,
     reachable: Option<LabelReachable>,
     lfst_ptr: *const u32,
@@ -106,7 +106,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         Ok(Self {
             fst: Rc::clone(&fst),
             matcher: M::new(fst, match_type)?,
-            prefix_arc: Tr::new(0, 0, W::one(), NO_STATE_ID),
+            prefix_tr: Tr::new(0, 0, W::one(), NO_STATE_ID),
             lookahead_weight: W::one(),
             reachable,
             lfst_ptr: std::ptr::null(),
@@ -157,19 +157,19 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
             let mut compute_weight = MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT);
             let compute_prefix = MFT::flags().contains(MatcherFlags::LOOKAHEAD_PREFIX);
             let aiter = lfst.arcs_iter(lfst_state)?;
-            let reach_arc = reachable.reach(
+            let reach_tr = reachable.reach(
                 matcher_state,
                 aiter,
                 0,
-                lfst.num_arcs(lfst_state)?,
+                lfst.num_trs(lfst_state)?,
                 compute_weight,
             )?;
-            let reach_arc_bool = reach_arc.is_some();
+            let reach_tr_bool = reach_tr.is_some();
             let lfinal = lfst.final_weight(lfst_state)?;
             let reach_final = lfinal.is_some()
                 && !lfinal.unwrap().is_zero()
                 && reachable.reach_final(matcher_state)?;
-            if let Some((reach_begin, reach_end, reach_weight)) = reach_arc {
+            if let Some((reach_begin, reach_end, reach_weight)) = reach_tr {
                 if compute_prefix && (reach_end - reach_begin) == 1 && !reach_final {
                     let arc = lfst
                         .arcs_iter(lfst_state)?
@@ -183,13 +183,13 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
                 }
             }
             if reach_final && compute_weight {
-                if reach_arc_bool {
+                if reach_tr_bool {
                     self.lookahead_weight_mut().plus_assign(lfinal.unwrap())?;
                 } else {
                     self.set_lookahead_weight(lfinal.unwrap().clone());
                 }
             }
-            Ok(reach_arc_bool || reach_final)
+            Ok(reach_tr_bool || reach_final)
         } else {
             Ok(true)
         }
@@ -214,12 +214,12 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         &self.lookahead_weight
     }
 
-    fn prefix_arc(&self) -> &Tr<W> {
-        &self.prefix_arc
+    fn prefix_tr(&self) -> &Tr<W> {
+        &self.prefix_tr
     }
 
-    fn prefix_arc_mut(&mut self) -> &mut Tr<W> {
-        &mut self.prefix_arc
+    fn prefix_tr_mut(&mut self) -> &mut Tr<W> {
+        &mut self.prefix_tr
     }
 
     fn lookahead_weight_mut(&mut self) -> &mut W {

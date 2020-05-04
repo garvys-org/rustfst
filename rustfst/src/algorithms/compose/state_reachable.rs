@@ -1,4 +1,4 @@
-use crate::algorithms::arc_filters::AnyTrFilter;
+use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::algorithms::compose::IntervalReachVisitor;
 use crate::algorithms::compose::IntervalSet;
 use crate::algorithms::condense;

@@ -13,7 +13,7 @@ where
     SI: Semiring,
     SO: Semiring<Type = SI::Type>,
 {
-    fn arc_map(&mut self, arc: &Tr<SI>) -> Result<Tr<SO>> {
+    fn tr_map(&mut self, arc: &Tr<SI>) -> Result<Tr<SO>> {
         Ok(Tr::new(
             arc.ilabel,
             arc.olabel,
@@ -22,11 +22,11 @@ where
         ))
     }
 
-    fn final_arc_map(&mut self, final_arc: &FinalTr<SI>) -> Result<FinalTr<SO>> {
+    fn final_tr_map(&mut self, final_tr: &FinalTr<SI>) -> Result<FinalTr<SO>> {
         Ok(FinalTr {
-            ilabel: final_arc.ilabel,
-            olabel: final_arc.olabel,
-            weight: SO::new(final_arc.weight.value().clone()),
+            ilabel: final_tr.ilabel,
+            olabel: final_tr.olabel,
+            weight: SO::new(final_tr.weight.value().clone()),
         })
     }
 

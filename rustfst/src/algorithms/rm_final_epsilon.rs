@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::arc_filters::AnyTrFilter;
+use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::algorithms::connect;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::visitors::SccVisitor;
@@ -69,7 +69,7 @@ where
             if !w.is_zero() {
                 unsafe { ifst.set_final_unchecked(state, w) };
             }
-            unsafe { ifst.del_arcs_id_sorted_unchecked(state, &arcs_to_del) };
+            unsafe { ifst.del_trs_id_sorted_unchecked(state, &arcs_to_del) };
         }
     }
 

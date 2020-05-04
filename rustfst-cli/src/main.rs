@@ -4,7 +4,7 @@ use clap::{App, Arg, SubCommand};
 use anyhow::{format_err, Result};
 use log::error;
 
-use crate::cmds::arcsort::TrsortAlgorithm;
+use crate::cmds::tr_sort::TrsortAlgorithm;
 use crate::cmds::connect::ConnectAlgorithm;
 use crate::cmds::invert::InvertAlgorithm;
 use crate::cmds::map::MapAlgorithm;
@@ -41,7 +41,7 @@ fn main() {
     app = app.subcommand(one_in_one_out_options(connect_cmd));
 
     // Trsort
-    let arcsort_cmd = SubCommand::with_name("arcsort")
+    let tr_sort_cmd = SubCommand::with_name("tr_sort")
         .about("Trsort algorithm.")
         .arg(
             Arg::with_name("sort_type")
@@ -51,7 +51,7 @@ fn main() {
                 .possible_values(&["ilabel", "olabel"])
                 .default_value("ilabel"),
         );
-    app = app.subcommand(one_in_one_out_options(arcsort_cmd));
+    app = app.subcommand(one_in_one_out_options(tr_sort_cmd));
 
     // Project
     let project_cmd = SubCommand::with_name("project")
@@ -82,8 +82,8 @@ fn main() {
             Arg::with_name("map_type")
                 .long("map_type")
                 .possible_values(&[
-                    "arc_sum",
-                    "arc_unique",
+                    "tr_sum",
+                    "tr_unique",
                     "identity",
                     "input_epsilon",
                     "invert",
@@ -165,7 +165,7 @@ fn handle(matches: clap::ArgMatches) -> Result<()> {
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
-        ("arcsort", Some(m)) => TrsortAlgorithm::new(
+        ("tr_sort", Some(m)) => TrsortAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("sort_type").unwrap(),
             m.value_of("out.fst").unwrap(),

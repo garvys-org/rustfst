@@ -2,12 +2,12 @@ use anyhow::Result;
 
 use bitflags::bitflags;
 
-use crate::algorithms::arc_mappers::RmWeightMapper;
+use crate::algorithms::tr_mappers::RmWeightMapper;
 use crate::algorithms::factor_iterators::{GallicFactorLeft, GallicFactorRight};
 use crate::algorithms::fst_convert::fst_convert_from_ref;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::algorithms::{
-    arc_map, factor_weight, reweight, shortest_distance, weight_convert, FactorWeightOptions,
+    tr_map, factor_weight, reweight, shortest_distance, weight_convert, FactorWeightOptions,
     FactorWeightType, ReweightType,
 };
 use crate::fst_impls::VectorFst;
@@ -120,7 +120,7 @@ macro_rules! m_labels_pushing {
         } else {
             let mut rm_weight_mapper = RmWeightMapper {};
             let mut uwfst: VectorFst<_> = fst_convert_from_ref($ifst);
-            arc_map(&mut uwfst, &mut rm_weight_mapper)?;
+            tr_map(&mut uwfst, &mut rm_weight_mapper)?;
             let guwfst: VectorFst<$gallic_weight> = weight_convert(&uwfst, &mut mapper)?;
             shortest_distance(&guwfst, $reweight_type == ReweightType::ReweightToInitial)?
         };

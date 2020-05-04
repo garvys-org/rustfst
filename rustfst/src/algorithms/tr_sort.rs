@@ -15,11 +15,11 @@ pub fn olabel_compare<W: Semiring>(a: &Tr<W>, b: &Tr<W>) -> Ordering {
 }
 
 /// Sorts arcs leaving each state of the FST using a compare function
-pub fn arc_sort<F>(fst: &mut F, comp: impl Fn(&Tr<F::W>, &Tr<F::W>) -> Ordering)
+pub fn tr_sort<F>(fst: &mut F, comp: impl Fn(&Tr<F::W>, &Tr<F::W>) -> Ordering)
 where
     F: MutableFst + ExpandedFst,
 {
     for state in 0..fst.num_states() {
-        fst.sort_arcs_unchecked(state, &comp);
+        fst.sort_trs_unchecked(state, &comp);
     }
 }

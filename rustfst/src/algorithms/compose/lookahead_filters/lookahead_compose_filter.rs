@@ -30,7 +30,7 @@ pub struct LookAheadComposeFilter<
     filter: CF,
     lookahead_type: MatchType,
     flags: MatcherFlags,
-    lookahead_arc: bool,
+    lookahead_tr: bool,
     smt: PhantomData<SMT>,
     w: PhantomData<W>,
     selector: Selector<W, CF::M1, CF::M2>,
@@ -42,7 +42,7 @@ where
     CF::M1: LookaheadMatcher<W>,
     CF::M2: LookaheadMatcher<W>,
 {
-    fn lookahead_filter_arc(
+    fn lookahead_filter_tr(
         &mut self,
         arca: &mut Tr<W>,
         arcb: &mut Tr<W>,
@@ -60,7 +60,7 @@ where
         if labela == EPS_LABEL && !self.flags.contains(MatcherFlags::LOOKAHEAD_EPSILONS) {
             return Ok(fs.clone());
         }
-        self.lookahead_arc = true;
+        self.lookahead_tr = true;
 
         let res = match self.selector() {
             Selector::MatchInput(s) => {
@@ -135,7 +135,7 @@ where
             lookahead_type,
             flags,
             smt: PhantomData,
-            lookahead_arc: false,
+            lookahead_tr: false,
             w: PhantomData,
             selector,
             filter,
@@ -150,16 +150,16 @@ where
         self.filter.set_state(s1, s2, filter_state)
     }
 
-    fn filter_arc(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
-        self.lookahead_arc = false;
-        let fs = self.filter.filter_arc(arc1, arc2)?;
+    fn filter_tr(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
+        self.lookahead_tr = false;
+        let fs = self.filter.filter_tr(arc1, arc2)?;
         if fs == CF::FS::new_no_state() {
             return Ok(CF::FS::new_no_state());
         }
         if self.lookahead_output() {
-            self.lookahead_filter_arc(arc1, arc2, &fs)
+            self.lookahead_filter_tr(arc1, arc2, &fs)
         } else {
-            self.lookahead_filter_arc(arc2, arc1, &fs)
+            self.lookahead_filter_tr(arc2, arc1, &fs)
         }
     }
 
@@ -186,8 +186,8 @@ where
         self.flags
     }
 
-    fn lookahead_arc(&self) -> bool {
-        self.lookahead_arc
+    fn lookahead_tr(&self) -> bool {
+        self.lookahead_tr
     }
 
     fn lookahead_type(&self) -> MatchType {

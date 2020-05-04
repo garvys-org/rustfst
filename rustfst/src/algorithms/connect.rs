@@ -1,7 +1,7 @@
 use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::arc_filters::AnyTrFilter;
+use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
 use crate::fst_traits::Fst;
 use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
@@ -100,11 +100,11 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for ConnectVisitor<'a, F> {
         true
     }
 
-    fn tree_arc(&mut self, _s: usize, _arc: &Tr<<F as CoreFst>::W>) -> bool {
+    fn tree_tr(&mut self, _s: usize, _tr: &Tr<<F as CoreFst>::W>) -> bool {
         true
     }
 
-    fn back_arc(&mut self, s: usize, arc: &Tr<<F as CoreFst>::W>) -> bool {
+    fn back_tr(&mut self, s: usize, arc: &Tr<<F as CoreFst>::W>) -> bool {
         let t = arc.nextstate;
         if self.dfnumber[t] < self.lowlink[s] {
             self.lowlink[s] = self.dfnumber[t];
@@ -115,7 +115,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for ConnectVisitor<'a, F> {
         true
     }
 
-    fn forward_or_cross_arc(&mut self, s: usize, arc: &Tr<<F as CoreFst>::W>) -> bool {
+    fn forward_or_cross_tr(&mut self, s: usize, arc: &Tr<<F as CoreFst>::W>) -> bool {
         let t = arc.nextstate;
         if self.dfnumber[t] < self.dfnumber[s]
             && self.onstack[t]
@@ -134,7 +134,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for ConnectVisitor<'a, F> {
         &mut self,
         s: usize,
         parent: Option<usize>,
-        _arc: Option<&Tr<<F as CoreFst>::W>>,
+        _tr: Option<&Tr<<F as CoreFst>::W>>,
     ) {
         if unsafe { self.fst.is_final_unchecked(s) } {
             self.coaccess[s] = true;

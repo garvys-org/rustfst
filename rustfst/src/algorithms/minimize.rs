@@ -8,9 +8,9 @@ use binary_heap_plus::BinaryHeap;
 use anyhow::Result;
 use stable_bst::TreeMap;
 
-use crate::algorithms::arc_compares::ilabel_compare;
-use crate::algorithms::arc_mappers::QuantizeMapper;
-use crate::algorithms::arc_unique;
+use crate::algorithms::tr_compares::ilabel_compare;
+use crate::algorithms::tr_mappers::QuantizeMapper;
+use crate::algorithms::tr_unique;
 use crate::algorithms::factor_iterators::GallicFactorLeft;
 use crate::algorithms::partition::Partition;
 use crate::algorithms::queues::LifoQueue;
@@ -18,7 +18,7 @@ use crate::algorithms::reverse;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::algorithms::Queue;
 use crate::algorithms::{
-    arc_map, arc_sort, connect, decode, encode, factor_weight, push_weights, weight_convert,
+    tr_map, tr_sort, connect, decode, encode, factor_weight, push_weights, weight_convert,
     FactorWeightOptions, FactorWeightType, ReweightType,
 };
 use crate::fst_impls::VectorFst;
@@ -63,7 +63,7 @@ where
         let mut gfst: VectorFst<GallicWeightLeft<F::W>> = weight_convert(ifst, &mut to_gallic)?;
         push_weights(&mut gfst, ReweightType::ReweightToInitial, false)?;
         let mut quantize_mapper = QuantizeMapper {};
-        arc_map(&mut gfst, &mut quantize_mapper)?;
+        tr_map(&mut gfst, &mut quantize_mapper)?;
         let encode_table = encode(&mut gfst, true, true)?;
         acceptor_minimize(&mut gfst, allow_acyclic_minimization)?;
         decode(&mut gfst, encode_table)?;
@@ -89,7 +89,7 @@ where
         // Weighted acceptor
         push_weights(ifst, ReweightType::ReweightToInitial, false)?;
         let mut quantize_mapper = QuantizeMapper {};
-        arc_map(ifst, &mut quantize_mapper)?;
+        tr_map(ifst, &mut quantize_mapper)?;
         let encode_table = encode(ifst, true, true)?;
         acceptor_minimize(ifst, allow_acyclic_minimization)?;
         decode(ifst, encode_table)
@@ -120,7 +120,7 @@ where
 
     if allow_acyclic_minimization && props.contains(FstProperties::ACYCLIC) {
         // Acyclic minimization
-        arc_sort(ifst, ilabel_compare);
+        tr_sort(ifst, ilabel_compare);
         let minimizer = AcyclicMinimizer::new(ifst)?;
         merge_states(minimizer.get_partition(), ifst)?;
     } else {
@@ -128,7 +128,7 @@ where
         merge_states(p, ifst)?;
     }
 
-    arc_unique(ifst);
+    tr_unique(ifst);
 
     Ok(())
 }
@@ -159,7 +159,7 @@ fn merge_states<F: MutableFst + ExpandedFst>(partition: Partition, fst: &mut F) 
                     })
                     .collect();
                 for arc in arcs.into_iter() {
-                    fst.add_arc(state_map[c].unwrap(), arc)?;
+                    fst.add_tr(state_map[c].unwrap(), arc)?;
                 }
             }
         }
@@ -316,10 +316,10 @@ impl<'a, F: MutableFst + ExpandedFst> StateComparator<'a, F> {
             return Ok(false);
         }
 
-        if self.fst.num_arcs(x)? < self.fst.num_arcs(y)? {
+        if self.fst.num_trs(x)? < self.fst.num_trs(y)? {
             return Ok(true);
         }
-        if self.fst.num_arcs(x)? > self.fst.num_arcs(y)? {
+        if self.fst.num_trs(x)? > self.fst.num_trs(y)? {
             return Ok(false);
         }
 
@@ -419,7 +419,7 @@ where
 {
     // Initialize
     let mut tr: VectorFst<W::ReverseWeight> = reverse(fst)?;
-    arc_sort(&mut tr, ilabel_compare);
+    tr_sort(&mut tr, ilabel_compare);
     let mut partition = Partition::new(tr.num_states() - 1);
     let mut queue = LifoQueue::default();
     pre_partition(fst, &mut partition, &mut queue);
@@ -444,7 +444,7 @@ where
 
         // Split
         for s in partition.iter(c) {
-            if tr.num_arcs(s + 1)? > 0 {
+            if tr.num_trs(s + 1)? > 0 {
                 aiter_queue.push(TrsIterCollected {
                     idx: 0,
                     arcs: tr.arcs_iter(s + 1)?.collect(),

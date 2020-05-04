@@ -1,7 +1,7 @@
 use anyhow::Result;
 
 use crate::algorithms::ReplaceFst;
-use crate::arc::Tr;
+use crate::tr::Tr;
 use crate::fst_traits::{
     AllocableFst, TrIterator, CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator,
 };
@@ -71,11 +71,11 @@ where
         if let Some(final_weight) = unsafe { fst_2.final_weight_unchecked(s2) } {
             unsafe { fst_1.set_final_unchecked(s1, final_weight.clone()) };
         }
-        unsafe { fst_1.reserve_arcs_unchecked(s1, fst_2.num_arcs_unchecked(s2)) };
+        unsafe { fst_1.reserve_trs_unchecked(s1, fst_2.num_trs_unchecked(s2)) };
         for arc in unsafe { fst_2.arcs_iter_unchecked(s2) } {
-            let mut new_arc = arc.clone();
-            new_arc.nextstate += numstates1;
-            unsafe { fst_1.add_arc_unchecked(s1, new_arc) };
+            let mut new_tr = arc.clone();
+            new_tr.nextstate += numstates1;
+            unsafe { fst_1.add_tr_unchecked(s1, new_tr) };
         }
     }
 
@@ -85,7 +85,7 @@ where
             if let Some(_start2) = start2 {
                 let weight = weight.clone();
                 unsafe {
-                    fst_1.add_arc_unchecked(
+                    fst_1.add_tr_unchecked(
                         s1,
                         Tr::new(EPS_LABEL, EPS_LABEL, weight, _start2 + numstates1),
                     )
@@ -124,9 +124,9 @@ where
         if let Some(osymt) = fst1.output_symbols() {
             rfst.set_output_symbols(osymt);
         }
-        unsafe { rfst.add_arc_unchecked(0, Tr::new(EPS_LABEL, std::usize::MAX, F::W::one(), 1)) };
+        unsafe { rfst.add_tr_unchecked(0, Tr::new(EPS_LABEL, std::usize::MAX, F::W::one(), 1)) };
         unsafe {
-            rfst.add_arc_unchecked(1, Tr::new(EPS_LABEL, std::usize::MAX - 1, F::W::one(), 2))
+            rfst.add_tr_unchecked(1, Tr::new(EPS_LABEL, std::usize::MAX - 1, F::W::one(), 2))
         };
 
         let mut fst_tuples = Vec::with_capacity(3);
@@ -156,12 +156,12 @@ where
         self.0.final_weight_unchecked(state_id)
     }
 
-    fn num_arcs(&self, s: usize) -> Result<usize> {
-        self.0.num_arcs(s)
+    fn num_trs(&self, s: usize) -> Result<usize> {
+        self.0.num_trs(s)
     }
 
-    unsafe fn num_arcs_unchecked(&self, s: usize) -> usize {
-        self.0.num_arcs_unchecked(s)
+    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+        self.0.num_trs_unchecked(s)
     }
 }
 

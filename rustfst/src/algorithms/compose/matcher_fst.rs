@@ -72,12 +72,12 @@ impl<F: CoreFst, M, T> CoreFst for MatcherFst<F, M, T> {
         self.fst_add_on.final_weight_unchecked(state_id)
     }
 
-    fn num_arcs(&self, s: usize) -> Result<usize> {
-        self.fst_add_on.num_arcs(s)
+    fn num_trs(&self, s: usize) -> Result<usize> {
+        self.fst_add_on.num_trs(s)
     }
 
-    unsafe fn num_arcs_unchecked(&self, s: usize) -> usize {
-        self.fst_add_on.num_arcs_unchecked(s)
+    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+        self.fst_add_on.num_trs_unchecked(s)
     }
 }
 

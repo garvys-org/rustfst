@@ -70,14 +70,14 @@ impl<IMPL: FstImpl> CoreFst for DynamicFst<IMPL> {
         self.final_weight(state_id).unwrap()
     }
 
-    fn num_arcs(&self, s: usize) -> Result<usize> {
+    fn num_trs(&self, s: usize) -> Result<usize> {
         let ptr = self.fst_impl.get();
         let fst_impl = unsafe { ptr.as_mut().unwrap() };
-        fst_impl.num_arcs(s)
+        fst_impl.num_trs(s)
     }
 
-    unsafe fn num_arcs_unchecked(&self, s: usize) -> usize {
-        self.num_arcs(s).unwrap()
+    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+        self.num_trs(s).unwrap()
     }
 }
 
@@ -174,7 +174,7 @@ impl<'a, IMPL: FstImpl + 'a> FstIterator<'a> for DynamicFst<IMPL> {
                 state_id,
                 arcs: p.arcs_iter(state_id).unwrap(),
                 final_weight: p.final_weight(state_id).unwrap(),
-                num_arcs: p.num_arcs(state_id).unwrap(),
+                num_trs: p.num_trs(state_id).unwrap(),
             }
         }))
     }

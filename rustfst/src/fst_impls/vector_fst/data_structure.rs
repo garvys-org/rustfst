@@ -1,6 +1,6 @@
-use crate::algorithms::arc_filters::TrFilter;
-use crate::algorithms::arc_filters::{InputEpsilonTrFilter, OutputEpsilonTrFilter};
-use crate::arc::Tr;
+use crate::algorithms::tr_filters::TrFilter;
+use crate::algorithms::tr_filters::{InputEpsilonTrFilter, OutputEpsilonTrFilter};
+use crate::tr::Tr;
 use crate::semirings::Semiring;
 use crate::symbol_table::SymbolTable;
 use crate::StateId;
@@ -18,7 +18,7 @@ pub struct VectorFst<W> {
     pub(crate) osymt: Option<Rc<SymbolTable>>,
 }
 
-// In my opinion, it is not a good idea to store values like num_arcs, num_input_epsilons
+// In my opinion, it is not a good idea to store values like num_trs, num_input_epsilons
 // and num_output_epsilons inside the data structure as it would mean having to maintain them
 // when the object is modified. Which is not trivial with the MutableTrIterator API for instance.
 // Same goes for TrMap. For not-mutable fst however, it is usefull.
@@ -35,7 +35,7 @@ impl<W> VectorFstState<W> {
             arcs: vec![],
         }
     }
-    pub fn num_arcs(&self) -> usize {
+    pub fn num_trs(&self) -> usize {
         self.arcs.len()
     }
 }

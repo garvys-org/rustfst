@@ -5,7 +5,7 @@ use crate::StateId;
 use anyhow::Result;
 
 impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
-    fn reserve_arcs(&mut self, source: usize, additional: usize) -> Result<()> {
+    fn reserve_trs(&mut self, source: usize, additional: usize) -> Result<()> {
         self.states
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
@@ -15,7 +15,7 @@ impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
     }
 
     #[inline]
-    unsafe fn reserve_arcs_unchecked(&mut self, source: usize, additional: usize) {
+    unsafe fn reserve_trs_unchecked(&mut self, source: usize, additional: usize) {
         self.states
             .get_unchecked_mut(source)
             .arcs
@@ -39,7 +39,7 @@ impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
         self.states.shrink_to_fit()
     }
 
-    fn shrink_to_fit_arcs(&mut self, source: StateId) -> Result<()> {
+    fn shrink_to_fit_trs(&mut self, source: StateId) -> Result<()> {
         self.states
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
@@ -49,7 +49,7 @@ impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
     }
 
     #[inline]
-    unsafe fn shrink_to_fit_arcs_unchecked(&mut self, source: StateId) {
+    unsafe fn shrink_to_fit_trs_unchecked(&mut self, source: StateId) {
         self.states.get_unchecked_mut(source).arcs.shrink_to_fit()
     }
 

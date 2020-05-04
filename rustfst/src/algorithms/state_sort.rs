@@ -51,11 +51,11 @@ where
                 None => fst.delete_final_weight(s2)?,
                 Some(v) => fst.set_final(s2, v.clone())?,
             };
-            fst.delete_arcs(s2)?;
+            fst.delete_trs(s2)?;
             for arc in arcsa.iter() {
                 let mut arc = arc.clone();
                 arc.nextstate = order[arc.nextstate];
-                fst.add_arc(s2, arc)?;
+                fst.add_tr(s2, arc)?;
             }
             done[s1] = true;
 

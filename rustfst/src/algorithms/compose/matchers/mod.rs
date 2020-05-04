@@ -75,7 +75,7 @@ pub enum IterItemMatcher<W: Semiring> {
 }
 
 impl<W: Semiring> IterItemMatcher<W> {
-    pub fn into_arc(self, state: StateId, match_type: MatchType) -> Result<Tr<W>> {
+    pub fn into_tr(self, state: StateId, match_type: MatchType) -> Result<Tr<W>> {
         match self {
             IterItemMatcher::Tr(arc) => Ok(unsafe { (*arc).clone() }),
             IterItemMatcher::EpsLoop => eps_loop(state, match_type),

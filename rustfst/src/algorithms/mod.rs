@@ -1,9 +1,9 @@
 mod add_super_final_state;
 mod all_pairs_shortest_distance;
-mod arc_map;
-mod arc_sort;
-mod arc_sum;
-pub(crate) mod arc_unique;
+mod tr_map;
+mod tr_sort;
+mod tr_sum;
+pub(crate) mod tr_unique;
 mod closure;
 pub mod compose;
 mod concat;
@@ -39,10 +39,10 @@ mod weight_convert;
 pub mod queues;
 
 /// Function objects to restrict which arcs are traversed in an FST.
-pub mod arc_filters;
+pub mod tr_filters;
 
 /// Module that provides structures implementing the `TrMapper` trait.
-pub mod arc_mappers;
+pub mod tr_mappers;
 
 pub(crate) mod visitors;
 
@@ -56,18 +56,18 @@ pub(crate) mod factor_iterators;
 pub mod weight_converters;
 
 /// Functions to compare / sort the Trs of an FST.
-pub mod arc_compares {
-    pub use super::arc_sort::{ilabel_compare, olabel_compare};
-    pub use super::isomorphic::arc_compare;
+pub mod tr_compares {
+    pub use super::tr_sort::{ilabel_compare, olabel_compare};
+    pub use super::isomorphic::tr_compare;
 }
 
 pub use self::{
     add_super_final_state::add_super_final_state,
     all_pairs_shortest_distance::all_pairs_shortest_distance,
-    arc_map::{arc_map, TrMapper, FinalTr, MapFinalAction},
-    arc_sort::arc_sort,
-    arc_sum::arc_sum,
-    arc_unique::arc_unique,
+    tr_map::{tr_map, TrMapper, FinalTr, MapFinalAction},
+    tr_sort::tr_sort,
+    tr_sum::tr_sum,
+    tr_unique::tr_unique,
     closure::{closure, ClosureFst, ClosureType},
     compose::compose,
     concat::{concat, ConcatFst},

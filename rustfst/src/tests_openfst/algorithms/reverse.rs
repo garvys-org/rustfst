@@ -21,19 +21,19 @@ where
     SI: Semiring,
     SO: Semiring,
 {
-    fn arc_map(&mut self, arc: &Tr<SI>) -> Result<Tr<SO>> {
+    fn tr_map(&mut self, arc: &Tr<SI>) -> Result<Tr<SO>> {
         let w = &arc.weight;
         let rw = unsafe { std::mem::transmute::<&SI, &SO>(w).clone() };
 
         Ok(Tr::new(arc.ilabel, arc.olabel, rw, arc.nextstate))
     }
 
-    fn final_arc_map(&mut self, final_arc: &FinalTr<SI>) -> Result<FinalTr<SO>> {
-        let w = &final_arc.weight;
+    fn final_tr_map(&mut self, final_tr: &FinalTr<SI>) -> Result<FinalTr<SO>> {
+        let w = &final_tr.weight;
         let rw = unsafe { std::mem::transmute::<&SI, &SO>(w).clone() };
         Ok(FinalTr {
-            ilabel: final_arc.ilabel,
-            olabel: final_arc.olabel,
+            ilabel: final_tr.ilabel,
+            olabel: final_tr.olabel,
             weight: rw,
         })
     }

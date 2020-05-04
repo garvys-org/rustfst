@@ -49,7 +49,7 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(())
     }
 
-    fn filter_arc(&mut self, _arc1: &mut Tr<W>, _arc2: &mut Tr<W>) -> Result<Self::FS> {
+    fn filter_tr(&mut self, _tr1: &mut Tr<W>, _tr2: &mut Tr<W>) -> Result<Self::FS> {
         Ok(Self::FS::new(true))
     }
 

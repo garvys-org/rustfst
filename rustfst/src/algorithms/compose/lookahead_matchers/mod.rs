@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use anyhow::Result;
 
-pub use arc_lookahead_matcher::TrLookAheadMatcher;
+pub use tr_lookahead_matcher::TrLookAheadMatcher;
 pub use label_lookahead_matcher::LabelLookAheadMatcher;
 pub use label_lookahead_relabeler::LabelLookAheadRelabeler;
 pub use trivial_lookahead_matcher::TrivialLookAheadMatcher;
@@ -15,7 +15,7 @@ use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Tr, Label, StateId, NO_STATE_ID};
 
-mod arc_lookahead_matcher;
+mod tr_lookahead_matcher;
 mod label_lookahead_matcher;
 pub mod label_lookahead_relabeler;
 mod trivial_lookahead_matcher;
@@ -61,8 +61,8 @@ pub trait LookaheadMatcher<W: Semiring>: Matcher<W> {
     // implementations are useful for weight-pushing in composition.
     fn lookahead_weight(&self) -> &W;
 
-    fn prefix_arc(&self) -> &Tr<W>;
-    fn prefix_arc_mut(&mut self) -> &mut Tr<W>;
+    fn prefix_tr(&self) -> &Tr<W>;
+    fn prefix_tr_mut(&mut self) -> &mut Tr<W>;
     fn lookahead_weight_mut(&mut self) -> &mut W;
 
     fn clear_lookahead_weight(&mut self) {
@@ -72,16 +72,16 @@ pub trait LookaheadMatcher<W: Semiring>: Matcher<W> {
         *self.lookahead_weight_mut() = weight;
     }
     fn clear_lookahead_prefix(&mut self) {
-        self.prefix_arc_mut().nextstate = NO_STATE_ID;
+        self.prefix_tr_mut().nextstate = NO_STATE_ID;
     }
     fn set_lookahead_prefix(&mut self, arc: Tr<W>) {
-        *self.prefix_arc_mut() = arc;
+        *self.prefix_tr_mut() = arc;
     }
 
     fn default_lookahead_prefix(&self, arc: &mut Tr<W>) -> bool {
-        let prefix_arc = self.prefix_arc();
-        if prefix_arc.nextstate != NO_STATE_ID {
-            *arc = prefix_arc.clone();
+        let prefix_tr = self.prefix_tr();
+        if prefix_tr.nextstate != NO_STATE_ID {
+            *arc = prefix_tr.clone();
             true
         } else {
             false

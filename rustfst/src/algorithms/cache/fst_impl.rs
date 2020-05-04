@@ -51,9 +51,9 @@ pub trait FstImpl: Debug {
         Ok(())
     }
 
-    fn num_arcs(&mut self, state: StateId) -> Result<usize> {
+    fn num_trs(&mut self, state: StateId) -> Result<usize> {
         self.expand_if_necessary(state)?;
-        self.cache_impl_ref().num_arcs(state)
+        self.cache_impl_ref().num_trs(state)
     }
 
     /// Turns the Dynamic FST into a static one.
@@ -83,7 +83,7 @@ pub trait FstImpl: Debug {
                 for _ in n..=arc.nextstate {
                     fst_out.add_state();
                 }
-                fst_out.add_arc(s, arc.clone())?;
+                fst_out.add_tr(s, arc.clone())?;
             }
             if let Some(f_w) = self.final_weight(s)? {
                 fst_out.set_final(s, f_w.clone())?;

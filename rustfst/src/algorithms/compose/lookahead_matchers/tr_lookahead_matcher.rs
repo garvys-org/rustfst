@@ -17,7 +17,7 @@ pub struct TrLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
     fst: Rc<M::F>,
     matcher: M,
     lookahead_weight: W,
-    prefix_arc: Tr<W>,
+    prefix_tr: Tr<W>,
 
     // Flags to customize the behaviour
     mft: PhantomData<MFT>,
@@ -33,7 +33,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
         Ok(Self {
             fst: Rc::clone(&fst),
             matcher: M::new(fst, match_type)?,
-            prefix_arc: Tr::new(0, 0, W::one(), NO_STATE_ID),
+            prefix_tr: Tr::new(0, 0, W::one(), NO_STATE_ID),
             lookahead_weight: W::one(),
             mft: PhantomData,
         })
@@ -231,12 +231,12 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
         &self.lookahead_weight
     }
 
-    fn prefix_arc(&self) -> &Tr<W> {
-        &self.prefix_arc
+    fn prefix_tr(&self) -> &Tr<W> {
+        &self.prefix_tr
     }
 
-    fn prefix_arc_mut(&mut self) -> &mut Tr<W> {
-        &mut self.prefix_arc
+    fn prefix_tr_mut(&mut self) -> &mut Tr<W> {
+        &mut self.prefix_tr
     }
 
     fn lookahead_weight_mut(&mut self) -> &mut W {

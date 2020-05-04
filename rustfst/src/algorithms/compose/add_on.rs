@@ -49,12 +49,12 @@ impl<F: CoreFst, T> CoreFst for FstAddOn<F, T> {
         self.fst.final_weight_unchecked(state_id)
     }
 
-    fn num_arcs(&self, s: usize) -> Result<usize> {
-        self.fst.num_arcs(s)
+    fn num_trs(&self, s: usize) -> Result<usize> {
+        self.fst.num_trs(s)
     }
 
-    unsafe fn num_arcs_unchecked(&self, s: usize) -> usize {
-        self.fst.num_arcs_unchecked(s)
+    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+        self.fst.num_trs_unchecked(s)
     }
 }
 

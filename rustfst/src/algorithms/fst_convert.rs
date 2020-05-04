@@ -16,10 +16,10 @@ where
 
         for data in ifst.fst_iter() {
             unsafe {
-                ofst.reserve_arcs_unchecked(data.state_id, data.num_arcs);
+                ofst.reserve_trs_unchecked(data.state_id, data.num_trs);
             }
             for arc in data.arcs {
-                unsafe { ofst.add_arc_unchecked(data.state_id, arc.clone()) };
+                unsafe { ofst.add_tr_unchecked(data.state_id, arc.clone()) };
             }
 
             if let Some(final_weight) = data.final_weight {
@@ -49,10 +49,10 @@ where
 
         for fst_iter_data in ifst.fst_into_iter() {
             unsafe {
-                ofst.reserve_arcs_unchecked(fst_iter_data.state_id, fst_iter_data.num_arcs);
+                ofst.reserve_trs_unchecked(fst_iter_data.state_id, fst_iter_data.num_trs);
             }
             for arc in fst_iter_data.arcs {
-                unsafe { ofst.add_arc_unchecked(fst_iter_data.state_id, arc) }
+                unsafe { ofst.add_tr_unchecked(fst_iter_data.state_id, arc) }
             }
 
             if let Some(w) = fst_iter_data.final_weight {

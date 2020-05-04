@@ -6,10 +6,10 @@ use anyhow::Result;
 pub trait AllocableFst: Fst {
     /// Reserve capacity for at least additional more arcs leaving the state.
     /// The FST may reserve more space to avoid frequent allocation.
-    /// After calling `reserve_arcs`, the capacity will be greater or equal to `num_arcs` + `additionnal`
+    /// After calling `reserve_trs`, the capacity will be greater or equal to `num_trs` + `additionnal`
     /// This method has no effects if the capacity is already sufficient
-    fn reserve_arcs(&mut self, source: StateId, additional: usize) -> Result<()>;
-    unsafe fn reserve_arcs_unchecked(&mut self, source: StateId, additional: usize);
+    fn reserve_trs(&mut self, source: StateId, additional: usize) -> Result<()>;
+    unsafe fn reserve_trs_unchecked(&mut self, source: StateId, additional: usize);
 
     /// Reserve capacity for at least additional states.
     /// The FST may reserve more space to avoid frequent allocation.
@@ -27,8 +27,8 @@ pub trait AllocableFst: Fst {
 
     /// Shrinks the capacity of the leaving arcs for the given state as much as possible.
     /// It will drop down as close as possible to theleaving arcs
-    fn shrink_to_fit_arcs(&mut self, source: StateId) -> Result<()>;
-    unsafe fn shrink_to_fit_arcs_unchecked(&mut self, source: StateId);
+    fn shrink_to_fit_trs(&mut self, source: StateId) -> Result<()>;
+    unsafe fn shrink_to_fit_trs_unchecked(&mut self, source: StateId);
 
     /// Returns the number of states the FST can hold without reallocating.
     fn states_capacity(&self) -> usize;

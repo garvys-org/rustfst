@@ -15,29 +15,29 @@ struct Isomorphism<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = 
 }
 
 /// Compare arcs in the order input label, output label, weight and nextstate.
-pub fn arc_compare<W: Semiring>(arc_1: &Tr<W>, arc_2: &Tr<W>) -> Ordering {
-    if arc_1.ilabel < arc_2.ilabel {
+pub fn tr_compare<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> Ordering {
+    if tr_1.ilabel < tr_2.ilabel {
         return Ordering::Less;
     }
-    if arc_1.ilabel > arc_2.ilabel {
+    if tr_1.ilabel > tr_2.ilabel {
         return Ordering::Greater;
     }
-    if arc_1.olabel < arc_2.olabel {
+    if tr_1.olabel < tr_2.olabel {
         return Ordering::Less;
     }
-    if arc_1.olabel > arc_2.olabel {
+    if tr_1.olabel > tr_2.olabel {
         return Ordering::Greater;
     }
-    if arc_1.weight < arc_2.weight {
+    if tr_1.weight < tr_2.weight {
         return Ordering::Less;
     }
-    if arc_1.weight > arc_2.weight {
+    if tr_1.weight > tr_2.weight {
         return Ordering::Greater;
     }
-    if arc_1.nextstate < arc_2.nextstate {
+    if tr_1.nextstate < tr_2.nextstate {
         return Ordering::Less;
     }
-    if arc_1.nextstate > arc_2.nextstate {
+    if tr_1.nextstate > tr_2.nextstate {
         return Ordering::Greater;
     }
     Ordering::Equal
@@ -70,8 +70,8 @@ impl<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> Isomorphis
             return Ok(false);
         }
 
-        let narcs1 = self.fst_1.num_arcs(s1)?;
-        let narcs2 = self.fst_2.num_arcs(s2)?;
+        let narcs1 = self.fst_1.num_trs(s1)?;
+        let narcs2 = self.fst_2.num_trs(s2)?;
 
         if narcs1 != narcs2 {
             return Ok(false);
@@ -80,8 +80,8 @@ impl<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> Isomorphis
         let mut arcs1: Vec<_> = self.fst_1.arcs_iter(s1)?.collect();
         let mut arcs2: Vec<_> = self.fst_2.arcs_iter(s2)?.collect();
 
-        arcs1.sort_by(|a, b| arc_compare(a, b));
-        arcs2.sort_by(|a, b| arc_compare(a, b));
+        arcs1.sort_by(|a, b| tr_compare(a, b));
+        arcs2.sort_by(|a, b| tr_compare(a, b));
 
         for i in 0..arcs1.len() {
             let arc1 = arcs1[i];
@@ -168,7 +168,7 @@ mod test {
         let mut fst_2 = fst_1.clone();
         assert!(isomorphic(&fst_1, &fst_2)?);
 
-        fst_2.add_arc(0, Tr::new(33, 45, LogWeight::new(0.3), 1))?;
+        fst_2.add_tr(0, Tr::new(33, 45, LogWeight::new(0.3), 1))?;
         assert!(!isomorphic(&fst_1, &fst_2)?);
 
         Ok(())

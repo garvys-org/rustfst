@@ -6,9 +6,9 @@ use std::rc::Rc;
 use anyhow::Result;
 use itertools::Itertools;
 
-use crate::algorithms::arc_compares::{ilabel_compare, olabel_compare};
+use crate::algorithms::tr_compares::{ilabel_compare, olabel_compare};
 use crate::algorithms::compose::{IntervalSet, StateReachable};
-use crate::algorithms::{arc_sort, fst_convert_from_ref};
+use crate::algorithms::{tr_sort, fst_convert_from_ref};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableTrIterator, MutableFst};
@@ -148,7 +148,7 @@ impl LabelReachable {
                     };
                     let final_weight = final_weight.clone();
                     unsafe {
-                        fst.add_arc_unchecked(
+                        fst.add_tr_unchecked(
                             s,
                             Tr::new(NO_LABEL, NO_LABEL, final_weight, nextstate),
                         )
@@ -170,7 +170,7 @@ impl LabelReachable {
         unsafe { fst.set_start_unchecked(start) };
         for s in 0..start {
             if indeg[s] == 0 {
-                unsafe { fst.add_arc_unchecked(start, Tr::new(0, 0, W::one(), s)) };
+                unsafe { fst.add_tr_unchecked(start, Tr::new(0, 0, W::one(), s)) };
             }
         }
     }
@@ -222,10 +222,10 @@ impl LabelReachable {
         }
 
         if relabel_input {
-            arc_sort(fst, ilabel_compare);
+            tr_sort(fst, ilabel_compare);
             fst.unset_input_symbols();
         } else {
-            arc_sort(fst, olabel_compare);
+            tr_sort(fst, olabel_compare);
             fst.unset_output_symbols();
         }
 

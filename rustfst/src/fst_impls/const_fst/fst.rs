@@ -51,7 +51,7 @@ impl<W: Semiring> CoreFst for ConstFst<W> {
         self.states.get_unchecked(state_id).final_weight.as_ref()
     }
 
-    fn num_arcs(&self, s: usize) -> Result<usize> {
+    fn num_trs(&self, s: usize) -> Result<usize> {
         let const_state = self
             .states
             .get(s)
@@ -59,7 +59,7 @@ impl<W: Semiring> CoreFst for ConstFst<W> {
         Ok(const_state.narcs)
     }
 
-    unsafe fn num_arcs_unchecked(&self, s: usize) -> usize {
+    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
         self.states.get_unchecked(s).narcs
     }
 }

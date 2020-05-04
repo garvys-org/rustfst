@@ -24,9 +24,9 @@ use crate::semirings::{Semiring, StarSemiring};
 /// let s1 = fst.add_state();
 /// let s2 = fst.add_state();
 ///
-/// fst.add_arc(s0, Tr::new(32, 23, 18, s1));
-/// fst.add_arc(s0, Tr::new(32, 23, 21, s2));
-/// fst.add_arc(s1, Tr::new(32, 23, 55, s2));
+/// fst.add_tr(s0, Tr::new(32, 23, 18, s1));
+/// fst.add_tr(s0, Tr::new(32, 23, 21, s2));
+/// fst.add_tr(s1, Tr::new(32, 23, 55, s2));
 ///
 /// let dists = all_pairs_shortest_distance(&fst)?;
 ///

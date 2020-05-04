@@ -23,7 +23,7 @@ use crate::tests_openfst::FstTestData;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FwGallicOperationResult {
     factor_final_weights: bool,
-    factor_arc_weights: bool,
+    factor_tr_weights: bool,
     gallic_type: String,
     result: String,
 }
@@ -34,7 +34,7 @@ where
     F::W: SerializableSemiring,
 {
     pub factor_final_weights: bool,
-    pub factor_arc_weights: bool,
+    pub factor_tr_weights: bool,
     pub gallic_type: String,
     pub result: F,
 }
@@ -47,7 +47,7 @@ impl FwGallicOperationResult {
     {
         FwGallicTestData {
             factor_final_weights: self.factor_final_weights,
-            factor_arc_weights: self.factor_arc_weights,
+            factor_tr_weights: self.factor_tr_weights,
             gallic_type: self.gallic_type.clone(),
             result: F::from_text_string(self.result.as_str()).unwrap(),
         }
@@ -61,8 +61,8 @@ where
     for data in &test_data.factor_weight_gallic {
         //        println!("test fwgallic");
         //        std::dbg!(data.factor_final_weights);
-        //        std::dbg!(data.factor_arc_weights);
-        let mode = FactorWeightType::from_bools(data.factor_final_weights, data.factor_arc_weights);
+        //        std::dbg!(data.factor_tr_weights);
+        let mode = FactorWeightType::from_bools(data.factor_final_weights, data.factor_tr_weights);
         let opts = FactorWeightOptions::new(mode);
 
         let mut to_gallic = ToGallicConverter {};
@@ -115,8 +115,8 @@ where
         data.result,
         fst_res,
         format!(
-            "Factor weight gallic failing with factor_final_weights={:?}, factor_arc_weights={:?} and gallic_type={:?}",
-            data.factor_final_weights, data.factor_arc_weights, data.gallic_type
+            "Factor weight gallic failing with factor_final_weights={:?}, factor_tr_weights={:?} and gallic_type={:?}",
+            data.factor_final_weights, data.factor_tr_weights, data.gallic_type
         )
     );
     }

@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::arc::Tr;
+use crate::tr::Tr;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::EPS_LABEL;
@@ -39,14 +39,14 @@ where
 
     ofst.add_states(ifst.num_states());
 
-    let mut c_arcs = vec![0; ifst.num_states() + 1];
+    let mut c_trs = vec![0; ifst.num_states() + 1];
     for is in 0..ifst.num_states() {
         for iarc in unsafe { ifst.arcs_iter_unchecked(is) } {
-            c_arcs[iarc.nextstate + 1] += 1;
+            c_trs[iarc.nextstate + 1] += 1;
         }
     }
 
-    let mut states_arcs: Vec<_> = c_arcs.into_iter().map(Vec::with_capacity).collect();
+    let mut states_trs: Vec<_> = c_trs.into_iter().map(Vec::with_capacity).collect();
 
     for is in 0..ifst.num_states() {
         let os = is + 1;
@@ -55,20 +55,20 @@ where
         }
         let weight = unsafe { ifst.final_weight_unchecked(is) };
         if let Some(w) = weight {
-            states_arcs[0].push(Tr::new(EPS_LABEL, EPS_LABEL, w.reverse()?, os));
+            states_trs[0].push(Tr::new(EPS_LABEL, EPS_LABEL, w.reverse()?, os));
         }
 
         for iarc in unsafe { ifst.arcs_iter_unchecked(is) } {
             let nos = iarc.nextstate + 1;
             let weight = iarc.weight.reverse()?;
             let w = Tr::new(iarc.ilabel, iarc.olabel, weight, os);
-            states_arcs[nos].push(w);
+            states_trs[nos].push(w);
         }
     }
-    states_arcs
+    states_trs
         .into_iter()
         .enumerate()
-        .for_each(|(s, arcs)| unsafe { ofst.set_arcs_unchecked(s, arcs) });
+        .for_each(|(s, arcs)| unsafe { ofst.set_trs_unchecked(s, arcs) });
     ofst.set_start(ostart)?;
 
     ofst.set_symts_from_fst(ifst);

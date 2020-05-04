@@ -184,26 +184,26 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
         matchera: Rc<RefCell<M>>,
         match_input: bool,
     ) -> Result<()> {
-        let arc_loop = if match_input {
+        let tr_loop = if match_input {
             Tr::new(EPS_LABEL, NO_LABEL, W::one(), sb)
         } else {
             Tr::new(NO_LABEL, EPS_LABEL, W::one(), sb)
         };
-        self.match_arc(s, sa, Rc::clone(&matchera), &arc_loop, match_input)?;
+        self.match_tr(s, sa, Rc::clone(&matchera), &tr_loop, match_input)?;
         for arc in fstb.arcs_iter(sb)? {
-            self.match_arc(s, sa, Rc::clone(&matchera), arc, match_input)?;
+            self.match_tr(s, sa, Rc::clone(&matchera), arc, match_input)?;
         }
         Ok(())
     }
 
-    fn add_arc(&mut self, s: StateId, mut arc1: Tr<W>, arc2: Tr<W>, fs: CF::FS) -> Result<()> {
+    fn add_tr(&mut self, s: StateId, mut arc1: Tr<W>, arc2: Tr<W>, fs: CF::FS) -> Result<()> {
         let tuple = ComposeStateTuple {
             fs,
             s1: arc1.nextstate,
             s2: arc2.nextstate,
         };
         arc1.weight.times_assign(arc2.weight)?;
-        self.cache_impl.push_arc(
+        self.cache_impl.push_tr(
             s,
             Tr::new(
                 arc1.ilabel,
@@ -216,7 +216,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
         Ok(())
     }
 
-    fn match_arc<M: Matcher<W>>(
+    fn match_tr<M: Matcher<W>>(
         &mut self,
         s: StateId,
         sa: StateId,
@@ -229,7 +229,7 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
         // Collect necessary here because need to borrow_mut a matcher later. To investigate.
         let temp = matchera.borrow().iter(sa, label)?.collect_vec();
         for arca in temp {
-            let mut arca = arca.into_arc(
+            let mut arca = arca.into_tr(
                 sa,
                 if match_input {
                     MatchType::MatchInput
@@ -239,15 +239,15 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFstImpl<W, CF> {
             )?;
             let mut arcb = arc.clone();
             if match_input {
-                let fs = self.compose_filter.filter_arc(&mut arcb, &mut arca)?;
+                let fs = self.compose_filter.filter_tr(&mut arcb, &mut arca)?;
                 if fs != CF::FS::new_no_state() {
-                    self.add_arc(s, arcb, arca, fs)?;
+                    self.add_tr(s, arcb, arca, fs)?;
                 }
             } else {
-                let fs = self.compose_filter.filter_arc(&mut arca, &mut arcb)?;
+                let fs = self.compose_filter.filter_tr(&mut arca, &mut arcb)?;
 
                 if fs != CF::FS::new_no_state() {
-                    self.add_arc(s, arca, arcb, fs)?;
+                    self.add_tr(s, arca, arcb, fs)?;
                 }
             }
         }

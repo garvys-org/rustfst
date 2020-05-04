@@ -1,4 +1,4 @@
-pub mod arcsort;
+pub mod tr_sort;
 pub mod connect;
 pub mod invert;
 pub mod map;

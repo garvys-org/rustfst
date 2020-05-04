@@ -76,7 +76,7 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
             self.s2 = s2;
             self.fs = filter_state.clone();
             // TODO: Could probably use unchecked here as the state should exist.
-            let na2 = self.fst2.num_arcs(self.s2)?;
+            let na2 = self.fst2.num_trs(self.s2)?;
             let ne2 = self.fst2.num_input_epsilons(self.s2)?;
             let fin2 = self.fst2.is_final(self.s2)?;
             self.alleps2 = na2 == ne2 && !fin2;
@@ -85,7 +85,7 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(())
     }
 
-    fn filter_arc(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
+    fn filter_tr(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
         let res = if arc2.ilabel == NO_LABEL {
             if self.alleps2 {
                 Self::FS::new_no_state()
@@ -130,7 +130,7 @@ impl<W: Semiring + 'static, M1: LookaheadMatcher<W>, M2: LookaheadMatcher<W>>
         unreachable!()
     }
 
-    fn lookahead_arc(&self) -> bool {
+    fn lookahead_tr(&self) -> bool {
         unreachable!()
     }
 

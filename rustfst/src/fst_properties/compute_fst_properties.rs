@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::arc_filters::AnyTrFilter;
+use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::visitors::SccVisitor;
 use crate::fst_properties::FstProperties;
@@ -49,7 +49,7 @@ pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Result<FstProper
     for state in states {
         let mut ilabels = HashSet::new();
         let mut olabels = HashSet::new();
-        let mut prev_arc: Option<&Tr<F::W>> = None;
+        let mut prev_tr: Option<&Tr<F::W>> = None;
         for arc in fst.arcs_iter(state)? {
             // There is already an outgoing arc with this ilabel
             if ilabels.contains(&arc.ilabel) {
@@ -84,13 +84,13 @@ pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Result<FstProper
             }
 
             // Not first arc
-            if let Some(_prev_arc) = prev_arc {
-                if arc.ilabel < _prev_arc.ilabel {
+            if let Some(_prev_tr) = prev_tr {
+                if arc.ilabel < _prev_tr.ilabel {
                     comp_props |= FstProperties::NOT_I_LABEL_SORTED;
                     comp_props &= !FstProperties::I_LABEL_SORTED;
                 }
 
-                if arc.olabel < _prev_arc.olabel {
+                if arc.olabel < _prev_tr.olabel {
                     comp_props |= FstProperties::NOT_O_LABEL_SORTED;
                     comp_props &= !FstProperties::O_LABEL_SORTED;
                 }
@@ -116,7 +116,7 @@ pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Result<FstProper
                 comp_props &= !FstProperties::STRING;
             }
 
-            prev_arc = Some(arc);
+            prev_tr = Some(arc);
             ilabels.insert(arc.ilabel);
             olabels.insert(arc.olabel);
         }
@@ -132,7 +132,7 @@ pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Result<FstProper
                 comp_props &= !FstProperties::UNWEIGHTED;
             }
             nfinal += 1;
-        } else if fst.num_arcs(state)? != 1 {
+        } else if fst.num_trs(state)? != 1 {
             comp_props |= FstProperties::NOT_STRING;
             comp_props &= !FstProperties::STRING;
         }

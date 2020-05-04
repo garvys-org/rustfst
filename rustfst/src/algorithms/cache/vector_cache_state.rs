@@ -44,8 +44,8 @@ impl<W> VectorCacheState<W> {
             .set_final_weight(final_weight);
     }
 
-    pub fn push_arc(&mut self, state: StateId, arc: Tr<W>) {
-        self.get_cache_state_unchecked_mut(state).push_arc(arc)
+    pub fn push_tr(&mut self, state: StateId, arc: Tr<W>) {
+        self.get_cache_state_unchecked_mut(state).push_tr(arc)
     }
 
     pub fn arcs_iter_unchecked(&self, state: StateId) -> IterSlice<Tr<W>> {
@@ -56,8 +56,8 @@ impl<W> VectorCacheState<W> {
         self.get_cache_state_unchecked_mut(state).mark_expanded()
     }
 
-    pub fn reserve_arcs_unchecked(&mut self, state: StateId, n: usize) {
-        self.get_cache_state_unchecked_mut(state).reserve_arcs(n)
+    pub fn reserve_trs_unchecked(&mut self, state: StateId, n: usize) {
+        self.get_cache_state_unchecked_mut(state).reserve_trs(n)
     }
 
     pub fn expanded(&self, state: StateId) -> bool {
@@ -78,7 +78,7 @@ impl<W> VectorCacheState<W> {
         self.get_cache_state_unchecked(state).final_weight()
     }
 
-    pub fn num_arcs(&self, state: StateId) -> usize {
-        self.get_cache_state_unchecked(state).num_arcs()
+    pub fn num_trs(&self, state: StateId) -> usize {
+        self.get_cache_state_unchecked(state).num_trs()
     }
 }

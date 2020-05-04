@@ -207,8 +207,8 @@ where
     fn expand(&mut self, state: usize) -> Result<()> {
         let tuple = self.state_table.tuple_table.find_tuple(state).clone();
         if let Some(fst_state) = tuple.fst_state {
-            if let Some(arc) = self.compute_final_arc(state) {
-                self.cache_impl.push_arc(state, arc)?;
+            if let Some(arc) = self.compute_final_tr(state) {
+                self.cache_impl.push_tr(state, arc)?;
             }
 
             for arc in self
@@ -218,8 +218,8 @@ where
                 .borrow()
                 .arcs_iter(fst_state)?
             {
-                if let Some(new_arc) = self.compute_arc(&tuple, arc) {
-                    self.cache_impl.push_arc(state, new_arc)?;
+                if let Some(new_tr) = self.compute_tr(&tuple, arc) {
+                    self.cache_impl.push_tr(state, new_tr)?;
                 }
             }
         }
@@ -304,7 +304,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
         Ok(replace_fst_impl)
     }
 
-    fn compute_final_arc(&mut self, state: StateId) -> Option<Tr<F::W>> {
+    fn compute_final_tr(&mut self, state: StateId) -> Option<Tr<F::W>> {
         let tuple = self.state_table.tuple_table.find_tuple(state);
         let fst_state = tuple.fst_state?;
         if self
@@ -378,7 +378,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
         self.get_prefix_id(prefix)
     }
 
-    fn compute_arc<W: Semiring>(&self, tuple: &ReplaceStateTuple, arc: &Tr<W>) -> Option<Tr<W>> {
+    fn compute_tr<W: Semiring>(&self, tuple: &ReplaceStateTuple, arc: &Tr<W>) -> Option<Tr<W>> {
         if arc.olabel == EPS_LABEL
             || arc.olabel < *self.nonterminal_set.iter().next().unwrap()
             || arc.olabel > *self.nonterminal_set.iter().rev().next().unwrap()

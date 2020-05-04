@@ -77,8 +77,8 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
             self.s2 = s2;
             self.fs = filter_state.clone();
 
-            let na1 = self.fst1.num_arcs(s1)?;
-            let na2 = self.fst2.num_arcs(s2)?;
+            let na1 = self.fst1.num_trs(s1)?;
+            let na2 = self.fst2.num_trs(s2)?;
 
             let ne1 = self.fst1.num_output_epsilons(s1)?;
             let ne2 = self.fst2.num_input_epsilons(s2)?;
@@ -95,7 +95,7 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(())
     }
 
-    fn filter_arc(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
+    fn filter_tr(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
         let res = if arc2.ilabel == NO_LABEL {
             // EPSILON in FST1
             if self.fs == Self::FS::new(0) {

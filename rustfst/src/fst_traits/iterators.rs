@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::arc::Tr;
+use crate::tr::Tr;
 use crate::fst_traits::CoreFst;
 use crate::StateId;
 
@@ -48,7 +48,7 @@ pub struct FstIterData<W, I> {
     pub state_id: StateId,
     pub final_weight: Option<W>,
     pub arcs: I,
-    pub num_arcs: usize,
+    pub num_trs: usize,
 }
 
 pub trait FstIntoIterator: CoreFst {

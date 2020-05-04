@@ -73,11 +73,11 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         true
     }
 
-    fn tree_arc(&mut self, _s: usize, _arc: &Tr<<F as CoreFst>::W>) -> bool {
+    fn tree_tr(&mut self, _s: usize, _tr: &Tr<<F as CoreFst>::W>) -> bool {
         true
     }
 
-    fn back_arc(&mut self, s: usize, arc: &Tr<<F as CoreFst>::W>) -> bool {
+    fn back_tr(&mut self, s: usize, arc: &Tr<<F as CoreFst>::W>) -> bool {
         let t = arc.nextstate;
         if self.dfnumber[t] < self.lowlink[s] {
             self.lowlink[s] = self.dfnumber[t];
@@ -94,7 +94,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         true
     }
 
-    fn forward_or_cross_arc(&mut self, s: usize, arc: &Tr<<F as CoreFst>::W>) -> bool {
+    fn forward_or_cross_tr(&mut self, s: usize, arc: &Tr<<F as CoreFst>::W>) -> bool {
         let t = arc.nextstate;
         if self.dfnumber[t] < self.dfnumber[s]
             && self.onstack[t]
@@ -113,7 +113,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         &mut self,
         s: usize,
         parent: Option<usize>,
-        _arc: Option<&Tr<<F as CoreFst>::W>>,
+        _tr: Option<&Tr<<F as CoreFst>::W>>,
     ) {
         if unsafe { self.fst.is_final_unchecked(s) } {
             self.coaccess[s] = true;

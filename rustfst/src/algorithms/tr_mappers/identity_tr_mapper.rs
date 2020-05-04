@@ -8,11 +8,11 @@ use crate::Tr;
 pub struct IdentityTrMapper {}
 
 impl<S: Semiring> TrMapper<S> for IdentityTrMapper {
-    fn arc_map(&self, _arc_to_map: &mut Tr<S>) -> Result<()> {
+    fn tr_map(&self, _tr_to_map: &mut Tr<S>) -> Result<()> {
         Ok(())
     }
 
-    fn final_arc_map(&self, _final_arc: &mut FinalTr<S>) -> Result<()> {
+    fn final_tr_map(&self, _final_tr: &mut FinalTr<S>) -> Result<()> {
         Ok(())
     }
 
@@ -21,4 +21,4 @@ impl<S: Semiring> TrMapper<S> for IdentityTrMapper {
     }
 }
 
-arc_mapper_to_weight_convert_mapper!(IdentityTrMapper);
+tr_mapper_to_weight_convert_mapper!(IdentityTrMapper);

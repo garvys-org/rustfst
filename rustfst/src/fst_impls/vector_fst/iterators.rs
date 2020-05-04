@@ -71,7 +71,7 @@ where
                 .enumerate()
                 .map(|(state_id, fst_state)| FstIterData {
                     state_id,
-                    num_arcs: fst_state.arcs.len(),
+                    num_trs: fst_state.arcs.len(),
                     arcs: fst_state.arcs.into_iter(),
                     final_weight: fst_state.final_weight,
                 }),
@@ -93,7 +93,7 @@ impl<'a, W: Semiring + 'static> FstIterator<'a> for VectorFst<W> {
                 state_id,
                 arcs: fst_state.arcs.iter(),
                 final_weight: fst_state.final_weight.as_ref(),
-                num_arcs: fst_state.arcs.len(),
+                num_trs: fst_state.arcs.len(),
             }))
     }
 }
@@ -119,7 +119,7 @@ impl<'a, W: Semiring + 'static> FstIteratorMut<'a> for VectorFst<W> {
                     state_id,
                     arcs: fst_state.arcs.iter_mut(),
                     final_weight: fst_state.final_weight.as_mut(),
-                    num_arcs: n,
+                    num_trs: n,
                 }
             }))
     }

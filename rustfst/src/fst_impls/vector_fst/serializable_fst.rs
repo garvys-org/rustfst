@@ -13,7 +13,7 @@ use crate::fst_impls::VectorFst;
 use crate::fst_traits::{TrIterator, CoreFst, ExpandedFst, Fst, MutableFst, SerializableFst};
 use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FST_MAGIC_NUMBER};
 use crate::parsers::bin_fst::utils_parsing::{
-    parse_final_weight, parse_fst_arc, parse_start_state,
+    parse_final_weight, parse_fst_tr, parse_start_state,
 };
 use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64};
 use crate::parsers::text_fst::ParsedTextFst;
@@ -42,8 +42,8 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
     fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Result<()> {
         let mut file = BufWriter::new(File::create(path_bin_fst)?);
 
-        let num_arcs: usize = (0..self.num_states())
-            .map(|s: usize| unsafe { self.num_arcs_unchecked(s) })
+        let num_trs: usize = (0..self.num_states())
+            .map(|s: usize| unsafe { self.num_trs_unchecked(s) })
             .sum();
 
         let mut flags = FstFlags::empty();
@@ -57,7 +57,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
         let hdr = FstHeader {
             magic_number: FST_MAGIC_NUMBER,
             fst_type: OpenFstString::new(Self::fst_type()),
-            arc_type: OpenFstString::new(Tr::<W>::arc_type()),
+            tr_type: OpenFstString::new(Tr::<W>::tr_type()),
             version: 2i32,
             // TODO: Set flags if the content is aligned
             flags,
@@ -65,7 +65,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
             properties: 3u64,
             start: self.start_state.map(|v| v as i64).unwrap_or(-1),
             num_states: self.num_states() as i64,
-            num_arcs: num_arcs as i64,
+            num_trs: num_trs as i64,
             isymt: self.input_symbols(),
             osymt: self.output_symbols(),
         };
@@ -76,7 +76,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
         for state in 0..self.num_states() {
             let f_weight = unsafe { self.final_weight_unchecked(state).unwrap_or_else(|| &zero) };
             f_weight.write_binary(&mut file)?;
-            write_bin_i64(&mut file, unsafe { self.num_arcs_unchecked(state) } as i64)?;
+            write_bin_i64(&mut file, unsafe { self.num_trs_unchecked(state) } as i64)?;
 
             for arc in unsafe { self.arcs_iter_unchecked(state) } {
                 write_bin_i32(&mut file, arc.ilabel as i32)?;
@@ -110,7 +110,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
                 weight,
                 transition.nextstate,
             );
-            fst.add_arc(transition.state, arc)?;
+            fst.add_tr(transition.state, arc)?;
         }
 
         for final_state in parsed_fst_text.final_states.into_iter() {
@@ -134,8 +134,8 @@ struct Transition {
 
 fn parse_vector_fst_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFstState<W>> {
     let (i, final_weight) = W::parse_binary(i)?;
-    let (i, num_arcs) = le_i64(i)?;
-    let (i, arcs) = count(parse_fst_arc, num_arcs as usize)(i)?;
+    let (i, num_trs) = le_i64(i)?;
+    let (i, arcs) = count(parse_fst_tr, num_trs as usize)(i)?;
     Ok((
         i,
         VectorFstState {
@@ -150,7 +150,7 @@ fn parse_vector_fst<W: SerializableSemiring + 'static>(i: &[u8]) -> IResult<&[u8
         i,
         VECTOR_MIN_FILE_VERSION,
         VectorFst::<W>::fst_type(),
-        Tr::<W>::arc_type(),
+        Tr::<W>::tr_type(),
     )?;
     let (i, states) = count(parse_vector_fst_state, header.num_states as usize)(i)?;
     Ok((

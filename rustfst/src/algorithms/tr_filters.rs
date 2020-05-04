@@ -15,7 +15,7 @@ pub trait TrFilter<S: Semiring>: Clone + Debug + PartialEq {
 pub struct AnyTrFilter {}
 
 impl<S: Semiring> TrFilter<S> for AnyTrFilter {
-    fn keep(&self, _arc: &Tr<S>) -> bool {
+    fn keep(&self, _tr: &Tr<S>) -> bool {
         true
     }
 }

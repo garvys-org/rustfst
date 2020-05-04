@@ -65,13 +65,13 @@ use crate::tests_openfst::io::vector_fst_text_serialization::{
 };
 
 use self::algorithms::{
-    arc_map::{
-        test_arc_map_identity, test_arc_map_input_epsilon, test_arc_map_invert,
-        test_arc_map_output_epsilon, test_arc_map_plus, test_arc_map_quantize,
-        test_arc_map_rmweight, test_arc_map_times, TrMapWithWeightOperationResult,
+    tr_map::{
+        test_tr_map_identity, test_tr_map_input_epsilon, test_tr_map_invert,
+        test_tr_map_output_epsilon, test_tr_map_plus, test_tr_map_quantize,
+        test_tr_map_rmweight, test_tr_map_times, TrMapWithWeightOperationResult,
         TrMapWithWeightTestData,
     },
-    arcsort::{test_arcsort_ilabel, test_arcsort_olabel},
+    tr_sort::{test_trsort_ilabel, test_trsort_olabel},
     compose::test_compose,
     connect::test_connect,
     // determinize::{test_determinize, DeterminizeOperationResult, DeterminizeTestData},
@@ -88,7 +88,7 @@ use self::algorithms::{
         test_shortest_distance, ShorestDistanceOperationResult, ShortestDistanceTestData,
     },
     shortest_path::{test_shortest_path, ShorestPathOperationResult, ShortestPathTestData},
-    state_map::{test_state_map_arc_sum, test_state_map_arc_unique},
+    state_map::{test_state_map_tr_sum, test_state_map_tr_unique},
     topsort::test_topsort,
     union::{UnionOperationResult, UnionTestData},
     weight_pushing::{test_weight_pushing_final, test_weight_pushing_initial},
@@ -137,22 +137,22 @@ pub struct ParsedFstTestData {
     weight_pushing_final: FstOperationResult,
     project_input: FstOperationResult,
     reverse: FstOperationResult,
-    arc_map_identity: FstOperationResult,
-    arc_map_rmweight: FstOperationResult,
-    arc_map_invert: FstOperationResult,
-    arc_map_input_epsilon: FstOperationResult,
-    arc_map_output_epsilon: FstOperationResult,
-    arc_map_plus: TrMapWithWeightOperationResult,
-    arc_map_times: TrMapWithWeightOperationResult,
-    arc_map_quantize: FstOperationResult,
+    tr_map_identity: FstOperationResult,
+    tr_map_rmweight: FstOperationResult,
+    tr_map_invert: FstOperationResult,
+    tr_map_input_epsilon: FstOperationResult,
+    tr_map_output_epsilon: FstOperationResult,
+    tr_map_plus: TrMapWithWeightOperationResult,
+    tr_map_times: TrMapWithWeightOperationResult,
+    tr_map_quantize: FstOperationResult,
     encode: Vec<EncodeOperationResult>,
     encode_decode: Vec<EncodeOperationResult>,
-    state_map_arc_sum: FstOperationResult,
-    state_map_arc_unique: FstOperationResult,
+    state_map_tr_sum: FstOperationResult,
+    state_map_tr_unique: FstOperationResult,
     // determinize: Vec<DeterminizeOperationResult>,
     minimize: Vec<MinimizeOperationResult>,
-    arcsort_ilabel: FstOperationResult,
-    arcsort_olabel: FstOperationResult,
+    tr_sort_ilabel: FstOperationResult,
+    tr_sort_olabel: FstOperationResult,
     topsort: FstOperationResult,
     fst_properties: HashMap<String, bool>,
     raw_vector_bin_path: String,
@@ -192,22 +192,22 @@ where
     pub weight_pushing_final: F,
     pub project_input: F,
     pub reverse: F,
-    pub arc_map_identity: F,
-    pub arc_map_rmweight: F,
-    pub arc_map_invert: F,
-    pub arc_map_input_epsilon: F,
-    pub arc_map_output_epsilon: F,
-    pub arc_map_plus: TrMapWithWeightTestData<F>,
-    pub arc_map_times: TrMapWithWeightTestData<F>,
-    pub arc_map_quantize: F,
+    pub tr_map_identity: F,
+    pub tr_map_rmweight: F,
+    pub tr_map_invert: F,
+    pub tr_map_input_epsilon: F,
+    pub tr_map_output_epsilon: F,
+    pub tr_map_plus: TrMapWithWeightTestData<F>,
+    pub tr_map_times: TrMapWithWeightTestData<F>,
+    pub tr_map_quantize: F,
     pub encode: Vec<EncodeTestData<F>>,
     pub encode_decode: Vec<EncodeTestData<F>>,
-    pub state_map_arc_sum: F,
-    pub state_map_arc_unique: F,
+    pub state_map_tr_sum: F,
+    pub state_map_tr_unique: F,
     // pub determinize: Vec<DeterminizeTestData<F>>,
     pub minimize: Vec<MinimizeTestData<F>>,
-    pub arcsort_ilabel: F,
-    pub arcsort_olabel: F,
+    pub tr_sort_ilabel: F,
+    pub tr_sort_olabel: F,
     pub topsort: F,
     pub fst_properties: FstProperties,
     pub raw_vector_bin_path: PathBuf,
@@ -248,22 +248,22 @@ where
             weight_pushing_final: data.weight_pushing_final.parse(),
             project_input: data.project_input.parse(),
             reverse: data.reverse.parse(),
-            arc_map_identity: data.arc_map_identity.parse(),
-            arc_map_rmweight: data.arc_map_rmweight.parse(),
-            arc_map_invert: data.arc_map_invert.parse(),
-            arc_map_input_epsilon: data.arc_map_input_epsilon.parse(),
-            arc_map_output_epsilon: data.arc_map_output_epsilon.parse(),
-            arc_map_plus: data.arc_map_plus.parse(),
-            arc_map_times: data.arc_map_times.parse(),
-            arc_map_quantize: data.arc_map_quantize.parse(),
+            tr_map_identity: data.tr_map_identity.parse(),
+            tr_map_rmweight: data.tr_map_rmweight.parse(),
+            tr_map_invert: data.tr_map_invert.parse(),
+            tr_map_input_epsilon: data.tr_map_input_epsilon.parse(),
+            tr_map_output_epsilon: data.tr_map_output_epsilon.parse(),
+            tr_map_plus: data.tr_map_plus.parse(),
+            tr_map_times: data.tr_map_times.parse(),
+            tr_map_quantize: data.tr_map_quantize.parse(),
             encode: data.encode.iter().map(|v| v.parse()).collect(),
             encode_decode: data.encode_decode.iter().map(|v| v.parse()).collect(),
-            state_map_arc_sum: data.state_map_arc_sum.parse(),
-            state_map_arc_unique: data.state_map_arc_unique.parse(),
+            state_map_tr_sum: data.state_map_tr_sum.parse(),
+            state_map_tr_unique: data.state_map_tr_unique.parse(),
             // determinize: data.determinize.iter().map(|v| v.parse()).collect(),
             minimize: data.minimize.iter().map(|v| v.parse()).collect(),
-            arcsort_ilabel: data.arcsort_ilabel.parse(),
-            arcsort_olabel: data.arcsort_olabel.parse(),
+            tr_sort_ilabel: data.tr_sort_ilabel.parse(),
+            tr_sort_olabel: data.tr_sort_olabel.parse(),
             topsort: data.topsort.parse(),
             fst_properties: parse_fst_properties(&data.fst_properties),
             raw_vector_bin_path: absolute_path_folder
@@ -359,64 +359,64 @@ macro_rules! test_fst {
             }
 
             #[test]
-            fn test_arc_map_identity_openfst() -> Result<()> {
-                do_run!(test_arc_map_identity, $fst_name);
+            fn test_tr_map_identity_openfst() -> Result<()> {
+                do_run!(test_tr_map_identity, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_arc_map_invert_openfst() -> Result<()> {
-                do_run!(test_arc_map_invert, $fst_name);
+            fn test_tr_map_invert_openfst() -> Result<()> {
+                do_run!(test_tr_map_invert, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_arc_map_input_epsilon_openfst() -> Result<()> {
-                do_run!(test_arc_map_input_epsilon, $fst_name);
+            fn test_tr_map_input_epsilon_openfst() -> Result<()> {
+                do_run!(test_tr_map_input_epsilon, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_arc_map_output_epsilon_openfst() -> Result<()> {
-                do_run!(test_arc_map_output_epsilon, $fst_name);
+            fn test_tr_map_output_epsilon_openfst() -> Result<()> {
+                do_run!(test_tr_map_output_epsilon, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_arc_map_plus_openfst() -> Result<()> {
-                do_run!(test_arc_map_plus, $fst_name);
+            fn test_tr_map_plus_openfst() -> Result<()> {
+                do_run!(test_tr_map_plus, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_arc_map_times_openfst() -> Result<()> {
-                do_run!(test_arc_map_times, $fst_name);
+            fn test_tr_map_times_openfst() -> Result<()> {
+                do_run!(test_tr_map_times, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_arc_map_quantize_openfst() -> Result<()> {
-                do_run!(test_arc_map_quantize, $fst_name);
+            fn test_tr_map_quantize_openfst() -> Result<()> {
+                do_run!(test_tr_map_quantize, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_arc_map_rmweight_openfst() -> Result<()> {
-                do_run!(test_arc_map_rmweight, $fst_name);
-                Ok(())
-            }
-
-            #[test]
-            #[ignore]
-            fn test_arcsort_ilabel_openfst() -> Result<()> {
-                do_run!(test_arcsort_ilabel, $fst_name);
+            fn test_tr_map_rmweight_openfst() -> Result<()> {
+                do_run!(test_tr_map_rmweight, $fst_name);
                 Ok(())
             }
 
             #[test]
             #[ignore]
-            fn test_arcsort_olabel_openfst() -> Result<()> {
-                do_run!(test_arcsort_olabel, $fst_name);
+            fn test_trsort_ilabel_openfst() -> Result<()> {
+                do_run!(test_trsort_ilabel, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            #[ignore]
+            fn test_trsort_olabel_openfst() -> Result<()> {
+                do_run!(test_trsort_olabel, $fst_name);
                 Ok(())
             }
 
@@ -569,14 +569,14 @@ macro_rules! test_fst {
             }
 
             #[test]
-            fn test_state_map_arc_unique_openfst() -> Result<()> {
-                do_run!(test_state_map_arc_unique, $fst_name);
+            fn test_state_map_tr_unique_openfst() -> Result<()> {
+                do_run!(test_state_map_tr_unique, $fst_name);
                 Ok(())
             }
 
             #[test]
-            fn test_state_map_arc_sum_openfst() -> Result<()> {
-                do_run!(test_state_map_arc_sum, $fst_name);
+            fn test_state_map_tr_sum_openfst() -> Result<()> {
+                do_run!(test_state_map_tr_sum, $fst_name);
                 Ok(())
             }
 

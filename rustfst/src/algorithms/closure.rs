@@ -1,5 +1,5 @@
 use crate::algorithms::ReplaceFst;
-use crate::arc::Tr;
+use crate::tr::Tr;
 use crate::fst_traits::{
     AllocableFst, TrIterator, CoreFst, FinalStatesIterator, Fst, FstIterator, MutableFst,
     StateIterator,
@@ -43,7 +43,7 @@ where
             .collect();
         for (final_state_id, final_weight) in final_states_id {
             unsafe {
-                fst.add_arc_unchecked(
+                fst.add_tr_unchecked(
                     final_state_id,
                     Tr::new(EPS_LABEL, EPS_LABEL, final_weight, start_state),
                 )
@@ -57,7 +57,7 @@ where
         // Add a new start state to allow empty path
         if let Some(start_state_id) = fst.start() {
             unsafe {
-                fst.add_arc_unchecked(
+                fst.add_tr_unchecked(
                     nstart,
                     Tr::new(
                         EPS_LABEL,
@@ -106,7 +106,7 @@ where
                 unsafe {
                     rfst.set_start_unchecked(0);
                     rfst.set_final_unchecked(0, F::W::one());
-                    rfst.add_arc_unchecked(0, Tr::new(EPS_LABEL, std::usize::MAX, F::W::one(), 0));
+                    rfst.add_tr_unchecked(0, Tr::new(EPS_LABEL, std::usize::MAX, F::W::one(), 0));
                 }
             }
             ClosureType::ClosurePlus => {
@@ -114,8 +114,8 @@ where
                 unsafe {
                     rfst.set_start_unchecked(0);
                     rfst.set_final_unchecked(1, F::W::one());
-                    rfst.add_arc_unchecked(0, Tr::new(EPS_LABEL, std::usize::MAX, F::W::one(), 1));
-                    rfst.add_arc_unchecked(1, Tr::new(EPS_LABEL, EPS_LABEL, F::W::one(), 0));
+                    rfst.add_tr_unchecked(0, Tr::new(EPS_LABEL, std::usize::MAX, F::W::one(), 1));
+                    rfst.add_tr_unchecked(1, Tr::new(EPS_LABEL, EPS_LABEL, F::W::one(), 0));
                 }
             }
         };
@@ -145,12 +145,12 @@ where
         self.0.final_weight_unchecked(state_id)
     }
 
-    fn num_arcs(&self, s: usize) -> Result<usize> {
-        self.0.num_arcs(s)
+    fn num_trs(&self, s: usize) -> Result<usize> {
+        self.0.num_trs(s)
     }
 
-    unsafe fn num_arcs_unchecked(&self, s: usize) -> usize {
-        self.0.num_arcs_unchecked(s)
+    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+        self.0.num_trs_unchecked(s)
     }
 }
 

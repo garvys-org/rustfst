@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use anyhow::Result;
 
-use crate::algorithms::arc_filters::{TrFilter, InputEpsilonTrFilter, OutputEpsilonTrFilter};
+use crate::algorithms::tr_filters::{TrFilter, InputEpsilonTrFilter, OutputEpsilonTrFilter};
 use crate::fst_traits::iterators::{TrIterator, StateIterator};
 use crate::fst_traits::FstIterator;
 use crate::semirings::Semiring;
@@ -68,12 +68,12 @@ pub trait CoreFst {
     /// let s1 = fst.add_state();
     /// let s2 = fst.add_state();
     ///
-    /// assert_eq!(fst.num_arcs(s1).unwrap(), 0);
-    /// fst.add_arc(s1, Tr::new(3, 5, BooleanWeight::new(true), s2));
-    /// assert_eq!(fst.num_arcs(s1).unwrap(), 1);
+    /// assert_eq!(fst.num_trs(s1).unwrap(), 0);
+    /// fst.add_tr(s1, Tr::new(3, 5, BooleanWeight::new(true), s2));
+    /// assert_eq!(fst.num_trs(s1).unwrap(), 1);
     /// ```
-    fn num_arcs(&self, s: StateId) -> Result<usize>;
-    unsafe fn num_arcs_unchecked(&self, s: StateId) -> usize;
+    fn num_trs(&self, s: StateId) -> Result<usize>;
+    unsafe fn num_trs_unchecked(&self, s: StateId) -> usize;
 
     /// Returns whether or not the state with identifier passed as parameters is a final state.
     ///
@@ -129,11 +129,11 @@ pub trait Fst:
     /// let s0 = fst.add_state();
     /// let s1 = fst.add_state();
     ///
-    /// fst.add_arc(s0, Tr::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
-    /// fst.add_arc(s0, Tr::new(76, EPS_LABEL, IntegerWeight::one(), s1));
-    /// fst.add_arc(s0, Tr::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
-    /// fst.add_arc(s0, Tr::new(45, 18, IntegerWeight::one(), s0));
-    /// fst.add_arc(s1, Tr::new(76, 18, IntegerWeight::one(), s1));
+    /// fst.add_tr(s0, Tr::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_tr(s0, Tr::new(76, EPS_LABEL, IntegerWeight::one(), s1));
+    /// fst.add_tr(s0, Tr::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_tr(s0, Tr::new(45, 18, IntegerWeight::one(), s0));
+    /// fst.add_tr(s1, Tr::new(76, 18, IntegerWeight::one(), s1));
     ///
     /// assert_eq!(fst.num_input_epsilons(s0).unwrap(), 2);
     /// assert_eq!(fst.num_input_epsilons(s1).unwrap(), 0);
@@ -156,11 +156,11 @@ pub trait Fst:
     /// let s0 = fst.add_state();
     /// let s1 = fst.add_state();
     ///
-    /// fst.add_arc(s0, Tr::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
-    /// fst.add_arc(s0, Tr::new(76, EPS_LABEL, IntegerWeight::one(), s1));
-    /// fst.add_arc(s0, Tr::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
-    /// fst.add_arc(s0, Tr::new(45, 18, IntegerWeight::one(), s0));
-    /// fst.add_arc(s1, Tr::new(76, 18, IntegerWeight::one(), s1));
+    /// fst.add_tr(s0, Tr::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_tr(s0, Tr::new(76, EPS_LABEL, IntegerWeight::one(), s1));
+    /// fst.add_tr(s0, Tr::new(EPS_LABEL, 18, IntegerWeight::one(), s1));
+    /// fst.add_tr(s0, Tr::new(45, 18, IntegerWeight::one(), s0));
+    /// fst.add_tr(s1, Tr::new(76, 18, IntegerWeight::one(), s1));
     ///
     /// assert_eq!(fst.num_output_epsilons(s0).unwrap(), 1);
     /// assert_eq!(fst.num_output_epsilons(s1).unwrap(), 0);

@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::arc_filters::{TrFilter, EpsilonTrFilter};
+use crate::algorithms::tr_filters::{TrFilter, EpsilonTrFilter};
 use crate::algorithms::cache::{CacheImpl, FstImpl};
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::dynamic_fst::DynamicFst;
@@ -64,8 +64,8 @@ impl<W: Semiring, Q: Queue> RmEpsilonConfig<W, Q> {
 /// let mut fst = VectorFst::new();
 /// let s0 = fst.add_state();
 /// let s1 = fst.add_state();
-/// fst.add_arc(s0, Tr::new(32, 25, IntegerWeight::new(78), s1));
-/// fst.add_arc(s1, Tr::new(EPS_LABEL, EPS_LABEL, IntegerWeight::new(13), s0));
+/// fst.add_tr(s0, Tr::new(32, 25, IntegerWeight::new(78), s1));
+/// fst.add_tr(s1, Tr::new(EPS_LABEL, EPS_LABEL, IntegerWeight::new(13), s0));
 /// fst.set_start(s0)?;
 /// fst.set_final(s0, IntegerWeight::new(5))?;
 ///
@@ -75,8 +75,8 @@ impl<W: Semiring, Q: Queue> RmEpsilonConfig<W, Q> {
 /// let mut fst_no_epsilon_ref = VectorFst::<IntegerWeight>::new();
 /// let s0 = fst_no_epsilon_ref.add_state();
 /// let s1 = fst_no_epsilon_ref.add_state();
-/// fst_no_epsilon_ref.add_arc(s0, Tr::new(32, 25, 78, s1));
-/// fst_no_epsilon_ref.add_arc(s1, Tr::new(32, 25, 78 * 13, s1));
+/// fst_no_epsilon_ref.add_tr(s0, Tr::new(32, 25, 78, s1));
+/// fst_no_epsilon_ref.add_tr(s1, Tr::new(32, 25, 78 * 13, s1));
 /// fst_no_epsilon_ref.set_start(s0)?;
 /// fst_no_epsilon_ref.set_final(s0, 5)?;
 /// fst_no_epsilon_ref.set_final(s1, 5 * 13)?;
@@ -100,8 +100,8 @@ pub fn rm_epsilon<F: MutableFst>(fst: &mut F) -> Result<()>
 where
     F::W: 'static,
 {
-    let arc_filter = EpsilonTrFilter {};
-    let queue = AutoQueue::new(fst, None, &arc_filter)?;
+    let tr_filter = EpsilonTrFilter {};
+    let queue = AutoQueue::new(fst, None, &tr_filter)?;
     let opts = RmEpsilonConfig::new_with_default(queue);
     rm_epsilon_with_config(fst, opts)
 }
@@ -193,8 +193,8 @@ where
     for (state, (arcs, final_weight)) in v.into_iter() {
         unsafe {
             // TODO: Use these arcs instead of cloning
-            fst.pop_arcs_unchecked(state);
-            fst.set_arcs_unchecked(state, arcs.into_iter().rev().collect());
+            fst.pop_trs_unchecked(state);
+            fst.set_trs_unchecked(state, arcs.into_iter().rev().collect());
             if final_weight != zero {
                 fst.set_final_unchecked(state, final_weight);
             } else {
@@ -206,7 +206,7 @@ where
     if connect || weight_threshold != F::W::zero() || state_threshold != None {
         for s in 0..fst.num_states() {
             if !noneps_in[s] {
-                fst.delete_arcs(s)?;
+                fst.delete_trs(s)?;
             }
         }
     }
@@ -272,7 +272,7 @@ where
         let zero = F::W::zero();
         let distance = self.sd_state.shortest_distance(Some(source))?;
 
-        let arc_filter = EpsilonTrFilter {};
+        let tr_filter = EpsilonTrFilter {};
 
         let mut eps_queue = vec![source];
 
@@ -291,7 +291,7 @@ where
                 // TODO: Remove this clone
                 let mut arc = arc.clone();
                 arc.weight = distance[state].times(&arc.weight)?;
-                if arc_filter.keep(&arc) {
+                if tr_filter.keep(&arc) {
                     while self.visited.len() <= arc.nextstate {
                         self.visited.push(false);
                     }
@@ -404,7 +404,7 @@ where
         let zero = F::W::zero();
 
         for arc in arcs.into_iter().rev() {
-            self.cache_impl.push_arc(state, arc)?;
+            self.cache_impl.push_tr(state, arc)?;
         }
         if final_weight != zero {
             self.cache_impl

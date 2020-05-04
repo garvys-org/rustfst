@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::algorithms::arc_filters::TrFilter;
+use crate::algorithms::tr_filters::TrFilter;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::visitors::SccVisitor;
 use crate::algorithms::{Queue, QueueType};
@@ -22,7 +22,7 @@ impl AutoQueue {
     pub fn new<F: ExpandedFst, A: TrFilter<F::W>>(
         fst: &F,
         distance: Option<&Vec<F::W>>,
-        arc_filter: &A,
+        tr_filter: &A,
     ) -> Result<Self>
     where
         F::W: 'static,
@@ -34,14 +34,14 @@ impl AutoQueue {
         if props.contains(FstProperties::TOP_SORTED) || fst.start().is_none() {
             queue = Box::new(StateOrderQueue::default());
         } else if props.contains(FstProperties::ACYCLIC) {
-            queue = Box::new(TopOrderQueue::new(fst, arc_filter));
+            queue = Box::new(TopOrderQueue::new(fst, tr_filter));
         } else if props.contains(FstProperties::UNWEIGHTED)
             && F::W::properties().contains(SemiringProperties::IDEMPOTENT)
         {
             queue = Box::new(LifoQueue::default());
         } else {
             let mut scc_visitor = SccVisitor::new(fst, true, false);
-            dfs_visit(fst, &mut scc_visitor, arc_filter, false);
+            dfs_visit(fst, &mut scc_visitor, tr_filter, false);
             let sccs: Vec<_> = scc_visitor
                 .scc
                 .unwrap()
@@ -70,7 +70,7 @@ impl AutoQueue {
                 &mut queue_types,
                 &mut all_trivial,
                 &mut unweighted,
-                arc_filter,
+                tr_filter,
             )?;
 
             if unweighted {
@@ -111,7 +111,7 @@ impl AutoQueue {
         queue_types: &mut Vec<QueueType>,
         all_trivial: &mut bool,
         unweighted: &mut bool,
-        arc_filter: &A,
+        tr_filter: &A,
     ) -> Result<()> {
         *all_trivial = true;
         *unweighted = true;
@@ -122,7 +122,7 @@ impl AutoQueue {
 
         for state in 0..fst.num_states() {
             for arc in unsafe { fst.arcs_iter_unchecked(state) } {
-                if !arc_filter.keep(arc) {
+                if !tr_filter.keep(arc) {
                     continue;
                 }
                 if sccs[state] == sccs[arc.nextstate] {

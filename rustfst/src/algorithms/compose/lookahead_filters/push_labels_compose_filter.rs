@@ -70,9 +70,9 @@ where
             return Ok(());
         }
         self.narcsa = if self.lookahead_output() {
-            self.fst1.num_arcs(s1)?
+            self.fst1.num_trs(s1)?
         } else {
-            self.fst2.num_arcs(s2)?
+            self.fst2.num_trs(s2)?
         };
         let fs2 = filter_state.state2();
         let flabel = fs2.state();
@@ -85,13 +85,13 @@ where
         Ok(())
     }
 
-    fn filter_arc(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
+    fn filter_tr(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
         if !self
             .lookahead_flags()
             .contains(MatcherFlags::LOOKAHEAD_PREFIX)
         {
             return Ok(FilterState::new((
-                self.filter.filter_arc(arc1, arc2)?,
+                self.filter.filter_tr(arc1, arc2)?,
                 FilterState::new(NO_LABEL),
             )));
         }
@@ -99,22 +99,22 @@ where
         let flabel = fs2.state();
         if *flabel != NO_LABEL {
             if self.lookahead_output() {
-                return self.pushed_label_filter_arc(arc1, arc2, *flabel);
+                return self.pushed_label_filter_tr(arc1, arc2, *flabel);
             } else {
-                return self.pushed_label_filter_arc(arc2, arc1, *flabel);
+                return self.pushed_label_filter_tr(arc2, arc1, *flabel);
             }
         }
-        let fs1 = self.filter.filter_arc(arc1, arc2)?;
+        let fs1 = self.filter.filter_tr(arc1, arc2)?;
         if fs1 == FilterState::new_no_state() {
             return Ok(FilterState::new_no_state());
         }
-        if !self.lookahead_arc() {
+        if !self.lookahead_tr() {
             return Ok(FilterState::new((fs1, FilterState::new(NO_LABEL))));
         }
         if self.lookahead_output() {
-            self.push_label_filter_arc(arc1, arc2, &fs1)
+            self.push_label_filter_tr(arc1, arc2, &fs1)
         } else {
-            self.push_label_filter_arc(arc2, arc1, &fs1)
+            self.push_label_filter_tr(arc2, arc1, &fs1)
         }
     }
 
@@ -151,7 +151,7 @@ where
     CF::M2: LookaheadMatcher<W>,
 {
     // Consumes an already pushed label.
-    fn pushed_label_filter_arc(
+    fn pushed_label_filter_tr(
         &self,
         arca: &mut Tr<W>,
         arcb: &mut Tr<W>,
@@ -199,7 +199,7 @@ where
     }
 
     // Pushes a label forward when possible.
-    fn push_label_filter_arc(
+    fn push_label_filter_tr(
         &self,
         arca: &mut Tr<W>,
         arcb: &mut Tr<W>,
@@ -255,8 +255,8 @@ where
         self.filter.lookahead_output()
     }
 
-    fn lookahead_arc(&self) -> bool {
-        self.filter.lookahead_arc()
+    fn lookahead_tr(&self) -> bool {
+        self.filter.lookahead_tr()
     }
 
     fn lookahead_flags(&self) -> MatcherFlags {

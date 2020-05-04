@@ -4,7 +4,7 @@ use anyhow::Result;
 use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::arc_mappers::{
+use crate::algorithms::tr_mappers::{
     IdentityTrMapper, InputEpsilonMapper, InvertWeightMapper, OutputEpsilonMapper, PlusMapper,
     QuantizeMapper, RmWeightMapper, TimesMapper,
 };
@@ -42,171 +42,171 @@ impl TrMapWithWeightOperationResult {
     }
 }
 
-pub fn test_arc_map_identity<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_tr_map_identity<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,
 {
     // TrMap IdentityMapper
-    let mut fst_arc_map_identity = test_data.raw.clone();
+    let mut fst_tr_map_identity = test_data.raw.clone();
     let mut identity_mapper = IdentityTrMapper {};
-    fst_arc_map_identity.arc_map(&mut identity_mapper)?;
+    fst_tr_map_identity.tr_map(&mut identity_mapper)?;
     assert_eq!(
-        test_data.arc_map_identity,
-        fst_arc_map_identity,
+        test_data.tr_map_identity,
+        fst_tr_map_identity,
         "{}",
         error_message_fst!(
-            test_data.arc_map_identity,
-            fst_arc_map_identity,
+            test_data.tr_map_identity,
+            fst_tr_map_identity,
             "TrMap identity"
         )
     );
     Ok(())
 }
 
-pub fn test_arc_map_invert<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_tr_map_invert<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
     // TrMap InvertWeightMapper
-    let mut fst_arc_map_invert = test_data.raw.clone();
+    let mut fst_tr_map_invert = test_data.raw.clone();
     let mut invertweight_mapper = InvertWeightMapper {};
-    fst_arc_map_invert.arc_map(&mut invertweight_mapper)?;
+    fst_tr_map_invert.tr_map(&mut invertweight_mapper)?;
     assert_eq!(
-        test_data.arc_map_invert,
-        fst_arc_map_invert,
+        test_data.tr_map_invert,
+        fst_tr_map_invert,
         "{}",
         error_message_fst!(
-            test_data.arc_map_invert,
-            fst_arc_map_invert,
+            test_data.tr_map_invert,
+            fst_tr_map_invert,
             "TrMap InvertWeight"
         )
     );
     Ok(())
 }
 
-pub fn test_arc_map_input_epsilon<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_tr_map_input_epsilon<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,
 {
-    let mut fst_arc_map = test_data.raw.clone();
+    let mut fst_tr_map = test_data.raw.clone();
     let mut mapper = InputEpsilonMapper {};
-    fst_arc_map.arc_map(&mut mapper)?;
+    fst_tr_map.tr_map(&mut mapper)?;
     assert_eq!(
-        test_data.arc_map_input_epsilon,
-        fst_arc_map,
+        test_data.tr_map_input_epsilon,
+        fst_tr_map,
         "{}",
         error_message_fst!(
-            test_data.arc_map_input_epsilon,
-            fst_arc_map,
+            test_data.tr_map_input_epsilon,
+            fst_tr_map,
             "TrMap InputEpsilonMapper"
         )
     );
     Ok(())
 }
 
-pub fn test_arc_map_output_epsilon<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_tr_map_output_epsilon<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,
 {
-    let mut fst_arc_map = test_data.raw.clone();
+    let mut fst_tr_map = test_data.raw.clone();
     let mut mapper = OutputEpsilonMapper {};
-    fst_arc_map.arc_map(&mut mapper)?;
+    fst_tr_map.tr_map(&mut mapper)?;
     assert_eq!(
-        test_data.arc_map_output_epsilon,
-        fst_arc_map,
+        test_data.tr_map_output_epsilon,
+        fst_tr_map,
         "{}",
         error_message_fst!(
-            test_data.arc_map_output_epsilon,
-            fst_arc_map,
+            test_data.tr_map_output_epsilon,
+            fst_tr_map,
             "TrMap OutputEpsilonMapper"
         )
     );
     Ok(())
 }
 
-pub fn test_arc_map_plus<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_tr_map_plus<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,
 {
-    let mut fst_arc_map = test_data.raw.clone();
-    let mut mapper = PlusMapper::from_weight(test_data.arc_map_plus.weight.clone());
-    fst_arc_map.arc_map(&mut mapper)?;
+    let mut fst_tr_map = test_data.raw.clone();
+    let mut mapper = PlusMapper::from_weight(test_data.tr_map_plus.weight.clone());
+    fst_tr_map.tr_map(&mut mapper)?;
     assert_eq!(
-        test_data.arc_map_plus.result,
-        fst_arc_map,
+        test_data.tr_map_plus.result,
+        fst_tr_map,
         "{}",
         error_message_fst!(
-            test_data.arc_map_plus.result,
-            fst_arc_map,
+            test_data.tr_map_plus.result,
+            fst_tr_map,
             "TrMap PlusMapper"
         )
     );
     Ok(())
 }
 
-pub fn test_arc_map_times<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_tr_map_times<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,
 {
-    let mut fst_arc_map = test_data.raw.clone();
-    let mut mapper = TimesMapper::from_weight(test_data.arc_map_times.weight.clone());
-    fst_arc_map.arc_map(&mut mapper)?;
+    let mut fst_tr_map = test_data.raw.clone();
+    let mut mapper = TimesMapper::from_weight(test_data.tr_map_times.weight.clone());
+    fst_tr_map.tr_map(&mut mapper)?;
     assert_eq!(
-        test_data.arc_map_times.result,
-        fst_arc_map,
+        test_data.tr_map_times.result,
+        fst_tr_map,
         "{}",
         error_message_fst!(
-            test_data.arc_map_times.result,
-            fst_arc_map,
+            test_data.tr_map_times.result,
+            fst_tr_map,
             "TrMap TimesMapper"
         )
     );
     Ok(())
 }
 
-pub fn test_arc_map_quantize<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_tr_map_quantize<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,
 {
-    let mut fst_arc_map = test_data.raw.clone();
+    let mut fst_tr_map = test_data.raw.clone();
     let mut mapper = QuantizeMapper {};
-    fst_arc_map.arc_map(&mut mapper)?;
+    fst_tr_map.tr_map(&mut mapper)?;
     assert_eq!(
-        test_data.arc_map_quantize,
-        fst_arc_map,
+        test_data.tr_map_quantize,
+        fst_tr_map,
         "{}",
         error_message_fst!(
-            test_data.arc_map_quantize,
-            fst_arc_map,
+            test_data.tr_map_quantize,
+            fst_tr_map,
             "TrMap QuantizeMapper"
         )
     );
     Ok(())
 }
 
-pub fn test_arc_map_rmweight<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_tr_map_rmweight<F>(test_data: &FstTestData<F>) -> Result<()>
 where
     F: SerializableFst + MutableFst + Display,
     F::W: SerializableSemiring + WeightQuantize,
 {
     // TrMap RmWeightMapper
-    let mut fst_arc_map_rmweight = test_data.raw.clone();
+    let mut fst_tr_map_rmweight = test_data.raw.clone();
     let mut rmweight_mapper = RmWeightMapper {};
-    fst_arc_map_rmweight.arc_map(&mut rmweight_mapper)?;
+    fst_tr_map_rmweight.tr_map(&mut rmweight_mapper)?;
     assert_eq!(
-        test_data.arc_map_rmweight,
-        fst_arc_map_rmweight,
+        test_data.tr_map_rmweight,
+        fst_tr_map_rmweight,
         "{}",
         error_message_fst!(
-            test_data.arc_map_rmweight,
-            fst_arc_map_rmweight,
+            test_data.tr_map_rmweight,
+            fst_tr_map_rmweight,
             "TrMap RmWeight"
         )
     );

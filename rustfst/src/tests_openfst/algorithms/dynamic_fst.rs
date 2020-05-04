@@ -21,11 +21,11 @@ where
                 fst_static.final_weight_unchecked(i)
             )
         };
-        assert_eq!(fst_dynamic.num_arcs(i)?, fst_static.num_arcs(i)?);
+        assert_eq!(fst_dynamic.num_trs(i)?, fst_static.num_trs(i)?);
         unsafe {
             assert_eq!(
-                fst_dynamic.num_arcs_unchecked(i),
-                fst_static.num_arcs_unchecked(i)
+                fst_dynamic.num_trs_unchecked(i),
+                fst_static.num_trs_unchecked(i)
             )
         };
 
@@ -45,7 +45,7 @@ where
                 data.state_id,
                 data.arcs.collect_vec(),
                 data.final_weight,
-                data.num_arcs,
+                data.num_trs,
             )
         })
         .collect_vec();
@@ -56,7 +56,7 @@ where
                 data.state_id,
                 data.arcs.collect_vec(),
                 data.final_weight,
-                data.num_arcs,
+                data.num_trs,
             )
         })
         .collect_vec();

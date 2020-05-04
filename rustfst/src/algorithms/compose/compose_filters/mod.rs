@@ -45,7 +45,7 @@ pub trait ComposeFilter<W: Semiring>: Debug {
 
     fn set_state(&mut self, s1: StateId, s2: StateId, filter_state: &Self::FS) -> Result<()>;
 
-    fn filter_arc(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS>;
+    fn filter_tr(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS>;
 
     fn filter_final(&self, w1: &mut W, w2: &mut W) -> Result<()>;
 

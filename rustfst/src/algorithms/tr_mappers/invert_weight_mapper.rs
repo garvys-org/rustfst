@@ -14,12 +14,12 @@ pub fn map_weight<W: WeaklyDivisibleSemiring>(weight: &mut W) -> Result<()> {
 }
 
 impl<S: WeaklyDivisibleSemiring> TrMapper<S> for InvertWeightMapper {
-    fn arc_map(&self, arc: &mut Tr<S>) -> Result<()> {
+    fn tr_map(&self, arc: &mut Tr<S>) -> Result<()> {
         map_weight(&mut arc.weight)
     }
 
-    fn final_arc_map(&self, final_arc: &mut FinalTr<S>) -> Result<()> {
-        map_weight(&mut final_arc.weight)
+    fn final_tr_map(&self, final_tr: &mut FinalTr<S>) -> Result<()> {
+        map_weight(&mut final_tr.weight)
     }
 
     fn final_action(&self) -> MapFinalAction {
@@ -31,5 +31,5 @@ impl<S> WeightConverter<S, S> for InvertWeightMapper
 where
     S: WeaklyDivisibleSemiring,
 {
-    arc_mapper_to_weight_convert_mapper_methods!(S);
+    tr_mapper_to_weight_convert_mapper_methods!(S);
 }

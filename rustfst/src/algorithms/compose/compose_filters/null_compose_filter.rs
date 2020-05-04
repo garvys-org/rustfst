@@ -44,7 +44,7 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W> for NullCompo
         Ok(())
     }
 
-    fn filter_arc(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
+    fn filter_tr(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
         let res = if arc1.olabel == NO_LABEL || arc2.ilabel == NO_LABEL {
             Self::FS::new_no_state()
         } else {

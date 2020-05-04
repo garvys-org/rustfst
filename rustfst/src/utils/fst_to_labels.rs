@@ -37,7 +37,7 @@ pub fn decode_linear_fst<F: Fst>(fst: &F) -> Result<FstPath<F::W>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::arc::Tr;
+    use crate::tr::Tr;
     use crate::fst_impls::VectorFst;
     use crate::fst_traits::MutableFst;
     use crate::semirings::{BooleanWeight, Semiring};
@@ -99,8 +99,8 @@ mod tests {
         let s2 = fst.add_state();
         fst.set_start(s1)?;
         fst.set_final(s2, BooleanWeight::one())?;
-        fst.add_arc(s1, Tr::new(10, 10, BooleanWeight::one(), s2))?;
-        fst.add_arc(s1, Tr::new(10, 10, BooleanWeight::one(), s2))?;
+        fst.add_tr(s1, Tr::new(10, 10, BooleanWeight::one(), s2))?;
+        fst.add_tr(s1, Tr::new(10, 10, BooleanWeight::one(), s2))?;
 
         assert!(decode_linear_fst(&fst).is_err());
         Ok(())

@@ -1,4 +1,4 @@
-use crate::arc::Tr;
+use crate::tr::Tr;
 use crate::fst_traits::{CoreFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::Label;
@@ -34,9 +34,9 @@ use std::cmp;
 /// fst_ref.set_start(s1).unwrap();
 /// fst_ref.set_final(s4, ProbabilityWeight::one()).unwrap();
 ///
-/// fst_ref.add_arc(s1, Tr::new(labels_input[0], labels_output[0], ProbabilityWeight::one(), s2)).unwrap();
-/// fst_ref.add_arc(s2, Tr::new(labels_input[1], labels_output[1], ProbabilityWeight::one(), s3)).unwrap();
-/// fst_ref.add_arc(s3, Tr::new(labels_input[2], labels_output[2], ProbabilityWeight::one(), s4)).unwrap();
+/// fst_ref.add_tr(s1, Tr::new(labels_input[0], labels_output[0], ProbabilityWeight::one(), s2)).unwrap();
+/// fst_ref.add_tr(s2, Tr::new(labels_input[1], labels_output[1], ProbabilityWeight::one(), s3)).unwrap();
+/// fst_ref.add_tr(s3, Tr::new(labels_input[2], labels_output[2], ProbabilityWeight::one(), s4)).unwrap();
 ///
 /// assert_eq!(fst, fst_ref);
 /// ```
@@ -60,7 +60,7 @@ pub fn transducer<F: MutableFst>(
         let new_state = fst.add_state();
 
         // Can't fail as the state has just been added
-        fst.add_arc(
+        fst.add_tr(
             state_cour,
             Tr::new(*i, *o, <F as CoreFst>::W::one(), new_state),
         )
@@ -104,9 +104,9 @@ pub fn transducer<F: MutableFst>(
 /// fst_ref.set_start(s1).unwrap();
 /// fst_ref.set_final(s4, ProbabilityWeight::one()).unwrap();
 ///
-/// fst_ref.add_arc(s1, Tr::new(labels[0], labels[0], ProbabilityWeight::one(), s2)).unwrap();
-/// fst_ref.add_arc(s2, Tr::new(labels[1], labels[1], ProbabilityWeight::one(), s3)).unwrap();
-/// fst_ref.add_arc(s3, Tr::new(labels[2], labels[2], ProbabilityWeight::one(), s4)).unwrap();
+/// fst_ref.add_tr(s1, Tr::new(labels[0], labels[0], ProbabilityWeight::one(), s2)).unwrap();
+/// fst_ref.add_tr(s2, Tr::new(labels[1], labels[1], ProbabilityWeight::one(), s3)).unwrap();
+/// fst_ref.add_tr(s3, Tr::new(labels[2], labels[2], ProbabilityWeight::one(), s4)).unwrap();
 ///
 /// assert_eq!(fst, fst_ref);
 ///
@@ -122,7 +122,7 @@ pub fn acceptor<F: MutableFst>(labels: &[Label], weight: F::W) -> F {
         let new_state = fst.add_state();
 
         // Can't fail as the state has just been added
-        fst.add_arc(
+        fst.add_tr(
             state_cour,
             Tr::new(*l, *l, <F as CoreFst>::W::one(), new_state),
         )

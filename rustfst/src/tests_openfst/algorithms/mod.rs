@@ -1,5 +1,5 @@
-pub mod arc_map;
-pub mod arcsort;
+pub mod tr_map;
+pub mod tr_sort;
 pub mod closure;
 pub mod compose;
 pub mod concat;

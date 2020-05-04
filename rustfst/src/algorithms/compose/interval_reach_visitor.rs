@@ -40,7 +40,7 @@ impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
             if !final_weight.is_zero() {
                 let interval_set = &mut self.isets[s];
                 if self.index == UNASSIGNED {
-                    if self.fst.num_arcs(s).unwrap() > 0 {
+                    if self.fst.num_trs(s).unwrap() > 0 {
                         panic!("IntervalReachVisitor: state2index map must be empty for this FST")
                     }
                     let index = self.state2index[s];
@@ -59,24 +59,24 @@ impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
     }
 
     /// Invoked when tree arc to white/undiscovered state examined.
-    fn tree_arc(&mut self, _s: StateId, _arc: &Tr<F::W>) -> bool {
+    fn tree_tr(&mut self, _s: StateId, _tr: &Tr<F::W>) -> bool {
         true
     }
 
     /// Invoked when back arc to grey/unfinished state examined.
-    fn back_arc(&mut self, _s: StateId, _arc: &Tr<F::W>) -> bool {
+    fn back_tr(&mut self, _s: StateId, _tr: &Tr<F::W>) -> bool {
         panic!("Cyclic input")
     }
 
     /// Invoked when forward or cross arc to black/finished state examined.
-    fn forward_or_cross_arc(&mut self, s: StateId, arc: &Tr<F::W>) -> bool {
+    fn forward_or_cross_tr(&mut self, s: StateId, arc: &Tr<F::W>) -> bool {
         union_vec_isets_unordered(&mut self.isets, s, arc.nextstate);
         true
     }
 
     /// Invoked when state finished ('s' is tree root, 'parent' is kNoStateId,
     /// and 'arc' is nullptr).
-    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, _arc: Option<&Tr<F::W>>) {
+    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, _tr: Option<&Tr<F::W>>) {
         if self.index != UNASSIGNED
             && self.fst.is_final(s).unwrap()
             && !self.fst.final_weight(s).unwrap().unwrap().is_zero()

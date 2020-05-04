@@ -23,7 +23,7 @@ impl<W> ConstFst<W> {
         0..self.states.len()
     }
 
-    fn arc_range(&self, state: &ConstState<W>) -> Range<usize> {
+    fn tr_range(&self, state: &ConstState<W>) -> Range<usize> {
         state.pos..state.pos + state.narcs
     }
 }
@@ -35,12 +35,12 @@ impl<'a, W: 'static + Semiring> TrIterator<'a> for ConstFst<W> {
             .states
             .get(state_id)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
-        Ok(self.arcs[self.arc_range(state)].iter())
+        Ok(self.arcs[self.tr_range(state)].iter())
     }
 
     unsafe fn arcs_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
         let state = self.states.get_unchecked(state_id);
-        self.arcs[self.arc_range(state)].iter()
+        self.arcs[self.tr_range(state)].iter()
     }
 }
 
@@ -71,7 +71,7 @@ where
                     state_id,
                     arcs: arcs_from_state.into_iter(),
                     final_weight: const_state.final_weight,
-                    num_arcs: const_state.narcs,
+                    num_trs: const_state.narcs,
                 }),
         )
     }
@@ -102,7 +102,7 @@ impl<'a, W: Semiring + 'static> FstIterator<'a> for ConstFst<W> {
                     state_id,
                     arcs: arcs.iter().skip(fst_state.pos).take(fst_state.narcs),
                     final_weight: fst_state.final_weight.as_ref(),
-                    num_arcs: fst_state.narcs,
+                    num_trs: fst_state.narcs,
                 }
             },
         ))

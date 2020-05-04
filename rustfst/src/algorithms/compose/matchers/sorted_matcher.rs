@@ -74,7 +74,7 @@ impl<W: Semiring + 'static, F: ExpandedFst<W = W>> Matcher<W> for SortedMatcher<
     }
 
     fn priority(&self, state: StateId) -> Result<usize> {
-        self.fst.num_arcs(state)
+        self.fst.num_trs(state)
     }
 
     fn fst(&self) -> Rc<Self::F> {
@@ -204,7 +204,7 @@ where
         unreachable!()
     }
 
-    fn lookahead_prefix(&self, _arc: &mut Tr<<F as CoreFst>::W>) -> bool {
+    fn lookahead_prefix(&self, _tr: &mut Tr<<F as CoreFst>::W>) -> bool {
         unreachable!()
     }
 
@@ -212,11 +212,11 @@ where
         unreachable!()
     }
 
-    fn prefix_arc(&self) -> &Tr<<F as CoreFst>::W> {
+    fn prefix_tr(&self) -> &Tr<<F as CoreFst>::W> {
         unreachable!()
     }
 
-    fn prefix_arc_mut(&mut self) -> &mut Tr<<F as CoreFst>::W> {
+    fn prefix_tr_mut(&mut self) -> &mut Tr<<F as CoreFst>::W> {
         unreachable!()
     }
 
