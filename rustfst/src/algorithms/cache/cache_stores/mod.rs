@@ -9,6 +9,7 @@ mod gc_cache_store;
 mod gc_cache_store_2;
 mod vector_cache_store;
 mod vector_cache_store_2;
+mod cache_impl;
 
 #[derive(Clone, Debug, PartialOrd, PartialEq, Eq)]
 pub struct DefaultCacheStore<W>(VectorCacheStore<W>);
@@ -45,7 +46,7 @@ pub trait CacheStore<W> {
 
 pub trait CacheStore2<W> {
     fn new(opts: &CacheOptions) -> Self;
-    fn get_state(&self, s: StateId) -> *const CacheState<W>;
+    fn get_state(&mut self, s: StateId) -> *mut CacheState<W>;
     fn get_mutable_state(&mut self, s: StateId) -> *mut CacheState<W>;
 
     fn add_arc(&mut self, state: *mut CacheState<W>, arc: Arc<W>);

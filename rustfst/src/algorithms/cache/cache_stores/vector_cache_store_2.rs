@@ -27,15 +27,15 @@ impl<W> CacheStore2<W> for VectorCacheStore2<W> {
         }
     }
 
-    fn get_state(&self, s: usize) -> *const CacheState<W> {
+    fn get_state(&mut self, s: usize) -> *mut CacheState<W> {
         if self.in_bounds(s) {
-            let a = &self.state_vec[s];
+            let a = &mut self.state_vec[s];
             match a {
-                Some(e) => e as *const CacheState<W>,
-                None => std::ptr::null(),
+                Some(e) => e as *mut CacheState<W>,
+                None => std::ptr::null_mut(),
             }
         } else {
-            std::ptr::null()
+            std::ptr::null_mut()
         }
     }
 

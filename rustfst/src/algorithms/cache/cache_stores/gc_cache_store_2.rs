@@ -31,7 +31,7 @@ impl<W, S: CacheStore2<W>> GCCacheStore2<W, S> {
         }
     }
 
-    pub fn get_state(&self, s: StateId) -> *const CacheState<W> {
+    pub fn get_state(&mut self, s: StateId) -> *mut CacheState<W> {
         self.store.get_state(s)
     }
 
