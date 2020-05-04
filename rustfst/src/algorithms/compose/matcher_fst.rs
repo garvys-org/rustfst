@@ -10,7 +10,7 @@ use crate::algorithms::compose::matchers::MatchType;
 use crate::algorithms::compose::FstAddOn;
 use crate::algorithms::compose::LabelReachableData;
 use crate::fst_traits::{
-    TrIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, MutableFst, StateIterator,
+    CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, MutableFst, StateIterator, TrIterator,
 };
 use crate::SymbolTable;
 

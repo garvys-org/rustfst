@@ -2,7 +2,7 @@ use crate::algorithms::compose::{IntInterval, IntervalSet};
 use crate::algorithms::dfs_visit::Visitor;
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
-use crate::{Tr, StateId};
+use crate::{StateId, Tr};
 
 static UNASSIGNED: usize = std::usize::MAX;
 

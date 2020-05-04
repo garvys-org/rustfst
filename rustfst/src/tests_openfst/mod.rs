@@ -65,13 +65,6 @@ use crate::tests_openfst::io::vector_fst_text_serialization::{
 };
 
 use self::algorithms::{
-    tr_map::{
-        test_tr_map_identity, test_tr_map_input_epsilon, test_tr_map_invert,
-        test_tr_map_output_epsilon, test_tr_map_plus, test_tr_map_quantize,
-        test_tr_map_rmweight, test_tr_map_times, TrMapWithWeightOperationResult,
-        TrMapWithWeightTestData,
-    },
-    tr_sort::{test_trsort_ilabel, test_trsort_olabel},
     compose::test_compose,
     connect::test_connect,
     // determinize::{test_determinize, DeterminizeOperationResult, DeterminizeTestData},
@@ -90,6 +83,12 @@ use self::algorithms::{
     shortest_path::{test_shortest_path, ShorestPathOperationResult, ShortestPathTestData},
     state_map::{test_state_map_tr_sum, test_state_map_tr_unique},
     topsort::test_topsort,
+    tr_map::{
+        test_tr_map_identity, test_tr_map_input_epsilon, test_tr_map_invert,
+        test_tr_map_output_epsilon, test_tr_map_plus, test_tr_map_quantize, test_tr_map_rmweight,
+        test_tr_map_times, TrMapWithWeightOperationResult, TrMapWithWeightTestData,
+    },
+    tr_sort::{test_trsort_ilabel, test_trsort_olabel},
     union::{UnionOperationResult, UnionTestData},
     weight_pushing::{test_weight_pushing_final, test_weight_pushing_initial},
 };

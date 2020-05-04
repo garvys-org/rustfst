@@ -7,13 +7,11 @@ use crate::fst_impls::vector_fst::{VectorFst, VectorFstState};
 use crate::fst_traits::MutableFst;
 use crate::fst_traits::{CoreFst, MutableTrIterator};
 use crate::semirings::Semiring;
-use crate::{Tr, StateId};
+use crate::{StateId, Tr};
 
 #[inline]
 fn equal_tr<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> bool {
-    tr_1.ilabel == tr_2.ilabel
-        && tr_1.olabel == tr_2.olabel
-        && tr_1.nextstate == tr_2.nextstate
+    tr_1.ilabel == tr_2.ilabel && tr_1.olabel == tr_2.olabel && tr_1.nextstate == tr_2.nextstate
 }
 
 impl<W: 'static + Semiring> MutableFst for VectorFst<W> {

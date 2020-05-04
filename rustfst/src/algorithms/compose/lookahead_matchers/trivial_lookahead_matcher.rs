@@ -7,7 +7,7 @@ use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
-use crate::{Tr, Label, StateId, NO_STATE_ID};
+use crate::{Label, StateId, Tr, NO_STATE_ID};
 
 #[derive(Debug)]
 pub struct TrivialLookAheadMatcher<W, M> {

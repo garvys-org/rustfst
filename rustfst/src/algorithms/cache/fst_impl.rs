@@ -7,7 +7,7 @@ use anyhow::Result;
 use crate::algorithms::cache::CacheImpl;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Tr, StateId};
+use crate::{StateId, Tr};
 
 pub trait FstImpl: Debug {
     type W: Semiring + 'static;

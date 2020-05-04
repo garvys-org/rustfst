@@ -1,7 +1,7 @@
 use anyhow::Result;
 
-use crate::algorithms::tr_filters::TrFilter;
 use crate::algorithms::dfs_visit::dfs_visit;
+use crate::algorithms::tr_filters::TrFilter;
 use crate::algorithms::visitors::SccVisitor;
 use crate::algorithms::{Queue, QueueType};
 use crate::fst_properties::FstProperties;

@@ -1,12 +1,12 @@
 use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
+use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::fst_traits::Fst;
 use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
-use crate::Tr;
 use crate::StateId;
+use crate::Tr;
 use crate::NO_STATE_ID;
 
 /// This operation trims an FST, removing states and arcs that are not on successful paths.

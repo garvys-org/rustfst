@@ -1,8 +1,8 @@
 use crate::algorithms::tr_filters::TrFilter;
 use crate::algorithms::tr_filters::{InputEpsilonTrFilter, OutputEpsilonTrFilter};
-use crate::tr::Tr;
 use crate::semirings::Semiring;
 use crate::symbol_table::SymbolTable;
+use crate::tr::Tr;
 use crate::StateId;
 use std::rc::Rc;
 

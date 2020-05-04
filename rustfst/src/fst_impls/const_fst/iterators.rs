@@ -13,10 +13,10 @@ use itertools::{izip, repeat_n, RepeatN};
 use crate::fst_impls::const_fst::data_structure::ConstState;
 use crate::fst_impls::ConstFst;
 use crate::fst_traits::FstIterData;
-use crate::fst_traits::{TrIterator, FstIntoIterator, FstIterator, StateIterator};
+use crate::fst_traits::{FstIntoIterator, FstIterator, StateIterator, TrIterator};
 use crate::semirings::Semiring;
-use crate::Tr;
 use crate::StateId;
+use crate::Tr;
 
 impl<W> ConstFst<W> {
     fn state_range(&self) -> Range<usize> {

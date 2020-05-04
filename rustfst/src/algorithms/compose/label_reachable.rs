@@ -6,14 +6,14 @@ use std::rc::Rc;
 use anyhow::Result;
 use itertools::Itertools;
 
-use crate::algorithms::tr_compares::{ilabel_compare, olabel_compare};
 use crate::algorithms::compose::{IntervalSet, StateReachable};
-use crate::algorithms::{tr_sort, fst_convert_from_ref};
+use crate::algorithms::tr_compares::{ilabel_compare, olabel_compare};
+use crate::algorithms::{fst_convert_from_ref, tr_sort};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableTrIterator, MutableFst};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, MutableTrIterator};
 use crate::semirings::Semiring;
-use crate::{Tr, Label, StateId, EPS_LABEL, NO_LABEL, UNASSIGNED};
+use crate::{Label, StateId, Tr, EPS_LABEL, NO_LABEL, UNASSIGNED};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelReachableData {

@@ -5,7 +5,7 @@ use anyhow::Result;
 
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{Tr, StateId};
+use crate::{StateId, Tr};
 
 struct Isomorphism<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> {
     fst_1: &'a F1,

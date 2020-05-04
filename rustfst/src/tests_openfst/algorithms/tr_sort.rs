@@ -24,11 +24,7 @@ where
         test_data.tr_sort_ilabel,
         fst_trsort,
         "{}",
-        error_message_fst!(
-            test_data.tr_map_output_epsilon,
-            fst_trsort,
-            "TrSort ilabel"
-        )
+        error_message_fst!(test_data.tr_map_output_epsilon, fst_trsort, "TrSort ilabel")
     );
     Ok(())
 }
@@ -47,11 +43,7 @@ where
         test_data.tr_sort_olabel,
         fst_trsort,
         "{}",
-        error_message_fst!(
-            test_data.tr_map_output_epsilon,
-            fst_trsort,
-            "TrSort olabel"
-        )
+        error_message_fst!(test_data.tr_map_output_epsilon, fst_trsort, "TrSort olabel")
     );
     Ok(())
 }

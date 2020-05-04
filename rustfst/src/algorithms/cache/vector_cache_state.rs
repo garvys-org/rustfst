@@ -2,8 +2,8 @@ use std::slice::Iter as IterSlice;
 
 use crate::algorithms::cache::CacheState;
 use crate::semirings::Semiring;
-use crate::Tr;
 use crate::StateId;
+use crate::Tr;
 
 #[derive(Clone, Debug, PartialOrd, PartialEq, Eq)]
 pub struct VectorCacheState<W> {

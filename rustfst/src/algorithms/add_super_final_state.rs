@@ -1,6 +1,6 @@
 use crate::fst_traits::{FinalStatesIterator, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Tr, StateId, EPS_LABEL};
+use crate::{StateId, Tr, EPS_LABEL};
 use unsafe_unwrap::UnsafeUnwrap;
 
 /// Add, if needed, a super final state to the given FST. The super final state

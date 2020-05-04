@@ -2,8 +2,8 @@ use std::fs::{read, File};
 use std::io::BufWriter;
 use std::path::Path;
 
-use anyhow::Result;
 use anyhow::Context;
+use anyhow::Result;
 use itertools::Itertools;
 use nom::bytes::complete::take;
 use nom::multi::count;
@@ -14,9 +14,7 @@ use crate::fst_impls::const_fst::data_structure::ConstState;
 use crate::fst_impls::ConstFst;
 use crate::fst_traits::{ExpandedFst, Fst, SerializableFst};
 use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FST_MAGIC_NUMBER};
-use crate::parsers::bin_fst::utils_parsing::{
-    parse_final_weight, parse_fst_tr, parse_start_state,
-};
+use crate::parsers::bin_fst::utils_parsing::{parse_final_weight, parse_fst_tr, parse_start_state};
 use crate::parsers::bin_fst::utils_serialization::write_bin_i32;
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::SerializableSemiring;

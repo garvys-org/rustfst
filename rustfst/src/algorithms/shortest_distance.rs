@@ -2,8 +2,8 @@ use std::marker::PhantomData;
 
 use anyhow::Result;
 
-use crate::algorithms::tr_filters::{AnyTrFilter, TrFilter};
 use crate::algorithms::queues::AutoQueue;
+use crate::algorithms::tr_filters::{AnyTrFilter, TrFilter};
 use crate::algorithms::Queue;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ExpandedFst, MutableFst};

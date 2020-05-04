@@ -9,7 +9,6 @@ use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::factor_iterators::{GallicFactor, GallicFactorMin, GallicFactorRestrict};
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::algorithms::{factor_weight, weight_convert, FactorWeightOptions, FactorWeightType};
-use crate::tr::Tr;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{
@@ -17,6 +16,7 @@ use crate::semirings::{
     SemiringProperties, StringWeightLeft, StringWeightRestrict, WeaklyDivisibleSemiring,
     WeightQuantize,
 };
+use crate::tr::Tr;
 use crate::{Label, StateId, EPS_LABEL, KDELTA};
 
 /// Determinization type.
@@ -479,9 +479,9 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::tr::Tr;
     use crate::fst_impls::VectorFst;
     use crate::semirings::TropicalWeight;
+    use crate::tr::Tr;
 
     use super::*;
 

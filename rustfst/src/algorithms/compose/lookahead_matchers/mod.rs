@@ -4,20 +4,20 @@ use std::rc::Rc;
 
 use anyhow::Result;
 
-pub use tr_lookahead_matcher::TrLookAheadMatcher;
 pub use label_lookahead_matcher::LabelLookAheadMatcher;
 pub use label_lookahead_relabeler::LabelLookAheadRelabeler;
+pub use tr_lookahead_matcher::TrLookAheadMatcher;
 pub use trivial_lookahead_matcher::TrivialLookAheadMatcher;
 
 use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{Tr, Label, StateId, NO_STATE_ID};
+use crate::{Label, StateId, Tr, NO_STATE_ID};
 
-mod tr_lookahead_matcher;
 mod label_lookahead_matcher;
 pub mod label_lookahead_relabeler;
+mod tr_lookahead_matcher;
 mod trivial_lookahead_matcher;
 
 pub trait MatcherFlagsTrait: Debug {

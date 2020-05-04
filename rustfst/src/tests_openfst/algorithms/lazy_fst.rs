@@ -1,5 +1,5 @@
-use counter::Counter;
 use anyhow::Result;
+use counter::Counter;
 use itertools::Itertools;
 
 use crate::fst_traits::{ExpandedFst, Fst};

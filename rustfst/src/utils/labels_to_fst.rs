@@ -1,6 +1,6 @@
-use crate::tr::Tr;
 use crate::fst_traits::{CoreFst, MutableFst};
 use crate::semirings::Semiring;
+use crate::tr::Tr;
 use crate::Label;
 
 use std::cmp;

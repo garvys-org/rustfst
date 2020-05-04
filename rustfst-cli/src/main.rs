@@ -1,10 +1,9 @@
 use std::process;
 
-use clap::{App, Arg, SubCommand};
 use anyhow::{format_err, Result};
+use clap::{App, Arg, SubCommand};
 use log::error;
 
-use crate::cmds::tr_sort::TrsortAlgorithm;
 use crate::cmds::connect::ConnectAlgorithm;
 use crate::cmds::invert::InvertAlgorithm;
 use crate::cmds::map::MapAlgorithm;
@@ -15,6 +14,7 @@ use crate::cmds::reverse::ReverseAlgorithm;
 use crate::cmds::rm_final_epsilon::RmFinalEpsilonAlgorithm;
 use crate::cmds::shortest_path::ShortestPathAlgorithm;
 use crate::cmds::topsort::TopsortAlgorithm;
+use crate::cmds::tr_sort::TrsortAlgorithm;
 use crate::unary_fst_algorithm::UnaryFstAlgorithm;
 
 pub mod cmds;

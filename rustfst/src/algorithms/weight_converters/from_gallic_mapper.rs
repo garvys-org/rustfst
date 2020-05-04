@@ -3,7 +3,7 @@ use crate::semirings::{
     GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, GallicWeightRight,
     Semiring, StringWeightVariant,
 };
-use crate::{Tr, Label, EPS_LABEL};
+use crate::{Label, Tr, EPS_LABEL};
 use anyhow::Result;
 
 /// Mapper from GallicWeight<W> to W.

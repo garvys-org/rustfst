@@ -3,9 +3,9 @@ use std::collections::HashSet;
 use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::algorithms::connect;
 use crate::algorithms::dfs_visit::dfs_visit;
+use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::algorithms::visitors::SccVisitor;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;

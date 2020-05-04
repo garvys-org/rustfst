@@ -1,10 +1,10 @@
 use crate::algorithms::ReplaceFst;
-use crate::tr::Tr;
 use crate::fst_traits::{
-    AllocableFst, TrIterator, CoreFst, FinalStatesIterator, Fst, FstIterator, MutableFst,
-    StateIterator,
+    AllocableFst, CoreFst, FinalStatesIterator, Fst, FstIterator, MutableFst, StateIterator,
+    TrIterator,
 };
 use crate::semirings::Semiring;
+use crate::tr::Tr;
 use crate::{SymbolTable, EPS_LABEL};
 use anyhow::Result;
 use std::rc::Rc;

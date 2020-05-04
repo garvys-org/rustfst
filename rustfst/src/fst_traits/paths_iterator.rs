@@ -81,10 +81,10 @@ mod tests {
 
     use counter::Counter;
 
-    use crate::tr::Tr;
     use crate::fst_impls::VectorFst;
     use crate::fst_traits::MutableFst;
     use crate::semirings::{IntegerWeight, Semiring};
+    use crate::tr::Tr;
     use crate::utils::acceptor;
 
     #[test]

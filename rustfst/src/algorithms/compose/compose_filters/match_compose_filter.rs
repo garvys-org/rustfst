@@ -5,7 +5,7 @@ use crate::algorithms::compose::filter_states::{FilterState, IntegerFilterState}
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
-use crate::{Tr, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
+use crate::{StateId, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 use std::cell::RefCell;
 use std::rc::Rc;
 

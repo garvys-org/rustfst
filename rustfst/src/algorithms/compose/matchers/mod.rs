@@ -9,8 +9,8 @@ pub use sorted_matcher::SortedMatcher;
 
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{Tr, EPS_LABEL, NO_LABEL};
 use crate::{Label, StateId};
+use crate::{Tr, EPS_LABEL, NO_LABEL};
 use std::rc::Rc;
 
 mod generic_matcher;

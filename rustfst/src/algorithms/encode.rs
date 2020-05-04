@@ -1,13 +1,13 @@
 use std::cell::RefCell;
 use std::collections::hash_map::{Entry, HashMap};
 
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 
-use crate::algorithms::{rm_final_epsilon, TrMapper, FinalTr, MapFinalAction};
+use crate::algorithms::{rm_final_epsilon, FinalTr, MapFinalAction, TrMapper};
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
-use crate::Tr;
 use crate::Label;
+use crate::Tr;
 use crate::EPS_LABEL;
 
 #[derive(PartialEq, Eq, Hash, Clone)]

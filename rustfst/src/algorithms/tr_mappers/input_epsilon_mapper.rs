@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::algorithms::{TrMapper, FinalTr, MapFinalAction, WeightConverter};
+use crate::algorithms::{FinalTr, MapFinalAction, TrMapper, WeightConverter};
 use crate::semirings::Semiring;
 use crate::Tr;
 use crate::EPS_LABEL;

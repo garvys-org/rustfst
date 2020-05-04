@@ -2,9 +2,9 @@ use std::fs::File;
 use std::io::Write;
 use std::time::{Duration, Instant};
 
+use anyhow::Result;
 use clap::ArgMatches;
 use colored::Colorize;
-use anyhow::Result;
 use log::{debug, info};
 
 use rustfst::prelude::*;

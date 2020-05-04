@@ -3,8 +3,8 @@ use std::rc::Rc;
 
 use anyhow::Result;
 
-use crate::algorithms::tr_filters::{TrFilter, InputEpsilonTrFilter, OutputEpsilonTrFilter};
-use crate::fst_traits::iterators::{TrIterator, StateIterator};
+use crate::algorithms::tr_filters::{InputEpsilonTrFilter, OutputEpsilonTrFilter, TrFilter};
+use crate::fst_traits::iterators::{StateIterator, TrIterator};
 use crate::fst_traits::FstIterator;
 use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable};

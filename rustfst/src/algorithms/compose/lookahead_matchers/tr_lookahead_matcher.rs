@@ -9,7 +9,7 @@ use crate::algorithms::compose::lookahead_matchers::{LookaheadMatcher, MatcherFl
 use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::semirings::Semiring;
-use crate::{Tr, Label, StateId, EPS_LABEL, NO_LABEL, NO_STATE_ID};
+use crate::{Label, StateId, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
 #[derive(Debug)]
 pub struct TrLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {

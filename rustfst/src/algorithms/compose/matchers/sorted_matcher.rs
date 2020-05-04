@@ -9,7 +9,7 @@ use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, 
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst};
 use crate::semirings::Semiring;
-use crate::{Tr, Label, StateId, EPS_LABEL, NO_LABEL};
+use crate::{Label, StateId, Tr, EPS_LABEL, NO_LABEL};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SortedMatcher<F: ExpandedFst> {

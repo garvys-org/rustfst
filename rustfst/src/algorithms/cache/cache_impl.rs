@@ -3,8 +3,8 @@ use std::slice::Iter as IterSlice;
 use anyhow::Result;
 
 use crate::algorithms::cache::VectorCacheState;
-use crate::Tr;
 use crate::StateId;
+use crate::Tr;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Eq)]
 pub struct CacheImpl<W> {

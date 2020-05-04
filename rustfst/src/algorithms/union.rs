@@ -4,12 +4,12 @@ use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::ReplaceFst;
-use crate::tr::Tr;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{
-    AllocableFst, TrIterator, CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator,
+    AllocableFst, CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator, TrIterator,
 };
 use crate::semirings::Semiring;
+use crate::tr::Tr;
 use crate::{SymbolTable, EPS_LABEL};
 
 /// Performs the union of two wFSTs. If A transduces string `x` to `y` with weight `a`
@@ -103,9 +103,7 @@ where
     } else {
         let nstart1 = fst_1.add_state();
         unsafe { fst_1.set_start_unchecked(nstart1) };
-        unsafe {
-            fst_1.add_tr_unchecked(nstart1, Tr::new(EPS_LABEL, EPS_LABEL, W::one(), start1))
-        };
+        unsafe { fst_1.add_tr_unchecked(nstart1, Tr::new(EPS_LABEL, EPS_LABEL, W::one(), start1)) };
         unsafe {
             fst_1.add_tr_unchecked(
                 nstart1,

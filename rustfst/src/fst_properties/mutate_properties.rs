@@ -1,8 +1,8 @@
 use crate::algorithms::ProjectType;
 use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
-use crate::Tr;
 use crate::StateId;
+use crate::Tr;
 
 pub fn set_start_properties(inprops: FstProperties) -> FstProperties {
     let mut outprops = inprops & FstProperties::SET_START_PROPERTIES;

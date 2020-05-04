@@ -1,11 +1,11 @@
 use anyhow::Result;
 
-use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
 use crate::algorithms::state_sort;
+use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
-use crate::Tr;
 use crate::StateId;
+use crate::Tr;
 
 pub struct TopOrderVisitor {
     pub order: Vec<StateId>,

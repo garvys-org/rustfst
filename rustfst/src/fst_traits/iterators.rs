@@ -1,7 +1,7 @@
 use anyhow::Result;
 
-use crate::tr::Tr;
 use crate::fst_traits::CoreFst;
+use crate::tr::Tr;
 use crate::StateId;
 
 /// Trait to iterate over the states of a wFST.

@@ -1,6 +1,6 @@
-use crate::tr::Tr;
-use crate::fst_traits::{TrIterator, ExpandedFst, Fst};
+use crate::fst_traits::{ExpandedFst, Fst, TrIterator};
 use crate::semirings::Semiring;
+use crate::tr::Tr;
 use crate::StateId;
 
 use crate::algorithms::tr_filters::TrFilter;

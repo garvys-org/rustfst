@@ -4,21 +4,21 @@ use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
-use binary_heap_plus::BinaryHeap;
 use anyhow::Result;
+use binary_heap_plus::BinaryHeap;
 use stable_bst::TreeMap;
 
-use crate::algorithms::tr_compares::ilabel_compare;
-use crate::algorithms::tr_mappers::QuantizeMapper;
-use crate::algorithms::tr_unique;
 use crate::algorithms::factor_iterators::GallicFactorLeft;
 use crate::algorithms::partition::Partition;
 use crate::algorithms::queues::LifoQueue;
 use crate::algorithms::reverse;
+use crate::algorithms::tr_compares::ilabel_compare;
+use crate::algorithms::tr_mappers::QuantizeMapper;
+use crate::algorithms::tr_unique;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::algorithms::Queue;
 use crate::algorithms::{
-    tr_map, tr_sort, connect, decode, encode, factor_weight, push_weights, weight_convert,
+    connect, decode, encode, factor_weight, push_weights, tr_map, tr_sort, weight_convert,
     FactorWeightOptions, FactorWeightType, ReweightType,
 };
 use crate::fst_impls::VectorFst;
@@ -28,8 +28,8 @@ use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{
     GallicWeightLeft, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::Tr;
 use crate::StateId;
+use crate::Tr;
 use crate::EPS_LABEL;
 use crate::KDELTA;
 use crate::NO_STATE_ID;

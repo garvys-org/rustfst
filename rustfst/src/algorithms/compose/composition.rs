@@ -18,7 +18,7 @@ use crate::algorithms::compose::matchers::{Matcher, MatcherFlags};
 use crate::algorithms::lazy_fst::LazyFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Tr, StateId, EPS_LABEL, NO_LABEL};
+use crate::{StateId, Tr, EPS_LABEL, NO_LABEL};
 
 pub struct ComposeFstImplOptions<M1, M2, CF, ST> {
     matcher1: Option<Rc<RefCell<M1>>>,

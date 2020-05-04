@@ -68,16 +68,14 @@ where
             let mapped_final_tr = mapper.final_tr_map(&final_tr)?;
             match final_action {
                 MapFinalAction::MapNoSuperfinal => {
-                    if mapped_final_tr.ilabel != EPS_LABEL || mapped_final_tr.olabel != EPS_LABEL
-                    {
+                    if mapped_final_tr.ilabel != EPS_LABEL || mapped_final_tr.olabel != EPS_LABEL {
                         bail!("TrMap: Non-zero arc labels for superfinal arc")
                     }
 
                     fst_out.set_final(state, mapped_final_tr.weight).unwrap();
                 }
                 MapFinalAction::MapAllowSuperfinal => {
-                    if mapped_final_tr.ilabel != EPS_LABEL || mapped_final_tr.olabel != EPS_LABEL
-                    {
+                    if mapped_final_tr.ilabel != EPS_LABEL || mapped_final_tr.olabel != EPS_LABEL {
                         if superfinal.is_none() {
                             let superfinal_id = fst_out.add_state();
                             superfinal = Some(superfinal_id);

@@ -1,4 +1,4 @@
-use crate::{Tr, StateId, SymbolTable};
+use crate::{StateId, SymbolTable, Tr};
 use std::rc::Rc;
 
 /// Immutable FST whose states and arcs each implemented by single arrays,

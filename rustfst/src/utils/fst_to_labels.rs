@@ -37,10 +37,10 @@ pub fn decode_linear_fst<F: Fst>(fst: &F) -> Result<FstPath<F::W>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tr::Tr;
     use crate::fst_impls::VectorFst;
     use crate::fst_traits::MutableFst;
     use crate::semirings::{BooleanWeight, Semiring};
+    use crate::tr::Tr;
     use crate::utils::{acceptor, transducer};
 
     #[test]

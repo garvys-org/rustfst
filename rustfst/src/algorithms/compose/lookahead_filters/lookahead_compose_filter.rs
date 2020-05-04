@@ -48,7 +48,6 @@ where
         arcb: &mut Tr<W>,
         fs: &CF::FS,
     ) -> Result<CF::FS> {
-
         let labela = if self.lookahead_output() {
             arca.olabel
         } else {

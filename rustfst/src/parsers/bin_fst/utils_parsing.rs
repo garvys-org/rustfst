@@ -2,8 +2,8 @@ use nom::number::complete::le_i32;
 use nom::IResult;
 
 use crate::semirings::SerializableSemiring;
-use crate::Tr;
 use crate::StateId;
+use crate::Tr;
 use crate::NO_STATE_ID;
 
 #[inline]

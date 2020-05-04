@@ -7,16 +7,16 @@ use anyhow::Result;
 
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::algorithms::queues::AutoQueue;
+use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::algorithms::{connect, determinize_with_distance, reverse, shortest_distance, Queue};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{TrIterator, CoreFst, ExpandedFst, MutableFst};
+use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst, TrIterator};
 use crate::semirings::{
     ReverseBack, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::Tr;
 use crate::StateId;
+use crate::Tr;
 
 /// Creates an FST containing the n-shortest paths in the input FST. The n-shortest paths are the
 /// n-lowest weight paths w.r.t. the natural semiring order.

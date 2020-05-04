@@ -9,11 +9,11 @@ use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::FstIterData;
 use crate::fst_traits::{
-    TrIterator, FstIntoIterator, FstIterator, FstIteratorMut, MutableTrIterator, StateIterator,
+    FstIntoIterator, FstIterator, FstIteratorMut, MutableTrIterator, StateIterator, TrIterator,
 };
 use crate::semirings::Semiring;
-use crate::Tr;
 use crate::StateId;
+use crate::Tr;
 
 impl<'a, W: Semiring> StateIterator<'a> for VectorFst<W> {
     type Iter = Range<StateId>;

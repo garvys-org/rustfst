@@ -1,8 +1,8 @@
 use anyhow::Result;
 
-use crate::tr::Tr;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
+use crate::tr::Tr;
 use crate::EPS_LABEL;
 
 /// Reverses an FST. The reversed result is written to an output mutable FST.

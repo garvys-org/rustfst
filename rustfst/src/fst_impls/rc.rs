@@ -4,7 +4,7 @@ use std::rc::Rc;
 use anyhow::Result;
 
 use crate::fst_traits::{
-    TrIterator, CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator,
+    CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator, TrIterator,
 };
 use crate::SymbolTable;
 

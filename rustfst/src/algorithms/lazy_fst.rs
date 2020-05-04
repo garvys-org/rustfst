@@ -8,9 +8,9 @@ use anyhow::Result;
 use itertools::izip;
 
 use crate::algorithms::cache::FstImpl;
-use crate::fst_traits::{TrIterator, Fst, FstIterData, FstIterator, MutableFst, StateIterator};
+use crate::fst_traits::{Fst, FstIterData, FstIterator, MutableFst, StateIterator, TrIterator};
 use crate::prelude::CoreFst;
-use crate::{Tr, StateId, SymbolTable};
+use crate::{StateId, SymbolTable, Tr};
 
 pub struct LazyFst<IMPL> {
     fst_impl: UnsafeCell<IMPL>,

@@ -4,13 +4,13 @@ mod tests {
 
     use anyhow::Result;
 
-    use crate::tr::Tr;
     use crate::fst_impls::VectorFst;
     use crate::fst_traits::{
-        TrIterator, CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableTrIterator,
-        MutableFst, SerializableFst, StateIterator,
+        CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableFst, MutableTrIterator,
+        SerializableFst, StateIterator, TrIterator,
     };
     use crate::semirings::{ProbabilityWeight, Semiring, TropicalWeight};
+    use crate::tr::Tr;
     use crate::SymbolTable;
     use std::rc::Rc;
 

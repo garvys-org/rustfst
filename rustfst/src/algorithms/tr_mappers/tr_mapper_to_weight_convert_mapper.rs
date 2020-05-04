@@ -15,7 +15,7 @@ macro_rules! tr_mapper_to_weight_convert_mapper_methods {
         fn final_action(&self) -> MapFinalAction {
             (self as &dyn TrMapper<$semiring>).final_action()
         }
-    }
+    };
 }
 
 macro_rules! tr_mapper_to_weight_convert_mapper {

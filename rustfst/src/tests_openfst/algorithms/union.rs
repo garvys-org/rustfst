@@ -69,8 +69,7 @@ where
 {
     for union_test_data in &test_data.union {
         let union_lazy_fst_openfst = &union_test_data.result_lazy;
-        let union_lazy_fst =
-            UnionFst::new(test_data.raw.clone(), union_test_data.fst_2.clone())?;
+        let union_lazy_fst = UnionFst::new(test_data.raw.clone(), union_test_data.fst_2.clone())?;
 
         compare_fst_static_lazy(union_lazy_fst_openfst, &union_lazy_fst)?;
     }

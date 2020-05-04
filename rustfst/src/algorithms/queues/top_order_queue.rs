@@ -1,6 +1,6 @@
-use crate::algorithms::tr_filters::TrFilter;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::top_sort::TopOrderVisitor;
+use crate::algorithms::tr_filters::TrFilter;
 use crate::algorithms::{Queue, QueueType};
 use crate::fst_traits::ExpandedFst;
 use crate::StateId;

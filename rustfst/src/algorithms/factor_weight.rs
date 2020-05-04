@@ -10,9 +10,9 @@ use bitflags::bitflags;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::lazy_fst::LazyFst;
-use crate::tr::Tr;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
+use crate::tr::Tr;
 use crate::KDELTA;
 use crate::{Label, StateId};
 

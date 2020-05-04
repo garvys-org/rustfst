@@ -140,11 +140,7 @@ where
         test_data.tr_map_plus.result,
         fst_tr_map,
         "{}",
-        error_message_fst!(
-            test_data.tr_map_plus.result,
-            fst_tr_map,
-            "TrMap PlusMapper"
-        )
+        error_message_fst!(test_data.tr_map_plus.result, fst_tr_map, "TrMap PlusMapper")
     );
     Ok(())
 }

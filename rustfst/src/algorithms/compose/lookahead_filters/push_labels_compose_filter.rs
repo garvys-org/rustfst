@@ -15,7 +15,7 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::algorithms::compose::matchers::{MultiEpsMatcher, MultiEpsMatcherFlags};
 use crate::fst_traits::CoreFst;
 use crate::semirings::Semiring;
-use crate::{Tr, Label, EPS_LABEL, NO_LABEL, NO_STATE_ID};
+use crate::{Label, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
 #[derive(Debug, Clone)]
 pub struct PushLabelsComposeFilter<

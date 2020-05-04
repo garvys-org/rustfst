@@ -136,11 +136,11 @@ pub mod utils;
 /// Provides algorithms that are generic to all wFST.
 pub mod algorithms;
 
-/// Implementation of the transitions inside a wFST.
-mod tr;
 /// Provides the `FstProperties` struct and some utils functions around it.
 /// Useful to assert some properties on a Fst.
 pub mod fst_properties;
+/// Implementation of the transitions inside a wFST.
+mod tr;
 
 #[macro_use]
 /// Provides traits that must be implemented to be able to use generic algorithms.
@@ -162,10 +162,10 @@ pub const KDELTA: f32 = 1.0f32 / 1024.0f32;
 pub mod prelude {
     pub use crate::algorithms::tr_compares::*;
     pub use crate::algorithms::*;
-    pub use crate::tr::Tr;
     pub use crate::fst_impls::*;
     pub use crate::fst_traits::*;
     pub use crate::semirings::*;
+    pub use crate::tr::Tr;
 }
 
 mod proptest_fst;
