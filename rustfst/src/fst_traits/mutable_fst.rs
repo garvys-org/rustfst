@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 
 use anyhow::Result;
 
-use crate::algorithms::{ClosureType, TrMapper};
+// use crate::algorithms::{ClosureType, TrMapper};
 use crate::fst_traits::{CoreFst, ExpandedFst, FstIteratorMut};
 use crate::tr::Tr;
 use crate::{Label, StateId};
@@ -328,19 +328,21 @@ pub trait MutableFst:
 
     unsafe fn sum_trs_unchecked(&mut self, state: StateId);
 
-    /// This operation computes the concatenative closure.
-    /// If A transduces string `x` to `y` with weight `a`,
-    /// then the closure transduces `x` to `y` with weight `a`,
-    /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
-    ///  If closure_star then the empty string is transduced to itself with weight `1` as well.
-    fn closure(&mut self, closure_type: ClosureType) {
-        crate::algorithms::closure(self, closure_type)
-    }
+    // /// This operation computes the concatenative closure.
+    // /// If A transduces string `x` to `y` with weight `a`,
+    // /// then the closure transduces `x` to `y` with weight `a`,
+    // /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
+    // ///  If closure_star then the empty string is transduced to itself with weight `1` as well.
+    // fn closure(&mut self, closure_type: ClosureType) {
+    //     unimplemented!()
+    //     // crate::algorithms::closure(self, closure_type)
+    // }
 
-    /// Maps a transition using a `TrMapper` object.
-    fn tr_map<M: TrMapper<Self::W>>(&mut self, mapper: &mut M) -> Result<()> {
-        crate::algorithms::tr_map(self, mapper)
-    }
+    // /// Maps a transition using a `TrMapper` object.
+    // fn tr_map<M: TrMapper<Self::W>>(&mut self, mapper: &mut M) -> Result<()> {
+    //     unimplemented!()
+    //     // crate::algorithms::tr_map(self, mapper)
+    // }
 }
 
 /// Iterate over mutable trs in a wFST.

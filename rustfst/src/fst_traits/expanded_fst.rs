@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::fst_properties::compute_fst_properties;
+// use crate::fst_properties::compute_fst_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{Fst, FstIntoIterator};
 
@@ -31,6 +31,7 @@ pub trait ExpandedFst: Fst + Clone + PartialEq + FstIntoIterator {
 
     /// Compute the properties verified by the Fst.
     fn properties(&self) -> Result<FstProperties> {
-        compute_fst_properties(self)
+        unimplemented!()
+        // compute_fst_properties(self)
     }
 }

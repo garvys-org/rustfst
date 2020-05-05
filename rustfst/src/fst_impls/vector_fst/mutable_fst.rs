@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 
 use anyhow::Result;
 
-use crate::algorithms::tr_unique::tr_compare;
+// use crate::algorithms::tr_unique::tr_compare;
 use crate::fst_impls::vector_fst::{VectorFst, VectorFstState};
 use crate::fst_traits::MutableFst;
 use crate::fst_traits::{CoreFst, MutableTrIterator};
@@ -231,29 +231,31 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
     }
 
     unsafe fn unique_trs_unchecked(&mut self, state: usize) {
-        let trs = &mut self.states.get_unchecked_mut(state).trs;
-        trs.sort_by(tr_compare);
-        trs.dedup();
+        unimplemented!()
+        // let trs = &mut self.states.get_unchecked_mut(state).trs;
+        // trs.sort_by(tr_compare);
+        // trs.dedup();
     }
 
     unsafe fn sum_trs_unchecked(&mut self, state: usize) {
-        let trs = &mut self.states.get_unchecked_mut(state).trs;
-        trs.sort_by(tr_compare);
-        let mut n_trs: usize = 0;
-        for i in 0..trs.len() {
-            if n_trs > 0 && equal_tr(&trs[i], &trs[n_trs - 1]) {
-                let (left, right) = trs.split_at_mut(i);
-                left[n_trs - 1]
-                    .weight
-                    .plus_assign(&right[0].weight)
-                    .unwrap();
-            } else {
-                trs.swap(n_trs, i);
-                n_trs += 1;
-            }
-        }
-        trs.truncate(n_trs);
-        // Truncate doesn't modify the capacity of the vector. Maybe a shrink_to_fit ?
+        unimplemented!()
+        // let trs = &mut self.states.get_unchecked_mut(state).trs;
+        // trs.sort_by(tr_compare);
+        // let mut n_trs: usize = 0;
+        // for i in 0..trs.len() {
+        //     if n_trs > 0 && equal_tr(&trs[i], &trs[n_trs - 1]) {
+        //         let (left, right) = trs.split_at_mut(i);
+        //         left[n_trs - 1]
+        //             .weight
+        //             .plus_assign(&right[0].weight)
+        //             .unwrap();
+        //     } else {
+        //         trs.swap(n_trs, i);
+        //         n_trs += 1;
+        //     }
+        // }
+        // trs.truncate(n_trs);
+        // // Truncate doesn't modify the capacity of the vector. Maybe a shrink_to_fit ?
     }
 }
 
