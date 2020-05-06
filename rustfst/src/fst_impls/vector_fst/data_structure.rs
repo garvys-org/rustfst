@@ -12,7 +12,7 @@ use std::ops::Deref;
 /// All states are stored in a vector of states.
 /// In each state, there is a vector of trs containing the outgoing transitions.
 #[derive(Debug, PartialEq, Clone)]
-pub struct VectorFst<W> {
+pub struct VectorFst<W: Semiring> {
     pub(crate) states: Vec<VectorFstState<W>>,
     pub(crate) start_state: Option<StateId>,
     pub(crate) isymt: Option<Arc<SymbolTable>>,
@@ -24,7 +24,7 @@ pub struct VectorFst<W> {
 // when the object is modified. Which is not trivial with the MutableTrIterator API for instance.
 // Same goes for TrMap. For not-mutable fst however, it is usefull.
 #[derive(Debug, Clone, PartialEq)]
-pub struct VectorFstState<W> {
+pub struct VectorFstState<W: Semiring> {
     pub(crate) final_weight: Option<W>,
     pub(crate) trs: TrsVec<W>,
 }

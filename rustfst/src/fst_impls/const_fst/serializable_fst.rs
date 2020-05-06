@@ -19,6 +19,7 @@ use crate::parsers::bin_fst::utils_serialization::write_bin_i32;
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::SerializableSemiring;
 use crate::{Tr, EPS_LABEL};
+use std::sync::Arc;
 
 impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
     fn fst_type() -> String {
@@ -78,7 +79,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
             write_bin_i32(&mut file, const_state.noepsilons as i32)?;
         }
 
-        for tr in &self.trs {
+        for tr in &*self.trs {
             write_bin_i32(&mut file, tr.ilabel as i32)?;
             write_bin_i32(&mut file, tr.olabel as i32)?;
             tr.weight.write_binary(&mut file)?;
@@ -158,7 +159,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
 
         Ok(ConstFst {
             states: const_states,
-            trs: const_trs,
+            trs: Arc::new(const_trs),
             start: start_state,
             isymt: None,
             osymt: None,
@@ -220,7 +221,7 @@ fn parse_const_fst<W: SerializableSemiring + 'static>(i: &[u8]) -> IResult<&[u8]
         ConstFst {
             start: parse_start_state(hdr.start),
             states: const_states,
-            trs: const_trs,
+            trs: Arc::new(const_trs),
             isymt: hdr.isymt,
             osymt: hdr.osymt,
         },

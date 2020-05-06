@@ -2,17 +2,22 @@ use std::sync::Arc;
 use crate::Tr;
 use crate::semirings::Semiring;
 
-pub trait Trs<W> : std::ops::Deref<Target=[Tr<W>]> {
+pub trait Trs<W: Semiring> : std::ops::Deref<Target=[Tr<W>]> {
     fn trs(&self) -> &[Tr<W>];
+    fn trs_mut(&mut self) -> &mut[Tr<W>];
     fn shallow_clone(&self) -> Self;
 }
 
 #[derive(Debug, PartialOrd, PartialEq)]
-pub struct TrsVec<W>(Arc<Vec<Tr<W>>>);
+pub struct TrsVec<W: Semiring>(pub(crate) Arc<Vec<Tr<W>>>);
 
-impl<W> Trs<W> for TrsVec<W> {
+impl<W: Semiring> Trs<W> for TrsVec<W> {
     fn trs(&self) -> &[Tr<W>] {
         self.0.as_slice()
+    }
+
+    fn trs_mut(&mut self) -> &mut[Tr<W>] {
+        Arc::make_mut(&mut self.0).as_mut_slice()
     }
 
     fn shallow_clone(&self) -> Self {
@@ -20,35 +25,52 @@ impl<W> Trs<W> for TrsVec<W> {
     }
 }
 
-impl<W: Clone> Clone for TrsVec<W> {
+impl<W: Semiring> TrsVec<W> {
+    pub fn remove(&mut self, index: usize) -> Tr<W> {
+        Arc::make_mut(&mut self.0).remove(index)
+    }
+    pub fn push(&mut self, tr: Tr<W>) {
+        Arc::make_mut(&mut self.0).push(tr)
+    }
+
+    pub fn clear(&mut self) {
+        Arc::make_mut(&mut self.0).clear()
+    }
+}
+
+impl<W: Semiring> Clone for TrsVec<W> {
     fn clone(&self) -> Self {
         Self(Arc::new((*self.0).clone()))
     }
 }
 
-impl<W> std::ops::Deref for TrsVec<W> {
+impl<W: Semiring> std::ops::Deref for TrsVec<W> {
     type Target=[Tr<W>];
     fn deref(&self) -> &Self::Target {
         self.trs()
     }
 }
 
-impl<W> Default for TrsVec<W> {
+impl<W: Semiring> Default for TrsVec<W> {
     fn default() -> Self {
         Self(Arc::new(vec![]))
     }
 }
 
 #[derive(Debug, PartialOrd, PartialEq)]
-pub struct TrsConst<W>{
+pub struct TrsConst<W: Semiring>{
     pub(crate) trs: Arc<Vec<Tr<W>>>,
     pub(crate) pos: usize,
     pub(crate) n: usize
 }
 
-impl<W> Trs<W> for TrsConst<W> {
+impl<W: Semiring> Trs<W> for TrsConst<W> {
     fn trs(&self) -> &[Tr<W>] {
         &self.trs[self.pos..self.pos+self.n]
+    }
+
+    fn trs_mut(&mut self) -> &mut[Tr<W>] {
+        &mut Arc::make_mut(&mut self.trs)[self.pos..self.pos+self.n]
     }
 
     // Doesn't clone the data, only the Arc
@@ -61,7 +83,7 @@ impl<W> Trs<W> for TrsConst<W> {
     }
 }
 
-impl<W: Clone> Clone for TrsConst<W> {
+impl<W: Semiring> Clone for TrsConst<W> {
     fn clone(&self) -> Self {
         Self {
             trs: Arc::new((*self.trs).clone()),
@@ -71,14 +93,14 @@ impl<W: Clone> Clone for TrsConst<W> {
     }
 }
 
-impl<W> std::ops::Deref for TrsConst<W> {
+impl<W: Semiring> std::ops::Deref for TrsConst<W> {
     type Target=[Tr<W>];
     fn deref(&self) -> &Self::Target {
         self.trs()
     }
 }
 
-impl<W> Default for TrsConst<W> {
+impl<W: Semiring> Default for TrsConst<W> {
     fn default() -> Self {
         Self{
             trs: Arc::new(vec![]),

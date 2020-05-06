@@ -37,7 +37,7 @@ impl<'a, W: Semiring> StateIterator<'a> for VectorFst<W> {
 //         self.states.get_unchecked_mut(state_id).trs.iter_mut()
 //     }
 // }
-//
+
 // impl<W: Semiring> FstIntoIterator for VectorFst<W>
 // where
 //     W: 'static,

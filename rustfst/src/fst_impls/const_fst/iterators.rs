@@ -28,7 +28,7 @@ impl<W> ConstFst<W> {
         state.pos..state.pos + state.ntrs
     }
 }
-//
+
 // impl<W: Semiring> FstIntoIterator for ConstFst<W>
 // where
 //     W: 'static,
@@ -61,7 +61,7 @@ impl<W> ConstFst<W> {
 //         )
 //     }
 // }
-//
+
 impl<'a, W> StateIterator<'a> for ConstFst<W> {
     type Iter = Range<StateId>;
     fn states_iter(&'a self) -> Self::Iter {

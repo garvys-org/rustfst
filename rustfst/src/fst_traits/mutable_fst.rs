@@ -9,7 +9,7 @@ use crate::{Label, StateId};
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst:
-    ExpandedFst + for<'a> MutableTrIterator<'a> + for<'b> FstIteratorMut<'b>
+    ExpandedFst //+ for<'a> MutableTrIterator<'a> + for<'b> FstIteratorMut<'b>
 {
     /// Creates an empty wFST.
     fn new() -> Self;
