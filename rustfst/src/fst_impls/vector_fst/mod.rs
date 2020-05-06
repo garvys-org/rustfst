@@ -7,6 +7,6 @@ mod expanded_fst;
 mod fst;
 mod iterators;
 mod misc;
-mod mutable_fst;
-mod serializable_fst;
+// mod mutable_fst;
+// mod serializable_fst;
 mod test;

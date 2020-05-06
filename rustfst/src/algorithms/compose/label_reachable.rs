@@ -11,7 +11,7 @@ use crate::algorithms::tr_compares::{ilabel_compare, olabel_compare};
 use crate::algorithms::{fst_convert_from_ref, tr_sort};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, MutableTrIterator};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, EPS_LABEL, NO_LABEL, UNASSIGNED};
 

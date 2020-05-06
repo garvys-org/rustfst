@@ -4,7 +4,6 @@ use crate::semirings::Semiring;
 
 pub trait Trs<W: Semiring> : std::ops::Deref<Target=[Tr<W>]> {
     fn trs(&self) -> &[Tr<W>];
-    fn trs_mut(&mut self) -> &mut[Tr<W>];
     fn shallow_clone(&self) -> Self;
 }
 
@@ -14,10 +13,6 @@ pub struct TrsVec<W: Semiring>(pub(crate) Arc<Vec<Tr<W>>>);
 impl<W: Semiring> Trs<W> for TrsVec<W> {
     fn trs(&self) -> &[Tr<W>] {
         self.0.as_slice()
-    }
-
-    fn trs_mut(&mut self) -> &mut[Tr<W>] {
-        Arc::make_mut(&mut self.0).as_mut_slice()
     }
 
     fn shallow_clone(&self) -> Self {
@@ -67,10 +62,6 @@ pub struct TrsConst<W: Semiring>{
 impl<W: Semiring> Trs<W> for TrsConst<W> {
     fn trs(&self) -> &[Tr<W>] {
         &self.trs[self.pos..self.pos+self.n]
-    }
-
-    fn trs_mut(&mut self) -> &mut[Tr<W>] {
-        &mut Arc::make_mut(&mut self.trs)[self.pos..self.pos+self.n]
     }
 
     // Doesn't clone the data, only the Arc

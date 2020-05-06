@@ -1,4 +1,4 @@
-use crate::fst_traits::{ExpandedFst, Fst, TrIterator};
+use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::StateId;
@@ -52,10 +52,9 @@ where
 impl<'a, W, AI> DfsState<'a, W, AI>
 where
     W: Semiring + 'a,
-    AI: Iterator<Item = &'a Tr<W>> + Clone,
 {
     #[inline]
-    pub fn new<F: TrIterator<'a, Iter = AI, W = W>>(fst: &'a F, s: StateId) -> Self {
+    pub fn new<F: Fst<W=W>>(fst: &'a F, s: StateId) -> Self {
         Self {
             state_id: s,
             tr_iter: OpenFstIterator::new(unsafe { fst.tr_iter_unchecked(s) }),
