@@ -29,38 +29,41 @@ impl<W> ConstFst<W> {
     }
 }
 
-// impl<W: Semiring> FstIntoIterator for ConstFst<W>
-// where
-//     W: 'static,
-// {
-//     type TrsIter = std::vec::IntoIter<Tr<W>>;
-//
-//     // TODO: Change this to impl once the feature has been stabilized
-//     // #![feature(type_alias_impl_trait)]
-//     // https://github.com/rust-lang/rust/issues/63063)
-//     type FstIter = Box<dyn Iterator<Item = FstIterData<W, Self::TrsIter>>>;
-//
-//     fn fst_into_iter(mut self) -> Self::FstIter {
-//         // Here the contiguous trs are moved into multiple vectors in order to be able to create
-//         // iterator for each states.
-//         // TODO: Find a way to avoid this allocation.
-//         let mut trs = Vec::with_capacity(self.states.len());
-//         for const_state in &self.states {
-//             trs.push(self.trs.drain(0..const_state.ntrs).collect_vec())
-//         }
-//
-//         Box::new(
-//             izip!(self.states.into_iter(), trs.into_iter())
-//                 .enumerate()
-//                 .map(|(state_id, (const_state, trs_from_state))| FstIterData {
-//                     state_id,
-//                     trs: trs_from_state.into_iter(),
-//                     final_weight: const_state.final_weight,
-//                     num_trs: const_state.ntrs,
-//                 }),
-//         )
-//     }
-// }
+impl<W: Semiring> FstIntoIterator for ConstFst<W>
+where
+    W: 'static,
+{
+    // TODO: Change this to impl once the feature has been stabilized
+    // #![feature(type_alias_impl_trait)]
+    // https://github.com/rust-lang/rust/issues/63063)
+    type FstIter = Box<dyn Iterator<Item = FstIterData<W, Self::TRS>>>;
+
+    fn fst_into_iter(mut self) -> Self::FstIter {
+        // Here the contiguous trs are moved into multiple vectors in order to be able to create
+        // iterator for each states.
+        // TODO: Find a way to avoid this allocation.
+        let mut v_trs = Vec::with_capacity(self.states.len());
+        let trs = Arc::make_mut(&mut self.trs);
+        for const_state in &self.states {
+            v_trs.push(trs.drain(0..const_state.ntrs).collect_vec())
+        }
+
+        Box::new(
+            izip!(self.states.into_iter(), v_trs.into_iter())
+                .enumerate()
+                .map(|(state_id, (const_state, trs_from_state))| FstIterData {
+                    state_id,
+                    trs: TrsConst{
+                        trs: Arc::new(trs_from_state),
+                        pos: 0,
+                        n: const_state.ntrs
+                    },
+                    final_weight: const_state.final_weight,
+                    num_trs: const_state.ntrs,
+                }),
+        )
+    }
+}
 
 impl<'a, W> StateIterator<'a> for ConstFst<W> {
     type Iter = Range<StateId>;

@@ -22,32 +22,30 @@ impl<'a, W: Semiring> StateIterator<'a> for VectorFst<W> {
     }
 }
 
-// impl<W: Semiring> FstIntoIterator for VectorFst<W>
-// where
-//     W: 'static,
-// {
-//     type TrsIter = std::vec::IntoIter<Tr<W>>;
-//
-//     // TODO: Change this to impl once the feature has been stabilized
-//     // #![feature(type_alias_impl_trait)]
-//     // https://github.com/rust-lang/rust/issues/63063)
-//     type FstIter = Box<dyn Iterator<Item = FstIterData<W, Self::TrsIter>>>;
-//
-//     fn fst_into_iter(self) -> Self::FstIter {
-//         Box::new(
-//             self.states
-//                 .into_iter()
-//                 .enumerate()
-//                 .map(|(state_id, fst_state)| FstIterData {
-//                     state_id,
-//                     num_trs: fst_state.trs.len(),
-//                     trs: fst_state.trs.into_iter(),
-//                     final_weight: fst_state.final_weight,
-//                 }),
-//         )
-//     }
-// }
-//
+impl<W: Semiring> FstIntoIterator for VectorFst<W>
+where
+    W: 'static,
+{
+    // TODO: Change this to impl once the feature has been stabilized
+    // #![feature(type_alias_impl_trait)]
+    // https://github.com/rust-lang/rust/issues/63063)
+    type FstIter = Box<dyn Iterator<Item = FstIterData<W, Self::TRS>>>;
+
+    fn fst_into_iter(self) -> Self::FstIter {
+        Box::new(
+            self.states
+                .into_iter()
+                .enumerate()
+                .map(|(state_id, fst_state)| FstIterData {
+                    state_id,
+                    num_trs: fst_state.trs.len(),
+                    trs: fst_state.trs.shallow_clone(),
+                    final_weight: fst_state.final_weight,
+                }),
+        )
+    }
+}
+
 impl<'a, W: Semiring + 'static> FstIterator<'a> for VectorFst<W> {
     type FstIter = Map<
         Enumerate<std::slice::Iter<'a, VectorFstState<W>>>,
