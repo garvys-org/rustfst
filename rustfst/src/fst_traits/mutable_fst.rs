@@ -9,7 +9,7 @@ use crate::{Label, StateId};
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst:
-    ExpandedFst //+ for<'a> MutableTrIterator<'a> + for<'b> FstIteratorMut<'b>
+    ExpandedFst + for<'b> FstIteratorMut<'b>
 {
     /// Creates an empty wFST.
     fn new() -> Self;
@@ -343,14 +343,4 @@ pub trait MutableFst:
     //     unimplemented!()
     //     // crate::algorithms::tr_map(self, mapper)
     // }
-}
-
-/// Iterate over mutable trs in a wFST.
-pub trait MutableTrIterator<'a>: CoreFst
-where
-    Self::W: 'a,
-{
-    type IterMut: Iterator<Item = &'a mut Tr<Self::W>>;
-    fn tr_iter_mut(&'a mut self, state_id: StateId) -> Result<Self::IterMut>;
-    unsafe fn tr_iter_unchecked_mut(&'a mut self, state_id: StateId) -> Self::IterMut;
 }

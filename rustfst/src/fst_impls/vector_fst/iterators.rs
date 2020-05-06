@@ -9,7 +9,7 @@ use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::FstIterData;
 use crate::fst_traits::{
-    FstIntoIterator, FstIterator, FstIteratorMut, MutableTrIterator, StateIterator,
+    FstIntoIterator, FstIterator, FstIteratorMut, StateIterator,
 };
 use crate::semirings::Semiring;
 use crate::{StateId, Trs};
@@ -21,22 +21,6 @@ impl<'a, W: Semiring> StateIterator<'a> for VectorFst<W> {
         0..self.states.len()
     }
 }
-
-// impl<'a, W: 'static + Semiring> MutableTrIterator<'a> for VectorFst<W> {
-//     type IterMut = slice::IterMut<'a, Tr<W>>;
-//     fn tr_iter_mut(&'a mut self, state_id: StateId) -> Result<Self::IterMut> {
-//         let state = self
-//             .states
-//             .get_mut(state_id)
-//             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
-//         Ok(state.trs.iter_mut())
-//     }
-//
-//     #[inline]
-//     unsafe fn tr_iter_unchecked_mut(&'a mut self, state_id: usize) -> Self::IterMut {
-//         self.states.get_unchecked_mut(state_id).trs.iter_mut()
-//     }
-// }
 
 // impl<W: Semiring> FstIntoIterator for VectorFst<W>
 // where
@@ -81,30 +65,29 @@ impl<'a, W: Semiring + 'static> FstIterator<'a> for VectorFst<W> {
             }))
     }
 }
-//
-// impl<'a, W: Semiring + 'static> FstIteratorMut<'a> for VectorFst<W> {
-//     type TrsIter = std::slice::IterMut<'a, Tr<W>>;
-//     type FstIter = Map<
-//         Enumerate<std::slice::IterMut<'a, VectorFstState<W>>>,
-//         Box<
-//             dyn FnMut(
-//                 (StateId, &'a mut VectorFstState<W>),
-//             ) -> FstIterData<&'a mut W, Self::TrsIter>,
-//         >,
-//     >;
-//
-//     fn fst_iter_mut(&'a mut self) -> Self::FstIter {
-//         self.states
-//             .iter_mut()
-//             .enumerate()
-//             .map(Box::new(|(state_id, fst_state)| {
-//                 let n = fst_state.trs.len();
-//                 FstIterData {
-//                     state_id,
-//                     trs: fst_state.trs.iter_mut(),
-//                     final_weight: fst_state.final_weight.as_mut(),
-//                     num_trs: n,
-//                 }
-//             }))
-//     }
-// }
+
+impl<'a, W: Semiring + 'static> FstIteratorMut<'a> for VectorFst<W> {
+    type FstIter = Map<
+        Enumerate<std::slice::IterMut<'a, VectorFstState<W>>>,
+        Box<
+            dyn FnMut(
+                (StateId, &'a mut VectorFstState<W>),
+            ) -> FstIterData<&'a mut W, Self::TRS>,
+        >,
+    >;
+
+    fn fst_iter_mut(&'a mut self) -> Self::FstIter {
+        self.states
+            .iter_mut()
+            .enumerate()
+            .map(Box::new(|(state_id, fst_state)| {
+                let n = fst_state.trs.len();
+                FstIterData {
+                    state_id,
+                    trs: fst_state.trs.shallow_clone(),
+                    final_weight: fst_state.final_weight.as_mut(),
+                    num_trs: n,
+                }
+            }))
+    }
+}

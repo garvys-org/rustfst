@@ -1,14 +1,14 @@
 use std::cmp::Ordering;
+use std::sync::Arc;
 
 use anyhow::Result;
 
+use crate::{StateId, Tr, Trs};
 // use crate::algorithms::tr_unique::tr_compare;
 use crate::fst_impls::vector_fst::{VectorFst, VectorFstState};
+use crate::fst_traits::CoreFst;
 use crate::fst_traits::MutableFst;
-use crate::fst_traits::{CoreFst, MutableTrIterator};
 use crate::semirings::Semiring;
-use crate::{StateId, Tr, Trs};
-use std::sync::Arc;
 
 #[inline]
 fn equal_tr<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> bool {

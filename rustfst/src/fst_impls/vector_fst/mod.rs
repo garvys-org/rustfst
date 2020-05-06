@@ -9,4 +9,4 @@ mod iterators;
 mod misc;
 mod mutable_fst;
 mod serializable_fst;
-// mod test;
+mod test;

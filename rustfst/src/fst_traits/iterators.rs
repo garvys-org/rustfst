@@ -51,7 +51,6 @@ pub trait FstIterator<'a>: CoreFst {
 }
 
 pub trait FstIteratorMut<'a>: CoreFst {
-    type TrsIter: Iterator<Item = &'a mut Tr<Self::W>>;
-    type FstIter: Iterator<Item = FstIterData<&'a mut Self::W, Self::TrsIter>>;
+    type FstIter: Iterator<Item = FstIterData<&'a mut Self::W, Self::TRS>>;
     fn fst_iter_mut(&'a mut self) -> Self::FstIter;
 }
