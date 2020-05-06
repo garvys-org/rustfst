@@ -6,7 +6,7 @@ use anyhow::Result;
 use crate::{StateId, Tr, Trs};
 // use crate::algorithms::tr_unique::tr_compare;
 use crate::fst_impls::vector_fst::{VectorFst, VectorFstState};
-use crate::fst_traits::CoreFst;
+use crate::fst_traits::{CoreFst, MutableTrIterator};
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 
@@ -99,7 +99,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
 
         for s in 0..self.states.len() {
             let mut to_delete = vec![];
-            for (idx, tr) in unsafe { self.get_trs_unchecked(s).trs_mut().iter_mut().enumerate() } {
+            for (idx, tr) in unsafe { self.tr_iter_unchecked_mut(s).enumerate() } {
                 let t = new_id[tr.nextstate];
                 if t != -1 {
                     tr.nextstate = t as usize;
@@ -264,9 +264,3 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         // // Truncate doesn't modify the capacity of the vector. Maybe a shrink_to_fit ?
     }
 }
-
-//#[test]
-//fn lol() {
-//    let mut fst = VectorFst::<crate::semirings::TropicalWeight>::new();
-//    fst.set_final(0, 1.0).unwrap();
-//}
