@@ -1,5 +1,5 @@
 pub(crate) mod const_fst;
-mod arc;
+// mod arc;
 pub(crate) mod vector_fst;
 
 pub use self::const_fst::ConstFst;

@@ -8,6 +8,7 @@ use crate::semirings::{Semiring, SerializableSemiring};
 use crate::{DrawingConfig, StateId};
 use std::fs::File;
 use std::io::{BufWriter, LineWriter, Write};
+use crate::Trs;
 
 /// Trait definining the methods an Fst must implement to be serialized and deserialized.
 pub trait SerializableFst: ExpandedFst
@@ -139,7 +140,7 @@ where
 
     writeln!(writer, " fontsize = {}]", config.fontsize)?;
 
-    for tr in fst.tr_iter(state_id).unwrap() {
+    for tr in fst.get_trs(state_id).unwrap().trs() {
         write!(writer, "\t{} -> {}", state_id, tr.nextstate)?;
 
         let ilabel = opt_isymt.clone().map_or_else(

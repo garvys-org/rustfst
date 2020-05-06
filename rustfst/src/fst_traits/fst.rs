@@ -4,15 +4,17 @@ use std::sync::Arc;
 use anyhow::Result;
 
 use crate::algorithms::tr_filters::{InputEpsilonTrFilter, OutputEpsilonTrFilter, TrFilter};
-use crate::fst_traits::iterators::{StateIterator, TrIterator};
+use crate::fst_traits::iterators::{StateIterator};
 use crate::fst_traits::FstIterator;
 use crate::semirings::Semiring;
-use crate::{StateId, SymbolTable};
+use crate::{StateId, SymbolTable, Tr, TrsVec};
+use crate::trs::Trs;
 
 /// Trait defining necessary methods for a wFST to access start states and final states.
 pub trait CoreFst {
     /// Weight use in the wFST. This type must implement the Semiring trait.
     type W: Semiring;
+    type TRS: Trs<Self::W>;
 
     /// Returns the ID of the start state of the wFST if it exists else none.
     ///
@@ -109,11 +111,14 @@ pub trait CoreFst {
     fn is_start(&self, state_id: StateId) -> bool {
         Some(state_id) == self.start()
     }
+
+    fn get_trs(&self, state_id: StateId) -> Result<Self::TRS>;
+    unsafe fn get_trs_unchecked(&self, state_id: StateId) -> Self::TRS;
 }
 
 /// Trait defining the minimum interface necessary for a wFST.
 pub trait Fst:
-    CoreFst + for<'a> TrIterator<'a> + for<'b> StateIterator<'b> + for<'c> FstIterator<'c> + Debug
+    CoreFst + for<'b> StateIterator<'b> + Debug + for<'c> FstIterator<'c>
 {
     // TODO: Move niepsilons and noepsilons to required methods.
     /// Returns the number of trs with epsilon input labels leaving a state.
@@ -140,7 +145,7 @@ pub trait Fst:
     /// ```
     fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
         let filter = InputEpsilonTrFilter {};
-        Ok(self.tr_iter(state)?.filter(|v| filter.keep(v)).count())
+        Ok(self.get_trs(state)?.iter().filter(|v| filter.keep(v)).count())
     }
 
     /// Returns the number of trs with epsilon output labels leaving a state.
@@ -167,20 +172,23 @@ pub trait Fst:
     /// ```
     fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
         let filter = OutputEpsilonTrFilter {};
-        Ok(self.tr_iter(state)?.filter(|v| filter.keep(v)).count())
+        Ok(self.get_trs(state)?.iter().filter(|v| filter.keep(v)).count())
     }
 
     /// Returns true if the Fst is an acceptor. False otherwise.
     /// Acceptor means for all transition, transition.ilabel == transition.olabel
     fn is_acceptor(&self) -> bool {
         let states: Vec<_> = self.states_iter().collect();
-        for state in states {
-            for tr in self.tr_iter(state).unwrap() {
-                if tr.ilabel != tr.olabel {
-                    return false;
+        unsafe {
+            for state in states {
+                for tr in self.get_trs_unchecked(state).trs() {
+                    if tr.ilabel != tr.olabel {
+                        return false;
+                    }
                 }
             }
         }
+
         true
     }
 
@@ -219,3 +227,7 @@ pub trait Fst:
         }
     }
 }
+
+// fn lol(fst: &dyn CoreFst<W=crate::semirings::TropicalWeight>) {
+//
+// }

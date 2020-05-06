@@ -1,6 +1,6 @@
 macro_rules! display_single_state {
     ($fst:expr, $state_id:expr, $f: expr, $show_weight_one: expr) => {
-        for tr in $fst.tr_iter($state_id).unwrap() {
+        for tr in $fst.get_trs($state_id).unwrap().trs() {
             if tr.weight.is_one() && !$show_weight_one {
                 writeln!(
                     $f,

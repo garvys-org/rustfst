@@ -10,7 +10,7 @@ use nom::IResult;
 
 use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, SerializableFst, TrIterator};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, SerializableFst};
 use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FST_MAGIC_NUMBER};
 use crate::parsers::bin_fst::utils_parsing::{parse_final_weight, parse_fst_tr, parse_start_state};
 use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64};

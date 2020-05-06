@@ -4,6 +4,7 @@ use crate::fst_path::FstPath;
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::StateId;
+use crate::trs::Trs;
 
 /// Trait to iterate over the paths accepted by an FST.
 pub trait PathsIterator<'a> {
@@ -56,7 +57,7 @@ where
         while !self.queue.is_empty() {
             let (state_id, mut path) = self.queue.pop_front().unwrap();
 
-            for tr in unsafe { self.fst.tr_iter_unchecked(state_id) } {
+            for tr in unsafe { self.fst.get_trs_unchecked(state_id).trs() } {
                 let mut new_path = path.clone();
                 new_path
                     .add_to_path(tr.ilabel, tr.olabel, &tr.weight)

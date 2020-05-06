@@ -104,9 +104,11 @@ pub use crate::fst_path::FstPath;
 pub use crate::symbol_table::SymbolTable;
 
 pub use self::tr::Tr;
+pub use self::trs::{Trs, TrsConst, TrsVec};
 
 #[cfg(test)]
 use doc_comment::doc_comment;
+use crate::semirings::Semiring;
 
 // When running `cargo test`, rustdoc will check this file as well.
 #[cfg(test)]
@@ -173,3 +175,6 @@ mod proptest_fst;
 pub(crate) static NO_LABEL: Label = std::usize::MAX;
 pub(crate) static NO_STATE_ID: StateId = std::usize::MAX;
 pub(crate) static UNASSIGNED: usize = std::usize::MAX;
+
+mod lol;
+pub mod trs;

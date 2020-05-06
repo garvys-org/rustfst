@@ -3,8 +3,9 @@ use crate::algorithms::tr_filters::{InputEpsilonTrFilter, OutputEpsilonTrFilter}
 use crate::semirings::Semiring;
 use crate::symbol_table::SymbolTable;
 use crate::tr::Tr;
-use crate::StateId;
+use crate::{StateId, TrsVec};
 use std::sync::Arc;
+use std::ops::Deref;
 
 /// Simple concrete, mutable FST whose states and trs are stored in standard vectors.
 ///
@@ -25,14 +26,14 @@ pub struct VectorFst<W> {
 #[derive(Debug, Clone, PartialEq)]
 pub struct VectorFstState<W> {
     pub(crate) final_weight: Option<W>,
-    pub(crate) trs: Vec<Tr<W>>,
+    pub(crate) trs: TrsVec<W>,
 }
 
-impl<W> VectorFstState<W> {
+impl<W: Semiring> VectorFstState<W> {
     pub fn new() -> Self {
         Self {
             final_weight: None,
-            trs: vec![],
+            trs: TrsVec::default(),
         }
     }
     pub fn num_trs(&self) -> usize {
