@@ -9,7 +9,7 @@ use anyhow::Result;
 // Returns an acyclic FST where each SCC in the input FST has been condensed to
 // a single state with transitions between SCCs retained and within SCCs
 // dropped. Also populates 'scc' with a mapping from input to output states.
-pub fn condense<FI: Fst + ExpandedFst, FO: MutableFst<W = FI::W>>(
+pub fn condense<W: Semiring, FI: Fst<W> + ExpandedFst<W>, FO: MutableFst<W>>(
     ifst: &FI,
 ) -> Result<(Vec<i32>, FO)> {
     let mut visitor = SccVisitor::new(ifst, true, false);

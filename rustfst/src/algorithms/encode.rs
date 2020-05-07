@@ -191,13 +191,14 @@ impl<W: Semiring> TrMapper<W> for DecodeMapper<W> {
 ///
 /// The encoding of each pair or triple of labels and/or weights as a unique key is stored
 /// in an `EncodeTable` object.
-pub fn encode<F>(
+pub fn encode<W, F>(
     fst: &mut F,
     encode_labels: bool,
     encode_weights: bool,
-) -> Result<EncodeTable<F::W>>
+) -> Result<EncodeTable<W>>
 where
-    F: MutableFst,
+    W: Semiring,
+    F: MutableFst<W>,
 {
     let mut encode_mapper = EncodeMapper::new(encode_labels, encode_weights);
     fst.tr_map(&mut encode_mapper)
@@ -207,9 +208,10 @@ where
 
 /// The `decode` operation takes as input an encoded FST and the corresponding `EncodeTable` object
 /// and reverts the encoding.
-pub fn decode<F>(fst: &mut F, encode_table: EncodeTable<F::W>) -> Result<()>
+pub fn decode<W, F>(fst: &mut F, encode_table: EncodeTable<W>) -> Result<()>
 where
-    F: MutableFst + ExpandedFst,
+    W: Semiring,
+    F: MutableFst<W>,
 {
     let mut decode_mapper = DecodeMapper::new(encode_table);
     fst.tr_map(&mut decode_mapper)

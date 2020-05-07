@@ -20,10 +20,10 @@ pub enum ReweightType {
 /// of potential q, is reweighted by p^-1 \otimes (w \otimes q) when reweighting
 /// torwards the initial state, and by (p \otimes w) \otimes q^-1 when
 /// reweighting towards the final states.
-pub fn reweight<F>(fst: &mut F, potentials: &[F::W], reweight_type: ReweightType) -> Result<()>
+pub fn reweight<W, F>(fst: &mut F, potentials: &[W], reweight_type: ReweightType) -> Result<()>
 where
-    F: MutableFst,
-    F::W: WeaklyDivisibleSemiring,
+    F: MutableFst<W>,
+    W: WeaklyDivisibleSemiring,
 {
     let zero = F::W::zero();
     let num_states = fst.num_states();
@@ -39,7 +39,7 @@ where
                 ReweightType::ReweightToInitial => {}
                 ReweightType::ReweightToFinal => {
                     if let Some(final_weight) = fst.final_weight(state)? {
-                        let new_weight = F::W::zero().times(final_weight)?;
+                        let new_weight = W::zero().times(final_weight)?;
                         fst.set_final(state, new_weight)?;
                     }
                 }

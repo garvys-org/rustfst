@@ -166,24 +166,24 @@ impl<W: Semiring> DeterminizeTr<W> {
 }
 
 #[derive(PartialEq, Debug)]
-struct DeterminizeFsaImpl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>> {
+struct DeterminizeFsaImpl<'a, 'b, W: Semiring, F: Fst<W>, CD: CommonDivisor<W>> {
     fst: &'a F,
-    cache_impl: CacheImpl<F::W>,
-    state_table: StateTable<DeterminizeStateTuple<F::W>>,
+    cache_impl: CacheImpl<W>,
+    state_table: StateTable<DeterminizeStateTuple<W>>,
     ghost: PhantomData<CD>,
-    in_dist: Option<&'b [F::W]>,
-    out_dist: Vec<F::W>,
+    in_dist: Option<&'b [W]>,
+    out_dist: Vec<W>,
 }
 
-impl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>> FstImpl for DeterminizeFsaImpl<'a, 'b, F, CD>
+impl<'a, 'b, W, F: Fst<W>, CD: CommonDivisor<W>> FstImpl for DeterminizeFsaImpl<'a, 'b, W, F, CD>
 where
-    F::W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
+    W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
 {
-    type W = F::W;
-    fn cache_impl_mut(&mut self) -> &mut CacheImpl<<F as CoreFst>::W> {
+    type W = W;
+    fn cache_impl_mut(&mut self) -> &mut CacheImpl<W> {
         &mut self.cache_impl
     }
-    fn cache_impl_ref(&self) -> &CacheImpl<<F as CoreFst>::W> {
+    fn cache_impl_ref(&self) -> &CacheImpl<W> {
         &self.cache_impl
     }
 
@@ -239,7 +239,7 @@ where
         Ok(None)
     }
 
-    fn compute_final(&mut self, state: usize) -> Result<Option<<F as CoreFst>::W>> {
+    fn compute_final(&mut self, state: usize) -> Result<Option<W>> {
         let zero = F::W::zero();
         let tuple = self.state_table.find_tuple(state);
         let mut final_weight = F::W::zero();
@@ -260,11 +260,11 @@ where
     }
 }
 
-impl<'a, 'b, F: Fst, CD: CommonDivisor<F::W>> DeterminizeFsaImpl<'a, 'b, F, CD>
+impl<'a, 'b, W, F: Fst<W>, CD: CommonDivisor<W>> DeterminizeFsaImpl<'a, 'b, W, F, CD>
 where
-    F::W: WeaklyDivisibleSemiring + WeightQuantize,
+    W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
 {
-    pub fn new(fst: &'a F, in_dist: Option<&'b [F::W]>) -> Result<Self> {
+    pub fn new(fst: &'a F, in_dist: Option<&'b [W]>) -> Result<Self> {
         if !fst.is_acceptor() {
             bail!("DeterminizeFsaImpl : expected acceptor as argument");
         }
@@ -278,7 +278,7 @@ where
         })
     }
 
-    fn add_tr(&mut self, state: StateId, det_tr: &DeterminizeTr<F::W>) -> Result<()> {
+    fn add_tr(&mut self, state: StateId, det_tr: &DeterminizeTr<W>) -> Result<()> {
         let tr = Tr::new(
             det_tr.label,
             det_tr.label,
@@ -288,7 +288,7 @@ where
         self.cache_impl.push_tr(state, tr)
     }
 
-    fn norm_tr(&mut self, det_tr: &mut DeterminizeTr<F::W>) -> Result<()> {
+    fn norm_tr(&mut self, det_tr: &mut DeterminizeTr<W>) -> Result<()> {
         det_tr
             .dest_tuple
             .subset
@@ -323,7 +323,7 @@ where
         Ok(())
     }
 
-    fn find_state(&mut self, tuple: &DeterminizeStateTuple<F::W>) -> Result<StateId> {
+    fn find_state(&mut self, tuple: &DeterminizeStateTuple<W>) -> Result<StateId> {
         let s = self.state_table.find_id_from_ref(&tuple);
         if let Some(_in_dist) = self.in_dist.as_ref() {
             if self.out_dist.len() <= s {
@@ -333,7 +333,7 @@ where
         Ok(s)
     }
 
-    fn compute_distance(&self, subset: &WeightedSubset<F::W>) -> Result<F::W> {
+    fn compute_distance(&self, subset: &WeightedSubset<W>) -> Result<W> {
         let mut outd = F::W::zero();
         let weight_zero = F::W::zero();
         for element in subset.iter() {
@@ -347,11 +347,9 @@ where
         Ok(outd)
     }
 
-    pub fn compute_with_distance<F2: MutableFst<W = F::W> + ExpandedFst<W = F::W>>(
+    pub fn compute_with_distance<F2: MutableFst<W>>(
         &mut self,
-    ) -> Result<(F2, Vec<F2::W>)>
-    where
-        F::W: 'static,
+    ) -> Result<(F2, Vec<W>)>
     {
         let dfst = self.compute()?;
         let out_dist = self.out_dist.clone();
@@ -362,13 +360,13 @@ where
 pub fn determinize_with_distance<W, F1, F2>(ifst: &F1, in_dist: &[W]) -> Result<(F2, Vec<W>)>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
-    F1: ExpandedFst<W = W>,
-    F2: MutableFst<W = W> + ExpandedFst<W = W>,
+    F1: ExpandedFst<W>,
+    F2: MutableFst<W> + ExpandedFst<W>,
 {
     if !W::properties().contains(SemiringProperties::LEFT_SEMIRING) {
         bail!("determinize_fsa : weight must be left distributive")
     }
-    let mut det_fsa_impl: DeterminizeFsaImpl<_, DefaultCommonDivisor> =
+    let mut det_fsa_impl: DeterminizeFsaImpl<_, _, DefaultCommonDivisor> =
         DeterminizeFsaImpl::new(ifst, Some(in_dist))?;
     det_fsa_impl.compute_with_distance()
 }
@@ -376,22 +374,22 @@ where
 pub fn determinize_fsa<W, F1, F2, CD>(fst_in: &F1) -> Result<F2>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
-    F1: Fst<W = W>,
-    F2: MutableFst<W = W> + ExpandedFst<W = W>,
+    F1: Fst<W>,
+    F2: MutableFst<W>,
     CD: CommonDivisor<W>,
 {
     if !W::properties().contains(SemiringProperties::LEFT_SEMIRING) {
         bail!("determinize_fsa : weight must be left distributive")
     }
-    let mut det_fsa_impl: DeterminizeFsaImpl<_, CD> = DeterminizeFsaImpl::new(fst_in, None)?;
+    let mut det_fsa_impl: DeterminizeFsaImpl<_, _, CD> = DeterminizeFsaImpl::new(fst_in, None)?;
     det_fsa_impl.compute()
 }
 
 pub fn determinize_fst<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Result<F2>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
-    F1: ExpandedFst<W = W>,
-    F2: MutableFst<W = W> + ExpandedFst<W = W> + AllocableFst,
+    F1: ExpandedFst<W>,
+    F2: MutableFst<W> + AllocableFst<W>,
 {
     let mut to_gallic = ToGallicConverter {};
     let mut from_gallic = FromGallicConverter {
@@ -464,8 +462,8 @@ where
 pub fn determinize<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Result<F2>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
-    F1: ExpandedFst<W = W>,
-    F2: MutableFst<W = W> + ExpandedFst<W = W> + AllocableFst,
+    F1: ExpandedFst<W>,
+    F2: MutableFst<W> + AllocableFst<W>,
 {
     let mut fst_res: F2 = if fst_in.is_acceptor() {
         determinize_fsa::<_, _, _, DefaultCommonDivisor>(fst_in)?

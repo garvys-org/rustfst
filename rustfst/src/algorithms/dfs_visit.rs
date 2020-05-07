@@ -16,7 +16,7 @@ enum DfsStateColor {
     Black,
 }
 
-pub trait Visitor<'a, F: Fst> {
+pub trait Visitor<'a, W: Semiring, F: Fst<W>> {
     /// Invoked before DFS visit.
     fn init_visit(&mut self, fst: &'a F);
 
@@ -24,17 +24,17 @@ pub trait Visitor<'a, F: Fst> {
     fn init_state(&mut self, s: StateId, root: StateId) -> bool;
 
     /// Invoked when tree transition to white/undiscovered state examined.
-    fn tree_tr(&mut self, s: StateId, tr: &Tr<F::W>) -> bool;
+    fn tree_tr(&mut self, s: StateId, tr: &Tr<W>) -> bool;
 
     /// Invoked when back transition to grey/unfinished state examined.
-    fn back_tr(&mut self, s: StateId, tr: &Tr<F::W>) -> bool;
+    fn back_tr(&mut self, s: StateId, tr: &Tr<W>) -> bool;
 
     /// Invoked when forward or cross transition to black/finished state examined.
-    fn forward_or_cross_tr(&mut self, s: StateId, tr: &Tr<F::W>) -> bool;
+    fn forward_or_cross_tr(&mut self, s: StateId, tr: &Tr<W>) -> bool;
 
     /// Invoked when state finished ('s' is tree root, 'parent' is kNoStateId,
     /// and 'tr' is nullptr).
-    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, tr: Option<&Tr<F::W>>);
+    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, tr: Option<&Tr<W>>);
 
     /// Invoked after DFS visit.
     fn finish_visit(&mut self);
@@ -54,7 +54,7 @@ where
     W: Semiring + 'a,
 {
     #[inline]
-    pub fn new<F: Fst<W=W>>(fst: &'a F, s: StateId) -> Self {
+    pub fn new<F: Fst<W>>(fst: &'a F, s: StateId) -> Self {
         Self {
             state_id: s,
             tr_iter: OpenFstIterator::new(unsafe { fst.tr_iter_unchecked(s) }),
@@ -90,7 +90,7 @@ impl<I: Iterator> OpenFstIterator<I> {
     }
 }
 
-pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>, A: TrFilter<F::W>>(
+pub fn dfs_visit<'a, W: Semiring, F: ExpandedFst<W>, V: Visitor<'a, W, F>, A: TrFilter<W>>(
     fst: &'a F,
     visitor: &mut V,
     tr_filter: &A,

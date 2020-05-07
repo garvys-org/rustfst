@@ -31,9 +31,10 @@ pub enum ClosureType {
 ///
 /// ## Closure Star
 /// ![closure_out_closure_star](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/closure_out_closure_star.svg?sanitize=true)
-pub fn closure<F>(fst: &mut F, closure_type: ClosureType)
+pub fn closure<W, F>(fst: &mut F, closure_type: ClosureType)
 where
-    F: MutableFst,
+    W: Semiring,
+    F: MutableFst<W>,
 {
     if let Some(start_state) = fst.start() {
         let final_states_id: Vec<_> = fst
@@ -61,7 +62,7 @@ where
                     Tr::new(
                         EPS_LABEL,
                         EPS_LABEL,
-                        <F as CoreFst>::W::one(),
+                        W::one(),
                         start_state_id,
                     ),
                 );
@@ -70,7 +71,7 @@ where
 
         unsafe {
             fst.set_start_unchecked(nstart);
-            fst.set_final_unchecked(nstart, F::W::one());
+            fst.set_final_unchecked(nstart, W::one());
         }
     }
 }
@@ -81,9 +82,7 @@ where
 /// Times(Times(a, a), a), etc. If closure_type == CLOSURE_STAR, then the empty
 /// string is transduced to itself with weight Weight::One() as well.
 #[derive(Debug, PartialEq)]
-pub struct ClosureFst<F: Fst + 'static>(ReplaceFst<F, F>)
-where
-    F::W: 'static;
+pub struct ClosureFst<W: Semiring, F: Fst<W> + 'static>(ReplaceFst<W, F, F>);
 //
 // impl<F: Fst + MutableFst + AllocableFst> ClosureFst<F>
 // where

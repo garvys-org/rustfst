@@ -5,6 +5,7 @@ use anyhow::{bail, format_err, Context, Result};
 
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::StateId;
+use crate::semirings::Semiring;
 
 fn iterator_to_hashmap<I>(pairs: I) -> Result<HashMap<StateId, StateId>>
 where
@@ -44,9 +45,10 @@ where
 /// # Ok(())
 /// # }
 /// ```
-pub fn relabel_pairs<F, I, J>(fst: &mut F, ipairs: I, opairs: J) -> Result<()>
+pub fn relabel_pairs<W, F, I, J>(fst: &mut F, ipairs: I, opairs: J) -> Result<()>
 where
-    F: ExpandedFst + MutableFst,
+    W: Semiring,
+    F: MutableFst<W>,
     I: IntoIterator<Item = (StateId, StateId)>,
     J: IntoIterator<Item = (StateId, StateId)>,
 {

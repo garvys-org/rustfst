@@ -60,8 +60,8 @@ use crate::{SymbolTable, EPS_LABEL};
 pub fn union<W, F1, F2>(fst_1: &mut F1, fst_2: &F2) -> Result<()>
 where
     W: Semiring,
-    F1: AllocableFst<W = W> + MutableFst<W = W>,
-    F2: ExpandedFst<W = W>,
+    F1: AllocableFst<W> + MutableFst<W>,
+    F2: ExpandedFst<W>,
 {
     let numstates1 = fst_1.num_states();
     let fst_props_1 = fst_1.properties()?;
@@ -119,9 +119,7 @@ where
 /// weight b, then their union transduces x to y with weight a and w to v with
 /// weight b.
 #[derive(Debug, Clone, PartialEq)]
-pub struct UnionFst<F: Fst + 'static>(ReplaceFst<F, F>)
-where
-    F::W: 'static;
+pub struct UnionFst<W: Semiring, F: Fst<W> + 'static>(ReplaceFst<W, F, F>);
 //
 // impl<F: Fst + MutableFst + AllocableFst> UnionFst<F>
 // where

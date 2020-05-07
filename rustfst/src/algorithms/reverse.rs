@@ -29,8 +29,8 @@ use crate::EPS_LABEL;
 pub fn reverse<W, F1, F2>(ifst: &F1) -> Result<F2>
 where
     W: Semiring,
-    F1: ExpandedFst<W = W>,
-    F2: MutableFst<W = W::ReverseWeight> + AllocableFst,
+    F1: ExpandedFst<W>,
+    F2: MutableFst<W::ReverseWeight> + AllocableFst<W::ReverseWeight>,
 {
     let mut ofst = F2::new();
     ofst.reserve_states(ifst.num_states());

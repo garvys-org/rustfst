@@ -1,6 +1,7 @@
 use std::mem::swap;
 
 use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::semirings::Semiring;
 
 /// This operation inverts the transduction corresponding to an FST
 /// by exchanging the FST's input and output labels.
@@ -28,7 +29,7 @@ use crate::fst_traits::{ExpandedFst, MutableFst};
 ///
 /// ![invert_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/invert_out.svg?sanitize=true)
 ///
-pub fn invert<F: ExpandedFst + MutableFst>(fst: &mut F) {
+pub fn invert<W: Semiring, F: MutableFst<W>>(fst: &mut F) {
     for state in 0..fst.num_states() {
         for tr in unsafe { fst.tr_iter_unchecked_mut(state) } {
             swap(&mut tr.ilabel, &mut tr.olabel);

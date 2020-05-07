@@ -6,6 +6,7 @@ use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::StateId;
 use crate::Tr;
+use crate::semirings::Semiring;
 
 pub struct TopOrderVisitor {
     pub order: Vec<StateId>,
@@ -23,27 +24,27 @@ impl TopOrderVisitor {
     }
 }
 
-impl<'a, F: 'a + Fst> Visitor<'a, F> for TopOrderVisitor {
+impl<'a, W: Semiring, F: 'a + Fst<W>> Visitor<'a, W, F> for TopOrderVisitor {
     fn init_visit(&mut self, _fst: &'a F) {}
 
     fn init_state(&mut self, _s: usize, _root: usize) -> bool {
         true
     }
 
-    fn tree_tr(&mut self, _s: StateId, _tr: &Tr<F::W>) -> bool {
+    fn tree_tr(&mut self, _s: StateId, _tr: &Tr<W>) -> bool {
         true
     }
 
-    fn back_tr(&mut self, _s: StateId, _tr: &Tr<F::W>) -> bool {
+    fn back_tr(&mut self, _s: StateId, _tr: &Tr<W>) -> bool {
         self.acyclic = false;
         false
     }
 
-    fn forward_or_cross_tr(&mut self, _s: StateId, _tr: &Tr<F::W>) -> bool {
+    fn forward_or_cross_tr(&mut self, _s: StateId, _tr: &Tr<W>) -> bool {
         true
     }
 
-    fn finish_state(&mut self, s: StateId, _parent: Option<StateId>, _tr: Option<&Tr<F::W>>) {
+    fn finish_state(&mut self, s: StateId, _parent: Option<StateId>, _tr: Option<&Tr<W>>) {
         self.finish.push(s)
     }
 
@@ -71,9 +72,10 @@ impl<'a, F: 'a + Fst> Visitor<'a, F> for TopOrderVisitor {
 ///
 /// ![topsort_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_out.svg?sanitize=true)
 ///
-pub fn top_sort<F>(fst: &mut F) -> Result<()>
+pub fn top_sort<W, F>(fst: &mut F) -> Result<()>
 where
-    F: MutableFst + ExpandedFst,
+    W: Semiring,
+    F: MutableFst<W>,
 {
     let mut visitor = TopOrderVisitor::new();
     dfs_visit(fst, &mut visitor, &AnyTrFilter {}, false);

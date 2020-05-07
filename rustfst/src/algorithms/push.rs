@@ -33,15 +33,14 @@ bitflags! {
 /// outgoing transitions and final weight at a non-initial state is
 /// equal to One() in the resulting machine. If pushing towards the
 /// final state, the same property holds on the reverse machine.
-pub fn push_weights<F>(
+pub fn push_weights<W, F>(
     fst: &mut F,
     reweight_type: ReweightType,
     remove_total_weight: bool,
 ) -> Result<()>
 where
-    F: MutableFst,
-    F::W: WeaklyDivisibleSemiring + 'static,
-    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
+    F: MutableFst<W>,
+    W: WeaklyDivisibleSemiring,
 {
     let dist = shortest_distance(fst, reweight_type == ReweightType::ReweightToInitial)?;
     if remove_total_weight {
@@ -59,9 +58,10 @@ where
     Ok(())
 }
 
-fn compute_total_weight<F>(fst: &F, dist: &[F::W], reverse: bool) -> Result<F::W>
+fn compute_total_weight<W, F>(fst: &F, dist: &[W], reverse: bool) -> Result<W>
 where
-    F: ExpandedFst,
+    W: Semiring,
+    F: ExpandedFst<W>,
 {
     if reverse {
         if let Some(start) = fst.start() {
@@ -85,10 +85,10 @@ where
     }
 }
 
-fn remove_weight<F>(fst: &mut F, weight: F::W, at_final: bool) -> Result<()>
+fn remove_weight<W, F>(fst: &mut F, weight: W, at_final: bool) -> Result<()>
 where
-    F: MutableFst,
-    F::W: WeaklyDivisibleSemiring,
+    F: MutableFst<W>,
+    W: WeaklyDivisibleSemiring,
 {
     if weight.is_one() || weight.is_zero() {
         return Ok(());
@@ -161,13 +161,12 @@ macro_rules! m_labels_pushing {
 
 /// Pushes the weights and/or labels of the input FST into the output
 /// mutable FST by pushing weights and/or labels towards the initial state or final states.
-pub fn push<F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType) -> Result<F2>
+pub fn push<W, F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType) -> Result<F2>
 where
-    F1: ExpandedFst,
-    F1::W: WeaklyDivisibleSemiring + WeightQuantize,
-    F2: ExpandedFst<W = F1::W> + MutableFst + AllocableFst,
-    <F1 as CoreFst>::W: 'static,
-    <<F1 as CoreFst>::W as Semiring>::ReverseWeight: 'static,
+    F1: ExpandedFst<W>,
+    F2: ExpandedFst<W> + MutableFst<W> + AllocableFst<W>,
+    W: 'static + WeaklyDivisibleSemiring + WeightQuantize,
+    <W as Semiring>::ReverseWeight: 'static,
 {
     if push_type.intersects(PushType::PUSH_WEIGHTS) && !push_type.intersects(PushType::PUSH_LABELS)
     {

@@ -56,8 +56,8 @@ use std::sync::Arc;
 pub fn concat<W, F1, F2>(fst_1: &mut F1, fst_2: &F2) -> Result<()>
 where
     W: Semiring,
-    F1: ExpandedFst<W = W> + MutableFst<W = W> + AllocableFst<W = W>,
-    F2: ExpandedFst<W = W>,
+    F1: ExpandedFst<W> + MutableFst<W> + AllocableFst<W>,
+    F2: ExpandedFst<W>,
 {
     let start1 = fst_1.start();
     if start1.is_none() {
@@ -103,9 +103,7 @@ where
 /// string w to v with weight b, then their concatenation transduces string xw
 /// to yv with Times(a, b).
 #[derive(Debug, Clone, PartialEq)]
-pub struct ConcatFst<F: Fst + 'static>(ReplaceFst<F, F>)
-where
-    F::W: 'static;
+pub struct ConcatFst<W: Semiring, F: Fst<W> + 'static>(ReplaceFst<W, F, F>);
 //
 // impl<F: Fst + MutableFst + AllocableFst> ConcatFst<F>
 // where

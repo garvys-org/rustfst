@@ -35,14 +35,13 @@ use crate::Tr;
 ///
 /// ![shortestpath_out_n_2](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/shortestpath_out_n_2.svg?sanitize=true)
 ///
-pub fn shortest_path<FI, FO>(ifst: &FI, nshortest: usize, unique: bool) -> Result<FO>
+pub fn shortest_path<W, FI, FO>(ifst: &FI, nshortest: usize, unique: bool) -> Result<FO>
 where
-    FI: ExpandedFst,
-    FO: MutableFst<W = FI::W>,
-    FI::W: 'static
-        + Into<<<FI as CoreFst>::W as Semiring>::ReverseWeight>
-        + From<<<FI as CoreFst>::W as Semiring>::ReverseWeight>,
-    <<FI as CoreFst>::W as Semiring>::ReverseWeight: WeightQuantize + WeaklyDivisibleSemiring,
+    FI: ExpandedFst<W>,
+    FO: MutableFst<W>,
+    W: Into<<W as Semiring>::ReverseWeight>
+        + From<<W as Semiring>::ReverseWeight>,
+    <W as Semiring>::ReverseWeight: WeightQuantize + WeaklyDivisibleSemiring,
 {
     if nshortest == 0 {
         return Ok(FO::new());
@@ -80,7 +79,7 @@ where
     let mut fst_res: FO = if !unique {
         n_shortest_path(&rfst, &distance_2, nshortest)?
     } else {
-        let distance_2_reversed: Vec<<<FI as CoreFst>::W as Semiring>::ReverseWeight> =
+        let distance_2_reversed: Vec<<W as Semiring>::ReverseWeight> =
             distance_2.into_iter().map(|v| v.into()).collect();
         let (dfst, distance_3_reversed): (VectorFst<_>, _) =
             determinize_with_distance(&rfst, &distance_2_reversed)?;
@@ -93,15 +92,15 @@ where
     Ok(fst_res)
 }
 
-fn single_shortest_path<F>(
+fn single_shortest_path<W, F>(
     ifst: &F,
-    distance: &mut Vec<F::W>,
+    distance: &mut Vec<W>,
     f_parent: &mut Option<StateId>,
     parent: &mut Vec<Option<(StateId, usize)>>,
 ) -> Result<()>
 where
-    F: ExpandedFst,
-    F::W: 'static,
+    W: Semiring,
+    F: ExpandedFst<W>,
 {
     parent.clear();
     *f_parent = None;
@@ -168,14 +167,15 @@ where
     Ok(())
 }
 
-fn single_shortest_path_backtrace<FI, FO>(
+fn single_shortest_path_backtrace<W, FI, FO>(
     ifst: &FI,
     f_parent: &Option<StateId>,
     parent: &[Option<(StateId, usize)>],
 ) -> Result<FO>
 where
-    FI: ExpandedFst,
-    FO: MutableFst<W = FI::W>,
+    W: Semiring,
+    FI: ExpandedFst<W>,
+    FO: MutableFst<W>,
 {
     let mut ofst = FO::new();
     let mut s_p = None;
@@ -260,8 +260,8 @@ impl<'a, 'b, W: Semiring> ShortestPathCompare<'a, 'b, W> {
 fn n_shortest_path<W, FI, FO>(ifst: &FI, distance: &[W], nshortest: usize) -> Result<FO>
 where
     W: Semiring,
-    FI: ExpandedFst<W = W::ReverseWeight> + MutableFst<W = W::ReverseWeight>,
-    FO: MutableFst<W = W> + ExpandedFst<W = W>,
+    FI: MutableFst<W::ReverseWeight>,
+    FO: MutableFst<W>,
 {
     let mut ofst = FO::new();
     if nshortest == 0 {

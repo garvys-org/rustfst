@@ -7,7 +7,7 @@ use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr};
 
-struct Isomorphism<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> {
+struct Isomorphism<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> {
     fst_1: &'a F1,
     fst_2: &'a F2,
     state_pairs: Vec<Option<StateId>>,
@@ -43,7 +43,7 @@ pub fn tr_compare<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> Ordering {
     Ordering::Equal
 }
 
-impl<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> Isomorphism<'a, W, F1, F2> {
+impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W, F1, F2> {
     fn new(fst_1: &'a F1, fst_2: &'a F2) -> Self {
         Self {
             fst_1,
@@ -141,8 +141,8 @@ impl<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> Isomorphis
 pub fn isomorphic<W, F1, F2>(fst_1: &F1, fst_2: &F2) -> Result<bool>
 where
     W: Semiring,
-    F1: ExpandedFst<W = W>,
-    F2: ExpandedFst<W = W>,
+    F1: ExpandedFst<W>,
+    F2: ExpandedFst<W>,
 {
     let mut iso = Isomorphism::new(fst_1, fst_2);
     iso.isomorphic()

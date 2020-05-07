@@ -53,10 +53,11 @@ pub trait TrMapper<S: Semiring> {
 }
 
 /// Maps every transition in the FST using an `TrMapper` object.
-pub fn tr_map<F, M>(ifst: &mut F, mapper: &M) -> Result<()>
+pub fn tr_map<W, F, M>(ifst: &mut F, mapper: &M) -> Result<()>
 where
-    F: MutableFst,
-    M: TrMapper<F::W>,
+    W: Semiring,
+    F: MutableFst<W>,
+    M: TrMapper<W>,
 {
     if ifst.start().is_none() {
         return Ok(());

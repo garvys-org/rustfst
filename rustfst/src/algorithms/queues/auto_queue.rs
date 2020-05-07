@@ -19,13 +19,11 @@ pub struct AutoQueue {
 }
 
 impl AutoQueue {
-    pub fn new<F: ExpandedFst, A: TrFilter<F::W>>(
+    pub fn new<W: Semiring, F: ExpandedFst<W>, A: TrFilter<W>>(
         fst: &F,
-        distance: Option<&Vec<F::W>>,
+        distance: Option<&Vec<W>>,
         tr_filter: &A,
     ) -> Result<Self>
-    where
-        F::W: 'static,
     {
         let props = fst.properties()?;
 
@@ -101,9 +99,10 @@ impl AutoQueue {
     }
 
     pub fn scc_queue_type<
-        F: ExpandedFst,
-        C: Fn(&F::W, &F::W) -> Result<bool>,
-        A: TrFilter<F::W>,
+        W: Semiring,
+        F: ExpandedFst<W>,
+        C: Fn(&W, &W) -> Result<bool>,
+        A: TrFilter<W>,
     >(
         fst: &F,
         sccs: &[usize],

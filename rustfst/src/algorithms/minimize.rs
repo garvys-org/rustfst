@@ -36,18 +36,18 @@ use crate::NO_STATE_ID;
 /// In place minimization of deterministic weighted automata and transducers,
 /// and also non-deterministic ones if they use an idempotent semiring.
 /// For transducers, the algorithm produces a compact factorization of the minimal transducer.
-pub fn minimize<F>(ifst: &mut F, allow_nondet: bool) -> Result<()>
+pub fn minimize<W, F>(ifst: &mut F, allow_nondet: bool) -> Result<()>
 where
-    F: MutableFst + ExpandedFst + AllocableFst,
-    F::W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
-    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
+    F: MutableFst<W> + ExpandedFst<W> + AllocableFst<W>,
+    W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
+    <W as Semiring>::ReverseWeight: 'static,
 {
     let props = ifst.properties()?;
 
     let allow_acyclic_minimization = if props.contains(FstProperties::I_DETERMINISTIC) {
         true
     } else {
-        if !F::W::properties().contains(SemiringProperties::IDEMPOTENT) {
+        if !W::properties().contains(SemiringProperties::IDEMPOTENT) {
             bail!("Cannot minimize a non-deterministic FST over a non-idempotent semiring")
         } else if !allow_nondet {
             bail!("Refusing to minimize a non-deterministic FST with allow_nondet = false")
@@ -98,13 +98,13 @@ where
     }
 }
 
-fn acceptor_minimize<F: MutableFst + ExpandedFst>(
+fn acceptor_minimize<W, F: MutableFst<W> + ExpandedFst<W>>(
     ifst: &mut F,
     allow_acyclic_minimization: bool,
 ) -> Result<()>
 where
-    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
-    F::W: 'static,
+    <W as Semiring>::ReverseWeight: 'static,
+    W: 'static,
 {
     let props = ifst.properties()?;
     if !props.contains(FstProperties::ACCEPTOR | FstProperties::UNWEIGHTED) {
@@ -132,7 +132,7 @@ where
     Ok(())
 }
 
-fn merge_states<F: MutableFst + ExpandedFst>(partition: Partition, fst: &mut F) -> Result<()> {
+fn merge_states<W: Semiring, F: MutableFst<W>>(partition: Partition, fst: &mut F) -> Result<()> {
     let mut state_map = vec![None; partition.num_classes()];
     for (i, s) in state_map
         .iter_mut()
@@ -170,7 +170,7 @@ fn merge_states<F: MutableFst + ExpandedFst>(partition: Partition, fst: &mut F) 
 }
 
 // Compute the height (distance) to final state
-pub fn fst_depth<F: Fst>(
+pub fn fst_depth<W: Semiring, F: Fst<W>>(
     fst: &F,
     state_id_cour: StateId,
     accessible_states: &mut HashSet<StateId>,
@@ -211,7 +211,7 @@ struct AcyclicMinimizer {
 }
 
 impl AcyclicMinimizer {
-    pub fn new<F: MutableFst + ExpandedFst>(fst: &mut F) -> Result<Self> {
+    pub fn new<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<Self> {
         let mut c = Self {
             partition: Partition::empty_new(),
         };
@@ -220,7 +220,7 @@ impl AcyclicMinimizer {
         Ok(c)
     }
 
-    fn initialize<F: MutableFst + ExpandedFst>(&mut self, fst: &mut F) -> Result<()> {
+    fn initialize<W: Semiring, F: MutableFst<W>>(&mut self, fst: &mut F) -> Result<()> {
         let mut accessible_state = HashSet::new();
         let mut fully_examined_states = HashSet::new();
         let mut heights = Vec::new();
@@ -240,7 +240,7 @@ impl AcyclicMinimizer {
         Ok(())
     }
 
-    fn refine<F: MutableFst + ExpandedFst>(&mut self, fst: &mut F) {
+    fn refine<W: Semiring, F: MutableFst<W>>(&mut self, fst: &mut F) {
         let state_cmp = StateComparator {
             fst,
             // This clone is necessary for the moment because the partition is modified while
@@ -298,14 +298,14 @@ impl AcyclicMinimizer {
     }
 }
 
-struct StateComparator<'a, F: MutableFst + ExpandedFst> {
+struct StateComparator<'a, W: Semiring, F: MutableFst<W>> {
     fst: &'a F,
     partition: Partition,
 }
 
-impl<'a, F: MutableFst + ExpandedFst> StateComparator<'a, F> {
+impl<'a, W: Semiring, F: MutableFst<W>> StateComparator<'a, W, F> {
     fn do_compare(&self, x: StateId, y: StateId) -> Result<bool> {
-        let zero = F::W::zero();
+        let zero = W::zero();
         let xfinal = self.fst.final_weight(x)?.unwrap_or_else(|| &zero);
         let yfinal = self.fst.final_weight(y)?.unwrap_or_else(|| &zero);
 
@@ -364,7 +364,7 @@ impl<'a, F: MutableFst + ExpandedFst> StateComparator<'a, F> {
     }
 }
 
-fn pre_partition<W: Semiring, F: MutableFst<W = W> + ExpandedFst<W = W>>(
+fn pre_partition<W: Semiring, F: MutableFst<W>>(
     fst: &F,
     partition: &mut Partition,
     queue: &mut LifoQueue,
@@ -409,12 +409,9 @@ fn pre_partition<W: Semiring, F: MutableFst<W = W> + ExpandedFst<W = W>>(
     }
 }
 
-fn cyclic_minimize<W: Semiring, F: MutableFst<W = W> + ExpandedFst<W = W>>(
+fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(
     fst: &mut F,
 ) -> Result<Partition>
-where
-    W: 'static,
-    <W as Semiring>::ReverseWeight: 'static,
 {
     // Initialize
     let mut tr: VectorFst<W::ReverseWeight> = reverse(fst)?;

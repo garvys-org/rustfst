@@ -21,7 +21,7 @@ use unsafe_unwrap::UnsafeUnwrap;
 /// Otherwise, a final super state will be added to the input FST. Any final state will
 /// point to this final super state where the transition weight will be their final weight.
 ///
-pub fn add_super_final_state<F: MutableFst>(ifst: &mut F) -> StateId {
+pub fn add_super_final_state<W: Semiring, F: MutableFst<W>>(ifst: &mut F) -> StateId {
     let final_states = ifst
         .final_states_iter()
         .map(|it| it.state_id)

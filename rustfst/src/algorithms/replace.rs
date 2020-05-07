@@ -93,15 +93,16 @@ impl ReplaceFstOptions {
 ///
 /// ![replace_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_out.svg?sanitize=true)
 ///
-pub fn replace<F1, F2, B>(
+pub fn replace<W, F1, F2, B>(
     fst_list: Vec<(Label, B)>,
     root: Label,
     epsilon_on_replace: bool,
 ) -> Result<F2>
 where
-    F1: Fst,
-    F1::W: Semiring + 'static,
-    F2: MutableFst<W = F1::W> + ExpandedFst<W = F1::W>,
+
+    F1: Fst<W>,
+    W: Semiring,
+    F2: MutableFst<W>,
     B: Borrow<F1>,
 {
     let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
@@ -134,8 +135,8 @@ fn replace_transducer(
 }
 
 #[derive(Clone, Eq)]
-pub struct ReplaceFstImpl<F: Fst, B: Borrow<F>> {
-    cache_impl: CacheImpl<F::W>,
+pub struct ReplaceFstImpl<W: Semiring, F: Fst<W>, B: Borrow<F>> {
+    cache_impl: CacheImpl<W>,
     call_label_type_: ReplaceLabelType,
     return_label_type_: ReplaceLabelType,
     call_output_label_: Option<Label>,
@@ -148,7 +149,7 @@ pub struct ReplaceFstImpl<F: Fst, B: Borrow<F>> {
     fst_type: PhantomData<F>,
 }
 
-impl<F: Fst + PartialEq, B: Borrow<F>> PartialEq for ReplaceFstImpl<F, B> {
+impl<W: Semiring, F: Fst<W> + PartialEq, B: Borrow<F>> PartialEq for ReplaceFstImpl<W, F, B> {
     fn eq(&self, other: &Self) -> bool {
         self.cache_impl.eq(&other.cache_impl)
             && self.call_label_type_.eq(&other.call_label_type_)
@@ -167,7 +168,7 @@ impl<F: Fst + PartialEq, B: Borrow<F>> PartialEq for ReplaceFstImpl<F, B> {
     }
 }
 
-impl<F: Fst, B: Borrow<F>> std::fmt::Debug for ReplaceFstImpl<F, B> {
+impl<W: Semiring, F: Fst<W>, B: Borrow<F>> std::fmt::Debug for ReplaceFstImpl<W, F, B> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // TODO: Allocating in debug should be avoided.
         let slice_fst = self.fst_array.iter().map(|fst| fst.borrow()).collect_vec();
@@ -191,16 +192,14 @@ impl<F: Fst, B: Borrow<F>> std::fmt::Debug for ReplaceFstImpl<F, B> {
     }
 }
 
-impl<'a, F: Fst, B: Borrow<F>> FstImpl for ReplaceFstImpl<F, B>
-where
-    F::W: 'static,
+impl<'a, W, F: Fst<W>, B: Borrow<F>> FstImpl for ReplaceFstImpl<W, F, B>
 {
-    type W = F::W;
-    fn cache_impl_mut(&mut self) -> &mut CacheImpl<<F as CoreFst>::W> {
+    type W = W;
+    fn cache_impl_mut(&mut self) -> &mut CacheImpl<W> {
         &mut self.cache_impl
     }
 
-    fn cache_impl_ref(&self) -> &CacheImpl<<F as CoreFst>::W> {
+    fn cache_impl_ref(&self) -> &CacheImpl<W> {
         &self.cache_impl
     }
 
@@ -242,7 +241,7 @@ where
         }
     }
 
-    fn compute_final(&mut self, state: usize) -> Result<Option<F::W>> {
+    fn compute_final(&mut self, state: usize) -> Result<Option<W>> {
         let tuple = self.state_table.tuple_table.find_tuple(state);
         if tuple.prefix_id == 0 {
             self.fst_array
@@ -257,7 +256,7 @@ where
     }
 }
 
-impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
+impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstImpl<W, F, B> {
     fn new(fst_list: Vec<(Label, B)>, opts: ReplaceFstOptions) -> Result<Self> {
         let mut replace_fst_impl = Self {
             cache_impl: CacheImpl::new(),
@@ -304,7 +303,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
         Ok(replace_fst_impl)
     }
 
-    fn compute_final_tr(&mut self, state: StateId) -> Option<Tr<F::W>> {
+    fn compute_final_tr(&mut self, state: StateId) -> Option<Tr<W>> {
         let tuple = self.state_table.tuple_table.find_tuple(state);
         let fst_state = tuple.fst_state?;
         if self
@@ -378,7 +377,7 @@ impl<F: Fst, B: Borrow<F>> ReplaceFstImpl<F, B> {
         self.get_prefix_id(prefix)
     }
 
-    fn compute_tr<W: Semiring>(&self, tuple: &ReplaceStateTuple, tr: &Tr<W>) -> Option<Tr<W>> {
+    fn compute_tr(&self, tuple: &ReplaceStateTuple, tr: &Tr<W>) -> Option<Tr<W>> {
         if tr.olabel == EPS_LABEL
             || tr.olabel < *self.nonterminal_set.iter().next().unwrap()
             || tr.olabel > *self.nonterminal_set.iter().rev().next().unwrap()
@@ -494,12 +493,9 @@ impl ReplaceStateTable {
 /// ReplaceFst supports lazy replacement of trs in one FST with another FST.
 /// This replacement is recursive. ReplaceFst can be used to support a variety of
 /// delayed constructions such as recursive transition networks, union, or closure.
-pub type ReplaceFst<F, B> = LazyFst<ReplaceFstImpl<F, B>>;
+pub type ReplaceFst<W, F, B> = LazyFst<ReplaceFstImpl<W, F, B>>;
 
-impl<F: Fst, B: Borrow<F>> ReplaceFst<F, B>
-where
-    F::W: 'static,
-    B: 'static,
+impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFst<W, F, B>
 {
     pub fn new(fst_list: Vec<(Label, B)>, root: Label, epsilon_on_replace: bool) -> Result<Self> {
         let mut isymt = None;

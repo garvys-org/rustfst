@@ -4,6 +4,7 @@ use crate::algorithms::tr_filters::TrFilter;
 use crate::algorithms::{Queue, QueueType};
 use crate::fst_traits::ExpandedFst;
 use crate::StateId;
+use crate::semirings::Semiring;
 
 /// Topological-order queue discipline, templated on the StateId. States are
 /// ordered in the queue topologically. The FST must be acyclic.
@@ -16,7 +17,7 @@ pub struct TopOrderQueue {
 }
 
 impl TopOrderQueue {
-    pub fn new<F: ExpandedFst, A: TrFilter<F::W>>(fst: &F, tr_filter: &A) -> Self {
+    pub fn new<W: Semiring, F: ExpandedFst<W>, A: TrFilter<W>>(fst: &F, tr_filter: &A) -> Self {
         let mut visitor = TopOrderVisitor::new();
         dfs_visit(fst, &mut visitor, tr_filter, false);
         if !visitor.acyclic {

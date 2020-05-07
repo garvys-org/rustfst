@@ -12,9 +12,10 @@ use crate::semirings::Semiring;
 use crate::EPS_LABEL;
 
 /// Removes final states that have epsilon-only input trs.
-pub fn rm_final_epsilon<F>(ifst: &mut F) -> Result<()>
+pub fn rm_final_epsilon<W, F>(ifst: &mut F) -> Result<()>
 where
-    F: MutableFst,
+    W: Semiring,
+    F: MutableFst<W>,
 {
     let mut visitors = SccVisitor::new(ifst, false, true);
     dfs_visit(ifst, &mut visitors, &AnyTrFilter {}, false);

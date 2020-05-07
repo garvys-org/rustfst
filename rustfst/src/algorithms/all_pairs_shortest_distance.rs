@@ -38,15 +38,15 @@ use crate::semirings::{Semiring, StarSemiring};
 /// # Ok(())
 /// # }
 /// ```
-pub fn all_pairs_shortest_distance<F>(fst: &F) -> Result<Vec<Vec<F::W>>>
+pub fn all_pairs_shortest_distance<W, F>(fst: &F) -> Result<Vec<Vec<W>>>
 where
-    F: Fst + ExpandedFst,
-    F::W: StarSemiring,
+    F: Fst<W> + ExpandedFst<W>,
+    W: StarSemiring,
 {
     let num_states = fst.num_states();
 
     // Distance between all states are initialized to zero
-    let mut d = vec![vec![<F as CoreFst>::W::zero(); num_states]; num_states];
+    let mut d = vec![vec![W::zero(); num_states]; num_states];
 
     // Iterator over the wFST to add the weight of the trs
     for state_id in fst.states_iter() {

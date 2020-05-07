@@ -96,22 +96,17 @@ impl<W: Semiring, Q: Queue> RmEpsilonConfig<W, Q> {
 ///
 /// ![rmepsilon_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/rmepsilon_out.svg?sanitize=true)
 ///
-pub fn rm_epsilon<F: MutableFst>(fst: &mut F) -> Result<()>
-where
-    F::W: 'static,
+pub fn rm_epsilon<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<()>
 {
     let tr_filter = EpsilonTrFilter {};
     let queue = AutoQueue::new(fst, None, &tr_filter)?;
     let opts = RmEpsilonConfig::new_with_default(queue);
     rm_epsilon_with_config(fst, opts)
 }
-pub fn rm_epsilon_with_config<F: MutableFst, Q: Queue>(
+pub fn rm_epsilon_with_config<W, F: MutableFst<W>, Q: Queue>(
     fst: &mut F,
-    opts: RmEpsilonConfig<F::W, Q>,
+    opts: RmEpsilonConfig<W, Q>,
 ) -> Result<()>
-where
-    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
-    F::W: 'static,
 {
     let connect = opts.connect;
     let weight_threshold = opts.weight_threshold.clone();
@@ -229,22 +224,22 @@ struct Element {
 }
 
 #[derive(Clone, Eq)]
-struct RmEpsilonState<F: MutableFst, B: Borrow<F>, Q: Queue> {
+struct RmEpsilonState<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> {
     visited: Vec<bool>,
     visited_states: Vec<StateId>,
     element_map: HashMap<Element, (StateId, usize)>,
     expand_id: usize,
-    sd_state: ShortestDistanceState<Q, F, B, EpsilonTrFilter>,
+    sd_state: ShortestDistanceState<W, Q, F, B, EpsilonTrFilter>,
 }
 
-impl<F: MutableFst, B: Borrow<F>, Q: Queue> std::fmt::Debug for RmEpsilonState<F, B, Q> {
+impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> std::fmt::Debug for RmEpsilonState<W, F, B, Q> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "RmEpsilonState {{ visited : {:?}, visited_states : {:?}, element_map : {:?}, expand_id : {:?}, sd_state : {:?} }}",
         self.visited, self.visited_states, self.element_map, self.expand_id, self.sd_state)
     }
 }
 
-impl<F: MutableFst, B: Borrow<F>, Q: Queue + PartialEq> PartialEq for RmEpsilonState<F, B, Q> {
+impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue + PartialEq> PartialEq for RmEpsilonState<W, F, B, Q> {
     fn eq(&self, other: &Self) -> bool {
         self.visited.eq(&other.visited)
             && self.visited_states.eq(&other.visited_states)
@@ -254,11 +249,9 @@ impl<F: MutableFst, B: Borrow<F>, Q: Queue + PartialEq> PartialEq for RmEpsilonS
     }
 }
 
-impl<F: MutableFst, B: Borrow<F>, Q: Queue> RmEpsilonState<F, B, Q>
-where
-    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
+impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> RmEpsilonState<W, F, B, Q>
 {
-    pub fn new(fst: B, opts: RmEpsilonConfig<F::W, Q>) -> Self {
+    pub fn new(fst: B, opts: RmEpsilonConfig<W, Q>) -> Self {
         Self {
             sd_state: ShortestDistanceState::new_from_config(fst, opts.sd_opts, true),
             visited: vec![],
@@ -268,8 +261,8 @@ where
         }
     }
 
-    pub fn expand(&mut self, source: StateId) -> Result<(Vec<Tr<F::W>>, F::W)> {
-        let zero = F::W::zero();
+    pub fn expand(&mut self, source: StateId) -> Result<(Vec<Tr<W>>, W)> {
+        let zero = W::zero();
         let distance = self.sd_state.shortest_distance(Some(source))?;
 
         let tr_filter = EpsilonTrFilter {};
@@ -277,7 +270,7 @@ where
         let mut eps_queue = vec![source];
 
         let mut trs = vec![];
-        let mut final_weight = F::W::zero();
+        let mut final_weight = W::zero();
         while let Some(state) = eps_queue.pop() {
             while self.visited.len() <= state {
                 self.visited.push(false);
@@ -349,12 +342,12 @@ where
 }
 
 #[derive(Clone, Eq)]
-pub struct RmEpsilonImpl<F: MutableFst, B: Borrow<F>> {
-    rmeps_state: RmEpsilonState<F, B, FifoQueue>,
-    cache_impl: CacheImpl<F::W>,
+pub struct RmEpsilonImpl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> {
+    rmeps_state: RmEpsilonState<W, F, B, FifoQueue>,
+    cache_impl: CacheImpl<W>,
 }
 
-impl<F: MutableFst, B: Borrow<F>> std::fmt::Debug for RmEpsilonImpl<F, B> {
+impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> std::fmt::Debug for RmEpsilonImpl<W, F, B> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -364,15 +357,13 @@ impl<F: MutableFst, B: Borrow<F>> std::fmt::Debug for RmEpsilonImpl<F, B> {
     }
 }
 
-impl<F: MutableFst, B: Borrow<F>> PartialEq for RmEpsilonImpl<F, B> {
+impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> PartialEq for RmEpsilonImpl<W, F, B> {
     fn eq(&self, other: &Self) -> bool {
         self.rmeps_state.eq(&other.rmeps_state) && self.cache_impl.eq(&other.cache_impl)
     }
 }
 
-impl<F: MutableFst, B: Borrow<F>> RmEpsilonImpl<F, B>
-where
-    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
+impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> RmEpsilonImpl<W, F, B>
 {
     fn new(fst: B) -> Self {
         Self {
@@ -385,11 +376,9 @@ where
     }
 }
 
-impl<F: MutableFst, B: Borrow<F>> FstImpl for RmEpsilonImpl<F, B>
-where
-    F::W: 'static,
+impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> FstImpl for RmEpsilonImpl<W, F, B>
 {
-    type W = F::W;
+    type W = W;
 
     fn cache_impl_mut(&mut self) -> &mut CacheImpl<Self::W> {
         &mut self.cache_impl
@@ -432,11 +421,8 @@ where
 /// Removes epsilon-transitions (when both the input and output label are an
 /// epsilon) from a transducer. The result will be an equivalent FST that has no
 /// such epsilon transitions. This version is a delayed FST.
-pub type RmEpsilonFst<F, B> = LazyFst<RmEpsilonImpl<F, B>>;
-impl<F: MutableFst, B: Borrow<F>> RmEpsilonFst<F, B>
-where
-    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
-    F::W: 'static,
+pub type RmEpsilonFst<W, F, B> = LazyFst<RmEpsilonImpl<W, F, B>>;
+impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> RmEpsilonFst<W, F, B>
 {
     pub fn new(fst: B) -> Self {
         let isymt = fst.borrow().input_symbols().cloned();

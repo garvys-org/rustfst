@@ -94,17 +94,17 @@ impl<W: Semiring> Element<W> {
 }
 
 #[derive(Clone)]
-pub struct FactorWeightImpl<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> {
+pub struct FactorWeightImpl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> {
     opts: FactorWeightOptions,
-    cache_impl: CacheImpl<F::W>,
-    state_table: StateTable<Element<F::W>>,
+    cache_impl: CacheImpl<W>,
+    state_table: StateTable<Element<W>>,
     fst: B,
     unfactored: RefCell<HashMap<StateId, StateId>>,
     ghost: PhantomData<FI>,
 }
 
-impl<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> std::fmt::Debug
-    for FactorWeightImpl<F, B, FI>
+impl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> std::fmt::Debug
+    for FactorWeightImpl<W, F, B, FI>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
@@ -120,8 +120,8 @@ impl<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> std::fmt::Debug
     }
 }
 
-impl<F: Fst + PartialEq, B: Borrow<F>, FI: FactorIterator<F::W>> PartialEq
-    for FactorWeightImpl<F, B, FI>
+impl<W: Semiring, F: Fst<W> + PartialEq, B: Borrow<F>, FI: FactorIterator<W>> PartialEq
+    for FactorWeightImpl<W, F, B, FI>
 {
     fn eq(&self, other: &Self) -> bool {
         self.opts.eq(&other.opts)
@@ -132,15 +132,15 @@ impl<F: Fst + PartialEq, B: Borrow<F>, FI: FactorIterator<F::W>> PartialEq
     }
 }
 
-impl<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> FstImpl for FactorWeightImpl<F, B, FI>
+impl<W, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FstImpl for FactorWeightImpl<W, F, B, FI>
 where
-    F::W: WeightQuantize + 'static,
+    W: WeightQuantize,
 {
-    type W = F::W;
-    fn cache_impl_mut(&mut self) -> &mut CacheImpl<<F as CoreFst>::W> {
+    type W = W;
+    fn cache_impl_mut(&mut self) -> &mut CacheImpl<W> {
         &mut self.cache_impl
     }
-    fn cache_impl_ref(&self) -> &CacheImpl<<F as CoreFst>::W> {
+    fn cache_impl_ref(&self) -> &CacheImpl<W> {
         &self.cache_impl
     }
 
@@ -151,7 +151,7 @@ where
                 let weight = elt.weight.times(&tr.weight).unwrap();
                 let factor_it = FI::new(weight.clone());
                 if !self.factor_tr_weights() || factor_it.done() {
-                    let dest = self.find_state(&Element::new(Some(tr.nextstate), F::W::one()));
+                    let dest = self.find_state(&Element::new(Some(tr.nextstate), W::one()));
                     self.cache_impl
                         .push_tr(state, Tr::new(tr.ilabel, tr.olabel, weight, dest))?;
                 } else {
@@ -208,7 +208,7 @@ where
         }
     }
 
-    fn compute_final(&mut self, state: usize) -> Result<Option<<F as CoreFst>::W>> {
+    fn compute_final(&mut self, state: usize) -> Result<Option<W>> {
         let zero = F::W::zero();
         let elt = self.state_table.find_tuple(state);
         let weight = match elt.state {
@@ -227,9 +227,9 @@ where
     }
 }
 
-impl<F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> FactorWeightImpl<F, B, FI>
+impl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FactorWeightImpl<W, F, B, FI>
 where
-    F::W: WeightQuantize + 'static,
+    W: WeightQuantize,
 {
     pub fn new(fst: B, opts: FactorWeightOptions) -> Result<Self> {
         if opts.mode.is_empty() {
@@ -257,7 +257,7 @@ where
             .intersects(FactorWeightType::FACTOR_FINAL_WEIGHTS)
     }
 
-    fn find_state(&self, elt: &Element<F::W>) -> StateId {
+    fn find_state(&self, elt: &Element<W>) -> StateId {
         if !self.factor_tr_weights() && elt.weight.is_one() && elt.state.is_some() {
             let old_state = elt.state.unwrap();
             if !self.unfactored.borrow().contains_key(&elt.state.unwrap()) {
@@ -281,15 +281,15 @@ where
 /// States and transitions will be added as necessary. The algorithm is a
 /// generalization to arbitrary weights of the second step of the input
 /// epsilon-normalization algorithm.
-pub fn factor_weight<F1, B, F2, FI>(fst_in: B, opts: FactorWeightOptions) -> Result<F2>
+pub fn factor_weight<W, F1, B, F2, FI>(fst_in: B, opts: FactorWeightOptions) -> Result<F2>
 where
-    F1: Fst,
+    F1: Fst<W>,
     B: Borrow<F1>,
-    F2: MutableFst<W = F1::W> + ExpandedFst<W = F1::W>,
-    FI: FactorIterator<F1::W>,
-    F1::W: WeightQuantize + 'static,
+    F2: MutableFst<W>,
+    FI: FactorIterator<W>,
+    W: WeightQuantize,
 {
-    let mut factor_weight_impl: FactorWeightImpl<F1, B, FI> = FactorWeightImpl::new(fst_in, opts)?;
+    let mut factor_weight_impl: FactorWeightImpl<W, F1, B, FI> = FactorWeightImpl::new(fst_in, opts)?;
     factor_weight_impl.compute()
 }
 
@@ -298,11 +298,11 @@ where
 /// States and transitions will be added as necessary. The algorithm is a
 /// generalization to arbitrary weights of the second step of the input
 /// epsilon-normalization algorithm. This version is a Delayed FST.
-pub type FactorWeightFst<F, B, FI> = LazyFst<FactorWeightImpl<F, B, FI>>;
+pub type FactorWeightFst<W, F, B, FI> = LazyFst<FactorWeightImpl<W, F, B, FI>>;
 
-impl<'a, F: Fst, B: Borrow<F>, FI: FactorIterator<F::W>> FactorWeightFst<F, B, FI>
+impl<'a, W, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FactorWeightFst<W, F, B, FI>
 where
-    F::W: WeightQuantize + 'static,
+    W: WeightQuantize,
 {
     pub fn new(fst: B, opts: FactorWeightOptions) -> Result<Self> {
         let isymt = fst.borrow().input_symbols().cloned();

@@ -57,7 +57,7 @@ pub trait FstImpl: Debug {
     }
 
     /// Turns the Lazy FST into a static one.
-    fn compute<F2: MutableFst<W = Self::W> + ExpandedFst<W = Self::W>>(&mut self) -> Result<F2> {
+    fn compute<F2: MutableFst<Self::W>>(&mut self) -> Result<F2> {
         let start_state = self.start()?;
         let mut fst_out = F2::new();
         if start_state.is_none() {

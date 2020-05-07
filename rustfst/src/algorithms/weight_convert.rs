@@ -16,11 +16,13 @@ pub trait WeightConverter<SI: Semiring, SO: Semiring> {
 
 /// Convert an FST in a given Semiring to another Semiring using a WeightConverter
 /// to specify how the conversion should be performed.
-pub fn weight_convert<F1, F2, M>(fst_in: &F1, mapper: &mut M) -> Result<F2>
+pub fn weight_convert<W1, W2, F1, F2, M>(fst_in: &F1, mapper: &mut M) -> Result<F2>
 where
-    F1: ExpandedFst,
-    F2: MutableFst + AllocableFst,
-    M: WeightConverter<F1::W, F2::W>,
+    W1: Semiring,
+    W2: Semiring,
+    F1: ExpandedFst<W1>,
+    F2: MutableFst<W2> + AllocableFst<W2>,
+    M: WeightConverter<W1, W2>,
 {
     let mut fst_out = F2::new();
     let final_action = mapper.final_action();
