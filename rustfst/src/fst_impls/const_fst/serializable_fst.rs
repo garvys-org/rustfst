@@ -21,7 +21,7 @@ use crate::semirings::SerializableSemiring;
 use crate::{Tr, EPS_LABEL};
 use std::sync::Arc;
 
-impl<W: 'static + SerializableSemiring> SerializableFst for ConstFst<W> {
+impl<W: 'static + SerializableSemiring> SerializableFst<W> for ConstFst<W> {
     fn fst_type() -> String {
         "const".to_string()
     }

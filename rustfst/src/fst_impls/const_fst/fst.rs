@@ -6,7 +6,7 @@ use crate::{SymbolTable, TrsConst, TrsVec};
 use anyhow::{format_err, Error, Result};
 use std::sync::Arc;
 
-impl<W: Semiring + 'static> Fst for ConstFst<W> {
+impl<W: Semiring + 'static> Fst<W> for ConstFst<W> {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.isymt.as_ref()
     }
@@ -39,7 +39,7 @@ impl<W: Semiring> CoreFst<W> for ConstFst<W> {
         self.start
     }
 
-    fn final_weight(&self, state_id: usize) -> Result<Option<&Self::W>> {
+    fn final_weight(&self, state_id: usize) -> Result<Option<&W>> {
         let s = self
             .states
             .get(state_id)
@@ -47,7 +47,7 @@ impl<W: Semiring> CoreFst<W> for ConstFst<W> {
         Ok(s.final_weight.as_ref())
     }
 
-    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<&Self::W> {
+    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<&W> {
         self.states.get_unchecked(state_id).final_weight.as_ref()
     }
 

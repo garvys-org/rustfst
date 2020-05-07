@@ -11,9 +11,7 @@ use std::fs::File;
 use std::io::{BufWriter, LineWriter, Write};
 
 /// Trait definining the methods an Fst must implement to be serialized and deserialized.
-pub trait SerializableFst: ExpandedFst
-where
-    Self::W: SerializableSemiring,
+pub trait SerializableFst<W: SerializableSemiring>: ExpandedFst<W>
 {
     /// String identifying the type of the FST. Will be used when serialiing and
     /// deserializing an FST in binary format.
@@ -29,7 +27,7 @@ where
     // TEXT
 
     /// Turns a generic wFST format into the one of the wFST.
-    fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst<Self::W>) -> Result<Self>;
+    fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst<W>) -> Result<Self>;
 
     /// Deserializes a wFST in text from a path and returns a loaded wFST.
     fn from_text_string(fst_string: &str) -> Result<Self> {
@@ -109,14 +107,12 @@ where
     }
 }
 
-fn draw_single_fst_state<F: SerializableFst, W: Write>(
+fn draw_single_fst_state<S: SerializableSemiring, F: SerializableFst<S>, W: Write>(
     fst: &F,
     writer: &mut W,
     state_id: StateId,
     config: &DrawingConfig,
 ) -> Result<()>
-where
-    F::W: SerializableSemiring,
 {
     let opt_isymt = fst.input_symbols();
     let opt_osymt = fst.output_symbols();

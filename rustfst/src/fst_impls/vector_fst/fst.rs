@@ -7,7 +7,7 @@ use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable, Trs, TrsVec};
 
-impl<W: 'static + Semiring> Fst for VectorFst<W> {
+impl<W: 'static + Semiring> Fst<W> for VectorFst<W> {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.isymt.as_ref()
     }
@@ -49,7 +49,7 @@ impl<W: 'static + Semiring> CoreFst<W> for VectorFst<W> {
     }
 
     #[inline]
-    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<&Self::W> {
+    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<&W> {
         self.states.get_unchecked(state_id).final_weight.as_ref()
     }
 

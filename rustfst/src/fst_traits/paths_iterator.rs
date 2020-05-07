@@ -7,18 +7,18 @@ use crate::trs::Trs;
 use crate::StateId;
 
 /// Trait to iterate over the paths accepted by an FST.
-pub trait PathsIterator<'a> {
-    type W: Semiring;
-    type Iter: Iterator<Item = FstPath<Self::W>>;
+pub trait PathsIterator<'a, W>
+where W: Semiring
+{
+    type Iter: Iterator<Item = FstPath<W>>;
     fn paths_iter(&'a self) -> Self::Iter;
 }
 
-impl<'a, W, F> PathsIterator<'a> for F
+impl<'a, W, F> PathsIterator<'a, W> for F
 where
     W: Semiring,
     F: 'a + Fst<W>,
 {
-    type W = F::W;
     type Iter = StructPathsIterator<'a, W, F>;
     fn paths_iter(&'a self) -> Self::Iter {
         StructPathsIterator::new(&self)
@@ -53,9 +53,9 @@ where
 impl<'a, W, F> Iterator for StructPathsIterator<'a, W, F>
 where
     W: Semiring,
-    F: 'a + Fst,
+    F: 'a + Fst<W>,
 {
-    type Item = FstPath<F::W>;
+    type Item = FstPath<W>;
 
     fn next(&mut self) -> Option<Self::Item> {
         while !self.queue.is_empty() {

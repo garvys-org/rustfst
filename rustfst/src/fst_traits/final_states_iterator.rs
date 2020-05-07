@@ -1,6 +1,7 @@
 use crate::fst_traits::{Fst, StateIterator};
 use crate::semirings::Semiring;
 use crate::StateId;
+use std::marker::PhantomData;
 
 #[derive(Debug)]
 pub struct FinalState<'f, W> {
@@ -9,48 +10,54 @@ pub struct FinalState<'f, W> {
 }
 
 /// Trait to iterate over the final states of a wFST.
-pub trait FinalStatesIterator<'f> {
-    type W: Semiring + 'f;
-    type Iter: Iterator<Item = FinalState<'f, Self::W>>;
+pub trait FinalStatesIterator<'f, W>
+where W: Semiring + 'f
+{
+    type Iter: Iterator<Item = FinalState<'f, W>>;
     fn final_states_iter(&'f self) -> Self::Iter;
 }
 
-impl<'f, F> FinalStatesIterator<'f> for F
+impl<'f, W, F> FinalStatesIterator<'f, W> for F
 where
-    F: 'f + Fst,
+    W: Semiring + 'f,
+    F: 'f + Fst<W>,
 {
-    type W = F::W;
-    type Iter = StructFinalStatesIterator<'f, F>;
+    type Iter = StructFinalStatesIterator<'f, W, F>;
     fn final_states_iter(&'f self) -> Self::Iter {
         StructFinalStatesIterator::new(&self)
     }
 }
 
-pub struct StructFinalStatesIterator<'f, F>
+pub struct StructFinalStatesIterator<'f, W, F>
 where
-    F: 'f + Fst,
+    W: Semiring + 'f,
+    F: 'f + Fst<W>,
 {
     fst: &'f F,
     it: <F as StateIterator<'f>>::Iter,
+    w: PhantomData<W>
 }
 
-impl<'f, F> StructFinalStatesIterator<'f, F>
+impl<'f, W, F> StructFinalStatesIterator<'f, W, F>
 where
-    F: 'f + Fst,
+    W: Semiring + 'f,
+    F: 'f + Fst<W>,
 {
-    fn new(fst: &'f F) -> StructFinalStatesIterator<F> {
+    fn new(fst: &'f F) -> StructFinalStatesIterator<W, F> {
         StructFinalStatesIterator {
             fst,
             it: fst.states_iter(),
+            w: PhantomData
         }
     }
 }
 
-impl<'f, F> Iterator for StructFinalStatesIterator<'f, F>
+impl<'f, W, F> Iterator for StructFinalStatesIterator<'f, W, F>
 where
-    F: 'f + Fst,
+    W: Semiring + 'f,
+    F: 'f + Fst<W>,
 {
-    type Item = FinalState<'f, F::W>;
+    type Item = FinalState<'f, W>;
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(state_id) = self.it.next() {

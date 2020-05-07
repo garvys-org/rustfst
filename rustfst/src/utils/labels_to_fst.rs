@@ -111,7 +111,7 @@ pub fn transducer<W: Semiring, F: MutableFst<W>>(
 /// assert_eq!(fst, fst_ref);
 ///
 /// ```
-pub fn acceptor<W: Semiring, F: MutableFst<W>>(labels: &[Label], weight: F) -> F {
+pub fn acceptor<W: Semiring, F: MutableFst<W>>(labels: &[Label], weight: W) -> F {
     let mut fst = F::new();
     let mut state_cour = fst.add_state();
 

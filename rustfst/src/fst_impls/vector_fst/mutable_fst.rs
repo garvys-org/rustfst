@@ -16,7 +16,7 @@ fn equal_tr<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> bool {
     tr_1.ilabel == tr_2.ilabel && tr_1.olabel == tr_2.olabel && tr_1.nextstate == tr_2.nextstate
 }
 
-impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
+impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
     fn new() -> Self {
         VectorFst {
             states: vec![],
@@ -165,11 +165,11 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(())
     }
 
-    unsafe fn add_tr_unchecked(&mut self, source: usize, tr: Tr<Self::W>) {
+    unsafe fn add_tr_unchecked(&mut self, source: usize, tr: Tr<W>) {
         self.states.get_unchecked_mut(source).trs.push(tr)
     }
 
-    unsafe fn set_trs_unchecked(&mut self, source: usize, trs: Vec<Tr<Self::W>>) {
+    unsafe fn set_trs_unchecked(&mut self, source: usize, trs: Vec<Tr<W>>) {
         let trs_inside = &mut self.states.get_unchecked_mut(source).trs;
         *Arc::make_mut(&mut trs_inside.0) = trs;
     }
@@ -195,7 +195,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(())
     }
 
-    fn pop_trs(&mut self, source: usize) -> Result<Vec<Tr<Self::W>>> {
+    fn pop_trs(&mut self, source: usize) -> Result<Vec<Tr<W>>> {
         let trs = &mut self
             .states
             .get_mut(source)
@@ -205,7 +205,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(v)
     }
 
-    unsafe fn pop_trs_unchecked(&mut self, source: usize) -> Vec<Tr<Self::W>> {
+    unsafe fn pop_trs_unchecked(&mut self, source: usize) -> Vec<Tr<W>> {
         let trs = &mut self.states.get_unchecked_mut(source).trs;
         Arc::make_mut(&mut trs.0).drain(..).collect()
     }
@@ -218,14 +218,14 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(s.final_weight.as_mut())
     }
 
-    unsafe fn final_weight_unchecked_mut(&mut self, state_id: usize) -> Option<&mut Self::W> {
+    unsafe fn final_weight_unchecked_mut(&mut self, state_id: usize) -> Option<&mut W> {
         self.states
             .get_unchecked_mut(state_id)
             .final_weight
             .as_mut()
     }
 
-    fn take_final_weight(&mut self, state_id: usize) -> Result<Option<Self::W>> {
+    fn take_final_weight(&mut self, state_id: usize) -> Result<Option<W>> {
         let s = self
             .states
             .get_mut(state_id)
@@ -233,11 +233,11 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         Ok(s.final_weight.take())
     }
 
-    unsafe fn take_final_weight_unchecked(&mut self, state_id: usize) -> Option<Self::W> {
+    unsafe fn take_final_weight_unchecked(&mut self, state_id: usize) -> Option<W> {
         self.states.get_unchecked_mut(state_id).final_weight.take()
     }
 
-    fn sort_trs_unchecked<F: Fn(&Tr<Self::W>, &Tr<Self::W>) -> Ordering>(
+    fn sort_trs_unchecked<F: Fn(&Tr<W>, &Tr<W>) -> Ordering>(
         &mut self,
         state: StateId,
         f: F,

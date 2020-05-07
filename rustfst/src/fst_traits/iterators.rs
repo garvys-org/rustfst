@@ -42,8 +42,8 @@ pub struct FstIterData<W, I> {
 }
 
 pub trait FstIntoIterator<W: Semiring>: CoreFst<W> {
-    type TrsIter: Iterator<Item = Tr<Self::W>>;
-    type FstIter: Iterator<Item = FstIterData<Self::W, Self::TrsIter>>;
+    type TrsIter: Iterator<Item = Tr<W>>;
+    type FstIter: Iterator<Item = FstIterData<W, Self::TrsIter>>;
     fn fst_into_iter(self) -> Self::FstIter;
 }
 

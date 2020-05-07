@@ -29,7 +29,7 @@ impl<W> ConstFst<W> {
     }
 }
 
-impl<W: Semiring> FstIntoIterator for ConstFst<W>
+impl<W: Semiring> FstIntoIterator<W> for ConstFst<W>
 where
     W: 'static,
 {
@@ -69,7 +69,7 @@ impl<'a, W> StateIterator<'a> for ConstFst<W> {
     }
 }
 
-impl<'a, W: Semiring + 'static> FstIterator<'a> for ConstFst<W> {
+impl<'a, W: Semiring + 'static> FstIterator<'a, W> for ConstFst<W> {
     type FstIter = Map<
         Enumerate<Zip<std::slice::Iter<'a, ConstState<W>>, RepeatN<&'a Arc<Vec<Tr<W>>>>>>,
         Box<

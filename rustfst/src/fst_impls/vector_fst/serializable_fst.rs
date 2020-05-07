@@ -19,7 +19,7 @@ use crate::semirings::SerializableSemiring;
 use crate::{Tr, Trs, TrsVec};
 use std::sync::Arc;
 
-impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
+impl<W: 'static + SerializableSemiring> SerializableFst<W> for VectorFst<W> {
     fn fst_type() -> String {
         "vector".to_string()
     }

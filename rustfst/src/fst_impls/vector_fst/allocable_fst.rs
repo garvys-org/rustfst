@@ -5,7 +5,7 @@ use crate::StateId;
 use anyhow::Result;
 use std::sync::Arc;
 
-impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
+impl<W: 'static + Semiring> AllocableFst<W> for VectorFst<W> {
     fn reserve_trs(&mut self, source: usize, additional: usize) -> Result<()> {
         let trs = &mut self
             .states

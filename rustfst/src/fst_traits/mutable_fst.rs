@@ -10,7 +10,7 @@ use std::slice;
 use crate::semirings::Semiring;
 
 /// Trait defining the methods to modify a wFST.
-pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a> {
+pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W> {
     /// Creates an empty wFST.
     fn new() -> Self;
 
@@ -62,8 +62,8 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a> {
     /// assert_eq!(fst.final_weight(s1).unwrap(), Some(&BooleanWeight::one()));
     /// assert_eq!(fst.final_weight(s2).unwrap(), Some(&BooleanWeight::one()));
     /// ```
-    fn set_final<S: Into<Self::W>>(&mut self, state_id: StateId, final_weight: S) -> Result<()>;
-    unsafe fn set_final_unchecked<S: Into<Self::W>>(&mut self, state_id: StateId, final_weight: S);
+    fn set_final<S: Into<W>>(&mut self, state_id: StateId, final_weight: S) -> Result<()>;
+    unsafe fn set_final_unchecked<S: Into<W>>(&mut self, state_id: StateId, final_weight: S);
 
     /// Adds a new state to the current FST. The identifier of the new state is returned
     ///
@@ -87,8 +87,8 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a> {
     fn add_state(&mut self) -> StateId;
     fn add_states(&mut self, n: usize);
 
-    fn tr_iter_mut(&mut self, state_id: StateId) -> Result<slice::IterMut<Tr<Self::W>>>;
-    unsafe fn tr_iter_unchecked_mut(&mut self, state_id: StateId) -> slice::IterMut<Tr<Self::W>>;
+    fn tr_iter_mut(&mut self, state_id: StateId) -> Result<slice::IterMut<Tr<W>>>;
+    unsafe fn tr_iter_unchecked_mut(&mut self, state_id: StateId) -> slice::IterMut<Tr<W>>;
 
     /// Removes a state from an FST. It also removes all the trs starting from another state and
     /// reaching this state. An error is raised if the state `state_id` doesn't exist.
@@ -197,8 +197,8 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a> {
     /// # Ok(())
     /// # }
     /// ```
-    fn add_tr(&mut self, source: StateId, tr: Tr<Self::W>) -> Result<()>;
-    unsafe fn add_tr_unchecked(&mut self, source: StateId, tr: Tr<Self::W>);
+    fn add_tr(&mut self, source: StateId, tr: Tr<W>) -> Result<()>;
+    unsafe fn add_tr_unchecked(&mut self, source: StateId, tr: Tr<W>);
 
     /// Adds a transition to the FST. The transition will start in the state `source`.
     ///
@@ -225,7 +225,7 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a> {
     /// # Ok(())
     /// # }
     /// ```
-    fn emplace_tr<S: Into<Self::W>>(
+    fn emplace_tr<S: Into<W>>(
         &mut self,
         source: StateId,
         ilabel: Label,
@@ -236,7 +236,7 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a> {
         self.add_tr(source, Tr::new(ilabel, olabel, weight, nextstate))
     }
 
-    unsafe fn emplace_tr_unchecked<S: Into<Self::W>>(
+    unsafe fn emplace_tr_unchecked<S: Into<W>>(
         &mut self,
         source: StateId,
         ilabel: Label,
@@ -247,7 +247,7 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a> {
         self.add_tr_unchecked(source, Tr::new(ilabel, olabel, weight, nextstate))
     }
 
-    unsafe fn set_trs_unchecked(&mut self, source: StateId, trs: Vec<Tr<Self::W>>);
+    unsafe fn set_trs_unchecked(&mut self, source: StateId, trs: Vec<Tr<W>>);
 
     /// Remove the final weight of a specific state.
     fn delete_final_weight(&mut self, source: StateId) -> Result<()>;
@@ -257,8 +257,8 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a> {
     fn delete_trs(&mut self, source: StateId) -> Result<()>;
 
     /// Remove all trs leaving a state and return them.
-    fn pop_trs(&mut self, source: StateId) -> Result<Vec<Tr<Self::W>>>;
-    unsafe fn pop_trs_unchecked(&mut self, source: StateId) -> Vec<Tr<Self::W>>;
+    fn pop_trs(&mut self, source: StateId) -> Result<Vec<Tr<W>>>;
+    unsafe fn pop_trs_unchecked(&mut self, source: StateId) -> Vec<Tr<W>>;
 
     /// Retrieves a mutable reference to the final weight of a state (if the state is a final one).
     fn final_weight_mut(&mut self, state_id: StateId) -> Result<Option<&mut W>>;
@@ -294,7 +294,7 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a> {
     /// # Ok(())
     /// # }
     /// ```
-    fn take_final_weight(&mut self, state_id: StateId) -> Result<Option<Self::W>>;
+    fn take_final_weight(&mut self, state_id: StateId) -> Result<Option<W>>;
 
     /// Takes the final weight out of the fst, leaving a None in its place.
     /// This version leads to `undefined behaviour` if the state doesn't exist.
@@ -319,9 +319,9 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a> {
     /// # Ok(())
     /// # }
     /// ```
-    unsafe fn take_final_weight_unchecked(&mut self, state_id: StateId) -> Option<Self::W>;
+    unsafe fn take_final_weight_unchecked(&mut self, state_id: StateId) -> Option<W>;
 
-    fn sort_trs_unchecked<F: Fn(&Tr<Self::W>, &Tr<Self::W>) -> Ordering>(
+    fn sort_trs_unchecked<F: Fn(&Tr<W>, &Tr<W>) -> Ordering>(
         &mut self,
         state: StateId,
         f: F,

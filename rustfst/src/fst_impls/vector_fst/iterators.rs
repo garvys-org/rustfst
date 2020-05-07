@@ -22,11 +22,11 @@ impl<'a, W: Semiring> StateIterator<'a> for VectorFst<W> {
     }
 }
 
-impl<W: Semiring> FstIntoIterator for VectorFst<W>
+impl<W: Semiring> FstIntoIterator<W> for VectorFst<W>
 where
     W: 'static,
 {
-    type TrsIter = std::vec::IntoIter<Tr<Self::W>>;
+    type TrsIter = std::vec::IntoIter<Tr<W>>;
     // TODO: Change this to impl once the feature has been stabilized
     // #![feature(type_alias_impl_trait)]
     // https://github.com/rust-lang/rust/issues/63063)
@@ -51,7 +51,7 @@ where
     }
 }
 
-impl<'a, W: Semiring + 'static> FstIterator<'a> for VectorFst<W> {
+impl<'a, W: Semiring + 'static> FstIterator<'a, W> for VectorFst<W> {
     type FstIter = Map<
         Enumerate<std::slice::Iter<'a, VectorFstState<W>>>,
         Box<dyn FnMut((StateId, &'a VectorFstState<W>)) -> FstIterData<&'a W, Self::TRS>>,
@@ -69,7 +69,7 @@ impl<'a, W: Semiring + 'static> FstIterator<'a> for VectorFst<W> {
     }
 }
 
-impl<'a, W: Semiring + 'static> FstIteratorMut<'a> for VectorFst<W> {
+impl<'a, W: Semiring + 'static> FstIteratorMut<'a, W> for VectorFst<W> {
     type FstIter = Map<
         Enumerate<std::slice::IterMut<'a, VectorFstState<W>>>,
         Box<
