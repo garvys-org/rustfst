@@ -15,8 +15,8 @@ use crate::fst_impls::ConstFst;
 use crate::fst_traits::FstIterData;
 use crate::fst_traits::{FstIntoIterator, FstIterator, StateIterator};
 use crate::semirings::Semiring;
-use crate::{StateId, TrsConst};
 use crate::Tr;
+use crate::{StateId, TrsConst};
 use std::sync::Arc;
 
 impl<W> ConstFst<W> {
@@ -33,10 +33,11 @@ impl<W: Semiring> FstIntoIterator for ConstFst<W>
 where
     W: 'static,
 {
+    type TrsIter = std::vec::IntoIter<Tr<W>>;
     // TODO: Change this to impl once the feature has been stabilized
     // #![feature(type_alias_impl_trait)]
     // https://github.com/rust-lang/rust/issues/63063)
-    type FstIter = Box<dyn Iterator<Item = FstIterData<W, Self::TRS>>>;
+    type FstIter = Box<dyn Iterator<Item = FstIterData<W, Self::TrsIter>>>;
 
     fn fst_into_iter(mut self) -> Self::FstIter {
         // Here the contiguous trs are moved into multiple vectors in order to be able to create
@@ -53,11 +54,7 @@ where
                 .enumerate()
                 .map(|(state_id, (const_state, trs_from_state))| FstIterData {
                     state_id,
-                    trs: TrsConst{
-                        trs: Arc::new(trs_from_state),
-                        pos: 0,
-                        n: const_state.ntrs
-                    },
+                    trs: trs_from_state.into_iter(),
                     final_weight: const_state.final_weight,
                     num_trs: const_state.ntrs,
                 }),
@@ -87,10 +84,10 @@ impl<'a, W: Semiring + 'static> FstIterator<'a> for ConstFst<W> {
             |(state_id, (fst_state, trs)): (StateId, (&'a ConstState<W>, &'a Arc<Vec<Tr<W>>>))| {
                 FstIterData {
                     state_id,
-                    trs: TrsConst{
+                    trs: TrsConst {
                         trs: Arc::clone(trs),
                         pos: fst_state.pos,
-                        n: fst_state.ntrs
+                        n: fst_state.ntrs,
                     },
                     final_weight: fst_state.final_weight.as_ref(),
                     num_trs: fst_state.ntrs,

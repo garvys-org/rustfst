@@ -1,15 +1,14 @@
 use std::sync::Arc;
 
-use anyhow::{Result, Error};
+use anyhow::{Error, Result};
 
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
-use crate::{StateId, SymbolTable, TrsVec, Trs};
+use crate::{StateId, SymbolTable, Trs, TrsVec};
 
 impl<W: 'static + Semiring> Fst for VectorFst<W> {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
-        // Arc is incremented, SymbolTable is not duplicated
         self.isymt.as_ref()
     }
 
@@ -69,7 +68,10 @@ impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
     }
 
     fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
-        let state = self.states.get(state_id).ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
+        let state = self
+            .states
+            .get(state_id)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
         // Data is not copied, only Arc
         Ok(state.trs.shallow_clone())
     }

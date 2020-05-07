@@ -3,8 +3,8 @@ use std::collections::VecDeque;
 use crate::fst_path::FstPath;
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
-use crate::StateId;
 use crate::trs::Trs;
+use crate::StateId;
 
 /// Trait to iterate over the paths accepted by an FST.
 pub trait PathsIterator<'a> {

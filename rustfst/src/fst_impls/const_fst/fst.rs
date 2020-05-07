@@ -2,8 +2,8 @@ use crate::fst_impls::ConstFst;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 
-use crate::{SymbolTable, TrsVec, TrsConst};
-use anyhow::{format_err, Result, Error};
+use crate::{SymbolTable, TrsConst, TrsVec};
+use anyhow::{format_err, Error, Result};
 use std::sync::Arc;
 
 impl<W: Semiring + 'static> Fst for ConstFst<W> {
@@ -69,21 +69,19 @@ impl<W: Semiring> CoreFst for ConstFst<W> {
             .states
             .get(state_id)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
-        Ok(TrsConst{
+        Ok(TrsConst {
             trs: Arc::clone(&self.trs),
             pos: state.pos,
-            n: state.ntrs
+            n: state.ntrs,
         })
     }
 
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
-        let state = self
-            .states
-            .get_unchecked(state_id);
-        TrsConst{
+        let state = self.states.get_unchecked(state_id);
+        TrsConst {
             trs: Arc::clone(&self.trs),
             pos: state.pos,
-            n: state.ntrs
+            n: state.ntrs,
         }
     }
 }

@@ -41,7 +41,8 @@ pub struct FstIterData<W, I> {
 }
 
 pub trait FstIntoIterator: CoreFst {
-    type FstIter: Iterator<Item = FstIterData<Self::W, Self::TRS>>;
+    type TrsIter: Iterator<Item = Tr<Self::W>>;
+    type FstIter: Iterator<Item = FstIterData<Self::W, Self::TrsIter>>;
     fn fst_into_iter(self) -> Self::FstIter;
 }
 

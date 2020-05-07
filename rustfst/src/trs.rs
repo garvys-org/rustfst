@@ -1,8 +1,8 @@
-use std::sync::Arc;
-use crate::Tr;
 use crate::semirings::Semiring;
+use crate::Tr;
+use std::sync::Arc;
 
-pub trait Trs<W: Semiring> : std::ops::Deref<Target=[Tr<W>]> {
+pub trait Trs<W: Semiring>: std::ops::Deref<Target = [Tr<W>]> {
     fn trs(&self) -> &[Tr<W>];
     fn shallow_clone(&self) -> Self;
 }
@@ -40,7 +40,7 @@ impl<W: Semiring> Clone for TrsVec<W> {
 }
 
 impl<W: Semiring> std::ops::Deref for TrsVec<W> {
-    type Target=[Tr<W>];
+    type Target = [Tr<W>];
     fn deref(&self) -> &Self::Target {
         self.trs()
     }
@@ -53,15 +53,15 @@ impl<W: Semiring> Default for TrsVec<W> {
 }
 
 #[derive(Debug, PartialOrd, PartialEq)]
-pub struct TrsConst<W: Semiring>{
+pub struct TrsConst<W: Semiring> {
     pub(crate) trs: Arc<Vec<Tr<W>>>,
     pub(crate) pos: usize,
-    pub(crate) n: usize
+    pub(crate) n: usize,
 }
 
 impl<W: Semiring> Trs<W> for TrsConst<W> {
     fn trs(&self) -> &[Tr<W>] {
-        &self.trs[self.pos..self.pos+self.n]
+        &self.trs[self.pos..self.pos + self.n]
     }
 
     // Doesn't clone the data, only the Arc
@@ -69,7 +69,7 @@ impl<W: Semiring> Trs<W> for TrsConst<W> {
         Self {
             trs: Arc::clone(&self.trs),
             pos: self.pos,
-            n: self.n
+            n: self.n,
         }
     }
 }
@@ -79,13 +79,13 @@ impl<W: Semiring> Clone for TrsConst<W> {
         Self {
             trs: Arc::new((*self.trs).clone()),
             n: self.n,
-            pos: self.pos
+            pos: self.pos,
         }
     }
 }
 
 impl<W: Semiring> std::ops::Deref for TrsConst<W> {
-    type Target=[Tr<W>];
+    type Target = [Tr<W>];
     fn deref(&self) -> &Self::Target {
         self.trs()
     }
@@ -93,10 +93,10 @@ impl<W: Semiring> std::ops::Deref for TrsConst<W> {
 
 impl<W: Semiring> Default for TrsConst<W> {
     fn default() -> Self {
-        Self{
+        Self {
             trs: Arc::new(vec![]),
             pos: 0,
-            n: 0
+            n: 0,
         }
     }
 }

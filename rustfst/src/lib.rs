@@ -106,9 +106,9 @@ pub use crate::symbol_table::SymbolTable;
 pub use self::tr::Tr;
 pub use self::trs::{Trs, TrsConst, TrsVec};
 
+use crate::semirings::Semiring;
 #[cfg(test)]
 use doc_comment::doc_comment;
-use crate::semirings::Semiring;
 
 // When running `cargo test`, rustdoc will check this file as well.
 #[cfg(test)]

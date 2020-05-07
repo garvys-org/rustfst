@@ -7,23 +7,20 @@ use std::sync::Arc;
 
 impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
     fn reserve_trs(&mut self, source: usize, additional: usize) -> Result<()> {
-        let trs = &mut self.states
+        let trs = &mut self
+            .states
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
             .trs;
 
-        Arc::make_mut(&mut trs.0)
-            .reserve(additional);
+        Arc::make_mut(&mut trs.0).reserve(additional);
         Ok(())
     }
 
     #[inline]
     unsafe fn reserve_trs_unchecked(&mut self, source: usize, additional: usize) {
-        let trs = &mut self.states
-            .get_unchecked_mut(source)
-            .trs;
-        Arc::make_mut(&mut trs.0)
-            .reserve(additional)
+        let trs = &mut self.states.get_unchecked_mut(source).trs;
+        Arc::make_mut(&mut trs.0).reserve(additional)
     }
 
     #[inline]
@@ -44,12 +41,12 @@ impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
     }
 
     fn shrink_to_fit_trs(&mut self, source: StateId) -> Result<()> {
-        let trs = &mut self.states
+        let trs = &mut self
+            .states
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
             .trs;
-        Arc::make_mut(&mut trs.0)
-            .shrink_to_fit();
+        Arc::make_mut(&mut trs.0).shrink_to_fit();
         Ok(())
     }
 
@@ -68,7 +65,8 @@ impl<W: 'static + Semiring> AllocableFst for VectorFst<W> {
             .states
             .get(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
-            .trs.0
+            .trs
+            .0
             .capacity())
     }
 

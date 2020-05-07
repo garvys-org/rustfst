@@ -64,6 +64,22 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         self.states.resize_with(len + n, VectorFstState::new);
     }
 
+    fn tr_iter_mut(&mut self, state_id: StateId) -> Result<slice::IterMut<Tr<W>>> {
+        let state = self
+            .states
+            .get_mut(state_id)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
+        let trs = Arc::make_mut(&mut state.trs.0);
+        Ok(trs.iter_mut())
+    }
+
+    #[inline]
+    unsafe fn tr_iter_unchecked_mut(&mut self, state_id: usize) -> slice::IterMut<Tr<W>> {
+        let state = self.states.get_unchecked_mut(state_id);
+        let trs = Arc::make_mut(&mut state.trs.0);
+        trs.iter_mut()
+    }
+
     fn del_state(&mut self, state_to_remove: StateId) -> Result<()> {
         // Remove the state from the vector
         // Check the trs for trs going to this state
@@ -185,19 +201,13 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
             .trs;
-        let v  = Arc::make_mut(&mut trs.0)
-            .drain(..)
-            .collect();
+        let v = Arc::make_mut(&mut trs.0).drain(..).collect();
         Ok(v)
     }
 
     unsafe fn pop_trs_unchecked(&mut self, source: usize) -> Vec<Tr<Self::W>> {
-        let trs = &mut self.states
-            .get_unchecked_mut(source)
-            .trs;
-        Arc::make_mut(&mut trs.0)
-            .drain(..)
-            .collect()
+        let trs = &mut self.states.get_unchecked_mut(source).trs;
+        Arc::make_mut(&mut trs.0).drain(..).collect()
     }
 
     fn final_weight_mut(&mut self, state_id: StateId) -> Result<Option<&mut W>> {
@@ -234,7 +244,8 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
     ) {
         unsafe {
             let trs = &mut self.states.get_unchecked_mut(state).trs;
-            Arc::make_mut(&mut trs.0).sort_by(f) }
+            Arc::make_mut(&mut trs.0).sort_by(f)
+        }
     }
 
     unsafe fn unique_trs_unchecked(&mut self, state: usize) {
@@ -264,22 +275,4 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         // trs.truncate(n_trs);
         // // Truncate doesn't modify the capacity of the vector. Maybe a shrink_to_fit ?
     }
-
-        fn tr_iter_mut(&mut self, state_id: StateId) -> Result<slice::IterMut<Tr<W>>> {
-            let state = self
-                .states
-                .get_mut(state_id)
-                .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
-            let trs = Arc::make_mut(&mut state.trs.0);
-            Ok(trs.iter_mut())
-        }
-
-        #[inline]
-        unsafe fn tr_iter_unchecked_mut(&mut self, state_id: usize) -> slice::IterMut<Tr<W>> {
-            let state = self
-                .states
-                .get_unchecked_mut(state_id);
-            let trs = Arc::make_mut(&mut state.trs.0);
-            trs.iter_mut()
-        }
 }

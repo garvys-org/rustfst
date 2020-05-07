@@ -3,7 +3,7 @@ pub use self::expanded_fst::ExpandedFst;
 pub use self::final_states_iterator::FinalStatesIterator;
 pub use self::fst::{CoreFst, Fst};
 pub use self::iterators::{
-    FstIntoIterator, FstIterator, FstIteratorMut, FstIterData, StateIterator
+    FstIntoIterator, FstIterData, FstIterator, FstIteratorMut, StateIterator,
 };
 pub use self::mutable_fst::MutableFst;
 pub use self::paths_iterator::PathsIterator;
@@ -19,4 +19,3 @@ mod iterators;
 mod mutable_fst;
 mod paths_iterator;
 mod serializable_fst;
-

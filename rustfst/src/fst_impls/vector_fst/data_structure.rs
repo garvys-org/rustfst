@@ -4,8 +4,8 @@ use crate::semirings::Semiring;
 use crate::symbol_table::SymbolTable;
 use crate::tr::Tr;
 use crate::{StateId, TrsVec};
-use std::sync::Arc;
 use std::ops::Deref;
+use std::sync::Arc;
 
 /// Simple concrete, mutable FST whose states and trs are stored in standard vectors.
 ///

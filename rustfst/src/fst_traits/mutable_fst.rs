@@ -9,9 +9,7 @@ use crate::{Label, StateId};
 use std::slice;
 
 /// Trait defining the methods to modify a wFST.
-pub trait MutableFst:
-    ExpandedFst + for<'a> FstIteratorMut<'a>
-{
+pub trait MutableFst: ExpandedFst + for<'a> FstIteratorMut<'a> {
     /// Creates an empty wFST.
     fn new() -> Self;
 

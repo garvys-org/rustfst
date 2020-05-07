@@ -4,11 +4,11 @@ use std::sync::Arc;
 use anyhow::Result;
 
 use crate::algorithms::tr_filters::{InputEpsilonTrFilter, OutputEpsilonTrFilter, TrFilter};
-use crate::fst_traits::iterators::{StateIterator};
+use crate::fst_traits::iterators::StateIterator;
 use crate::fst_traits::FstIterator;
 use crate::semirings::Semiring;
-use crate::{StateId, SymbolTable, Tr, TrsVec};
 use crate::trs::Trs;
+use crate::{StateId, SymbolTable, Tr, TrsVec};
 
 /// Trait defining necessary methods for a wFST to access start states and final states.
 pub trait CoreFst {
@@ -117,9 +117,7 @@ pub trait CoreFst {
 }
 
 /// Trait defining the minimum interface necessary for a wFST.
-pub trait Fst:
-    CoreFst + for<'b> StateIterator<'b> + Debug + for<'c> FstIterator<'c>
-{
+pub trait Fst: CoreFst + for<'b> StateIterator<'b> + Debug + for<'c> FstIterator<'c> {
     // TODO: Move niepsilons and noepsilons to required methods.
     /// Returns the number of trs with epsilon input labels leaving a state.
     ///
@@ -145,7 +143,11 @@ pub trait Fst:
     /// ```
     fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
         let filter = InputEpsilonTrFilter {};
-        Ok(self.get_trs(state)?.iter().filter(|v| filter.keep(v)).count())
+        Ok(self
+            .get_trs(state)?
+            .iter()
+            .filter(|v| filter.keep(v))
+            .count())
     }
 
     /// Returns the number of trs with epsilon output labels leaving a state.
@@ -172,7 +174,11 @@ pub trait Fst:
     /// ```
     fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
         let filter = OutputEpsilonTrFilter {};
-        Ok(self.get_trs(state)?.iter().filter(|v| filter.keep(v)).count())
+        Ok(self
+            .get_trs(state)?
+            .iter()
+            .filter(|v| filter.keep(v))
+            .count())
     }
 
     /// Returns true if the Fst is an acceptor. False otherwise.
