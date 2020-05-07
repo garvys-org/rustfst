@@ -32,8 +32,7 @@ impl<W: Semiring + 'static> Fst for ConstFst<W> {
     }
 }
 
-impl<W: Semiring> CoreFst for ConstFst<W> {
-    type W = W;
+impl<W: Semiring> CoreFst<W> for ConstFst<W> {
     type TRS = TrsConst<W>;
 
     fn start(&self) -> Option<usize> {

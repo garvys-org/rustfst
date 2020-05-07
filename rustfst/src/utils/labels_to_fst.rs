@@ -40,10 +40,10 @@ use std::cmp;
 ///
 /// assert_eq!(fst, fst_ref);
 /// ```
-pub fn transducer<F: MutableFst>(
+pub fn transducer<W: Semiring, F: MutableFst<W>>(
     labels_input: &[Label],
     labels_output: &[Label],
-    weight: F::W,
+    weight: W,
 ) -> F {
     let max_size = cmp::max(labels_input.len(), labels_output.len());
 
@@ -62,7 +62,7 @@ pub fn transducer<F: MutableFst>(
         // Can't fail as the state has just been added
         fst.add_tr(
             state_cour,
-            Tr::new(*i, *o, <F as CoreFst>::W::one(), new_state),
+            Tr::new(*i, *o, W::one(), new_state),
         )
         .unwrap();
 
@@ -111,7 +111,7 @@ pub fn transducer<F: MutableFst>(
 /// assert_eq!(fst, fst_ref);
 ///
 /// ```
-pub fn acceptor<F: MutableFst>(labels: &[Label], weight: F::W) -> F {
+pub fn acceptor<W: Semiring, F: MutableFst<W>>(labels: &[Label], weight: F) -> F {
     let mut fst = F::new();
     let mut state_cour = fst.add_state();
 
@@ -124,7 +124,7 @@ pub fn acceptor<F: MutableFst>(labels: &[Label], weight: F::W) -> F {
         // Can't fail as the state has just been added
         fst.add_tr(
             state_cour,
-            Tr::new(*l, *l, <F as CoreFst>::W::one(), new_state),
+            Tr::new(*l, *l, W::one(), new_state),
         )
         .unwrap();
         state_cour = new_state;

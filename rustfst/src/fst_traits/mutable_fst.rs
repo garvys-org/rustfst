@@ -7,9 +7,10 @@ use crate::fst_traits::{CoreFst, ExpandedFst, FstIteratorMut};
 use crate::tr::Tr;
 use crate::{Label, StateId};
 use std::slice;
+use crate::semirings::Semiring;
 
 /// Trait defining the methods to modify a wFST.
-pub trait MutableFst: ExpandedFst + for<'a> FstIteratorMut<'a> {
+pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a> {
     /// Creates an empty wFST.
     fn new() -> Self;
 
@@ -260,12 +261,12 @@ pub trait MutableFst: ExpandedFst + for<'a> FstIteratorMut<'a> {
     unsafe fn pop_trs_unchecked(&mut self, source: StateId) -> Vec<Tr<Self::W>>;
 
     /// Retrieves a mutable reference to the final weight of a state (if the state is a final one).
-    fn final_weight_mut(&mut self, state_id: StateId) -> Result<Option<&mut <Self as CoreFst>::W>>;
+    fn final_weight_mut(&mut self, state_id: StateId) -> Result<Option<&mut W>>;
 
     unsafe fn final_weight_unchecked_mut(
         &mut self,
         state_id: StateId,
-    ) -> Option<&mut <Self as CoreFst>::W>;
+    ) -> Option<&mut W>;
 
     /// Takes the final weight out of the fst, leaving a None in its place.
     ///

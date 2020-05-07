@@ -1,7 +1,7 @@
 // mod add_super_final_state;
 // mod all_pairs_shortest_distance;
 // mod closure;
-// pub mod compose;
+// // pub mod compose;
 // mod concat;
 // mod condense;
 // mod connect;
@@ -65,7 +65,7 @@ pub mod tr_filters;
 //     add_super_final_state::add_super_final_state,
 //     all_pairs_shortest_distance::all_pairs_shortest_distance,
 //     closure::{closure, ClosureFst, ClosureType},
-//     compose::compose,
+//     // compose::compose,
 //     concat::{concat, ConcatFst},
 //     condense::condense,
 //     connect::connect,

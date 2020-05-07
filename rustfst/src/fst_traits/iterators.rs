@@ -4,6 +4,7 @@ use crate::fst_traits::CoreFst;
 use crate::tr::Tr;
 use crate::StateId;
 use std::slice;
+use crate::semirings::Semiring;
 
 /// Trait to iterate over the states of a wFST.
 pub trait StateIterator<'a> {
@@ -40,18 +41,18 @@ pub struct FstIterData<W, I> {
     pub num_trs: usize,
 }
 
-pub trait FstIntoIterator: CoreFst {
+pub trait FstIntoIterator<W: Semiring>: CoreFst<W> {
     type TrsIter: Iterator<Item = Tr<Self::W>>;
     type FstIter: Iterator<Item = FstIterData<Self::W, Self::TrsIter>>;
     fn fst_into_iter(self) -> Self::FstIter;
 }
 
-pub trait FstIterator<'a>: CoreFst {
-    type FstIter: Iterator<Item = FstIterData<&'a Self::W, Self::TRS>>;
+pub trait FstIterator<'a, W: Semiring>: CoreFst<W> {
+    type FstIter: Iterator<Item = FstIterData<&'a W, Self::TRS>>;
     fn fst_iter(&'a self) -> Self::FstIter;
 }
 
-pub trait FstIteratorMut<'a>: CoreFst {
-    type FstIter: Iterator<Item = FstIterData<&'a mut Self::W, slice::IterMut<'a, Tr<Self::W>>>>;
+pub trait FstIteratorMut<'a, W: Semiring>: CoreFst<W> {
+    type FstIter: Iterator<Item = FstIterData<&'a mut W, slice::IterMut<'a, Tr<W>>>>;
     fn fst_iter_mut(&'a mut self) -> Self::FstIter;
 }

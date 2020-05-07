@@ -11,10 +11,9 @@ use crate::trs::Trs;
 use crate::{StateId, SymbolTable, Tr, TrsVec};
 
 /// Trait defining necessary methods for a wFST to access start states and final states.
-pub trait CoreFst {
+pub trait CoreFst<W: Semiring> {
     /// Weight use in the wFST. This type must implement the Semiring trait.
-    type W: Semiring;
-    type TRS: Trs<Self::W>;
+    type TRS: Trs<W>;
 
     /// Returns the ID of the start state of the wFST if it exists else none.
     ///
@@ -54,8 +53,8 @@ pub trait CoreFst {
     /// assert_eq!(fst.final_weight(s2).unwrap(), Some(&BooleanWeight::one()));
     /// assert!(fst.final_weight(s2 + 1).is_err());
     /// ```
-    fn final_weight(&self, state_id: StateId) -> Result<Option<&<Self as CoreFst>::W>>;
-    unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<&<Self as CoreFst>::W>;
+    fn final_weight(&self, state_id: StateId) -> Result<Option<&W>>;
+    unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<&W>;
 
     /// Number of trs leaving a specific state in the wFST.
     ///
@@ -117,7 +116,7 @@ pub trait CoreFst {
 }
 
 /// Trait defining the minimum interface necessary for a wFST.
-pub trait Fst: CoreFst + for<'b> StateIterator<'b> + Debug + for<'c> FstIterator<'c> {
+pub trait Fst<W: Semiring>: CoreFst<W> + for<'b> StateIterator<'b> + Debug + for<'c> FstIterator<'c, W> {
     // TODO: Move niepsilons and noepsilons to required methods.
     /// Returns the number of trs with epsilon input labels leaving a state.
     ///

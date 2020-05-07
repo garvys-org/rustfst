@@ -13,28 +13,31 @@ pub trait PathsIterator<'a> {
     fn paths_iter(&'a self) -> Self::Iter;
 }
 
-impl<'a, F> PathsIterator<'a> for F
+impl<'a, W, F> PathsIterator<'a> for F
 where
-    F: 'a + Fst,
+    W: Semiring,
+    F: 'a + Fst<W>,
 {
     type W = F::W;
-    type Iter = StructPathsIterator<'a, F>;
+    type Iter = StructPathsIterator<'a, W, F>;
     fn paths_iter(&'a self) -> Self::Iter {
         StructPathsIterator::new(&self)
     }
 }
 
-pub struct StructPathsIterator<'a, F>
+pub struct StructPathsIterator<'a, W, F>
 where
-    F: 'a + Fst,
+    W: Semiring,
+    F: 'a + Fst<W>,
 {
     fst: &'a F,
-    queue: VecDeque<(StateId, FstPath<F::W>)>,
+    queue: VecDeque<(StateId, FstPath<W>)>,
 }
 
-impl<'a, F> StructPathsIterator<'a, F>
+impl<'a, W, F> StructPathsIterator<'a, W, F>
 where
-    F: 'a + Fst,
+    W: Semiring,
+    F: 'a + Fst<W>,
 {
     pub fn new(fst: &'a F) -> Self {
         let mut queue = VecDeque::new();
@@ -47,8 +50,9 @@ where
     }
 }
 
-impl<'a, F> Iterator for StructPathsIterator<'a, F>
+impl<'a, W, F> Iterator for StructPathsIterator<'a, W, F>
 where
+    W: Semiring,
     F: 'a + Fst,
 {
     type Item = FstPath<F::W>;

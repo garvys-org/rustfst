@@ -33,8 +33,7 @@ impl<W: 'static + Semiring> Fst for VectorFst<W> {
     }
 }
 
-impl<W: 'static + Semiring> CoreFst for VectorFst<W> {
-    type W = W;
+impl<W: 'static + Semiring> CoreFst<W> for VectorFst<W> {
     type TRS = TrsVec<W>;
 
     fn start(&self) -> Option<StateId> {

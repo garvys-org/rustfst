@@ -156,7 +156,7 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         }
     }
 
-    fn add_tr(&mut self, source: StateId, tr: Tr<<Self as CoreFst>::W>) -> Result<()> {
+    fn add_tr(&mut self, source: StateId, tr: Tr<W>) -> Result<()> {
         self.states
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
