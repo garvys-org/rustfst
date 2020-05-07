@@ -3,6 +3,7 @@ use anyhow::Result;
 use crate::fst_traits::CoreFst;
 use crate::tr::Tr;
 use crate::StateId;
+use std::slice;
 
 /// Trait to iterate over the states of a wFST.
 pub trait StateIterator<'a> {
@@ -50,6 +51,6 @@ pub trait FstIterator<'a>: CoreFst {
 }
 
 pub trait FstIteratorMut<'a>: CoreFst {
-    type FstIter: Iterator<Item = FstIterData<&'a mut Self::W, Self::TRS>>;
+    type FstIter: Iterator<Item = FstIterData<&'a mut Self::W, slice::IterMut<'a, Tr<Self::W>>>>;
     fn fst_iter_mut(&'a mut self) -> Self::FstIter;
 }

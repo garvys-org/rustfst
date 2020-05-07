@@ -6,9 +6,10 @@ use anyhow::Result;
 use crate::{StateId, Tr, Trs};
 // use crate::algorithms::tr_unique::tr_compare;
 use crate::fst_impls::vector_fst::{VectorFst, VectorFstState};
-use crate::fst_traits::{CoreFst, MutableTrIterator};
+use crate::fst_traits::CoreFst;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
+use std::slice;
 
 #[inline]
 fn equal_tr<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> bool {
@@ -263,4 +264,22 @@ impl<W: 'static + Semiring> MutableFst for VectorFst<W> {
         // trs.truncate(n_trs);
         // // Truncate doesn't modify the capacity of the vector. Maybe a shrink_to_fit ?
     }
+
+        fn tr_iter_mut(&mut self, state_id: StateId) -> Result<slice::IterMut<Tr<W>>> {
+            let state = self
+                .states
+                .get_mut(state_id)
+                .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
+            let trs = Arc::make_mut(&mut state.trs.0);
+            Ok(trs.iter_mut())
+        }
+
+        #[inline]
+        unsafe fn tr_iter_unchecked_mut(&mut self, state_id: usize) -> slice::IterMut<Tr<W>> {
+            let state = self
+                .states
+                .get_unchecked_mut(state_id);
+            let trs = Arc::make_mut(&mut state.trs.0);
+            trs.iter_mut()
+        }
 }

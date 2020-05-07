@@ -6,10 +6,11 @@ use anyhow::Result;
 use crate::fst_traits::{CoreFst, ExpandedFst, FstIteratorMut};
 use crate::tr::Tr;
 use crate::{Label, StateId};
+use std::slice;
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst:
-    ExpandedFst + for<'a> MutableTrIterator<'a>// + for<'b> FstIteratorMut<'b>
+    ExpandedFst + for<'a> FstIteratorMut<'a>
 {
     /// Creates an empty wFST.
     fn new() -> Self;
@@ -86,6 +87,9 @@ pub trait MutableFst:
     /// ```
     fn add_state(&mut self) -> StateId;
     fn add_states(&mut self, n: usize);
+
+    fn tr_iter_mut(&mut self, state_id: StateId) -> Result<slice::IterMut<Tr<Self::W>>>;
+    unsafe fn tr_iter_unchecked_mut(&mut self, state_id: StateId) -> slice::IterMut<Tr<Self::W>>;
 
     /// Removes a state from an FST. It also removes all the trs starting from another state and
     /// reaching this state. An error is raised if the state `state_id` doesn't exist.
@@ -343,14 +347,4 @@ pub trait MutableFst:
     //     unimplemented!()
     //     // crate::algorithms::tr_map(self, mapper)
     // }
-}
-
-/// Iterate over mutable trs in a wFST.
-pub trait MutableTrIterator<'a>: CoreFst
-    where
-        Self::W: 'a,
-{
-    type IterMut: Iterator<Item = &'a mut Tr<Self::W>>;
-    fn tr_iter_mut(&'a mut self, state_id: StateId) -> Result<Self::IterMut>;
-    unsafe fn tr_iter_unchecked_mut(&'a mut self, state_id: StateId) -> Self::IterMut;
 }

@@ -5,7 +5,7 @@ pub use self::fst::{CoreFst, Fst};
 pub use self::iterators::{
     FstIntoIterator, FstIterator, FstIteratorMut, FstIterData, StateIterator
 };
-pub use self::mutable_fst::{MutableFst, MutableTrIterator};
+pub use self::mutable_fst::MutableFst;
 pub use self::paths_iterator::PathsIterator;
 pub use self::serializable_fst::SerializableFst;
 
