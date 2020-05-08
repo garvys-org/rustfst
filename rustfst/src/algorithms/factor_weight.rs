@@ -13,7 +13,7 @@ use crate::algorithms::lazy_fst::LazyFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::tr::Tr;
-use crate::KDELTA;
+use crate::{KDELTA, Trs};
 use crate::{Label, StateId};
 
 bitflags! {
@@ -101,6 +101,7 @@ pub struct FactorWeightImpl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIter
     fst: B,
     unfactored: RefCell<HashMap<StateId, StateId>>,
     ghost: PhantomData<FI>,
+    f: PhantomData<F>
 }
 
 impl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> std::fmt::Debug
@@ -147,7 +148,7 @@ where
     fn expand(&mut self, state: usize) -> Result<()> {
         let elt = self.state_table.find_tuple(state).clone();
         if let Some(old_state) = elt.state {
-            for tr in self.fst.borrow().tr_iter(old_state)? {
+            for tr in self.fst.borrow().get_trs(old_state)?.trs() {
                 let weight = elt.weight.times(&tr.weight).unwrap();
                 let factor_it = FI::new(weight.clone());
                 if !self.factor_tr_weights() || factor_it.done() {
@@ -169,7 +170,7 @@ where
         if self.factor_final_weights()
             && (elt.state.is_none() || self.fst.borrow().is_final(elt.state.unwrap())?)
         {
-            let one = F::W::one();
+            let one = W::one();
             let weight = match elt.state {
                 None => elt.weight,
                 Some(s) => elt
@@ -201,7 +202,7 @@ where
             Some(s) => {
                 let new_state = self.find_state(&Element {
                     state: Some(s),
-                    weight: F::W::one(),
+                    weight: W::one(),
                 });
                 Ok(Some(new_state))
             }
@@ -209,7 +210,7 @@ where
     }
 
     fn compute_final(&mut self, state: usize) -> Result<Option<W>> {
-        let zero = F::W::zero();
+        let zero = W::zero();
         let elt = self.state_table.find_tuple(state);
         let weight = match elt.state {
             None => elt.weight.clone(),
@@ -242,6 +243,7 @@ where
             cache_impl: CacheImpl::new(),
             unfactored: RefCell::new(HashMap::new()),
             ghost: PhantomData,
+            f: PhantomData
         })
     }
 
@@ -300,17 +302,17 @@ where
 /// epsilon-normalization algorithm. This version is a Delayed FST.
 pub type FactorWeightFst<W, F, B, FI> = LazyFst<FactorWeightImpl<W, F, B, FI>>;
 
-impl<'a, W, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FactorWeightFst<W, F, B, FI>
-where
-    W: WeightQuantize,
-{
-    pub fn new(fst: B, opts: FactorWeightOptions) -> Result<Self> {
-        let isymt = fst.borrow().input_symbols().cloned();
-        let osymt = fst.borrow().output_symbols().cloned();
-        Ok(Self::from_impl(
-            FactorWeightImpl::new(fst, opts)?,
-            isymt,
-            osymt,
-        ))
-    }
-}
+// impl<'a, W, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FactorWeightFst<W, F, B, FI>
+// where
+//     W: WeightQuantize,
+// {
+//     pub fn new(fst: B, opts: FactorWeightOptions) -> Result<Self> {
+//         let isymt = fst.borrow().input_symbols().cloned();
+//         let osymt = fst.borrow().output_symbols().cloned();
+//         Ok(Self::from_impl(
+//             FactorWeightImpl::new(fst, opts)?,
+//             isymt,
+//             osymt,
+//         ))
+//     }
+// }

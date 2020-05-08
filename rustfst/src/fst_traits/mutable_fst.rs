@@ -8,6 +8,7 @@ use crate::tr::Tr;
 use crate::{Label, StateId};
 use std::slice;
 use crate::semirings::Semiring;
+use crate::algorithms::{TrMapper, ClosureType};
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W> {
@@ -331,19 +332,17 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W
 
     unsafe fn sum_trs_unchecked(&mut self, state: StateId);
 
-    // /// This operation computes the concatenative closure.
-    // /// If A transduces string `x` to `y` with weight `a`,
-    // /// then the closure transduces `x` to `y` with weight `a`,
-    // /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
-    // ///  If closure_star then the empty string is transduced to itself with weight `1` as well.
-    // fn closure(&mut self, closure_type: ClosureType) {
-    //     unimplemented!()
-    //     // crate::algorithms::closure(self, closure_type)
-    // }
+    /// This operation computes the concatenative closure.
+    /// If A transduces string `x` to `y` with weight `a`,
+    /// then the closure transduces `x` to `y` with weight `a`,
+    /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
+    ///  If closure_star then the empty string is transduced to itself with weight `1` as well.
+    fn closure(&mut self, closure_type: ClosureType) {
+        crate::algorithms::closure(self, closure_type)
+    }
 
-    // /// Maps a transition using a `TrMapper` object.
-    // fn tr_map<M: TrMapper<Self::W>>(&mut self, mapper: &mut M) -> Result<()> {
-    //     unimplemented!()
-    //     // crate::algorithms::tr_map(self, mapper)
-    // }
+    /// Maps a transition using a `TrMapper` object.
+    fn tr_map<M: TrMapper<W>>(&mut self, mapper: &mut M) -> Result<()> {
+        crate::algorithms::tr_map(self, mapper)
+    }
 }

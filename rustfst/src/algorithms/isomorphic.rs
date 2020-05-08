@@ -5,13 +5,15 @@ use anyhow::Result;
 
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{StateId, Tr};
+use crate::{StateId, Tr, Trs};
+use std::marker::PhantomData;
 
 struct Isomorphism<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> {
     fst_1: &'a F1,
     fst_2: &'a F2,
     state_pairs: Vec<Option<StateId>>,
     queue: VecDeque<(StateId, StateId)>,
+    w: PhantomData<W>
 }
 
 /// Compare trs in the order input label, output label, weight and nextstate.
@@ -50,6 +52,7 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
             fst_2,
             state_pairs: vec![None; fst_1.num_states()],
             queue: VecDeque::new(),
+            w: PhantomData
         }
     }
 
@@ -77,8 +80,8 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
             return Ok(false);
         }
 
-        let mut trs1: Vec<_> = self.fst_1.tr_iter(s1)?.collect();
-        let mut trs2: Vec<_> = self.fst_2.tr_iter(s2)?.collect();
+        let mut trs1: Vec<_> = self.fst_1.get_trs(s1)?.trs().iter().collect();
+        let mut trs2: Vec<_> = self.fst_2.get_trs(s2)?.trs().iter().collect();
 
         trs1.sort_by(|a, b| tr_compare(a, b));
         trs2.sort_by(|a, b| tr_compare(a, b));

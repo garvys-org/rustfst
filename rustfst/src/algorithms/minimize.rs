@@ -3,6 +3,7 @@ use std::cmp::Ordering;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::marker::PhantomData;
 
 use anyhow::Result;
 use binary_heap_plus::BinaryHeap;
@@ -27,7 +28,7 @@ use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{
     GallicWeightLeft, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::StateId;
+use crate::{StateId, Trs};
 use crate::Tr;
 use crate::EPS_LABEL;
 use crate::KDELTA;
@@ -59,7 +60,7 @@ where
     if !props.contains(FstProperties::ACCEPTOR) {
         // Weighted transducer
         let mut to_gallic = ToGallicConverter {};
-        let mut gfst: VectorFst<GallicWeightLeft<F::W>> = weight_convert(ifst, &mut to_gallic)?;
+        let mut gfst: VectorFst<GallicWeightLeft<W>> = weight_convert(ifst, &mut to_gallic)?;
         push_weights(&mut gfst, ReweightType::ReweightToInitial, false)?;
         let mut quantize_mapper = QuantizeMapper {};
         tr_map(&mut gfst, &mut quantize_mapper)?;
@@ -75,7 +76,7 @@ where
             increment_final_olabel: false,
         };
         let fwfst: VectorFst<_> =
-            factor_weight::<VectorFst<GallicWeightLeft<F::W>>, _, _, GallicFactorLeft<F::W>>(
+            factor_weight::<_, VectorFst<GallicWeightLeft<W>>, _, _, GallicFactorLeft<W>>(
                 &gfst,
                 factor_opts,
             )?;
@@ -98,13 +99,10 @@ where
     }
 }
 
-fn acceptor_minimize<W, F: MutableFst<W> + ExpandedFst<W>>(
+fn acceptor_minimize<W: Semiring, F: MutableFst<W> + ExpandedFst<W>>(
     ifst: &mut F,
     allow_acyclic_minimization: bool,
 ) -> Result<()>
-where
-    <W as Semiring>::ReverseWeight: 'static,
-    W: 'static,
 {
     let props = ifst.properties()?;
     if !props.contains(FstProperties::ACCEPTOR | FstProperties::UNWEIGHTED) {
@@ -150,7 +148,7 @@ fn merge_states<W: Semiring, F: MutableFst<W>>(partition: Partition, fst: &mut F
                 }
             } else {
                 let trs: Vec<_> = fst
-                    .tr_iter(s)?
+                    .get_trs(s)?.trs().iter()
                     .cloned()
                     .map(|mut tr| {
                         tr.nextstate = state_map[partition.get_class_id(tr.nextstate)].unwrap();
@@ -184,7 +182,7 @@ pub fn fst_depth<W: Semiring, F: Fst<W>>(
     }
 
     let mut height_cur_state = 0;
-    for tr in fst.tr_iter(state_id_cour)? {
+    for tr in fst.get_trs(state_id_cour)?.trs() {
         let nextstate = tr.nextstate;
 
         if !accessible_states.contains(&nextstate) {
@@ -247,6 +245,7 @@ impl AcyclicMinimizer {
             // still needing the StateComparator.
             // TODO: Find a way to remove the clone.
             partition: self.partition.clone(),
+            w: PhantomData
         };
 
         let height = self.partition.num_classes();
@@ -301,6 +300,7 @@ impl AcyclicMinimizer {
 struct StateComparator<'a, W: Semiring, F: MutableFst<W>> {
     fst: &'a F,
     partition: Partition,
+    w: PhantomData<W>
 }
 
 impl<'a, W: Semiring, F: MutableFst<W>> StateComparator<'a, W, F> {
@@ -322,8 +322,8 @@ impl<'a, W: Semiring, F: MutableFst<W>> StateComparator<'a, W, F> {
             return Ok(false);
         }
 
-        let it_x = self.fst.tr_iter(x)?;
-        let it_y = self.fst.tr_iter(y)?;
+        let it_x = self.fst.get_trs(x)?.trs().iter();
+        let it_y = self.fst.get_trs(y)?.trs().iter();
 
         for (arc1, arc2) in it_x.zip(it_y) {
             if arc1.ilabel < arc2.ilabel {
@@ -377,7 +377,7 @@ fn pre_partition<W: Semiring, F: MutableFst<W>>(
         let mut hash_to_class_final = HashMap::<Vec<usize>, StateId>::new();
 
         for s in 0..num_states {
-            let ilabels: Vec<usize> = unsafe { fst.tr_iter_unchecked(s) }
+            let ilabels: Vec<usize> = unsafe { fst.get_trs_unchecked(s).trs().iter() }
                 .map(|tr| tr.ilabel)
                 .collect();
 
@@ -443,7 +443,7 @@ fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(
             if tr.num_trs(s + 1)? > 0 {
                 aiter_queue.push(TrsIterCollected {
                     idx: 0,
-                    trs: tr.tr_iter(s + 1)?.collect(),
+                    trs: tr.get_trs(s + 1)?.trs().iter().collect(),
                 });
             }
         }

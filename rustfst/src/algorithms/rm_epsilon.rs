@@ -19,6 +19,7 @@ use crate::fst_traits::CoreFst;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, EPS_LABEL};
+use bitflags::_core::marker::PhantomData;
 
 pub struct RmEpsilonConfig<W: Semiring, Q: Queue> {
     sd_opts: ShortestDistanceConfig<W, Q, EpsilonTrFilter>,
@@ -103,7 +104,7 @@ pub fn rm_epsilon<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<()>
     let opts = RmEpsilonConfig::new_with_default(queue);
     rm_epsilon_with_config(fst, opts)
 }
-pub fn rm_epsilon_with_config<W, F: MutableFst<W>, Q: Queue>(
+pub fn rm_epsilon_with_config<W: Semiring, F: MutableFst<W>, Q: Queue>(
     fst: &mut F,
     opts: RmEpsilonConfig<W, Q>,
 ) -> Result<()>
@@ -230,6 +231,7 @@ struct RmEpsilonState<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> {
     element_map: HashMap<Element, (StateId, usize)>,
     expand_id: usize,
     sd_state: ShortestDistanceState<W, Q, F, B, EpsilonTrFilter>,
+    f: PhantomData<F>
 }
 
 impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> std::fmt::Debug for RmEpsilonState<W, F, B, Q> {

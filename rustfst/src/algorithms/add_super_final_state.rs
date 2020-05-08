@@ -27,14 +27,14 @@ pub fn add_super_final_state<W: Semiring, F: MutableFst<W>>(ifst: &mut F) -> Sta
         .map(|it| it.state_id)
         .collect::<Vec<_>>();
     if final_states.len() == 1
-        && unsafe { ifst.final_weight_unchecked(final_states[0]) } == Some(&F::W::one())
+        && unsafe { ifst.final_weight_unchecked(final_states[0]) } == Some(&W::one())
     {
         return final_states[0];
     }
 
     let super_final_state = ifst.add_state();
     unsafe {
-        ifst.set_final_unchecked(super_final_state, F::W::one());
+        ifst.set_final_unchecked(super_final_state, W::one());
     }
 
     for final_state in final_states {

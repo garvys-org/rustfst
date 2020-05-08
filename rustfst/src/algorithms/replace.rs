@@ -192,7 +192,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> std::fmt::Debug for ReplaceFstImpl<W,
     }
 }
 
-impl<'a, W, F: Fst<W>, B: Borrow<F>> FstImpl for ReplaceFstImpl<W, F, B>
+impl<'a, W: Semiring, F: Fst<W>, B: Borrow<F>> FstImpl for ReplaceFstImpl<W, F, B>
 {
     type W = W;
     fn cache_impl_mut(&mut self) -> &mut CacheImpl<W> {

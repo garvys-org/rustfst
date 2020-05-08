@@ -68,14 +68,14 @@ where
             if start < dist.len() {
                 Ok(dist[start].clone())
             } else {
-                Ok(F::W::zero())
+                Ok(W::zero())
             }
         } else {
-            Ok(F::W::zero())
+            Ok(W::zero())
         }
     } else {
-        let mut sum = F::W::zero();
-        let zero = F::W::zero();
+        let mut sum = W::zero();
+        let zero = W::zero();
         for s in 0..dist.len() {
             sum.plus_assign(
                 dist[s].times(unsafe { fst.final_weight_unchecked(s) }.unwrap_or_else(|| &zero))?,
@@ -134,7 +134,7 @@ macro_rules! m_labels_pushing {
                 total_weight.set_value1($string_weight::one());
             }
             if !$push_type.intersects(PushType::REMOVE_TOTAL_WEIGHT) {
-                total_weight.set_value2(F1::W::one());
+                total_weight.set_value2(W::one());
             }
             reweight(&mut gfst, gdistance.as_slice(), $reweight_type)?;
             remove_weight(
@@ -146,7 +146,7 @@ macro_rules! m_labels_pushing {
             reweight(&mut gfst, gdistance.as_slice(), $reweight_type)?;
         }
         let fwfst: VectorFst<$gallic_weight> =
-            factor_weight::<VectorFst<$gallic_weight>, _, _, $gallic_factor>(
+            factor_weight::<_, VectorFst<$gallic_weight>, _, _, $gallic_factor>(
                 &gfst,
                 FactorWeightOptions::new(
                     FactorWeightType::FACTOR_FINAL_WEIGHTS | FactorWeightType::FACTOR_ARC_WEIGHTS,
@@ -184,17 +184,17 @@ where
                 ifst,
                 reweight_type,
                 push_type,
-                GallicWeightLeft<F1::W>,
+                GallicWeightLeft<W>,
                 StringWeightLeft,
-                GallicFactorLeft<F1::W>
+                GallicFactorLeft<W>
             ),
             ReweightType::ReweightToFinal => m_labels_pushing!(
                 ifst,
                 reweight_type,
                 push_type,
-                GallicWeightRight<F1::W>,
+                GallicWeightRight<W>,
                 StringWeightRight,
-                GallicFactorRight<F1::W>
+                GallicFactorRight<W>
             ),
         }
     } else {

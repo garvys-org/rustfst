@@ -17,7 +17,7 @@ pub struct LazyFst<IMPL> {
     isymt: Option<Arc<SymbolTable>>,
     osymt: Option<Arc<SymbolTable>>,
 }
-//
+
 // impl<IMPL: FstImpl> LazyFst<IMPL> {
 //     pub(crate) fn from_impl(
 //         fst_impl: IMPL,
@@ -51,9 +51,7 @@ pub struct LazyFst<IMPL> {
 //     }
 // }
 //
-// impl<IMPL: FstImpl> CoreFst for LazyFst<IMPL> {
-//     type W = IMPL::W;
-//
+// impl<IMPL: FstImpl> CoreFst<IMPL::W> for LazyFst<IMPL> {
 //     fn start(&self) -> Option<usize> {
 //         let ptr = self.fst_impl.get();
 //         let fst_impl = unsafe { ptr.as_mut().unwrap() };
@@ -151,15 +149,15 @@ pub struct LazyFst<IMPL> {
 //         self.osymt.take()
 //     }
 // }
-//
-// impl<IMPL: FstImpl> std::fmt::Debug for LazyFst<IMPL> {
-//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//         let ptr = self.fst_impl.get();
-//         let fst_impl = unsafe { ptr.as_ref().unwrap() };
-//         write!(f, "LazyFst {{ {:?} }}", &fst_impl)
-//     }
-// }
-//
+
+impl<IMPL: FstImpl> std::fmt::Debug for LazyFst<IMPL> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let ptr = self.fst_impl.get();
+        let fst_impl = unsafe { ptr.as_ref().unwrap() };
+        write!(f, "LazyFst {{ {:?} }}", &fst_impl)
+    }
+}
+
 // impl<'a, IMPL: FstImpl + 'a> FstIterator<'a> for LazyFst<IMPL> {
 //     type TrsIter = <LazyFst<IMPL> as TrIterator<'a>>::Iter;
 //     type FstIter = Map<
@@ -179,27 +177,28 @@ pub struct LazyFst<IMPL> {
 //         }))
 //     }
 // }
-//
-// impl<IMPL: FstImpl + PartialEq> PartialEq for LazyFst<IMPL> {
-//     fn eq(&self, other: &Self) -> bool {
-//         let ptr = self.fst_impl.get();
-//         let fst_impl = unsafe { ptr.as_ref().unwrap() };
-//
-//         let ptr_other = other.fst_impl.get();
-//         let fst_impl_other = unsafe { ptr_other.as_ref().unwrap() };
-//
-//         fst_impl.eq(fst_impl_other)
-//     }
-// }
-//
-// impl<IMPL: FstImpl + Clone + 'static> Clone for LazyFst<IMPL> {
-//     fn clone(&self) -> Self {
-//         let ptr = self.fst_impl.get();
-//         let fst_impl = unsafe { ptr.as_ref().unwrap() };
-//         Self {
-//             fst_impl: UnsafeCell::new(fst_impl.clone()),
-//             isymt: self.input_symbols().cloned(),
-//             osymt: self.output_symbols().cloned(),
-//         }
-//     }
-// }
+
+impl<IMPL: FstImpl + PartialEq> PartialEq for LazyFst<IMPL> {
+    fn eq(&self, other: &Self) -> bool {
+        let ptr = self.fst_impl.get();
+        let fst_impl = unsafe { ptr.as_ref().unwrap() };
+
+        let ptr_other = other.fst_impl.get();
+        let fst_impl_other = unsafe { ptr_other.as_ref().unwrap() };
+
+        fst_impl.eq(fst_impl_other)
+    }
+}
+
+impl<IMPL: FstImpl + Clone + 'static> Clone for LazyFst<IMPL> {
+    fn clone(&self) -> Self {
+        unimplemented!()
+        // let ptr = self.fst_impl.get();
+        // let fst_impl = unsafe { ptr.as_ref().unwrap() };
+        // Self {
+        //     fst_impl: UnsafeCell::new(fst_impl.clone()),
+        //     isymt: self.input_symbols().cloned(),
+        //     osymt: self.output_symbols().cloned(),
+        // }
+    }
+}

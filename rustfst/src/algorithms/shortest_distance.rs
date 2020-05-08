@@ -49,6 +49,7 @@ pub struct ShortestDistanceState<W: Semiring, Q: Queue, F: ExpandedFst<W>, B: Bo
     sources: Vec<Option<StateId>>,
     retain: bool,
     source_id: usize,
+    f: PhantomData<F>
 }
 
 impl<W: Semiring, Q: Queue + PartialEq, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>> PartialEq

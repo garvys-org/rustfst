@@ -17,7 +17,7 @@ use crate::semirings::{
     WeightQuantize,
 };
 use crate::tr::Tr;
-use crate::{Label, StateId, EPS_LABEL, KDELTA};
+use crate::{Label, StateId, EPS_LABEL, KDELTA, Trs};
 
 /// Determinization type.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
@@ -189,10 +189,10 @@ where
 
     fn expand(&mut self, state: usize) -> Result<()> {
         // GetLabelMap
-        let mut label_map: HashMap<Label, DeterminizeTr<F::W>> = HashMap::new();
+        let mut label_map: HashMap<Label, DeterminizeTr<W>> = HashMap::new();
         let src_tuple = self.state_table.find_tuple(state);
         for src_elt in src_tuple.subset.iter() {
-            for tr in self.fst.tr_iter(src_elt.state)? {
+            for tr in self.fst.get_trs(src_elt.state)?.trs() {
                 let r = src_elt.weight.times(&tr.weight)?;
 
                 let dest_elt = DeterminizeElement::new(tr.nextstate, r);
@@ -229,7 +229,7 @@ where
 
     fn compute_start(&mut self) -> Result<Option<usize>> {
         if let Some(start_state) = self.fst.start() {
-            let elt = DeterminizeElement::new(start_state, F::W::one());
+            let elt = DeterminizeElement::new(start_state, W::one());
             let tuple = DeterminizeStateTuple {
                 subset: WeightedSubset::from_vec(vec![elt]),
                 filter_state: start_state,
@@ -240,9 +240,9 @@ where
     }
 
     fn compute_final(&mut self, state: usize) -> Result<Option<W>> {
-        let zero = F::W::zero();
+        let zero = W::zero();
         let tuple = self.state_table.find_tuple(state);
-        let mut final_weight = F::W::zero();
+        let mut final_weight = W::zero();
         for det_elt in tuple.subset.iter() {
             final_weight.plus_assign(
                 det_elt.weight.times(
@@ -334,8 +334,8 @@ where
     }
 
     fn compute_distance(&self, subset: &WeightedSubset<W>) -> Result<W> {
-        let mut outd = F::W::zero();
-        let weight_zero = F::W::zero();
+        let mut outd = W::zero();
+        let weight_zero = W::zero();
         for element in subset.iter() {
             let ind = if element.state < self.in_dist.as_ref().unwrap().len() {
                 &self.in_dist.as_ref().unwrap()[element.state]
@@ -414,7 +414,7 @@ where
             let determinized_fsa: VectorFst<GallicWeightMin<W>> =
                 determinize_fsa::<_, _, _, GallicCommonDivisor>(&fsa)?;
             let factored_determinized_fsa: VectorFst<GallicWeightMin<W>> =
-                factor_weight::<VectorFst<GallicWeightMin<W>>, _, _, GallicFactorMin<W>>(
+                factor_weight::<_, VectorFst<GallicWeightMin<W>>, _, _, GallicFactorMin<W>>(
                     &determinized_fsa,
                     factor_opts,
                 )?;
@@ -425,7 +425,7 @@ where
             let determinized_fsa: VectorFst<GallicWeightRestrict<W>> =
                 determinize_fsa::<_, _, _, GallicCommonDivisor>(&fsa)?;
             let factored_determinized_fsa: VectorFst<GallicWeightRestrict<W>> =
-                factor_weight::<VectorFst<GallicWeightRestrict<W>>, _, _, GallicFactorRestrict<W>>(
+                factor_weight::<_, VectorFst<GallicWeightRestrict<W>>, _, _, GallicFactorRestrict<W>>(
                     &determinized_fsa,
                     factor_opts,
                 )?;
@@ -436,7 +436,7 @@ where
             let determinized_fsa: VectorFst<GallicWeight<W>> =
                 determinize_fsa::<_, _, _, GallicCommonDivisor>(&fsa)?;
             let factored_determinized_fsa: VectorFst<GallicWeight<W>> =
-                factor_weight::<VectorFst<GallicWeight<W>>, _, _, GallicFactor<W>>(
+                factor_weight::<_, VectorFst<GallicWeight<W>>, _, _, GallicFactor<W>>(
                     &determinized_fsa,
                     factor_opts,
                 )?;

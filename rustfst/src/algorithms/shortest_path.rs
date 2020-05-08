@@ -39,7 +39,7 @@ pub fn shortest_path<W, FI, FO>(ifst: &FI, nshortest: usize, unique: bool) -> Re
 where
     FI: ExpandedFst<W>,
     FO: MutableFst<W>,
-    W: Into<<W as Semiring>::ReverseWeight>
+    W: Semiring + Into<<W as Semiring>::ReverseWeight>
         + From<<W as Semiring>::ReverseWeight>,
     <W as Semiring>::ReverseWeight: WeightQuantize + WeaklyDivisibleSemiring,
 {

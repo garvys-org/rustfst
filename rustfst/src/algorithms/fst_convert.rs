@@ -1,5 +1,6 @@
 use crate::fst_traits::{AllocableFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
+use crate::Trs;
 
 /// Generic method to convert an Fst into any other types implementing the MutableFst trait.
 pub fn fst_convert_from_ref<W, F1, F2>(ifst: &F1) -> F2
@@ -20,7 +21,7 @@ where
             unsafe {
                 ofst.reserve_trs_unchecked(data.state_id, data.num_trs);
             }
-            for tr in data.trs {
+            for tr in data.trs.trs() {
                 unsafe { ofst.add_tr_unchecked(data.state_id, tr.clone()) };
             }
 

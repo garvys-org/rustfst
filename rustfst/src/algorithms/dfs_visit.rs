@@ -1,10 +1,11 @@
 use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
-use crate::StateId;
+use crate::{StateId, Trs};
 
 use crate::algorithms::tr_filters::TrFilter;
 use unsafe_unwrap::UnsafeUnwrap;
+use std::marker::PhantomData;
 
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
 enum DfsStateColor {
@@ -40,53 +41,56 @@ pub trait Visitor<'a, W: Semiring, F: Fst<W>> {
     fn finish_visit(&mut self);
 }
 
-struct DfsState<'a, W, AI>
+struct DfsState<W, TRS>
 where
-    W: Semiring + 'a,
-    AI: Iterator<Item = &'a Tr<W>> + Clone,
+    W: Semiring,
+    TRS: Trs<W>
 {
     state_id: StateId,
-    tr_iter: OpenFstIterator<AI>,
+    tr_iter: OpenFstIterator<W, TRS>,
+    w: PhantomData<W>
 }
 
-impl<'a, W, AI> DfsState<'a, W, AI>
-where
-    W: Semiring + 'a,
+impl<W: Semiring, TRS: Trs<W>> DfsState<W, TRS>
 {
     #[inline]
-    pub fn new<F: Fst<W>>(fst: &'a F, s: StateId) -> Self {
+    pub fn new<F: Fst<W, TRS=TRS>>(fst: &F, s: StateId) -> Self {
         Self {
             state_id: s,
-            tr_iter: OpenFstIterator::new(unsafe { fst.tr_iter_unchecked(s) }),
+            tr_iter: OpenFstIterator::new(unsafe { fst.get_trs_unchecked(s)}),
+            w: PhantomData
         }
     }
 }
 
-struct OpenFstIterator<I: Iterator> {
-    iter: I,
-    e: Option<I::Item>,
+struct OpenFstIterator<W: Semiring, TRS: Trs<W>> {
+    trs: TRS,
+    pos: usize,
+    w: PhantomData<W>
 }
 
-impl<I: Iterator> OpenFstIterator<I> {
+impl<W: Semiring, TRS: Trs<W>> OpenFstIterator<W, TRS> {
     #[inline]
-    fn new(mut iter: I) -> Self {
-        let e = iter.next();
-        Self { iter, e }
+    fn new(trs: TRS) -> Self {
+        Self {
+            trs, pos: 0, w: PhantomData
+        }
     }
 
     #[inline]
-    fn value(&self) -> &I::Item {
-        unsafe { self.e.as_ref().unsafe_unwrap() }
+    fn value(&self) -> &Tr<W> {
+        unsafe { self.trs.trs().get_unchecked(0) }
     }
 
     #[inline]
     fn done(&self) -> bool {
-        self.e.is_none()
+        let n = self.trs.trs().len();
+        self.pos >= n
     }
 
     #[inline]
     fn next(&mut self) {
-        self.e = self.iter.next();
+        self.pos += 1;
     }
 }
 
@@ -129,7 +133,7 @@ pub fn dfs_visit<'a, W: Semiring, F: ExpandedFst<W>, V: Visitor<'a, W, F>, A: Tr
                 if !state_stack.is_empty() {
                     let parent_state = unsafe { state_stack.last_mut().unsafe_unwrap() };
                     let piter = &mut parent_state.tr_iter;
-                    visitor.finish_state(s, Some(parent_state.state_id), Some(*piter.value()));
+                    visitor.finish_state(s, Some(parent_state.state_id), Some(piter.value()));
                     piter.next();
                 } else {
                     visitor.finish_state(s, None, None);

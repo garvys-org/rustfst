@@ -4,6 +4,7 @@ use crate::fst_traits::CoreFst;
 use crate::fst_traits::ExpandedFst;
 use crate::fst_traits::Fst;
 use crate::semirings::{Semiring, StarSemiring};
+use crate::Trs;
 
 /// This operation computes the shortest distance from each state to every other states.
 /// The shortest distance from `p` to `q` is the ⊕-sum of the weights
@@ -50,7 +51,7 @@ where
 
     // Iterator over the wFST to add the weight of the trs
     for state_id in fst.states_iter() {
-        for tr in fst.tr_iter(state_id)? {
+        for tr in fst.get_trs(state_id)?.trs() {
             let nextstate = tr.nextstate;
             let weight = &tr.weight;
 
