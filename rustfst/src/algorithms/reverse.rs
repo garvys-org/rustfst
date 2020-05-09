@@ -3,7 +3,7 @@ use anyhow::Result;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
-use crate::EPS_LABEL;
+use crate::{EPS_LABEL, Trs};
 
 /// Reverses an FST. The reversed result is written to an output mutable FST.
 /// If A transduces string x to y with weight a, then the reverse of A
@@ -41,7 +41,7 @@ where
 
     let mut c_trs = vec![0; ifst.num_states() + 1];
     for is in 0..ifst.num_states() {
-        for iarc in unsafe { ifst.tr_iter_unchecked(is) } {
+        for iarc in unsafe { ifst.get_trs_unchecked(is).trs() } {
             c_trs[iarc.nextstate + 1] += 1;
         }
     }
@@ -58,7 +58,7 @@ where
             states_trs[0].push(Tr::new(EPS_LABEL, EPS_LABEL, w.reverse()?, os));
         }
 
-        for iarc in unsafe { ifst.tr_iter_unchecked(is) } {
+        for iarc in unsafe { ifst.get_trs_unchecked(is).trs() } {
             let nos = iarc.nextstate + 1;
             let weight = iarc.weight.reverse()?;
             let w = Tr::new(iarc.ilabel, iarc.olabel, weight, os);

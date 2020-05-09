@@ -3,7 +3,7 @@ use anyhow::Result;
 use crate::algorithms::{FinalTr, MapFinalAction};
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Tr, EPS_LABEL};
+use crate::{Tr, EPS_LABEL, Trs};
 use unsafe_unwrap::UnsafeUnwrap;
 
 /// The WeightConverter interfaces defines how a weight should be turned into another one.
@@ -48,7 +48,7 @@ where
     let mut superfinal = None;
     if final_action == MapFinalAction::MapRequireSuperfinal {
         superfinal = Some(fst_out.add_state());
-        fst_out.set_final(superfinal.unwrap(), F2::W::one())?;
+        fst_out.set_final(superfinal.unwrap(), W2::one())?;
     }
 
     if let Some(start_state) = fst_in.start() {
@@ -58,7 +58,7 @@ where
     let states: Vec<_> = fst_in.states_iter().collect();
     for state in states {
         fst_out.reserve_trs(state, fst_in.num_trs(state)?)?;
-        for tr in fst_in.tr_iter(state)? {
+        for tr in fst_in.get_trs(state)?.trs() {
             fst_out.add_tr(state, mapper.tr_map(tr)?)?;
         }
         if let Some(w) = unsafe { fst_in.final_weight_unchecked(state) } {
@@ -81,7 +81,7 @@ where
                         if superfinal.is_none() {
                             let superfinal_id = fst_out.add_state();
                             superfinal = Some(superfinal_id);
-                            fst_out.set_final(superfinal_id, F2::W::one()).unwrap();
+                            fst_out.set_final(superfinal_id, W2::one()).unwrap();
                         }
 
                         fst_out.add_tr(

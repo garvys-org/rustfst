@@ -15,7 +15,7 @@ use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{
     ReverseBack, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::StateId;
+use crate::{StateId, Trs};
 use crate::Tr;
 
 /// Creates an FST containing the n-shortest paths in the input FST. The n-shortest paths are the
@@ -58,18 +58,18 @@ where
         return Ok(fst_res);
     }
 
-    if !FI::W::properties().contains(SemiringProperties::PATH | SemiringProperties::SEMIRING) {
+    if !W::properties().contains(SemiringProperties::PATH | SemiringProperties::SEMIRING) {
         bail!("ShortestPath : Weight need to have the Path property and be distributive")
     }
 
     let mut distance = shortest_distance(ifst, false)?;
 
     let rfst: VectorFst<_> = reverse(ifst)?;
-    let mut d = FI::W::zero();
-    for rarc in rfst.tr_iter(0)? {
+    let mut d = W::zero();
+    for rarc in rfst.get_trs(0)?.trs() {
         let state = rarc.nextstate - 1;
         if state < distance.len() {
-            let rweight: FI::W = rarc.weight.reverse_back()?;
+            let rweight: W = rarc.weight.reverse_back()?;
             d.plus_assign(rweight.times(&distance[state])?)?;
         }
     }
@@ -111,20 +111,20 @@ where
     let mut enqueued = vec![];
     let mut queue = AutoQueue::new(ifst, None, &AnyTrFilter {})?;
     let source = unsafe { start.unsafe_unwrap() };
-    let mut f_distance = F::W::zero();
+    let mut f_distance = W::zero();
     distance.clear();
     queue.clear();
-    if !F::W::properties().contains(SemiringProperties::PATH | SemiringProperties::RIGHT_SEMIRING) {
+    if !W::properties().contains(SemiringProperties::PATH | SemiringProperties::RIGHT_SEMIRING) {
         bail!(
             "SingleShortestPath: Weight needs to have the path property and be right distributive"
         )
     }
     while distance.len() < source {
-        distance.push(F::W::zero());
+        distance.push(W::zero());
         enqueued.push(false);
         parent.push(None)
     }
-    distance.push(F::W::one());
+    distance.push(W::one());
     parent.push(None);
     queue.enqueue(source);
     enqueued.push(true);
@@ -144,9 +144,9 @@ where
             }
         }
 
-        for (pos, tr) in unsafe { ifst.tr_iter_unchecked(s).enumerate() } {
+        for (pos, tr) in unsafe { ifst.get_trs_unchecked(s).trs().iter().enumerate() } {
             while distance.len() <= tr.nextstate {
-                distance.push(F::W::zero());
+                distance.push(W::zero());
                 enqueued.push(false);
                 parent.push(None)
             }
@@ -192,7 +192,7 @@ where
             }
         } else {
             let pos = parent[d.unwrap()].unwrap().1;
-            let mut tr = ifst.tr_iter(state)?.nth(pos).unwrap().clone();
+            let mut tr = ifst.get_trs(state)?.trs().iter().nth(pos).unwrap().clone();
             tr.nextstate = d_p.unwrap();
             ofst.add_tr(s_p.unwrap(), tr)?;
         }
@@ -268,7 +268,7 @@ where
         return Ok(ofst);
     }
 
-    if !FI::W::properties().contains(SemiringProperties::PATH | SemiringProperties::SEMIRING) {
+    if !W::properties().contains(SemiringProperties::PATH | SemiringProperties::SEMIRING) {
         bail!("NShortestPath: Weight needs to have the path property and be distributive");
     }
 
@@ -317,7 +317,7 @@ where
         if p.0.is_none() {
             continue;
         }
-        for rarc in ifst.tr_iter(p.0.unwrap())? {
+        for rarc in ifst.get_trs(p.0.unwrap())?.trs() {
             let mut tr: Tr<W> = Tr::new(
                 rarc.ilabel,
                 rarc.olabel,

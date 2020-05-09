@@ -18,7 +18,7 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::CoreFst;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
-use crate::{Label, StateId, Tr, EPS_LABEL};
+use crate::{Label, StateId, Tr, EPS_LABEL, Trs};
 use bitflags::_core::marker::PhantomData;
 
 pub struct RmEpsilonConfig<W: Semiring, Q: Queue> {
@@ -125,7 +125,7 @@ pub fn rm_epsilon_with_config<W: Semiring, F: MutableFst<W>, Q: Queue>(
     noneps_in[start_state] = true;
 
     for state in 0..fst.num_states() {
-        for tr in fst.tr_iter(state)? {
+        for tr in fst.get_trs(state)?.trs() {
             if tr.ilabel != EPS_LABEL || tr.olabel != EPS_LABEL {
                 noneps_in[tr.nextstate] = true;
             }
@@ -172,10 +172,10 @@ pub fn rm_epsilon_with_config<W: Semiring, F: MutableFst<W>, Q: Queue>(
         }
     }
 
-    let mut rmeps_state = RmEpsilonState::<F, _, _>::new(&*fst, opts);
-    let zero = F::W::zero();
+    let mut rmeps_state = RmEpsilonState::<_, F, _, _>::new(&*fst, opts);
+    let zero = W::zero();
 
-    let mut v: Vec<(_, (_, F::W))> = Vec::with_capacity(states.len());
+    let mut v: Vec<(_, (_, W))> = Vec::with_capacity(states.len());
     for state in states.into_iter().rev() {
         if !noneps_in[state] {
             continue;
@@ -199,7 +199,7 @@ pub fn rm_epsilon_with_config<W: Semiring, F: MutableFst<W>, Q: Queue>(
         }
     }
 
-    if connect || weight_threshold != F::W::zero() || state_threshold != None {
+    if connect || weight_threshold != W::zero() || state_threshold != None {
         for s in 0..fst.num_states() {
             if !noneps_in[s] {
                 fst.delete_trs(s)?;
@@ -207,11 +207,11 @@ pub fn rm_epsilon_with_config<W: Semiring, F: MutableFst<W>, Q: Queue>(
         }
     }
 
-    if weight_threshold != F::W::zero() || state_threshold != None {
+    if weight_threshold != W::zero() || state_threshold != None {
         todo!("Implement Prune!")
     }
 
-    if connect && weight_threshold == F::W::zero() && state_threshold == None {
+    if connect && weight_threshold == W::zero() && state_threshold == None {
         crate::algorithms::connect(fst)?;
     }
     Ok(())
@@ -260,6 +260,7 @@ impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> RmEpsilonState<W, F,
             visited_states: vec![],
             element_map: HashMap::new(),
             expand_id: 0,
+            f: PhantomData
         }
     }
 
@@ -282,7 +283,7 @@ impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> RmEpsilonState<W, F,
             }
             self.visited[state] = true;
             self.visited_states.push(state);
-            for tr in self.sd_state.fst.borrow().tr_iter(state)? {
+            for tr in self.sd_state.fst.borrow().get_trs(state)?.trs() {
                 // TODO: Remove this clone
                 let mut tr = tr.clone();
                 tr.weight = distance[state].times(&tr.weight)?;
@@ -392,7 +393,7 @@ impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> FstImpl for RmEpsilonImpl<W, F
 
     fn expand(&mut self, state: usize) -> Result<()> {
         let (trs, final_weight) = self.rmeps_state.expand(state)?;
-        let zero = F::W::zero();
+        let zero = W::zero();
 
         for tr in trs.into_iter().rev() {
             self.cache_impl.push_tr(state, tr)?;
@@ -424,11 +425,11 @@ impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> FstImpl for RmEpsilonImpl<W, F
 /// epsilon) from a transducer. The result will be an equivalent FST that has no
 /// such epsilon transitions. This version is a delayed FST.
 pub type RmEpsilonFst<W, F, B> = LazyFst<RmEpsilonImpl<W, F, B>>;
-impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> RmEpsilonFst<W, F, B>
-{
-    pub fn new(fst: B) -> Self {
-        let isymt = fst.borrow().input_symbols().cloned();
-        let osymt = fst.borrow().output_symbols().cloned();
-        Self::from_impl(RmEpsilonImpl::new(fst), isymt, osymt)
-    }
-}
+// impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> RmEpsilonFst<W, F, B>
+// {
+//     pub fn new(fst: B) -> Self {
+//         let isymt = fst.borrow().input_symbols().cloned();
+//         let osymt = fst.borrow().output_symbols().cloned();
+//         Self::from_impl(RmEpsilonImpl::new(fst), isymt, osymt)
+//     }
+// }

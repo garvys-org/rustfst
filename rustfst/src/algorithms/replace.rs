@@ -11,7 +11,7 @@ use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::lazy_fst::LazyFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Label, StateId, Tr, EPS_LABEL};
+use crate::{Label, StateId, Tr, EPS_LABEL, Trs};
 
 /// This specifies what labels to output on the call or return transition.
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug, Eq)]
@@ -215,7 +215,7 @@ impl<'a, W: Semiring, F: Fst<W>, B: Borrow<F>> FstImpl for ReplaceFstImpl<W, F, 
                 .get(tuple.fst_id.unwrap())
                 .unwrap()
                 .borrow()
-                .tr_iter(fst_state)?
+                .get_trs(fst_state)?.trs()
             {
                 if let Some(new_tr) = self.compute_tr(&tuple, tr) {
                     self.cache_impl.push_tr(state, new_tr)?;
@@ -495,17 +495,17 @@ impl ReplaceStateTable {
 /// delayed constructions such as recursive transition networks, union, or closure.
 pub type ReplaceFst<W, F, B> = LazyFst<ReplaceFstImpl<W, F, B>>;
 
-impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFst<W, F, B>
-{
-    pub fn new(fst_list: Vec<(Label, B)>, root: Label, epsilon_on_replace: bool) -> Result<Self> {
-        let mut isymt = None;
-        let mut osymt = None;
-        if let Some(first_elt) = fst_list.first() {
-            isymt = first_elt.1.borrow().input_symbols().cloned();
-            osymt = first_elt.1.borrow().output_symbols().cloned();
-        }
-        let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
-        let fst = ReplaceFstImpl::new(fst_list, opts)?;
-        Ok(Self::from_impl(fst, isymt, osymt))
-    }
-}
+// impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFst<W, F, B>
+// {
+//     pub fn new(fst_list: Vec<(Label, B)>, root: Label, epsilon_on_replace: bool) -> Result<Self> {
+//         let mut isymt = None;
+//         let mut osymt = None;
+//         if let Some(first_elt) = fst_list.first() {
+//             isymt = first_elt.1.borrow().input_symbols().cloned();
+//             osymt = first_elt.1.borrow().output_symbols().cloned();
+//         }
+//         let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
+//         let fst = ReplaceFstImpl::new(fst_list, opts)?;
+//         Ok(Self::from_impl(fst, isymt, osymt))
+//     }
+// }

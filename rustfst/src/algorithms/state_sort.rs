@@ -3,7 +3,7 @@ use std::mem::swap;
 use anyhow::{ensure, Result};
 
 use crate::fst_traits::{ExpandedFst, MutableFst};
-use crate::StateId;
+use crate::{StateId, Trs};
 use crate::semirings::Semiring;
 
 /// Sorts the input states of an FST. order[i] gives the the state ID after
@@ -41,13 +41,13 @@ where
         }
         let mut final1 = unsafe { fst.final_weight_unchecked(s1) }.cloned();
         let mut final2 = None;
-        let mut trsa: Vec<_> = fst.tr_iter(s1)?.cloned().collect();
+        let mut trsa: Vec<_> = fst.get_trs(s1)?.trs().iter().cloned().collect();
         let mut trsb = vec![];
         while !done[s1] {
             let s2 = order[s1];
             if !done[s2] {
                 final2 = unsafe { fst.final_weight_unchecked(s2) }.cloned();
-                trsb = fst.tr_iter(s2)?.cloned().collect();
+                trsb = fst.get_trs(s2)?.trs().iter().cloned().collect();
             }
             match final1 {
                 None => fst.delete_final_weight(s2)?,

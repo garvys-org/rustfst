@@ -322,8 +322,10 @@ impl<'a, W: Semiring, F: MutableFst<W>> StateComparator<'a, W, F> {
             return Ok(false);
         }
 
-        let it_x = self.fst.get_trs(x)?.trs().iter();
-        let it_y = self.fst.get_trs(y)?.trs().iter();
+        let it_x_owner = self.fst.get_trs(x)?;
+        let it_x = it_x_owner.trs().iter();
+        let it_y_owner = self.fst.get_trs(y)?;
+        let it_y = it_y_owner.trs().iter();
 
         for (arc1, arc2) in it_x.zip(it_y) {
             if arc1.ilabel < arc2.ilabel {

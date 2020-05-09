@@ -25,7 +25,7 @@ where
     F: MutableFst<W>,
     W: WeaklyDivisibleSemiring,
 {
-    let zero = F::W::zero();
+    let zero = W::zero();
     let num_states = fst.num_states();
 
     if num_states == 0 {
@@ -98,7 +98,7 @@ where
                 tr.weight = match reweight_type {
                     ReweightType::ReweightToInitial => d_s.times(&tr.weight)?,
                     ReweightType::ReweightToFinal => {
-                        (F::W::one().divide(&d_s, DivideType::DivideRight)?).times(&tr.weight)?
+                        (W::one().divide(&d_s, DivideType::DivideRight)?).times(&tr.weight)?
                     }
                 };
             }
@@ -107,7 +107,7 @@ where
                 let new_weight = match reweight_type {
                     ReweightType::ReweightToInitial => d_s.times(final_weight)?,
                     ReweightType::ReweightToFinal => {
-                        (F::W::one().divide(&d_s, DivideType::DivideRight)?).times(final_weight)?
+                        (W::one().divide(&d_s, DivideType::DivideRight)?).times(final_weight)?
                     }
                 };
 

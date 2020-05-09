@@ -12,6 +12,7 @@ use super::{
     natural_less, FifoQueue, LifoQueue, NaturalShortestFirstQueue, SccQueue, StateOrderQueue,
     TopOrderQueue, TrivialQueue,
 };
+use crate::Trs;
 
 #[derive(Debug)]
 pub struct AutoQueue {
@@ -34,7 +35,7 @@ impl AutoQueue {
         } else if props.contains(FstProperties::ACYCLIC) {
             queue = Box::new(TopOrderQueue::new(fst, tr_filter));
         } else if props.contains(FstProperties::UNWEIGHTED)
-            && F::W::properties().contains(SemiringProperties::IDEMPOTENT)
+            && W::properties().contains(SemiringProperties::IDEMPOTENT)
         {
             queue = Box::new(LifoQueue::default());
         } else {
@@ -51,7 +52,7 @@ impl AutoQueue {
             let mut queue_types = vec![QueueType::TrivialQueue; n_sccs];
             let less = if distance.is_some()
                 && !distance.unwrap().is_empty()
-                && F::W::properties().contains(SemiringProperties::PATH)
+                && W::properties().contains(SemiringProperties::PATH)
             {
                 Some(natural_less)
             } else {
@@ -120,18 +121,18 @@ impl AutoQueue {
             .for_each(|v| *v = QueueType::TrivialQueue);
 
         for state in 0..fst.num_states() {
-            for tr in unsafe { fst.tr_iter_unchecked(state) } {
+            for tr in unsafe { fst.get_trs_unchecked(state).trs() } {
                 if !tr_filter.keep(tr) {
                     continue;
                 }
                 if sccs[state] == sccs[tr.nextstate] {
                     let queue_type = unsafe { queue_types.get_unchecked_mut(sccs[state]) };
-                    if compare.is_none() || compare.as_ref().unwrap()(&tr.weight, &F::W::one())? {
+                    if compare.is_none() || compare.as_ref().unwrap()(&tr.weight, &W::one())? {
                         *queue_type = QueueType::FifoQueue;
                     } else if *queue_type == QueueType::TrivialQueue
                         || *queue_type == QueueType::LifoQueue
                     {
-                        if !F::W::properties().contains(SemiringProperties::IDEMPOTENT)
+                        if !W::properties().contains(SemiringProperties::IDEMPOTENT)
                             || (!tr.weight.is_zero() && !tr.weight.is_one())
                         {
                             *queue_type = QueueType::ShortestFirstQueue;
@@ -145,7 +146,7 @@ impl AutoQueue {
                     }
                 }
 
-                if !F::W::properties().contains(SemiringProperties::IDEMPOTENT)
+                if !W::properties().contains(SemiringProperties::IDEMPOTENT)
                     || (!tr.weight.is_zero() && !tr.weight.is_one())
                 {
                     *unweighted = false;

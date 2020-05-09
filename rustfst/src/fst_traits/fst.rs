@@ -218,7 +218,7 @@ pub trait Fst<W: Semiring>: CoreFst<W> + for<'b> StateIterator<'b> + Debug + for
     /// Removes the output symbol table from the Fst and retrieves it.
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>>;
 
-    fn set_symts_from_fst<OF: Fst<W>>(&mut self, other_fst: &OF) {
+    fn set_symts_from_fst<W2: Semiring, OF: Fst<W2>>(&mut self, other_fst: &OF) {
         if let Some(symt) = other_fst.input_symbols() {
             self.set_input_symbols(Arc::clone(symt));
         } else {

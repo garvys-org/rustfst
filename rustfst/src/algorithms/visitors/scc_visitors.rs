@@ -53,6 +53,7 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> SccVisitor<'a, W, F> {
             scc_stack: vec![],
             nscc: 0,
             props,
+            w: PhantomData
         }
     }
 }

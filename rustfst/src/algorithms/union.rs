@@ -10,7 +10,7 @@ use crate::fst_traits::{
 };
 use crate::semirings::Semiring;
 use crate::tr::Tr;
-use crate::{SymbolTable, EPS_LABEL};
+use crate::{SymbolTable, EPS_LABEL, Trs};
 
 /// Performs the union of two wFSTs. If A transduces string `x` to `y` with weight `a`
 /// and `B` transduces string `w` to `v` with weight `b`, then their union transduces `x` to `y`
@@ -79,7 +79,7 @@ where
             unsafe { fst_1.set_final_unchecked(s1, final_weight.clone()) };
         }
         unsafe { fst_1.reserve_trs_unchecked(s1, fst_2.num_trs_unchecked(s2)) };
-        for tr in unsafe { fst_2.tr_iter_unchecked(s2) } {
+        for tr in unsafe { fst_2.get_trs_unchecked(s2).trs() } {
             let mut new_tr = tr.clone();
             new_tr.nextstate += numstates1;
             unsafe { fst_1.add_tr_unchecked(s1, new_tr) };

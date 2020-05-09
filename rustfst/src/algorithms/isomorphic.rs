@@ -80,8 +80,10 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
             return Ok(false);
         }
 
-        let mut trs1: Vec<_> = self.fst_1.get_trs(s1)?.trs().iter().collect();
-        let mut trs2: Vec<_> = self.fst_2.get_trs(s2)?.trs().iter().collect();
+        let trs1_owner = self.fst_1.get_trs(s1)?;
+        let mut trs1: Vec<_> = trs1_owner.trs().iter().collect();
+        let trs2_owner = self.fst_2.get_trs(s2)?;
+        let mut trs2: Vec<_> = trs2_owner.trs().iter().collect();
 
         trs1.sort_by(|a, b| tr_compare(a, b));
         trs2.sort_by(|a, b| tr_compare(a, b));

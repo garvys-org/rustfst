@@ -8,7 +8,7 @@ use crate::algorithms::Queue;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::{ReverseBack, Semiring, SemiringProperties};
-use crate::StateId;
+use crate::{StateId, Trs};
 use std::borrow::Borrow;
 
 pub struct ShortestDistanceConfig<W: Semiring, Q: Queue, A: TrFilter<W>> {
@@ -94,10 +94,10 @@ impl<W: Semiring, Q: Queue, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>> std
 macro_rules! ensure_distance_index_is_valid {
     ($s: ident, $index: expr) => {
         while $s.distance.len() <= $index {
-            $s.distance.push(F::W::zero());
+            $s.distance.push(W::zero());
             $s.enqueued.push(false);
-            $s.adder.push(F::W::zero());
-            $s.radder.push(F::W::zero());
+            $s.adder.push(W::zero());
+            $s.radder.push(W::zero());
         }
     };
 }
@@ -124,6 +124,7 @@ impl<W: Semiring, Q: Queue, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>> Sho
             source_id: 0,
             retain,
             fst,
+            f: PhantomData
         }
     }
     pub fn new_from_config(fst: B, opts: ShortestDistanceConfig<W, Q, A>, retain: bool) -> Self {
@@ -156,7 +157,7 @@ impl<W: Semiring, Q: Queue, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>> Sho
             Some(start_state) => start_state,
             None => return Ok(vec![]),
         };
-        let weight_properties = F::W::properties();
+        let weight_properties = W::properties();
         if !weight_properties.contains(SemiringProperties::RIGHT_SEMIRING) {
             bail!("ShortestDistance: Weight needs to be right distributive")
         }
@@ -177,9 +178,9 @@ impl<W: Semiring, Q: Queue, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>> Sho
             self.ensure_sources_index_is_valid(source);
             self.sources[source] = Some(self.source_id);
         }
-        self.distance[source] = F::W::one();
-        self.adder[source] = F::W::one();
-        self.radder[source] = F::W::one();
+        self.distance[source] = W::one();
+        self.adder[source] = W::one();
+        self.radder[source] = W::one();
         self.enqueued[source] = true;
         self.state_queue.enqueue(source);
         while !self.state_queue.is_empty() {
@@ -191,8 +192,8 @@ impl<W: Semiring, Q: Queue, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>> Sho
             }
             self.enqueued[state] = false;
             let r = self.radder[state].clone();
-            self.radder[state] = F::W::zero();
-            for tr in self.fst.borrow().tr_iter(state)? {
+            self.radder[state] = W::zero();
+            for tr in self.fst.borrow().get_trs(state)?.trs() {
                 let nextstate = tr.nextstate;
                 if !self.tr_filter.keep(tr) {
                     continue;
@@ -204,9 +205,9 @@ impl<W: Semiring, Q: Queue, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>> Sho
                 if self.retain {
                     ensure_source_index_is_valid!(self, nextstate);
                     if self.sources[nextstate] != Some(self.source_id) {
-                        self.distance[nextstate] = F::W::zero();
-                        self.adder[nextstate] = F::W::zero();
-                        self.radder[nextstate] = F::W::zero();
+                        self.distance[nextstate] = W::zero();
+                        self.adder[nextstate] = W::zero();
+                        self.radder[nextstate] = W::zero();
                         self.enqueued[nextstate] = false;
                         self.sources[nextstate] = Some(self.source_id);
                     }
@@ -244,7 +245,7 @@ pub fn shortest_distance_with_config<
     opts: ShortestDistanceConfig<W, Q, A>,
 ) -> Result<Vec<W>> {
     let source = opts.source;
-    let mut sd_state = ShortestDistanceState::<_, F, _, _>::new_from_config(fst, opts, false);
+    let mut sd_state = ShortestDistanceState::<_, _, F, _, _>::new_from_config(fst, opts, false);
     sd_state.shortest_distance(source)
 }
 
@@ -307,12 +308,12 @@ pub fn shortest_distance<W: Semiring, F: ExpandedFst<W>>(fst: &F, reverse: bool)
 /// shortest-distance from the initial state to the final states..
 fn shortest_distance_3<W: Semiring, F: MutableFst<W>>(fst: &F) -> Result<W>
 {
-    let weight_properties = F::W::properties();
+    let weight_properties = W::properties();
 
     if weight_properties.contains(SemiringProperties::RIGHT_SEMIRING) {
         let distance = shortest_distance(fst, false)?;
-        let mut sum = F::W::zero();
-        let zero = F::W::zero();
+        let mut sum = W::zero();
+        let zero = W::zero();
         for state in 0..distance.len() {
             sum.plus_assign(distance[state].times(fst.final_weight(state)?.unwrap_or(&zero))?)?;
         }
@@ -323,10 +324,10 @@ fn shortest_distance_3<W: Semiring, F: MutableFst<W>>(fst: &F) -> Result<W>
             if state < distance.len() {
                 Ok(distance[state].clone())
             } else {
-                Ok(F::W::zero())
+                Ok(W::zero())
             }
         } else {
-            Ok(F::W::zero())
+            Ok(W::zero())
         }
     }
 }

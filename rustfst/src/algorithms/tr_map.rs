@@ -69,7 +69,7 @@ where
     if final_action == MapFinalAction::MapRequireSuperfinal {
         let superfinal_id = ifst.add_state();
         superfinal = Some(superfinal_id);
-        ifst.set_final(superfinal_id, F::W::one()).unwrap();
+        ifst.set_final(superfinal_id, W::one()).unwrap();
     }
 
     // TODO: Remove this collect
@@ -103,7 +103,7 @@ where
                                 superfinal = Some(superfinal_id);
                                 unsafe {
                                     // Checked because the state is created just above
-                                    ifst.set_final_unchecked(superfinal_id, F::W::one());
+                                    ifst.set_final_unchecked(superfinal_id, W::one());
                                 }
                             }
                             unsafe {
