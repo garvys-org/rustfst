@@ -445,7 +445,8 @@ fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(
             if tr.num_trs(s + 1)? > 0 {
                 aiter_queue.push(TrsIterCollected {
                     idx: 0,
-                    trs: tr.get_trs(s + 1)?.trs().iter().collect(),
+                    trs: tr.get_trs(s + 1)?,
+                    w: PhantomData
                 });
             }
         }
@@ -480,14 +481,15 @@ fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(
     Ok(partition)
 }
 
-struct TrsIterCollected<'a, W: Semiring> {
+struct TrsIterCollected<W: Semiring, T: Trs<W>> {
     idx: usize,
-    trs: Vec<&'a Tr<W>>,
+    trs: T,
+    w: PhantomData<W>
 }
 
-impl<'a, W: Semiring> TrsIterCollected<'a, W> {
-    fn peek(&self) -> Option<&&Tr<W>> {
-        self.trs.get(self.idx)
+impl<W: Semiring, T: Trs<W>> TrsIterCollected<W, T> {
+    fn peek(&self) -> Option<&Tr<W>> {
+        self.trs.trs().get(self.idx)
     }
 
     fn done(&self) -> bool {
@@ -505,9 +507,9 @@ struct TrIterCompare {
 }
 
 impl TrIterCompare {
-    fn compare<'a, 'b, W>(&self, x: &TrsIterCollected<'a, W>, y: &TrsIterCollected<'b, W>) -> bool
+    fn compare<W: Semiring, T: Trs<W>>(&self, x: &TrsIterCollected<W, T>, y: &TrsIterCollected<W, T>) -> bool
     where
-        W: Semiring + 'static,
+        W: Semiring,
     {
         let xarc = x.peek().unwrap();
         let yarc = y.peek().unwrap();

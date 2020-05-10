@@ -162,8 +162,8 @@ pub const KDELTA: f32 = 1.0f32 / 1024.0f32;
 
 /// Module re-exporting most of the objects from this crate.
 pub mod prelude {
-    // pub use crate::algorithms::tr_compares::*;
-    // pub use crate::algorithms::*;
+    pub use crate::algorithms::tr_compares::*;
+    pub use crate::algorithms::*;
     pub use crate::fst_impls::*;
     pub use crate::fst_traits::*;
     pub use crate::semirings::*;

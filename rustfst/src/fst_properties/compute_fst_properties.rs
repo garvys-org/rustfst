@@ -9,10 +9,10 @@ use crate::algorithms::visitors::SccVisitor;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
-use crate::Tr;
+use crate::{Tr, Trs};
 
 /// Computes all the FstProperties of the FST bit don't attach them to the FST.
-pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Result<FstProperties> {
+pub fn compute_fst_properties<W: Semiring, F: ExpandedFst<W>>(fst: &F) -> Result<FstProperties> {
     let states: Vec<_> = fst.states_iter().collect();
     let mut comp_props = FstProperties::empty();
 
@@ -49,8 +49,8 @@ pub fn compute_fst_properties<F: Fst + ExpandedFst>(fst: &F) -> Result<FstProper
     for state in states {
         let mut ilabels = HashSet::new();
         let mut olabels = HashSet::new();
-        let mut prev_tr: Option<&Tr<F::W>> = None;
-        for tr in fst.tr_iter(state)? {
+        let mut prev_tr: Option<&Tr<W>> = None;
+        for tr in fst.get_trs(state)?.trs() {
             // There is already an outgoing transition with this ilabel
             if ilabels.contains(&tr.ilabel) {
                 comp_props |= FstProperties::NOT_I_DETERMINISTIC;
