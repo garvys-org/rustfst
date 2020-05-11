@@ -73,8 +73,12 @@ pub trait CoreFst<W: Semiring> {
     /// fst.add_tr(s1, Tr::new(3, 5, BooleanWeight::new(true), s2));
     /// assert_eq!(fst.num_trs(s1).unwrap(), 1);
     /// ```
-    fn num_trs(&self, s: StateId) -> Result<usize>;
-    unsafe fn num_trs_unchecked(&self, s: StateId) -> usize;
+    fn num_trs(&self, s: StateId) -> Result<usize> {
+        Ok(self.get_trs(s)?.len())
+    }
+    unsafe fn num_trs_unchecked(&self, s: StateId) -> usize {
+        self.get_trs_unchecked(s).len()
+    }
 
     /// Returns whether or not the state with identifier passed as parameters is a final state.
     ///

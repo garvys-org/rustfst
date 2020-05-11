@@ -53,19 +53,6 @@ impl<W: 'static + Semiring> CoreFst<W> for VectorFst<W> {
         self.states.get_unchecked(state_id).final_weight.clone()
     }
 
-    fn num_trs(&self, s: StateId) -> Result<usize> {
-        if let Some(vector_fst_state) = self.states.get(s) {
-            Ok(vector_fst_state.num_trs())
-        } else {
-            bail!("State {:?} doesn't exist", s);
-        }
-    }
-
-    #[inline]
-    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
-        self.states.get_unchecked(s).num_trs()
-    }
-
     fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
         let state = self
             .states

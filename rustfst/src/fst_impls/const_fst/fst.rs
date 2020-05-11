@@ -51,18 +51,6 @@ impl<W: Semiring> CoreFst<W> for ConstFst<W> {
         self.states.get_unchecked(state_id).final_weight.clone()
     }
 
-    fn num_trs(&self, s: usize) -> Result<usize> {
-        let const_state = self
-            .states
-            .get(s)
-            .ok_or_else(|| format_err!("State doesn't exist"))?;
-        Ok(const_state.ntrs)
-    }
-
-    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
-        self.states.get_unchecked(s).ntrs
-    }
-
     fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
         let state = self
             .states

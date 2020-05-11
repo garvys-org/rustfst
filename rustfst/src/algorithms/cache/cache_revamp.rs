@@ -9,7 +9,7 @@ use crate::semirings::Semiring;
 use crate::{Trs, StateId};
 use unsafe_unwrap::UnsafeUnwrap;
 
-trait FstCache<W: Semiring, T> {
+trait FstCache<W: Semiring, T: Trs<W>> {
     fn get_start(&self) -> Option<Option<StateId>>;
     fn insert_start(&self, id: Option<StateId>);
 
@@ -20,7 +20,7 @@ trait FstCache<W: Semiring, T> {
     fn insert_final_weight(&self, id: StateId, weight: Option<W>);
 }
 
-trait FstOp<W: Semiring, T> {
+trait FstOp<W: Semiring, T: Trs<W>> {
     // was FstImpl
     fn compute_start(&self) -> Option<StateId>;
     fn compute_trs(&self, fst: &dyn CoreFst<W, TRS=T>, id: usize) -> T;
@@ -72,33 +72,40 @@ impl<W: Semiring, T: Trs<W>, Op: FstOp<W, T>, Cache: FstCache<W, T>> CoreFst<W> 
     type TRS = T;
 
     fn start(&self) -> Option<usize> {
-         self.cache.get_start().unwrap()
+         if let Some(start) = self.cache.get_start() {
+             start
+         } else {
+             let start = self.op.compute_start();
+             self.cache.insert_start(start.clone());
+             start
+         }
     }
 
     fn final_weight(&self, state_id: usize) -> Result<Option<W>> {
-        unimplemented!()
+        if let Some(final_weight) = self.cache.get_final_weight(state_id) {
+            Ok(final_weight)
+        } else {
+            let final_weight = self.op.compute_final_weight(state_id);
+            self.cache.insert_final_weight(state_id, final_weight.clone());
+            Ok(final_weight)
+        }
     }
 
     unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<W> {
-        unimplemented!()
-    }
-
-    fn num_trs(&self, s: usize) -> Result<usize> {
-        let c = self.cache.get_trs(s).ok_or_else(|| format_err!("State {} not present in cache", s))?;
-        Ok(c.len())
-    }
-
-    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
-        let c = self.cache.get_trs(s).unsafe_unwrap();
-        c.len()
+        self.final_weight(state_id).unsafe_unwrap()
     }
 
     fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
-        let c = self.cache.get_trs(state_id).ok_or_else(|| format_err!("Trs for state {} missing in cache", state_id))?;
-        Ok(c)
+        if let Some(trs) = self.cache.get_trs(state_id) {
+            Ok(trs)
+        } else {
+            let trs = self.op.compute_trs(self, state_id);
+            self.cache.insert_trs(state_id, trs.shallow_clone());
+            Ok(trs)
+        }
     }
 
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
-        self.cache.get_trs(state_id).unsafe_unwrap()
+        self.get_trs(state_id).unsafe_unwrap()
     }
 }
