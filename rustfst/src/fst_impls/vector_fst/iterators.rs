@@ -54,7 +54,7 @@ where
 impl<'a, W: Semiring + 'static> FstIterator<'a, W> for VectorFst<W> {
     type FstIter = Map<
         Enumerate<std::slice::Iter<'a, VectorFstState<W>>>,
-        Box<dyn FnMut((StateId, &'a VectorFstState<W>)) -> FstIterData<&'a W, Self::TRS>>,
+        Box<dyn FnMut((StateId, &'a VectorFstState<W>)) -> FstIterData<W, Self::TRS>>,
     >;
     fn fst_iter(&'a self) -> Self::FstIter {
         self.states
@@ -63,7 +63,7 @@ impl<'a, W: Semiring + 'static> FstIterator<'a, W> for VectorFst<W> {
             .map(Box::new(|(state_id, fst_state)| FstIterData {
                 state_id,
                 trs: fst_state.trs.shallow_clone(),
-                final_weight: fst_state.final_weight.as_ref(),
+                final_weight: fst_state.final_weight.clone(),
                 num_trs: fst_state.trs.len(),
             }))
     }

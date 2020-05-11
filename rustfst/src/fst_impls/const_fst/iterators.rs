@@ -75,7 +75,7 @@ impl<'a, W: Semiring + 'static> FstIterator<'a, W> for ConstFst<W> {
         Box<
             dyn FnMut(
                 (StateId, (&'a ConstState<W>, &'a Arc<Vec<Tr<W>>>)),
-            ) -> FstIterData<&'a W, Self::TRS>,
+            ) -> FstIterData<W, Self::TRS>,
         >,
     >;
     fn fst_iter(&'a self) -> Self::FstIter {
@@ -89,7 +89,7 @@ impl<'a, W: Semiring + 'static> FstIterator<'a, W> for ConstFst<W> {
                         pos: fst_state.pos,
                         n: fst_state.ntrs,
                     },
-                    final_weight: fst_state.final_weight.as_ref(),
+                    final_weight: fst_state.final_weight.clone(),
                     num_trs: fst_state.ntrs,
                 }
             },

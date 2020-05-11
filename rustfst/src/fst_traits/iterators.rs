@@ -48,7 +48,7 @@ pub trait FstIntoIterator<W: Semiring>: CoreFst<W> {
 }
 
 pub trait FstIterator<'a, W: Semiring>: CoreFst<W> {
-    type FstIter: Iterator<Item = FstIterData<&'a W, Self::TRS>>;
+    type FstIter: Iterator<Item = FstIterData<W, Self::TRS>>;
     fn fst_iter(&'a self) -> Self::FstIter;
 }
 

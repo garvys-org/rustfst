@@ -1,13 +1,15 @@
 use std::collections::HashMap;
+use std::iter::{Map, Repeat, repeat, Zip};
 use std::marker::PhantomData;
 use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
-
-use crate::fst_traits::{CoreFst, Fst, StateIterator};
-use crate::semirings::Semiring;
-use crate::{Trs, StateId};
+use itertools::izip;
 use unsafe_unwrap::UnsafeUnwrap;
+
+use crate::{StateId, Trs};
+use crate::fst_traits::{CoreFst, Fst, FstIterator, FstIterData, StateIterator};
+use crate::semirings::Semiring;
 
 trait FstCache<W: Semiring, T: Trs<W>> {
     fn get_start(&self) -> Option<Option<StateId>>;
@@ -157,5 +159,30 @@ where
         } else {
             None
         }
+    }
+}
+
+impl<'a, W, T, Op, Cache> FstIterator<'a, W> for LazyFST2<W, T, Op, Cache>
+    where
+        W: Semiring,
+        T: Trs<W> + 'a,
+        Op: FstOp<W, T> + 'a,
+        Cache: FstCache<W, T> + 'a
+{
+    type FstIter = Map<
+        Zip<<LazyFST2<W, T, Op, Cache> as StateIterator<'a>>::Iter, Repeat<&'a Self>>,
+        Box<dyn FnMut((StateId, &'a Self)) -> FstIterData<W, Self::TRS>>,
+    >;
+
+    fn fst_iter(&'a self) -> Self::FstIter {
+        let it = repeat(self);
+        izip!(self.states_iter(), it).map(Box::new(|(state_id, p): (StateId, &'a Self)| {
+            FstIterData {
+                state_id,
+                trs: unsafe {p.get_trs_unchecked(state_id)},
+                final_weight: unsafe {p.final_weight_unchecked(state_id)},
+                num_trs: unsafe {p.num_trs_unchecked(state_id)},
+            }
+        }))
     }
 }
