@@ -313,9 +313,8 @@ fn shortest_distance_3<W: Semiring, F: MutableFst<W>>(fst: &F) -> Result<W>
     if weight_properties.contains(SemiringProperties::RIGHT_SEMIRING) {
         let distance = shortest_distance(fst, false)?;
         let mut sum = W::zero();
-        let zero = W::zero();
         for state in 0..distance.len() {
-            sum.plus_assign(distance[state].times(fst.final_weight(state)?.unwrap_or(&zero))?)?;
+            sum.plus_assign(distance[state].times(fst.final_weight(state)?.unwrap_or_else(W::zero))?)?;
         }
         Ok(sum)
     } else {

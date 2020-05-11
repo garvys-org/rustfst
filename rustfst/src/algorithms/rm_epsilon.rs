@@ -329,7 +329,7 @@ impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> RmEpsilonState<W, F,
                         .fst
                         .borrow()
                         .final_weight(state)?
-                        .unwrap_or(&zero),
+                        .unwrap_or_else(W::zero),
                 )?,
             )?;
         }

@@ -1,14 +1,15 @@
+use std::fs::File;
+use std::io::{BufWriter, LineWriter, Write};
 use std::path::Path;
 
 use anyhow::Result;
+use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::fst_traits::{ExpandedFst, FinalStatesIterator};
+use crate::{DrawingConfig, StateId};
+use crate::fst_traits::ExpandedFst;
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::{Semiring, SerializableSemiring};
 use crate::Trs;
-use crate::{DrawingConfig, StateId};
-use std::fs::File;
-use std::io::{BufWriter, LineWriter, Write};
 
 /// Trait definining the methods an Fst must implement to be serialized and deserialized.
 pub trait SerializableFst<W: SerializableSemiring>: ExpandedFst<W>

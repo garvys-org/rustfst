@@ -248,7 +248,7 @@ where
                 det_elt.weight.times(
                     self.fst
                         .final_weight(det_elt.state)?
-                        .unwrap_or_else(|| &zero),
+                        .unwrap_or_else(W::zero),
                 )?,
             )?;
         }

@@ -70,7 +70,7 @@ where
             }
 
             if let Some(final_weight) = unsafe { self.fst.final_weight_unchecked(state_id) } {
-                path.add_weight(final_weight)
+                path.add_weight(&final_weight)
                     .expect("Error add_weight in PathsIterator");
                 return Some(path);
             }

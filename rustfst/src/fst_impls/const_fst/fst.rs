@@ -39,16 +39,16 @@ impl<W: Semiring> CoreFst<W> for ConstFst<W> {
         self.start
     }
 
-    fn final_weight(&self, state_id: usize) -> Result<Option<&W>> {
+    fn final_weight(&self, state_id: usize) -> Result<Option<W>> {
         let s = self
             .states
             .get(state_id)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
-        Ok(s.final_weight.as_ref())
+        Ok(s.final_weight.clone())
     }
 
-    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<&W> {
-        self.states.get_unchecked(state_id).final_weight.as_ref()
+    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<W> {
+        self.states.get_unchecked(state_id).final_weight.clone()
     }
 
     fn num_trs(&self, s: usize) -> Result<usize> {

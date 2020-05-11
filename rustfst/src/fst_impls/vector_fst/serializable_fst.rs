@@ -73,7 +73,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst<W> for VectorFst<W> {
         let zero = W::zero();
         // FstBody
         for state in 0..self.num_states() {
-            let f_weight = unsafe { self.final_weight_unchecked(state).unwrap_or_else(|| &zero) };
+            let f_weight = unsafe { self.final_weight_unchecked(state).unwrap_or_else(W::zero) };
             f_weight.write_binary(&mut file)?;
             write_bin_i64(&mut file, unsafe { self.num_trs_unchecked(state) } as i64)?;
 

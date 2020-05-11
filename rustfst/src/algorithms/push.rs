@@ -78,7 +78,7 @@ where
         let zero = W::zero();
         for s in 0..dist.len() {
             sum.plus_assign(
-                dist[s].times(unsafe { fst.final_weight_unchecked(s) }.unwrap_or_else(|| &zero))?,
+                dist[s].times(unsafe { fst.final_weight_unchecked(s) }.unwrap_or_else(W::zero))?,
             )?;
         }
         Ok(sum)

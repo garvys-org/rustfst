@@ -249,7 +249,6 @@ impl<'a, W: Semiring, F: Fst<W>, B: Borrow<F>> FstImpl for ReplaceFstImpl<W, F, 
                 .unwrap()
                 .borrow()
                 .final_weight(tuple.fst_state.unwrap())
-                .map(|e| e.cloned())
         } else {
             Ok(None)
         }

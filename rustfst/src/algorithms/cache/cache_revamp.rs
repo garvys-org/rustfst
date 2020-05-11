@@ -12,8 +12,10 @@ use unsafe_unwrap::UnsafeUnwrap;
 trait FstCache<W: Semiring, T> {
     fn get_start(&self) -> Option<Option<StateId>>;
     fn insert_start(&self, id: Option<StateId>);
+
     fn get_trs(&self, id: StateId) -> Option<T>;
     fn insert_trs(&self, id: StateId, trs: T);
+
     fn get_final_weight(&self, id: StateId) -> Option<Option<W>>;
     fn insert_final_weight(&self, id: StateId, weight: Option<W>);
 }
@@ -73,11 +75,11 @@ impl<W: Semiring, T: Trs<W>, Op: FstOp<W, T>, Cache: FstCache<W, T>> CoreFst<W> 
          self.cache.get_start().unwrap()
     }
 
-    fn final_weight(&self, state_id: usize) -> Result<Option<&W>> {
+    fn final_weight(&self, state_id: usize) -> Result<Option<W>> {
         unimplemented!()
     }
 
-    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<&W> {
+    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<W> {
         unimplemented!()
     }
 

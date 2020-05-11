@@ -175,7 +175,7 @@ where
                 None => elt.weight,
                 Some(s) => elt
                     .weight
-                    .times(self.fst.borrow().final_weight(s)?.unwrap_or_else(|| &one))
+                    .times(self.fst.borrow().final_weight(s)?.unwrap_or_else(|| one))
                     .unwrap(),
             };
             let mut ilabel = self.opts.final_ilabel;
@@ -216,7 +216,7 @@ where
             None => elt.weight.clone(),
             Some(s) => elt
                 .weight
-                .times(self.fst.borrow().final_weight(s)?.unwrap_or_else(|| &zero))
+                .times(self.fst.borrow().final_weight(s)?.unwrap_or_else(|| zero))
                 .unwrap(),
         };
         let factor_iterator = FI::new(weight.clone());

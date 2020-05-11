@@ -53,8 +53,8 @@ pub trait CoreFst<W: Semiring> {
     /// assert_eq!(fst.final_weight(s2).unwrap(), Some(&BooleanWeight::one()));
     /// assert!(fst.final_weight(s2 + 1).is_err());
     /// ```
-    fn final_weight(&self, state_id: StateId) -> Result<Option<&W>>;
-    unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<&W>;
+    fn final_weight(&self, state_id: StateId) -> Result<Option<W>>;
+    unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<W>;
 
     /// Number of trs leaving a specific state in the wFST.
     ///
@@ -231,8 +231,9 @@ pub trait Fst<W: Semiring>: CoreFst<W> + for<'b> StateIterator<'b> + Debug + for
             self.take_output_symbols();
         }
     }
-}
 
-// fn lol(fst: &dyn CoreFst<W=crate::semirings::TropicalWeight>) {
-//
-// }
+    fn final_states_iter(&self) -> std::iter::Filter<<Self as StateIterator>::Iter, Box<dyn FnMut(&StateId) -> bool>> {
+        unimplemented!()
+        // self.states_iter().filter(Box::new(|s| unsafe {self.is_final_unchecked(*s)}))
+    }
+}

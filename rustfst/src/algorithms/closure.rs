@@ -1,12 +1,13 @@
 use crate::algorithms::ReplaceFst;
 use crate::fst_traits::{
-    AllocableFst, CoreFst, FinalStatesIterator, Fst, FstIterator, MutableFst, StateIterator,
+    AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator,
 };
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::{SymbolTable, EPS_LABEL};
 use anyhow::Result;
 use std::sync::Arc;
+use unsafe_unwrap::UnsafeUnwrap;
 
 /// Defines the different types of closure : Star or Plus.
 #[derive(Clone, Debug, Copy, PartialEq)]
@@ -39,7 +40,7 @@ where
     if let Some(start_state) = fst.start() {
         let final_states_id: Vec<_> = fst
             .final_states_iter()
-            .map(|u| (u.state_id, u.final_weight.clone()))
+            .map(|s| (s, unsafe {fst.final_weight_unchecked(s).unsafe_unwrap()}))
             .collect();
         for (final_state_id, final_weight) in final_states_id {
             unsafe {

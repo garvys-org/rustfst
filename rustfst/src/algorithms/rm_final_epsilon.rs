@@ -50,7 +50,6 @@ where
                     if weight.is_none() {
                         weight = Some(
                             ifst.final_weight_unchecked(state)
-                                .cloned()
                                 .unwrap_or_else(W::zero),
                         );
                     }
