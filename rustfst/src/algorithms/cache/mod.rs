@@ -9,3 +9,5 @@ mod cache_state;
 mod fst_impl;
 mod state_table;
 mod vector_cache_state;
+
+pub mod cache_revamp;
