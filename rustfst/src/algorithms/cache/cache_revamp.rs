@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
 
-use crate::fst_traits::{CoreFst, Fst};
+use crate::fst_traits::{CoreFst, Fst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{Trs, StateId};
 use unsafe_unwrap::UnsafeUnwrap;
@@ -18,6 +18,8 @@ trait FstCache<W: Semiring, T: Trs<W>> {
 
     fn get_final_weight(&self, id: StateId) -> Option<Option<W>>;
     fn insert_final_weight(&self, id: StateId, weight: Option<W>);
+
+    fn num_known_states(&self) -> usize;
 }
 
 trait FstOp<W: Semiring, T: Trs<W>> {
@@ -58,6 +60,10 @@ impl<W: Semiring, T: Trs<W>> FstCache<W, T> for SimpleHashMapCache<W, T> {
 
     fn insert_final_weight(&self, id: StateId, weight: Option<W>) {
         self.final_weight.lock().unwrap().insert(id, weight);
+    }
+
+    fn num_known_states(&self) -> usize {
+        std::cmp::max(self.final_weight.lock().unwrap().len(), self.trs.lock().unwrap().len())
     }
 }
 
@@ -107,5 +113,49 @@ impl<W: Semiring, T: Trs<W>, Op: FstOp<W, T>, Cache: FstCache<W, T>> CoreFst<W> 
 
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
         self.get_trs(state_id).unsafe_unwrap()
+    }
+}
+
+impl<'a, W, T, Op, Cache> StateIterator<'a> for LazyFST2<W, T, Op, Cache>
+where
+    W: Semiring,
+    T: Trs<W> + 'a,
+    Op: FstOp<W, T> + 'a,
+    Cache: FstCache<W, T> + 'a
+{
+    type Iter = StatesIteratorLazyFst<'a, Self>;
+
+    fn states_iter(&'a self) -> Self::Iter {
+        self.start();
+        StatesIteratorLazyFst { fst: &self, s: 0 }
+    }
+}
+
+#[derive(Clone)]
+pub struct StatesIteratorLazyFst<'a, T> {
+    pub(crate) fst: &'a T,
+    pub(crate) s: usize,
+}
+
+impl<'a, W, T, Op, Cache> Iterator for StatesIteratorLazyFst<'a, LazyFST2<W, T, Op, Cache>>
+where
+    W: Semiring,
+    T: Trs<W>,
+    Op: FstOp<W, T>,
+    Cache: FstCache<W, T>
+{
+    type Item = StateId;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let num_known_states = self.fst.cache.num_known_states();
+        if self.s < num_known_states {
+            let s_cur = self.s;
+            // Force expansion of the state
+            self.fst.get_trs(self.s).unwrap();
+            self.s += 1;
+            Some(s_cur)
+        } else {
+            None
+        }
     }
 }
