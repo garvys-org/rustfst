@@ -7,11 +7,12 @@ use anyhow::Result;
 use itertools::izip;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::{StateId, Trs};
+use crate::{StateId, Trs, SymbolTable};
 use crate::fst_traits::{CoreFst, Fst, FstIterator, FstIterData, StateIterator};
 use crate::semirings::Semiring;
+use std::fmt::Debug;
 
-trait FstCache<W: Semiring, T: Trs<W>> {
+trait FstCache<W: Semiring, T: Trs<W>> : Debug {
     fn get_start(&self) -> Option<Option<StateId>>;
     fn insert_start(&self, id: Option<StateId>);
 
@@ -24,14 +25,14 @@ trait FstCache<W: Semiring, T: Trs<W>> {
     fn num_known_states(&self) -> usize;
 }
 
-trait FstOp<W: Semiring, T: Trs<W>> {
+trait FstOp<W: Semiring, T: Trs<W>> : Debug {
     // was FstImpl
     fn compute_start(&self) -> Option<StateId>;
     fn compute_trs(&self, fst: &dyn CoreFst<W, TRS=T>, id: usize) -> T;
     fn compute_final_weight(&self, id: StateId) -> Option<W>;
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct SimpleHashMapCache<W: Semiring, T: Trs<W>> {
     // First option : has start been computed
     // Second option: value of the start state (possibly none)
@@ -69,11 +70,14 @@ impl<W: Semiring, T: Trs<W>> FstCache<W, T> for SimpleHashMapCache<W, T> {
     }
 }
 
+#[derive(Debug)]
 struct LazyFST2<W: Semiring, T: Trs<W>, Op: FstOp<W, T>, Cache: FstCache<W, T>> {
     cache: Cache,
     op: Op,
     w: PhantomData<W>,
-    t: PhantomData<T>
+    t: PhantomData<T>,
+    isymt: Option<Arc<SymbolTable>>,
+    osymt: Option<Arc<SymbolTable>>,
 }
 
 impl<W: Semiring, T: Trs<W>, Op: FstOp<W, T>, Cache: FstCache<W, T>> CoreFst<W> for LazyFST2<W, T, Op, Cache> {
@@ -184,5 +188,37 @@ impl<'a, W, T, Op, Cache> FstIterator<'a, W> for LazyFST2<W, T, Op, Cache>
                 num_trs: unsafe {p.num_trs_unchecked(state_id)},
             }
         }))
+    }
+}
+
+impl<W, T, Op, Cache> Fst<W> for LazyFST2<W, T, Op, Cache>
+    where
+        W: Semiring,
+        T: Trs<W> + 'static,
+        Op: FstOp<W, T> + 'static,
+        Cache: FstCache<W, T> + 'static
+{
+    fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
+        self.isymt.as_ref()
+    }
+
+    fn output_symbols(&self) -> Option<&Arc<SymbolTable>> {
+        self.osymt.as_ref()
+    }
+
+    fn set_input_symbols(&mut self, symt: Arc<SymbolTable>) {
+        self.isymt = Some(symt);
+    }
+
+    fn set_output_symbols(&mut self, symt: Arc<SymbolTable>) {
+        self.osymt = Some(symt);
+    }
+
+    fn take_input_symbols(&mut self) -> Option<Arc<SymbolTable>> {
+        self.isymt.take()
+    }
+
+    fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
+        self.osymt.take()
     }
 }

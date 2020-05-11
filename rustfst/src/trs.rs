@@ -1,8 +1,9 @@
 use crate::semirings::Semiring;
 use crate::Tr;
 use std::sync::Arc;
+use std::fmt::Debug;
 
-pub trait Trs<W: Semiring>: std::ops::Deref<Target = [Tr<W>]> {
+pub trait Trs<W: Semiring>: std::ops::Deref<Target = [Tr<W>]> + Debug {
     fn trs(&self) -> &[Tr<W>];
     fn shallow_clone(&self) -> Self;
 }
