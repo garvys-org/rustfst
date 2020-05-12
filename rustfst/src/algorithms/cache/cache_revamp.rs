@@ -7,17 +7,17 @@ use anyhow::Result;
 use itertools::izip;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::{StateId, Trs, SymbolTable};
+use crate::{StateId, Trs, SymbolTable, TrsVec};
 use crate::fst_traits::{CoreFst, Fst, FstIterator, FstIterData, StateIterator};
 use crate::semirings::Semiring;
 use std::fmt::Debug;
 
-trait FstCache<W: Semiring, T: Trs<W>> : Debug {
+trait FstCache<W: Semiring> : Debug {
     fn get_start(&self) -> Option<Option<StateId>>;
     fn insert_start(&self, id: Option<StateId>);
 
-    fn get_trs(&self, id: StateId) -> Option<T>;
-    fn insert_trs(&self, id: StateId, trs: T);
+    fn get_trs(&self, id: StateId) -> Option<TrsVec<W>>;
+    fn insert_trs(&self, id: StateId, trs: TrsVec<W>);
 
     fn get_final_weight(&self, id: StateId) -> Option<Option<W>>;
     fn insert_final_weight(&self, id: StateId, weight: Option<W>);
@@ -25,23 +25,23 @@ trait FstCache<W: Semiring, T: Trs<W>> : Debug {
     fn num_known_states(&self) -> usize;
 }
 
-trait FstOp<W: Semiring, T: Trs<W>> : Debug {
+pub trait FstOp<W: Semiring> : Debug {
     // was FstImpl
-    fn compute_start(&self) -> Option<StateId>;
-    fn compute_trs(&self, fst: &dyn CoreFst<W, TRS=T>, id: usize) -> T;
-    fn compute_final_weight(&self, id: StateId) -> Option<W>;
+    fn compute_start(&self) -> Result<Option<StateId>>;
+    fn compute_trs(&self, fst: &dyn CoreFst<W, TRS=TrsVec<W>>, id: usize) -> Result<TrsVec<W>>;
+    fn compute_final_weight(&self, id: StateId) -> Result<Option<W>>;
 }
 
 #[derive(Default, Debug)]
-struct SimpleHashMapCache<W: Semiring, T: Trs<W>> {
+struct SimpleHashMapCache<W: Semiring> {
     // First option : has start been computed
     // Second option: value of the start state (possibly none)
     start: Mutex<Option<Option<StateId>>>,
-    trs: Mutex<HashMap<StateId, T>>,
+    trs: Mutex<HashMap<StateId, TrsVec<W>>>,
     final_weight: Mutex<HashMap<StateId, Option<W>>>,
 }
 
-impl<W: Semiring, T: Trs<W>> FstCache<W, T> for SimpleHashMapCache<W, T> {
+impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
     fn get_start(&self) -> Option<Option<StateId>> {
         self.start.lock().unwrap().clone()
     }
@@ -50,11 +50,11 @@ impl<W: Semiring, T: Trs<W>> FstCache<W, T> for SimpleHashMapCache<W, T> {
         *self.start.lock().unwrap() = Some(id);
     }
 
-    fn get_trs(&self, id: usize) -> Option<T> {
+    fn get_trs(&self, id: usize) -> Option<TrsVec<W>> {
         self.trs.lock().unwrap().get(&id).map(|v| v.shallow_clone())
     }
 
-    fn insert_trs(&self, id: usize, trs: T) {
+    fn insert_trs(&self, id: usize, trs: TrsVec<W>) {
         self.trs.lock().unwrap().insert(id, trs);
     }
     fn get_final_weight(&self, id: usize) -> Option<Option<W>> {
@@ -71,23 +71,23 @@ impl<W: Semiring, T: Trs<W>> FstCache<W, T> for SimpleHashMapCache<W, T> {
 }
 
 #[derive(Debug)]
-struct LazyFST2<W: Semiring, T: Trs<W>, Op: FstOp<W, T>, Cache: FstCache<W, T>> {
+struct LazyFST2<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> {
     cache: Cache,
     op: Op,
     w: PhantomData<W>,
-    t: PhantomData<T>,
     isymt: Option<Arc<SymbolTable>>,
     osymt: Option<Arc<SymbolTable>>,
 }
 
-impl<W: Semiring, T: Trs<W>, Op: FstOp<W, T>, Cache: FstCache<W, T>> CoreFst<W> for LazyFST2<W, T, Op, Cache> {
-    type TRS = T;
+impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFST2<W, Op, Cache> {
+    type TRS = TrsVec<W>;
 
     fn start(&self) -> Option<usize> {
          if let Some(start) = self.cache.get_start() {
              start
          } else {
-             let start = self.op.compute_start();
+             // TODO: Need to return a Result
+             let start = self.op.compute_start().unwrap();
              self.cache.insert_start(start.clone());
              start
          }
@@ -97,7 +97,7 @@ impl<W: Semiring, T: Trs<W>, Op: FstOp<W, T>, Cache: FstCache<W, T>> CoreFst<W> 
         if let Some(final_weight) = self.cache.get_final_weight(state_id) {
             Ok(final_weight)
         } else {
-            let final_weight = self.op.compute_final_weight(state_id);
+            let final_weight = self.op.compute_final_weight(state_id)?;
             self.cache.insert_final_weight(state_id, final_weight.clone());
             Ok(final_weight)
         }
@@ -111,7 +111,7 @@ impl<W: Semiring, T: Trs<W>, Op: FstOp<W, T>, Cache: FstCache<W, T>> CoreFst<W> 
         if let Some(trs) = self.cache.get_trs(state_id) {
             Ok(trs)
         } else {
-            let trs = self.op.compute_trs(self, state_id);
+            let trs = self.op.compute_trs(self, state_id)?;
             self.cache.insert_trs(state_id, trs.shallow_clone());
             Ok(trs)
         }
@@ -122,12 +122,11 @@ impl<W: Semiring, T: Trs<W>, Op: FstOp<W, T>, Cache: FstCache<W, T>> CoreFst<W> 
     }
 }
 
-impl<'a, W, T, Op, Cache> StateIterator<'a> for LazyFST2<W, T, Op, Cache>
+impl<'a, W, Op, Cache> StateIterator<'a> for LazyFST2<W, Op, Cache>
 where
     W: Semiring,
-    T: Trs<W> + 'a,
-    Op: FstOp<W, T> + 'a,
-    Cache: FstCache<W, T> + 'a
+    Op: FstOp<W> + 'a,
+    Cache: FstCache<W> + 'a
 {
     type Iter = StatesIteratorLazyFst<'a, Self>;
 
@@ -143,12 +142,11 @@ pub struct StatesIteratorLazyFst<'a, T> {
     pub(crate) s: usize,
 }
 
-impl<'a, W, T, Op, Cache> Iterator for StatesIteratorLazyFst<'a, LazyFST2<W, T, Op, Cache>>
+impl<'a, W, Op, Cache> Iterator for StatesIteratorLazyFst<'a, LazyFST2<W, Op, Cache>>
 where
     W: Semiring,
-    T: Trs<W>,
-    Op: FstOp<W, T>,
-    Cache: FstCache<W, T>
+    Op: FstOp<W>,
+    Cache: FstCache<W>
 {
     type Item = StateId;
 
@@ -166,15 +164,14 @@ where
     }
 }
 
-impl<'a, W, T, Op, Cache> FstIterator<'a, W> for LazyFST2<W, T, Op, Cache>
+impl<'a, W, Op, Cache> FstIterator<'a, W> for LazyFST2<W, Op, Cache>
     where
         W: Semiring,
-        T: Trs<W> + 'a,
-        Op: FstOp<W, T> + 'a,
-        Cache: FstCache<W, T> + 'a
+        Op: FstOp<W> + 'a,
+        Cache: FstCache<W> + 'a
 {
     type FstIter = Map<
-        Zip<<LazyFST2<W, T, Op, Cache> as StateIterator<'a>>::Iter, Repeat<&'a Self>>,
+        Zip<<LazyFST2<W, Op, Cache> as StateIterator<'a>>::Iter, Repeat<&'a Self>>,
         Box<dyn FnMut((StateId, &'a Self)) -> FstIterData<W, Self::TRS>>,
     >;
 
@@ -191,12 +188,11 @@ impl<'a, W, T, Op, Cache> FstIterator<'a, W> for LazyFST2<W, T, Op, Cache>
     }
 }
 
-impl<W, T, Op, Cache> Fst<W> for LazyFST2<W, T, Op, Cache>
+impl<W, Op, Cache> Fst<W> for LazyFST2<W, Op, Cache>
     where
         W: Semiring,
-        T: Trs<W> + 'static,
-        Op: FstOp<W, T> + 'static,
-        Cache: FstCache<W, T> + 'static
+        Op: FstOp<W> + 'static,
+        Cache: FstCache<W> + 'static
 {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.isymt.as_ref()
