@@ -82,7 +82,7 @@ where
 /// with weight a, xx to yy with weight Times(a, a), xxx to yyy with weight
 /// Times(Times(a, a), a), etc. If closure_type == CLOSURE_STAR, then the empty
 /// string is transduced to itself with weight Weight::One() as well.
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct ClosureFst<W: Semiring, F: Fst<W> + 'static>(ReplaceFst<W, F, F>);
 //
 // impl<F: Fst + MutableFst + AllocableFst> ClosureFst<F>

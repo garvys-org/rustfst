@@ -118,7 +118,7 @@ where
 /// transduces string x to y with weight a and B transduces string w to v with
 /// weight b, then their union transduces x to y with weight a and w to v with
 /// weight b.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug)]
 pub struct UnionFst<W: Semiring, F: Fst<W> + 'static>(ReplaceFst<W, F, F>);
 //
 // impl<F: Fst + MutableFst + AllocableFst> UnionFst<F>

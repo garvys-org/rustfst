@@ -102,7 +102,7 @@ where
 /// FST. If FST1 transduces string x to y with weight a and FST2 transduces
 /// string w to v with weight b, then their concatenation transduces string xw
 /// to yv with Times(a, b).
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug)]
 pub struct ConcatFst<W: Semiring, F: Fst<W> + 'static>(ReplaceFst<W, F, F>);
 //
 // impl<F: Fst + MutableFst + AllocableFst> ConcatFst<F>

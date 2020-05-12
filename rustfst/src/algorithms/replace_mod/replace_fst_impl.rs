@@ -1,144 +1,22 @@
 use std::borrow::Borrow;
-use std::collections::hash_map::Entry;
 use std::collections::{BTreeSet, HashMap};
-use std::hash::Hash;
+use std::collections::hash_map::Entry;
 use std::marker::PhantomData;
+use std::sync::Arc;
 
-use anyhow::{bail, Result};
+use anyhow::Result;
 use itertools::Itertools;
 
-use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
-use crate::algorithms::lazy_fst::LazyFst;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
-use crate::semirings::Semiring;
-use crate::{Label, StateId, Tr, EPS_LABEL, Trs, TrsVec};
-use std::sync::Arc;
+use crate::{EPS_LABEL, Label, StateId, Tr, TrsVec, Trs};
 use crate::algorithms::lazy_fst_revamp::FstOp;
-
-/// This specifies what labels to output on the call or return transition.
-#[derive(PartialOrd, PartialEq, Copy, Clone, Debug, Eq)]
-enum ReplaceLabelType {
-    /// Epsilon labels on both input and output.
-    Neither,
-    /// Non-epsilon labels on input and epsilon on output.
-    Input,
-    /// Epsilon on input and non-epsilon on output.
-    Output,
-    #[allow(unused)]
-    /// Non-epsilon labels on both input and output.
-    Both,
-}
-
-#[derive(PartialOrd, PartialEq, Clone, Debug, Eq)]
-struct ReplaceFstOptions {
-    /// Index of root rule for expansion.
-    root: Label,
-    /// How to label call transition.
-    call_label_type: ReplaceLabelType,
-    /// How to label return transition.
-    return_label_type: ReplaceLabelType,
-    /// Specifies output label to put on call transition; if `None`, use existing label
-    /// on call transition. Otherwise, use this field as the output label.
-    call_output_label: Option<Label>,
-    /// Specifies label to put on return transition.
-    return_label: Label,
-}
-
-impl ReplaceFstOptions {
-    pub fn new(root: Label, epsilon_on_replace: bool) -> Self {
-        Self {
-            root,
-            call_label_type: if epsilon_on_replace {
-                ReplaceLabelType::Neither
-            } else {
-                ReplaceLabelType::Input
-            },
-            return_label_type: ReplaceLabelType::Neither,
-            call_output_label: if epsilon_on_replace { Some(0) } else { None },
-            return_label: 0,
-        }
-    }
-}
-
-/// Recursively replaces trs in the root FSTs with other FSTs.
-///
-/// Replace supports replacement of trs in one Fst with another FST. This
-/// replacement is recursive. Replace takes an array of FST(s). One FST
-/// represents the root (or topology) machine. The root FST refers to other FSTs
-/// by recursively replacing trs labeled as non-terminals with the matching
-/// non-terminal FST. Currently Replace uses the output symbols of the trs to
-/// determine whether the transition is a non-terminal transition or not. A non-terminal can be
-/// any label that is not a non-zero terminal label in the output alphabet.
-///
-/// Note that input argument is a vector of pairs. These correspond to the tuple
-/// of non-terminal Label and corresponding FST.
-///
-/// # Example
-///
-/// ## Root Fst
-///
-/// ![replace_in_1](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_1.svg?sanitize=true)
-///
-/// ## Fst for non-terminal #NAME
-///
-/// ![replace_in_2](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_2.svg?sanitize=true)
-///
-/// ## Fst for non-termincal #FIRSTNAME
-///
-/// ![replace_in_3](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_3.svg?sanitize=true)
-///
-/// ## Fst for non-termincal #LASTNAME
-///
-/// ![replace_in_4](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_4.svg?sanitize=true)
-///
-/// ## Output
-///
-/// ![replace_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_out.svg?sanitize=true)
-///
-pub fn replace<W, F1, F2, B>(
-    fst_list: Vec<(Label, B)>,
-    root: Label,
-    epsilon_on_replace: bool,
-) -> Result<F2>
-where
-
-    F1: Fst<W>,
-    W: Semiring,
-    F2: MutableFst<W>,
-    B: Borrow<F1>,
-{
-    let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
-    let mut fst = ReplaceFstImpl::new(fst_list, opts)?;
-    fst.compute()
-}
-
-/// Returns true if label type on transition results in epsilon input label.
-fn epsilon_on_input(label_type: ReplaceLabelType) -> bool {
-    label_type == ReplaceLabelType::Neither || label_type == ReplaceLabelType::Output
-}
-
-/// Returns true if label type on transition results in epsilon input label.
-fn epsilon_on_output(label_type: ReplaceLabelType) -> bool {
-    label_type == ReplaceLabelType::Neither || label_type == ReplaceLabelType::Input
-}
-
-#[allow(unused)]
-// Necessary when setting the properties.
-fn replace_transducer(
-    call_label_type: ReplaceLabelType,
-    return_label_type: ReplaceLabelType,
-    call_output_label: Option<Label>,
-) -> bool {
-    call_label_type == ReplaceLabelType::Input
-        || call_label_type == ReplaceLabelType::Output
-        || (call_label_type == ReplaceLabelType::Both && call_output_label.is_some())
-        || return_label_type == ReplaceLabelType::Input
-        || return_label_type == ReplaceLabelType::Output
-}
+use crate::algorithms::replace_mod::config::{ReplaceFstOptions, ReplaceLabelType};
+use crate::algorithms::replace_mod::state_table::{ReplaceStackPrefix, ReplaceStateTable, ReplaceStateTuple};
+use crate::algorithms::replace_mod::utils::{epsilon_on_input, epsilon_on_output};
+use crate::fst_traits::Fst;
+use crate::semirings::Semiring;
 
 #[derive(Clone, Eq)]
 pub struct ReplaceFstImpl<W: Semiring, F: Fst<W>, B: Borrow<F>> {
-    cache_impl: CacheImpl<W>,
     call_label_type_: ReplaceLabelType,
     return_label_type_: ReplaceLabelType,
     call_output_label_: Option<Label>,
@@ -149,20 +27,20 @@ pub struct ReplaceFstImpl<W: Semiring, F: Fst<W>, B: Borrow<F>> {
     root: Label,
     state_table: ReplaceStateTable,
     fst_type: PhantomData<F>,
+    w: PhantomData<W>
 }
 
 impl<W: Semiring, F: Fst<W> + PartialEq, B: Borrow<F>> PartialEq for ReplaceFstImpl<W, F, B> {
     fn eq(&self, other: &Self) -> bool {
-        self.cache_impl.eq(&other.cache_impl)
-            && self.call_label_type_.eq(&other.call_label_type_)
+        self.call_label_type_.eq(&other.call_label_type_)
             && self.return_label_type_.eq(&other.return_label_type_)
             && self.call_output_label_.eq(&other.call_output_label_)
             && self.return_label_.eq(&other.return_label_)
             && self
-                .fst_array
-                .iter()
-                .zip(other.fst_array.iter())
-                .all(|(a, b)| a.borrow().eq(b.borrow()))
+            .fst_array
+            .iter()
+            .zip(other.fst_array.iter())
+            .all(|(a, b)| a.borrow().eq(b.borrow()))
             && self.nonterminal_set.eq(&other.nonterminal_set)
             && self.nonterminal_hash.eq(&other.nonterminal_hash)
             && self.root.eq(&other.root)
@@ -176,11 +54,10 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> std::fmt::Debug for ReplaceFstImpl<W,
         let slice_fst = self.fst_array.iter().map(|fst| fst.borrow()).collect_vec();
         write!(
             f,
-            "ReplaceFstImpl {{ cache_impl : {:?}, call_label_type_ : {:?}, \
+            "ReplaceFstImpl {{ call_label_type_ : {:?}, \
              return_label_type_ : {:?}, call_output_label_ : {:?}, return_label_ : {:?}, \
              fst_array : {:?}, nonterminal_set : {:?}, nonterminal_hash : {:?}, root : {:?}, \
              state_table : {:?} }}",
-            self.cache_impl,
             self.call_label_type_,
             self.return_label_type_,
             self.call_output_label_,
@@ -250,74 +127,9 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> FstOp<W> for ReplaceFstImpl<W, F, B> 
     }
 }
 
-
-impl<W: Semiring, F: Fst<W>, B: Borrow<F>> FstImpl for ReplaceFstImpl<W, F, B>
-{
-    type W = W;
-    fn cache_impl_mut(&mut self) -> &mut CacheImpl<W> {
-        &mut self.cache_impl
-    }
-
-    fn cache_impl_ref(&self) -> &CacheImpl<W> {
-        &self.cache_impl
-    }
-
-    fn expand(&mut self, state: usize) -> Result<()> {
-        let tuple = self.state_table.tuple_table.find_tuple(state).clone();
-        if let Some(fst_state) = tuple.fst_state {
-            if let Some(tr) = self.compute_final_tr(state) {
-                self.cache_impl.push_tr(state, tr)?;
-            }
-
-            for tr in self
-                .fst_array
-                .get(tuple.fst_id.unwrap())
-                .unwrap()
-                .borrow()
-                .get_trs(fst_state)?.trs()
-            {
-                if let Some(new_tr) = self.compute_tr(&tuple, tr) {
-                    self.cache_impl.push_tr(state, new_tr)?;
-                }
-            }
-        }
-        Ok(())
-    }
-
-    fn compute_start(&mut self) -> Result<Option<usize>> {
-        if self.fst_array.is_empty() {
-            Ok(None)
-        } else if let Some(fst_start) = self.fst_array[self.root].borrow().start() {
-            let prefix = self.get_prefix_id(ReplaceStackPrefix::new());
-            let start = self.state_table.tuple_table.find_id(ReplaceStateTuple::new(
-                prefix,
-                Some(self.root),
-                Some(fst_start),
-            ));
-            Ok(Some(start))
-        } else {
-            Ok(None)
-        }
-    }
-
-    fn compute_final(&mut self, state: usize) -> Result<Option<W>> {
-        let tuple = self.state_table.tuple_table.find_tuple(state);
-        if tuple.prefix_id == 0 {
-            self.fst_array
-                .get(tuple.fst_id.unwrap())
-                .unwrap()
-                .borrow()
-                .final_weight(tuple.fst_state.unwrap())
-        } else {
-            Ok(None)
-        }
-    }
-}
-
 impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstImpl<W, F, B> {
-    fn new(fst_list: Vec<(Label, B)>, opts: ReplaceFstOptions) -> Result<Self> {
+    pub fn new(fst_list: Vec<(Label, B)>, opts: ReplaceFstOptions) -> Result<Self> {
         let mut replace_fst_impl = Self {
-            cache_impl: CacheImpl::new(),
             call_label_type_: opts.call_label_type,
             return_label_type_: opts.return_label_type,
             call_output_label_: opts.call_output_label,
@@ -328,6 +140,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstImpl<W, F, B> {
             root: 0,
             state_table: ReplaceStateTable::new(),
             fst_type: PhantomData,
+            w: PhantomData
         };
 
         if let Some(v) = replace_fst_impl.call_output_label_ {
@@ -482,88 +295,3 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstImpl<W, F, B> {
         }
     }
 }
-
-#[derive(Hash, Eq, PartialOrd, PartialEq, Clone, Debug)]
-struct PrefixTuple {
-    fst_id: Option<Label>,
-    nextstate: Option<StateId>,
-}
-
-#[derive(Hash, Eq, PartialOrd, PartialEq, Clone, Debug)]
-struct ReplaceStackPrefix {
-    prefix: Vec<PrefixTuple>,
-}
-
-impl ReplaceStackPrefix {
-    fn new() -> Self {
-        Self { prefix: vec![] }
-    }
-
-    fn push(&mut self, fst_id: Option<StateId>, nextstate: Option<StateId>) {
-        self.prefix.push(PrefixTuple { fst_id, nextstate });
-    }
-
-    fn pop(&mut self) {
-        self.prefix.pop();
-    }
-
-    fn top(&self) -> &PrefixTuple {
-        self.prefix.last().as_ref().unwrap()
-    }
-}
-
-#[derive(Hash, Eq, PartialOrd, PartialEq, Clone, Debug)]
-struct ReplaceStateTuple {
-    /// Index in prefix table.
-    prefix_id: usize,
-    /// Current FST being walked.
-    fst_id: Option<StateId>,
-    /// Current state in FST being walked (not to be
-    /// confused with the thse StateId of the combined FST).
-    fst_state: Option<StateId>,
-}
-
-impl ReplaceStateTuple {
-    fn new(prefix_id: usize, fst_id: Option<StateId>, fst_state: Option<StateId>) -> Self {
-        Self {
-            prefix_id,
-            fst_id,
-            fst_state,
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-struct ReplaceStateTable {
-    pub prefix_table: StateTable<ReplaceStackPrefix>,
-    pub tuple_table: StateTable<ReplaceStateTuple>,
-}
-
-impl ReplaceStateTable {
-    fn new() -> Self {
-        Self {
-            prefix_table: StateTable::new(),
-            tuple_table: StateTable::new(),
-        }
-    }
-}
-
-/// ReplaceFst supports lazy replacement of trs in one FST with another FST.
-/// This replacement is recursive. ReplaceFst can be used to support a variety of
-/// delayed constructions such as recursive transition networks, union, or closure.
-pub type ReplaceFst<W, F, B> = LazyFst<ReplaceFstImpl<W, F, B>>;
-
-// impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFst<W, F, B>
-// {
-//     pub fn new(fst_list: Vec<(Label, B)>, root: Label, epsilon_on_replace: bool) -> Result<Self> {
-//         let mut isymt = None;
-//         let mut osymt = None;
-//         if let Some(first_elt) = fst_list.first() {
-//             isymt = first_elt.1.borrow().input_symbols().cloned();
-//             osymt = first_elt.1.borrow().output_symbols().cloned();
-//         }
-//         let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
-//         let fst = ReplaceFstImpl::new(fst_list, opts)?;
-//         Ok(Self::from_impl(fst, isymt, osymt))
-//     }
-// }

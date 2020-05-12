@@ -16,6 +16,16 @@ pub struct SimpleHashMapCache<W: Semiring> {
     final_weight: Mutex<HashMap<StateId, Option<W>>>,
 }
 
+impl<W: Semiring> SimpleHashMapCache<W> {
+    pub fn new() -> Self {
+        Self {
+            start: Mutex::new(None),
+            trs: Mutex::new(HashMap::new()),
+            final_weight: Mutex::new(HashMap::new())
+        }
+    }
+}
+
 impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
     fn get_start(&self) -> Option<Option<StateId>> {
         self.start.lock().unwrap().clone()

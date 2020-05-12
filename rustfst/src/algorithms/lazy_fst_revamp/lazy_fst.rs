@@ -9,8 +9,9 @@ use unsafe_unwrap::UnsafeUnwrap;
 use crate::{StateId, SymbolTable, Trs, TrsVec};
 use crate::algorithms::lazy_fst_revamp::fst_op::FstOp;
 use crate::algorithms::lazy_fst_revamp::FstCache;
-use crate::fst_traits::{CoreFst, Fst, FstIterator, FstIterData, StateIterator};
+use crate::fst_traits::{CoreFst, Fst, FstIterator, FstIterData, StateIterator, MutableFst};
 use crate::semirings::Semiring;
+use std::collections::{VecDeque, HashSet};
 
 #[derive(Debug)]
 pub struct LazyFst<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> {
@@ -158,5 +159,63 @@ impl<W, Op, Cache> Fst<W> for LazyFst<W, Op, Cache>
 
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.osymt.take()
+    }
+}
+
+impl<W, Op, Cache> LazyFst<W, Op, Cache>
+where
+    W: Semiring,
+    Op: FstOp<W>,
+    Cache: FstCache<W>
+{
+    pub(crate) fn from_op_and_cache(
+        op: Op,
+        cache: Cache,
+        isymt: Option<Arc<SymbolTable>>,
+        osymt: Option<Arc<SymbolTable>>,
+    ) -> Self {
+        Self {
+            op,
+            cache,
+            isymt,
+            osymt,
+            w: PhantomData
+        }
+    }
+
+    /// Turns the Lazy FST into a static one.
+    pub fn compute<F2: MutableFst<W>>(&mut self) -> Result<F2> {
+        let start_state = self.start();
+        let mut fst_out = F2::new();
+        if start_state.is_none() {
+            return Ok(fst_out);
+        }
+        let start_state = start_state.unwrap();
+        for _ in 0..=start_state {
+            fst_out.add_state();
+        }
+        fst_out.set_start(start_state)?;
+        let mut queue = VecDeque::new();
+        let mut visited_states = HashSet::new();
+        visited_states.insert(start_state);
+        queue.push_back(start_state);
+        while !queue.is_empty() {
+            let s = queue.pop_front().unwrap();
+            for tr in self.get_trs(s)?.trs() {
+                if !visited_states.contains(&tr.nextstate) {
+                    queue.push_back(tr.nextstate);
+                    visited_states.insert(tr.nextstate);
+                }
+                let n = fst_out.num_states();
+                for _ in n..=tr.nextstate {
+                    fst_out.add_state();
+                }
+                fst_out.add_tr(s, tr.clone())?;
+            }
+            if let Some(f_w) = self.final_weight(s)? {
+                fst_out.set_final(s, f_w)?;
+            }
+        }
+        Ok(fst_out)
     }
 }
