@@ -21,7 +21,11 @@ impl<T: Hash + Eq + Clone> Default for StateTable<T> {
 
 impl<T: Hash + Eq + Clone + fmt::Debug> fmt::Debug for StateTable<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "StateTable {{ table : {:?} }}", self.table.lock().unwrap())
+        write!(
+            f,
+            "StateTable {{ table : {:?} }}",
+            self.table.lock().unwrap()
+        )
     }
 }
 
