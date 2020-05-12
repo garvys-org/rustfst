@@ -12,8 +12,8 @@ use crate::algorithms::lazy_fst::LazyFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, EPS_LABEL, Trs, TrsVec};
-use crate::algorithms::cache::cache_revamp::FstOp;
 use std::sync::Arc;
+use crate::algorithms::lazy_fst_revamp::FstOp;
 
 /// This specifies what labels to output on the call or return transition.
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug, Eq)]

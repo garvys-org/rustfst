@@ -61,6 +61,8 @@ pub mod tr_compares {
     pub use super::tr_sort::{ilabel_compare, olabel_compare};
 }
 
+pub mod lazy_fst_revamp;
+
 pub use self::{
     add_super_final_state::add_super_final_state,
     all_pairs_shortest_distance::all_pairs_shortest_distance,
