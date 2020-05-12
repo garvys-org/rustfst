@@ -140,6 +140,6 @@ where
     B: Borrow<F>,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        unimplemented!()
+        self.0.fmt(f)
     }
 }

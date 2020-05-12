@@ -17,7 +17,6 @@ use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, Trs, TrsVec, EPS_LABEL};
 
-#[derive(Clone, Eq)]
 pub struct ReplaceFstImpl<W: Semiring, F: Fst<W>, B: Borrow<F>> {
     call_label_type_: ReplaceLabelType,
     return_label_type_: ReplaceLabelType,

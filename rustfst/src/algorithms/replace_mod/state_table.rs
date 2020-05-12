@@ -1,4 +1,4 @@
-use crate::algorithms::cache::StateTable;
+use crate::algorithms::lazy_fst_revamp::StateTable;
 use crate::{Label, StateId};
 
 #[derive(Hash, Eq, PartialOrd, PartialEq, Clone, Debug)]
@@ -51,7 +51,7 @@ impl ReplaceStateTuple {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 pub struct ReplaceStateTable {
     pub prefix_table: StateTable<ReplaceStackPrefix>,
     pub tuple_table: StateTable<ReplaceStateTuple>,
