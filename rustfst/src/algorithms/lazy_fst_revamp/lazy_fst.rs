@@ -185,7 +185,7 @@ where
     }
 
     /// Turns the Lazy FST into a static one.
-    pub fn compute<F2: MutableFst<W>>(&mut self) -> Result<F2> {
+    pub fn compute<F2: MutableFst<W>>(&self) -> Result<F2> {
         let start_state = self.start();
         let mut fst_out = F2::new();
         if start_state.is_none() {

@@ -150,6 +150,11 @@ where
 
         Ok(UnionFst(ReplaceFst::new(fst_tuples, 0, false)?))
     }
+
+    /// Turns the Lazy FST into a static one.
+    pub fn compute<F2: MutableFst<W>>(&self) -> Result<F2> {
+        self.0.compute()
+    }
 }
 
 impl<W, F> CoreFst<W> for UnionFst<W, F>
