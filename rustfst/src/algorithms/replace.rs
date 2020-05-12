@@ -11,7 +11,9 @@ use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::lazy_fst::LazyFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Label, StateId, Tr, EPS_LABEL, Trs};
+use crate::{Label, StateId, Tr, EPS_LABEL, Trs, TrsVec};
+use crate::algorithms::cache::cache_revamp::FstOp;
+use std::sync::Arc;
 
 /// This specifies what labels to output on the call or return transition.
 #[derive(PartialOrd, PartialEq, Copy, Clone, Debug, Eq)]
@@ -192,7 +194,64 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> std::fmt::Debug for ReplaceFstImpl<W,
     }
 }
 
-impl<'a, W: Semiring, F: Fst<W>, B: Borrow<F>> FstImpl for ReplaceFstImpl<W, F, B>
+impl<W: Semiring, F: Fst<W>, B: Borrow<F>> FstOp<W> for ReplaceFstImpl<W, F, B> {
+    fn compute_start(&self) -> Result<Option<usize>> {
+        if self.fst_array.is_empty() {
+            Ok(None)
+        } else if let Some(fst_start) = self.fst_array[self.root].borrow().start() {
+            let prefix = self.get_prefix_id(ReplaceStackPrefix::new());
+            let start = self.state_table.tuple_table.find_id(ReplaceStateTuple::new(
+                prefix,
+                Some(self.root),
+                Some(fst_start),
+            ));
+            Ok(Some(start))
+        } else {
+            Ok(None)
+        }
+    }
+
+    fn compute_trs(&self, state: usize) -> Result<TrsVec<W>> {
+        let tuple = self.state_table.tuple_table.find_tuple(state).clone();
+        let mut trs = vec![];
+        if let Some(fst_state) = tuple.fst_state {
+            if let Some(tr) = self.compute_final_tr(state) {
+                // self.cache_impl.push_tr(state, tr)?;
+                trs.push(tr);
+            }
+
+            for tr in self
+                .fst_array
+                .get(tuple.fst_id.unwrap())
+                .unwrap()
+                .borrow()
+                .get_trs(fst_state)?.trs()
+            {
+                if let Some(new_tr) = self.compute_tr(&tuple, tr) {
+                    // self.cache_impl.push_tr(state, new_tr)?;
+                    trs.push(new_tr);
+                }
+            }
+        }
+        Ok(TrsVec(Arc::new(trs)))
+    }
+
+    fn compute_final_weight(&self, state: usize) -> Result<Option<W>> {
+        let tuple = self.state_table.tuple_table.find_tuple(state);
+        if tuple.prefix_id == 0 {
+            self.fst_array
+                .get(tuple.fst_id.unwrap())
+                .unwrap()
+                .borrow()
+                .final_weight(tuple.fst_state.unwrap())
+        } else {
+            Ok(None)
+        }
+    }
+}
+
+
+impl<W: Semiring, F: Fst<W>, B: Borrow<F>> FstImpl for ReplaceFstImpl<W, F, B>
 {
     type W = W;
     fn cache_impl_mut(&mut self) -> &mut CacheImpl<W> {
@@ -302,7 +361,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstImpl<W, F, B> {
         Ok(replace_fst_impl)
     }
 
-    fn compute_final_tr(&mut self, state: StateId) -> Option<Tr<W>> {
+    fn compute_final_tr(&self, state: StateId) -> Option<Tr<W>> {
         let tuple = self.state_table.tuple_table.find_tuple(state);
         let fst_state = tuple.fst_state?;
         if self

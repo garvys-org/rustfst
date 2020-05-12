@@ -28,7 +28,7 @@ trait FstCache<W: Semiring> : Debug {
 pub trait FstOp<W: Semiring> : Debug {
     // was FstImpl
     fn compute_start(&self) -> Result<Option<StateId>>;
-    fn compute_trs(&self, fst: &dyn CoreFst<W, TRS=TrsVec<W>>, id: usize) -> Result<TrsVec<W>>;
+    fn compute_trs(&self, id: usize) -> Result<TrsVec<W>>;
     fn compute_final_weight(&self, id: StateId) -> Result<Option<W>>;
 }
 
@@ -111,7 +111,7 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFST2<W, O
         if let Some(trs) = self.cache.get_trs(state_id) {
             Ok(trs)
         } else {
-            let trs = self.op.compute_trs(self, state_id)?;
+            let trs = self.op.compute_trs(state_id)?;
             self.cache.insert_trs(state_id, trs.shallow_clone());
             Ok(trs)
         }
