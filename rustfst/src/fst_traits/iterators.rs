@@ -1,10 +1,10 @@
 use anyhow::Result;
 
 use crate::fst_traits::CoreFst;
+use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::StateId;
 use std::slice;
-use crate::semirings::Semiring;
 
 /// Trait to iterate over the states of a wFST.
 pub trait StateIterator<'a> {

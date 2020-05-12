@@ -60,11 +60,8 @@ pub fn transducer<W: Semiring, F: MutableFst<W>>(
         let new_state = fst.add_state();
 
         // Can't fail as the state has just been added
-        fst.add_tr(
-            state_cour,
-            Tr::new(*i, *o, W::one(), new_state),
-        )
-        .unwrap();
+        fst.add_tr(state_cour, Tr::new(*i, *o, W::one(), new_state))
+            .unwrap();
 
         state_cour = new_state;
     }
@@ -122,11 +119,8 @@ pub fn acceptor<W: Semiring, F: MutableFst<W>>(labels: &[Label], weight: W) -> F
         let new_state = fst.add_state();
 
         // Can't fail as the state has just been added
-        fst.add_tr(
-            state_cour,
-            Tr::new(*l, *l, W::one(), new_state),
-        )
-        .unwrap();
+        fst.add_tr(state_cour, Tr::new(*l, *l, W::one(), new_state))
+            .unwrap();
         state_cour = new_state;
     }
 

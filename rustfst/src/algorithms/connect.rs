@@ -5,10 +5,10 @@ use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
 use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::fst_traits::Fst;
 use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
+use crate::semirings::Semiring;
 use crate::StateId;
 use crate::Tr;
 use crate::NO_STATE_ID;
-use crate::semirings::Semiring;
 use std::marker::PhantomData;
 
 /// This operation trims an FST, removing states and trs that are not on successful paths.
@@ -70,7 +70,7 @@ struct ConnectVisitor<'a, W: Semiring, F: Fst<W>> {
     lowlink: Vec<i32>,
     onstack: Vec<bool>,
     scc_stack: Vec<StateId>,
-    w: PhantomData<W>
+    w: PhantomData<W>,
 }
 
 impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> ConnectVisitor<'a, W, F> {
@@ -86,7 +86,7 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> ConnectVisitor<'a, W, F> {
             lowlink: vec![-1; n],
             onstack: vec![false; n],
             scc_stack: vec![],
-            w: PhantomData
+            w: PhantomData,
         }
     }
 }
@@ -134,12 +134,7 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for ConnectVisit
     }
 
     #[inline]
-    fn finish_state(
-        &mut self,
-        s: usize,
-        parent: Option<usize>,
-        _tr: Option<&Tr<W>>,
-    ) {
+    fn finish_state(&mut self, s: usize, parent: Option<usize>, _tr: Option<&Tr<W>>) {
         if unsafe { self.fst.is_final_unchecked(s) } {
             self.coaccess[s] = true;
         }

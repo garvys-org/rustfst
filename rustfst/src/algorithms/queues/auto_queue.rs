@@ -24,8 +24,7 @@ impl AutoQueue {
         fst: &F,
         distance: Option<&Vec<W>>,
         tr_filter: &A,
-    ) -> Result<Self>
-    {
+    ) -> Result<Self> {
         let props = fst.properties()?;
 
         let queue: Box<dyn Queue>;

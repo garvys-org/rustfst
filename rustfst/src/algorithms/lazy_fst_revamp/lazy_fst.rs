@@ -1,4 +1,4 @@
-use std::iter::{Map, Repeat, repeat, Zip};
+use std::iter::{repeat, Map, Repeat, Zip};
 use std::marker::PhantomData;
 use std::sync::Arc;
 
@@ -6,12 +6,12 @@ use anyhow::Result;
 use itertools::izip;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::{StateId, SymbolTable, Trs, TrsVec};
 use crate::algorithms::lazy_fst_revamp::fst_op::FstOp;
 use crate::algorithms::lazy_fst_revamp::FstCache;
-use crate::fst_traits::{CoreFst, Fst, FstIterator, FstIterData, StateIterator, MutableFst};
+use crate::fst_traits::{CoreFst, Fst, FstIterData, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
-use std::collections::{VecDeque, HashSet};
+use crate::{StateId, SymbolTable, Trs, TrsVec};
+use std::collections::{HashSet, VecDeque};
 
 #[derive(Debug)]
 pub struct LazyFst<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> {
@@ -41,7 +41,8 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
             Ok(final_weight)
         } else {
             let final_weight = self.op.compute_final_weight(state_id)?;
-            self.cache.insert_final_weight(state_id, final_weight.clone());
+            self.cache
+                .insert_final_weight(state_id, final_weight.clone());
             Ok(final_weight)
         }
     }
@@ -66,10 +67,10 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
 }
 
 impl<'a, W, Op, Cache> StateIterator<'a> for LazyFst<W, Op, Cache>
-    where
-        W: Semiring,
-        Op: FstOp<W> + 'a,
-        Cache: FstCache<W> + 'a
+where
+    W: Semiring,
+    Op: FstOp<W> + 'a,
+    Cache: FstCache<W> + 'a,
 {
     type Iter = StatesIteratorLazyFst<'a, Self>;
 
@@ -86,10 +87,10 @@ pub struct StatesIteratorLazyFst<'a, T> {
 }
 
 impl<'a, W, Op, Cache> Iterator for StatesIteratorLazyFst<'a, LazyFst<W, Op, Cache>>
-    where
-        W: Semiring,
-        Op: FstOp<W>,
-        Cache: FstCache<W>
+where
+    W: Semiring,
+    Op: FstOp<W>,
+    Cache: FstCache<W>,
 {
     type Item = StateId;
 
@@ -108,10 +109,10 @@ impl<'a, W, Op, Cache> Iterator for StatesIteratorLazyFst<'a, LazyFst<W, Op, Cac
 }
 
 impl<'a, W, Op, Cache> FstIterator<'a, W> for LazyFst<W, Op, Cache>
-    where
-        W: Semiring,
-        Op: FstOp<W> + 'a,
-        Cache: FstCache<W> + 'a
+where
+    W: Semiring,
+    Op: FstOp<W> + 'a,
+    Cache: FstCache<W> + 'a,
 {
     type FstIter = Map<
         Zip<<LazyFst<W, Op, Cache> as StateIterator<'a>>::Iter, Repeat<&'a Self>>,
@@ -123,19 +124,19 @@ impl<'a, W, Op, Cache> FstIterator<'a, W> for LazyFst<W, Op, Cache>
         izip!(self.states_iter(), it).map(Box::new(|(state_id, p): (StateId, &'a Self)| {
             FstIterData {
                 state_id,
-                trs: unsafe {p.get_trs_unchecked(state_id)},
-                final_weight: unsafe {p.final_weight_unchecked(state_id)},
-                num_trs: unsafe {p.num_trs_unchecked(state_id)},
+                trs: unsafe { p.get_trs_unchecked(state_id) },
+                final_weight: unsafe { p.final_weight_unchecked(state_id) },
+                num_trs: unsafe { p.num_trs_unchecked(state_id) },
             }
         }))
     }
 }
 
 impl<W, Op, Cache> Fst<W> for LazyFst<W, Op, Cache>
-    where
-        W: Semiring,
-        Op: FstOp<W> + 'static,
-        Cache: FstCache<W> + 'static
+where
+    W: Semiring,
+    Op: FstOp<W> + 'static,
+    Cache: FstCache<W> + 'static,
 {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.isymt.as_ref()
@@ -166,7 +167,7 @@ impl<W, Op, Cache> LazyFst<W, Op, Cache>
 where
     W: Semiring,
     Op: FstOp<W>,
-    Cache: FstCache<W>
+    Cache: FstCache<W>,
 {
     pub(crate) fn from_op_and_cache(
         op: Op,
@@ -179,7 +180,7 @@ where
             cache,
             isymt,
             osymt,
-            w: PhantomData
+            w: PhantomData,
         }
     }
 

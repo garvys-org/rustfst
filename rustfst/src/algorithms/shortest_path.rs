@@ -15,8 +15,8 @@ use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{
     ReverseBack, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::{StateId, Trs};
 use crate::Tr;
+use crate::{StateId, Trs};
 
 /// Creates an FST containing the n-shortest paths in the input FST. The n-shortest paths are the
 /// n-lowest weight paths w.r.t. the natural semiring order.
@@ -39,8 +39,7 @@ pub fn shortest_path<W, FI, FO>(ifst: &FI, nshortest: usize, unique: bool) -> Re
 where
     FI: ExpandedFst<W>,
     FO: MutableFst<W>,
-    W: Semiring + Into<<W as Semiring>::ReverseWeight>
-        + From<<W as Semiring>::ReverseWeight>,
+    W: Semiring + Into<<W as Semiring>::ReverseWeight> + From<<W as Semiring>::ReverseWeight>,
     <W as Semiring>::ReverseWeight: WeightQuantize + WeaklyDivisibleSemiring,
 {
     if nshortest == 0 {

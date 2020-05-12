@@ -37,7 +37,13 @@ impl<W: Semiring, Q: Queue, A: TrFilter<W>> ShortestDistanceConfig<W, Q, A> {
 }
 
 #[derive(Clone, Eq)]
-pub struct ShortestDistanceState<W: Semiring, Q: Queue, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>> {
+pub struct ShortestDistanceState<
+    W: Semiring,
+    Q: Queue,
+    F: ExpandedFst<W>,
+    B: Borrow<F>,
+    A: TrFilter<W>,
+> {
     pub fst: B,
     state_queue: Q,
     tr_filter: A,
@@ -49,7 +55,7 @@ pub struct ShortestDistanceState<W: Semiring, Q: Queue, F: ExpandedFst<W>, B: Bo
     sources: Vec<Option<StateId>>,
     retain: bool,
     source_id: usize,
-    f: PhantomData<F>
+    f: PhantomData<F>,
 }
 
 impl<W: Semiring, Q: Queue + PartialEq, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>> PartialEq
@@ -110,7 +116,9 @@ macro_rules! ensure_source_index_is_valid {
     };
 }
 
-impl<W: Semiring, Q: Queue, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>> ShortestDistanceState<W, Q, F, B, A> {
+impl<W: Semiring, Q: Queue, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>>
+    ShortestDistanceState<W, Q, F, B, A>
+{
     pub fn new(fst: B, state_queue: Q, tr_filter: A, first_path: bool, retain: bool) -> Self {
         Self {
             state_queue,
@@ -124,7 +132,7 @@ impl<W: Semiring, Q: Queue, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>> Sho
             source_id: 0,
             retain,
             fst,
-            f: PhantomData
+            f: PhantomData,
         }
     }
     pub fn new_from_config(fst: B, opts: ShortestDistanceConfig<W, Q, A>, retain: bool) -> Self {
@@ -235,12 +243,7 @@ impl<W: Semiring, Q: Queue, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>> Sho
     }
 }
 
-pub fn shortest_distance_with_config<
-    W: Semiring,
-    Q: Queue,
-    A: TrFilter<W>,
-    F: ExpandedFst<W>,
->(
+pub fn shortest_distance_with_config<W: Semiring, Q: Queue, A: TrFilter<W>, F: ExpandedFst<W>>(
     fst: &F,
     opts: ShortestDistanceConfig<W, Q, A>,
 ) -> Result<Vec<W>> {
@@ -282,8 +285,7 @@ pub fn shortest_distance_with_config<
 /// # Ok(())
 /// # }
 /// ```
-pub fn shortest_distance<W: Semiring, F: ExpandedFst<W>>(fst: &F, reverse: bool) -> Result<Vec<W>>
-{
+pub fn shortest_distance<W: Semiring, F: ExpandedFst<W>>(fst: &F, reverse: bool) -> Result<Vec<W>> {
     if !reverse {
         let tr_filter = AnyTrFilter {};
         let queue = AutoQueue::new(fst, None, &tr_filter)?;
@@ -306,15 +308,16 @@ pub fn shortest_distance<W: Semiring, F: ExpandedFst<W>>(fst: &F, reverse: bool)
 #[allow(unused)]
 /// Return the sum of the weight of all successful paths in an FST, i.e., the
 /// shortest-distance from the initial state to the final states..
-fn shortest_distance_3<W: Semiring, F: MutableFst<W>>(fst: &F) -> Result<W>
-{
+fn shortest_distance_3<W: Semiring, F: MutableFst<W>>(fst: &F) -> Result<W> {
     let weight_properties = W::properties();
 
     if weight_properties.contains(SemiringProperties::RIGHT_SEMIRING) {
         let distance = shortest_distance(fst, false)?;
         let mut sum = W::zero();
         for state in 0..distance.len() {
-            sum.plus_assign(distance[state].times(fst.final_weight(state)?.unwrap_or_else(W::zero))?)?;
+            sum.plus_assign(
+                distance[state].times(fst.final_weight(state)?.unwrap_or_else(W::zero))?,
+            )?;
         }
         Ok(sum)
     } else {

@@ -5,16 +5,25 @@ use anyhow::Result;
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
 use crate::algorithms::replace_mod::config::ReplaceFstOptions;
 use crate::algorithms::replace_mod::replace_fst_impl::ReplaceFstImpl;
-use crate::fst_traits::Fst;
-use crate::Label;
+use crate::fst_traits::{CoreFst, Fst, FstIterData, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
+use crate::{Label, SymbolTable, TrsVec};
+use bitflags::_core::fmt::Formatter;
+use std::fmt::Debug;
+use std::sync::Arc;
 
 /// ReplaceFst supports lazy replacement of trs in one FST with another FST.
 /// This replacement is recursive. ReplaceFst can be used to support a variety of
 /// delayed constructions such as recursive transition networks, union, or closure.
-pub type ReplaceFst<W, F, B> = LazyFst<W, ReplaceFstImpl<W, F, B>, SimpleHashMapCache<W>>;
+pub struct ReplaceFst<W: Semiring, F: Fst<W>, B: Borrow<F>>(
+    LazyFst<W, ReplaceFstImpl<W, F, B>, SimpleHashMapCache<W>>,
+);
 
-impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFst<W, F, B>
+impl<W, F, B> ReplaceFst<W, F, B>
+where
+    W: Semiring,
+    F: Fst<W>,
+    B: Borrow<F>,
 {
     pub fn new(fst_list: Vec<(Label, B)>, root: Label, epsilon_on_replace: bool) -> Result<Self> {
         let mut isymt = None;
@@ -26,6 +35,111 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFst<W, F, B>
         let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
         let fst_op = ReplaceFstImpl::new(fst_list, opts)?;
         let fst_cache = SimpleHashMapCache::new();
-        Ok(Self::from_op_and_cache(fst_op, fst_cache, isymt, osymt))
+        Ok(ReplaceFst(LazyFst::from_op_and_cache(
+            fst_op, fst_cache, isymt, osymt,
+        )))
+    }
+
+    pub fn compute<F2: MutableFst<W>>(&mut self) -> Result<F2> {
+        self.0.compute()
+    }
+}
+
+impl<W, F, B> CoreFst<W> for ReplaceFst<W, F, B>
+where
+    W: Semiring,
+    F: Fst<W>,
+    B: Borrow<F>,
+{
+    type TRS = TrsVec<W>;
+
+    fn start(&self) -> Option<usize> {
+        self.0.start()
+    }
+
+    fn final_weight(&self, state_id: usize) -> Result<Option<W>> {
+        self.0.final_weight(state_id)
+    }
+
+    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<W> {
+        self.0.final_weight_unchecked(state_id)
+    }
+
+    fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
+        self.0.get_trs(state_id)
+    }
+
+    unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
+        self.0.get_trs_unchecked(state_id)
+    }
+}
+
+impl<'a, W, F, B> StateIterator<'a> for ReplaceFst<W, F, B>
+where
+    W: Semiring,
+    F: Fst<W> + 'a,
+    B: Borrow<F> + 'a,
+{
+    type Iter =
+        <LazyFst<W, ReplaceFstImpl<W, F, B>, SimpleHashMapCache<W>> as StateIterator<'a>>::Iter;
+
+    fn states_iter(&'a self) -> Self::Iter {
+        self.0.states_iter()
+    }
+}
+
+impl<'a, W, F, B> FstIterator<'a, W> for ReplaceFst<W, F, B>
+where
+    W: Semiring,
+    F: Fst<W> + 'a,
+    B: Borrow<F> + 'a,
+{
+    type FstIter =
+        <LazyFst<W, ReplaceFstImpl<W, F, B>, SimpleHashMapCache<W>> as FstIterator<'a, W>>::FstIter;
+
+    fn fst_iter(&'a self) -> Self::FstIter {
+        self.0.fst_iter()
+    }
+}
+
+impl<W, F, B> Fst<W> for ReplaceFst<W, F, B>
+where
+    W: Semiring,
+    F: Fst<W> + 'static,
+    B: Borrow<F> + 'static,
+{
+    fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
+        self.0.input_symbols()
+    }
+
+    fn output_symbols(&self) -> Option<&Arc<SymbolTable>> {
+        self.0.output_symbols()
+    }
+
+    fn set_input_symbols(&mut self, symt: Arc<SymbolTable>) {
+        self.0.set_input_symbols(symt)
+    }
+
+    fn set_output_symbols(&mut self, symt: Arc<SymbolTable>) {
+        self.0.set_output_symbols(symt)
+    }
+
+    fn take_input_symbols(&mut self) -> Option<Arc<SymbolTable>> {
+        self.0.take_input_symbols()
+    }
+
+    fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
+        self.0.take_output_symbols()
+    }
+}
+
+impl<W, F, B> Debug for ReplaceFst<W, F, B>
+where
+    W: Semiring,
+    F: Fst<W>,
+    B: Borrow<F>,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        unimplemented!()
     }
 }

@@ -13,8 +13,8 @@ use crate::algorithms::lazy_fst::LazyFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::tr::Tr;
-use crate::{KDELTA, Trs};
 use crate::{Label, StateId};
+use crate::{Trs, KDELTA};
 
 bitflags! {
     /// What kind of weight should be factored ? Tr weight ? Final weights ?
@@ -101,7 +101,7 @@ pub struct FactorWeightImpl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIter
     fst: B,
     unfactored: RefCell<HashMap<StateId, StateId>>,
     ghost: PhantomData<FI>,
-    f: PhantomData<F>
+    f: PhantomData<F>,
 }
 
 impl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> std::fmt::Debug
@@ -243,7 +243,7 @@ where
             cache_impl: CacheImpl::new(),
             unfactored: RefCell::new(HashMap::new()),
             ghost: PhantomData,
-            f: PhantomData
+            f: PhantomData,
         })
     }
 
@@ -291,7 +291,8 @@ where
     FI: FactorIterator<W>,
     W: WeightQuantize,
 {
-    let mut factor_weight_impl: FactorWeightImpl<W, F1, B, FI> = FactorWeightImpl::new(fst_in, opts)?;
+    let mut factor_weight_impl: FactorWeightImpl<W, F1, B, FI> =
+        FactorWeightImpl::new(fst_in, opts)?;
     factor_weight_impl.compute()
 }
 

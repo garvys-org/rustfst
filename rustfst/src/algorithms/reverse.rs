@@ -3,7 +3,7 @@ use anyhow::Result;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
-use crate::{EPS_LABEL, Trs};
+use crate::{Trs, EPS_LABEL};
 
 /// Reverses an FST. The reversed result is written to an output mutable FST.
 /// If A transduces string x to y with weight a, then the reverse of A

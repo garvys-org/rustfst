@@ -3,7 +3,7 @@ use anyhow::Result;
 use crate::algorithms::{FinalTr, MapFinalAction};
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Tr, EPS_LABEL, Trs};
+use crate::{Tr, Trs, EPS_LABEL};
 use unsafe_unwrap::UnsafeUnwrap;
 
 /// The WeightConverter interfaces defines how a weight should be turned into another one.

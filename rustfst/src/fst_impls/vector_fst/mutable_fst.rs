@@ -237,11 +237,7 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
         self.states.get_unchecked_mut(state_id).final_weight.take()
     }
 
-    fn sort_trs_unchecked<F: Fn(&Tr<W>, &Tr<W>) -> Ordering>(
-        &mut self,
-        state: StateId,
-        f: F,
-    ) {
+    fn sort_trs_unchecked<F: Fn(&Tr<W>, &Tr<W>) -> Ordering>(&mut self, state: StateId, f: F) {
         unsafe {
             let trs = &mut self.states.get_unchecked_mut(state).trs;
             Arc::make_mut(&mut trs.0).sort_by(f)

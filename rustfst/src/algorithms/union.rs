@@ -10,7 +10,7 @@ use crate::fst_traits::{
 };
 use crate::semirings::Semiring;
 use crate::tr::Tr;
-use crate::{SymbolTable, EPS_LABEL, Trs};
+use crate::{SymbolTable, Trs, EPS_LABEL};
 
 /// Performs the union of two wFSTs. If A transduces string `x` to `y` with weight `a`
 /// and `B` transduces string `w` to `v` with weight `b`, then their union transduces `x` to `y`

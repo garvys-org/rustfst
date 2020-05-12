@@ -1,19 +1,21 @@
 use std::borrow::Borrow;
-use std::collections::{BTreeSet, HashMap};
 use std::collections::hash_map::Entry;
+use std::collections::{BTreeSet, HashMap};
 use std::marker::PhantomData;
 use std::sync::Arc;
 
 use anyhow::Result;
 use itertools::Itertools;
 
-use crate::{EPS_LABEL, Label, StateId, Tr, TrsVec, Trs};
 use crate::algorithms::lazy_fst_revamp::FstOp;
 use crate::algorithms::replace_mod::config::{ReplaceFstOptions, ReplaceLabelType};
-use crate::algorithms::replace_mod::state_table::{ReplaceStackPrefix, ReplaceStateTable, ReplaceStateTuple};
+use crate::algorithms::replace_mod::state_table::{
+    ReplaceStackPrefix, ReplaceStateTable, ReplaceStateTuple,
+};
 use crate::algorithms::replace_mod::utils::{epsilon_on_input, epsilon_on_output};
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
+use crate::{Label, StateId, Tr, Trs, TrsVec, EPS_LABEL};
 
 #[derive(Clone, Eq)]
 pub struct ReplaceFstImpl<W: Semiring, F: Fst<W>, B: Borrow<F>> {
@@ -27,7 +29,7 @@ pub struct ReplaceFstImpl<W: Semiring, F: Fst<W>, B: Borrow<F>> {
     root: Label,
     state_table: ReplaceStateTable,
     fst_type: PhantomData<F>,
-    w: PhantomData<W>
+    w: PhantomData<W>,
 }
 
 impl<W: Semiring, F: Fst<W> + PartialEq, B: Borrow<F>> PartialEq for ReplaceFstImpl<W, F, B> {
@@ -37,10 +39,10 @@ impl<W: Semiring, F: Fst<W> + PartialEq, B: Borrow<F>> PartialEq for ReplaceFstI
             && self.call_output_label_.eq(&other.call_output_label_)
             && self.return_label_.eq(&other.return_label_)
             && self
-            .fst_array
-            .iter()
-            .zip(other.fst_array.iter())
-            .all(|(a, b)| a.borrow().eq(b.borrow()))
+                .fst_array
+                .iter()
+                .zip(other.fst_array.iter())
+                .all(|(a, b)| a.borrow().eq(b.borrow()))
             && self.nonterminal_set.eq(&other.nonterminal_set)
             && self.nonterminal_hash.eq(&other.nonterminal_hash)
             && self.root.eq(&other.root)
@@ -102,7 +104,8 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> FstOp<W> for ReplaceFstImpl<W, F, B> 
                 .get(tuple.fst_id.unwrap())
                 .unwrap()
                 .borrow()
-                .get_trs(fst_state)?.trs()
+                .get_trs(fst_state)?
+                .trs()
             {
                 if let Some(new_tr) = self.compute_tr(&tuple, tr) {
                     // self.cache_impl.push_tr(state, new_tr)?;
@@ -140,7 +143,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstImpl<W, F, B> {
             root: 0,
             state_table: ReplaceStateTable::new(),
             fst_type: PhantomData,
-            w: PhantomData
+            w: PhantomData,
         };
 
         if let Some(v) = replace_fst_impl.call_output_label_ {

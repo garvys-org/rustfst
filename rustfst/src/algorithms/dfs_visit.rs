@@ -4,8 +4,8 @@ use crate::tr::Tr;
 use crate::{StateId, Trs};
 
 use crate::algorithms::tr_filters::TrFilter;
-use unsafe_unwrap::UnsafeUnwrap;
 use std::marker::PhantomData;
+use unsafe_unwrap::UnsafeUnwrap;
 
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
 enum DfsStateColor {
@@ -44,21 +44,20 @@ pub trait Visitor<'a, W: Semiring, F: Fst<W>> {
 struct DfsState<W, TRS>
 where
     W: Semiring,
-    TRS: Trs<W>
+    TRS: Trs<W>,
 {
     state_id: StateId,
     tr_iter: OpenFstIterator<W, TRS>,
-    w: PhantomData<W>
+    w: PhantomData<W>,
 }
 
-impl<W: Semiring, TRS: Trs<W>> DfsState<W, TRS>
-{
+impl<W: Semiring, TRS: Trs<W>> DfsState<W, TRS> {
     #[inline]
-    pub fn new<F: Fst<W, TRS=TRS>>(fst: &F, s: StateId) -> Self {
+    pub fn new<F: Fst<W, TRS = TRS>>(fst: &F, s: StateId) -> Self {
         Self {
             state_id: s,
-            tr_iter: OpenFstIterator::new(unsafe { fst.get_trs_unchecked(s)}),
-            w: PhantomData
+            tr_iter: OpenFstIterator::new(unsafe { fst.get_trs_unchecked(s) }),
+            w: PhantomData,
         }
     }
 }
@@ -66,14 +65,16 @@ impl<W: Semiring, TRS: Trs<W>> DfsState<W, TRS>
 struct OpenFstIterator<W: Semiring, TRS: Trs<W>> {
     trs: TRS,
     pos: usize,
-    w: PhantomData<W>
+    w: PhantomData<W>,
 }
 
 impl<W: Semiring, TRS: Trs<W>> OpenFstIterator<W, TRS> {
     #[inline]
     fn new(trs: TRS) -> Self {
         Self {
-            trs, pos: 0, w: PhantomData
+            trs,
+            pos: 0,
+            w: PhantomData,
         }
     }
 

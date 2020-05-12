@@ -17,7 +17,7 @@ use crate::semirings::{
     WeightQuantize,
 };
 use crate::tr::Tr;
-use crate::{Label, StateId, EPS_LABEL, KDELTA, Trs};
+use crate::{Label, StateId, Trs, EPS_LABEL, KDELTA};
 
 /// Determinization type.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
@@ -347,10 +347,7 @@ where
         Ok(outd)
     }
 
-    pub fn compute_with_distance<F2: MutableFst<W>>(
-        &mut self,
-    ) -> Result<(F2, Vec<W>)>
-    {
+    pub fn compute_with_distance<F2: MutableFst<W>>(&mut self) -> Result<(F2, Vec<W>)> {
         let dfst = self.compute()?;
         let out_dist = self.out_dist.clone();
         Ok((dfst, out_dist))
@@ -425,10 +422,13 @@ where
             let determinized_fsa: VectorFst<GallicWeightRestrict<W>> =
                 determinize_fsa::<_, _, _, GallicCommonDivisor>(&fsa)?;
             let factored_determinized_fsa: VectorFst<GallicWeightRestrict<W>> =
-                factor_weight::<_, VectorFst<GallicWeightRestrict<W>>, _, _, GallicFactorRestrict<W>>(
-                    &determinized_fsa,
-                    factor_opts,
-                )?;
+                factor_weight::<
+                    _,
+                    VectorFst<GallicWeightRestrict<W>>,
+                    _,
+                    _,
+                    GallicFactorRestrict<W>,
+                >(&determinized_fsa, factor_opts)?;
             weight_convert(&factored_determinized_fsa, &mut from_gallic)
         }
         DeterminizeType::DeterminizeNonFunctional => {

@@ -12,8 +12,8 @@ use crate::fst_traits::{FstIntoIterator, FstIterator, FstIteratorMut, StateItera
 use crate::semirings::Semiring;
 use crate::Tr;
 use crate::{StateId, Trs};
-use std::sync::Arc;
 use itertools::Itertools;
+use std::sync::Arc;
 
 impl<'a, W: Semiring> StateIterator<'a> for VectorFst<W> {
     type Iter = Range<StateId>;

@@ -1,7 +1,7 @@
 use crate::fst_traits::Fst;
+use crate::semirings::Semiring;
 use crate::StateId;
 use anyhow::Result;
-use crate::semirings::Semiring;
 
 /// Trait defining the methods to control allocation for a wFST
 pub trait AllocableFst<W: Semiring>: Fst<W> {

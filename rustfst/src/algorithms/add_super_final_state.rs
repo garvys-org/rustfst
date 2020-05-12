@@ -1,8 +1,8 @@
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::{EPS_LABEL, StateId, Tr};
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
+use crate::{StateId, Tr, EPS_LABEL};
 
 /// Add, if needed, a super final state to the given FST. The super final state
 /// is returned if it is possible.
@@ -23,9 +23,7 @@ use crate::semirings::Semiring;
 /// point to this final super state where the transition weight will be their final weight.
 ///
 pub fn add_super_final_state<W: Semiring, F: MutableFst<W>>(ifst: &mut F) -> StateId {
-    let final_states = ifst
-        .final_states_iter()
-        .collect::<Vec<_>>();
+    let final_states = ifst.final_states_iter().collect::<Vec<_>>();
     if final_states.len() == 1
         && unsafe { ifst.final_weight_unchecked(final_states[0]) } == Some(W::one())
     {

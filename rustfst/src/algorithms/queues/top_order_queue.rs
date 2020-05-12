@@ -3,8 +3,8 @@ use crate::algorithms::top_sort::TopOrderVisitor;
 use crate::algorithms::tr_filters::TrFilter;
 use crate::algorithms::{Queue, QueueType};
 use crate::fst_traits::ExpandedFst;
-use crate::StateId;
 use crate::semirings::Semiring;
+use crate::StateId;
 
 /// Topological-order queue discipline, templated on the StateId. States are
 /// ordered in the queue topologically. The FST must be acyclic.

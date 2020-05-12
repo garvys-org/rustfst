@@ -4,9 +4,9 @@ use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
 use crate::algorithms::state_sort;
 use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
+use crate::semirings::Semiring;
 use crate::StateId;
 use crate::Tr;
-use crate::semirings::Semiring;
 
 pub struct TopOrderVisitor {
     pub order: Vec<StateId>,

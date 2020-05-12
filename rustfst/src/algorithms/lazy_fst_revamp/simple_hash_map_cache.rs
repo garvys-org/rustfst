@@ -3,9 +3,9 @@ use std::sync::Mutex;
 
 use anyhow::Result;
 
-use crate::{StateId, TrsVec, Trs};
-use crate::semirings::Semiring;
 use crate::algorithms::lazy_fst_revamp::FstCache;
+use crate::semirings::Semiring;
+use crate::{StateId, Trs, TrsVec};
 
 #[derive(Default, Debug)]
 pub struct SimpleHashMapCache<W: Semiring> {
@@ -21,7 +21,7 @@ impl<W: Semiring> SimpleHashMapCache<W> {
         Self {
             start: Mutex::new(None),
             trs: Mutex::new(HashMap::new()),
-            final_weight: Mutex::new(HashMap::new())
+            final_weight: Mutex::new(HashMap::new()),
         }
     }
 }
@@ -51,6 +51,9 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
     }
 
     fn num_known_states(&self) -> usize {
-        std::cmp::max(self.final_weight.lock().unwrap().len(), self.trs.lock().unwrap().len())
+        std::cmp::max(
+            self.final_weight.lock().unwrap().len(),
+            self.trs.lock().unwrap().len(),
+        )
     }
 }

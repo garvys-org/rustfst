@@ -1,9 +1,9 @@
 use std::fmt::Debug;
 
-use crate::{StateId, TrsVec};
 use crate::semirings::Semiring;
+use crate::{StateId, TrsVec};
 
-pub trait FstCache<W: Semiring> : Debug {
+pub trait FstCache<W: Semiring>: Debug {
     fn get_start(&self) -> Option<Option<StateId>>;
     fn insert_start(&self, id: Option<StateId>);
 

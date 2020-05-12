@@ -4,9 +4,9 @@ use crate::Tr;
 use crate::{StateId, NO_STATE_ID};
 
 use crate::fst_properties::FstProperties;
-use unsafe_unwrap::UnsafeUnwrap;
 use crate::semirings::Semiring;
 use std::marker::PhantomData;
+use unsafe_unwrap::UnsafeUnwrap;
 
 pub struct SccVisitor<'a, W: Semiring, F: Fst<W>> {
     pub scc: Option<Vec<i32>>,
@@ -53,7 +53,7 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> SccVisitor<'a, W, F> {
             scc_stack: vec![],
             nscc: 0,
             props,
-            w: PhantomData
+            w: PhantomData,
         }
     }
 }
@@ -113,12 +113,7 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for SccVisitor<'
     }
 
     #[inline]
-    fn finish_state(
-        &mut self,
-        s: usize,
-        parent: Option<usize>,
-        _tr: Option<&Tr<W>>,
-    ) {
+    fn finish_state(&mut self, s: usize, parent: Option<usize>, _tr: Option<&Tr<W>>) {
         if unsafe { self.fst.is_final_unchecked(s) } {
             self.coaccess[s] = true;
         }

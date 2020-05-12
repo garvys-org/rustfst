@@ -28,11 +28,11 @@ use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{
     GallicWeightLeft, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::{StateId, Trs};
 use crate::Tr;
 use crate::EPS_LABEL;
 use crate::KDELTA;
 use crate::NO_STATE_ID;
+use crate::{StateId, Trs};
 
 /// In place minimization of deterministic weighted automata and transducers,
 /// and also non-deterministic ones if they use an idempotent semiring.
@@ -102,8 +102,7 @@ where
 fn acceptor_minimize<W: Semiring, F: MutableFst<W> + ExpandedFst<W>>(
     ifst: &mut F,
     allow_acyclic_minimization: bool,
-) -> Result<()>
-{
+) -> Result<()> {
     let props = ifst.properties()?;
     if !props.contains(FstProperties::ACCEPTOR | FstProperties::UNWEIGHTED) {
         bail!("FST is not an unweighted acceptor");
@@ -148,7 +147,9 @@ fn merge_states<W: Semiring, F: MutableFst<W>>(partition: Partition, fst: &mut F
                 }
             } else {
                 let trs: Vec<_> = fst
-                    .get_trs(s)?.trs().iter()
+                    .get_trs(s)?
+                    .trs()
+                    .iter()
                     .cloned()
                     .map(|mut tr| {
                         tr.nextstate = state_map[partition.get_class_id(tr.nextstate)].unwrap();
@@ -245,7 +246,7 @@ impl AcyclicMinimizer {
             // still needing the StateComparator.
             // TODO: Find a way to remove the clone.
             partition: self.partition.clone(),
-            w: PhantomData
+            w: PhantomData,
         };
 
         let height = self.partition.num_classes();
@@ -300,7 +301,7 @@ impl AcyclicMinimizer {
 struct StateComparator<'a, W: Semiring, F: MutableFst<W>> {
     fst: &'a F,
     partition: Partition,
-    w: PhantomData<W>
+    w: PhantomData<W>,
 }
 
 impl<'a, W: Semiring, F: MutableFst<W>> StateComparator<'a, W, F> {
@@ -411,10 +412,7 @@ fn pre_partition<W: Semiring, F: MutableFst<W>>(
     }
 }
 
-fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(
-    fst: &mut F,
-) -> Result<Partition>
-{
+fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<Partition> {
     // Initialize
     let mut tr: VectorFst<W::ReverseWeight> = reverse(fst)?;
     tr_sort(&mut tr, ilabel_compare);
@@ -446,7 +444,7 @@ fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(
                 aiter_queue.push(TrsIterCollected {
                     idx: 0,
                     trs: tr.get_trs(s + 1)?,
-                    w: PhantomData
+                    w: PhantomData,
                 });
             }
         }
@@ -484,7 +482,7 @@ fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(
 struct TrsIterCollected<W: Semiring, T: Trs<W>> {
     idx: usize,
     trs: T,
-    w: PhantomData<W>
+    w: PhantomData<W>,
 }
 
 impl<W: Semiring, T: Trs<W>> TrsIterCollected<W, T> {
@@ -507,7 +505,11 @@ struct TrIterCompare {
 }
 
 impl TrIterCompare {
-    fn compare<W: Semiring, T: Trs<W>>(&self, x: &TrsIterCollected<W, T>, y: &TrsIterCollected<W, T>) -> bool
+    fn compare<W: Semiring, T: Trs<W>>(
+        &self,
+        x: &TrsIterCollected<W, T>,
+        y: &TrsIterCollected<W, T>,
+    ) -> bool
     where
         W: Semiring,
     {

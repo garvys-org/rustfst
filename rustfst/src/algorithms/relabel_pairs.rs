@@ -4,8 +4,8 @@ use std::collections::HashMap;
 use anyhow::{bail, format_err, Context, Result};
 
 use crate::fst_traits::{ExpandedFst, MutableFst};
-use crate::StateId;
 use crate::semirings::Semiring;
+use crate::StateId;
 
 fn iterator_to_hashmap<I>(pairs: I) -> Result<HashMap<StateId, StateId>>
 where

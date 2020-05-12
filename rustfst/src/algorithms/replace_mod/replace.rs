@@ -5,8 +5,8 @@ use anyhow::Result;
 use crate::algorithms::lazy_fst_revamp::SimpleHashMapCache;
 use crate::algorithms::ReplaceFst;
 use crate::fst_traits::{Fst, MutableFst};
-use crate::Label;
 use crate::semirings::Semiring;
+use crate::Label;
 
 use self::super::config::ReplaceFstOptions;
 use self::super::replace_fst_impl::ReplaceFstImpl;
@@ -51,12 +51,11 @@ pub fn replace<W, F1, F2, B>(
     root: Label,
     epsilon_on_replace: bool,
 ) -> Result<F2>
-    where
-
-        F1: Fst<W>,
-        W: Semiring,
-        F2: MutableFst<W>,
-        B: Borrow<F1>,
+where
+    F1: Fst<W>,
+    W: Semiring,
+    F2: MutableFst<W>,
+    B: Borrow<F1>,
 {
     let mut fst = ReplaceFst::new(fst_list, root, epsilon_on_replace)?;
     fst.compute()

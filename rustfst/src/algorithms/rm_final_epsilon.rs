@@ -9,7 +9,7 @@ use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::algorithms::visitors::SccVisitor;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
-use crate::{EPS_LABEL, Trs};
+use crate::{Trs, EPS_LABEL};
 
 /// Removes final states that have epsilon-only input trs.
 pub fn rm_final_epsilon<W, F>(ifst: &mut F) -> Result<()>
@@ -48,10 +48,7 @@ where
             if finals.contains(&tr.nextstate) && tr.ilabel == EPS_LABEL && tr.olabel == EPS_LABEL {
                 unsafe {
                     if weight.is_none() {
-                        weight = Some(
-                            ifst.final_weight_unchecked(state)
-                                .unwrap_or_else(W::zero),
-                        );
+                        weight = Some(ifst.final_weight_unchecked(state).unwrap_or_else(W::zero));
                     }
                     weight.as_mut().unsafe_unwrap().plus_assign(
                         ifst.final_weight_unchecked(tr.nextstate)

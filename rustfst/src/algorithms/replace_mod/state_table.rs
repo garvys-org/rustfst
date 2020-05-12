@@ -1,5 +1,5 @@
-use crate::{StateId, Label};
 use crate::algorithms::cache::StateTable;
+use crate::{Label, StateId};
 
 #[derive(Hash, Eq, PartialOrd, PartialEq, Clone, Debug)]
 pub struct PrefixTuple {

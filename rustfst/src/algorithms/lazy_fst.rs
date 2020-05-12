@@ -1,8 +1,8 @@
 use std::cell::UnsafeCell;
 use std::fmt;
 use std::iter::{repeat, Map, Repeat, Zip};
-use std::sync::Arc;
 use std::slice::Iter as IterSlice;
+use std::sync::Arc;
 
 use anyhow::Result;
 use itertools::izip;

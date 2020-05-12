@@ -6,7 +6,7 @@ use crate::fst_traits::{
 };
 use crate::semirings::Semiring;
 use crate::tr::Tr;
-use crate::{SymbolTable, EPS_LABEL, Trs};
+use crate::{SymbolTable, Trs, EPS_LABEL};
 use std::sync::Arc;
 
 /// Performs the concatenation of two wFSTs. If `A` transduces string `x` to `y` with weight `a`

@@ -3,8 +3,8 @@ use std::mem::swap;
 use anyhow::{ensure, Result};
 
 use crate::fst_traits::{ExpandedFst, MutableFst};
-use crate::{StateId, Trs};
 use crate::semirings::Semiring;
+use crate::{StateId, Trs};
 
 /// Sorts the input states of an FST. order[i] gives the the state ID after
 /// sorting that corresponds to the state ID i before sorting; it must

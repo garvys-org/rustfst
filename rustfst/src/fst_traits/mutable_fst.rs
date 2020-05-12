@@ -3,12 +3,12 @@ use std::cmp::Ordering;
 use anyhow::Result;
 
 // use crate::algorithms::{ClosureType, TrMapper};
+use crate::algorithms::{ClosureType, TrMapper};
 use crate::fst_traits::{CoreFst, ExpandedFst, FstIteratorMut};
+use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::{Label, StateId};
 use std::slice;
-use crate::semirings::Semiring;
-use crate::algorithms::{TrMapper, ClosureType};
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W> {
@@ -264,10 +264,7 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W
     /// Retrieves a mutable reference to the final weight of a state (if the state is a final one).
     fn final_weight_mut(&mut self, state_id: StateId) -> Result<Option<&mut W>>;
 
-    unsafe fn final_weight_unchecked_mut(
-        &mut self,
-        state_id: StateId,
-    ) -> Option<&mut W>;
+    unsafe fn final_weight_unchecked_mut(&mut self, state_id: StateId) -> Option<&mut W>;
 
     /// Takes the final weight out of the fst, leaving a None in its place.
     ///
@@ -322,11 +319,7 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W
     /// ```
     unsafe fn take_final_weight_unchecked(&mut self, state_id: StateId) -> Option<W>;
 
-    fn sort_trs_unchecked<F: Fn(&Tr<W>, &Tr<W>) -> Ordering>(
-        &mut self,
-        state: StateId,
-        f: F,
-    );
+    fn sort_trs_unchecked<F: Fn(&Tr<W>, &Tr<W>) -> Ordering>(&mut self, state: StateId, f: F);
 
     unsafe fn unique_trs_unchecked(&mut self, state: StateId);
 

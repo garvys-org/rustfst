@@ -8,7 +8,8 @@ use crate::StateId;
 
 /// Trait to iterate over the paths accepted by an FST.
 pub trait PathsIterator<'a, W>
-where W: Semiring
+where
+    W: Semiring,
 {
     type Iter: Iterator<Item = FstPath<W>>;
     fn paths_iter(&'a self) -> Self::Iter;

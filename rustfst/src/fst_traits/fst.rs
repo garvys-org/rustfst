@@ -120,7 +120,9 @@ pub trait CoreFst<W: Semiring> {
 }
 
 /// Trait defining the minimum interface necessary for a wFST.
-pub trait Fst<W: Semiring>: CoreFst<W> + for<'b> StateIterator<'b> + Debug + for<'c> FstIterator<'c, W> {
+pub trait Fst<W: Semiring>:
+    CoreFst<W> + for<'b> StateIterator<'b> + Debug + for<'c> FstIterator<'c, W>
+{
     // TODO: Move niepsilons and noepsilons to required methods.
     /// Returns the number of trs with epsilon input labels leaving a state.
     ///
@@ -236,7 +238,9 @@ pub trait Fst<W: Semiring>: CoreFst<W> + for<'b> StateIterator<'b> + Debug + for
         }
     }
 
-    fn final_states_iter(&self) -> std::iter::Filter<<Self as StateIterator>::Iter, Box<dyn FnMut(&StateId) -> bool>> {
+    fn final_states_iter(
+        &self,
+    ) -> std::iter::Filter<<Self as StateIterator>::Iter, Box<dyn FnMut(&StateId) -> bool>> {
         unimplemented!()
         // self.states_iter().filter(Box::new(|s| unsafe {self.is_final_unchecked(*s)}))
     }

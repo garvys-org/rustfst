@@ -1,7 +1,5 @@
 use crate::algorithms::ReplaceFst;
-use crate::fst_traits::{
-    AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator,
-};
+use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::{SymbolTable, EPS_LABEL};
@@ -40,7 +38,7 @@ where
     if let Some(start_state) = fst.start() {
         let final_states_id: Vec<_> = fst
             .final_states_iter()
-            .map(|s| (s, unsafe {fst.final_weight_unchecked(s).unsafe_unwrap()}))
+            .map(|s| (s, unsafe { fst.final_weight_unchecked(s).unsafe_unwrap() }))
             .collect();
         for (final_state_id, final_weight) in final_states_id {
             unsafe {
@@ -60,12 +58,7 @@ where
             unsafe {
                 fst.add_tr_unchecked(
                     nstart,
-                    Tr::new(
-                        EPS_LABEL,
-                        EPS_LABEL,
-                        W::one(),
-                        start_state_id,
-                    ),
+                    Tr::new(EPS_LABEL, EPS_LABEL, W::one(), start_state_id),
                 );
             }
         }

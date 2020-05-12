@@ -13,7 +13,7 @@ struct Isomorphism<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> {
     fst_2: &'a F2,
     state_pairs: Vec<Option<StateId>>,
     queue: VecDeque<(StateId, StateId)>,
-    w: PhantomData<W>
+    w: PhantomData<W>,
 }
 
 /// Compare trs in the order input label, output label, weight and nextstate.
@@ -52,7 +52,7 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
             fst_2,
             state_pairs: vec![None; fst_1.num_states()],
             queue: VecDeque::new(),
-            w: PhantomData
+            w: PhantomData,
         }
     }
 

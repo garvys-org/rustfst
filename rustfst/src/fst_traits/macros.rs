@@ -33,15 +33,12 @@ macro_rules! write_fst {
 
             // Finally, print the final states with their weight
             for final_state in $fst.final_states_iter() {
-                let final_weight = unsafe{$fst.final_weight_unchecked(final_state).unsafe_unwrap()};
+                let final_weight =
+                    unsafe { $fst.final_weight_unchecked(final_state).unsafe_unwrap() };
                 if final_weight.is_one() && !$show_weight_one {
                     writeln!($f, "{}", &final_state)?;
                 } else {
-                    writeln!(
-                        $f,
-                        "{}\t{}",
-                        &final_state, &final_weight
-                    )?;
+                    writeln!($f, "{}\t{}", &final_state, &final_weight)?;
                 }
             }
         }

@@ -5,15 +5,14 @@ use std::path::Path;
 use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::{DrawingConfig, StateId};
 use crate::fst_traits::ExpandedFst;
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::{Semiring, SerializableSemiring};
 use crate::Trs;
+use crate::{DrawingConfig, StateId};
 
 /// Trait definining the methods an Fst must implement to be serialized and deserialized.
-pub trait SerializableFst<W: SerializableSemiring>: ExpandedFst<W>
-{
+pub trait SerializableFst<W: SerializableSemiring>: ExpandedFst<W> {
     /// String identifying the type of the FST. Will be used when serialiing and
     /// deserializing an FST in binary format.
     fn fst_type() -> String;
@@ -113,8 +112,7 @@ fn draw_single_fst_state<S: SerializableSemiring, F: SerializableFst<S>, W: Writ
     writer: &mut W,
     state_id: StateId,
     config: &DrawingConfig,
-) -> Result<()>
-{
+) -> Result<()> {
     let opt_isymt = fst.input_symbols();
     let opt_osymt = fst.output_symbols();
 

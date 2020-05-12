@@ -1,7 +1,7 @@
 use crate::semirings::Semiring;
 use crate::Tr;
-use std::sync::Arc;
 use std::fmt::Debug;
+use std::sync::Arc;
 
 pub trait Trs<W: Semiring>: std::ops::Deref<Target = [Tr<W>]> + Debug {
     fn trs(&self) -> &[Tr<W>];
