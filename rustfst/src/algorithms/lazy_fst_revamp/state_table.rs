@@ -42,6 +42,14 @@ impl<T: Hash + Eq + Clone> StateTable<T> {
         }
     }
 
+    // Be carefull with deadlock, this need access to the mutex
+    pub fn insert(&self, tuple: T) -> usize {
+        let mut table = self.table.lock().unwrap();
+        let n = table.len();
+        table.insert(n, tuple);
+        n
+    }
+
     /// Looks up integer ID from entry. If it doesn't exist and insert
     pub fn find_id_from_ref(&self, tuple: &T) -> StateId {
         let mut table = self.table.lock().unwrap();

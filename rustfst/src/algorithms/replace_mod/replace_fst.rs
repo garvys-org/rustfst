@@ -4,7 +4,7 @@ use anyhow::Result;
 
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
 use crate::algorithms::replace_mod::config::ReplaceFstOptions;
-use crate::algorithms::replace_mod::replace_fst_impl::ReplaceFstImpl;
+use crate::algorithms::replace_mod::replace_fst_op::ReplaceFstOp;
 use crate::fst_traits::{CoreFst, Fst, FstIterData, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{Label, SymbolTable, TrsVec};
@@ -16,7 +16,7 @@ use std::sync::Arc;
 /// This replacement is recursive. ReplaceFst can be used to support a variety of
 /// delayed constructions such as recursive transition networks, union, or closure.
 pub struct ReplaceFst<W: Semiring, F: Fst<W>, B: Borrow<F>>(
-    LazyFst<W, ReplaceFstImpl<W, F, B>, SimpleHashMapCache<W>>,
+    LazyFst<W, ReplaceFstOp<W, F, B>, SimpleHashMapCache<W>>,
 );
 
 impl<W, F, B> ReplaceFst<W, F, B>
@@ -33,7 +33,7 @@ where
             osymt = first_elt.1.borrow().output_symbols().cloned();
         }
         let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
-        let fst_op = ReplaceFstImpl::new(fst_list, opts)?;
+        let fst_op = ReplaceFstOp::new(fst_list, opts)?;
         let fst_cache = SimpleHashMapCache::new();
         Ok(ReplaceFst(LazyFst::from_op_and_cache(
             fst_op, fst_cache, isymt, osymt,
@@ -82,7 +82,7 @@ where
     B: Borrow<F> + 'a,
 {
     type Iter =
-        <LazyFst<W, ReplaceFstImpl<W, F, B>, SimpleHashMapCache<W>> as StateIterator<'a>>::Iter;
+        <LazyFst<W, ReplaceFstOp<W, F, B>, SimpleHashMapCache<W>> as StateIterator<'a>>::Iter;
 
     fn states_iter(&'a self) -> Self::Iter {
         self.0.states_iter()
@@ -96,7 +96,7 @@ where
     B: Borrow<F> + 'a,
 {
     type FstIter =
-        <LazyFst<W, ReplaceFstImpl<W, F, B>, SimpleHashMapCache<W>> as FstIterator<'a, W>>::FstIter;
+        <LazyFst<W, ReplaceFstOp<W, F, B>, SimpleHashMapCache<W>> as FstIterator<'a, W>>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
         self.0.fst_iter()

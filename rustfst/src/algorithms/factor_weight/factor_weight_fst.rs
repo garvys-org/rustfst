@@ -5,7 +5,7 @@ use anyhow::Result;
 use crate::algorithms::factor_weight::factor_weight_op::FactorWeightOp;
 use crate::algorithms::factor_weight::{FactorIterator, FactorWeightOptions};
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
-use crate::fst_traits::{CoreFst, Fst, FstIterator, StateIterator, MutableFst};
+use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::{SymbolTable, TrsVec};
 use std::fmt::Debug;
@@ -58,7 +58,7 @@ where
     FI: FactorIterator<W> + 'a,
 {
     type Iter =
-    <LazyFst<W, FactorWeightOp<W, F, B, FI>, SimpleHashMapCache<W>> as StateIterator<'a>>::Iter;
+        <LazyFst<W, FactorWeightOp<W, F, B, FI>, SimpleHashMapCache<W>> as StateIterator<'a>>::Iter;
 
     fn states_iter(&'a self) -> Self::Iter {
         self.0.states_iter()

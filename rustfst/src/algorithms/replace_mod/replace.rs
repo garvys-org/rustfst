@@ -9,7 +9,7 @@ use crate::semirings::Semiring;
 use crate::Label;
 
 use self::super::config::ReplaceFstOptions;
-use self::super::replace_fst_impl::ReplaceFstImpl;
+use self::super::replace_fst_op::ReplaceFstOp;
 
 /// Recursively replaces trs in the root FSTs with other FSTs.
 ///
