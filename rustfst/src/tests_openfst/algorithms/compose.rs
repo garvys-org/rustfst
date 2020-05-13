@@ -18,7 +18,7 @@ use crate::algorithms::compose::matchers::SortedMatcher;
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::algorithms::compose::MatcherFst;
 use crate::algorithms::compose::{compose_with_config, ComposeConfig, LabelReachableData};
-use crate::algorithms::compose::{ComposeFilterEnum, ComposeFst, ComposeFstImplOptions};
+use crate::algorithms::compose::{ComposeFilterEnum, ComposeFst, ComposeFstOpOptions};
 use crate::algorithms::{tr_compares::ilabel_compare, tr_sort};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, SerializableFst};
@@ -181,7 +181,7 @@ where
     //     Arc::new(RefCell::new(matcher2)),
     // )?;
 
-    let compose_options = ComposeFstImplOptions::<_, _, TComposeFilter<_, _, _>, _>::new(
+    let compose_options = ComposeFstOpOptions::<_, _, TComposeFilter<_, _, _>, _>::new(
         compose_filter.matcher1(),
         compose_filter.matcher2(),
         compose_filter,
