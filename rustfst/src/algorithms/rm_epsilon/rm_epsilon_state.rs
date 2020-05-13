@@ -1,16 +1,17 @@
-use anyhow::Result;
-
-use crate::algorithms::shortest_distance::ShortestDistanceState;
+use std::borrow::Borrow;
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::marker::PhantomData;
+
+use anyhow::Result;
+
 use crate::{StateId, Tr, Trs};
-use crate::algorithms::tr_filters::{EpsilonTrFilter, TrFilter};
-use crate::semirings::Semiring;
-use crate::fst_traits::MutableFst;
-use std::borrow::Borrow;
-use crate::algorithms::rm_epsilon::{RmEpsilonConfig, Element};
-use std::collections::hash_map::Entry;
 use crate::algorithms::Queue;
+use crate::algorithms::rm_epsilon::{Element, RmEpsilonConfig};
+use crate::algorithms::shortest_distance::ShortestDistanceState;
+use crate::algorithms::tr_filters::{EpsilonTrFilter, TrFilter};
+use crate::fst_traits::MutableFst;
+use crate::semirings::Semiring;
 
 #[derive(Clone, Eq)]
 pub struct RmEpsilonState<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> {

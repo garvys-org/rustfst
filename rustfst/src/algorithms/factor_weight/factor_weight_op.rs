@@ -5,7 +5,6 @@ use std::marker::PhantomData;
 
 use anyhow::Result;
 
-use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::factor_weight::{Element, FactorWeightStateTable};
 use crate::algorithms::factor_weight::{FactorIterator, FactorWeightOptions, FactorWeightType};
 use crate::algorithms::lazy_fst_revamp::FstOp;
