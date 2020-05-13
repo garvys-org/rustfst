@@ -5,13 +5,13 @@ use std::marker::PhantomData;
 
 use anyhow::Result;
 
-use crate::{StateId, Tr, Trs};
-use crate::algorithms::Queue;
 use crate::algorithms::rm_epsilon::{Element, RmEpsilonConfig};
 use crate::algorithms::shortest_distance::ShortestDistanceState;
 use crate::algorithms::tr_filters::{EpsilonTrFilter, TrFilter};
+use crate::algorithms::Queue;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
+use crate::{StateId, Tr, Trs};
 
 #[derive(Clone, Eq)]
 pub struct RmEpsilonState<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> {
@@ -24,7 +24,7 @@ pub struct RmEpsilonState<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue>
 }
 
 impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> std::fmt::Debug
-for RmEpsilonState<W, F, B, Q>
+    for RmEpsilonState<W, F, B, Q>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "RmEpsilonState {{ visited : {:?}, visited_states : {:?}, element_map : {:?}, expand_id : {:?}, sd_state : {:?} }}",
@@ -33,7 +33,7 @@ for RmEpsilonState<W, F, B, Q>
 }
 
 impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue + PartialEq> PartialEq
-for RmEpsilonState<W, F, B, Q>
+    for RmEpsilonState<W, F, B, Q>
 {
     fn eq(&self, other: &Self) -> bool {
         self.visited.eq(&other.visited)

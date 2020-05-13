@@ -1,7 +1,7 @@
 use crate::algorithms::shortest_distance::ShortestDistanceConfig;
 use crate::algorithms::tr_filters::EpsilonTrFilter;
-use crate::semirings::Semiring;
 use crate::algorithms::Queue;
+use crate::semirings::Semiring;
 use crate::StateId;
 
 pub struct RmEpsilonConfig<W: Semiring, Q: Queue> {

@@ -3,15 +3,11 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::fst_traits::{
-    CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator, TrIterator,
-};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator};
+use crate::semirings::Semiring;
 use crate::SymbolTable;
 
-impl<F: Fst> Fst for Arc<F>
-where
-    F::W: 'static,
-{
+impl<W: Semiring, F: Fst<W>> Fst<W> for Arc<F> {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.deref().input_symbols()
     }
@@ -37,27 +33,24 @@ where
     }
 }
 
-impl<F: ExpandedFst> ExpandedFst for Arc<F>
-where
-    F::W: 'static,
-{
+impl<W: Semiring, F: ExpandedFst<W>> ExpandedFst<W> for Arc<F> {
     fn num_states(&self) -> usize {
         self.deref().num_states()
     }
 }
 
-impl<F: CoreFst> CoreFst for Arc<F> {
-    type W = F::W;
+impl<W: Semiring, F: CoreFst<W>> CoreFst<W> for Arc<F> {
+    type TRS = F::TRS;
 
     fn start(&self) -> Option<usize> {
         self.deref().start()
     }
 
-    fn final_weight(&self, state_id: usize) -> Result<Option<&Self::W>> {
+    fn final_weight(&self, state_id: usize) -> Result<Option<W>> {
         self.deref().final_weight(state_id)
     }
 
-    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<&Self::W> {
+    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<W> {
         self.deref().final_weight_unchecked(state_id)
     }
 
@@ -68,32 +61,21 @@ impl<F: CoreFst> CoreFst for Arc<F> {
     unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
         self.deref().num_trs_unchecked(s)
     }
+
+    fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
+        self.deref().get_trs(state_id)
+    }
+
+    unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
+        self.deref().get_trs_unchecked(state_id)
+    }
 }
 
-impl<'a, F: FstIterator<'a>> FstIterator<'a> for Arc<F>
-where
-    F::W: 'a,
-{
-    type TrsIter = F::TrsIter;
+impl<'a, W: Semiring + 'a, F: FstIterator<'a, W>> FstIterator<'a, W> for Arc<F> {
     type FstIter = F::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
         self.deref().fst_iter()
-    }
-}
-
-impl<'a, F: TrIterator<'a>> TrIterator<'a> for Arc<F>
-where
-    F::W: 'a,
-{
-    type Iter = F::Iter;
-
-    fn tr_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
-        self.deref().tr_iter(state_id)
-    }
-
-    unsafe fn tr_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
-        self.deref().tr_iter_unchecked(state_id)
     }
 }
 
@@ -105,7 +87,7 @@ impl<'a, F: StateIterator<'a>> StateIterator<'a> for Arc<F> {
     }
 }
 
-impl<F: FstIntoIterator> FstIntoIterator for Arc<F> {
+impl<W: Semiring, F: FstIntoIterator<W>> FstIntoIterator<W> for Arc<F> {
     type TrsIter = F::TrsIter;
     type FstIter = F::FstIter;
 

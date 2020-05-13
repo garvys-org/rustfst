@@ -9,6 +9,7 @@ use crate::algorithms::cache::{CacheImpl, FstImpl};
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::lazy_fst::LazyFst;
 use crate::algorithms::queues::{AutoQueue, FifoQueue};
+use crate::algorithms::rm_epsilon::{RmEpsilonConfig, RmEpsilonState};
 use crate::algorithms::shortest_distance::{ShortestDistanceConfig, ShortestDistanceState};
 use crate::algorithms::top_sort::TopOrderVisitor;
 use crate::algorithms::tr_filters::{EpsilonTrFilter, TrFilter};
@@ -19,8 +20,6 @@ use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, Trs, EPS_LABEL};
 use bitflags::_core::marker::PhantomData;
-use crate::algorithms::rm_epsilon::{RmEpsilonConfig, RmEpsilonState};
-
 
 /// This operation removes epsilon-transitions (when both the input and
 /// output labels are an epsilon) from a transducer. The result will be an
@@ -188,4 +187,3 @@ pub fn rm_epsilon_with_config<W: Semiring, F: MutableFst<W>, Q: Queue>(
     }
     Ok(())
 }
-

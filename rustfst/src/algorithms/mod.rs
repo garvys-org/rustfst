@@ -1,7 +1,7 @@
 mod add_super_final_state;
 mod all_pairs_shortest_distance;
 pub mod closure;
-// pub mod compose;
+pub mod compose;
 pub mod concat;
 mod condense;
 mod connect;

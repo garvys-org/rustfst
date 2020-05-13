@@ -3,9 +3,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::fst_traits::{
-    CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator,
-};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator};
 use crate::SymbolTable;
 
 /// Adds an object of type T to an FST.

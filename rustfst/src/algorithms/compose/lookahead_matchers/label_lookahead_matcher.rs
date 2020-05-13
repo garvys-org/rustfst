@@ -9,7 +9,7 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::algorithms::compose::{LabelReachable, LabelReachableData};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{Tr, EPS_LABEL, NO_STATE_ID};
+use crate::{Tr, Trs, EPS_LABEL, NO_STATE_ID};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
@@ -37,7 +37,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
         self.matcher.iter(state, label)
     }
 
-    fn final_weight(&self, state: usize) -> Result<Option<*const W>> {
+    fn final_weight(&self, state: usize) -> Result<Option<W>> {
         self.matcher.final_weight(state)
     }
 
@@ -114,7 +114,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         })
     }
 
-    fn create_data<F: ExpandedFst<W = W>>(
+    fn create_data<F: ExpandedFst<W>>(
         fst: &F,
         match_type: MatchType,
     ) -> Result<Option<Arc<RefCell<Self::MatcherData>>>> {
@@ -128,7 +128,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         }
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &Arc<LF>) -> Result<()> {
+    fn init_lookahead_fst<LF: ExpandedFst<W>>(&mut self, lfst: &Arc<LF>) -> Result<()> {
         let lfst_ptr = Arc::into_raw(Arc::clone(lfst)) as *const LF as *const u32;
         self.lfst_ptr = lfst_ptr;
         let reach_input = self.match_type() == MatchType::MatchOutput;
@@ -138,7 +138,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         Ok(())
     }
 
-    fn lookahead_fst<LF: ExpandedFst<W = W>>(
+    fn lookahead_fst<LF: ExpandedFst<W>>(
         &mut self,
         matcher_state: usize,
         lfst: &Arc<LF>,
@@ -156,10 +156,9 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         if let Some(reachable) = &self.reachable {
             let mut compute_weight = MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT);
             let compute_prefix = MFT::flags().contains(MatcherFlags::LOOKAHEAD_PREFIX);
-            let aiter = lfst.tr_iter(lfst_state)?;
             let reach_tr = reachable.reach(
                 matcher_state,
-                aiter,
+                lfst.get_trs(lfst_state)?,
                 0,
                 lfst.num_trs(lfst_state)?,
                 compute_weight,
@@ -167,11 +166,12 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
             let reach_tr_bool = reach_tr.is_some();
             let lfinal = lfst.final_weight(lfst_state)?;
             let reach_final = lfinal.is_some()
-                && !lfinal.unwrap().is_zero()
+                && !lfinal.clone().unwrap().is_zero()
                 && reachable.reach_final(matcher_state)?;
             if let Some((reach_begin, reach_end, reach_weight)) = reach_tr {
                 if compute_prefix && (reach_end - reach_begin) == 1 && !reach_final {
-                    let tr = lfst.tr_iter(lfst_state)?.skip(reach_begin).next().unwrap();
+                    let trs_owner = lfst.get_trs(lfst_state)?;
+                    let tr = trs_owner.trs().iter().skip(reach_begin).next().unwrap();
                     self.set_lookahead_prefix(tr.clone());
                     compute_weight = false;
                 } else {

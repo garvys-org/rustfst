@@ -36,15 +36,15 @@ pub trait LookaheadMatcher<W: Semiring>: Matcher<W> {
     where
         Self: std::marker::Sized;
 
-    fn create_data<F: ExpandedFst<W = W>>(
+    fn create_data<F: ExpandedFst<W>>(
         fst: &F,
         match_type: MatchType,
     ) -> Result<Option<Arc<RefCell<Self::MatcherData>>>>;
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, lfst: &Arc<LF>) -> Result<()>;
+    fn init_lookahead_fst<LF: ExpandedFst<W>>(&mut self, lfst: &Arc<LF>) -> Result<()>;
     // Are there paths from a state in the lookahead FST that can be read from
     // the curent matcher state?
-    fn lookahead_fst<LF: ExpandedFst<W = W>>(
+    fn lookahead_fst<LF: ExpandedFst<W>>(
         &mut self,
         matcher_state: StateId,
         lfst: &Arc<LF>,

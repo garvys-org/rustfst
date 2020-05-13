@@ -9,7 +9,7 @@ use crate::algorithms::compose::lookahead_matchers::{LookaheadMatcher, MatcherFl
 use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::semirings::Semiring;
-use crate::{Label, StateId, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
+use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
 #[derive(Debug)]
 pub struct TrLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
@@ -43,7 +43,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
         self.matcher.iter(state, label)
     }
 
-    fn final_weight(&self, state: usize) -> Result<Option<*const W>> {
+    fn final_weight(&self, state: usize) -> Result<Option<W>> {
         self.matcher.final_weight(state)
     }
 
@@ -85,18 +85,18 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
         Self::new(fst, match_type)
     }
 
-    fn create_data<F: ExpandedFst<W = W>>(
+    fn create_data<F: ExpandedFst<W>>(
         _fst: &F,
         _match_type: MatchType,
     ) -> Result<Option<Arc<RefCell<Self::MatcherData>>>> {
         Ok(None)
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
+    fn init_lookahead_fst<LF: ExpandedFst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
         Ok(())
     }
 
-    fn lookahead_fst<LF: Fst<W = W>>(
+    fn lookahead_fst<LF: Fst<W>>(
         &mut self,
         matcher_state: StateId,
         lfst: &Arc<LF>,
@@ -157,7 +157,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
         }
 
         let match_type = self.match_type();
-        for tr in lfst.tr_iter(lfst_state)? {
+        for tr in lfst.get_trs(lfst_state)?.trs() {
             let label = match match_type {
                 MatchType::MatchInput => tr.olabel,
                 MatchType::MatchOutput => tr.ilabel,

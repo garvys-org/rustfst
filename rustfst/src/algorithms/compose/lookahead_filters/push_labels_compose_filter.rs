@@ -267,7 +267,10 @@ where
         self.filter.selector()
     }
 
-    pub fn new_2<IM1: Into<Option<Arc<RefCell<CF::M1>>>>, IM2: Into<Option<Arc<RefCell<CF::M2>>>>>(
+    pub fn new_2<
+        IM1: Into<Option<Arc<RefCell<CF::M1>>>>,
+        IM2: Into<Option<Arc<RefCell<CF::M2>>>>,
+    >(
         fst1: Arc<<<Self as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
         fst2: Arc<<<Self as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
         m1: IM1,

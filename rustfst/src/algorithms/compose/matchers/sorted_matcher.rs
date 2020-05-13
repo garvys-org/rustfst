@@ -9,37 +9,38 @@ use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, 
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst};
 use crate::semirings::Semiring;
-use crate::{Label, StateId, Tr, EPS_LABEL, NO_LABEL};
+use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL};
+use std::marker::PhantomData;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct SortedMatcher<F: ExpandedFst> {
+pub struct SortedMatcher<W: Semiring, F: ExpandedFst<W>> {
     fst: Arc<F>,
     match_type: MatchType,
+    w: PhantomData<W>,
 }
 
-impl<W: Semiring + 'static, F: ExpandedFst<W = W>> Matcher<W> for SortedMatcher<F> {
+impl<W: Semiring, F: ExpandedFst<W>> Matcher<W> for SortedMatcher<W, F> {
     type F = F;
-    type Iter = IteratorSortedMatcher<W>;
+    type Iter = IteratorSortedMatcher<W, F::TRS>;
 
     fn new(fst: Arc<F>, match_type: MatchType) -> Result<Self> {
-        Ok(Self { fst, match_type })
+        Ok(Self {
+            fst,
+            match_type,
+            w: PhantomData,
+        })
     }
 
     fn iter(&self, state: usize, label: usize) -> Result<Self::Iter> {
         Ok(IteratorSortedMatcher::new(
-            self.fst
-                .tr_iter(state)?
-                .map(|a| a as *const Tr<W>)
-                .collect(),
+            self.fst.get_trs(state)?,
             label,
             self.match_type,
         ))
     }
 
-    fn final_weight(&self, state: usize) -> Result<Option<*const W>> {
-        let final_weight = self.fst.final_weight(state)?;
-        let final_weight = final_weight.map(|e| e as *const W);
-        Ok(final_weight)
+    fn final_weight(&self, state: usize) -> Result<Option<W>> {
+        self.fst.final_weight(state)
     }
 
     fn match_type(&self) -> MatchType {
@@ -82,17 +83,31 @@ impl<W: Semiring + 'static, F: ExpandedFst<W = W>> Matcher<W> for SortedMatcher<
     }
 }
 
-#[derive(Clone)]
-pub struct IteratorSortedMatcher<W: Semiring> {
-    trs: Vec<*const Tr<W>>,
+pub struct IteratorSortedMatcher<W: Semiring, T: Trs<W>> {
+    trs: T,
     match_label: Label,
     pos: usize,
     current_loop: bool,
     match_type: MatchType,
+    w: PhantomData<W>,
 }
 
-impl<W: Semiring> IteratorSortedMatcher<W> {
-    pub fn new(trs: Vec<*const Tr<W>>, match_label: Label, match_type: MatchType) -> Self {
+// Clone that doesn't copy the data inside Trs, only the Arc
+impl<W: Semiring, T: Trs<W>> Clone for IteratorSortedMatcher<W, T> {
+    fn clone(&self) -> Self {
+        Self {
+            trs: self.trs.shallow_clone(),
+            match_label: self.match_label,
+            pos: self.pos,
+            current_loop: self.current_loop,
+            match_type: self.match_type,
+            w: PhantomData,
+        }
+    }
+}
+
+impl<W: Semiring, T: Trs<W>> IteratorSortedMatcher<W, T> {
+    pub fn new(trs: T, match_label: Label, match_type: MatchType) -> Self {
         // If we have to match epsilon, an epsilon loop is added
         let current_loop = match_label == EPS_LABEL;
 
@@ -109,12 +124,8 @@ impl<W: Semiring> IteratorSortedMatcher<W> {
             0
         } else {
             match match_type {
-                MatchType::MatchInput => {
-                    trs.lower_bound_by(|x| (unsafe { &**x }).ilabel.cmp(&match_label))
-                }
-                MatchType::MatchOutput => {
-                    trs.lower_bound_by(|x| (unsafe { &**x }).olabel.cmp(&match_label))
-                }
+                MatchType::MatchInput => trs.lower_bound_by(|x| x.ilabel.cmp(&match_label)),
+                MatchType::MatchOutput => trs.lower_bound_by(|x| x.olabel.cmp(&match_label)),
                 _ => panic!("Shouldn't happen : {:?}", match_type),
             }
         };
@@ -125,6 +136,7 @@ impl<W: Semiring> IteratorSortedMatcher<W> {
             pos,
             current_loop,
             match_type,
+            w: PhantomData,
         }
     }
 
@@ -137,7 +149,7 @@ impl<W: Semiring> IteratorSortedMatcher<W> {
     }
 }
 
-impl<W: Semiring> Iterator for IteratorSortedMatcher<W> {
+impl<W: Semiring, T: Trs<W>> Iterator for IteratorSortedMatcher<W, T> {
     type Item = IterItemMatcher<W>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -146,7 +158,6 @@ impl<W: Semiring> Iterator for IteratorSortedMatcher<W> {
             return Some(IterItemMatcher::EpsLoop);
         }
         if let Some(tr) = self.trs.get(self.pos) {
-            let tr = unsafe { &**tr };
             if self.get_label(tr) == self.match_label {
                 self.pos += 1;
                 Some(IterItemMatcher::Tr(tr))
@@ -159,10 +170,7 @@ impl<W: Semiring> Iterator for IteratorSortedMatcher<W> {
     }
 }
 
-impl<F: ExpandedFst> LookaheadMatcher<F::W> for SortedMatcher<F>
-where
-    F::W: 'static,
-{
+impl<W: Semiring, F: ExpandedFst<W>> LookaheadMatcher<W> for SortedMatcher<W, F> {
     type MatcherData = ();
 
     fn data(&self) -> Option<&Arc<RefCell<Self::MatcherData>>> {
@@ -180,18 +188,18 @@ where
         unreachable!()
     }
 
-    fn create_data<G: ExpandedFst<W = F::W>>(
+    fn create_data<G: ExpandedFst<W>>(
         _fst: &G,
         _match_type: MatchType,
     ) -> Result<Option<Arc<RefCell<Self::MatcherData>>>> {
         unreachable!()
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = F::W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
+    fn init_lookahead_fst<LF: ExpandedFst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
         unreachable!()
     }
 
-    fn lookahead_fst<LF: ExpandedFst<W = F::W>>(
+    fn lookahead_fst<LF: ExpandedFst<W>>(
         &mut self,
         _matcher_state: usize,
         _lfst: &Arc<LF>,
@@ -204,23 +212,23 @@ where
         unreachable!()
     }
 
-    fn lookahead_prefix(&self, _tr: &mut Tr<<F as CoreFst>::W>) -> bool {
+    fn lookahead_prefix(&self, _tr: &mut Tr<W>) -> bool {
         unreachable!()
     }
 
-    fn lookahead_weight(&self) -> &<F as CoreFst>::W {
+    fn lookahead_weight(&self) -> &W {
         unreachable!()
     }
 
-    fn prefix_tr(&self) -> &Tr<<F as CoreFst>::W> {
+    fn prefix_tr(&self) -> &Tr<W> {
         unreachable!()
     }
 
-    fn prefix_tr_mut(&mut self) -> &mut Tr<<F as CoreFst>::W> {
+    fn prefix_tr_mut(&mut self) -> &mut Tr<W> {
         unreachable!()
     }
 
-    fn lookahead_weight_mut(&mut self) -> &mut <F as CoreFst>::W {
+    fn lookahead_weight_mut(&mut self) -> &mut W {
         unreachable!()
     }
 }

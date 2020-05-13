@@ -13,7 +13,7 @@ use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Label, StateId, Tr, EPS_LABEL, NO_LABEL, UNASSIGNED};
+use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL, UNASSIGNED};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelReachableData {
@@ -60,10 +60,7 @@ pub struct LabelReachable {
 }
 
 impl LabelReachable {
-    pub fn new<F: Fst>(fst: &F, reach_input: bool) -> Result<Self>
-    where
-        F::W: 'static,
-    {
+    pub fn new<W: Semiring, F: Fst<W>>(fst: &F, reach_input: bool) -> Result<Self> {
         let mut fst: VectorFst<_> = fst_convert_from_ref(fst);
 
         let mut data = LabelReachableData::new(reach_input);
@@ -210,7 +207,11 @@ impl LabelReachable {
         *label2index.entry(label).or_insert_with(|| n + 1)
     }
 
-    pub fn relabel_fst<F: MutableFst>(&self, fst: &mut F, relabel_input: bool) -> Result<()> {
+    pub fn relabel_fst<W: Semiring, F: MutableFst<W>>(
+        &self,
+        fst: &mut F,
+        relabel_input: bool,
+    ) -> Result<()> {
         for fst_data in fst.fst_iter_mut() {
             for tr in fst_data.trs {
                 if relabel_input {
@@ -257,10 +258,11 @@ impl LabelReachable {
         pairs
     }
 
-    pub fn reach_init<F: ExpandedFst>(&mut self, fst: &Arc<F>, reach_input: bool) -> Result<()>
-    where
-        F::W: 'static,
-    {
+    pub fn reach_init<W: Semiring, F: ExpandedFst<W>>(
+        &mut self,
+        fst: &Arc<F>,
+        reach_input: bool,
+    ) -> Result<()> {
         self.reach_fst_input = reach_input;
         let props = fst.properties()?;
 
@@ -298,14 +300,15 @@ impl LabelReachable {
             .member(self.data.borrow().final_label()))
     }
 
-    pub fn reach<'a, W: Semiring + 'a>(
+    pub fn reach<'a, W: Semiring + 'a, T: Trs<W>>(
         &self,
         current_state: StateId,
-        aiter: impl Iterator<Item = &'a Tr<W>>,
+        trs: T,
         aiter_begin: usize,
         aiter_end: usize,
         compute_weight: bool,
     ) -> Result<Option<(usize, usize, W)>> {
+        let aiter = trs.trs().iter();
         let mut reach_begin = UNASSIGNED;
         let mut reach_end = UNASSIGNED;
         let mut reach_weight = W::zero();

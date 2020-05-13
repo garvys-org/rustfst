@@ -32,7 +32,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
         self.matcher.iter(state, label)
     }
 
-    fn final_weight(&self, state: usize) -> Result<Option<*const W>> {
+    fn final_weight(&self, state: usize) -> Result<Option<W>> {
         self.matcher.final_weight(state)
     }
 
@@ -70,18 +70,18 @@ impl<W: Semiring, M: Matcher<W>> LookaheadMatcher<W> for TrivialLookAheadMatcher
         Self::new(fst, match_type)
     }
 
-    fn create_data<F: ExpandedFst<W = W>>(
+    fn create_data<F: ExpandedFst<W>>(
         _fst: &F,
         _match_type: MatchType,
     ) -> Result<Option<Arc<RefCell<Self::MatcherData>>>> {
         Ok(None)
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
+    fn init_lookahead_fst<LF: ExpandedFst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
         Ok(())
     }
 
-    fn lookahead_fst<LF: Fst<W = W>>(
+    fn lookahead_fst<LF: Fst<W>>(
         &mut self,
         _matcher_state: StateId,
         _lfst: &Arc<LF>,

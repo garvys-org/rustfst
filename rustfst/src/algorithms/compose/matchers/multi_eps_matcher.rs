@@ -224,7 +224,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
         })
     }
 
-    fn final_weight(&self, state: usize) -> Result<Option<*const W>> {
+    fn final_weight(&self, state: usize) -> Result<Option<W>> {
         self.matcher.borrow().final_weight(state)
     }
 

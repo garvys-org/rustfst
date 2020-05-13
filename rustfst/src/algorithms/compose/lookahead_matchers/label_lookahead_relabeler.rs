@@ -6,11 +6,12 @@ use anyhow::Result;
 use crate::algorithms::compose::FstAddOn;
 use crate::algorithms::compose::{LabelReachable, LabelReachableData};
 use crate::fst_traits::MutableFst;
+use crate::semirings::Semiring;
 
 pub struct LabelLookAheadRelabeler {}
 
 impl LabelLookAheadRelabeler {
-    pub fn init<F: MutableFst>(
+    pub fn init<W: Semiring, F: MutableFst<W>>(
         fst_addon: &mut FstAddOn<
             F,
             (
@@ -35,7 +36,7 @@ impl LabelLookAheadRelabeler {
         Ok(())
     }
 
-    pub fn relabel<F: MutableFst>(
+    pub fn relabel<W: Semiring, F: MutableFst<W>>(
         fst: &mut F,
         addon: &(
             Option<Arc<RefCell<LabelReachableData>>>,

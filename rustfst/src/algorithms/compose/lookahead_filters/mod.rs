@@ -43,12 +43,8 @@ pub fn lookahead_match_type<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
     }
 }
 
-pub fn lookahead_match_type_2<
-    'fst,
-    W: Semiring + 'fst,
-    F1: Fst<W = W> + 'fst,
-    F2: Fst<W = W> + 'fst,
->() -> MatchType {
+pub fn lookahead_match_type_2<'fst, W: Semiring + 'fst, F1: Fst<W> + 'fst, F2: Fst<W> + 'fst>(
+) -> MatchType {
     unimplemented!()
 }
 
