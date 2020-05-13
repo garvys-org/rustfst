@@ -22,7 +22,7 @@ mod relabel_pairs;
 pub mod replace;
 mod reverse;
 mod reweight;
-mod rm_epsilon;
+pub mod rm_epsilon;
 mod rm_final_epsilon;
 mod shortest_distance;
 mod shortest_path;
@@ -78,7 +78,6 @@ pub use self::{
     relabel_pairs::relabel_pairs,
     reverse::reverse,
     reweight::{reweight, ReweightType},
-    rm_epsilon::{rm_epsilon, RmEpsilonFst},
     rm_final_epsilon::rm_final_epsilon,
     shortest_distance::shortest_distance,
     shortest_path::shortest_path,

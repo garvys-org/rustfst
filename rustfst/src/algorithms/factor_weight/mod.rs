@@ -9,8 +9,8 @@ mod state_table;
 pub mod factor_iterators;
 
 pub use config::{FactorWeightOptions, FactorWeightType};
-pub(crate) use element::Element;
+pub(self) use element::Element;
 pub use factor_iterator::FactorIterator;
 pub use factor_weight::factor_weight;
 pub use factor_weight_fst::FactorWeightFst;
-pub(crate) use state_table::FactorWeightStateTable;
+pub(self) use state_table::FactorWeightStateTable;
