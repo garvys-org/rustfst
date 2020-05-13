@@ -2,7 +2,7 @@ use std::borrow::Borrow;
 
 use anyhow::Result;
 
-use crate::algorithms::factor_weight::factor_weight_impl::FactorWeightImpl;
+use crate::algorithms::factor_weight::factor_weight_op::FactorWeightOp;
 use crate::algorithms::factor_weight::{FactorIterator, FactorWeightOptions};
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
 use crate::fst_traits::{CoreFst, Fst, FstIterator, StateIterator, MutableFst};
@@ -17,7 +17,7 @@ use std::sync::Arc;
 /// generalization to arbitrary weights of the second step of the input
 /// epsilon-normalization algorithm. This version is a Delayed FST.
 pub struct FactorWeightFst<W: WeightQuantize, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>>(
-    LazyFst<W, FactorWeightImpl<W, F, B, FI>, SimpleHashMapCache<W>>,
+    LazyFst<W, FactorWeightOp<W, F, B, FI>, SimpleHashMapCache<W>>,
 );
 
 impl<W, F, B, FI> CoreFst<W> for FactorWeightFst<W, F, B, FI>
@@ -58,7 +58,7 @@ where
     FI: FactorIterator<W> + 'a,
 {
     type Iter =
-    <LazyFst<W, FactorWeightImpl<W, F, B, FI>, SimpleHashMapCache<W>> as StateIterator<'a>>::Iter;
+    <LazyFst<W, FactorWeightOp<W, F, B, FI>, SimpleHashMapCache<W>> as StateIterator<'a>>::Iter;
 
     fn states_iter(&'a self) -> Self::Iter {
         self.0.states_iter()
@@ -73,7 +73,7 @@ where
     FI: FactorIterator<W> + 'a,
 {
     type FstIter =
-    <LazyFst<W, FactorWeightImpl<W, F, B, FI>, SimpleHashMapCache<W>> as FstIterator<'a, W>>::FstIter;
+    <LazyFst<W, FactorWeightOp<W, F, B, FI>, SimpleHashMapCache<W>> as FstIterator<'a, W>>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
         self.0.fst_iter()
@@ -131,7 +131,7 @@ where
     pub fn new(fst: B, opts: FactorWeightOptions) -> Result<Self> {
         let isymt = fst.borrow().input_symbols().cloned();
         let osymt = fst.borrow().output_symbols().cloned();
-        let fst_op = FactorWeightImpl::new(fst, opts)?;
+        let fst_op = FactorWeightOp::new(fst, opts)?;
         let fst_cache = SimpleHashMapCache::new();
         let lazy_fst = LazyFst::from_op_and_cache(fst_op, fst_cache, isymt, osymt);
         Ok(FactorWeightFst(lazy_fst))

@@ -3,7 +3,7 @@ mod element;
 mod factor_iterator;
 mod factor_weight;
 mod factor_weight_fst;
-mod factor_weight_impl;
+mod factor_weight_op;
 
 pub mod factor_iterators;
 

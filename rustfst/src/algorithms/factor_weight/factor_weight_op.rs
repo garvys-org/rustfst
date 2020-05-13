@@ -15,7 +15,7 @@ use crate::{StateId, Tr, Trs, TrsVec};
 use std::sync::Arc;
 
 #[derive(Clone)]
-pub struct FactorWeightImpl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> {
+pub struct FactorWeightOp<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> {
     opts: FactorWeightOptions,
     state_table: StateTable<Element<W>>,
     fst: B,
@@ -25,7 +25,7 @@ pub struct FactorWeightImpl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIter
 }
 
 impl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> std::fmt::Debug
-    for FactorWeightImpl<W, F, B, FI>
+    for FactorWeightOp<W, F, B, FI>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
@@ -41,7 +41,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> std::fmt::Debu
 }
 
 impl<W: Semiring, F: Fst<W> + PartialEq, B: Borrow<F>, FI: FactorIterator<W>> PartialEq
-    for FactorWeightImpl<W, F, B, FI>
+    for FactorWeightOp<W, F, B, FI>
 {
     fn eq(&self, other: &Self) -> bool {
         self.opts.eq(&other.opts)
@@ -52,7 +52,7 @@ impl<W: Semiring, F: Fst<W> + PartialEq, B: Borrow<F>, FI: FactorIterator<W>> Pa
 }
 
 impl<W: WeightQuantize, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FstOp<W>
-    for FactorWeightImpl<W, F, B, FI>
+    for FactorWeightOp<W, F, B, FI>
 {
     fn compute_start(&self) -> Result<Option<usize>> {
         match self.fst.borrow().start() {
@@ -141,7 +141,7 @@ impl<W: WeightQuantize, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FstOp<W>
     }
 }
 
-impl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FactorWeightImpl<W, F, B, FI>
+impl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FactorWeightOp<W, F, B, FI>
 where
     W: WeightQuantize,
 {
