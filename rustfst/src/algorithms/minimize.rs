@@ -306,7 +306,6 @@ struct StateComparator<'a, W: Semiring, F: MutableFst<W>> {
 
 impl<'a, W: Semiring, F: MutableFst<W>> StateComparator<'a, W, F> {
     fn do_compare(&self, x: StateId, y: StateId) -> Result<bool> {
-        let zero = W::zero();
         let xfinal = self.fst.final_weight(x)?.unwrap_or_else(W::zero);
         let yfinal = self.fst.final_weight(y)?.unwrap_or_else(W::zero);
 

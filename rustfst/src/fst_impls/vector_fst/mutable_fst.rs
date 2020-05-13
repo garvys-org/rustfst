@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::{StateId, Tr, Trs};
+use crate::{StateId, Tr};
 // use crate::algorithms::tr_unique::tr_compare;
 use crate::fst_impls::vector_fst::{VectorFst, VectorFstState};
 use crate::fst_traits::CoreFst;

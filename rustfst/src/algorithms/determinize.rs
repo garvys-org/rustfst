@@ -240,7 +240,6 @@ where
     }
 
     fn compute_final(&mut self, state: usize) -> Result<Option<W>> {
-        let zero = W::zero();
         let tuple = self.state_table.find_tuple(state);
         let mut final_weight = W::zero();
         for det_elt in tuple.subset.iter() {

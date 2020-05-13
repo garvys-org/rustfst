@@ -1,6 +1,5 @@
 use std::cmp::Ordering;
 
-use crate::fst_traits::ExpandedFst;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::Tr;

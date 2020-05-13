@@ -1,15 +1,16 @@
+use std::marker::PhantomData;
+
 use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
 use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::fst_traits::Fst;
-use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
+use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::StateId;
 use crate::Tr;
 use crate::NO_STATE_ID;
-use std::marker::PhantomData;
 
 /// This operation trims an FST, removing states and trs that are not on successful paths.
 ///
@@ -180,11 +181,10 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for ConnectVisit
 
 #[cfg(test)]
 mod tests {
-    use crate::proptest_fst::proptest_fst;
+    use proptest::prelude::*;
 
     use crate::fst_properties::FstProperties;
-
-    use proptest::prelude::*;
+    use crate::proptest_fst::proptest_fst;
 
     use super::*;
 

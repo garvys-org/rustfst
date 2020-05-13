@@ -1,6 +1,6 @@
 use std::mem::swap;
 
-use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 
 /// This operation inverts the transduction corresponding to an FST

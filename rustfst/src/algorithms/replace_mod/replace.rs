@@ -57,6 +57,6 @@ where
     F2: MutableFst<W>,
     B: Borrow<F1>,
 {
-    let mut fst = ReplaceFst::new(fst_list, root, epsilon_on_replace)?;
+    let fst = ReplaceFst::new(fst_list, root, epsilon_on_replace)?;
     fst.compute()
 }

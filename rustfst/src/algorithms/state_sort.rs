@@ -2,7 +2,7 @@ use std::mem::swap;
 
 use anyhow::{ensure, Result};
 
-use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::{StateId, Trs};
 

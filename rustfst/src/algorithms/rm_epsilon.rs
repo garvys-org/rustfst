@@ -15,7 +15,6 @@ use crate::algorithms::tr_filters::{EpsilonTrFilter, TrFilter};
 use crate::algorithms::visitors::SccVisitor;
 use crate::algorithms::Queue;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::CoreFst;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, Trs, EPS_LABEL};
@@ -266,7 +265,6 @@ impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> RmEpsilonState<W, F,
     }
 
     pub fn expand(&mut self, source: StateId) -> Result<(Vec<Tr<W>>, W)> {
-        let zero = W::zero();
         let distance = self.sd_state.shortest_distance(Some(source))?;
 
         let tr_filter = EpsilonTrFilter {};

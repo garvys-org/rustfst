@@ -70,7 +70,6 @@ impl<W: 'static + SerializableSemiring> SerializableFst<W> for VectorFst<W> {
         };
         hdr.write(&mut file)?;
 
-        let zero = W::zero();
         // FstBody
         for state in 0..self.num_states() {
             let f_weight = unsafe { self.final_weight_unchecked(state).unwrap_or_else(W::zero) };
