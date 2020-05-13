@@ -1,8 +1,8 @@
 mod add_super_final_state;
 mod all_pairs_shortest_distance;
-mod closure;
+pub mod closure;
 // pub mod compose;
-mod concat;
+pub mod concat;
 mod condense;
 mod connect;
 mod determinize;
@@ -19,7 +19,7 @@ mod projection;
 mod push;
 mod queue;
 mod relabel_pairs;
-pub(crate) mod replace_mod;
+pub mod replace;
 mod reverse;
 mod reweight;
 mod rm_epsilon;
@@ -32,7 +32,7 @@ mod tr_map;
 mod tr_sort;
 mod tr_sum;
 pub(crate) mod tr_unique;
-mod union;
+pub mod union;
 mod weight_convert;
 
 /// Module that provides different structures implementing the `Queue` trait.
@@ -63,9 +63,7 @@ pub mod lazy_fst_revamp;
 pub use self::{
     add_super_final_state::add_super_final_state,
     all_pairs_shortest_distance::all_pairs_shortest_distance,
-    closure::{closure, ClosureFst, ClosureType},
     // compose::compose,
-    concat::{concat, ConcatFst},
     condense::condense,
     connect::connect,
     determinize::{determinize, determinize_with_distance, DeterminizeType},
@@ -78,7 +76,6 @@ pub use self::{
     push::{push, push_weights, PushType},
     queue::{Queue, QueueType},
     relabel_pairs::relabel_pairs,
-    replace_mod::{replace, ReplaceFst},
     reverse::reverse,
     reweight::{reweight, ReweightType},
     rm_epsilon::{rm_epsilon, RmEpsilonFst},
@@ -91,6 +88,5 @@ pub use self::{
     tr_sort::tr_sort,
     tr_sum::tr_sum,
     tr_unique::tr_unique,
-    union::{union, UnionFst},
     weight_convert::{weight_convert, WeightConverter},
 };

@@ -1,14 +1,14 @@
 use std::cmp::Ordering;
+use std::slice;
 
 use anyhow::Result;
 
-// use crate::algorithms::{ClosureType, TrMapper};
-use crate::algorithms::{ClosureType, TrMapper};
+use crate::{Label, StateId};
+use crate::algorithms::closure::ClosureType;
+use crate::algorithms::TrMapper;
 use crate::fst_traits::{CoreFst, ExpandedFst, FstIteratorMut};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
-use crate::{Label, StateId};
-use std::slice;
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W> {
@@ -331,7 +331,7 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W
     /// `xx` to `yy` with weight `a ⊗ a`, `xxx` to `yyy` with weight `a ⊗ a ⊗ a`, etc.
     ///  If closure_star then the empty string is transduced to itself with weight `1` as well.
     fn closure(&mut self, closure_type: ClosureType) {
-        crate::algorithms::closure(self, closure_type)
+        crate::algorithms::closure::closure(self, closure_type)
     }
 
     /// Maps a transition using a `TrMapper` object.

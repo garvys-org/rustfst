@@ -8,16 +8,16 @@ use anyhow::Result;
 use itertools::Itertools;
 
 use crate::algorithms::lazy_fst_revamp::FstOp;
-use crate::algorithms::replace_mod::config::{ReplaceFstOptions, ReplaceLabelType};
-use crate::algorithms::replace_mod::state_table::{
+use crate::algorithms::replace::config::{ReplaceFstOptions, ReplaceLabelType};
+use crate::algorithms::replace::state_table::{
     ReplaceStackPrefix, ReplaceStateTable, ReplaceStateTuple,
 };
-use crate::algorithms::replace_mod::utils::{epsilon_on_input, epsilon_on_output};
+use crate::algorithms::replace::utils::{epsilon_on_input, epsilon_on_output};
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, Trs, TrsVec, EPS_LABEL};
 
-pub struct ReplaceFstImpl<W: Semiring, F: Fst<W>, B: Borrow<F>> {
+pub struct ReplaceFstOp<W: Semiring, F: Fst<W>, B: Borrow<F>> {
     call_label_type_: ReplaceLabelType,
     return_label_type_: ReplaceLabelType,
     call_output_label_: Option<Label>,
@@ -31,25 +31,7 @@ pub struct ReplaceFstImpl<W: Semiring, F: Fst<W>, B: Borrow<F>> {
     w: PhantomData<W>,
 }
 
-impl<W: Semiring, F: Fst<W> + PartialEq, B: Borrow<F>> PartialEq for ReplaceFstImpl<W, F, B> {
-    fn eq(&self, other: &Self) -> bool {
-        self.call_label_type_.eq(&other.call_label_type_)
-            && self.return_label_type_.eq(&other.return_label_type_)
-            && self.call_output_label_.eq(&other.call_output_label_)
-            && self.return_label_.eq(&other.return_label_)
-            && self
-                .fst_array
-                .iter()
-                .zip(other.fst_array.iter())
-                .all(|(a, b)| a.borrow().eq(b.borrow()))
-            && self.nonterminal_set.eq(&other.nonterminal_set)
-            && self.nonterminal_hash.eq(&other.nonterminal_hash)
-            && self.root.eq(&other.root)
-            && self.state_table.eq(&other.state_table)
-    }
-}
-
-impl<W: Semiring, F: Fst<W>, B: Borrow<F>> std::fmt::Debug for ReplaceFstImpl<W, F, B> {
+impl<W: Semiring, F: Fst<W>, B: Borrow<F>> std::fmt::Debug for ReplaceFstOp<W, F, B> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // TODO: Allocating in debug should be avoided.
         let slice_fst = self.fst_array.iter().map(|fst| fst.borrow()).collect_vec();
@@ -72,7 +54,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> std::fmt::Debug for ReplaceFstImpl<W,
     }
 }
 
-impl<W: Semiring, F: Fst<W>, B: Borrow<F>> FstOp<W> for ReplaceFstImpl<W, F, B> {
+impl<W: Semiring, F: Fst<W>, B: Borrow<F>> FstOp<W> for ReplaceFstOp<W, F, B> {
     fn compute_start(&self) -> Result<Option<usize>> {
         if self.fst_array.is_empty() {
             Ok(None)
@@ -129,7 +111,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> FstOp<W> for ReplaceFstImpl<W, F, B> 
     }
 }
 
-impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstImpl<W, F, B> {
+impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstOp<W, F, B> {
     pub fn new(fst_list: Vec<(Label, B)>, opts: ReplaceFstOptions) -> Result<Self> {
         let mut replace_fst_impl = Self {
             call_label_type_: opts.call_label_type,
