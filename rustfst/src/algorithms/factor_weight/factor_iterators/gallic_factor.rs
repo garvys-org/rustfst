@@ -1,7 +1,7 @@
-use crate::algorithms::factor_iterators::{
+use crate::algorithms::factor_weight::factor_iterators::{
     StringFactorLeft, StringFactorRestrict, StringFactorRight,
 };
-use crate::algorithms::FactorIterator;
+use crate::algorithms::factor_weight::FactorIterator;
 use crate::semirings::{
     GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, GallicWeightRight,
     Semiring, StringWeightVariant,

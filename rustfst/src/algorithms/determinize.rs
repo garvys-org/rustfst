@@ -6,9 +6,12 @@ use std::marker::PhantomData;
 use anyhow::Result;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
-use crate::algorithms::factor_iterators::{GallicFactor, GallicFactorMin, GallicFactorRestrict};
+use crate::algorithms::factor_weight::factor_iterators::{
+    GallicFactor, GallicFactorMin, GallicFactorRestrict,
+};
+use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, FactorWeightType};
+use crate::algorithms::weight_convert;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
-use crate::algorithms::{factor_weight, weight_convert, FactorWeightOptions, FactorWeightType};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{

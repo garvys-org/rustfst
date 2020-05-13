@@ -2,14 +2,12 @@ use anyhow::Result;
 
 use bitflags::bitflags;
 
-use crate::algorithms::factor_iterators::{GallicFactorLeft, GallicFactorRight};
+use crate::algorithms::factor_weight::factor_iterators::{GallicFactorLeft, GallicFactorRight};
+use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, FactorWeightType};
 use crate::algorithms::fst_convert::fst_convert_from_ref;
 use crate::algorithms::tr_mappers::RmWeightMapper;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
-use crate::algorithms::{
-    factor_weight, reweight, shortest_distance, tr_map, weight_convert, FactorWeightOptions,
-    FactorWeightType, ReweightType,
-};
+use crate::algorithms::{reweight, shortest_distance, tr_map, weight_convert, ReweightType};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{DivideType, Semiring};

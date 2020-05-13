@@ -1,97 +1,16 @@
 use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::fmt;
 use std::marker::PhantomData;
 
 use anyhow::Result;
 
-use bitflags::bitflags;
-
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
-use crate::algorithms::lazy_fst::LazyFst;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
+use crate::algorithms::factor_weight::Element;
+use crate::algorithms::factor_weight::{FactorIterator, FactorWeightOptions, FactorWeightType};
+use crate::fst_traits::Fst;
 use crate::semirings::{Semiring, WeightQuantize};
-use crate::tr::Tr;
-use crate::{Label, StateId};
-use crate::{Trs, KDELTA};
-
-bitflags! {
-    /// What kind of weight should be factored ? Tr weight ? Final weights ?
-    pub struct FactorWeightType: u32 {
-        /// Factor weights located on the Trs.
-        const FACTOR_FINAL_WEIGHTS = 0b01;
-        /// Factor weights located in the final states.
-        const FACTOR_ARC_WEIGHTS = 0b10;
-    }
-}
-
-#[cfg(test)]
-impl FactorWeightType {
-    pub fn from_bools(factor_final_weights: bool, factor_tr_weights: bool) -> FactorWeightType {
-        match (factor_final_weights, factor_tr_weights) {
-            (true, true) => {
-                FactorWeightType::FACTOR_FINAL_WEIGHTS | FactorWeightType::FACTOR_ARC_WEIGHTS
-            }
-            (true, false) => FactorWeightType::FACTOR_FINAL_WEIGHTS,
-            (false, true) => FactorWeightType::FACTOR_ARC_WEIGHTS,
-            (false, false) => Self::empty(),
-        }
-    }
-}
-
-/// Configuration to control the behaviour of the `factor_weight` algorithm.
-#[derive(Clone, Debug, PartialEq)]
-pub struct FactorWeightOptions {
-    /// Quantization delta
-    pub delta: f32,
-    /// Factor transition weights and/or final weights
-    pub mode: FactorWeightType,
-    /// Input label of transition when factoring final weights.
-    pub final_ilabel: Label,
-    /// Output label of transition when factoring final weights.
-    pub final_olabel: Label,
-    /// When factoring final w' results in > 1 trs at state, increments ilabels to make distinct ?
-    pub increment_final_ilabel: bool,
-    /// When factoring final w' results in > 1 trs at state, increments olabels to make distinct ?
-    pub increment_final_olabel: bool,
-}
-
-impl FactorWeightOptions {
-    #[allow(unused)]
-    pub fn new(mode: FactorWeightType) -> FactorWeightOptions {
-        FactorWeightOptions {
-            delta: KDELTA,
-            mode,
-            final_ilabel: 0,
-            final_olabel: 0,
-            increment_final_ilabel: false,
-            increment_final_olabel: false,
-        }
-    }
-}
-
-/// A factor iterator takes as argument a weight w and returns a sequence of
-/// pairs of weights (xi, yi) such that the sum of the products xi times yi is
-/// equal to w. If w is fully factored, the iterator should return nothing.
-pub trait FactorIterator<W: Semiring>:
-    fmt::Debug + PartialEq + Clone + Iterator<Item = (W, W)>
-{
-    fn new(weight: W) -> Self;
-    fn done(&self) -> bool;
-}
-
-#[derive(PartialOrd, PartialEq, Hash, Clone, Debug, Eq)]
-struct Element<W: Semiring> {
-    state: Option<StateId>,
-    weight: W,
-}
-
-impl<W: Semiring> Element<W> {
-    fn new(state: Option<StateId>, weight: W) -> Self {
-        Self { state, weight }
-    }
-}
+use crate::{StateId, Tr, Trs};
 
 #[derive(Clone)]
 pub struct FactorWeightImpl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> {
@@ -277,43 +196,3 @@ where
         }
     }
 }
-
-/// The result of weight factoring is a transducer equivalent to the
-/// input whose path weights have been factored according to the FactorIterator.
-/// States and transitions will be added as necessary. The algorithm is a
-/// generalization to arbitrary weights of the second step of the input
-/// epsilon-normalization algorithm.
-pub fn factor_weight<W, F1, B, F2, FI>(fst_in: B, opts: FactorWeightOptions) -> Result<F2>
-where
-    F1: Fst<W>,
-    B: Borrow<F1>,
-    F2: MutableFst<W>,
-    FI: FactorIterator<W>,
-    W: WeightQuantize,
-{
-    let mut factor_weight_impl: FactorWeightImpl<W, F1, B, FI> =
-        FactorWeightImpl::new(fst_in, opts)?;
-    factor_weight_impl.compute()
-}
-
-/// The result of weight factoring is a transducer equivalent to the
-/// input whose path weights have been factored according to the FactorIterator.
-/// States and transitions will be added as necessary. The algorithm is a
-/// generalization to arbitrary weights of the second step of the input
-/// epsilon-normalization algorithm. This version is a Delayed FST.
-pub type FactorWeightFst<W, F, B, FI> = LazyFst<FactorWeightImpl<W, F, B, FI>>;
-
-// impl<'a, W, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FactorWeightFst<W, F, B, FI>
-// where
-//     W: WeightQuantize,
-// {
-//     pub fn new(fst: B, opts: FactorWeightOptions) -> Result<Self> {
-//         let isymt = fst.borrow().input_symbols().cloned();
-//         let osymt = fst.borrow().output_symbols().cloned();
-//         Ok(Self::from_impl(
-//             FactorWeightImpl::new(fst, opts)?,
-//             isymt,
-//             osymt,
-//         ))
-//     }
-// }

@@ -9,7 +9,8 @@ use anyhow::Result;
 use binary_heap_plus::BinaryHeap;
 use stable_bst::TreeMap;
 
-use crate::algorithms::factor_iterators::GallicFactorLeft;
+use crate::algorithms::factor_weight::factor_iterators::GallicFactorLeft;
+use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, FactorWeightType};
 use crate::algorithms::partition::Partition;
 use crate::algorithms::queues::LifoQueue;
 use crate::algorithms::reverse;
@@ -19,8 +20,7 @@ use crate::algorithms::tr_unique;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::algorithms::Queue;
 use crate::algorithms::{
-    connect, decode, encode, factor_weight, push_weights, tr_map, tr_sort, weight_convert,
-    FactorWeightOptions, FactorWeightType, ReweightType,
+    connect, decode, encode, push_weights, tr_map, tr_sort, weight_convert, ReweightType,
 };
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;

@@ -8,7 +8,7 @@ mod connect;
 mod determinize;
 pub(crate) mod dfs_visit;
 mod encode;
-mod factor_weight;
+pub mod factor_weight;
 mod fst_convert;
 mod inversion;
 mod isomorphic;
@@ -48,9 +48,6 @@ pub(crate) mod visitors;
 
 #[allow(unused)]
 pub(crate) mod cache;
-
-#[allow(unused)]
-pub(crate) mod factor_iterators;
 
 /// Module that provides structures implementing the `WeightConverter` trait.
 pub mod weight_converters;
@@ -96,8 +93,4 @@ pub use self::{
     tr_unique::tr_unique,
     union::{union, UnionFst},
     weight_convert::{weight_convert, WeightConverter},
-};
-
-pub use self::factor_weight::{
-    factor_weight, FactorIterator, FactorWeightFst, FactorWeightOptions, FactorWeightType,
 };
