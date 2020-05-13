@@ -4,7 +4,7 @@ use anyhow::Result;
 
 use crate::algorithms::cache::FstImpl;
 use crate::algorithms::factor_weight::factor_weight_impl::FactorWeightImpl;
-use crate::algorithms::factor_weight::{FactorIterator, FactorWeightOptions};
+use crate::algorithms::factor_weight::{FactorIterator, FactorWeightOptions, FactorWeightFst};
 use crate::fst_traits::{Fst, MutableFst};
 use crate::semirings::WeightQuantize;
 
@@ -21,7 +21,6 @@ where
     FI: FactorIterator<W>,
     W: WeightQuantize,
 {
-    let mut factor_weight_impl: FactorWeightImpl<W, F1, B, FI> =
-        FactorWeightImpl::new(fst_in, opts)?;
-    factor_weight_impl.compute()
+    let fst = FactorWeightFst::<_, _, _, FI>::new(fst_in, opts)?;
+    fst.compute()
 }

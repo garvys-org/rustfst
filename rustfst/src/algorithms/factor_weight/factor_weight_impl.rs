@@ -8,14 +8,15 @@ use anyhow::Result;
 use crate::algorithms::cache::{CacheImpl, FstImpl, StateTable};
 use crate::algorithms::factor_weight::Element;
 use crate::algorithms::factor_weight::{FactorIterator, FactorWeightOptions, FactorWeightType};
+use crate::algorithms::lazy_fst_revamp::FstOp;
 use crate::fst_traits::Fst;
 use crate::semirings::{Semiring, WeightQuantize};
-use crate::{StateId, Tr, Trs};
+use crate::{StateId, Tr, Trs, TrsVec};
+use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct FactorWeightImpl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> {
     opts: FactorWeightOptions,
-    cache_impl: CacheImpl<W>,
     state_table: StateTable<Element<W>>,
     fst: B,
     unfactored: RefCell<HashMap<StateId, StateId>>,
@@ -29,10 +30,9 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> std::fmt::Debu
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "FactorWeightImpl {{ opts : {:?}, cache_impl: {:?}, \
+            "FactorWeightImpl {{ opts : {:?}, \
              state_table: {:?}, fst: {:?}, unfactored : {:?} }}",
             self.opts,
-            self.cache_impl,
             self.state_table,
             self.fst.borrow(),
             self.unfactored.borrow()
@@ -45,43 +45,49 @@ impl<W: Semiring, F: Fst<W> + PartialEq, B: Borrow<F>, FI: FactorIterator<W>> Pa
 {
     fn eq(&self, other: &Self) -> bool {
         self.opts.eq(&other.opts)
-            && self.cache_impl.eq(&other.cache_impl)
             && self.state_table.eq(&other.state_table)
             && self.fst.borrow().eq(&other.fst.borrow())
             && self.unfactored.borrow().eq(&other.unfactored.borrow())
     }
 }
 
-impl<W, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FstImpl for FactorWeightImpl<W, F, B, FI>
-where
-    W: WeightQuantize,
+impl<W: WeightQuantize, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FstOp<W>
+    for FactorWeightImpl<W, F, B, FI>
 {
-    type W = W;
-    fn cache_impl_mut(&mut self) -> &mut CacheImpl<W> {
-        &mut self.cache_impl
-    }
-    fn cache_impl_ref(&self) -> &CacheImpl<W> {
-        &self.cache_impl
+    fn compute_start(&self) -> Result<Option<usize>> {
+        match self.fst.borrow().start() {
+            None => Ok(None),
+            Some(s) => {
+                let new_state = self.find_state(&Element {
+                    state: Some(s),
+                    weight: W::one(),
+                });
+                Ok(Some(new_state))
+            }
+        }
     }
 
-    fn expand(&mut self, state: usize) -> Result<()> {
+    fn compute_trs(&self, state: usize) -> Result<TrsVec<W>> {
         let elt = self.state_table.find_tuple(state).clone();
+        let mut trs = vec![];
         if let Some(old_state) = elt.state {
             for tr in self.fst.borrow().get_trs(old_state)?.trs() {
                 let weight = elt.weight.times(&tr.weight).unwrap();
                 let factor_it = FI::new(weight.clone());
                 if !self.factor_tr_weights() || factor_it.done() {
                     let dest = self.find_state(&Element::new(Some(tr.nextstate), W::one()));
-                    self.cache_impl
-                        .push_tr(state, Tr::new(tr.ilabel, tr.olabel, weight, dest))?;
+                    // self.cache_impl
+                    // .push_tr(state, Tr::new(tr.ilabel, tr.olabel, weight, dest))?;
+                    trs.push(Tr::new(tr.ilabel, tr.olabel, weight, dest));
                 } else {
                     for (p_f, p_s) in factor_it {
                         let dest = self.find_state(&Element::new(
                             Some(tr.nextstate),
                             p_s.quantize(self.opts.delta)?,
                         ));
-                        self.cache_impl
-                            .push_tr(state, Tr::new(tr.ilabel, tr.olabel, p_f, dest))?;
+                        // self.cache_impl
+                        //     .push_tr(state, Tr::new(tr.ilabel, tr.olabel, p_f, dest))?;
+                        trs.push(Tr::new(tr.ilabel, tr.olabel, p_f, dest))
                     }
                 }
             }
@@ -102,8 +108,9 @@ where
             let factor_it = FI::new(weight);
             for (p_f, p_s) in factor_it {
                 let dest = self.find_state(&Element::new(None, p_s.quantize(self.opts.delta)?));
-                self.cache_impl
-                    .push_tr(state, Tr::new(ilabel, olabel, p_f, dest))?;
+                // self.cache_impl
+                //     .push_tr(state, Tr::new(ilabel, olabel, p_f, dest))?;
+                trs.push(Tr::new(ilabel, olabel, p_f, dest));
                 if self.opts.increment_final_ilabel {
                     ilabel += 1;
                 }
@@ -112,23 +119,10 @@ where
                 }
             }
         }
-        Ok(())
+        Ok(TrsVec(Arc::new(trs)))
     }
 
-    fn compute_start(&mut self) -> Result<Option<usize>> {
-        match self.fst.borrow().start() {
-            None => Ok(None),
-            Some(s) => {
-                let new_state = self.find_state(&Element {
-                    state: Some(s),
-                    weight: W::one(),
-                });
-                Ok(Some(new_state))
-            }
-        }
-    }
-
-    fn compute_final(&mut self, state: usize) -> Result<Option<W>> {
+    fn compute_final_weight(&self, state: usize) -> Result<Option<W>> {
         let zero = W::zero();
         let elt = self.state_table.find_tuple(state);
         let weight = match elt.state {
@@ -159,7 +153,6 @@ where
             opts,
             fst,
             state_table: StateTable::new(),
-            cache_impl: CacheImpl::new(),
             unfactored: RefCell::new(HashMap::new()),
             ghost: PhantomData,
             f: PhantomData,
