@@ -3,8 +3,10 @@ use std::sync::Arc;
 use anyhow::Result;
 
 use crate::algorithms::compose::compose_filters::{
-    AltSequenceComposeFilter, MatchComposeFilter, NoMatchComposeFilter, NullComposeFilter,
-    SequenceComposeFilter, TrivialComposeFilter,
+    AltSequenceComposeFilter, AltSequenceComposeFilterBuilder, MatchComposeFilter,
+    MatchComposeFilterBuilder, NoMatchComposeFilter, NoMatchComposeFilterBuilder,
+    NullComposeFilter, NullComposeFilterBuilder, SequenceComposeFilter,
+    SequenceComposeFilterBuilder, TrivialComposeFilter, TrivialComposeFilterBuilder,
 };
 use crate::algorithms::compose::matchers::SortedMatcher;
 use crate::algorithms::compose::ComposeFst;
@@ -51,32 +53,32 @@ pub fn compose_with_config<
         ComposeFilterEnum::AutoFilter => ComposeFst::new_auto(fst1, fst2)?.compute()?,
         ComposeFilterEnum::NullFilter => ComposeFst::<
             _,
-            NullComposeFilter<SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            NullComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
         .compute()?,
         ComposeFilterEnum::SequenceFilter => ComposeFst::<
             _,
-            SequenceComposeFilter<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            SequenceComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
         .compute()?,
         ComposeFilterEnum::AltSequenceFilter => ComposeFst::<
             _,
-            AltSequenceComposeFilter<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            AltSequenceComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
         .compute()?,
         ComposeFilterEnum::MatchFilter => ComposeFst::<
             _,
-            MatchComposeFilter<_, _, SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            MatchComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
         .compute()?,
         ComposeFilterEnum::NoMatchFilter => ComposeFst::<
             _,
-            NoMatchComposeFilter<SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            NoMatchComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
         .compute()?,
         ComposeFilterEnum::TrivialFilter => ComposeFst::<
             _,
-            TrivialComposeFilter<SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            TrivialComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
         .compute()?,
     };

@@ -50,7 +50,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
         self.matcher.priority(state)
     }
 
-    fn fst(&self) -> Arc<Self::F> {
+    fn fst(&self) -> &Arc<Self::F> {
         self.matcher.fst()
     }
 }
@@ -77,12 +77,12 @@ impl<W: Semiring, M: Matcher<W>> LookaheadMatcher<W> for TrivialLookAheadMatcher
         Ok(None)
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
+    fn check_lookahead_fst<LF: ExpandedFst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
         Ok(())
     }
 
     fn lookahead_fst<LF: Fst<W>>(
-        &mut self,
+        &self,
         _matcher_state: StateId,
         _lfst: &Arc<LF>,
         _s: StateId,

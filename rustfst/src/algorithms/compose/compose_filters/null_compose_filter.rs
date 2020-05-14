@@ -3,38 +3,58 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::compose::compose_filters::ComposeFilter;
+use crate::algorithms::compose::compose_filters::{
+    ComposeFilter, ComposeFilterBuilder, SharedDataComposeFilter,
+};
 use crate::algorithms::compose::filter_states::{FilterState, TrivialFilterState};
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;
 use crate::{Tr, NO_LABEL};
 
 #[derive(Debug)]
-pub struct NullComposeFilter<M1, M2> {
-    matcher1: Arc<RefCell<M1>>,
-    matcher2: Arc<RefCell<M2>>,
+pub struct NullComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
+    shared_data: Arc<SharedDataComposeFilter<W, M1, M2>>,
 }
 
-impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W> for NullComposeFilter<M1, M2> {
+#[derive(Debug)]
+pub struct NullComposeFilterBuilder<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
+    shared_data: Arc<SharedDataComposeFilter<W, M1, M2>>,
+}
+
+impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
+    for NullComposeFilterBuilder<W, M1, M2>
+{
+    type CF = NullComposeFilter<W, M1, M2>;
+
+    fn new(
+        fst1: Arc<M1::F>,
+        fst2: Arc<M2::F>,
+        matcher1: Option<M1>,
+        matcher2: Option<M2>,
+    ) -> Result<Self> {
+        let matcher1 =
+            matcher1.unwrap_or_else(|| M1::new(Arc::clone(&fst1), MatchType::MatchOutput).unwrap());
+        let matcher2 =
+            matcher2.unwrap_or_else(|| M2::new(Arc::clone(&fst2), MatchType::MatchInput).unwrap());
+        let shared_data = SharedDataComposeFilter::new(matcher1, matcher2);
+        Ok(Self {
+            shared_data: Arc::new(shared_data),
+        })
+    }
+
+    fn build(&self) -> Result<Self::CF> {
+        Ok(NullComposeFilter::<W, M1, M2> {
+            shared_data: Arc::clone(&self.shared_data),
+        })
+    }
+}
+
+impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
+    for NullComposeFilter<W, M1, M2>
+{
     type M1 = M1;
     type M2 = M2;
     type FS = TrivialFilterState;
-
-    fn new<IM1: Into<Option<Arc<RefCell<Self::M1>>>>, IM2: Into<Option<Arc<RefCell<Self::M2>>>>>(
-        fst1: Arc<<Self::M1 as Matcher<W>>::F>,
-        fst2: Arc<<Self::M2 as Matcher<W>>::F>,
-        m1: IM1,
-        m2: IM2,
-    ) -> Result<Self> {
-        Ok(Self {
-            matcher1: m1.into().unwrap_or_else(|| {
-                Arc::new(RefCell::new(M1::new(fst1, MatchType::MatchOutput).unwrap()))
-            }),
-            matcher2: m2.into().unwrap_or_else(|| {
-                Arc::new(RefCell::new(M2::new(fst2, MatchType::MatchInput).unwrap()))
-            }),
-        })
-    }
 
     fn start(&self) -> Self::FS {
         Self::FS::new(true)
@@ -57,11 +77,7 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W> for NullCompo
         Ok(())
     }
 
-    fn matcher1(&self) -> Arc<RefCell<Self::M1>> {
-        Arc::clone(&self.matcher1)
-    }
-
-    fn matcher2(&self) -> Arc<RefCell<Self::M2>> {
-        Arc::clone(&self.matcher2)
+    fn get_shared_data(&self) -> &Arc<SharedDataComposeFilter<W, Self::M1, Self::M2>> {
+        &self.shared_data
     }
 }

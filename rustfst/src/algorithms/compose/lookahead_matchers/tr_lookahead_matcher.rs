@@ -62,8 +62,8 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
         self.matcher.priority(state)
     }
 
-    fn fst(&self) -> Arc<Self::F> {
-        Arc::clone(&self.fst)
+    fn fst(&self) -> &Arc<Self::F> {
+        &self.fst
     }
 }
 
@@ -92,12 +92,12 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
         Ok(None)
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
+    fn check_lookahead_fst<LF: ExpandedFst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
         Ok(())
     }
 
     fn lookahead_fst<LF: Fst<W>>(
-        &mut self,
+        &self,
         matcher_state: StateId,
         lfst: &Arc<LF>,
         lfst_state: StateId,

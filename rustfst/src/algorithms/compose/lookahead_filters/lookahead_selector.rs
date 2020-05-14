@@ -54,56 +54,50 @@ impl MatchTypeTrait for SMatchUnknown {
     }
 }
 
+// #[derive(Clone, Debug)]
+// pub struct LookAheadSelector<F, M> {
+//     pub fst: Arc<F>,
+//     pub matcher: Arc<M>,
+// }
+//
+// fn selector_match_input<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
+//     lmatcher1: &Arc<M1>,
+//     lmatcher2: &Arc<M2>,
+// ) -> LookAheadSelector<M1::F, M2> {
+//     LookAheadSelector {
+//         fst: lmatcher1.fst(),
+//         matcher: Arc::clone(lmatcher2),
+//     }
+// }
+//
+// fn selector_match_output<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
+//     lmatcher1: &Arc<M1>,
+//     lmatcher2: &Arc<M2>,
+// ) -> LookAheadSelector<M2::F, M1> {
+//     LookAheadSelector {
+//         fst: lmatcher2.fst(),
+//         matcher: Arc::clone(lmatcher1),
+//     }
+// }
+
 #[derive(Clone, Debug)]
-pub struct LookAheadSelector<F, M> {
-    pub fst: Arc<F>,
-    pub matcher: Arc<RefCell<M>>,
-}
-
-fn selector_match_input<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
-    lmatcher1: Arc<RefCell<M1>>,
-    lmatcher2: Arc<RefCell<M2>>,
-) -> LookAheadSelector<M1::F, M2> {
-    LookAheadSelector {
-        fst: lmatcher1.borrow().fst(),
-        matcher: lmatcher2,
-    }
-}
-
-fn selector_match_output<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
-    lmatcher1: Arc<RefCell<M1>>,
-    lmatcher2: Arc<RefCell<M2>>,
-) -> LookAheadSelector<M2::F, M1> {
-    LookAheadSelector {
-        fst: lmatcher2.borrow().fst(),
-        matcher: lmatcher1,
-    }
-}
-
-#[derive(Clone, Debug)]
-pub enum Selector<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
-    MatchInput(LookAheadSelector<M1::F, M2>),
-    MatchOutput(LookAheadSelector<M2::F, M1>),
+pub enum Selector {
+    Fst1Matcher2,
+    Fst2Matcher1,
 }
 
 pub(crate) fn selector<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
-    lmatcher1: Arc<RefCell<M1>>,
-    lmatcher2: Arc<RefCell<M2>>,
     match_type: MatchType,
     lookahead_type: MatchType,
-) -> Selector<W, M1, M2> {
+) -> Selector {
     match match_type {
-        MatchType::MatchInput => {
-            Selector::MatchInput(selector_match_input::<W, M1, M2>(lmatcher1, lmatcher2))
-        }
-        MatchType::MatchOutput => {
-            Selector::MatchOutput(selector_match_output(lmatcher1, lmatcher2))
-        }
+        MatchType::MatchInput => Selector::Fst1Matcher2,
+        MatchType::MatchOutput => Selector::Fst2Matcher1,
         _ => {
             if lookahead_type == MatchType::MatchOutput {
-                Selector::MatchOutput(selector_match_output(lmatcher1, lmatcher2))
+                Selector::Fst2Matcher1
             } else {
-                Selector::MatchInput(selector_match_input(lmatcher1, lmatcher2))
+                Selector::Fst1Matcher2
             }
         }
     }

@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::compose::compose_filters::ComposeFilter;
+use crate::algorithms::compose::compose_filters::{ComposeFilter, SharedDataComposeFilter};
 use crate::algorithms::compose::filter_states::{FilterState, IntegerFilterState, PairFilterState};
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::MatchTypeTrait;
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::Selector;
@@ -26,8 +26,6 @@ pub struct PushLabelsComposeFilter<
     CF::M1: LookaheadMatcher<W>,
     CF::M2: LookaheadMatcher<W>,
 {
-    fst1: Arc<<CF::M1 as Matcher<W>>::F>,
-    fst2: Arc<<CF::M2 as Matcher<W>>::F>,
     matcher1: Arc<RefCell<MultiEpsMatcher<W, CF::M1>>>,
     matcher2: Arc<RefCell<MultiEpsMatcher<W, CF::M2>>>,
     filter: CF,
@@ -46,14 +44,14 @@ where
     type M2 = MultiEpsMatcher<W, CF::M2>;
     type FS = PairFilterState<CF::FS, IntegerFilterState>;
 
-    fn new<IM1: Into<Option<Arc<RefCell<Self::M1>>>>, IM2: Into<Option<Arc<RefCell<Self::M2>>>>>(
-        _fst1: Arc<<Self::M1 as Matcher<W>>::F>,
-        _fst2: Arc<<Self::M2 as Matcher<W>>::F>,
-        _m1: IM1,
-        _m2: IM2,
-    ) -> Result<Self> {
-        unimplemented!()
-    }
+    // fn new<IM1: Into<Option<Arc<Self::M1>>>, IM2: Into<Option<Arc<Self::M2>>>>(
+    //     _fst1: Arc<<Self::M1 as Matcher<W>>::F>,
+    //     _fst2: Arc<<Self::M2 as Matcher<W>>::F>,
+    //     _m1: IM1,
+    //     _m2: IM2,
+    // ) -> Result<Self> {
+    //     unimplemented!()
+    // }
 
     fn start(&self) -> Self::FS {
         PairFilterState::new((self.filter.start(), FilterState::new(NO_LABEL)))
@@ -135,12 +133,8 @@ where
         Ok(())
     }
 
-    fn matcher1(&self) -> Arc<RefCell<Self::M1>> {
-        Arc::clone(&self.matcher1)
-    }
-
-    fn matcher2(&self) -> Arc<RefCell<Self::M2>> {
-        Arc::clone(&self.matcher2)
+    fn get_shared_data(&self) -> &Arc<SharedDataComposeFilter<W, Self::M1, Self::M2>> {
+        unimplemented!()
     }
 }
 
@@ -178,14 +172,16 @@ where
                 self.fs.clone()
             } else {
                 if match self.selector() {
-                    Selector::MatchInput(s) => s
-                        .matcher
-                        .borrow_mut()
-                        .lookahead_label(arca.nextstate, flabel)?,
-                    Selector::MatchOutput(s) => s
-                        .matcher
-                        .borrow_mut()
-                        .lookahead_label(arca.nextstate, flabel)?,
+                    Selector::Fst1Matcher2 => {
+                        let data = self.get_shared_data();
+                        let matcher = &data.matcher2;
+                        matcher.lookahead_label(arca.nextstate, flabel)?
+                    },
+                    Selector::Fst2Matcher1 => {
+                        let data = self.get_shared_data();
+                        let matcher = &data.matcher1;
+                        matcher.lookahead_label(arca.nextstate, flabel)?
+                    },
                 } {
                     self.fs.clone()
                 } else {
@@ -231,8 +227,16 @@ where
         let mut larc = Tr::new(NO_LABEL, NO_LABEL, W::zero(), NO_STATE_ID);
 
         let b = match self.selector() {
-            Selector::MatchInput(s) => s.matcher.borrow().lookahead_prefix(&mut larc),
-            Selector::MatchOutput(s) => s.matcher.borrow().lookahead_prefix(&mut larc),
+            Selector::Fst1Matcher2 => {
+                let data = self.filter.get_shared_data();
+                let matcher = &data.matcher2;
+                matcher.lookahead_prefix(&mut larc)
+            },
+            Selector::Fst2Matcher1 => {
+                let data = self.filter.get_shared_data();
+                let matcher = &data.matcher1;
+                matcher.lookahead_prefix(&mut larc)
+            },
         };
 
         if b {
@@ -263,7 +267,7 @@ where
         self.filter.lookahead_flags()
     }
 
-    fn selector(&self) -> &Selector<W, CF::M1, CF::M2> {
+    fn selector(&self) -> &Selector {
         self.filter.selector()
     }
 

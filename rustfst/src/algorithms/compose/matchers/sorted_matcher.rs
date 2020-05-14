@@ -78,8 +78,8 @@ impl<W: Semiring, F: ExpandedFst<W>> Matcher<W> for SortedMatcher<W, F> {
         self.fst.num_trs(state)
     }
 
-    fn fst(&self) -> Arc<Self::F> {
-        Arc::clone(&self.fst)
+    fn fst(&self) -> &Arc<Self::F> {
+        &self.fst
     }
 }
 
@@ -195,12 +195,12 @@ impl<W: Semiring, F: ExpandedFst<W>> LookaheadMatcher<W> for SortedMatcher<W, F>
         unreachable!()
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
+    fn check_lookahead_fst<LF: ExpandedFst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
         unreachable!()
     }
 
     fn lookahead_fst<LF: ExpandedFst<W>>(
-        &mut self,
+        &self,
         _matcher_state: usize,
         _lfst: &Arc<LF>,
         _lfst_state: usize,

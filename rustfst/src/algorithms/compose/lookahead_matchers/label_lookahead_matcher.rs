@@ -20,7 +20,6 @@ pub struct LabelLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
     prefix_tr: Tr<W>,
     mft: PhantomData<MFT>,
     reachable: Option<LabelReachable>,
-    lfst_ptr: *const u32,
 }
 
 impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
@@ -61,8 +60,8 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
         self.matcher.priority(state)
     }
 
-    fn fst(&self) -> Arc<Self::F> {
-        Arc::clone(&self.fst)
+    fn fst(&self) -> &Arc<Self::F> {
+        &self.fst
     }
 }
 
@@ -109,7 +108,6 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
             prefix_tr: Tr::new(0, 0, W::one(), NO_STATE_ID),
             lookahead_weight: W::one(),
             reachable,
-            lfst_ptr: std::ptr::null(),
             mft: PhantomData,
         })
     }
@@ -128,9 +126,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         }
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W>>(&mut self, lfst: &Arc<LF>) -> Result<()> {
-        let lfst_ptr = Arc::into_raw(Arc::clone(lfst)) as *const LF as *const u32;
-        self.lfst_ptr = lfst_ptr;
+    fn check_lookahead_fst<LF: ExpandedFst<W>>(&mut self, lfst: &Arc<LF>) -> Result<()> {
         let reach_input = self.match_type() == MatchType::MatchOutput;
         if let Some(reachable) = &mut self.reachable {
             reachable.reach_init(lfst, reach_input)?;
@@ -139,16 +135,16 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
     }
 
     fn lookahead_fst<LF: ExpandedFst<W>>(
-        &mut self,
+        &self,
         matcher_state: usize,
         lfst: &Arc<LF>,
         lfst_state: usize,
     ) -> Result<bool> {
         // InitLookAheadFst
-        let lfst_ptr = Arc::into_raw(Arc::clone(&lfst)) as *const LF as *const u32;
-        if lfst_ptr != self.lfst_ptr {
-            self.init_lookahead_fst(lfst)?;
-        }
+        // let lfst_ptr = Arc::into_raw(Arc::clone(&lfst)) as *const LF as *const u32;
+        // if lfst_ptr != self.lfst_ptr {
+        //     self.check_lookahead_fst(lfst)?;
+        // }
 
         // LookAheadFst
         self.clear_lookahead_weight();

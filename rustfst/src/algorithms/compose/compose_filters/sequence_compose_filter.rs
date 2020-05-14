@@ -1,6 +1,8 @@
 use anyhow::Result;
 
-use crate::algorithms::compose::compose_filters::ComposeFilter;
+use crate::algorithms::compose::compose_filters::{
+    ComposeFilter, ComposeFilterBuilder, SharedDataComposeFilter,
+};
 use crate::algorithms::compose::filter_states::{FilterState, IntegerFilterState};
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_traits::{CoreFst, Fst};
@@ -12,10 +14,7 @@ use std::sync::Arc;
 #[derive(Debug)]
 /// This filter requires epsilons on FST1 to be read before epsilons on FST2.
 pub struct SequenceComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
-    fst1: Arc<M1::F>,
-    fst2: Arc<M2::F>,
-    matcher1: Arc<RefCell<M1>>,
-    matcher2: Arc<RefCell<M2>>,
+    shared_data: Arc<SharedDataComposeFilter<W, M1, M2>>,
     /// Current fst1 state
     s1: StateId,
     /// Current fst2 state
@@ -28,39 +27,50 @@ pub struct SequenceComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
     noeps1: bool,
 }
 
+#[derive(Debug)]
+pub struct SequenceComposeFilterBuilder<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
+    shared_data: Arc<SharedDataComposeFilter<W, M1, M2>>,
+}
+
+impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
+    for SequenceComposeFilterBuilder<W, M1, M2>
+{
+    type CF = SequenceComposeFilter<W, M1, M2>;
+
+    fn new(
+        fst1: Arc<M1::F>,
+        fst2: Arc<M2::F>,
+        matcher1: Option<M1>,
+        matcher2: Option<M2>,
+    ) -> Result<Self> {
+        let matcher1 =
+            matcher1.unwrap_or_else(|| M1::new(Arc::clone(&fst1), MatchType::MatchOutput).unwrap());
+        let matcher2 =
+            matcher2.unwrap_or_else(|| M2::new(Arc::clone(&fst2), MatchType::MatchInput).unwrap());
+        let shared_data = SharedDataComposeFilter::new(matcher1, matcher2);
+        Ok(Self {
+            shared_data: Arc::new(shared_data),
+        })
+    }
+
+    fn build(&self) -> Result<Self::CF> {
+        Ok(SequenceComposeFilter::<W, M1, M2> {
+            shared_data: Arc::clone(&self.shared_data),
+            s1: NO_STATE_ID,
+            s2: NO_STATE_ID,
+            fs: <Self::CF as ComposeFilter<W>>::FS::new(NO_STATE_ID),
+            alleps1: false,
+            noeps1: false,
+        })
+    }
+}
+
 impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
     for SequenceComposeFilter<W, M1, M2>
 {
     type M1 = M1;
     type M2 = M2;
     type FS = IntegerFilterState;
-
-    fn new<IM1: Into<Option<Arc<RefCell<Self::M1>>>>, IM2: Into<Option<Arc<RefCell<Self::M2>>>>>(
-        fst1: Arc<M1::F>,
-        fst2: Arc<M2::F>,
-        m1: IM1,
-        m2: IM2,
-    ) -> Result<Self> {
-        Ok(Self {
-            fst1: Arc::clone(&fst1),
-            fst2: Arc::clone(&fst2),
-            matcher1: m1.into().unwrap_or_else(|| {
-                Arc::new(RefCell::new(
-                    Self::M1::new(fst1, MatchType::MatchOutput).unwrap(),
-                ))
-            }),
-            matcher2: m2.into().unwrap_or_else(|| {
-                Arc::new(RefCell::new(
-                    Self::M2::new(fst2, MatchType::MatchInput).unwrap(),
-                ))
-            }),
-            s1: NO_STATE_ID,
-            s2: NO_STATE_ID,
-            fs: Self::FS::new(NO_STATE_ID),
-            alleps1: false,
-            noeps1: false,
-        })
-    }
 
     fn start(&self) -> Self::FS {
         Self::FS::new(0)
@@ -72,9 +82,10 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
             self.s2 = s2;
             self.fs = filter_state.clone();
             // TODO: Could probably use unchecked here as the state should exist.
-            let na1 = self.fst1.num_trs(self.s1)?;
-            let ne1 = self.fst1.num_output_epsilons(self.s1)?;
-            let fin1 = self.fst1.is_final(self.s1)?;
+            let fst1 = self.shared_data.matcher1.fst();
+            let na1 = fst1.num_trs(self.s1)?;
+            let ne1 = fst1.num_output_epsilons(self.s1)?;
+            let fin1 = fst1.is_final(self.s1)?;
             self.alleps1 = na1 == ne1 && !fin1;
             self.noeps1 = ne1 == 0;
         }
@@ -110,11 +121,7 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(())
     }
 
-    fn matcher1(&self) -> Arc<RefCell<Self::M1>> {
-        Arc::clone(&self.matcher1)
-    }
-
-    fn matcher2(&self) -> Arc<RefCell<Self::M2>> {
-        Arc::clone(&self.matcher2)
+    fn get_shared_data(&self) -> &Arc<SharedDataComposeFilter<W, Self::M1, Self::M2>> {
+        &self.shared_data
     }
 }

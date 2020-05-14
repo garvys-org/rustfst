@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::compose::compose_filters::ComposeFilter;
+use crate::algorithms::compose::compose_filters::{ComposeFilter, SharedDataComposeFilter};
 use crate::algorithms::compose::filter_states::{FilterState, PairFilterState, WeightFilterState};
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::{MatchTypeTrait, Selector};
 use crate::algorithms::compose::lookahead_filters::LookAheadComposeFilterTrait;
@@ -38,18 +38,18 @@ where
     type M2 = CF::M2;
     type FS = PairFilterState<CF::FS, WeightFilterState<W>>;
 
-    fn new<IM1: Into<Option<Arc<RefCell<Self::M1>>>>, IM2: Into<Option<Arc<RefCell<Self::M2>>>>>(
-        fst1: Arc<<Self::M1 as Matcher<W>>::F>,
-        fst2: Arc<<Self::M2 as Matcher<W>>::F>,
-        m1: IM1,
-        m2: IM2,
-    ) -> Result<Self> {
-        Ok(Self {
-            filter: CF::new(fst1, fst2, m1, m2)?,
-            fs: Self::FS::new_no_state(),
-            smt: PhantomData,
-        })
-    }
+    // fn new<IM1: Into<Option<Arc<Self::M1>>>, IM2: Into<Option<Arc<Self::M2>>>>(
+    //     fst1: Arc<<Self::M1 as Matcher<W>>::F>,
+    //     fst2: Arc<<Self::M2 as Matcher<W>>::F>,
+    //     m1: IM1,
+    //     m2: IM2,
+    // ) -> Result<Self> {
+    //     Ok(Self {
+    //         filter: CF::new(fst1, fst2, m1, m2)?,
+    //         fs: Self::FS::new_no_state(),
+    //         smt: PhantomData,
+    //     })
+    // }
 
     fn start(&self) -> Self::FS {
         Self::FS::new((self.filter.start(), WeightFilterState::new(W::one())))
@@ -73,8 +73,16 @@ where
         }
         let lweight = if self.filter.lookahead_tr() {
             match self.selector() {
-                Selector::MatchInput(s) => s.matcher.borrow().lookahead_weight().clone(),
-                Selector::MatchOutput(s) => s.matcher.borrow().lookahead_weight().clone(),
+                Selector::Fst1Matcher2 => {
+                    let data = self.filter.get_shared_data();
+                    let matcher = &data.matcher2;
+                    matcher.lookahead_weight().clone()
+                },
+                Selector::Fst2Matcher1 => {
+                    let data = self.filter.get_shared_data();
+                    let matcher = &data.matcher1;
+                    matcher.lookahead_weight().clone()
+                },
             }
         } else {
             W::one()
@@ -108,12 +116,8 @@ where
         w1.divide_assign(fweight, DivideType::DivideAny)
     }
 
-    fn matcher1(&self) -> Arc<RefCell<Self::M1>> {
-        self.filter.matcher1()
-    }
-
-    fn matcher2(&self) -> Arc<RefCell<Self::M2>> {
-        self.filter.matcher2()
+    fn get_shared_data(&self) -> &Arc<SharedDataComposeFilter<W, Self::M1, Self::M2>> {
+        unimplemented!()
     }
 }
 
@@ -142,7 +146,7 @@ where
         self.filter.lookahead_output()
     }
 
-    fn selector(&self) -> &Selector<W, Self::M1, Self::M2> {
+    fn selector(&self) -> &Selector {
         self.filter.selector()
     }
 }

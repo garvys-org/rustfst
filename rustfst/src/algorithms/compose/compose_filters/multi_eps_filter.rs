@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::compose::compose_filters::ComposeFilter;
+use crate::algorithms::compose::compose_filters::{ComposeFilter, SharedDataComposeFilter};
 use crate::algorithms::compose::matchers::Matcher;
 use crate::semirings::Semiring;
 use crate::{Tr, NO_LABEL};
@@ -19,17 +19,17 @@ impl<W: Semiring, F: ComposeFilter<W>> ComposeFilter<W> for MultiEpsFilter<F> {
     type M2 = F::M2;
     type FS = F::FS;
 
-    fn new<IM1: Into<Option<Arc<RefCell<Self::M1>>>>, IM2: Into<Option<Arc<RefCell<Self::M2>>>>>(
-        fst1: Arc<<Self::M1 as Matcher<W>>::F>,
-        fst2: Arc<<Self::M2 as Matcher<W>>::F>,
-        m1: IM1,
-        m2: IM2,
-    ) -> Result<Self> {
-        Ok(Self {
-            filter: F::new(fst1, fst2, m1, m2)?,
-            keep_multi_eps: false,
-        })
-    }
+    // fn new<IM1: Into<Option<Arc<Self::M1>>>, IM2: Into<Option<Arc<Self::M2>>>>(
+    //     fst1: Arc<<Self::M1 as Matcher<W>>::F>,
+    //     fst2: Arc<<Self::M2 as Matcher<W>>::F>,
+    //     m1: IM1,
+    //     m2: IM2,
+    // ) -> Result<Self> {
+    //     Ok(Self {
+    //         filter: F::new(fst1, fst2, m1, m2)?,
+    //         keep_multi_eps: false,
+    //     })
+    // }
 
     fn start(&self) -> Self::FS {
         self.filter.start()
@@ -57,11 +57,7 @@ impl<W: Semiring, F: ComposeFilter<W>> ComposeFilter<W> for MultiEpsFilter<F> {
         self.filter.filter_final(w1, w2)
     }
 
-    fn matcher1(&self) -> Arc<RefCell<Self::M1>> {
-        Arc::clone(&self.filter.matcher1())
-    }
-
-    fn matcher2(&self) -> Arc<RefCell<Self::M2>> {
-        Arc::clone(&self.filter.matcher2())
+    fn get_shared_data(&self) -> &Arc<SharedDataComposeFilter<W, Self::M1, Self::M2>> {
+        unimplemented!()
     }
 }

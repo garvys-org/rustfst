@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::compose::compose_filters::ComposeFilter;
+use crate::algorithms::compose::compose_filters::{ComposeFilter, SharedDataComposeFilter};
 use crate::algorithms::compose::filter_states::FilterState;
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::{
     selector, MatchTypeTrait, Selector,
@@ -33,7 +33,7 @@ pub struct LookAheadComposeFilter<
     lookahead_tr: bool,
     smt: PhantomData<SMT>,
     w: PhantomData<W>,
-    selector: Selector<W, CF::M1, CF::M2>,
+    selector: Selector,
 }
 
 impl<W: Semiring, CF: LookAheadComposeFilterTrait<W>, SMT: MatchTypeTrait>
@@ -62,15 +62,17 @@ where
         self.lookahead_tr = true;
 
         let res = match self.selector() {
-            Selector::MatchInput(s) => {
-                s.matcher
-                    .borrow_mut()
-                    .lookahead_fst(arca.nextstate, &s.fst, arcb.nextstate)?
+            Selector::Fst1Matcher2 => {
+                let data = self.filter.get_shared_data();
+                let fst = data.matcher1.fst();
+                let matcher = &data.matcher2;
+                matcher.lookahead_fst(arca.nextstate, fst, arcb.nextstate)?
             }
-            Selector::MatchOutput(s) => {
-                s.matcher
-                    .borrow_mut()
-                    .lookahead_fst(arca.nextstate, &s.fst, arcb.nextstate)?
+            Selector::Fst2Matcher1 => {
+                let data = self.filter.get_shared_data();
+                let fst = data.matcher2.fst();
+                let matcher = &data.matcher1;
+                matcher.lookahead_fst(arca.nextstate, fst, arcb.nextstate)?
             }
         };
 
@@ -92,54 +94,54 @@ where
     type M2 = CF::M2;
     type FS = CF::FS;
 
-    fn new<IM1: Into<Option<Arc<RefCell<Self::M1>>>>, IM2: Into<Option<Arc<RefCell<Self::M2>>>>>(
-        fst1: Arc<<Self::M1 as Matcher<W>>::F>,
-        fst2: Arc<<Self::M2 as Matcher<W>>::F>,
-        m1: IM1,
-        m2: IM2,
-    ) -> Result<Self> {
-        let filter = CF::new(fst1, fst2, m1, m2)?;
-        let lookahead_type = if SMT::match_type() == MatchType::MatchBoth {
-            lookahead_match_type(filter.matcher1(), filter.matcher2())
-        } else {
-            SMT::match_type()
-        };
-
-        let flags = if lookahead_type == MatchType::MatchOutput {
-            filter.matcher1().borrow().flags()
-        } else {
-            filter.matcher2().borrow().flags()
-        };
-
-        if lookahead_type == MatchType::MatchNone {
-            bail!(
-                "LookAheadComposeFilter: 1st argument cannot match/look-ahead on output \
-            labels and 2nd argument cannot match/look-ahead on input labels"
-            )
-        }
-
-        let mut selector = selector(
-            filter.matcher1(),
-            filter.matcher2(),
-            SMT::match_type(),
-            lookahead_type,
-        );
-
-        match &mut selector {
-            Selector::MatchInput(l) => l.matcher.borrow_mut().init_lookahead_fst(&l.fst)?,
-            Selector::MatchOutput(l) => l.matcher.borrow_mut().init_lookahead_fst(&l.fst)?,
-        };
-
-        Ok(Self {
-            lookahead_type,
-            flags,
-            smt: PhantomData,
-            lookahead_tr: false,
-            w: PhantomData,
-            selector,
-            filter,
-        })
-    }
+    // fn new<IM1: Into<Option<Arc<Self::M1>>>, IM2: Into<Option<Arc<Self::M2>>>>(
+    //     fst1: <Self::M1 as Matcher<W>>::F,
+    //     fst2: <Self::M2 as Matcher<W>>::F,
+    //     m1: IM1,
+    //     m2: IM2,
+    // ) -> Result<Self> {
+    //     let filter = CF::new(fst1, fst2, m1, m2)?;
+    //     let lookahead_type = if SMT::match_type() == MatchType::MatchBoth {
+    //         lookahead_match_type(filter.matcher1(), filter.matcher2())
+    //     } else {
+    //         SMT::match_type()
+    //     };
+    //
+    //     let flags = if lookahead_type == MatchType::MatchOutput {
+    //         filter.matcher1().flags()
+    //     } else {
+    //         filter.matcher2().flags()
+    //     };
+    //
+    //     if lookahead_type == MatchType::MatchNone {
+    //         bail!(
+    //             "LookAheadComposeFilter: 1st argument cannot match/look-ahead on output \
+    //         labels and 2nd argument cannot match/look-ahead on input labels"
+    //         )
+    //     }
+    //
+    //     let mut selector = selector(
+    //         filter.matcher1(),
+    //         filter.matcher2(),
+    //         SMT::match_type(),
+    //         lookahead_type,
+    //     );
+    //
+    //     match &mut selector {
+    //         Selector::MatchInput(l) => l.matcher.check_lookahead_fst(&l.fst)?,
+    //         Selector::MatchOutput(l) => l.matcher.check_lookahead_fst(&l.fst)?,
+    //     };
+    //
+    //     Ok(Self {
+    //         lookahead_type,
+    //         flags,
+    //         smt: PhantomData,
+    //         lookahead_tr: false,
+    //         w: PhantomData,
+    //         selector,
+    //         filter,
+    //     })
+    // }
 
     fn start(&self) -> Self::FS {
         self.filter.start()
@@ -166,12 +168,8 @@ where
         self.filter.filter_final(w1, w2)
     }
 
-    fn matcher1(&self) -> Arc<RefCell<Self::M1>> {
-        self.filter.matcher1()
-    }
-
-    fn matcher2(&self) -> Arc<RefCell<Self::M2>> {
-        self.filter.matcher2()
+    fn get_shared_data(&self) -> &Arc<SharedDataComposeFilter<W, Self::M1, Self::M2>> {
+        unimplemented!()
     }
 }
 
@@ -205,7 +203,7 @@ where
         }
     }
 
-    fn selector(&self) -> &Selector<W, Self::M1, Self::M2> {
+    fn selector(&self) -> &Selector {
         &self.selector
     }
 }

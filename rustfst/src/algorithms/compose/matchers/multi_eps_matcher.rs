@@ -240,7 +240,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
         self.matcher.borrow().priority(state)
     }
 
-    fn fst(&self) -> Arc<Self::F> {
+    fn fst(&self) -> &Arc<Self::F> {
         self.matcher.borrow().fst()
     }
 }
