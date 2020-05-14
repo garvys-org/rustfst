@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::algorithms::compose::compose_filters::{ComposeFilter, SequenceComposeFilter};
+use crate::algorithms::compose::compose_filters::{ComposeFilter, SequenceComposeFilter, ComposeFilterBuilder};
 use crate::algorithms::compose::matchers::{GenericMatcher, Matcher};
 use crate::algorithms::compose::{ComposeFstOp, ComposeFstOpOptions, ComposeStateTuple};
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache, StateTable};
@@ -23,7 +23,7 @@ fn create_base<W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>>(
     let opts = ComposeFstOpOptions::<
         GenericMatcher<_, _>,
         GenericMatcher<_, _>,
-        SequenceComposeFilter<_, _, _>,
+        ComposeFilterBuilder<_, SequenceComposeFilter<_, _, _>>,
         _,
     >::default();
     let compose_impl = ComposeFstOp::new(fst1, fst2, opts)?;
@@ -34,10 +34,8 @@ impl<W: Semiring, CF: ComposeFilter<W>> ComposeFst<W, CF> {
     pub fn new_with_options(
         fst1: Arc<<CF::M1 as Matcher<W>>::F>,
         fst2: Arc<<CF::M2 as Matcher<W>>::F>,
-        opts: ComposeFstOpOptions<CF::M1, CF::M2, CF, StateTable<ComposeStateTuple<CF::FS>>>,
+        opts: ComposeFstOpOptions<CF::M1, CF::M2, ComposeFilterBuilder<W, CF>, StateTable<ComposeStateTuple<CF::FS>>>,
     ) -> Result<Self>
-    where
-        W: 'static,
     {
         let isymt = fst1.input_symbols().cloned();
         let osymt = fst2.output_symbols().cloned();

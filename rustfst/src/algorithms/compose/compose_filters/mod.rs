@@ -25,6 +25,44 @@ mod null_compose_filter;
 mod sequence_compose_filter;
 mod trivial_compose_filter;
 
+#[derive(Debug)]
+pub struct ComposeFilterBuilder<W: Semiring, CF: ComposeFilter<W>> {
+    fst1: Arc<<CF::M1 as Matcher<W>>::F>,
+    fst2: Arc<<CF::M2 as Matcher<W>>::F>,
+    matcher1: Option<Arc<RefCell<CF::M1>>>,
+    matcher2: Option<Arc<RefCell<CF::M2>>>,
+}
+
+impl<W: Semiring, CF: ComposeFilter<W>> ComposeFilterBuilder<W, CF> {
+    pub fn new(
+        fst1: Arc<<CF::M1 as Matcher<W>>::F>,
+        fst2: Arc<<CF::M2 as Matcher<W>>::F>,
+        matcher1: Option<Arc<RefCell<CF::M1>>>,
+        matcher2: Option<Arc<RefCell<CF::M2>>>,
+    ) -> Self {
+        Self {fst1, fst2, matcher1, matcher2}
+    }
+
+    pub fn build(&self) -> Result<CF> {
+        let fst1 = Arc::clone(&self.fst1);
+        let fst2 = Arc::clone(&self.fst2);
+        let matcher1 = if let Some(m1) = &self.matcher1 {
+            Some(Arc::clone(m1))
+        } else {
+            None
+        };
+        let matcher2 = if let Some(m2) = &self.matcher2 {
+            Some(Arc::clone(m2))
+        } else {
+            None
+        };
+        CF::new(
+            fst1, fst2, matcher1, matcher2
+        )
+    }
+}
+
+
 /// Composition filters determine which matches are allowed to proceed. The
 /// filter's state is represented by the type ComposeFilter::FS.
 pub trait ComposeFilter<W: Semiring>: Debug {
@@ -38,8 +76,8 @@ pub trait ComposeFilter<W: Semiring>: Debug {
         m1: IM1,
         m2: IM2,
     ) -> Result<Self>
-    where
-        Self: std::marker::Sized;
+        where
+            Self: std::marker::Sized;
 
     fn start(&self) -> Self::FS;
 
