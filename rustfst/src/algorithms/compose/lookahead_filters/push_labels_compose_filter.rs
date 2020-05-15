@@ -26,8 +26,8 @@ pub struct PushLabelsComposeFilter<
     CF::M1: LookaheadMatcher<W>,
     CF::M2: LookaheadMatcher<W>,
 {
-    matcher1: Arc<RefCell<MultiEpsMatcher<W, CF::M1>>>,
-    matcher2: Arc<RefCell<MultiEpsMatcher<W, CF::M2>>>,
+    matcher1: MultiEpsMatcher<W, CF::M1>,
+    matcher2: MultiEpsMatcher<W, CF::M2>,
     filter: CF,
     fs: PairFilterState<CF::FS, IntegerFilterState>,
     smt: PhantomData<SMT>,
@@ -117,11 +117,11 @@ where
         };
         let fs2 = filter_state.state2();
         let flabel = fs2.state();
-        self.matcher1.borrow_mut().clear_multi_eps_labels();
-        self.matcher2.borrow_mut().clear_multi_eps_labels();
+        self.matcher1.clear_multi_eps_labels();
+        self.matcher2.clear_multi_eps_labels();
         if *flabel != NO_LABEL {
-            self.matcher1.borrow_mut().add_multi_eps_label(*flabel)?;
-            self.matcher2.borrow_mut().add_multi_eps_label(*flabel)?;
+            self.matcher1.add_multi_eps_label(*flabel)?;
+            self.matcher2.add_multi_eps_label(*flabel)?;
         }
         Ok(())
     }
