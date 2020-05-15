@@ -1,5 +1,5 @@
-use std::cell::RefCell;
 use std::fmt::Debug;
+use std::marker::PhantomData;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -16,7 +16,6 @@ use crate::algorithms::compose::filter_states::FilterState;
 use crate::algorithms::compose::matchers::Matcher;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr};
-use std::marker::PhantomData;
 
 mod alt_sequence_compose_filter;
 mod match_compose_filter;

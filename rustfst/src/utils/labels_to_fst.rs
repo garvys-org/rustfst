@@ -1,9 +1,9 @@
-use crate::fst_traits::{CoreFst, MutableFst};
+use std::cmp;
+
+use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::Label;
-
-use std::cmp;
 
 /// Turns a list of input labels and output labels into a linear FST.
 /// The only accepted path in the FST has for input `labels_input` and for output `labels_output`.

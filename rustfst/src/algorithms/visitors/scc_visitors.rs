@@ -1,12 +1,13 @@
+use std::marker::PhantomData;
+
+use unsafe_unwrap::UnsafeUnwrap;
+
 use crate::algorithms::dfs_visit::Visitor;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
+use crate::fst_properties::FstProperties;
+use crate::fst_traits::{ExpandedFst, Fst};
+use crate::semirings::Semiring;
 use crate::Tr;
 use crate::{StateId, NO_STATE_ID};
-
-use crate::fst_properties::FstProperties;
-use crate::semirings::Semiring;
-use std::marker::PhantomData;
-use unsafe_unwrap::UnsafeUnwrap;
 
 pub struct SccVisitor<'a, W: Semiring, F: Fst<W>> {
     pub scc: Option<Vec<i32>>,

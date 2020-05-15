@@ -9,7 +9,7 @@ use crate::algorithms::tr_mappers::RmWeightMapper;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::algorithms::{reweight, shortest_distance, tr_map, weight_convert, ReweightType};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, MutableFst};
+use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::{DivideType, Semiring};
 use crate::semirings::{
     GallicWeightLeft, GallicWeightRight, StringWeightLeft, StringWeightRight,

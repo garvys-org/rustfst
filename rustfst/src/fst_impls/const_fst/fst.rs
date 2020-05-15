@@ -1,10 +1,11 @@
+use std::sync::Arc;
+
+use anyhow::{format_err, Result};
+
 use crate::fst_impls::ConstFst;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
-
-use crate::{SymbolTable, TrsConst, TrsVec};
-use anyhow::{format_err, Error, Result};
-use std::sync::Arc;
+use crate::{SymbolTable, TrsConst};
 
 impl<W: Semiring + 'static> Fst<W> for ConstFst<W> {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {

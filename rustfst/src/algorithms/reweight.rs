@@ -1,7 +1,7 @@
 use anyhow::Result;
 
 use crate::fst_traits::MutableFst;
-use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring};
+use crate::semirings::{DivideType, WeaklyDivisibleSemiring};
 
 /// Different types of reweighting.
 #[derive(PartialOrd, PartialEq, Copy, Clone)]

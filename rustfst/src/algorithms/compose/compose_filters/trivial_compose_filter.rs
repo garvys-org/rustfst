@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use anyhow::Result;
 
 use crate::algorithms::compose::compose_filters::{
@@ -7,8 +9,6 @@ use crate::algorithms::compose::filter_states::{FilterState, TrivialFilterState}
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;
 use crate::Tr;
-use std::cell::RefCell;
-use std::sync::Arc;
 
 #[derive(Debug)]
 pub struct TrivialComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {

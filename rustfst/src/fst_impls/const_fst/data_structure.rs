@@ -1,5 +1,6 @@
-use crate::{StateId, SymbolTable, Tr, TrsConst};
 use std::sync::Arc;
+
+use crate::{StateId, SymbolTable, Tr};
 
 /// Immutable FST whose states and trs each implemented by single arrays,
 #[derive(Debug, PartialEq, Clone)]

@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 use std::sync::Mutex;
 
-use anyhow::Result;
-
 use crate::algorithms::lazy_fst_revamp::FstCache;
 use crate::semirings::Semiring;
 use crate::{StateId, Trs, TrsVec};

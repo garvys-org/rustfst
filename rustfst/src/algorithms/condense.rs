@@ -3,7 +3,7 @@ use anyhow::Result;
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::algorithms::visitors::SccVisitor;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
+use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::Trs;
 

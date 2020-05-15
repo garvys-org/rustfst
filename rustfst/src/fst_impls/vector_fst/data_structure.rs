@@ -1,11 +1,10 @@
+use std::sync::Arc;
+
 use crate::algorithms::tr_filters::TrFilter;
 use crate::algorithms::tr_filters::{InputEpsilonTrFilter, OutputEpsilonTrFilter};
 use crate::semirings::Semiring;
 use crate::symbol_table::SymbolTable;
-use crate::tr::Tr;
 use crate::{StateId, TrsVec};
-use std::ops::Deref;
-use std::sync::Arc;
 
 /// Simple concrete, mutable FST whose states and trs are stored in standard vectors.
 ///

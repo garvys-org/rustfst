@@ -18,8 +18,7 @@ use crate::algorithms::Queue;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
-use crate::{Label, StateId, Tr, Trs, EPS_LABEL};
-use bitflags::_core::marker::PhantomData;
+use crate::{Trs, EPS_LABEL};
 
 /// This operation removes epsilon-transitions (when both the input and
 /// output labels are an epsilon) from a transducer. The result will be an

@@ -17,7 +17,7 @@ impl<W: Semiring> InnerStateTable<W> {
     fn new() -> Self {
         Self {
             bimap: BiHashMap::new(),
-            unfactored: HashMap::new()
+            unfactored: HashMap::new(),
         }
     }
 
@@ -51,7 +51,7 @@ impl<W: Semiring> FactorWeightStateTable<W> {
     pub fn new(factor_tr_weights: bool) -> Self {
         Self {
             factor_tr_weights,
-            inner_state_table: Mutex::new(InnerStateTable::new())
+            inner_state_table: Mutex::new(InnerStateTable::new()),
         }
     }
 
@@ -64,7 +64,10 @@ impl<W: Semiring> FactorWeightStateTable<W> {
         let mut inner_state_table = self.inner_state_table.lock().unwrap();
         if !self.factor_tr_weights && elt.weight.is_one() && elt.state.is_some() {
             let old_state = elt.state.unwrap();
-            if !inner_state_table.unfactored.contains_key(&elt.state.unwrap()) {
+            if !inner_state_table
+                .unfactored
+                .contains_key(&elt.state.unwrap())
+            {
                 let new_state = inner_state_table.insert_bimap(elt.clone());
                 inner_state_table.unfactored.insert(old_state, new_state);
             }

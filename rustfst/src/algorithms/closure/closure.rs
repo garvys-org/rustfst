@@ -1,12 +1,10 @@
+use unsafe_unwrap::UnsafeUnwrap;
+
 use crate::algorithms::closure::ClosureType;
-use crate::algorithms::replace::ReplaceFst;
-use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
+use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::tr::Tr;
-use crate::{SymbolTable, TrsVec, EPS_LABEL};
-use anyhow::Result;
-use std::sync::Arc;
-use unsafe_unwrap::UnsafeUnwrap;
+use crate::EPS_LABEL;
 
 /// This operation computes the concatenative closure.
 /// If A transduces string `x` to `y` with weight `a`,

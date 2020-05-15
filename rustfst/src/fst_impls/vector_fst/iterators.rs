@@ -2,8 +2,9 @@ use std::iter::Enumerate;
 use std::iter::Map;
 use std::ops::Range;
 use std::slice;
+use std::sync::Arc;
 
-use anyhow::Result;
+use itertools::Itertools;
 
 use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
@@ -12,8 +13,6 @@ use crate::fst_traits::{FstIntoIterator, FstIterator, FstIteratorMut, StateItera
 use crate::semirings::Semiring;
 use crate::Tr;
 use crate::{StateId, Trs};
-use itertools::Itertools;
-use std::sync::Arc;
 
 impl<'a, W: Semiring> StateIterator<'a> for VectorFst<W> {
     type Iter = Range<StateId>;

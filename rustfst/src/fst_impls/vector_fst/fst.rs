@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use anyhow::{Error, Result};
+use anyhow::Result;
 
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, Fst};

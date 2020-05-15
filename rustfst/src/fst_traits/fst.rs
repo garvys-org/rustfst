@@ -8,7 +8,7 @@ use crate::fst_traits::iterators::StateIterator;
 use crate::fst_traits::FstIterator;
 use crate::semirings::Semiring;
 use crate::trs::Trs;
-use crate::{StateId, SymbolTable, Tr, TrsVec};
+use crate::{StateId, SymbolTable};
 
 /// Trait defining necessary methods for a wFST to access start states and final states.
 pub trait CoreFst<W: Semiring> {

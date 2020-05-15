@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use anyhow::Result;
 
 use crate::algorithms::compose::compose_filters::{
@@ -8,8 +10,6 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
-use std::cell::RefCell;
-use std::sync::Arc;
 
 #[derive(Debug)]
 /// This filter requires epsilons on FST1 to be read before epsilons on FST2.

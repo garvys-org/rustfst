@@ -1,4 +1,6 @@
 use std::borrow::Borrow;
+use std::fmt::Debug;
+use std::sync::Arc;
 
 use anyhow::Result;
 
@@ -6,10 +8,8 @@ use crate::algorithms::factor_weight::factor_weight_op::FactorWeightOp;
 use crate::algorithms::factor_weight::{FactorIterator, FactorWeightOptions};
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
 use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
-use crate::semirings::{Semiring, WeightQuantize};
+use crate::semirings::WeightQuantize;
 use crate::{SymbolTable, TrsVec};
-use std::fmt::Debug;
-use std::sync::Arc;
 
 /// The result of weight factoring is a transducer equivalent to the
 /// input whose path weights have been factored according to the FactorIterator.

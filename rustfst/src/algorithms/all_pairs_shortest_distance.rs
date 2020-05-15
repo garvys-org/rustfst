@@ -1,9 +1,8 @@
 use anyhow::Result;
 
-use crate::fst_traits::CoreFst;
 use crate::fst_traits::ExpandedFst;
 use crate::fst_traits::Fst;
-use crate::semirings::{Semiring, StarSemiring};
+use crate::semirings::StarSemiring;
 use crate::Trs;
 
 /// This operation computes the shortest distance from each state to every other states.

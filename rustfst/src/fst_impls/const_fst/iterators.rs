@@ -1,12 +1,7 @@
-use std::iter::Enumerate;
-use std::iter::Map;
-use std::iter::Skip;
-use std::iter::Take;
-use std::iter::Zip;
+use std::iter::{Enumerate, Map, Zip};
 use std::ops::Range;
-use std::slice;
+use std::sync::Arc;
 
-use anyhow::Result;
 use itertools::Itertools;
 use itertools::{izip, repeat_n, RepeatN};
 
@@ -17,7 +12,6 @@ use crate::fst_traits::{FstIntoIterator, FstIterator, StateIterator};
 use crate::semirings::Semiring;
 use crate::Tr;
 use crate::{StateId, TrsConst};
-use std::sync::Arc;
 
 impl<W> ConstFst<W> {
     fn state_range(&self) -> Range<usize> {
