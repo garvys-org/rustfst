@@ -4,7 +4,7 @@ use anyhow::Result;
 
 use bitflags::bitflags;
 pub use generic_matcher::GenericMatcher;
-// pub use multi_eps_matcher::{MultiEpsMatcher, MultiEpsMatcherFlags};
+pub use multi_eps_matcher::{MultiEpsMatcher, MultiEpsMatcherFlags};
 pub use sorted_matcher::SortedMatcher;
 
 use crate::fst_traits::ExpandedFst;
@@ -14,7 +14,7 @@ use crate::{Tr, EPS_LABEL, NO_LABEL};
 use std::sync::Arc;
 
 mod generic_matcher;
-// mod multi_eps_matcher;
+mod multi_eps_matcher;
 mod sorted_matcher;
 
 bitflags! {

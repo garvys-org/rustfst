@@ -1,10 +1,10 @@
 use std::cell::RefCell;
 use std::sync::Arc;
 
-pub use lookahead_compose_filter::LookAheadComposeFilter;
+pub use lookahead_compose_filter::{LookAheadComposeFilter, LookAheadComposeFilterBulder};
 pub use lookahead_selector::{SMatchBoth, SMatchInput, SMatchNone, SMatchOutput, SMatchUnknown};
 // pub use push_labels_compose_filter::PushLabelsComposeFilter;
-pub use push_weights_compose_filter::PushWeightsComposeFilter;
+pub use push_weights_compose_filter::{PushWeightsComposeFilter, PushWeightsComposeFilterBuilder};
 
 use crate::algorithms::compose::compose_filters::ComposeFilter;
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::Selector;
