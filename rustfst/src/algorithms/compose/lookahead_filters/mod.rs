@@ -4,11 +4,11 @@ use std::sync::Arc;
 pub use lookahead_compose_filter::LookAheadComposeFilter;
 pub use lookahead_selector::{SMatchBoth, SMatchInput, SMatchNone, SMatchOutput, SMatchUnknown};
 // pub use push_labels_compose_filter::PushLabelsComposeFilter;
-// pub use push_weights_compose_filter::PushWeightsComposeFilter;
+pub use push_weights_compose_filter::PushWeightsComposeFilter;
 
 use crate::algorithms::compose::compose_filters::ComposeFilter;
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::Selector;
-use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
@@ -16,7 +16,7 @@ use crate::semirings::Semiring;
 mod lookahead_compose_filter;
 pub mod lookahead_selector;
 // mod push_labels_compose_filter;
-// mod push_weights_compose_filter;
+mod push_weights_compose_filter;
 
 pub fn lookahead_match_type<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
     m1: &M1,
@@ -52,4 +52,5 @@ where
     fn lookahead_type(&self) -> MatchType;
     fn lookahead_output(&self) -> bool;
     fn selector(&self) -> &Selector;
+    fn lookahead_matcher_data(&self) -> Option<&LookAheadMatcherData<W>>;
 }

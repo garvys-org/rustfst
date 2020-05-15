@@ -259,4 +259,8 @@ where
     fn selector(&self) -> &Selector {
         &self.selector
     }
+
+    fn lookahead_matcher_data(&self) -> Option<&LookAheadMatcherData<W>> {
+        self.la_matcher_data.as_ref()
+    }
 }

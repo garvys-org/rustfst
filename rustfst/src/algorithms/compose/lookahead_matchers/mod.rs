@@ -25,8 +25,8 @@ pub trait MatcherFlagsTrait: Debug {
 
 #[derive(Clone, Debug)]
 pub struct LookAheadMatcherData<W: Semiring> {
-    lookahead_weight: W,
-    prefix_tr: Tr<W>,
+    pub lookahead_weight: W,
+    pub prefix_tr: Tr<W>,
 }
 
 impl<W: Semiring> Default for LookAheadMatcherData<W> {

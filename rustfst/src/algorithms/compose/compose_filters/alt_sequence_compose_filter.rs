@@ -8,7 +8,7 @@ use crate::algorithms::compose::compose_filters::{
 use crate::algorithms::compose::filter_states::{FilterState, IntegerFilterState};
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::Selector;
 use crate::algorithms::compose::lookahead_filters::LookAheadComposeFilterTrait;
-use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
@@ -148,6 +148,10 @@ impl<W: Semiring + 'static, M1: LookaheadMatcher<W>, M2: LookaheadMatcher<W>>
     }
 
     fn selector(&self) -> &Selector {
+        unreachable!()
+    }
+
+    fn lookahead_matcher_data(&self) -> Option<&LookAheadMatcherData<W>> {
         unreachable!()
     }
 }

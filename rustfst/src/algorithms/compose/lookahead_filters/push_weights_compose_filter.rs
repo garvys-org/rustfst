@@ -4,11 +4,13 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::compose::compose_filters::{ComposeFilter, SharedDataComposeFilter};
+use crate::algorithms::compose::compose_filters::{
+    ComposeFilter, ComposeFilterBuilder, SharedDataComposeFilter,
+};
 use crate::algorithms::compose::filter_states::{FilterState, PairFilterState, WeightFilterState};
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::{MatchTypeTrait, Selector};
 use crate::algorithms::compose::lookahead_filters::LookAheadComposeFilterTrait;
-use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
 use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
@@ -25,6 +27,56 @@ where
     smt: PhantomData<SMT>,
 }
 
+#[derive(Debug, Clone)]
+pub struct PushWeightsComposeFilterBuilder<W, CFB, SMT>
+where
+    W: Semiring,
+    CFB: ComposeFilterBuilder<W>,
+    CFB::CF: LookAheadComposeFilterTrait<W>,
+    <CFB::CF as ComposeFilter<W>>::M1: LookaheadMatcher<W>,
+    <CFB::CF as ComposeFilter<W>>::M2: LookaheadMatcher<W>,
+{
+    filter_builder: CFB,
+    w: PhantomData<W>,
+    smt: PhantomData<SMT>,
+}
+
+impl<W, CFB, SMT> ComposeFilterBuilder<W> for PushWeightsComposeFilterBuilder<W, CFB, SMT>
+where
+    W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
+    CFB: ComposeFilterBuilder<W>,
+    CFB::CF: LookAheadComposeFilterTrait<W>,
+    <CFB::CF as ComposeFilter<W>>::M1: LookaheadMatcher<W>,
+    <CFB::CF as ComposeFilter<W>>::M2: LookaheadMatcher<W>,
+    SMT: MatchTypeTrait,
+{
+    type CF = PushWeightsComposeFilter<W, CFB::CF, SMT>;
+
+    fn new(
+        fst1: Arc<<<Self::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
+        fst2: Arc<<<Self::CF as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
+        matcher1: Option<<Self::CF as ComposeFilter<W>>::M1>,
+        matcher2: Option<<Self::CF as ComposeFilter<W>>::M2>,
+    ) -> Result<Self>
+    where
+        Self: Sized,
+    {
+        Ok(Self {
+            filter_builder: CFB::new(fst1, fst2, matcher1, matcher2)?,
+            w: PhantomData,
+            smt: PhantomData,
+        })
+    }
+
+    fn build(&self) -> Result<Self::CF> {
+        Ok(PushWeightsComposeFilter::<W, CFB::CF, SMT> {
+            filter: self.filter_builder.build()?,
+            fs: FilterState::new_no_state(),
+            smt: PhantomData,
+        })
+    }
+}
+
 impl<
         W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
         CF: LookAheadComposeFilterTrait<W>,
@@ -38,19 +90,6 @@ where
     type M2 = CF::M2;
     type FS = PairFilterState<CF::FS, WeightFilterState<W>>;
 
-    // fn new<IM1: Into<Option<Arc<Self::M1>>>, IM2: Into<Option<Arc<Self::M2>>>>(
-    //     fst1: Arc<<Self::M1 as Matcher<W>>::F>,
-    //     fst2: Arc<<Self::M2 as Matcher<W>>::F>,
-    //     m1: IM1,
-    //     m2: IM2,
-    // ) -> Result<Self> {
-    //     Ok(Self {
-    //         filter: CF::new(fst1, fst2, m1, m2)?,
-    //         fs: Self::FS::new_no_state(),
-    //         smt: PhantomData,
-    //     })
-    // }
-
     fn start(&self) -> Self::FS {
         Self::FS::new((self.filter.start(), WeightFilterState::new(W::one())))
     }
@@ -62,6 +101,8 @@ where
 
     fn filter_tr(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
         let fs1 = self.filter.filter_tr(arc1, arc2)?;
+        // TODO: Find a way to avoid this unwrap. Should be safe as LaMatcherData has been computed above.
+        let la_matcher_data = self.filter.lookahead_matcher_data().unwrap();
         if fs1 == CF::FS::new_no_state() {
             return Ok(FilterState::new_no_state());
         }
@@ -72,18 +113,7 @@ where
             return Ok(FilterState::new((fs1, FilterState::new(W::one()))));
         }
         let lweight = if self.filter.lookahead_tr() {
-            match self.selector() {
-                Selector::Fst1Matcher2 => {
-                    let data = self.filter.get_shared_data();
-                    let matcher = &data.matcher2;
-                    matcher.lookahead_weight().clone()
-                },
-                Selector::Fst2Matcher1 => {
-                    let data = self.filter.get_shared_data();
-                    let matcher = &data.matcher1;
-                    matcher.lookahead_weight().clone()
-                },
-            }
+            la_matcher_data.lookahead_weight.clone()
         } else {
             W::one()
         };
@@ -117,7 +147,7 @@ where
     }
 
     fn get_shared_data(&self) -> &Arc<SharedDataComposeFilter<W, Self::M1, Self::M2>> {
-        unimplemented!()
+        self.filter.get_shared_data()
     }
 }
 
@@ -148,5 +178,9 @@ where
 
     fn selector(&self) -> &Selector {
         self.filter.selector()
+    }
+
+    fn lookahead_matcher_data(&self) -> Option<&LookAheadMatcherData<W>> {
+        self.filter.lookahead_matcher_data()
     }
 }
