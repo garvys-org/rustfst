@@ -2,14 +2,10 @@ use std::borrow::Borrow;
 
 use anyhow::Result;
 
-use crate::algorithms::lazy_fst_revamp::SimpleHashMapCache;
 use crate::algorithms::replace::ReplaceFst;
 use crate::fst_traits::{Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::Label;
-
-use self::super::config::ReplaceFstOptions;
-use self::super::replace_fst_op::ReplaceFstOp;
 
 /// Recursively replaces trs in the root FSTs with other FSTs.
 ///

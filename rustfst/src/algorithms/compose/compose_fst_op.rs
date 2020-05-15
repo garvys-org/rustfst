@@ -1,10 +1,8 @@
-use std::cell::RefCell;
 use std::sync::Arc;
 
 use anyhow::Result;
 use itertools::Itertools;
 
-use crate::algorithms::cache::{CacheImpl, FstImpl};
 use crate::algorithms::compose::compose_filters::{ComposeFilter, ComposeFilterBuilder};
 use crate::algorithms::compose::filter_states::FilterState;
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::Selector;
@@ -12,7 +10,7 @@ use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MatchType, Matcher, REQUIRE_PRIORITY};
 use crate::algorithms::compose::{ComposeFstOpOptions, ComposeStateTuple};
 use crate::algorithms::lazy_fst_revamp::{FstOp, StateTable};
-use crate::fst_traits::{CoreFst, ExpandedFst};
+use crate::fst_traits::CoreFst;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, Trs, TrsVec, EPS_LABEL, NO_LABEL};
 
@@ -113,7 +111,6 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
 
     fn ordered_expand(
         &self,
-        s: StateId,
         sa: StateId,
         sb: StateId,
         match_input: bool,
@@ -133,7 +130,6 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
                 let fst = data.matcher1.fst();
                 let matcher = &data.matcher2;
                 trs.extend(self.match_tr(
-                    s,
                     sa,
                     matcher,
                     &tr_loop,
@@ -141,21 +137,13 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
                     &mut compose_filter,
                 )?);
                 for tr in fst.get_trs(sb)?.trs() {
-                    trs.extend(self.match_tr(
-                        s,
-                        sa,
-                        matcher,
-                        tr,
-                        match_input,
-                        &mut compose_filter,
-                    )?);
+                    trs.extend(self.match_tr(sa, matcher, tr, match_input, &mut compose_filter)?);
                 }
             }
             Selector::Fst2Matcher1 => {
                 let fst = data.matcher2.fst();
                 let matcher = &data.matcher1;
                 trs.extend(self.match_tr(
-                    s,
                     sa,
                     matcher,
                     &tr_loop,
@@ -163,14 +151,7 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
                     &mut compose_filter,
                 )?);
                 for tr in fst.get_trs(sb)?.trs() {
-                    trs.extend(self.match_tr(
-                        s,
-                        sa,
-                        matcher,
-                        tr,
-                        match_input,
-                        &mut compose_filter,
-                    )?);
+                    trs.extend(self.match_tr(sa, matcher, tr, match_input, &mut compose_filter)?);
                 }
             }
         }
@@ -197,7 +178,6 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
 
     fn add_tr(
         &self,
-        s: StateId,
         mut arc1: Tr<W>,
         arc2: Tr<W>,
         fs: <CFB::CF as ComposeFilter<W>>::FS,
@@ -218,7 +198,6 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
 
     fn match_tr<M: Matcher<W>>(
         &self,
-        s: StateId,
         sa: StateId,
         matchera: &Arc<M>,
         tr: &Tr<W>,
@@ -243,13 +222,13 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
             if match_input {
                 let fs = compose_filter.filter_tr(&mut arcb, &mut arca)?;
                 if fs != <CFB::CF as ComposeFilter<W>>::FS::new_no_state() {
-                    trs.push(self.add_tr(s, arcb, arca, fs)?);
+                    trs.push(self.add_tr(arcb, arca, fs)?);
                 }
             } else {
                 let fs = compose_filter.filter_tr(&mut arca, &mut arcb)?;
 
                 if fs != <CFB::CF as ComposeFilter<W>>::FS::new_no_state() {
-                    trs.push(self.add_tr(s, arca, arcb, fs)?);
+                    trs.push(self.add_tr(arca, arcb, fs)?);
                 }
             }
         }
@@ -284,12 +263,10 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> FstOp<W> for ComposeFstOp<W, CFB
 
         let mut compose_filter = self.compose_filter_builder.build()?;
         compose_filter.set_state(s1, s2, &tuple.fs)?;
-        let data = compose_filter.get_shared_data();
-        drop(tuple);
         if self.match_input(s1, s2, &compose_filter)? {
-            self.ordered_expand(state, s2, s1, true, compose_filter, Selector::Fst1Matcher2)
+            self.ordered_expand(s2, s1, true, compose_filter, Selector::Fst1Matcher2)
         } else {
-            self.ordered_expand(state, s1, s2, false, compose_filter, Selector::Fst2Matcher1)
+            self.ordered_expand(s1, s2, false, compose_filter, Selector::Fst2Matcher1)
         }
     }
 

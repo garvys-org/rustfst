@@ -2,7 +2,6 @@ use std::borrow::Borrow;
 
 use anyhow::Result;
 
-use crate::algorithms::factor_weight::factor_weight_op::FactorWeightOp;
 use crate::algorithms::factor_weight::{FactorIterator, FactorWeightFst, FactorWeightOptions};
 use crate::fst_traits::{Fst, MutableFst};
 use crate::semirings::WeightQuantize;

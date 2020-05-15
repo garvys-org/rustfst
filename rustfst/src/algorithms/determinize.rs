@@ -13,7 +13,7 @@ use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, Facto
 use crate::algorithms::weight_convert;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, Fst, MutableFst};
+use crate::fst_traits::{AllocableFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{
     DivideType, GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, Semiring,
     SemiringProperties, StringWeightLeft, StringWeightRestrict, WeaklyDivisibleSemiring,

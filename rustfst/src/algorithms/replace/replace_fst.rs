@@ -5,10 +5,9 @@ use anyhow::Result;
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
 use crate::algorithms::replace::config::ReplaceFstOptions;
 use crate::algorithms::replace::replace_fst_op::ReplaceFstOp;
-use crate::fst_traits::{CoreFst, Fst, FstIterData, FstIterator, MutableFst, StateIterator};
+use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{Label, SymbolTable, TrsVec};
-use bitflags::_core::fmt::Formatter;
 use std::fmt::Debug;
 use std::sync::Arc;
 

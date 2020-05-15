@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use anyhow::{bail, format_err, Context, Result};
 
-use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::StateId;
 
@@ -75,10 +75,11 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::fst_impls::VectorFst;
     use crate::semirings::{IntegerWeight, Semiring};
     use crate::tr::Tr;
+
+    use super::*;
 
     #[test]
     fn test_projection_input_generic() -> Result<()> {

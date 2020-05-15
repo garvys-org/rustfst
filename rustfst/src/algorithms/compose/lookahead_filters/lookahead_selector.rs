@@ -1,9 +1,6 @@
-use std::cell::RefCell;
 use std::fmt::Debug;
-use std::sync::Arc;
 
-use crate::algorithms::compose::matchers::{MatchType, Matcher};
-use crate::semirings::Semiring;
+use crate::algorithms::compose::matchers::MatchType;
 
 #[derive(Clone, Debug)]
 pub struct SMatchInput {}
@@ -53,32 +50,6 @@ impl MatchTypeTrait for SMatchUnknown {
         MatchType::MatchUnknown
     }
 }
-
-// #[derive(Clone, Debug)]
-// pub struct LookAheadSelector<F, M> {
-//     pub fst: Arc<F>,
-//     pub matcher: Arc<M>,
-// }
-//
-// fn selector_match_input<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
-//     lmatcher1: &Arc<M1>,
-//     lmatcher2: &Arc<M2>,
-// ) -> LookAheadSelector<M1::F, M2> {
-//     LookAheadSelector {
-//         fst: lmatcher1.fst(),
-//         matcher: Arc::clone(lmatcher2),
-//     }
-// }
-//
-// fn selector_match_output<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
-//     lmatcher1: &Arc<M1>,
-//     lmatcher2: &Arc<M2>,
-// ) -> LookAheadSelector<M2::F, M1> {
-//     LookAheadSelector {
-//         fst: lmatcher2.fst(),
-//         matcher: Arc::clone(lmatcher1),
-//     }
-// }
 
 #[derive(Clone, Debug, Copy)]
 pub enum Selector {

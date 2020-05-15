@@ -1,18 +1,11 @@
-use std::borrow::Borrow;
-use std::collections::hash_map::Entry;
-use std::collections::HashMap;
-
 use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::cache::{CacheImpl, FstImpl};
 use crate::algorithms::dfs_visit::dfs_visit;
-use crate::algorithms::lazy_fst::LazyFst;
-use crate::algorithms::queues::{AutoQueue, FifoQueue};
+use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::rm_epsilon::{RmEpsilonConfig, RmEpsilonState};
-use crate::algorithms::shortest_distance::{ShortestDistanceConfig, ShortestDistanceState};
 use crate::algorithms::top_sort::TopOrderVisitor;
-use crate::algorithms::tr_filters::{EpsilonTrFilter, TrFilter};
+use crate::algorithms::tr_filters::EpsilonTrFilter;
 use crate::algorithms::visitors::SccVisitor;
 use crate::algorithms::Queue;
 use crate::fst_properties::FstProperties;

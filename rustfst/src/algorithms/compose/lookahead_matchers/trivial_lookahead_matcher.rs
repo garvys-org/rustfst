@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::marker::PhantomData;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -7,8 +7,7 @@ use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, Looka
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
-use crate::{Label, StateId, Tr, NO_STATE_ID};
-use std::marker::PhantomData;
+use crate::{Label, StateId, Tr};
 
 #[derive(Debug)]
 pub struct TrivialLookAheadMatcher<W, M> {

@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 pub struct ComposeFstOpOptions<M1, M2, CFB, ST> {
     pub matcher1: Option<M1>,
     pub matcher2: Option<M2>,

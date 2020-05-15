@@ -1,10 +1,6 @@
-use std::cell::RefCell;
-use std::sync::Arc;
-
 use anyhow::Result;
 
-use crate::algorithms::compose::FstAddOn;
-use crate::algorithms::compose::{LabelReachable, LabelReachableData};
+use crate::algorithms::compose::LabelReachableData;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 

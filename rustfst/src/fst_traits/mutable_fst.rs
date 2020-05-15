@@ -5,7 +5,7 @@ use anyhow::Result;
 
 use crate::algorithms::closure::ClosureType;
 use crate::algorithms::TrMapper;
-use crate::fst_traits::{CoreFst, ExpandedFst, FstIteratorMut};
+use crate::fst_traits::{ExpandedFst, FstIteratorMut};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::{Label, StateId};

@@ -1,7 +1,6 @@
 use std::borrow::Borrow;
-use std::cell::RefCell;
-use std::collections::HashMap;
 use std::marker::PhantomData;
+use std::sync::Arc;
 
 use anyhow::Result;
 
@@ -10,14 +9,11 @@ use crate::algorithms::factor_weight::{FactorIterator, FactorWeightOptions, Fact
 use crate::algorithms::lazy_fst_revamp::FstOp;
 use crate::fst_traits::Fst;
 use crate::semirings::{Semiring, WeightQuantize};
-use crate::{StateId, Tr, Trs, TrsVec};
-use std::sync::Arc;
+use crate::{Tr, Trs, TrsVec};
 
 pub struct FactorWeightOp<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> {
     opts: FactorWeightOptions,
-    // state_table: StateTable<Element<W>>,
     fst: B,
-    // unfactored: RefCell<HashMap<StateId, StateId>>,
     fw_state_table: FactorWeightStateTable<W>,
     ghost: PhantomData<FI>,
     f: PhantomData<F>,
@@ -144,8 +140,6 @@ where
         Ok(Self {
             opts,
             fst,
-            // state_table: StateTable::new(),
-            // unfactored: RefCell::new(HashMap::new()),
             ghost: PhantomData,
             f: PhantomData,
             fw_state_table: FactorWeightStateTable::new(factor_tr_weights),

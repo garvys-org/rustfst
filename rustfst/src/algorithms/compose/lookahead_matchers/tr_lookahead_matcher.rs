@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
@@ -11,7 +10,7 @@ use crate::algorithms::compose::lookahead_matchers::{
 use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::semirings::Semiring;
-use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL, NO_STATE_ID};
+use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL};
 
 #[derive(Debug)]
 pub struct TrLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {

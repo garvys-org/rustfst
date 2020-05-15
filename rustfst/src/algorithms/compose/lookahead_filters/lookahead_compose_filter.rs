@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
@@ -17,7 +16,7 @@ use crate::algorithms::compose::lookahead_filters::{
 use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
 use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
-use crate::fst_traits::{ExpandedFst, Fst};
+use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Tr, EPS_LABEL};
 

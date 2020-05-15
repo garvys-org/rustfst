@@ -1,11 +1,9 @@
-use std::sync::Arc;
-
 use anyhow::Result;
 
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
-use crate::{SymbolTable, Trs, TrsVec, EPS_LABEL};
+use crate::{Trs, EPS_LABEL};
 
 /// Performs the concatenation of two wFSTs. If `A` transduces string `x` to `y` with weight `a`
 /// and `B` transduces string `w` to `v` with weight `b`, then their concatenation

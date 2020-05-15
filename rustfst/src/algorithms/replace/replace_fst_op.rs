@@ -170,11 +170,6 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstOp<W, F, B> {
             .unwrap()
             && tuple.prefix_id > 0
         {
-            // Necessary to avoid issues with the RefCell.
-            let tuple_owned = tuple.clone();
-            drop(tuple);
-            let tuple = tuple_owned;
-
             let ilabel = if epsilon_on_input(self.return_label_type_) {
                 EPS_LABEL
             } else {

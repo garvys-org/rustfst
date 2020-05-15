@@ -1,11 +1,8 @@
-use std::sync::Arc;
-
 use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::replace::ReplaceFst;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{AllocableFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator};
+use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::{Trs, EPS_LABEL};

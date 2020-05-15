@@ -3,10 +3,8 @@ use std::sync::Arc;
 use anyhow::Result;
 
 use crate::algorithms::compose::compose_filters::{
-    AltSequenceComposeFilter, AltSequenceComposeFilterBuilder, MatchComposeFilter,
-    MatchComposeFilterBuilder, NoMatchComposeFilter, NoMatchComposeFilterBuilder,
-    NullComposeFilter, NullComposeFilterBuilder, SequenceComposeFilter,
-    SequenceComposeFilterBuilder, TrivialComposeFilter, TrivialComposeFilterBuilder,
+    AltSequenceComposeFilterBuilder, MatchComposeFilterBuilder, NoMatchComposeFilterBuilder,
+    NullComposeFilterBuilder, SequenceComposeFilterBuilder, TrivialComposeFilterBuilder,
 };
 use crate::algorithms::compose::matchers::SortedMatcher;
 use crate::algorithms::compose::ComposeFst;

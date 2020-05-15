@@ -1,7 +1,7 @@
 use anyhow::Result;
 
 use crate::algorithms::compose::compose_filters::{
-    ComposeFilter, ComposeFilterBuilder, SequenceComposeFilter, SequenceComposeFilterBuilder,
+    ComposeFilter, ComposeFilterBuilder, SequenceComposeFilterBuilder,
 };
 use crate::algorithms::compose::matchers::{GenericMatcher, Matcher};
 use crate::algorithms::compose::{ComposeFstOp, ComposeFstOpOptions, ComposeStateTuple};

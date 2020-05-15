@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
@@ -11,7 +10,7 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::algorithms::compose::{LabelReachable, LabelReachableData};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{Tr, Trs, EPS_LABEL, NO_STATE_ID};
+use crate::{Tr, Trs, EPS_LABEL};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {

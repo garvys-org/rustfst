@@ -4,7 +4,7 @@ use std::collections::hash_map::{Entry, HashMap};
 use anyhow::{Context, Result};
 
 use crate::algorithms::{rm_final_epsilon, FinalTr, MapFinalAction, TrMapper};
-use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::Label;
 use crate::Tr;
