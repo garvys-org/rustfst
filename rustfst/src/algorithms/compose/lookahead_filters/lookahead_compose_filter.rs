@@ -12,7 +12,7 @@ use crate::algorithms::compose::lookahead_filters::lookahead_selector::{
 use crate::algorithms::compose::lookahead_filters::{
     lookahead_match_type, LookAheadComposeFilterTrait,
 };
-use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::compose::lookahead_matchers::{LookaheadMatcher, LookAheadMatcherData};
 use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;
@@ -34,6 +34,7 @@ pub struct LookAheadComposeFilter<
     smt: PhantomData<SMT>,
     w: PhantomData<W>,
     selector: Selector,
+    la_matcher_data: Option<LookAheadMatcherData<W>>,
 }
 
 impl<W: Semiring, CF: LookAheadComposeFilterTrait<W>, SMT: MatchTypeTrait>
@@ -61,7 +62,7 @@ where
         }
         self.lookahead_tr = true;
 
-        let res = match self.selector() {
+        self.la_matcher_data = match self.selector() {
             Selector::Fst1Matcher2 => {
                 let data = self.filter.get_shared_data();
                 let fst = data.matcher1.fst();
@@ -76,7 +77,7 @@ where
             }
         };
 
-        if res {
+        if self.la_matcher_data.is_some() {
             Ok(fs.clone())
         } else {
             Ok(CF::FS::new_no_state())
@@ -169,7 +170,7 @@ where
     }
 
     fn get_shared_data(&self) -> &Arc<SharedDataComposeFilter<W, Self::M1, Self::M2>> {
-        unimplemented!()
+        self.filter.get_shared_data()
     }
 }
 

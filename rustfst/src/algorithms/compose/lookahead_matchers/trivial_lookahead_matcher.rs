@@ -3,17 +3,17 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::compose::lookahead_matchers::{LookaheadMatcher, LookAheadMatcherData};
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, NO_STATE_ID};
+use std::marker::PhantomData;
 
 #[derive(Debug)]
 pub struct TrivialLookAheadMatcher<W, M> {
     matcher: M,
-    lookahead_weight: W,
-    prefix_tr: Tr<W>,
+    w: PhantomData<W>
 }
 
 impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
@@ -23,8 +23,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
     fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self> {
         Ok(Self {
             matcher: M::new(fst, match_type)?,
-            prefix_tr: Tr::new(0, 0, W::one(), NO_STATE_ID),
-            lookahead_weight: W::one(),
+            w: PhantomData
         })
     }
 
@@ -86,31 +85,15 @@ impl<W: Semiring, M: Matcher<W>> LookaheadMatcher<W> for TrivialLookAheadMatcher
         _matcher_state: StateId,
         _lfst: &Arc<LF>,
         _s: StateId,
-    ) -> Result<bool> {
-        Ok(true)
+    ) -> Result<Option<LookAheadMatcherData<W>>> {
+        Ok(Some(LookAheadMatcherData::default()))
     }
 
     fn lookahead_label(&self, _state: StateId, _label: Label) -> Result<bool> {
         Ok(true)
     }
 
-    fn lookahead_prefix(&self, _tr: &mut Tr<W>) -> bool {
+    fn lookahead_prefix(&self, _tr: &mut Tr<W>, _la_matcher_data: &LookAheadMatcherData<W>) -> bool {
         false
-    }
-
-    fn lookahead_weight(&self) -> &W {
-        &self.lookahead_weight
-    }
-
-    fn prefix_tr(&self) -> &Tr<W> {
-        &self.prefix_tr
-    }
-
-    fn prefix_tr_mut(&mut self) -> &mut Tr<W> {
-        &mut self.prefix_tr
-    }
-
-    fn lookahead_weight_mut(&mut self) -> &mut W {
-        &mut self.lookahead_weight
     }
 }

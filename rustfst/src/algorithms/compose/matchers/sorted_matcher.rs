@@ -4,7 +4,7 @@ use std::sync::Arc;
 use anyhow::Result;
 use superslice::Ext;
 
-use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::compose::lookahead_matchers::{LookaheadMatcher, LookAheadMatcherData};
 use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst};
@@ -204,7 +204,7 @@ impl<W: Semiring, F: ExpandedFst<W>> LookaheadMatcher<W> for SortedMatcher<W, F>
         _matcher_state: usize,
         _lfst: &Arc<LF>,
         _lfst_state: usize,
-    ) -> Result<bool> {
+    ) -> Result<Option<LookAheadMatcherData<W>>> {
         unreachable!()
     }
 
@@ -212,23 +212,7 @@ impl<W: Semiring, F: ExpandedFst<W>> LookaheadMatcher<W> for SortedMatcher<W, F>
         unreachable!()
     }
 
-    fn lookahead_prefix(&self, _tr: &mut Tr<W>) -> bool {
-        unreachable!()
-    }
-
-    fn lookahead_weight(&self) -> &W {
-        unreachable!()
-    }
-
-    fn prefix_tr(&self) -> &Tr<W> {
-        unreachable!()
-    }
-
-    fn prefix_tr_mut(&mut self) -> &mut Tr<W> {
-        unreachable!()
-    }
-
-    fn lookahead_weight_mut(&mut self) -> &mut W {
+    fn lookahead_prefix(&self, _tr: &mut Tr<W>, _la_matcher_data: &LookAheadMatcherData<W>) -> bool {
         unreachable!()
     }
 }
