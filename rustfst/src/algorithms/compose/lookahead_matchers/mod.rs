@@ -68,12 +68,12 @@ impl<W: Semiring> LookAheadMatcherData<W> {
 
 pub trait LookaheadMatcher<W: Semiring>: Matcher<W> {
     type MatcherData: Clone;
-    fn data(&self) -> Option<&Arc<RefCell<Self::MatcherData>>>;
+    fn data(&self) -> Option<&Arc<Self::MatcherData>>;
 
     fn new_with_data(
         fst: Arc<Self::F>,
         match_type: MatchType,
-        data: Option<Arc<RefCell<Self::MatcherData>>>,
+        data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self>
     where
         Self: std::marker::Sized;
@@ -81,7 +81,7 @@ pub trait LookaheadMatcher<W: Semiring>: Matcher<W> {
     fn create_data<F: ExpandedFst<W>>(
         fst: &F,
         match_type: MatchType,
-    ) -> Result<Option<Arc<RefCell<Self::MatcherData>>>>;
+    ) -> Result<Option<Self::MatcherData>>;
 
     // Previously init_lookahead_fst
     fn check_lookahead_fst<LF: ExpandedFst<W>>(&mut self, lfst: &Arc<LF>) -> Result<()>;

@@ -69,7 +69,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
 {
     type MatcherData = LabelReachableData;
 
-    fn data(&self) -> Option<&Arc<RefCell<Self::MatcherData>>> {
+    fn data(&self) -> Option<&Arc<Self::MatcherData>> {
         if let Some(reachable) = &self.reachable {
             Some(reachable.data())
         } else {
@@ -80,7 +80,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
     fn new_with_data(
         fst: Arc<Self::F>,
         match_type: MatchType,
-        data: Option<Arc<RefCell<Self::MatcherData>>>,
+        data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self> {
         if !(MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER)
             | MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
@@ -94,11 +94,11 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
 
         let mut reachable = None;
         if let Some(d) = data {
-            if reach_input == d.borrow().reach_input() {
-                reachable = Some(LabelReachable::new_from_data(d.clone()));
+            if reach_input == d.reach_input() {
+                reachable = Some(LabelReachable::new_from_data(d));
             }
         } else if let Some(d) = Self::create_data(&fst, match_type)? {
-            reachable = Some(LabelReachable::new_from_data(d));
+            reachable = Some(LabelReachable::new_from_data(Arc::new(d)));
         }
 
         Ok(Self {
@@ -112,12 +112,13 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
     fn create_data<F: ExpandedFst<W>>(
         fst: &F,
         match_type: MatchType,
-    ) -> Result<Option<Arc<RefCell<Self::MatcherData>>>> {
+    ) -> Result<Option<Self::MatcherData>> {
         let reach_input = match_type == MatchType::MatchInput;
         if (reach_input && MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER))
             || (!reach_input && MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
         {
-            Ok(Some(LabelReachable::new(fst, reach_input)?.shared_data()))
+            // Ok(Some(Arc::clone(LabelReachable::new(fst, reach_input)?.data())))
+            Ok(Some(LabelReachable::compute_data(fst, reach_input)?.0))
         } else {
             Ok(None)
         }

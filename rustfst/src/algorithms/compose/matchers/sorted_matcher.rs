@@ -173,14 +173,14 @@ impl<W: Semiring, T: Trs<W>> Iterator for IteratorSortedMatcher<W, T> {
 impl<W: Semiring, F: ExpandedFst<W>> LookaheadMatcher<W> for SortedMatcher<W, F> {
     type MatcherData = ();
 
-    fn data(&self) -> Option<&Arc<RefCell<Self::MatcherData>>> {
+    fn data(&self) -> Option<&Arc<Self::MatcherData>> {
         unreachable!()
     }
 
     fn new_with_data(
         _fst: Arc<Self::F>,
         _match_type: MatchType,
-        _data: Option<Arc<RefCell<Self::MatcherData>>>,
+        _data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self>
     where
         Self: std::marker::Sized,
@@ -191,7 +191,7 @@ impl<W: Semiring, F: ExpandedFst<W>> LookaheadMatcher<W> for SortedMatcher<W, F>
     fn create_data<G: ExpandedFst<W>>(
         _fst: &G,
         _match_type: MatchType,
-    ) -> Result<Option<Arc<RefCell<Self::MatcherData>>>> {
+    ) -> Result<Option<Self::MatcherData>> {
         unreachable!()
     }
 

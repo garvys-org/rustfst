@@ -70,14 +70,14 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
     // NullAddon
     type MatcherData = ();
 
-    fn data(&self) -> Option<&Arc<RefCell<Self::MatcherData>>> {
+    fn data(&self) -> Option<&Arc<Self::MatcherData>> {
         None
     }
 
     fn new_with_data(
         fst: Arc<Self::F>,
         match_type: MatchType,
-        _data: Option<Arc<RefCell<Self::MatcherData>>>,
+        _data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self> {
         Self::new(fst, match_type)
     }
@@ -85,7 +85,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
     fn create_data<F: ExpandedFst<W>>(
         _fst: &F,
         _match_type: MatchType,
-    ) -> Result<Option<Arc<RefCell<Self::MatcherData>>>> {
+    ) -> Result<Option<Self::MatcherData>> {
         Ok(None)
     }
 
