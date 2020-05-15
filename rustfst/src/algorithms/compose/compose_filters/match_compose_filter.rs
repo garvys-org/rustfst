@@ -39,6 +39,8 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
     for MatchComposeFilterBuilder<W, M1, M2>
 {
     type CF = MatchComposeFilter<W, M1, M2>;
+    type M1 = M1;
+    type M2 = M2;
 
     fn new(
         fst1: Arc<M1::F>,
@@ -50,7 +52,7 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
             matcher1.unwrap_or_else(|| M1::new(Arc::clone(&fst1), MatchType::MatchOutput).unwrap());
         let matcher2 =
             matcher2.unwrap_or_else(|| M2::new(Arc::clone(&fst2), MatchType::MatchInput).unwrap());
-        let shared_data = SharedDataComposeFilter::new(matcher1, matcher2);
+        let shared_data = SharedDataComposeFilter::new(Arc::new(matcher1), Arc::new(matcher2));
         Ok(Self {
             shared_data: Arc::new(shared_data),
         })

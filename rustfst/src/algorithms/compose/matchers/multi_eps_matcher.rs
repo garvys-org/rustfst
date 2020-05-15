@@ -163,10 +163,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
 
     fn iter(&self, state: usize, label: usize) -> Result<Self::Iter> {
         let (iter_matcher, iter_labels) = if label == EPS_LABEL {
-            (
-                Some(self.matcher.iter(state, EPS_LABEL)?.peekable()),
-                None,
-            )
+            (Some(self.matcher.iter(state, EPS_LABEL)?.peekable()), None)
         } else if label == NO_LABEL {
             if self.flags.contains(MultiEpsMatcherFlags::MULTI_EPS_LIST) {
                 // TODO: Didn't find a way to store the iterator in IteratorMultiEpsMatcher.
@@ -189,16 +186,10 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
                 if pos_labels < multi_eps_labels.len() {
                     (iter_matcher, Some((multi_eps_labels, pos_labels)))
                 } else {
-                    (
-                        Some(self.matcher.iter(state, NO_LABEL)?.peekable()),
-                        None,
-                    )
+                    (Some(self.matcher.iter(state, NO_LABEL)?.peekable()), None)
                 }
             } else {
-                (
-                    Some(self.matcher.iter(state, NO_LABEL)?.peekable()),
-                    None,
-                )
+                (Some(self.matcher.iter(state, NO_LABEL)?.peekable()), None)
             }
         } else if self.flags.contains(MultiEpsMatcherFlags::MULTI_EPS_LOOP)
             && self.multi_eps_labels.contains(&label)
@@ -206,10 +197,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
             // Empty iter
             (None, None)
         } else {
-            (
-                Some(self.matcher.iter(state, label)?.peekable()),
-                None,
-            )
+            (Some(self.matcher.iter(state, label)?.peekable()), None)
         };
         Ok(IteratorMultiEpsMatcher {
             iter_matcher,

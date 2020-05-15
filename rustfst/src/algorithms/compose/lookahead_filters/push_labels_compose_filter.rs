@@ -4,7 +4,9 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::compose::compose_filters::{ComposeFilter, SharedDataComposeFilter, ComposeFilterBuilder};
+use crate::algorithms::compose::compose_filters::{
+    ComposeFilter, ComposeFilterBuilder, SharedDataComposeFilter,
+};
 use crate::algorithms::compose::filter_states::{FilterState, IntegerFilterState, PairFilterState};
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::MatchTypeTrait;
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::Selector;
@@ -34,20 +36,19 @@ pub struct PushLabelsComposeFilter<
     ntrsa: usize,
 }
 
-
 #[derive(Debug, Clone)]
 pub struct PushLabelsComposeFilterBuilder<W, CFB, SMT>
-    where
-        W: Semiring,
-        CFB: ComposeFilterBuilder<W>,
-        CFB::CF: LookAheadComposeFilterTrait<W>,
-        SMT: MatchTypeTrait,
-        <CFB::CF as ComposeFilter<W>>::M1: LookaheadMatcher<W>,
-        <CFB::CF as ComposeFilter<W>>::M2: LookaheadMatcher<W>,
+where
+    W: Semiring,
+    CFB: ComposeFilterBuilder<W>,
+    CFB::CF: LookAheadComposeFilterTrait<W>,
+    SMT: MatchTypeTrait,
+    <CFB::CF as ComposeFilter<W>>::M1: LookaheadMatcher<W>,
+    <CFB::CF as ComposeFilter<W>>::M2: LookaheadMatcher<W>,
 {
     filter_builder: CFB,
     w: PhantomData<W>,
-    smt: PhantomData<SMT>
+    smt: PhantomData<SMT>,
 }
 
 impl<W, CFB, SMT> ComposeFilterBuilder<W> for PushLabelsComposeFilterBuilder<W, CFB, SMT>
@@ -59,20 +60,59 @@ where
     <CFB::CF as ComposeFilter<W>>::M1: LookaheadMatcher<W>,
     <CFB::CF as ComposeFilter<W>>::M2: LookaheadMatcher<W>,
 {
-    type CF = PushLabelsComposeFilter::<W, CFB::CF, SMT>;
+    type CF = PushLabelsComposeFilter<W, CFB::CF, SMT>;
+    type M1 = CFB::M1;
+    type M2 = CFB::M2;
 
     fn new(
         fst1: Arc<<<Self::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
         fst2: Arc<<<Self::CF as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
-        matcher1: Option<<Self::CF as ComposeFilter<W>>::M1>,
-        matcher2: Option<<Self::CF as ComposeFilter<W>>::M2>,
-    ) -> Result<Self> where
-        Self: Sized {
-        unimplemented!()
+        matcher1: Option<Self::M1>,
+        matcher2: Option<Self::M2>,
+    ) -> Result<Self>
+    where
+        Self: Sized,
+    {
+        let filter_builder = CFB::new(fst1, fst2, matcher1, matcher2)?;
+        Ok(Self {
+            filter_builder,
+            w: PhantomData,
+            smt: PhantomData,
+        })
     }
 
     fn build(&self) -> Result<Self::CF> {
-        unimplemented!()
+        let filter = self.filter_builder.build()?;
+        let data = filter.get_shared_data();
+
+        let matcher1 = MultiEpsMatcher::new_with_opts(
+            Arc::clone(data.matcher1.fst()),
+            MatchType::MatchOutput,
+            if filter.lookahead_output() {
+                MultiEpsMatcherFlags::MULTI_EPS_LIST
+            } else {
+                MultiEpsMatcherFlags::MULTI_EPS_LOOP
+            },
+            Arc::clone(&data.matcher1),
+        )?;
+        let matcher2 = MultiEpsMatcher::new_with_opts(
+            Arc::clone(data.matcher2.fst()),
+            MatchType::MatchInput,
+            if filter.lookahead_output() {
+                MultiEpsMatcherFlags::MULTI_EPS_LOOP
+            } else {
+                MultiEpsMatcherFlags::MULTI_EPS_LIST
+            },
+            Arc::clone(&data.matcher2),
+        )?;
+        Ok(Self::CF {
+            fs: FilterState::new_no_state(),
+            matcher1,
+            matcher2,
+            filter,
+            ntrsa: 0,
+            smt: PhantomData,
+        })
     }
 }
 
@@ -85,15 +125,6 @@ where
     type M1 = MultiEpsMatcher<W, CF::M1>;
     type M2 = MultiEpsMatcher<W, CF::M2>;
     type FS = PairFilterState<CF::FS, IntegerFilterState>;
-
-    // fn new<IM1: Into<Option<Arc<Self::M1>>>, IM2: Into<Option<Arc<Self::M2>>>>(
-    //     _fst1: Arc<<Self::M1 as Matcher<W>>::F>,
-    //     _fst2: Arc<<Self::M2 as Matcher<W>>::F>,
-    //     _m1: IM1,
-    //     _m2: IM2,
-    // ) -> Result<Self> {
-    //     unimplemented!()
-    // }
 
     fn start(&self) -> Self::FS {
         PairFilterState::new((self.filter.start(), FilterState::new(NO_LABEL)))
@@ -219,12 +250,12 @@ where
                         let data = self.filter.get_shared_data();
                         let matcher = &data.matcher2;
                         matcher.lookahead_label(arca.nextstate, flabel)?
-                    },
+                    }
                     Selector::Fst2Matcher1 => {
                         let data = self.filter.get_shared_data();
                         let matcher = &data.matcher1;
                         matcher.lookahead_label(arca.nextstate, flabel)?
-                    },
+                    }
                 } {
                     self.fs.clone()
                 } else {
@@ -274,12 +305,12 @@ where
                 let data = self.filter.get_shared_data();
                 let matcher = &data.matcher2;
                 matcher.lookahead_prefix(&mut larc, la_matcher_data)
-            },
+            }
             Selector::Fst2Matcher1 => {
                 let data = self.filter.get_shared_data();
                 let matcher = &data.matcher1;
                 matcher.lookahead_prefix(&mut larc, la_matcher_data)
-            },
+            }
         };
 
         if b {
@@ -313,46 +344,4 @@ where
     fn selector(&self) -> &Selector {
         self.filter.selector()
     }
-
-    // pub fn new_2<
-    //     IM1: Into<Option<Arc<RefCell<CF::M1>>>>,
-    //     IM2: Into<Option<Arc<RefCell<CF::M2>>>>,
-    // >(
-    //     fst1: Arc<<<Self as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
-    //     fst2: Arc<<<Self as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
-    //     m1: IM1,
-    //     m2: IM2,
-    // ) -> Result<Self> {
-    //     let filter = CF::new(fst1, fst2, m1, m2)?;
-    //     let fst1 = filter.matcher1().borrow().fst();
-    //     let fst2 = filter.matcher2().borrow().fst();
-    //     let matcher1 = Arc::new(RefCell::new(MultiEpsMatcher::new_with_opts(
-    //         Arc::clone(&fst1),
-    //         MatchType::MatchOutput,
-    //         if filter.lookahead_output() {
-    //             MultiEpsMatcherFlags::MULTI_EPS_LIST
-    //         } else {
-    //             MultiEpsMatcherFlags::MULTI_EPS_LOOP
-    //         },
-    //         filter.matcher1(),
-    //     )?));
-    //     let matcher2 = Arc::new(RefCell::new(MultiEpsMatcher::new_with_opts(
-    //         Arc::clone(&fst2),
-    //         MatchType::MatchInput,
-    //         if filter.lookahead_output() {
-    //             MultiEpsMatcherFlags::MULTI_EPS_LOOP
-    //         } else {
-    //             MultiEpsMatcherFlags::MULTI_EPS_LIST
-    //         },
-    //         filter.matcher2(),
-    //     )?));
-    //     Ok(Self {
-    //         fs: FilterState::new_no_state(),
-    //         matcher1,
-    //         matcher2,
-    //         filter,
-    //         ntrsa: 0,
-    //         smt: PhantomData,
-    //     })
-    // }
 }

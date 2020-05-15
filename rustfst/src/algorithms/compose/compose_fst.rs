@@ -33,8 +33,8 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFst<W, CFB> {
         fst1: Arc<<<CFB::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
         fst2: Arc<<<CFB::CF as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
         opts: ComposeFstOpOptions<
-            <CFB::CF as ComposeFilter<W>>::M1,
-            <CFB::CF as ComposeFilter<W>>::M2,
+            CFB::M1,
+            CFB::M2,
             CFB,
             StateTable<ComposeStateTuple<<CFB::CF as ComposeFilter<W>>::FS>>,
         >,

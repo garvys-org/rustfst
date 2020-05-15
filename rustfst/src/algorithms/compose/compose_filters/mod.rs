@@ -25,15 +25,16 @@ mod null_compose_filter;
 mod sequence_compose_filter;
 mod trivial_compose_filter;
 
+// TODO: Two levels of Arc here, can probably get rid of it
 #[derive(Debug)]
 pub struct SharedDataComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
-    pub(crate) matcher1: M1,
-    pub(crate) matcher2: M2,
+    pub(crate) matcher1: Arc<M1>,
+    pub(crate) matcher2: Arc<M2>,
     w: PhantomData<W>,
 }
 
 impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> SharedDataComposeFilter<W, M1, M2> {
-    pub fn new(matcher1: M1, matcher2: M2) -> Self {
+    pub fn new(matcher1: Arc<M1>, matcher2: Arc<M2>) -> Self {
         Self {
             matcher1,
             matcher2,
@@ -44,11 +45,13 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> SharedDataComposeFilter<W, M1,
 
 pub trait ComposeFilterBuilder<W: Semiring>: Debug {
     type CF: ComposeFilter<W>;
+    type M1: Matcher<W>;
+    type M2: Matcher<W>;
     fn new(
         fst1: Arc<<<Self::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
         fst2: Arc<<<Self::CF as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
-        matcher1: Option<<Self::CF as ComposeFilter<W>>::M1>,
-        matcher2: Option<<Self::CF as ComposeFilter<W>>::M2>,
+        matcher1: Option<Self::M1>,
+        matcher2: Option<Self::M2>,
     ) -> Result<Self>
     where
         Self: Sized;

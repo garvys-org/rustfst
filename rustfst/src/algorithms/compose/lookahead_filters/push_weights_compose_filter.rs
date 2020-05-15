@@ -13,6 +13,7 @@ use crate::algorithms::compose::lookahead_filters::LookAheadComposeFilterTrait;
 use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
 use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
+use crate::fst_traits::ExpandedFst;
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::{Tr, KDELTA};
 
@@ -41,22 +42,27 @@ where
     smt: PhantomData<SMT>,
 }
 
-impl<W, CFB, SMT> ComposeFilterBuilder<W> for PushWeightsComposeFilterBuilder<W, CFB, SMT>
+impl<W, F1, F2, M1, M2, CF, CFB, SMT> ComposeFilterBuilder<W>
+    for PushWeightsComposeFilterBuilder<W, CFB, SMT>
 where
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
-    CFB: ComposeFilterBuilder<W>,
-    CFB::CF: LookAheadComposeFilterTrait<W>,
-    <CFB::CF as ComposeFilter<W>>::M1: LookaheadMatcher<W>,
-    <CFB::CF as ComposeFilter<W>>::M2: LookaheadMatcher<W>,
+    F1: ExpandedFst<W>,
+    F2: ExpandedFst<W>,
+    M1: Matcher<W, F = F1> + LookaheadMatcher<W>,
+    M2: Matcher<W, F = F2> + LookaheadMatcher<W>,
+    CF: ComposeFilter<W, M1 = M1, M2 = M2> + LookAheadComposeFilterTrait<W>,
+    CFB: ComposeFilterBuilder<W, M1 = M1, M2 = M2, CF = CF>,
     SMT: MatchTypeTrait,
 {
-    type CF = PushWeightsComposeFilter<W, CFB::CF, SMT>;
+    type CF = PushWeightsComposeFilter<W, CF, SMT>;
+    type M1 = M1;
+    type M2 = M2;
 
     fn new(
         fst1: Arc<<<Self::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
         fst2: Arc<<<Self::CF as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
-        matcher1: Option<<Self::CF as ComposeFilter<W>>::M1>,
-        matcher2: Option<<Self::CF as ComposeFilter<W>>::M2>,
+        matcher1: Option<Self::M1>,
+        matcher2: Option<Self::M2>,
     ) -> Result<Self>
     where
         Self: Sized,
