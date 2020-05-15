@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::compose::lookahead_matchers::{LookaheadMatcher, LookAheadMatcherData};
+use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
@@ -13,7 +13,7 @@ use std::marker::PhantomData;
 #[derive(Debug)]
 pub struct TrivialLookAheadMatcher<W, M> {
     matcher: M,
-    w: PhantomData<W>
+    w: PhantomData<W>,
 }
 
 impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
@@ -23,7 +23,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
     fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self> {
         Ok(Self {
             matcher: M::new(fst, match_type)?,
-            w: PhantomData
+            w: PhantomData,
         })
     }
 
@@ -93,7 +93,11 @@ impl<W: Semiring, M: Matcher<W>> LookaheadMatcher<W> for TrivialLookAheadMatcher
         Ok(true)
     }
 
-    fn lookahead_prefix(&self, _tr: &mut Tr<W>, _la_matcher_data: &LookAheadMatcherData<W>) -> bool {
+    fn lookahead_prefix(
+        &self,
+        _tr: &mut Tr<W>,
+        _la_matcher_data: &LookAheadMatcherData<W>,
+    ) -> bool {
         false
     }
 }

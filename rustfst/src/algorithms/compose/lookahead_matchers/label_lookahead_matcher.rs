@@ -4,7 +4,9 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::compose::lookahead_matchers::{LookaheadMatcher, MatcherFlagsTrait};
+use crate::algorithms::compose::lookahead_matchers::{
+    LookAheadMatcherData, LookaheadMatcher, MatcherFlagsTrait,
+};
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::algorithms::compose::{LabelReachable, LabelReachableData};
 use crate::fst_traits::ExpandedFst;
@@ -13,13 +15,10 @@ use crate::{Tr, Trs, EPS_LABEL, NO_STATE_ID};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
-    // matcher fst
-    fst: Arc<M::F>,
     matcher: M,
-    lookahead_weight: W,
-    prefix_tr: Tr<W>,
     mft: PhantomData<MFT>,
     reachable: Option<LabelReachable>,
+    w: PhantomData<W>,
 }
 
 impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
@@ -61,7 +60,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
     }
 
     fn fst(&self) -> &Arc<Self::F> {
-        &self.fst
+        self.matcher.fst()
     }
 }
 
@@ -103,12 +102,10 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         }
 
         Ok(Self {
-            fst: Arc::clone(&fst),
             matcher: M::new(fst, match_type)?,
-            prefix_tr: Tr::new(0, 0, W::one(), NO_STATE_ID),
-            lookahead_weight: W::one(),
             reachable,
             mft: PhantomData,
+            w: PhantomData,
         })
     }
 
@@ -139,7 +136,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         matcher_state: usize,
         lfst: &Arc<LF>,
         lfst_state: usize,
-    ) -> Result<bool> {
+    ) -> Result<Option<LookAheadMatcherData<W>>> {
         // InitLookAheadFst
         // let lfst_ptr = Arc::into_raw(Arc::clone(&lfst)) as *const LF as *const u32;
         // if lfst_ptr != self.lfst_ptr {
@@ -147,8 +144,9 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         // }
 
         // LookAheadFst
-        self.clear_lookahead_weight();
-        self.clear_lookahead_prefix();
+        let mut la_matcher_data = LookAheadMatcherData::default();
+        la_matcher_data.clear_lookahead_weight();
+        la_matcher_data.clear_lookahead_prefix();
         if let Some(reachable) = &self.reachable {
             let mut compute_weight = MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT);
             let compute_prefix = MFT::flags().contains(MatcherFlags::LOOKAHEAD_PREFIX);
@@ -168,22 +166,28 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
                 if compute_prefix && (reach_end - reach_begin) == 1 && !reach_final {
                     let trs_owner = lfst.get_trs(lfst_state)?;
                     let tr = trs_owner.trs().iter().skip(reach_begin).next().unwrap();
-                    self.set_lookahead_prefix(tr.clone());
+                    la_matcher_data.set_lookahead_prefix(tr.clone());
                     compute_weight = false;
                 } else {
-                    self.set_lookahead_weight(reach_weight);
+                    la_matcher_data.set_lookahead_weight(reach_weight);
                 }
             }
             if reach_final && compute_weight {
                 if reach_tr_bool {
-                    self.lookahead_weight_mut().plus_assign(lfinal.unwrap())?;
+                    la_matcher_data
+                        .lookahead_weight
+                        .plus_assign(lfinal.unwrap())?;
                 } else {
-                    self.set_lookahead_weight(lfinal.unwrap().clone());
+                    la_matcher_data.set_lookahead_weight(lfinal.unwrap().clone());
                 }
             }
-            Ok(reach_tr_bool || reach_final)
+            if reach_tr_bool || reach_final {
+                Ok(Some(la_matcher_data))
+            } else {
+                Ok(None)
+            }
         } else {
-            Ok(true)
+            Ok(Some(la_matcher_data))
         }
     }
 
@@ -198,23 +202,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         }
     }
 
-    fn lookahead_prefix(&self, tr: &mut Tr<W>) -> bool {
-        self.default_lookahead_prefix(tr)
-    }
-
-    fn lookahead_weight(&self) -> &W {
-        &self.lookahead_weight
-    }
-
-    fn prefix_tr(&self) -> &Tr<W> {
-        &self.prefix_tr
-    }
-
-    fn prefix_tr_mut(&mut self) -> &mut Tr<W> {
-        &mut self.prefix_tr
-    }
-
-    fn lookahead_weight_mut(&mut self) -> &mut W {
-        &mut self.lookahead_weight
+    fn lookahead_prefix(&self, tr: &mut Tr<W>, la_matcher_data: &LookAheadMatcherData<W>) -> bool {
+        la_matcher_data.default_lookahead_prefix(tr)
     }
 }

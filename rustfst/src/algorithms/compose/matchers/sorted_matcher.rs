@@ -4,7 +4,7 @@ use std::sync::Arc;
 use anyhow::Result;
 use superslice::Ext;
 
-use crate::algorithms::compose::lookahead_matchers::{LookaheadMatcher, LookAheadMatcherData};
+use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
 use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst};
@@ -212,7 +212,11 @@ impl<W: Semiring, F: ExpandedFst<W>> LookaheadMatcher<W> for SortedMatcher<W, F>
         unreachable!()
     }
 
-    fn lookahead_prefix(&self, _tr: &mut Tr<W>, _la_matcher_data: &LookAheadMatcherData<W>) -> bool {
+    fn lookahead_prefix(
+        &self,
+        _tr: &mut Tr<W>,
+        _la_matcher_data: &LookAheadMatcherData<W>,
+    ) -> bool {
         unreachable!()
     }
 }

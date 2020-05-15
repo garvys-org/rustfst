@@ -4,8 +4,8 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-// pub use label_lookahead_matcher::LabelLookAheadMatcher;
-// pub use label_lookahead_relabeler::LabelLookAheadRelabeler;
+pub use label_lookahead_matcher::LabelLookAheadMatcher;
+pub use label_lookahead_relabeler::LabelLookAheadRelabeler;
 pub use tr_lookahead_matcher::TrLookAheadMatcher;
 pub use trivial_lookahead_matcher::TrivialLookAheadMatcher;
 
@@ -15,8 +15,8 @@ use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, NO_STATE_ID};
 
-// mod label_lookahead_matcher;
-// pub mod label_lookahead_relabeler;
+mod label_lookahead_matcher;
+pub mod label_lookahead_relabeler;
 mod tr_lookahead_matcher;
 mod trivial_lookahead_matcher;
 
@@ -27,21 +27,20 @@ pub trait MatcherFlagsTrait: Debug {
 #[derive(Clone, Debug)]
 pub struct LookAheadMatcherData<W: Semiring> {
     lookahead_weight: W,
-    prefix_tr: Tr<W>
+    prefix_tr: Tr<W>,
 }
 
 impl<W: Semiring> Default for LookAheadMatcherData<W> {
     fn default() -> Self {
-        LookAheadMatcherData::new(W::one(),
-                                  Tr::new(0, 0, W::one(), NO_STATE_ID)
-        )
+        LookAheadMatcherData::new(W::one(), Tr::new(0, 0, W::one(), NO_STATE_ID))
     }
 }
 
 impl<W: Semiring> LookAheadMatcherData<W> {
     pub fn new(lookahead_weight: W, prefix_tr: Tr<W>) -> Self {
         Self {
-            lookahead_weight, prefix_tr
+            lookahead_weight,
+            prefix_tr,
         }
     }
 
@@ -99,5 +98,4 @@ pub trait LookaheadMatcher<W: Semiring>: Matcher<W> {
     // following epsilon transitions?
     fn lookahead_label(&self, state: StateId, label: Label) -> Result<bool>;
     fn lookahead_prefix(&self, tr: &mut Tr<W>, la_matcher_data: &LookAheadMatcherData<W>) -> bool;
-
 }

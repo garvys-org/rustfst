@@ -7,7 +7,7 @@ pub use self::compose_state_tuple::ComposeStateTuple;
 pub use self::interval_reach_visitor::IntervalReachVisitor;
 pub use self::interval_set::{IntInterval, IntervalSet};
 pub use self::label_reachable::{LabelReachable, LabelReachableData};
-// pub use self::matcher_fst::MatcherFst;
+pub use self::matcher_fst::MatcherFst;
 pub use self::state_reachable::StateReachable;
 
 pub mod compose_filters;
@@ -25,5 +25,5 @@ mod compose_state_tuple;
 mod interval_reach_visitor;
 mod interval_set;
 mod label_reachable;
-// mod matcher_fst;
+mod matcher_fst;
 mod state_reachable;

@@ -12,7 +12,7 @@ use crate::algorithms::compose::lookahead_filters::lookahead_selector::{
 use crate::algorithms::compose::lookahead_filters::{
     lookahead_match_type, LookAheadComposeFilterTrait,
 };
-use crate::algorithms::compose::lookahead_matchers::{LookaheadMatcher, LookAheadMatcherData};
+use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
 use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;
