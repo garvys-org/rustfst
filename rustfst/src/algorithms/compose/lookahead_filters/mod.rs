@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 pub use lookahead_compose_filter::{LookAheadComposeFilter, LookAheadComposeFilterBulder};
 pub use lookahead_selector::{SMatchBoth, SMatchInput, SMatchNone, SMatchOutput, SMatchUnknown};
-// pub use push_labels_compose_filter::PushLabelsComposeFilter;
+pub use push_labels_compose_filter::{PushLabelsComposeFilter, PushLabelsComposeFilterBuilder};
 pub use push_weights_compose_filter::{PushWeightsComposeFilter, PushWeightsComposeFilterBuilder};
 
 use crate::algorithms::compose::compose_filters::ComposeFilter;
@@ -15,7 +15,7 @@ use crate::semirings::Semiring;
 
 mod lookahead_compose_filter;
 pub mod lookahead_selector;
-// mod push_labels_compose_filter;
+mod push_labels_compose_filter;
 mod push_weights_compose_filter;
 
 pub fn lookahead_match_type<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
