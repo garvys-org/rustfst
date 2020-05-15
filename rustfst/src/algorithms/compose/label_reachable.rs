@@ -126,7 +126,10 @@ impl LabelReachable {
         })
     }
 
-    pub fn compute_data<W: Semiring, F:Fst<W>>(fst: &F, reach_input: bool) -> Result<(LabelReachableData, HashMap<usize, usize>)> {
+    pub fn compute_data<W: Semiring, F: Fst<W>>(
+        fst: &F,
+        reach_input: bool,
+    ) -> Result<(LabelReachableData, HashMap<usize, usize>)> {
         let mut fst: VectorFst<_> = fst_convert_from_ref(fst);
 
         let mut data = LabelReachableData::new(reach_input);
@@ -281,10 +284,7 @@ impl LabelReachable {
         if label == EPS_LABEL {
             return Ok(false);
         }
-        Ok(self
-            .data
-            .interval_set(current_state)?
-            .member(label))
+        Ok(self.data.interval_set(current_state)?.member(label))
     }
 
     // Can reach final state (via epsilon transitions) from this state?

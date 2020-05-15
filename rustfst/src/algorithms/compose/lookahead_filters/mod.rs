@@ -19,8 +19,8 @@ pub mod lookahead_selector;
 // mod push_weights_compose_filter;
 
 pub fn lookahead_match_type<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
-    m1: &Arc<M1>,
-    m2: &Arc<M2>,
+    m1: &M1,
+    m2: &M2,
 ) -> MatchType {
     let type1 = m1.match_type();
     let type2 = m2.match_type();

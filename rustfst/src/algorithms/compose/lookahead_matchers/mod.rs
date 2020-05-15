@@ -1,11 +1,10 @@
-use std::cell::RefCell;
 use std::fmt::Debug;
 use std::sync::Arc;
 
 use anyhow::Result;
 
 pub use label_lookahead_matcher::LabelLookAheadMatcher;
-pub use label_lookahead_relabeler::LabelLookAheadRelabeler;
+pub(super) use label_lookahead_relabeler::LabelLookAheadRelabeler;
 pub use tr_lookahead_matcher::TrLookAheadMatcher;
 pub use trivial_lookahead_matcher::TrivialLookAheadMatcher;
 
@@ -16,7 +15,7 @@ use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, NO_STATE_ID};
 
 mod label_lookahead_matcher;
-pub mod label_lookahead_relabeler;
+pub(super) mod label_lookahead_relabeler;
 mod tr_lookahead_matcher;
 mod trivial_lookahead_matcher;
 
@@ -83,10 +82,10 @@ pub trait LookaheadMatcher<W: Semiring>: Matcher<W> {
         match_type: MatchType,
     ) -> Result<Option<Self::MatcherData>>;
 
-    // Previously init_lookahead_fst
-    fn check_lookahead_fst<LF: ExpandedFst<W>>(&mut self, lfst: &Arc<LF>) -> Result<()>;
+    fn init_lookahead_fst<LF: ExpandedFst<W>>(&mut self, lfst: &Arc<LF>) -> Result<()>;
     // Are there paths from a state in the lookahead FST that can be read from
     // the curent matcher state?
+
     fn lookahead_fst<LF: ExpandedFst<W>>(
         &self,
         matcher_state: StateId,

@@ -12,14 +12,14 @@ use crate::algorithms::compose::LabelReachableData;
 use crate::fst_traits::{
     CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, MutableFst, StateIterator,
 };
-use crate::SymbolTable;
 use crate::semirings::Semiring;
+use crate::SymbolTable;
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct MatcherFst<W, F, M, T> {
     fst_add_on: FstAddOn<F, (Option<Arc<T>>, Option<Arc<T>>)>,
     matcher: PhantomData<M>,
-    w: PhantomData<W>
+    w: PhantomData<W>,
 }
 
 impl<W, F, M, T> MatcherFst<W, F, M, T> {
@@ -44,10 +44,16 @@ impl<W, F, M, T> MatcherFst<W, F, M, T> {
 // TODO: To be generalized
 impl<W, F, M> MatcherFst<W, F, M, M::MatcherData>
 where
-    W: Semiring, F: MutableFst<W>, M: LookaheadMatcher<W, F = F, MatcherData = LabelReachableData>
+    W: Semiring,
+    F: MutableFst<W>,
+    M: LookaheadMatcher<W, F = F, MatcherData = LabelReachableData>,
 {
     // Construct a new Matcher Fst intended for LookAhead composition and relabel fst2 wrt to the first fst.
-    pub fn new_with_relabeling<F2: MutableFst<W>>(mut fst: F, fst2: &mut F2, relabel_input: bool) -> Result<Self> {
+    pub fn new_with_relabeling<F2: MutableFst<W>>(
+        mut fst: F,
+        fst2: &mut F2,
+        relabel_input: bool,
+    ) -> Result<Self> {
         let imatcher_data = M::create_data(&fst, MatchType::MatchInput)?;
         let omatcher_data = M::create_data(&fst, MatchType::MatchOutput)?;
 
@@ -55,14 +61,13 @@ where
         LabelLookAheadRelabeler::init(&mut fst, &mut add_on)?;
         LabelLookAheadRelabeler::relabel(fst2, &mut add_on, relabel_input)?;
 
-        let add_on = (
-            add_on.0.map(Arc::new), add_on.1.map(Arc::new));
+        let add_on = (add_on.0.map(Arc::new), add_on.1.map(Arc::new));
 
         let fst_add_on = FstAddOn::new(fst, add_on);
         Ok(Self {
             fst_add_on,
             matcher: PhantomData,
-            w: PhantomData
+            w: PhantomData,
         })
     }
 }
@@ -109,7 +114,8 @@ impl<'a, W, F: StateIterator<'a>, M, T> StateIterator<'a> for MatcherFst<W, F, M
 
 impl<'a, W, F, M, T> FstIterator<'a, W> for MatcherFst<W, F, M, T>
 where
-    W: Semiring, F: FstIterator<'a, W>,
+    W: Semiring,
+    F: FstIterator<'a, W>,
 {
     type FstIter = F::FstIter;
 
@@ -120,7 +126,10 @@ where
 
 impl<W, F, M, T> Fst<W> for MatcherFst<W, F, M, T>
 where
-    W: Semiring, F: Fst<W>, M: Debug, T: Debug
+    W: Semiring,
+    F: Fst<W>,
+    M: Debug,
+    T: Debug,
 {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.fst_add_on.input_symbols()
@@ -147,10 +156,12 @@ where
     }
 }
 
-impl<W, F, M, T> ExpandedFst<W>
-    for MatcherFst<W, F, M, T>
+impl<W, F, M, T> ExpandedFst<W> for MatcherFst<W, F, M, T>
 where
-    W: Semiring, F: ExpandedFst<W>, M: Debug + Clone + PartialEq, T: Debug + Clone + PartialEq
+    W: Semiring,
+    F: ExpandedFst<W>,
+    M: Debug + Clone + PartialEq,
+    T: Debug + Clone + PartialEq,
 {
     fn num_states(&self) -> usize {
         self.fst_add_on.num_states()
@@ -159,7 +170,9 @@ where
 
 impl<W, F, M, T> FstIntoIterator<W> for MatcherFst<W, F, M, T>
 where
-    W: Semiring, F: FstIntoIterator<W>, T: Debug
+    W: Semiring,
+    F: FstIntoIterator<W>,
+    T: Debug,
 {
     type TrsIter = F::TrsIter;
     type FstIter = F::FstIter;

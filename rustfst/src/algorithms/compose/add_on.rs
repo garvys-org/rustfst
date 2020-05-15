@@ -4,8 +4,8 @@ use std::sync::Arc;
 use anyhow::Result;
 
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator};
-use crate::SymbolTable;
 use crate::semirings::Semiring;
+use crate::SymbolTable;
 
 /// Adds an object of type T to an FST.
 /// The resulting type is a new FST implementation.
@@ -76,7 +76,7 @@ impl<'a, F: StateIterator<'a>, T> StateIterator<'a> for FstAddOn<F, T> {
 impl<'a, W, F, T> FstIterator<'a, W> for FstAddOn<F, T>
 where
     W: Semiring + 'a,
-    F: FstIterator<'a, W>
+    F: FstIterator<'a, W>,
 {
     type FstIter = F::FstIter;
 
@@ -88,7 +88,7 @@ where
 impl<W, F, T: Debug> Fst<W> for FstAddOn<F, T>
 where
     W: Semiring,
-    F: Fst<W>
+    F: Fst<W>,
 {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.fst.input_symbols()
@@ -117,7 +117,9 @@ where
 
 impl<W, F, T> ExpandedFst<W> for FstAddOn<F, T>
 where
-    W: Semiring, F: ExpandedFst<W>, T: Debug + Clone + PartialEq
+    W: Semiring,
+    F: ExpandedFst<W>,
+    T: Debug + Clone + PartialEq,
 {
     fn num_states(&self) -> usize {
         self.fst.num_states()
@@ -126,7 +128,9 @@ where
 
 impl<W, F, T> FstIntoIterator<W> for FstAddOn<F, T>
 where
-    W: Semiring, F: FstIntoIterator<W>, T: Debug
+    W: Semiring,
+    F: FstIntoIterator<W>,
+    T: Debug,
 {
     type TrsIter = F::TrsIter;
     type FstIter = F::FstIter;

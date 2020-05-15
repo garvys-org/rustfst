@@ -80,16 +80,13 @@ impl MatchTypeTrait for SMatchUnknown {
 //     }
 // }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub enum Selector {
     Fst1Matcher2,
     Fst2Matcher1,
 }
 
-pub(crate) fn selector<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
-    match_type: MatchType,
-    lookahead_type: MatchType,
-) -> Selector {
+pub(crate) fn selector(match_type: MatchType, lookahead_type: MatchType) -> Selector {
     match match_type {
         MatchType::MatchInput => Selector::Fst1Matcher2,
         MatchType::MatchOutput => Selector::Fst2Matcher1,
