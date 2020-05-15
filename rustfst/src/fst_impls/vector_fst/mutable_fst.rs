@@ -4,7 +4,7 @@ use std::sync::Arc;
 use anyhow::Result;
 
 use crate::{StateId, Tr};
-// use crate::algorithms::tr_unique::tr_compare;
+use crate::algorithms::tr_unique::tr_compare;
 use crate::fst_impls::vector_fst::{VectorFst, VectorFstState};
 use crate::fst_traits::CoreFst;
 use crate::fst_traits::MutableFst;
@@ -245,30 +245,30 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
     }
 
     unsafe fn unique_trs_unchecked(&mut self, state: usize) {
-        unimplemented!()
-        // let trs = &mut self.states.get_unchecked_mut(state).trs;
-        // trs.sort_by(tr_compare);
-        // trs.dedup();
+        let trs = &mut self.states.get_unchecked_mut(state).trs;
+        let trs_vec = Arc::make_mut(&mut trs.0);
+        trs_vec.sort_by(tr_compare);
+        trs_vec.dedup();
     }
 
     unsafe fn sum_trs_unchecked(&mut self, state: usize) {
-        unimplemented!()
-        // let trs = &mut self.states.get_unchecked_mut(state).trs;
-        // trs.sort_by(tr_compare);
-        // let mut n_trs: usize = 0;
-        // for i in 0..trs.len() {
-        //     if n_trs > 0 && equal_tr(&trs[i], &trs[n_trs - 1]) {
-        //         let (left, right) = trs.split_at_mut(i);
-        //         left[n_trs - 1]
-        //             .weight
-        //             .plus_assign(&right[0].weight)
-        //             .unwrap();
-        //     } else {
-        //         trs.swap(n_trs, i);
-        //         n_trs += 1;
-        //     }
-        // }
-        // trs.truncate(n_trs);
-        // // Truncate doesn't modify the capacity of the vector. Maybe a shrink_to_fit ?
+        let trs = &mut self.states.get_unchecked_mut(state).trs;
+        let trs_vec = Arc::make_mut(&mut trs.0);
+        trs_vec.sort_by(tr_compare);
+        let mut n_trs: usize = 0;
+        for i in 0..trs_vec.len() {
+            if n_trs > 0 && equal_tr(&trs_vec[i], &trs_vec[n_trs - 1]) {
+                let (left, right) = trs_vec.split_at_mut(i);
+                left[n_trs - 1]
+                    .weight
+                    .plus_assign(&right[0].weight)
+                    .unwrap();
+            } else {
+                trs_vec.swap(n_trs, i);
+                n_trs += 1;
+            }
+        }
+        trs_vec.truncate(n_trs);
+        // Truncate doesn't modify the capacity of the vector. Maybe a shrink_to_fit ?
     }
 }

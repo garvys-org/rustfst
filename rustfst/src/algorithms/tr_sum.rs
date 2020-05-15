@@ -1,4 +1,4 @@
-use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 
 /// Plus-Sum weights of trs leaving the same state, going to the same state
