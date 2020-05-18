@@ -47,6 +47,23 @@ where
     F: MutableFst<W>,
     M: LookaheadMatcher<W, F = F, MatcherData = LabelReachableData>,
 {
+    pub fn new(mut fst: F) -> Result<Self> {
+        let imatcher_data = M::create_data(&fst, MatchType::MatchInput)?;
+        let omatcher_data = M::create_data(&fst, MatchType::MatchOutput)?;
+
+        let mut add_on = (imatcher_data, omatcher_data);
+        LabelLookAheadRelabeler::init(&mut fst, &mut add_on)?;
+
+        let add_on = (add_on.0.map(Arc::new), add_on.1.map(Arc::new));
+
+        let fst_add_on = FstAddOn::new(fst, add_on);
+        Ok(Self {
+            fst_add_on,
+            matcher: PhantomData,
+            w: PhantomData,
+        })
+    }
+
     // Construct a new Matcher Fst intended for LookAhead composition and relabel fst2 wrt to the first fst.
     pub fn new_with_relabeling<F2: MutableFst<W>>(
         mut fst: F,

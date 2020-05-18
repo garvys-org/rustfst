@@ -8,10 +8,10 @@ use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_state_map_tr_sum<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_state_map_tr_sum<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring,
 {
     let mut fst_state_map = test_data.raw.clone();
     tr_sum(&mut fst_state_map);
@@ -30,10 +30,10 @@ where
     Ok(())
 }
 
-pub fn test_state_map_tr_unique<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_state_map_tr_unique<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring,
 {
     let mut fst_state_map = test_data.raw.clone();
     tr_unique(&mut fst_state_map);

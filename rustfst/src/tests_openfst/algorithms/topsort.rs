@@ -8,10 +8,10 @@ use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_topsort<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_topsort<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring,
 {
     let mut fst_topsort = test_data.raw.clone();
     top_sort(&mut fst_topsort)?;

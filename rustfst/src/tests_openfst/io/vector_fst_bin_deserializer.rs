@@ -5,9 +5,9 @@ use crate::fst_traits::{Fst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_vector_fst_bin_deserializer<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_vector_fst_bin_deserializer<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring + 'static,
+    W: SerializableSemiring,
 {
     let parsed_fst_bin = VectorFst::<W>::read(&test_data.raw_vector_bin_path)?;
 
@@ -21,10 +21,10 @@ where
 }
 
 pub fn test_vector_fst_bin_with_symt_deserializer<W>(
-    test_data: &FstTestData<VectorFst<W>>,
+    test_data: &FstTestData<W, VectorFst<W>>,
 ) -> Result<()>
 where
-    W: SerializableSemiring + 'static,
+    W: SerializableSemiring,
 {
     let mut parsed_fst_bin = VectorFst::<W>::read(&test_data.raw_vector_with_symt_bin_path)?;
 

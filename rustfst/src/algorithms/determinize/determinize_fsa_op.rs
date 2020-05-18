@@ -4,15 +4,17 @@ use anyhow::Result;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl};
 use crate::algorithms::determinize::divisors::CommonDivisor;
-use crate::algorithms::determinize::{DeterminizeElement, DeterminizeStateTuple, DeterminizeTr, WeightedSubset, DeterminizeStateTable};
+use crate::algorithms::determinize::{
+    DeterminizeElement, DeterminizeStateTable, DeterminizeStateTuple, DeterminizeTr, WeightedSubset,
+};
 use crate::algorithms::lazy_fst_revamp::{FstOp, StateTable};
 use crate::fst_traits::{Fst, MutableFst};
 use crate::semirings::{DivideType, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::{Label, Semiring, StateId, Tr, Trs, TrsVec, KDELTA};
+use itertools::enumerate;
 use std::collections::hash_map::Entry;
 use std::marker::PhantomData;
 use std::sync::{Arc, Mutex};
-use itertools::enumerate;
 
 #[derive(Debug)]
 pub struct DeterminizeFsaOp<W: Semiring, F: Fst<W>, CD: CommonDivisor<W>> {
@@ -159,6 +161,12 @@ where
 
     pub fn out_dist(self) -> Result<Vec<W>> {
         let out_dist = self.state_table.out_dist();
-        out_dist.into_iter().enumerate().map(|(s, e)| e.ok_or_else(|| format_err!("Outdist for state {} has not been computed", s))).collect::<Result<Vec<_>>>()
+        out_dist
+            .into_iter()
+            .enumerate()
+            .map(|(s, e)| {
+                e.ok_or_else(|| format_err!("Outdist for state {} has not been computed", s))
+            })
+            .collect::<Result<Vec<_>>>()
     }
 }

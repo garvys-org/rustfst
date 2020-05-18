@@ -1,11 +1,11 @@
 use std::fmt;
 use std::hash::Hash;
-use std::sync::{Mutex, Arc};
+use std::sync::{Arc, Mutex};
 
 use bimap::BiHashMap;
 
-use crate::{StateId, Semiring};
 use crate::algorithms::determinize::{DeterminizeStateTuple, WeightedSubset};
+use crate::{Semiring, StateId};
 use anyhow::Result;
 
 #[derive(Debug, PartialEq)]
@@ -14,7 +14,7 @@ struct InnerDeterminizeStateTable<W: Semiring> {
     // Distance to final NFA states.
     in_dist: Option<Arc<Vec<W>>>,
     // Distance to final DFA states.
-    out_dist: Vec<Option<W>>
+    out_dist: Vec<Option<W>>,
 }
 
 impl<W: Semiring> InnerDeterminizeStateTable<W> {
@@ -37,11 +37,7 @@ pub struct DeterminizeStateTable<W: Semiring>(Mutex<InnerDeterminizeStateTable<W
 
 impl<W: Semiring> fmt::Debug for DeterminizeStateTable<W> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{:?}",
-            self.0.lock().unwrap()
-        )
+        write!(f, "{:?}", self.0.lock().unwrap())
     }
 }
 
@@ -53,7 +49,11 @@ impl<W: Semiring> PartialEq for DeterminizeStateTable<W> {
 
 impl<W: Semiring> DeterminizeStateTable<W> {
     pub fn new(in_dist: Option<Arc<Vec<W>>>) -> Self {
-        Self(Mutex::new(InnerDeterminizeStateTable {in_dist, out_dist: vec![], table: BiHashMap::new()}))
+        Self(Mutex::new(InnerDeterminizeStateTable {
+            in_dist,
+            out_dist: vec![],
+            table: BiHashMap::new(),
+        }))
     }
 
     /// Looks up integer ID from entry. If it doesn't exist and insert
@@ -65,7 +65,7 @@ impl<W: Semiring> DeterminizeStateTable<W> {
 
             if inner.in_dist.is_some() {
                 if n >= inner.out_dist.len() {
-                    inner.out_dist.resize(n+1, None);
+                    inner.out_dist.resize(n + 1, None);
                 }
                 if inner.out_dist[n].is_none() {
                     inner.out_dist[n] = Some(inner.compute_distance(&tuple.subset)?);

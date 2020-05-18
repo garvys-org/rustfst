@@ -50,7 +50,7 @@ where
     CD: CommonDivisor<W> + 'a,
 {
     type Iter =
-    <LazyFst<W, DeterminizeFsaOp<W, F, CD>, SimpleHashMapCache<W>> as StateIterator<'a>>::Iter;
+        <LazyFst<W, DeterminizeFsaOp<W, F, CD>, SimpleHashMapCache<W>> as StateIterator<'a>>::Iter;
 
     fn states_iter(&'a self) -> Self::Iter {
         self.0.states_iter()
@@ -63,8 +63,10 @@ where
     F: Fst<W> + 'a,
     CD: CommonDivisor<W> + 'a,
 {
-    type FstIter =
-    <LazyFst<W, DeterminizeFsaOp<W, F, CD>, SimpleHashMapCache<W>> as FstIterator<'a, W>>::FstIter;
+    type FstIter = <LazyFst<W, DeterminizeFsaOp<W, F, CD>, SimpleHashMapCache<W>> as FstIterator<
+        'a,
+        W,
+    >>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
         self.0.fst_iter()
@@ -127,7 +129,7 @@ where
     }
 
     pub fn compute_with_distance<F2: MutableFst<W>>(self) -> Result<(F2, Vec<W>)> {
-        let dfst : F2 = self.compute()?;
+        let dfst: F2 = self.compute()?;
         let out_dist = self.out_dist()?;
         Ok((dfst, out_dist))
     }

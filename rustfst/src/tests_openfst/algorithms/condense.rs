@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use std::marker::PhantomData;
 
 use anyhow::Result;
 use itertools::Itertools;
@@ -15,32 +16,34 @@ pub struct CondenseOperationResult {
     result: String,
 }
 
-pub struct CondenseTestData<F>
+pub struct CondenseTestData<W, F>
 where
-    F: SerializableFst,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W>,
+    W: SerializableSemiring,
 {
     pub sccs: Vec<i32>,
     pub result: F,
+    w: PhantomData<W>,
 }
 
 impl CondenseOperationResult {
-    pub fn parse<F>(&self) -> CondenseTestData<F>
+    pub fn parse<W, F>(&self) -> CondenseTestData<W, F>
     where
-        F: SerializableFst,
-        F::W: SerializableSemiring,
+        F: SerializableFst<W>,
+        W: SerializableSemiring,
     {
         CondenseTestData {
             result: F::from_text_string(self.result.as_str()).unwrap(),
             sccs: self.sccs.iter().map(|e| e.parse().unwrap()).collect_vec(),
+            w: PhantomData,
         }
     }
 }
 
-pub fn test_condense<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_condense<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: MutableFst + Display + SerializableFst,
-    F::W: SerializableSemiring,
+    F: MutableFst<W> + Display + SerializableFst<W>,
+    W: SerializableSemiring,
 {
     // Connect
     let fst_in = test_data.raw.clone();

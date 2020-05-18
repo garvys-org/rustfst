@@ -1,6 +1,9 @@
+use std::sync::Arc;
+
 use anyhow::Result;
 
 use crate::algorithms::cache::FstImpl;
+use crate::algorithms::determinize::determinize_fsa::DeterminizeFsa;
 use crate::algorithms::determinize::divisors::CommonDivisor;
 use crate::algorithms::determinize::{
     DefaultCommonDivisor, DeterminizeFsaOp, DeterminizeType, GallicCommonDivisor,
@@ -18,10 +21,11 @@ use crate::semirings::{
     GallicWeight, GallicWeightMin, GallicWeightRestrict, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::{EPS_LABEL, KDELTA};
-use std::sync::Arc;
-use crate::algorithms::determinize::determinize_fsa::DeterminizeFsa;
 
-pub fn determinize_with_distance<W, F1, F2>(ifst: Arc<F1>, in_dist: Arc<Vec<W>>) -> Result<(F2, Vec<W>)>
+pub fn determinize_with_distance<W, F1, F2>(
+    ifst: Arc<F1>,
+    in_dist: Arc<Vec<W>>,
+) -> Result<(F2, Vec<W>)>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
     F1: ExpandedFst<W>,
@@ -146,6 +150,7 @@ mod tests {
     use crate::fst_impls::VectorFst;
     use crate::semirings::TropicalWeight;
     use crate::tr::Tr;
+    use crate::Semiring;
 
     use super::*;
 
@@ -172,7 +177,7 @@ mod tests {
         ref_fst.add_tr(s0, Tr::new(1, 1, TropicalWeight::new(2.0), s1))?;
 
         let determinized_fst: VectorFst<TropicalWeight> =
-            determinize(&ref_fst, DeterminizeType::DeterminizeFunctional)?;
+            determinize(Arc::new(input_fst), DeterminizeType::DeterminizeFunctional)?;
 
         assert_eq!(determinized_fst, ref_fst);
         Ok(())
@@ -207,7 +212,7 @@ mod tests {
         ref_fst.add_tr(s1, Tr::new(2, 2, TropicalWeight::new(4.0), s2))?;
 
         let determinized_fst: VectorFst<TropicalWeight> =
-            determinize(&ref_fst, DeterminizeType::DeterminizeFunctional)?;
+            determinize(Arc::new(input_fst), DeterminizeType::DeterminizeFunctional)?;
 
         assert_eq!(determinized_fst, ref_fst);
         Ok(())

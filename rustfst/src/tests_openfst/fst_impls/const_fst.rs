@@ -9,9 +9,9 @@ use crate::semirings::{SerializableSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
 use crate::SymbolTable;
 
-pub fn test_const_fst_convert_convert<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_const_fst_convert_convert<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring + WeightQuantize + 'static,
+    W: SerializableSemiring + WeightQuantize,
 {
     let mut raw_fst = test_data.raw.clone();
 

@@ -8,11 +8,10 @@ use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::{Semiring, SerializableSemiring};
 use crate::tests_openfst::FstTestData;
 
-pub fn test_weight_pushing_initial<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_weight_pushing_initial<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeaklyDivisibleSemiring + 'static,
-    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring + WeaklyDivisibleSemiring,
 {
     // Weight pushing initial
     let mut fst_weight_push_initial = test_data.raw.clone();
@@ -34,11 +33,10 @@ where
     Ok(())
 }
 
-pub fn test_weight_pushing_final<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_weight_pushing_final<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeaklyDivisibleSemiring + 'static,
-    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring + WeaklyDivisibleSemiring,
 {
     // Weight pushing final
     let mut fst_weight_push_final = test_data.raw.clone();

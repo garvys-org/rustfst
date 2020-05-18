@@ -1,15 +1,15 @@
 use std::cell::RefCell;
 use std::cmp::Ordering;
-
-use binary_heap_plus::BinaryHeap;
+use std::sync::Arc;
 
 use anyhow::Result;
-
+use binary_heap_plus::BinaryHeap;
 use unsafe_unwrap::UnsafeUnwrap;
 
+use crate::algorithms::determinize::determinize_with_distance;
 use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::tr_filters::AnyTrFilter;
-use crate::algorithms::{connect, determinize_with_distance, reverse, shortest_distance, Queue};
+use crate::algorithms::{connect, reverse, shortest_distance, Queue};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{
@@ -17,7 +17,6 @@ use crate::semirings::{
 };
 use crate::Tr;
 use crate::{StateId, Trs};
-use std::sync::Arc;
 
 /// Creates an FST containing the n-shortest paths in the input FST. The n-shortest paths are the
 /// n-lowest weight paths w.r.t. the natural semiring order.
@@ -83,7 +82,10 @@ where
             distance_2.into_iter().map(|v| v.into()).collect();
         let (dfst, distance_3_reversed): (VectorFst<_>, _) =
             determinize_with_distance(Arc::new(rfst), Arc::new(distance_2_reversed))?;
-        let distance_3: Vec<_> = distance_3_reversed.into_iter().map(|v| v.reverse_back()).collect::<Result<Vec<_>>>()?;
+        let distance_3: Vec<_> = distance_3_reversed
+            .into_iter()
+            .map(|v| v.reverse_back())
+            .collect::<Result<Vec<_>>>()?;
         n_shortest_path(&dfst, &distance_3, nshortest)?
     };
 

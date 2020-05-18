@@ -143,10 +143,10 @@ pub fn parse_fst_properties(mapping: &HashMap<String, bool>) -> FstProperties {
     props
 }
 
-pub fn test_fst_properties<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_fst_properties<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst,
-    F::W: SerializableSemiring + WeightQuantize,
+    F: SerializableFst<W> + MutableFst<W>,
+    W: SerializableSemiring + WeightQuantize,
 {
     let ref_props = test_data.fst_properties;
     let props = test_data.raw.properties()?;

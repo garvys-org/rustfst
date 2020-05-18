@@ -10,10 +10,10 @@ use crate::semirings::SerializableSemiring;
 use crate::semirings::WeightQuantize;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_trsort_ilabel<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_trsort_ilabel<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeightQuantize,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring + WeightQuantize,
 {
     let mut fst_trsort = test_data.raw.clone();
     tr_sort(&mut fst_trsort, ilabel_compare);
@@ -29,10 +29,10 @@ where
     Ok(())
 }
 
-pub fn test_trsort_olabel<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_trsort_olabel<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeightQuantize,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring + WeightQuantize,
 {
     let mut fst_trsort = test_data.raw.clone();
     tr_sort(&mut fst_trsort, olabel_compare);

@@ -37,10 +37,10 @@ impl ShorestDistanceOperationResult {
     }
 }
 
-pub fn test_shortest_distance<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_shortest_distance<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst,
-    F::W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize + 'static,
+    F: SerializableFst<W> + MutableFst<W>,
+    W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
 {
     for data in &test_data.shortest_distance {
         let distance = shortest_distance(&test_data.raw, data.reverse)?;

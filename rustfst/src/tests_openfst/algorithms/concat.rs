@@ -1,7 +1,9 @@
+use std::marker::PhantomData;
+
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::{concat, ConcatFst};
+use crate::algorithms::concat::{concat, ConcatFst};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
@@ -15,34 +17,35 @@ pub struct ConcatOperationResult {
     result_lazy: String,
 }
 
-pub struct ConcatTestData<F>
+pub struct ConcatTestData<W, F>
 where
-    F: SerializableFst,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W>,
+    W: SerializableSemiring,
 {
     pub fst_2: F,
     pub result_static: F,
     pub result_lazy: F,
+    w: PhantomData<W>,
 }
 
 impl ConcatOperationResult {
-    pub fn parse<F>(&self) -> ConcatTestData<F>
+    pub fn parse<W, F>(&self) -> ConcatTestData<W, F>
     where
-        F: SerializableFst,
-        F::W: SerializableSemiring,
+        F: SerializableFst<W>,
+        W: SerializableSemiring,
     {
         ConcatTestData {
             fst_2: F::from_text_string(self.fst_2.as_str()).unwrap(),
             result_static: F::from_text_string(self.result_static.as_str()).unwrap(),
             result_lazy: F::from_text_string(self.result_lazy.as_str()).unwrap(),
+            w: PhantomData,
         }
     }
 }
 
-pub fn test_concat<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_concat<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-    W::ReverseWeight: 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
     for concat_test_data in &test_data.concat {
         let mut fst_res_static = test_data.raw.clone();
@@ -62,10 +65,9 @@ where
     Ok(())
 }
 
-pub fn test_concat_lazy<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_concat_lazy<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-    W::ReverseWeight: 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
     for concat_test_data in &test_data.concat {
         let concat_lazy_fst_openfst = &concat_test_data.result_lazy;

@@ -4,10 +4,10 @@ use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_del_all_states<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_del_all_states<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: MutableFst + SerializableFst,
-    F::W: SerializableSemiring,
+    F: MutableFst<W> + SerializableFst<W>,
+    W: SerializableSemiring,
 {
     let mut fst = test_data.raw.clone();
 

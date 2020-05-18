@@ -91,7 +91,7 @@ mod tests {
         assert!(!fst.is_final(s3)?);
         assert_eq!(1, fst.num_trs(s3)?);
         assert_eq!(
-            Some(&TropicalWeight::one()),
+            Some(TropicalWeight::one()),
             fst.final_weight(super_final_state)?
         );
         Ok(())
@@ -115,7 +115,7 @@ mod tests {
         let super_final_state = add_super_final_state(&mut fst);
         assert_eq!(s3, super_final_state);
         assert_eq!(
-            Some(&TropicalWeight::one()),
+            Some(TropicalWeight::one()),
             fst.final_weight(super_final_state)?
         );
         Ok(())
@@ -143,7 +143,7 @@ mod tests {
         assert!(!fst.is_final(s3)?);
         assert_eq!(1, fst.num_trs(s3)?);
         assert_eq!(
-            Some(&TropicalWeight::one()),
+            Some(TropicalWeight::one()),
             fst.final_weight(super_final_state)?
         );
         Ok(())
@@ -167,7 +167,7 @@ mod tests {
         let super_final_state = add_super_final_state(&mut fst);
         assert_eq!(num_states, super_final_state);
         assert_eq!(
-            Some(&TropicalWeight::one()),
+            Some(TropicalWeight::one()),
             fst.final_weight(super_final_state)?
         );
         Ok(())

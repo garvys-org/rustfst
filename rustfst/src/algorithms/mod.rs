@@ -63,10 +63,8 @@ pub mod lazy_fst_revamp;
 pub use self::{
     add_super_final_state::add_super_final_state,
     all_pairs_shortest_distance::all_pairs_shortest_distance,
-    // compose::compose,
     condense::condense,
     connect::connect,
-    determinize::{determinize, determinize_with_distance, DeterminizeType},
     encode::{decode, encode},
     fst_convert::{fst_convert, fst_convert_from_ref},
     inversion::invert,

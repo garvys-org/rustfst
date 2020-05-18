@@ -7,10 +7,10 @@ use crate::tests_openfst::FstTestData;
 
 use anyhow::Result;
 
-pub fn test_fst_convert<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_fst_convert<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display + AllocableFst,
-    F::W: SerializableSemiring + WeaklyDivisibleSemiring,
+    F: SerializableFst<W> + MutableFst<W> + Display + AllocableFst<W>,
+    W: SerializableSemiring + WeaklyDivisibleSemiring,
 {
     // Invert
     let fst = test_data.raw.clone();

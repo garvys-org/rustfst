@@ -3,11 +3,13 @@ use counter::Counter;
 use itertools::Itertools;
 
 use crate::fst_traits::{ExpandedFst, Fst};
+use crate::{Semiring, Trs};
 
-pub fn compare_fst_static_lazy<FS, FD>(fst_static: &FS, fst_lazy: &FD) -> Result<()>
+pub fn compare_fst_static_lazy<W, FS, FD>(fst_static: &FS, fst_lazy: &FD) -> Result<()>
 where
-    FS: ExpandedFst,
-    FD: Fst<W = FS::W>,
+    FS: ExpandedFst<W>,
+    FD: Fst<W>,
+    W: Semiring,
 {
     assert_eq!(fst_lazy.states_iter().count(), fst_static.num_states());
 
@@ -30,10 +32,12 @@ where
         };
 
         let mut trs_lazy: Counter<_, usize> = Counter::new();
-        trs_lazy.update(fst_lazy.tr_iter(i)?.cloned());
+        let trs_lazy_owner = fst_lazy.get_trs(i)?;
+        trs_lazy.update(trs_lazy_owner.trs().iter().cloned());
 
         let mut trs_static: Counter<_, usize> = Counter::new();
-        trs_static.update(fst_static.tr_iter(i)?.cloned());
+        let trs_static_owner = fst_static.get_trs(i)?;
+        trs_static.update(trs_static_owner.trs().iter().cloned());
 
         assert_eq!(trs_lazy, trs_static);
     }
@@ -43,7 +47,7 @@ where
         .map(|data| {
             (
                 data.state_id,
-                data.trs.collect_vec(),
+                data.trs.trs().iter().cloned().collect_vec(),
                 data.final_weight,
                 data.num_trs,
             )
@@ -54,7 +58,7 @@ where
         .map(|data| {
             (
                 data.state_id,
-                data.trs.collect_vec(),
+                data.trs.trs().iter().cloned().collect_vec(),
                 data.final_weight,
                 data.num_trs,
             )

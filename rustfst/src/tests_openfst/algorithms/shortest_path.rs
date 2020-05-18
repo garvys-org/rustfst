@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use std::marker::PhantomData;
 
 use anyhow::{format_err, Result};
 use serde::{Deserialize, Serialize};
@@ -17,21 +18,22 @@ pub struct ShorestPathOperationResult {
     result: String,
 }
 
-pub struct ShortestPathTestData<F>
+pub struct ShortestPathTestData<W, F>
 where
-    F: SerializableFst,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W>,
+    W: SerializableSemiring,
 {
     unique: bool,
     nshortest: usize,
     result: Result<F>,
+    w: PhantomData<W>,
 }
 
 impl ShorestPathOperationResult {
-    pub fn parse<F>(&self) -> ShortestPathTestData<F>
+    pub fn parse<W, F>(&self) -> ShortestPathTestData<W, F>
     where
-        F: SerializableFst,
-        F::W: SerializableSemiring,
+        F: SerializableFst<W>,
+        W: SerializableSemiring,
     {
         ShortestPathTestData {
             unique: self.unique,
@@ -40,17 +42,17 @@ impl ShorestPathOperationResult {
                 "error" => Err(format_err!("lol")),
                 _ => F::from_text_string(self.result.as_str()),
             },
+            w: PhantomData,
         }
     }
 }
 
-pub fn test_shortest_path<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_shortest_path<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize + 'static,
-    <<F as CoreFst>::W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize,
-    F::W: Into<<<F as CoreFst>::W as Semiring>::ReverseWeight>
-        + From<<<F as CoreFst>::W as Semiring>::ReverseWeight>,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
+    <W as Semiring>::ReverseWeight: WeaklyDivisibleSemiring + WeightQuantize,
+    W: Into<<W as Semiring>::ReverseWeight> + From<<W as Semiring>::ReverseWeight>,
 {
     for data in &test_data.shortest_path {
         //        println!(

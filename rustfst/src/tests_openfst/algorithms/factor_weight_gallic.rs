@@ -1,23 +1,22 @@
+use std::marker::PhantomData;
+
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::factor_iterators::GallicFactor;
-use crate::algorithms::factor_iterators::GallicFactorLeft;
-use crate::algorithms::factor_iterators::GallicFactorMin;
-use crate::algorithms::factor_iterators::GallicFactorRestrict;
-use crate::algorithms::factor_iterators::GallicFactorRight;
-use crate::algorithms::factor_weight;
-use crate::algorithms::weight_converters::FromGallicConverter;
-use crate::algorithms::weight_converters::ToGallicConverter;
-use crate::algorithms::{weight_convert, FactorWeightOptions, FactorWeightType};
+use crate::algorithms::factor_weight::{
+    factor_iterators::{
+        GallicFactor, GallicFactorLeft, GallicFactorMin, GallicFactorRestrict, GallicFactorRight,
+    },
+    factor_weight, FactorWeightOptions, FactorWeightType,
+};
+use crate::algorithms::weight_convert;
+use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
-use crate::semirings::GallicWeightLeft;
-use crate::semirings::GallicWeightMin;
-use crate::semirings::GallicWeightRestrict;
-use crate::semirings::GallicWeightRight;
-use crate::semirings::WeightQuantize;
-use crate::semirings::{GallicWeight, SerializableSemiring};
+use crate::semirings::{
+    GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, GallicWeightRight,
+    SerializableSemiring, WeightQuantize,
+};
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -28,35 +27,37 @@ pub struct FwGallicOperationResult {
     result: String,
 }
 
-pub struct FwGallicTestData<F>
+pub struct FwGallicTestData<W, F>
 where
-    F: SerializableFst,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W>,
+    W: SerializableSemiring,
 {
     pub factor_final_weights: bool,
     pub factor_tr_weights: bool,
     pub gallic_type: String,
     pub result: F,
+    w: PhantomData<W>,
 }
 
 impl FwGallicOperationResult {
-    pub fn parse<F>(&self) -> FwGallicTestData<F>
+    pub fn parse<W, F>(&self) -> FwGallicTestData<W, F>
     where
-        F: SerializableFst,
-        F::W: SerializableSemiring,
+        F: SerializableFst<W>,
+        W: SerializableSemiring,
     {
         FwGallicTestData {
             factor_final_weights: self.factor_final_weights,
             factor_tr_weights: self.factor_tr_weights,
             gallic_type: self.gallic_type.clone(),
             result: F::from_text_string(self.result.as_str()).unwrap(),
+            w: PhantomData,
         }
     }
 }
 
-pub fn test_factor_weight_gallic<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_factor_weight_gallic<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring + WeightQuantize + 'static,
+    W: SerializableSemiring + WeightQuantize,
 {
     for data in &test_data.factor_weight_gallic {
         //        println!("test fwgallic");
@@ -75,28 +76,30 @@ where
                 let fst_temp: VectorFst<GallicWeightLeft<W>> =
                     weight_convert(&test_data.raw, &mut to_gallic)?;
                 let fst_temp: VectorFst<_> =
-                    factor_weight::<VectorFst<_>, _, _, GallicFactorLeft<_>>(&fst_temp, opts)?;
+                    factor_weight::<_, VectorFst<_>, _, _, GallicFactorLeft<_>>(&fst_temp, opts)?;
                 weight_convert(&fst_temp, &mut from_gallic)?
             }
             "gallic_right" => {
                 let fst_temp: VectorFst<GallicWeightRight<W>> =
                     weight_convert(&test_data.raw, &mut to_gallic)?;
                 let fst_temp: VectorFst<_> =
-                    factor_weight::<VectorFst<_>, _, _, GallicFactorRight<_>>(&fst_temp, opts)?;
+                    factor_weight::<_, VectorFst<_>, _, _, GallicFactorRight<_>>(&fst_temp, opts)?;
                 weight_convert(&fst_temp, &mut from_gallic)?
             }
             "gallic_restrict" => {
                 let fst_temp: VectorFst<GallicWeightRestrict<W>> =
                     weight_convert(&test_data.raw, &mut to_gallic)?;
                 let fst_temp: VectorFst<_> =
-                    factor_weight::<VectorFst<_>, _, _, GallicFactorRestrict<_>>(&fst_temp, opts)?;
+                    factor_weight::<_, VectorFst<_>, _, _, GallicFactorRestrict<_>>(
+                        &fst_temp, opts,
+                    )?;
                 weight_convert(&fst_temp, &mut from_gallic)?
             }
             "gallic_min" => {
                 let fst_temp: VectorFst<GallicWeightMin<W>> =
                     weight_convert(&test_data.raw, &mut to_gallic)?;
                 let fst_temp: VectorFst<GallicWeightMin<W>> =
-                    factor_weight::<VectorFst<GallicWeightMin<W>>, _, _, GallicFactorMin<_>>(
+                    factor_weight::<_, VectorFst<GallicWeightMin<W>>, _, _, GallicFactorMin<_>>(
                         &fst_temp, opts,
                     )?;
                 weight_convert(&fst_temp, &mut from_gallic)?
@@ -105,7 +108,7 @@ where
                 let fst_temp: VectorFst<GallicWeight<W>> =
                     weight_convert(&test_data.raw, &mut to_gallic)?;
                 let fst_temp: VectorFst<_> =
-                    factor_weight::<VectorFst<_>, _, _, GallicFactor<_>>(&fst_temp, opts)?;
+                    factor_weight::<_, VectorFst<_>, _, _, GallicFactor<_>>(&fst_temp, opts)?;
                 weight_convert(&fst_temp, &mut from_gallic)?
             }
             _ => bail!("Unexpected gallic_type={:?}", data.gallic_type),

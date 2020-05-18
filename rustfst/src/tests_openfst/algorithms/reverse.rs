@@ -43,11 +43,11 @@ where
     }
 }
 
-pub fn test_reverse<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_reverse<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + AllocableFst + Display,
-    F::W: 'static + SerializableSemiring + WeaklyDivisibleSemiring,
-    <<F as CoreFst>::W as Semiring>::ReverseWeight: SerializableSemiring,
+    F: SerializableFst<W> + MutableFst<W> + AllocableFst<W> + Display,
+    W: SerializableSemiring + WeaklyDivisibleSemiring,
+    <W as Semiring>::ReverseWeight: SerializableSemiring,
 {
     let fst_reverse: VectorFst<_> = reverse(&test_data.raw).unwrap();
     let mut mapper = ReverseWeightConverter {};

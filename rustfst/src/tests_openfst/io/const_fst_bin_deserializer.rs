@@ -6,9 +6,9 @@ use crate::fst_traits::SerializableFst;
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_const_fst_bin_deserializer<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_const_fst_bin_deserializer<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring + 'static,
+    W: SerializableSemiring,
 {
     let parsed_fst_bin = ConstFst::<W>::read(&test_data.raw_const_bin_path)
         .with_context(|| format_err!("Failed parsing ConstFst Aligned"))?;
@@ -24,10 +24,10 @@ where
 }
 
 pub fn test_const_fst_aligned_bin_deserializer<W>(
-    test_data: &FstTestData<VectorFst<W>>,
+    test_data: &FstTestData<W, VectorFst<W>>,
 ) -> Result<()>
 where
-    W: SerializableSemiring + 'static,
+    W: SerializableSemiring,
 {
     let parsed_fst_bin = ConstFst::<W>::read(&test_data.raw_const_aligned_bin_path)
         .with_context(|| format_err!("Failed parsing ConstFst Aligned Bin"))?;

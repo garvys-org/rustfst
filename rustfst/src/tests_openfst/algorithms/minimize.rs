@@ -9,6 +9,7 @@ use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
 use crate::tests_openfst::FstTestData;
+use std::marker::PhantomData;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MinimizeOperationResult {
@@ -16,20 +17,21 @@ pub struct MinimizeOperationResult {
     result: String,
 }
 
-pub struct MinimizeTestData<F>
+pub struct MinimizeTestData<W, F>
 where
-    F: SerializableFst,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W>,
+    W: SerializableSemiring,
 {
     allow_nondet: bool,
     result: Result<F>,
+    w: PhantomData<W>,
 }
 
 impl MinimizeOperationResult {
-    pub fn parse<F>(&self) -> MinimizeTestData<F>
+    pub fn parse<W, F>(&self) -> MinimizeTestData<W, F>
     where
-        F: SerializableFst,
-        F::W: SerializableSemiring,
+        F: SerializableFst<W>,
+        W: SerializableSemiring,
     {
         MinimizeTestData {
             allow_nondet: self.allow_nondet,
@@ -37,14 +39,15 @@ impl MinimizeOperationResult {
                 "error" => Err(format_err!("lol")),
                 _ => F::from_text_string(self.result.as_str()),
             },
+            w: PhantomData,
         }
     }
 }
 
-pub fn test_minimize<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_minimize<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + AllocableFst + Display,
-    F::W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize + 'static,
+    F: SerializableFst<W> + MutableFst<W> + AllocableFst<W> + Display,
+    W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
 {
     for minimize_data in &test_data.minimize {
         //        println!("Minimize : allow_nondet = {}", minimize_data.allow_nondet);

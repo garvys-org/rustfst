@@ -11,6 +11,7 @@ use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::algorithms::compose::OLabelLookAheadFlags;
 use crate::tests_openfst::FstTestData;
 use crate::NO_LABEL;
+use std::sync::Arc;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ReachabilityTestResult {
@@ -51,23 +52,35 @@ impl LabelReachableOperationResult {
     }
 }
 
-pub fn test_label_reachable<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_label_reachable<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: MutableFst + Display + SerializableFst,
-    F::W: SerializableSemiring + 'static,
+    F: MutableFst<W> + Display + SerializableFst<W>,
+    W: SerializableSemiring,
 {
-    type TLaFst<F> = MatcherFst<
+    type TLaFst<S, F> = MatcherFst<
+        S,
         F,
-        LabelLookAheadMatcher<<F as CoreFst>::W, SortedMatcher<F>, OLabelLookAheadFlags>,
+        LabelLookAheadMatcher<S, SortedMatcher<S, F>, OLabelLookAheadFlags>,
         LabelReachableData,
     >;
 
     let fst = TLaFst::new(test_data.raw.clone())?;
 
     for label_reachable_test_data in &test_data.label_reachable {
-        let reachable = LabelReachable::new(&fst, label_reachable_test_data.reach_input)?;
+        let mut reachable_data =
+            LabelReachable::compute_data(&fst, label_reachable_test_data.reach_input)?.0;
 
-        let reachable_data = reachable.data().borrow();
+        // Mutable operations done at the beginning
+        for data in &label_reachable_test_data.result {
+            let label = data.label;
+            let label_relabeled = reachable_data.relabel(label);
+            assert_eq!(label_relabeled, data.label_relabeled);
+        }
+
+        let reachable = LabelReachable::new_from_data(Arc::new(reachable_data));
+
+        let reachable_data = reachable.data();
+
         assert_eq!(
             reachable_data.final_label(),
             label_reachable_test_data.final_label
@@ -81,12 +94,10 @@ where
             );
         }
 
-        drop(reachable_data);
-
         for data in &label_reachable_test_data.result {
             let current_state = data.state;
             let label = data.label;
-            let label_relabeled = reachable.relabel(label);
+            let label_relabeled = reachable_data.label2index()[&label];
             assert_eq!(label_relabeled, data.label_relabeled);
             let res = reachable.reach_label(current_state, label_relabeled)?;
             assert_eq!(res, data.reachable);

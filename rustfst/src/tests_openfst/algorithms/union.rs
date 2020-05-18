@@ -1,7 +1,9 @@
+use std::marker::PhantomData;
+
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::{union, UnionFst};
+use crate::algorithms::union::{union, UnionFst};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
@@ -15,34 +17,35 @@ pub struct UnionOperationResult {
     result_lazy: String,
 }
 
-pub struct UnionTestData<F>
+pub struct UnionTestData<W, F>
 where
-    F: SerializableFst,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W>,
+    W: SerializableSemiring,
 {
     pub fst_2: F,
     pub result_static: F,
     pub result_lazy: F,
+    w: PhantomData<W>,
 }
 
 impl UnionOperationResult {
-    pub fn parse<F>(&self) -> UnionTestData<F>
+    pub fn parse<W, F>(&self) -> UnionTestData<W, F>
     where
-        F: SerializableFst,
-        F::W: SerializableSemiring,
+        F: SerializableFst<W>,
+        W: SerializableSemiring,
     {
         UnionTestData {
             fst_2: F::from_text_string(self.fst_2.as_str()).unwrap(),
             result_static: F::from_text_string(self.result_static.as_str()).unwrap(),
             result_lazy: F::from_text_string(self.result_lazy.as_str()).unwrap(),
+            w: PhantomData,
         }
     }
 }
 
-pub fn test_union<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_union<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-    W::ReverseWeight: 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
     for union_test_data in &test_data.union {
         let mut fst_res_static = test_data.raw.clone();
@@ -62,10 +65,9 @@ where
     Ok(())
 }
 
-pub fn test_union_lazy<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_union_lazy<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-    W::ReverseWeight: 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
     for union_test_data in &test_data.union {
         let union_lazy_fst_openfst = &union_test_data.result_lazy;

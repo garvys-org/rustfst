@@ -1,3 +1,10 @@
+use std::sync::Arc;
+
+use crate::fst_traits::Fst;
+use crate::symbol_table::SymbolTable;
+use crate::trs::Trs;
+use crate::Semiring;
+
 pub mod const_fst_bin_deserializer;
 pub mod const_fst_bin_serializer;
 pub mod const_fst_text_serialization;
@@ -5,17 +12,16 @@ pub mod vector_fst_bin_deserializer;
 pub mod vector_fst_bin_serializer;
 pub mod vector_fst_text_serialization;
 
-use crate::fst_traits::Fst;
-use crate::symbol_table::SymbolTable;
-use std::sync::Arc;
-
-fn generate_symbol_table<F: Fst>(prefix: &str, fst: &F) -> (Arc<SymbolTable>, Arc<SymbolTable>) {
+fn generate_symbol_table<W: Semiring, F: Fst<W>>(
+    prefix: &str,
+    fst: &F,
+) -> (Arc<SymbolTable>, Arc<SymbolTable>) {
     let mut input_symt = SymbolTable::new();
     let mut output_symt = SymbolTable::new();
     let mut highest_ilabel = 0;
     let mut highest_olabel = 0;
     for state in fst.fst_iter() {
-        for tr_out in state.trs {
+        for tr_out in state.trs.trs() {
             highest_ilabel = highest_ilabel.max(tr_out.ilabel);
             highest_olabel = highest_olabel.max(tr_out.olabel);
         }
