@@ -122,13 +122,13 @@ where
         self.0.compute()
     }
 
-    pub fn out_dist(self) -> Vec<W> {
+    pub fn out_dist(self) -> Result<Vec<W>> {
         self.0.op.out_dist()
     }
 
     pub fn compute_with_distance<F2: MutableFst<W>>(self) -> Result<(F2, Vec<W>)> {
         let dfst : F2 = self.compute()?;
-        let out_dist = self.out_dist();
+        let out_dist = self.out_dist()?;
         Ok((dfst, out_dist))
     }
 }

@@ -4,9 +4,7 @@ use anyhow::Result;
 
 use crate::algorithms::cache::{CacheImpl, FstImpl};
 use crate::algorithms::determinize::divisors::CommonDivisor;
-use crate::algorithms::determinize::{
-    DeterminizeElement, DeterminizeStateTuple, DeterminizeTr, WeightedSubset,
-};
+use crate::algorithms::determinize::{DeterminizeElement, DeterminizeStateTuple, DeterminizeTr, WeightedSubset, DeterminizeStateTable};
 use crate::algorithms::lazy_fst_revamp::{FstOp, StateTable};
 use crate::fst_traits::{Fst, MutableFst};
 use crate::semirings::{DivideType, WeaklyDivisibleSemiring, WeightQuantize};
@@ -14,35 +12,13 @@ use crate::{Label, Semiring, StateId, Tr, Trs, TrsVec, KDELTA};
 use std::collections::hash_map::Entry;
 use std::marker::PhantomData;
 use std::sync::{Arc, Mutex};
-
-#[derive(Debug)]
-struct OutDistances<W: Semiring>(Mutex<Vec<W>>);
-
-impl<W: Semiring> OutDistances<W> {
-    fn new() -> Self {
-        Self (Mutex::new(vec![]))
-    }
-
-    pub fn insert_if_needed<F: Fn() -> Result<W>>(&self, s: StateId, f: F) -> Result<()> {
-        let mut v = self.0.lock().unwrap();
-        if v.len() <= s {
-            v.push(f()?);
-        }
-        Ok(())
-    }
-}
-
-
+use itertools::enumerate;
 
 #[derive(Debug)]
 pub struct DeterminizeFsaOp<W: Semiring, F: Fst<W>, CD: CommonDivisor<W>> {
     fst: Arc<F>,
-    state_table: StateTable<DeterminizeStateTuple<W>>,
+    state_table: DeterminizeStateTable<W>,
     ghost: PhantomData<CD>,
-    // Distance to final NFA states.
-    in_dist: Option<Arc<Vec<W>>>,
-    // Distance to final DFA states.
-    out_dist: OutDistances<W>,
 }
 
 impl<W, F: Fst<W>, CD: CommonDivisor<W>> FstOp<W> for DeterminizeFsaOp<W, F, CD>
@@ -137,10 +113,8 @@ where
         }
         Ok(Self {
             fst,
-            state_table: StateTable::new(),
+            state_table: DeterminizeStateTable::new(in_dist),
             ghost: PhantomData,
-            in_dist,
-            out_dist: OutDistances::new(),
         })
     }
 
@@ -180,28 +154,11 @@ where
     }
 
     fn find_state(&self, tuple: &DeterminizeStateTuple<W>) -> Result<StateId> {
-        let s = self.state_table.find_id_from_ref(&tuple);
-        if self.in_dist.is_some() {
-            self.out_dist.insert_if_needed(s, || self.compute_distance(&tuple.subset));
-        }
-        Ok(s)
+        self.state_table.find_id_from_ref(&tuple)
     }
 
-    fn compute_distance(&self, subset: &WeightedSubset<W>) -> Result<W> {
-        let mut outd = W::zero();
-        let weight_zero = W::zero();
-        for element in subset.iter() {
-            let ind = if element.state < self.in_dist.as_ref().unwrap().len() {
-                &self.in_dist.as_ref().unwrap()[element.state]
-            } else {
-                &weight_zero
-            };
-            outd.plus_assign(element.weight.times(ind)?)?;
-        }
-        Ok(outd)
-    }
-
-    pub fn out_dist(self) -> Vec<W> {
-        self.out_dist.0.into_inner().unwrap()
+    pub fn out_dist(self) -> Result<Vec<W>> {
+        let out_dist = self.state_table.out_dist();
+        out_dist.into_iter().enumerate().map(|(s, e)| e.ok_or_else(|| format_err!("Outdist for state {} has not been computed", s))).collect::<Result<Vec<_>>>()
     }
 }
