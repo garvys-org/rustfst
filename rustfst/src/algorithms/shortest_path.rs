@@ -17,6 +17,7 @@ use crate::semirings::{
 };
 use crate::Tr;
 use crate::{StateId, Trs};
+use std::sync::Arc;
 
 /// Creates an FST containing the n-shortest paths in the input FST. The n-shortest paths are the
 /// n-lowest weight paths w.r.t. the natural semiring order.
@@ -81,8 +82,8 @@ where
         let distance_2_reversed: Vec<<W as Semiring>::ReverseWeight> =
             distance_2.into_iter().map(|v| v.into()).collect();
         let (dfst, distance_3_reversed): (VectorFst<_>, _) =
-            determinize_with_distance(&rfst, &distance_2_reversed)?;
-        let distance_3: Vec<_> = distance_3_reversed.into_iter().map(|v| v.into()).collect();
+            determinize_with_distance(Arc::new(rfst), Arc::new(distance_2_reversed))?;
+        let distance_3: Vec<_> = distance_3_reversed.into_iter().map(|v| v.reverse_back()).collect::<Result<Vec<_>>>()?;
         n_shortest_path(&dfst, &distance_3, nshortest)?
     };
 

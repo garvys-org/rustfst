@@ -16,7 +16,7 @@ use std::collections::{HashSet, VecDeque};
 #[derive(Debug)]
 pub struct LazyFst<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> {
     cache: Cache,
-    op: Op,
+    pub(crate) op: Op,
     w: PhantomData<W>,
     isymt: Option<Arc<SymbolTable>>,
     osymt: Option<Arc<SymbolTable>>,

@@ -3,7 +3,7 @@ use anyhow::Result;
 use crate::algorithms::cache::FstImpl;
 use crate::algorithms::determinize::divisors::CommonDivisor;
 use crate::algorithms::determinize::{
-    DefaultCommonDivisor, DeterminizeFsaImpl, DeterminizeType, GallicCommonDivisor,
+    DefaultCommonDivisor, DeterminizeFsaOp, DeterminizeType, GallicCommonDivisor,
 };
 use crate::algorithms::factor_weight::factor_iterators::{
     GallicFactor, GallicFactorMin, GallicFactorRestrict,
@@ -18,8 +18,10 @@ use crate::semirings::{
     GallicWeight, GallicWeightMin, GallicWeightRestrict, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::{EPS_LABEL, KDELTA};
+use std::sync::Arc;
+use crate::algorithms::determinize::determinize_fsa::DeterminizeFsa;
 
-pub fn determinize_with_distance<W, F1, F2>(ifst: &F1, in_dist: &[W]) -> Result<(F2, Vec<W>)>
+pub fn determinize_with_distance<W, F1, F2>(ifst: Arc<F1>, in_dist: Arc<Vec<W>>) -> Result<(F2, Vec<W>)>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
     F1: ExpandedFst<W>,
@@ -28,12 +30,11 @@ where
     if !W::properties().contains(SemiringProperties::LEFT_SEMIRING) {
         bail!("determinize_fsa : weight must be left distributive")
     }
-    let mut det_fsa_impl: DeterminizeFsaImpl<_, _, DefaultCommonDivisor> =
-        DeterminizeFsaImpl::new(ifst, Some(in_dist))?;
-    det_fsa_impl.compute_with_distance()
+    let fst = DeterminizeFsa::<_, _, DefaultCommonDivisor>::new(ifst, Some(in_dist))?;
+    fst.compute_with_distance()
 }
 
-pub fn determinize_fsa<W, F1, F2, CD>(fst_in: &F1) -> Result<F2>
+pub fn determinize_fsa<W, F1, F2, CD>(fst_in: Arc<F1>) -> Result<F2>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
     F1: Fst<W>,
@@ -43,11 +44,11 @@ where
     if !W::properties().contains(SemiringProperties::LEFT_SEMIRING) {
         bail!("determinize_fsa : weight must be left distributive")
     }
-    let mut det_fsa_impl: DeterminizeFsaImpl<_, _, CD> = DeterminizeFsaImpl::new(fst_in, None)?;
-    det_fsa_impl.compute()
+    let mut det_fsa: DeterminizeFsa<_, _, CD> = DeterminizeFsa::new(fst_in, None)?;
+    det_fsa.compute()
 }
 
-pub fn determinize_fst<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Result<F2>
+pub fn determinize_fst<W, F1, F2>(fst_in: Arc<F1>, det_type: DeterminizeType) -> Result<F2>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
     F1: ExpandedFst<W>,
@@ -72,9 +73,9 @@ where
             if !W::properties().contains(SemiringProperties::PATH) {
                 bail!("determinize : weight needs to have the path property to disambiguate output")
             }
-            let fsa: VectorFst<GallicWeightMin<W>> = weight_convert(fst_in, &mut to_gallic)?;
+            let fsa: VectorFst<GallicWeightMin<W>> = weight_convert(&fst_in, &mut to_gallic)?;
             let determinized_fsa: VectorFst<GallicWeightMin<W>> =
-                determinize_fsa::<_, _, _, GallicCommonDivisor>(&fsa)?;
+                determinize_fsa::<_, _, _, GallicCommonDivisor>(Arc::new(fsa))?;
             let factored_determinized_fsa: VectorFst<GallicWeightMin<W>> =
                 factor_weight::<_, VectorFst<GallicWeightMin<W>>, _, _, GallicFactorMin<W>>(
                     &determinized_fsa,
@@ -83,9 +84,9 @@ where
             weight_convert(&factored_determinized_fsa, &mut from_gallic)
         }
         DeterminizeType::DeterminizeFunctional => {
-            let fsa: VectorFst<GallicWeightRestrict<W>> = weight_convert(fst_in, &mut to_gallic)?;
+            let fsa: VectorFst<GallicWeightRestrict<W>> = weight_convert(&fst_in, &mut to_gallic)?;
             let determinized_fsa: VectorFst<GallicWeightRestrict<W>> =
-                determinize_fsa::<_, _, _, GallicCommonDivisor>(&fsa)?;
+                determinize_fsa::<_, _, _, GallicCommonDivisor>(Arc::new(fsa))?;
             let factored_determinized_fsa: VectorFst<GallicWeightRestrict<W>> =
                 factor_weight::<
                     _,
@@ -97,9 +98,9 @@ where
             weight_convert(&factored_determinized_fsa, &mut from_gallic)
         }
         DeterminizeType::DeterminizeNonFunctional => {
-            let fsa: VectorFst<GallicWeight<W>> = weight_convert(fst_in, &mut to_gallic)?;
+            let fsa: VectorFst<GallicWeight<W>> = weight_convert(&fst_in, &mut to_gallic)?;
             let determinized_fsa: VectorFst<GallicWeight<W>> =
-                determinize_fsa::<_, _, _, GallicCommonDivisor>(&fsa)?;
+                determinize_fsa::<_, _, _, GallicCommonDivisor>(Arc::new(fsa))?;
             let factored_determinized_fsa: VectorFst<GallicWeight<W>> =
                 factor_weight::<_, VectorFst<GallicWeight<W>>, _, _, GallicFactor<W>>(
                     &determinized_fsa,
@@ -124,19 +125,19 @@ where
 ///
 /// ![determinize_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/determinize_out.svg?sanitize=true)
 ///
-pub fn determinize<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Result<F2>
+pub fn determinize<W, F1, F2>(fst_in: Arc<F1>, det_type: DeterminizeType) -> Result<F2>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
     F1: ExpandedFst<W>,
     F2: MutableFst<W> + AllocableFst<W>,
 {
     let mut fst_res: F2 = if fst_in.is_acceptor() {
-        determinize_fsa::<_, _, _, DefaultCommonDivisor>(fst_in)?
+        determinize_fsa::<_, _, _, DefaultCommonDivisor>(Arc::clone(&fst_in))?
     } else {
-        determinize_fst(fst_in, det_type)?
+        determinize_fst(Arc::clone(&fst_in), det_type)?
     };
 
-    fst_res.set_symts_from_fst(fst_in);
+    fst_res.set_symts_from_fst(&fst_in);
     Ok(fst_res)
 }
 

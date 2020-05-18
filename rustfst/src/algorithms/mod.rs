@@ -5,7 +5,7 @@ pub mod compose;
 pub mod concat;
 mod condense;
 mod connect;
-mod determinize;
+pub mod determinize;
 pub(crate) mod dfs_visit;
 mod encode;
 pub mod factor_weight;

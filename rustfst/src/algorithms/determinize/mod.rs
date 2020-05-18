@@ -1,9 +1,11 @@
-pub use determinize_fsa_impl::DeterminizeFsaImpl;
+pub use determinize_fsa::DeterminizeFsa;
+pub use determinize_fsa_op::DeterminizeFsaOp;
 pub use determinize_static::{determinize, determinize_with_distance};
 pub(self) use divisors::{DefaultCommonDivisor, GallicCommonDivisor, LabelCommonDivisor};
 pub(self) use element::{DeterminizeElement, DeterminizeStateTuple, DeterminizeTr, WeightedSubset};
 
-mod determinize_fsa_impl;
+mod determinize_fsa;
+mod determinize_fsa_op;
 mod determinize_static;
 mod divisors;
 mod element;
