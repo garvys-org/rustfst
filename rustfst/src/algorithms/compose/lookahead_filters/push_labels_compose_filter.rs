@@ -121,8 +121,8 @@ where
     CF::M1: LookaheadMatcher<W>,
     CF::M2: LookaheadMatcher<W>,
 {
-    type M1 = MultiEpsMatcher<W, CF::M1>;
-    type M2 = MultiEpsMatcher<W, CF::M2>;
+    type M1 = CF::M1;
+    type M2 = CF::M2;
     type FS = PairFilterState<CF::FS, IntegerFilterState>;
 
     fn start(&self) -> Self::FS {
@@ -207,7 +207,7 @@ where
     }
 
     fn get_shared_data(&self) -> &Arc<SharedDataComposeFilter<W, Self::M1, Self::M2>> {
-        unimplemented!()
+        self.filter.get_shared_data()
     }
 }
 

@@ -56,12 +56,12 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W
     /// assert_eq!(fst.final_weight(s2).unwrap(), None);
     ///
     /// fst.set_final(s1, BooleanWeight::one());
-    /// assert_eq!(fst.final_weight(s1).unwrap(), Some(&BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s1).unwrap(), Some(BooleanWeight::one()));
     /// assert_eq!(fst.final_weight(s2).unwrap(), None);
     ///
     /// fst.set_final(s2, BooleanWeight::one());
-    /// assert_eq!(fst.final_weight(s1).unwrap(), Some(&BooleanWeight::one()));
-    /// assert_eq!(fst.final_weight(s2).unwrap(), Some(&BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s1).unwrap(), Some(BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s2).unwrap(), Some(BooleanWeight::one()));
     /// ```
     fn set_final<S: Into<W>>(&mut self, state_id: StateId, final_weight: S) -> Result<()>;
     unsafe fn set_final_unchecked<S: Into<W>>(&mut self, state_id: StateId, final_weight: S);
@@ -285,7 +285,7 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W
     /// let s1 = fst.add_state();
     /// fst.set_final(s1, 1.2)?;
     ///
-    /// assert_eq!(fst.final_weight(s1)?, Some(&ProbabilityWeight::new(1.2)));
+    /// assert_eq!(fst.final_weight(s1)?, Some(ProbabilityWeight::new(1.2)));
     /// let weight = fst.take_final_weight(s1)?;
     /// assert_eq!(weight, Some(ProbabilityWeight::new(1.2)));
     /// assert_eq!(fst.final_weight(s1)?, None);
@@ -310,7 +310,7 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W
     /// let s1 = fst.add_state();
     /// fst.set_final(s1, 1.2)?;
     ///
-    /// assert_eq!(fst.final_weight(s1)?, Some(&ProbabilityWeight::new(1.2)));
+    /// assert_eq!(fst.final_weight(s1)?, Some(ProbabilityWeight::new(1.2)));
     /// let weight = unsafe {fst.take_final_weight_unchecked(s1)};
     /// assert_eq!(weight, Some(ProbabilityWeight::new(1.2)));
     /// assert_eq!(fst.final_weight(s1)?, None);

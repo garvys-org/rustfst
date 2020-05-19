@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 use std::sync::Arc;
+use std::marker::PhantomData;
 
 use anyhow::Result;
 
@@ -50,7 +51,7 @@ pub trait CoreFst<W: Semiring> {
     ///
     /// // 2 - Access the final weight of each state
     /// assert_eq!(fst.final_weight(s1).unwrap(), None);
-    /// assert_eq!(fst.final_weight(s2).unwrap(), Some(&BooleanWeight::one()));
+    /// assert_eq!(fst.final_weight(s2).unwrap(), Some(BooleanWeight::one()));
     /// assert!(fst.final_weight(s2 + 1).is_err());
     /// ```
     fn final_weight(&self, state_id: StateId) -> Result<Option<W>>;
@@ -240,8 +241,41 @@ pub trait Fst<W: Semiring>:
 
     fn final_states_iter(
         &self,
-    ) -> std::iter::Filter<<Self as StateIterator>::Iter, Box<dyn FnMut(&StateId) -> bool>> {
-        unimplemented!()
-        // self.states_iter().filter(Box::new(|s| unsafe {self.is_final_unchecked(*s)}))
+    ) -> FinalStatesIterator<W, Self>
+    where Self: std::marker::Sized
+    {
+        FinalStatesIterator {
+            fst: self,
+            state_iter: self.states_iter(),
+            w: PhantomData
+        }
+    }
+}
+
+pub struct FinalStatesIterator<'a, W, F>
+where
+    W: Semiring,
+    F: Fst<W>,
+{
+    fst: &'a F,
+    state_iter: <F as StateIterator<'a>>::Iter,
+    w: PhantomData<W>
+}
+
+impl<'a, W, F> Iterator for FinalStatesIterator<'a, W, F>
+where W: Semiring, F: Fst<W>
+{
+    type Item = StateId;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if let Some(s) = self.state_iter.next() {
+                if unsafe {self.fst.is_final_unchecked(s)} {
+                    return Some(s)
+                }
+            } else {
+                return None
+            }
+        }
     }
 }

@@ -22,7 +22,7 @@ use crate::{Trs, EPS_LABEL};
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::fst_traits::MutableFst;
-/// # use rustfst::algorithms::rm_epsilon;
+/// # use rustfst::algorithms::rm_epsilon::rm_epsilon;
 /// # use rustfst::Tr;
 /// # use rustfst::EPS_LABEL;
 /// # use anyhow::Result;

@@ -35,13 +35,13 @@ mod tests {
         assert_eq!(fst.get_trs(s1)?.trs().iter().count(), 2);
 
         // Iterates on trs leaving s1
-        let mut it_s1 = fst.get_trs(s1)?;
+        let it_s1 = fst.get_trs(s1)?;
         assert_eq!(it_s1.len(), 2);
         assert_eq!(tr_1, it_s1.trs()[0]);
         assert_eq!(tr_2, it_s1.trs()[1]);
 
         // Iterates on trs leaving s2
-        let mut it_s2 = fst.get_trs(s2)?;
+        let it_s2 = fst.get_trs(s2)?;
 
         assert_eq!(it_s2.len(), 0);
         Ok(())

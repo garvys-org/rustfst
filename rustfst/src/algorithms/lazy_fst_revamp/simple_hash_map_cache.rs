@@ -12,6 +12,7 @@ pub struct SimpleHashMapCache<W: Semiring> {
     start: Mutex<Option<Option<StateId>>>,
     trs: Mutex<HashMap<StateId, TrsVec<W>>>,
     final_weight: Mutex<HashMap<StateId, Option<W>>>,
+    num_known_states: Mutex<usize>
 }
 
 impl<W: Semiring> SimpleHashMapCache<W> {
@@ -20,6 +21,7 @@ impl<W: Semiring> SimpleHashMapCache<W> {
             start: Mutex::new(None),
             trs: Mutex::new(HashMap::new()),
             final_weight: Mutex::new(HashMap::new()),
+            num_known_states: Mutex::new(0)
         }
     }
 }
@@ -29,7 +31,12 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
         self.start.lock().unwrap().clone()
     }
 
-    fn insert_start(&self, id: Option<StateId>) {
+    fn insert_start(&self, id: Option<StateId>)
+    {
+        if let Some(s) = id {
+            let mut n = self.num_known_states.lock().unwrap();
+            *n = std::cmp::max(*n, s+1);
+        }
         *self.start.lock().unwrap() = Some(id);
     }
 
@@ -38,6 +45,12 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
     }
 
     fn insert_trs(&self, id: usize, trs: TrsVec<W>) {
+        let mut n = self.num_known_states.lock().unwrap();
+        *n = std::cmp::max(*n, id+1);
+        for tr in trs.trs() {
+            *n = std::cmp::max(*n, tr.nextstate+1);
+        }
+        drop(n);
         self.trs.lock().unwrap().insert(id, trs);
     }
     fn get_final_weight(&self, id: usize) -> Option<Option<W>> {
@@ -45,13 +58,13 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
     }
 
     fn insert_final_weight(&self, id: StateId, weight: Option<W>) {
+        let mut n = self.num_known_states.lock().unwrap();
+        *n = std::cmp::max(*n, id+1);
+        drop(n);
         self.final_weight.lock().unwrap().insert(id, weight);
     }
 
     fn num_known_states(&self) -> usize {
-        std::cmp::max(
-            self.final_weight.lock().unwrap().len(),
-            self.trs.lock().unwrap().len(),
-        )
+        *self.num_known_states.lock().unwrap()
     }
 }

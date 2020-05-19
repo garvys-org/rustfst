@@ -33,6 +33,8 @@
 //! ```rust
 //! use anyhow::Result;
 //! use rustfst::prelude::*;
+//! use rustfst::algorithms::determinize::{DeterminizeType, determinize};
+//! use rustfst::algorithms::rm_epsilon::rm_epsilon;
 //!
 //! fn main() -> Result<()> {
 //!     // Creates a empty wFST

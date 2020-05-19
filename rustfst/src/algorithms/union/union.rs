@@ -20,7 +20,7 @@ use crate::{Trs, EPS_LABEL};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::fst_traits::PathsIterator;
 /// # use rustfst::FstPath;
-/// # use rustfst::algorithms::union;
+/// # use rustfst::algorithms::union::union;
 /// # use std::collections::HashSet;
 /// # fn main() -> Result<()> {
 /// let mut fst_a : VectorFst<IntegerWeight> = fst![2 => 3];
