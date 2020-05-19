@@ -130,7 +130,7 @@ where
 ///
 pub fn determinize<W, F1, F2>(fst_in: Arc<F1>, det_type: DeterminizeType) -> Result<F2>
 where
-    W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
+    W: WeaklyDivisibleSemiring + WeightQuantize,
     F1: ExpandedFst<W>,
     F2: MutableFst<W> + AllocableFst<W>,
 {

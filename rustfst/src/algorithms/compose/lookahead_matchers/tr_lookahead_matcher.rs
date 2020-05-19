@@ -141,7 +141,6 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
                     for tr in iter {
                         match tr {
                             IterItemMatcher::Tr(a) => {
-                                let a = unsafe { &*a };
                                 la_matcher_data.lookahead_weight.plus_assign(&a.weight)?
                             }
                             IterItemMatcher::EpsLoop => {
@@ -187,7 +186,6 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
                         if MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
                             match matcher_value {
                                 IterItemMatcher::Tr(a) => {
-                                    let a = unsafe { &*a };
                                     la_matcher_data
                                         .lookahead_weight
                                         .plus_assign(tr.weight.times(&a.weight)?)?

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::compose::compose_filters::{ComposeFilter, SharedDataComposeFilter};
+use crate::algorithms::compose::compose_filters::{ComposeFilter};
 use crate::semirings::Semiring;
 use crate::{Tr, NO_LABEL};
 
@@ -43,7 +43,19 @@ impl<W: Semiring, F: ComposeFilter<W>> ComposeFilter<W> for MultiEpsFilter<F> {
         self.filter.filter_final(w1, w2)
     }
 
-    fn get_shared_data(&self) -> &Arc<SharedDataComposeFilter<W, Self::M1, Self::M2>> {
-        unimplemented!()
+    fn matcher1(&self) -> &Self::M1 {
+        self.filter.matcher1()
+    }
+
+    fn matcher2(&self) -> &Self::M2 {
+        self.filter.matcher2()
+    }
+
+    fn matcher1_shared(&self) -> &Arc<Self::M1> {
+        self.filter.matcher1_shared()
+    }
+
+    fn matcher2_shared(&self) -> &Arc<Self::M2> {
+        self.filter.matcher2_shared()
     }
 }

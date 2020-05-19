@@ -1,9 +1,10 @@
 use std::sync::Arc;
+use std::marker::PhantomData;
 
 use anyhow::Result;
 
 use crate::algorithms::compose::compose_filters::{
-    ComposeFilter, ComposeFilterBuilder, SharedDataComposeFilter,
+    ComposeFilter, ComposeFilterBuilder,
 };
 use crate::algorithms::compose::filter_states::{FilterState, IntegerFilterState};
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
@@ -13,7 +14,8 @@ use crate::{StateId, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
 #[derive(Debug)]
 pub struct MatchComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
-    shared_data: Arc<SharedDataComposeFilter<W, M1, M2>>,
+    matcher1: Arc<M1>,
+    matcher2: Arc<M2>,
     /// Current fst1 state
     s1: StateId,
     /// Current fst2 state
@@ -28,11 +30,14 @@ pub struct MatchComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
     noeps1: bool,
     /// No epsilons leaving s2 ?
     noeps2: bool,
+    w: PhantomData<W>
 }
 
 #[derive(Debug)]
 pub struct MatchComposeFilterBuilder<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
-    shared_data: Arc<SharedDataComposeFilter<W, M1, M2>>,
+    matcher1: Arc<M1>,
+    matcher2: Arc<M2>,
+    w: PhantomData<W>
 }
 
 impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
@@ -52,15 +57,17 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
             matcher1.unwrap_or_else(|| M1::new(Arc::clone(&fst1), MatchType::MatchOutput).unwrap());
         let matcher2 =
             matcher2.unwrap_or_else(|| M2::new(Arc::clone(&fst2), MatchType::MatchInput).unwrap());
-        let shared_data = SharedDataComposeFilter::new(Arc::new(matcher1), Arc::new(matcher2));
         Ok(Self {
-            shared_data: Arc::new(shared_data),
+            matcher1: Arc::new(matcher1),
+            matcher2: Arc::new(matcher2),
+            w: PhantomData
         })
     }
 
     fn build(&self) -> Result<Self::CF> {
         Ok(MatchComposeFilter::<W, M1, M2> {
-            shared_data: Arc::clone(&self.shared_data),
+            matcher1: Arc::clone(&self.matcher1),
+            matcher2: Arc::clone(&self.matcher2),
             s1: NO_STATE_ID,
             s2: NO_STATE_ID,
             fs: <Self::CF as ComposeFilter<W>>::FS::new(NO_STATE_ID),
@@ -68,6 +75,7 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
             alleps2: false,
             noeps1: false,
             noeps2: false,
+            w: PhantomData
         })
     }
 }
@@ -89,8 +97,8 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
             self.s2 = s2;
             self.fs = filter_state.clone();
 
-            let fst1 = self.shared_data.matcher1.fst();
-            let fst2 = self.shared_data.matcher2.fst();
+            let fst1 = self.fst1();
+            let fst2 = self.fst2();
 
             let na1 = fst1.num_trs(s1)?;
             let na2 = fst2.num_trs(s2)?;
@@ -163,7 +171,19 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(())
     }
 
-    fn get_shared_data(&self) -> &Arc<SharedDataComposeFilter<W, Self::M1, Self::M2>> {
-        &self.shared_data
+    fn matcher1(&self) -> &Self::M1 {
+        &self.matcher1
+    }
+
+    fn matcher2(&self) -> &Self::M2 {
+        &self.matcher2
+    }
+
+    fn matcher1_shared(&self) -> &Arc<Self::M1> {
+        &self.matcher1
+    }
+
+    fn matcher2_shared(&self) -> &Arc<Self::M2> {
+        &self.matcher2
     }
 }

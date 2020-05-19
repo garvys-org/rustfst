@@ -159,7 +159,7 @@ impl<W: Semiring, T: Trs<W>> Iterator for IteratorSortedMatcher<W, T> {
         if let Some(tr) = self.trs.get(self.pos) {
             if self.get_label(tr) == self.match_label {
                 self.pos += 1;
-                Some(IterItemMatcher::Tr(tr))
+                Some(IterItemMatcher::Tr(tr.clone()))
             } else {
                 None
             }

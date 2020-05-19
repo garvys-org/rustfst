@@ -4,7 +4,7 @@ use std::sync::Arc;
 use anyhow::Result;
 
 use crate::algorithms::compose::compose_filters::{
-    ComposeFilter, ComposeFilterBuilder, SharedDataComposeFilter,
+    ComposeFilter, ComposeFilterBuilder,
 };
 use crate::algorithms::compose::filter_states::FilterState;
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::{
@@ -170,15 +170,13 @@ where
 
         self.la_matcher_data = match self.selector() {
             Selector::Fst1Matcher2 => {
-                let data = self.filter.get_shared_data();
-                let fst = data.matcher1.fst();
-                let matcher = &data.matcher2;
+                let fst = self.fst1();
+                let matcher = self.matcher2();
                 matcher.lookahead_fst(arca.nextstate, fst, arcb.nextstate)?
             }
             Selector::Fst2Matcher1 => {
-                let data = self.filter.get_shared_data();
-                let fst = data.matcher2.fst();
-                let matcher = &data.matcher1;
+                let fst = self.fst2();
+                let matcher = self.matcher1();
                 matcher.lookahead_fst(arca.nextstate, fst, arcb.nextstate)?
             }
         };
@@ -226,8 +224,20 @@ where
         self.filter.filter_final(w1, w2)
     }
 
-    fn get_shared_data(&self) -> &Arc<SharedDataComposeFilter<W, Self::M1, Self::M2>> {
-        self.filter.get_shared_data()
+    fn matcher1(&self) -> &Self::M1 {
+        self.filter.matcher1()
+    }
+
+    fn matcher2(&self) -> &Self::M2 {
+        self.filter.matcher2()
+    }
+
+    fn matcher1_shared(&self) -> &Arc<Self::M1> {
+        self.filter.matcher1_shared()
+    }
+
+    fn matcher2_shared(&self) -> &Arc<Self::M2> {
+        self.filter.matcher2_shared()
     }
 }
 

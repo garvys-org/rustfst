@@ -12,7 +12,7 @@ use crate::algorithms::compose::compose_filters::{
     AltSequenceComposeFilterBuilder, ComposeFilterBuilder,
 };
 use crate::algorithms::compose::lookahead_filters::{
-    LookAheadComposeFilterBulder,
+    LookAheadComposeFilterBuilder,
     PushLabelsComposeFilterBuilder, PushWeightsComposeFilterBuilder,
 };
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::SMatchOutput;
@@ -118,7 +118,6 @@ impl MatcherFlagsTrait for OLabelLookAheadFlags {
     }
 }
 
-#[allow(unused)]
 fn do_test_compose_lookahead<W>(
     fst_raw: &VectorFst<W>,
     compose_test_data: &ComposeTestData<W, VectorFst<W>>,
@@ -140,7 +139,7 @@ where
     type TSeqFilter<S, F1, F2> =
         AltSequenceComposeFilterBuilder<S, TMatcher1<S, F1>, TMatcher2<S, F2>>;
     type TLookFilter<S, F1, F2> =
-        LookAheadComposeFilterBulder<S, TSeqFilter<S, F1, F2>, SMatchOutput>;
+        LookAheadComposeFilterBuilder<S, TSeqFilter<S, F1, F2>, SMatchOutput>;
     type TPushWeightsFilter<S, F1, F2> =
         PushWeightsComposeFilterBuilder<S, TLookFilter<S, F1, F2>, SMatchOutput>;
     type TPushLabelsFilter<S, F1, F2> =
@@ -165,7 +164,7 @@ where
     )?;
     let matcher2 = TMatcher2::new(Arc::clone(&fst2), MatchType::MatchInput)?;
 
-    let compose_filter = TPushLabelsFilter::new(
+    let compose_filter = TComposeFilter::new(
         Arc::clone(&graph1look),
         Arc::clone(&fst2),
         Some(matcher1),

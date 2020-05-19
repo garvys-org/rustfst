@@ -70,14 +70,14 @@ pub enum MatchType {
 // Use this to avoid autoref
 #[derive(Clone)]
 pub enum IterItemMatcher<W: Semiring> {
-    Tr(*const Tr<W>),
+    Tr(Tr<W>),
     EpsLoop,
 }
 
 impl<W: Semiring> IterItemMatcher<W> {
     pub fn into_tr(self, state: StateId, match_type: MatchType) -> Result<Tr<W>> {
         match self {
-            IterItemMatcher::Tr(tr) => Ok(unsafe { (*tr).clone() }),
+            IterItemMatcher::Tr(tr) => Ok(tr),
             IterItemMatcher::EpsLoop => eps_loop(state, match_type),
         }
     }

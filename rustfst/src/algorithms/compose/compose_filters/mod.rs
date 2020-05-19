@@ -1,5 +1,4 @@
 use std::fmt::Debug;
-use std::marker::PhantomData;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -24,40 +23,6 @@ mod no_match_compose_filter;
 mod null_compose_filter;
 mod sequence_compose_filter;
 mod trivial_compose_filter;
-
-// TODO: Two levels of Arc here, can probably get rid of it
-#[derive(Debug)]
-pub struct SharedDataComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
-    pub(crate) matcher1: Arc<M1>,
-    pub(crate) matcher2: Arc<M2>,
-    w: PhantomData<W>,
-}
-
-impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> SharedDataComposeFilter<W, M1, M2> {
-    pub fn new(matcher1: Arc<M1>, matcher2: Arc<M2>) -> Self {
-        Self {
-            matcher1,
-            matcher2,
-            w: PhantomData,
-        }
-    }
-
-    pub fn matcher1(&self) -> &Arc<M1> {
-        &self.matcher1
-    }
-
-    pub fn matcher2(&self) -> &Arc<M2> {
-        &self.matcher2
-    }
-
-    pub fn fst1(&self) -> &Arc<M1::F> {
-        self.matcher1.fst()
-    }
-
-    pub fn fst2(&self) -> &Arc<M2::F> {
-        self.matcher2.fst()
-    }
-}
 
 pub trait ComposeFilterBuilder<W: Semiring>: Debug {
     type CF: ComposeFilter<W>;
@@ -90,5 +55,14 @@ pub trait ComposeFilter<W: Semiring>: Debug {
 
     fn filter_final(&self, w1: &mut W, w2: &mut W) -> Result<()>;
 
-    fn get_shared_data(&self) -> &Arc<SharedDataComposeFilter<W, Self::M1, Self::M2>>;
+    fn matcher1(&self) -> &Self::M1;
+    fn matcher2(&self) -> &Self::M2;
+    fn matcher1_shared(&self) -> &Arc<Self::M1>;
+    fn matcher2_shared(&self) -> &Arc<Self::M2>;
+    fn fst1(&self) -> &Arc<<Self::M1 as Matcher<W>>::F> {
+        self.matcher1().fst()
+    }
+    fn fst2(&self) -> &Arc<<Self::M2 as Matcher<W>>::F> {
+        self.matcher2().fst()
+    }
 }

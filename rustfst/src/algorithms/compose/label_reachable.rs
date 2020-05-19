@@ -281,7 +281,7 @@ impl LabelReachable {
         if label == EPS_LABEL {
             return Ok(false);
         }
-        Ok(std::dbg!(self.data.interval_set(current_state)?).member(label))
+        Ok(self.data.interval_set(current_state)?.member(label))
     }
 
     // Can reach final state (via epsilon transitions) from this state?

@@ -1,9 +1,10 @@
 use std::sync::Arc;
+use std::marker::PhantomData;
 
 use anyhow::Result;
 
 use crate::algorithms::compose::compose_filters::{
-    ComposeFilter, ComposeFilterBuilder, SharedDataComposeFilter,
+    ComposeFilter, ComposeFilterBuilder,
 };
 use crate::algorithms::compose::filter_states::{FilterState, TrivialFilterState};
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
@@ -12,12 +13,16 @@ use crate::{Tr, NO_LABEL};
 
 #[derive(Debug)]
 pub struct NullComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
-    shared_data: Arc<SharedDataComposeFilter<W, M1, M2>>,
+    matcher1: Arc<M1>,
+    matcher2: Arc<M2>,
+    w: PhantomData<W>
 }
 
 #[derive(Debug)]
 pub struct NullComposeFilterBuilder<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
-    shared_data: Arc<SharedDataComposeFilter<W, M1, M2>>,
+    matcher1: Arc<M1>,
+    matcher2: Arc<M2>,
+    w: PhantomData<W>
 }
 
 impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
@@ -37,15 +42,18 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
             matcher1.unwrap_or_else(|| M1::new(Arc::clone(&fst1), MatchType::MatchOutput).unwrap());
         let matcher2 =
             matcher2.unwrap_or_else(|| M2::new(Arc::clone(&fst2), MatchType::MatchInput).unwrap());
-        let shared_data = SharedDataComposeFilter::new(Arc::new(matcher1), Arc::new(matcher2));
         Ok(Self {
-            shared_data: Arc::new(shared_data),
+            matcher1: Arc::new(matcher1),
+            matcher2: Arc::new(matcher2),
+            w: PhantomData
         })
     }
 
     fn build(&self) -> Result<Self::CF> {
         Ok(NullComposeFilter::<W, M1, M2> {
-            shared_data: Arc::clone(&self.shared_data),
+            matcher1: Arc::clone(&self.matcher1),
+            matcher2: Arc::clone(&self.matcher2),
+            w: PhantomData
         })
     }
 }
@@ -78,7 +86,19 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(())
     }
 
-    fn get_shared_data(&self) -> &Arc<SharedDataComposeFilter<W, Self::M1, Self::M2>> {
-        &self.shared_data
+    fn matcher1(&self) -> &Self::M1 {
+        &self.matcher1
+    }
+
+    fn matcher2(&self) -> &Self::M2 {
+        &self.matcher2
+    }
+
+    fn matcher1_shared(&self) -> &Arc<Self::M1> {
+        &self.matcher1
+    }
+
+    fn matcher2_shared(&self) -> &Arc<Self::M2> {
+        &self.matcher2
     }
 }

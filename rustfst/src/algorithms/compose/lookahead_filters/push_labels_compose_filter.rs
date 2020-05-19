@@ -4,7 +4,7 @@ use std::sync::Arc;
 use anyhow::Result;
 
 use crate::algorithms::compose::compose_filters::{
-    ComposeFilter, ComposeFilterBuilder, SharedDataComposeFilter,
+    ComposeFilter, ComposeFilterBuilder,
 };
 use crate::algorithms::compose::filter_states::{FilterState, IntegerFilterState, PairFilterState};
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::MatchTypeTrait;
@@ -82,27 +82,26 @@ where
 
     fn build(&self) -> Result<Self::CF> {
         let filter = self.filter_builder.build()?;
-        let data = filter.get_shared_data();
 
         let matcher1 = MultiEpsMatcher::new_with_opts(
-            Arc::clone(data.matcher1.fst()),
+            Arc::clone(filter.fst1()),
             MatchType::MatchOutput,
             if filter.lookahead_output() {
                 MultiEpsMatcherFlags::MULTI_EPS_LIST
             } else {
                 MultiEpsMatcherFlags::MULTI_EPS_LOOP
             },
-            Arc::clone(&data.matcher1),
+            Arc::clone(filter.matcher1_shared()),
         )?;
         let matcher2 = MultiEpsMatcher::new_with_opts(
-            Arc::clone(data.matcher2.fst()),
+            Arc::clone(filter.fst2()),
             MatchType::MatchInput,
             if filter.lookahead_output() {
                 MultiEpsMatcherFlags::MULTI_EPS_LOOP
             } else {
                 MultiEpsMatcherFlags::MULTI_EPS_LIST
             },
-            Arc::clone(&data.matcher2),
+            Arc::clone(filter.matcher2_shared()),
         )?;
         Ok(Self::CF {
             fs: FilterState::new_no_state(),
@@ -121,8 +120,8 @@ where
     CF::M1: LookaheadMatcher<W>,
     CF::M2: LookaheadMatcher<W>,
 {
-    type M1 = CF::M1;
-    type M2 = CF::M2;
+    type M1 = MultiEpsMatcher<W, CF::M1>;
+    type M2 = MultiEpsMatcher<W, CF::M2>;
     type FS = PairFilterState<CF::FS, IntegerFilterState>;
 
     fn start(&self) -> Self::FS {
@@ -139,11 +138,10 @@ where
         {
             return Ok(());
         }
-        let data = self.filter.get_shared_data();
         self.ntrsa = if self.lookahead_output() {
-            data.matcher1.fst().num_trs(s1)?
+            self.filter.fst1().num_trs(s1)?
         } else {
-            data.matcher2.fst().num_trs(s2)?
+            self.filter.fst2().num_trs(s2)?
         };
         let fs2 = filter_state.state2();
         let flabel = fs2.state();
@@ -206,8 +204,22 @@ where
         Ok(())
     }
 
-    fn get_shared_data(&self) -> &Arc<SharedDataComposeFilter<W, Self::M1, Self::M2>> {
-        self.filter.get_shared_data()
+    fn matcher1(&self) -> &Self::M1 {
+        &self.matcher1
+    }
+
+    fn matcher2(&self) -> &Self::M2 {
+        &self.matcher2
+    }
+
+    fn matcher1_shared(&self) -> &Arc<Self::M1> {
+        // Not supported at the moment as the MultiEpsMatcher is owned by the ComposeFilter
+        unimplemented!()
+    }
+
+    fn matcher2_shared(&self) -> &Arc<Self::M2> {
+        // Not supported at the moment as the MultiEpsMatcher is owned by the ComposeFilter
+        unimplemented!()
     }
 }
 
@@ -246,14 +258,12 @@ where
             } else {
                 if match self.selector() {
                     Selector::Fst1Matcher2 => {
-                        let data = self.filter.get_shared_data();
-                        let matcher = data.matcher2();
+                        let matcher = self.filter.matcher2();
                         matcher.lookahead_label(arca.nextstate, flabel)?
                     }
                     Selector::Fst2Matcher1 => {
-                        let data = self.filter.get_shared_data();
-                        let matcher = data.matcher1();
-                        std::dbg!(matcher.lookahead_label(arca.nextstate, flabel)?)
+                        let matcher = self.filter.matcher1();
+                        matcher.lookahead_label(arca.nextstate, flabel)?
                     }
                 } {
                     self.fs.clone()
@@ -301,13 +311,11 @@ where
         let la_matcher_data = self.filter.lookahead_matcher_data().unwrap();
         let b = match self.selector() {
             Selector::Fst1Matcher2 => {
-                let data = self.filter.get_shared_data();
-                let matcher = &data.matcher2;
+                let matcher = self.filter.matcher2();
                 matcher.lookahead_prefix(&mut larc, la_matcher_data)
             }
             Selector::Fst2Matcher1 => {
-                let data = self.filter.get_shared_data();
-                let matcher = &data.matcher1;
+                let matcher = self.filter.matcher1();
                 matcher.lookahead_prefix(&mut larc, la_matcher_data)
             }
         };
