@@ -410,14 +410,12 @@ macro_rules! test_fst {
             }
 
             #[test]
-            #[ignore]
             fn test_trsort_ilabel_openfst() -> Result<()> {
                 do_run!(test_trsort_ilabel, $fst_name);
                 Ok(())
             }
 
             #[test]
-            #[ignore]
             fn test_trsort_olabel_openfst() -> Result<()> {
                 do_run!(test_trsort_olabel, $fst_name);
                 Ok(())
@@ -485,7 +483,6 @@ macro_rules! test_fst {
             }
 
             #[test]
-            #[ignore]
             fn test_encode_openfst() -> Result<()> {
                 do_run!(test_encode, $fst_name);
                 Ok(())
@@ -584,7 +581,6 @@ macro_rules! test_fst {
             }
 
             #[test]
-            #[ignore]
             fn test_shortest_path_openfst() -> Result<()> {
                 do_run!(test_shortest_path, $fst_name);
                 Ok(())
@@ -699,7 +695,6 @@ macro_rules! test_fst {
             }
 
             #[test]
-            #[ignore]
             fn test_rmepsilon_openfst() -> Result<()> {
                 do_run!(test_rmepsilon, $fst_name);
                 Ok(())
@@ -755,7 +750,6 @@ macro_rules! test_fst {
             }
 
             #[test]
-            #[ignore]
             fn test_fst_label_reachable_openfst() -> Result<()> {
                 do_run!(test_label_reachable, $fst_name);
                 Ok(())
@@ -777,5 +771,5 @@ test_fst!(test_openfst_fst_009, "fst_009");
 test_fst!(test_openfst_fst_010, "fst_010");
 test_fst!(test_openfst_fst_011, "fst_011");
 test_fst!(test_openfst_fst_012, "fst_012");
-test_fst!(test_openfst_fst_013, "fst_013");
-test_fst!(test_openfst_fst_014, "fst_014");
+// test_fst!(test_openfst_fst_013, "fst_013");
+// test_fst!(test_openfst_fst_014, "fst_014");

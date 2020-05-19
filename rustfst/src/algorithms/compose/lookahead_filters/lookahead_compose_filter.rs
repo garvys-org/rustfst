@@ -40,7 +40,7 @@ pub struct LookAheadComposeFilter<
 }
 
 #[derive(Debug)]
-pub struct LookAheadComposeFilterBulder<W, CFB, SMT>
+pub struct LookAheadComposeFilterBuilder<W, CFB, SMT>
 where
     W: Semiring,
     CFB: ComposeFilterBuilder<W>,
@@ -58,7 +58,7 @@ where
 }
 
 impl<W, F1, F2, M1, M2, CF, CFB, SMT> ComposeFilterBuilder<W>
-    for LookAheadComposeFilterBulder<W, CFB, SMT>
+    for LookAheadComposeFilterBuilder<W, CFB, SMT>
 where
     W: Semiring,
     F1: ExpandedFst<W>,

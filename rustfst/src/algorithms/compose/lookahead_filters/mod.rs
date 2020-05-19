@@ -1,4 +1,4 @@
-pub use lookahead_compose_filter::{LookAheadComposeFilter, LookAheadComposeFilterBulder};
+pub use lookahead_compose_filter::{LookAheadComposeFilter, LookAheadComposeFilterBuilder};
 pub use lookahead_selector::{SMatchBoth, SMatchInput, SMatchNone, SMatchOutput, SMatchUnknown};
 pub use push_labels_compose_filter::{PushLabelsComposeFilter, PushLabelsComposeFilterBuilder};
 pub use push_weights_compose_filter::{PushWeightsComposeFilter, PushWeightsComposeFilterBuilder};

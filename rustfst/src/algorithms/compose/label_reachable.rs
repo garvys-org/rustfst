@@ -111,17 +111,15 @@ impl LabelReachableData {
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelReachable {
     data: Arc<LabelReachableData>,
-    label2state: HashMap<Label, StateId>,
     reach_fst_input: bool,
 }
 
 impl LabelReachable {
     pub fn new<W: Semiring, F: Fst<W>>(fst: &F, reach_input: bool) -> Result<Self> {
-        let (data, label2state) = Self::compute_data(fst, reach_input)?;
+        let data= Self::compute_data(fst, reach_input)?;
 
         Ok(Self {
             data: Arc::new(data),
-            label2state,
             reach_fst_input: false,
         })
     }
@@ -129,7 +127,7 @@ impl LabelReachable {
     pub fn compute_data<W: Semiring, F: Fst<W>>(
         fst: &F,
         reach_input: bool,
-    ) -> Result<(LabelReachableData, HashMap<usize, usize>)> {
+    ) -> Result<LabelReachableData> {
         let mut fst: VectorFst<_> = fst_convert_from_ref(fst);
 
         let mut data = LabelReachableData::new(reach_input);
@@ -139,13 +137,12 @@ impl LabelReachable {
         Self::transform_fst(&mut fst, &mut data, &mut label2state);
         Self::find_intervals(&fst, nstates, &mut data, &mut label2state)?;
 
-        Ok((data, label2state))
+        Ok(data)
     }
 
     pub fn new_from_data(data: Arc<LabelReachableData>) -> Self {
         Self {
             data,
-            label2state: HashMap::new(),
             reach_fst_input: false,
         }
     }
@@ -163,7 +160,7 @@ impl LabelReachable {
     // redirected via a transition labeled with kNoLabel to a new
     // kNoLabel-specific final state. Creates super-initial state for all states
     // with zero in-degree.
-    fn transform_fst<W: Semiring + 'static>(
+    fn transform_fst<W: Semiring>(
         fst: &mut VectorFst<W>,
         data: &mut LabelReachableData,
         label2state: &mut HashMap<Label, StateId>,
@@ -284,7 +281,7 @@ impl LabelReachable {
         if label == EPS_LABEL {
             return Ok(false);
         }
-        Ok(self.data.interval_set(current_state)?.member(label))
+        Ok(std::dbg!(self.data.interval_set(current_state)?).member(label))
     }
 
     // Can reach final state (via epsilon transitions) from this state?

@@ -68,7 +68,7 @@ where
 
     for label_reachable_test_data in &test_data.label_reachable {
         let mut reachable_data =
-            LabelReachable::compute_data(&fst, label_reachable_test_data.reach_input)?.0;
+            LabelReachable::compute_data(&fst, label_reachable_test_data.reach_input)?;
 
         // Mutable operations done at the beginning
         for data in &label_reachable_test_data.result {

@@ -247,13 +247,13 @@ where
                 if match self.selector() {
                     Selector::Fst1Matcher2 => {
                         let data = self.filter.get_shared_data();
-                        let matcher = &data.matcher2;
+                        let matcher = data.matcher2();
                         matcher.lookahead_label(arca.nextstate, flabel)?
                     }
                     Selector::Fst2Matcher1 => {
                         let data = self.filter.get_shared_data();
-                        let matcher = &data.matcher1;
-                        matcher.lookahead_label(arca.nextstate, flabel)?
+                        let matcher = data.matcher1();
+                        std::dbg!(matcher.lookahead_label(arca.nextstate, flabel)?)
                     }
                 } {
                     self.fs.clone()

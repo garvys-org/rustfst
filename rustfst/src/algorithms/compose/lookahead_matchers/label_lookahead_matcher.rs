@@ -116,8 +116,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         if (reach_input && MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER))
             || (!reach_input && MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
         {
-            // Ok(Some(Arc::clone(LabelReachable::new(fst, reach_input)?.data())))
-            Ok(Some(LabelReachable::compute_data(fst, reach_input)?.0))
+            Ok(Some(LabelReachable::compute_data(fst, reach_input)?))
         } else {
             Ok(None)
         }

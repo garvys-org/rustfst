@@ -127,8 +127,8 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
 
         match selector {
             Selector::Fst1Matcher2 => {
-                let fst = data.matcher1.fst();
-                let matcher = &data.matcher2;
+                let fst = data.fst1();
+                let matcher = data.matcher2();
                 trs.extend(self.match_tr(
                     sa,
                     matcher,
@@ -141,8 +141,8 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
                 }
             }
             Selector::Fst2Matcher1 => {
-                let fst = data.matcher2.fst();
-                let matcher = &data.matcher1;
+                let fst = data.fst2();
+                let matcher = data.matcher1();
                 trs.extend(self.match_tr(
                     sa,
                     matcher,
@@ -155,24 +155,6 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
                 }
             }
         }
-        // trs.extend(self.match_tr(
-        //     s,
-        //     sa,
-        //     &matchera,
-        //     &tr_loop,
-        //     match_input,
-        //     &mut compose_filter,
-        // )?);
-        // for tr in fstb.get_trs(sb)?.trs() {
-        //     trs.extend(self.match_tr(
-        //         s,
-        //         sa,
-        //         &matchera,
-        //         tr,
-        //         match_input,
-        //         &mut compose_filter,
-        //     )?);
-        // }
         Ok(TrsVec(Arc::new(trs)))
     }
 
@@ -182,6 +164,8 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
         arc2: Tr<W>,
         fs: <CFB::CF as ComposeFilter<W>>::FS,
     ) -> Result<Tr<W>> {
+        std::dbg!(&arc1);
+        std::dbg!(&arc2);
         let tuple = ComposeStateTuple {
             fs,
             s1: arc1.nextstate,
@@ -228,7 +212,10 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
                 let fs = compose_filter.filter_tr(&mut arca, &mut arcb)?;
 
                 if fs != <CFB::CF as ComposeFilter<W>>::FS::new_no_state() {
+                    println!("OK");
                     trs.push(self.add_tr(arca, arcb, fs)?);
+                } else {
+                    println!("Filtered out!");
                 }
             }
         }
@@ -257,13 +244,14 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> FstOp<W> for ComposeFstOp<W, CFB
     }
 
     fn compute_trs(&self, state: usize) -> Result<TrsVec<W>> {
+        println!("Compute trs for state : {:?}", state);
         let tuple = self.state_table.find_tuple(state);
         let s1 = tuple.s1;
         let s2 = tuple.s2;
 
         let mut compose_filter = self.compose_filter_builder.build()?;
         compose_filter.set_state(s1, s2, &tuple.fs)?;
-        if self.match_input(s1, s2, &compose_filter)? {
+        if std::dbg!(self.match_input(s1, s2, &compose_filter)?) {
             self.ordered_expand(s2, s1, true, compose_filter, Selector::Fst1Matcher2)
         } else {
             self.ordered_expand(s1, s2, false, compose_filter, Selector::Fst2Matcher1)

@@ -41,6 +41,22 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> SharedDataComposeFilter<W, M1,
             w: PhantomData,
         }
     }
+
+    pub fn matcher1(&self) -> &Arc<M1> {
+        &self.matcher1
+    }
+
+    pub fn matcher2(&self) -> &Arc<M2> {
+        &self.matcher2
+    }
+
+    pub fn fst1(&self) -> &Arc<M1::F> {
+        self.matcher1.fst()
+    }
+
+    pub fn fst2(&self) -> &Arc<M2::F> {
+        self.matcher2.fst()
+    }
 }
 
 pub trait ComposeFilterBuilder<W: Semiring>: Debug {
