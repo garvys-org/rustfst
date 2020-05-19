@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::algorithms::compose::lookahead_matchers::LabelLookAheadMatcher;
 use crate::algorithms::compose::matchers::SortedMatcher;
 use crate::algorithms::compose::{IntInterval, LabelReachable, LabelReachableData, MatcherFst};
-use crate::fst_traits::{CoreFst, MutableFst, SerializableFst};
+use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::algorithms::compose::OLabelLookAheadFlags;
 use crate::tests_openfst::FstTestData;

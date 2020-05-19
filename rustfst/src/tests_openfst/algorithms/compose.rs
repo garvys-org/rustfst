@@ -5,25 +5,25 @@ use anyhow::Result;
 use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 
+use crate::algorithms::{tr_compares::ilabel_compare, tr_sort};
+use crate::algorithms::compose::{compose_with_config, ComposeConfig, LabelReachableData};
+use crate::algorithms::compose::{ComposeFilterEnum, ComposeFst, ComposeFstOpOptions};
 use crate::algorithms::compose::compose_filters::{
-    AltSequenceComposeFilter, AltSequenceComposeFilterBuilder, ComposeFilter, ComposeFilterBuilder,
+    AltSequenceComposeFilterBuilder, ComposeFilterBuilder,
+};
+use crate::algorithms::compose::lookahead_filters::{
+    LookAheadComposeFilterBulder,
+    PushLabelsComposeFilterBuilder, PushWeightsComposeFilterBuilder,
 };
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::SMatchOutput;
-use crate::algorithms::compose::lookahead_filters::{
-    LookAheadComposeFilter, LookAheadComposeFilterBulder, PushLabelsComposeFilter,
-    PushLabelsComposeFilterBuilder, PushWeightsComposeFilter, PushWeightsComposeFilterBuilder,
-};
 use crate::algorithms::compose::lookahead_matchers::{
     LabelLookAheadMatcher, LookaheadMatcher, MatcherFlagsTrait,
 };
-use crate::algorithms::compose::matchers::SortedMatcher;
-use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::algorithms::compose::MatcherFst;
-use crate::algorithms::compose::{compose_with_config, ComposeConfig, LabelReachableData};
-use crate::algorithms::compose::{ComposeFilterEnum, ComposeFst, ComposeFstOpOptions};
-use crate::algorithms::{tr_compares::ilabel_compare, tr_sort};
+use crate::algorithms::compose::matchers::{Matcher, MatcherFlags, MatchType};
+use crate::algorithms::compose::matchers::SortedMatcher;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{CoreFst, SerializableFst};
+use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
 

@@ -5,7 +5,7 @@ use anyhow::Result;
 use crate::algorithms::rm_epsilon::{rm_epsilon, RmEpsilonFst};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{ExpandedFst, MutableFst, SerializableFst};
+use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::tests_openfst::algorithms::lazy_fst::compare_fst_static_lazy;
@@ -39,10 +39,9 @@ pub fn test_rmepsilon_lazy<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Resul
 where
     W: SerializableSemiring,
 {
-    unimplemented!()
-    // let rmepsilon_lazy_fst_openfst = &test_data.rmepsilon.result_lazy;
-    // let rmepsilon_lazy_fst = RmEpsilonFst::new(test_data.raw.clone());
-    // compare_fst_static_lazy(rmepsilon_lazy_fst_openfst, &rmepsilon_lazy_fst)?;
-    //
-    // Ok(())
+    let rmepsilon_lazy_fst_openfst = &test_data.rmepsilon.result_lazy;
+    let rmepsilon_lazy_fst = RmEpsilonFst::new(test_data.raw.clone())?;
+    compare_fst_static_lazy(rmepsilon_lazy_fst_openfst, &rmepsilon_lazy_fst)?;
+
+    Ok(())
 }

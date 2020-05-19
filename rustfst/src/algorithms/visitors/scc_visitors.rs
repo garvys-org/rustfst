@@ -67,12 +67,16 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for SccVisitor<'
         self.dfnumber[s] = self.nstates as i32;
         self.lowlink[s] = self.nstates as i32;
         self.onstack[s] = true;
-        if let Some(ref mut access) = self.access {
-            access[s] = root == self.start;
-            if root != self.start {
-                self.props |= FstProperties::NOT_ACCESSIBLE;
-                self.props &= !FstProperties::ACCESSIBLE;
+        if root == self.start {
+            if let Some(ref mut access) = self.access {
+                access[s] = true;
             }
+        } else {
+            if let Some(ref mut access) = self.access {
+                access[s] = true;
+            }
+            self.props |= FstProperties::NOT_ACCESSIBLE;
+            self.props &= !FstProperties::ACCESSIBLE;
         }
         self.nstates += 1;
         true

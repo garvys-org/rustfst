@@ -3,9 +3,9 @@ use std::fmt::Display;
 use anyhow::Result;
 
 use crate::algorithms::{push_weights, ReweightType};
-use crate::fst_traits::{CoreFst, MutableFst, SerializableFst};
+use crate::fst_traits::{MutableFst, SerializableFst};
+use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
-use crate::semirings::{Semiring, SerializableSemiring};
 use crate::tests_openfst::FstTestData;
 
 pub fn test_weight_pushing_initial<W, F>(test_data: &FstTestData<W, F>) -> Result<()>

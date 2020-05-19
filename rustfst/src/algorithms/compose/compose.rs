@@ -99,7 +99,7 @@ pub fn compose_with_config<
 /// # use rustfst::utils::transducer;
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::algorithms::compose;
+/// # use rustfst::algorithms::compose::compose;
 /// # use std::sync::Arc;
 /// # fn main() -> Result<()> {
 /// let fst_1 : VectorFst<IntegerWeight> = fst![1,2 => 2,3];

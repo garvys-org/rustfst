@@ -5,7 +5,7 @@ use anyhow::{format_err, Result};
 use serde::{Deserialize, Serialize};
 
 use crate::algorithms::{isomorphic, shortest_path};
-use crate::fst_traits::{CoreFst, MutableFst, SerializableFst};
+use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
 use crate::semirings::{Semiring, SerializableSemiring};

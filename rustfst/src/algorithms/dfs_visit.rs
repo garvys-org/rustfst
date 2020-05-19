@@ -80,7 +80,7 @@ impl<W: Semiring, TRS: Trs<W>> OpenFstIterator<W, TRS> {
 
     #[inline]
     fn value(&self) -> &Tr<W> {
-        unsafe { self.trs.trs().get_unchecked(0) }
+        unsafe { self.trs.trs().get_unchecked(self.pos) }
     }
 
     #[inline]
