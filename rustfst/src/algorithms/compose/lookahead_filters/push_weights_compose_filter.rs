@@ -107,7 +107,6 @@ where
     fn filter_tr(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
         let fs1 = self.filter.filter_tr(arc1, arc2)?;
         // TODO: Find a way to avoid this unwrap. Should be safe as LaMatcherData has been computed above.
-        let la_matcher_data = self.filter.lookahead_matcher_data().unwrap();
         if fs1 == CF::FS::new_no_state() {
             return Ok(FilterState::new_no_state());
         }
@@ -118,6 +117,8 @@ where
             return Ok(FilterState::new((fs1, FilterState::new(W::one()))));
         }
         let lweight = if self.filter.lookahead_tr() {
+            // Unwrap should be safe because lookahead_tr is set to true. Find a better way!
+            let la_matcher_data = self.filter.lookahead_matcher_data().unwrap();
             la_matcher_data.lookahead_weight.clone()
         } else {
             W::one()
