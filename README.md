@@ -45,6 +45,9 @@ Implementation heavily inspired from Mehryar Mohri's, Cyril Allauzen's and Micha
 ```rust
 use anyhow::Result;
 use rustfst::prelude::*;
+use rustfst::algorithms::determinize::{DeterminizeType, determinize};
+use rustfst::algorithms::rm_epsilon::rm_epsilon;
+use std::sync::Arc;
 
 fn main() -> Result<()> {
     // Creates a empty wFST
@@ -58,11 +61,11 @@ fn main() -> Result<()> {
     // Set s0 as the start state
     fst.set_start(s0)?;
 
-    // Add an arc from s0 to s1
-    fst.add_arc(s0, Arc::new(3, 5, 10.0, s1))?;
+    // Add a transition from s0 to s1
+    fst.add_tr(s0, Tr::new(3, 5, 10.0, s1))?;
 
-    // Add an arc from s0 to s2
-    fst.add_arc(s0, Arc::new(5, 7, 18.0, s2))?;
+    // Add a transition from s0 to s2
+    fst.add_tr(s0, Tr::new(5, 7, 18.0, s2))?;
 
     // Set s1 and s2 as final states
     fst.set_final(s1, 31.0)?;
@@ -89,7 +92,7 @@ fn main() -> Result<()> {
     rm_epsilon(&mut fst)?;
 
     // - Compute an equivalent FST but deterministic.
-    fst = determinize(&fst, DeterminizeType::DeterminizeFunctional)?;
+    fst = determinize(Arc::new(fst), DeterminizeType::DeterminizeFunctional)?;
 
     Ok(())
 }
