@@ -1,3 +1,31 @@
+pub use self::{
+    add_super_final_state::add_super_final_state,
+    all_pairs_shortest_distance::all_pairs_shortest_distance,
+    condense::condense,
+    connect::connect,
+    encode::{decode, encode},
+    fst_convert::{fst_convert, fst_convert_from_ref},
+    inversion::invert,
+    isomorphic::isomorphic,
+    minimize::minimize,
+    projection::{project, ProjectType},
+    push::{push, push_weights, PushType},
+    queue::{Queue, QueueType},
+    relabel_pairs::relabel_pairs,
+    reverse::reverse,
+    reweight::{reweight, ReweightType},
+    rm_final_epsilon::rm_final_epsilon,
+    shortest_distance::shortest_distance,
+    shortest_path::shortest_path,
+    state_sort::state_sort,
+    top_sort::top_sort,
+    tr_map::{FinalTr, MapFinalAction, tr_map, TrMapper},
+    tr_sort::tr_sort,
+    tr_sum::tr_sum,
+    tr_unique::tr_unique,
+    weight_convert::{weight_convert, WeightConverter},
+};
+
 mod add_super_final_state;
 mod all_pairs_shortest_distance;
 pub mod closure;
@@ -12,7 +40,6 @@ pub mod factor_weight;
 mod fst_convert;
 mod inversion;
 mod isomorphic;
-pub(crate) mod lazy_fst;
 mod minimize;
 mod partition;
 mod projection;
@@ -46,9 +73,6 @@ pub mod tr_mappers;
 
 pub(crate) mod visitors;
 
-#[allow(unused)]
-pub(crate) mod cache;
-
 /// Module that provides structures implementing the `WeightConverter` trait.
 pub mod weight_converters;
 
@@ -60,30 +84,3 @@ pub mod tr_compares {
 
 pub mod lazy_fst_revamp;
 
-pub use self::{
-    add_super_final_state::add_super_final_state,
-    all_pairs_shortest_distance::all_pairs_shortest_distance,
-    condense::condense,
-    connect::connect,
-    encode::{decode, encode},
-    fst_convert::{fst_convert, fst_convert_from_ref},
-    inversion::invert,
-    isomorphic::isomorphic,
-    minimize::minimize,
-    projection::{project, ProjectType},
-    push::{push, push_weights, PushType},
-    queue::{Queue, QueueType},
-    relabel_pairs::relabel_pairs,
-    reverse::reverse,
-    reweight::{reweight, ReweightType},
-    rm_final_epsilon::rm_final_epsilon,
-    shortest_distance::shortest_distance,
-    shortest_path::shortest_path,
-    state_sort::state_sort,
-    top_sort::top_sort,
-    tr_map::{tr_map, FinalTr, MapFinalAction, TrMapper},
-    tr_sort::tr_sort,
-    tr_sum::tr_sum,
-    tr_unique::tr_unique,
-    weight_convert::{weight_convert, WeightConverter},
-};

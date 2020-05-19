@@ -18,6 +18,7 @@ impl<W> ConstFst<W> {
         0..self.states.len()
     }
 
+    #[allow(unused)]
     fn tr_range(&self, state: &ConstState<W>) -> Range<usize> {
         state.pos..state.pos + state.ntrs
     }

@@ -2,25 +2,24 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::cache::FstImpl;
+use crate::{EPS_LABEL, KDELTA};
+use crate::algorithms::determinize::{
+    DefaultCommonDivisor, DeterminizeType, GallicCommonDivisor,
+};
 use crate::algorithms::determinize::determinize_fsa::DeterminizeFsa;
 use crate::algorithms::determinize::divisors::CommonDivisor;
-use crate::algorithms::determinize::{
-    DefaultCommonDivisor, DeterminizeFsaOp, DeterminizeType, GallicCommonDivisor,
-};
+use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, FactorWeightType};
 use crate::algorithms::factor_weight::factor_iterators::{
     GallicFactor, GallicFactorMin, GallicFactorRestrict,
 };
-use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, FactorWeightType};
 use crate::algorithms::weight_convert;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{AllocableFst, ExpandedFst, Fst, MutableFst};
-use crate::semirings::SemiringProperties;
 use crate::semirings::{
     GallicWeight, GallicWeightMin, GallicWeightRestrict, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::{EPS_LABEL, KDELTA};
+use crate::semirings::SemiringProperties;
 
 pub fn determinize_with_distance<W, F1, F2>(
     ifst: Arc<F1>,
@@ -48,7 +47,7 @@ where
     if !W::properties().contains(SemiringProperties::LEFT_SEMIRING) {
         bail!("determinize_fsa : weight must be left distributive")
     }
-    let mut det_fsa: DeterminizeFsa<_, _, CD> = DeterminizeFsa::new(fst_in, None)?;
+    let det_fsa: DeterminizeFsa<_, _, CD> = DeterminizeFsa::new(fst_in, None)?;
     det_fsa.compute()
 }
 
@@ -148,9 +147,9 @@ where
 #[cfg(test)]
 mod tests {
     use crate::fst_impls::VectorFst;
+    use crate::Semiring;
     use crate::semirings::TropicalWeight;
     use crate::tr::Tr;
-    use crate::Semiring;
 
     use super::*;
 
