@@ -3,7 +3,6 @@ pub use self::{
     all_pairs_shortest_distance::all_pairs_shortest_distance,
     condense::condense,
     connect::connect,
-    encode::{decode, encode},
     fst_convert::{fst_convert, fst_convert_from_ref},
     inversion::invert,
     isomorphic::isomorphic,
@@ -35,7 +34,7 @@ mod condense;
 mod connect;
 pub mod determinize;
 pub(crate) mod dfs_visit;
-mod encode;
+pub mod encode;
 pub mod factor_weight;
 mod fst_convert;
 mod inversion;

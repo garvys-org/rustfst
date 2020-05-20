@@ -483,7 +483,6 @@ macro_rules! test_fst {
             }
 
             #[test]
-            #[ignore]
             fn test_encode_openfst() -> Result<()> {
                 do_run!(test_encode, $fst_name);
                 Ok(())
