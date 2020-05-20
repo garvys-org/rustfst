@@ -69,10 +69,10 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
 }
 
 impl<'a, W, Op, Cache> StateIterator<'a> for LazyFst2<W, Op, Cache>
-    where
-        W: Semiring,
-        Op: FstOp2<W> + 'a,
-        Cache: FstCache<W> + 'a,
+where
+    W: Semiring,
+    Op: FstOp2<W> + 'a,
+    Cache: FstCache<W> + 'a,
 {
     type Iter = StatesIteratorLazyFst<'a, Self>;
 
@@ -89,10 +89,10 @@ pub struct StatesIteratorLazyFst<'a, T> {
 }
 
 impl<'a, W, Op, Cache> Iterator for StatesIteratorLazyFst<'a, LazyFst2<W, Op, Cache>>
-    where
-        W: Semiring,
-        Op: FstOp2<W>,
-        Cache: FstCache<W>,
+where
+    W: Semiring,
+    Op: FstOp2<W>,
+    Cache: FstCache<W>,
 {
     type Item = StateId;
 
@@ -111,10 +111,10 @@ impl<'a, W, Op, Cache> Iterator for StatesIteratorLazyFst<'a, LazyFst2<W, Op, Ca
 }
 
 impl<'a, W, Op, Cache> FstIterator<'a, W> for LazyFst2<W, Op, Cache>
-    where
-        W: Semiring,
-        Op: FstOp2<W> + 'a,
-        Cache: FstCache<W> + 'a,
+where
+    W: Semiring,
+    Op: FstOp2<W> + 'a,
+    Cache: FstCache<W> + 'a,
 {
     type FstIter = Map<
         Zip<<LazyFst2<W, Op, Cache> as StateIterator<'a>>::Iter, Repeat<&'a Self>>,
@@ -135,10 +135,10 @@ impl<'a, W, Op, Cache> FstIterator<'a, W> for LazyFst2<W, Op, Cache>
 }
 
 impl<W, Op, Cache> Fst<W> for LazyFst2<W, Op, Cache>
-    where
-        W: Semiring,
-        Op: FstOp2<W> + 'static,
-        Cache: FstCache<W> + 'static,
+where
+    W: Semiring,
+    Op: FstOp2<W> + 'static,
+    Cache: FstCache<W> + 'static,
 {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.isymt.as_ref()
@@ -166,10 +166,10 @@ impl<W, Op, Cache> Fst<W> for LazyFst2<W, Op, Cache>
 }
 
 impl<W, Op, Cache> LazyFst2<W, Op, Cache>
-    where
-        W: Semiring,
-        Op: FstOp2<W>,
-        Cache: FstCache<W>,
+where
+    W: Semiring,
+    Op: FstOp2<W>,
+    Cache: FstCache<W>,
 {
     pub(crate) fn from_op_and_cache(
         op: Op,

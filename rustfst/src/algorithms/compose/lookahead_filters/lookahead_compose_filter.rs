@@ -3,9 +3,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::compose::compose_filters::{
-    ComposeFilter, ComposeFilterBuilder,
-};
+use crate::algorithms::compose::compose_filters::{ComposeFilter, ComposeFilterBuilder};
 use crate::algorithms::compose::filter_states::FilterState;
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::{
     selector, MatchTypeTrait, Selector,

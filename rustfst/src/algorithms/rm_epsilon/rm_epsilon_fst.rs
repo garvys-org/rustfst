@@ -11,17 +11,16 @@
 // //     }
 // // }
 
-
 use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::{Semiring, SymbolTable, TrsVec};
 use crate::algorithms::lazy_fst_revamp::{LazyFst2, SimpleHashMapCache};
 use crate::algorithms::rm_epsilon::rm_epsilon_op::RmEpsilonOp;
 use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
+use crate::{Semiring, SymbolTable, TrsVec};
 
 /// The result of weight factoring is a transducer equivalent to the
 /// input whose path weights have been factored according to the FactorIterator.
@@ -33,8 +32,10 @@ pub struct RmEpsilonFst<W: Semiring, F: MutableFst<W>, B: Borrow<F>>(
 );
 
 impl<W, F, B> CoreFst<W> for RmEpsilonFst<W, F, B>
-    where
-        W: Semiring, F: MutableFst<W>, B: Borrow<F>
+where
+    W: Semiring,
+    F: MutableFst<W>,
+    B: Borrow<F>,
 {
     type TRS = TrsVec<W>;
 
@@ -61,10 +62,12 @@ impl<W, F, B> CoreFst<W> for RmEpsilonFst<W, F, B>
 
 impl<'a, W, F, B> StateIterator<'a> for RmEpsilonFst<W, F, B>
 where
-W: Semiring, F: MutableFst<W>+'a, B: Borrow<F> +'a
+    W: Semiring,
+    F: MutableFst<W> + 'a,
+    B: Borrow<F> + 'a,
 {
     type Iter =
-    <LazyFst2<W, RmEpsilonOp<W, F, B>, SimpleHashMapCache<W>> as StateIterator<'a>>::Iter;
+        <LazyFst2<W, RmEpsilonOp<W, F, B>, SimpleHashMapCache<W>> as StateIterator<'a>>::Iter;
 
     fn states_iter(&'a self) -> Self::Iter {
         self.0.states_iter()
@@ -72,11 +75,13 @@ W: Semiring, F: MutableFst<W>+'a, B: Borrow<F> +'a
 }
 
 impl<'a, W, F, B> FstIterator<'a, W> for RmEpsilonFst<W, F, B>
-    where
-        W: Semiring, F: MutableFst<W>+'a, B: Borrow<F>+'a
+where
+    W: Semiring,
+    F: MutableFst<W> + 'a,
+    B: Borrow<F> + 'a,
 {
     type FstIter =
-    <LazyFst2<W, RmEpsilonOp<W, F, B>, SimpleHashMapCache<W>> as FstIterator<'a, W>>::FstIter;
+        <LazyFst2<W, RmEpsilonOp<W, F, B>, SimpleHashMapCache<W>> as FstIterator<'a, W>>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
         self.0.fst_iter()
@@ -84,8 +89,10 @@ impl<'a, W, F, B> FstIterator<'a, W> for RmEpsilonFst<W, F, B>
 }
 
 impl<W, F, B> Fst<W> for RmEpsilonFst<W, F, B>
-    where
-        W: Semiring, F: MutableFst<W>+'static, B: Borrow<F>+'static
+where
+    W: Semiring,
+    F: MutableFst<W> + 'static,
+    B: Borrow<F> + 'static,
 {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.0.input_symbols()
@@ -113,8 +120,10 @@ impl<W, F, B> Fst<W> for RmEpsilonFst<W, F, B>
 }
 
 impl<W, F, B> Debug for RmEpsilonFst<W, F, B>
-    where
-        W: Semiring, F: MutableFst<W>, B: Borrow<F>
+where
+    W: Semiring,
+    F: MutableFst<W>,
+    B: Borrow<F>,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.0.fmt(f)
@@ -122,8 +131,10 @@ impl<W, F, B> Debug for RmEpsilonFst<W, F, B>
 }
 
 impl<'a, W, F, B> RmEpsilonFst<W, F, B>
-    where
-        W: Semiring, F: MutableFst<W>, B: Borrow<F>
+where
+    W: Semiring,
+    F: MutableFst<W>,
+    B: Borrow<F>,
 {
     pub fn new(fst: B) -> Result<Self> {
         let isymt = fst.borrow().input_symbols().cloned();

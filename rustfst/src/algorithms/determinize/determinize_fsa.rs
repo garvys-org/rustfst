@@ -138,9 +138,9 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::semirings::TropicalWeight;
-    use crate::fst_impls::VectorFst;
     use crate::algorithms::determinize::DefaultCommonDivisor;
+    use crate::fst_impls::VectorFst;
+    use crate::semirings::TropicalWeight;
 
     #[test]
     fn test_determinize_fsa_sync() {

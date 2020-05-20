@@ -1,12 +1,9 @@
-use std::sync::Arc;
 use std::marker::PhantomData;
-
+use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::compose::compose_filters::{
-    ComposeFilter, ComposeFilterBuilder,
-};
+use crate::algorithms::compose::compose_filters::{ComposeFilter, ComposeFilterBuilder};
 use crate::algorithms::compose::filter_states::{FilterState, IntegerFilterState};
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_traits::{CoreFst, Fst};
@@ -28,14 +25,14 @@ pub struct SequenceComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
     alleps1: bool,
     /// No epsilons leaving s1 ?
     noeps1: bool,
-    w: PhantomData<W>
+    w: PhantomData<W>,
 }
 
 #[derive(Debug)]
 pub struct SequenceComposeFilterBuilder<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
     matcher1: Arc<M1>,
     matcher2: Arc<M2>,
-    w: PhantomData<W>
+    w: PhantomData<W>,
 }
 
 impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
@@ -58,7 +55,7 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
         Ok(Self {
             matcher1: Arc::new(matcher1),
             matcher2: Arc::new(matcher2),
-            w: PhantomData
+            w: PhantomData,
         })
     }
 
@@ -71,7 +68,7 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
             fs: <Self::CF as ComposeFilter<W>>::FS::new(NO_STATE_ID),
             alleps1: false,
             noeps1: false,
-            w: PhantomData
+            w: PhantomData,
         })
     }
 }

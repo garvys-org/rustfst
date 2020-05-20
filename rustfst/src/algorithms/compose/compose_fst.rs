@@ -161,13 +161,22 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::semirings::TropicalWeight;
-    use crate::fst_impls::VectorFst;
     use crate::algorithms::compose::matchers::SortedMatcher;
+    use crate::fst_impls::VectorFst;
+    use crate::semirings::TropicalWeight;
 
     #[test]
     fn test_compose_fst_sync() {
         fn is_sync<T: Sync>() {}
-        is_sync::<ComposeFst<TropicalWeight, SequenceComposeFilterBuilder<_, SortedMatcher<_, VectorFst<_>>, SortedMatcher<_, VectorFst<_>>>>>();
+        is_sync::<
+            ComposeFst<
+                TropicalWeight,
+                SequenceComposeFilterBuilder<
+                    _,
+                    SortedMatcher<_, VectorFst<_>>,
+                    SortedMatcher<_, VectorFst<_>>,
+                >,
+            >,
+        >();
     }
 }

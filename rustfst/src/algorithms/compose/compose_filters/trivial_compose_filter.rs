@@ -3,10 +3,7 @@ use std::sync::Arc;
 use anyhow::Result;
 use std::marker::PhantomData;
 
-
-use crate::algorithms::compose::compose_filters::{
-    ComposeFilter, ComposeFilterBuilder,
-};
+use crate::algorithms::compose::compose_filters::{ComposeFilter, ComposeFilterBuilder};
 use crate::algorithms::compose::filter_states::{FilterState, TrivialFilterState};
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;
@@ -16,14 +13,14 @@ use crate::Tr;
 pub struct TrivialComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
     matcher1: Arc<M1>,
     matcher2: Arc<M2>,
-    w: PhantomData<W>
+    w: PhantomData<W>,
 }
 
 #[derive(Debug)]
 pub struct TrivialComposeFilterBuilder<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
     matcher1: Arc<M1>,
     matcher2: Arc<M2>,
-    w: PhantomData<W>
+    w: PhantomData<W>,
 }
 
 impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
@@ -46,7 +43,7 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
         Ok(Self {
             matcher1: Arc::new(matcher1),
             matcher2: Arc::new(matcher2),
-            w: PhantomData
+            w: PhantomData,
         })
     }
 
@@ -54,7 +51,7 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
         Ok(TrivialComposeFilter::<W, M1, M2> {
             matcher1: Arc::clone(&self.matcher1),
             matcher2: Arc::clone(&self.matcher2),
-            w: PhantomData
+            w: PhantomData,
         })
     }
 }

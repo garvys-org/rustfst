@@ -1,6 +1,6 @@
 use std::fmt::Debug;
-use std::sync::Arc;
 use std::marker::PhantomData;
+use std::sync::Arc;
 
 use anyhow::Result;
 
@@ -239,15 +239,14 @@ pub trait Fst<W: Semiring>:
         }
     }
 
-    fn final_states_iter(
-        &self,
-    ) -> FinalStatesIterator<W, Self>
-    where Self: std::marker::Sized
+    fn final_states_iter(&self) -> FinalStatesIterator<W, Self>
+    where
+        Self: std::marker::Sized,
     {
         FinalStatesIterator {
             fst: self,
             state_iter: self.states_iter(),
-            w: PhantomData
+            w: PhantomData,
         }
     }
 }
@@ -259,22 +258,24 @@ where
 {
     fst: &'a F,
     state_iter: <F as StateIterator<'a>>::Iter,
-    w: PhantomData<W>
+    w: PhantomData<W>,
 }
 
 impl<'a, W, F> Iterator for FinalStatesIterator<'a, W, F>
-where W: Semiring, F: Fst<W>
+where
+    W: Semiring,
+    F: Fst<W>,
 {
     type Item = StateId;
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
             if let Some(s) = self.state_iter.next() {
-                if unsafe {self.fst.is_final_unchecked(s)} {
-                    return Some(s)
+                if unsafe { self.fst.is_final_unchecked(s) } {
+                    return Some(s);
                 }
             } else {
-                return None
+                return None;
             }
         }
     }

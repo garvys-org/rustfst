@@ -116,7 +116,7 @@ pub struct LabelReachable {
 
 impl LabelReachable {
     pub fn new<W: Semiring, F: Fst<W>>(fst: &F, reach_input: bool) -> Result<Self> {
-        let data= Self::compute_data(fst, reach_input)?;
+        let data = Self::compute_data(fst, reach_input)?;
 
         Ok(Self {
             data: Arc::new(data),

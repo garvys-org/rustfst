@@ -146,9 +146,9 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::semirings::TropicalWeight;
-    use crate::fst_impls::VectorFst;
     use crate::algorithms::factor_weight::factor_iterators::IdentityFactor;
+    use crate::fst_impls::VectorFst;
+    use crate::semirings::TropicalWeight;
 
     #[test]
     fn test_factor_weight_fst_sync() {

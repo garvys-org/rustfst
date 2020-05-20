@@ -30,23 +30,27 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
         self.start.lock().unwrap().0.clone()
     }
 
-    fn insert_start(&self, id: Option<StateId>)
-    {
+    fn insert_start(&self, id: Option<StateId>) {
         let mut data = self.start.lock().unwrap();
         if let Some(s) = id {
-            data.1 = std::cmp::max(data.1, s+1);
+            data.1 = std::cmp::max(data.1, s + 1);
         }
         data.0 = Some(id);
     }
 
     fn get_trs(&self, id: usize) -> Option<TrsVec<W>> {
-        self.trs.lock().unwrap().0.get(&id).map(|v| v.shallow_clone())
+        self.trs
+            .lock()
+            .unwrap()
+            .0
+            .get(&id)
+            .map(|v| v.shallow_clone())
     }
 
     fn insert_trs(&self, id: usize, trs: TrsVec<W>) {
         let mut data = self.trs.lock().unwrap();
         for tr in trs.trs() {
-            data.1 = std::cmp::max(data.1, tr.nextstate+1);
+            data.1 = std::cmp::max(data.1, tr.nextstate + 1);
         }
         data.0.insert(id, trs);
     }
@@ -56,7 +60,7 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
 
     fn insert_final_weight(&self, id: StateId, weight: Option<W>) {
         let mut data = self.final_weight.lock().unwrap();
-        data.1 = std::cmp::max(data.1, id+1);
+        data.1 = std::cmp::max(data.1, id + 1);
         data.0.insert(id, weight);
     }
 

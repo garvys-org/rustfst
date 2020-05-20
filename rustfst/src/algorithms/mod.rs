@@ -19,7 +19,7 @@ pub use self::{
     shortest_path::shortest_path,
     state_sort::state_sort,
     top_sort::top_sort,
-    tr_map::{FinalTr, MapFinalAction, tr_map, TrMapper},
+    tr_map::{tr_map, FinalTr, MapFinalAction, TrMapper},
     tr_sort::tr_sort,
     tr_sum::tr_sum,
     tr_unique::tr_unique,
@@ -83,4 +83,3 @@ pub mod tr_compares {
 }
 
 pub mod lazy_fst_revamp;
-

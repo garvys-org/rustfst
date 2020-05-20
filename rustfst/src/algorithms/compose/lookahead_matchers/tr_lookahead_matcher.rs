@@ -185,11 +185,9 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
                         nprefix += 1;
                         if MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
                             match matcher_value {
-                                IterItemMatcher::Tr(a) => {
-                                    la_matcher_data
-                                        .lookahead_weight
-                                        .plus_assign(tr.weight.times(&a.weight)?)?
-                                }
+                                IterItemMatcher::Tr(a) => la_matcher_data
+                                    .lookahead_weight
+                                    .plus_assign(tr.weight.times(&a.weight)?)?,
                                 IterItemMatcher::EpsLoop => la_matcher_data
                                     .lookahead_weight
                                     .plus_assign(tr.weight.times(W::one())?)?,

@@ -2,15 +2,15 @@ use std::borrow::Borrow;
 
 use anyhow::Result;
 
+use crate::algorithms::lazy_fst_revamp::FstOp2;
 use crate::algorithms::queues::FifoQueue;
 use crate::algorithms::rm_epsilon::{RmEpsilonConfig, RmEpsilonState};
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
-use crate::algorithms::lazy_fst_revamp::FstOp2;
 use crate::TrsVec;
 use itertools::Itertools;
-use std::sync::Arc;
 use std::cell::RefCell;
+use std::sync::Arc;
 
 #[derive(Clone, Eq)]
 pub struct RmEpsilonOp<W: Semiring, F: MutableFst<W>, B: Borrow<F>> {

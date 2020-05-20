@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::compose::compose_filters::{ComposeFilter};
+use crate::algorithms::compose::compose_filters::ComposeFilter;
 use crate::semirings::Semiring;
 use crate::{Tr, NO_LABEL};
 

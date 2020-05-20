@@ -132,11 +132,17 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
                     &tr_loop,
                     match_input,
                     &mut compose_filter,
-                    selector
+                    selector,
                 )?);
                 println!("MatchArc loop");
                 for tr in fst.get_trs(sb)?.trs() {
-                    trs.extend(self.match_tr(sa, tr, match_input, &mut compose_filter, selector)?);
+                    trs.extend(self.match_tr(
+                        sa,
+                        tr,
+                        match_input,
+                        &mut compose_filter,
+                        selector,
+                    )?);
                 }
             }
             Selector::Fst2Matcher1 => {
@@ -147,11 +153,17 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
                     &tr_loop,
                     match_input,
                     &mut compose_filter,
-                    selector
+                    selector,
                 )?);
                 println!("MatchArc loop");
                 for tr in fst.get_trs(sb)?.trs() {
-                    trs.extend(self.match_tr(sa, tr, match_input, &mut compose_filter, selector)?);
+                    trs.extend(self.match_tr(
+                        sa,
+                        tr,
+                        match_input,
+                        &mut compose_filter,
+                        selector,
+                    )?);
                 }
             }
         }
@@ -184,7 +196,7 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
         tr: &Tr<W>,
         match_input: bool,
         compose_filter: &mut CFB::CF,
-        selector: Selector
+        selector: Selector,
     ) -> Result<Vec<Tr<W>>> {
         let label = if match_input { tr.olabel } else { tr.ilabel };
         let mut trs = vec![];
@@ -192,12 +204,8 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
         println!("label = {:?}", label);
         // Collect necessary here because need to borrow_mut a matcher later. To investigate.
         let temp = match selector {
-          Selector::Fst2Matcher1 => {
-              compose_filter.matcher1().iter(sa, label)?.collect_vec()
-          }  ,
-            Selector::Fst1Matcher2 => {
-                compose_filter.matcher2().iter(sa, label)?.collect_vec()
-            }
+            Selector::Fst2Matcher1 => compose_filter.matcher1().iter(sa, label)?.collect_vec(),
+            Selector::Fst1Matcher2 => compose_filter.matcher2().iter(sa, label)?.collect_vec(),
         };
         for arca in temp {
             let mut arca = arca.into_tr(
@@ -209,8 +217,14 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
                 },
             )?;
             let mut arcb = tr.clone();
-            println!("arca = {:?} {:?} {:?} {:?}", arca.ilabel, arca.olabel, arca.weight, arca.nextstate);
-            println!("arcb = {:?} {:?} {:?} {:?}", arcb.ilabel, arcb.olabel, arcb.weight, arcb.nextstate);
+            println!(
+                "arca = {:?} {:?} {:?} {:?}",
+                arca.ilabel, arca.olabel, arca.weight, arca.nextstate
+            );
+            println!(
+                "arcb = {:?} {:?} {:?} {:?}",
+                arcb.ilabel, arcb.olabel, arcb.weight, arcb.nextstate
+            );
             if match_input {
                 let fs = compose_filter.filter_tr(&mut arcb, &mut arca)?;
                 if fs != <CFB::CF as ComposeFilter<W>>::FS::new_no_state() {

@@ -8,8 +8,8 @@ mod state_table;
 
 pub use fst_cache::FstCache;
 pub use fst_op::FstOp;
+pub use fst_op_2::FstOp2;
 pub use lazy_fst::LazyFst;
+pub use lazy_fst_2::LazyFst2;
 pub use simple_hash_map_cache::SimpleHashMapCache;
 pub use state_table::StateTable;
-pub use fst_op_2::FstOp2;
-pub use lazy_fst_2::LazyFst2;
