@@ -37,6 +37,7 @@ addons:
       - binutils-dev
       - libiberty-dev
       - libssl-dev
+      - rpl
 
 before_cache: |
   if [[ "$TRAVIS_RUST_VERSION" == stable ]]; then
