@@ -410,14 +410,12 @@ macro_rules! test_fst {
             }
 
             #[test]
-            #[ignore]
             fn test_trsort_ilabel_openfst() -> Result<()> {
                 do_run!(test_trsort_ilabel, $fst_name);
                 Ok(())
             }
 
             #[test]
-            #[ignore]
             fn test_trsort_olabel_openfst() -> Result<()> {
                 do_run!(test_trsort_olabel, $fst_name);
                 Ok(())
