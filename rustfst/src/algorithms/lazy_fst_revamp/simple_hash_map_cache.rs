@@ -9,62 +9,62 @@ use crate::{StateId, Trs, TrsVec};
 pub struct SimpleHashMapCache<W: Semiring> {
     // First option : has start been computed
     // Second option: value of the start state (possibly none)
-    start: Mutex<Option<Option<StateId>>>,
-    trs: Mutex<HashMap<StateId, TrsVec<W>>>,
-    final_weight: Mutex<HashMap<StateId, Option<W>>>,
-    num_known_states: Mutex<usize>
+    // The second element of each tuple is the number of known states.
+    start: Mutex<(Option<Option<StateId>>, usize)>,
+    trs: Mutex<(HashMap<StateId, TrsVec<W>>, usize)>,
+    final_weight: Mutex<(HashMap<StateId, Option<W>>, usize)>,
 }
 
 impl<W: Semiring> SimpleHashMapCache<W> {
     pub fn new() -> Self {
         Self {
-            start: Mutex::new(None),
-            trs: Mutex::new(HashMap::new()),
-            final_weight: Mutex::new(HashMap::new()),
-            num_known_states: Mutex::new(0)
+            start: Mutex::new((None, 0)),
+            trs: Mutex::new((HashMap::new(), 0)),
+            final_weight: Mutex::new((HashMap::new(), 0)),
         }
     }
 }
 
 impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
     fn get_start(&self) -> Option<Option<StateId>> {
-        self.start.lock().unwrap().clone()
+        self.start.lock().unwrap().0.clone()
     }
 
     fn insert_start(&self, id: Option<StateId>)
     {
+        let mut data = self.start.lock().unwrap();
         if let Some(s) = id {
-            let mut n = self.num_known_states.lock().unwrap();
-            *n = std::cmp::max(*n, s+1);
+            data.1 = std::cmp::max(data.1, s+1);
         }
-        *self.start.lock().unwrap() = Some(id);
+        data.0 = Some(id);
     }
 
     fn get_trs(&self, id: usize) -> Option<TrsVec<W>> {
-        self.trs.lock().unwrap().get(&id).map(|v| v.shallow_clone())
+        self.trs.lock().unwrap().0.get(&id).map(|v| v.shallow_clone())
     }
 
     fn insert_trs(&self, id: usize, trs: TrsVec<W>) {
-        let mut n = self.num_known_states.lock().unwrap();
-        *n = std::cmp::max(*n, id+1);
+        let mut data = self.trs.lock().unwrap();
         for tr in trs.trs() {
-            *n = std::cmp::max(*n, tr.nextstate+1);
+            data.1 = std::cmp::max(data.1, tr.nextstate+1);
         }
-        drop(n);
-        self.trs.lock().unwrap().insert(id, trs);
+        data.0.insert(id, trs);
     }
     fn get_final_weight(&self, id: usize) -> Option<Option<W>> {
-        self.final_weight.lock().unwrap().get(&id).cloned()
+        self.final_weight.lock().unwrap().0.get(&id).cloned()
     }
 
     fn insert_final_weight(&self, id: StateId, weight: Option<W>) {
-        let mut n = self.num_known_states.lock().unwrap();
-        *n = std::cmp::max(*n, id+1);
-        drop(n);
-        self.final_weight.lock().unwrap().insert(id, weight);
+        let mut data = self.final_weight.lock().unwrap();
+        data.1 = std::cmp::max(data.1, id+1);
+        data.0.insert(id, weight);
     }
 
     fn num_known_states(&self) -> usize {
-        *self.num_known_states.lock().unwrap()
+        let mut n = 0;
+        n = std::cmp::max(n, self.start.lock().unwrap().1);
+        n = std::cmp::max(n, self.trs.lock().unwrap().1);
+        n = std::cmp::max(n, self.final_weight.lock().unwrap().1);
+        n
     }
 }
