@@ -151,3 +151,17 @@ where
         self.0.fst_iter()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::semirings::TropicalWeight;
+    use crate::fst_impls::VectorFst;
+
+    #[test]
+    fn test_closure_fst_sync() {
+        fn is_sync<T: Sync>() {}
+        is_sync::<ClosureFst<TropicalWeight, VectorFst<_>>>();
+    }
+}
+

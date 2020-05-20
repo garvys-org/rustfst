@@ -142,3 +142,17 @@ where
         self.0.compute()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::semirings::TropicalWeight;
+    use crate::fst_impls::VectorFst;
+    use crate::algorithms::factor_weight::factor_iterators::IdentityFactor;
+
+    #[test]
+    fn test_factor_weight_fst_sync() {
+        fn is_sync<T: Sync>() {}
+        is_sync::<FactorWeightFst<TropicalWeight, VectorFst<_>, VectorFst<_>, IdentityFactor<_>>>();
+    }
+}

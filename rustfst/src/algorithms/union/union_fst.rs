@@ -139,3 +139,16 @@ where
         self.0.fst_iter()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::semirings::TropicalWeight;
+    use crate::fst_impls::VectorFst;
+
+    #[test]
+    fn test_union_fst_sync() {
+        fn is_sync<T: Sync>() {}
+        is_sync::<UnionFst<TropicalWeight, VectorFst<_>>>();
+    }
+}

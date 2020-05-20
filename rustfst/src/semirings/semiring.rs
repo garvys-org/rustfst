@@ -32,7 +32,7 @@ bitflags! {
 /// `0` is an annihilator for `*`.
 /// Thus, a semiring is a ring that may lack negation.
 /// For more information : https://cs.nyu.edu/~mohri/pub/hwa.pdf
-pub trait Semiring: Clone + PartialEq + PartialOrd + Debug + Hash + Eq + 'static {
+pub trait Semiring: Clone + PartialEq + PartialOrd + Debug + Hash + Eq + Sync + 'static {
     type Type: Clone;
     type ReverseWeight: Semiring + ReverseBack<Self>;
 

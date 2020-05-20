@@ -134,3 +134,17 @@ where
         Ok((dfst, out_dist))
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::semirings::TropicalWeight;
+    use crate::fst_impls::VectorFst;
+    use crate::algorithms::determinize::DefaultCommonDivisor;
+
+    #[test]
+    fn test_determinize_fsa_sync() {
+        fn is_sync<T: Sync>() {}
+        is_sync::<DeterminizeFsa<TropicalWeight, VectorFst<_>, DefaultCommonDivisor>>();
+    }
+}

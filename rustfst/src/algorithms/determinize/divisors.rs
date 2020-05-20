@@ -8,7 +8,7 @@ use crate::semirings::{
 };
 use crate::Semiring;
 
-pub trait CommonDivisor<W: Semiring>: PartialEq + Debug {
+pub trait CommonDivisor<W: Semiring>: PartialEq + Debug + Sync {
     fn common_divisor(w1: &W, w2: &W) -> Result<W>;
 }
 

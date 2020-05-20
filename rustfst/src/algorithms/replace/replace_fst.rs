@@ -143,3 +143,16 @@ where
         self.0.fmt(f)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::semirings::TropicalWeight;
+    use crate::fst_impls::VectorFst;
+
+    #[test]
+    fn test_replace_fst_sync() {
+        fn is_sync<T: Sync>() {}
+        is_sync::<ReplaceFst<TropicalWeight, VectorFst<_>, VectorFst<_>>>();
+    }
+}
