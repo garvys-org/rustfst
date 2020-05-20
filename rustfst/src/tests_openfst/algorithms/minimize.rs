@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use std::marker::PhantomData;
 
 use anyhow::{format_err, Result};
 use serde::{Deserialize, Serialize};
@@ -8,8 +9,8 @@ use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
-use std::marker::PhantomData;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MinimizeOperationResult {
@@ -57,13 +58,13 @@ where
 
         match (&minimize_data.result, fst_res) {
             (Ok(fst_expected), Ok(ref fst_minimized)) => {
-                assert_eq_fst!(
+                test_eq_fst(
                     fst_expected,
                     fst_minimized,
                     format!(
                         "Minimize fail for allow_nondet = {:?} ",
                         minimize_data.allow_nondet
-                    )
+                    ),
                 );
             }
             (Ok(_fst_expected), Err(_)) => panic!(

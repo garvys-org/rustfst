@@ -5,6 +5,7 @@ use crate::algorithms::{push, PushType, ReweightType};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 use std::marker::PhantomData;
 
@@ -86,24 +87,20 @@ where
         };
 
         let pushed_fst: VectorFst<W> = push(&test_data.raw, reweight_type, push_type)?;
-        assert_eq!(
-            push_test_data.result,
-            pushed_fst,
-            "{}",
-            error_message_fst!(
-                push_test_data.result,
-                pushed_fst,
-                format!(
-                    "Push failed with parameters {:?}",
-                    vec![
-                        push_test_data.push_weights,
-                        push_test_data.push_labels,
-                        push_test_data.remove_total_weight,
-                        push_test_data.remove_common_affix,
-                        push_test_data.reweight_to_final
-                    ]
-                )
-            )
+
+        test_eq_fst(
+            &push_test_data.result,
+            &pushed_fst,
+            format!(
+                "Push failed with parameters {:?}",
+                vec![
+                    push_test_data.push_weights,
+                    push_test_data.push_labels,
+                    push_test_data.remove_total_weight,
+                    push_test_data.remove_common_affix,
+                    push_test_data.reweight_to_final
+                ]
+            ),
         );
     }
     Ok(())

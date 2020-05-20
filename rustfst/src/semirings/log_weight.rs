@@ -11,7 +11,6 @@ use crate::semirings::{
     CompleteSemiring, DivideType, ReverseBack, Semiring, SemiringProperties, SerializableSemiring,
     StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::KDELTA;
 use nom::number::complete::{float, le_f32};
 use nom::IResult;
 use std::io::Write;

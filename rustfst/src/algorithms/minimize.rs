@@ -20,8 +20,9 @@ use crate::algorithms::tr_unique;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::algorithms::Queue;
 use crate::algorithms::{
-    connect, push_weights, tr_map, tr_sort, weight_convert, ReweightType,
-    encode::{encode, decode}
+    connect,
+    encode::{decode, encode},
+    push_weights, tr_map, tr_sort, weight_convert, ReweightType,
 };
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;

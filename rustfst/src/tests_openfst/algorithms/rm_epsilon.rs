@@ -6,8 +6,8 @@ use crate::algorithms::rm_epsilon::{rm_epsilon, RmEpsilonFst};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{MutableFst, SerializableFst};
-use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
+use crate::semirings::{SerializableSemiring, WeightQuantize};
 use crate::tests_openfst::algorithms::lazy_fst::compare_fst_static_lazy;
 use crate::tests_openfst::FstTestData;
 
@@ -37,7 +37,7 @@ where
 
 pub fn test_rmepsilon_lazy<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring,
+    W: SerializableSemiring + WeightQuantize,
 {
     let rmepsilon_lazy_fst_openfst = &test_data.rmepsilon.result_lazy;
     let rmepsilon_lazy_fst = RmEpsilonFst::new(test_data.raw.clone())?;

@@ -2,7 +2,6 @@ use std::marker::PhantomData;
 use std::sync::Arc;
 
 use anyhow::Result;
-use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 
 use crate::algorithms::compose::compose_filters::{
@@ -24,6 +23,7 @@ use crate::algorithms::{tr_compares::ilabel_compare, tr_sort};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -78,18 +78,13 @@ where
         config,
     )?;
 
-    assert_eq!(
-        compose_test_data.result,
-        fst_res_static,
-        "{}",
-        error_message_fst!(
-            compose_test_data.result,
-            fst_res_static,
-            format!(
-                "Compose failed : filter_name = {:?}",
-                compose_test_data.filter_name
-            )
-        )
+    test_eq_fst(
+        &compose_test_data.result,
+        &fst_res_static,
+        format!(
+            "Compose failed : filter_name = {:?}",
+            compose_test_data.filter_name
+        ),
     );
 
     Ok(())
@@ -189,15 +184,10 @@ where
     let dyn_fst = ComposeFst::new_with_options(graph1look, fst2, compose_options)?;
     let static_fst: VectorFst<_> = dyn_fst.compute()?;
 
-    assert_eq!(
-        static_fst,
-        compose_test_data.result,
-        "{}",
-        error_message_fst!(
-            compose_test_data.result,
-            static_fst,
-            format!("Compose failed : filter_name = lookahead")
-        )
+    test_eq_fst(
+        &compose_test_data.result,
+        &static_fst,
+        format!("Compose failed : filter_name = lookahead"),
     );
 
     Ok(())

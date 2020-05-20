@@ -1,8 +1,8 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-use crate::{EPS_LABEL, Semiring, Tr, Label};
 use crate::algorithms::FinalTr;
+use crate::{Label, Semiring, Tr, EPS_LABEL};
 use std::collections::hash_map::Entry;
 
 #[derive(PartialEq, Eq, Hash, Clone)]

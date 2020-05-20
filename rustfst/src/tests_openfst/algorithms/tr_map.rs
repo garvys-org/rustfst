@@ -12,6 +12,7 @@ use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -136,11 +137,10 @@ where
     let mut fst_tr_map = test_data.raw.clone();
     let mut mapper = PlusMapper::from_weight(test_data.tr_map_plus.weight.clone());
     fst_tr_map.tr_map(&mut mapper)?;
-    assert_eq!(
-        test_data.tr_map_plus.result,
-        fst_tr_map,
-        "{}",
-        error_message_fst!(test_data.tr_map_plus.result, fst_tr_map, "TrMap PlusMapper")
+    test_eq_fst(
+        &test_data.tr_map_plus.result,
+        &fst_tr_map,
+        "TrMap PlusMapper",
     );
     Ok(())
 }
@@ -153,15 +153,10 @@ where
     let mut fst_tr_map = test_data.raw.clone();
     let mut mapper = TimesMapper::from_weight(test_data.tr_map_times.weight.clone());
     fst_tr_map.tr_map(&mut mapper)?;
-    assert_eq!(
-        test_data.tr_map_times.result,
-        fst_tr_map,
-        "{}",
-        error_message_fst!(
-            test_data.tr_map_times.result,
-            fst_tr_map,
-            "TrMap TimesMapper"
-        )
+    test_eq_fst(
+        &test_data.tr_map_times.result,
+        &fst_tr_map,
+        "TrMap TimesMapper",
     );
     Ok(())
 }
@@ -174,16 +169,13 @@ where
     let mut fst_tr_map = test_data.raw.clone();
     let mut mapper = QuantizeMapper {};
     fst_tr_map.tr_map(&mut mapper)?;
-    assert_eq!(
-        test_data.tr_map_quantize,
-        fst_tr_map,
-        "{}",
-        error_message_fst!(
-            test_data.tr_map_quantize,
-            fst_tr_map,
-            "TrMap QuantizeMapper"
-        )
+
+    test_eq_fst(
+        &test_data.tr_map_quantize,
+        &fst_tr_map,
+        "TrMap QuantizeMapper",
     );
+
     Ok(())
 }
 
@@ -196,15 +188,11 @@ where
     let mut fst_tr_map_rmweight = test_data.raw.clone();
     let mut rmweight_mapper = RmWeightMapper {};
     fst_tr_map_rmweight.tr_map(&mut rmweight_mapper)?;
-    assert_eq!(
-        test_data.tr_map_rmweight,
-        fst_tr_map_rmweight,
-        "{}",
-        error_message_fst!(
-            test_data.tr_map_rmweight,
-            fst_tr_map_rmweight,
-            "TrMap RmWeight"
-        )
+
+    test_eq_fst(
+        &test_data.tr_map_rmweight,
+        &fst_tr_map_rmweight,
+        "TrMap RmWeight",
     );
     Ok(())
 }

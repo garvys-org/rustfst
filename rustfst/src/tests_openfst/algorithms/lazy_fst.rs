@@ -3,13 +3,14 @@ use counter::Counter;
 use itertools::Itertools;
 
 use crate::fst_traits::{ExpandedFst, Fst};
-use crate::{Semiring, Trs};
+use crate::semirings::WeightQuantize;
+use crate::{Semiring, Tr, Trs, KDELTA};
 
 pub fn compare_fst_static_lazy<W, FS, FD>(fst_static: &FS, fst_lazy: &FD) -> Result<()>
 where
     FS: ExpandedFst<W>,
     FD: Fst<W>,
-    W: Semiring,
+    W: Semiring + WeightQuantize,
 {
     assert_eq!(fst_lazy.states_iter().count(), fst_static.num_states());
 
@@ -31,13 +32,27 @@ where
             )
         };
 
-        let mut trs_lazy: Counter<_, usize> = Counter::new();
+        let mut trs_lazy: Counter<Tr<W>, usize> = Counter::new();
         let trs_lazy_owner = fst_lazy.get_trs(i)?;
-        trs_lazy.update(trs_lazy_owner.trs().iter().cloned());
+        trs_lazy.update(trs_lazy_owner.trs().iter().map(|tr| {
+            Tr::new(
+                tr.ilabel,
+                tr.olabel,
+                tr.weight.quantize(KDELTA).unwrap(),
+                tr.nextstate,
+            )
+        }));
 
-        let mut trs_static: Counter<_, usize> = Counter::new();
+        let mut trs_static: Counter<Tr<W>, usize> = Counter::new();
         let trs_static_owner = fst_static.get_trs(i)?;
-        trs_static.update(trs_static_owner.trs().iter().cloned());
+        trs_static.update(trs_static_owner.trs().iter().map(|tr| {
+            Tr::new(
+                tr.ilabel,
+                tr.olabel,
+                tr.weight.quantize(KDELTA).unwrap(),
+                tr.nextstate,
+            )
+        }));
 
         assert_eq!(trs_lazy, trs_static);
     }
@@ -47,7 +62,18 @@ where
         .map(|data| {
             (
                 data.state_id,
-                data.trs.trs().iter().cloned().collect_vec(),
+                data.trs
+                    .trs()
+                    .iter()
+                    .map(|tr| {
+                        Tr::<W>::new(
+                            tr.ilabel,
+                            tr.olabel,
+                            tr.weight.quantize(KDELTA).unwrap(),
+                            tr.nextstate,
+                        )
+                    })
+                    .collect_vec(),
                 data.final_weight,
                 data.num_trs,
             )
@@ -58,7 +84,18 @@ where
         .map(|data| {
             (
                 data.state_id,
-                data.trs.trs().iter().cloned().collect_vec(),
+                data.trs
+                    .trs()
+                    .iter()
+                    .map(|tr| {
+                        Tr::<W>::new(
+                            tr.ilabel,
+                            tr.olabel,
+                            tr.weight.quantize(KDELTA).unwrap(),
+                            tr.nextstate,
+                        )
+                    })
+                    .collect_vec(),
                 data.final_weight,
                 data.num_trs,
             )

@@ -1,11 +1,11 @@
 use std::cell::RefCell;
 
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 
-use crate::algorithms::{FinalTr, TrMapper, MapFinalAction};
 use crate::algorithms::encode::{EncodeTable, EncodeTableMut};
-use crate::{Semiring, Tr};
+use crate::algorithms::{FinalTr, MapFinalAction, TrMapper};
 use crate::fst_traits::MutableFst;
+use crate::{Semiring, Tr};
 
 struct EncodeMapper<W: Semiring> {
     encode_table: EncodeTable<W>,
@@ -73,9 +73,9 @@ pub fn encode<W, F>(
     encode_labels: bool,
     encode_weights: bool,
 ) -> Result<EncodeTable<W>>
-    where
-        W: Semiring,
-        F: MutableFst<W>,
+where
+    W: Semiring,
+    F: MutableFst<W>,
 {
     let mut encode_mapper = EncodeMapper::new(encode_labels, encode_weights);
     fst.tr_map(&mut encode_mapper)
