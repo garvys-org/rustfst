@@ -256,7 +256,6 @@ impl<'a, 'b, W: Semiring + WeightQuantize> ShortestPathCompare<'a, 'b, W> {
         } else {
             natural_less(&wy, &wx).unwrap()
         };
-
         return res;
     }
 }
@@ -280,10 +279,7 @@ impl<F: Fn(&usize, &usize) -> bool> Heap<F> {
         if idx > 0{
             let parent_idx = (idx - 1) / 2;
             if (self.less)(&self.data[parent_idx], &self.data[idx]) {
-                let children_val = self.data[idx];
-                let parent_val = self.data[parent_idx];
-                self.data[parent_idx] = children_val;
-                self.data[idx] = parent_val;
+                self.data.swap(idx, parent_idx);
                 self.sift_up(parent_idx);
             }
         }
@@ -297,31 +293,20 @@ impl<F: Fn(&usize, &usize) -> bool> Heap<F> {
         let child1_idx = 2*idx + 1;
         let child2_idx = 2*idx + 2;
 
-        let mut to_swap = 0;
-        if child1_idx < self.data.len() && (self.less)(&cur_val, &self.data[child1_idx]) {
-            to_swap = 1;
-        }
 
-        if child2_idx < self.data.len() && (self.less)(&cur_val, &self.data[child2_idx]) {
-            if (to_swap != 1) || (to_swap == 1 && (self.less)(&self.data[child1_idx], &self.data[child2_idx])){
-                to_swap = 2;
-            }
-        }
+        let biggest_child_idx = if child1_idx >= self.len() && child2_idx >= self.len() {
+            return;
+        } else if child1_idx < self.len() && child2_idx >= self.len(){
+            child1_idx
+        } else if (self.less)(&self.data[child1_idx], &self.data[child2_idx]) {
+            child2_idx
+        } else {
+            child1_idx
+        };
 
-        if to_swap != 0 {
-            let child_val = if to_swap == 1 {
-                self.data[child1_idx]
-            } else {
-                self.data[child2_idx]
-            };
-            self.data[idx] = child_val;
-            if to_swap == 1 {
-                self.data[child1_idx] = cur_val;
-                self.sift_down(child1_idx);
-            } else {
-                self.data[child2_idx] = cur_val;
-                self.sift_down(child2_idx);
-            }
+        if !(self.less)(&self.data[biggest_child_idx], &cur_val) {
+            self.data.swap(idx, biggest_child_idx);
+            self.sift_down(biggest_child_idx);
         }
     }
     fn pop(&mut self) -> Result<usize> {
