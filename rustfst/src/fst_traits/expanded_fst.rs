@@ -42,9 +42,11 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
     {
         let n = self.num_states();
         if fst2.num_states() != n {
+            println!("Not the same number of states");
             return false;
         }
         if self.start() != fst2.start() {
+            println!("Not the same start state");
             return false;
         }
         for state in 0..n {
@@ -52,6 +54,7 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
             let trs2 = unsafe { fst2.get_trs_unchecked(state) };
 
             if trs1.trs().len() != trs2.trs().len() {
+                println!("Not the same number of trs for state {:?}", state);
                 return false;
             }
 
@@ -60,11 +63,13 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
                     || tr1.olabel != tr2.olabel
                     || tr1.nextstate != tr2.nextstate
                 {
+                    println!("A tr1 : {:?} tr2 : {:?} for state {:?}", &tr1, &tr2, state);
                     return false;
                 }
                 let w1 = tr1.weight.quantize(KDELTA).unwrap();
                 let w2 = tr2.weight.quantize(KDELTA).unwrap();
                 if w1 != w2 {
+                    println!("B");
                     return false;
                 }
             }

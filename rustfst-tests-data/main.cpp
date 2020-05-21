@@ -467,6 +467,8 @@ template<class F>
 void compute_fst_shortest_path(const F& raw_fst, json& j) {
     j["shortest_path"] = {};
     std::vector<bool> v = {true, false};
+    // bool unique = false;
+    // int n = 2;
     for(int n = 1; n < 10; n++) {
         for(bool unique: v) {
             fst::VectorFst<typename F::Arc> fst_out;
@@ -1116,9 +1118,6 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     std::cout << "Minimization" << std::endl;
     compute_fst_minimization(raw_fst, data);
 
-    std::cout << "ShortestPath" << std::endl;
-    compute_fst_shortest_path(raw_fst, data);
-
     std::cout << "Gallic Encode Decode" << std::endl;
     compute_fst_gallic_encode_decode(raw_fst, data);
 
@@ -1157,6 +1156,9 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
 
     std::cout << "State Reachable" << std::endl;
     compute_fst_state_reachable(raw_fst, data);
+
+    std::cout << "ShortestPath" << std::endl;
+    compute_fst_shortest_path(raw_fst, data);
 
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;

@@ -1,9 +1,7 @@
 use std::cell::RefCell;
-use std::cmp::Ordering;
 use std::sync::Arc;
 
 use anyhow::Result;
-use binary_heap_plus::BinaryHeap;
 use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::determinize::determinize_with_distance;
@@ -15,8 +13,10 @@ use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{
     ReverseBack, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::Tr;
+use crate::{Tr, KDELTA};
 use crate::{StateId, Trs};
+use std::fmt::Debug;
+use bitflags::_core::fmt::Formatter;
 
 /// Creates an FST containing the n-shortest paths in the input FST. The n-shortest paths are the
 /// n-lowest weight paths w.r.t. the natural semiring order.
@@ -39,7 +39,7 @@ pub fn shortest_path<W, FI, FO>(ifst: &FI, nshortest: usize, unique: bool) -> Re
 where
     FI: ExpandedFst<W>,
     FO: MutableFst<W>,
-    W: Semiring + Into<<W as Semiring>::ReverseWeight> + From<<W as Semiring>::ReverseWeight>,
+    W: Semiring + WeightQuantize + Into<<W as Semiring>::ReverseWeight> + From<<W as Semiring>::ReverseWeight>,
     <W as Semiring>::ReverseWeight: WeightQuantize + WeaklyDivisibleSemiring,
 {
     if nshortest == 0 {
@@ -221,7 +221,7 @@ struct ShortestPathCompare<'a, 'b, W: Semiring> {
     weight_one: W,
 }
 
-impl<'a, 'b, W: Semiring> ShortestPathCompare<'a, 'b, W> {
+impl<'a, 'b, W: Semiring + WeightQuantize> ShortestPathCompare<'a, 'b, W> {
     pub fn new(pairs: &'a RefCell<Vec<(Option<StateId>, W)>>, distance: &'b [W]) -> Self {
         Self {
             pairs,
@@ -249,19 +249,103 @@ impl<'a, 'b, W: Semiring> ShortestPathCompare<'a, 'b, W> {
         let py = &b[y];
         let wx = self.pweight(&px.0).times(&px.1).unwrap();
         let wy = self.pweight(&py.0).times(&py.1).unwrap();
-        if px.0.is_none() && py.0.is_some() {
-            natural_less(&wy, &wx).unwrap() || (wy == wx)
+        let res = if px.0.is_none() && py.0.is_some() {
+            natural_less(&wy, &wx).unwrap() || (wy.quantize(KDELTA).unwrap() == wx.quantize(KDELTA).unwrap())
         } else if px.0.is_some() && py.0.is_none() {
-            natural_less(&wy, &wx).unwrap() && !(wy == wx)
+            natural_less(&wy, &wx).unwrap() && !(wy.quantize(KDELTA).unwrap() == wx.quantize(KDELTA).unwrap())
         } else {
             natural_less(&wy, &wx).unwrap()
+        };
+
+        return res;
+    }
+}
+
+struct Heap<F> {
+    data: Vec<usize>,
+    less: F
+}
+
+impl<F> Debug for Heap<F> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.data.fmt(f)
+    }
+}
+
+impl<F: Fn(&usize, &usize) -> bool> Heap<F> {
+    fn new(f: F) -> Self {
+        Self{data: vec![], less: f }
+    }
+    fn sift_up(&mut self, idx: usize) {
+        if idx > 0{
+            let parent_idx = (idx - 1) / 2;
+            if (self.less)(&self.data[parent_idx], &self.data[idx]) {
+                let children_val = self.data[idx];
+                let parent_val = self.data[parent_idx];
+                self.data[parent_idx] = children_val;
+                self.data[idx] = parent_val;
+                self.sift_up(parent_idx);
+            }
         }
     }
+    fn push(&mut self, v: usize) {
+        self.data.push(v);
+        self.sift_up(self.len()-1);
+    }
+    fn sift_down(&mut self, idx: usize) {
+        let cur_val = self.data[idx];
+        let child1_idx = 2*idx + 1;
+        let child2_idx = 2*idx + 2;
+
+        let mut to_swap = 0;
+        if child1_idx < self.data.len() && (self.less)(&cur_val, &self.data[child1_idx]) {
+            to_swap = 1;
+        }
+
+        if child2_idx < self.data.len() && (self.less)(&cur_val, &self.data[child2_idx]) {
+            if (to_swap != 1) || (to_swap == 1 && (self.less)(&self.data[child1_idx], &self.data[child2_idx])){
+                to_swap = 2;
+            }
+        }
+
+        if to_swap != 0 {
+            let child_val = if to_swap == 1 {
+                self.data[child1_idx]
+            } else {
+                self.data[child2_idx]
+            };
+            self.data[idx] = child_val;
+            if to_swap == 1 {
+                self.data[child1_idx] = cur_val;
+                self.sift_down(child1_idx);
+            } else {
+                self.data[child2_idx] = cur_val;
+                self.sift_down(child2_idx);
+            }
+        }
+    }
+    fn pop(&mut self) -> Result<usize> {
+        let top_val = self.data[0];
+        if self.len() == 1{
+            self.data.remove(0);
+        } else {
+            self.data[0] = self.data.remove(self.data.len()-1);
+            self.sift_down(0);
+        }
+        Ok(top_val)
+    }
+    fn len(&self) -> usize {
+        self.data.len()
+    }
+    fn is_empty(&self) -> bool {
+        self.data.is_empty()
+    }
+
 }
 
 fn n_shortest_path<W, FI, FO>(ifst: &FI, distance: &[W], nshortest: usize) -> Result<FO>
 where
-    W: Semiring,
+    W: Semiring + WeightQuantize,
     FI: MutableFst<W::ReverseWeight>,
     FO: MutableFst<W>,
 {
@@ -289,20 +373,36 @@ where
     pairs.borrow_mut()[final_state] = (Some(istart), W::one());
 
     let shortest_path_compare = ShortestPathCompare::new(&pairs, distance);
-    let mut heap = BinaryHeap::new_by(|v1, v2| {
-        if shortest_path_compare.compare(*v1, *v2) {
-            Ordering::Less
-        } else {
-            Ordering::Greater
-        }
+
+    let mut heap = Heap::new(|v1, v2| {
+        shortest_path_compare.compare(*v1, *v2)
     });
     heap.push(final_state);
 
+    let weight_threshold = W::zero();
+    let state_threshold : Option<StateId> = None;
+    let limit = distance[istart].times(weight_threshold)?;
+
     let mut r = vec![];
+
     while !heap.is_empty() {
         let state = heap.pop().unwrap();
         let p = pairs.borrow()[state].clone();
         let p_first_real = p.0.map(|v| v as i32).unwrap_or(-1) + 1;
+
+        let d = if let Some(lol) = p.0 {
+            if lol < distance.len() {
+                distance[lol].clone()
+            } else {
+                W::zero()
+            }
+        } else {
+            W::one()
+        };
+        if natural_less(&limit, &d.times(&p.1)?)? || (state_threshold.is_some() && ofst.num_states() >= state_threshold.unwrap()) {
+            continue;
+        }
+
         while r.len() as i32 <= p_first_real {
             r.push(0);
         }

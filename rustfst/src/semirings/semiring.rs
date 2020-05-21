@@ -33,7 +33,7 @@ bitflags! {
 /// Thus, a semiring is a ring that may lack negation.
 /// For more information : https://cs.nyu.edu/~mohri/pub/hwa.pdf
 pub trait Semiring: Clone + PartialEq + PartialOrd + Debug + Hash + Eq + Sync + 'static {
-    type Type: Clone;
+    type Type: Clone + Debug;
     type ReverseWeight: Semiring + ReverseBack<Self>;
 
     fn zero() -> Self;

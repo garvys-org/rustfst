@@ -10,11 +10,12 @@ use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::{SerializableSemiring, WeightQuantize};
 use crate::tests_openfst::algorithms::lazy_fst::compare_fst_static_lazy;
 use crate::tests_openfst::FstTestData;
+use crate::tests_openfst::macros::test_eq_fst;
 
 pub fn test_rmepsilon<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
     F: SerializableFst<W> + MutableFst<W> + Display,
-    W: SerializableSemiring + WeaklyDivisibleSemiring,
+    W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
 {
     // Remove epsilon
     let mut fst_rmepsilon = test_data.raw.clone();
@@ -22,16 +23,7 @@ where
     assert!(fst_rmepsilon
         .properties()?
         .contains(FstProperties::NO_EPSILONS));
-    assert_eq!(
-        fst_rmepsilon,
-        test_data.rmepsilon.result_static,
-        "{}",
-        error_message_fst!(
-            test_data.rmepsilon.result_static,
-            fst_rmepsilon,
-            "RmEpsilon"
-        )
-    );
+    test_eq_fst(&test_data.rmepsilon.result_static, &fst_rmepsilon, "RmEpsilon");
     Ok(())
 }
 

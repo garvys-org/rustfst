@@ -581,7 +581,6 @@ macro_rules! test_fst {
             }
 
             #[test]
-            #[ignore]
             fn test_shortest_path_openfst() -> Result<()> {
                 do_run!(test_shortest_path, $fst_name);
                 Ok(())
