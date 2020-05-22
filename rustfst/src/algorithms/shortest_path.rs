@@ -141,7 +141,7 @@ where
         enqueued[s] = false;
         let sd = distance[s].clone();
 
-        if let Some(final_weight) = ifst.final_weight(s)? {
+        if let Some(final_weight) = unsafe {ifst.final_weight_unchecked(s)} {
             let plus = f_distance.plus(&sd.times(final_weight)?)?;
             if f_distance != plus {
                 f_distance = plus;
@@ -192,7 +192,7 @@ where
             }
         } else {
             let pos = parent[d.unwrap()].unwrap().1;
-            let mut tr = ifst.get_trs(state)?.trs().iter().nth(pos).unwrap().clone();
+            let mut tr = ifst.get_trs(state)?.trs()[pos].clone();
             tr.nextstate = d_p.unwrap();
             ofst.add_tr(s_p.unwrap(), tr)?;
         }
