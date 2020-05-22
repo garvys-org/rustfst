@@ -39,9 +39,6 @@ use crate::tests_openfst::algorithms::fst_convert::test_fst_convert;
 use crate::tests_openfst::algorithms::gallic_encode_decode::test_gallic_encode_decode;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicOperationResult;
 use crate::tests_openfst::algorithms::gallic_encode_decode::GallicTestData;
-use crate::tests_openfst::algorithms::label_reachable::{
-    test_label_reachable, LabelReachableOperationResult, LabelReachableTestData,
-};
 // use crate::tests_openfst::algorithms::matcher::test_sorted_matcher;
 // use crate::tests_openfst::algorithms::matcher::{MatcherOperationResult, MatcherTestData};
 use crate::tests_openfst::algorithms::state_reachable::{
@@ -173,7 +170,6 @@ pub struct ParsedFstTestData {
     // matcher: Vec<MatcherOperationResult>,
     compose: Vec<ComposeOperationResult>,
     state_reachable: StateReachableOperationResult,
-    label_reachable: Vec<LabelReachableOperationResult>,
 }
 
 pub struct FstTestData<W, F: SerializableFst<W>>
@@ -228,7 +224,6 @@ where
     // pub matcher: Vec<MatcherTestData<F>>,
     pub compose: Vec<ComposeTestData<W, F>>,
     pub state_reachable: StateReachableTestData,
-    pub label_reachable: Vec<LabelReachableTestData>,
 }
 
 impl<W, F> FstTestData<W, F>
@@ -305,7 +300,6 @@ where
             // matcher: data.matcher.iter().map(|v| v.parse()).collect(),
             compose: data.compose.iter().map(|v| v.parse()).collect(),
             state_reachable: data.state_reachable.parse(),
-            label_reachable: data.label_reachable.iter().map(|v| v.parse()).collect(),
         }
     }
 }
@@ -746,13 +740,6 @@ macro_rules! test_fst {
             #[test]
             fn test_fst_state_reachable_openfst() -> Result<()> {
                 do_run!(test_state_reachable, $fst_name);
-                Ok(())
-            }
-
-            #[test]
-            #[ignore]
-            fn test_fst_label_reachable_openfst() -> Result<()> {
-                do_run!(test_label_reachable, $fst_name);
                 Ok(())
             }
         }

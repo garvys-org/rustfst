@@ -116,92 +116,6 @@ void compute_fst_condense(const F& raw_fst, json& j) {
 }
 
 template<class F>
-void compute_fst_label_reachable(const F& raw_fst, json& j) {
-    using Arc = typename F::Arc;
-    using Weight = typename F::Weight;
-    using StateId = typename Arc::StateId;
-
-    fst::ConstFst<Arc> ifst(raw_fst);
-
-    using P = fst::MatcherFst<
-                    fst::ConstFst<Arc>,
-                    fst::LabelLookAheadMatcher<fst::SortedMatcher<fst::Fst<Arc>>, fst::olabel_lookahead_flags>,
-                    fst::olabel_lookahead_fst_type,
-                    fst::LabelLookAheadRelabeler<Arc>
-                  >;
-
-    P fst_in(ifst);
-
-    std::vector<bool> v = {true, false};
-
-    j["label_reachable"] = {};
-    for (auto reach_input: v) {
-        json j2 = {};
-        j2["reach_input"] = bool(reach_input);
-
-        fst::LabelReachable<Arc> reachable(fst_in, reach_input);
-
-        auto data = reachable.GetData();
-        j2["final_label"] = data->FinalLabel();
-
-        j2["interval_sets"] = {};
-        for (int s = 0; s < data->NumIntervalSets(); s++) {
-            auto interval_set = data->GetIntervalSet(s);
-            auto intervals = interval_set.Intervals();
-            json j_interval_set = {};
-            for (int idx = 0; idx < interval_set.Size(); idx++) {
-                auto interval = intervals[idx];
-                json j_interval = {};
-                j_interval["begin"] = interval.begin;
-                j_interval["end"] = interval.end;
-                j_interval_set.push_back(j_interval);
-            }
-            if (interval_set.Size() == 0) {
-                j_interval_set = std::vector<int>();
-            }
-            j2["interval_sets"].push_back(j_interval_set);
-        }
-        if (data->NumIntervalSets() == 0) {
-            j2["interval_sets"] = std::vector<int>();
-        }
-
-        std::set<int> labels;
-        for (fst::StateIterator<P> siter(fst_in); !siter.Done(); siter.Next()) {
-            StateId state_id = siter.Value();
-            for (fst::ArcIterator<P> aiter(fst_in, state_id); !aiter.Done(); aiter.Next()) {
-                const Arc &tr = aiter.Value();
-                if (reach_input) {
-                    labels.insert(tr.ilabel);
-                } else {
-                    labels.insert(tr.olabel);
-                }
-            }
-        }
-
-        j2["result"] = {};
-        for(int state=0; state<fst_in.NumStates(); state++) {
-            for(auto label: labels) {
-                reachable.SetState(state);
-                auto r = reachable.Relabel(label);
-                auto res = reachable.Reach(r);
-
-                json j3;
-                j3["state"] = state;
-                j3["label"] = label;
-                j3["label_relabeled"] = r;
-                j3["reachable"] = res;
-                j3["reach_final"] = reachable.ReachFinal();
-                j2["result"].push_back(j3);
-            }
-        }
-        if (fst_in.NumStates() == 0) {
-            j2["result"] = std::vector<int>();
-        }
-        j["label_reachable"].push_back(j2);
-    }
-}
-
-template<class F>
 void compute_fst_state_reachable(const F& raw_fst, json& j) {
     using Arc = typename F::Arc;
     using Weight = typename F::Weight;
@@ -1155,9 +1069,6 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
 
 //    std::cout << "Matcher" << std::endl;
 //    compute_fst_matcher(raw_fst, data);
-
-    std::cout << "Label Reachable" << std::endl;
-    compute_fst_label_reachable(raw_fst, data);
 
     std::cout << "Compose" << std::endl;
     compute_fst_compose(raw_fst, data, fst_test_data.get_fst_compose());

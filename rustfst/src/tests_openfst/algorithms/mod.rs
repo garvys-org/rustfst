@@ -12,7 +12,6 @@ pub mod factor_weight_identity;
 pub mod fst_convert;
 pub mod gallic_encode_decode;
 pub mod inverse;
-pub mod label_reachable;
 pub mod lazy_fst;
 // pub mod matcher;
 pub mod minimize;
