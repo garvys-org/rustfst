@@ -5,7 +5,7 @@ pub mod condense;
 pub mod connect;
 pub mod tr_map;
 pub mod tr_sort;
-// pub mod determinize;
+pub mod determinize;
 pub mod encode;
 pub mod factor_weight_gallic;
 pub mod factor_weight_identity;

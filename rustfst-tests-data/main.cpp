@@ -392,6 +392,14 @@ template<class F>
 void compute_fst_determinization(const F& raw_fst, json& j) {
     j["determinize"] = {};
 
+    // To check if a FST is determinizable, let's try to disambiguate it.
+    F raw_fst_disambiguated;
+    fst::Disambiguate(raw_fst, &raw_fst_disambiguated);
+    if (prop_to_bool(raw_fst_disambiguated.Properties(fst::kError, true), fst::kError)) {
+        j["determinize"] = vector<int>();
+        return;
+    }
+
     compute_fst_determinization(raw_fst, j, fst::DeterminizeType::DETERMINIZE_FUNCTIONAL, "functional");
     compute_fst_determinization(raw_fst, j, fst::DeterminizeType::DETERMINIZE_NONFUNCTIONAL, "nonfunctional");
     compute_fst_determinization(raw_fst, j, fst::DeterminizeType::DETERMINIZE_DISAMBIGUATE, "disambiguate");
@@ -1106,8 +1114,8 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     compute_fst_state_map(raw_fst, data, "state_map_tr_sum", fst::ArcSumMapper<typename F::MyArc>(raw_fst));
     compute_fst_state_map(raw_fst, data, "state_map_tr_unique", fst::ArcUniqueMapper<typename F::MyArc>(raw_fst));
 
-//    std::cout << "Determinization" << std::endl;
-//    compute_fst_determinization(raw_fst, data);
+   std::cout << "Determinization" << std::endl;
+   compute_fst_determinization(raw_fst, data);
 
     std::cout << "TopSort" << std::endl;
     compute_fst_topsort(raw_fst, data);

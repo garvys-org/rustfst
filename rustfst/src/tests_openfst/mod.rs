@@ -67,7 +67,7 @@ use crate::tests_openfst::io::vector_fst_text_serialization::{
 use self::algorithms::{
     compose::test_compose,
     connect::test_connect,
-    // determinize::{test_determinize, DeterminizeOperationResult, DeterminizeTestData},
+    determinize::{test_determinize, DeterminizeOperationResult, DeterminizeTestData},
     encode::{test_encode, test_encode_decode, EncodeOperationResult, EncodeTestData},
     inverse::test_invert,
     minimize::{test_minimize, MinimizeOperationResult, MinimizeTestData},
@@ -149,7 +149,7 @@ pub struct ParsedFstTestData {
     encode_decode: Vec<EncodeOperationResult>,
     state_map_tr_sum: FstOperationResult,
     state_map_tr_unique: FstOperationResult,
-    // determinize: Vec<DeterminizeOperationResult>,
+    determinize: Vec<DeterminizeOperationResult>,
     minimize: Vec<MinimizeOperationResult>,
     tr_sort_ilabel: FstOperationResult,
     tr_sort_olabel: FstOperationResult,
@@ -204,7 +204,7 @@ where
     pub encode_decode: Vec<EncodeTestData<W, F>>,
     pub state_map_tr_sum: F,
     pub state_map_tr_unique: F,
-    // pub determinize: Vec<DeterminizeTestData<F>>,
+    pub determinize: Vec<DeterminizeTestData<W, F>>,
     pub minimize: Vec<MinimizeTestData<W, F>>,
     pub tr_sort_ilabel: F,
     pub tr_sort_olabel: F,
@@ -261,7 +261,7 @@ where
             encode_decode: data.encode_decode.iter().map(|v| v.parse()).collect(),
             state_map_tr_sum: data.state_map_tr_sum.parse(),
             state_map_tr_unique: data.state_map_tr_unique.parse(),
-            // determinize: data.determinize.iter().map(|v| v.parse()).collect(),
+            determinize: data.determinize.iter().map(|v| v.parse()).collect(),
             minimize: data.minimize.iter().map(|v| v.parse()).collect(),
             tr_sort_ilabel: data.tr_sort_ilabel.parse(),
             tr_sort_olabel: data.tr_sort_olabel.parse(),
@@ -469,12 +469,11 @@ macro_rules! test_fst {
                 Ok(())
             }
 
-            // #[test]
-            // #[ignore]
-            // fn test_determinize_openfst() -> Result<()> {
-            //     do_run!(test_determinize, $fst_name);
-            //     Ok(())
-            // }
+            #[test]
+            fn test_determinize_openfst() -> Result<()> {
+                do_run!(test_determinize, $fst_name);
+                Ok(())
+            }
 
             #[test]
             fn test_encode_decode_openfst() -> Result<()> {
