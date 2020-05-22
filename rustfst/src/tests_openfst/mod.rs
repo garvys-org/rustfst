@@ -94,6 +94,7 @@ use self::fst_impls::test_fst_into_iterator::{
     test_fst_into_iterator_const, test_fst_into_iterator_vector,
 };
 use self::misc::test_del_all_states;
+use crate::tests_openfst::algorithms::queue::{QueueOperationResult, test_queue};
 
 #[macro_use]
 mod macros;
@@ -170,6 +171,7 @@ pub struct ParsedFstTestData {
     // matcher: Vec<MatcherOperationResult>,
     compose: Vec<ComposeOperationResult>,
     state_reachable: StateReachableOperationResult,
+    queue: QueueOperationResult,
 }
 
 pub struct FstTestData<W, F: SerializableFst<W>>
@@ -224,6 +226,7 @@ where
     // pub matcher: Vec<MatcherTestData<F>>,
     pub compose: Vec<ComposeTestData<W, F>>,
     pub state_reachable: StateReachableTestData,
+    pub queue: QueueOperationResult
 }
 
 impl<W, F> FstTestData<W, F>
@@ -300,6 +303,7 @@ where
             // matcher: data.matcher.iter().map(|v| v.parse()).collect(),
             compose: data.compose.iter().map(|v| v.parse()).collect(),
             state_reachable: data.state_reachable.parse(),
+            queue: data.queue.clone()
         }
     }
 }
@@ -738,6 +742,12 @@ macro_rules! test_fst {
             #[test]
             fn test_fst_state_reachable_openfst() -> Result<()> {
                 do_run!(test_state_reachable, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_queue_openfst() -> Result<()> {
+                do_run!(test_queue, $fst_name);
                 Ok(())
             }
         }
