@@ -103,7 +103,7 @@ extern crate serde;
 extern crate serde_json;
 
 pub use crate::drawing_config::DrawingConfig;
-pub use crate::fst_path::{FstPath, check_path_in_fst};
+pub use crate::fst_path::{check_path_in_fst, FstPath};
 pub use crate::symbol_table::SymbolTable;
 
 pub use self::tr::Tr;

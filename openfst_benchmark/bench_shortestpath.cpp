@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
         unique = true;
     }
 
-    cout << "Running benchmark for algorithm project" << endl;
+    cout << "Running benchmark for algorithm shortestpath" << endl;
     UNARY_ALGO_BENCH({
         auto rfst = new VectorFst<StdArc>();
         ShortestPath(*fst, rfst, nshortest, unique);

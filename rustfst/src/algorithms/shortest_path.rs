@@ -13,10 +13,10 @@ use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{
     ReverseBack, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::{Tr, KDELTA};
 use crate::{StateId, Trs};
-use std::fmt::Debug;
+use crate::{Tr, KDELTA};
 use bitflags::_core::fmt::Formatter;
+use std::fmt::Debug;
 
 /// Creates an FST containing the n-shortest paths in the input FST. The n-shortest paths are the
 /// n-lowest weight paths w.r.t. the natural semiring order.
@@ -39,7 +39,10 @@ pub fn shortest_path<W, FI, FO>(ifst: &FI, nshortest: usize, unique: bool) -> Re
 where
     FI: ExpandedFst<W>,
     FO: MutableFst<W>,
-    W: Semiring + WeightQuantize + Into<<W as Semiring>::ReverseWeight> + From<<W as Semiring>::ReverseWeight>,
+    W: Semiring
+        + WeightQuantize
+        + Into<<W as Semiring>::ReverseWeight>
+        + From<<W as Semiring>::ReverseWeight>,
     <W as Semiring>::ReverseWeight: WeightQuantize + WeaklyDivisibleSemiring,
 {
     if nshortest == 0 {
@@ -250,9 +253,11 @@ impl<'a, 'b, W: Semiring + WeightQuantize> ShortestPathCompare<'a, 'b, W> {
         let wx = self.pweight(&px.0).times(&px.1).unwrap();
         let wy = self.pweight(&py.0).times(&py.1).unwrap();
         let res = if px.0.is_none() && py.0.is_some() {
-            natural_less(&wy, &wx).unwrap() || (wy.quantize(KDELTA).unwrap() == wx.quantize(KDELTA).unwrap())
+            natural_less(&wy, &wx).unwrap()
+                || (wy.quantize(KDELTA).unwrap() == wx.quantize(KDELTA).unwrap())
         } else if px.0.is_some() && py.0.is_none() {
-            natural_less(&wy, &wx).unwrap() && !(wy.quantize(KDELTA).unwrap() == wx.quantize(KDELTA).unwrap())
+            natural_less(&wy, &wx).unwrap()
+                && !(wy.quantize(KDELTA).unwrap() == wx.quantize(KDELTA).unwrap())
         } else {
             natural_less(&wy, &wx).unwrap()
         };
@@ -262,7 +267,7 @@ impl<'a, 'b, W: Semiring + WeightQuantize> ShortestPathCompare<'a, 'b, W> {
 
 struct Heap<F> {
     data: Vec<usize>,
-    less: F
+    less: F,
 }
 
 impl<F> Debug for Heap<F> {
@@ -273,10 +278,13 @@ impl<F> Debug for Heap<F> {
 
 impl<F: Fn(&usize, &usize) -> bool> Heap<F> {
     fn new(f: F) -> Self {
-        Self{data: vec![], less: f }
+        Self {
+            data: vec![],
+            less: f,
+        }
     }
     fn sift_up(&mut self, idx: usize) {
-        if idx > 0{
+        if idx > 0 {
             let parent_idx = (idx - 1) / 2;
             if (self.less)(&self.data[parent_idx], &self.data[idx]) {
                 self.data.swap(idx, parent_idx);
@@ -286,17 +294,16 @@ impl<F: Fn(&usize, &usize) -> bool> Heap<F> {
     }
     fn push(&mut self, v: usize) {
         self.data.push(v);
-        self.sift_up(self.len()-1);
+        self.sift_up(self.len() - 1);
     }
     fn sift_down(&mut self, idx: usize) {
         let cur_val = self.data[idx];
-        let child1_idx = 2*idx + 1;
-        let child2_idx = 2*idx + 2;
-
+        let child1_idx = 2 * idx + 1;
+        let child2_idx = 2 * idx + 2;
 
         let biggest_child_idx = if child1_idx >= self.len() && child2_idx >= self.len() {
             return;
-        } else if child1_idx < self.len() && child2_idx >= self.len(){
+        } else if child1_idx < self.len() && child2_idx >= self.len() {
             child1_idx
         } else if (self.less)(&self.data[child1_idx], &self.data[child2_idx]) {
             child2_idx
@@ -311,10 +318,10 @@ impl<F: Fn(&usize, &usize) -> bool> Heap<F> {
     }
     fn pop(&mut self) -> Result<usize> {
         let top_val = self.data[0];
-        if self.len() == 1{
+        if self.len() == 1 {
             self.data.remove(0);
         } else {
-            self.data[0] = self.data.remove(self.data.len()-1);
+            self.data[0] = self.data.remove(self.data.len() - 1);
             self.sift_down(0);
         }
         Ok(top_val)
@@ -325,7 +332,6 @@ impl<F: Fn(&usize, &usize) -> bool> Heap<F> {
     fn is_empty(&self) -> bool {
         self.data.is_empty()
     }
-
 }
 
 fn n_shortest_path<W, FI, FO>(ifst: &FI, distance: &[W], nshortest: usize) -> Result<FO>
@@ -359,13 +365,11 @@ where
 
     let shortest_path_compare = ShortestPathCompare::new(&pairs, distance);
 
-    let mut heap = Heap::new(|v1, v2| {
-        shortest_path_compare.compare(*v1, *v2)
-    });
+    let mut heap = Heap::new(|v1, v2| shortest_path_compare.compare(*v1, *v2));
     heap.push(final_state);
 
     let weight_threshold = W::zero();
-    let state_threshold : Option<StateId> = None;
+    let state_threshold: Option<StateId> = None;
     let limit = distance[istart].times(weight_threshold)?;
 
     let mut r = vec![];
@@ -384,7 +388,9 @@ where
         } else {
             W::one()
         };
-        if natural_less(&limit, &d.times(&p.1)?)? || (state_threshold.is_some() && ofst.num_states() >= state_threshold.unwrap()) {
+        if natural_less(&limit, &d.times(&p.1)?)?
+            || (state_threshold.is_some() && ofst.num_states() >= state_threshold.unwrap())
+        {
             continue;
         }
 

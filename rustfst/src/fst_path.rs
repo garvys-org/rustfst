@@ -3,9 +3,9 @@ use std::hash::{Hash, Hasher};
 
 use anyhow::Result;
 
-use crate::{EPS_LABEL, Label, StateId, Trs};
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
+use crate::{Label, StateId, Trs, EPS_LABEL};
 
 /// Structure representing a path in a FST
 /// (list of input labels, list of output labels and total weight).
@@ -101,7 +101,7 @@ pub fn check_path_in_fst<W: Semiring, F: Fst<W>>(fst: &F, fst_path: &FstPath<W>)
             state: start,
             next_ilabel_idx: 0,
             next_olabel_idx: 0,
-            weight_curr: W::one()
+            weight_curr: W::one(),
         });
 
         while !queue.is_empty() {
@@ -111,44 +111,49 @@ pub fn check_path_in_fst<W: Semiring, F: Fst<W>>(fst: &F, fst_path: &FstPath<W>)
             let next_olabel_idx = lol.next_olabel_idx;
             let weight_curr = lol.weight_curr;
 
-            if next_ilabel_idx >= fst_path.ilabels.len() && next_olabel_idx >= fst_path.olabels.len() {
+            if next_ilabel_idx >= fst_path.ilabels.len()
+                && next_olabel_idx >= fst_path.olabels.len()
+            {
                 // No more labels left
-                if let Some(final_weight) = unsafe {fst.final_weight_unchecked(state)} {
+                if let Some(final_weight) = unsafe { fst.final_weight_unchecked(state) } {
                     if weight_curr.times(final_weight).unwrap() == fst_path.weight {
                         return true;
                     }
                 }
             }
 
-            for tr in unsafe {fst.get_trs_unchecked(state)}.trs() {
-                let match_ilabel = next_ilabel_idx < fst_path.ilabels.len() && tr.ilabel == fst_path.ilabels[next_ilabel_idx];
-                let match_olabel = next_olabel_idx < fst_path.olabels.len() && tr.olabel == fst_path.olabels[next_ilabel_idx];
-                let (new_next_ilabel_idx, new_next_olabel_idx) = if tr.ilabel == EPS_LABEL && tr.olabel == EPS_LABEL {
-                    (next_ilabel_idx, next_olabel_idx)
-                } else if tr.ilabel != EPS_LABEL && tr.olabel == EPS_LABEL {
-                    if match_ilabel {
-                        (next_ilabel_idx+1, next_olabel_idx)
+            for tr in unsafe { fst.get_trs_unchecked(state) }.trs() {
+                let match_ilabel = next_ilabel_idx < fst_path.ilabels.len()
+                    && tr.ilabel == fst_path.ilabels[next_ilabel_idx];
+                let match_olabel = next_olabel_idx < fst_path.olabels.len()
+                    && tr.olabel == fst_path.olabels[next_ilabel_idx];
+                let (new_next_ilabel_idx, new_next_olabel_idx) =
+                    if tr.ilabel == EPS_LABEL && tr.olabel == EPS_LABEL {
+                        (next_ilabel_idx, next_olabel_idx)
+                    } else if tr.ilabel != EPS_LABEL && tr.olabel == EPS_LABEL {
+                        if match_ilabel {
+                            (next_ilabel_idx + 1, next_olabel_idx)
+                        } else {
+                            continue;
+                        }
+                    } else if tr.ilabel == EPS_LABEL && tr.olabel != EPS_LABEL {
+                        if match_olabel {
+                            (next_ilabel_idx, next_olabel_idx + 1)
+                        } else {
+                            continue;
+                        }
                     } else {
-                        continue
-                    }
-                } else if tr.ilabel == EPS_LABEL && tr.olabel != EPS_LABEL {
-                    if match_olabel {
-                        (next_ilabel_idx, next_olabel_idx+1)
-                    } else {
-                        continue
-                    }
-                } else {
-                    if match_ilabel && match_olabel {
-                        (next_ilabel_idx + 1, next_olabel_idx + 1)
-                    } else {
-                        continue
-                    }
-                };
+                        if match_ilabel && match_olabel {
+                            (next_ilabel_idx + 1, next_olabel_idx + 1)
+                        } else {
+                            continue;
+                        }
+                    };
                 queue.push_back(BfsState {
                     state: tr.nextstate,
                     next_ilabel_idx: new_next_ilabel_idx,
                     next_olabel_idx: new_next_olabel_idx,
-                    weight_curr: weight_curr.times(&tr.weight).unwrap()
+                    weight_curr: weight_curr.times(&tr.weight).unwrap(),
                 })
             }
         }
@@ -286,14 +291,38 @@ mod test {
         fst.emplace_tr(0, 10, 12, 3.0, 2)?;
         fst.set_final(2, 3.2)?;
 
-        assert!(!check_path_in_fst(&fst, &FstPath::new(vec![], vec![], TropicalWeight::one())));
-        assert!(!check_path_in_fst(&fst, &FstPath::new(vec![1], vec![2], TropicalWeight::new(1.2))));
-        assert!(!check_path_in_fst(&fst, &FstPath::new(vec![1, 2], vec![2, 3], TropicalWeight::new(1.5))));
-        assert!(check_path_in_fst(&fst, &FstPath::new(vec![1, 2], vec![2, 3], TropicalWeight::new(4.7))));
-        assert!(!check_path_in_fst(&fst, &FstPath::new(vec![10], vec![10], TropicalWeight::new(3.0))));
-        assert!(!check_path_in_fst(&fst, &FstPath::new(vec![12], vec![12], TropicalWeight::new(6.2))));
-        assert!(!check_path_in_fst(&fst, &FstPath::new(vec![10], vec![10], TropicalWeight::new(6.2))));
-        assert!(check_path_in_fst(&fst, &FstPath::new(vec![10], vec![12], TropicalWeight::new(6.2))));
+        assert!(!check_path_in_fst(
+            &fst,
+            &FstPath::new(vec![], vec![], TropicalWeight::one())
+        ));
+        assert!(!check_path_in_fst(
+            &fst,
+            &FstPath::new(vec![1], vec![2], TropicalWeight::new(1.2))
+        ));
+        assert!(!check_path_in_fst(
+            &fst,
+            &FstPath::new(vec![1, 2], vec![2, 3], TropicalWeight::new(1.5))
+        ));
+        assert!(check_path_in_fst(
+            &fst,
+            &FstPath::new(vec![1, 2], vec![2, 3], TropicalWeight::new(4.7))
+        ));
+        assert!(!check_path_in_fst(
+            &fst,
+            &FstPath::new(vec![10], vec![10], TropicalWeight::new(3.0))
+        ));
+        assert!(!check_path_in_fst(
+            &fst,
+            &FstPath::new(vec![12], vec![12], TropicalWeight::new(6.2))
+        ));
+        assert!(!check_path_in_fst(
+            &fst,
+            &FstPath::new(vec![10], vec![10], TropicalWeight::new(6.2))
+        ));
+        assert!(check_path_in_fst(
+            &fst,
+            &FstPath::new(vec![10], vec![12], TropicalWeight::new(6.2))
+        ));
 
         Ok(())
     }

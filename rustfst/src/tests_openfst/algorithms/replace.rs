@@ -27,7 +27,7 @@ where
     pub label_fst_pairs: Vec<(usize, F)>,
     pub epsilon_on_replace: bool,
     pub result: F,
-    w: PhantomData<W>
+    w: PhantomData<W>,
 }
 
 impl ReplaceOperationResult {
@@ -45,7 +45,7 @@ impl ReplaceOperationResult {
                 .collect(),
             epsilon_on_replace: self.epsilon_on_replace,
             result: F::from_text_string(self.result.as_str()).unwrap(),
-            w: PhantomData
+            w: PhantomData,
         }
     }
 }

@@ -7,11 +7,11 @@ use serde::{Deserialize, Serialize};
 use crate::algorithms::shortest_path;
 use crate::fst_path::check_path_in_fst;
 use crate::fst_traits::{MutableFst, PathsIterator, SerializableFst};
-use crate::FstPath;
-use crate::semirings::{Semiring, SerializableSemiring};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
+use crate::semirings::{Semiring, SerializableSemiring};
 use crate::tests_openfst::FstTestData;
+use crate::FstPath;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ShorestPathOperationResult {

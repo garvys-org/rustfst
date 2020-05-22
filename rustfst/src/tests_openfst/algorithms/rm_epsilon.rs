@@ -9,8 +9,8 @@ use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::{SerializableSemiring, WeightQuantize};
 use crate::tests_openfst::algorithms::lazy_fst::compare_fst_static_lazy;
-use crate::tests_openfst::FstTestData;
 use crate::tests_openfst::macros::test_eq_fst;
+use crate::tests_openfst::FstTestData;
 
 pub fn test_rmepsilon<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
@@ -23,7 +23,11 @@ where
     assert!(fst_rmepsilon
         .properties()?
         .contains(FstProperties::NO_EPSILONS));
-    test_eq_fst(&test_data.rmepsilon.result_static, &fst_rmepsilon, "RmEpsilon");
+    test_eq_fst(
+        &test_data.rmepsilon.result_static,
+        &fst_rmepsilon,
+        "RmEpsilon",
+    );
     Ok(())
 }
 
