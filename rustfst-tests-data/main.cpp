@@ -389,9 +389,7 @@ template<class F>
 void compute_fst_shortest_path(const F& raw_fst, json& j) {
     j["shortest_path"] = {};
     std::vector<bool> v = {true, false};
-    // bool unique = false;
-    // int n = 2;
-    for(int n = 1; n < 10; n++) {
+    for(int n = 1; n <= 5; n++) {
         for(bool unique: v) {
             fst::VectorFst<typename F::Arc> fst_out;
             fst::ShortestPath(raw_fst, &fst_out, n, unique);
@@ -1028,8 +1026,8 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     compute_fst_state_map(raw_fst, data, "state_map_tr_sum", fst::ArcSumMapper<typename F::MyArc>(raw_fst));
     compute_fst_state_map(raw_fst, data, "state_map_tr_unique", fst::ArcUniqueMapper<typename F::MyArc>(raw_fst));
 
-   std::cout << "Determinization" << std::endl;
-   compute_fst_determinization(raw_fst, data);
+    std::cout << "Determinization" << std::endl;
+    compute_fst_determinization(raw_fst, data);
 
     std::cout << "TopSort" << std::endl;
     compute_fst_topsort(raw_fst, data);
