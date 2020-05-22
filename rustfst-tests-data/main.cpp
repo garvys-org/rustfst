@@ -620,6 +620,8 @@ void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fs
     using Arc = typename F::MyArc;
     using StateId = typename F::MyArc::StateId;
 
+    int N = 10;
+
     std::set<int> labels;
     for (fst::StateIterator<MyFst> siter(raw_fst); !siter.Done(); siter.Next()) {
         StateId state_id = siter.Value();
@@ -628,6 +630,8 @@ void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fs
             labels.insert(tr.olabel);
         }
     }
+
+    vector<int> labels_vec(labels.begin(), labels.end());
 
     j["replace"] = {};
     auto max_label = *std::max_element(labels.begin(), labels.end());
@@ -661,19 +665,28 @@ void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fs
 
     std::vector<bool> v = {true, false};
 
+    std::random_shuffle(labels_vec.begin(), labels_vec.end());
+
     // Single replacement
-    for (auto label: labels) {
-        for (bool epsilon_on_replace: v) {
-            vector<pair<typename Arc::Label, const fst::Fst<Arc>* > > label_fst_pairs;
-            label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
-            label_fst_pairs.push_back(std::make_pair(label, &fst_1));
-            do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j);
+    for (int i = 0; i < N; i++) {
+        if (i < labels_vec.size()) {
+            auto label = labels_vec[i];
+            for (bool epsilon_on_replace: v) {
+                vector<pair<typename Arc::Label, const fst::Fst<Arc>* > > label_fst_pairs;
+                label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
+                label_fst_pairs.push_back(std::make_pair(label, &fst_1));
+                do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j);
+            }
         }
     }
 
+    std::random_shuffle(labels_vec.begin(), labels_vec.end());
+
     // Two replacements
-    for (auto label_fst_1: labels) {
-        for (auto label_fst_2: labels) {
+    for (int i = 0; i < N; i++) {
+        if ((i + 1) < labels_vec.size()) {
+            auto label_fst_1 = labels_vec[i];
+            auto label_fst_2 = labels_vec[i+1];
             if (label_fst_1 != label_fst_2) {
                 for (bool epsilon_on_replace: v) {
                     vector<pair<typename Arc::Label, const fst::Fst<Arc>* > > label_fst_pairs;
@@ -690,14 +703,19 @@ void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fs
     fst_1.AddArc(0, Arc(label_3, label_5, fst_test_data.random_weight(), 1));
     fst_1.AddArc(1, Arc(label_5, label_2, fst_test_data.random_weight(), 2));
 
+    std::random_shuffle(labels_vec.begin(), labels_vec.end());
+
     // Two replacements + recursion
-    for (auto label: labels) {
-        for (bool epsilon_on_replace: v) {
-            vector<pair<typename Arc::Label, const fst::Fst<Arc>* > > label_fst_pairs;
-            label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
-            label_fst_pairs.push_back(std::make_pair(label, &fst_1));
-            label_fst_pairs.push_back(std::make_pair(label_5, &fst_2));
-            do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j);
+    for (int i = 0; i < N; i++) {
+        if (i < labels_vec.size()) {
+            auto label = labels_vec[i];
+            for (bool epsilon_on_replace: v) {
+                vector<pair<typename Arc::Label, const fst::Fst<Arc>* > > label_fst_pairs;
+                label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
+                label_fst_pairs.push_back(std::make_pair(label, &fst_1));
+                label_fst_pairs.push_back(std::make_pair(label_5, &fst_2));
+                do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j);
+            }
         }
     }
 
@@ -1050,8 +1068,8 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     std::cout << "Push" << std::endl;
     compute_fst_push(raw_fst, data);
 
-//    std::cout << "Replace" << std::endl;
-//    compute_fst_replace(raw_fst, data, fst_test_data);
+   std::cout << "Replace" << std::endl;
+   compute_fst_replace(raw_fst, data, fst_test_data);
 
     std::cout << "Union" << std::endl;
     compute_fst_union(raw_fst, data, fst_test_data.get_fst_union());

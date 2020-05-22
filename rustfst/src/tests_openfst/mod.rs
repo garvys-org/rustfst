@@ -71,7 +71,7 @@ use self::algorithms::{
     project::{test_project_input, test_project_output},
     properties::{parse_fst_properties, test_fst_properties},
     push::{test_push, PushOperationResult, PushTestData},
-    // replace::{test_replace, test_replace_lazy, ReplaceOperationResult, ReplaceTestData},
+    replace::{test_replace, test_replace_lazy, ReplaceOperationResult, ReplaceTestData},
     reverse::test_reverse,
     rm_epsilon::{test_rmepsilon, test_rmepsilon_lazy},
     shortest_distance::{
@@ -161,7 +161,7 @@ pub struct ParsedFstTestData {
     factor_weight_identity: Vec<FwIdentityOperationResult>,
     factor_weight_gallic: Vec<FwGallicOperationResult>,
     push: Vec<PushOperationResult>,
-    // replace: Vec<ReplaceOperationResult>,
+    replace: Vec<ReplaceOperationResult>,
     union: Vec<UnionOperationResult>,
     concat: Vec<ConcatOperationResult>,
     closure_plus: SimpleStaticLazyOperationResult,
@@ -215,7 +215,7 @@ where
     pub factor_weight_identity: Vec<FwIdentityTestData<W, F>>,
     pub factor_weight_gallic: Vec<FwGallicTestData<W, F>>,
     pub push: Vec<PushTestData<W, F>>,
-    // pub replace: Vec<ReplaceTestData<F>>,
+    pub replace: Vec<ReplaceTestData<W, F>>,
     pub union: Vec<UnionTestData<W, F>>,
     pub concat: Vec<ConcatTestData<W, F>>,
     pub closure_plus: SimpleStaticLazyTestData<W, F>,
@@ -289,7 +289,7 @@ where
                 .map(|v| v.parse())
                 .collect(),
             push: data.push.iter().map(|v| v.parse()).collect(),
-            // replace: data.replace.iter().map(|v| v.parse()).collect(),
+            replace: data.replace.iter().map(|v| v.parse()).collect(),
             union: data.union.iter().map(|v| v.parse()).collect(),
             concat: data.concat.iter().map(|v| v.parse()).collect(),
             closure_plus: data.closure_plus.parse(),
@@ -535,19 +535,17 @@ macro_rules! test_fst {
                 Ok(())
             }
 
-            // #[test]
-            // #[ignore]
-            // fn test_replace_openfst() -> Result<()> {
-            //     do_run!(test_replace, $fst_name);
-            //     Ok(())
-            // }
-            //
-            // #[test]
-            // #[ignore]
-            // fn test_replace_lazy_openfst() -> Result<()> {
-            //     do_run!(test_replace_lazy, $fst_name);
-            //     Ok(())
-            // }
+            #[test]
+            fn test_replace_openfst() -> Result<()> {
+                do_run!(test_replace, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_replace_lazy_openfst() -> Result<()> {
+                do_run!(test_replace_lazy, $fst_name);
+                Ok(())
+            }
 
             #[test]
             fn test_reverse_openfst() -> Result<()> {
