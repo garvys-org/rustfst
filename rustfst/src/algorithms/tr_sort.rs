@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::Tr;
 
@@ -15,9 +15,10 @@ pub fn olabel_compare<W: Semiring>(a: &Tr<W>, b: &Tr<W>) -> Ordering {
 }
 
 /// Sorts trs leaving each state of the FST using a compare function
-pub fn tr_sort<F>(fst: &mut F, comp: impl Fn(&Tr<F::W>, &Tr<F::W>) -> Ordering)
+pub fn tr_sort<W, F>(fst: &mut F, comp: impl Fn(&Tr<W>, &Tr<W>) -> Ordering)
 where
-    F: MutableFst + ExpandedFst,
+    W: Semiring,
+    F: MutableFst<W>,
 {
     for state in 0..fst.num_states() {
         fst.sort_trs_unchecked(state, &comp);

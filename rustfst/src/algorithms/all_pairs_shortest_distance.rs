@@ -1,9 +1,9 @@
 use anyhow::Result;
 
-use crate::fst_traits::CoreFst;
 use crate::fst_traits::ExpandedFst;
 use crate::fst_traits::Fst;
-use crate::semirings::{Semiring, StarSemiring};
+use crate::semirings::StarSemiring;
+use crate::Trs;
 
 /// This operation computes the shortest distance from each state to every other states.
 /// The shortest distance from `p` to `q` is the ⊕-sum of the weights
@@ -38,19 +38,19 @@ use crate::semirings::{Semiring, StarSemiring};
 /// # Ok(())
 /// # }
 /// ```
-pub fn all_pairs_shortest_distance<F>(fst: &F) -> Result<Vec<Vec<F::W>>>
+pub fn all_pairs_shortest_distance<W, F>(fst: &F) -> Result<Vec<Vec<W>>>
 where
-    F: Fst + ExpandedFst,
-    F::W: StarSemiring,
+    F: Fst<W> + ExpandedFst<W>,
+    W: StarSemiring,
 {
     let num_states = fst.num_states();
 
     // Distance between all states are initialized to zero
-    let mut d = vec![vec![<F as CoreFst>::W::zero(); num_states]; num_states];
+    let mut d = vec![vec![W::zero(); num_states]; num_states];
 
     // Iterator over the wFST to add the weight of the trs
     for state_id in fst.states_iter() {
-        for tr in fst.tr_iter(state_id)? {
+        for tr in fst.get_trs(state_id)?.trs() {
             let nextstate = tr.nextstate;
             let weight = &tr.weight;
 

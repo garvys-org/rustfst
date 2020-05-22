@@ -6,12 +6,11 @@ mod tests {
 
     use crate::fst_impls::VectorFst;
     use crate::fst_traits::{
-        CoreFst, ExpandedFst, FinalStatesIterator, Fst, MutableFst, MutableTrIterator,
-        SerializableFst, StateIterator, TrIterator,
+        CoreFst, ExpandedFst, Fst, MutableFst, SerializableFst, StateIterator,
     };
     use crate::semirings::{ProbabilityWeight, Semiring, TropicalWeight};
     use crate::tr::Tr;
-    use crate::SymbolTable;
+    use crate::{SymbolTable, Trs};
     use std::sync::Arc;
 
     #[test]
@@ -33,25 +32,18 @@ mod tests {
         let tr_2 = Tr::new(5, 7, 18.0, s2);
         fst.add_tr(s1, tr_2.clone())?;
         assert_eq!(fst.num_trs(s1).unwrap(), 2);
-        assert_eq!(fst.tr_iter(s1)?.count(), 2);
+        assert_eq!(fst.get_trs(s1)?.trs().iter().count(), 2);
 
         // Iterates on trs leaving s1
-        let mut it_s1 = fst.tr_iter(s1)?;
-
-        let tr = it_s1.next().ok_or_else(|| format_err!("Missing tr"))?;
-        assert_eq!(tr_1, *tr);
-
-        let tr = it_s1.next().ok_or_else(|| format_err!("Missing tr"))?;
-        assert_eq!(tr_2, *tr);
-
-        let tr = it_s1.next();
-        assert!(tr.is_none());
+        let it_s1 = fst.get_trs(s1)?;
+        assert_eq!(it_s1.len(), 2);
+        assert_eq!(tr_1, it_s1.trs()[0]);
+        assert_eq!(tr_2, it_s1.trs()[1]);
 
         // Iterates on trs leaving s2
-        let mut it_s2 = fst.tr_iter(s2)?;
+        let it_s2 = fst.get_trs(s2)?;
 
-        let d = it_s2.next();
-        assert!(d.is_none());
+        assert_eq!(it_s2.len(), 0);
         Ok(())
     }
 
@@ -79,15 +71,11 @@ mod tests {
             .ok_or_else(|| format_err!("Missing tr"))?
             .set_value(&new_tr_1);
 
-        let mut it_s1 = fst.tr_iter(s1)?;
+        let it_s1 = fst.get_trs(s1)?;
+        assert_eq!(new_tr_1, it_s1[0]);
+        assert_eq!(tr_2, it_s1[1]);
+        assert_eq!(it_s1.len(), 2);
 
-        let tr = it_s1.next().ok_or_else(|| format_err!("Missing tr"))?;
-        assert_eq!(new_tr_1, *tr);
-
-        let tr = it_s1.next().ok_or_else(|| format_err!("Missing tr"))?;
-        assert_eq!(tr_2, *tr);
-
-        assert!(it_s1.next().is_none());
         Ok(())
     }
 
@@ -172,7 +160,7 @@ mod tests {
             .iter()
             .enumerate()
             .all(|(idx, state_id)| fst.final_weight(*state_id).unwrap()
-                == Some(&ProbabilityWeight::new(idx as f32))));
+                == Some(ProbabilityWeight::new(idx as f32))));
         Ok(())
     }
 
@@ -189,15 +177,15 @@ mod tests {
 
         assert_eq!(fst.num_trs(s1)?, 1);
         assert_eq!(fst.num_trs(s2)?, 2);
-        assert_eq!(fst.tr_iter(s1)?.count(), 1);
-        assert_eq!(fst.tr_iter(s2)?.count(), 2);
+        assert_eq!(fst.get_trs(s1)?.len(), 1);
+        assert_eq!(fst.get_trs(s2)?.len(), 2);
 
         fst.del_state(s1)?;
 
         assert_eq!(fst.num_trs(0)?, 1);
 
         let only_state = fst.states_iter().next().unwrap();
-        assert_eq!(fst.tr_iter(only_state)?.count(), 1);
+        assert_eq!(fst.get_trs(only_state)?.len(), 1);
         Ok(())
     }
 

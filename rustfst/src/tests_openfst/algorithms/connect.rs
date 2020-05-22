@@ -8,10 +8,10 @@ use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_connect<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_connect<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: MutableFst + Display + SerializableFst,
-    F::W: SerializableSemiring,
+    F: MutableFst<W> + Display + SerializableFst<W>,
+    W: SerializableSemiring,
 {
     // Connect
     let mut fst_connect = test_data.raw.clone();

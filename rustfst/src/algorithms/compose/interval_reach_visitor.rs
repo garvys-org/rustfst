@@ -24,7 +24,7 @@ impl<'a, F> IntervalReachVisitor<'a, F> {
     }
 }
 
-impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
+impl<'a, W: Semiring, F: Fst<W>> Visitor<'a, W, F> for IntervalReachVisitor<'a, F> {
     /// Invoked before DFS visit.
     fn init_visit(&mut self, _fst: &'a F) {}
 
@@ -59,24 +59,24 @@ impl<'a, F: Fst> Visitor<'a, F> for IntervalReachVisitor<'a, F> {
     }
 
     /// Invoked when tree transition to white/undiscovered state examined.
-    fn tree_tr(&mut self, _s: StateId, _tr: &Tr<F::W>) -> bool {
+    fn tree_tr(&mut self, _s: StateId, _tr: &Tr<W>) -> bool {
         true
     }
 
     /// Invoked when back transition to grey/unfinished state examined.
-    fn back_tr(&mut self, _s: StateId, _tr: &Tr<F::W>) -> bool {
+    fn back_tr(&mut self, _s: StateId, _tr: &Tr<W>) -> bool {
         panic!("Cyclic input")
     }
 
     /// Invoked when forward or cross transition to black/finished state examined.
-    fn forward_or_cross_tr(&mut self, s: StateId, tr: &Tr<F::W>) -> bool {
+    fn forward_or_cross_tr(&mut self, s: StateId, tr: &Tr<W>) -> bool {
         union_vec_isets_unordered(&mut self.isets, s, tr.nextstate);
         true
     }
 
     /// Invoked when state finished ('s' is tree root, 'parent' is kNoStateId,
     /// and '_tr' is nullptr).
-    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, _tr: Option<&Tr<F::W>>) {
+    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, _tr: Option<&Tr<W>>) {
         if self.index != UNASSIGNED
             && self.fst.is_final(s).unwrap()
             && !self.fst.final_weight(s).unwrap().unwrap().is_zero()

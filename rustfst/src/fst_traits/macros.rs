@@ -1,6 +1,6 @@
 macro_rules! display_single_state {
     ($fst:expr, $state_id:expr, $f: expr, $show_weight_one: expr) => {
-        for tr in $fst.tr_iter($state_id).unwrap() {
+        for tr in $fst.get_trs($state_id).unwrap().trs() {
             if tr.weight.is_one() && !$show_weight_one {
                 writeln!(
                     $f,
@@ -33,14 +33,12 @@ macro_rules! write_fst {
 
             // Finally, print the final states with their weight
             for final_state in $fst.final_states_iter() {
-                if final_state.final_weight.is_one() && !$show_weight_one {
-                    writeln!($f, "{}", &final_state.state_id)?;
+                let final_weight =
+                    unsafe { $fst.final_weight_unchecked(final_state).unsafe_unwrap() };
+                if final_weight.is_one() && !$show_weight_one {
+                    writeln!($f, "{}", &final_state)?;
                 } else {
-                    writeln!(
-                        $f,
-                        "{}\t{}",
-                        &final_state.state_id, &final_state.final_weight
-                    )?;
+                    writeln!($f, "{}\t{}", &final_state, &final_weight)?;
                 }
             }
         }

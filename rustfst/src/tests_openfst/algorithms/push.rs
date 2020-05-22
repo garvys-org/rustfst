@@ -5,7 +5,9 @@ use crate::algorithms::{push, PushType, ReweightType};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
+use std::marker::PhantomData;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PushOperationResult {
@@ -17,10 +19,10 @@ pub struct PushOperationResult {
     result: String,
 }
 
-pub struct PushTestData<F>
+pub struct PushTestData<W, F>
 where
-    F: SerializableFst,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W>,
+    W: SerializableSemiring,
 {
     pub push_labels: bool,
     pub push_weights: bool,
@@ -28,13 +30,14 @@ where
     pub remove_total_weight: bool,
     pub reweight_to_final: bool,
     pub result: F,
+    w: PhantomData<W>,
 }
 
 impl PushOperationResult {
-    pub fn parse<F>(&self) -> PushTestData<F>
+    pub fn parse<W, F>(&self) -> PushTestData<W, F>
     where
-        F: SerializableFst,
-        F::W: SerializableSemiring,
+        F: SerializableFst<W>,
+        W: SerializableSemiring,
     {
         PushTestData {
             push_labels: self.push_labels,
@@ -43,14 +46,14 @@ impl PushOperationResult {
             remove_total_weight: self.remove_total_weight,
             reweight_to_final: self.reweight_to_final,
             result: F::from_text_string(self.result.as_str()).unwrap(),
+            w: PhantomData,
         }
     }
 }
 
-pub fn test_push<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_push<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-    W::ReverseWeight: 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
     for push_test_data in &test_data.push {
         //        println!(
@@ -84,24 +87,20 @@ where
         };
 
         let pushed_fst: VectorFst<W> = push(&test_data.raw, reweight_type, push_type)?;
-        assert_eq!(
-            push_test_data.result,
-            pushed_fst,
-            "{}",
-            error_message_fst!(
-                push_test_data.result,
-                pushed_fst,
-                format!(
-                    "Push failed with parameters {:?}",
-                    vec![
-                        push_test_data.push_weights,
-                        push_test_data.push_labels,
-                        push_test_data.remove_total_weight,
-                        push_test_data.remove_common_affix,
-                        push_test_data.reweight_to_final
-                    ]
-                )
-            )
+
+        test_eq_fst(
+            &push_test_data.result,
+            &pushed_fst,
+            format!(
+                "Push failed with parameters {:?}",
+                vec![
+                    push_test_data.push_weights,
+                    push_test_data.push_labels,
+                    push_test_data.remove_total_weight,
+                    push_test_data.remove_common_affix,
+                    push_test_data.reweight_to_final
+                ]
+            ),
         );
     }
     Ok(())

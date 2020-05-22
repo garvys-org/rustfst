@@ -2,15 +2,17 @@ use std::mem::swap;
 
 use anyhow::{ensure, Result};
 
-use crate::fst_traits::{ExpandedFst, MutableFst};
-use crate::StateId;
+use crate::fst_traits::MutableFst;
+use crate::semirings::Semiring;
+use crate::{StateId, Trs};
 
 /// Sorts the input states of an FST. order[i] gives the the state ID after
 /// sorting that corresponds to the state ID i before sorting; it must
 /// therefore be a permutation of the input FST's states ID sequence.
-pub fn state_sort<F>(fst: &mut F, order: &[StateId]) -> Result<()>
+pub fn state_sort<W, F>(fst: &mut F, order: &[StateId]) -> Result<()>
 where
-    F: MutableFst + ExpandedFst,
+    W: Semiring,
+    F: MutableFst<W>,
 {
     ensure!(
         order.len() == fst.num_states(),
@@ -37,15 +39,15 @@ where
         if done[s1] {
             continue;
         }
-        let mut final1 = unsafe { fst.final_weight_unchecked(s1) }.cloned();
+        let mut final1 = unsafe { fst.final_weight_unchecked(s1) };
         let mut final2 = None;
-        let mut trsa: Vec<_> = fst.tr_iter(s1)?.cloned().collect();
+        let mut trsa: Vec<_> = fst.get_trs(s1)?.trs().iter().cloned().collect();
         let mut trsb = vec![];
         while !done[s1] {
             let s2 = order[s1];
             if !done[s2] {
-                final2 = unsafe { fst.final_weight_unchecked(s2) }.cloned();
-                trsb = fst.tr_iter(s2)?.cloned().collect();
+                final2 = unsafe { fst.final_weight_unchecked(s2) };
+                trsb = fst.get_trs(s2)?.trs().iter().cloned().collect();
             }
             match final1 {
                 None => fst.delete_final_weight(s2)?,

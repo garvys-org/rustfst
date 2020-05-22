@@ -1,14 +1,13 @@
-use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::compose::compose_filters::ComposeFilter;
+use crate::algorithms::compose::compose_filters::{ComposeFilter, ComposeFilterBuilder};
 use crate::algorithms::compose::filter_states::{FilterState, IntegerFilterState};
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::Selector;
 use crate::algorithms::compose::lookahead_filters::LookAheadComposeFilterTrait;
-use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
@@ -16,10 +15,8 @@ use crate::{StateId, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
 #[derive(Clone, Debug)]
 pub struct AltSequenceComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
-    fst1: PhantomData<M1::F>,
-    fst2: Arc<M2::F>,
-    matcher1: Arc<RefCell<M1>>,
-    matcher2: Arc<RefCell<M2>>,
+    matcher1: Arc<M1>,
+    matcher2: Arc<M2>,
     /// Current fst1 state
     s1: StateId,
     /// Current fst2 state
@@ -30,41 +27,60 @@ pub struct AltSequenceComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>
     alleps2: bool,
     /// No epsilons leaving s2 ?
     noeps2: bool,
+    w: PhantomData<W>,
 }
 
-impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
+#[derive(Debug)]
+pub struct AltSequenceComposeFilterBuilder<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
+    matcher1: Arc<M1>,
+    matcher2: Arc<M2>,
+    w: PhantomData<W>,
+}
+
+impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
+    for AltSequenceComposeFilterBuilder<W, M1, M2>
+{
+    type CF = AltSequenceComposeFilter<W, M1, M2>;
+    type M1 = M1;
+    type M2 = M2;
+
+    fn new(
+        fst1: Arc<M1::F>,
+        fst2: Arc<M2::F>,
+        matcher1: Option<M1>,
+        matcher2: Option<M2>,
+    ) -> Result<Self> {
+        let matcher1 =
+            matcher1.unwrap_or_else(|| M1::new(Arc::clone(&fst1), MatchType::MatchOutput).unwrap());
+        let matcher2 =
+            matcher2.unwrap_or_else(|| M2::new(Arc::clone(&fst2), MatchType::MatchInput).unwrap());
+        Ok(Self {
+            matcher1: Arc::new(matcher1),
+            matcher2: Arc::new(matcher2),
+            w: PhantomData,
+        })
+    }
+
+    fn build(&self) -> Result<Self::CF> {
+        Ok(AltSequenceComposeFilter::<W, M1, M2> {
+            matcher1: Arc::clone(&self.matcher1),
+            matcher2: Arc::clone(&self.matcher2),
+            s1: NO_STATE_ID,
+            s2: NO_STATE_ID,
+            fs: <AltSequenceComposeFilter<W, M1, M2> as ComposeFilter<W>>::FS::new(NO_STATE_ID),
+            alleps2: false,
+            noeps2: false,
+            w: PhantomData,
+        })
+    }
+}
+
+impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
     for AltSequenceComposeFilter<W, M1, M2>
 {
     type M1 = M1;
     type M2 = M2;
     type FS = IntegerFilterState;
-
-    fn new<IM1: Into<Option<Arc<RefCell<Self::M1>>>>, IM2: Into<Option<Arc<RefCell<Self::M2>>>>>(
-        fst1: Arc<<Self::M1 as Matcher<W>>::F>,
-        fst2: Arc<<Self::M2 as Matcher<W>>::F>,
-        m1: IM1,
-        m2: IM2,
-    ) -> Result<Self> {
-        Ok(Self {
-            fst2: Arc::clone(&fst2),
-            matcher1: m1.into().unwrap_or_else(|| {
-                Arc::new(RefCell::new(
-                    Self::M1::new(fst1, MatchType::MatchOutput).unwrap(),
-                ))
-            }),
-            matcher2: m2.into().unwrap_or_else(|| {
-                Arc::new(RefCell::new(
-                    Self::M2::new(fst2, MatchType::MatchInput).unwrap(),
-                ))
-            }),
-            s1: NO_STATE_ID,
-            s2: NO_STATE_ID,
-            fs: Self::FS::new(NO_STATE_ID),
-            alleps2: false,
-            noeps2: false,
-            fst1: PhantomData,
-        })
-    }
 
     fn start(&self) -> Self::FS {
         Self::FS::new(0)
@@ -76,9 +92,10 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
             self.s2 = s2;
             self.fs = filter_state.clone();
             // TODO: Could probably use unchecked here as the state should exist.
-            let na2 = self.fst2.num_trs(self.s2)?;
-            let ne2 = self.fst2.num_input_epsilons(self.s2)?;
-            let fin2 = self.fst2.is_final(self.s2)?;
+            let fst2 = self.fst2();
+            let na2 = fst2.num_trs(self.s2)?;
+            let ne2 = fst2.num_input_epsilons(self.s2)?;
+            let fin2 = fst2.is_final(self.s2)?;
             self.alleps2 = na2 == ne2 && !fin2;
             self.noeps2 = ne2 == 0;
         }
@@ -114,12 +131,20 @@ impl<W: Semiring + 'static, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(())
     }
 
-    fn matcher1(&self) -> Arc<RefCell<Self::M1>> {
-        Arc::clone(&self.matcher1)
+    fn matcher1(&self) -> &Self::M1 {
+        &self.matcher1
     }
 
-    fn matcher2(&self) -> Arc<RefCell<Self::M2>> {
-        Arc::clone(&self.matcher2)
+    fn matcher2(&self) -> &Self::M2 {
+        &self.matcher2
+    }
+
+    fn matcher1_shared(&self) -> &Arc<Self::M1> {
+        &self.matcher1
+    }
+
+    fn matcher2_shared(&self) -> &Arc<Self::M2> {
+        &self.matcher2
     }
 }
 
@@ -142,7 +167,11 @@ impl<W: Semiring + 'static, M1: LookaheadMatcher<W>, M2: LookaheadMatcher<W>>
         unreachable!()
     }
 
-    fn selector(&self) -> &Selector<W, Self::M1, Self::M2> {
+    fn selector(&self) -> &Selector {
+        unreachable!()
+    }
+
+    fn lookahead_matcher_data(&self) -> Option<&LookAheadMatcherData<W>> {
         unreachable!()
     }
 }

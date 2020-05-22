@@ -33,6 +33,9 @@
 //! ```rust
 //! use anyhow::Result;
 //! use rustfst::prelude::*;
+//! use rustfst::algorithms::determinize::{DeterminizeType, determinize};
+//! use rustfst::algorithms::rm_epsilon::rm_epsilon;
+//! use std::sync::Arc;
 //!
 //! fn main() -> Result<()> {
 //!     // Creates a empty wFST
@@ -77,7 +80,7 @@
 //!     rm_epsilon(&mut fst)?;
 //!
 //!     // - Compute an equivalent FST but deterministic.
-//!     fst = determinize(&fst, DeterminizeType::DeterminizeFunctional)?;
+//!     fst = determinize(Arc::new(fst), DeterminizeType::DeterminizeFunctional)?;
 //!
 //!     Ok(())
 //! }
@@ -100,11 +103,13 @@ extern crate serde;
 extern crate serde_json;
 
 pub use crate::drawing_config::DrawingConfig;
-pub use crate::fst_path::FstPath;
+pub use crate::fst_path::{check_path_in_fst, FstPath};
 pub use crate::symbol_table::SymbolTable;
 
 pub use self::tr::Tr;
+pub use self::trs::{Trs, TrsConst, TrsVec};
 
+pub use crate::semirings::Semiring;
 #[cfg(test)]
 use doc_comment::doc_comment;
 
@@ -173,3 +178,5 @@ mod proptest_fst;
 pub(crate) static NO_LABEL: Label = std::usize::MAX;
 pub(crate) static NO_STATE_ID: StateId = std::usize::MAX;
 pub(crate) static UNASSIGNED: usize = std::usize::MAX;
+
+pub mod trs;

@@ -19,7 +19,9 @@ use crate::semirings::{
     WeaklyDivisibleSemiring, WeightQuantize,
 };
 
-pub trait UnionWeightOption<W: Semiring>: Debug + Hash + Clone + PartialOrd + Eq + 'static {
+pub trait UnionWeightOption<W: Semiring>:
+    Debug + Hash + Clone + PartialOrd + Eq + Sync + 'static
+{
     type ReverseOptions: UnionWeightOption<W::ReverseWeight>;
     fn compare(w1: &W, w2: &W) -> bool;
     fn merge(w1: &W, w2: &W) -> Result<W>;

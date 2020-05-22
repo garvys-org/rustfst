@@ -1,12 +1,13 @@
+use std::sync::Arc;
+
+use anyhow::{format_err, Result};
+
 use crate::fst_impls::ConstFst;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
+use crate::{SymbolTable, TrsConst};
 
-use crate::SymbolTable;
-use anyhow::{format_err, Result};
-use std::sync::Arc;
-
-impl<W: Semiring + 'static> Fst for ConstFst<W> {
+impl<W: Semiring + 'static> Fst<W> for ConstFst<W> {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.isymt.as_ref()
     }
@@ -32,34 +33,43 @@ impl<W: Semiring + 'static> Fst for ConstFst<W> {
     }
 }
 
-impl<W: Semiring> CoreFst for ConstFst<W> {
-    type W = W;
+impl<W: Semiring> CoreFst<W> for ConstFst<W> {
+    type TRS = TrsConst<W>;
 
     fn start(&self) -> Option<usize> {
         self.start
     }
 
-    fn final_weight(&self, state_id: usize) -> Result<Option<&Self::W>> {
+    fn final_weight(&self, state_id: usize) -> Result<Option<W>> {
         let s = self
             .states
             .get(state_id)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
-        Ok(s.final_weight.as_ref())
+        Ok(s.final_weight.clone())
     }
 
-    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<&Self::W> {
-        self.states.get_unchecked(state_id).final_weight.as_ref()
+    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<W> {
+        self.states.get_unchecked(state_id).final_weight.clone()
     }
 
-    fn num_trs(&self, s: usize) -> Result<usize> {
-        let const_state = self
+    fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
+        let state = self
             .states
-            .get(s)
-            .ok_or_else(|| format_err!("State doesn't exist"))?;
-        Ok(const_state.ntrs)
+            .get(state_id)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
+        Ok(TrsConst {
+            trs: Arc::clone(&self.trs),
+            pos: state.pos,
+            n: state.ntrs,
+        })
     }
 
-    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
-        self.states.get_unchecked(s).ntrs
+    unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
+        let state = self.states.get_unchecked(state_id);
+        TrsConst {
+            trs: Arc::clone(&self.trs),
+            pos: state.pos,
+            n: state.ntrs,
+        }
     }
 }

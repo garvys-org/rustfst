@@ -116,92 +116,6 @@ void compute_fst_condense(const F& raw_fst, json& j) {
 }
 
 template<class F>
-void compute_fst_label_reachable(const F& raw_fst, json& j) {
-    using Arc = typename F::Arc;
-    using Weight = typename F::Weight;
-    using StateId = typename Arc::StateId;
-
-    fst::ConstFst<Arc> ifst(raw_fst);
-
-    using P = fst::MatcherFst<
-                    fst::ConstFst<Arc>,
-                    fst::LabelLookAheadMatcher<fst::SortedMatcher<fst::Fst<Arc>>, fst::olabel_lookahead_flags>,
-                    fst::olabel_lookahead_fst_type,
-                    fst::LabelLookAheadRelabeler<Arc>
-                  >;
-
-    P fst_in(ifst);
-
-    std::vector<bool> v = {true, false};
-
-    j["label_reachable"] = {};
-    for (auto reach_input: v) {
-        json j2 = {};
-        j2["reach_input"] = bool(reach_input);
-
-        fst::LabelReachable<Arc> reachable(fst_in, reach_input);
-
-        auto data = reachable.GetData();
-        j2["final_label"] = data->FinalLabel();
-
-        j2["interval_sets"] = {};
-        for (int s = 0; s < data->NumIntervalSets(); s++) {
-            auto interval_set = data->GetIntervalSet(s);
-            auto intervals = interval_set.Intervals();
-            json j_interval_set = {};
-            for (int idx = 0; idx < interval_set.Size(); idx++) {
-                auto interval = intervals[idx];
-                json j_interval = {};
-                j_interval["begin"] = interval.begin;
-                j_interval["end"] = interval.end;
-                j_interval_set.push_back(j_interval);
-            }
-            if (interval_set.Size() == 0) {
-                j_interval_set = std::vector<int>();
-            }
-            j2["interval_sets"].push_back(j_interval_set);
-        }
-        if (data->NumIntervalSets() == 0) {
-            j2["interval_sets"] = std::vector<int>();
-        }
-
-        std::set<int> labels;
-        for (fst::StateIterator<P> siter(fst_in); !siter.Done(); siter.Next()) {
-            StateId state_id = siter.Value();
-            for (fst::ArcIterator<P> aiter(fst_in, state_id); !aiter.Done(); aiter.Next()) {
-                const Arc &tr = aiter.Value();
-                if (reach_input) {
-                    labels.insert(tr.ilabel);
-                } else {
-                    labels.insert(tr.olabel);
-                }
-            }
-        }
-
-        j2["result"] = {};
-        for(int state=0; state<fst_in.NumStates(); state++) {
-            for(auto label: labels) {
-                reachable.SetState(state);
-                auto r = reachable.Relabel(label);
-                auto res = reachable.Reach(r);
-
-                json j3;
-                j3["state"] = state;
-                j3["label"] = label;
-                j3["label_relabeled"] = r;
-                j3["reachable"] = res;
-                j3["reach_final"] = reachable.ReachFinal();
-                j2["result"].push_back(j3);
-            }
-        }
-        if (fst_in.NumStates() == 0) {
-            j2["result"] = std::vector<int>();
-        }
-        j["label_reachable"].push_back(j2);
-    }
-}
-
-template<class F>
 void compute_fst_state_reachable(const F& raw_fst, json& j) {
     using Arc = typename F::Arc;
     using Weight = typename F::Weight;
@@ -392,6 +306,14 @@ template<class F>
 void compute_fst_determinization(const F& raw_fst, json& j) {
     j["determinize"] = {};
 
+    // To check if a FST is determinizable, let's try to disambiguate it.
+    F raw_fst_disambiguated;
+    fst::Disambiguate(raw_fst, &raw_fst_disambiguated);
+    if (prop_to_bool(raw_fst_disambiguated.Properties(fst::kError, true), fst::kError)) {
+        j["determinize"] = vector<int>();
+        return;
+    }
+
     compute_fst_determinization(raw_fst, j, fst::DeterminizeType::DETERMINIZE_FUNCTIONAL, "functional");
     compute_fst_determinization(raw_fst, j, fst::DeterminizeType::DETERMINIZE_NONFUNCTIONAL, "nonfunctional");
     compute_fst_determinization(raw_fst, j, fst::DeterminizeType::DETERMINIZE_DISAMBIGUATE, "disambiguate");
@@ -467,7 +389,7 @@ template<class F>
 void compute_fst_shortest_path(const F& raw_fst, json& j) {
     j["shortest_path"] = {};
     std::vector<bool> v = {true, false};
-    for(int n = 1; n < 10; n++) {
+    for(int n = 1; n <= 5; n++) {
         for(bool unique: v) {
             fst::VectorFst<typename F::Arc> fst_out;
             fst::ShortestPath(raw_fst, &fst_out, n, unique);
@@ -698,6 +620,8 @@ void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fs
     using Arc = typename F::MyArc;
     using StateId = typename F::MyArc::StateId;
 
+    int N = 10;
+
     std::set<int> labels;
     for (fst::StateIterator<MyFst> siter(raw_fst); !siter.Done(); siter.Next()) {
         StateId state_id = siter.Value();
@@ -706,6 +630,8 @@ void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fs
             labels.insert(tr.olabel);
         }
     }
+
+    vector<int> labels_vec(labels.begin(), labels.end());
 
     j["replace"] = {};
     auto max_label = *std::max_element(labels.begin(), labels.end());
@@ -739,19 +665,28 @@ void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fs
 
     std::vector<bool> v = {true, false};
 
+    std::random_shuffle(labels_vec.begin(), labels_vec.end());
+
     // Single replacement
-    for (auto label: labels) {
-        for (bool epsilon_on_replace: v) {
-            vector<pair<typename Arc::Label, const fst::Fst<Arc>* > > label_fst_pairs;
-            label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
-            label_fst_pairs.push_back(std::make_pair(label, &fst_1));
-            do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j);
+    for (int i = 0; i < N; i++) {
+        if (i < labels_vec.size()) {
+            auto label = labels_vec[i];
+            for (bool epsilon_on_replace: v) {
+                vector<pair<typename Arc::Label, const fst::Fst<Arc>* > > label_fst_pairs;
+                label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
+                label_fst_pairs.push_back(std::make_pair(label, &fst_1));
+                do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j);
+            }
         }
     }
 
+    std::random_shuffle(labels_vec.begin(), labels_vec.end());
+
     // Two replacements
-    for (auto label_fst_1: labels) {
-        for (auto label_fst_2: labels) {
+    for (int i = 0; i < N; i++) {
+        if ((i + 1) < labels_vec.size()) {
+            auto label_fst_1 = labels_vec[i];
+            auto label_fst_2 = labels_vec[i+1];
             if (label_fst_1 != label_fst_2) {
                 for (bool epsilon_on_replace: v) {
                     vector<pair<typename Arc::Label, const fst::Fst<Arc>* > > label_fst_pairs;
@@ -768,14 +703,19 @@ void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fs
     fst_1.AddArc(0, Arc(label_3, label_5, fst_test_data.random_weight(), 1));
     fst_1.AddArc(1, Arc(label_5, label_2, fst_test_data.random_weight(), 2));
 
+    std::random_shuffle(labels_vec.begin(), labels_vec.end());
+
     // Two replacements + recursion
-    for (auto label: labels) {
-        for (bool epsilon_on_replace: v) {
-            vector<pair<typename Arc::Label, const fst::Fst<Arc>* > > label_fst_pairs;
-            label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
-            label_fst_pairs.push_back(std::make_pair(label, &fst_1));
-            label_fst_pairs.push_back(std::make_pair(label_5, &fst_2));
-            do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j);
+    for (int i = 0; i < N; i++) {
+        if (i < labels_vec.size()) {
+            auto label = labels_vec[i];
+            for (bool epsilon_on_replace: v) {
+                vector<pair<typename Arc::Label, const fst::Fst<Arc>* > > label_fst_pairs;
+                label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
+                label_fst_pairs.push_back(std::make_pair(label, &fst_1));
+                label_fst_pairs.push_back(std::make_pair(label_5, &fst_2));
+                do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j);
+            }
         }
     }
 
@@ -1104,8 +1044,8 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     compute_fst_state_map(raw_fst, data, "state_map_tr_sum", fst::ArcSumMapper<typename F::MyArc>(raw_fst));
     compute_fst_state_map(raw_fst, data, "state_map_tr_unique", fst::ArcUniqueMapper<typename F::MyArc>(raw_fst));
 
-//    std::cout << "Determinization" << std::endl;
-//    compute_fst_determinization(raw_fst, data);
+    std::cout << "Determinization" << std::endl;
+    compute_fst_determinization(raw_fst, data);
 
     std::cout << "TopSort" << std::endl;
     compute_fst_topsort(raw_fst, data);
@@ -1115,9 +1055,6 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
 
     std::cout << "Minimization" << std::endl;
     compute_fst_minimization(raw_fst, data);
-
-    std::cout << "ShortestPath" << std::endl;
-    compute_fst_shortest_path(raw_fst, data);
 
     std::cout << "Gallic Encode Decode" << std::endl;
     compute_fst_gallic_encode_decode(raw_fst, data);
@@ -1131,8 +1068,8 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     std::cout << "Push" << std::endl;
     compute_fst_push(raw_fst, data);
 
-//    std::cout << "Replace" << std::endl;
-//    compute_fst_replace(raw_fst, data, fst_test_data);
+   std::cout << "Replace" << std::endl;
+   compute_fst_replace(raw_fst, data, fst_test_data);
 
     std::cout << "Union" << std::endl;
     compute_fst_union(raw_fst, data, fst_test_data.get_fst_union());
@@ -1149,14 +1086,14 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
 //    std::cout << "Matcher" << std::endl;
 //    compute_fst_matcher(raw_fst, data);
 
-    std::cout << "Label Reachable" << std::endl;
-    compute_fst_label_reachable(raw_fst, data);
-
     std::cout << "Compose" << std::endl;
     compute_fst_compose(raw_fst, data, fst_test_data.get_fst_compose());
 
     std::cout << "State Reachable" << std::endl;
     compute_fst_state_reachable(raw_fst, data);
+
+    std::cout << "ShortestPath" << std::endl;
+    compute_fst_shortest_path(raw_fst, data);
 
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;

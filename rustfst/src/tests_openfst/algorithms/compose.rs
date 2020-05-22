@@ -1,16 +1,16 @@
-use std::cell::RefCell;
+use std::marker::PhantomData;
 use std::sync::Arc;
 
 use anyhow::Result;
-use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::compose::compose_filters::{AltSequenceComposeFilter, ComposeFilter};
+use crate::algorithms::compose::compose_filters::{
+    AltSequenceComposeFilterBuilder, ComposeFilterBuilder,
+};
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::SMatchOutput;
 use crate::algorithms::compose::lookahead_filters::{
-    LookAheadComposeFilter, PushLabelsComposeFilter, PushWeightsComposeFilter,
+    LookAheadComposeFilterBuilder, PushLabelsComposeFilterBuilder, PushWeightsComposeFilterBuilder,
 };
-use crate::algorithms::compose::lookahead_matchers::label_lookahead_relabeler::LabelLookAheadRelabeler;
 use crate::algorithms::compose::lookahead_matchers::{
     LabelLookAheadMatcher, LookaheadMatcher, MatcherFlagsTrait,
 };
@@ -18,11 +18,12 @@ use crate::algorithms::compose::matchers::SortedMatcher;
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::algorithms::compose::MatcherFst;
 use crate::algorithms::compose::{compose_with_config, ComposeConfig, LabelReachableData};
-use crate::algorithms::compose::{ComposeFilterEnum, ComposeFst, ComposeFstImplOptions};
+use crate::algorithms::compose::{ComposeFilterEnum, ComposeFst, ComposeFstOpOptions};
 use crate::algorithms::{tr_compares::ilabel_compare, tr_sort};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{CoreFst, SerializableFst};
+use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -32,38 +33,39 @@ pub struct ComposeOperationResult {
     filter_name: String,
 }
 
-pub struct ComposeTestData<F>
+pub struct ComposeTestData<W, F>
 where
-    F: SerializableFst,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W>,
+    W: SerializableSemiring,
 {
     pub fst_2: F,
     pub result: F,
     pub filter_name: String,
+    w: PhantomData<W>,
 }
 
 impl ComposeOperationResult {
-    pub fn parse<F>(&self) -> ComposeTestData<F>
+    pub fn parse<W, F>(&self) -> ComposeTestData<W, F>
     where
-        F: SerializableFst,
-        F::W: SerializableSemiring,
+        F: SerializableFst<W>,
+        W: SerializableSemiring,
     {
         ComposeTestData {
             fst_2: F::from_text_string(self.fst_2.as_str()).unwrap(),
             result: F::from_text_string(self.result.as_str()).unwrap(),
             filter_name: self.filter_name.clone(),
+            w: PhantomData,
         }
     }
 }
 
 fn do_test_compose<W>(
     fst_raw: &VectorFst<W>,
-    compose_test_data: &ComposeTestData<VectorFst<W>>,
+    compose_test_data: &ComposeTestData<W, VectorFst<W>>,
     filter: ComposeFilterEnum,
 ) -> Result<()>
 where
-    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-    W::ReverseWeight: 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
     // println!("Skipping simple compose for debugging");
     let mut config = ComposeConfig::default();
@@ -76,18 +78,13 @@ where
         config,
     )?;
 
-    assert_eq!(
-        compose_test_data.result,
-        fst_res_static,
-        "{}",
-        error_message_fst!(
-            compose_test_data.result,
-            fst_res_static,
-            format!(
-                "Compose failed : filter_name = {:?}",
-                compose_test_data.filter_name
-            )
-        )
+    test_eq_fst(
+        &compose_test_data.result,
+        &fst_res_static,
+        format!(
+            "Compose failed : filter_name = {:?}",
+            compose_test_data.filter_name
+        ),
     );
 
     Ok(())
@@ -115,47 +112,41 @@ impl MatcherFlagsTrait for OLabelLookAheadFlags {
     }
 }
 
-#[allow(unused)]
 fn do_test_compose_lookahead<W>(
     fst_raw: &VectorFst<W>,
-    compose_test_data: &ComposeTestData<VectorFst<W>>,
+    compose_test_data: &ComposeTestData<W, VectorFst<W>>,
 ) -> Result<()>
 where
-    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-    W::ReverseWeight: 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
-    type TLaFst<F> = MatcherFst<
+    type TLaFst<S, F> = MatcherFst<
+        S,
         F,
-        LabelLookAheadMatcher<
-            <F as CoreFst>::W,
-            SortedMatcher<F>,
-            DefaultLabelLookAheadMatcherFlags,
-        >,
+        LabelLookAheadMatcher<S, SortedMatcher<S, F>, DefaultLabelLookAheadMatcherFlags>,
         LabelReachableData,
     >;
 
-    type TMatcher1<F> = LabelLookAheadMatcher<
-        <F as CoreFst>::W,
-        SortedMatcher<F>,
-        DefaultLabelLookAheadMatcherFlags,
-    >;
-    type TMatcher2<F> = SortedMatcher<F>;
+    type TMatcher1<S, F> =
+        LabelLookAheadMatcher<S, SortedMatcher<S, F>, DefaultLabelLookAheadMatcherFlags>;
+    type TMatcher2<S, F> = SortedMatcher<S, F>;
 
-    type TSeqFilter<S, F1, F2> = AltSequenceComposeFilter<S, TMatcher1<F1>, TMatcher2<F2>>;
-    type TLookFilter<S, F1, F2> = LookAheadComposeFilter<S, TSeqFilter<S, F1, F2>, SMatchOutput>;
+    type TSeqFilter<S, F1, F2> =
+        AltSequenceComposeFilterBuilder<S, TMatcher1<S, F1>, TMatcher2<S, F2>>;
+    type TLookFilter<S, F1, F2> =
+        LookAheadComposeFilterBuilder<S, TSeqFilter<S, F1, F2>, SMatchOutput>;
     type TPushWeightsFilter<S, F1, F2> =
-        PushWeightsComposeFilter<S, TLookFilter<S, F1, F2>, SMatchOutput>;
+        PushWeightsComposeFilterBuilder<S, TLookFilter<S, F1, F2>, SMatchOutput>;
     type TPushLabelsFilter<S, F1, F2> =
-        PushLabelsComposeFilter<S, TPushWeightsFilter<S, F1, F2>, SMatchOutput>;
+        PushLabelsComposeFilterBuilder<S, TPushWeightsFilter<S, F1, F2>, SMatchOutput>;
 
     type TComposeFilter<S, F1, F2> = TPushLabelsFilter<S, F1, F2>;
 
     let fst1: VectorFst<_> = fst_raw.clone().into();
     let mut fst2: VectorFst<_> = compose_test_data.fst_2.clone();
 
-    let graph1look = Arc::new(TLaFst::new(fst1)?);
+    let graph1look = Arc::new(TLaFst::new_with_relabeling(fst1, &mut fst2, true)?);
 
-    LabelLookAheadRelabeler::relabel(&mut fst2, graph1look.addon(), true)?;
+    // LabelLookAheadRelabeler::relabel(&mut fst2, graph1look.addon(), true)?;
 
     tr_sort(&mut fst2, ilabel_compare);
     let fst2 = Arc::new(fst2);
@@ -167,11 +158,11 @@ where
     )?;
     let matcher2 = TMatcher2::new(Arc::clone(&fst2), MatchType::MatchInput)?;
 
-    let compose_filter = TPushLabelsFilter::new_2(
+    let compose_filter = TComposeFilter::new(
         Arc::clone(&graph1look),
         Arc::clone(&fst2),
-        Arc::new(RefCell::new(matcher1)),
-        Arc::new(RefCell::new(matcher2)),
+        Some(matcher1),
+        Some(matcher2),
     )?;
 
     // let compose_filter = TComposeFilter::new(
@@ -181,9 +172,11 @@ where
     //     Arc::new(RefCell::new(matcher2)),
     // )?;
 
-    let compose_options = ComposeFstImplOptions::<_, _, TComposeFilter<_, _, _>, _>::new(
-        compose_filter.matcher1(),
-        compose_filter.matcher2(),
+    let compose_options = ComposeFstOpOptions::<_, _, TComposeFilter<_, _, _>, _>::new(
+        // compose_filter.matcher1(),
+        None,
+        // compose_filter.matcher2(),
+        None,
         compose_filter,
         None,
     );
@@ -191,24 +184,18 @@ where
     let dyn_fst = ComposeFst::new_with_options(graph1look, fst2, compose_options)?;
     let static_fst: VectorFst<_> = dyn_fst.compute()?;
 
-    assert_eq!(
-        static_fst,
-        compose_test_data.result,
-        "{}",
-        error_message_fst!(
-            compose_test_data.result,
-            static_fst,
-            format!("Compose failed : filter_name = lookahead")
-        )
+    test_eq_fst(
+        &compose_test_data.result,
+        &static_fst,
+        format!("Compose failed : filter_name = lookahead"),
     );
 
     Ok(())
 }
 
-pub fn test_compose<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_compose<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-    W::ReverseWeight: 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
     for compose_test_data in &test_data.compose {
         match compose_test_data.filter_name.as_str() {

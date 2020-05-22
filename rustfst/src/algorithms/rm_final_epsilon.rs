@@ -9,12 +9,13 @@ use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::algorithms::visitors::SccVisitor;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
-use crate::EPS_LABEL;
+use crate::{Trs, EPS_LABEL};
 
 /// Removes final states that have epsilon-only input trs.
-pub fn rm_final_epsilon<F>(ifst: &mut F) -> Result<()>
+pub fn rm_final_epsilon<W, F>(ifst: &mut F) -> Result<()>
 where
-    F: MutableFst,
+    W: Semiring,
+    F: MutableFst<W>,
 {
     let mut visitors = SccVisitor::new(ifst, false, true);
     dfs_visit(ifst, &mut visitors, &AnyTrFilter {}, false);
@@ -25,7 +26,7 @@ where
         if unsafe { ifst.is_final_unchecked(s) } {
             let mut future_coaccess = false;
 
-            for tr in unsafe { ifst.tr_iter_unchecked(s) } {
+            for tr in unsafe { ifst.get_trs_unchecked(s).trs() } {
                 if visitors.coaccess[tr.nextstate] {
                     future_coaccess = true;
                     break;
@@ -43,15 +44,11 @@ where
         let mut weight = None;
         trs_to_del.clear();
 
-        for (idx, tr) in unsafe { ifst.tr_iter_unchecked(state).enumerate() } {
+        for (idx, tr) in unsafe { ifst.get_trs_unchecked(state).trs().iter().enumerate() } {
             if finals.contains(&tr.nextstate) && tr.ilabel == EPS_LABEL && tr.olabel == EPS_LABEL {
                 unsafe {
                     if weight.is_none() {
-                        weight = Some(
-                            ifst.final_weight_unchecked(state)
-                                .cloned()
-                                .unwrap_or_else(F::W::zero),
-                        );
+                        weight = Some(ifst.final_weight_unchecked(state).unwrap_or_else(W::zero));
                     }
                     weight.as_mut().unsafe_unwrap().plus_assign(
                         ifst.final_weight_unchecked(tr.nextstate)

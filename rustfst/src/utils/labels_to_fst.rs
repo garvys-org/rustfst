@@ -1,9 +1,9 @@
-use crate::fst_traits::{CoreFst, MutableFst};
+use std::cmp;
+
+use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::Label;
-
-use std::cmp;
 
 /// Turns a list of input labels and output labels into a linear FST.
 /// The only accepted path in the FST has for input `labels_input` and for output `labels_output`.
@@ -40,10 +40,10 @@ use std::cmp;
 ///
 /// assert_eq!(fst, fst_ref);
 /// ```
-pub fn transducer<F: MutableFst>(
+pub fn transducer<W: Semiring, F: MutableFst<W>>(
     labels_input: &[Label],
     labels_output: &[Label],
-    weight: F::W,
+    weight: W,
 ) -> F {
     let max_size = cmp::max(labels_input.len(), labels_output.len());
 
@@ -60,11 +60,8 @@ pub fn transducer<F: MutableFst>(
         let new_state = fst.add_state();
 
         // Can't fail as the state has just been added
-        fst.add_tr(
-            state_cour,
-            Tr::new(*i, *o, <F as CoreFst>::W::one(), new_state),
-        )
-        .unwrap();
+        fst.add_tr(state_cour, Tr::new(*i, *o, W::one(), new_state))
+            .unwrap();
 
         state_cour = new_state;
     }
@@ -111,7 +108,7 @@ pub fn transducer<F: MutableFst>(
 /// assert_eq!(fst, fst_ref);
 ///
 /// ```
-pub fn acceptor<F: MutableFst>(labels: &[Label], weight: F::W) -> F {
+pub fn acceptor<W: Semiring, F: MutableFst<W>>(labels: &[Label], weight: W) -> F {
     let mut fst = F::new();
     let mut state_cour = fst.add_state();
 
@@ -122,11 +119,8 @@ pub fn acceptor<F: MutableFst>(labels: &[Label], weight: F::W) -> F {
         let new_state = fst.add_state();
 
         // Can't fail as the state has just been added
-        fst.add_tr(
-            state_cour,
-            Tr::new(*l, *l, <F as CoreFst>::W::one(), new_state),
-        )
-        .unwrap();
+        fst.add_tr(state_cour, Tr::new(*l, *l, W::one(), new_state))
+            .unwrap();
         state_cour = new_state;
     }
 

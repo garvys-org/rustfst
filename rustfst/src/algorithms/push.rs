@@ -2,16 +2,14 @@ use anyhow::Result;
 
 use bitflags::bitflags;
 
-use crate::algorithms::factor_iterators::{GallicFactorLeft, GallicFactorRight};
+use crate::algorithms::factor_weight::factor_iterators::{GallicFactorLeft, GallicFactorRight};
+use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, FactorWeightType};
 use crate::algorithms::fst_convert::fst_convert_from_ref;
 use crate::algorithms::tr_mappers::RmWeightMapper;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
-use crate::algorithms::{
-    factor_weight, reweight, shortest_distance, tr_map, weight_convert, FactorWeightOptions,
-    FactorWeightType, ReweightType,
-};
+use crate::algorithms::{reweight, shortest_distance, tr_map, weight_convert, ReweightType};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, MutableFst};
+use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::{DivideType, Semiring};
 use crate::semirings::{
     GallicWeightLeft, GallicWeightRight, StringWeightLeft, StringWeightRight,
@@ -33,15 +31,14 @@ bitflags! {
 /// outgoing transitions and final weight at a non-initial state is
 /// equal to One() in the resulting machine. If pushing towards the
 /// final state, the same property holds on the reverse machine.
-pub fn push_weights<F>(
+pub fn push_weights<W, F>(
     fst: &mut F,
     reweight_type: ReweightType,
     remove_total_weight: bool,
 ) -> Result<()>
 where
-    F: MutableFst,
-    F::W: WeaklyDivisibleSemiring + 'static,
-    <<F as CoreFst>::W as Semiring>::ReverseWeight: 'static,
+    F: MutableFst<W>,
+    W: WeaklyDivisibleSemiring,
 {
     let dist = shortest_distance(fst, reweight_type == ReweightType::ReweightToInitial)?;
     if remove_total_weight {
@@ -59,36 +56,36 @@ where
     Ok(())
 }
 
-fn compute_total_weight<F>(fst: &F, dist: &[F::W], reverse: bool) -> Result<F::W>
+fn compute_total_weight<W, F>(fst: &F, dist: &[W], reverse: bool) -> Result<W>
 where
-    F: ExpandedFst,
+    W: Semiring,
+    F: ExpandedFst<W>,
 {
     if reverse {
         if let Some(start) = fst.start() {
             if start < dist.len() {
                 Ok(dist[start].clone())
             } else {
-                Ok(F::W::zero())
+                Ok(W::zero())
             }
         } else {
-            Ok(F::W::zero())
+            Ok(W::zero())
         }
     } else {
-        let mut sum = F::W::zero();
-        let zero = F::W::zero();
+        let mut sum = W::zero();
         for s in 0..dist.len() {
             sum.plus_assign(
-                dist[s].times(unsafe { fst.final_weight_unchecked(s) }.unwrap_or_else(|| &zero))?,
+                dist[s].times(unsafe { fst.final_weight_unchecked(s) }.unwrap_or_else(W::zero))?,
             )?;
         }
         Ok(sum)
     }
 }
 
-fn remove_weight<F>(fst: &mut F, weight: F::W, at_final: bool) -> Result<()>
+fn remove_weight<W, F>(fst: &mut F, weight: W, at_final: bool) -> Result<()>
 where
-    F: MutableFst,
-    F::W: WeaklyDivisibleSemiring,
+    F: MutableFst<W>,
+    W: WeaklyDivisibleSemiring,
 {
     if weight.is_one() || weight.is_zero() {
         return Ok(());
@@ -134,7 +131,7 @@ macro_rules! m_labels_pushing {
                 total_weight.set_value1($string_weight::one());
             }
             if !$push_type.intersects(PushType::REMOVE_TOTAL_WEIGHT) {
-                total_weight.set_value2(F1::W::one());
+                total_weight.set_value2(W::one());
             }
             reweight(&mut gfst, gdistance.as_slice(), $reweight_type)?;
             remove_weight(
@@ -146,7 +143,7 @@ macro_rules! m_labels_pushing {
             reweight(&mut gfst, gdistance.as_slice(), $reweight_type)?;
         }
         let fwfst: VectorFst<$gallic_weight> =
-            factor_weight::<VectorFst<$gallic_weight>, _, _, $gallic_factor>(
+            factor_weight::<_, VectorFst<$gallic_weight>, _, _, $gallic_factor>(
                 &gfst,
                 FactorWeightOptions::new(
                     FactorWeightType::FACTOR_FINAL_WEIGHTS | FactorWeightType::FACTOR_ARC_WEIGHTS,
@@ -161,13 +158,12 @@ macro_rules! m_labels_pushing {
 
 /// Pushes the weights and/or labels of the input FST into the output
 /// mutable FST by pushing weights and/or labels towards the initial state or final states.
-pub fn push<F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType) -> Result<F2>
+pub fn push<W, F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType) -> Result<F2>
 where
-    F1: ExpandedFst,
-    F1::W: WeaklyDivisibleSemiring + WeightQuantize,
-    F2: ExpandedFst<W = F1::W> + MutableFst + AllocableFst,
-    <F1 as CoreFst>::W: 'static,
-    <<F1 as CoreFst>::W as Semiring>::ReverseWeight: 'static,
+    F1: ExpandedFst<W>,
+    F2: ExpandedFst<W> + MutableFst<W> + AllocableFst<W>,
+    W: 'static + WeaklyDivisibleSemiring + WeightQuantize,
+    <W as Semiring>::ReverseWeight: 'static,
 {
     if push_type.intersects(PushType::PUSH_WEIGHTS) && !push_type.intersects(PushType::PUSH_LABELS)
     {
@@ -185,17 +181,17 @@ where
                 ifst,
                 reweight_type,
                 push_type,
-                GallicWeightLeft<F1::W>,
+                GallicWeightLeft<W>,
                 StringWeightLeft,
-                GallicFactorLeft<F1::W>
+                GallicFactorLeft<W>
             ),
             ReweightType::ReweightToFinal => m_labels_pushing!(
                 ifst,
                 reweight_type,
                 push_type,
-                GallicWeightRight<F1::W>,
+                GallicWeightRight<W>,
                 StringWeightRight,
-                GallicFactorRight<F1::W>
+                GallicFactorRight<W>
             ),
         }
     } else {

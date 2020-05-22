@@ -23,19 +23,3 @@ impl ParsedTextSymt {
         Self::from_string(&symt_string)
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::symbol_table::SymbolTable;
-
-    #[test]
-    fn test_parse_text_symt() -> Result<()> {
-        let mut symt = SymbolTable::new();
-        symt.add_symbol("a");
-        symt.add_symbol("b");
-        let s = symt.text()?;
-        println!("{:?}", ParsedTextSymt::from_string(&s));
-        Ok(())
-    }
-}

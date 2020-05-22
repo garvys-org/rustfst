@@ -5,13 +5,15 @@ use anyhow::Result;
 
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{StateId, Tr};
+use crate::{StateId, Tr, Trs};
+use std::marker::PhantomData;
 
-struct Isomorphism<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> {
+struct Isomorphism<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> {
     fst_1: &'a F1,
     fst_2: &'a F2,
     state_pairs: Vec<Option<StateId>>,
     queue: VecDeque<(StateId, StateId)>,
+    w: PhantomData<W>,
 }
 
 /// Compare trs in the order input label, output label, weight and nextstate.
@@ -43,13 +45,14 @@ pub fn tr_compare<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> Ordering {
     Ordering::Equal
 }
 
-impl<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> Isomorphism<'a, W, F1, F2> {
+impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W, F1, F2> {
     fn new(fst_1: &'a F1, fst_2: &'a F2) -> Self {
         Self {
             fst_1,
             fst_2,
             state_pairs: vec![None; fst_1.num_states()],
             queue: VecDeque::new(),
+            w: PhantomData,
         }
     }
 
@@ -77,8 +80,10 @@ impl<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> Isomorphis
             return Ok(false);
         }
 
-        let mut trs1: Vec<_> = self.fst_1.tr_iter(s1)?.collect();
-        let mut trs2: Vec<_> = self.fst_2.tr_iter(s2)?.collect();
+        let trs1_owner = self.fst_1.get_trs(s1)?;
+        let mut trs1: Vec<_> = trs1_owner.trs().iter().collect();
+        let trs2_owner = self.fst_2.get_trs(s2)?;
+        let mut trs2: Vec<_> = trs2_owner.trs().iter().collect();
 
         trs1.sort_by(|a, b| tr_compare(a, b));
         trs2.sort_by(|a, b| tr_compare(a, b));
@@ -141,8 +146,8 @@ impl<'a, W: Semiring, F1: ExpandedFst<W = W>, F2: ExpandedFst<W = W>> Isomorphis
 pub fn isomorphic<W, F1, F2>(fst_1: &F1, fst_2: &F2) -> Result<bool>
 where
     W: Semiring,
-    F1: ExpandedFst<W = W>,
-    F2: ExpandedFst<W = W>,
+    F1: ExpandedFst<W>,
+    F2: ExpandedFst<W>,
 {
     let mut iso = Isomorphism::new(fst_1, fst_2);
     iso.isomorphic()

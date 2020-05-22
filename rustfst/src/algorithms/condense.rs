@@ -1,15 +1,16 @@
-use crate::algorithms::visitors::SccVisitor;
-use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
+use anyhow::Result;
 
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::tr_filters::AnyTrFilter;
+use crate::algorithms::visitors::SccVisitor;
+use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
-use anyhow::Result;
+use crate::Trs;
 
 // Returns an acyclic FST where each SCC in the input FST has been condensed to
 // a single state with transitions between SCCs retained and within SCCs
 // dropped. Also populates 'scc' with a mapping from input to output states.
-pub fn condense<FI: Fst + ExpandedFst, FO: MutableFst<W = FI::W>>(
+pub fn condense<W: Semiring, FI: Fst<W> + ExpandedFst<W>, FO: MutableFst<W>>(
     ifst: &FI,
 ) -> Result<(Vec<i32>, FO)> {
     let mut visitor = SccVisitor::new(ifst, true, false);
@@ -31,7 +32,7 @@ pub fn condense<FI: Fst + ExpandedFst, FO: MutableFst<W = FI::W>>(
                         None => ofst.set_final_unchecked(c, final_weight.clone()),
                     };
                 }
-                for tr in ifst.tr_iter_unchecked(s) {
+                for tr in ifst.get_trs_unchecked(s).trs() {
                     let nextc = scc[tr.nextstate] as usize;
                     if nextc != c {
                         let mut condensed_tr = tr.clone();

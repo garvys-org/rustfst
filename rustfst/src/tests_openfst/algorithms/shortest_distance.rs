@@ -7,6 +7,8 @@ use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
 use crate::tests_openfst::FstTestData;
+use crate::KDELTA;
+use itertools::Itertools;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ShorestDistanceOperationResult {
@@ -37,15 +39,22 @@ impl ShorestDistanceOperationResult {
     }
 }
 
-pub fn test_shortest_distance<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_shortest_distance<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst,
-    F::W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize + 'static,
+    F: SerializableFst<W> + MutableFst<W>,
+    W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
 {
     for data in &test_data.shortest_distance {
         let distance = shortest_distance(&test_data.raw, data.reverse)?;
         assert_eq!(
-            data.result, distance,
+            data.result
+                .iter()
+                .map(|w| w.quantize(KDELTA).unwrap())
+                .collect_vec(),
+            distance
+                .iter()
+                .map(|w| w.quantize(KDELTA).unwrap())
+                .collect_vec(),
             "Test failing for ShortestDistance with reverse={}",
             data.reverse
         );

@@ -3,9 +3,8 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::fst_traits::{
-    CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator, TrIterator,
-};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator};
+use crate::semirings::Semiring;
 use crate::SymbolTable;
 
 /// Adds an object of type T to an FST.
@@ -34,18 +33,18 @@ impl<F, T> FstAddOn<F, T> {
     }
 }
 
-impl<F: CoreFst, T> CoreFst for FstAddOn<F, T> {
-    type W = F::W;
+impl<W: Semiring, F: CoreFst<W>, T> CoreFst<W> for FstAddOn<F, T> {
+    type TRS = F::TRS;
 
     fn start(&self) -> Option<usize> {
         self.fst.start()
     }
 
-    fn final_weight(&self, state_id: usize) -> Result<Option<&Self::W>> {
+    fn final_weight(&self, state_id: usize) -> Result<Option<W>> {
         self.fst.final_weight(state_id)
     }
 
-    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<&Self::W> {
+    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<W> {
         self.fst.final_weight_unchecked(state_id)
     }
 
@@ -55,6 +54,14 @@ impl<F: CoreFst, T> CoreFst for FstAddOn<F, T> {
 
     unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
         self.fst.num_trs_unchecked(s)
+    }
+
+    fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
+        self.fst.get_trs(state_id)
+    }
+
+    unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
+        self.fst.get_trs_unchecked(state_id)
     }
 }
 
@@ -66,26 +73,11 @@ impl<'a, F: StateIterator<'a>, T> StateIterator<'a> for FstAddOn<F, T> {
     }
 }
 
-impl<'a, F: TrIterator<'a>, T> TrIterator<'a> for FstAddOn<F, T>
+impl<'a, W, F, T> FstIterator<'a, W> for FstAddOn<F, T>
 where
-    F::W: 'a,
+    W: Semiring + 'a,
+    F: FstIterator<'a, W>,
 {
-    type Iter = <F as TrIterator<'a>>::Iter;
-
-    fn tr_iter(&'a self, state_id: usize) -> Result<Self::Iter> {
-        self.fst.tr_iter(state_id)
-    }
-
-    unsafe fn tr_iter_unchecked(&'a self, state_id: usize) -> Self::Iter {
-        self.fst.tr_iter_unchecked(state_id)
-    }
-}
-
-impl<'a, F: FstIterator<'a>, T> FstIterator<'a> for FstAddOn<F, T>
-where
-    F::W: 'a,
-{
-    type TrsIter = F::TrsIter;
     type FstIter = F::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
@@ -93,9 +85,10 @@ where
     }
 }
 
-impl<F: Fst, T: Debug> Fst for FstAddOn<F, T>
+impl<W, F, T: Debug> Fst<W> for FstAddOn<F, T>
 where
-    F::W: 'static,
+    W: Semiring,
+    F: Fst<W>,
 {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.fst.input_symbols()
@@ -122,18 +115,22 @@ where
     }
 }
 
-impl<F: ExpandedFst, T: Debug + Clone + PartialEq> ExpandedFst for FstAddOn<F, T>
+impl<W, F, T> ExpandedFst<W> for FstAddOn<F, T>
 where
-    F::W: 'static,
+    W: Semiring,
+    F: ExpandedFst<W>,
+    T: Debug + Clone + PartialEq,
 {
     fn num_states(&self) -> usize {
         self.fst.num_states()
     }
 }
 
-impl<F: FstIntoIterator, T: Debug> FstIntoIterator for FstAddOn<F, T>
+impl<W, F, T> FstIntoIterator<W> for FstAddOn<F, T>
 where
-    F::W: 'static,
+    W: Semiring,
+    F: FstIntoIterator<W>,
+    T: Debug,
 {
     type TrsIter = F::TrsIter;
     type FstIter = F::FstIter;

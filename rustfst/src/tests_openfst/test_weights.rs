@@ -6,9 +6,9 @@ use serde::{Deserialize, Serialize};
 use crate::semirings::{
     GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, GallicWeightRight,
     LogWeight, ProductWeight, ReverseBack, SerializableSemiring, StringWeightLeft,
-    StringWeightRestrict, StringWeightRight, TropicalWeight,
+    StringWeightRestrict, StringWeightRight, TropicalWeight, WeightQuantize,
 };
-use crate::Tr;
+use crate::{Tr, KDELTA};
 
 use self::super::get_path_folder;
 
@@ -54,18 +54,26 @@ pub struct ParsedWeightTestData<W> {
     times: W,
 }
 
-fn do_run_test_openfst_weight<W: SerializableSemiring>(
+fn do_run_test_openfst_weight<W: SerializableSemiring + WeightQuantize>(
     test_data: ParsedWeightTestData<W>,
 ) -> Result<()> {
     assert_eq!(W::one(), test_data.one);
     assert_eq!(W::zero(), test_data.zero);
     assert_eq!(
-        test_data.weight_1.times(&test_data.weight_2)?,
-        test_data.times
+        test_data
+            .weight_1
+            .times(&test_data.weight_2)?
+            .quantize(KDELTA)
+            .unwrap(),
+        test_data.times.quantize(KDELTA).unwrap()
     );
     assert_eq!(
-        test_data.weight_1.plus(&test_data.weight_2)?,
-        test_data.plus
+        test_data
+            .weight_1
+            .plus(&test_data.weight_2)?
+            .quantize(KDELTA)
+            .unwrap(),
+        test_data.plus.quantize(KDELTA).unwrap()
     );
     assert_eq!(W::weight_type(), test_data.weight_type);
     assert_eq!(Tr::<W>::tr_type(), test_data.tr_type);

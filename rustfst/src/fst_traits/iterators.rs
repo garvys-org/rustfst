@@ -1,6 +1,7 @@
-use anyhow::Result;
+use std::slice;
 
 use crate::fst_traits::CoreFst;
+use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::StateId;
 
@@ -32,15 +33,6 @@ pub trait StateIterator<'a> {
     fn states_iter(&'a self) -> Self::Iter;
 }
 
-/// Trait to iterate over the outgoing transitions of a particular state in a wFST.
-pub trait TrIterator<'a>: CoreFst {
-    /// Iterator used to iterate over the transitions leaving a state of an FST.
-    type Iter: Iterator<Item = &'a Tr<Self::W>> + Clone;
-
-    fn tr_iter(&'a self, state_id: StateId) -> Result<Self::Iter>;
-    unsafe fn tr_iter_unchecked(&'a self, state_id: StateId) -> Self::Iter;
-}
-
 pub struct FstIterData<W, I> {
     pub state_id: StateId,
     pub final_weight: Option<W>,
@@ -48,20 +40,18 @@ pub struct FstIterData<W, I> {
     pub num_trs: usize,
 }
 
-pub trait FstIntoIterator: CoreFst {
-    type TrsIter: Iterator<Item = Tr<Self::W>>;
-    type FstIter: Iterator<Item = FstIterData<Self::W, Self::TrsIter>>;
+pub trait FstIntoIterator<W: Semiring>: CoreFst<W> {
+    type TrsIter: Iterator<Item = Tr<W>>;
+    type FstIter: Iterator<Item = FstIterData<W, Self::TrsIter>>;
     fn fst_into_iter(self) -> Self::FstIter;
 }
 
-pub trait FstIterator<'a>: CoreFst {
-    type TrsIter: Iterator<Item = &'a Tr<Self::W>>;
-    type FstIter: Iterator<Item = FstIterData<&'a Self::W, Self::TrsIter>>;
+pub trait FstIterator<'a, W: Semiring>: CoreFst<W> {
+    type FstIter: Iterator<Item = FstIterData<W, Self::TRS>>;
     fn fst_iter(&'a self) -> Self::FstIter;
 }
 
-pub trait FstIteratorMut<'a>: CoreFst {
-    type TrsIter: Iterator<Item = &'a mut Tr<Self::W>>;
-    type FstIter: Iterator<Item = FstIterData<&'a mut Self::W, Self::TrsIter>>;
+pub trait FstIteratorMut<'a, W: Semiring>: CoreFst<W> {
+    type FstIter: Iterator<Item = FstIterData<&'a mut W, slice::IterMut<'a, Tr<W>>>>;
     fn fst_iter_mut(&'a mut self) -> Self::FstIter;
 }

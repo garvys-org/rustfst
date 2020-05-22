@@ -1,19 +1,18 @@
-use std::cell::RefCell;
+use std::marker::PhantomData;
 use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
-use crate::{Label, StateId, Tr, NO_STATE_ID};
+use crate::{Label, StateId, Tr};
 
 #[derive(Debug)]
 pub struct TrivialLookAheadMatcher<W, M> {
     matcher: M,
-    lookahead_weight: W,
-    prefix_tr: Tr<W>,
+    w: PhantomData<W>,
 }
 
 impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
@@ -23,8 +22,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
     fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self> {
         Ok(Self {
             matcher: M::new(fst, match_type)?,
-            prefix_tr: Tr::new(0, 0, W::one(), NO_STATE_ID),
-            lookahead_weight: W::one(),
+            w: PhantomData,
         })
     }
 
@@ -32,7 +30,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
         self.matcher.iter(state, label)
     }
 
-    fn final_weight(&self, state: usize) -> Result<Option<*const W>> {
+    fn final_weight(&self, state: usize) -> Result<Option<W>> {
         self.matcher.final_weight(state)
     }
 
@@ -50,7 +48,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
         self.matcher.priority(state)
     }
 
-    fn fst(&self) -> Arc<Self::F> {
+    fn fst(&self) -> &Arc<Self::F> {
         self.matcher.fst()
     }
 }
@@ -58,59 +56,47 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
 impl<W: Semiring, M: Matcher<W>> LookaheadMatcher<W> for TrivialLookAheadMatcher<W, M> {
     type MatcherData = ();
 
-    fn data(&self) -> Option<&Arc<RefCell<Self::MatcherData>>> {
+    fn data(&self) -> Option<&Arc<Self::MatcherData>> {
         None
     }
 
     fn new_with_data(
         fst: Arc<Self::F>,
         match_type: MatchType,
-        _data: Option<Arc<RefCell<Self::MatcherData>>>,
+        _data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self> {
         Self::new(fst, match_type)
     }
 
-    fn create_data<F: ExpandedFst<W = W>>(
+    fn create_data<F: ExpandedFst<W>>(
         _fst: &F,
         _match_type: MatchType,
-    ) -> Result<Option<Arc<RefCell<Self::MatcherData>>>> {
+    ) -> Result<Option<Self::MatcherData>> {
         Ok(None)
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W = W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
+    fn init_lookahead_fst<LF: ExpandedFst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
         Ok(())
     }
 
-    fn lookahead_fst<LF: Fst<W = W>>(
-        &mut self,
+    fn lookahead_fst<LF: Fst<W>>(
+        &self,
         _matcher_state: StateId,
         _lfst: &Arc<LF>,
         _s: StateId,
-    ) -> Result<bool> {
-        Ok(true)
+    ) -> Result<Option<LookAheadMatcherData<W>>> {
+        Ok(Some(LookAheadMatcherData::default()))
     }
 
     fn lookahead_label(&self, _state: StateId, _label: Label) -> Result<bool> {
         Ok(true)
     }
 
-    fn lookahead_prefix(&self, _tr: &mut Tr<W>) -> bool {
+    fn lookahead_prefix(
+        &self,
+        _tr: &mut Tr<W>,
+        _la_matcher_data: &LookAheadMatcherData<W>,
+    ) -> bool {
         false
-    }
-
-    fn lookahead_weight(&self) -> &W {
-        &self.lookahead_weight
-    }
-
-    fn prefix_tr(&self) -> &Tr<W> {
-        &self.prefix_tr
-    }
-
-    fn prefix_tr_mut(&mut self) -> &mut Tr<W> {
-        &mut self.prefix_tr
-    }
-
-    fn lookahead_weight_mut(&mut self) -> &mut W {
-        &mut self.lookahead_weight
     }
 }

@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
@@ -19,31 +21,33 @@ pub struct GallicOperationResult {
     result: String,
 }
 
-pub struct GallicTestData<F>
+pub struct GallicTestData<W, F>
 where
-    F: SerializableFst,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W>,
+    W: SerializableSemiring,
 {
     pub gallic_type: String,
     pub result: F,
+    w: PhantomData<W>,
 }
 
 impl GallicOperationResult {
-    pub fn parse<F>(&self) -> GallicTestData<F>
+    pub fn parse<W, F>(&self) -> GallicTestData<W, F>
     where
-        F: SerializableFst,
-        F::W: SerializableSemiring,
+        F: SerializableFst<W>,
+        W: SerializableSemiring,
     {
         GallicTestData {
             gallic_type: self.gallic_type.clone(),
             result: F::from_text_string(self.result.as_str()).unwrap(),
+            w: PhantomData,
         }
     }
 }
 
-pub fn test_gallic_encode_decode<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_gallic_encode_decode<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: 'static + SerializableSemiring,
+    W: SerializableSemiring,
 {
     for data in &test_data.gallic_encode_decode {
         let mut to_gallic = ToGallicConverter {};

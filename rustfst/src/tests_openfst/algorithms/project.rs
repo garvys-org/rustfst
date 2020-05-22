@@ -8,10 +8,10 @@ use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_project_output<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_project_output<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeaklyDivisibleSemiring,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring + WeaklyDivisibleSemiring,
 {
     // Project output
     let mut fst_project_output = test_data.raw.clone();
@@ -29,10 +29,10 @@ where
     Ok(())
 }
 
-pub fn test_project_input<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_project_input<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeaklyDivisibleSemiring,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring + WeaklyDivisibleSemiring,
 {
     // Project input
     let mut fst_project_input = test_data.raw.clone();

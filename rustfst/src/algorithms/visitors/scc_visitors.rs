@@ -1,12 +1,15 @@
+use std::marker::PhantomData;
+
+use unsafe_unwrap::UnsafeUnwrap;
+
 use crate::algorithms::dfs_visit::Visitor;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
+use crate::fst_properties::FstProperties;
+use crate::fst_traits::{ExpandedFst, Fst};
+use crate::semirings::Semiring;
 use crate::Tr;
 use crate::{StateId, NO_STATE_ID};
 
-use crate::fst_properties::FstProperties;
-use unsafe_unwrap::UnsafeUnwrap;
-
-pub struct SccVisitor<'a, F: Fst> {
+pub struct SccVisitor<'a, W: Semiring, F: Fst<W>> {
     pub scc: Option<Vec<i32>>,
     pub access: Option<Vec<bool>>,
     pub coaccess: Vec<bool>,
@@ -19,9 +22,10 @@ pub struct SccVisitor<'a, F: Fst> {
     scc_stack: Vec<StateId>,
     pub nscc: i32,
     pub props: FstProperties,
+    w: PhantomData<W>,
 }
 
-impl<'a, F: 'a + Fst + ExpandedFst> SccVisitor<'a, F> {
+impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> SccVisitor<'a, W, F> {
     pub fn new(fst: &'a F, compute_scc: bool, compute_acess: bool) -> Self {
         let n = fst.num_states();
         let mut props = FstProperties::empty();
@@ -50,11 +54,12 @@ impl<'a, F: 'a + Fst + ExpandedFst> SccVisitor<'a, F> {
             scc_stack: vec![],
             nscc: 0,
             props,
+            w: PhantomData,
         }
     }
 }
 
-impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
+impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for SccVisitor<'a, W, F> {
     fn init_visit(&mut self, _fst: &'a F) {}
 
     fn init_state(&mut self, s: usize, root: usize) -> bool {
@@ -62,22 +67,26 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         self.dfnumber[s] = self.nstates as i32;
         self.lowlink[s] = self.nstates as i32;
         self.onstack[s] = true;
-        if let Some(ref mut access) = self.access {
-            access[s] = root == self.start;
-            if root != self.start {
-                self.props |= FstProperties::NOT_ACCESSIBLE;
-                self.props &= !FstProperties::ACCESSIBLE;
+        if root == self.start {
+            if let Some(ref mut access) = self.access {
+                access[s] = true;
             }
+        } else {
+            if let Some(ref mut access) = self.access {
+                access[s] = true;
+            }
+            self.props |= FstProperties::NOT_ACCESSIBLE;
+            self.props &= !FstProperties::ACCESSIBLE;
         }
         self.nstates += 1;
         true
     }
 
-    fn tree_tr(&mut self, _s: usize, _tr: &Tr<<F as CoreFst>::W>) -> bool {
+    fn tree_tr(&mut self, _s: usize, _tr: &Tr<W>) -> bool {
         true
     }
 
-    fn back_tr(&mut self, s: usize, tr: &Tr<<F as CoreFst>::W>) -> bool {
+    fn back_tr(&mut self, s: usize, tr: &Tr<W>) -> bool {
         let t = tr.nextstate;
         if self.dfnumber[t] < self.lowlink[s] {
             self.lowlink[s] = self.dfnumber[t];
@@ -94,7 +103,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
         true
     }
 
-    fn forward_or_cross_tr(&mut self, s: usize, tr: &Tr<<F as CoreFst>::W>) -> bool {
+    fn forward_or_cross_tr(&mut self, s: usize, tr: &Tr<W>) -> bool {
         let t = tr.nextstate;
         if self.dfnumber[t] < self.dfnumber[s]
             && self.onstack[t]
@@ -109,12 +118,7 @@ impl<'a, F: 'a + ExpandedFst> Visitor<'a, F> for SccVisitor<'a, F> {
     }
 
     #[inline]
-    fn finish_state(
-        &mut self,
-        s: usize,
-        parent: Option<usize>,
-        _tr: Option<&Tr<<F as CoreFst>::W>>,
-    ) {
+    fn finish_state(&mut self, s: usize, parent: Option<usize>, _tr: Option<&Tr<W>>) {
         if unsafe { self.fst.is_final_unchecked(s) } {
             self.coaccess[s] = true;
         }

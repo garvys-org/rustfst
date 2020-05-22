@@ -1,19 +1,18 @@
+use std::fs::File;
+use std::io::{BufWriter, LineWriter, Write};
 use std::path::Path;
 
 use anyhow::Result;
+use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::fst_traits::{ExpandedFst, FinalStatesIterator};
+use crate::fst_traits::ExpandedFst;
 use crate::parsers::text_fst::ParsedTextFst;
-use crate::semirings::{Semiring, SerializableSemiring};
+use crate::semirings::SerializableSemiring;
+use crate::Trs;
 use crate::{DrawingConfig, StateId};
-use std::fs::File;
-use std::io::{BufWriter, LineWriter, Write};
 
 /// Trait definining the methods an Fst must implement to be serialized and deserialized.
-pub trait SerializableFst: ExpandedFst
-where
-    Self::W: SerializableSemiring,
-{
+pub trait SerializableFst<W: SerializableSemiring>: ExpandedFst<W> {
     /// String identifying the type of the FST. Will be used when serialiing and
     /// deserializing an FST in binary format.
     fn fst_type() -> String;
@@ -28,7 +27,7 @@ where
     // TEXT
 
     /// Turns a generic wFST format into the one of the wFST.
-    fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst<Self::W>) -> Result<Self>;
+    fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst<W>) -> Result<Self>;
 
     /// Deserializes a wFST in text from a path and returns a loaded wFST.
     fn from_text_string(fst_string: &str) -> Result<Self> {
@@ -108,15 +107,12 @@ where
     }
 }
 
-fn draw_single_fst_state<F: SerializableFst, W: Write>(
+fn draw_single_fst_state<S: SerializableSemiring, F: SerializableFst<S>, W: Write>(
     fst: &F,
     writer: &mut W,
     state_id: StateId,
     config: &DrawingConfig,
-) -> Result<()>
-where
-    F::W: SerializableSemiring,
-{
+) -> Result<()> {
     let opt_isymt = fst.input_symbols();
     let opt_osymt = fst.output_symbols();
 
@@ -139,7 +135,7 @@ where
 
     writeln!(writer, " fontsize = {}]", config.fontsize)?;
 
-    for tr in fst.tr_iter(state_id).unwrap() {
+    for tr in fst.get_trs(state_id).unwrap().trs() {
         write!(writer, "\t{} -> {}", state_id, tr.nextstate)?;
 
         let ilabel = opt_isymt.clone().map_or_else(

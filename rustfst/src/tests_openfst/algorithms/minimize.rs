@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use std::marker::PhantomData;
 
 use anyhow::{format_err, Result};
 use serde::{Deserialize, Serialize};
@@ -8,6 +9,7 @@ use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -16,20 +18,21 @@ pub struct MinimizeOperationResult {
     result: String,
 }
 
-pub struct MinimizeTestData<F>
+pub struct MinimizeTestData<W, F>
 where
-    F: SerializableFst,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W>,
+    W: SerializableSemiring,
 {
     allow_nondet: bool,
     result: Result<F>,
+    w: PhantomData<W>,
 }
 
 impl MinimizeOperationResult {
-    pub fn parse<F>(&self) -> MinimizeTestData<F>
+    pub fn parse<W, F>(&self) -> MinimizeTestData<W, F>
     where
-        F: SerializableFst,
-        F::W: SerializableSemiring,
+        F: SerializableFst<W>,
+        W: SerializableSemiring,
     {
         MinimizeTestData {
             allow_nondet: self.allow_nondet,
@@ -37,14 +40,15 @@ impl MinimizeOperationResult {
                 "error" => Err(format_err!("lol")),
                 _ => F::from_text_string(self.result.as_str()),
             },
+            w: PhantomData,
         }
     }
 }
 
-pub fn test_minimize<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_minimize<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + AllocableFst + Display,
-    F::W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize + 'static,
+    F: SerializableFst<W> + MutableFst<W> + AllocableFst<W> + Display,
+    W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
 {
     for minimize_data in &test_data.minimize {
         //        println!("Minimize : allow_nondet = {}", minimize_data.allow_nondet);
@@ -54,13 +58,13 @@ where
 
         match (&minimize_data.result, fst_res) {
             (Ok(fst_expected), Ok(ref fst_minimized)) => {
-                assert_eq_fst!(
+                test_eq_fst(
                     fst_expected,
                     fst_minimized,
                     format!(
                         "Minimize fail for allow_nondet = {:?} ",
                         minimize_data.allow_nondet
-                    )
+                    ),
                 );
             }
             (Ok(_fst_expected), Err(_)) => panic!(

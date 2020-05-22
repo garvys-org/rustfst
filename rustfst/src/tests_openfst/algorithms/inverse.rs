@@ -8,10 +8,10 @@ use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_invert<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_invert<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeaklyDivisibleSemiring,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring + WeaklyDivisibleSemiring,
 {
     // Invert
     let mut fst_invert = test_data.raw.clone();

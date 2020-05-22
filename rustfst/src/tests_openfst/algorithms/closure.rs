@@ -1,7 +1,9 @@
+use std::marker::PhantomData;
+
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::{closure, ClosureFst, ClosureType};
+use crate::algorithms::closure::{closure, ClosureFst, ClosureType};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
@@ -14,32 +16,33 @@ pub struct SimpleStaticLazyOperationResult {
     result_lazy: String,
 }
 
-pub struct SimpleStaticLazyTestData<F>
+pub struct SimpleStaticLazyTestData<W, F>
 where
-    F: SerializableFst,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W>,
+    W: SerializableSemiring,
 {
     pub result_static: F,
     pub result_lazy: F,
+    w: PhantomData<W>,
 }
 
 impl SimpleStaticLazyOperationResult {
-    pub fn parse<F>(&self) -> SimpleStaticLazyTestData<F>
+    pub fn parse<W, F>(&self) -> SimpleStaticLazyTestData<W, F>
     where
-        F: SerializableFst,
-        F::W: SerializableSemiring,
+        F: SerializableFst<W>,
+        W: SerializableSemiring,
     {
         SimpleStaticLazyTestData {
             result_static: F::from_text_string(self.result_static.as_str()).unwrap(),
             result_lazy: F::from_text_string(self.result_lazy.as_str()).unwrap(),
+            w: PhantomData,
         }
     }
 }
 
-pub fn test_closure_plus<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_closure_plus<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-    W::ReverseWeight: 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
     let closure_test_data = &test_data.closure_plus;
     let mut fst_res_static = test_data.raw.clone();
@@ -58,10 +61,9 @@ where
     Ok(())
 }
 
-pub fn test_closure_star<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_closure_star<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-    W::ReverseWeight: 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
     let closure_test_data = &test_data.closure_star;
     let mut fst_res_static = test_data.raw.clone();
@@ -80,10 +82,9 @@ where
     Ok(())
 }
 
-pub fn test_closure_plus_lazy<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_closure_plus_lazy<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-    W::ReverseWeight: 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
     let closure_test_data = &test_data.closure_plus;
     let closure_lazy_fst_openfst = &closure_test_data.result_lazy;
@@ -93,10 +94,9 @@ where
     Ok(())
 }
 
-pub fn test_closure_star_lazy<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_closure_star_lazy<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring + 'static,
-    W::ReverseWeight: 'static,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
     let closure_test_data = &test_data.closure_star;
     let closure_lazy_fst_openfst = &closure_test_data.result_lazy;

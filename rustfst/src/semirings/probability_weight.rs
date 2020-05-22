@@ -1,18 +1,18 @@
 use std::borrow::Borrow;
 use std::f32;
 use std::hash::{Hash, Hasher};
+use std::io::Write;
+
+use anyhow::Result;
+use nom::number::complete::{float, le_f32};
+use nom::IResult;
+use ordered_float::OrderedFloat;
 
 use crate::parsers::bin_fst::utils_serialization::write_bin_f32;
 use crate::semirings::{
     CompleteSemiring, DivideType, ReverseBack, Semiring, SemiringProperties, SerializableSemiring,
     StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::KDELTA;
-use anyhow::Result;
-use nom::number::complete::{float, le_f32};
-use nom::IResult;
-use ordered_float::OrderedFloat;
-use std::io::Write;
 
 /// Probability semiring: (x, +, 0.0, 1.0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]

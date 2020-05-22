@@ -10,15 +10,16 @@ use nom::IResult;
 
 use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, SerializableFst, TrIterator};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, SerializableFst};
 use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FST_MAGIC_NUMBER};
 use crate::parsers::bin_fst::utils_parsing::{parse_final_weight, parse_fst_tr, parse_start_state};
 use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64};
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::SerializableSemiring;
-use crate::Tr;
+use crate::{Tr, Trs, TrsVec};
+use std::sync::Arc;
 
-impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
+impl<W: 'static + SerializableSemiring> SerializableFst<W> for VectorFst<W> {
     fn fst_type() -> String {
         "vector".to_string()
     }
@@ -69,14 +70,13 @@ impl<W: 'static + SerializableSemiring> SerializableFst for VectorFst<W> {
         };
         hdr.write(&mut file)?;
 
-        let zero = W::zero();
         // FstBody
         for state in 0..self.num_states() {
-            let f_weight = unsafe { self.final_weight_unchecked(state).unwrap_or_else(|| &zero) };
+            let f_weight = unsafe { self.final_weight_unchecked(state).unwrap_or_else(W::zero) };
             f_weight.write_binary(&mut file)?;
             write_bin_i64(&mut file, unsafe { self.num_trs_unchecked(state) } as i64)?;
 
-            for tr in unsafe { self.tr_iter_unchecked(state) } {
+            for tr in unsafe { self.get_trs_unchecked(state).trs() } {
                 write_bin_i32(&mut file, tr.ilabel as i32)?;
                 write_bin_i32(&mut file, tr.olabel as i32)?;
                 tr.weight.write_binary(&mut file)?;
@@ -138,7 +138,7 @@ fn parse_vector_fst_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], V
         i,
         VectorFstState {
             final_weight: parse_final_weight(final_weight),
-            trs,
+            trs: TrsVec(Arc::new(trs)),
         },
     ))
 }

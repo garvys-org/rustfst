@@ -53,10 +53,11 @@ pub trait TrMapper<S: Semiring> {
 }
 
 /// Maps every transition in the FST using an `TrMapper` object.
-pub fn tr_map<F, M>(ifst: &mut F, mapper: &M) -> Result<()>
+pub fn tr_map<W, F, M>(ifst: &mut F, mapper: &M) -> Result<()>
 where
-    F: MutableFst,
-    M: TrMapper<F::W>,
+    W: Semiring,
+    F: MutableFst<W>,
+    M: TrMapper<W>,
 {
     if ifst.start().is_none() {
         return Ok(());
@@ -68,7 +69,7 @@ where
     if final_action == MapFinalAction::MapRequireSuperfinal {
         let superfinal_id = ifst.add_state();
         superfinal = Some(superfinal_id);
-        ifst.set_final(superfinal_id, F::W::one()).unwrap();
+        ifst.set_final(superfinal_id, W::one()).unwrap();
     }
 
     // TODO: Remove this collect
@@ -102,7 +103,7 @@ where
                                 superfinal = Some(superfinal_id);
                                 unsafe {
                                     // Checked because the state is created just above
-                                    ifst.set_final_unchecked(superfinal_id, F::W::one());
+                                    ifst.set_final_unchecked(superfinal_id, W::one());
                                 }
                             }
                             unsafe {

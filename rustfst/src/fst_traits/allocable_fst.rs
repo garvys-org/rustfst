@@ -1,9 +1,10 @@
 use crate::fst_traits::Fst;
+use crate::semirings::Semiring;
 use crate::StateId;
 use anyhow::Result;
 
 /// Trait defining the methods to control allocation for a wFST
-pub trait AllocableFst: Fst {
+pub trait AllocableFst<W: Semiring>: Fst<W> {
     /// Reserve capacity for at least additional more trs leaving the state.
     /// The FST may reserve more space to avoid frequent allocation.
     /// After calling `reserve_trs`, the capacity will be greater or equal to `num_trs` + `additionnal`

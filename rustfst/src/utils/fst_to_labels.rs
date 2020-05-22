@@ -2,6 +2,7 @@ use anyhow::{bail, Result};
 
 use crate::fst_path::FstPath;
 use crate::fst_traits::{Fst, PathsIterator};
+use crate::semirings::Semiring;
 
 /// Decode a linear FST to retrieves the only path recognized by it. A path is composed of the
 /// input symbols, the output symbols and the weight (multiplication of the weights of the trs
@@ -25,7 +26,7 @@ use crate::fst_traits::{Fst, PathsIterator};
 ///
 /// assert_eq!(path, FstPath::new(labels_input, labels_output, BooleanWeight::one()));
 /// ```
-pub fn decode_linear_fst<F: Fst>(fst: &F) -> Result<FstPath<F::W>> {
+pub fn decode_linear_fst<W: Semiring, F: Fst<W>>(fst: &F) -> Result<FstPath<W>> {
     let mut it_path = fst.paths_iter();
     let path = it_path.next().unwrap_or_default();
     if it_path.next().is_some() {

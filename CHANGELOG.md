@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement `SerializableSemiring` for `ProbabilityWeight`
 - Add support for `SymbolTable` serialization while serializing a FST in binary format.
 - Implement Composition operation. Added support to LookAhead filter.
+- W is now a trait parameter of all the Fst traits instead of an associated type.
+- Re-organized most of the algorithms into their own modules.
+- All the lazy fsts except `rm_epsilon` are now Send and Sync.
+- Remove the `TrIterator` in favor of the `get_trs` method in the CoreFst trait.
 
 ### Changed
 - `fst_convert` now consumes its input. Use `fst_convert_from_ref` to pass a borrow.
@@ -31,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SymbolTable are now wrapped in std::sync::Arc (instead of Rc)
 - renamed unset_input_symbols and unset_output_symbols to take_*_symbols
 - static FST struct are now Send and Sync
+- `final_weight` method of the `CoreFst` trait now returns a copy instead of a reference.
 
 ### Fixed
 - Fix olabel display while drawing a FST if no symbol table is provided

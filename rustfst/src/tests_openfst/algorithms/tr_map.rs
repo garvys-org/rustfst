@@ -12,6 +12,7 @@ use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -20,32 +21,32 @@ pub struct TrMapWithWeightOperationResult {
     result: String,
 }
 
-pub struct TrMapWithWeightTestData<F>
+pub struct TrMapWithWeightTestData<W, F>
 where
-    F: SerializableFst,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W>,
+    W: SerializableSemiring,
 {
-    pub weight: F::W,
+    pub weight: W,
     pub result: F,
 }
 
 impl TrMapWithWeightOperationResult {
-    pub fn parse<F>(&self) -> TrMapWithWeightTestData<F>
+    pub fn parse<W, F>(&self) -> TrMapWithWeightTestData<W, F>
     where
-        F: SerializableFst,
-        F::W: SerializableSemiring,
+        F: SerializableFst<W>,
+        W: SerializableSemiring,
     {
         TrMapWithWeightTestData {
-            weight: F::W::parse_text(self.weight.as_str()).unwrap().1,
+            weight: W::parse_text(self.weight.as_str()).unwrap().1,
             result: F::from_text_string(self.result.as_str()).unwrap(),
         }
     }
 }
 
-pub fn test_tr_map_identity<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_tr_map_identity<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeightQuantize,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring + WeightQuantize,
 {
     // TrMap IdentityMapper
     let mut fst_tr_map_identity = test_data.raw.clone();
@@ -64,10 +65,10 @@ where
     Ok(())
 }
 
-pub fn test_tr_map_invert<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_tr_map_invert<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
     // TrMap InvertWeightMapper
     let mut fst_tr_map_invert = test_data.raw.clone();
@@ -86,10 +87,10 @@ where
     Ok(())
 }
 
-pub fn test_tr_map_input_epsilon<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_tr_map_input_epsilon<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeightQuantize,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring + WeightQuantize,
 {
     let mut fst_tr_map = test_data.raw.clone();
     let mut mapper = InputEpsilonMapper {};
@@ -107,10 +108,10 @@ where
     Ok(())
 }
 
-pub fn test_tr_map_output_epsilon<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_tr_map_output_epsilon<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeightQuantize,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring + WeightQuantize,
 {
     let mut fst_tr_map = test_data.raw.clone();
     let mut mapper = OutputEpsilonMapper {};
@@ -128,83 +129,70 @@ where
     Ok(())
 }
 
-pub fn test_tr_map_plus<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_tr_map_plus<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeightQuantize,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring + WeightQuantize,
 {
     let mut fst_tr_map = test_data.raw.clone();
     let mut mapper = PlusMapper::from_weight(test_data.tr_map_plus.weight.clone());
     fst_tr_map.tr_map(&mut mapper)?;
-    assert_eq!(
-        test_data.tr_map_plus.result,
-        fst_tr_map,
-        "{}",
-        error_message_fst!(test_data.tr_map_plus.result, fst_tr_map, "TrMap PlusMapper")
+    test_eq_fst(
+        &test_data.tr_map_plus.result,
+        &fst_tr_map,
+        "TrMap PlusMapper",
     );
     Ok(())
 }
 
-pub fn test_tr_map_times<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_tr_map_times<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeightQuantize,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring + WeightQuantize,
 {
     let mut fst_tr_map = test_data.raw.clone();
     let mut mapper = TimesMapper::from_weight(test_data.tr_map_times.weight.clone());
     fst_tr_map.tr_map(&mut mapper)?;
-    assert_eq!(
-        test_data.tr_map_times.result,
-        fst_tr_map,
-        "{}",
-        error_message_fst!(
-            test_data.tr_map_times.result,
-            fst_tr_map,
-            "TrMap TimesMapper"
-        )
+    test_eq_fst(
+        &test_data.tr_map_times.result,
+        &fst_tr_map,
+        "TrMap TimesMapper",
     );
     Ok(())
 }
 
-pub fn test_tr_map_quantize<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_tr_map_quantize<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeightQuantize,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring + WeightQuantize,
 {
     let mut fst_tr_map = test_data.raw.clone();
     let mut mapper = QuantizeMapper {};
     fst_tr_map.tr_map(&mut mapper)?;
-    assert_eq!(
-        test_data.tr_map_quantize,
-        fst_tr_map,
-        "{}",
-        error_message_fst!(
-            test_data.tr_map_quantize,
-            fst_tr_map,
-            "TrMap QuantizeMapper"
-        )
+
+    test_eq_fst(
+        &test_data.tr_map_quantize,
+        &fst_tr_map,
+        "TrMap QuantizeMapper",
     );
+
     Ok(())
 }
 
-pub fn test_tr_map_rmweight<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_tr_map_rmweight<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring + WeightQuantize,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring + WeightQuantize,
 {
     // TrMap RmWeightMapper
     let mut fst_tr_map_rmweight = test_data.raw.clone();
     let mut rmweight_mapper = RmWeightMapper {};
     fst_tr_map_rmweight.tr_map(&mut rmweight_mapper)?;
-    assert_eq!(
-        test_data.tr_map_rmweight,
-        fst_tr_map_rmweight,
-        "{}",
-        error_message_fst!(
-            test_data.tr_map_rmweight,
-            fst_tr_map_rmweight,
-            "TrMap RmWeight"
-        )
+
+    test_eq_fst(
+        &test_data.tr_map_rmweight,
+        &fst_tr_map_rmweight,
+        "TrMap RmWeight",
     );
     Ok(())
 }

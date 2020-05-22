@@ -36,10 +36,10 @@ impl StateReachableOperationResult {
     }
 }
 
-pub fn test_state_reachable<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_state_reachable<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: MutableFst + Display + SerializableFst,
-    F::W: SerializableSemiring + 'static,
+    F: MutableFst<W> + Display + SerializableFst<W>,
+    W: SerializableSemiring,
 {
     let state_reachable_test_data = &test_data.state_reachable;
     let reachable = StateReachable::new(&test_data.raw);

@@ -8,9 +8,9 @@ use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::io::generate_symbol_table;
 use crate::tests_openfst::FstTestData;
 
-pub fn test_const_fst_text_serialization<W>(test_data: &FstTestData<VectorFst<W>>) -> Result<()>
+pub fn test_const_fst_text_serialization<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring + 'static,
+    W: SerializableSemiring,
 {
     let const_fst_ref: ConstFst<_> = test_data.raw.clone().into();
 
@@ -46,10 +46,10 @@ where
 }
 
 pub fn test_const_fst_text_serialization_with_symt<W>(
-    test_data: &FstTestData<VectorFst<W>>,
+    test_data: &FstTestData<W, VectorFst<W>>,
 ) -> Result<()>
 where
-    W: SerializableSemiring + 'static,
+    W: SerializableSemiring,
 {
     let dir = tempdir()?;
 

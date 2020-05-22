@@ -1,10 +1,13 @@
 use crate::fst_traits::{AllocableFst, ExpandedFst, Fst, MutableFst};
+use crate::semirings::Semiring;
+use crate::Trs;
 
 /// Generic method to convert an Fst into any other types implementing the MutableFst trait.
-pub fn fst_convert_from_ref<F1, F2>(ifst: &F1) -> F2
+pub fn fst_convert_from_ref<W, F1, F2>(ifst: &F1) -> F2
 where
-    F1: Fst,
-    F2: MutableFst<W = F1::W> + AllocableFst,
+    W: Semiring,
+    F1: Fst<W>,
+    F2: MutableFst<W> + AllocableFst<W>,
 {
     let mut ofst = F2::new();
 
@@ -18,7 +21,7 @@ where
             unsafe {
                 ofst.reserve_trs_unchecked(data.state_id, data.num_trs);
             }
-            for tr in data.trs {
+            for tr in data.trs.trs() {
                 unsafe { ofst.add_tr_unchecked(data.state_id, tr.clone()) };
             }
 
@@ -34,10 +37,11 @@ where
 }
 
 /// Generic method to convert an Fst into any other types implementing the MutableFst trait.
-pub fn fst_convert<F1, F2>(ifst: F1) -> F2
+pub fn fst_convert<W, F1, F2>(ifst: F1) -> F2
 where
-    F1: ExpandedFst,
-    F2: MutableFst<W = F1::W> + AllocableFst,
+    W: Semiring,
+    F1: ExpandedFst<W>,
+    F2: MutableFst<W> + AllocableFst<W>,
 {
     let mut ofst = F2::new();
     ofst.add_states(ifst.num_states());

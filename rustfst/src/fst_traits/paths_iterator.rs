@@ -3,37 +3,42 @@ use std::collections::VecDeque;
 use crate::fst_path::FstPath;
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
+use crate::trs::Trs;
 use crate::StateId;
 
 /// Trait to iterate over the paths accepted by an FST.
-pub trait PathsIterator<'a> {
-    type W: Semiring;
-    type Iter: Iterator<Item = FstPath<Self::W>>;
+pub trait PathsIterator<'a, W>
+where
+    W: Semiring,
+{
+    type Iter: Iterator<Item = FstPath<W>>;
     fn paths_iter(&'a self) -> Self::Iter;
 }
 
-impl<'a, F> PathsIterator<'a> for F
+impl<'a, W, F> PathsIterator<'a, W> for F
 where
-    F: 'a + Fst,
+    W: Semiring,
+    F: 'a + Fst<W>,
 {
-    type W = F::W;
-    type Iter = StructPathsIterator<'a, F>;
+    type Iter = StructPathsIterator<'a, W, F>;
     fn paths_iter(&'a self) -> Self::Iter {
         StructPathsIterator::new(&self)
     }
 }
 
-pub struct StructPathsIterator<'a, F>
+pub struct StructPathsIterator<'a, W, F>
 where
-    F: 'a + Fst,
+    W: Semiring,
+    F: 'a + Fst<W>,
 {
     fst: &'a F,
-    queue: VecDeque<(StateId, FstPath<F::W>)>,
+    queue: VecDeque<(StateId, FstPath<W>)>,
 }
 
-impl<'a, F> StructPathsIterator<'a, F>
+impl<'a, W, F> StructPathsIterator<'a, W, F>
 where
-    F: 'a + Fst,
+    W: Semiring,
+    F: 'a + Fst<W>,
 {
     pub fn new(fst: &'a F) -> Self {
         let mut queue = VecDeque::new();
@@ -46,17 +51,18 @@ where
     }
 }
 
-impl<'a, F> Iterator for StructPathsIterator<'a, F>
+impl<'a, W, F> Iterator for StructPathsIterator<'a, W, F>
 where
-    F: 'a + Fst,
+    W: Semiring,
+    F: 'a + Fst<W>,
 {
-    type Item = FstPath<F::W>;
+    type Item = FstPath<W>;
 
     fn next(&mut self) -> Option<Self::Item> {
         while !self.queue.is_empty() {
             let (state_id, mut path) = self.queue.pop_front().unwrap();
 
-            for tr in unsafe { self.fst.tr_iter_unchecked(state_id) } {
+            for tr in unsafe { self.fst.get_trs_unchecked(state_id).trs() } {
                 let mut new_path = path.clone();
                 new_path
                     .add_to_path(tr.ilabel, tr.olabel, &tr.weight)
@@ -65,7 +71,7 @@ where
             }
 
             if let Some(final_weight) = unsafe { self.fst.final_weight_unchecked(state_id) } {
-                path.add_weight(final_weight)
+                path.add_weight(&final_weight)
                     .expect("Error add_weight in PathsIterator");
                 return Some(path);
             }

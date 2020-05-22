@@ -70,14 +70,14 @@ pub enum MatchType {
 // Use this to avoid autoref
 #[derive(Clone)]
 pub enum IterItemMatcher<W: Semiring> {
-    Tr(*const Tr<W>),
+    Tr(Tr<W>),
     EpsLoop,
 }
 
 impl<W: Semiring> IterItemMatcher<W> {
     pub fn into_tr(self, state: StateId, match_type: MatchType) -> Result<Tr<W>> {
         match self {
-            IterItemMatcher::Tr(tr) => Ok(unsafe { (*tr).clone() }),
+            IterItemMatcher::Tr(tr) => Ok(tr),
             IterItemMatcher::EpsLoop => eps_loop(state, match_type),
         }
     }
@@ -97,7 +97,7 @@ pub fn eps_loop<W: Semiring>(state: StateId, match_type: MatchType) -> Result<Tr
 /// More generally, they may implement matching special labels that represent
 /// sets of labels such as sigma (all), rho (rest), or phi (fail).
 pub trait Matcher<W: Semiring>: Debug {
-    type F: ExpandedFst<W = W>;
+    type F: ExpandedFst<W>;
 
     type Iter: Iterator<Item = IterItemMatcher<W>> + Clone;
 
@@ -105,7 +105,7 @@ pub trait Matcher<W: Semiring>: Debug {
     where
         Self: std::marker::Sized;
     fn iter(&self, state: StateId, label: Label) -> Result<Self::Iter>;
-    fn final_weight(&self, state: StateId) -> Result<Option<*const W>>;
+    fn final_weight(&self, state: StateId) -> Result<Option<W>>;
     fn match_type(&self) -> MatchType;
     fn flags(&self) -> MatcherFlags;
 
@@ -115,5 +115,5 @@ pub trait Matcher<W: Semiring>: Debug {
     /// current state of the matcher invalidates the state of the matcher.
     fn priority(&self, state: StateId) -> Result<usize>;
 
-    fn fst(&self) -> Arc<Self::F>;
+    fn fst(&self) -> &Arc<Self::F>;
 }

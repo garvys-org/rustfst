@@ -1,9 +1,10 @@
-use crate::fst_traits::{ExpandedFst, Fst, TrIterator};
+use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
-use crate::StateId;
+use crate::{StateId, Trs};
 
 use crate::algorithms::tr_filters::TrFilter;
+use std::marker::PhantomData;
 use unsafe_unwrap::UnsafeUnwrap;
 
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
@@ -16,7 +17,7 @@ enum DfsStateColor {
     Black,
 }
 
-pub trait Visitor<'a, F: Fst> {
+pub trait Visitor<'a, W: Semiring, F: Fst<W>> {
     /// Invoked before DFS visit.
     fn init_visit(&mut self, fst: &'a F);
 
@@ -24,74 +25,77 @@ pub trait Visitor<'a, F: Fst> {
     fn init_state(&mut self, s: StateId, root: StateId) -> bool;
 
     /// Invoked when tree transition to white/undiscovered state examined.
-    fn tree_tr(&mut self, s: StateId, tr: &Tr<F::W>) -> bool;
+    fn tree_tr(&mut self, s: StateId, tr: &Tr<W>) -> bool;
 
     /// Invoked when back transition to grey/unfinished state examined.
-    fn back_tr(&mut self, s: StateId, tr: &Tr<F::W>) -> bool;
+    fn back_tr(&mut self, s: StateId, tr: &Tr<W>) -> bool;
 
     /// Invoked when forward or cross transition to black/finished state examined.
-    fn forward_or_cross_tr(&mut self, s: StateId, tr: &Tr<F::W>) -> bool;
+    fn forward_or_cross_tr(&mut self, s: StateId, tr: &Tr<W>) -> bool;
 
     /// Invoked when state finished ('s' is tree root, 'parent' is kNoStateId,
     /// and 'tr' is nullptr).
-    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, tr: Option<&Tr<F::W>>);
+    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, tr: Option<&Tr<W>>);
 
     /// Invoked after DFS visit.
     fn finish_visit(&mut self);
 }
 
-struct DfsState<'a, W, AI>
+struct DfsState<W, TRS>
 where
-    W: Semiring + 'a,
-    AI: Iterator<Item = &'a Tr<W>> + Clone,
+    W: Semiring,
+    TRS: Trs<W>,
 {
     state_id: StateId,
-    tr_iter: OpenFstIterator<AI>,
+    tr_iter: OpenFstIterator<W, TRS>,
+    w: PhantomData<W>,
 }
 
-impl<'a, W, AI> DfsState<'a, W, AI>
-where
-    W: Semiring + 'a,
-    AI: Iterator<Item = &'a Tr<W>> + Clone,
-{
+impl<W: Semiring, TRS: Trs<W>> DfsState<W, TRS> {
     #[inline]
-    pub fn new<F: TrIterator<'a, Iter = AI, W = W>>(fst: &'a F, s: StateId) -> Self {
+    pub fn new<F: Fst<W, TRS = TRS>>(fst: &F, s: StateId) -> Self {
         Self {
             state_id: s,
-            tr_iter: OpenFstIterator::new(unsafe { fst.tr_iter_unchecked(s) }),
+            tr_iter: OpenFstIterator::new(unsafe { fst.get_trs_unchecked(s) }),
+            w: PhantomData,
         }
     }
 }
 
-struct OpenFstIterator<I: Iterator> {
-    iter: I,
-    e: Option<I::Item>,
+struct OpenFstIterator<W: Semiring, TRS: Trs<W>> {
+    trs: TRS,
+    pos: usize,
+    w: PhantomData<W>,
 }
 
-impl<I: Iterator> OpenFstIterator<I> {
+impl<W: Semiring, TRS: Trs<W>> OpenFstIterator<W, TRS> {
     #[inline]
-    fn new(mut iter: I) -> Self {
-        let e = iter.next();
-        Self { iter, e }
+    fn new(trs: TRS) -> Self {
+        Self {
+            trs,
+            pos: 0,
+            w: PhantomData,
+        }
     }
 
     #[inline]
-    fn value(&self) -> &I::Item {
-        unsafe { self.e.as_ref().unsafe_unwrap() }
+    fn value(&self) -> &Tr<W> {
+        unsafe { self.trs.trs().get_unchecked(self.pos) }
     }
 
     #[inline]
     fn done(&self) -> bool {
-        self.e.is_none()
+        let n = self.trs.trs().len();
+        self.pos >= n
     }
 
     #[inline]
     fn next(&mut self) {
-        self.e = self.iter.next();
+        self.pos += 1;
     }
 }
 
-pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>, A: TrFilter<F::W>>(
+pub fn dfs_visit<'a, W: Semiring, F: ExpandedFst<W>, V: Visitor<'a, W, F>, A: TrFilter<W>>(
     fst: &'a F,
     visitor: &mut V,
     tr_filter: &A,
@@ -130,7 +134,7 @@ pub fn dfs_visit<'a, F: Fst + ExpandedFst, V: Visitor<'a, F>, A: TrFilter<F::W>>
                 if !state_stack.is_empty() {
                     let parent_state = unsafe { state_stack.last_mut().unsafe_unwrap() };
                     let piter = &mut parent_state.tr_iter;
-                    visitor.finish_state(s, Some(parent_state.state_id), Some(*piter.value()));
+                    visitor.finish_state(s, Some(parent_state.state_id), Some(piter.value()));
                     piter.next();
                 } else {
                     visitor.finish_state(s, None, None);

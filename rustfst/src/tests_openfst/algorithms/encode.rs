@@ -1,10 +1,11 @@
 use std::fmt::Display;
+use std::marker::PhantomData;
 
 use anyhow::{format_err, Context, Result};
 use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::{decode, encode};
+use crate::algorithms::encode::{decode, encode};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
@@ -17,34 +18,36 @@ pub struct EncodeOperationResult {
     result: String,
 }
 
-pub struct EncodeTestData<F>
+pub struct EncodeTestData<W, F>
 where
-    F: SerializableFst,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W>,
+    W: SerializableSemiring,
 {
     pub encode_labels: bool,
     pub encode_weights: bool,
     pub result: F,
+    w: PhantomData<W>,
 }
 
 impl EncodeOperationResult {
-    pub fn parse<F>(&self) -> EncodeTestData<F>
+    pub fn parse<W, F>(&self) -> EncodeTestData<W, F>
     where
-        F: SerializableFst,
-        F::W: SerializableSemiring,
+        F: SerializableFst<W>,
+        W: SerializableSemiring,
     {
         EncodeTestData {
             encode_weights: self.encode_weights,
             encode_labels: self.encode_labels,
             result: F::from_text_string(self.result.as_str()).unwrap(),
+            w: PhantomData,
         }
     }
 }
 
-pub fn test_encode_decode<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_encode_decode<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring,
 {
     for encode_test_data in &test_data.encode_decode {
         let mut fst_encoded = test_data.raw.clone();
@@ -70,12 +73,13 @@ where
     Ok(())
 }
 
-pub fn test_encode<F>(test_data: &FstTestData<F>) -> Result<()>
+pub fn test_encode<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
-    F: SerializableFst + MutableFst + Display,
-    F::W: SerializableSemiring,
+    F: SerializableFst<W> + MutableFst<W> + Display,
+    W: SerializableSemiring,
 {
     for encode_test_data in &test_data.encode {
+        // println!("Encode labels = {:?} Encode weights = {:?}", encode_test_data.encode_labels, encode_test_data.encode_weights);
         let mut fst_encoded = test_data.raw.clone();
         encode(&mut fst_encoded, encode_test_data.encode_labels, encode_test_data.encode_weights)
             .with_context(|| format_err!(
@@ -93,7 +97,14 @@ where
             encode_test_data.result,
             fst_encoded,
             "{}",
-            error_message_fst!(encode_test_data.result, fst_encoded, "Encode")
+            error_message_fst!(
+                encode_test_data.result,
+                fst_encoded,
+                format!(
+                    "Encode encode_labels = {} encode_weights = {}",
+                    encode_test_data.encode_labels, encode_test_data.encode_weights
+                )
+            )
         );
     }
     Ok(())

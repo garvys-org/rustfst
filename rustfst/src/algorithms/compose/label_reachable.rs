@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -11,9 +10,9 @@ use crate::algorithms::tr_compares::{ilabel_compare, olabel_compare};
 use crate::algorithms::{fst_convert_from_ref, tr_sort};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, MutableTrIterator};
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Label, StateId, Tr, EPS_LABEL, NO_LABEL, UNASSIGNED};
+use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL, UNASSIGNED};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelReachableData {
@@ -50,20 +49,85 @@ impl LabelReachableData {
     pub fn reach_input(&self) -> bool {
         self.reach_input
     }
+
+    pub fn relabel(&mut self, label: Label) -> Label {
+        if label == EPS_LABEL {
+            return EPS_LABEL;
+        }
+        let n = self.label2index.len();
+        *self.label2index.entry(label).or_insert_with(|| n + 1)
+    }
+
+    pub fn relabel_fst<W: Semiring, F: MutableFst<W>>(
+        &mut self,
+        fst: &mut F,
+        relabel_input: bool,
+    ) -> Result<()> {
+        for fst_data in fst.fst_iter_mut() {
+            for tr in fst_data.trs {
+                if relabel_input {
+                    tr.ilabel = self.relabel(tr.ilabel);
+                } else {
+                    tr.olabel = self.relabel(tr.olabel);
+                }
+            }
+        }
+
+        if relabel_input {
+            tr_sort(fst, ilabel_compare);
+            fst.take_input_symbols();
+        } else {
+            tr_sort(fst, olabel_compare);
+            fst.take_output_symbols();
+        }
+
+        Ok(())
+    }
+
+    // Returns relabeling pairs (cf. relabel.h::Relabel()). If avoid_collisions is
+    // true, extra pairs are added to ensure no collisions when relabeling
+    // automata that have labels unseen here.
+    pub fn relabel_pairs(&self, avoid_collisions: bool) -> Vec<(Label, Label)> {
+        let mut pairs = vec![];
+        for (key, val) in self.label2index.iter() {
+            if *val != self.final_label {
+                pairs.push((*key, *val));
+            }
+        }
+
+        if avoid_collisions {
+            for i in 1..=self.label2index.len() {
+                let it = self.label2index.get(&i);
+                if it.is_none() || it.unwrap() == &self.final_label {
+                    pairs.push((i, self.label2index.len() + 1));
+                }
+            }
+        }
+
+        pairs
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelReachable {
-    data: Arc<RefCell<LabelReachableData>>,
-    label2state: HashMap<Label, StateId>,
+    data: Arc<LabelReachableData>,
     reach_fst_input: bool,
 }
 
 impl LabelReachable {
-    pub fn new<F: Fst>(fst: &F, reach_input: bool) -> Result<Self>
-    where
-        F::W: 'static,
-    {
+    pub fn new<W: Semiring, F: Fst<W>>(fst: &F, reach_input: bool) -> Result<Self> {
+        let data = Self::compute_data(fst, reach_input)?;
+
+        Ok(Self {
+            data: Arc::new(data),
+            reach_fst_input: false,
+        })
+    }
+
+    pub fn compute_data<W: Semiring, F: Fst<W>>(
+        fst: &F,
+        reach_input: bool,
+    ) -> Result<LabelReachableData> {
         let mut fst: VectorFst<_> = fst_convert_from_ref(fst);
 
         let mut data = LabelReachableData::new(reach_input);
@@ -73,31 +137,22 @@ impl LabelReachable {
         Self::transform_fst(&mut fst, &mut data, &mut label2state);
         Self::find_intervals(&fst, nstates, &mut data, &mut label2state)?;
 
-        Ok(Self {
-            data: Arc::new(RefCell::new(data)),
-            label2state,
-            reach_fst_input: false,
-        })
+        Ok(data)
     }
 
-    pub fn new_from_data(data: Arc<RefCell<LabelReachableData>>) -> Self {
+    pub fn new_from_data(data: Arc<LabelReachableData>) -> Self {
         Self {
             data,
-            label2state: HashMap::new(),
             reach_fst_input: false,
         }
     }
 
-    pub fn data(&self) -> &Arc<RefCell<LabelReachableData>> {
+    pub fn data(&self) -> &Arc<LabelReachableData> {
         &self.data
     }
 
-    pub fn shared_data(&self) -> Arc<RefCell<LabelReachableData>> {
-        Arc::clone(&self.data)
-    }
-
     pub fn reach_input(&self) -> bool {
-        self.data.borrow().reach_input
+        self.data.reach_input
     }
 
     // Redirects labeled trs (input or output labels determined by ReachInput())
@@ -105,7 +160,7 @@ impl LabelReachable {
     // redirected via a transition labeled with kNoLabel to a new
     // kNoLabel-specific final state. Creates super-initial state for all states
     // with zero in-degree.
-    fn transform_fst<W: Semiring + 'static>(
+    fn transform_fst<W: Semiring>(
         fst: &mut VectorFst<W>,
         data: &mut LabelReachableData,
         label2state: &mut HashMap<Label, StateId>,
@@ -200,67 +255,11 @@ impl LabelReachable {
         Ok(())
     }
 
-    pub fn relabel(&self, label: Label) -> Label {
-        if label == EPS_LABEL {
-            return EPS_LABEL;
-        }
-        let mut data = self.data.borrow_mut();
-        let label2index = &mut data.label2index;
-        let n = label2index.len();
-        *label2index.entry(label).or_insert_with(|| n + 1)
-    }
-
-    pub fn relabel_fst<F: MutableFst>(&self, fst: &mut F, relabel_input: bool) -> Result<()> {
-        for fst_data in fst.fst_iter_mut() {
-            for tr in fst_data.trs {
-                if relabel_input {
-                    tr.ilabel = self.relabel(tr.ilabel);
-                } else {
-                    tr.olabel = self.relabel(tr.olabel);
-                }
-            }
-        }
-
-        if relabel_input {
-            tr_sort(fst, ilabel_compare);
-            fst.take_input_symbols();
-        } else {
-            tr_sort(fst, olabel_compare);
-            fst.take_output_symbols();
-        }
-
-        Ok(())
-    }
-
-    // Returns relabeling pairs (cf. relabel.h::Relabel()). If avoid_collisions is
-    // true, extra pairs are added to ensure no collisions when relabeling
-    // automata that have labels unseen here.
-    pub fn relabel_pairs(&self, avoid_collisions: bool) -> Vec<(Label, Label)> {
-        let mut pairs = vec![];
-        let data = self.data.borrow();
-        let label2index = data.label2index();
-        for (key, val) in label2index.iter() {
-            if *val != data.final_label() {
-                pairs.push((*key, *val));
-            }
-        }
-
-        if avoid_collisions {
-            for i in 1..=label2index.len() {
-                let it = label2index.get(&i);
-                if it.is_none() || it.unwrap() == &data.final_label() {
-                    pairs.push((i, label2index.len() + 1));
-                }
-            }
-        }
-
-        pairs
-    }
-
-    pub fn reach_init<F: ExpandedFst>(&mut self, fst: &Arc<F>, reach_input: bool) -> Result<()>
-    where
-        F::W: 'static,
-    {
+    pub fn reach_init<W: Semiring, F: ExpandedFst<W>>(
+        &mut self,
+        fst: &Arc<F>,
+        reach_input: bool,
+    ) -> Result<()> {
         self.reach_fst_input = reach_input;
         let props = fst.properties()?;
 
@@ -282,35 +281,30 @@ impl LabelReachable {
         if label == EPS_LABEL {
             return Ok(false);
         }
-        Ok(self
-            .data
-            .borrow()
-            .interval_set(current_state)?
-            .member(label))
+        Ok(self.data.interval_set(current_state)?.member(label))
     }
 
     // Can reach final state (via epsilon transitions) from this state?
     pub fn reach_final(&self, current_state: StateId) -> Result<bool> {
         Ok(self
             .data
-            .borrow()
             .interval_set(current_state)?
-            .member(self.data.borrow().final_label()))
+            .member(self.data.final_label()))
     }
 
-    pub fn reach<'a, W: Semiring + 'a>(
+    pub fn reach<'a, W: Semiring + 'a, T: Trs<W>>(
         &self,
         current_state: StateId,
-        aiter: impl Iterator<Item = &'a Tr<W>>,
+        trs: T,
         aiter_begin: usize,
         aiter_end: usize,
         compute_weight: bool,
     ) -> Result<Option<(usize, usize, W)>> {
+        let aiter = trs.trs().iter();
         let mut reach_begin = UNASSIGNED;
         let mut reach_end = UNASSIGNED;
         let mut reach_weight = W::zero();
-        let data = self.data.borrow();
-        let interval_set = data.interval_set(current_state)?;
+        let interval_set = self.data.interval_set(current_state)?;
         if 2 * (aiter_end - aiter_begin) < interval_set.len() {
             let aiter = aiter.skip(aiter_begin);
             let mut reach_label = NO_LABEL;
