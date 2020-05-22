@@ -18,6 +18,7 @@ pub mod minimize;
 pub mod project;
 pub mod properties;
 pub mod push;
+pub mod queue;
 pub mod replace;
 pub mod reverse;
 pub mod rm_epsilon;

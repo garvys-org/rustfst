@@ -940,6 +940,67 @@ void compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typenam
     do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NO_MATCH_FILTER, "no_match");
 
     do_compute_fst_compose_lookahead(raw_fst, j, fst_2);
+}
+
+template<class F>
+void compute_fst_queue(const F& raw_fst, json& j) {
+    using Weight = typename F::Weight;
+    using Arc = typename F::Arc;
+    using StateId = typename F::Arc::StateId;
+
+    fst::AutoQueue<StateId> queue(raw_fst, NULL, fst::AnyArcFilter<Arc>());
+
+    vector<bool> enqueued(raw_fst.NumStates());
+    for (int i = 0; i < raw_fst.NumStates(); i++) {
+        enqueued[i] = false;
+    }
+
+    json j2 = {};
+
+    if (raw_fst.Start() != fst::kNoStateId) {
+        queue.Enqueue(raw_fst.Start());
+        enqueued[raw_fst.Start()] = true;
+
+        {
+            json j3;
+            j3["op_type"] = "enqueue";
+            j3["state"] = raw_fst.Start();
+            j2.push_back(j3);
+        }
+
+        while (!queue.Empty()) {
+            auto state = queue.Head();
+            queue.Dequeue();
+
+            {
+                json j3;
+                j3["op_type"] = "dequeue";
+                j3["state"] = state;
+                j2.push_back(j3);
+            }
+
+
+            for (fst::ArcIterator<F> aiter(raw_fst, state); !aiter.Done(); aiter.Next()) {
+              const auto &arc = aiter.Value();
+              if (!enqueued[arc.nextstate]) {
+                enqueued[arc.nextstate] = true;
+                queue.Enqueue(arc.nextstate);
+
+                {
+                    json j3;
+                    j3["op_type"] = "enqueue";
+                    j3["state"] = arc.nextstate;
+                    j2.push_back(j3);
+                }
+
+              }
+            }
+        }
+    } else {
+        j2 = vector<int>();
+    }
+
+    j["queue"]["result"] = j2;
 
 }
 
@@ -1094,6 +1155,9 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
 
     std::cout << "ShortestPath" << std::endl;
     compute_fst_shortest_path(raw_fst, data);
+
+    std::cout << "Queue" << std::endl;
+    compute_fst_queue(raw_fst, data);
 
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;

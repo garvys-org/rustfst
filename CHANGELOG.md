@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - renamed unset_input_symbols and unset_output_symbols to take_*_symbols
 - static FST struct are now Send and Sync
 - `final_weight` method of the `CoreFst` trait now returns a copy instead of a reference.
+- Fix an issue in `SccQueue` which made the `is_empty()` call super slow. As a result, an important speed-up can be observed when running the `shortest_path` algorithm.
 
 ### Fixed
 - Fix olabel display while drawing a FST if no symbol table is provided
