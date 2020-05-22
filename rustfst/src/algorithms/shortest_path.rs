@@ -124,15 +124,15 @@ where
             "SingleShortestPath: Weight needs to have the path property and be right distributive"
         )
     }
-    while distance.len() < source {
-        distance.push(W::zero());
-        enqueued.push(false);
-        parent.push(None)
-    }
-    distance.push(W::one());
-    parent.push(None);
+    distance.resize_with(ifst.num_states(), W::zero);
+    enqueued.resize(ifst.num_states(), false);
+    parent.resize(ifst.num_states(), None);
+
+    distance[source] = W::one();
+    parent[source] = None;
+    enqueued[source] = true;
+
     queue.enqueue(source);
-    enqueued.push(true);
 
     while !queue.is_empty() {
         // Safe because non empty
@@ -150,11 +150,6 @@ where
         }
 
         for (pos, tr) in unsafe { ifst.get_trs_unchecked(s).trs().iter().enumerate() } {
-            while distance.len() <= tr.nextstate {
-                distance.push(W::zero());
-                enqueued.push(false);
-                parent.push(None)
-            }
             let nd = &mut distance[tr.nextstate];
             let weight = sd.times(&tr.weight)?;
             if *nd != nd.plus(&weight)? {
