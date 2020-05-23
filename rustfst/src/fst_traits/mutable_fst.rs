@@ -261,11 +261,6 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W
     fn pop_trs(&mut self, source: StateId) -> Result<Vec<Tr<W>>>;
     unsafe fn pop_trs_unchecked(&mut self, source: StateId) -> Vec<Tr<W>>;
 
-    /// Retrieves a mutable reference to the final weight of a state (if the state is a final one).
-    fn final_weight_mut(&mut self, state_id: StateId) -> Result<Option<&mut W>>;
-
-    unsafe fn final_weight_unchecked_mut(&mut self, state_id: StateId) -> Option<&mut W>;
-
     /// Takes the final weight out of the fst, leaving a None in its place.
     ///
     /// # Errors

@@ -79,11 +79,11 @@ where
             mapper.tr_map(tr)?;
         }
 
-        if let Some(w) = unsafe { ifst.final_weight_unchecked_mut(state) } {
+        if let Some(w) = unsafe { ifst.final_weight_unchecked(state) } {
             let mut final_tr = FinalTr {
                 ilabel: EPS_LABEL,
                 olabel: EPS_LABEL,
-                weight: w.clone(),
+                weight: w,
             };
             mapper.final_tr_map(&mut final_tr)?;
             match final_action {

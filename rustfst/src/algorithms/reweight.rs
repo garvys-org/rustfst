@@ -72,7 +72,7 @@ where
     }
 
     for state_id in 0..fst.num_states() {
-        if let Some(final_weight) = unsafe { fst.final_weight_unchecked_mut(state_id) } {
+        if let Some(mut final_weight) = unsafe { fst.final_weight_unchecked(state_id) } {
             let d_s = potentials.get(state_id).unwrap_or(&zero);
 
             match reweight_type {
@@ -86,6 +86,8 @@ where
                     final_weight.divide_assign(d_s, DivideType::DivideLeft)?;
                 }
             };
+
+            unsafe {fst.set_final_unchecked(state_id, final_weight)};
         }
     }
 

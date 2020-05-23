@@ -91,17 +91,23 @@ where
         return Ok(());
     }
     if at_final {
-        for s in 0..fst.num_states() {
-            if let Some(final_weight) = unsafe { fst.final_weight_unchecked_mut(s) } {
-                final_weight.divide_assign(&weight, DivideType::DivideRight)?;
+        unsafe {
+            for s in 0..fst.num_states() {
+                if let Some(mut final_weight) = fst.final_weight_unchecked(s){
+                    final_weight.divide_assign(&weight, DivideType::DivideRight)?;
+                    fst.set_final_unchecked(s, final_weight);
+                }
             }
         }
     } else if let Some(start) = fst.start() {
-        for tr in unsafe { fst.tr_iter_unchecked_mut(start) } {
-            tr.weight.divide_assign(&weight, DivideType::DivideLeft)?;
-        }
-        if let Some(final_weight) = unsafe { fst.final_weight_unchecked_mut(start) } {
-            final_weight.divide_assign(&weight, DivideType::DivideLeft)?;
+        unsafe {
+            for tr in fst.tr_iter_unchecked_mut(start)  {
+                tr.weight.divide_assign(&weight, DivideType::DivideLeft)?;
+            }
+            if let Some(mut final_weight) = fst.final_weight_unchecked(start) {
+                final_weight.divide_assign(&weight, DivideType::DivideLeft)?;
+                fst.set_final_unchecked(start, final_weight);
+            }
         }
     }
     Ok(())

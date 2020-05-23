@@ -239,23 +239,6 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
         Arc::make_mut(&mut trs.0).drain(..).collect()
     }
 
-    fn final_weight_mut(&mut self, state_id: StateId) -> Result<Option<&mut W>> {
-        let s = self
-            .states
-            .get_mut(state_id)
-            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
-        todo!("props");
-        Ok(s.final_weight.as_mut())
-    }
-
-    unsafe fn final_weight_unchecked_mut(&mut self, state_id: usize) -> Option<&mut W> {
-        self.states
-            .get_unchecked_mut(state_id)
-            .final_weight
-            .as_mut();
-        todo!("props")
-    }
-
     fn take_final_weight(&mut self, state_id: usize) -> Result<Option<W>> {
         let s = self
             .states
