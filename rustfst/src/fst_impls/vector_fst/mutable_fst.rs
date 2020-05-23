@@ -11,6 +11,7 @@ use crate::semirings::Semiring;
 use crate::{StateId, Tr};
 use std::slice;
 use crate::fst_properties::mutable_properties::{set_start_properties, set_final_properties, add_state_properties, delete_states_properties, delete_all_states_properties, delete_trs_properties};
+use crate::fst_properties::FstProperties;
 
 #[inline]
 fn equal_tr<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> bool {
@@ -19,13 +20,13 @@ fn equal_tr<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> bool {
 
 impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
     fn new() -> Self {
-        unimplemented!()
-        // VectorFst {
-        //     states: vec![],
-        //     start_state: None,
-        //     isymt: None,
-        //     osymt: None,
-        // }
+        VectorFst {
+            states: vec![],
+            start_state: None,
+            isymt: None,
+            osymt: None,
+            properties: FstProperties::NULL_PROPERTIES
+        }
     }
 
     fn set_start(&mut self, state_id: StateId) -> Result<()> {
@@ -196,17 +197,19 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
     }
 
     fn delete_final_weight(&mut self, source: usize) -> Result<()> {
-        self.states
-            .get_mut(source)
-            .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
-            .final_weight = None;
-        todo!("props");
+        if let Some(s) = self.states.get_mut(source) {
+            self.properties = set_final_properties(self.properties, s.final_weight.as_ref(), None);
+            s.final_weight = None;
+        } else {
+            bail!("State {:?} doesn't exist", source)
+        }
         Ok(())
     }
 
     unsafe fn delete_final_weight_unchecked(&mut self, source: usize) {
-        self.states.get_unchecked_mut(source).final_weight = None;
-        todo!("props")
+        let s = self.states.get_unchecked_mut(source);
+        self.properties = set_final_properties(self.properties, s.final_weight.as_ref(), None);
+        s.final_weight = None;
     }
 
     fn delete_trs(&mut self, source: usize) -> Result<()> {
@@ -226,14 +229,14 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
             .trs;
         let v = Arc::make_mut(&mut trs.0).drain(..).collect();
-        todo!("props");
+        self.properties = delete_trs_properties(self.properties);
         Ok(v)
     }
 
     unsafe fn pop_trs_unchecked(&mut self, source: usize) -> Vec<Tr<W>> {
-        // let trs = &mut self.states.get_unchecked_mut(source).trs;
-        // Arc::make_mut(&mut trs.0).drain(..).collect();
-        todo!("props")
+        self.properties = delete_trs_properties(self.properties);
+        let trs = &mut self.states.get_unchecked_mut(source).trs;
+        Arc::make_mut(&mut trs.0).drain(..).collect()
     }
 
     fn final_weight_mut(&mut self, state_id: StateId) -> Result<Option<&mut W>> {
@@ -250,7 +253,7 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
             .get_unchecked_mut(state_id)
             .final_weight
             .as_mut();
-        todo!("props");
+        todo!("props")
     }
 
     fn take_final_weight(&mut self, state_id: usize) -> Result<Option<W>> {
@@ -258,13 +261,15 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
             .states
             .get_mut(state_id)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
-        todo!("props");
+
+        self.properties = set_final_properties(self.properties, s.final_weight.as_ref(), None);
         Ok(s.final_weight.take())
     }
 
     unsafe fn take_final_weight_unchecked(&mut self, state_id: usize) -> Option<W> {
-        self.states.get_unchecked_mut(state_id).final_weight.take();
-        todo!("props")
+        let s = self.states.get_unchecked_mut(state_id);
+        self.properties = set_final_properties(self.properties, s.final_weight.as_ref(), None);
+        s.final_weight.take()
     }
 
     fn sort_trs_unchecked<F: Fn(&Tr<W>, &Tr<W>) -> Ordering>(&mut self, state: StateId, f: F) {
