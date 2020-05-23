@@ -93,30 +93,31 @@ impl<W: 'static + SerializableSemiring> SerializableFst<W> for VectorFst<W> {
 
         let states = vec![VectorFstState::<W>::new(); num_states];
 
-        let mut fst = VectorFst {
-            states,
-            start_state,
-            isymt: None,
-            osymt: None,
-        };
-
-        for transition in parsed_fst_text.transitions.into_iter() {
-            let weight = transition.weight.unwrap_or_else(W::one);
-            let tr = Tr::new(
-                transition.ilabel,
-                transition.olabel,
-                weight,
-                transition.nextstate,
-            );
-            fst.add_tr(transition.state, tr)?;
-        }
-
-        for final_state in parsed_fst_text.final_states.into_iter() {
-            let weight = final_state.weight.unwrap_or_else(W::one);
-            fst.set_final(final_state.state, weight)?;
-        }
-
-        Ok(fst)
+        unimplemented!()
+        // let mut fst = VectorFst {
+        //     states,
+        //     start_state,
+        //     isymt: None,
+        //     osymt: None,
+        // };
+        //
+        // for transition in parsed_fst_text.transitions.into_iter() {
+        //     let weight = transition.weight.unwrap_or_else(W::one);
+        //     let tr = Tr::new(
+        //         transition.ilabel,
+        //         transition.olabel,
+        //         weight,
+        //         transition.nextstate,
+        //     );
+        //     fst.add_tr(transition.state, tr)?;
+        // }
+        //
+        // for final_state in parsed_fst_text.final_states.into_iter() {
+        //     let weight = final_state.weight.unwrap_or_else(W::one);
+        //     fst.set_final(final_state.state, weight)?;
+        // }
+        //
+        // Ok(fst)
     }
 }
 
@@ -144,20 +145,21 @@ fn parse_vector_fst_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], V
 }
 
 fn parse_vector_fst<W: SerializableSemiring + 'static>(i: &[u8]) -> IResult<&[u8], VectorFst<W>> {
-    let (i, header) = FstHeader::parse(
-        i,
-        VECTOR_MIN_FILE_VERSION,
-        VectorFst::<W>::fst_type(),
-        Tr::<W>::tr_type(),
-    )?;
-    let (i, states) = count(parse_vector_fst_state, header.num_states as usize)(i)?;
-    Ok((
-        i,
-        VectorFst {
-            start_state: parse_start_state(header.start),
-            states,
-            isymt: header.isymt,
-            osymt: header.osymt,
-        },
-    ))
+    // let (i, header) = FstHeader::parse(
+    //     i,
+    //     VECTOR_MIN_FILE_VERSION,
+    //     VectorFst::<W>::fst_type(),
+    //     Tr::<W>::tr_type(),
+    // )?;
+    // let (i, states) = count(parse_vector_fst_state, header.num_states as usize)(i)?;
+    unimplemented!()
+    // Ok((
+    //     i,
+    //     VectorFst {
+    //         start_state: parse_start_state(header.start),
+    //         states,
+    //         isymt: header.isymt,
+    //         osymt: header.osymt,
+    //     },
+    // ))
 }

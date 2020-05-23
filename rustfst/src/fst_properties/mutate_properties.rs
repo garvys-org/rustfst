@@ -1,7 +1,7 @@
 use crate::algorithms::ProjectType;
 use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
-use crate::StateId;
+use crate::{StateId, EPS_LABEL};
 use crate::Tr;
 
 pub fn set_start_properties(inprops: FstProperties) -> FstProperties {
@@ -13,11 +13,26 @@ pub fn set_start_properties(inprops: FstProperties) -> FstProperties {
 }
 
 pub fn set_final_properties<W: Semiring>(
-    _inprops: FstProperties,
-    _old_weight: &W,
-    _new_weight: &W,
+    inprops: FstProperties,
+    old_weight: Option<&W>,
+    new_weight: Option<&W>,
 ) -> FstProperties {
-    unimplemented!()
+    let mut outprops = inprops;
+    if let Some(w) = old_weight {
+        if !w.is_one() {
+            outprops &= !FstProperties::WEIGHTED;
+        }
+    }
+
+    if let Some(w) = new_weight {
+        if !w.is_one() {
+            outprops |= FstProperties::WEIGHTED;
+            outprops &= !FstProperties::UNWEIGHTED;
+        }
+    }
+
+    outprops &= FstProperties::SET_FINAL_PROPERTIES | FstProperties::WEIGHTED | FstProperties::UNWEIGHTED;
+    outprops
 }
 
 pub fn add_state_properties(inprops: FstProperties) -> FstProperties {
@@ -25,12 +40,55 @@ pub fn add_state_properties(inprops: FstProperties) -> FstProperties {
 }
 
 pub fn add_tr_properties<W: Semiring>(
-    _inprops: FstProperties,
-    _state: StateId,
-    _old_tr: Tr<W>,
-    _new_tr: Tr<W>,
+    inprops: FstProperties,
+    state: StateId,
+    tr: &Tr<W>,
+    prev_tr: Option<&Tr<W>>,
 ) -> FstProperties {
-    unimplemented!()
+    let mut outprops = inprops;
+
+    if tr.ilabel != tr.olabel {
+        outprops |= FstProperties::NOT_ACCEPTOR;
+        outprops &= !FstProperties::ACCEPTOR;
+    }
+    if tr.ilabel == EPS_LABEL {
+        outprops |= FstProperties::I_EPSILONS;
+        outprops &= !FstProperties::NO_I_EPSILONS;
+        if tr.olabel == EPS_LABEL {
+            outprops |= FstProperties::EPSILONS;
+            outprops &= !FstProperties::NO_EPSILONS;
+        }
+    }
+    if tr.olabel == EPS_LABEL {
+        outprops |= FstProperties::O_EPSILONS;
+        outprops &= !FstProperties::NO_O_EPSILONS;
+    }
+    if let Some(prev_tr) = prev_tr {
+        if prev_tr.ilabel > tr.ilabel {
+            outprops |= FstProperties::NOT_I_LABEL_SORTED;
+            outprops &= !FstProperties::I_LABEL_SORTED;
+        }
+        if prev_tr.olabel > tr.olabel {
+            outprops |= FstProperties::NOT_O_LABEL_SORTED;
+            outprops &= !FstProperties::O_LABEL_SORTED;
+        }
+    }
+    if !tr.weight.is_zero() && !tr.weight.is_one() {
+            outprops |= FstProperties::WEIGHTED;
+            outprops &= !FstProperties::UNWEIGHTED;
+    }
+    if tr.nextstate <= state {
+        outprops |= FstProperties::NOT_TOP_SORTED;
+        outprops &= FstProperties::TOP_SORTED;
+    }
+    outprops &= FstProperties::ADD_ARC_PROPERTIES | FstProperties::ACCEPTOR | FstProperties::NO_EPSILONS | FstProperties::NO_I_EPSILONS | FstProperties::NO_O_EPSILONS |
+        FstProperties::I_LABEL_SORTED | FstProperties::O_LABEL_SORTED | FstProperties::UNWEIGHTED | FstProperties::TOP_SORTED;
+
+    if outprops.contains(FstProperties::TOP_SORTED) {
+        outprops |= FstProperties::ACYCLIC | FstProperties::INITIAL_ACYCLIC;
+    }
+
+    outprops
 }
 
 pub fn delete_states_properties(inprops: FstProperties) -> FstProperties {
@@ -38,7 +96,7 @@ pub fn delete_states_properties(inprops: FstProperties) -> FstProperties {
 }
 
 pub fn delete_all_states_properties(_inprops: FstProperties) -> FstProperties {
-    unimplemented!()
+    FstProperties::NULL_PROPERTIES
 }
 
 pub fn delete_trs_properties(inprops: FstProperties) -> FstProperties {

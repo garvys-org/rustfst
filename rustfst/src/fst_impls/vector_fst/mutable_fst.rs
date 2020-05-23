@@ -10,6 +10,7 @@ use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr};
 use std::slice;
+use crate::fst_properties::mutable_properties::{set_start_properties, set_final_properties, add_state_properties, delete_states_properties, delete_all_states_properties, delete_trs_properties};
 
 #[inline]
 fn equal_tr<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> bool {
@@ -18,12 +19,13 @@ fn equal_tr<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> bool {
 
 impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
     fn new() -> Self {
-        VectorFst {
-            states: vec![],
-            start_state: None,
-            isymt: None,
-            osymt: None,
-        }
+        unimplemented!()
+        // VectorFst {
+        //     states: vec![],
+        //     start_state: None,
+        //     isymt: None,
+        //     osymt: None,
+        // }
     }
 
     fn set_start(&mut self, state_id: StateId) -> Result<()> {
@@ -33,16 +35,20 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
             state_id
         );
         self.start_state = Some(state_id);
+        self.properties = set_start_properties(self.properties);
         Ok(())
     }
 
     unsafe fn set_start_unchecked(&mut self, state_id: usize) {
         self.start_state = Some(state_id);
+        self.properties = set_start_properties(self.properties);
     }
 
     fn set_final<S: Into<W>>(&mut self, state_id: StateId, final_weight: S) -> Result<()> {
         if let Some(state) = self.states.get_mut(state_id) {
-            state.final_weight = Some(final_weight.into());
+            let new_final_weight = final_weight.into();
+            self.properties = set_final_properties(self.properties, state.final_weight.as_ref(), Some(&new_final_weight));
+            state.final_weight = Some(new_final_weight);
             Ok(())
         } else {
             bail!("Stateid {:?} doesn't exist", state_id);
@@ -50,18 +56,22 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
     }
 
     unsafe fn set_final_unchecked<S: Into<W>>(&mut self, state_id: usize, final_weight: S) {
-        self.states.get_unchecked_mut(state_id).final_weight = Some(final_weight.into());
+        let new_final_weight = final_weight.into();
+        self.properties = set_final_properties(self.properties, self.states.get_unchecked_mut(state_id).final_weight.as_ref(), Some(&new_final_weight));
+        self.states.get_unchecked_mut(state_id).final_weight = Some(new_final_weight);
     }
 
     fn add_state(&mut self) -> StateId {
         let id = self.states.len();
         self.states.insert(id, VectorFstState::new());
+        self.properties = add_state_properties(self.properties);
         id
     }
 
     fn add_states(&mut self, n: usize) {
         let len = self.states.len();
         self.states.resize_with(len + n, VectorFstState::new);
+        self.properties = add_state_properties(self.properties);
     }
 
     fn tr_iter_mut(&mut self, state_id: StateId) -> Result<slice::IterMut<Tr<W>>> {
@@ -70,6 +80,7 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
             .get_mut(state_id)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
         let trs = Arc::make_mut(&mut state.trs.0);
+        todo!("props");
         Ok(trs.iter_mut())
     }
 
@@ -77,6 +88,7 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
     unsafe fn tr_iter_unchecked_mut(&mut self, state_id: usize) -> slice::IterMut<Tr<W>> {
         let state = self.states.get_unchecked_mut(state_id);
         let trs = Arc::make_mut(&mut state.trs.0);
+        todo!("props");
         trs.iter_mut()
     }
 
@@ -89,6 +101,7 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
             "State id {:?} doesn't exist",
             state_to_remove
         );
+        self.properties = delete_states_properties(self.properties);
         let v = vec![state_to_remove];
         self.del_states(v.into_iter())
     }
@@ -138,6 +151,8 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
             }
         }
 
+        self.properties = delete_states_properties(self.properties);
+
         Ok(())
     }
 
@@ -147,6 +162,8 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
 
         // Remove all the states and thus the trs
         self.states.clear();
+
+        self.properties = delete_all_states_properties(self.properties);
     }
 
     unsafe fn del_trs_id_sorted_unchecked(&mut self, state: usize, to_del: &Vec<usize>) {
@@ -154,6 +171,7 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
         for i in to_del.iter().rev() {
             trs.remove(*i);
         }
+        todo!("props")
     }
 
     fn add_tr(&mut self, source: StateId, tr: Tr<W>) -> Result<()> {
@@ -162,16 +180,19 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
             .trs
             .push(tr);
+        self.update_properties_after_add_tr(source);
         Ok(())
     }
 
     unsafe fn add_tr_unchecked(&mut self, source: usize, tr: Tr<W>) {
-        self.states.get_unchecked_mut(source).trs.push(tr)
+        self.states.get_unchecked_mut(source).trs.push(tr);
+        self.update_properties_after_add_tr(source);
     }
 
     unsafe fn set_trs_unchecked(&mut self, source: usize, trs: Vec<Tr<W>>) {
         let trs_inside = &mut self.states.get_unchecked_mut(source).trs;
         *Arc::make_mut(&mut trs_inside.0) = trs;
+        todo!("props");
     }
 
     fn delete_final_weight(&mut self, source: usize) -> Result<()> {
@@ -179,11 +200,13 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
             .get_mut(source)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
             .final_weight = None;
+        todo!("props");
         Ok(())
     }
 
     unsafe fn delete_final_weight_unchecked(&mut self, source: usize) {
         self.states.get_unchecked_mut(source).final_weight = None;
+        todo!("props")
     }
 
     fn delete_trs(&mut self, source: usize) -> Result<()> {
@@ -192,6 +215,7 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
             .trs
             .clear();
+        self.properties = delete_trs_properties(self.properties);
         Ok(())
     }
 
@@ -202,12 +226,14 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
             .trs;
         let v = Arc::make_mut(&mut trs.0).drain(..).collect();
+        todo!("props");
         Ok(v)
     }
 
     unsafe fn pop_trs_unchecked(&mut self, source: usize) -> Vec<Tr<W>> {
-        let trs = &mut self.states.get_unchecked_mut(source).trs;
-        Arc::make_mut(&mut trs.0).drain(..).collect()
+        // let trs = &mut self.states.get_unchecked_mut(source).trs;
+        // Arc::make_mut(&mut trs.0).drain(..).collect();
+        todo!("props")
     }
 
     fn final_weight_mut(&mut self, state_id: StateId) -> Result<Option<&mut W>> {
@@ -215,6 +241,7 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
             .states
             .get_mut(state_id)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
+        todo!("props");
         Ok(s.final_weight.as_mut())
     }
 
@@ -222,7 +249,8 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
         self.states
             .get_unchecked_mut(state_id)
             .final_weight
-            .as_mut()
+            .as_mut();
+        todo!("props");
     }
 
     fn take_final_weight(&mut self, state_id: usize) -> Result<Option<W>> {
@@ -230,17 +258,20 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
             .states
             .get_mut(state_id)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
+        todo!("props");
         Ok(s.final_weight.take())
     }
 
     unsafe fn take_final_weight_unchecked(&mut self, state_id: usize) -> Option<W> {
-        self.states.get_unchecked_mut(state_id).final_weight.take()
+        self.states.get_unchecked_mut(state_id).final_weight.take();
+        todo!("props")
     }
 
     fn sort_trs_unchecked<F: Fn(&Tr<W>, &Tr<W>) -> Ordering>(&mut self, state: StateId, f: F) {
         unsafe {
             let trs = &mut self.states.get_unchecked_mut(state).trs;
-            Arc::make_mut(&mut trs.0).sort_by(f)
+            Arc::make_mut(&mut trs.0).sort_by(f);
+            todo!("props")
         }
     }
 
@@ -249,6 +280,7 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
         let trs_vec = Arc::make_mut(&mut trs.0);
         trs_vec.sort_by(tr_compare);
         trs_vec.dedup();
+        todo!("props")
     }
 
     unsafe fn sum_trs_unchecked(&mut self, state: usize) {
@@ -270,5 +302,6 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
         }
         trs_vec.truncate(n_trs);
         // Truncate doesn't modify the capacity of the vector. Maybe a shrink_to_fit ?
+        todo!("props")
     }
 }

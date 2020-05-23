@@ -1,10 +1,12 @@
 use std::sync::Arc;
 
-use crate::algorithms::tr_filters::TrFilter;
+use crate::{StateId, TrsVec, Trs};
 use crate::algorithms::tr_filters::{InputEpsilonTrFilter, OutputEpsilonTrFilter};
+use crate::algorithms::tr_filters::TrFilter;
+use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
 use crate::symbol_table::SymbolTable;
-use crate::{StateId, TrsVec};
+use crate::fst_properties::mutable_properties::add_tr_properties;
 
 /// Simple concrete, mutable FST whose states and trs are stored in standard vectors.
 ///
@@ -16,6 +18,7 @@ pub struct VectorFst<W: Semiring> {
     pub(crate) start_state: Option<StateId>,
     pub(crate) isymt: Option<Arc<SymbolTable>>,
     pub(crate) osymt: Option<Arc<SymbolTable>>,
+    pub(crate) properties: FstProperties
 }
 
 // In my opinion, it is not a good idea to store values like num_trs, num_input_epsilons
@@ -49,5 +52,37 @@ impl<W: Semiring> VectorFstState<W> {
     pub fn num_output_epsilons(&self) -> usize {
         let filter = OutputEpsilonTrFilter {};
         self.trs.iter().filter(|v| filter.keep(v)).count()
+    }
+}
+
+impl<W: Semiring> VectorFst<W> {
+    pub fn proto_properties(&self) -> FstProperties {
+        self.properties
+    }
+
+    pub fn proto_properties_2(&self, mask: FstProperties) -> FstProperties {
+        self.properties & mask
+    }
+
+    pub fn proto_set_properties(&mut self, props: FstProperties) {
+        self.properties |= props;
+    }
+
+    pub fn proto_set_properties_2(&mut self, props: FstProperties, mask: FstProperties) {
+        self.properties &= !mask;
+        self.properties |= props | mask;
+    }
+
+    pub fn update_properties_after_add_tr(&mut self, state: StateId) {
+        let vector_state = unsafe {self.states.get_unchecked(state)};
+
+        // Safe because at least one Tr has been added
+        let new_tr = vector_state.trs.last().unwrap();
+        let old_tr = if vector_state.trs.trs().len() > 1 {
+            Some(&vector_state.trs.trs()[vector_state.trs.trs().len()-2])
+        } else {
+            None
+        };
+        self.properties = add_tr_properties(self.properties, state, new_tr, old_tr);
     }
 }
