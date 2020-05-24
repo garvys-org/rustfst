@@ -95,8 +95,8 @@ pub fn delete_states_properties(inprops: FstProperties) -> FstProperties {
     inprops & FstProperties::DELETE_STATES_PROPERTIES
 }
 
-pub fn delete_all_states_properties(static_props: FstProperties) -> FstProperties {
-    FstProperties::NULL_PROPERTIES | static_props
+pub fn delete_all_states_properties() -> FstProperties {
+    FstProperties::NULL_PROPERTIES
 }
 
 pub fn delete_trs_properties(inprops: FstProperties) -> FstProperties {

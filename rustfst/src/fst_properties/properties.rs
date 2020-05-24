@@ -2,6 +2,9 @@ use std::ops::{Shl, Shr};
 
 use bitflags::bitflags;
 
+pub(crate) const EXPANDED : u64 = 0x0000000000000001;
+pub(crate) const MUTABLE : u64 = 0x0000000000000002;
+
 bitflags! {
     /// The property bits here assert facts about an FST. If individual bits are
     /// added, then the composite fst_properties below, the property functions and
@@ -14,9 +17,6 @@ bitflags! {
     /// individual positive and negative bit pairs should be adjacent with the
     /// positive bit at an odd and lower position.
     pub struct FstProperties: u64 {
-        const EXPANDED = 0x0000000000000001;
-        const MUTABLE = 0x0000000000000002;
-
         /// ilabel == olabel for each transition.
         const ACCEPTOR = 0x0000000000010000;
         /// ilabel != olabel for some transition.
@@ -288,9 +288,13 @@ bitflags! {
             Self::ACCESSIBLE.bits | Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits |
             Self::STRING.bits | Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
 
-        const POS_PROPERTIES = 0b0101_0101_0101_0101_0101_0101_0101_0101;
-        const NEG_PROPERTIES = Self::POS_PROPERTIES.bits << 1;
-        const ALL_PROPERTIES = Self::POS_PROPERTIES.bits | Self::NEG_PROPERTIES.bits;
+        // Binary properties are not stored here so should be useless.
+        const BINARY_PROPERTIES = 0x0000000000000007;
+        const TRINARY_PROPERTIES = 0x0000ffffffff0000;
+
+        const POS_TRINARY_PROPERTIES = Self::TRINARY_PROPERTIES.bits | 0x5555555555555555;
+        const NEG_TRINARY_PROPERTIES = Self::TRINARY_PROPERTIES.bits | 0xaaaaaaaaaaaaaaaa;
+        const ALL_PROPERTIES = Self::BINARY_PROPERTIES.bits | Self::TRINARY_PROPERTIES.bits;
     }
 
 }

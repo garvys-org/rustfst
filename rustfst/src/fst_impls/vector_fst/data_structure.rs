@@ -7,6 +7,7 @@ use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
 use crate::symbol_table::SymbolTable;
 use crate::fst_properties::mutable_properties::add_tr_properties;
+use crate::fst_properties::properties::{MUTABLE, EXPANDED};
 
 /// Simple concrete, mutable FST whose states and trs are stored in standard vectors.
 ///
@@ -86,7 +87,7 @@ impl<W: Semiring> VectorFst<W> {
         self.properties = add_tr_properties(self.properties, state, new_tr, old_tr);
     }
 
-    pub fn static_properties() -> FstProperties {
-        FstProperties::EXPANDED | FstProperties::MUTABLE
+    pub fn static_properties() -> u64 {
+        EXPANDED | MUTABLE
     }
 }

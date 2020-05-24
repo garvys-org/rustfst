@@ -61,7 +61,8 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
             version: 2i32,
             // TODO: Set flags if the content is aligned
             flags,
-            properties: self.properties.bits(),
+            // Static properties are added to the property bits to be compliant with OpenFst format.
+            properties: self.properties.bits() | VectorFst::<W>::static_properties(),
             start: self.start_state.map(|v| v as i64).unwrap_or(-1),
             num_states: self.num_states() as i64,
             num_trs: num_trs as i64,
@@ -99,7 +100,7 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
             isymt: None,
             osymt: None,
             // To check, not sure about that one. Shouldn't we compute all the props ?
-            properties: VectorFst::<W>::static_properties()
+            properties: FstProperties::empty()
         };
 
         for transition in parsed_fst_text.transitions.into_iter() {
