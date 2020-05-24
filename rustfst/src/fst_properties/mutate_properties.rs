@@ -1,11 +1,11 @@
 use crate::algorithms::ProjectType;
 use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
-use crate::{StateId, EPS_LABEL};
 use crate::Tr;
+use crate::{StateId, EPS_LABEL};
 
 pub fn set_start_properties(inprops: FstProperties) -> FstProperties {
-    let mut outprops = inprops & FstProperties::SET_START_PROPERTIES;
+    let mut outprops = inprops & FstProperties::set_start_properties();
     if inprops.contains(FstProperties::ACYCLIC) {
         outprops |= FstProperties::INITIAL_ACYCLIC;
     }
@@ -31,12 +31,12 @@ pub fn set_final_properties<W: Semiring>(
         }
     }
 
-    outprops &= FstProperties::SET_FINAL_PROPERTIES | FstProperties::WEIGHTED | FstProperties::UNWEIGHTED;
+    outprops &= FstProperties::set_final_properties() | FstProperties::WEIGHTED | FstProperties::UNWEIGHTED;
     outprops
 }
 
 pub fn add_state_properties(inprops: FstProperties) -> FstProperties {
-    inprops & FstProperties::ADD_STATE_PROPERTIES
+    inprops & FstProperties::add_state_properties()
 }
 
 pub fn add_tr_properties<W: Semiring>(
@@ -74,15 +74,22 @@ pub fn add_tr_properties<W: Semiring>(
         }
     }
     if !tr.weight.is_zero() && !tr.weight.is_one() {
-            outprops |= FstProperties::WEIGHTED;
-            outprops &= !FstProperties::UNWEIGHTED;
+        outprops |= FstProperties::WEIGHTED;
+        outprops &= !FstProperties::UNWEIGHTED;
     }
     if tr.nextstate <= state {
         outprops |= FstProperties::NOT_TOP_SORTED;
         outprops &= FstProperties::TOP_SORTED;
     }
-    outprops &= FstProperties::ADD_ARC_PROPERTIES | FstProperties::ACCEPTOR | FstProperties::NO_EPSILONS | FstProperties::NO_I_EPSILONS | FstProperties::NO_O_EPSILONS |
-        FstProperties::I_LABEL_SORTED | FstProperties::O_LABEL_SORTED | FstProperties::UNWEIGHTED | FstProperties::TOP_SORTED;
+    outprops &= FstProperties::add_arc_properties()
+        | FstProperties::ACCEPTOR
+        | FstProperties::NO_EPSILONS
+        | FstProperties::NO_I_EPSILONS
+        | FstProperties::NO_O_EPSILONS
+        | FstProperties::I_LABEL_SORTED
+        | FstProperties::O_LABEL_SORTED
+        | FstProperties::UNWEIGHTED
+        | FstProperties::TOP_SORTED;
 
     if outprops.contains(FstProperties::TOP_SORTED) {
         outprops |= FstProperties::ACYCLIC | FstProperties::INITIAL_ACYCLIC;
@@ -92,15 +99,15 @@ pub fn add_tr_properties<W: Semiring>(
 }
 
 pub fn delete_states_properties(inprops: FstProperties) -> FstProperties {
-    inprops & FstProperties::DELETE_STATES_PROPERTIES
+    inprops & FstProperties::delete_states_properties()
 }
 
 pub fn delete_all_states_properties() -> FstProperties {
-    FstProperties::NULL_PROPERTIES
+    FstProperties::null_properties()
 }
 
 pub fn delete_trs_properties(inprops: FstProperties) -> FstProperties {
-    inprops & FstProperties::DELETE_ARCS_PROPERTIES
+    inprops & FstProperties::delete_arcs_properties()
 }
 
 pub fn closure_properties(_inprops: FstProperties, _star: bool) -> FstProperties {

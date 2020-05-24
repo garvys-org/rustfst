@@ -87,7 +87,7 @@ where
                 }
             };
 
-            unsafe {fst.set_final_unchecked(state_id, final_weight)};
+            unsafe { fst.set_final_unchecked(state_id, final_weight) };
         }
     }
 

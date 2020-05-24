@@ -5,13 +5,16 @@ use anyhow::Result;
 
 use crate::algorithms::tr_unique::tr_compare;
 use crate::fst_impls::vector_fst::{VectorFst, VectorFstState};
+use crate::fst_properties::mutable_properties::{
+    add_state_properties, delete_all_states_properties, delete_states_properties,
+    delete_trs_properties, set_final_properties, set_start_properties,
+};
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::CoreFst;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr};
 use std::slice;
-use crate::fst_properties::mutable_properties::{set_start_properties, set_final_properties, add_state_properties, delete_states_properties, delete_all_states_properties, delete_trs_properties};
-use crate::fst_properties::FstProperties;
 
 #[inline]
 fn equal_tr<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> bool {
@@ -25,7 +28,7 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
             start_state: None,
             isymt: None,
             osymt: None,
-            properties: FstProperties::NULL_PROPERTIES
+            properties: FstProperties::null_properties(),
         }
     }
 
@@ -48,7 +51,11 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
     fn set_final<S: Into<W>>(&mut self, state_id: StateId, final_weight: S) -> Result<()> {
         if let Some(state) = self.states.get_mut(state_id) {
             let new_final_weight = final_weight.into();
-            self.properties = set_final_properties(self.properties, state.final_weight.as_ref(), Some(&new_final_weight));
+            self.properties = set_final_properties(
+                self.properties,
+                state.final_weight.as_ref(),
+                Some(&new_final_weight),
+            );
             state.final_weight = Some(new_final_weight);
             Ok(())
         } else {
@@ -58,7 +65,14 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
 
     unsafe fn set_final_unchecked<S: Into<W>>(&mut self, state_id: usize, final_weight: S) {
         let new_final_weight = final_weight.into();
-        self.properties = set_final_properties(self.properties, self.states.get_unchecked_mut(state_id).final_weight.as_ref(), Some(&new_final_weight));
+        self.properties = set_final_properties(
+            self.properties,
+            self.states
+                .get_unchecked_mut(state_id)
+                .final_weight
+                .as_ref(),
+            Some(&new_final_weight),
+        );
         self.states.get_unchecked_mut(state_id).final_weight = Some(new_final_weight);
     }
 

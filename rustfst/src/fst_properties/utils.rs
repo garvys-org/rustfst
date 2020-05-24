@@ -2,9 +2,10 @@ use crate::fst_properties::FstProperties;
 
 /// Both bits are set iff one bit is set.
 pub fn known_properties(props: FstProperties) -> FstProperties {
-    props
-        | ((props & FstProperties::POS_TRINARY_PROPERTIES) << 1)
-        | ((props & FstProperties::NEG_TRINARY_PROPERTIES) >> 1)
+    FstProperties::binary_properties()
+        | (props & FstProperties::trinary_properties())
+        | ((props & FstProperties::pos_trinary_properties()) << 1)
+        | ((props & FstProperties::neg_trinary_properties()) >> 1)
 }
 
 /// Tests compatibility between two sets of properties.

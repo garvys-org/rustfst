@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
-use crate::{StateId, TrsVec, Trs};
-use crate::algorithms::tr_filters::{InputEpsilonTrFilter, OutputEpsilonTrFilter};
 use crate::algorithms::tr_filters::TrFilter;
+use crate::algorithms::tr_filters::{InputEpsilonTrFilter, OutputEpsilonTrFilter};
+use crate::fst_properties::mutable_properties::add_tr_properties;
+use crate::fst_properties::properties::{EXPANDED, MUTABLE};
 use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
 use crate::symbol_table::SymbolTable;
-use crate::fst_properties::mutable_properties::add_tr_properties;
-use crate::fst_properties::properties::{MUTABLE, EXPANDED};
+use crate::{StateId, Trs, TrsVec};
 
 /// Simple concrete, mutable FST whose states and trs are stored in standard vectors.
 ///
@@ -19,7 +19,7 @@ pub struct VectorFst<W: Semiring> {
     pub(crate) start_state: Option<StateId>,
     pub(crate) isymt: Option<Arc<SymbolTable>>,
     pub(crate) osymt: Option<Arc<SymbolTable>>,
-    pub(crate) properties: FstProperties
+    pub(crate) properties: FstProperties,
 }
 
 // In my opinion, it is not a good idea to store values like num_trs, num_input_epsilons
@@ -75,12 +75,12 @@ impl<W: Semiring> VectorFst<W> {
     }
 
     pub fn update_properties_after_add_tr(&mut self, state: StateId) {
-        let vector_state = unsafe {self.states.get_unchecked(state)};
+        let vector_state = unsafe { self.states.get_unchecked(state) };
 
         // Safe because at least one Tr has been added
         let new_tr = vector_state.trs.last().unwrap();
         let old_tr = if vector_state.trs.trs().len() > 1 {
-            Some(&vector_state.trs.trs()[vector_state.trs.trs().len()-2])
+            Some(&vector_state.trs.trs()[vector_state.trs.trs().len() - 2])
         } else {
             None
         };

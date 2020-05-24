@@ -93,7 +93,7 @@ where
     if at_final {
         unsafe {
             for s in 0..fst.num_states() {
-                if let Some(mut final_weight) = fst.final_weight_unchecked(s){
+                if let Some(mut final_weight) = fst.final_weight_unchecked(s) {
                     final_weight.divide_assign(&weight, DivideType::DivideRight)?;
                     fst.set_final_unchecked(s, final_weight);
                 }
@@ -101,7 +101,7 @@ where
         }
     } else if let Some(start) = fst.start() {
         unsafe {
-            for tr in fst.tr_iter_unchecked_mut(start)  {
+            for tr in fst.tr_iter_unchecked_mut(start) {
                 tr.weight.divide_assign(&weight, DivideType::DivideLeft)?;
             }
             if let Some(mut final_weight) = fst.final_weight_unchecked(start) {

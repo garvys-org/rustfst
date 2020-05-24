@@ -27,7 +27,7 @@ pub fn condense<W: Semiring, FI: Fst<W> + ExpandedFst<W>, FO: MutableFst<W>>(
                     ofst.set_start_unchecked(c);
                 }
                 if let Some(final_weight) = ifst.final_weight_unchecked(s) {
-                    let final_weight_ofst= match ofst.final_weight_unchecked(c) {
+                    let final_weight_ofst = match ofst.final_weight_unchecked(c) {
                         Some(w) => w.plus(final_weight)?,
                         None => final_weight,
                     };

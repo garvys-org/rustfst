@@ -1,24 +1,24 @@
-use std::fs::{File, read};
+use std::fs::{read, File};
 use std::io::BufWriter;
 use std::path::Path;
 use std::sync::Arc;
 
 use anyhow::Context;
 use anyhow::Result;
-use nom::IResult;
 use nom::multi::count;
 use nom::number::complete::le_i64;
+use nom::IResult;
 
-use crate::{Tr, Trs, TrsVec};
 use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, SerializableFst};
-use crate::parsers::bin_fst::fst_header::{FST_MAGIC_NUMBER, FstFlags, FstHeader, OpenFstString};
+use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FST_MAGIC_NUMBER};
 use crate::parsers::bin_fst::utils_parsing::{parse_final_weight, parse_fst_tr, parse_start_state};
 use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64};
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::SerializableSemiring;
-use crate::fst_properties::FstProperties;
+use crate::{Tr, Trs, TrsVec};
 
 impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
     fn fst_type() -> String {
@@ -100,7 +100,7 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
             isymt: None,
             osymt: None,
             // To check, not sure about that one. Shouldn't we compute all the props ?
-            properties: FstProperties::empty()
+            properties: FstProperties::empty(),
         };
 
         for transition in parsed_fst_text.transitions.into_iter() {
@@ -161,7 +161,7 @@ fn parse_vector_fst<W: SerializableSemiring + 'static>(i: &[u8]) -> IResult<&[u8
             states,
             isymt: header.isymt,
             osymt: header.osymt,
-            properties: FstProperties::from_bits_truncate(header.properties)
+            properties: FstProperties::from_bits_truncate(header.properties),
         },
     ))
 }

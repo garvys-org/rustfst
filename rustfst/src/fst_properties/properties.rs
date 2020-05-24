@@ -2,8 +2,8 @@ use std::ops::{Shl, Shr};
 
 use bitflags::bitflags;
 
-pub(crate) const EXPANDED : u64 = 0x0000000000000001;
-pub(crate) const MUTABLE : u64 = 0x0000000000000002;
+pub(crate) const EXPANDED: u64 = 0x0000000000000001;
+pub(crate) const MUTABLE: u64 = 0x0000000000000002;
 
 bitflags! {
     /// The property bits here assert facts about an FST. If individual bits are
@@ -100,203 +100,476 @@ bitflags! {
 
         /// Only unweighted cycles.
         const UNWEIGHTED_CYCLES = 0x0000800000000000;
-
-        /// Properties of an empty machine.
-        const NULL_PROPERTIES =
-            Self::ACCEPTOR.bits | Self::I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
-            Self::NO_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::NO_O_EPSILONS.bits |
-            Self::I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits | Self::UNWEIGHTED.bits |
-            Self::ACYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits |
-            Self::ACCESSIBLE.bits | Self::COACCESSIBLE.bits | Self::STRING.bits |
-            Self::UNWEIGHTED_CYCLES.bits;
-
-        /// Properties that are preserved when an FST is copied.
-        const COPY_PROPERTIES =
-            Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
-            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::NO_EPSILONS.bits |
-            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits |
-            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits |
-            Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits |
-            Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits |
-            Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits |
-            Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits | Self::NOT_ACCESSIBLE.bits |
-            Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits | Self::STRING.bits |
-            Self::NOT_STRING.bits | Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
-
-        /// Properties that are intrinsic to the FST.
-        const INTRINSIC_PROPERTIES =
-            Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
-            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::NO_EPSILONS.bits |
-            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits |
-            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits |
-            Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits |
-            Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits |
-            Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits |
-            Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits | Self::NOT_ACCESSIBLE.bits |
-            Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits | Self::STRING.bits |
-            Self::NOT_STRING.bits | Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
-
-        /// Properties that are preserved when an FST start state is set.
-        const SET_START_PROPERTIES =
-            Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
-            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::NO_EPSILONS.bits |
-            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits |
-            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits |
-            Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits |
-            Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::TOP_SORTED.bits |
-            Self::NOT_TOP_SORTED.bits | Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits |
-            Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
-
-        /// Properties that are preserved when an FST final weight is set.
-        const SET_FINAL_PROPERTIES =
-            Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
-            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::NO_EPSILONS.bits |
-            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits |
-            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits |
-            Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::CYCLIC.bits |
-            Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits |
-            Self::TOP_SORTED.bits | Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits |
-            Self::NOT_ACCESSIBLE.bits | Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
-
-        /// Properties that are preserved when an FST state is added.
-        const ADD_STATE_PROPERTIES =
-            Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
-            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::NO_EPSILONS.bits |
-            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits |
-            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits |
-            Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits |
-            Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits |
-            Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits |
-            Self::NOT_TOP_SORTED.bits | Self::NOT_ACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits |
-            Self::NOT_STRING.bits | Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
-
-        /// Properties that are preserved when an FST transition is added.
-        const ADD_ARC_PROPERTIES =
-            Self::NOT_ACCEPTOR.bits | Self::NOT_I_DETERMINISTIC.bits |
-            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::I_EPSILONS.bits |
-            Self::O_EPSILONS.bits | Self::NOT_I_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits |
-            Self::WEIGHTED.bits | Self::CYCLIC.bits | Self::INITIAL_CYCLIC.bits |
-            Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits | Self::COACCESSIBLE.bits |
-            Self::WEIGHTED_CYCLES.bits;
-
-        /// Properties that are preserved when an FST transition is set.
-        const SET_ARC_PROPERTIES = 0b0;
-
-        /// Properties that are preserved when FST states are deleted.
-        const DELETE_STATES_PROPERTIES =
-            Self::ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::O_DETERMINISTIC.bits | Self::NO_EPSILONS.bits | Self::NO_I_EPSILONS.bits |
-            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits |
-            Self::UNWEIGHTED.bits | Self::ACYCLIC.bits | Self::INITIAL_ACYCLIC.bits |
-            Self::TOP_SORTED.bits | Self::UNWEIGHTED_CYCLES.bits;
-
-        /// Properties that are preserved when FST trs are deleted.
-        const DELETE_ARCS_PROPERTIES =
-            Self::ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::O_DETERMINISTIC.bits | Self::NO_EPSILONS.bits | Self::NO_I_EPSILONS.bits |
-            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits |
-            Self::UNWEIGHTED.bits | Self::ACYCLIC.bits | Self::INITIAL_ACYCLIC.bits |
-            Self::TOP_SORTED.bits | Self::NOT_ACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits |
-            Self::UNWEIGHTED_CYCLES.bits;
-
-        /// Properties that are preserved when an FST's states are reordered.
-        const STATESORT_PROPERTIES =
-            Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
-            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::NO_EPSILONS.bits |
-            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits |
-            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits |
-            Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits |
-            Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits |
-            Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::ACCESSIBLE.bits |
-            Self::NOT_ACCESSIBLE.bits | Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits |
-            Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
-
-        /// Properties that are preserved when an FST's trs are reordered.
-        const ARCSORT_PROPERTIES =
-            Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
-            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::NO_EPSILONS.bits |
-            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits |
-            Self::NO_O_EPSILONS.bits | Self::WEIGHTED.bits | Self::UNWEIGHTED.bits |
-            Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits |
-            Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits | Self::NOT_TOP_SORTED.bits |
-            Self::ACCESSIBLE.bits | Self::NOT_ACCESSIBLE.bits | Self::COACCESSIBLE.bits |
-            Self::NOT_COACCESSIBLE.bits | Self::STRING.bits | Self::NOT_STRING.bits |
-            Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
-
-        /// Properties that are preserved when an FST's input labels are changed.
-        const I_LABEL_INVARIANT_PROPERTIES =
-            Self::O_DETERMINISTIC.bits | Self::NOT_O_DETERMINISTIC.bits |
-            Self::O_EPSILONS.bits | Self::NO_O_EPSILONS.bits | Self::O_LABEL_SORTED.bits |
-            Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits | Self::UNWEIGHTED.bits |
-            Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits |
-            Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits | Self::NOT_TOP_SORTED.bits |
-            Self::ACCESSIBLE.bits | Self::NOT_ACCESSIBLE.bits | Self::COACCESSIBLE.bits |
-            Self::NOT_COACCESSIBLE.bits | Self::STRING.bits | Self::NOT_STRING.bits |
-            Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
-
-        /// Properties that are preserved when an FST's output labels are changed.
-        const O_LABEL_INVARIANT_PROPERTIES =
-            Self::I_DETERMINISTIC.bits | Self::NOT_I_DETERMINISTIC.bits | Self::I_EPSILONS.bits |
-            Self::NO_I_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits |
-            Self::WEIGHTED.bits | Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits |
-            Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits |
-            Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits | Self::NOT_ACCESSIBLE.bits |
-            Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits | Self::STRING.bits |
-            Self::NOT_STRING.bits | Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
-
-        /// Properties that are preserved when an FST's weights are changed. This
-        /// assumes that the set of states that are non-final is not changed.
-        const WEIGHT_INVARIANT_PROPERTIES =
-            Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::NOT_I_DETERMINISTIC.bits | Self::O_DETERMINISTIC.bits |
-            Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits | Self::NO_EPSILONS.bits |
-            Self::I_EPSILONS.bits | Self::NO_I_EPSILONS.bits | Self::O_EPSILONS.bits |
-            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::NOT_I_LABEL_SORTED.bits |
-            Self::O_LABEL_SORTED.bits | Self::NOT_O_LABEL_SORTED.bits | Self::CYCLIC.bits |
-            Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits |
-            Self::TOP_SORTED.bits | Self::NOT_TOP_SORTED.bits | Self::ACCESSIBLE.bits |
-            Self::NOT_ACCESSIBLE.bits | Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits |
-            Self::STRING.bits | Self::NOT_STRING.bits;
-
-        /// Properties that are preserved when a superfinal state is added and an FST's
-        /// final weights are directed to it via new transitions.
-        const ADD_SUPER_FINAL_PROPERTIES =
-            Self::NOT_ACCEPTOR.bits |
-            Self::NOT_I_DETERMINISTIC.bits | Self::NOT_O_DETERMINISTIC.bits | Self::EPSILONS.bits |
-            Self::I_EPSILONS.bits | Self::O_EPSILONS.bits | Self::NOT_I_LABEL_SORTED.bits |
-            Self::NOT_O_LABEL_SORTED.bits | Self::WEIGHTED.bits | Self::UNWEIGHTED.bits |
-            Self::CYCLIC.bits | Self::ACYCLIC.bits | Self::INITIAL_CYCLIC.bits |
-            Self::INITIAL_ACYCLIC.bits | Self::NOT_TOP_SORTED.bits | Self::NOT_ACCESSIBLE.bits |
-            Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits | Self::NOT_STRING.bits |
-            Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
-
-        /// Properties that are preserved when a superfinal state is removed and the
-        /// epsilon transitions directed to it are made final weights.
-        const RM_SUPER_FINAL_PROPERTIES =
-            Self::ACCEPTOR.bits | Self::NOT_ACCEPTOR.bits | Self::I_DETERMINISTIC.bits |
-            Self::O_DETERMINISTIC.bits | Self::NO_EPSILONS.bits | Self::NO_I_EPSILONS.bits |
-            Self::NO_O_EPSILONS.bits | Self::I_LABEL_SORTED.bits | Self::O_LABEL_SORTED.bits |
-            Self::WEIGHTED.bits | Self::UNWEIGHTED.bits | Self::CYCLIC.bits | Self::ACYCLIC.bits |
-            Self::INITIAL_CYCLIC.bits | Self::INITIAL_ACYCLIC.bits | Self::TOP_SORTED.bits |
-            Self::ACCESSIBLE.bits | Self::COACCESSIBLE.bits | Self::NOT_COACCESSIBLE.bits |
-            Self::STRING.bits | Self::WEIGHTED_CYCLES.bits | Self::UNWEIGHTED_CYCLES.bits;
-
-        // Binary properties are not stored here so should be useless.
-        const BINARY_PROPERTIES = 0x0000000000000007;
-        const TRINARY_PROPERTIES = 0x0000ffffffff0000;
-
-        const POS_TRINARY_PROPERTIES = Self::TRINARY_PROPERTIES.bits | 0x5555555555555555;
-        const NEG_TRINARY_PROPERTIES = Self::TRINARY_PROPERTIES.bits | 0xaaaaaaaaaaaaaaaa;
-        const ALL_PROPERTIES = Self::BINARY_PROPERTIES.bits | Self::TRINARY_PROPERTIES.bits;
     }
 
+}
+
+impl FstProperties {
+    /// Properties of an empty machine.
+    pub(crate) fn null_properties() -> FstProperties {
+        FstProperties::ACCEPTOR
+            | FstProperties::I_DETERMINISTIC
+            | FstProperties::O_DETERMINISTIC
+            | FstProperties::NO_EPSILONS
+            | FstProperties::NO_I_EPSILONS
+            | FstProperties::NO_O_EPSILONS
+            | FstProperties::I_LABEL_SORTED
+            | FstProperties::O_LABEL_SORTED
+            | FstProperties::UNWEIGHTED
+            | FstProperties::ACYCLIC
+            | FstProperties::INITIAL_ACYCLIC
+            | FstProperties::TOP_SORTED
+            | FstProperties::ACCESSIBLE
+            | FstProperties::COACCESSIBLE
+            | FstProperties::STRING
+            | FstProperties::UNWEIGHTED_CYCLES
+    }
+
+    /// Properties that are preserved when an FST is copied.
+    pub(crate) fn copy_properties() -> FstProperties {
+        FstProperties::ACCEPTOR
+            | FstProperties::NOT_ACCEPTOR
+            | FstProperties::I_DETERMINISTIC
+            | FstProperties::NOT_I_DETERMINISTIC
+            | FstProperties::O_DETERMINISTIC
+            | FstProperties::NOT_O_DETERMINISTIC
+            | FstProperties::EPSILONS
+            | FstProperties::NO_EPSILONS
+            | FstProperties::I_EPSILONS
+            | FstProperties::NO_I_EPSILONS
+            | FstProperties::O_EPSILONS
+            | FstProperties::NO_O_EPSILONS
+            | FstProperties::I_LABEL_SORTED
+            | FstProperties::NOT_I_LABEL_SORTED
+            | FstProperties::O_LABEL_SORTED
+            | FstProperties::NOT_O_LABEL_SORTED
+            | FstProperties::WEIGHTED
+            | FstProperties::UNWEIGHTED
+            | FstProperties::CYCLIC
+            | FstProperties::ACYCLIC
+            | FstProperties::INITIAL_CYCLIC
+            | FstProperties::INITIAL_ACYCLIC
+            | FstProperties::TOP_SORTED
+            | FstProperties::NOT_TOP_SORTED
+            | FstProperties::ACCESSIBLE
+            | FstProperties::NOT_ACCESSIBLE
+            | FstProperties::COACCESSIBLE
+            | FstProperties::NOT_COACCESSIBLE
+            | FstProperties::STRING
+            | FstProperties::NOT_STRING
+            | FstProperties::WEIGHTED_CYCLES
+            | FstProperties::UNWEIGHTED_CYCLES
+    }
+
+    /// Properties that are intrinsic to the FST.
+    pub(crate) fn intrinsic_properties() -> FstProperties {
+        FstProperties::ACCEPTOR
+            | FstProperties::NOT_ACCEPTOR
+            | FstProperties::I_DETERMINISTIC
+            | FstProperties::NOT_I_DETERMINISTIC
+            | FstProperties::O_DETERMINISTIC
+            | FstProperties::NOT_O_DETERMINISTIC
+            | FstProperties::EPSILONS
+            | FstProperties::NO_EPSILONS
+            | FstProperties::I_EPSILONS
+            | FstProperties::NO_I_EPSILONS
+            | FstProperties::O_EPSILONS
+            | FstProperties::NO_O_EPSILONS
+            | FstProperties::I_LABEL_SORTED
+            | FstProperties::NOT_I_LABEL_SORTED
+            | FstProperties::O_LABEL_SORTED
+            | FstProperties::NOT_O_LABEL_SORTED
+            | FstProperties::WEIGHTED
+            | FstProperties::UNWEIGHTED
+            | FstProperties::CYCLIC
+            | FstProperties::ACYCLIC
+            | FstProperties::INITIAL_CYCLIC
+            | FstProperties::INITIAL_ACYCLIC
+            | FstProperties::TOP_SORTED
+            | FstProperties::NOT_TOP_SORTED
+            | FstProperties::ACCESSIBLE
+            | FstProperties::NOT_ACCESSIBLE
+            | FstProperties::COACCESSIBLE
+            | FstProperties::NOT_COACCESSIBLE
+            | FstProperties::STRING
+            | FstProperties::NOT_STRING
+            | FstProperties::WEIGHTED_CYCLES
+            | FstProperties::UNWEIGHTED_CYCLES
+    }
+
+    /// Properties that are preserved when an FST start state is set.
+    pub(crate) fn set_start_properties() -> FstProperties {
+        FstProperties::ACCEPTOR
+            | FstProperties::NOT_ACCEPTOR
+            | FstProperties::I_DETERMINISTIC
+            | FstProperties::NOT_I_DETERMINISTIC
+            | FstProperties::O_DETERMINISTIC
+            | FstProperties::NOT_O_DETERMINISTIC
+            | FstProperties::EPSILONS
+            | FstProperties::NO_EPSILONS
+            | FstProperties::I_EPSILONS
+            | FstProperties::NO_I_EPSILONS
+            | FstProperties::O_EPSILONS
+            | FstProperties::NO_O_EPSILONS
+            | FstProperties::I_LABEL_SORTED
+            | FstProperties::NOT_I_LABEL_SORTED
+            | FstProperties::O_LABEL_SORTED
+            | FstProperties::NOT_O_LABEL_SORTED
+            | FstProperties::WEIGHTED
+            | FstProperties::UNWEIGHTED
+            | FstProperties::CYCLIC
+            | FstProperties::ACYCLIC
+            | FstProperties::TOP_SORTED
+            | FstProperties::NOT_TOP_SORTED
+            | FstProperties::COACCESSIBLE
+            | FstProperties::NOT_COACCESSIBLE
+            | FstProperties::WEIGHTED_CYCLES
+            | FstProperties::UNWEIGHTED_CYCLES
+    }
+
+    /// Properties that are preserved when an FST final weight is set.
+    pub(crate) fn set_final_properties() -> FstProperties {
+        FstProperties::ACCEPTOR
+            | FstProperties::NOT_ACCEPTOR
+            | FstProperties::I_DETERMINISTIC
+            | FstProperties::NOT_I_DETERMINISTIC
+            | FstProperties::O_DETERMINISTIC
+            | FstProperties::NOT_O_DETERMINISTIC
+            | FstProperties::EPSILONS
+            | FstProperties::NO_EPSILONS
+            | FstProperties::I_EPSILONS
+            | FstProperties::NO_I_EPSILONS
+            | FstProperties::O_EPSILONS
+            | FstProperties::NO_O_EPSILONS
+            | FstProperties::I_LABEL_SORTED
+            | FstProperties::NOT_I_LABEL_SORTED
+            | FstProperties::O_LABEL_SORTED
+            | FstProperties::NOT_O_LABEL_SORTED
+            | FstProperties::CYCLIC
+            | FstProperties::ACYCLIC
+            | FstProperties::INITIAL_CYCLIC
+            | FstProperties::INITIAL_ACYCLIC
+            | FstProperties::TOP_SORTED
+            | FstProperties::NOT_TOP_SORTED
+            | FstProperties::ACCESSIBLE
+            | FstProperties::NOT_ACCESSIBLE
+            | FstProperties::WEIGHTED_CYCLES
+            | FstProperties::UNWEIGHTED_CYCLES
+    }
+
+    /// Properties that are preserved when an FST state is added.
+    pub(crate) fn add_state_properties() -> FstProperties {
+        FstProperties::ACCEPTOR
+            | FstProperties::NOT_ACCEPTOR
+            | FstProperties::I_DETERMINISTIC
+            | FstProperties::NOT_I_DETERMINISTIC
+            | FstProperties::O_DETERMINISTIC
+            | FstProperties::NOT_O_DETERMINISTIC
+            | FstProperties::EPSILONS
+            | FstProperties::NO_EPSILONS
+            | FstProperties::I_EPSILONS
+            | FstProperties::NO_I_EPSILONS
+            | FstProperties::O_EPSILONS
+            | FstProperties::NO_O_EPSILONS
+            | FstProperties::I_LABEL_SORTED
+            | FstProperties::NOT_I_LABEL_SORTED
+            | FstProperties::O_LABEL_SORTED
+            | FstProperties::NOT_O_LABEL_SORTED
+            | FstProperties::WEIGHTED
+            | FstProperties::UNWEIGHTED
+            | FstProperties::CYCLIC
+            | FstProperties::ACYCLIC
+            | FstProperties::INITIAL_CYCLIC
+            | FstProperties::INITIAL_ACYCLIC
+            | FstProperties::TOP_SORTED
+            | FstProperties::NOT_TOP_SORTED
+            | FstProperties::NOT_ACCESSIBLE
+            | FstProperties::NOT_COACCESSIBLE
+            | FstProperties::NOT_STRING
+            | FstProperties::WEIGHTED_CYCLES
+            | FstProperties::UNWEIGHTED_CYCLES
+    }
+
+    /// Properties that are preserved when an FST transition is added.
+    pub(crate) fn add_arc_properties() -> FstProperties {
+        FstProperties::NOT_ACCEPTOR
+            | FstProperties::NOT_I_DETERMINISTIC
+            | FstProperties::NOT_O_DETERMINISTIC
+            | FstProperties::EPSILONS
+            | FstProperties::I_EPSILONS
+            | FstProperties::O_EPSILONS
+            | FstProperties::NOT_I_LABEL_SORTED
+            | FstProperties::NOT_O_LABEL_SORTED
+            | FstProperties::WEIGHTED
+            | FstProperties::CYCLIC
+            | FstProperties::INITIAL_CYCLIC
+            | FstProperties::NOT_TOP_SORTED
+            | FstProperties::ACCESSIBLE
+            | FstProperties::COACCESSIBLE
+            | FstProperties::WEIGHTED_CYCLES
+    }
+
+    /// Properties that are preserved when an FST transition is set.
+    pub(crate) fn set_arc_properties() -> FstProperties {
+        FstProperties::empty()
+    }
+
+    /// Properties that are preserved when FST states are deleted.
+    pub(crate) fn delete_states_properties() -> FstProperties {
+        FstProperties::ACCEPTOR
+            | FstProperties::I_DETERMINISTIC
+            | FstProperties::O_DETERMINISTIC
+            | FstProperties::NO_EPSILONS
+            | FstProperties::NO_I_EPSILONS
+            | FstProperties::NO_O_EPSILONS
+            | FstProperties::I_LABEL_SORTED
+            | FstProperties::O_LABEL_SORTED
+            | FstProperties::UNWEIGHTED
+            | FstProperties::ACYCLIC
+            | FstProperties::INITIAL_ACYCLIC
+            | FstProperties::TOP_SORTED
+            | FstProperties::UNWEIGHTED_CYCLES
+    }
+
+    /// Properties that are preserved when FST trs are deleted.
+    pub(crate) fn delete_arcs_properties() -> FstProperties {
+        FstProperties::ACCEPTOR
+            | FstProperties::I_DETERMINISTIC
+            | FstProperties::O_DETERMINISTIC
+            | FstProperties::NO_EPSILONS
+            | FstProperties::NO_I_EPSILONS
+            | FstProperties::NO_O_EPSILONS
+            | FstProperties::I_LABEL_SORTED
+            | FstProperties::O_LABEL_SORTED
+            | FstProperties::UNWEIGHTED
+            | FstProperties::ACYCLIC
+            | FstProperties::INITIAL_ACYCLIC
+            | FstProperties::TOP_SORTED
+            | FstProperties::NOT_ACCESSIBLE
+            | FstProperties::NOT_COACCESSIBLE
+            | FstProperties::UNWEIGHTED_CYCLES
+    }
+
+    /// Properties that are preserved when an FST's states are reordered.
+    pub(crate) fn statesort_properties() -> FstProperties {
+        FstProperties::ACCEPTOR
+            | FstProperties::NOT_ACCEPTOR
+            | FstProperties::I_DETERMINISTIC
+            | FstProperties::NOT_I_DETERMINISTIC
+            | FstProperties::O_DETERMINISTIC
+            | FstProperties::NOT_O_DETERMINISTIC
+            | FstProperties::EPSILONS
+            | FstProperties::NO_EPSILONS
+            | FstProperties::I_EPSILONS
+            | FstProperties::NO_I_EPSILONS
+            | FstProperties::O_EPSILONS
+            | FstProperties::NO_O_EPSILONS
+            | FstProperties::I_LABEL_SORTED
+            | FstProperties::NOT_I_LABEL_SORTED
+            | FstProperties::O_LABEL_SORTED
+            | FstProperties::NOT_O_LABEL_SORTED
+            | FstProperties::WEIGHTED
+            | FstProperties::UNWEIGHTED
+            | FstProperties::CYCLIC
+            | FstProperties::ACYCLIC
+            | FstProperties::INITIAL_CYCLIC
+            | FstProperties::INITIAL_ACYCLIC
+            | FstProperties::ACCESSIBLE
+            | FstProperties::NOT_ACCESSIBLE
+            | FstProperties::COACCESSIBLE
+            | FstProperties::NOT_COACCESSIBLE
+            | FstProperties::WEIGHTED_CYCLES
+            | FstProperties::UNWEIGHTED_CYCLES
+    }
+
+    /// Properties that are preserved when an FST's trs are reordered.
+    pub(crate) fn arcsort_properties() -> FstProperties {
+        FstProperties::ACCEPTOR
+            | FstProperties::NOT_ACCEPTOR
+            | FstProperties::I_DETERMINISTIC
+            | FstProperties::NOT_I_DETERMINISTIC
+            | FstProperties::O_DETERMINISTIC
+            | FstProperties::NOT_O_DETERMINISTIC
+            | FstProperties::EPSILONS
+            | FstProperties::NO_EPSILONS
+            | FstProperties::I_EPSILONS
+            | FstProperties::NO_I_EPSILONS
+            | FstProperties::O_EPSILONS
+            | FstProperties::NO_O_EPSILONS
+            | FstProperties::WEIGHTED
+            | FstProperties::UNWEIGHTED
+            | FstProperties::CYCLIC
+            | FstProperties::ACYCLIC
+            | FstProperties::INITIAL_CYCLIC
+            | FstProperties::INITIAL_ACYCLIC
+            | FstProperties::TOP_SORTED
+            | FstProperties::NOT_TOP_SORTED
+            | FstProperties::ACCESSIBLE
+            | FstProperties::NOT_ACCESSIBLE
+            | FstProperties::COACCESSIBLE
+            | FstProperties::NOT_COACCESSIBLE
+            | FstProperties::STRING
+            | FstProperties::NOT_STRING
+            | FstProperties::WEIGHTED_CYCLES
+            | FstProperties::UNWEIGHTED_CYCLES
+    }
+
+    /// Properties that are preserved when an FST's input labels are changed.
+    pub(crate) fn i_label_invariant_properties() -> FstProperties {
+        FstProperties::O_DETERMINISTIC
+            | FstProperties::NOT_O_DETERMINISTIC
+            | FstProperties::O_EPSILONS
+            | FstProperties::NO_O_EPSILONS
+            | FstProperties::O_LABEL_SORTED
+            | FstProperties::NOT_O_LABEL_SORTED
+            | FstProperties::WEIGHTED
+            | FstProperties::UNWEIGHTED
+            | FstProperties::CYCLIC
+            | FstProperties::ACYCLIC
+            | FstProperties::INITIAL_CYCLIC
+            | FstProperties::INITIAL_ACYCLIC
+            | FstProperties::TOP_SORTED
+            | FstProperties::NOT_TOP_SORTED
+            | FstProperties::ACCESSIBLE
+            | FstProperties::NOT_ACCESSIBLE
+            | FstProperties::COACCESSIBLE
+            | FstProperties::NOT_COACCESSIBLE
+            | FstProperties::STRING
+            | FstProperties::NOT_STRING
+            | FstProperties::WEIGHTED_CYCLES
+            | FstProperties::UNWEIGHTED_CYCLES
+    }
+
+    /// Properties that are preserved when an FST's output labels are changed.
+    pub(crate) fn o_label_invariant_properties() -> FstProperties {
+        FstProperties::I_DETERMINISTIC
+            | FstProperties::NOT_I_DETERMINISTIC
+            | FstProperties::I_EPSILONS
+            | FstProperties::NO_I_EPSILONS
+            | FstProperties::I_LABEL_SORTED
+            | FstProperties::NOT_I_LABEL_SORTED
+            | FstProperties::WEIGHTED
+            | FstProperties::UNWEIGHTED
+            | FstProperties::CYCLIC
+            | FstProperties::ACYCLIC
+            | FstProperties::INITIAL_CYCLIC
+            | FstProperties::INITIAL_ACYCLIC
+            | FstProperties::TOP_SORTED
+            | FstProperties::NOT_TOP_SORTED
+            | FstProperties::ACCESSIBLE
+            | FstProperties::NOT_ACCESSIBLE
+            | FstProperties::COACCESSIBLE
+            | FstProperties::NOT_COACCESSIBLE
+            | FstProperties::STRING
+            | FstProperties::NOT_STRING
+            | FstProperties::WEIGHTED_CYCLES
+            | FstProperties::UNWEIGHTED_CYCLES
+    }
+
+    /// Properties that are preserved when an FST's weights are changed. This
+    /// assumes that the set of states that are non-final is not changed.
+    pub(crate) fn weight_invariant_properties() -> FstProperties {
+        FstProperties::ACCEPTOR
+            | FstProperties::NOT_ACCEPTOR
+            | FstProperties::I_DETERMINISTIC
+            | FstProperties::NOT_I_DETERMINISTIC
+            | FstProperties::O_DETERMINISTIC
+            | FstProperties::NOT_O_DETERMINISTIC
+            | FstProperties::EPSILONS
+            | FstProperties::NO_EPSILONS
+            | FstProperties::I_EPSILONS
+            | FstProperties::NO_I_EPSILONS
+            | FstProperties::O_EPSILONS
+            | FstProperties::NO_O_EPSILONS
+            | FstProperties::I_LABEL_SORTED
+            | FstProperties::NOT_I_LABEL_SORTED
+            | FstProperties::O_LABEL_SORTED
+            | FstProperties::NOT_O_LABEL_SORTED
+            | FstProperties::CYCLIC
+            | FstProperties::ACYCLIC
+            | FstProperties::INITIAL_CYCLIC
+            | FstProperties::INITIAL_ACYCLIC
+            | FstProperties::TOP_SORTED
+            | FstProperties::NOT_TOP_SORTED
+            | FstProperties::ACCESSIBLE
+            | FstProperties::NOT_ACCESSIBLE
+            | FstProperties::COACCESSIBLE
+            | FstProperties::NOT_COACCESSIBLE
+            | FstProperties::STRING
+            | FstProperties::NOT_STRING
+    }
+
+    /// Properties that are preserved when a superfinal state is added and an FST's
+    /// final weights are directed to it via new transitions.
+    pub(crate) fn add_super_final_properties() -> FstProperties {
+        FstProperties::NOT_ACCEPTOR
+            | FstProperties::NOT_I_DETERMINISTIC
+            | FstProperties::NOT_O_DETERMINISTIC
+            | FstProperties::EPSILONS
+            | FstProperties::I_EPSILONS
+            | FstProperties::O_EPSILONS
+            | FstProperties::NOT_I_LABEL_SORTED
+            | FstProperties::NOT_O_LABEL_SORTED
+            | FstProperties::WEIGHTED
+            | FstProperties::UNWEIGHTED
+            | FstProperties::CYCLIC
+            | FstProperties::ACYCLIC
+            | FstProperties::INITIAL_CYCLIC
+            | FstProperties::INITIAL_ACYCLIC
+            | FstProperties::NOT_TOP_SORTED
+            | FstProperties::NOT_ACCESSIBLE
+            | FstProperties::COACCESSIBLE
+            | FstProperties::NOT_COACCESSIBLE
+            | FstProperties::NOT_STRING
+            | FstProperties::WEIGHTED_CYCLES
+            | FstProperties::UNWEIGHTED_CYCLES
+    }
+
+    /// Properties that are preserved when a superfinal state is removed and the
+    /// epsilon transitions directed to it are made final weights.
+    pub(crate) fn rm_super_final_properties() -> FstProperties {
+        FstProperties::ACCEPTOR
+            | FstProperties::NOT_ACCEPTOR
+            | FstProperties::I_DETERMINISTIC
+            | FstProperties::O_DETERMINISTIC
+            | FstProperties::NO_EPSILONS
+            | FstProperties::NO_I_EPSILONS
+            | FstProperties::NO_O_EPSILONS
+            | FstProperties::I_LABEL_SORTED
+            | FstProperties::O_LABEL_SORTED
+            | FstProperties::WEIGHTED
+            | FstProperties::UNWEIGHTED
+            | FstProperties::CYCLIC
+            | FstProperties::ACYCLIC
+            | FstProperties::INITIAL_CYCLIC
+            | FstProperties::INITIAL_ACYCLIC
+            | FstProperties::TOP_SORTED
+            | FstProperties::ACCESSIBLE
+            | FstProperties::COACCESSIBLE
+            | FstProperties::NOT_COACCESSIBLE
+            | FstProperties::STRING
+            | FstProperties::WEIGHTED_CYCLES
+            | FstProperties::UNWEIGHTED_CYCLES
+    }
+
+    // Binary properties are not stored here so should be useless.
+    pub(crate) fn binary_properties() -> FstProperties {
+        FstProperties::from_bits_truncate(0x0000000000000007)
+    }
+    pub(crate) fn trinary_properties() -> FstProperties {
+        FstProperties::from_bits_truncate(0x0000ffffffff0000)
+    }
+
+    pub(crate) fn pos_trinary_properties() -> FstProperties {
+        FstProperties::trinary_properties() & FstProperties::from_bits_truncate(0x5555555555555555)
+    }
+    pub(crate) fn neg_trinary_properties() -> FstProperties {
+        FstProperties::trinary_properties() & FstProperties::from_bits_truncate(0xaaaaaaaaaaaaaaaa)
+    }
+
+    pub(crate) fn all_properties() -> FstProperties {
+        FstProperties::binary_properties() | FstProperties::trinary_properties()
+    }
 }
 
 impl Shl<usize> for FstProperties {
