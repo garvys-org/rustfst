@@ -93,7 +93,8 @@ impl<W: 'static + SerializableSemiring> SerializableFst<W> for VectorFst<W> {
 
         let states = vec![VectorFstState::<W>::new(); num_states];
 
-        unimplemented!()
+        todo!("props")
+
         // let mut fst = VectorFst {
         //     states,
         //     start_state,

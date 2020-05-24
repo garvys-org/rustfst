@@ -13,90 +13,93 @@ bitflags! {
     /// property has unknown value. Both should never be simultaneously set. The
     /// individual positive and negative bit pairs should be adjacent with the
     /// positive bit at an odd and lower position.
-    pub struct FstProperties: u32 {
+    pub struct FstProperties: u64 {
+        const EXPANDED = 0x0000000000000001;
+        const MUTABLE = 0x0000000000000002;
+
         /// ilabel == olabel for each transition.
-        const ACCEPTOR = 0b1;
+        const ACCEPTOR = 0x0000000000010000;
         /// ilabel != olabel for some transition.
-        const NOT_ACCEPTOR = 0b1 << 1;
+        const NOT_ACCEPTOR = 0x0000000000020000;
 
         /// ilabels unique leaving each state.
-        const I_DETERMINISTIC = 0b1 << 2;
+        const I_DETERMINISTIC = 0x0000000000040000;
         /// ilabels not unique leaving some state.
-        const NOT_I_DETERMINISTIC = 0b1 << 3;
+        const NOT_I_DETERMINISTIC = 0x0000000000080000;
 
         /// olabels unique leaving each state.
-        const O_DETERMINISTIC = 0b1 << 4;
+        const O_DETERMINISTIC = 0x0000000000100000;
         /// olabels not unique leaving some state.
-        const NOT_O_DETERMINISTIC = 0b1 << 5;
+        const NOT_O_DETERMINISTIC = 0x0000000000200000;
 
         /// FST has input/output epsilons.
-        const EPSILONS = 0b1 << 6;
+        const EPSILONS = 0x0000000000400000;
         /// FST has no input/output epsilons.
-        const NO_EPSILONS = 0b1 << 7;
+        const NO_EPSILONS = 0x0000000000800000;
 
         /// FST has input epsilons.
-        const I_EPSILONS = 0b1 << 8;
+        const I_EPSILONS = 0x0000000001000000;
         /// FST has no input epsilons.
-        const NO_I_EPSILONS = 0b1 << 9;
+        const NO_I_EPSILONS = 0x0000000002000000;
 
         /// FST has output epsilons.
-        const O_EPSILONS = 0b1 << 10;
+        const O_EPSILONS = 0x0000000004000000;
         /// FST has no output epsilons.
-        const NO_O_EPSILONS = 0b1 << 11;
+        const NO_O_EPSILONS = 0x0000000008000000;
 
         /// ilabels sorted wrt < for each state.
-        const I_LABEL_SORTED = 0b1 << 12;
+        const I_LABEL_SORTED = 0x0000000010000000;
         /// ilabels not sorted wrt < for some state.
-        const NOT_I_LABEL_SORTED = 0b1 << 13;
+        const NOT_I_LABEL_SORTED = 0x0000000020000000;
 
         /// olabels sorted wrt < for each state.
-        const O_LABEL_SORTED = 0b1 << 14;
+        const O_LABEL_SORTED = 0x0000000040000000;
         /// olabels not sorted wrt < for some state.
-        const NOT_O_LABEL_SORTED = 0b1 << 15;
+        const NOT_O_LABEL_SORTED = 0x0000000080000000;
 
         /// Non-trivial transition or final weights.
-        const WEIGHTED = 0b1 << 16;
+        const WEIGHTED = 0x0000000100000000;
         /// Only trivial transition and final weights.
-        const UNWEIGHTED = 0b1 << 17;
+        const UNWEIGHTED = 0x0000000200000000;
 
         /// FST has cycles.
-        const CYCLIC = 0b1 << 18;
+        const CYCLIC = 0x0000000400000000;
         /// FST has no cycles.
-        const ACYCLIC = 0b1 << 19;
+        const ACYCLIC = 0x0000000800000000;
 
         /// FST has cycles containing the initial state.
-        const INITIAL_CYCLIC = 0b1 << 20;
+        const INITIAL_CYCLIC = 0x0000001000000000;
         /// FST has no cycles containing the initial state.
-        const INITIAL_ACYCLIC = 0b1 << 21;
+        const INITIAL_ACYCLIC = 0x0000002000000000;
 
         /// FST is topologically sorted.
-        const TOP_SORTED = 0b1 << 22;
+        const TOP_SORTED = 0x0000004000000000;
         /// FST is not topologically sorted.
-        const NOT_TOP_SORTED = 0b1 << 23;
+        const NOT_TOP_SORTED = 0x0000008000000000;
 
         /// All states reachable from the initial state.
-        const ACCESSIBLE = 0b1 << 24;
+        const ACCESSIBLE = 0x0000010000000000;
         /// Not all states reachable from the initial state.
-        const NOT_ACCESSIBLE = 0b1 << 25;
+        const NOT_ACCESSIBLE = 0x0000020000000000;
 
         /// All states can reach a final state.
-        const COACCESSIBLE = 0b1 << 26;
+        const COACCESSIBLE = 0x0000040000000000;
         /// Not all states can reach a final state.
-        const NOT_COACCESSIBLE = 0b1 << 27;
+        const NOT_COACCESSIBLE = 0x0000080000000000;
 
         /// If NumStates() > 0, then state 0 is initial, state NumStates() - 1 is final,
         /// there is a transition from each non-final state i to state i + 1, and there
         /// are no other transitions.
-        const STRING = 0b1 << 28;
+        const STRING = 0x0000100000000000;
 
         /// Not a string FST.
-        const NOT_STRING = 0b1 << 29;
+        const NOT_STRING = 0x0000200000000000;
 
         /// FST has at least one weighted cycle.
-        const WEIGHTED_CYCLES = 0b1 << 30;
+        const WEIGHTED_CYCLES = 0x0000400000000000;
 
         /// Only unweighted cycles.
-        const UNWEIGHTED_CYCLES = 0b1 << 31;
+        const UNWEIGHTED_CYCLES = 0x0000800000000000;
 
         /// Properties of an empty machine.
         const NULL_PROPERTIES =
