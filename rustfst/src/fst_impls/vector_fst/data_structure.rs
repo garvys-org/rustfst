@@ -85,4 +85,8 @@ impl<W: Semiring> VectorFst<W> {
         };
         self.properties = add_tr_properties(self.properties, state, new_tr, old_tr);
     }
+
+    pub fn static_properties() -> FstProperties {
+        FstProperties::EXPANDED | FstProperties::MUTABLE
+    }
 }

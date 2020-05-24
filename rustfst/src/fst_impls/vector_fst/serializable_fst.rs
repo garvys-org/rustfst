@@ -1,25 +1,26 @@
-use std::fs::{read, File};
+use std::fs::{File, read};
 use std::io::BufWriter;
 use std::path::Path;
+use std::sync::Arc;
 
 use anyhow::Context;
 use anyhow::Result;
+use nom::IResult;
 use nom::multi::count;
 use nom::number::complete::le_i64;
-use nom::IResult;
 
+use crate::{Tr, Trs, TrsVec};
 use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, SerializableFst};
-use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FST_MAGIC_NUMBER};
+use crate::parsers::bin_fst::fst_header::{FST_MAGIC_NUMBER, FstFlags, FstHeader, OpenFstString};
 use crate::parsers::bin_fst::utils_parsing::{parse_final_weight, parse_fst_tr, parse_start_state};
 use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64};
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::SerializableSemiring;
-use crate::{Tr, Trs, TrsVec};
-use std::sync::Arc;
+use crate::fst_properties::FstProperties;
 
-impl<W: 'static + SerializableSemiring> SerializableFst<W> for VectorFst<W> {
+impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
     fn fst_type() -> String {
         "vector".to_string()
     }
@@ -60,8 +61,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst<W> for VectorFst<W> {
             version: 2i32,
             // TODO: Set flags if the content is aligned
             flags,
-            // TODO: Once the properties are stored, need to read them
-            properties: 3u64,
+            properties: self.properties.bits(),
             start: self.start_state.map(|v| v as i64).unwrap_or(-1),
             num_states: self.num_states() as i64,
             num_trs: num_trs as i64,
@@ -93,32 +93,32 @@ impl<W: 'static + SerializableSemiring> SerializableFst<W> for VectorFst<W> {
 
         let states = vec![VectorFstState::<W>::new(); num_states];
 
-        todo!("props")
+        let mut fst = VectorFst {
+            states,
+            start_state,
+            isymt: None,
+            osymt: None,
+            // To check, not sure about that one. Shouldn't we compute all the props ?
+            properties: VectorFst::<W>::static_properties()
+        };
 
-        // let mut fst = VectorFst {
-        //     states,
-        //     start_state,
-        //     isymt: None,
-        //     osymt: None,
-        // };
-        //
-        // for transition in parsed_fst_text.transitions.into_iter() {
-        //     let weight = transition.weight.unwrap_or_else(W::one);
-        //     let tr = Tr::new(
-        //         transition.ilabel,
-        //         transition.olabel,
-        //         weight,
-        //         transition.nextstate,
-        //     );
-        //     fst.add_tr(transition.state, tr)?;
-        // }
-        //
-        // for final_state in parsed_fst_text.final_states.into_iter() {
-        //     let weight = final_state.weight.unwrap_or_else(W::one);
-        //     fst.set_final(final_state.state, weight)?;
-        // }
-        //
-        // Ok(fst)
+        for transition in parsed_fst_text.transitions.into_iter() {
+            let weight = transition.weight.unwrap_or_else(W::one);
+            let tr = Tr::new(
+                transition.ilabel,
+                transition.olabel,
+                weight,
+                transition.nextstate,
+            );
+            fst.add_tr(transition.state, tr)?;
+        }
+
+        for final_state in parsed_fst_text.final_states.into_iter() {
+            let weight = final_state.weight.unwrap_or_else(W::one);
+            fst.set_final(final_state.state, weight)?;
+        }
+
+        Ok(fst)
     }
 }
 
@@ -146,21 +146,21 @@ fn parse_vector_fst_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], V
 }
 
 fn parse_vector_fst<W: SerializableSemiring + 'static>(i: &[u8]) -> IResult<&[u8], VectorFst<W>> {
-    // let (i, header) = FstHeader::parse(
-    //     i,
-    //     VECTOR_MIN_FILE_VERSION,
-    //     VectorFst::<W>::fst_type(),
-    //     Tr::<W>::tr_type(),
-    // )?;
-    // let (i, states) = count(parse_vector_fst_state, header.num_states as usize)(i)?;
-    unimplemented!()
-    // Ok((
-    //     i,
-    //     VectorFst {
-    //         start_state: parse_start_state(header.start),
-    //         states,
-    //         isymt: header.isymt,
-    //         osymt: header.osymt,
-    //     },
-    // ))
+    let (i, header) = FstHeader::parse(
+        i,
+        VECTOR_MIN_FILE_VERSION,
+        VectorFst::<W>::fst_type(),
+        Tr::<W>::tr_type(),
+    )?;
+    let (i, states) = count(parse_vector_fst_state, header.num_states as usize)(i)?;
+    Ok((
+        i,
+        VectorFst {
+            start_state: parse_start_state(header.start),
+            states,
+            isymt: header.isymt,
+            osymt: header.osymt,
+            properties: FstProperties::from_bits_truncate(header.properties)
+        },
+    ))
 }

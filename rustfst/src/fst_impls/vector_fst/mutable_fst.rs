@@ -25,7 +25,7 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
             start_state: None,
             isymt: None,
             osymt: None,
-            properties: FstProperties::NULL_PROPERTIES
+            properties: FstProperties::NULL_PROPERTIES | Self::static_properties()
         }
     }
 
@@ -164,7 +164,7 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
         // Remove all the states and thus the trs
         self.states.clear();
 
-        self.properties = delete_all_states_properties(self.properties);
+        self.properties = delete_all_states_properties(Self::static_properties());
     }
 
     unsafe fn del_trs_id_sorted_unchecked(&mut self, state: usize, to_del: &Vec<usize>) {
