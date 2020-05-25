@@ -141,7 +141,7 @@ where
         enqueued[s] = false;
         let sd = distance[s].clone();
 
-        if let Some(final_weight) = unsafe {ifst.final_weight_unchecked(s)} {
+        if let Some(final_weight) = unsafe { ifst.final_weight_unchecked(s) } {
             let plus = f_distance.plus(&sd.times(final_weight)?)?;
             if f_distance != plus {
                 f_distance = plus;

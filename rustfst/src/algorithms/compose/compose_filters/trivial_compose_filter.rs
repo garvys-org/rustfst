@@ -9,14 +9,14 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::semirings::Semiring;
 use crate::Tr;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TrivialComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
     matcher1: Arc<M1>,
     matcher2: Arc<M2>,
     w: PhantomData<W>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TrivialComposeFilterBuilder<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
     matcher1: Arc<M1>,
     matcher2: Arc<M2>,

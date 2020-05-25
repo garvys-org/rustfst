@@ -9,7 +9,7 @@ use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TrivialLookAheadMatcher<W, M> {
     matcher: M,
     w: PhantomData<W>,

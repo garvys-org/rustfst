@@ -37,7 +37,7 @@ pub struct LookAheadComposeFilter<
     la_matcher_data: Option<LookAheadMatcherData<W>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LookAheadComposeFilterBuilder<W, CFB, SMT>
 where
     W: Semiring,

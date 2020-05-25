@@ -30,7 +30,7 @@ pub struct AltSequenceComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>
     w: PhantomData<W>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AltSequenceComposeFilterBuilder<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
     matcher1: Arc<M1>,
     matcher2: Arc<M2>,

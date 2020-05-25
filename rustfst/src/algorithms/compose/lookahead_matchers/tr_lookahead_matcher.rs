@@ -12,7 +12,7 @@ use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TrLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
     // matcher fst
     fst: Arc<M::F>,

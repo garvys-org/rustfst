@@ -10,6 +10,14 @@ pub struct StateTable<T: Hash + Eq + Clone> {
     pub(crate) table: Mutex<BiHashMap<StateId, T>>,
 }
 
+impl<T: Hash + Eq + Clone> Clone for StateTable<T> {
+    fn clone(&self) -> Self {
+        Self {
+            table: Mutex::new(self.table.lock().unwrap().clone()),
+        }
+    }
+}
+
 impl<T: Hash + Eq + Clone> Default for StateTable<T> {
     fn default() -> Self {
         Self {
