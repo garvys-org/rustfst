@@ -6,7 +6,7 @@ use crate::algorithms::compose::compose_filters::ComposeFilter;
 use crate::semirings::Semiring;
 use crate::{Tr, NO_LABEL};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MultiEpsFilter<F> {
     filter: F,
     keep_multi_eps: bool,

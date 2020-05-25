@@ -42,7 +42,7 @@ pub trait ComposeFilterBuilder<W: Semiring>: Debug {
 
 /// Composition filters determine which matches are allowed to proceed. The
 /// filter's state is represented by the type ComposeFilter::FS.
-pub trait ComposeFilter<W: Semiring>: Debug {
+pub trait ComposeFilter<W: Semiring>: Debug + Clone {
     type M1: Matcher<W>;
     type M2: Matcher<W>;
     type FS: FilterState;

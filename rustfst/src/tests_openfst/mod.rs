@@ -94,7 +94,7 @@ use self::fst_impls::test_fst_into_iterator::{
     test_fst_into_iterator_const, test_fst_into_iterator_vector,
 };
 use self::misc::test_del_all_states;
-use crate::tests_openfst::algorithms::queue::{QueueOperationResult, test_queue};
+use crate::tests_openfst::algorithms::queue::{test_queue, QueueOperationResult};
 
 #[macro_use]
 mod macros;
@@ -226,7 +226,7 @@ where
     // pub matcher: Vec<MatcherTestData<F>>,
     pub compose: Vec<ComposeTestData<W, F>>,
     pub state_reachable: StateReachableTestData,
-    pub queue: QueueOperationResult
+    pub queue: QueueOperationResult,
 }
 
 impl<W, F> FstTestData<W, F>
@@ -303,7 +303,7 @@ where
             // matcher: data.matcher.iter().map(|v| v.parse()).collect(),
             compose: data.compose.iter().map(|v| v.parse()).collect(),
             state_reachable: data.state_reachable.parse(),
-            queue: data.queue.clone()
+            queue: data.queue.clone(),
         }
     }
 }

@@ -13,7 +13,7 @@ use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable, Trs, TrsVec};
 use std::collections::{HashSet, VecDeque};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LazyFst<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> {
     cache: Cache,
     pub(crate) op: Op,

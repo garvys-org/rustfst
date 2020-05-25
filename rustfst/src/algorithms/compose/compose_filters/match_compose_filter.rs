@@ -10,7 +10,7 @@ use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MatchComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
     matcher1: Arc<M1>,
     matcher2: Arc<M2>,
@@ -31,7 +31,7 @@ pub struct MatchComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
     w: PhantomData<W>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MatchComposeFilterBuilder<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
     matcher1: Arc<M1>,
     matcher2: Arc<M2>,

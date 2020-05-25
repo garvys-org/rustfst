@@ -11,7 +11,7 @@ use crate::semirings::Semiring;
 use crate::{SymbolTable, TrsVec};
 use std::sync::Arc;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ComposeFst<W: Semiring, CFB: ComposeFilterBuilder<W>>(
     LazyFst<W, ComposeFstOp<W, CFB>, SimpleHashMapCache<W>>,
 );

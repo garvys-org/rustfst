@@ -17,7 +17,7 @@ pub struct SMatchNone {}
 #[derive(Clone, Debug)]
 pub struct SMatchUnknown {}
 
-pub trait MatchTypeTrait: Debug {
+pub trait MatchTypeTrait: Debug + Clone {
     fn match_type() -> MatchType;
 }
 

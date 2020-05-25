@@ -14,7 +14,7 @@ use crate::fst_traits::CoreFst;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, Trs, TrsVec, EPS_LABEL, NO_LABEL};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ComposeFstOp<W: Semiring, CFB: ComposeFilterBuilder<W>> {
     compose_filter_builder: CFB,
     state_table: StateTable<ComposeStateTuple<<CFB::CF as ComposeFilter<W>>::FS>>,

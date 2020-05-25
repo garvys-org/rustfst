@@ -19,7 +19,7 @@ pub(super) mod label_lookahead_relabeler;
 mod tr_lookahead_matcher;
 mod trivial_lookahead_matcher;
 
-pub trait MatcherFlagsTrait: Debug {
+pub trait MatcherFlagsTrait: Debug + Clone {
     fn flags() -> MatcherFlags;
 }
 
