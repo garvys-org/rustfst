@@ -260,7 +260,7 @@ mod tests {
         fst_ref.add_state();
         fst_ref.set_start(0)?;
 
-        assert_eq!(parsed_fst, fst_ref);
+        assert_eq!(fst_ref, parsed_fst);
 
         Ok(())
     }

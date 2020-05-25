@@ -99,7 +99,6 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
             start_state,
             isymt: None,
             osymt: None,
-            // To check, not sure about that one. Shouldn't we compute all the props ?
             properties: FstProperties::empty(),
         };
 
@@ -118,6 +117,9 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
             let weight = final_state.weight.unwrap_or_else(W::one);
             fst.set_final(final_state.state, weight)?;
         }
+
+        // Compute properties. Should be moved elsewhere
+        fst.properties = fst.properties()?;
 
         Ok(fst)
     }
