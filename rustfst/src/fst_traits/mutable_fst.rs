@@ -3,12 +3,13 @@ use std::slice;
 
 use anyhow::Result;
 
+use crate::{Label, StateId};
 use crate::algorithms::closure::ClosureType;
 use crate::algorithms::TrMapper;
 use crate::fst_traits::{ExpandedFst, FstIteratorMut};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
-use crate::{Label, StateId};
+use crate::trs_iter_mut::TrsIterMut;
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W> {
@@ -88,7 +89,9 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W
     fn add_state(&mut self) -> StateId;
     fn add_states(&mut self, n: usize);
 
+    #[deprecated]
     fn tr_iter_mut(&mut self, state_id: StateId) -> Result<slice::IterMut<Tr<W>>>;
+    #[deprecated]
     unsafe fn tr_iter_unchecked_mut(&mut self, state_id: StateId) -> slice::IterMut<Tr<W>>;
 
     /// Removes a state from an FST. It also removes all the trs starting from another state and
@@ -333,4 +336,7 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W
     fn tr_map<M: TrMapper<W>>(&mut self, mapper: &mut M) -> Result<()> {
         crate::algorithms::tr_map(self, mapper)
     }
+
+    fn tr_iter_mut_revamp(&mut self, state_id: StateId) -> Result<TrsIterMut<W>>;
+    unsafe fn tr_iter_unchecked_mut_revamp(&mut self, state_id: StateId) -> TrsIterMut<W>;
 }

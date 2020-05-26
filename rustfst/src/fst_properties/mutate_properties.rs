@@ -31,7 +31,8 @@ pub fn set_final_properties<W: Semiring>(
         }
     }
 
-    outprops &= FstProperties::set_final_properties() | FstProperties::WEIGHTED | FstProperties::UNWEIGHTED;
+    outprops &=
+        FstProperties::set_final_properties() | FstProperties::WEIGHTED | FstProperties::UNWEIGHTED;
     outprops
 }
 

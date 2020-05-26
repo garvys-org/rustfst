@@ -1,4 +1,6 @@
 use std::cmp::Ordering;
+use std::ops::Index;
+use std::slice;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -13,8 +15,8 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::CoreFst;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
-use crate::{StateId, Tr};
-use std::slice;
+use crate::{Label, StateId, Tr, EPS_LABEL};
+use crate::trs_iter_mut::TrsIterMut;
 
 #[inline]
 fn equal_tr<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> bool {
@@ -306,4 +308,20 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
         // Truncate doesn't modify the capacity of the vector. Maybe a shrink_to_fit ?
         todo!("props")
     }
+
+    fn tr_iter_mut_revamp(&mut self, state_id: StateId) -> Result<TrsIterMut<W>> {
+        let state = self
+            .states
+            .get_mut(state_id)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
+        let trs = Arc::make_mut(&mut state.trs.0);
+        Ok(TrsIterMut::new(trs, &mut self.properties))
+    }
+
+    unsafe fn tr_iter_unchecked_mut_revamp(&mut self, state_id: StateId) -> TrsIterMut<W> {
+        let state = self.states.get_unchecked_mut(state_id);
+        let trs = Arc::make_mut(&mut state.trs.0);
+        TrsIterMut::new(trs, &mut self.properties)
+    }
 }
+
