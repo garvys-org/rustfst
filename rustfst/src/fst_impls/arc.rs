@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator};
 use crate::semirings::Semiring;
 use crate::SymbolTable;
@@ -29,6 +30,10 @@ impl<W: Semiring, F: Fst<W>> Fst<W> for Arc<F> {
     }
 
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
+        unimplemented!()
+    }
+
+    fn properties_revamp(&self) -> FstProperties {
         unimplemented!()
     }
 }

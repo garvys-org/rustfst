@@ -60,17 +60,21 @@ void compute_fst_invert(const F& raw_fst, json& j) {
 }
 
 template<class F>
-void compute_fst_project_input(const F& raw_fst, json& j) {
+void compute_fst_project_input(const F& raw_fst, json& j, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
     fst::Project(&fst_out, fst::ProjectType::PROJECT_INPUT);
-    j["project_input"]["result"] = fst_to_string(fst_out);
+    auto name = "fst_project_input.fst";
+    j["project_input"]["result_path"] = name;
+    fst_out.Write(dir_path + name);
 }
 
 template<class F>
-void compute_fst_project_output(const F& raw_fst, json& j) {
+void compute_fst_project_output(const F& raw_fst, json& j, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
     fst::Project(&fst_out, fst::ProjectType::PROJECT_OUTPUT);
-    j["project_output"]["result"] = fst_to_string(fst_out);
+    auto name = "fst_project_output.fst";
+    j["project_output"]["result_path"] = name;
+    fst_out.Write(dir_path + name);
 }
 
 template<class F>
@@ -1008,15 +1012,19 @@ template<class F>
 void compute_fst_data(const F& fst_test_data, const string fst_name) {
     std::cout << "FST :" << fst_name << std::endl;
     json data;
+    auto dir_path = fst_name + "/";
 
     auto raw_fst = fst_test_data.get_fst();
 
+    // Force the computation of all the properties.
+    raw_fst.Properties(fst::kFstProperties, true);
+
     data["name"] = fst_name;
     data["weight_type"] = F::MyArc::Type();
-    data["raw"]["result"] = fst_to_string(raw_fst);
+    data["raw"]["result_path"] = "raw_vector.fst";
 
     data["raw_vector_bin_path"] = "raw_vector.fst";
-    raw_fst.Write(fst_name + "/raw_vector.fst");
+    raw_fst.Write(dir_path + "raw_vector.fst");
 
     fst::SymbolTable isymt;
     isymt.AddSymbol("<eps>");
@@ -1035,30 +1043,30 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     fst_with_symt.SetOutputSymbols(&osymt);
 
     data["raw_vector_with_symt_bin_path"] = "raw_vector_with_symt.fst";
-    fst_with_symt.Write(fst_name + "/raw_vector_with_symt.fst");
+    fst_with_symt.Write(dir_path + "raw_vector_with_symt.fst");
 
     fst::FstWriteOptions write_opts("<unspecified>");
     fst::ConstFst<typename F::MyArc> raw_const_fst(raw_fst);
     // Not aligned
     write_opts.align = false;
     data["raw_const_bin_path"] = "raw_const.fst";
-    std::ofstream strm((fst_name + "/raw_const.fst").c_str(), std::ios_base::out | std::ios_base::binary);
+    std::ofstream strm((dir_path + "raw_const.fst").c_str(), std::ios_base::out | std::ios_base::binary);
     raw_const_fst.Write(strm, write_opts);
 
     // Aligned
     write_opts.align = true;
     data["raw_const_aligned_bin_path"] = "raw_const_aligned.fst";
-    std::ofstream strm_aligned((fst_name + "/raw_const_aligned.fst").c_str(), std::ios_base::out | std::ios_base::binary);
+    std::ofstream strm_aligned((dir_path + "raw_const_aligned.fst").c_str(), std::ios_base::out | std::ios_base::binary);
     raw_const_fst.Write(strm_aligned, write_opts);
 
     std::cout << "Invert" << std::endl;
     compute_fst_invert(raw_fst, data);
 
     std::cout << "Project Input" << std::endl;
-    compute_fst_project_input(raw_fst, data);
+    compute_fst_project_input(raw_fst, data, dir_path);
 
     std::cout << "Project Output" << std::endl;
-    compute_fst_project_output(raw_fst, data);
+    compute_fst_project_output(raw_fst, data, dir_path);
 
     std::cout << "Reverse" << std::endl;
     compute_fst_reverse(raw_fst, data);

@@ -8,6 +8,7 @@ use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::lazy_fst_revamp::fst_op_2::FstOp2;
 use crate::algorithms::lazy_fst_revamp::FstCache;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterData, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable, Trs, TrsVec};
@@ -162,6 +163,10 @@ where
 
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.osymt.take()
+    }
+
+    fn properties_revamp(&self) -> FstProperties {
+        unimplemented!()
     }
 }
 

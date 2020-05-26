@@ -19,6 +19,7 @@ use anyhow::Result;
 
 use crate::algorithms::lazy_fst_revamp::{LazyFst2, SimpleHashMapCache};
 use crate::algorithms::rm_epsilon::rm_epsilon_op::RmEpsilonOp;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::{Semiring, SymbolTable, TrsVec};
 
@@ -116,6 +117,10 @@ where
 
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.0.take_output_symbols()
+    }
+
+    fn properties_revamp(&self) -> FstProperties {
+        unimplemented!()
     }
 }
 

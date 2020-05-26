@@ -22,7 +22,7 @@ fn equal_tr<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> bool {
     tr_1.ilabel == tr_2.ilabel && tr_1.olabel == tr_2.olabel && tr_1.nextstate == tr_2.nextstate
 }
 
-impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
+impl<W: Semiring> MutableFst<W> for VectorFst<W> {
     fn new() -> Self {
         VectorFst {
             states: vec![],
@@ -321,5 +321,14 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
         let state = self.states.get_unchecked_mut(state_id);
         let trs = Arc::make_mut(&mut state.trs.0);
         TrsIterMut::new(trs, &mut self.properties)
+    }
+
+    fn set_properties(&mut self, props: FstProperties) {
+        self.properties |= props;
+    }
+
+    fn set_properties_with_mask(&mut self, props: FstProperties, mask: FstProperties) {
+        self.properties &= !mask;
+        self.properties |= props & mask;
     }
 }

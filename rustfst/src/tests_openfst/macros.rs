@@ -16,7 +16,13 @@ pub fn test_eq_fst<
 ) {
     let message = format!("Test {} with openfst failing : \nREF = \n{}\nPRED = \n{}\n \nREF = \n{:?}\nPRED = \n{:?}\n",
                           s.into(), fst_ref, fst_pred, fst_ref, fst_pred);
-    assert!(fst_ref.equal_quantized(fst_pred), message)
+    assert!(fst_ref.equal_quantized(fst_pred), message);
+    assert_eq!(
+        fst_ref.properties_revamp(),
+        fst_pred.properties_revamp(),
+        "{}",
+        message
+    );
 }
 
 macro_rules! error_message_fst {

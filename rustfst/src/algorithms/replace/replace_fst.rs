@@ -5,6 +5,7 @@ use anyhow::Result;
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
 use crate::algorithms::replace::config::ReplaceFstOptions;
 use crate::algorithms::replace::replace_fst_op::ReplaceFstOp;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{Label, SymbolTable, TrsVec};
@@ -130,6 +131,10 @@ where
 
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.0.take_output_symbols()
+    }
+
+    fn properties_revamp(&self) -> FstProperties {
+        unimplemented!()
     }
 }
 

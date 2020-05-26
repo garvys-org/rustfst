@@ -6,6 +6,7 @@ use crate::algorithms::compose::compose_filters::{
 use crate::algorithms::compose::matchers::{GenericMatcher, Matcher};
 use crate::algorithms::compose::{ComposeFstOp, ComposeFstOpOptions, ComposeStateTuple};
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache, StateTable};
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{SymbolTable, TrsVec};
@@ -155,6 +156,10 @@ where
 
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.0.take_output_symbols()
+    }
+
+    fn properties_revamp(&self) -> FstProperties {
+        unimplemented!()
     }
 }
 

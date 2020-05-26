@@ -4,6 +4,7 @@ use anyhow::Result;
 
 use crate::algorithms::closure::ClosureType;
 use crate::algorithms::replace::ReplaceFst;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{SymbolTable, Tr, TrsVec, EPS_LABEL};
@@ -137,6 +138,10 @@ where
 
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.0.take_output_symbols()
+    }
+
+    fn properties_revamp(&self) -> FstProperties {
+        unimplemented!()
     }
 }
 

@@ -5,6 +5,7 @@ use std::sync::Arc;
 use anyhow::Result;
 
 use crate::algorithms::tr_filters::{InputEpsilonTrFilter, OutputEpsilonTrFilter, TrFilter};
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::iterators::StateIterator;
 use crate::fst_traits::FstIterator;
 use crate::semirings::Semiring;
@@ -249,6 +250,8 @@ pub trait Fst<W: Semiring>:
             w: PhantomData,
         }
     }
+
+    fn properties_revamp(&self) -> FstProperties;
 }
 
 pub struct FinalStatesIterator<'a, W, F>

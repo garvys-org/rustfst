@@ -65,15 +65,6 @@ impl<W: Semiring> VectorFst<W> {
         self.properties & mask
     }
 
-    pub fn proto_set_properties(&mut self, props: FstProperties) {
-        self.properties |= props;
-    }
-
-    pub fn proto_set_properties_2(&mut self, props: FstProperties, mask: FstProperties) {
-        self.properties &= !mask;
-        self.properties |= props | mask;
-    }
-
     pub fn update_properties_after_add_tr(&mut self, state: StateId) {
         let vector_state = unsafe { self.states.get_unchecked(state) };
 

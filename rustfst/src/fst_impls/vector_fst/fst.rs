@@ -3,11 +3,12 @@ use std::sync::Arc;
 use anyhow::Result;
 
 use crate::fst_impls::VectorFst;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable, Trs, TrsVec};
 
-impl<W: 'static + Semiring> Fst<W> for VectorFst<W> {
+impl<W: Semiring> Fst<W> for VectorFst<W> {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.isymt.as_ref()
     }
@@ -31,9 +32,13 @@ impl<W: 'static + Semiring> Fst<W> for VectorFst<W> {
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.osymt.take()
     }
+
+    fn properties_revamp(&self) -> FstProperties {
+        self.properties
+    }
 }
 
-impl<W: 'static + Semiring> CoreFst<W> for VectorFst<W> {
+impl<W: Semiring> CoreFst<W> for VectorFst<W> {
     type TRS = TrsVec<W>;
 
     fn start(&self) -> Option<StateId> {

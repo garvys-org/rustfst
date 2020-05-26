@@ -5,6 +5,7 @@ use anyhow::Result;
 
 use crate::algorithms::closure::ClosureType;
 use crate::algorithms::TrMapper;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ExpandedFst, FstIteratorMut};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
@@ -339,4 +340,7 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W
 
     fn tr_iter_mut_revamp(&mut self, state_id: StateId) -> Result<TrsIterMut<W>>;
     unsafe fn tr_iter_unchecked_mut_revamp(&mut self, state_id: StateId) -> TrsIterMut<W>;
+
+    fn set_properties(&mut self, props: FstProperties);
+    fn set_properties_with_mask(&mut self, props: FstProperties, mask: FstProperties);
 }

@@ -1,3 +1,5 @@
+use crate::fst_properties::mutable_properties::project_properties;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 
@@ -61,6 +63,7 @@ pub enum ProjectType {
 ///
 /// ![project_out_project-input](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/project_out_project-output.svg?sanitize=true)
 pub fn project<W: Semiring, F: MutableFst<W>>(fst: &mut F, project_type: ProjectType) {
+    let props = fst.properties_revamp();
     match project_type {
         ProjectType::ProjectInput => {
             for state in 0..fst.num_states() {
@@ -83,6 +86,10 @@ pub fn project<W: Semiring, F: MutableFst<W>>(fst: &mut F, project_type: Project
             }
         }
     };
+    fst.set_properties_with_mask(
+        project_properties(props, project_type),
+        FstProperties::all_properties(),
+    );
 }
 
 #[cfg(test)]

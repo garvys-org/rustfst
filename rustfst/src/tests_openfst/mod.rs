@@ -122,18 +122,34 @@ impl FstOperationResult {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+struct FstOperationResultPath {
+    result_path: String,
+}
+
+impl FstOperationResultPath {
+    fn parse<W, F>(&self, dir_path: &Path) -> F
+    where
+        W: SerializableSemiring,
+        F: SerializableFst<W>,
+    {
+        let path = dir_path.join(&self.result_path);
+        F::read(path).unwrap()
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ParsedFstTestData {
     rmepsilon: SimpleStaticLazyOperationResult,
     name: String,
     invert: FstOperationResult,
     weight_type: String,
-    raw: FstOperationResult,
-    project_output: FstOperationResult,
+    raw: FstOperationResultPath,
+    project_output: FstOperationResultPath,
     connect: FstOperationResult,
     condense: CondenseOperationResult,
     weight_pushing_initial: FstOperationResult,
     weight_pushing_final: FstOperationResult,
-    project_input: FstOperationResult,
+    project_input: FstOperationResultPath,
     reverse: FstOperationResult,
     tr_map_identity: FstOperationResult,
     tr_map_rmweight: FstOperationResult,
@@ -239,13 +255,13 @@ where
             rmepsilon: data.rmepsilon.parse(),
             name: data.name.clone(),
             invert: data.invert.parse(),
-            raw: data.raw.parse(),
-            project_output: data.project_output.parse(),
+            raw: data.raw.parse(absolute_path_folder),
+            project_output: data.project_output.parse(absolute_path_folder),
             connect: data.connect.parse(),
             condense: data.condense.parse(),
             weight_pushing_initial: data.weight_pushing_initial.parse(),
             weight_pushing_final: data.weight_pushing_final.parse(),
-            project_input: data.project_input.parse(),
+            project_input: data.project_input.parse(absolute_path_folder),
             reverse: data.reverse.parse(),
             tr_map_identity: data.tr_map_identity.parse(),
             tr_map_rmweight: data.tr_map_rmweight.parse(),

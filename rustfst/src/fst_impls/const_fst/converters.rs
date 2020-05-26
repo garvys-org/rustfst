@@ -25,6 +25,8 @@ impl<W: Semiring + 'static> From<VectorFst<W>> for ConstFst<W> {
             const_trs.extend(Arc::make_mut(&mut s.trs.0).drain(..));
         }
 
+        todo!("As ConstFst is immutable, all properties should be computed !");
+
         ConstFst {
             states: const_states,
             trs: Arc::new(const_trs),

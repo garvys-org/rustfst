@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator};
 use crate::semirings::Semiring;
 use crate::SymbolTable;
@@ -112,6 +113,10 @@ where
 
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.fst.take_output_symbols()
+    }
+
+    fn properties_revamp(&self) -> FstProperties {
+        unimplemented!()
     }
 }
 

@@ -8,6 +8,7 @@ use crate::algorithms::compose::lookahead_matchers::{LabelLookAheadRelabeler, Lo
 use crate::algorithms::compose::matchers::MatchType;
 use crate::algorithms::compose::FstAddOn;
 use crate::algorithms::compose::LabelReachableData;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{
     CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, MutableFst, StateIterator,
 };
@@ -169,6 +170,10 @@ where
 
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.fst_add_on.take_output_symbols()
+    }
+
+    fn properties_revamp(&self) -> FstProperties {
+        unimplemented!()
     }
 }
 

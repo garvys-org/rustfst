@@ -1,6 +1,6 @@
 use std::fs::{read, File};
 use std::io::BufWriter;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use anyhow::Context;
@@ -17,7 +17,7 @@ use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FS
 use crate::parsers::bin_fst::utils_parsing::{parse_final_weight, parse_fst_tr, parse_start_state};
 use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64};
 use crate::parsers::text_fst::ParsedTextFst;
-use crate::semirings::SerializableSemiring;
+use crate::semirings::{SerializableSemiring, TropicalWeight};
 use crate::{Tr, Trs, TrsVec};
 
 impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
