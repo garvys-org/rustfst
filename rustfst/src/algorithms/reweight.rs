@@ -53,21 +53,27 @@ where
             continue;
         }
 
-        for tr in fst.tr_iter_mut(state)? {
-            let d_ns = potentials.get(tr.nextstate).unwrap_or(&zero);
+        unsafe {
+            let mut it_tr = fst.tr_iter_unchecked_mut_revamp(state);
+            for idx_tr in 0..it_tr.len() {
+                let tr = it_tr.get_unchecked(idx_tr);
+                let d_ns = potentials.get(tr.nextstate).unwrap_or(&zero);
 
-            if d_ns.is_zero() {
-                continue;
+                if d_ns.is_zero() {
+                    continue;
+                }
+
+                let weight = match reweight_type {
+                    ReweightType::ReweightToInitial => {
+                        (&tr.weight.times(d_ns)?).divide(d_s, DivideType::DivideLeft)?
+                    }
+                    ReweightType::ReweightToFinal => {
+                        (d_s.times(&tr.weight)?).divide(&d_ns, DivideType::DivideRight)?
+                    }
+                };
+
+                it_tr.set_weight_unchecked(idx_tr, weight);
             }
-
-            tr.weight = match reweight_type {
-                ReweightType::ReweightToInitial => {
-                    (&tr.weight.times(d_ns)?).divide(d_s, DivideType::DivideLeft)?
-                }
-                ReweightType::ReweightToFinal => {
-                    (d_s.times(&tr.weight)?).divide(&d_ns, DivideType::DivideRight)?
-                }
-            };
         }
     }
 
@@ -96,15 +102,19 @@ where
         let d_s = potentials.get(start_state).unwrap_or(&zero);
 
         if !d_s.is_one() && !d_s.is_zero() {
-            for tr in fst.tr_iter_mut(start_state)? {
-                tr.weight = match reweight_type {
-                    ReweightType::ReweightToInitial => d_s.times(&tr.weight)?,
-                    ReweightType::ReweightToFinal => {
-                        (W::one().divide(&d_s, DivideType::DivideRight)?).times(&tr.weight)?
-                    }
-                };
+            unsafe {
+                let mut it_tr = fst.tr_iter_unchecked_mut_revamp(start_state);
+                for idx_tr in 0..it_tr.len() {
+                    let tr = it_tr.get_unchecked(idx_tr);
+                    let weight = match reweight_type {
+                        ReweightType::ReweightToInitial => d_s.times(&tr.weight)?,
+                        ReweightType::ReweightToFinal => {
+                            (W::one().divide(&d_s, DivideType::DivideRight)?).times(&tr.weight)?
+                        }
+                    };
+                    it_tr.set_weight_unchecked(idx_tr, weight);
+                }
             }
-
             if let Some(final_weight) = fst.final_weight(start_state)? {
                 let new_weight = match reweight_type {
                     ReweightType::ReweightToInitial => d_s.times(final_weight)?,

@@ -72,11 +72,14 @@ where
         ifst.set_final(superfinal_id, W::one()).unwrap();
     }
 
-    // TODO: Remove this collect
-    let states: Vec<_> = ifst.states_iter().collect();
-    for state in states {
-        for tr in unsafe { ifst.tr_iter_unchecked_mut(state) } {
-            mapper.tr_map(tr)?;
+    for state in 0..ifst.num_states() {
+        unsafe {
+            let mut it_tr = ifst.tr_iter_unchecked_mut_revamp(state);
+            for idx_tr in 0..it_tr.len() {
+                let mut tr = it_tr.get_unchecked(idx_tr).clone();
+                mapper.tr_map(&mut tr)?;
+                it_tr.set_tr_unchecked(idx_tr, tr);
+            }
         }
 
         if let Some(w) = unsafe { ifst.final_weight_unchecked(state) } {

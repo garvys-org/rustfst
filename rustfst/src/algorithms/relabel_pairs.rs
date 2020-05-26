@@ -58,15 +58,20 @@ where
     let map_olabels = iterator_to_hashmap(opairs)
         .with_context(|| format_err!("Error while creating the HashMap for opairs"))?;
 
-    let states: Vec<_> = fst.states_iter().collect();
-    for state_id in states {
-        for tr in fst.tr_iter_mut(state_id)? {
-            if let Some(v) = map_ilabels.get(&tr.ilabel) {
-                tr.ilabel = *v;
-            }
+    for state_id in 0..fst.num_states() {
+        unsafe {
+            let mut it_tr = fst.tr_iter_unchecked_mut_revamp(state_id);
+            for idx_tr in 0..it_tr.len() {
+                let tr = it_tr.get_unchecked(idx_tr);
 
-            if let Some(v) = map_olabels.get(&tr.olabel) {
-                tr.olabel = *v;
+                match (map_ilabels.get(&tr.ilabel), map_olabels.get(&tr.olabel)) {
+                    (Some(ilabel), Some(olabel)) => {
+                        it_tr.set_labels_unchecked(idx_tr, *ilabel, *olabel)
+                    }
+                    (Some(ilabel), None) => it_tr.set_ilabel_unchecked(idx_tr, *ilabel),
+                    (None, Some(olabel)) => it_tr.set_olabel_unchecked(idx_tr, *olabel),
+                    (None, None) => {}
+                };
             }
         }
     }

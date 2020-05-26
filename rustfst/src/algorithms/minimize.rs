@@ -144,8 +144,11 @@ fn merge_states<W: Semiring, F: MutableFst<W>>(partition: Partition, fst: &mut F
     for c in 0..partition.num_classes() {
         for s in partition.iter(c) {
             if s == state_map[c].unwrap() {
-                for tr in fst.tr_iter_mut(s)? {
-                    tr.nextstate = state_map[partition.get_class_id(tr.nextstate)].unwrap();
+                let mut it_tr = fst.tr_iter_mut_revamp(s)?;
+                for idx_tr in 0..it_tr.len() {
+                    let tr = unsafe { it_tr.get_unchecked(idx_tr) };
+                    let nextstate = state_map[partition.get_class_id(tr.nextstate)].unwrap();
+                    unsafe { it_tr.set_nextstate_unchecked(idx_tr, nextstate) };
                 }
             } else {
                 let trs: Vec<_> = fst

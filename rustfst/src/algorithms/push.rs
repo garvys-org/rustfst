@@ -101,8 +101,11 @@ where
         }
     } else if let Some(start) = fst.start() {
         unsafe {
-            for tr in fst.tr_iter_unchecked_mut(start) {
-                tr.weight.divide_assign(&weight, DivideType::DivideLeft)?;
+            let mut it_tr = fst.tr_iter_unchecked_mut_revamp(start);
+            for idx_tr in 0..it_tr.len() {
+                let tr = it_tr.get_unchecked(idx_tr);
+                let weight = tr.weight.divide(&weight, DivideType::DivideLeft)?;
+                it_tr.set_weight_unchecked(idx_tr, weight);
             }
             if let Some(mut final_weight) = fst.final_weight_unchecked(start) {
                 final_weight.divide_assign(&weight, DivideType::DivideLeft)?;

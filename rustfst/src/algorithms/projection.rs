@@ -65,22 +65,20 @@ pub fn project<W: Semiring, F: MutableFst<W>>(fst: &mut F, project_type: Project
         ProjectType::ProjectInput => {
             for state in 0..fst.num_states() {
                 let mut it_trs = unsafe { fst.tr_iter_unchecked_mut_revamp(state) };
-                for i in 0..it_trs.len() {
-                    let tr = unsafe { it_trs.get_unchecked(i) };
+                for idx_tr in 0..it_trs.len() {
+                    let tr = unsafe { it_trs.get_unchecked(idx_tr) };
                     let ilabel = tr.ilabel;
-                    drop(tr);
-                    unsafe { it_trs.set_olabel_unchecked(ilabel) }
+                    unsafe { it_trs.set_olabel_unchecked(idx_tr, ilabel) }
                 }
             }
         }
         ProjectType::ProjectOutput => {
             for state in 0..fst.num_states() {
                 let mut it_trs = unsafe { fst.tr_iter_unchecked_mut_revamp(state) };
-                for i in 0..it_trs.len() {
-                    let tr = unsafe { it_trs.get_unchecked(i) };
+                for idx_tr in 0..it_trs.len() {
+                    let tr = unsafe { it_trs.get_unchecked(idx_tr) };
                     let olabel = tr.olabel;
-                    drop(tr);
-                    unsafe { it_trs.set_ilabel_unchecked(olabel) }
+                    unsafe { it_trs.set_ilabel_unchecked(idx_tr, olabel) }
                 }
             }
         }

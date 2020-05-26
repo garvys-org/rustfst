@@ -1,5 +1,3 @@
-use std::mem::swap;
-
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 
@@ -31,8 +29,14 @@ use crate::semirings::Semiring;
 ///
 pub fn invert<W: Semiring, F: MutableFst<W>>(fst: &mut F) {
     for state in 0..fst.num_states() {
-        for tr in unsafe { fst.tr_iter_unchecked_mut(state) } {
-            swap(&mut tr.ilabel, &mut tr.olabel);
+        unsafe {
+            let mut it_tr = fst.tr_iter_unchecked_mut_revamp(state);
+            for idx_tr in 0..it_tr.len() {
+                let tr = it_tr.get_unchecked(idx_tr);
+                let ilabel = tr.ilabel;
+                let olabel = tr.olabel;
+                it_tr.set_labels_unchecked(idx_tr, olabel, ilabel);
+            }
         }
     }
 }

@@ -170,14 +170,18 @@ impl LabelReachable {
         let mut indeg = vec![0; ins];
         // Redirects labeled trs to new final states.
         for s in 0..ins {
-            for tr in unsafe { fst.tr_iter_unchecked_mut(s) } {
+            let mut it_tr = unsafe { fst.tr_iter_unchecked_mut_revamp(s) };
+            for idx_tr in 0..it_tr.len() {
+                let tr = unsafe { it_tr.get_unchecked(idx_tr) };
+
                 let label = if data.reach_input {
                     tr.ilabel
                 } else {
                     tr.olabel
                 };
-                if label != EPS_LABEL {
-                    tr.nextstate = match label2state.entry(label) {
+
+                let nextstate = if label != EPS_LABEL {
+                    match label2state.entry(label) {
                         Entry::Vacant(e) => {
                             let v = *e.insert(ons);
                             indeg.push(0);
@@ -185,9 +189,12 @@ impl LabelReachable {
                             v
                         }
                         Entry::Occupied(e) => *e.get(),
-                    };
-                }
-                indeg[tr.nextstate] += 1;
+                    }
+                } else {
+                    tr.nextstate
+                };
+                indeg[nextstate] += 1;
+                unsafe { it_tr.set_nextstate_unchecked(idx_tr, nextstate) };
             }
 
             if let Some(final_weight) = unsafe { fst.final_weight_unchecked(s) } {

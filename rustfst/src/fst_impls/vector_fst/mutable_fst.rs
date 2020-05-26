@@ -1,5 +1,4 @@
 use std::cmp::Ordering;
-use std::ops::Index;
 use std::slice;
 use std::sync::Arc;
 
@@ -15,8 +14,8 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::CoreFst;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
-use crate::{Label, StateId, Tr, EPS_LABEL};
 use crate::trs_iter_mut::TrsIterMut;
+use crate::{StateId, Tr};
 
 #[inline]
 fn equal_tr<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> bool {
@@ -324,4 +323,3 @@ impl<W: 'static + Semiring> MutableFst<W> for VectorFst<W> {
         TrsIterMut::new(trs, &mut self.properties)
     }
 }
-
