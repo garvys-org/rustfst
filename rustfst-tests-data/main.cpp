@@ -32,8 +32,18 @@
 #include "symt_001/symt_001.h"
 #include "symt_002/symt_002.h"
 
+int ID_FST_NUM = 0;
+
 using namespace std;
 using json = nlohmann::json;
+
+template<class F>
+string dump_fst(const F& a, const string& dir_path) {
+    auto name = "res_" + std::to_string(ID_FST_NUM) + ".fst";
+    a.Write(dir_path + name);
+    ID_FST_NUM++;
+    return name;
+}
 
 template<class F>
 string fst_to_string(const F& a) {
@@ -53,19 +63,17 @@ string weight_to_string(const W& a) {
 }
 
 template<class F>
-void compute_fst_invert(const F& raw_fst, json& j) {
+void compute_fst_invert(const F& raw_fst, json& j, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
     fst::Invert(&fst_out);
-    j["invert"]["result"] = fst_to_string(fst_out);
+    j["invert"]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F>
 void compute_fst_project_input(const F& raw_fst, json& j, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
     fst::Project(&fst_out, fst::ProjectType::PROJECT_INPUT);
-    auto name = "fst_project_input.fst";
-    j["project_input"]["result_path"] = name;
-    fst_out.Write(dir_path + name);
+    j["project_input"]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F>
@@ -73,8 +81,7 @@ void compute_fst_project_output(const F& raw_fst, json& j, const string& dir_pat
     auto fst_out = *raw_fst.Copy();
     fst::Project(&fst_out, fst::ProjectType::PROJECT_OUTPUT);
     auto name = "fst_project_output.fst";
-    j["project_output"]["result_path"] = name;
-    fst_out.Write(dir_path + name);
+    j["project_output"]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F>
@@ -1060,7 +1067,7 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     raw_const_fst.Write(strm_aligned, write_opts);
 
     std::cout << "Invert" << std::endl;
-    compute_fst_invert(raw_fst, data);
+    compute_fst_invert(raw_fst, data, dir_path);
 
     std::cout << "Project Input" << std::endl;
     compute_fst_project_input(raw_fst, data, dir_path);

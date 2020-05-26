@@ -1,3 +1,5 @@
+use crate::fst_properties::mutable_properties::invert_properties;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 
@@ -28,6 +30,8 @@ use crate::semirings::Semiring;
 /// ![invert_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/invert_out.svg?sanitize=true)
 ///
 pub fn invert<W: Semiring, F: MutableFst<W>>(fst: &mut F) {
+    let props = fst.properties_revamp();
+
     for state in 0..fst.num_states() {
         unsafe {
             let mut it_tr = fst.tr_iter_unchecked_mut_revamp(state);
@@ -39,4 +43,6 @@ pub fn invert<W: Semiring, F: MutableFst<W>>(fst: &mut F) {
             }
         }
     }
+
+    fst.set_properties_with_mask(invert_properties(props), FstProperties::all_properties());
 }

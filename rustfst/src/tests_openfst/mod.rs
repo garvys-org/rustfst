@@ -141,7 +141,7 @@ impl FstOperationResultPath {
 pub struct ParsedFstTestData {
     rmepsilon: SimpleStaticLazyOperationResult,
     name: String,
-    invert: FstOperationResult,
+    invert: FstOperationResultPath,
     weight_type: String,
     raw: FstOperationResultPath,
     project_output: FstOperationResultPath,
@@ -254,7 +254,7 @@ where
         Self {
             rmepsilon: data.rmepsilon.parse(),
             name: data.name.clone(),
-            invert: data.invert.parse(),
+            invert: data.invert.parse(absolute_path_folder),
             raw: data.raw.parse(absolute_path_folder),
             project_output: data.project_output.parse(absolute_path_folder),
             connect: data.connect.parse(),

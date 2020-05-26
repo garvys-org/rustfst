@@ -135,8 +135,67 @@ pub fn factor_weight_properties(_inprops: FstProperties) -> FstProperties {
     unimplemented!()
 }
 
-pub fn invert_properties(_inprops: FstProperties) -> FstProperties {
-    unimplemented!()
+pub fn invert_properties(inprops: FstProperties) -> FstProperties {
+    let mut outprops = (FstProperties::ACCEPTOR
+        | FstProperties::NOT_ACCEPTOR
+        | FstProperties::EPSILONS
+        | FstProperties::NO_EPSILONS
+        | FstProperties::WEIGHTED
+        | FstProperties::UNWEIGHTED
+        | FstProperties::WEIGHTED_CYCLES
+        | FstProperties::UNWEIGHTED_CYCLES
+        | FstProperties::CYCLIC
+        | FstProperties::ACYCLIC
+        | FstProperties::INITIAL_CYCLIC
+        | FstProperties::INITIAL_ACYCLIC
+        | FstProperties::TOP_SORTED
+        | FstProperties::NOT_TOP_SORTED
+        | FstProperties::ACCESSIBLE
+        | FstProperties::NOT_ACCESSIBLE
+        | FstProperties::COACCESSIBLE
+        | FstProperties::NOT_COACCESSIBLE
+        | FstProperties::STRING
+        | FstProperties::NOT_STRING)
+        & inprops;
+    if inprops.contains(FstProperties::I_DETERMINISTIC) {
+        outprops |= FstProperties::O_DETERMINISTIC;
+    }
+    if inprops.contains(FstProperties::NOT_I_DETERMINISTIC) {
+        outprops |= FstProperties::NOT_O_DETERMINISTIC;
+    }
+    if inprops.contains(FstProperties::O_DETERMINISTIC) {
+        outprops |= FstProperties::I_DETERMINISTIC;
+    }
+    if inprops.contains(FstProperties::NOT_O_DETERMINISTIC) {
+        outprops |= FstProperties::NOT_I_DETERMINISTIC;
+    }
+
+    if inprops.contains(FstProperties::I_EPSILONS) {
+        outprops |= FstProperties::O_EPSILONS;
+    }
+    if inprops.contains(FstProperties::NO_I_EPSILONS) {
+        outprops |= FstProperties::NO_O_EPSILONS;
+    }
+    if inprops.contains(FstProperties::O_EPSILONS) {
+        outprops |= FstProperties::I_EPSILONS;
+    }
+    if inprops.contains(FstProperties::NO_O_EPSILONS) {
+        outprops |= FstProperties::NO_I_EPSILONS;
+    }
+
+    if inprops.contains(FstProperties::I_LABEL_SORTED) {
+        outprops |= FstProperties::O_LABEL_SORTED;
+    }
+    if inprops.contains(FstProperties::NOT_I_LABEL_SORTED) {
+        outprops |= FstProperties::NOT_O_LABEL_SORTED;
+    }
+    if inprops.contains(FstProperties::O_LABEL_SORTED) {
+        outprops |= FstProperties::I_LABEL_SORTED;
+    }
+    if inprops.contains(FstProperties::NOT_O_LABEL_SORTED) {
+        outprops |= FstProperties::NOT_I_LABEL_SORTED;
+    }
+    outprops
 }
 
 pub fn project_properties(inprops: FstProperties, project_type: ProjectType) -> FstProperties {
