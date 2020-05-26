@@ -145,14 +145,16 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
 
         for s in 0..self.states.len() {
             let mut to_delete = vec![];
-            for (idx, tr) in unsafe { self.tr_iter_unchecked_mut(s).enumerate() } {
+            let trs_mut = Arc::make_mut(&mut self.states[s].trs.0);
+            for (idx, tr) in trs_mut.iter_mut().enumerate() {
                 let t = new_id[tr.nextstate];
                 if t != -1 {
-                    tr.nextstate = t as usize;
+                    tr.nextstate = t as usize
                 } else {
                     to_delete.push(idx);
                 }
             }
+
             for i in to_delete.iter().rev() {
                 self.states[s].trs.remove(*i);
             }

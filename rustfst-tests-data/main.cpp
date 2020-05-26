@@ -101,15 +101,13 @@ void compute_fst_remove_epsilon(const F& raw_fst, json& j) {
     fst::RmEpsilon(&fst_out);
     j["rmepsilon"]["result_static"] = fst_to_string(fst_out);
     j["rmepsilon"]["result_lazy"] = fst_to_string(dyn_rmeps);
-
-
 }
 
 template<class F>
-void compute_fst_connect(const F& raw_fst, json& j) {
+void compute_fst_connect(const F& raw_fst, json& j, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
     fst::Connect(&fst_out);
-    j["connect"]["result"] = fst_to_string(fst_out);
+    j["connect"]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F>
@@ -1082,7 +1080,7 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     compute_fst_remove_epsilon(raw_fst, data);
 
     std::cout << "Connect" << std::endl;
-    compute_fst_connect(raw_fst, data);
+    compute_fst_connect(raw_fst, data, dir_path);
 
     std::cout << "Condense" << std::endl;
     compute_fst_condense(raw_fst, data);
