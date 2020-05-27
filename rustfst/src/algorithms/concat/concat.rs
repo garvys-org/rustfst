@@ -58,9 +58,7 @@ where
     F2: ExpandedFst<W>,
 {
     let props1 = fst_1.properties_revamp();
-    std::dbg!(props1);
     let props2 = fst_2.properties_revamp();
-    std::dbg!(props2);
     let start1 = fst_1.start();
     if start1.is_none() {
         return Ok(());
