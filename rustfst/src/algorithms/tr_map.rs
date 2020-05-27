@@ -4,6 +4,7 @@ use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::Tr;
 use crate::{Label, StateId, EPS_LABEL};
+use crate::fst_properties::FstProperties;
 
 /// Struct used to map final weights when performing a transition mapping.
 /// It will always be of the form `(EPS_LABEL, EPS_LABEL, final_weight)`
@@ -50,6 +51,8 @@ pub trait TrMapper<S: Semiring> {
 
     /// Specifies final action the mapper requires (see above).
     fn final_action(&self) -> MapFinalAction;
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties;
 }
 
 /// Maps every transition in the FST using an `TrMapper` object.
@@ -62,6 +65,8 @@ where
     if ifst.start().is_none() {
         return Ok(());
     }
+
+    let inprops = ifst.properties_revamp();
 
     let final_action = mapper.final_action();
     let mut superfinal: Option<StateId> = None;
@@ -155,6 +160,8 @@ where
             };
         }
     }
+
+    ifst.set_properties_with_mask(mapper.properties(inprops), FstProperties::all_properties());
 
     Ok(())
 }

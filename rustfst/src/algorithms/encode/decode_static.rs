@@ -4,6 +4,7 @@ use crate::algorithms::{encode::EncodeTable, rm_final_epsilon};
 use crate::algorithms::{FinalTr, MapFinalAction, TrMapper};
 use crate::fst_traits::MutableFst;
 use crate::{Semiring, Tr};
+use crate::fst_properties::FstProperties;
 
 struct DecodeMapper<W: Semiring> {
     encode_table: EncodeTable<W>,
@@ -40,6 +41,10 @@ impl<W: Semiring> TrMapper<W> for DecodeMapper<W> {
 
     fn final_action(&self) -> MapFinalAction {
         MapFinalAction::MapNoSuperfinal
+    }
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties {
+        unimplemented!()
     }
 }
 

@@ -3,6 +3,7 @@ use anyhow::Result;
 use crate::algorithms::{FinalTr, MapFinalAction, TrMapper, WeightConverter};
 use crate::semirings::Semiring;
 use crate::Tr;
+use crate::fst_properties::FstProperties;
 
 /// Mapper to add a constant to all weights.
 pub struct PlusMapper<W: Semiring> {
@@ -36,6 +37,10 @@ impl<S: Semiring> TrMapper<S> for PlusMapper<S> {
 
     fn final_action(&self) -> MapFinalAction {
         MapFinalAction::MapNoSuperfinal
+    }
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties {
+        inprops & FstProperties::weight_invariant_properties()
     }
 }
 

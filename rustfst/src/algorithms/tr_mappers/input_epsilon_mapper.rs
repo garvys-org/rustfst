@@ -4,6 +4,7 @@ use crate::algorithms::{FinalTr, MapFinalAction, TrMapper, WeightConverter};
 use crate::semirings::Semiring;
 use crate::Tr;
 use crate::EPS_LABEL;
+use crate::fst_properties::FstProperties;
 
 /// Mapper that converts all input symbols to epsilon.
 pub struct InputEpsilonMapper {}
@@ -20,6 +21,10 @@ impl<S: Semiring> TrMapper<S> for InputEpsilonMapper {
 
     fn final_action(&self) -> MapFinalAction {
         MapFinalAction::MapNoSuperfinal
+    }
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties {
+        (inprops & FstProperties::set_arc_properties())| FstProperties::I_EPSILONS | FstProperties::I_LABEL_SORTED
     }
 }
 

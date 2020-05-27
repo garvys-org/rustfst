@@ -3,6 +3,7 @@ use anyhow::Result;
 use crate::algorithms::{FinalTr, MapFinalAction, TrMapper, WeightConverter};
 use crate::semirings::Semiring;
 use crate::Tr;
+use crate::fst_properties::FstProperties;
 
 /// Mapper to map all non-Zero() weights to One().
 pub struct RmWeightMapper {}
@@ -26,6 +27,10 @@ impl<S: Semiring> TrMapper<S> for RmWeightMapper {
 
     fn final_action(&self) -> MapFinalAction {
         MapFinalAction::MapNoSuperfinal
+    }
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties {
+        (inprops & FstProperties::weight_invariant_properties()) | FstProperties::UNWEIGHTED
     }
 }
 

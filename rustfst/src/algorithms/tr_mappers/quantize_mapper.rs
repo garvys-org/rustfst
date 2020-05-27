@@ -4,6 +4,7 @@ use crate::algorithms::{FinalTr, MapFinalAction, TrMapper, WeightConverter};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::Tr;
 use crate::KDELTA;
+use crate::fst_properties::FstProperties;
 
 /// Mapper to quantize all weights.
 pub struct QuantizeMapper {}
@@ -23,6 +24,10 @@ impl<S: WeightQuantize + Semiring> TrMapper<S> for QuantizeMapper {
 
     fn final_action(&self) -> MapFinalAction {
         MapFinalAction::MapNoSuperfinal
+    }
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties {
+        inprops & FstProperties::weight_invariant_properties()
     }
 }
 

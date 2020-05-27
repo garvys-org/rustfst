@@ -6,6 +6,7 @@ use crate::algorithms::encode::{EncodeTable, EncodeTableMut};
 use crate::algorithms::{FinalTr, MapFinalAction, TrMapper};
 use crate::fst_traits::MutableFst;
 use crate::{Semiring, Tr};
+use crate::fst_properties::FstProperties;
 
 struct EncodeMapper<W: Semiring> {
     encode_table: EncodeTable<W>,
@@ -57,6 +58,10 @@ impl<W: Semiring> TrMapper<W> for EncodeMapper<W> {
         } else {
             MapFinalAction::MapNoSuperfinal
         }
+    }
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties {
+        unimplemented!()
     }
 }
 
