@@ -108,31 +108,16 @@ mod test_weights;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct FstOperationResult {
-    result: String,
-}
-
-impl FstOperationResult {
-    fn parse<W, F>(&self) -> F
-    where
-        W: SerializableSemiring,
-        F: SerializableFst<W>,
-    {
-        F::from_text_string(self.result.as_str()).unwrap()
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct FstOperationResultPath {
     result_path: String,
 }
 
-impl FstOperationResultPath {
-    fn parse<W, F>(&self, dir_path: &Path) -> F
+impl FstOperationResult {
+    fn parse<W, F, P: AsRef<Path>>(&self, dir_path: P) -> F
     where
         W: SerializableSemiring,
         F: SerializableFst<W>,
     {
-        let path = dir_path.join(&self.result_path);
+        let path = dir_path.as_ref().join(&self.result_path);
         F::read(path).unwrap()
     }
 }
@@ -141,32 +126,32 @@ impl FstOperationResultPath {
 pub struct ParsedFstTestData {
     rmepsilon: SimpleStaticLazyOperationResult,
     name: String,
-    invert: FstOperationResultPath,
+    invert: FstOperationResult,
     weight_type: String,
-    raw: FstOperationResultPath,
-    project_output: FstOperationResultPath,
-    connect: FstOperationResultPath,
+    raw: FstOperationResult,
+    project_output: FstOperationResult,
+    connect: FstOperationResult,
     condense: CondenseOperationResult,
-    weight_pushing_initial: FstOperationResultPath,
-    weight_pushing_final: FstOperationResultPath,
-    project_input: FstOperationResultPath,
+    weight_pushing_initial: FstOperationResult,
+    weight_pushing_final: FstOperationResult,
+    project_input: FstOperationResult,
     reverse: FstOperationResult,
-    tr_map_identity: FstOperationResultPath,
-    tr_map_rmweight: FstOperationResultPath,
-    tr_map_invert: FstOperationResultPath,
-    tr_map_input_epsilon: FstOperationResultPath,
-    tr_map_output_epsilon: FstOperationResultPath,
+    tr_map_identity: FstOperationResult,
+    tr_map_rmweight: FstOperationResult,
+    tr_map_invert: FstOperationResult,
+    tr_map_input_epsilon: FstOperationResult,
+    tr_map_output_epsilon: FstOperationResult,
     tr_map_plus: TrMapWithWeightOperationResult,
     tr_map_times: TrMapWithWeightOperationResult,
-    tr_map_quantize: FstOperationResultPath,
+    tr_map_quantize: FstOperationResult,
     encode: Vec<EncodeOperationResult>,
     encode_decode: Vec<EncodeOperationResult>,
-    state_map_tr_sum: FstOperationResultPath,
-    state_map_tr_unique: FstOperationResultPath,
+    state_map_tr_sum: FstOperationResult,
+    state_map_tr_unique: FstOperationResult,
     determinize: Vec<DeterminizeOperationResult>,
     minimize: Vec<MinimizeOperationResult>,
-    tr_sort_ilabel: FstOperationResultPath,
-    tr_sort_olabel: FstOperationResultPath,
+    tr_sort_ilabel: FstOperationResult,
+    tr_sort_olabel: FstOperationResult,
     topsort: FstOperationResult,
     fst_properties: HashMap<String, bool>,
     raw_vector_bin_path: String,
@@ -252,34 +237,50 @@ where
 {
     pub fn new(data: &ParsedFstTestData, absolute_path_folder: &Path) -> Self {
         Self {
-            rmepsilon: data.rmepsilon.parse(),
+            rmepsilon: data.rmepsilon.parse(absolute_path_folder),
             name: data.name.clone(),
             invert: data.invert.parse(absolute_path_folder),
             raw: data.raw.parse(absolute_path_folder),
             project_output: data.project_output.parse(absolute_path_folder),
             connect: data.connect.parse(absolute_path_folder),
-            condense: data.condense.parse(),
+            condense: data.condense.parse(absolute_path_folder),
             weight_pushing_initial: data.weight_pushing_initial.parse(absolute_path_folder),
             weight_pushing_final: data.weight_pushing_final.parse(absolute_path_folder),
             project_input: data.project_input.parse(absolute_path_folder),
-            reverse: data.reverse.parse(),
+            reverse: data.reverse.parse(absolute_path_folder),
             tr_map_identity: data.tr_map_identity.parse(absolute_path_folder),
             tr_map_rmweight: data.tr_map_rmweight.parse(absolute_path_folder),
             tr_map_invert: data.tr_map_invert.parse(absolute_path_folder),
             tr_map_input_epsilon: data.tr_map_input_epsilon.parse(absolute_path_folder),
             tr_map_output_epsilon: data.tr_map_output_epsilon.parse(absolute_path_folder),
-            tr_map_plus: data.tr_map_plus.parse(),
-            tr_map_times: data.tr_map_times.parse(),
+            tr_map_plus: data.tr_map_plus.parse(absolute_path_folder),
+            tr_map_times: data.tr_map_times.parse(absolute_path_folder),
             tr_map_quantize: data.tr_map_quantize.parse(absolute_path_folder),
-            encode: data.encode.iter().map(|v| v.parse()).collect(),
-            encode_decode: data.encode_decode.iter().map(|v| v.parse()).collect(),
+            encode: data
+                .encode
+                .iter()
+                .map(|v| v.parse(absolute_path_folder))
+                .collect(),
+            encode_decode: data
+                .encode_decode
+                .iter()
+                .map(|v| v.parse(absolute_path_folder))
+                .collect(),
             state_map_tr_sum: data.state_map_tr_sum.parse(absolute_path_folder),
             state_map_tr_unique: data.state_map_tr_unique.parse(absolute_path_folder),
-            determinize: data.determinize.iter().map(|v| v.parse()).collect(),
-            minimize: data.minimize.iter().map(|v| v.parse()).collect(),
+            determinize: data
+                .determinize
+                .iter()
+                .map(|v| v.parse(absolute_path_folder))
+                .collect(),
+            minimize: data
+                .minimize
+                .iter()
+                .map(|v| v.parse(absolute_path_folder))
+                .collect(),
             tr_sort_ilabel: data.tr_sort_ilabel.parse(absolute_path_folder),
             tr_sort_olabel: data.tr_sort_olabel.parse(absolute_path_folder),
-            topsort: data.topsort.parse(),
+            topsort: data.topsort.parse(absolute_path_folder),
             fst_properties: parse_fst_properties(&data.fst_properties),
             raw_vector_bin_path: absolute_path_folder
                 .join(&data.raw_vector_bin_path)
@@ -291,28 +292,44 @@ where
                 .join(&data.raw_const_aligned_bin_path)
                 .to_path_buf(),
             shortest_distance: data.shortest_distance.iter().map(|v| v.parse()).collect(),
-            shortest_path: data.shortest_path.iter().map(|v| v.parse()).collect(),
+            shortest_path: data
+                .shortest_path
+                .iter()
+                .map(|v| v.parse(absolute_path_folder))
+                .collect(),
             gallic_encode_decode: data
                 .gallic_encode_decode
                 .iter()
-                .map(|v| v.parse())
+                .map(|v| v.parse(absolute_path_folder))
                 .collect(),
             factor_weight_identity: data
                 .factor_weight_identity
                 .iter()
-                .map(|v| v.parse())
+                .map(|v| v.parse(absolute_path_folder))
                 .collect(),
             factor_weight_gallic: data
                 .factor_weight_gallic
                 .iter()
-                .map(|v| v.parse())
+                .map(|v| v.parse(absolute_path_folder))
                 .collect(),
-            push: data.push.iter().map(|v| v.parse()).collect(),
+            push: data
+                .push
+                .iter()
+                .map(|v| v.parse(absolute_path_folder))
+                .collect(),
             replace: data.replace.iter().map(|v| v.parse()).collect(),
-            union: data.union.iter().map(|v| v.parse()).collect(),
-            concat: data.concat.iter().map(|v| v.parse()).collect(),
-            closure_plus: data.closure_plus.parse(),
-            closure_star: data.closure_star.parse(),
+            union: data
+                .union
+                .iter()
+                .map(|v| v.parse(absolute_path_folder))
+                .collect(),
+            concat: data
+                .concat
+                .iter()
+                .map(|v| v.parse(absolute_path_folder))
+                .collect(),
+            closure_plus: data.closure_plus.parse(absolute_path_folder),
+            closure_star: data.closure_star.parse(absolute_path_folder),
             raw_vector_with_symt_bin_path: absolute_path_folder
                 .join(&data.raw_vector_with_symt_bin_path)
                 .to_path_buf(),

@@ -14,11 +14,12 @@ use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
 use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct TrMapWithWeightOperationResult {
     weight: String,
-    result: String,
+    result_path: String,
 }
 
 pub struct TrMapWithWeightTestData<W, F>
@@ -31,14 +32,15 @@ where
 }
 
 impl TrMapWithWeightOperationResult {
-    pub fn parse<W, F>(&self) -> TrMapWithWeightTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> TrMapWithWeightTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         TrMapWithWeightTestData {
             weight: W::parse_text(self.weight.as_str()).unwrap().1,
-            result: F::from_text_string(self.result.as_str()).unwrap(),
+            result: F::read(dir_path.as_ref().join(&self.result_path)).unwrap(),
         }
     }
 }

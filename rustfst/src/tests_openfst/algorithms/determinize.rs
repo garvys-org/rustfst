@@ -14,12 +14,13 @@ use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
 use crate::tests_openfst::FstTestData;
 use bitflags::_core::marker::PhantomData;
+use std::path::Path;
 use std::sync::Arc;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DeterminizeOperationResult {
     det_type: String,
-    result: String,
+    result_path: String,
 }
 
 pub struct DeterminizeTestData<W, F>
@@ -33,10 +34,11 @@ where
 }
 
 impl DeterminizeOperationResult {
-    pub fn parse<W, F>(&self) -> DeterminizeTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> DeterminizeTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         DeterminizeTestData {
             det_type: match self.det_type.as_str() {
@@ -45,9 +47,9 @@ impl DeterminizeOperationResult {
                 "disambiguate" => DeterminizeType::DeterminizeDisambiguate,
                 _ => panic!("Unknown determinize type : {:?}", self.det_type),
             },
-            result: match self.result.as_str() {
+            result: match self.result_path.as_str() {
                 "error" => Err(format_err!("lol")),
-                _ => F::from_text_string(self.result.as_str()),
+                _ => F::read(dir_path.as_ref().join(&self.result_path)),
             },
             w: PhantomData,
         }

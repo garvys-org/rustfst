@@ -9,11 +9,12 @@ use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::algorithms::lazy_fst::compare_fst_static_lazy;
 use crate::tests_openfst::FstTestData;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SimpleStaticLazyOperationResult {
-    result_static: String,
-    result_lazy: String,
+    result_static_path: String,
+    result_lazy_path: String,
 }
 
 pub struct SimpleStaticLazyTestData<W, F>
@@ -27,14 +28,15 @@ where
 }
 
 impl SimpleStaticLazyOperationResult {
-    pub fn parse<W, F>(&self) -> SimpleStaticLazyTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> SimpleStaticLazyTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         SimpleStaticLazyTestData {
-            result_static: F::from_text_string(self.result_static.as_str()).unwrap(),
-            result_lazy: F::from_text_string(self.result_lazy.as_str()).unwrap(),
+            result_static: F::read(dir_path.as_ref().join(&self.result_static_path)).unwrap(),
+            result_lazy: F::read(dir_path.as_ref().join(&self.result_lazy_path)).unwrap(),
             w: PhantomData,
         }
     }

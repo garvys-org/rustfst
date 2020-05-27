@@ -10,12 +10,13 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EncodeOperationResult {
     encode_labels: bool,
     encode_weights: bool,
-    result: String,
+    result_path: String,
 }
 
 pub struct EncodeTestData<W, F>
@@ -30,15 +31,16 @@ where
 }
 
 impl EncodeOperationResult {
-    pub fn parse<W, F>(&self) -> EncodeTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> EncodeTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         EncodeTestData {
             encode_weights: self.encode_weights,
             encode_labels: self.encode_labels,
-            result: F::from_text_string(self.result.as_str()).unwrap(),
+            result: F::read(dir_path.as_ref().join(&self.result_path)).unwrap(),
             w: PhantomData,
         }
     }

@@ -13,12 +13,13 @@ use crate::semirings::WeightQuantize;
 use crate::tests_openfst::FstTestData;
 
 use super::lazy_fst::compare_fst_static_lazy;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FwIdentityOperationResult {
     factor_final_weights: bool,
     factor_tr_weights: bool,
-    result: String,
+    result_path: String,
 }
 
 pub struct FwIdentityTestData<W, F>
@@ -33,15 +34,16 @@ where
 }
 
 impl FwIdentityOperationResult {
-    pub fn parse<W, F>(&self) -> FwIdentityTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> FwIdentityTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         FwIdentityTestData {
             factor_final_weights: self.factor_final_weights,
             factor_tr_weights: self.factor_tr_weights,
-            result: F::from_text_string(self.result.as_str()).unwrap(),
+            result: F::read(dir_path.as_ref().join(&self.result_path)).unwrap(),
             w: PhantomData,
         }
     }

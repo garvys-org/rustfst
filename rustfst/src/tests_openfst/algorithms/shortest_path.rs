@@ -12,12 +12,13 @@ use crate::semirings::WeightQuantize;
 use crate::semirings::{Semiring, SerializableSemiring};
 use crate::tests_openfst::FstTestData;
 use crate::FstPath;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ShorestPathOperationResult {
     unique: bool,
     nshortest: usize,
-    result: String,
+    result_path: String,
 }
 
 pub struct ShortestPathTestData<W, F>
@@ -32,17 +33,18 @@ where
 }
 
 impl ShorestPathOperationResult {
-    pub fn parse<W, F>(&self) -> ShortestPathTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> ShortestPathTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         ShortestPathTestData {
             unique: self.unique,
             nshortest: self.nshortest,
-            result: match self.result.as_str() {
+            result: match self.result_path.as_str() {
                 "error" => Err(format_err!("lol")),
-                _ => F::from_text_string(self.result.as_str()),
+                _ => F::read(dir_path.as_ref().join(&self.result_path)),
             },
             w: PhantomData,
         }

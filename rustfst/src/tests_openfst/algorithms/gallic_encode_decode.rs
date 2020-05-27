@@ -14,11 +14,12 @@ use crate::semirings::GallicWeightRestrict;
 use crate::semirings::GallicWeightRight;
 use crate::semirings::{GallicWeight, SerializableSemiring};
 use crate::tests_openfst::FstTestData;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GallicOperationResult {
     gallic_type: String,
-    result: String,
+    result_path: String,
 }
 
 pub struct GallicTestData<W, F>
@@ -32,14 +33,15 @@ where
 }
 
 impl GallicOperationResult {
-    pub fn parse<W, F>(&self) -> GallicTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> GallicTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         GallicTestData {
             gallic_type: self.gallic_type.clone(),
-            result: F::from_text_string(self.result.as_str()).unwrap(),
+            result: F::read(dir_path.as_ref().join(&self.result_path)).unwrap(),
             w: PhantomData,
         }
     }

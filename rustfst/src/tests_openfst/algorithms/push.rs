@@ -8,6 +8,7 @@ use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuan
 use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 use std::marker::PhantomData;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PushOperationResult {
@@ -16,7 +17,7 @@ pub struct PushOperationResult {
     remove_common_affix: bool,
     remove_total_weight: bool,
     reweight_to_final: bool,
-    result: String,
+    result_path: String,
 }
 
 pub struct PushTestData<W, F>
@@ -34,10 +35,11 @@ where
 }
 
 impl PushOperationResult {
-    pub fn parse<W, F>(&self) -> PushTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> PushTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         PushTestData {
             push_labels: self.push_labels,
@@ -45,7 +47,7 @@ impl PushOperationResult {
             remove_common_affix: self.remove_common_affix,
             remove_total_weight: self.remove_total_weight,
             reweight_to_final: self.reweight_to_final,
-            result: F::from_text_string(self.result.as_str()).unwrap(),
+            result: F::read(dir_path.as_ref().join(&self.result_path)).unwrap(),
             w: PhantomData,
         }
     }

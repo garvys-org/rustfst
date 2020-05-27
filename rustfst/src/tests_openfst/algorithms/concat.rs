@@ -9,12 +9,13 @@ use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::algorithms::lazy_fst::compare_fst_static_lazy;
 use crate::tests_openfst::FstTestData;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConcatOperationResult {
-    fst_2: String,
-    result_static: String,
-    result_lazy: String,
+    fst_2_path: String,
+    result_static_path: String,
+    result_lazy_path: String,
 }
 
 pub struct ConcatTestData<W, F>
@@ -29,15 +30,16 @@ where
 }
 
 impl ConcatOperationResult {
-    pub fn parse<W, F>(&self) -> ConcatTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> ConcatTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         ConcatTestData {
-            fst_2: F::from_text_string(self.fst_2.as_str()).unwrap(),
-            result_static: F::from_text_string(self.result_static.as_str()).unwrap(),
-            result_lazy: F::from_text_string(self.result_lazy.as_str()).unwrap(),
+            fst_2: F::read(dir_path.as_ref().join(&self.fst_2_path)).unwrap(),
+            result_static: F::read(dir_path.as_ref().join(&self.result_static_path)).unwrap(),
+            result_lazy: F::read(dir_path.as_ref().join(&self.result_lazy_path)).unwrap(),
             w: PhantomData,
         }
     }
