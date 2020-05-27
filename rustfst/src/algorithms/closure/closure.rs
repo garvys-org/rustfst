@@ -1,6 +1,8 @@
 use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::closure::ClosureType;
+use crate::fst_properties::mutable_properties::closure_properties;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::tr::Tr;
@@ -27,6 +29,7 @@ where
     W: Semiring,
     F: MutableFst<W>,
 {
+    let props = fst.properties_revamp();
     if let Some(start_state) = fst.start() {
         let final_states_id: Vec<_> = fst
             .final_states_iter()
@@ -60,4 +63,9 @@ where
             fst.set_final_unchecked(nstart, W::one());
         }
     }
+
+    fst.set_properties_with_mask(
+        closure_properties(props, false),
+        FstProperties::all_properties(),
+    );
 }

@@ -1,3 +1,4 @@
+use crate::algorithms::closure::ClosureType;
 use crate::algorithms::ProjectType;
 use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
@@ -19,13 +20,13 @@ pub fn set_final_properties<W: Semiring>(
 ) -> FstProperties {
     let mut outprops = inprops;
     if let Some(w) = old_weight {
-        if !w.is_one() {
+        if !w.is_zero() && !w.is_one() {
             outprops &= !FstProperties::WEIGHTED;
         }
     }
 
     if let Some(w) = new_weight {
-        if !w.is_one() {
+        if !w.is_zero() && !w.is_one() {
             outprops |= FstProperties::WEIGHTED;
             outprops &= !FstProperties::UNWEIGHTED;
         }
@@ -80,7 +81,7 @@ pub fn add_tr_properties<W: Semiring>(
     }
     if tr.nextstate <= state {
         outprops |= FstProperties::NOT_TOP_SORTED;
-        outprops &= FstProperties::TOP_SORTED;
+        outprops &= !FstProperties::TOP_SORTED;
     }
     outprops &= FstProperties::add_arc_properties()
         | FstProperties::ACCEPTOR
@@ -111,8 +112,37 @@ pub fn delete_trs_properties(inprops: FstProperties) -> FstProperties {
     inprops & FstProperties::delete_arcs_properties()
 }
 
-pub fn closure_properties(_inprops: FstProperties, _star: bool) -> FstProperties {
-    unimplemented!()
+pub fn closure_properties(inprops: FstProperties, delayed: bool) -> FstProperties {
+    let mut outprops =
+        (FstProperties::ACCEPTOR | FstProperties::UNWEIGHTED | FstProperties::ACCESSIBLE) & inprops;
+    if inprops.contains(FstProperties::UNWEIGHTED) {
+        outprops |= FstProperties::UNWEIGHTED_CYCLES;
+    }
+    if !delayed {
+        outprops |= (FstProperties::COACCESSIBLE
+            | FstProperties::NOT_TOP_SORTED
+            | FstProperties::NOT_STRING)
+            & inprops;
+    }
+    if !delayed || inprops.contains(FstProperties::ACCESSIBLE) {
+        outprops |= (FstProperties::NOT_ACCEPTOR
+            | FstProperties::NOT_I_DETERMINISTIC
+            | FstProperties::NOT_O_DETERMINISTIC
+            | FstProperties::NOT_I_LABEL_SORTED
+            | FstProperties::NOT_O_LABEL_SORTED
+            | FstProperties::WEIGHTED
+            | FstProperties::WEIGHTED_CYCLES
+            | FstProperties::NOT_ACCESSIBLE
+            | FstProperties::NOT_COACCESSIBLE)
+            & inprops;
+        if inprops.contains(FstProperties::WEIGHTED)
+            && inprops.contains(FstProperties::ACCESSIBLE)
+            && inprops.contains(FstProperties::COACCESSIBLE)
+        {
+            outprops |= FstProperties::WEIGHTED_CYCLES;
+        }
+    }
+    outprops
 }
 
 pub fn complement_properties(_inprops: FstProperties) -> FstProperties {
@@ -123,8 +153,65 @@ pub fn compose_properties(_inprops1: FstProperties, _inprops2: FstProperties) ->
     unimplemented!()
 }
 
-pub fn concat_properties(_inprops1: FstProperties, _inprops2: FstProperties) -> FstProperties {
-    unimplemented!()
+pub fn concat_properties(
+    inprops1: FstProperties,
+    inprops2: FstProperties,
+    delayed: bool,
+) -> FstProperties {
+    let mut outprops = (FstProperties::ACCEPTOR
+        | FstProperties::UNWEIGHTED
+        | FstProperties::UNWEIGHTED_CYCLES
+        | FstProperties::ACYCLIC)
+        & inprops1
+        & inprops2;
+    let empty1 = delayed; // Can the first FST be the empty machine?
+    let empty2 = delayed; // Can the second FST be the empty machine?
+    if !delayed {
+        outprops |= (FstProperties::NOT_TOP_SORTED | FstProperties::NOT_STRING) & inprops1;
+        outprops |= (FstProperties::NOT_TOP_SORTED | FstProperties::NOT_STRING) & inprops2;
+    }
+    if !empty1 {
+        outprops |= (FstProperties::INITIAL_ACYCLIC | FstProperties::INITIAL_CYCLIC) & inprops1;
+    }
+    if !delayed || inprops1.contains(FstProperties::ACCESSIBLE) {
+        outprops |= (FstProperties::NOT_ACCEPTOR
+            | FstProperties::NOT_I_DETERMINISTIC
+            | FstProperties::NOT_O_DETERMINISTIC
+            | FstProperties::EPSILONS
+            | FstProperties::I_EPSILONS
+            | FstProperties::O_EPSILONS
+            | FstProperties::NOT_I_LABEL_SORTED
+            | FstProperties::NOT_O_LABEL_SORTED
+            | FstProperties::WEIGHTED
+            | FstProperties::WEIGHTED_CYCLES
+            | FstProperties::CYCLIC
+            | FstProperties::NOT_ACCESSIBLE
+            | FstProperties::NOT_COACCESSIBLE)
+            & inprops1;
+    }
+    if (inprops1.contains(FstProperties::ACCESSIBLE | FstProperties::COACCESSIBLE)) && !empty1 {
+        outprops |= FstProperties::ACCESSIBLE & inprops2;
+        if !empty2 {
+            outprops |= FstProperties::COACCESSIBLE & inprops2;
+        }
+        if !delayed || inprops2.contains(FstProperties::ACCESSIBLE) {
+            outprops |= (FstProperties::NOT_ACCEPTOR
+                | FstProperties::NOT_I_DETERMINISTIC
+                | FstProperties::NOT_O_DETERMINISTIC
+                | FstProperties::EPSILONS
+                | FstProperties::I_EPSILONS
+                | FstProperties::O_EPSILONS
+                | FstProperties::NOT_I_LABEL_SORTED
+                | FstProperties::NOT_O_LABEL_SORTED
+                | FstProperties::WEIGHTED
+                | FstProperties::WEIGHTED_CYCLES
+                | FstProperties::CYCLIC
+                | FstProperties::NOT_ACCESSIBLE
+                | FstProperties::NOT_COACCESSIBLE)
+                & inprops2;
+        }
+    }
+    outprops
 }
 
 pub fn determinize_properties(_inprops: FstProperties) -> FstProperties {

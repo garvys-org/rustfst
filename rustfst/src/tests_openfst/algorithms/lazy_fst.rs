@@ -104,5 +104,7 @@ where
 
     assert_eq!(fst_data_static, fst_data_lazy);
 
+    assert_eq!(fst_static.properties_revamp(), fst_lazy.properties_revamp());
+
     Ok(())
 }

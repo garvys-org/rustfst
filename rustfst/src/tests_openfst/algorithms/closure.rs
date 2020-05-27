@@ -8,6 +8,7 @@ use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::algorithms::lazy_fst::compare_fst_static_lazy;
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 use std::path::Path;
 
@@ -49,16 +50,10 @@ where
     let closure_test_data = &test_data.closure_plus;
     let mut fst_res_static = test_data.raw.clone();
     closure(&mut fst_res_static, ClosureType::ClosurePlus);
-
-    assert_eq!(
-        closure_test_data.result_static,
-        fst_res_static,
-        "{}",
-        error_message_fst!(
-            closure_test_data.result_static,
-            fst_res_static,
-            format!("Closure plus failed")
-        )
+    test_eq_fst(
+        &closure_test_data.result_static,
+        &fst_res_static,
+        "Closure plus",
     );
     Ok(())
 }
@@ -70,16 +65,10 @@ where
     let closure_test_data = &test_data.closure_star;
     let mut fst_res_static = test_data.raw.clone();
     closure(&mut fst_res_static, ClosureType::ClosureStar);
-
-    assert_eq!(
-        closure_test_data.result_static,
-        fst_res_static,
-        "{}",
-        error_message_fst!(
-            closure_test_data.result_static,
-            fst_res_static,
-            format!("Closure star failed")
-        )
+    test_eq_fst(
+        &closure_test_data.result_static,
+        &fst_res_static,
+        "Closure star",
     );
     Ok(())
 }

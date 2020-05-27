@@ -8,6 +8,7 @@ use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::algorithms::lazy_fst::compare_fst_static_lazy;
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 use std::path::Path;
 
@@ -53,16 +54,7 @@ where
         let mut fst_res_static = test_data.raw.clone();
         concat(&mut fst_res_static, &concat_test_data.fst_2)?;
 
-        assert_eq!(
-            concat_test_data.result_static,
-            fst_res_static,
-            "{}",
-            error_message_fst!(
-                concat_test_data.result_static,
-                fst_res_static,
-                format!("Concat failed")
-            )
-        );
+        test_eq_fst(&concat_test_data.result_static, &fst_res_static, "Concat");
     }
     Ok(())
 }

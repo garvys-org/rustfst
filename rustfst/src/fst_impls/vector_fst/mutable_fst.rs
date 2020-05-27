@@ -346,7 +346,7 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
     }
 
     fn set_properties(&mut self, props: FstProperties) {
-        self.properties |= props;
+        self.properties = props;
     }
 
     fn set_properties_with_mask(&mut self, props: FstProperties, mask: FstProperties) {

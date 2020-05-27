@@ -1149,7 +1149,9 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     compute_fst_union(raw_fst, data, fst_test_data.get_fst_union(), dir_path);
 
     std::cout << "Concat" << std::endl;
-    compute_fst_concat(raw_fst, data, fst_test_data.get_fst_concat(), dir_path);
+    auto fst_concat = fst_test_data.get_fst_concat();
+    fst_concat.Properties(fst::kFstProperties, true);
+    compute_fst_concat(raw_fst, data, fst_concat, dir_path);
 
     std::cout << "Closure Plus" << std::endl;
     compute_fst_closure_plus(raw_fst, data, dir_path);
