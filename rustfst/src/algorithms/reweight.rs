@@ -1,5 +1,7 @@
 use anyhow::Result;
 
+use crate::fst_properties::mutable_properties::reweight_properties;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::{DivideType, WeaklyDivisibleSemiring};
 
@@ -127,6 +129,11 @@ where
             }
         }
     }
+
+    fst.set_properties_with_mask(
+        reweight_properties(fst.properties_revamp()),
+        FstProperties::all_properties(),
+    );
 
     Ok(())
 }

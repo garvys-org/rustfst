@@ -227,10 +227,10 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         self.update_properties_after_add_tr(source);
     }
 
+    /// DOESN'T MODIFY THE PROPERTIES
     unsafe fn set_trs_unchecked(&mut self, source: usize, trs: Vec<Tr<W>>) {
         let trs_inside = &mut self.states.get_unchecked_mut(source).trs;
         *Arc::make_mut(&mut trs_inside.0) = trs;
-        todo!("props");
     }
 
     fn delete_final_weight(&mut self, source: usize) -> Result<()> {

@@ -32,6 +32,7 @@ where
     }
 
     ofst.set_symts_from_fst(ifst);
+    ofst.set_properties_with_mask(ifst.properties_revamp(), ifst.properties_revamp());
 
     ofst
 }
@@ -47,6 +48,7 @@ where
     ofst.add_states(ifst.num_states());
 
     ofst.set_symts_from_fst(&ifst);
+    let iprops = ifst.properties_revamp();
 
     if let Some(start) = ifst.start() {
         unsafe { ofst.set_start_unchecked(start) };
@@ -64,6 +66,8 @@ where
             }
         }
     }
+
+    ofst.set_properties_with_mask(iprops, iprops);
 
     ofst
 }

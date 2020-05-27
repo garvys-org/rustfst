@@ -8,10 +8,11 @@ use crate::algorithms::WeightConverter;
 use crate::algorithms::{reverse, weight_convert};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
-use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::{Semiring, SerializableSemiring};
+use crate::semirings::{WeaklyDivisibleSemiring, WeightQuantize};
 use crate::Tr;
 
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 
 pub struct ReverseWeightConverter {}
@@ -46,17 +47,12 @@ where
 pub fn test_reverse<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
     F: SerializableFst<W> + MutableFst<W> + AllocableFst<W> + Display,
-    W: SerializableSemiring + WeaklyDivisibleSemiring,
+    W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
     <W as Semiring>::ReverseWeight: SerializableSemiring,
 {
     let fst_reverse: VectorFst<_> = reverse(&test_data.raw).unwrap();
     let mut mapper = ReverseWeightConverter {};
     let fst_reverse_2: F = weight_convert(&fst_reverse, &mut mapper)?;
-    assert_eq!(
-        test_data.reverse,
-        fst_reverse_2,
-        "{}",
-        error_message_fst!(test_data.reverse, fst_reverse, "Reverse")
-    );
+    test_eq_fst(&test_data.reverse, &fst_reverse_2, "Reverse");
     Ok(())
 }

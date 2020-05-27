@@ -385,8 +385,10 @@ pub fn reverse_properties(_inprops: FstProperties) -> FstProperties {
     unimplemented!()
 }
 
-pub fn reweight_properties(_inprops: FstProperties) -> FstProperties {
-    unimplemented!()
+pub fn reweight_properties(inprops: FstProperties) -> FstProperties {
+    let mut outprops = inprops & FstProperties::weight_invariant_properties();
+    outprops = outprops & !FstProperties::COACCESSIBLE;
+    outprops
 }
 
 pub fn rmepsilon_properties(_inprops: FstProperties) -> FstProperties {

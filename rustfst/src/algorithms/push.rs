@@ -171,7 +171,7 @@ pub fn push<W, F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushTy
 where
     F1: ExpandedFst<W>,
     F2: ExpandedFst<W> + MutableFst<W> + AllocableFst<W>,
-    W: 'static + WeaklyDivisibleSemiring + WeightQuantize,
+    W: WeaklyDivisibleSemiring + WeightQuantize,
     <W as Semiring>::ReverseWeight: 'static,
 {
     if push_type.intersects(PushType::PUSH_WEIGHTS) && !push_type.intersects(PushType::PUSH_LABELS)
