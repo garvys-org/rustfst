@@ -3,6 +3,7 @@ use std::cmp::Ordering;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::Tr;
+use crate::fst_properties::FstProperties;
 
 pub(crate) fn tr_compare<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> Ordering {
     if tr_1.ilabel < tr_2.ilabel {
@@ -29,11 +30,17 @@ pub(crate) fn tr_compare<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> Ordering {
 /// Keep a single instance of trs leaving the same state, going to the same state and
 /// with the same input labels, output labels and weight.
 pub fn tr_unique<W: Semiring, F: MutableFst<W>>(ifst: &mut F) {
+    let props = ifst.properties_revamp();
     unsafe {
         for s in 0..ifst.num_states() {
             ifst.unique_trs_unchecked(s);
         }
     }
+    let mut outprops = props & FstProperties::arcsort_properties() & FstProperties::delete_arcs_properties();
+    if ifst.num_states() == 0 {
+        outprops |= FstProperties::null_properties();
+    }
+    ifst.set_properties_with_mask(outprops, FstProperties::all_properties());
 }
 
 #[cfg(test)]

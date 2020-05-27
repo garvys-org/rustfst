@@ -280,14 +280,15 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         }
     }
 
+    /// DOESN'T MODIFY THE PROPERTIES
     unsafe fn unique_trs_unchecked(&mut self, state: usize) {
         let trs = &mut self.states.get_unchecked_mut(state).trs;
         let trs_vec = Arc::make_mut(&mut trs.0);
         trs_vec.sort_by(tr_compare);
         trs_vec.dedup();
-        todo!("props")
     }
 
+    /// DOESN'T MODIFY THE PROPERTIES
     unsafe fn sum_trs_unchecked(&mut self, state: usize) {
         let trs = &mut self.states.get_unchecked_mut(state).trs;
         let trs_vec = Arc::make_mut(&mut trs.0);
@@ -307,7 +308,6 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         }
         trs_vec.truncate(n_trs);
         // Truncate doesn't modify the capacity of the vector. Maybe a shrink_to_fit ?
-        todo!("props")
     }
 
     fn tr_iter_mut_revamp(&mut self, state_id: StateId) -> Result<TrsIterMut<W>> {
