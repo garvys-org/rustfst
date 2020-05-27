@@ -14,7 +14,7 @@ use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, Facto
 use crate::algorithms::partition::Partition;
 use crate::algorithms::queues::LifoQueue;
 use crate::algorithms::reverse;
-use crate::algorithms::tr_compares::ilabel_compare;
+use crate::algorithms::tr_compares::ILabelCompare;
 use crate::algorithms::tr_mappers::QuantizeMapper;
 use crate::algorithms::tr_unique;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
@@ -118,7 +118,7 @@ fn acceptor_minimize<W: Semiring, F: MutableFst<W> + ExpandedFst<W>>(
 
     if allow_acyclic_minimization && props.contains(FstProperties::ACYCLIC) {
         // Acyclic minimization
-        tr_sort(ifst, ilabel_compare);
+        tr_sort(ifst, ILabelCompare{});
         let minimizer = AcyclicMinimizer::new(ifst)?;
         merge_states(minimizer.get_partition(), ifst)?;
     } else {
@@ -419,7 +419,7 @@ fn pre_partition<W: Semiring, F: MutableFst<W>>(
 fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<Partition> {
     // Initialize
     let mut tr: VectorFst<W::ReverseWeight> = reverse(fst)?;
-    tr_sort(&mut tr, ilabel_compare);
+    tr_sort(&mut tr, ILabelCompare{});
     let mut partition = Partition::new(tr.num_states() - 1);
     let mut queue = LifoQueue::default();
     pre_partition(fst, &mut partition, &mut queue);

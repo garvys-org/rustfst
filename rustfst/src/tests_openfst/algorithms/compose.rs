@@ -19,7 +19,7 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::algorithms::compose::MatcherFst;
 use crate::algorithms::compose::{compose_with_config, ComposeConfig, LabelReachableData};
 use crate::algorithms::compose::{ComposeFilterEnum, ComposeFst, ComposeFstOpOptions};
-use crate::algorithms::{tr_compares::ilabel_compare, tr_sort};
+use crate::algorithms::{tr_compares::ILabelCompare, tr_sort};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
@@ -148,7 +148,7 @@ where
 
     // LabelLookAheadRelabeler::relabel(&mut fst2, graph1look.addon(), true)?;
 
-    tr_sort(&mut fst2, ilabel_compare);
+    tr_sort(&mut fst2, ILabelCompare{});
     let fst2 = Arc::new(fst2);
 
     let matcher1 = TMatcher1::new_with_data(

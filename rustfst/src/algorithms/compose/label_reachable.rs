@@ -6,7 +6,7 @@ use anyhow::Result;
 use itertools::Itertools;
 
 use crate::algorithms::compose::{IntervalSet, StateReachable};
-use crate::algorithms::tr_compares::{ilabel_compare, olabel_compare};
+use crate::algorithms::tr_compares::{ILabelCompare, OLabelCompare};
 use crate::algorithms::{fst_convert_from_ref, tr_sort};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
@@ -74,10 +74,10 @@ impl LabelReachableData {
         }
 
         if relabel_input {
-            tr_sort(fst, ilabel_compare);
+            tr_sort(fst, ILabelCompare{});
             fst.take_input_symbols();
         } else {
-            tr_sort(fst, olabel_compare);
+            tr_sort(fst, OLabelCompare{});
             fst.take_output_symbols();
         }
 

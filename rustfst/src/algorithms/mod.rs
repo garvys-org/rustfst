@@ -78,7 +78,7 @@ pub mod weight_converters;
 /// Functions to compare / sort the Trs of an FST.
 pub mod tr_compares {
     pub use super::isomorphic::tr_compare;
-    pub use super::tr_sort::{ilabel_compare, olabel_compare};
+    pub use super::tr_sort::{ILabelCompare, OLabelCompare, TrCompare};
 }
 
 pub mod lazy_fst_revamp;
