@@ -1,8 +1,9 @@
 use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
+use crate::fst_properties::mutable_properties::union_properties;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
+use crate::fst_traits::{AllocableFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::{Trs, EPS_LABEL};
@@ -58,9 +59,11 @@ where
     F1: AllocableFst<W> + MutableFst<W>,
     F2: ExpandedFst<W>,
 {
+    let props1 = fst_1.properties_revamp();
+    let props2 = fst_2.properties_revamp();
     let numstates1 = fst_1.num_states();
-    let fst_props_1 = fst_1.properties()?;
-    let initial_acyclic_1 = fst_props_1.contains(FstProperties::INITIAL_ACYCLIC);
+    let fst_props1 = fst_1.properties()?;
+    let initial_acyclic_1 = fst_props1.contains(FstProperties::INITIAL_ACYCLIC);
     let start2 = fst_2.start();
     if start2.is_none() {
         return Ok(());
@@ -106,5 +109,9 @@ where
             )
         };
     }
+    fst_1.set_properties_with_mask(
+        union_properties(props1, props2, false),
+        FstProperties::all_properties(),
+    );
     Ok(())
 }

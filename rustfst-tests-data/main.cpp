@@ -1146,7 +1146,9 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
    compute_fst_replace(raw_fst, data, fst_test_data);
 
     std::cout << "Union" << std::endl;
-    compute_fst_union(raw_fst, data, fst_test_data.get_fst_union(), dir_path);
+    auto fst_union = fst_test_data.get_fst_union();
+    fst_union.Properties(fst::kFstProperties, true);
+    compute_fst_union(raw_fst, data, fst_union, dir_path);
 
     std::cout << "Concat" << std::endl;
     auto fst_concat = fst_test_data.get_fst_concat();
@@ -1163,7 +1165,9 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
 //    compute_fst_matcher(raw_fst, data);
 
     std::cout << "Compose" << std::endl;
-    compute_fst_compose(raw_fst, data, fst_test_data.get_fst_compose());
+    auto fst_compose = fst_test_data.get_fst_compose();
+    fst_compose.Properties(fst::kFstProperties, true);
+    compute_fst_compose(raw_fst, data, fst_compose);
 
     std::cout << "State Reachable" << std::endl;
     compute_fst_state_reachable(raw_fst, data);

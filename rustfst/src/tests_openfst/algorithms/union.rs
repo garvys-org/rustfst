@@ -8,6 +8,7 @@ use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::algorithms::lazy_fst::compare_fst_static_lazy;
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 use std::path::Path;
 
@@ -53,15 +54,10 @@ where
         let mut fst_res_static = test_data.raw.clone();
         union(&mut fst_res_static, &union_test_data.fst_2)?;
 
-        assert_eq!(
-            union_test_data.result_static,
-            fst_res_static,
-            "{}",
-            error_message_fst!(
-                union_test_data.result_static,
-                fst_res_static,
-                format!("Union failed")
-            )
+        test_eq_fst(
+            &union_test_data.result_static,
+            &fst_res_static,
+            "Union failed",
         );
     }
     Ok(())

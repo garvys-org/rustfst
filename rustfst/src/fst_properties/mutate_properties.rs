@@ -401,6 +401,60 @@ pub fn synchronization_properties(_inprops: FstProperties) -> FstProperties {
     unimplemented!()
 }
 
-pub fn union_properties(_inprops: FstProperties) -> FstProperties {
-    unimplemented!()
+pub fn union_properties(
+    inprops1: FstProperties,
+    inprops2: FstProperties,
+    delayed: bool,
+) -> FstProperties {
+    let mut outprops = (FstProperties::ACCEPTOR
+        | FstProperties::UNWEIGHTED
+        | FstProperties::UNWEIGHTED_CYCLES
+        | FstProperties::ACYCLIC
+        | FstProperties::ACCESSIBLE)
+        & inprops1
+        & inprops2;
+    outprops |= FstProperties::INITIAL_ACYCLIC;
+    let empty1 = delayed; // Can the first FST be the empty machine?
+    let empty2 = delayed; // Can the second FST be the empty machine?
+    if !delayed {
+        outprops |= FstProperties::NOT_TOP_SORTED & inprops1;
+        outprops |= FstProperties::NOT_TOP_SORTED & inprops2;
+    }
+    if !empty1 && !empty2 {
+        outprops |= FstProperties::EPSILONS | FstProperties::I_EPSILONS | FstProperties::O_EPSILONS;
+        outprops |= FstProperties::COACCESSIBLE & inprops1 & inprops2;
+    }
+    // Note FstProperties::NOT_COACCESSIBLE does not hold because of FstProperties::INITIAL_ACYCLIC option.
+    if !delayed || inprops1.contains(FstProperties::ACCESSIBLE) {
+        outprops |= (FstProperties::NOT_ACCEPTOR
+            | FstProperties::NOT_I_DETERMINISTIC
+            | FstProperties::NOT_O_DETERMINISTIC
+            | FstProperties::EPSILONS
+            | FstProperties::I_EPSILONS
+            | FstProperties::O_EPSILONS
+            | FstProperties::NOT_I_LABEL_SORTED
+            | FstProperties::NOT_O_LABEL_SORTED
+            | FstProperties::WEIGHTED
+            | FstProperties::WEIGHTED_CYCLES
+            | FstProperties::CYCLIC
+            | FstProperties::NOT_ACCESSIBLE)
+            & inprops1;
+    }
+    if !delayed || inprops2.contains(FstProperties::ACCESSIBLE) {
+        outprops |= (FstProperties::NOT_ACCEPTOR
+            | FstProperties::NOT_I_DETERMINISTIC
+            | FstProperties::NOT_O_DETERMINISTIC
+            | FstProperties::EPSILONS
+            | FstProperties::I_EPSILONS
+            | FstProperties::O_EPSILONS
+            | FstProperties::NOT_I_LABEL_SORTED
+            | FstProperties::NOT_O_LABEL_SORTED
+            | FstProperties::WEIGHTED
+            | FstProperties::WEIGHTED_CYCLES
+            | FstProperties::CYCLIC
+            | FstProperties::NOT_ACCESSIBLE
+            | FstProperties::NOT_COACCESSIBLE)
+            & inprops2;
+    }
+    outprops
 }
