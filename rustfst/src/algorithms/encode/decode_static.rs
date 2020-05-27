@@ -2,9 +2,9 @@ use anyhow::{Context, Result};
 
 use crate::algorithms::{encode::EncodeTable, rm_final_epsilon};
 use crate::algorithms::{FinalTr, MapFinalAction, TrMapper};
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::{Semiring, Tr};
-use crate::fst_properties::FstProperties;
 
 struct DecodeMapper<W: Semiring> {
     encode_table: EncodeTable<W>,
@@ -13,6 +13,14 @@ struct DecodeMapper<W: Semiring> {
 impl<W: Semiring> DecodeMapper<W> {
     pub fn new(encode_table: EncodeTable<W>) -> Self {
         DecodeMapper { encode_table }
+    }
+
+    pub fn encode_weights(&self) -> bool {
+        self.encode_table.0.borrow().encode_weights
+    }
+
+    pub fn encode_labels(&self) -> bool {
+        self.encode_table.0.borrow().encode_labels
     }
 }
 
@@ -26,10 +34,10 @@ impl<W: Semiring> TrMapper<W> for DecodeMapper<W> {
             .unwrap()
             .clone();
         tr.ilabel = tuple.ilabel;
-        if self.encode_table.0.borrow().encode_labels {
+        if self.encode_labels() {
             tr.olabel = tuple.olabel;
         }
-        if self.encode_table.0.borrow().encode_weights {
+        if self.encode_weights() {
             tr.weight = tuple.weight;
         }
         Ok(())
@@ -44,7 +52,18 @@ impl<W: Semiring> TrMapper<W> for DecodeMapper<W> {
     }
 
     fn properties(&self, inprops: FstProperties) -> FstProperties {
-        unimplemented!()
+        let mut outprops = inprops;
+        let mut mask = FstProperties::all_properties();
+        if self.encode_labels() {
+            mask &= FstProperties::i_label_invariant_properties()
+                & FstProperties::o_label_invariant_properties();
+        }
+        if self.encode_weights() {
+            mask &= FstProperties::i_label_invariant_properties()
+                & FstProperties::weight_invariant_properties()
+                & FstProperties::rm_super_final_properties()
+        }
+        outprops & mask
     }
 }
 

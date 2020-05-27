@@ -1,9 +1,9 @@
 use std::cmp::Ordering;
 
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::Tr;
-use crate::fst_properties::FstProperties;
 
 pub trait TrCompare {
     fn compare<W: Semiring>(a: &Tr<W>, b: &Tr<W>) -> Ordering;
@@ -11,7 +11,7 @@ pub trait TrCompare {
 }
 
 /// Compare only input labels.
-pub struct ILabelCompare{}
+pub struct ILabelCompare {}
 
 impl TrCompare for ILabelCompare {
     fn compare<W: Semiring>(a: &Tr<W>, b: &Tr<W>) -> Ordering {
@@ -19,7 +19,8 @@ impl TrCompare for ILabelCompare {
     }
 
     fn properties(inprops: FstProperties) -> FstProperties {
-        let mut outprops = (inprops & FstProperties::arcsort_properties()) | FstProperties::I_LABEL_SORTED;
+        let mut outprops =
+            (inprops & FstProperties::arcsort_properties()) | FstProperties::I_LABEL_SORTED;
         if inprops.contains(FstProperties::ACCEPTOR) {
             outprops |= FstProperties::O_LABEL_SORTED;
         }
@@ -28,7 +29,7 @@ impl TrCompare for ILabelCompare {
 }
 
 /// Compare only output labels.
-pub struct OLabelCompare{}
+pub struct OLabelCompare {}
 
 impl TrCompare for OLabelCompare {
     fn compare<W: Semiring>(a: &Tr<W>, b: &Tr<W>) -> Ordering {
@@ -36,7 +37,8 @@ impl TrCompare for OLabelCompare {
     }
 
     fn properties(inprops: FstProperties) -> FstProperties {
-        let mut outprops = (inprops & FstProperties::arcsort_properties()) | FstProperties::O_LABEL_SORTED;
+        let mut outprops =
+            (inprops & FstProperties::arcsort_properties()) | FstProperties::O_LABEL_SORTED;
         if inprops.contains(FstProperties::ACCEPTOR) {
             outprops |= FstProperties::I_LABEL_SORTED;
         }
@@ -50,7 +52,7 @@ pub fn tr_sort<W, F, C>(fst: &mut F, _comp: C)
 where
     W: Semiring,
     F: MutableFst<W>,
-    C: TrCompare
+    C: TrCompare,
 {
     let props = fst.properties_revamp();
     for state in 0..fst.num_states() {

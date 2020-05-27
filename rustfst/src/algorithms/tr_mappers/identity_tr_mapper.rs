@@ -1,9 +1,9 @@
 use anyhow::Result;
 
 use crate::algorithms::{FinalTr, MapFinalAction, TrMapper, WeightConverter};
+use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
 use crate::Tr;
-use crate::fst_properties::FstProperties;
 
 /// Mapper that returns its input.
 pub struct IdentityTrMapper {}

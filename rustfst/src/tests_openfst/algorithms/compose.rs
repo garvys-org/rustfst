@@ -148,7 +148,7 @@ where
 
     // LabelLookAheadRelabeler::relabel(&mut fst2, graph1look.addon(), true)?;
 
-    tr_sort(&mut fst2, ILabelCompare{});
+    tr_sort(&mut fst2, ILabelCompare {});
     let fst2 = Arc::new(fst2);
 
     let matcher1 = TMatcher1::new_with_data(

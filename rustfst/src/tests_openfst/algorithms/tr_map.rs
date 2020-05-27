@@ -54,7 +54,11 @@ where
     let mut fst_tr_map_identity = test_data.raw.clone();
     let mut identity_mapper = IdentityTrMapper {};
     fst_tr_map_identity.tr_map(&mut identity_mapper)?;
-    test_eq_fst(&test_data.tr_map_identity, &fst_tr_map_identity, "TrMap Identity");
+    test_eq_fst(
+        &test_data.tr_map_identity,
+        &fst_tr_map_identity,
+        "TrMap Identity",
+    );
     Ok(())
 }
 
@@ -67,7 +71,11 @@ where
     let mut fst_tr_map_invert = test_data.raw.clone();
     let mut invertweight_mapper = InvertWeightMapper {};
     fst_tr_map_invert.tr_map(&mut invertweight_mapper)?;
-    test_eq_fst(&test_data.tr_map_invert, &fst_tr_map_invert, "TrMap InvertWeight");
+    test_eq_fst(
+        &test_data.tr_map_invert,
+        &fst_tr_map_invert,
+        "TrMap InvertWeight",
+    );
     Ok(())
 }
 
@@ -79,7 +87,11 @@ where
     let mut fst_tr_map = test_data.raw.clone();
     let mut mapper = InputEpsilonMapper {};
     fst_tr_map.tr_map(&mut mapper)?;
-    test_eq_fst(&test_data.tr_map_input_epsilon, &fst_tr_map, "TrMap InputEpsilonMapper");
+    test_eq_fst(
+        &test_data.tr_map_input_epsilon,
+        &fst_tr_map,
+        "TrMap InputEpsilonMapper",
+    );
     Ok(())
 }
 
@@ -91,7 +103,11 @@ where
     let mut fst_tr_map = test_data.raw.clone();
     let mut mapper = OutputEpsilonMapper {};
     fst_tr_map.tr_map(&mut mapper)?;
-    test_eq_fst(&test_data.tr_map_output_epsilon, &fst_tr_map, "TrMap OutputEpsilonMapper");
+    test_eq_fst(
+        &test_data.tr_map_output_epsilon,
+        &fst_tr_map,
+        "TrMap OutputEpsilonMapper",
+    );
     Ok(())
 }
 

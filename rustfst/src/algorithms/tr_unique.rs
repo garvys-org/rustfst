@@ -1,9 +1,9 @@
 use std::cmp::Ordering;
 
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::Tr;
-use crate::fst_properties::FstProperties;
 
 pub(crate) fn tr_compare<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> Ordering {
     if tr_1.ilabel < tr_2.ilabel {
@@ -36,7 +36,8 @@ pub fn tr_unique<W: Semiring, F: MutableFst<W>>(ifst: &mut F) {
             ifst.unique_trs_unchecked(s);
         }
     }
-    let mut outprops = props & FstProperties::arcsort_properties() & FstProperties::delete_arcs_properties();
+    let mut outprops =
+        props & FstProperties::arcsort_properties() & FstProperties::delete_arcs_properties();
     if ifst.num_states() == 0 {
         outprops |= FstProperties::null_properties();
     }

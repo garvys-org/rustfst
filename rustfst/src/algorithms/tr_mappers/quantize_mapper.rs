@@ -1,10 +1,10 @@
 use anyhow::Result;
 
 use crate::algorithms::{FinalTr, MapFinalAction, TrMapper, WeightConverter};
+use crate::fst_properties::FstProperties;
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::Tr;
 use crate::KDELTA;
-use crate::fst_properties::FstProperties;
 
 /// Mapper to quantize all weights.
 pub struct QuantizeMapper {}

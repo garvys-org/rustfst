@@ -4,9 +4,9 @@ use anyhow::{Context, Result};
 
 use crate::algorithms::encode::{EncodeTable, EncodeTableMut};
 use crate::algorithms::{FinalTr, MapFinalAction, TrMapper};
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::{Semiring, Tr};
-use crate::fst_properties::FstProperties;
 
 struct EncodeMapper<W: Semiring> {
     encode_table: EncodeTable<W>,
@@ -21,6 +21,14 @@ impl<W: Semiring> EncodeMapper<W> {
             ))),
         }
     }
+
+    pub fn encode_weights(&self) -> bool {
+        self.encode_table.0.borrow().encode_weights
+    }
+
+    pub fn encode_labels(&self) -> bool {
+        self.encode_table.0.borrow().encode_labels
+    }
 }
 
 impl<W: Semiring> TrMapper<W> for EncodeMapper<W> {
@@ -28,10 +36,10 @@ impl<W: Semiring> TrMapper<W> for EncodeMapper<W> {
         let tuple = self.encode_table.0.borrow().tr_to_tuple(tr);
         let label = self.encode_table.0.borrow_mut().encode(tuple);
         tr.ilabel = label;
-        if self.encode_table.0.borrow().encode_labels {
+        if self.encode_labels() {
             tr.olabel = label;
         }
-        if self.encode_table.0.borrow().encode_weights {
+        if self.encode_weights() {
             tr.weight.set_value(W::one().take_value());
         }
         Ok(())
@@ -42,10 +50,10 @@ impl<W: Semiring> TrMapper<W> for EncodeMapper<W> {
             let tuple = self.encode_table.0.borrow().final_tr_to_tuple(final_tr);
             let label = self.encode_table.0.borrow_mut().encode(tuple);
             final_tr.ilabel = label;
-            if self.encode_table.0.borrow().encode_labels {
+            if self.encode_labels() {
                 final_tr.olabel = label;
             }
-            if self.encode_table.0.borrow().encode_weights {
+            if self.encode_weights() {
                 final_tr.weight.set_value(W::one().take_value());
             }
         }
@@ -61,7 +69,18 @@ impl<W: Semiring> TrMapper<W> for EncodeMapper<W> {
     }
 
     fn properties(&self, inprops: FstProperties) -> FstProperties {
-        unimplemented!()
+        let mut outprops = inprops;
+        let mut mask = FstProperties::all_properties();
+        if self.encode_labels() {
+            mask &= FstProperties::i_label_invariant_properties()
+                & FstProperties::o_label_invariant_properties();
+        }
+        if self.encode_weights() {
+            mask &= FstProperties::i_label_invariant_properties()
+                & FstProperties::weight_invariant_properties()
+                & FstProperties::add_super_final_properties()
+        }
+        outprops & mask
     }
 }
 

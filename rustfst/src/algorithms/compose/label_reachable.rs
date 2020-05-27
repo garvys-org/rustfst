@@ -74,10 +74,10 @@ impl LabelReachableData {
         }
 
         if relabel_input {
-            tr_sort(fst, ILabelCompare{});
+            tr_sort(fst, ILabelCompare {});
             fst.take_input_symbols();
         } else {
-            tr_sort(fst, OLabelCompare{});
+            tr_sort(fst, OLabelCompare {});
             fst.take_output_symbols();
         }
 

@@ -189,7 +189,27 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         for i in to_del.iter().rev() {
             trs.remove(*i);
         }
-        todo!("props")
+        if trs.len() == 0 {
+            // All Trs are removed
+            self.properties = delete_trs_properties(self.properties);
+        } else {
+            self.properties &= FstProperties::ACCEPTOR
+                | FstProperties::I_DETERMINISTIC
+                | FstProperties::O_DETERMINISTIC
+                | FstProperties::NO_EPSILONS
+                | FstProperties::NO_I_EPSILONS
+                | FstProperties::NO_O_EPSILONS
+                | FstProperties::I_LABEL_SORTED
+                | FstProperties::O_LABEL_SORTED
+                | FstProperties::UNWEIGHTED
+                // I believe it's correct to keep them but need to remove to be compliant with OpenFst.
+                // | FstProperties::ACYCLIC
+                // | FstProperties::INITIAL_ACYCLIC
+                | FstProperties::TOP_SORTED
+                | FstProperties::NOT_ACCESSIBLE
+                | FstProperties::NOT_COACCESSIBLE
+                | FstProperties::UNWEIGHTED_CYCLES;
+        }
     }
 
     fn add_tr(&mut self, source: StateId, tr: Tr<W>) -> Result<()> {

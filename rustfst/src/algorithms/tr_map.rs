@@ -1,10 +1,10 @@
 use anyhow::Result;
 
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::Tr;
 use crate::{Label, StateId, EPS_LABEL};
-use crate::fst_properties::FstProperties;
 
 /// Struct used to map final weights when performing a transition mapping.
 /// It will always be of the form `(EPS_LABEL, EPS_LABEL, final_weight)`

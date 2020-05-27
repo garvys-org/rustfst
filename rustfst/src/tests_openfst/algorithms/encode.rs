@@ -8,7 +8,8 @@ use serde::{Deserialize, Serialize};
 use crate::algorithms::encode::{decode, encode};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{MutableFst, SerializableFst};
-use crate::semirings::SerializableSemiring;
+use crate::semirings::{SerializableSemiring, WeightQuantize};
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 use std::path::Path;
 
@@ -49,7 +50,7 @@ impl EncodeOperationResult {
 pub fn test_encode_decode<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
     F: SerializableFst<W> + MutableFst<W> + Display,
-    W: SerializableSemiring,
+    W: SerializableSemiring + WeightQuantize,
 {
     for encode_test_data in &test_data.encode_decode {
         let mut fst_encoded = test_data.raw.clone();
@@ -58,18 +59,13 @@ where
             "Error when running test_encode_decode with parameters encode_labels={:?} and encode_weights={:?}.",
             encode_test_data.encode_labels, encode_test_data.encode_weights))?;
         decode(&mut fst_encoded, encode_table)?;
-        assert_eq!(
-            encode_test_data.result,
-            fst_encoded,
-            "{}",
-            error_message_fst!(
-                encode_test_data.result,
-                fst_encoded,
-                format!(
-                    "Encode/Decode with encode_labels={:?} and encode_weights={:?}",
-                    encode_test_data.encode_labels, encode_test_data.encode_weights
-                )
-            )
+        test_eq_fst(
+            &encode_test_data.result,
+            &fst_encoded,
+            format!(
+                "Encode/Decode with encode_labels={:?} and encode_weights={:?}",
+                encode_test_data.encode_labels, encode_test_data.encode_weights
+            ),
         );
     }
     Ok(())
@@ -78,7 +74,7 @@ where
 pub fn test_encode<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
     F: SerializableFst<W> + MutableFst<W> + Display,
-    W: SerializableSemiring,
+    W: SerializableSemiring + WeightQuantize,
 {
     for encode_test_data in &test_data.encode {
         // println!("Encode labels = {:?} Encode weights = {:?}", encode_test_data.encode_labels, encode_test_data.encode_weights);
@@ -95,18 +91,13 @@ where
                 .properties()?
                 .contains(FstProperties::UNWEIGHTED));
         }
-        assert_eq!(
-            encode_test_data.result,
-            fst_encoded,
-            "{}",
-            error_message_fst!(
-                encode_test_data.result,
-                fst_encoded,
-                format!(
-                    "Encode encode_labels = {} encode_weights = {}",
-                    encode_test_data.encode_labels, encode_test_data.encode_weights
-                )
-            )
+        test_eq_fst(
+            &encode_test_data.result,
+            &fst_encoded,
+            format!(
+                "Encode encode_labels = {} encode_weights = {}",
+                encode_test_data.encode_labels, encode_test_data.encode_weights
+            ),
         );
     }
     Ok(())

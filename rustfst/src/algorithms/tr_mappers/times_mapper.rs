@@ -1,9 +1,9 @@
 use anyhow::Result;
 
 use crate::algorithms::{FinalTr, MapFinalAction, TrMapper, WeightConverter};
+use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
 use crate::Tr;
-use crate::fst_properties::FstProperties;
 
 /// Mapper to (right) multiply a constant to all weights.
 pub struct TimesMapper<W: Semiring> {
@@ -40,7 +40,7 @@ impl<S: Semiring> TrMapper<S> for TimesMapper<S> {
     }
 
     fn properties(&self, inprops: FstProperties) -> FstProperties {
-       inprops & FstProperties::weight_invariant_properties()
+        inprops & FstProperties::weight_invariant_properties()
     }
 }
 
