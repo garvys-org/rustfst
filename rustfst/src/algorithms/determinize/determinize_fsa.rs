@@ -117,15 +117,14 @@ where
     CD: CommonDivisor<W>,
 {
     pub fn new(fst: Arc<F>, in_dist: Option<Arc<Vec<W>>>) -> Result<Self> {
-        // let isymt = fst.input_symbols().cloned();
-        // let osymt = fst.output_symbols().cloned();
-        // let fst_op = DeterminizeFsaOp::new(fst, in_dist)?;
-        // let fst_cache = SimpleHashMapCache::new();
-        // let iprops = fst.properties_revamp();
-        todo!("lazy fst props")
-        // let dprops = determinize_properties(iprops, )
-        // let lazy_fst = LazyFst::from_op_and_cache(fst_op, fst_cache, isymt, osymt);
-        // Ok(DeterminizeFsa(lazy_fst))
+        let isymt = fst.input_symbols().cloned();
+        let osymt = fst.output_symbols().cloned();
+        let fst_op = DeterminizeFsaOp::new(fst, in_dist)?;
+        let fst_cache = SimpleHashMapCache::new();
+        // Properties are for the DeterminizeFst object. DeterminizeFsa shouldn't be used directly
+        let props = FstProperties::empty();
+        let lazy_fst = LazyFst::from_op_and_cache(fst_op, fst_cache, isymt, osymt, props);
+        Ok(DeterminizeFsa(lazy_fst))
     }
 
     /// Turns the Lazy FST into a static one.

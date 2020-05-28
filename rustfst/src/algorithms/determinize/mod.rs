@@ -1,4 +1,4 @@
-pub use determinize_fsa::DeterminizeFsa;
+pub(self) use determinize_fsa::DeterminizeFsa;
 pub(self) use determinize_fsa_op::DeterminizeFsaOp;
 pub use determinize_static::{determinize, determinize_with_distance};
 pub(self) use divisors::{DefaultCommonDivisor, GallicCommonDivisor};
@@ -13,7 +13,7 @@ mod element;
 mod state_table;
 
 /// Determinization type.
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Copy)]
 pub enum DeterminizeType {
     /// Input transducer is known to be functional (or error).
     DeterminizeFunctional,

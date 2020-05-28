@@ -12,6 +12,8 @@ use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, Facto
 use crate::algorithms::weight_convert;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
 use crate::fst_impls::VectorFst;
+use crate::fst_properties::mutable_properties::determinize_properties;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::SemiringProperties;
 use crate::semirings::{
@@ -132,12 +134,24 @@ where
     F1: ExpandedFst<W>,
     F2: MutableFst<W> + AllocableFst<W>,
 {
-    let mut fst_res: F2 = if fst_in.is_acceptor() {
+    let iprops = fst_in.properties_revamp();
+    let mut fst_res: F2 = if iprops.contains(FstProperties::ACCEPTOR) {
         determinize_fsa::<_, _, _, DefaultCommonDivisor>(Arc::clone(&fst_in))?
     } else {
         determinize_fst(Arc::clone(&fst_in), det_type)?
     };
 
+    let distinct_psubsequential_labels = if det_type == DeterminizeType::DeterminizeFunctional {
+        // increment_subsequential_label
+        false
+    } else {
+        true
+    };
+    fst_res.set_properties(determinize_properties(
+        iprops,
+        false,
+        distinct_psubsequential_labels,
+    ));
     fst_res.set_symts_from_fst(&fst_in);
     Ok(fst_res)
 }

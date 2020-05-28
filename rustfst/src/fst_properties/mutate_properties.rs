@@ -214,8 +214,38 @@ pub fn concat_properties(
     outprops
 }
 
-pub fn determinize_properties(_inprops: FstProperties) -> FstProperties {
-    unimplemented!()
+pub fn determinize_properties(
+    inprops: FstProperties,
+    has_subsequential_label: bool,
+    distinct_psubsequential_labels: bool,
+) -> FstProperties {
+    let mut outprops = FstProperties::ACCESSIBLE;
+    if inprops.contains(FstProperties::ACCEPTOR)
+        || (inprops.contains(FstProperties::NO_I_EPSILONS) && distinct_psubsequential_labels)
+        || (has_subsequential_label && distinct_psubsequential_labels)
+    {
+        outprops |= FstProperties::I_DETERMINISTIC;
+    }
+    outprops |= (FstProperties::ACCEPTOR
+        | FstProperties::ACYCLIC
+        | FstProperties::INITIAL_ACYCLIC
+        | FstProperties::COACCESSIBLE
+        | FstProperties::STRING)
+        & inprops;
+    if inprops.contains(FstProperties::NO_I_EPSILONS) && distinct_psubsequential_labels {
+        outprops |= FstProperties::NO_EPSILONS & inprops;
+    }
+    if inprops.contains(FstProperties::ACCESSIBLE) {
+        outprops |= (FstProperties::I_EPSILONS | FstProperties::O_EPSILONS | FstProperties::CYCLIC)
+            & inprops;
+    }
+    if inprops.contains(FstProperties::ACCEPTOR) {
+        outprops |= (FstProperties::NO_I_EPSILONS | FstProperties::NO_O_EPSILONS) & inprops;
+    }
+    if inprops.contains(FstProperties::NO_I_EPSILONS) && has_subsequential_label {
+        outprops |= FstProperties::NO_I_EPSILONS;
+    }
+    outprops
 }
 
 pub fn factor_weight_properties(inprops: FstProperties) -> FstProperties {

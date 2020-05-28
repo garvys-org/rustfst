@@ -72,7 +72,7 @@ impl<W: Semiring, F: CoreFst<W>> CoreFst<W> for Arc<F> {
     }
 
     fn properties_revamp(&self) -> FstProperties {
-        unimplemented!()
+        self.deref().properties_revamp()
     }
 }
 
