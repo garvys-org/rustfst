@@ -32,17 +32,15 @@ impl<W: Semiring> Clone for SimpleHashMapCache<W> {
     }
 }
 
-impl<W: Semiring> SimpleHashMapCache<W> {
-    pub fn new() -> Self {
+impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
+    fn new() -> Self {
         Self {
             start: Mutex::new((None, 0)),
             trs: Mutex::new((HashMap::new(), 0)),
             final_weight: Mutex::new((HashMap::new(), 0)),
         }
     }
-}
 
-impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
     fn get_start(&self) -> Option<Option<StateId>> {
         self.start.lock().unwrap().0
     }

@@ -1,9 +1,14 @@
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::sync::{Mutex, Arc};
 
 use crate::algorithms::lazy_fst_revamp::FstCache;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, Trs, TrsVec};
+use crate::algorithms::compose::ComposeFst;
+use crate::algorithms::compose::compose_filters::SequenceComposeFilterBuilder;
+use crate::algorithms::compose::matchers::SortedMatcher;
+use crate::fst_impls::VectorFst;
+use crate::fst_traits::MutableFst;
 
 #[derive(Default, Debug)]
 pub struct PreInitializedCache<W: Semiring> {
@@ -45,17 +50,15 @@ impl<W: Semiring> Clone for PreInitializedCache<W> {
     }
 }
 
-impl<W: Semiring> PreInitializedCache<W> {
-    pub fn new() -> Self {
+impl<W: Semiring> FstCache<W> for PreInitializedCache<W> {
+    fn new() -> Self {
         Self {
             start: Mutex::new((None, 0)),
             trs: Mutex::new((HashMap::new(), 0)),
             final_weight: Mutex::new((HashMap::new(), 0)),
         }
     }
-}
 
-impl<W: Semiring> FstCache<W> for PreInitializedCache<W> {
     fn get_start(&self) -> Option<Option<StateId>> {
         self.start.lock().unwrap().0.clone()
     }
@@ -101,4 +104,15 @@ impl<W: Semiring> FstCache<W> for PreInitializedCache<W> {
         n = std::cmp::max(n, self.final_weight.lock().unwrap().1);
         n
     }
+}
+
+fn lol<W: Semiring>() {
+    let fst = ComposeFst::<
+        W, SequenceComposeFilterBuilder<
+            W,
+            SortedMatcher<W, VectorFst<W>>,
+            SortedMatcher<W, VectorFst<W>>
+        >,
+        PreInitializedCache<W>
+    >::new(Arc::new(VectorFst::new()), Arc::new(VectorFst::new()));
 }

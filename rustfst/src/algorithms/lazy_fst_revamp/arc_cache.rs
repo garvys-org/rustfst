@@ -4,6 +4,10 @@ use std::ops::Deref;
 use std::sync::Arc;
 
 impl<W: Semiring, C: FstCache<W>> FstCache<W> for Arc<C> {
+    fn new() -> Self {
+        Arc::new(C::new())
+    }
+
     fn get_start(&self) -> Option<Option<usize>> {
         self.deref().get_start()
     }
@@ -30,5 +34,17 @@ impl<W: Semiring, C: FstCache<W>> FstCache<W> for Arc<C> {
 
     fn num_known_states(&self) -> usize {
         self.deref().num_known_states()
+    }
+
+    fn num_trs(&self, id: usize) -> Option<usize> {
+        self.deref().num_trs(id)
+    }
+
+    fn num_input_epsilons(&self, id: usize) -> Option<usize> {
+        self.deref().num_input_epsilons(id)
+    }
+
+    fn num_output_epsilons(&self, id: usize) -> Option<usize> {
+        self.deref().num_output_epsilons(id)
     }
 }
