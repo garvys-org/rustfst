@@ -1,6 +1,8 @@
 use anyhow::Result;
 
-use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
+use crate::fst_properties::mutable_properties::reverse_properties;
+use crate::fst_properties::FstProperties;
+use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::{Trs, EPS_LABEL};
@@ -58,10 +60,10 @@ where
             states_trs[0].push(Tr::new(EPS_LABEL, EPS_LABEL, w.reverse()?, os));
         }
 
-        for iarc in unsafe { ifst.get_trs_unchecked(is).trs() } {
-            let nos = iarc.nextstate + 1;
-            let weight = iarc.weight.reverse()?;
-            let w = Tr::new(iarc.ilabel, iarc.olabel, weight, os);
+        for itr in unsafe { ifst.get_trs_unchecked(is).trs() } {
+            let nos = itr.nextstate + 1;
+            let weight = itr.weight.reverse()?;
+            let w = Tr::new(itr.ilabel, itr.olabel, weight, os);
             states_trs[nos].push(w);
         }
     }
@@ -72,6 +74,12 @@ where
     ofst.set_start(ostart)?;
 
     ofst.set_symts_from_fst(ifst);
+    let iprops = ifst.properties_revamp();
+    let oprops = ofst.properties_revamp();
+    ofst.set_properties_with_mask(
+        reverse_properties(iprops, true) | oprops,
+        FstProperties::all_properties(),
+    );
 
     Ok(ofst)
 }

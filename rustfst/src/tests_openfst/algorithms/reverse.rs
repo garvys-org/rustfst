@@ -7,7 +7,7 @@ use crate::algorithms::MapFinalAction;
 use crate::algorithms::WeightConverter;
 use crate::algorithms::{reverse, weight_convert};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
+use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, MutableFst, SerializableFst};
 use crate::semirings::{Semiring, SerializableSemiring};
 use crate::semirings::{WeaklyDivisibleSemiring, WeightQuantize};
 use crate::Tr;
@@ -45,7 +45,7 @@ where
     }
 
     fn properties(&self, iprops: FstProperties) -> FstProperties {
-        unimplemented!()
+        iprops
     }
 }
 
@@ -58,6 +58,18 @@ where
     let fst_reverse: VectorFst<_> = reverse(&test_data.raw).unwrap();
     let mut mapper = ReverseWeightConverter {};
     let fst_reverse_2: F = weight_convert(&fst_reverse, &mut mapper)?;
-    test_eq_fst(&test_data.reverse, &fst_reverse_2, "Reverse");
+
+    assert!(
+        &test_data.reverse.equal_quantized(&fst_reverse_2),
+        "Reverse"
+    );
+    assert_eq!(
+        test_data.reverse.properties_revamp(),
+        fst_reverse.properties_revamp(),
+        "{}",
+        "Reverse"
+    );
+
+    // test_eq_fst(&test_data.reverse, &fst_reverse_2, "Reverse");
     Ok(())
 }

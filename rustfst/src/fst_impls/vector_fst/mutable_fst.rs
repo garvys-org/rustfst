@@ -7,15 +7,15 @@ use anyhow::Result;
 use crate::algorithms::tr_unique::tr_compare;
 use crate::fst_impls::vector_fst::{VectorFst, VectorFstState};
 use crate::fst_properties::mutable_properties::{
-    add_state_properties, delete_all_states_properties, delete_states_properties,
-    delete_trs_properties, set_final_properties, set_start_properties,
+    add_state_properties, add_tr_properties, delete_all_states_properties,
+    delete_states_properties, delete_trs_properties, set_final_properties, set_start_properties,
 };
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::CoreFst;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::trs_iter_mut::TrsIterMut;
-use crate::{StateId, Tr};
+use crate::{StateId, Tr, Trs};
 
 #[inline]
 fn equal_tr<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> bool {
@@ -227,10 +227,23 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         self.update_properties_after_add_tr(source);
     }
 
-    /// DOESN'T MODIFY THE PROPERTIES
+    // / DOESN'T MODIFY THE PROPERTIES
     unsafe fn set_trs_unchecked(&mut self, source: usize, trs: Vec<Tr<W>>) {
         let trs_inside = &mut self.states.get_unchecked_mut(source).trs;
         *Arc::make_mut(&mut trs_inside.0) = trs;
+
+        // Find a way to avoid this loop
+        let trs = &self.states.get_unchecked(source).trs;
+        let mut properties = self.properties_revamp();
+        for i in 0..trs.len() {
+            if i >= 1 {
+                properties =
+                    add_tr_properties(properties, source, &trs.trs()[i], Some(&trs.trs()[i - 1]));
+            } else {
+                properties = add_tr_properties(properties, source, &trs.trs()[i], None);
+            }
+        }
+        self.set_properties(properties)
     }
 
     fn delete_final_weight(&mut self, source: usize) -> Result<()> {

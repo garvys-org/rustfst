@@ -520,8 +520,22 @@ pub fn replace_properties(
     return outprops;
 }
 
-pub fn reverse_properties(_inprops: FstProperties) -> FstProperties {
-    unimplemented!()
+pub fn reverse_properties(inprops: FstProperties, has_superinitial: bool) -> FstProperties {
+    let mut outprops = (FstProperties::ACCEPTOR
+        | FstProperties::NOT_ACCEPTOR
+        | FstProperties::EPSILONS
+        | FstProperties::I_EPSILONS
+        | FstProperties::O_EPSILONS
+        | FstProperties::UNWEIGHTED
+        | FstProperties::CYCLIC
+        | FstProperties::ACYCLIC
+        | FstProperties::WEIGHTED_CYCLES
+        | FstProperties::UNWEIGHTED_CYCLES)
+        & inprops;
+    if has_superinitial {
+        outprops |= FstProperties::WEIGHTED & inprops;
+    }
+    return outprops;
 }
 
 pub fn reweight_properties(inprops: FstProperties) -> FstProperties {
