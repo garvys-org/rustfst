@@ -5,13 +5,13 @@ use anyhow::Result;
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
 use crate::algorithms::replace::config::{ReplaceFstOptions, ReplaceLabelType};
 use crate::algorithms::replace::replace_fst_op::ReplaceFstOp;
+use crate::algorithms::replace::utils::{epsilon_on_input, epsilon_on_output};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{Label, SymbolTable, TrsVec};
 use std::fmt::Debug;
 use std::sync::Arc;
-use crate::algorithms::replace::utils::{epsilon_on_input, epsilon_on_output};
 
 /// ReplaceFst supports lazy replacement of trs in one FST with another FST.
 /// This replacement is recursive. ReplaceFst can be used to support a variety of
@@ -26,7 +26,7 @@ fn replace_properties<W, F, B>(
     call_label_type: ReplaceLabelType,
     return_label_type: ReplaceLabelType,
     call_output_label: Option<Label>,
-    sorted_and_non_empty: &mut bool
+    sorted_and_non_empty: &mut bool,
 ) -> FstProperties
 where
     W: Semiring,
@@ -41,7 +41,7 @@ where
     let mut all_negative = true;
     // All nonterminals are positive and form a dense range containing 1?
     let mut dense_range = true;
-    let mut root_fst_idx : usize = 0;
+    let mut root_fst_idx: usize = 0;
     for i in 0..fst_list.len() {
         let label = fst_list[i].0;
         if label >= 0 {
@@ -57,10 +57,18 @@ where
         if fst.borrow().start().is_none() {
             all_non_empty = false;
         }
-        if !fst.borrow().properties_revamp().contains(FstProperties::I_LABEL_SORTED) {
+        if !fst
+            .borrow()
+            .properties_revamp()
+            .contains(FstProperties::I_LABEL_SORTED)
+        {
             all_ilabel_sorted = false;
         }
-        if !fst.borrow().properties_revamp().contains(FstProperties::O_LABEL_SORTED) {
+        if !fst
+            .borrow()
+            .properties_revamp()
+            .contains(FstProperties::O_LABEL_SORTED)
+        {
             all_olabel_sorted = false;
         }
         inprops.push(fst.borrow().properties_revamp());
@@ -76,19 +84,23 @@ where
         all_non_empty,
         all_ilabel_sorted,
         all_olabel_sorted,
-        all_negative || dense_range
+        all_negative || dense_range,
     );
     let sorted = props.contains(FstProperties::I_LABEL_SORTED | FstProperties::O_LABEL_SORTED);
     *sorted_and_non_empty = all_non_empty && sorted;
     props
 }
 
-fn replace_transducer(call_label_type: ReplaceLabelType, return_label_type: ReplaceLabelType, call_output_label: Option<Label>) -> bool {
-    call_label_type == ReplaceLabelType::Input ||
-        call_label_type == ReplaceLabelType::Output ||
-        (call_label_type == ReplaceLabelType::Both && call_output_label.is_some()) ||
-        return_label_type == ReplaceLabelType::Input ||
-        return_label_type == ReplaceLabelType::Output
+fn replace_transducer(
+    call_label_type: ReplaceLabelType,
+    return_label_type: ReplaceLabelType,
+    call_output_label: Option<Label>,
+) -> bool {
+    call_label_type == ReplaceLabelType::Input
+        || call_label_type == ReplaceLabelType::Output
+        || (call_label_type == ReplaceLabelType::Both && call_output_label.is_some())
+        || return_label_type == ReplaceLabelType::Input
+        || return_label_type == ReplaceLabelType::Output
 }
 
 impl<W, F, B> ReplaceFst<W, F, B>
@@ -112,7 +124,7 @@ where
             opts.call_label_type,
             opts.return_label_type,
             opts.call_output_label,
-            &mut all_non_empty_and_sorted
+            &mut all_non_empty_and_sorted,
         );
         let fst_op = ReplaceFstOp::new(fst_list, opts)?;
         let fst_cache = SimpleHashMapCache::new();

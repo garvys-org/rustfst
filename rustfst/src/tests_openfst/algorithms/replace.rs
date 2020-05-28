@@ -36,7 +36,7 @@ impl ReplaceOperationResult {
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
-        P: AsRef<Path>
+        P: AsRef<Path>,
     {
         ReplaceTestData {
             root: self.root,

@@ -2,7 +2,7 @@ use crate::algorithms::closure::ClosureType;
 use crate::algorithms::ProjectType;
 use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
-use crate::{Tr, Label};
+use crate::{Label, Tr};
 use crate::{StateId, EPS_LABEL};
 
 pub fn set_start_properties(inprops: FstProperties) -> FstProperties {
@@ -405,7 +405,7 @@ pub fn replace_properties(
     no_empty_fsts: bool,
     all_ilabel_sorted: bool,
     all_olabel_sorted: bool,
-    all_negative_or_dense: bool
+    all_negative_or_dense: bool,
 ) -> FstProperties {
     if inprops.is_empty() {
         return FstProperties::null_properties();
@@ -432,9 +432,17 @@ pub fn replace_properties(
             if replace_transducer {
                 props |= FstProperties::NOT_ACCEPTOR & *inprop;
             }
-            props |= (FstProperties::NOT_I_DETERMINISTIC | FstProperties::NOT_O_DETERMINISTIC | FstProperties::EPSILONS |
-                FstProperties::I_EPSILONS | FstProperties::O_EPSILONS | FstProperties::WEIGHTED | FstProperties::WEIGHTED_CYCLES |
-                FstProperties::CYCLIC | FstProperties::NOT_TOP_SORTED | FstProperties::NOT_STRING) & *inprop;
+            props |= (FstProperties::NOT_I_DETERMINISTIC
+                | FstProperties::NOT_O_DETERMINISTIC
+                | FstProperties::EPSILONS
+                | FstProperties::I_EPSILONS
+                | FstProperties::O_EPSILONS
+                | FstProperties::WEIGHTED
+                | FstProperties::WEIGHTED_CYCLES
+                | FstProperties::CYCLIC
+                | FstProperties::NOT_TOP_SORTED
+                | FstProperties::NOT_STRING)
+                & *inprop;
             if !inprop.contains(FstProperties::STRING) {
                 string = false;
             }
@@ -495,8 +503,7 @@ pub fn replace_properties(
     //  1. the input label of the call arc is not epsilon
     //  2. all non-terminals are negative, or
     //  3. all non-terninals are positive and form a dense range containing 1.
-    if all_ilabel_sorted && epsilon_on_return &&
-        (!epsilon_on_call || all_negative_or_dense) {
+    if all_ilabel_sorted && epsilon_on_return && (!epsilon_on_call || all_negative_or_dense) {
         outprops |= FstProperties::I_LABEL_SORTED;
     }
     // Similarly, the resulting ReplaceFst is known to be FstProperties::O_LABEL_SORTED when: (1)
@@ -506,8 +513,8 @@ pub fn replace_properties(
     //  1. the output label of the call arc is not epsilon
     //  2. all non-terminals are negative, or
     //  3. all non-terninals are positive and form a dense range containing 1.
-    if all_olabel_sorted && out_epsilon_on_return &&
-        (!out_epsilon_on_call || all_negative_or_dense) {
+    if all_olabel_sorted && out_epsilon_on_return && (!out_epsilon_on_call || all_negative_or_dense)
+    {
         outprops |= FstProperties::O_LABEL_SORTED;
     }
     return outprops;
