@@ -6,6 +6,8 @@ mod lazy_fst_2;
 mod simple_hash_map_cache;
 mod state_table;
 
+mod arc_cache;
+
 pub use fst_cache::FstCache;
 pub use fst_op::FstOp;
 pub use fst_op_2::FstOp2;
