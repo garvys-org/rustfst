@@ -1028,6 +1028,7 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     data["name"] = fst_name;
     data["weight_type"] = F::MyArc::Type();
     data["raw"]["result_path"] = "raw_vector.fst";
+    data["raw_text"] = fst_to_string(raw_fst);
 
     data["raw_vector_bin_path"] = "raw_vector.fst";
     raw_fst.Write(dir_path + "raw_vector.fst");

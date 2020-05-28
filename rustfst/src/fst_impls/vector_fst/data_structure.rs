@@ -14,7 +14,7 @@ use crate::{StateId, Trs, TrsVec};
 ///
 /// All states are stored in a vector of states.
 /// In each state, there is a vector of trs containing the outgoing transitions.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone)]
 pub struct VectorFst<W: Semiring> {
     pub(crate) states: Vec<VectorFstState<W>>,
     pub(crate) start_state: Option<StateId>,
@@ -31,6 +31,13 @@ pub struct VectorFst<W: Semiring> {
 pub struct VectorFstState<W: Semiring> {
     pub(crate) final_weight: Option<W>,
     pub(crate) trs: TrsVec<W>,
+}
+
+impl<W: Semiring> PartialEq for VectorFst<W> {
+    fn eq(&self, other: &Self) -> bool {
+        // Indended: Doesn't check properties and symbol tables.
+        self.states == other.states && self.start_state == other.start_state
+    }
 }
 
 impl<W: Semiring> VectorFstState<W> {

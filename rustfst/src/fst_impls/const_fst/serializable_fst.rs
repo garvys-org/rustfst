@@ -1,6 +1,7 @@
 use std::fs::{read, File};
 use std::io::BufWriter;
 use std::path::Path;
+use std::sync::Arc;
 
 use anyhow::Context;
 use anyhow::Result;
@@ -12,6 +13,7 @@ use nom::IResult;
 
 use crate::fst_impls::const_fst::data_structure::ConstState;
 use crate::fst_impls::ConstFst;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ExpandedFst, Fst, SerializableFst};
 use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FST_MAGIC_NUMBER};
 use crate::parsers::bin_fst::utils_parsing::{parse_final_weight, parse_fst_tr, parse_start_state};
@@ -19,9 +21,8 @@ use crate::parsers::bin_fst::utils_serialization::write_bin_i32;
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::SerializableSemiring;
 use crate::{Tr, EPS_LABEL};
-use std::sync::Arc;
 
-impl<W: 'static + SerializableSemiring> SerializableFst<W> for ConstFst<W> {
+impl<W: SerializableSemiring> SerializableFst<W> for ConstFst<W> {
     fn fst_type() -> String {
         "const".to_string()
     }
@@ -58,8 +59,7 @@ impl<W: 'static + SerializableSemiring> SerializableFst<W> for ConstFst<W> {
             version: CONST_FILE_VERSION,
             // TODO: Set flags if the content is aligned
             flags,
-            // TODO: Once the properties are stored, need to read them. kExpanded
-            properties: 1u64,
+            properties: self.properties.bits() | ConstFst::<W>::static_properties(),
             start: self.start.map(|v| v as i64).unwrap_or(-1),
             num_states: self.num_states() as i64,
             num_trs: self.trs.len() as i64,
@@ -157,13 +157,21 @@ impl<W: 'static + SerializableSemiring> SerializableFst<W> for ConstFst<W> {
             };
         }
 
-        Ok(ConstFst {
+        // Trick to compute the FstProperties. Indeed we need a fst to compute the properties
+        // and we need the properties to construct a fst...
+        let mut fst = ConstFst {
             states: const_states,
             trs: Arc::new(const_trs),
             start: start_state,
             isymt: None,
             osymt: None,
-        })
+            properties: FstProperties::empty(),
+        };
+
+        let properties = fst.properties()?;
+        fst.properties = properties;
+
+        Ok(fst)
     }
 }
 
@@ -224,6 +232,7 @@ fn parse_const_fst<W: SerializableSemiring + 'static>(i: &[u8]) -> IResult<&[u8]
             trs: Arc::new(const_trs),
             isymt: hdr.isymt,
             osymt: hdr.osymt,
+            properties: FstProperties::from_bits_truncate(hdr.properties),
         },
     ))
 }

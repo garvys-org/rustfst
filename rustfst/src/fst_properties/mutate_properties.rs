@@ -150,8 +150,6 @@ pub fn complement_properties(_inprops: FstProperties) -> FstProperties {
 }
 
 pub fn compose_properties(inprops1: FstProperties, inprops2: FstProperties) -> FstProperties {
-    std::dbg!(inprops1);
-    std::dbg!(inprops2);
     let mut outprops = FstProperties::empty();
     if inprops1.contains(FstProperties::ACCEPTOR) && inprops2.contains(FstProperties::ACCEPTOR) {
         outprops |= FstProperties::ACCEPTOR | FstProperties::ACCESSIBLE;
@@ -183,7 +181,6 @@ pub fn compose_properties(inprops1: FstProperties, inprops2: FstProperties) -> F
             outprops |= FstProperties::I_DETERMINISTIC & inprops1 & inprops2;
         }
     }
-    std::dbg!(outprops);
     outprops
 }
 

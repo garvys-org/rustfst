@@ -50,6 +50,7 @@ use crate::tests_openfst::io::const_fst_bin_deserializer::{
 };
 use crate::tests_openfst::io::const_fst_bin_serializer::test_const_fst_bin_serializer;
 use crate::tests_openfst::io::const_fst_bin_serializer::test_const_fst_bin_serializer_with_symt;
+use crate::tests_openfst::io::const_fst_text_deserialization::test_const_fst_text_deserialization;
 use crate::tests_openfst::io::const_fst_text_serialization::test_const_fst_text_serialization;
 use crate::tests_openfst::io::const_fst_text_serialization::test_const_fst_text_serialization_with_symt;
 use crate::tests_openfst::io::vector_fst_bin_deserializer::test_vector_fst_bin_deserializer;
@@ -57,6 +58,7 @@ use crate::tests_openfst::io::vector_fst_bin_deserializer::test_vector_fst_bin_w
 use crate::tests_openfst::io::vector_fst_bin_serializer::{
     test_vector_fst_bin_serializer, test_vector_fst_bin_serializer_with_symt,
 };
+use crate::tests_openfst::io::vector_fst_text_deserialization::test_vector_fst_text_deserialization;
 use crate::tests_openfst::io::vector_fst_text_serialization::{
     test_vector_fst_text_serialization, test_vector_fst_text_serialization_with_symt,
 };
@@ -129,6 +131,7 @@ pub struct ParsedFstTestData {
     invert: FstOperationResult,
     weight_type: String,
     raw: FstOperationResult,
+    raw_text: String,
     project_output: FstOperationResult,
     connect: FstOperationResult,
     condense: CondenseOperationResult,
@@ -184,6 +187,7 @@ where
     pub name: String,
     pub invert: F,
     pub raw: F,
+    pub raw_text: String,
     pub project_output: F,
     pub connect: F,
     pub condense: CondenseTestData<W, F>,
@@ -241,6 +245,7 @@ where
             name: data.name.clone(),
             invert: data.invert.parse(absolute_path_folder),
             raw: data.raw.parse(absolute_path_folder),
+            raw_text: data.raw_text.clone(),
             project_output: data.project_output.parse(absolute_path_folder),
             connect: data.connect.parse(absolute_path_folder),
             condense: data.condense.parse(absolute_path_folder),
@@ -788,6 +793,18 @@ macro_rules! test_fst {
             #[test]
             fn test_queue_openfst() -> Result<()> {
                 do_run!(test_queue, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_const_fst_text_deserialization_openfst() -> Result<()> {
+                do_run!(test_const_fst_text_deserialization, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_vector_fst_text_deserialization_openfst() -> Result<()> {
+                do_run!(test_vector_fst_text_deserialization, $fst_name);
                 Ok(())
             }
         }

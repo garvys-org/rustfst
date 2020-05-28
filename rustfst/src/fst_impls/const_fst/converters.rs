@@ -4,8 +4,9 @@ use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use std::sync::Arc;
 
-impl<W: Semiring + 'static> From<VectorFst<W>> for ConstFst<W> {
+impl<W: Semiring> From<VectorFst<W>> for ConstFst<W> {
     fn from(ifst: VectorFst<W>) -> Self {
+        let properties = ifst.properties().unwrap();
         let mut const_states = Vec::with_capacity(ifst.num_states());
         let mut const_trs = Vec::with_capacity(ifst.states.iter().map(|s| s.trs.len()).sum());
         let mut pos = 0;
@@ -25,14 +26,13 @@ impl<W: Semiring + 'static> From<VectorFst<W>> for ConstFst<W> {
             const_trs.extend(Arc::make_mut(&mut s.trs.0).drain(..));
         }
 
-        todo!("As ConstFst is immutable, all properties should be computed !");
-
         ConstFst {
             states: const_states,
             trs: Arc::new(const_trs),
             start: ifst.start_state,
             isymt: ifst.isymt,
             osymt: ifst.osymt,
+            properties,
         }
     }
 }

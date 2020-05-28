@@ -1,8 +1,10 @@
 use anyhow::Result;
 
+use crate::algorithms::fst_convert_from_ref;
+use crate::algorithms::tr_mappers::QuantizeMapper;
 use crate::fst_properties::compute_fst_properties;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{Fst, FstIntoIterator};
+use crate::fst_traits::{AllocableFst, Fst, FstIntoIterator, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::{Trs, KDELTA};
 
@@ -85,5 +87,15 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
         }
 
         true
+    }
+
+    fn quantize<F2: MutableFst<W> + AllocableFst<W>>(&self) -> Result<F2>
+    where
+        W: WeightQuantize,
+    {
+        let mut fst_tr_map: F2 = fst_convert_from_ref(self);
+        let mut mapper = QuantizeMapper {};
+        fst_tr_map.tr_map(&mut mapper)?;
+        Ok(fst_tr_map)
     }
 }
