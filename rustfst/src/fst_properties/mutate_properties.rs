@@ -150,23 +150,40 @@ pub fn complement_properties(_inprops: FstProperties) -> FstProperties {
 }
 
 pub fn compose_properties(inprops1: FstProperties, inprops2: FstProperties) -> FstProperties {
+    std::dbg!(inprops1);
+    std::dbg!(inprops2);
     let mut outprops = FstProperties::empty();
     if inprops1.contains(FstProperties::ACCEPTOR) && inprops2.contains(FstProperties::ACCEPTOR) {
         outprops |= FstProperties::ACCEPTOR | FstProperties::ACCESSIBLE;
-        outprops |= (FstProperties::NO_EPSILONS | FstProperties::NO_I_EPSILONS | FstProperties::NO_O_EPSILONS | FstProperties::ACYCLIC |
-            FstProperties::INITIAL_ACYCLIC) &
-            inprops1 & inprops2;
-        if inprops1.contains(FstProperties::NO_I_EPSILONS)  && inprops2.contains(FstProperties::NO_I_EPSILONS) {
-            outprops |= (FstProperties::I_DETERMINISTIC | FstProperties::O_DETERMINISTIC) & inprops1 & inprops2;
+        outprops |= (FstProperties::NO_EPSILONS
+            | FstProperties::NO_I_EPSILONS
+            | FstProperties::NO_O_EPSILONS
+            | FstProperties::ACYCLIC
+            | FstProperties::INITIAL_ACYCLIC)
+            & inprops1
+            & inprops2;
+        if inprops1.contains(FstProperties::NO_I_EPSILONS)
+            && inprops2.contains(FstProperties::NO_I_EPSILONS)
+        {
+            outprops |= (FstProperties::I_DETERMINISTIC | FstProperties::O_DETERMINISTIC)
+                & inprops1
+                & inprops2;
         }
     } else {
         outprops |= FstProperties::ACCESSIBLE;
-        outprops |= (FstProperties::ACCEPTOR | FstProperties::NO_I_EPSILONS | FstProperties::ACYCLIC | FstProperties::INITIAL_ACYCLIC) &
-            inprops1 & inprops2;
-        if inprops1.contains(FstProperties::NO_I_EPSILONS)  && inprops2.contains(FstProperties::NO_I_EPSILONS) {
+        outprops |= (FstProperties::ACCEPTOR
+            | FstProperties::NO_I_EPSILONS
+            | FstProperties::ACYCLIC
+            | FstProperties::INITIAL_ACYCLIC)
+            & inprops1
+            & inprops2;
+        if inprops1.contains(FstProperties::NO_I_EPSILONS)
+            && inprops2.contains(FstProperties::NO_I_EPSILONS)
+        {
             outprops |= FstProperties::I_DETERMINISTIC & inprops1 & inprops2;
         }
     }
+    std::dbg!(outprops);
     outprops
 }
 

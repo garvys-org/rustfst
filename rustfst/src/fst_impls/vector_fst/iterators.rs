@@ -68,7 +68,7 @@ impl<'a, W: Semiring + 'static> FstIterator<'a, W> for VectorFst<W> {
     }
 }
 
-impl<'a, W: Semiring + 'static> FstIteratorMut<'a, W> for VectorFst<W> {
+impl<'a, W: Semiring> FstIteratorMut<'a, W> for VectorFst<W> {
     type FstIter = Map<
         Enumerate<std::slice::IterMut<'a, VectorFstState<W>>>,
         Box<

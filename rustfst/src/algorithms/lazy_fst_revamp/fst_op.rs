@@ -2,9 +2,9 @@ use std::fmt::Debug;
 
 use anyhow::Result;
 
+use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
 use crate::{StateId, TrsVec};
-use crate::fst_properties::FstProperties;
 
 pub trait FstOp<W: Semiring>: Debug {
     // was FstImpl

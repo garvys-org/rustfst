@@ -7,12 +7,12 @@ pub use generic_matcher::GenericMatcher;
 pub use multi_eps_matcher::{MultiEpsMatcher, MultiEpsMatcherFlags};
 pub use sorted_matcher::SortedMatcher;
 
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Label, StateId};
 use crate::{Tr, EPS_LABEL, NO_LABEL};
 use std::sync::Arc;
-use crate::fst_properties::FstProperties;
 
 mod generic_matcher;
 mod multi_eps_matcher;

@@ -9,10 +9,10 @@ use crate::algorithms::compose::lookahead_filters::lookahead_selector::Selector;
 use crate::algorithms::compose::lookahead_filters::LookAheadComposeFilterTrait;
 use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
-use crate::fst_properties::FstProperties;
 
 #[derive(Clone, Debug)]
 pub struct AltSequenceComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {

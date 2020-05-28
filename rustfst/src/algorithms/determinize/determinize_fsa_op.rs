@@ -10,10 +10,10 @@ use crate::algorithms::determinize::{
     DeterminizeElement, DeterminizeStateTable, DeterminizeStateTuple, DeterminizeTr, WeightedSubset,
 };
 use crate::algorithms::lazy_fst_revamp::FstOp;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
 use crate::semirings::{DivideType, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::{Label, Semiring, StateId, Tr, Trs, TrsVec, KDELTA};
-use crate::fst_properties::FstProperties;
 
 #[derive(Debug)]
 pub struct DeterminizeFsaOp<W: Semiring, F: Fst<W>, CD: CommonDivisor<W>> {

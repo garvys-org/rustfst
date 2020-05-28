@@ -53,5 +53,7 @@ pub trait FstIterator<'a, W: Semiring>: CoreFst<W> {
 
 pub trait FstIteratorMut<'a, W: Semiring>: CoreFst<W> {
     type FstIter: Iterator<Item = FstIterData<&'a mut W, slice::IterMut<'a, Tr<W>>>>;
+
+    #[deprecated]
     fn fst_iter_mut(&'a mut self) -> Self::FstIter;
 }

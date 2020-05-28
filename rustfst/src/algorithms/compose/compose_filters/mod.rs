@@ -13,9 +13,9 @@ pub use trivial_compose_filter::{TrivialComposeFilter, TrivialComposeFilterBuild
 
 use crate::algorithms::compose::filter_states::FilterState;
 use crate::algorithms::compose::matchers::Matcher;
+use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr};
-use crate::fst_properties::FstProperties;
 
 mod alt_sequence_compose_filter;
 mod match_compose_filter;

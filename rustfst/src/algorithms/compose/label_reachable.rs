@@ -63,12 +63,16 @@ impl LabelReachableData {
         fst: &mut F,
         relabel_input: bool,
     ) -> Result<()> {
-        for fst_data in fst.fst_iter_mut() {
-            for tr in fst_data.trs {
-                if relabel_input {
-                    tr.ilabel = self.relabel(tr.ilabel);
-                } else {
-                    tr.olabel = self.relabel(tr.olabel);
+        for s in 0..fst.num_states() {
+            unsafe {
+                let mut it_tr = fst.tr_iter_unchecked_mut_revamp(s);
+                for idx_tr in 0..it_tr.len() {
+                    let tr = it_tr.get_unchecked(idx_tr);
+                    if relabel_input {
+                        it_tr.set_ilabel_unchecked(idx_tr, self.relabel(tr.ilabel));
+                    } else {
+                        it_tr.set_olabel_unchecked(idx_tr, self.relabel(tr.olabel));
+                    }
                 }
             }
         }

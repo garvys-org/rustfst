@@ -10,18 +10,18 @@ use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MatchType, Matcher, REQUIRE_PRIORITY};
 use crate::algorithms::compose::{ComposeFstOpOptions, ComposeStateTuple};
 use crate::algorithms::lazy_fst_revamp::{FstOp, StateTable};
+use crate::fst_properties::mutable_properties::compose_properties;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::CoreFst;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, Trs, TrsVec, EPS_LABEL, NO_LABEL};
-use crate::fst_properties::FstProperties;
-use crate::fst_properties::mutable_properties::compose_properties;
 
 #[derive(Debug, Clone)]
 pub struct ComposeFstOp<W: Semiring, CFB: ComposeFilterBuilder<W>> {
     compose_filter_builder: CFB,
     state_table: StateTable<ComposeStateTuple<<CFB::CF as ComposeFilter<W>>::FS>>,
     match_type: MatchType,
-    properties: FstProperties
+    properties: FstProperties,
 }
 
 impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
@@ -62,7 +62,7 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
             compose_filter_builder,
             state_table: opts.state_table.unwrap_or_else(StateTable::new),
             match_type,
-            properties
+            properties,
         })
     }
 

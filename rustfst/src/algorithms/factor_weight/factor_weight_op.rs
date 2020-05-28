@@ -7,11 +7,11 @@ use anyhow::Result;
 use crate::algorithms::factor_weight::{Element, FactorWeightStateTable};
 use crate::algorithms::factor_weight::{FactorIterator, FactorWeightOptions, FactorWeightType};
 use crate::algorithms::lazy_fst_revamp::FstOp;
+use crate::fst_properties::mutable_properties::factor_weight_properties;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::{Tr, Trs, TrsVec};
-use crate::fst_properties::FstProperties;
-use crate::fst_properties::mutable_properties::factor_weight_properties;
 
 pub struct FactorWeightOp<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> {
     opts: FactorWeightOptions,

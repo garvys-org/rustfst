@@ -6,9 +6,9 @@ use anyhow::Result;
 use crate::algorithms::compose::compose_filters::{ComposeFilter, ComposeFilterBuilder};
 use crate::algorithms::compose::filter_states::{FilterState, TrivialFilterState};
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
+use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
 use crate::{Tr, EPS_LABEL};
-use crate::fst_properties::FstProperties;
 
 #[derive(Debug, Clone)]
 pub struct NoMatchComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {

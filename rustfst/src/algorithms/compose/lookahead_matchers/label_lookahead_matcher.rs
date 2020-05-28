@@ -8,10 +8,10 @@ use crate::algorithms::compose::lookahead_matchers::{
 };
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::algorithms::compose::{LabelReachable, LabelReachableData};
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Tr, Trs, EPS_LABEL};
-use crate::fst_properties::FstProperties;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {

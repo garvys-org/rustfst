@@ -5,19 +5,19 @@ use anyhow::Result;
 use crate::algorithms::lazy_fst_revamp::FstOp2;
 use crate::algorithms::queues::FifoQueue;
 use crate::algorithms::rm_epsilon::{RmEpsilonConfig, RmEpsilonState};
+use crate::fst_properties::mutable_properties::rmepsilon_properties;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::TrsVec;
 use itertools::Itertools;
 use std::cell::RefCell;
 use std::sync::Arc;
-use crate::fst_properties::FstProperties;
-use crate::fst_properties::mutable_properties::rmepsilon_properties;
 
 #[derive(Clone, Eq)]
 pub struct RmEpsilonOp<W: Semiring, F: MutableFst<W>, B: Borrow<F>> {
     rmeps_state: RefCell<RmEpsilonState<W, F, B, FifoQueue>>,
-    properties: FstProperties
+    properties: FstProperties,
 }
 
 impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> std::fmt::Debug for RmEpsilonOp<W, F, B> {

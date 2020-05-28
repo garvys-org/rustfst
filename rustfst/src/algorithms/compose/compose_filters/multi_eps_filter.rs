@@ -3,9 +3,9 @@ use std::sync::Arc;
 use anyhow::Result;
 
 use crate::algorithms::compose::compose_filters::ComposeFilter;
+use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
 use crate::{Tr, NO_LABEL};
-use crate::fst_properties::FstProperties;
 
 #[derive(Debug, Clone)]
 pub struct MultiEpsFilter<F> {
@@ -62,6 +62,8 @@ impl<W: Semiring, F: ComposeFilter<W>> ComposeFilter<W> for MultiEpsFilter<F> {
 
     fn properties(&self, inprops: FstProperties) -> FstProperties {
         let oprops = self.filter.properties(inprops);
-        oprops & FstProperties::i_label_invariant_properties() & FstProperties::o_label_invariant_properties()
+        oprops
+            & FstProperties::i_label_invariant_properties()
+            & FstProperties::o_label_invariant_properties()
     }
 }

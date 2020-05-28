@@ -12,10 +12,10 @@ use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
 use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::algorithms::compose::matchers::{MultiEpsMatcher, MultiEpsMatcherFlags};
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::CoreFst;
 use crate::semirings::Semiring;
 use crate::{Label, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
-use crate::fst_properties::FstProperties;
 
 #[derive(Debug, Clone)]
 pub struct PushLabelsComposeFilter<

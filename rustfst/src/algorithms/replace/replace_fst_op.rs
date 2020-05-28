@@ -13,10 +13,10 @@ use crate::algorithms::replace::state_table::{
     ReplaceStackPrefix, ReplaceStateTable, ReplaceStateTuple,
 };
 use crate::algorithms::replace::utils::{epsilon_on_input, epsilon_on_output};
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, Trs, TrsVec, EPS_LABEL};
-use crate::fst_properties::FstProperties;
 
 pub struct ReplaceFstOp<W: Semiring, F: Fst<W>, B: Borrow<F>> {
     call_label_type_: ReplaceLabelType,
@@ -125,10 +125,10 @@ fn replace_properties<W, F, B>(
     call_output_label: Option<Label>,
     sorted_and_non_empty: &mut bool,
 ) -> FstProperties
-    where
-        W: Semiring,
-        F: Fst<W>,
-        B: Borrow<F>,
+where
+    W: Semiring,
+    F: Fst<W>,
+    B: Borrow<F>,
 {
     let mut inprops = Vec::with_capacity(fst_list.len());
     let mut all_ilabel_sorted = true;
@@ -202,7 +202,6 @@ fn replace_transducer(
 
 impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstOp<W, F, B> {
     pub fn new(fst_list: Vec<(Label, B)>, opts: ReplaceFstOptions) -> Result<Self> {
-
         let mut all_non_empty_and_sorted = false;
         let properties = replace_properties(
             opts.root,
