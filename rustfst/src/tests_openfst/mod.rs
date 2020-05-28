@@ -727,7 +727,6 @@ macro_rules! test_fst {
             }
 
             #[test]
-            #[ignore]
             fn test_rmepsilon_openfst() -> Result<()> {
                 do_run!(test_rmepsilon, $fst_name);
                 Ok(())

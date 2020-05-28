@@ -574,8 +574,20 @@ pub fn reweight_properties(inprops: FstProperties) -> FstProperties {
     outprops
 }
 
-pub fn rmepsilon_properties(_inprops: FstProperties) -> FstProperties {
-    unimplemented!()
+pub fn rmepsilon_properties(inprops: FstProperties, delayed: bool) -> FstProperties {
+    let mut outprops = FstProperties::NO_EPSILONS;
+    outprops |= (FstProperties::ACCEPTOR | FstProperties::ACYCLIC | FstProperties::INITIAL_ACYCLIC)
+        & inprops;
+    if inprops.contains(FstProperties::ACCEPTOR) {
+        outprops |= FstProperties::NO_I_EPSILONS | FstProperties::NO_O_EPSILONS;
+    }
+    if !delayed {
+        outprops |= FstProperties::TOP_SORTED & inprops;
+    }
+    if !delayed || inprops.contains(FstProperties::ACCESSIBLE) {
+        outprops |= FstProperties::NOT_ACCEPTOR & inprops;
+    }
+    return outprops;
 }
 
 pub fn shortest_path_properties(_inprops: FstProperties) -> FstProperties {

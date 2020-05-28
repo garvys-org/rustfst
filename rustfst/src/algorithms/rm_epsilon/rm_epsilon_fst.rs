@@ -19,6 +19,7 @@ use anyhow::Result;
 
 use crate::algorithms::lazy_fst_revamp::{LazyFst2, SimpleHashMapCache};
 use crate::algorithms::rm_epsilon::rm_epsilon_op::RmEpsilonOp;
+use crate::fst_properties::mutable_properties::rmepsilon_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::{Semiring, SymbolTable, TrsVec};
@@ -61,7 +62,7 @@ where
     }
 
     fn properties_revamp(&self) -> FstProperties {
-        unimplemented!()
+        self.0.properties_revamp()
     }
 }
 
@@ -144,9 +145,10 @@ where
     pub fn new(fst: B) -> Result<Self> {
         let isymt = fst.borrow().input_symbols().cloned();
         let osymt = fst.borrow().output_symbols().cloned();
+        let properties = rmepsilon_properties(fst.borrow().properties_revamp(), true);
         let fst_op = RmEpsilonOp::new(fst);
         let fst_cache = SimpleHashMapCache::new();
-        let lazy_fst = LazyFst2::from_op_and_cache(fst_op, fst_cache, isymt, osymt);
+        let lazy_fst = LazyFst2::from_op_and_cache(fst_op, fst_cache, isymt, osymt, properties);
         Ok(RmEpsilonFst(lazy_fst))
     }
 
