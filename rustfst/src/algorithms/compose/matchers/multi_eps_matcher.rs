@@ -12,6 +12,7 @@ use bitflags::bitflags;
 use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::semirings::Semiring;
 use crate::{Label, StateId, EPS_LABEL, NO_LABEL};
+use crate::fst_properties::FstProperties;
 
 bitflags! {
     pub struct MultiEpsMatcherFlags: u32 {

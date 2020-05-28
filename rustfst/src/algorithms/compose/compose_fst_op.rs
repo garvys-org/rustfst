@@ -13,12 +13,15 @@ use crate::algorithms::lazy_fst_revamp::{FstOp, StateTable};
 use crate::fst_traits::CoreFst;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, Trs, TrsVec, EPS_LABEL, NO_LABEL};
+use crate::fst_properties::FstProperties;
+use crate::fst_properties::mutable_properties::compose_properties;
 
 #[derive(Debug, Clone)]
 pub struct ComposeFstOp<W: Semiring, CFB: ComposeFilterBuilder<W>> {
     compose_filter_builder: CFB,
     state_table: StateTable<ComposeStateTuple<<CFB::CF as ComposeFilter<W>>::FS>>,
     match_type: MatchType,
+    properties: FstProperties
 }
 
 impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
@@ -49,10 +52,17 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
         });
         let compose_filter = compose_filter_builder.build()?;
         let match_type = Self::match_type(compose_filter.matcher1(), compose_filter.matcher2())?;
+
+        let fprops1 = fst1.properties_revamp();
+        let fprops2 = fst2.properties_revamp();
+        let cprops = compose_properties(fprops1, fprops2);
+        let properties = compose_filter.properties(cprops);
+
         Ok(Self {
             compose_filter_builder,
             state_table: opts.state_table.unwrap_or_else(StateTable::new),
             match_type,
+            properties
         })
     }
 
@@ -291,5 +301,9 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> FstOp<W> for ComposeFstOp<W, CFB
         } else {
             Ok(Some(final1))
         }
+    }
+
+    fn properties(&self) -> FstProperties {
+        self.properties
     }
 }

@@ -13,6 +13,7 @@ use crate::algorithms::lazy_fst_revamp::FstOp;
 use crate::fst_traits::Fst;
 use crate::semirings::{DivideType, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::{Label, Semiring, StateId, Tr, Trs, TrsVec, KDELTA};
+use crate::fst_properties::FstProperties;
 
 #[derive(Debug)]
 pub struct DeterminizeFsaOp<W: Semiring, F: Fst<W>, CD: CommonDivisor<W>> {
@@ -101,6 +102,11 @@ where
             Ok(Some(final_weight))
         }
     }
+
+    fn properties(&self) -> FstProperties {
+        // Properties are set for the DeterminizeFst object. DeterminizeFsa shouldn't be used directly
+        FstProperties::empty()
+    }
 }
 
 impl<W, F: Fst<W>, CD: CommonDivisor<W>> DeterminizeFsaOp<W, F, CD>
@@ -108,7 +114,7 @@ where
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
 {
     pub fn new(fst: Arc<F>, in_dist: Option<Arc<Vec<W>>>) -> Result<Self> {
-        if !fst.is_acceptor() {
+        if !fst.properties_revamp().contains(FstProperties::ACCEPTOR) {
             bail!("DeterminizeFsaImpl : expected acceptor as argument");
         }
         Ok(Self {

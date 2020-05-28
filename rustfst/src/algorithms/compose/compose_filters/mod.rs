@@ -15,6 +15,7 @@ use crate::algorithms::compose::filter_states::FilterState;
 use crate::algorithms::compose::matchers::Matcher;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr};
+use crate::fst_properties::FstProperties;
 
 mod alt_sequence_compose_filter;
 mod match_compose_filter;
@@ -65,4 +66,6 @@ pub trait ComposeFilter<W: Semiring>: Debug + Clone {
     fn fst2(&self) -> &Arc<<Self::M2 as Matcher<W>>::F> {
         self.matcher2().fst()
     }
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties;
 }

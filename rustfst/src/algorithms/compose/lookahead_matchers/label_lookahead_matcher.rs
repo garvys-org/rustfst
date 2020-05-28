@@ -11,6 +11,7 @@ use crate::algorithms::compose::{LabelReachable, LabelReachableData};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Tr, Trs, EPS_LABEL};
+use crate::fst_properties::FstProperties;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
@@ -20,7 +21,7 @@ pub struct LabelLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
     w: PhantomData<W>,
 }
 
-impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
+impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
     for LabelLookAheadMatcher<W, M, MFT>
 {
     type F = M::F;

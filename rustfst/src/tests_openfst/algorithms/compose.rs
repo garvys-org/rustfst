@@ -25,11 +25,12 @@ use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ComposeOperationResult {
-    fst_2: String,
-    result: String,
+    fst_2_path: String,
+    result_path: String,
     filter_name: String,
 }
 
@@ -45,14 +46,15 @@ where
 }
 
 impl ComposeOperationResult {
-    pub fn parse<W, F>(&self) -> ComposeTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> ComposeTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>
     {
         ComposeTestData {
-            fst_2: F::from_text_string(self.fst_2.as_str()).unwrap(),
-            result: F::from_text_string(self.result.as_str()).unwrap(),
+            fst_2: F::read(dir_path.as_ref().join(&self.fst_2_path)).unwrap(),
+            result: F::read(dir_path.as_ref().join(&self.result_path)).unwrap(),
             filter_name: self.filter_name.clone(),
             w: PhantomData,
         }

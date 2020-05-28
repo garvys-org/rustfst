@@ -13,6 +13,7 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::{Tr, KDELTA};
+use crate::fst_properties::FstProperties;
 
 #[derive(Debug, Clone)]
 pub struct PushWeightsComposeFilter<W: Semiring, CF: LookAheadComposeFilterTrait<W>, SMT>
@@ -164,6 +165,10 @@ where
 
     fn matcher2_shared(&self) -> &Arc<Self::M2> {
         self.filter.matcher2_shared()
+    }
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties {
+        self.filter.properties(inprops) & FstProperties::weight_invariant_properties()
     }
 }
 

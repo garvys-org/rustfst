@@ -8,6 +8,7 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr};
+use crate::fst_properties::FstProperties;
 
 #[derive(Debug, Clone)]
 pub struct TrivialLookAheadMatcher<W, M> {

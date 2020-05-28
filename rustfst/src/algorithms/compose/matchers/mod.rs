@@ -12,6 +12,7 @@ use crate::semirings::Semiring;
 use crate::{Label, StateId};
 use crate::{Tr, EPS_LABEL, NO_LABEL};
 use std::sync::Arc;
+use crate::fst_properties::FstProperties;
 
 mod generic_matcher;
 mod multi_eps_matcher;

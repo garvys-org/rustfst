@@ -17,6 +17,7 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Tr, EPS_LABEL};
+use crate::fst_properties::FstProperties;
 
 #[derive(Clone, Debug)]
 pub struct LookAheadComposeFilter<
@@ -236,6 +237,14 @@ where
 
     fn matcher2_shared(&self) -> &Arc<Self::M2> {
         self.filter.matcher2_shared()
+    }
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties {
+        let outprops = self.filter.properties(inprops);
+        if self.lookahead_type == MatchType::MatchNone {
+            panic!("Error");
+        }
+        outprops
     }
 }
 

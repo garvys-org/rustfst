@@ -137,11 +137,9 @@ where
     pub fn new(fst: B, opts: FactorWeightOptions) -> Result<Self> {
         let isymt = fst.borrow().input_symbols().cloned();
         let osymt = fst.borrow().output_symbols().cloned();
-        let properties =
-            factor_weight_properties(factor_weight_properties(fst.borrow().properties_revamp()));
         let fst_op = FactorWeightOp::new(fst, opts)?;
         let fst_cache = SimpleHashMapCache::new();
-        let lazy_fst = LazyFst::from_op_and_cache(fst_op, fst_cache, isymt, osymt, properties);
+        let lazy_fst = LazyFst::from_op_and_cache(fst_op, fst_cache, isymt, osymt);
         Ok(FactorWeightFst(lazy_fst))
     }
 

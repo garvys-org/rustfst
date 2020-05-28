@@ -21,7 +21,6 @@ pub struct LazyFst2<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> {
     w: PhantomData<W>,
     isymt: Option<Arc<SymbolTable>>,
     osymt: Option<Arc<SymbolTable>>,
-    properties: FstProperties,
 }
 
 impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, Op, Cache> {
@@ -70,7 +69,7 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
     }
 
     fn properties_revamp(&self) -> FstProperties {
-        self.properties
+        self.op.properties()
     }
 }
 
@@ -182,14 +181,12 @@ where
         cache: Cache,
         isymt: Option<Arc<SymbolTable>>,
         osymt: Option<Arc<SymbolTable>>,
-        properties: FstProperties,
     ) -> Self {
         Self {
             op,
             cache,
             isymt,
             osymt,
-            properties,
             w: PhantomData,
         }
     }

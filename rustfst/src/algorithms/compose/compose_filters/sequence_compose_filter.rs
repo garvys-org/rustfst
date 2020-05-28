@@ -9,6 +9,7 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
+use crate::fst_properties::FstProperties;
 
 #[derive(Debug, Clone)]
 /// This filter requires epsilons on FST1 to be read before epsilons on FST2.
@@ -143,5 +144,9 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
 
     fn matcher2_shared(&self) -> &Arc<Self::M2> {
         &self.matcher2
+    }
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties {
+        inprops
     }
 }

@@ -15,6 +15,7 @@ use crate::algorithms::compose::matchers::{MultiEpsMatcher, MultiEpsMatcherFlags
 use crate::fst_traits::CoreFst;
 use crate::semirings::Semiring;
 use crate::{Label, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
+use crate::fst_properties::FstProperties;
 
 #[derive(Debug, Clone)]
 pub struct PushLabelsComposeFilter<
@@ -218,6 +219,15 @@ where
     fn matcher2_shared(&self) -> &Arc<Self::M2> {
         // Not supported at the moment as the MultiEpsMatcher is owned by the ComposeFilter
         unimplemented!()
+    }
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties {
+        let oprops = self.filter.properties(inprops);
+        if self.lookahead_output() {
+            oprops & FstProperties::o_label_invariant_properties()
+        } else {
+            oprops & FstProperties::i_label_invariant_properties()
+        }
     }
 }
 

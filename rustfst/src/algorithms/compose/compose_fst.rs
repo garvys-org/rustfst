@@ -11,6 +11,7 @@ use crate::fst_traits::{CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, Stat
 use crate::semirings::Semiring;
 use crate::{SymbolTable, TrsVec};
 use std::sync::Arc;
+use crate::fst_properties::mutable_properties::compose_properties;
 
 #[derive(Debug, Clone)]
 pub struct ComposeFst<W: Semiring, CFB: ComposeFilterBuilder<W>>(
@@ -40,13 +41,12 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFst<W, CFB> {
             StateTable<ComposeStateTuple<<CFB::CF as ComposeFilter<W>>::FS>>,
         >,
     ) -> Result<Self> {
-        // let isymt = fst1.input_symbols().cloned();
-        // let osymt = fst2.output_symbols().cloned();
-        // let compose_impl = ComposeFstOp::new(fst1, fst2, opts)?;
-        // let fst_cache = SimpleHashMapCache::new();
-        todo!("lazy fst props")
-        // let fst = LazyFst::from_op_and_cache(compose_impl, fst_cache, isymt, osymt);
-        // Ok(ComposeFst(fst))
+        let isymt = fst1.input_symbols().cloned();
+        let osymt = fst2.output_symbols().cloned();
+        let compose_impl = ComposeFstOp::new(fst1, fst2, opts)?;
+        let fst_cache = SimpleHashMapCache::new();
+        let fst = LazyFst::from_op_and_cache(compose_impl, fst_cache, isymt, osymt);
+        Ok(ComposeFst(fst))
     }
 
     // TODO: Change API, no really user friendly
@@ -67,13 +67,12 @@ impl<W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>>
     ComposeFst<W, SequenceComposeFilterBuilder<W, GenericMatcher<W, F1>, GenericMatcher<W, F2>>>
 {
     pub fn new_auto(fst1: Arc<F1>, fst2: Arc<F2>) -> Result<Self> {
-        todo!("lazy fst props")
-        // let isymt = fst1.input_symbols().cloned();
-        // let osymt = fst2.output_symbols().cloned();
-        // let compose_impl = create_base(fst1, fst2)?;
-        // let fst_cache = SimpleHashMapCache::new();
-        // let fst = LazyFst::from_op_and_cache(compose_impl, fst_cache, isymt, osymt);
-        // Ok(ComposeFst(fst))
+        let isymt = fst1.input_symbols().cloned();
+        let osymt = fst2.output_symbols().cloned();
+        let compose_impl = create_base(fst1, fst2)?;
+        let fst_cache = SimpleHashMapCache::new();
+        let fst = LazyFst::from_op_and_cache(compose_impl, fst_cache, isymt, osymt);
+        Ok(ComposeFst(fst))
     }
 }
 

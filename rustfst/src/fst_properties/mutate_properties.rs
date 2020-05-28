@@ -149,8 +149,25 @@ pub fn complement_properties(_inprops: FstProperties) -> FstProperties {
     unimplemented!()
 }
 
-pub fn compose_properties(_inprops1: FstProperties, _inprops2: FstProperties) -> FstProperties {
-    unimplemented!()
+pub fn compose_properties(inprops1: FstProperties, inprops2: FstProperties) -> FstProperties {
+    let mut outprops = FstProperties::empty();
+    if inprops1.contains(FstProperties::ACCEPTOR) && inprops2.contains(FstProperties::ACCEPTOR) {
+        outprops |= FstProperties::ACCEPTOR | FstProperties::ACCESSIBLE;
+        outprops |= (FstProperties::NO_EPSILONS | FstProperties::NO_I_EPSILONS | FstProperties::NO_O_EPSILONS | FstProperties::ACYCLIC |
+            FstProperties::INITIAL_ACYCLIC) &
+            inprops1 & inprops2;
+        if inprops1.contains(FstProperties::NO_I_EPSILONS)  && inprops2.contains(FstProperties::NO_I_EPSILONS) {
+            outprops |= (FstProperties::I_DETERMINISTIC | FstProperties::O_DETERMINISTIC) & inprops1 & inprops2;
+        }
+    } else {
+        outprops |= FstProperties::ACCESSIBLE;
+        outprops |= (FstProperties::ACCEPTOR | FstProperties::NO_I_EPSILONS | FstProperties::ACYCLIC | FstProperties::INITIAL_ACYCLIC) &
+            inprops1 & inprops2;
+        if inprops1.contains(FstProperties::NO_I_EPSILONS)  && inprops2.contains(FstProperties::NO_I_EPSILONS) {
+            outprops |= FstProperties::I_DETERMINISTIC & inprops1 & inprops2;
+        }
+    }
+    outprops
 }
 
 pub fn concat_properties(

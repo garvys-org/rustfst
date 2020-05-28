@@ -338,7 +338,7 @@ where
                 .join(&data.raw_vector_with_symt_bin_path)
                 .to_path_buf(),
             // matcher: data.matcher.iter().map(|v| v.parse()).collect(),
-            compose: data.compose.iter().map(|v| v.parse()).collect(),
+            compose: data.compose.iter().map(|v| v.parse(absolute_path_folder)).collect(),
             state_reachable: data.state_reachable.parse(),
             queue: data.queue.clone(),
         }

@@ -10,11 +10,14 @@ use crate::algorithms::lazy_fst_revamp::FstOp;
 use crate::fst_traits::Fst;
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::{Tr, Trs, TrsVec};
+use crate::fst_properties::FstProperties;
+use crate::fst_properties::mutable_properties::factor_weight_properties;
 
 pub struct FactorWeightOp<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> {
     opts: FactorWeightOptions,
     fst: B,
     fw_state_table: FactorWeightStateTable<W>,
+    properties: FstProperties,
     ghost: PhantomData<FI>,
     f: PhantomData<F>,
 }
@@ -126,6 +129,10 @@ impl<W: WeightQuantize, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FstOp<W>
             Ok(None)
         }
     }
+
+    fn properties(&self) -> FstProperties {
+        self.properties
+    }
 }
 
 impl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FactorWeightOp<W, F, B, FI>
@@ -136,10 +143,12 @@ where
         if opts.mode.is_empty() {
             bail!("Factoring neither tr weights nor final weights");
         }
-        let factor_tr_weights = opts.mode.intersects(FactorWeightType::FACTOR_ARC_WEIGHTS);
+        let factor_tr_weights = opts.mode.contains(FactorWeightType::FACTOR_ARC_WEIGHTS);
+        let properties = factor_weight_properties(fst.borrow().properties_revamp());
         Ok(Self {
             opts,
             fst,
+            properties,
             ghost: PhantomData,
             f: PhantomData,
             fw_state_table: FactorWeightStateTable::new(factor_tr_weights),

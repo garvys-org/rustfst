@@ -121,7 +121,7 @@ impl<W: Semiring, F: CoreFst<W>, M, T> CoreFst<W> for MatcherFst<W, F, M, T> {
     }
 
     fn properties_revamp(&self) -> FstProperties {
-        unimplemented!()
+        self.fst_add_on.properties_revamp()
     }
 }
 

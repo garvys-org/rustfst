@@ -865,7 +865,7 @@ void compute_fst_matcher(const F& raw_fst, json& j) {
 }
 
 template<class F, class FILTER>
-void do_compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2, bool connect, FILTER filter, string filter_name) {
+void do_compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2, bool connect, FILTER filter, string filter_name, const string& dir_path) {
     using Arc = typename F::Arc;
 
     auto opts = fst::ComposeOptions();
@@ -877,15 +877,15 @@ void do_compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<type
     fst::Compose(raw_fst, fst_2, &static_fst, opts);
 
     json j2;
-    j2["fst_2"] = fst_to_string(fst_2);
-    j2["result"] = fst_to_string(static_fst);
+    j2["fst_2_path"] = dump_fst(fst_2, dir_path);
+    j2["result_path"] = dump_fst(static_fst, dir_path);
     j2["filter_name"] = filter_name;
 
     j["compose"].push_back(j2);
 }
 
 template<class F>
-void do_compute_fst_compose_lookahead(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2) {
+void do_compute_fst_compose_lookahead(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2, const string& dir_path) {
     using Arc = typename F::Arc;
 
     using MATCHER1 = fst::LabelLookAheadMatcher<fst::SortedMatcher<fst::Fst<Arc>>, fst::olabel_lookahead_flags>;
@@ -927,8 +927,8 @@ void do_compute_fst_compose_lookahead(const F& raw_fst, json& j, const fst::Vect
     auto res_lazy = fst::VectorFst<Arc>(*lol);
 
     json j2;
-    j2["fst_2"] = fst_to_string(fst_2);
-    j2["result"] = fst_to_string(res_lazy);
+    j2["fst_2_path"] = dump_fst(fst_2, dir_path);
+    j2["result_path"] = dump_fst(res_lazy, dir_path);
     j2["filter_name"] = "lookahead";
 
     j["compose"].push_back(j2);
@@ -936,20 +936,20 @@ void do_compute_fst_compose_lookahead(const F& raw_fst, json& j, const fst::Vect
 
 
 template<class F>
-void compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2) {
+void compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2, const string& dir_path) {
     using Weight = typename F::Weight;
     using Arc = typename F::Arc;
     j["compose"] = {};
 
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::AUTO_FILTER, "auto");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NULL_FILTER, "null");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::TRIVIAL_FILTER, "trivial");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::SEQUENCE_FILTER, "sequence");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::ALT_SEQUENCE_FILTER, "alt_sequence");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::MATCH_FILTER, "match");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NO_MATCH_FILTER, "no_match");
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::AUTO_FILTER, "auto", dir_path);
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NULL_FILTER, "null", dir_path);
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::TRIVIAL_FILTER, "trivial", dir_path);
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::SEQUENCE_FILTER, "sequence", dir_path);
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::ALT_SEQUENCE_FILTER, "alt_sequence", dir_path);
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::MATCH_FILTER, "match", dir_path);
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NO_MATCH_FILTER, "no_match", dir_path);
 
-    do_compute_fst_compose_lookahead(raw_fst, j, fst_2);
+    do_compute_fst_compose_lookahead(raw_fst, j, fst_2, dir_path);
 }
 
 template<class F>
@@ -1168,7 +1168,7 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     std::cout << "Compose" << std::endl;
     auto fst_compose = fst_test_data.get_fst_compose();
     fst_compose.Properties(fst::kFstProperties, true);
-    compute_fst_compose(raw_fst, data, fst_compose);
+    compute_fst_compose(raw_fst, data, fst_compose, dir_path);
 
     std::cout << "State Reachable" << std::endl;
     compute_fst_state_reachable(raw_fst, data);

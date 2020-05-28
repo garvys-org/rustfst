@@ -66,7 +66,7 @@ impl<W: Semiring, F: CoreFst<W>, T> CoreFst<W> for FstAddOn<F, T> {
     }
 
     fn properties_revamp(&self) -> FstProperties {
-        unimplemented!()
+        self.fst.properties_revamp()
     }
 }
 
