@@ -7,6 +7,7 @@ use anyhow::Result;
 use crate::algorithms::factor_weight::factor_weight_op::FactorWeightOp;
 use crate::algorithms::factor_weight::{FactorIterator, FactorWeightOptions};
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
+use crate::fst_properties::mutable_properties::factor_weight_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::WeightQuantize;
@@ -48,6 +49,10 @@ where
 
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
         self.0.get_trs_unchecked(state_id)
+    }
+
+    fn properties_revamp(&self) -> FstProperties {
+        self.0.properties_revamp()
     }
 }
 
@@ -111,10 +116,6 @@ where
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.0.take_output_symbols()
     }
-
-    fn properties_revamp(&self) -> FstProperties {
-        unimplemented!()
-    }
 }
 
 impl<W, F, B, FI> Debug for FactorWeightFst<W, F, B, FI>
@@ -136,9 +137,11 @@ where
     pub fn new(fst: B, opts: FactorWeightOptions) -> Result<Self> {
         let isymt = fst.borrow().input_symbols().cloned();
         let osymt = fst.borrow().output_symbols().cloned();
+        let properties =
+            factor_weight_properties(factor_weight_properties(fst.borrow().properties_revamp()));
         let fst_op = FactorWeightOp::new(fst, opts)?;
         let fst_cache = SimpleHashMapCache::new();
-        let lazy_fst = LazyFst::from_op_and_cache(fst_op, fst_cache, isymt, osymt);
+        let lazy_fst = LazyFst::from_op_and_cache(fst_op, fst_cache, isymt, osymt, properties);
         Ok(FactorWeightFst(lazy_fst))
     }
 

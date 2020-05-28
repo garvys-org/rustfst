@@ -64,6 +64,10 @@ impl<W: Semiring, F: CoreFst<W>, T> CoreFst<W> for FstAddOn<F, T> {
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
         self.fst.get_trs_unchecked(state_id)
     }
+
+    fn properties_revamp(&self) -> FstProperties {
+        unimplemented!()
+    }
 }
 
 impl<'a, F: StateIterator<'a>, T> StateIterator<'a> for FstAddOn<F, T> {
@@ -113,10 +117,6 @@ where
 
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.fst.take_output_symbols()
-    }
-
-    fn properties_revamp(&self) -> FstProperties {
-        unimplemented!()
     }
 }
 

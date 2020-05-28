@@ -32,10 +32,6 @@ impl<W: Semiring> Fst<W> for VectorFst<W> {
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.osymt.take()
     }
-
-    fn properties_revamp(&self) -> FstProperties {
-        self.properties
-    }
 }
 
 impl<W: Semiring> CoreFst<W> for VectorFst<W> {
@@ -71,5 +67,9 @@ impl<W: Semiring> CoreFst<W> for VectorFst<W> {
         let state = self.states.get_unchecked(state_id);
         // Data is not copied, only Arc
         state.trs.shallow_clone()
+    }
+
+    fn properties_revamp(&self) -> FstProperties {
+        self.properties
     }
 }

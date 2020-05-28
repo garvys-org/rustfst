@@ -3,7 +3,7 @@ use std::borrow::Borrow;
 use anyhow::Result;
 
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
-use crate::algorithms::replace::config::ReplaceFstOptions;
+use crate::algorithms::replace::config::{ReplaceFstOptions, ReplaceLabelType};
 use crate::algorithms::replace::replace_fst_op::ReplaceFstOp;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
@@ -11,6 +11,7 @@ use crate::semirings::Semiring;
 use crate::{Label, SymbolTable, TrsVec};
 use std::fmt::Debug;
 use std::sync::Arc;
+use crate::algorithms::replace::utils::{epsilon_on_input, epsilon_on_output};
 
 /// ReplaceFst supports lazy replacement of trs in one FST with another FST.
 /// This replacement is recursive. ReplaceFst can be used to support a variety of
@@ -18,6 +19,77 @@ use std::sync::Arc;
 pub struct ReplaceFst<W: Semiring, F: Fst<W>, B: Borrow<F>>(
     LazyFst<W, ReplaceFstOp<W, F, B>, SimpleHashMapCache<W>>,
 );
+
+fn replace_properties<W, F, B>(
+    root_label: Label,
+    fst_list: &[(Label, B)],
+    call_label_type: ReplaceLabelType,
+    return_label_type: ReplaceLabelType,
+    call_output_label: Option<Label>,
+    sorted_and_non_empty: &mut bool
+) -> FstProperties
+where
+    W: Semiring,
+    F: Fst<W>,
+    B: Borrow<F>,
+{
+    let mut inprops = Vec::with_capacity(fst_list.len());
+    let mut all_ilabel_sorted = true;
+    let mut all_olabel_sorted = true;
+    let mut all_non_empty = true;
+    // All nonterminals are negative?
+    let mut all_negative = true;
+    // All nonterminals are positive and form a dense range containing 1?
+    let mut dense_range = true;
+    let mut root_fst_idx : usize = 0;
+    for i in 0..fst_list.len() {
+        let label = fst_list[i].0;
+        if label >= 0 {
+            all_negative = false;
+        }
+        if label > fst_list.len() {
+            dense_range = false;
+        }
+        if label == root_label {
+            root_fst_idx = i;
+        }
+        let fst = &fst_list[i].1;
+        if fst.borrow().start().is_none() {
+            all_non_empty = false;
+        }
+        if !fst.borrow().properties_revamp().contains(FstProperties::I_LABEL_SORTED) {
+            all_ilabel_sorted = false;
+        }
+        if !fst.borrow().properties_revamp().contains(FstProperties::O_LABEL_SORTED) {
+            all_olabel_sorted = false;
+        }
+        inprops.push(fst.borrow().properties_revamp());
+    }
+    let props = crate::fst_properties::mutable_properties::replace_properties(
+        &inprops,
+        root_fst_idx,
+        epsilon_on_input(call_label_type),
+        epsilon_on_input(return_label_type),
+        epsilon_on_output(call_label_type),
+        epsilon_on_output(return_label_type),
+        replace_transducer(call_label_type, return_label_type, call_output_label),
+        all_non_empty,
+        all_ilabel_sorted,
+        all_olabel_sorted,
+        all_negative || dense_range
+    );
+    let sorted = props.contains(FstProperties::I_LABEL_SORTED | FstProperties::O_LABEL_SORTED);
+    *sorted_and_non_empty = all_non_empty && sorted;
+    props
+}
+
+fn replace_transducer(call_label_type: ReplaceLabelType, return_label_type: ReplaceLabelType, call_output_label: Option<Label>) -> bool {
+    call_label_type == ReplaceLabelType::Input ||
+        call_label_type == ReplaceLabelType::Output ||
+        (call_label_type == ReplaceLabelType::Both && call_output_label.is_some()) ||
+        return_label_type == ReplaceLabelType::Input ||
+        return_label_type == ReplaceLabelType::Output
+}
 
 impl<W, F, B> ReplaceFst<W, F, B>
 where
@@ -33,10 +105,19 @@ where
             osymt = first_elt.1.borrow().output_symbols().cloned();
         }
         let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
+        let mut all_non_empty_and_sorted = false;
+        let properties = replace_properties(
+            opts.root,
+            fst_list.as_slice(),
+            opts.call_label_type,
+            opts.return_label_type,
+            opts.call_output_label,
+            &mut all_non_empty_and_sorted
+        );
         let fst_op = ReplaceFstOp::new(fst_list, opts)?;
         let fst_cache = SimpleHashMapCache::new();
         Ok(ReplaceFst(LazyFst::from_op_and_cache(
-            fst_op, fst_cache, isymt, osymt,
+            fst_op, fst_cache, isymt, osymt, properties,
         )))
     }
 
@@ -72,6 +153,10 @@ where
 
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
         self.0.get_trs_unchecked(state_id)
+    }
+
+    fn properties_revamp(&self) -> FstProperties {
+        self.0.properties_revamp()
     }
 }
 
@@ -131,10 +216,6 @@ where
 
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.0.take_output_symbols()
-    }
-
-    fn properties_revamp(&self) -> FstProperties {
-        unimplemented!()
     }
 }
 

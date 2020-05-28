@@ -119,6 +119,10 @@ impl<W: Semiring, F: CoreFst<W>, M, T> CoreFst<W> for MatcherFst<W, F, M, T> {
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
         self.fst_add_on.get_trs_unchecked(state_id)
     }
+
+    fn properties_revamp(&self) -> FstProperties {
+        unimplemented!()
+    }
 }
 
 impl<'a, W, F: StateIterator<'a>, M, T> StateIterator<'a> for MatcherFst<W, F, M, T> {
@@ -170,10 +174,6 @@ where
 
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.fst_add_on.take_output_symbols()
-    }
-
-    fn properties_revamp(&self) -> FstProperties {
-        unimplemented!()
     }
 }
 

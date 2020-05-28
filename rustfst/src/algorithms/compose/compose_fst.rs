@@ -40,12 +40,13 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFst<W, CFB> {
             StateTable<ComposeStateTuple<<CFB::CF as ComposeFilter<W>>::FS>>,
         >,
     ) -> Result<Self> {
-        let isymt = fst1.input_symbols().cloned();
-        let osymt = fst2.output_symbols().cloned();
-        let compose_impl = ComposeFstOp::new(fst1, fst2, opts)?;
-        let fst_cache = SimpleHashMapCache::new();
-        let fst = LazyFst::from_op_and_cache(compose_impl, fst_cache, isymt, osymt);
-        Ok(ComposeFst(fst))
+        // let isymt = fst1.input_symbols().cloned();
+        // let osymt = fst2.output_symbols().cloned();
+        // let compose_impl = ComposeFstOp::new(fst1, fst2, opts)?;
+        // let fst_cache = SimpleHashMapCache::new();
+        todo!("lazy fst props")
+        // let fst = LazyFst::from_op_and_cache(compose_impl, fst_cache, isymt, osymt);
+        // Ok(ComposeFst(fst))
     }
 
     // TODO: Change API, no really user friendly
@@ -66,12 +67,13 @@ impl<W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>>
     ComposeFst<W, SequenceComposeFilterBuilder<W, GenericMatcher<W, F1>, GenericMatcher<W, F2>>>
 {
     pub fn new_auto(fst1: Arc<F1>, fst2: Arc<F2>) -> Result<Self> {
-        let isymt = fst1.input_symbols().cloned();
-        let osymt = fst2.output_symbols().cloned();
-        let compose_impl = create_base(fst1, fst2)?;
-        let fst_cache = SimpleHashMapCache::new();
-        let fst = LazyFst::from_op_and_cache(compose_impl, fst_cache, isymt, osymt);
-        Ok(ComposeFst(fst))
+        todo!("lazy fst props")
+        // let isymt = fst1.input_symbols().cloned();
+        // let osymt = fst2.output_symbols().cloned();
+        // let compose_impl = create_base(fst1, fst2)?;
+        // let fst_cache = SimpleHashMapCache::new();
+        // let fst = LazyFst::from_op_and_cache(compose_impl, fst_cache, isymt, osymt);
+        // Ok(ComposeFst(fst))
     }
 }
 
@@ -100,6 +102,10 @@ where
 
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
         self.0.get_trs_unchecked(state_id)
+    }
+
+    fn properties_revamp(&self) -> FstProperties {
+        unimplemented!()
     }
 }
 
@@ -156,10 +162,6 @@ where
 
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.0.take_output_symbols()
-    }
-
-    fn properties_revamp(&self) -> FstProperties {
-        unimplemented!()
     }
 }
 

@@ -119,6 +119,8 @@ pub trait CoreFst<W: Semiring> {
 
     fn get_trs(&self, state_id: StateId) -> Result<Self::TRS>;
     unsafe fn get_trs_unchecked(&self, state_id: StateId) -> Self::TRS;
+
+    fn properties_revamp(&self) -> FstProperties;
 }
 
 /// Trait defining the minimum interface necessary for a wFST.
@@ -250,8 +252,6 @@ pub trait Fst<W: Semiring>:
             w: PhantomData,
         }
     }
-
-    fn properties_revamp(&self) -> FstProperties;
 }
 
 pub struct FinalStatesIterator<'a, W, F>

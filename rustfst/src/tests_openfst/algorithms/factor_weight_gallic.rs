@@ -17,6 +17,7 @@ use crate::semirings::{
     GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, GallicWeightRight,
     SerializableSemiring, WeightQuantize,
 };
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 use std::path::Path;
 
@@ -116,14 +117,10 @@ where
             _ => bail!("Unexpected gallic_type={:?}", data.gallic_type),
         };
 
-        assert_eq_fst!(
-        data.result,
-        fst_res,
-        format!(
+        test_eq_fst(&data.result, &fst_res,         format!(
             "Factor weight gallic failing with factor_final_weights={:?}, factor_tr_weights={:?} and gallic_type={:?}",
             data.factor_final_weights, data.factor_tr_weights, data.gallic_type
-        )
-    );
+        ));
     }
 
     Ok(())

@@ -596,7 +596,8 @@ void do_compute_fst_replace(
         vector<pair<typename F::Arc::Label, const fst::Fst<typename F::Arc>* > > label_fst_pairs,
         int root,
         bool epsilon_on_replace,
-        json& j) {
+        json& j,
+        const string& dir_path) {
     using Weight = typename F::Weight;
     using Arc = typename F::Arc;
     fst::VectorFst<Arc> res;
@@ -611,19 +612,19 @@ void do_compute_fst_replace(
         if (label == root) {
             continue;
         }
-        label_fst_pairs_serialized.push_back(std::make_pair(label, fst_to_string(*fst)));
+        label_fst_pairs_serialized.push_back(std::make_pair(label, dump_fst(*fst, dir_path)));
     }
 
     json j2;
-    j2["label_fst_pairs"] = label_fst_pairs_serialized;
+    j2["label_fst_pairs_path"] = label_fst_pairs_serialized;
     j2["root"] = root;
     j2["epsilon_on_replace"] = epsilon_on_replace;
-    j2["result"] = fst_to_string(res);
+    j2["result_path"] = dump_fst(res, dir_path);
     j["replace"].push_back(j2);
 }
 
 template<class F>
-void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fst_test_data) {
+void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fst_test_data, const string& dir_path) {
     using MyFst = typename F::MyFst;
     using Weight = typename F::MyWeight;
     using Arc = typename F::MyArc;
@@ -684,7 +685,7 @@ void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fs
                 vector<pair<typename Arc::Label, const fst::Fst<Arc>* > > label_fst_pairs;
                 label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
                 label_fst_pairs.push_back(std::make_pair(label, &fst_1));
-                do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j);
+                do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j, dir_path);
             }
         }
     }
@@ -702,7 +703,7 @@ void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fs
                     label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
                     label_fst_pairs.push_back(std::make_pair(label_fst_1, &fst_1));
                     label_fst_pairs.push_back(std::make_pair(label_fst_2, &fst_2));
-                    do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j);
+                    do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j, dir_path);
                 }
             }
         }
@@ -723,7 +724,7 @@ void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fs
                 label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
                 label_fst_pairs.push_back(std::make_pair(label, &fst_1));
                 label_fst_pairs.push_back(std::make_pair(label_5, &fst_2));
-                do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j);
+                do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j, dir_path);
             }
         }
     }
@@ -1143,7 +1144,7 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     compute_fst_push(raw_fst, data, dir_path);
 
    std::cout << "Replace" << std::endl;
-   compute_fst_replace(raw_fst, data, fst_test_data);
+   compute_fst_replace(raw_fst, data, fst_test_data, dir_path);
 
     std::cout << "Union" << std::endl;
     auto fst_union = fst_test_data.get_fst_union();

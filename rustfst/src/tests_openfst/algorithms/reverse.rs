@@ -12,6 +12,7 @@ use crate::semirings::{Semiring, SerializableSemiring};
 use crate::semirings::{WeaklyDivisibleSemiring, WeightQuantize};
 use crate::Tr;
 
+use crate::fst_properties::FstProperties;
 use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 
@@ -41,6 +42,10 @@ where
 
     fn final_action(&self) -> MapFinalAction {
         MapFinalAction::MapNoSuperfinal
+    }
+
+    fn properties(&self, iprops: FstProperties) -> FstProperties {
+        unimplemented!()
     }
 }
 

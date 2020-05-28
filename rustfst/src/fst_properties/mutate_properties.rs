@@ -2,7 +2,7 @@ use crate::algorithms::closure::ClosureType;
 use crate::algorithms::ProjectType;
 use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
-use crate::Tr;
+use crate::{Tr, Label};
 use crate::{StateId, EPS_LABEL};
 
 pub fn set_start_properties(inprops: FstProperties) -> FstProperties {
@@ -218,8 +218,25 @@ pub fn determinize_properties(_inprops: FstProperties) -> FstProperties {
     unimplemented!()
 }
 
-pub fn factor_weight_properties(_inprops: FstProperties) -> FstProperties {
-    unimplemented!()
+pub fn factor_weight_properties(inprops: FstProperties) -> FstProperties {
+    let mut outprops = (FstProperties::ACCEPTOR
+        | FstProperties::ACYCLIC
+        | FstProperties::ACCESSIBLE
+        | FstProperties::COACCESSIBLE)
+        & inprops;
+    if inprops.contains(FstProperties::ACCESSIBLE) {
+        outprops |= (FstProperties::NOT_ACCEPTOR
+            | FstProperties::NOT_I_DETERMINISTIC
+            | FstProperties::NOT_O_DETERMINISTIC
+            | FstProperties::EPSILONS
+            | FstProperties::I_EPSILONS
+            | FstProperties::O_EPSILONS
+            | FstProperties::CYCLIC
+            | FstProperties::NOT_I_LABEL_SORTED
+            | FstProperties::NOT_O_LABEL_SORTED)
+            & inprops;
+    }
+    outprops
 }
 
 pub fn invert_properties(inprops: FstProperties) -> FstProperties {
@@ -377,8 +394,123 @@ pub fn relabel_properties(_inprops: FstProperties) -> FstProperties {
     unimplemented!()
 }
 
-pub fn replace_properties(_inprops: FstProperties) -> FstProperties {
-    unimplemented!()
+pub fn replace_properties(
+    inprops: &[FstProperties],
+    root: Label,
+    epsilon_on_call: bool,
+    epsilon_on_return: bool,
+    out_epsilon_on_call: bool,
+    out_epsilon_on_return: bool,
+    replace_transducer: bool,
+    no_empty_fsts: bool,
+    all_ilabel_sorted: bool,
+    all_olabel_sorted: bool,
+    all_negative_or_dense: bool
+) -> FstProperties {
+    if inprops.is_empty() {
+        return FstProperties::null_properties();
+    }
+    let mut outprops = FstProperties::empty();
+    let mut access_props = if no_empty_fsts {
+        FstProperties::ACCESSIBLE | FstProperties::COACCESSIBLE
+    } else {
+        FstProperties::empty()
+    };
+
+    for inprop in inprops {
+        access_props &= (*inprop & (FstProperties::ACCESSIBLE | FstProperties::COACCESSIBLE));
+    }
+
+    if access_props == (FstProperties::ACCESSIBLE | FstProperties::COACCESSIBLE) {
+        outprops |= access_props;
+        if inprops[root].contains(FstProperties::INITIAL_CYCLIC) {
+            outprops |= FstProperties::INITIAL_CYCLIC;
+        }
+        let mut props = FstProperties::empty();
+        let mut string = true;
+        for inprop in inprops {
+            if replace_transducer {
+                props |= FstProperties::NOT_ACCEPTOR & *inprop;
+            }
+            props |= (FstProperties::NOT_I_DETERMINISTIC | FstProperties::NOT_O_DETERMINISTIC | FstProperties::EPSILONS |
+                FstProperties::I_EPSILONS | FstProperties::O_EPSILONS | FstProperties::WEIGHTED | FstProperties::WEIGHTED_CYCLES |
+                FstProperties::CYCLIC | FstProperties::NOT_TOP_SORTED | FstProperties::NOT_STRING) & *inprop;
+            if !inprop.contains(FstProperties::STRING) {
+                string = false;
+            }
+        }
+        outprops |= props;
+        if string {
+            outprops |= FstProperties::STRING;
+        }
+    }
+    let mut acceptor = !replace_transducer;
+    let mut ideterministic = !epsilon_on_call && epsilon_on_return;
+    let mut no_iepsilons = !epsilon_on_call && !epsilon_on_return;
+    let mut acyclic = true;
+    let mut unweighted = true;
+    for i in 0..inprops.len() {
+        if !inprops[i].contains(FstProperties::ACCEPTOR) {
+            acceptor = false;
+        }
+        if !inprops[i].contains(FstProperties::I_DETERMINISTIC) {
+            ideterministic = false;
+        }
+        if !inprops[i].contains(FstProperties::NO_I_EPSILONS) {
+            no_iepsilons = false;
+        }
+        if !inprops[i].contains(FstProperties::ACYCLIC) {
+            acyclic = false;
+        }
+        if !inprops[i].contains(FstProperties::UNWEIGHTED) {
+            unweighted = false;
+        }
+        if i != root && !inprops[i].contains(FstProperties::NO_I_EPSILONS) {
+            ideterministic = false;
+        }
+    }
+    if acceptor {
+        outprops |= FstProperties::ACCEPTOR;
+    }
+    if ideterministic {
+        outprops |= FstProperties::I_DETERMINISTIC;
+    }
+    if no_iepsilons {
+        outprops |= FstProperties::NO_I_EPSILONS;
+    }
+    if acyclic {
+        outprops |= FstProperties::ACYCLIC;
+    }
+    if unweighted {
+        outprops |= FstProperties::UNWEIGHTED;
+    }
+    if inprops[root].contains(FstProperties::INITIAL_ACYCLIC) {
+        outprops |= FstProperties::INITIAL_ACYCLIC;
+    }
+    // We assume that all terminals are positive. The resulting ReplaceFst is
+    // known to be FstProperties::I_LABEL_SORTED when: (1) all sub-FSTs are FstProperties::I_LABEL_SORTED, (2) the
+    // input label of the return arc is epsilon, and (3) one of the 3 following
+    // conditions is satisfied:
+    //
+    //  1. the input label of the call arc is not epsilon
+    //  2. all non-terminals are negative, or
+    //  3. all non-terninals are positive and form a dense range containing 1.
+    if all_ilabel_sorted && epsilon_on_return &&
+        (!epsilon_on_call || all_negative_or_dense) {
+        outprops |= FstProperties::I_LABEL_SORTED;
+    }
+    // Similarly, the resulting ReplaceFst is known to be FstProperties::O_LABEL_SORTED when: (1)
+    // all sub-FSTs are FstProperties::O_LABEL_SORTED, (2) the output label of the return arc is
+    // epsilon, and (3) one of the 3 following conditions is satisfied:
+    //
+    //  1. the output label of the call arc is not epsilon
+    //  2. all non-terminals are negative, or
+    //  3. all non-terninals are positive and form a dense range containing 1.
+    if all_olabel_sorted && out_epsilon_on_return &&
+        (!out_epsilon_on_call || all_negative_or_dense) {
+        outprops |= FstProperties::O_LABEL_SORTED;
+    }
+    return outprops;
 }
 
 pub fn reverse_properties(_inprops: FstProperties) -> FstProperties {

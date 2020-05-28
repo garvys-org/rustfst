@@ -1,6 +1,7 @@
 use crate::algorithms::determinize::divisors::CommonDivisor;
 use crate::algorithms::determinize::DeterminizeFsaOp;
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
+use crate::fst_properties::mutable_properties::determinize_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::{WeaklyDivisibleSemiring, WeightQuantize};
@@ -41,6 +42,10 @@ where
 
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
         self.0.get_trs_unchecked(state_id)
+    }
+
+    fn properties_revamp(&self) -> FstProperties {
+        unimplemented!()
     }
 }
 
@@ -103,10 +108,6 @@ where
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.0.take_output_symbols()
     }
-
-    fn properties_revamp(&self) -> FstProperties {
-        unimplemented!()
-    }
 }
 
 impl<W, F, CD> DeterminizeFsa<W, F, CD>
@@ -116,12 +117,15 @@ where
     CD: CommonDivisor<W>,
 {
     pub fn new(fst: Arc<F>, in_dist: Option<Arc<Vec<W>>>) -> Result<Self> {
-        let isymt = fst.input_symbols().cloned();
-        let osymt = fst.output_symbols().cloned();
-        let fst_op = DeterminizeFsaOp::new(fst, in_dist)?;
-        let fst_cache = SimpleHashMapCache::new();
-        let lazy_fst = LazyFst::from_op_and_cache(fst_op, fst_cache, isymt, osymt);
-        Ok(DeterminizeFsa(lazy_fst))
+        // let isymt = fst.input_symbols().cloned();
+        // let osymt = fst.output_symbols().cloned();
+        // let fst_op = DeterminizeFsaOp::new(fst, in_dist)?;
+        // let fst_cache = SimpleHashMapCache::new();
+        // let iprops = fst.properties_revamp();
+        todo!("lazy fst props")
+        // let dprops = determinize_properties(iprops, )
+        // let lazy_fst = LazyFst::from_op_and_cache(fst_op, fst_cache, isymt, osymt);
+        // Ok(DeterminizeFsa(lazy_fst))
     }
 
     /// Turns the Lazy FST into a static one.

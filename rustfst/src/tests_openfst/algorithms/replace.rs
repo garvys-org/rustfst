@@ -9,13 +9,14 @@ use crate::tests_openfst::FstTestData;
 
 use super::lazy_fst::compare_fst_static_lazy;
 use bitflags::_core::marker::PhantomData;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ReplaceOperationResult {
     root: usize,
-    label_fst_pairs: Vec<(usize, String)>,
+    label_fst_pairs_path: Vec<(usize, String)>,
     epsilon_on_replace: bool,
-    result: String,
+    result_path: String,
 }
 
 pub struct ReplaceTestData<W, F>
@@ -31,20 +32,21 @@ where
 }
 
 impl ReplaceOperationResult {
-    pub fn parse<W, F>(&self) -> ReplaceTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> ReplaceTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>
     {
         ReplaceTestData {
             root: self.root,
             label_fst_pairs: self
-                .label_fst_pairs
+                .label_fst_pairs_path
                 .iter()
-                .map(|v| (v.0, F::from_text_string(v.1.as_str()).unwrap()))
+                .map(|v| (v.0, F::read(dir_path.as_ref().join(&v.1)).unwrap()))
                 .collect(),
             epsilon_on_replace: self.epsilon_on_replace,
-            result: F::from_text_string(self.result.as_str()).unwrap(),
+            result: F::read(dir_path.as_ref().join(&self.result_path)).unwrap(),
             w: PhantomData,
         }
     }

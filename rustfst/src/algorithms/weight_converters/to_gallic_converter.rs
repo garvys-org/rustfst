@@ -1,6 +1,9 @@
 use anyhow::Result;
 
+use crate::algorithms::ProjectType;
 use crate::algorithms::{FinalTr, MapFinalAction, WeightConverter};
+use crate::fst_properties::mutable_properties::project_properties;
+use crate::fst_properties::FstProperties;
 use crate::semirings::{
     GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, GallicWeightRight,
     Semiring, StringWeightLeft, StringWeightRestrict, StringWeightRight,
@@ -41,6 +44,12 @@ macro_rules! impl_to_gallic_converter {
 
             fn final_action(&self) -> MapFinalAction {
                 MapFinalAction::MapNoSuperfinal
+            }
+
+            fn properties(&self, inprops: FstProperties) -> FstProperties {
+                inprops
+                    & project_properties(inprops, ProjectType::ProjectInput)
+                    & FstProperties::weight_invariant_properties()
             }
         }
     };

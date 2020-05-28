@@ -32,10 +32,6 @@ impl<W: Semiring, F: Fst<W>> Fst<W> for Arc<F> {
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         unimplemented!()
     }
-
-    fn properties_revamp(&self) -> FstProperties {
-        unimplemented!()
-    }
 }
 
 impl<W: Semiring, F: ExpandedFst<W>> ExpandedFst<W> for Arc<F> {
@@ -73,6 +69,10 @@ impl<W: Semiring, F: CoreFst<W>> CoreFst<W> for Arc<F> {
 
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
         self.deref().get_trs_unchecked(state_id)
+    }
+
+    fn properties_revamp(&self) -> FstProperties {
+        unimplemented!()
     }
 }
 

@@ -32,10 +32,6 @@ impl<W: Semiring> Fst<W> for ConstFst<W> {
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.osymt.take()
     }
-
-    fn properties_revamp(&self) -> FstProperties {
-        unimplemented!()
-    }
 }
 
 impl<W: Semiring> CoreFst<W> for ConstFst<W> {
@@ -76,5 +72,9 @@ impl<W: Semiring> CoreFst<W> for ConstFst<W> {
             pos: state.pos,
             n: state.ntrs,
         }
+    }
+
+    fn properties_revamp(&self) -> FstProperties {
+        unimplemented!()
     }
 }

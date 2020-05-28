@@ -67,6 +67,10 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
         self.get_trs(state_id).unsafe_unwrap()
     }
+
+    fn properties_revamp(&self) -> FstProperties {
+        unimplemented!()
+    }
 }
 
 impl<'a, W, Op, Cache> StateIterator<'a> for LazyFst2<W, Op, Cache>
@@ -163,10 +167,6 @@ where
 
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.osymt.take()
-    }
-
-    fn properties_revamp(&self) -> FstProperties {
-        unimplemented!()
     }
 }
 

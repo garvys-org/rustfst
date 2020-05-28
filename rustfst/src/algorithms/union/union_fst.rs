@@ -91,6 +91,10 @@ where
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
         self.0.get_trs_unchecked(state_id)
     }
+
+    fn properties_revamp(&self) -> FstProperties {
+        self.1
+    }
 }
 
 impl<'a, W, F> StateIterator<'a> for UnionFst<W, F>
@@ -132,10 +136,6 @@ where
 
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.0.take_output_symbols()
-    }
-
-    fn properties_revamp(&self) -> FstProperties {
-        self.1
     }
 }
 

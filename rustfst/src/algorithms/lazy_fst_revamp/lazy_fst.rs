@@ -21,6 +21,7 @@ pub struct LazyFst<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> {
     w: PhantomData<W>,
     isymt: Option<Arc<SymbolTable>>,
     osymt: Option<Arc<SymbolTable>>,
+    properties: FstProperties,
 }
 
 impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op, Cache> {
@@ -64,6 +65,10 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
 
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
         self.get_trs(state_id).unsafe_unwrap()
+    }
+
+    fn properties_revamp(&self) -> FstProperties {
+        self.properties
     }
 }
 
@@ -162,10 +167,6 @@ where
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>> {
         self.osymt.take()
     }
-
-    fn properties_revamp(&self) -> FstProperties {
-        unimplemented!()
-    }
 }
 
 impl<W, Op, Cache> LazyFst<W, Op, Cache>
@@ -179,12 +180,14 @@ where
         cache: Cache,
         isymt: Option<Arc<SymbolTable>>,
         osymt: Option<Arc<SymbolTable>>,
+        properties: FstProperties,
     ) -> Self {
         Self {
             op,
             cache,
             isymt,
             osymt,
+            properties,
             w: PhantomData,
         }
     }
@@ -222,6 +225,8 @@ where
                 fst_out.set_final(s, f_w)?;
             }
         }
+        fst_out.set_properties(self.properties_revamp());
+        // TODO: Symbol tables should be set here
         Ok(fst_out)
     }
 }

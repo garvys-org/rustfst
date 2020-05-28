@@ -13,6 +13,7 @@ use crate::semirings::WeightQuantize;
 use crate::tests_openfst::FstTestData;
 
 use super::lazy_fst::compare_fst_static_lazy;
+use crate::tests_openfst::macros::test_eq_fst;
 use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -60,14 +61,10 @@ where
         let fst_res: VectorFst<_> =
             factor_weight::<_, VectorFst<_>, _, _, IdentityFactor<_>>(&test_data.raw, opts)?;
 
-        assert_eq_fst!(
-        data.result,
-        fst_res,
-        format!(
+        test_eq_fst(&data.result, &fst_res,         format!(
             "Factor weight identity failing with factor_final_weights={:?} and factor_tr_weights={:?}",
             data.factor_final_weights, data.factor_tr_weights
-        )
-    );
+        ));
     }
 
     Ok(())

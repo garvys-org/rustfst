@@ -1,4 +1,5 @@
 use crate::algorithms::{FinalTr, MapFinalAction, WeightConverter};
+use crate::fst_properties::FstProperties;
 use crate::semirings::{
     GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, GallicWeightRight,
     Semiring, StringWeightVariant,
@@ -102,6 +103,13 @@ macro_rules! impl_weight_converter_gallic {
 
             fn final_action(&self) -> MapFinalAction {
                 MapFinalAction::MapAllowSuperfinal
+            }
+
+            fn properties(&self, inprops: FstProperties) -> FstProperties {
+                inprops
+                    & FstProperties::o_label_invariant_properties()
+                    & FstProperties::weight_invariant_properties()
+                    & FstProperties::add_super_final_properties()
             }
         }
     };

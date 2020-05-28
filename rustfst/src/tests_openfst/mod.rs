@@ -317,7 +317,7 @@ where
                 .iter()
                 .map(|v| v.parse(absolute_path_folder))
                 .collect(),
-            replace: data.replace.iter().map(|v| v.parse()).collect(),
+            replace: data.replace.iter().map(|v| v.parse(absolute_path_folder)).collect(),
             union: data
                 .union
                 .iter()
