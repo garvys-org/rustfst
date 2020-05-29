@@ -7,7 +7,7 @@ mod simple_hash_map_cache;
 mod state_table;
 
 mod arc_cache;
-// pub mod snips_cache;
+// pub mod hash_map_cache_sized;
 
 pub use fst_cache::FstCache;
 pub use fst_op::FstOp;

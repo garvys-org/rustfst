@@ -11,7 +11,7 @@ use crate::fst_impls::VectorFst;
 use crate::fst_traits::MutableFst;
 
 #[derive(Default, Debug)]
-pub struct PreInitializedCache<W: Semiring> {
+pub struct HashMapCacheSized<W: Semiring> {
     // First option : has start been computed
     // Second option: value of the start state (possibly none)
     // The second element of each tuple is the number of known states.
@@ -20,7 +20,7 @@ pub struct PreInitializedCache<W: Semiring> {
     final_weight: Mutex<(HashMap<StateId, Option<W>>, usize)>,
 }
 
-impl<W: Semiring> PreInitializedCache<W> {
+impl<W: Semiring> HashMapCacheSized<W> {
     pub fn mem_size(&self) -> usize {
         // 2 usizes for start + 1 usize for trs + 1 usize for final_weight
         let mut mem_size = 4 * std::mem::size_of::<usize>();
@@ -40,7 +40,7 @@ impl<W: Semiring> PreInitializedCache<W> {
     }
 }
 
-impl<W: Semiring> Clone for PreInitializedCache<W> {
+impl<W: Semiring> Clone for HashMapCacheSized<W> {
     fn clone(&self) -> Self {
         Self {
             start: Mutex::new(self.start.lock().unwrap().clone()),
@@ -50,7 +50,7 @@ impl<W: Semiring> Clone for PreInitializedCache<W> {
     }
 }
 
-impl<W: Semiring> FstCache<W> for PreInitializedCache<W> {
+impl<W: Semiring> FstCache<W> for HashMapCacheSized<W> {
     fn new() -> Self {
         Self {
             start: Mutex::new((None, 0)),
@@ -113,6 +113,6 @@ fn lol<W: Semiring>() {
             SortedMatcher<W, VectorFst<W>>,
             SortedMatcher<W, VectorFst<W>>
         >,
-        PreInitializedCache<W>
+        HashMapCacheSized<W>
     >::new(Arc::new(VectorFst::new()), Arc::new(VectorFst::new()));
 }
