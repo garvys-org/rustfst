@@ -1,4 +1,3 @@
-use crate::algorithms::closure::ClosureType;
 use crate::algorithms::ProjectType;
 use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
@@ -479,7 +478,7 @@ pub fn replace_properties(
     };
 
     for inprop in inprops {
-        access_props &= (*inprop & (FstProperties::ACCESSIBLE | FstProperties::COACCESSIBLE));
+        access_props &= *inprop & (FstProperties::ACCESSIBLE | FstProperties::COACCESSIBLE);
     }
 
     if access_props == (FstProperties::ACCESSIBLE | FstProperties::COACCESSIBLE) {
@@ -634,6 +633,8 @@ pub fn union_properties(
     inprops2: FstProperties,
     delayed: bool,
 ) -> FstProperties {
+    std::dbg!(inprops1);
+    std::dbg!(inprops2);
     let mut outprops = (FstProperties::ACCEPTOR
         | FstProperties::UNWEIGHTED
         | FstProperties::UNWEIGHTED_CYCLES

@@ -27,7 +27,7 @@ impl UnaryFstAlgorithm for TrsortAlgorithm {
         &self,
         mut fst: VectorFst<TropicalWeight>,
     ) -> Result<VectorFst<TropicalWeight>> {
-        let cmp = match self.sort_type.as_str() {
+        match self.sort_type.as_str() {
             "ilabel" => tr_sort(&mut fst, ILabelCompare {}),
             "olabel" => tr_sort(&mut fst, OLabelCompare {}),
             _ => bail!("Unknow sort_type : {}", self.sort_type),

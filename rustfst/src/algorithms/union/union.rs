@@ -3,7 +3,7 @@ use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::fst_properties::mutable_properties::union_properties;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{AllocableFst, ExpandedFst, Fst, MutableFst};
+use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::{Trs, EPS_LABEL};
@@ -87,6 +87,7 @@ where
     let start1 = fst_1.start();
     if start1.is_none() {
         unsafe { fst_1.set_start_unchecked(start2) };
+        fst_1.set_properties_with_mask(props2, FstProperties::copy_properties());
         return Ok(());
     }
     let start1 = unsafe { start1.unsafe_unwrap() };

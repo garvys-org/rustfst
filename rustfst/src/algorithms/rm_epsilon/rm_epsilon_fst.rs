@@ -19,7 +19,6 @@ use anyhow::Result;
 
 use crate::algorithms::lazy_fst_revamp::{LazyFst2, SimpleHashMapCache};
 use crate::algorithms::rm_epsilon::rm_epsilon_op::RmEpsilonOp;
-use crate::fst_properties::mutable_properties::rmepsilon_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::{Semiring, SymbolTable, TrsVec};

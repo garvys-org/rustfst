@@ -6,7 +6,6 @@ use crate::algorithms::compose::compose_filters::{
 use crate::algorithms::compose::matchers::{GenericMatcher, Matcher};
 use crate::algorithms::compose::{ComposeFstOp, ComposeFstOpOptions, ComposeStateTuple};
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache, StateTable};
-use crate::fst_properties::mutable_properties::compose_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;

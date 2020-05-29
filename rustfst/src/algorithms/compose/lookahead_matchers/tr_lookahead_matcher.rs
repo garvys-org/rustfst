@@ -8,7 +8,6 @@ use crate::algorithms::compose::lookahead_matchers::{
     LookAheadMatcherData, LookaheadMatcher, MatcherFlagsTrait,
 };
 use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
-use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL};

@@ -95,17 +95,17 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
             .states
             .get_mut(state_id)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
-        let trs = Arc::make_mut(&mut state.trs.0);
-        todo!("props");
-        Ok(trs.iter_mut())
+        let _trs = Arc::make_mut(&mut state.trs.0);
+        todo!("props")
+        // Ok(trs.iter_mut())
     }
 
     #[inline]
     unsafe fn tr_iter_unchecked_mut(&mut self, state_id: usize) -> slice::IterMut<Tr<W>> {
         let state = self.states.get_unchecked_mut(state_id);
-        let trs = Arc::make_mut(&mut state.trs.0);
-        todo!("props");
-        trs.iter_mut()
+        let _trs = Arc::make_mut(&mut state.trs.0);
+        todo!("props")
+        // trs.iter_mut()
     }
 
     fn del_state(&mut self, state_to_remove: StateId) -> Result<()> {

@@ -7,7 +7,6 @@ pub use generic_matcher::GenericMatcher;
 pub use multi_eps_matcher::{MultiEpsMatcher, MultiEpsMatcherFlags};
 pub use sorted_matcher::SortedMatcher;
 
-use crate::fst_properties::FstProperties;
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Label, StateId};

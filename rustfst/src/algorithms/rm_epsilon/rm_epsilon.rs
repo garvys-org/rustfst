@@ -108,6 +108,7 @@ pub fn rm_epsilon_with_config<W: Semiring, F: MutableFst<W>, Q: Queue>(
         let mut visitor = TopOrderVisitor::new();
         dfs_visit(fst, &mut visitor, &EpsilonTrFilter {}, false);
 
+        states.resize(visitor.order.len(), 0);
         for i in 0..visitor.order.len() {
             states[visitor.order[i]] = i;
         }

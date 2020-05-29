@@ -3,8 +3,7 @@ use std::borrow::Borrow;
 use anyhow::Result;
 
 use crate::algorithms::factor_weight::{FactorIterator, FactorWeightFst, FactorWeightOptions};
-use crate::algorithms::{fst_convert, fst_convert_from_ref};
-use crate::fst_traits::{CoreFst, Fst, MutableFst};
+use crate::fst_traits::{Fst, MutableFst};
 use crate::semirings::WeightQuantize;
 
 /// The result of weight factoring is a transducer equivalent to the

@@ -59,7 +59,7 @@ impl Semiring for BooleanWeight {
 
 impl ReverseBack<BooleanWeight> for BooleanWeight {
     fn reverse_back(&self) -> Result<BooleanWeight> {
-        Ok(self.clone())
+        Ok(*self)
     }
 }
 

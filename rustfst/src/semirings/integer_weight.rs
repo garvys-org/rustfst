@@ -61,7 +61,7 @@ impl Semiring for IntegerWeight {
 
 impl ReverseBack<IntegerWeight> for IntegerWeight {
     fn reverse_back(&self) -> Result<IntegerWeight> {
-        Ok(self.clone())
+        Ok(*self)
     }
 }
 

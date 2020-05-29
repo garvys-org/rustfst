@@ -8,7 +8,6 @@ use crate::algorithms::compose::lookahead_matchers::{
 };
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::algorithms::compose::{LabelReachable, LabelReachableData};
-use crate::fst_properties::FstProperties;
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Tr, Trs, EPS_LABEL};
@@ -178,7 +177,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
                         .lookahead_weight
                         .plus_assign(lfinal.unwrap())?;
                 } else {
-                    la_matcher_data.set_lookahead_weight(lfinal.unwrap().clone());
+                    la_matcher_data.set_lookahead_weight(lfinal.unwrap());
                 }
             }
             if reach_tr_bool || reach_final {

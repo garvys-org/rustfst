@@ -41,13 +41,13 @@ where
         }
         let mut final1 = unsafe { fst.final_weight_unchecked(s1) };
         let mut final2 = None;
-        let mut trsa: Vec<_> = fst.get_trs(s1)?.trs().iter().cloned().collect();
+        let mut trsa: Vec<_> = fst.get_trs(s1)?.trs().to_vec();
         let mut trsb = vec![];
         while !done[s1] {
             let s2 = order[s1];
             if !done[s2] {
                 final2 = unsafe { fst.final_weight_unchecked(s2) };
-                trsb = fst.get_trs(s2)?.trs().iter().cloned().collect();
+                trsb = fst.get_trs(s2)?.trs().to_vec();
             }
             match final1 {
                 None => fst.delete_final_weight(s2)?,

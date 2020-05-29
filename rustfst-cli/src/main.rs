@@ -226,7 +226,6 @@ fn handle(matches: clap::ArgMatches) -> Result<()> {
         .run_cli_or_bench(m),
         (s, _) => Err(format_err!("Unknown subcommand {}.", s)),
     }
-    .map_err(|e| e.into())
 }
 
 fn one_in_one_out_options<'a, 'b>(command: clap::App<'a, 'b>) -> clap::App<'a, 'b> {

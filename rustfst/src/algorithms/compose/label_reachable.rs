@@ -69,9 +69,11 @@ impl LabelReachableData {
                 for idx_tr in 0..it_tr.len() {
                     let tr = it_tr.get_unchecked(idx_tr);
                     if relabel_input {
-                        it_tr.set_ilabel_unchecked(idx_tr, self.relabel(tr.ilabel));
+                        let new_ilabel = self.relabel(tr.ilabel);
+                        it_tr.set_ilabel_unchecked(idx_tr, new_ilabel);
                     } else {
-                        it_tr.set_olabel_unchecked(idx_tr, self.relabel(tr.olabel));
+                        let new_olabel = self.relabel(tr.olabel);
+                        it_tr.set_olabel_unchecked(idx_tr, new_olabel);
                     }
                 }
             }

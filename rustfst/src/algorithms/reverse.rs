@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use crate::fst_properties::mutable_properties::reverse_properties;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, MutableFst};
+use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::{Trs, EPS_LABEL};

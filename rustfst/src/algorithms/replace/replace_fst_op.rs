@@ -74,7 +74,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> FstOp<W> for ReplaceFstOp<W, F, B> {
     }
 
     fn compute_trs(&self, state: usize) -> Result<TrsVec<W>> {
-        let tuple = self.state_table.tuple_table.find_tuple(state).clone();
+        let tuple = self.state_table.tuple_table.find_tuple(state);
         let mut trs = vec![];
         if let Some(fst_state) = tuple.fst_state {
             if let Some(tr) = self.compute_final_tr(state) {
@@ -135,15 +135,12 @@ where
     let mut all_olabel_sorted = true;
     let mut all_non_empty = true;
     // All nonterminals are negative?
-    let mut all_negative = true;
-    // All nonterminals are positive and form a dense range containing 1?
+    let all_negative = false; // usize so all positive
+                              // All nonterminals are positive and form a dense range containing 1?
     let mut dense_range = true;
     let mut root_fst_idx: usize = 0;
     for i in 0..fst_list.len() {
         let label = fst_list[i].0;
-        if label >= 0 {
-            all_negative = false;
-        }
         if label > fst_list.len() {
             dense_range = false;
         }
@@ -300,7 +297,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstOp<W, F, B> {
                 .final_weight(fst_state)
                 .unwrap()
             {
-                return Some(Tr::new(ilabel, olabel, weight.clone(), nextstate));
+                return Some(Tr::new(ilabel, olabel, weight, nextstate));
             }
             None
         } else {
@@ -339,11 +336,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstOp<W, F, B> {
         } else {
             // Checks for non-terminal
             if let Some(nonterminal) = self.nonterminal_hash.get(&tr.olabel) {
-                let p = self
-                    .state_table
-                    .prefix_table
-                    .find_tuple(tuple.prefix_id)
-                    .clone();
+                let p = self.state_table.prefix_table.find_tuple(tuple.prefix_id);
                 let nt_prefix = self.push_prefix(p, tuple.fst_id, Some(tr.nextstate));
                 if let Some(nt_start) = self.fst_array.get(*nonterminal).unwrap().borrow().start() {
                     let nt_nextstate = self.state_table.tuple_table.find_id(

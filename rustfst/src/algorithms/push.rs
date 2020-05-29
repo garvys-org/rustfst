@@ -124,9 +124,9 @@ macro_rules! m_labels_pushing {
         let gdistance = if $push_type.intersects(PushType::PUSH_WEIGHTS) {
             shortest_distance(&gfst, $reweight_type == ReweightType::ReweightToInitial)?
         } else {
-            let mut rm_weight_mapper = RmWeightMapper {};
+            let rm_weight_mapper = RmWeightMapper {};
             let mut uwfst: VectorFst<_> = fst_convert_from_ref($ifst);
-            tr_map(&mut uwfst, &mut rm_weight_mapper)?;
+            tr_map(&mut uwfst, &rm_weight_mapper)?;
             let guwfst: VectorFst<$gallic_weight> = weight_convert(&uwfst, &mut mapper)?;
             shortest_distance(&guwfst, $reweight_type == ReweightType::ReweightToInitial)?
         };

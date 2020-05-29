@@ -52,7 +52,7 @@ impl<W: Semiring> TrMapper<W> for DecodeMapper<W> {
     }
 
     fn properties(&self, inprops: FstProperties) -> FstProperties {
-        let mut outprops = inprops;
+        let outprops = inprops;
         let mut mask = FstProperties::all_properties();
         if self.encode_labels() {
             mask &= FstProperties::i_label_invariant_properties()

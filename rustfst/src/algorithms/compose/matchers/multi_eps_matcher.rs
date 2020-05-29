@@ -10,14 +10,13 @@ use nom::lib::std::collections::BTreeSet;
 use bitflags::bitflags;
 
 use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
-use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
 use crate::{Label, StateId, EPS_LABEL, NO_LABEL};
 
 bitflags! {
     pub struct MultiEpsMatcherFlags: u32 {
-        const MULTI_EPS_LOOP =  1u32 << 0;
-        const MULTI_EPS_LIST =  1u32 << 1;
+        const MULTI_EPS_LOOP =  1u32;
+        const MULTI_EPS_LIST =  2u32;
     }
 }
 

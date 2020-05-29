@@ -1,7 +1,6 @@
 use crate::algorithms::determinize::divisors::CommonDivisor;
 use crate::algorithms::determinize::DeterminizeFsaOp;
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
-use crate::fst_properties::mutable_properties::determinize_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::{WeaklyDivisibleSemiring, WeightQuantize};

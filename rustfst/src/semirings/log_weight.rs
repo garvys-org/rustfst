@@ -98,7 +98,7 @@ impl Semiring for LogWeight {
 
 impl ReverseBack<LogWeight> for LogWeight {
     fn reverse_back(&self) -> Result<LogWeight> {
-        Ok(self.clone())
+        Ok(*self)
     }
 }
 

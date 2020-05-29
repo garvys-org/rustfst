@@ -69,8 +69,7 @@ fn do_test_compose<W>(
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
-    println!("Skipping simple compose for debugging");
-    return Ok(());
+    // println!("Skipping simple compose for debugging");
     let mut config = ComposeConfig::default();
     config.connect = false;
     config.compose_filter = filter;

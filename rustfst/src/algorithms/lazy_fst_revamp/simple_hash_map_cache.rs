@@ -37,7 +37,7 @@ impl<W: Semiring> SimpleHashMapCache<W> {
 
 impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
     fn get_start(&self) -> Option<Option<StateId>> {
-        self.start.lock().unwrap().0.clone()
+        self.start.lock().unwrap().0
     }
 
     fn insert_start(&self, id: Option<StateId>) {

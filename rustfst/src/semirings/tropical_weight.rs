@@ -89,7 +89,7 @@ impl Semiring for TropicalWeight {
 
 impl ReverseBack<TropicalWeight> for TropicalWeight {
     fn reverse_back(&self) -> Result<TropicalWeight> {
-        Ok(self.clone())
+        Ok(*self)
     }
 }
 

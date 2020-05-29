@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use crate::algorithms::{FinalTr, MapFinalAction};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, MutableFst};
+use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Tr, Trs, EPS_LABEL};
 use unsafe_unwrap::UnsafeUnwrap;

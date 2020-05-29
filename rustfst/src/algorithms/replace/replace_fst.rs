@@ -1,17 +1,16 @@
 use std::borrow::Borrow;
+use std::fmt::Debug;
+use std::sync::Arc;
 
 use anyhow::Result;
 
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
-use crate::algorithms::replace::config::{ReplaceFstOptions, ReplaceLabelType};
+use crate::algorithms::replace::config::ReplaceFstOptions;
 use crate::algorithms::replace::replace_fst_op::ReplaceFstOp;
-use crate::algorithms::replace::utils::{epsilon_on_input, epsilon_on_output};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{Label, SymbolTable, TrsVec};
-use std::fmt::Debug;
-use std::sync::Arc;
 
 /// ReplaceFst supports lazy replacement of trs in one FST with another FST.
 /// This replacement is recursive. ReplaceFst can be used to support a variety of
@@ -152,9 +151,10 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use crate::fst_impls::VectorFst;
     use crate::semirings::TropicalWeight;
+
+    use super::*;
 
     #[test]
     fn test_replace_fst_sync() {

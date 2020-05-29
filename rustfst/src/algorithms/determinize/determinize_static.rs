@@ -2,8 +2,8 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::determinize::determinize_fsa::DeterminizeFsa;
 use crate::algorithms::determinize::divisors::CommonDivisor;
+use crate::algorithms::determinize::DeterminizeFsa;
 use crate::algorithms::determinize::{DefaultCommonDivisor, DeterminizeType, GallicCommonDivisor};
 use crate::algorithms::factor_weight::factor_iterators::{
     GallicFactor, GallicFactorMin, GallicFactorRestrict,
