@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache, FstCache};
+use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
 use crate::algorithms::replace::config::ReplaceFstOptions;
 use crate::algorithms::replace::replace_fst_op::ReplaceFstOp;
 use crate::fst_properties::FstProperties;
@@ -34,7 +34,7 @@ where
         }
         let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
         let fst_op = ReplaceFstOp::new(fst_list, opts)?;
-        let fst_cache = SimpleHashMapCache::new();
+        let fst_cache = SimpleHashMapCache::default();
         Ok(ReplaceFst(LazyFst::from_op_and_cache(
             fst_op, fst_cache, isymt, osymt,
         )))

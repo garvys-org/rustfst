@@ -45,7 +45,7 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>, Cache: FstCache<W>> ComposeFst<W
         let isymt = fst1.input_symbols().cloned();
         let osymt = fst2.output_symbols().cloned();
         let compose_impl = ComposeFstOp::new(fst1, fst2, opts)?;
-        let fst_cache = Cache::new();
+        let fst_cache = Cache::default();
         let fst = LazyFst::from_op_and_cache(compose_impl, fst_cache, isymt, osymt);
         Ok(ComposeFst(fst))
     }
@@ -89,7 +89,7 @@ impl<W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>>
         let isymt = fst1.input_symbols().cloned();
         let osymt = fst2.output_symbols().cloned();
         let compose_impl = create_base(fst1, fst2)?;
-        let fst_cache = FstCache::new();
+        let fst_cache = SimpleHashMapCache::default();
         let fst = LazyFst::from_op_and_cache(compose_impl, fst_cache, isymt, osymt);
         Ok(ComposeFst(fst))
     }

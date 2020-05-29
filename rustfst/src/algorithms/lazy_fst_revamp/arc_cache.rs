@@ -1,13 +1,10 @@
-use crate::algorithms::lazy_fst_revamp::FstCache;
-use crate::{Semiring, TrsVec};
 use std::ops::Deref;
 use std::sync::Arc;
 
-impl<W: Semiring, C: FstCache<W>> FstCache<W> for Arc<C> {
-    fn new() -> Self {
-        Arc::new(C::new())
-    }
+use crate::{Semiring, TrsVec};
+use crate::algorithms::lazy_fst_revamp::FstCache;
 
+impl<W: Semiring, C: FstCache<W>> FstCache<W> for Arc<C> {
     fn get_start(&self) -> Option<Option<usize>> {
         self.deref().get_start()
     }

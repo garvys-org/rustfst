@@ -17,7 +17,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::lazy_fst_revamp::{LazyFst2, SimpleHashMapCache, FstCache};
+use crate::algorithms::lazy_fst_revamp::{LazyFst2, SimpleHashMapCache};
 use crate::algorithms::rm_epsilon::rm_epsilon_op::RmEpsilonOp;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
@@ -161,7 +161,7 @@ where
         let isymt = fst.borrow().input_symbols().cloned();
         let osymt = fst.borrow().output_symbols().cloned();
         let fst_op = RmEpsilonOp::new(fst);
-        let fst_cache = SimpleHashMapCache::new();
+        let fst_cache = SimpleHashMapCache::default();
         let lazy_fst = LazyFst2::from_op_and_cache(fst_op, fst_cache, isymt, osymt);
         Ok(RmEpsilonFst(lazy_fst))
     }
