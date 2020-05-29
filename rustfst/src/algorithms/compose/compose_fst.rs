@@ -50,6 +50,24 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>, Cache: FstCache<W>> ComposeFst<W
         Ok(ComposeFst(fst))
     }
 
+    pub fn new_with_options_and_cache(
+        fst1: Arc<<<CFB::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
+        fst2: Arc<<<CFB::CF as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
+        opts: ComposeFstOpOptions<
+            CFB::M1,
+            CFB::M2,
+            CFB,
+            StateTable<ComposeStateTuple<<CFB::CF as ComposeFilter<W>>::FS>>,
+        >,
+        fst_cache: Cache
+    ) -> Result<Self> {
+        let isymt = fst1.input_symbols().cloned();
+        let osymt = fst2.output_symbols().cloned();
+        let compose_impl = ComposeFstOp::new(fst1, fst2, opts)?;
+        let fst = LazyFst::from_op_and_cache(compose_impl, fst_cache, isymt, osymt);
+        Ok(ComposeFst(fst))
+    }
+
     // TODO: Change API, no really user friendly
     pub fn new(
         fst1: Arc<<<CFB::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
