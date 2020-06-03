@@ -37,3 +37,39 @@ where
 
     Ok(())
 }
+
+// Test parsing a VectorFst from a ConstFst file.
+pub fn test_const_fst_bin_deserializer_as_vector<W>(
+    test_data: &FstTestData<W, VectorFst<W>>,
+) -> Result<()>
+where
+    W: SerializableSemiring + WeightQuantize,
+{
+    let parsed_fst_bin = VectorFst::<W>::read_from_const(&test_data.raw_const_bin_path)
+        .with_context(|| format_err!("Failed parsing ConstFst Aligned"))?;
+
+    test_eq_fst(
+        &test_data.raw,
+        &parsed_fst_bin,
+        "Deserializer ConstFst Bin as VectorFst",
+    );
+    Ok(())
+}
+
+pub fn test_const_fst_aligned_bin_deserializer_as_vector<W>(
+    test_data: &FstTestData<W, VectorFst<W>>,
+) -> Result<()>
+where
+    W: SerializableSemiring + WeightQuantize,
+{
+    let parsed_fst_bin = VectorFst::<W>::read_from_const(&test_data.raw_const_aligned_bin_path)
+        .with_context(|| format_err!("Failed parsing ConstFst Aligned Bin"))?;
+
+    test_eq_fst(
+        &test_data.raw,
+        &parsed_fst_bin,
+        "Deserializer ConstFst Aligned Bin as VectorFst",
+    );
+
+    Ok(())
+}

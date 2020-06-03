@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Re-organized most of the algorithms into their own modules.
 - All the lazy fsts except `rm_epsilon` are now Send and Sync.
 - Remove the `TrIterator` in favor of the `get_trs` method in the CoreFst trait.
+- Add method `read_from_const` to `VectorFst` allowing to load a `VectorFst` from a `ConstFst` file.
 
 ### Changed
 - `fst_convert` now consumes its input. Use `fst_convert_from_ref` to pass a borrow.
@@ -38,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `final_weight` method of the `CoreFst` trait now returns a copy instead of a reference.
 - Fix an issue in `SccQueue` which made the `is_empty()` call super slow. As a result, an important speed-up can be observed when running the `shortest_path` algorithm.
 - `ComposeFst` now clonable.
+- Remove call to `collect_vec` when calling `LabelReachable.reach()`.
 
 ### Fixed
 - Fix olabel display while drawing a FST if no symbol table is provided

@@ -1,8 +1,9 @@
-use crate::fst_impls::{ConstFst, VectorFst};
+use anyhow::Result;
+
+use crate::fst_impls::VectorFst;
 use crate::fst_traits::{ExpandedFst, SerializableFst};
 use crate::semirings::{SerializableSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
-use anyhow::Result;
 
 pub fn test_vector_fst_text_deserialization<W>(
     test_data: &FstTestData<W, VectorFst<W>>,

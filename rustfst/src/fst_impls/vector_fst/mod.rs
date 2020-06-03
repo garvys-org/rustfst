@@ -8,5 +8,6 @@ mod fst;
 mod iterators;
 mod misc;
 mod mutable_fst;
+mod parse_const;
 mod serializable_fst;
 mod test;

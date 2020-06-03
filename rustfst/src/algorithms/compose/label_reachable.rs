@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use anyhow::Result;
-use itertools::Itertools;
 
 use crate::algorithms::compose::{IntervalSet, StateReachable};
 use crate::algorithms::tr_compares::{ILabelCompare, OLabelCompare};
@@ -313,16 +312,15 @@ impl LabelReachable {
         aiter_end: usize,
         compute_weight: bool,
     ) -> Result<Option<(usize, usize, W)>> {
-        let aiter = trs.trs().iter();
         let mut reach_begin = UNASSIGNED;
         let mut reach_end = UNASSIGNED;
         let mut reach_weight = W::zero();
         let interval_set = self.data.interval_set(current_state)?;
+        let trs_slice = trs.trs();
         if 2 * (aiter_end - aiter_begin) < interval_set.len() {
-            let aiter = aiter.skip(aiter_begin);
             let mut reach_label = NO_LABEL;
-            for (pos, tr) in aiter.take(aiter_end - aiter_begin).enumerate() {
-                let aiter_pos = aiter_begin + pos;
+            for pos in aiter_begin..aiter_end {
+                let tr = unsafe { trs_slice.get_unchecked(pos) };
                 let label = if self.reach_fst_input {
                     tr.ilabel
                 } else {
@@ -331,9 +329,9 @@ impl LabelReachable {
                 if label == reach_label || self.reach_label(current_state, label)? {
                     reach_label = label;
                     if reach_begin == UNASSIGNED {
-                        reach_begin = aiter_pos;
+                        reach_begin = pos;
                     }
-                    reach_end = aiter_pos + 1;
+                    reach_end = pos + 1;
                     if compute_weight {
                         reach_weight.plus_assign(&tr.weight)?;
                     }
@@ -342,11 +340,9 @@ impl LabelReachable {
         } else {
             let mut begin_low;
             let mut end_low = aiter_begin;
-
-            let trs = aiter.collect_vec();
             for interval in interval_set.iter() {
-                begin_low = self.lower_bound(trs.as_slice(), end_low, aiter_end, interval.begin);
-                end_low = self.lower_bound(trs.as_slice(), begin_low, aiter_end, interval.end);
+                begin_low = self.lower_bound(trs_slice, end_low, aiter_end, interval.begin);
+                end_low = self.lower_bound(trs_slice, begin_low, aiter_end, interval.end);
                 if end_low - begin_low > 0 {
                     if reach_begin == UNASSIGNED {
                         reach_begin = begin_low;
@@ -354,7 +350,8 @@ impl LabelReachable {
                     reach_end = end_low;
                     if compute_weight {
                         for i in begin_low..end_low {
-                            reach_weight.plus_assign(&trs[i].weight)?;
+                            reach_weight
+                                .plus_assign(unsafe { &trs_slice.get_unchecked(i).weight })?;
                         }
                     }
                 }
@@ -370,7 +367,7 @@ impl LabelReachable {
 
     fn lower_bound<W: Semiring>(
         &self,
-        trs: &[&Tr<W>],
+        trs: &[Tr<W>],
         aiter_begin: usize,
         aiter_end: usize,
         match_label: Label,
@@ -380,7 +377,7 @@ impl LabelReachable {
         let mut high = aiter_end;
         while low < high {
             let mid = low + (high - low) / 2;
-            let tr = trs[mid];
+            let tr = unsafe { trs.get_unchecked(mid) };
             let label = if self.reach_fst_input {
                 tr.ilabel
             } else {

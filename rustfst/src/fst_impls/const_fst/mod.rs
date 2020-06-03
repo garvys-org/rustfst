@@ -7,3 +7,8 @@ mod fst;
 mod iterators;
 mod misc;
 mod serializable_fst;
+
+pub(super) static CONST_MIN_FILE_VERSION: i32 = 1;
+pub(super) static CONST_ALIGNED_FILE_VERSION: i32 = 1;
+pub(super) static CONST_FILE_VERSION: i32 = 2;
+pub(super) static CONST_ARCH_ALIGNMENT: usize = 16;

@@ -46,7 +46,8 @@ use crate::tests_openfst::algorithms::state_reachable::{
 };
 use crate::tests_openfst::algorithms::union::{test_union, test_union_lazy};
 use crate::tests_openfst::io::const_fst_bin_deserializer::{
-    test_const_fst_aligned_bin_deserializer, test_const_fst_bin_deserializer,
+    test_const_fst_aligned_bin_deserializer, test_const_fst_aligned_bin_deserializer_as_vector,
+    test_const_fst_bin_deserializer, test_const_fst_bin_deserializer_as_vector,
 };
 use crate::tests_openfst::io::const_fst_bin_serializer::test_const_fst_bin_serializer;
 use crate::tests_openfst::io::const_fst_bin_serializer::test_const_fst_bin_serializer_with_symt;
@@ -803,8 +804,20 @@ macro_rules! test_fst {
             }
 
             #[test]
+            fn test_const_fst_bin_deserializer_as_vector_openfst() -> Result<()> {
+                do_run!(test_const_fst_bin_deserializer_as_vector, $fst_name);
+                Ok(())
+            }
+
+            #[test]
             fn test_vector_fst_text_deserialization_openfst() -> Result<()> {
                 do_run!(test_vector_fst_text_deserialization, $fst_name);
+                Ok(())
+            }
+
+            #[test]
+            fn test_const_fst_aligned_bin_deserializer_as_vector_openfst() -> Result<()> {
+                do_run!(test_const_fst_aligned_bin_deserializer_as_vector, $fst_name);
                 Ok(())
             }
         }
