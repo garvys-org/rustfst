@@ -19,7 +19,7 @@ use crate::semirings::SerializableSemiring;
 use crate::{Tr, Trs, TrsVec};
 use std::sync::Arc;
 
-impl<W: 'static + SerializableSemiring> SerializableFst<W> for VectorFst<W> {
+impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
     fn fst_type() -> String {
         "vector".to_string()
     }
@@ -143,7 +143,7 @@ fn parse_vector_fst_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], V
     ))
 }
 
-fn parse_vector_fst<W: SerializableSemiring + 'static>(i: &[u8]) -> IResult<&[u8], VectorFst<W>> {
+fn parse_vector_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFst<W>> {
     let (i, header) = FstHeader::parse(
         i,
         VECTOR_MIN_FILE_VERSION,

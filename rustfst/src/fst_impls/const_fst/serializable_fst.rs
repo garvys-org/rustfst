@@ -11,6 +11,9 @@ use nom::number::complete::le_i32;
 use nom::IResult;
 
 use crate::fst_impls::const_fst::data_structure::ConstState;
+use crate::fst_impls::const_fst::{
+    CONST_ALIGNED_FILE_VERSION, CONST_ARCH_ALIGNMENT, CONST_FILE_VERSION, CONST_MIN_FILE_VERSION,
+};
 use crate::fst_impls::ConstFst;
 use crate::fst_traits::{ExpandedFst, Fst, SerializableFst};
 use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FST_MAGIC_NUMBER};
@@ -21,7 +24,7 @@ use crate::semirings::SerializableSemiring;
 use crate::{Tr, EPS_LABEL};
 use std::sync::Arc;
 
-impl<W: 'static + SerializableSemiring> SerializableFst<W> for ConstFst<W> {
+impl<W: SerializableSemiring> SerializableFst<W> for ConstFst<W> {
     fn fst_type() -> String {
         "const".to_string()
     }
@@ -167,11 +170,6 @@ impl<W: 'static + SerializableSemiring> SerializableFst<W> for ConstFst<W> {
     }
 }
 
-static CONST_MIN_FILE_VERSION: i32 = 1;
-static CONST_ALIGNED_FILE_VERSION: i32 = 1;
-static CONST_FILE_VERSION: i32 = 2;
-static CONST_ARCH_ALIGNMENT: usize = 16;
-
 fn parse_const_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], ConstState<W>> {
     let (i, final_weight) = W::parse_binary(i)?;
     let (i, pos) = le_i32(i)?;
@@ -191,7 +189,7 @@ fn parse_const_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], ConstS
     ))
 }
 
-fn parse_const_fst<W: SerializableSemiring + 'static>(i: &[u8]) -> IResult<&[u8], ConstFst<W>> {
+fn parse_const_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], ConstFst<W>> {
     let stream_len = i.len();
 
     let (mut i, hdr) = FstHeader::parse(
