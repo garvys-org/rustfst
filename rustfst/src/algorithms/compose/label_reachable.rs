@@ -307,7 +307,7 @@ impl LabelReachable {
         if 2 * (aiter_end - aiter_begin) < interval_set.len() {
             let mut reach_label = NO_LABEL;
             for pos in aiter_begin..aiter_end {
-                let tr = &trs_slice[pos];
+                let tr = unsafe { trs_slice.get_unchecked(pos) };
                 let label = if self.reach_fst_input {
                     tr.ilabel
                 } else {
@@ -337,7 +337,8 @@ impl LabelReachable {
                     reach_end = end_low;
                     if compute_weight {
                         for i in begin_low..end_low {
-                            reach_weight.plus_assign(&trs_slice[i].weight)?;
+                            reach_weight
+                                .plus_assign(unsafe { &trs_slice.get_unchecked(i).weight })?;
                         }
                     }
                 }
@@ -363,7 +364,7 @@ impl LabelReachable {
         let mut high = aiter_end;
         while low < high {
             let mid = low + (high - low) / 2;
-            let tr = &trs[mid];
+            let tr = unsafe { trs.get_unchecked(mid) };
             let label = if self.reach_fst_input {
                 tr.ilabel
             } else {
