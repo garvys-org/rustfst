@@ -4,13 +4,13 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use crate::algorithms::concat::{concat, ConcatFst};
+use crate::algorithms::fst_convert_from_ref;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 use std::path::Path;
-use crate::algorithms::fst_convert_from_ref;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConcatOperationResult {
@@ -65,8 +65,10 @@ where
 {
     for concat_test_data in &test_data.concat {
         let concat_lazy_fst_openfst = &concat_test_data.result_lazy;
-        let concat_lazy_fst : VectorFst<_> =
-            fst_convert_from_ref(&ConcatFst::new(test_data.raw.clone(), concat_test_data.fst_2.clone())?);
+        let concat_lazy_fst: VectorFst<_> = fst_convert_from_ref(&ConcatFst::new(
+            test_data.raw.clone(),
+            concat_test_data.fst_2.clone(),
+        )?);
 
         test_eq_fst(concat_lazy_fst_openfst, &concat_lazy_fst, "Concat lazy");
     }

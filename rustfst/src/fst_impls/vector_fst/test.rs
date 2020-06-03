@@ -67,11 +67,7 @@ mod tests {
 
         // Modify first transition leaving s1
         let mut tr_it = fst.tr_iter_mut_revamp(s1)?;
-        tr_it.set_tr(0, new_tr_1.clone());
-        // fst.tr_iter_mut(s1)?
-        //     .next()
-        //     .ok_or_else(|| format_err!("Missing tr"))?
-        //     .set_value(&new_tr_1);
+        tr_it.set_tr(0, new_tr_1.clone())?;
 
         let it_s1 = fst.get_trs(s1)?;
         assert_eq!(new_tr_1, it_s1[0]);

@@ -13,12 +13,12 @@ use crate::fst_impls::const_fst::{
 };
 use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::{ConstFst, VectorFst};
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::SerializableFst;
 use crate::parsers::bin_fst::fst_header::FstHeader;
 use crate::parsers::bin_fst::utils_parsing::{parse_final_weight, parse_fst_tr, parse_start_state};
 use crate::semirings::SerializableSemiring;
 use crate::{Tr, TrsVec};
-use crate::fst_properties::FstProperties;
 
 impl<W: SerializableSemiring> VectorFst<W> {
     /// Load a VectorFst directly from a ConstFst file.

@@ -7,10 +7,10 @@ use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
 
-use bitflags::_core::marker::PhantomData;
-use std::path::Path;
 use crate::algorithms::fst_convert_from_ref;
 use crate::tests_openfst::macros::test_eq_fst;
+use bitflags::_core::marker::PhantomData;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ReplaceOperationResult {
@@ -110,7 +110,7 @@ where
             replace_test_data.epsilon_on_replace,
         )?;
 
-        let replaced_lazy_fst : VectorFst<_> = fst_convert_from_ref(&ReplaceFst::new(
+        let replaced_lazy_fst: VectorFst<_> = fst_convert_from_ref(&ReplaceFst::new(
             fst_list,
             replace_test_data.root,
             replace_test_data.epsilon_on_replace,

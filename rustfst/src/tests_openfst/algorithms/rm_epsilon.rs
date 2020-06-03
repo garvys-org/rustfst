@@ -2,6 +2,7 @@ use std::fmt::Display;
 
 use anyhow::Result;
 
+use crate::algorithms::fst_convert_from_ref;
 use crate::algorithms::rm_epsilon::{rm_epsilon, RmEpsilonFst};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
@@ -10,7 +11,6 @@ use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::{SerializableSemiring, WeightQuantize};
 use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
-use crate::algorithms::fst_convert_from_ref;
 
 pub fn test_rmepsilon<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
@@ -36,8 +36,13 @@ where
     W: SerializableSemiring + WeightQuantize,
 {
     let rmepsilon_lazy_fst_openfst = &test_data.rmepsilon.result_lazy;
-    let rmepsilon_lazy_fst : VectorFst<_> = fst_convert_from_ref(&RmEpsilonFst::new(test_data.raw.clone())?);
-    test_eq_fst(rmepsilon_lazy_fst_openfst, &rmepsilon_lazy_fst, "RmEpsilon lazy");
+    let rmepsilon_lazy_fst: VectorFst<_> =
+        fst_convert_from_ref(&RmEpsilonFst::new(test_data.raw.clone())?);
+    test_eq_fst(
+        rmepsilon_lazy_fst_openfst,
+        &rmepsilon_lazy_fst,
+        "RmEpsilon lazy",
+    );
 
     Ok(())
 }
