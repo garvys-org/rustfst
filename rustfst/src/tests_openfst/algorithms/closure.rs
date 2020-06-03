@@ -7,10 +7,10 @@ use crate::algorithms::closure::{closure, ClosureFst, ClosureType};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
-use crate::tests_openfst::algorithms::lazy_fst::compare_fst_static_lazy;
 use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 use std::path::Path;
+use crate::algorithms::fst_convert_from_ref;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SimpleStaticLazyOperationResult {
@@ -79,9 +79,9 @@ where
 {
     let closure_test_data = &test_data.closure_plus;
     let closure_lazy_fst_openfst = &closure_test_data.result_lazy;
-    let closure_lazy_fst = ClosureFst::new(test_data.raw.clone(), ClosureType::ClosurePlus)?;
+    let closure_lazy_fst : VectorFst<_> = fst_convert_from_ref(&ClosureFst::new(test_data.raw.clone(), ClosureType::ClosurePlus)?);
 
-    compare_fst_static_lazy(closure_lazy_fst_openfst, &closure_lazy_fst)?;
+    test_eq_fst(closure_lazy_fst_openfst, &closure_lazy_fst, "Closure plus lazy");
     Ok(())
 }
 
@@ -91,8 +91,8 @@ where
 {
     let closure_test_data = &test_data.closure_star;
     let closure_lazy_fst_openfst = &closure_test_data.result_lazy;
-    let closure_lazy_fst = ClosureFst::new(test_data.raw.clone(), ClosureType::ClosureStar)?;
+    let closure_lazy_fst : VectorFst<_> = fst_convert_from_ref(&ClosureFst::new(test_data.raw.clone(), ClosureType::ClosureStar)?);
 
-    compare_fst_static_lazy(closure_lazy_fst_openfst, &closure_lazy_fst)?;
+    test_eq_fst(closure_lazy_fst_openfst, &closure_lazy_fst, "Closure star lazy");
     Ok(())
 }

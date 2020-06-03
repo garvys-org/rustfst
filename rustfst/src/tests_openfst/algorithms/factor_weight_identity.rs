@@ -12,9 +12,9 @@ use crate::semirings::SerializableSemiring;
 use crate::semirings::WeightQuantize;
 use crate::tests_openfst::FstTestData;
 
-use super::lazy_fst::compare_fst_static_lazy;
 use crate::tests_openfst::macros::test_eq_fst;
 use std::path::Path;
+use crate::algorithms::fst_convert_from_ref;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FwIdentityOperationResult {
@@ -78,15 +78,10 @@ where
         let mode = FactorWeightType::from_bools(data.factor_final_weights, data.factor_tr_weights);
         let opts = FactorWeightOptions::new(mode);
 
-        let fst_res_static: VectorFst<_> = factor_weight::<_, VectorFst<_>, _, _, IdentityFactor<_>>(
-            &test_data.raw,
-            opts.clone(),
-        )?;
+        let fst_res_lazy : VectorFst<_> =
+            fst_convert_from_ref(&FactorWeightFst::<_, _, _, IdentityFactor<_>>::new(test_data.raw.clone(), opts)?);
 
-        let fst_res_lazy =
-            FactorWeightFst::<_, _, _, IdentityFactor<_>>::new(test_data.raw.clone(), opts)?;
-
-        compare_fst_static_lazy(&fst_res_static, &fst_res_lazy)?;
+        test_eq_fst(&data.result, &fst_res_lazy, "Factor weight identity lazy");
     }
 
     Ok(())

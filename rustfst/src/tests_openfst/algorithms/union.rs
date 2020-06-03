@@ -7,10 +7,10 @@ use crate::algorithms::union::{union, UnionFst};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
-use crate::tests_openfst::algorithms::lazy_fst::compare_fst_static_lazy;
 use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 use std::path::Path;
+use crate::algorithms::fst_convert_from_ref;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UnionOperationResult {
@@ -69,9 +69,9 @@ where
 {
     for union_test_data in &test_data.union {
         let union_lazy_fst_openfst = &union_test_data.result_lazy;
-        let union_lazy_fst = UnionFst::new(test_data.raw.clone(), union_test_data.fst_2.clone())?;
+        let union_lazy_fst : VectorFst<_> = fst_convert_from_ref(&UnionFst::new(test_data.raw.clone(), union_test_data.fst_2.clone())?);
 
-        compare_fst_static_lazy(union_lazy_fst_openfst, &union_lazy_fst)?;
+        test_eq_fst(union_lazy_fst_openfst, &union_lazy_fst, "Union lazy");
     }
     Ok(())
 }
