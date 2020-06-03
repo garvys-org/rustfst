@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Re-organized most of the algorithms into their own modules.
 - All the lazy fsts except `rm_epsilon` are now Send and Sync.
 - Remove the `TrIterator` in favor of the `get_trs` method in the CoreFst trait.
+- Add method `read_from_const` to `VectorFst` allowing to load a `VectorFst` from a `ConstFst` file.
 
 ### Changed
 - `fst_convert` now consumes its input. Use `fst_convert_from_ref` to pass a borrow.
