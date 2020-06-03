@@ -3,7 +3,7 @@ use std::fmt::Display;
 use anyhow::Result;
 
 use crate::algorithms::{project, ProjectType};
-use crate::fst_traits::{Fst, MutableFst, SerializableFst};
+use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::{SerializableSemiring, WeightQuantize};
 use crate::tests_openfst::macros::test_eq_fst;

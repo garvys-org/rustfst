@@ -633,8 +633,6 @@ pub fn union_properties(
     inprops2: FstProperties,
     delayed: bool,
 ) -> FstProperties {
-    std::dbg!(inprops1);
-    std::dbg!(inprops2);
     let mut outprops = (FstProperties::ACCEPTOR
         | FstProperties::UNWEIGHTED
         | FstProperties::UNWEIGHTED_CYCLES
