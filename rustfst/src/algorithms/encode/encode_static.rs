@@ -2,7 +2,7 @@ use std::cell::RefCell;
 
 use anyhow::{Context, Result};
 
-use crate::algorithms::encode::{EncodeTable, EncodeTableMut};
+use crate::algorithms::encode::{EncodeTable, EncodeTableMut, EncodeType};
 use crate::algorithms::{FinalTr, MapFinalAction, TrMapper};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
@@ -13,21 +13,18 @@ struct EncodeMapper<W: Semiring> {
 }
 
 impl<W: Semiring> EncodeMapper<W> {
-    pub fn new(encode_labels: bool, encode_weights: bool) -> Self {
+    pub fn new(encode_type: EncodeType) -> Self {
         EncodeMapper {
-            encode_table: EncodeTable(RefCell::new(EncodeTableMut::new(
-                encode_labels,
-                encode_weights,
-            ))),
+            encode_table: EncodeTable(RefCell::new(EncodeTableMut::new(encode_type))),
         }
     }
 
     pub fn encode_weights(&self) -> bool {
-        self.encode_table.0.borrow().encode_weights
+        self.encode_table.0.borrow().encode_type.encode_weights()
     }
 
     pub fn encode_labels(&self) -> bool {
-        self.encode_table.0.borrow().encode_labels
+        self.encode_table.0.borrow().encode_type.encode_labels()
     }
 }
 
@@ -46,7 +43,7 @@ impl<W: Semiring> TrMapper<W> for EncodeMapper<W> {
     }
 
     fn final_tr_map(&self, final_tr: &mut FinalTr<W>) -> Result<()> {
-        if self.encode_table.0.borrow().encode_weights {
+        if self.encode_weights() {
             let tuple = self.encode_table.0.borrow().final_tr_to_tuple(final_tr);
             let label = self.encode_table.0.borrow_mut().encode(tuple);
             final_tr.ilabel = label;
@@ -61,7 +58,7 @@ impl<W: Semiring> TrMapper<W> for EncodeMapper<W> {
     }
 
     fn final_action(&self) -> MapFinalAction {
-        if self.encode_table.0.borrow().encode_weights {
+        if self.encode_weights() {
             MapFinalAction::MapRequireSuperfinal
         } else {
             MapFinalAction::MapNoSuperfinal
@@ -92,16 +89,12 @@ impl<W: Semiring> TrMapper<W> for EncodeMapper<W> {
 ///
 /// The encoding of each pair or triple of labels and/or weights as a unique key is stored
 /// in an `EncodeTable` object.
-pub fn encode<W, F>(
-    fst: &mut F,
-    encode_labels: bool,
-    encode_weights: bool,
-) -> Result<EncodeTable<W>>
+pub fn encode<W, F>(fst: &mut F, encode_type: EncodeType) -> Result<EncodeTable<W>>
 where
     W: Semiring,
     F: MutableFst<W>,
 {
-    let mut encode_mapper = EncodeMapper::new(encode_labels, encode_weights);
+    let mut encode_mapper = EncodeMapper::new(encode_type);
     fst.tr_map(&mut encode_mapper)
         .with_context(|| format_err!("Error calling TrMap with EncodeMapper."))?;
     Ok(encode_mapper.encode_table)

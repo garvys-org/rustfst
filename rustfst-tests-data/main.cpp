@@ -240,6 +240,9 @@ void compute_fst_encode(const F& raw_fst, json& j, const string& dir_path) {
     j["encode"] = {};
     for(bool encode_labels: v) {
         for(bool encode_weights: v) {
+            if (!encode_weights && !encode_labels) {
+                continue;
+            }
             uint32 flags = 0;
             if (encode_labels) {
                 flags |= fst::kEncodeLabels;
@@ -266,6 +269,9 @@ void compute_fst_encode_decode(const F& raw_fst, json& j, const string& dir_path
     j["encode_decode"] = {};
     for(bool encode_labels: v) {
         for(bool encode_weights: v) {
+            if (!encode_weights && !encode_labels) {
+                continue;
+            }
             uint32 flags = 0;
             if (encode_labels) {
                 flags |= fst::kEncodeLabels;

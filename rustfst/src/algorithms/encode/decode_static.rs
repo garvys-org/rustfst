@@ -16,11 +16,11 @@ impl<W: Semiring> DecodeMapper<W> {
     }
 
     pub fn encode_weights(&self) -> bool {
-        self.encode_table.0.borrow().encode_weights
+        self.encode_table.0.borrow().encode_type.encode_weights()
     }
 
     pub fn encode_labels(&self) -> bool {
-        self.encode_table.0.borrow().encode_labels
+        self.encode_table.0.borrow().encode_type.encode_labels()
     }
 }
 

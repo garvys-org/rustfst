@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 
+use crate::algorithms::encode::EncodeType;
 use crate::algorithms::FinalTr;
 use crate::{Label, Semiring, Tr, EPS_LABEL};
 use std::collections::hash_map::Entry;
@@ -13,8 +14,7 @@ pub struct EncodeTuple<W: Semiring> {
 }
 
 pub struct EncodeTableMut<W: Semiring> {
-    pub encode_labels: bool,
-    pub encode_weights: bool,
+    pub encode_type: EncodeType,
     // FIXME : Store references ?
     id_to_tuple: Vec<EncodeTuple<W>>,
     tuple_to_id: HashMap<EncodeTuple<W>, usize>,
@@ -23,10 +23,9 @@ pub struct EncodeTableMut<W: Semiring> {
 pub struct EncodeTable<W: Semiring>(pub RefCell<EncodeTableMut<W>>);
 
 impl<W: Semiring> EncodeTableMut<W> {
-    pub fn new(encode_labels: bool, encode_weights: bool) -> Self {
+    pub fn new(encode_type: EncodeType) -> Self {
         EncodeTableMut {
-            encode_labels,
-            encode_weights,
+            encode_type,
             id_to_tuple: vec![],
             tuple_to_id: HashMap::new(),
         }
@@ -35,12 +34,12 @@ impl<W: Semiring> EncodeTableMut<W> {
     pub fn tr_to_tuple(&self, tr: &Tr<W>) -> EncodeTuple<W> {
         EncodeTuple {
             ilabel: tr.ilabel,
-            olabel: if self.encode_labels {
+            olabel: if self.encode_type.encode_labels() {
                 tr.olabel
             } else {
                 EPS_LABEL
             },
-            weight: if self.encode_weights {
+            weight: if self.encode_type.encode_weights() {
                 tr.weight.clone()
             } else {
                 W::one()
@@ -51,12 +50,12 @@ impl<W: Semiring> EncodeTableMut<W> {
     pub fn final_tr_to_tuple(&self, tr: &FinalTr<W>) -> EncodeTuple<W> {
         EncodeTuple {
             ilabel: tr.ilabel,
-            olabel: if self.encode_labels {
+            olabel: if self.encode_type.encode_labels() {
                 tr.olabel
             } else {
                 EPS_LABEL
             },
-            weight: if self.encode_weights {
+            weight: if self.encode_type.encode_weights() {
                 tr.weight.clone()
             } else {
                 W::one()
@@ -83,6 +82,6 @@ impl<W: Semiring> EncodeTableMut<W> {
 
 impl<W: Semiring> Default for EncodeTableMut<W> {
     fn default() -> Self {
-        Self::new(true, true)
+        Self::new(EncodeType::EncodeWeightsAndLabels)
     }
 }

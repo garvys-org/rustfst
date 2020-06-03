@@ -9,6 +9,7 @@ use anyhow::Result;
 use binary_heap_plus::BinaryHeap;
 use stable_bst::TreeMap;
 
+use crate::algorithms::encode::EncodeType;
 use crate::algorithms::factor_weight::factor_iterators::GallicFactorLeft;
 use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, FactorWeightType};
 use crate::algorithms::partition::Partition;
@@ -66,7 +67,7 @@ where
         push_weights(&mut gfst, ReweightType::ReweightToInitial, false)?;
         let mut quantize_mapper = QuantizeMapper {};
         tr_map(&mut gfst, &mut quantize_mapper)?;
-        let encode_table = encode(&mut gfst, true, true)?;
+        let encode_table = encode(&mut gfst, EncodeType::EncodeWeightsAndLabels)?;
         acceptor_minimize(&mut gfst, allow_acyclic_minimization)?;
         decode(&mut gfst, encode_table)?;
         let factor_opts: FactorWeightOptions = FactorWeightOptions {
@@ -92,7 +93,7 @@ where
         push_weights(ifst, ReweightType::ReweightToInitial, false)?;
         let mut quantize_mapper = QuantizeMapper {};
         tr_map(ifst, &mut quantize_mapper)?;
-        let encode_table = encode(ifst, true, true)?;
+        let encode_table = encode(ifst, EncodeType::EncodeWeightsAndLabels)?;
         acceptor_minimize(ifst, allow_acyclic_minimization)?;
         decode(ifst, encode_table)
     } else {
