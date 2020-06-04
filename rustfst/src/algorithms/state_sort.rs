@@ -2,6 +2,7 @@ use std::mem::swap;
 
 use anyhow::{ensure, Result};
 
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::{StateId, Trs};
@@ -23,6 +24,9 @@ where
     if fst.start().is_none() {
         return Ok(());
     }
+    // TODO: Use properties with mask once available
+    let props = fst.properties_revamp() & FstProperties::statesort_properties();
+
     let start_state = fst.start().unwrap();
 
     let mut done = vec![false; order.len()];
@@ -34,8 +38,7 @@ where
 
     fst.set_start(order[start_state])?;
 
-    let states: Vec<_> = fst.states_iter().collect();
-    for mut s1 in states {
+    for mut s1 in 0..fst.num_states() {
         if done[s1] {
             continue;
         }
@@ -51,7 +54,7 @@ where
             }
             match final1 {
                 None => fst.delete_final_weight(s2)?,
-                Some(v) => fst.set_final(s2, v.clone())?,
+                Some(v) => fst.set_final(s2, v)?,
             };
             fst.delete_trs(s2)?;
             for tr in trsa.iter() {
@@ -67,6 +70,8 @@ where
             s1 = s2;
         }
     }
+
+    fst.set_properties_with_mask(props, FstProperties::all_properties());
 
     Ok(())
 }

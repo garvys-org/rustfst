@@ -21,10 +21,9 @@ where
             .properties()?
             .contains(FstProperties::TOP_SORTED);
         assert!(top_sorted);
-    } else {
-        // If Acyclic, the fst shouldn't have been modified.
-        test_eq_fst(&test_data.raw, &fst_topsort, "TopSort");
     }
+
+    test_eq_fst(&test_data.topsort, &fst_topsort, "TopSort");
 
     Ok(())
 }

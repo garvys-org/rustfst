@@ -3,6 +3,7 @@ use anyhow::Result;
 use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
 use crate::algorithms::state_sort;
 use crate::algorithms::tr_filters::AnyTrFilter;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::StateId;
@@ -81,6 +82,12 @@ where
     dfs_visit(fst, &mut visitor, &AnyTrFilter {}, false);
     if visitor.acyclic {
         state_sort(fst, &visitor.order)?;
+        let props =
+            FstProperties::ACYCLIC | FstProperties::INITIAL_ACYCLIC | FstProperties::TOP_SORTED;
+        fst.set_properties_with_mask(props, props);
+    } else {
+        let props = FstProperties::CYCLIC | FstProperties::NOT_TOP_SORTED;
+        fst.set_properties_with_mask(props, props);
     }
 
     Ok(())

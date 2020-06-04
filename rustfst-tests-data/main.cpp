@@ -337,7 +337,6 @@ void compute_fst_determinization(const F& raw_fst, json& j, const string& dir_pa
 template<class F>
 void compute_fst_topsort(const F& raw_fst, json& j, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
-    fst::ArcSort(&fst_out, fst::ILabelCompare<typename F::Arc>());
     fst::TopSort(&fst_out);
     bool error = prop_to_bool(fst_out.Properties(fst::kError, true), fst::kError);
     j["topsort"]["result_path"] = error ? "error" : dump_fst(fst_out, dir_path);

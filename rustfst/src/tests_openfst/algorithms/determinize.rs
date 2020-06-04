@@ -6,10 +6,7 @@ use anyhow::{format_err, Result};
 use bitflags::_core::marker::PhantomData;
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::{
-    determinize::{determinize, DeterminizeType},
-    isomorphic,
-};
+use crate::algorithms::determinize::{determinize, DeterminizeType};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
