@@ -1,6 +1,9 @@
 use std::fmt::Display;
+use std::path::Path;
+use std::sync::Arc;
 
 use anyhow::{format_err, Result};
+use bitflags::_core::marker::PhantomData;
 use serde::{Deserialize, Serialize};
 
 use crate::algorithms::{
@@ -12,11 +15,8 @@ use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
-use crate::tests_openfst::macros::{test_eq_fst, test_isomorphic_fst};
+use crate::tests_openfst::macros::test_isomorphic_fst;
 use crate::tests_openfst::FstTestData;
-use bitflags::_core::marker::PhantomData;
-use std::path::Path;
-use std::sync::Arc;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DeterminizeOperationResult {
