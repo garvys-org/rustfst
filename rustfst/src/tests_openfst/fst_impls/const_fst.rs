@@ -6,6 +6,7 @@ use crate::algorithms::fst_convert_from_ref;
 use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_traits::Fst;
 use crate::semirings::{SerializableSemiring, WeightQuantize};
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 use crate::SymbolTable;
 
@@ -28,15 +29,11 @@ where
 
     let const_fst: ConstFst<_> = raw_fst.clone().into();
     let pred_fst: VectorFst<_> = fst_convert_from_ref(&const_fst);
-    assert_eq!(
-        raw_fst,
-        pred_fst,
-        "{}",
-        error_message_fst!(
-            raw_fst,
-            pred_fst,
-            "Convert VectorFst -> ConstFst -> VectorFst"
-        )
+
+    test_eq_fst(
+        &raw_fst,
+        &pred_fst,
+        "Convert VectorFst -> ConstFst -> VectorFst",
     );
 
     // Check symbol tables are still attached

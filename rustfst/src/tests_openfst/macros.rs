@@ -1,10 +1,11 @@
 use std::fmt::Display;
 
+use crate::algorithms::isomorphic;
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::WeightQuantize;
 use crate::Semiring;
 
-fn test_correctness_properties<W: Semiring, FREF: ExpandedFst<W>, FPRED: ExpandedFst<W>>(
+pub fn test_correctness_properties<W: Semiring, FREF: ExpandedFst<W>, FPRED: ExpandedFst<W>>(
     fst_ref: &FREF,
     fst_pred: &FPRED,
     msg: String,
@@ -16,7 +17,13 @@ fn test_correctness_properties<W: Semiring, FREF: ExpandedFst<W>, FPRED: Expande
 
     let props_fref = fst_ref.properties_revamp();
     let props_fpred = fst_pred.properties_revamp();
-    assert!(props_fpred.contains(props_fref));
+    assert!(
+        props_fpred.contains(props_fref),
+        "{} \n Props_fref = {:?}\nProps_fpred = {:?}",
+        msg,
+        props_fref,
+        props_fpred
+    );
 
     let computed_props_fpred = fst_pred.properties().unwrap();
     assert!(
@@ -49,22 +56,23 @@ pub fn test_eq_fst<
     )
 }
 
-macro_rules! error_message_fst {
-    ($fst_ref:expr, $fst:expr, $operation_name:expr) => {
-        format!(
-            "\nTest {} with openfst failing : \nREF = \n{}\nPRED = \n{}\n",
-            $operation_name, $fst_ref, $fst
-        )
-    };
-}
-
-macro_rules! assert_eq_fst {
-    ($fst_ref: expr, $fst: expr, $operation_name: expr) => {
-        assert_eq!(
-            $fst_ref,
-            $fst,
-            "{}",
-            error_message_fst!($fst_ref, $fst, $operation_name)
-        );
-    };
+pub fn test_isomorphic_fst<
+    W: Semiring + WeightQuantize,
+    FREF: ExpandedFst<W> + Display,
+    FPRED: ExpandedFst<W> + Display,
+    I: Into<String>,
+>(
+    fst_ref: &FREF,
+    fst_pred: &FPRED,
+    s: I,
+) {
+    let s = s.into();
+    let message = format!("Test {} with openfst failing : \nREF = \n{}\nPRED = \n{}\n \nREF = \n{:?}\nPRED = \n{:?}\n",
+                          s, fst_ref, fst_pred, fst_ref, fst_pred);
+    assert!(isomorphic(fst_ref, fst_pred).unwrap(), message);
+    test_correctness_properties(
+        fst_ref,
+        fst_pred,
+        format!("Test properties {} with openfst failing", s),
+    )
 }

@@ -141,7 +141,7 @@ where
         determinize_fst(Arc::clone(&fst_in), det_type)?
     };
 
-    let distinct_psubsequential_labels = if det_type == DeterminizeType::DeterminizeFunctional {
+    let distinct_psubsequential_labels = if det_type == DeterminizeType::DeterminizeNonFunctional {
         // increment_subsequential_label
         false
     } else {

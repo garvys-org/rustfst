@@ -12,6 +12,7 @@ use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
+use crate::tests_openfst::macros::{test_eq_fst, test_isomorphic_fst};
 use crate::tests_openfst::FstTestData;
 use bitflags::_core::marker::PhantomData;
 use std::path::Path;
@@ -73,18 +74,14 @@ where
                         .properties()?
                         .contains(FstProperties::I_DETERMINISTIC));
                 }
-                let a = isomorphic(fst_expected, fst_determinized)?;
-                assert!(
-                    a,
-                    "{}",
-                    error_message_fst!(
-                        fst_expected,
-                        fst_determinized,
-                        format!(
-                            "Determinize fail for det_type = {:?} ",
-                            determinize_data.det_type
-                        )
-                    )
+
+                test_isomorphic_fst(
+                    fst_expected,
+                    fst_determinized,
+                    format!(
+                        "Determinize fail for det_type = {:?} ",
+                        determinize_data.det_type
+                    ),
                 );
             }
             (Ok(_fst_expected), Err(_)) => panic!(

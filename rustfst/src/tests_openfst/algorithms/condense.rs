@@ -7,7 +7,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::algorithms::condense;
 use crate::fst_traits::{MutableFst, SerializableFst};
-use crate::semirings::SerializableSemiring;
+use crate::semirings::{SerializableSemiring, WeightQuantize};
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 use std::path::Path;
 
@@ -45,7 +46,7 @@ impl CondenseOperationResult {
 pub fn test_condense<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
     F: MutableFst<W> + Display + SerializableFst<W>,
-    W: SerializableSemiring,
+    W: SerializableSemiring + WeightQuantize,
 {
     // Connect
     let fst_in = test_data.raw.clone();
@@ -53,11 +54,7 @@ where
 
     assert_eq!(sccs, test_data.condense.sccs);
 
-    assert_eq!(
-        test_data.condense.result,
-        fst_condensed,
-        "{}",
-        error_message_fst!(test_data.condense.result, fst_condensed, "Condense")
-    );
+    test_eq_fst(&test_data.condense.result, &fst_condensed, "Condense");
+
     Ok(())
 }

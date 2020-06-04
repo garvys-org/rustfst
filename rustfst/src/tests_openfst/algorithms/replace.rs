@@ -76,18 +76,13 @@ where
             replace_test_data.epsilon_on_replace,
         )?;
 
-        assert_eq!(
-            replace_test_data.result,
-            replaced_fst,
-            "{}",
-            error_message_fst!(
-                replace_test_data.result,
-                replaced_fst,
-                format!(
-                    "Replace failed with parameters root={:?} epsilon_on_replace={:?}",
-                    replace_test_data.root, replace_test_data.epsilon_on_replace
-                )
-            )
+        test_eq_fst(
+            &replace_test_data.result,
+            &replaced_fst,
+            format!(
+                "Replace failed with parameters root={:?} epsilon_on_replace={:?}",
+                replace_test_data.root, replace_test_data.epsilon_on_replace
+            ),
         );
     }
     Ok(())
