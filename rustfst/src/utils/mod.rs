@@ -1,4 +1,5 @@
 mod fst_to_labels;
+pub mod hasher;
 mod labels_to_fst;
 
 pub use self::fst_to_labels::decode_linear_fst;

@@ -3,6 +3,7 @@ use std::sync::Mutex;
 
 use crate::algorithms::lazy_fst_revamp::FstCache;
 use crate::semirings::Semiring;
+use crate::utils::hasher::BuildIdentityHasher;
 use crate::{StateId, Trs, TrsVec, EPS_LABEL};
 
 #[derive(Default, Debug)]
@@ -11,8 +12,8 @@ pub struct SimpleHashMapCache<W: Semiring> {
     // Second option: value of the start state (possibly none)
     // The second element of each tuple is the number of known states.
     start: Mutex<(Option<Option<StateId>>, usize)>,
-    trs: Mutex<(HashMap<StateId, CacheTrs<W>>, usize)>,
-    final_weight: Mutex<(HashMap<StateId, Option<W>>, usize)>,
+    trs: Mutex<(HashMap<StateId, CacheTrs<W>, BuildIdentityHasher>, usize)>,
+    final_weight: Mutex<(HashMap<StateId, Option<W>, BuildIdentityHasher>, usize)>,
 }
 
 #[derive(Debug, Clone)]
@@ -36,8 +37,8 @@ impl<W: Semiring> SimpleHashMapCache<W> {
     pub fn new() -> Self {
         Self {
             start: Mutex::new((None, 0)),
-            trs: Mutex::new((HashMap::new(), 0)),
-            final_weight: Mutex::new((HashMap::new(), 0)),
+            trs: Mutex::new((HashMap::default(), 0)),
+            final_weight: Mutex::new((HashMap::default(), 0)),
         }
     }
 }
