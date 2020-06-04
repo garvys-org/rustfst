@@ -1,11 +1,11 @@
 use anyhow::Result;
 use itertools::Itertools;
 
+use crate::{Semiring, Trs};
 use crate::fst_impls::{ConstFst, VectorFst};
-use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::fst_traits::ExpandedFst;
 use crate::semirings::{SerializableSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
-use crate::{Semiring, Trs};
 
 fn do_test_fst_into_iterator<W: Semiring, F: ExpandedFst<W>>(fst: F) -> Result<()> {
     let mut fst_data_ref = vec![];
@@ -59,30 +59,6 @@ fn do_test_fst_iterator<W: Semiring, F: ExpandedFst<W>>(fst: &F) -> Result<()> {
     Ok(())
 }
 
-fn do_test_fst_iterator_mut<W: Semiring, F: MutableFst<W>>(mut fst: F) -> Result<()> {
-    let mut fst_data_ref = vec![];
-
-    for state in 0..fst.num_states() {
-        fst_data_ref.push((
-            state,
-            fst.get_trs(state)?.trs().iter().cloned().collect_vec(),
-            fst.final_weight(state)?,
-        ));
-    }
-
-    let mut fst_data = vec![];
-    for data in fst.fst_iter_mut() {
-        fst_data.push((
-            data.state_id,
-            data.trs.map(|v| v.clone()).collect_vec(),
-            data.final_weight.cloned(),
-        ));
-    }
-    assert_eq!(fst_data, fst_data_ref);
-
-    Ok(())
-}
-
 pub fn test_fst_into_iterator_const<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize,
@@ -103,7 +79,6 @@ where
 
     do_test_fst_iterator(&raw_fst)?;
     do_test_fst_into_iterator(raw_fst.clone())?;
-    do_test_fst_iterator_mut(raw_fst)?;
 
     Ok(())
 }

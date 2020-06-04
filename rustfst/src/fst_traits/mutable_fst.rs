@@ -2,17 +2,17 @@ use std::cmp::Ordering;
 
 use anyhow::Result;
 
+use crate::{Label, StateId};
 use crate::algorithms::closure::ClosureType;
 use crate::algorithms::TrMapper;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{ExpandedFst, FstIteratorMut};
+use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::trs_iter_mut::TrsIterMut;
-use crate::{Label, StateId};
 
 /// Trait defining the methods to modify a wFST.
-pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W> {
+pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
     /// Creates an empty wFST.
     fn new() -> Self;
 

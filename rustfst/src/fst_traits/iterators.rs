@@ -1,5 +1,3 @@
-use std::slice;
-
 use crate::fst_traits::CoreFst;
 use crate::semirings::Semiring;
 use crate::tr::Tr;
@@ -51,9 +49,3 @@ pub trait FstIterator<'a, W: Semiring>: CoreFst<W> {
     fn fst_iter(&'a self) -> Self::FstIter;
 }
 
-pub trait FstIteratorMut<'a, W: Semiring>: CoreFst<W> {
-    type FstIter: Iterator<Item = FstIterData<&'a mut W, slice::IterMut<'a, Tr<W>>>>;
-
-    #[deprecated]
-    fn fst_iter_mut(&'a mut self) -> Self::FstIter;
-}

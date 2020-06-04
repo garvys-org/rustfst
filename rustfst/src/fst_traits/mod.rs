@@ -2,7 +2,7 @@ pub use self::allocable_fst::AllocableFst;
 pub use self::expanded_fst::ExpandedFst;
 pub use self::fst::{CoreFst, Fst};
 pub use self::iterators::{
-    FstIntoIterator, FstIterData, FstIterator, FstIteratorMut, StateIterator,
+    FstIntoIterator, FstIterData, FstIterator, StateIterator,
 };
 pub use self::mutable_fst::MutableFst;
 pub use self::paths_iterator::PathsIterator;
