@@ -52,6 +52,16 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
         self.final_weight(state_id).unsafe_unwrap()
     }
 
+    fn num_trs(&self, s: usize) -> Result<usize> {
+        self.cache
+            .num_trs(s)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", s))
+    }
+
+    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+        self.cache.num_trs(s).unsafe_unwrap()
+    }
+
     fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
         if let Some(trs) = self.cache.get_trs(state_id) {
             Ok(trs)

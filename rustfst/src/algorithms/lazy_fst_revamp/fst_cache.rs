@@ -14,4 +14,5 @@ pub trait FstCache<W: Semiring>: Debug {
     fn insert_final_weight(&self, id: StateId, weight: Option<W>);
 
     fn num_known_states(&self) -> usize;
+    fn num_trs(&self, id: StateId) -> Option<usize>;
 }
