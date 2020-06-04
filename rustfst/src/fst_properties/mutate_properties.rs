@@ -446,12 +446,50 @@ pub fn project_properties(inprops: FstProperties, project_type: ProjectType) -> 
     outprops
 }
 
-pub fn rand_gen_propertoes(_inprops: FstProperties) -> FstProperties {
-    unimplemented!()
+pub fn rand_gen_properties(inprops: FstProperties, weighted: bool) -> FstProperties {
+    let mut outprops = FstProperties::ACYCLIC
+        | FstProperties::INITIAL_ACYCLIC
+        | FstProperties::ACCESSIBLE
+        | FstProperties::UNWEIGHTED_CYCLES;
+    if weighted {
+        outprops |= FstProperties::TOP_SORTED;
+        outprops |= (FstProperties::ACCEPTOR
+            | FstProperties::NO_EPSILONS
+            | FstProperties::NO_I_EPSILONS
+            | FstProperties::NO_O_EPSILONS
+            | FstProperties::I_DETERMINISTIC
+            | FstProperties::O_DETERMINISTIC
+            | FstProperties::I_LABEL_SORTED
+            | FstProperties::O_LABEL_SORTED)
+            & inprops;
+    } else {
+        outprops |= FstProperties::UNWEIGHTED;
+        outprops |= (FstProperties::ACCEPTOR
+            | FstProperties::I_LABEL_SORTED
+            | FstProperties::O_LABEL_SORTED)
+            & inprops;
+    }
+    return outprops;
 }
 
-pub fn relabel_properties(_inprops: FstProperties) -> FstProperties {
-    unimplemented!()
+pub fn relabel_properties(inprops: FstProperties) -> FstProperties {
+    let outprops = FstProperties::WEIGHTED
+        | FstProperties::UNWEIGHTED
+        | FstProperties::WEIGHTED_CYCLES
+        | FstProperties::UNWEIGHTED_CYCLES
+        | FstProperties::CYCLIC
+        | FstProperties::ACYCLIC
+        | FstProperties::INITIAL_CYCLIC
+        | FstProperties::INITIAL_ACYCLIC
+        | FstProperties::TOP_SORTED
+        | FstProperties::NOT_TOP_SORTED
+        | FstProperties::ACCESSIBLE
+        | FstProperties::NOT_ACCESSIBLE
+        | FstProperties::COACCESSIBLE
+        | FstProperties::NOT_COACCESSIBLE
+        | FstProperties::STRING
+        | FstProperties::NOT_STRING;
+    return outprops & inprops;
 }
 
 pub fn replace_properties(
@@ -620,12 +658,34 @@ pub fn rmepsilon_properties(inprops: FstProperties, delayed: bool) -> FstPropert
     return outprops;
 }
 
-pub fn shortest_path_properties(_inprops: FstProperties) -> FstProperties {
-    unimplemented!()
+pub fn shortest_path_properties(props: FstProperties, tree: bool) -> FstProperties {
+    let mut outprops = props
+        | FstProperties::ACYCLIC
+        | FstProperties::INITIAL_ACYCLIC
+        | FstProperties::ACCESSIBLE
+        | FstProperties::UNWEIGHTED_CYCLES;
+    if !tree {
+        outprops |= FstProperties::COACCESSIBLE;
+    }
+    return outprops;
 }
 
-pub fn synchronization_properties(_inprops: FstProperties) -> FstProperties {
-    unimplemented!()
+pub fn synchronization_properties(inprops: FstProperties) -> FstProperties {
+    let mut outprops = (FstProperties::ACCEPTOR
+        | FstProperties::ACYCLIC
+        | FstProperties::ACCESSIBLE
+        | FstProperties::COACCESSIBLE
+        | FstProperties::UNWEIGHTED
+        | FstProperties::UNWEIGHTED_CYCLES)
+        & inprops;
+    if inprops.contains(FstProperties::ACCESSIBLE) {
+        outprops |= (FstProperties::CYCLIC
+            | FstProperties::NOT_COACCESSIBLE
+            | FstProperties::WEIGHTED
+            | FstProperties::WEIGHTED_CYCLES)
+            & inprops;
+    }
+    return outprops;
 }
 
 pub fn union_properties(
