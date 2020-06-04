@@ -56,7 +56,7 @@ where
         }
 
         unsafe {
-            let mut it_tr = fst.tr_iter_unchecked_mut_revamp(state);
+            let mut it_tr = fst.tr_iter_unchecked_mut(state);
             for idx_tr in 0..it_tr.len() {
                 let tr = it_tr.get_unchecked(idx_tr);
                 let d_ns = potentials.get(tr.nextstate).unwrap_or(&zero);
@@ -105,7 +105,7 @@ where
 
         if !d_s.is_one() && !d_s.is_zero() {
             unsafe {
-                let mut it_tr = fst.tr_iter_unchecked_mut_revamp(start_state);
+                let mut it_tr = fst.tr_iter_unchecked_mut(start_state);
                 for idx_tr in 0..it_tr.len() {
                     let tr = it_tr.get_unchecked(idx_tr);
                     let weight = match reweight_type {

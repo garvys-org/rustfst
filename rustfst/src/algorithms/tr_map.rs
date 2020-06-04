@@ -79,7 +79,7 @@ where
 
     for state in 0..ifst.num_states() {
         unsafe {
-            let mut it_tr = ifst.tr_iter_unchecked_mut_revamp(state);
+            let mut it_tr = ifst.tr_iter_unchecked_mut(state);
             for idx_tr in 0..it_tr.len() {
                 let mut tr = it_tr.get_unchecked(idx_tr).clone();
                 mapper.tr_map(&mut tr)?;

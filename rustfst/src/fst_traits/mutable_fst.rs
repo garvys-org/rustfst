@@ -1,5 +1,4 @@
 use std::cmp::Ordering;
-use std::slice;
 
 use anyhow::Result;
 
@@ -90,10 +89,8 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W
     fn add_state(&mut self) -> StateId;
     fn add_states(&mut self, n: usize);
 
-    #[deprecated]
-    fn tr_iter_mut(&mut self, state_id: StateId) -> Result<slice::IterMut<Tr<W>>>;
-    #[deprecated]
-    unsafe fn tr_iter_unchecked_mut(&mut self, state_id: StateId) -> slice::IterMut<Tr<W>>;
+    fn tr_iter_mut(&mut self, state_id: StateId) -> Result<TrsIterMut<W>>;
+    unsafe fn tr_iter_unchecked_mut(&mut self, state_id: StateId) -> TrsIterMut<W>;
 
     /// Removes a state from an FST. It also removes all the trs starting from another state and
     /// reaching this state. An error is raised if the state `state_id` doesn't exist.
@@ -337,9 +334,6 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W
     fn tr_map<M: TrMapper<W>>(&mut self, mapper: &mut M) -> Result<()> {
         crate::algorithms::tr_map(self, mapper)
     }
-
-    fn tr_iter_mut_revamp(&mut self, state_id: StateId) -> Result<TrsIterMut<W>>;
-    unsafe fn tr_iter_unchecked_mut_revamp(&mut self, state_id: StateId) -> TrsIterMut<W>;
 
     fn set_properties(&mut self, props: FstProperties);
     fn set_properties_with_mask(&mut self, props: FstProperties, mask: FstProperties);

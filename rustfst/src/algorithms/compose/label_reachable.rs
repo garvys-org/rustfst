@@ -64,7 +64,7 @@ impl LabelReachableData {
     ) -> Result<()> {
         for s in 0..fst.num_states() {
             unsafe {
-                let mut it_tr = fst.tr_iter_unchecked_mut_revamp(s);
+                let mut it_tr = fst.tr_iter_unchecked_mut(s);
                 for idx_tr in 0..it_tr.len() {
                     let tr = it_tr.get_unchecked(idx_tr);
                     if relabel_input {
@@ -175,7 +175,7 @@ impl LabelReachable {
         let mut indeg = vec![0; ins];
         // Redirects labeled trs to new final states.
         for s in 0..ins {
-            let mut it_tr = unsafe { fst.tr_iter_unchecked_mut_revamp(s) };
+            let mut it_tr = unsafe { fst.tr_iter_unchecked_mut(s) };
             for idx_tr in 0..it_tr.len() {
                 let tr = unsafe { it_tr.get_unchecked(idx_tr) };
 

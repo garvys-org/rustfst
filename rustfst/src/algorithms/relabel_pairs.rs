@@ -60,7 +60,7 @@ where
 
     for state_id in 0..fst.num_states() {
         unsafe {
-            let mut it_tr = fst.tr_iter_unchecked_mut_revamp(state_id);
+            let mut it_tr = fst.tr_iter_unchecked_mut(state_id);
             for idx_tr in 0..it_tr.len() {
                 let tr = it_tr.get_unchecked(idx_tr);
 

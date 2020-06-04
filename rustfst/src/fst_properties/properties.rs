@@ -161,42 +161,6 @@ impl FstProperties {
             | FstProperties::UNWEIGHTED_CYCLES
     }
 
-    /// Properties that are intrinsic to the FST.
-    pub(crate) fn intrinsic_properties() -> FstProperties {
-        FstProperties::ACCEPTOR
-            | FstProperties::NOT_ACCEPTOR
-            | FstProperties::I_DETERMINISTIC
-            | FstProperties::NOT_I_DETERMINISTIC
-            | FstProperties::O_DETERMINISTIC
-            | FstProperties::NOT_O_DETERMINISTIC
-            | FstProperties::EPSILONS
-            | FstProperties::NO_EPSILONS
-            | FstProperties::I_EPSILONS
-            | FstProperties::NO_I_EPSILONS
-            | FstProperties::O_EPSILONS
-            | FstProperties::NO_O_EPSILONS
-            | FstProperties::I_LABEL_SORTED
-            | FstProperties::NOT_I_LABEL_SORTED
-            | FstProperties::O_LABEL_SORTED
-            | FstProperties::NOT_O_LABEL_SORTED
-            | FstProperties::WEIGHTED
-            | FstProperties::UNWEIGHTED
-            | FstProperties::CYCLIC
-            | FstProperties::ACYCLIC
-            | FstProperties::INITIAL_CYCLIC
-            | FstProperties::INITIAL_ACYCLIC
-            | FstProperties::TOP_SORTED
-            | FstProperties::NOT_TOP_SORTED
-            | FstProperties::ACCESSIBLE
-            | FstProperties::NOT_ACCESSIBLE
-            | FstProperties::COACCESSIBLE
-            | FstProperties::NOT_COACCESSIBLE
-            | FstProperties::STRING
-            | FstProperties::NOT_STRING
-            | FstProperties::WEIGHTED_CYCLES
-            | FstProperties::UNWEIGHTED_CYCLES
-    }
-
     /// Properties that are preserved when an FST start state is set.
     pub(crate) fn set_start_properties() -> FstProperties {
         FstProperties::ACCEPTOR

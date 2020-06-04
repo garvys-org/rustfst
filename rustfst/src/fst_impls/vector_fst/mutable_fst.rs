@@ -1,5 +1,4 @@
 use std::cmp::Ordering;
-use std::slice;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -90,22 +89,19 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         self.properties = add_state_properties(self.properties);
     }
 
-    fn tr_iter_mut(&mut self, state_id: StateId) -> Result<slice::IterMut<Tr<W>>> {
+    fn tr_iter_mut(&mut self, state_id: StateId) -> Result<TrsIterMut<W>> {
         let state = self
             .states
             .get_mut(state_id)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
-        let _trs = Arc::make_mut(&mut state.trs.0);
-        todo!("props")
-        // Ok(trs.iter_mut())
+        let trs = Arc::make_mut(&mut state.trs.0);
+        Ok(TrsIterMut::new(trs, &mut self.properties))
     }
 
-    #[inline]
-    unsafe fn tr_iter_unchecked_mut(&mut self, state_id: usize) -> slice::IterMut<Tr<W>> {
+    unsafe fn tr_iter_unchecked_mut(&mut self, state_id: StateId) -> TrsIterMut<W> {
         let state = self.states.get_unchecked_mut(state_id);
-        let _trs = Arc::make_mut(&mut state.trs.0);
-        todo!("props")
-        // trs.iter_mut()
+        let trs = Arc::make_mut(&mut state.trs.0);
+        TrsIterMut::new(trs, &mut self.properties)
     }
 
     fn del_state(&mut self, state_to_remove: StateId) -> Result<()> {
@@ -341,21 +337,6 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         }
         trs_vec.truncate(n_trs);
         // Truncate doesn't modify the capacity of the vector. Maybe a shrink_to_fit ?
-    }
-
-    fn tr_iter_mut_revamp(&mut self, state_id: StateId) -> Result<TrsIterMut<W>> {
-        let state = self
-            .states
-            .get_mut(state_id)
-            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
-        let trs = Arc::make_mut(&mut state.trs.0);
-        Ok(TrsIterMut::new(trs, &mut self.properties))
-    }
-
-    unsafe fn tr_iter_unchecked_mut_revamp(&mut self, state_id: StateId) -> TrsIterMut<W> {
-        let state = self.states.get_unchecked_mut(state_id);
-        let trs = Arc::make_mut(&mut state.trs.0);
-        TrsIterMut::new(trs, &mut self.properties)
     }
 
     fn set_properties(&mut self, props: FstProperties) {

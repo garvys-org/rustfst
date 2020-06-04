@@ -66,7 +66,7 @@ mod tests {
         let new_tr_1 = Tr::new(15, 29, 33.0, s2 + 55);
 
         // Modify first transition leaving s1
-        let mut tr_it = fst.tr_iter_mut_revamp(s1)?;
+        let mut tr_it = fst.tr_iter_mut(s1)?;
         tr_it.set_tr(0, new_tr_1.clone())?;
 
         let it_s1 = fst.get_trs(s1)?;

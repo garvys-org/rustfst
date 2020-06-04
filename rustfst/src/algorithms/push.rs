@@ -101,7 +101,7 @@ where
         }
     } else if let Some(start) = fst.start() {
         unsafe {
-            let mut it_tr = fst.tr_iter_unchecked_mut_revamp(start);
+            let mut it_tr = fst.tr_iter_unchecked_mut(start);
             for idx_tr in 0..it_tr.len() {
                 let tr = it_tr.get_unchecked(idx_tr);
                 let weight = tr.weight.divide(&weight, DivideType::DivideLeft)?;
