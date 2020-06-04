@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix an issue in `SccQueue` which made the `is_empty()` call super slow. As a result, an important speed-up can be observed when running the `shortest_path` algorithm.
 - `ComposeFst` now clonable.
 - Remove call to `collect_vec` when calling `LabelReachable.reach()`.
+- `num_trs` and `num_trs_unchecked` are now mandatory methods of the `Fst` trait. This allows removing useless calls to `Arc::clone`.
 
 ### Fixed
 - Fix olabel display while drawing a FST if no symbol table is provided

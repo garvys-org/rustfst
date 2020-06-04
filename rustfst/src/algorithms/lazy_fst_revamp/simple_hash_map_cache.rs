@@ -81,4 +81,9 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
         n = std::cmp::max(n, self.final_weight.lock().unwrap().1);
         n
     }
+
+    fn num_trs(&self, id: usize) -> Option<usize> {
+        let data = self.trs.lock().unwrap();
+        data.0.get(&id).map(|v| v.len())
+    }
 }

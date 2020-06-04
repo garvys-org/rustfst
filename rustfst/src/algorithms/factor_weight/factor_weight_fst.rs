@@ -42,6 +42,14 @@ where
         self.0.final_weight_unchecked(state_id)
     }
 
+    fn num_trs(&self, s: usize) -> Result<usize> {
+        self.0.num_trs(s)
+    }
+
+    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+        self.0.num_trs_unchecked(s)
+    }
+
     fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
         self.0.get_trs(state_id)
     }
