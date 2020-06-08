@@ -21,7 +21,7 @@ where
     let mut fst_rmepsilon = test_data.raw.clone();
     rm_epsilon(&mut fst_rmepsilon)?;
     assert!(fst_rmepsilon
-        .properties()?
+        .properties()
         .contains(FstProperties::NO_EPSILONS));
     test_eq_fst(
         &test_data.rmepsilon.result_static,

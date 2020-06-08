@@ -144,7 +144,7 @@ where
             bail!("Factoring neither tr weights nor final weights");
         }
         let factor_tr_weights = opts.mode.contains(FactorWeightType::FACTOR_ARC_WEIGHTS);
-        let properties = factor_weight_properties(fst.borrow().properties_revamp());
+        let properties = factor_weight_properties(fst.borrow().properties());
         Ok(Self {
             opts,
             fst,

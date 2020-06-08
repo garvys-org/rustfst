@@ -134,7 +134,7 @@ where
     F1: ExpandedFst<W>,
     F2: MutableFst<W> + AllocableFst<W>,
 {
-    let iprops = fst_in.properties_revamp();
+    let iprops = fst_in.properties();
     let mut fst_res: F2 = if iprops.contains(FstProperties::ACCEPTOR) {
         determinize_fsa::<_, _, _, DefaultCommonDivisor>(Arc::clone(&fst_in))?
     } else {

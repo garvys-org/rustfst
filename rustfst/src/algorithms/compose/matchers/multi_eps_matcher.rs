@@ -212,8 +212,8 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
         self.matcher.final_weight(state)
     }
 
-    fn match_type(&self) -> MatchType {
-        self.matcher.match_type()
+    fn match_type(&self, test: bool) -> Result<MatchType> {
+        self.matcher.match_type(test)
     }
 
     fn flags(&self) -> MatcherFlags {

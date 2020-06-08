@@ -63,7 +63,7 @@ pub enum ProjectType {
 ///
 /// ![project_out_project-input](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/project_out_project-output.svg?sanitize=true)
 pub fn project<W: Semiring, F: MutableFst<W>>(fst: &mut F, project_type: ProjectType) {
-    let props = fst.properties_revamp();
+    let props = fst.properties();
     match project_type {
         ProjectType::ProjectInput => {
             for state in 0..fst.num_states() {
@@ -97,7 +97,7 @@ mod tests {
     use proptest::prelude::*;
 
     use crate::fst_properties::FstProperties;
-    use crate::fst_traits::ExpandedFst;
+    use crate::fst_traits::CoreFst;
     use crate::proptest_fst::proptest_fst;
 
     use super::*;
@@ -106,7 +106,7 @@ mod tests {
         #[test]
         fn test_project_input_proptest(mut fst in proptest_fst()) {
             project(&mut fst, ProjectType::ProjectInput);
-            prop_assume!(fst.properties().unwrap().intersects(FstProperties::ACCEPTOR));
+            prop_assume!(fst.properties().intersects(FstProperties::ACCEPTOR));
         }
     }
 
@@ -114,7 +114,7 @@ mod tests {
         #[test]
         fn test_project_output_proptest(mut fst in proptest_fst()) {
             project(&mut fst, ProjectType::ProjectOutput);
-            prop_assume!(fst.properties().unwrap().intersects(FstProperties::ACCEPTOR));
+            prop_assume!(fst.properties().intersects(FstProperties::ACCEPTOR));
         }
     }
 }

@@ -25,7 +25,7 @@ where
         return Ok(());
     }
     // TODO: Use properties with mask once available
-    let props = fst.properties_revamp() & FstProperties::statesort_properties();
+    let props = fst.properties_with_mask(FstProperties::statesort_properties());
 
     let start_state = fst.start().unwrap();
 

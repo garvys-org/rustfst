@@ -69,9 +69,9 @@ where
                     ),
                 );
             }
-            (Ok(_fst_expected), Err(_)) => panic!(
-                "Minimize fail for allow_nondet {:?}. Got Err. Expected Ok",
-                minimize_data.allow_nondet
+            (Ok(_fst_expected), Err(ref e)) => panic!(
+                "Minimize fail for allow_nondet {:?}. Got Err {:?}. Expected Ok",
+                minimize_data.allow_nondet, e
             ),
             (Err(_), Ok(_fst_minimized)) => panic!(
                 "Minimize fail for allow_nondet {:?}. Got Ok. Expected Err, \n{}",

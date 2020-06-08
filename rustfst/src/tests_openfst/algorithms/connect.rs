@@ -19,7 +19,7 @@ where
     connect(&mut fst_connect)?;
 
     assert!(fst_connect
-        .properties()?
+        .properties()
         .contains(FstProperties::ACCESSIBLE | FstProperties::COACCESSIBLE));
 
     test_eq_fst(&test_data.connect, &fst_connect, "Connect");

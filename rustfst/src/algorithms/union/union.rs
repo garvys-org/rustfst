@@ -59,11 +59,12 @@ where
     F1: AllocableFst<W> + MutableFst<W>,
     F2: ExpandedFst<W>,
 {
-    let props1 = fst_1.properties_revamp();
-    let props2 = fst_2.properties_revamp();
+    let initial_acyclic_1 = fst_1
+        .compute_and_update_properties(FstProperties::INITIAL_ACYCLIC)?
+        .contains(FstProperties::INITIAL_ACYCLIC);
+    let props1 = fst_1.properties();
+    let props2 = fst_2.properties();
     let numstates1 = fst_1.num_states();
-    let fst_props1 = fst_1.properties()?;
-    let initial_acyclic_1 = fst_props1.contains(FstProperties::INITIAL_ACYCLIC);
     let start2 = fst_2.start();
     if start2.is_none() {
         return Ok(());

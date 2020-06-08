@@ -86,7 +86,7 @@ impl<W: Semiring> CoreFst<W> for ConstFst<W> {
         }
     }
 
-    fn properties_revamp(&self) -> FstProperties {
+    fn properties(&self) -> FstProperties {
         self.properties
     }
 }

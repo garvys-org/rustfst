@@ -120,8 +120,8 @@ impl<W: Semiring, F: CoreFst<W>, M, T> CoreFst<W> for MatcherFst<W, F, M, T> {
         self.fst_add_on.get_trs_unchecked(state_id)
     }
 
-    fn properties_revamp(&self) -> FstProperties {
-        self.fst_add_on.properties_revamp()
+    fn properties(&self) -> FstProperties {
+        self.fst_add_on.properties()
     }
 }
 

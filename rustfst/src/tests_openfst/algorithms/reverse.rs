@@ -63,8 +63,8 @@ where
         "Reverse"
     );
     assert_eq!(
-        test_data.reverse.properties_revamp(),
-        fst_reverse.properties_revamp(),
+        test_data.reverse.properties(),
+        fst_reverse.properties(),
         "{}",
         "Reverse"
     );

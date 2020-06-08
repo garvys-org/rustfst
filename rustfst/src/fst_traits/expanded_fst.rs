@@ -2,8 +2,6 @@ use anyhow::Result;
 
 use crate::algorithms::fst_convert_from_ref;
 use crate::algorithms::tr_mappers::QuantizeMapper;
-use crate::fst_properties::compute_fst_properties;
-use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, Fst, FstIntoIterator, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::{Trs, KDELTA};
@@ -32,11 +30,6 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
     ///
     /// ```
     fn num_states(&self) -> usize;
-
-    /// Compute the properties verified by the Fst.
-    fn properties(&self) -> Result<FstProperties> {
-        compute_fst_properties(self)
-    }
 
     fn equal_quantized<F2: ExpandedFst<W>>(&self, fst2: &F2) -> bool
     where

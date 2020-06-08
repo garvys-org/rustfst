@@ -131,7 +131,7 @@ where
     }
 
     fst.set_properties_with_mask(
-        reweight_properties(fst.properties_revamp()),
+        reweight_properties(fst.properties()),
         FstProperties::all_properties(),
     );
 

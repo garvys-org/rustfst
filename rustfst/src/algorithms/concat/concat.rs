@@ -57,8 +57,8 @@ where
     F1: ExpandedFst<W> + MutableFst<W> + AllocableFst<W>,
     F2: ExpandedFst<W>,
 {
-    let props1 = fst_1.properties_revamp();
-    let props2 = fst_2.properties_revamp();
+    let props1 = fst_1.properties();
+    let props2 = fst_2.properties();
     let start1 = fst_1.start();
     if start1.is_none() {
         return Ok(());

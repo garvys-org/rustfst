@@ -82,7 +82,7 @@ impl<W: Semiring> CoreFst<W> for VectorFst<W> {
         state.trs.shallow_clone()
     }
 
-    fn properties_revamp(&self) -> FstProperties {
+    fn properties(&self) -> FstProperties {
         self.properties
     }
 }

@@ -26,7 +26,7 @@ where
     F2: MutableFst<W2> + AllocableFst<W2>,
     M: WeightConverter<W1, W2>,
 {
-    let iprops = fst_in.properties_revamp();
+    let iprops = fst_in.properties();
     let mut fst_out = F2::new();
     let final_action = mapper.final_action();
 
@@ -125,7 +125,7 @@ where
         }
     }
 
-    let oprops = fst_out.properties_revamp();
+    let oprops = fst_out.properties();
     fst_out.set_properties_with_mask(
         mapper.properties(iprops) | oprops,
         FstProperties::all_properties(),

@@ -114,7 +114,7 @@ where
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
 {
     pub fn new(fst: Arc<F>, in_dist: Option<Arc<Vec<W>>>) -> Result<Self> {
-        if !fst.properties_revamp().contains(FstProperties::ACCEPTOR) {
+        if !fst.properties().contains(FstProperties::ACCEPTOR) {
             bail!("DeterminizeFsaImpl : expected acceptor as argument");
         }
         Ok(Self {

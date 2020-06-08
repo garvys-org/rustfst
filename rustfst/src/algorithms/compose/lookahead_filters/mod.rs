@@ -1,3 +1,5 @@
+use anyhow::Result;
+
 pub use lookahead_compose_filter::{LookAheadComposeFilter, LookAheadComposeFilterBuilder};
 pub use lookahead_selector::{SMatchBoth, SMatchInput, SMatchNone, SMatchOutput, SMatchUnknown};
 pub use push_labels_compose_filter::{PushLabelsComposeFilter, PushLabelsComposeFilterBuilder};
@@ -18,19 +20,27 @@ mod push_weights_compose_filter;
 pub fn lookahead_match_type<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
     m1: &M1,
     m2: &M2,
-) -> MatchType {
-    let type1 = m1.match_type();
-    let type2 = m2.match_type();
+) -> Result<MatchType> {
+    let type1 = m1.match_type(false)?;
+    let type2 = m2.match_type(false)?;
     if type1 == MatchType::MatchOutput
         && m1.flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER)
     {
-        MatchType::MatchOutput
+        Ok(MatchType::MatchOutput)
     } else if type2 == MatchType::MatchInput
         && m2.flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER)
     {
-        MatchType::MatchInput
+        Ok(MatchType::MatchInput)
+    } else if m1.flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER)
+        && m1.match_type(true)? == MatchType::MatchOutput
+    {
+        Ok(MatchType::MatchOutput)
+    } else if m2.flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER)
+        && m2.match_type(true)? == MatchType::MatchInput
+    {
+        Ok(MatchType::MatchInput)
     } else {
-        MatchType::MatchNone
+        Ok(MatchType::MatchNone)
     }
 }
 

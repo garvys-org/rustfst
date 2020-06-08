@@ -85,19 +85,19 @@ where
                 encode_test_data.encode_type
             )
         })?;
-        if encode_test_data.encode_type.encode_labels() {
-            assert!(fst_encoded.properties()?.contains(FstProperties::ACCEPTOR));
-        }
-        if encode_test_data.encode_type.encode_weights() {
-            assert!(fst_encoded
-                .properties()?
-                .contains(FstProperties::UNWEIGHTED));
-        }
         test_eq_fst(
             &encode_test_data.result,
             &fst_encoded,
             format!("Encode encode_type = {:?}", encode_test_data.encode_type),
         );
+
+        fst_encoded.compute_and_update_properties_all()?;
+        if encode_test_data.encode_type.encode_labels() {
+            assert!(fst_encoded.properties().contains(FstProperties::ACCEPTOR));
+        }
+        if encode_test_data.encode_type.encode_weights() {
+            assert!(fst_encoded.properties().contains(FstProperties::UNWEIGHTED));
+        }
     }
     Ok(())
 }

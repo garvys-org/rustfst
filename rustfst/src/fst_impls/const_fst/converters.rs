@@ -1,12 +1,13 @@
 use crate::fst_impls::const_fst::data_structure::ConstState;
 use crate::fst_impls::{ConstFst, VectorFst};
-use crate::fst_traits::ExpandedFst;
+use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use std::sync::Arc;
 
 impl<W: Semiring> From<VectorFst<W>> for ConstFst<W> {
-    fn from(ifst: VectorFst<W>) -> Self {
-        let properties = ifst.properties().unwrap();
+    fn from(mut ifst: VectorFst<W>) -> Self {
+        // Force the computation of all the properties as once stored, they won't be modified in the ConstFst.
+        let properties = ifst.compute_and_update_properties_all().unwrap();
         let mut const_states = Vec::with_capacity(ifst.num_states());
         let mut const_trs = Vec::with_capacity(ifst.states.iter().map(|s| s.trs.len()).sum());
         let mut pos = 0;

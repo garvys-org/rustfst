@@ -65,8 +65,8 @@ impl<W: Semiring, F: CoreFst<W>, T> CoreFst<W> for FstAddOn<F, T> {
         self.fst.get_trs_unchecked(state_id)
     }
 
-    fn properties_revamp(&self) -> FstProperties {
-        self.fst.properties_revamp()
+    fn properties(&self) -> FstProperties {
+        self.fst.properties()
     }
 }
 

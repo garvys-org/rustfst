@@ -43,10 +43,14 @@ use crate::{StateId, Trs};
 pub fn minimize<W, F>(ifst: &mut F, allow_nondet: bool) -> Result<()>
 where
     F: MutableFst<W> + ExpandedFst<W> + AllocableFst<W>,
-    W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
-    <W as Semiring>::ReverseWeight: 'static,
+    W: WeaklyDivisibleSemiring + WeightQuantize,
 {
-    let props = ifst.properties()?;
+    let props = ifst.compute_and_update_properties(
+        FstProperties::ACCEPTOR
+            | FstProperties::I_DETERMINISTIC
+            | FstProperties::WEIGHTED
+            | FstProperties::UNWEIGHTED,
+    )?;
 
     let allow_acyclic_minimization = if props.contains(FstProperties::I_DETERMINISTIC) {
         true
@@ -106,7 +110,9 @@ fn acceptor_minimize<W: Semiring, F: MutableFst<W> + ExpandedFst<W>>(
     ifst: &mut F,
     allow_acyclic_minimization: bool,
 ) -> Result<()> {
-    let props = ifst.properties()?;
+    let props = ifst.compute_and_update_properties(
+        FstProperties::ACCEPTOR | FstProperties::UNWEIGHTED | FstProperties::ACYCLIC,
+    )?;
     if !props.contains(FstProperties::ACCEPTOR | FstProperties::UNWEIGHTED) {
         bail!("FST is not an unweighted acceptor");
     }

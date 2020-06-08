@@ -1,11 +1,11 @@
 use anyhow::Result;
 use itertools::Itertools;
 
-use crate::{Semiring, Trs};
 use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::{SerializableSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
+use crate::{Semiring, Trs};
 
 fn do_test_fst_into_iterator<W: Semiring, F: ExpandedFst<W>>(fst: F) -> Result<()> {
     let mut fst_data_ref = vec![];

@@ -153,19 +153,19 @@ where
         }
         if !fst
             .borrow()
-            .properties_revamp()
+            .properties()
             .contains(FstProperties::I_LABEL_SORTED)
         {
             all_ilabel_sorted = false;
         }
         if !fst
             .borrow()
-            .properties_revamp()
+            .properties()
             .contains(FstProperties::O_LABEL_SORTED)
         {
             all_olabel_sorted = false;
         }
-        inprops.push(fst.borrow().properties_revamp());
+        inprops.push(fst.borrow().properties());
     }
     let props = crate::fst_properties::mutable_properties::replace_properties(
         &inprops,

@@ -78,7 +78,7 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
         self.get_trs(state_id).unsafe_unwrap()
     }
 
-    fn properties_revamp(&self) -> FstProperties {
+    fn properties(&self) -> FstProperties {
         self.op.properties()
     }
 }
@@ -234,7 +234,7 @@ where
                 fst_out.set_final(s, f_w)?;
             }
         }
-        fst_out.set_properties(self.properties_revamp());
+        fst_out.set_properties(self.properties());
         Ok(fst_out)
     }
 }

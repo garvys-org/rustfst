@@ -66,7 +66,7 @@ where
         return Ok(());
     }
 
-    let inprops = ifst.properties_revamp();
+    let inprops = ifst.properties();
 
     let final_action = mapper.final_action();
     let mut superfinal: Option<StateId> = None;

@@ -18,11 +18,11 @@ where
     let mut fst_trsort = test_data.raw.clone();
     tr_sort(&mut fst_trsort, ILabelCompare {});
     assert!(fst_trsort
-        .properties()?
+        .properties()
         .contains(FstProperties::I_LABEL_SORTED));
     assert_eq!(
-        test_data.tr_sort_ilabel.properties_revamp(),
-        fst_trsort.properties_revamp()
+        test_data.tr_sort_ilabel.properties(),
+        fst_trsort.properties()
     );
     Ok(())
 }
@@ -35,11 +35,11 @@ where
     let mut fst_trsort = test_data.raw.clone();
     tr_sort(&mut fst_trsort, OLabelCompare {});
     assert!(fst_trsort
-        .properties()?
+        .properties()
         .contains(FstProperties::O_LABEL_SORTED));
     assert_eq!(
-        test_data.tr_sort_olabel.properties_revamp(),
-        fst_trsort.properties_revamp()
+        test_data.tr_sort_olabel.properties(),
+        fst_trsort.properties()
     );
     Ok(())
 }

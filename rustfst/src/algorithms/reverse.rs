@@ -74,8 +74,8 @@ where
     ofst.set_start(ostart)?;
 
     ofst.set_symts_from_fst(ifst);
-    let iprops = ifst.properties_revamp();
-    let oprops = ofst.properties_revamp();
+    let iprops = ifst.properties();
+    let oprops = ofst.properties();
     ofst.set_properties_with_mask(
         reverse_properties(iprops, true) | oprops,
         FstProperties::all_properties(),

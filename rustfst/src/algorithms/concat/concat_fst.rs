@@ -24,8 +24,8 @@ where
     //TODO: Use a borrow and not a move
     //TODO: Allow fsts of different types
     pub fn new(fst1: F, fst2: F) -> Result<Self> {
-        let props1 = fst1.properties_revamp();
-        let props2 = fst2.properties_revamp();
+        let props1 = fst1.properties();
+        let props2 = fst2.properties();
         let mut rfst = F::new();
         rfst.add_states(3);
         unsafe { rfst.set_start_unchecked(0) };
@@ -91,7 +91,7 @@ where
         self.0.get_trs_unchecked(state_id)
     }
 
-    fn properties_revamp(&self) -> FstProperties {
+    fn properties(&self) -> FstProperties {
         self.1
     }
 }

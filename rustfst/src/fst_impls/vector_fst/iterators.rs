@@ -20,8 +20,7 @@ impl<'a, W: Semiring> StateIterator<'a> for VectorFst<W> {
     }
 }
 
-impl<W: Semiring> FstIntoIterator<W> for VectorFst<W>
-{
+impl<W: Semiring> FstIntoIterator<W> for VectorFst<W> {
     type TrsIter = std::vec::IntoIter<Tr<W>>;
     // TODO: Change this to impl once the feature has been stabilized
     // #![feature(type_alias_impl_trait)]

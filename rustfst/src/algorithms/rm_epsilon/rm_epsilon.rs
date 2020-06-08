@@ -100,7 +100,7 @@ pub fn rm_epsilon_with_config<W: Semiring, F: MutableFst<W>, Q: Queue>(
     // order (cyclic).
     let mut states = vec![];
 
-    let fst_props = fst.properties_revamp();
+    let fst_props = fst.properties();
 
     if fst_props.contains(FstProperties::TOP_SORTED) {
         states = (0..fst.num_states()).collect();
@@ -172,7 +172,7 @@ pub fn rm_epsilon_with_config<W: Semiring, F: MutableFst<W>, Q: Queue>(
         }
     }
 
-    fst.set_properties(rmepsilon_properties(fst.properties_revamp(), false));
+    fst.set_properties(rmepsilon_properties(fst.properties(), false));
 
     if weight_threshold != W::zero() || state_threshold != None {
         todo!("Implement Prune!")

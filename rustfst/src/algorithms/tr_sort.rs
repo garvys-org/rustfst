@@ -54,7 +54,7 @@ where
     F: MutableFst<W>,
     C: TrCompare,
 {
-    let props = fst.properties_revamp();
+    let props = fst.properties();
     for state in 0..fst.num_states() {
         fst.sort_trs_unchecked(state, C::compare);
     }

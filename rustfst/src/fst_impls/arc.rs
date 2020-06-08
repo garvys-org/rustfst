@@ -71,8 +71,8 @@ impl<W: Semiring, F: CoreFst<W>> CoreFst<W> for Arc<F> {
         self.deref().get_trs_unchecked(state_id)
     }
 
-    fn properties_revamp(&self) -> FstProperties {
-        self.deref().properties_revamp()
+    fn properties(&self) -> FstProperties {
+        self.deref().properties()
     }
 }
 

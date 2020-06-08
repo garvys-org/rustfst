@@ -140,6 +140,7 @@ impl LabelReachable {
 
         let nstates = fst.num_states();
         Self::transform_fst(&mut fst, &mut data, &mut label2state);
+        fst.compute_and_update_properties(FstProperties::ACYCLIC)?;
         Self::find_intervals(&fst, nstates, &mut data, &mut label2state)?;
 
         Ok(data)
@@ -242,7 +243,7 @@ impl LabelReachable {
         }
     }
 
-    fn find_intervals<W: Semiring + 'static>(
+    fn find_intervals<W: Semiring>(
         fst: &VectorFst<W>,
         ins: StateId,
         data: &mut LabelReachableData,
@@ -273,13 +274,14 @@ impl LabelReachable {
         reach_input: bool,
     ) -> Result<()> {
         self.reach_fst_input = reach_input;
-        let props = fst.properties()?;
 
         let true_prop = if self.reach_fst_input {
             FstProperties::I_LABEL_SORTED
         } else {
             FstProperties::O_LABEL_SORTED
         };
+
+        let props = fst.properties_test(true_prop)?;
 
         if !props.contains(true_prop) {
             bail!("LabelReachable::ReachInit: Fst is not sorted")

@@ -65,14 +65,6 @@ impl<W: Semiring> VectorFstState<W> {
 }
 
 impl<W: Semiring> VectorFst<W> {
-    pub fn proto_properties(&self) -> FstProperties {
-        self.properties
-    }
-
-    pub fn proto_properties_2(&self, mask: FstProperties) -> FstProperties {
-        self.properties & mask
-    }
-
     pub fn update_properties_after_add_tr(&mut self, state: StateId) {
         let vector_state = unsafe { self.states.get_unchecked(state) };
 
@@ -83,7 +75,7 @@ impl<W: Semiring> VectorFst<W> {
         } else {
             None
         };
-        self.properties = add_tr_properties(self.properties_revamp(), state, new_tr, old_tr);
+        self.properties = add_tr_properties(self.properties(), state, new_tr, old_tr);
     }
 
     pub fn static_properties() -> u64 {

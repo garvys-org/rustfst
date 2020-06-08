@@ -171,7 +171,13 @@ impl<W: SerializableSemiring> SerializableFst<W> for ConstFst<W> {
             properties: FstProperties::empty(),
         };
 
-        let properties = fst.properties()?;
+        let mut known = FstProperties::empty();
+        let properties = crate::fst_properties::compute_fst_properties(
+            &fst,
+            FstProperties::all_properties(),
+            &mut known,
+            false,
+        )?;
         fst.properties = properties;
 
         Ok(fst)

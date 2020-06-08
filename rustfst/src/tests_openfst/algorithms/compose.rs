@@ -1,4 +1,5 @@
 use std::marker::PhantomData;
+use std::path::Path;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -25,7 +26,6 @@ use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
-use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ComposeOperationResult {
@@ -69,7 +69,6 @@ fn do_test_compose<W>(
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
-    // println!("Skipping simple compose for debugging");
     let mut config = ComposeConfig::default();
     config.connect = false;
     config.compose_filter = filter;
@@ -151,6 +150,7 @@ where
     // LabelLookAheadRelabeler::relabel(&mut fst2, graph1look.addon(), true)?;
 
     tr_sort(&mut fst2, ILabelCompare {});
+
     let fst2 = Arc::new(fst2);
 
     let matcher1 = TMatcher1::new_with_data(
@@ -158,6 +158,7 @@ where
         MatchType::MatchOutput,
         graph1look.data(MatchType::MatchOutput).cloned(),
     )?;
+
     let matcher2 = TMatcher2::new(Arc::clone(&fst2), MatchType::MatchInput)?;
 
     let compose_filter = TComposeFilter::new(
@@ -184,6 +185,7 @@ where
     );
 
     let dyn_fst = ComposeFst::new_with_options(graph1look, fst2, compose_options)?;
+
     let static_fst: VectorFst<_> = dyn_fst.compute()?;
 
     test_eq_fst(

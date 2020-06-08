@@ -68,8 +68,8 @@ where
         self.0.get_trs_unchecked(state_id)
     }
 
-    fn properties_revamp(&self) -> FstProperties {
-        self.0.properties_revamp()
+    fn properties(&self) -> FstProperties {
+        self.0.properties()
     }
 }
 

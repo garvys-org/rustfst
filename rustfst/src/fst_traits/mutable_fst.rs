@@ -2,7 +2,6 @@ use std::cmp::Ordering;
 
 use anyhow::Result;
 
-use crate::{Label, StateId};
 use crate::algorithms::closure::ClosureType;
 use crate::algorithms::TrMapper;
 use crate::fst_properties::FstProperties;
@@ -10,6 +9,7 @@ use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::trs_iter_mut::TrsIterMut;
+use crate::{Label, StateId};
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
@@ -337,4 +337,16 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
 
     fn set_properties(&mut self, props: FstProperties);
     fn set_properties_with_mask(&mut self, props: FstProperties, mask: FstProperties);
+
+    fn compute_and_update_properties(&mut self, mask: FstProperties) -> Result<FstProperties> {
+        let mut knownprops = FstProperties::empty();
+        let testprops =
+            crate::fst_properties::compute_fst_properties(self, mask, &mut knownprops, true)?;
+        self.set_properties_with_mask(testprops, knownprops);
+        Ok(testprops & mask)
+    }
+
+    fn compute_and_update_properties_all(&mut self) -> Result<FstProperties> {
+        self.compute_and_update_properties(FstProperties::all_properties())
+    }
 }

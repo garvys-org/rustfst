@@ -43,8 +43,8 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
         self.matcher.final_weight(state)
     }
 
-    fn match_type(&self) -> MatchType {
-        self.matcher.match_type()
+    fn match_type(&self, test: bool) -> Result<MatchType> {
+        self.matcher.match_type(test)
     }
 
     fn flags(&self) -> MatcherFlags {
@@ -153,7 +153,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
             }
         }
 
-        let match_type = self.match_type();
+        let match_type = self.match_type(false)?;
         for tr in lfst.get_trs(lfst_state)?.trs() {
             let label = match match_type {
                 MatchType::MatchInput => tr.olabel,

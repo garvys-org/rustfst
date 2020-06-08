@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use crate::algorithms::isomorphic;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::WeightQuantize;
 use crate::Semiring;
@@ -15,8 +16,8 @@ pub fn test_correctness_properties<W: Semiring, FREF: ExpandedFst<W>, FPRED: Exp
     // 1) Each property bit set in FREF is also set in FPRED
     // 2) Check that all the properties that are marked as verified in FPRED are effectively true.
 
-    let props_fref = fst_ref.properties_revamp();
-    let props_fpred = fst_pred.properties_revamp();
+    let props_fref = fst_ref.properties();
+    let props_fpred = fst_pred.properties();
     assert!(
         props_fpred.contains(props_fref),
         "{} \n Props_fref = {:?}\nProps_fpred = {:?}",
@@ -25,7 +26,15 @@ pub fn test_correctness_properties<W: Semiring, FREF: ExpandedFst<W>, FPRED: Exp
         props_fpred
     );
 
-    let computed_props_fpred = fst_pred.properties().unwrap();
+    let mut known = FstProperties::empty();
+    let computed_props_fpred = crate::fst_properties::compute_fst_properties(
+        fst_pred,
+        FstProperties::all_properties(),
+        &mut known,
+        false,
+    )
+    .unwrap();
+
     assert!(
         computed_props_fpred.contains(props_fpred),
         "{} \nComputed props = {:?}\nProps = {:?}",

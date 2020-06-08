@@ -208,7 +208,7 @@ where
         ofst.set_start(_s_p)?;
     }
     ofst.set_properties_with_mask(
-        shortest_path_properties(ofst.properties_revamp(), true),
+        shortest_path_properties(ofst.properties(), true),
         FstProperties::all_properties(),
     );
     Ok(ofst)
@@ -440,7 +440,7 @@ where
 
     connect(&mut ofst)?;
     ofst.set_properties_with_mask(
-        shortest_path_properties(ofst.properties_revamp(), false),
+        shortest_path_properties(ofst.properties(), false),
         FstProperties::all_properties(),
     );
     Ok(ofst)

@@ -119,7 +119,7 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
         }
 
         // Compute properties. Should be moved elsewhere
-        fst.properties = fst.properties()?;
+        fst.compute_and_update_properties_all()?;
 
         Ok(fst)
     }

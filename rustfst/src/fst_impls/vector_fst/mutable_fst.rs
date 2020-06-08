@@ -230,7 +230,7 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
 
         // Find a way to avoid this loop
         let trs = &self.states.get_unchecked(source).trs;
-        let mut properties = self.properties_revamp();
+        let mut properties = self.properties();
         for i in 0..trs.len() {
             if i >= 1 {
                 properties =

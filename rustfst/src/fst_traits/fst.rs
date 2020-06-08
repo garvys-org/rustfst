@@ -116,7 +116,21 @@ pub trait CoreFst<W: Semiring> {
     fn get_trs(&self, state_id: StateId) -> Result<Self::TRS>;
     unsafe fn get_trs_unchecked(&self, state_id: StateId) -> Self::TRS;
 
-    fn properties_revamp(&self) -> FstProperties;
+    fn properties(&self) -> FstProperties;
+    fn properties_with_mask(&self, mask: FstProperties) -> FstProperties {
+        self.properties() & mask
+    }
+    fn properties_test(&self, props_known: FstProperties) -> Result<FstProperties> {
+        let props = self.properties();
+        if !props.knows(props_known) {
+            bail!(
+                "Properties are not known : {:?}. Properties of the Fst : {:?}",
+                props_known,
+                props
+            )
+        }
+        Ok(props)
+    }
 }
 
 /// Trait defining the minimum interface necessary for a wFST.

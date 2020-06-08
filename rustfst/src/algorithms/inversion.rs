@@ -30,7 +30,7 @@ use crate::semirings::Semiring;
 /// ![invert_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/invert_out.svg?sanitize=true)
 ///
 pub fn invert<W: Semiring, F: MutableFst<W>>(fst: &mut F) {
-    let props = fst.properties_revamp();
+    let props = fst.properties();
 
     for state in 0..fst.num_states() {
         unsafe {

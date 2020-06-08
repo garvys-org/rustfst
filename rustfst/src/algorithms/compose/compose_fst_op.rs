@@ -53,8 +53,8 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
         let compose_filter = compose_filter_builder.build()?;
         let match_type = Self::match_type(compose_filter.matcher1(), compose_filter.matcher2())?;
 
-        let fprops1 = fst1.properties_revamp();
-        let fprops2 = fst2.properties_revamp();
+        let fprops1 = fst1.properties();
+        let fprops2 = fst2.properties();
         let cprops = compose_properties(fprops1, fprops2);
         let properties = compose_filter.properties(cprops);
 
@@ -71,23 +71,27 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
         matcher2: &<CFB::CF as ComposeFilter<W>>::M2,
     ) -> Result<MatchType> {
         if matcher1.flags().contains(MatcherFlags::REQUIRE_MATCH)
-            && matcher1.match_type() != MatchType::MatchOutput
+            && matcher1.match_type(true)? != MatchType::MatchOutput
         {
             bail!("ComposeFst: 1st argument cannot perform required matching (sort?)")
         }
         if matcher2.flags().contains(MatcherFlags::REQUIRE_MATCH)
-            && matcher2.match_type() != MatchType::MatchInput
+            && matcher2.match_type(true)? != MatchType::MatchInput
         {
             bail!("ComposeFst: 2nd argument cannot perform required matching (sort?)")
         }
 
-        let type1 = matcher1.match_type();
-        let type2 = matcher2.match_type();
+        let type1 = matcher1.match_type(false)?;
+        let type2 = matcher2.match_type(false)?;
         let mt = if type1 == MatchType::MatchOutput && type2 == MatchType::MatchInput {
             MatchType::MatchBoth
         } else if type1 == MatchType::MatchOutput {
             MatchType::MatchOutput
         } else if type2 == MatchType::MatchInput {
+            MatchType::MatchInput
+        } else if matcher1.match_type(true)? == MatchType::MatchOutput {
+            MatchType::MatchOutput
+        } else if matcher2.match_type(true)? == MatchType::MatchInput {
             MatchType::MatchInput
         } else {
             bail!("ComposeFst: 1st argument cannot match on output labels and 2nd argument cannot match on input labels (sort?).")

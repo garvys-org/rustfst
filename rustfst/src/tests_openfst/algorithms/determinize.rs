@@ -68,7 +68,7 @@ where
             (Ok(fst_expected), Ok(ref fst_determinized)) => {
                 if determinize_data.det_type == DeterminizeType::DeterminizeFunctional {
                     assert!(fst_determinized
-                        .properties()?
+                        .properties()
                         .contains(FstProperties::I_DETERMINISTIC));
                 }
 

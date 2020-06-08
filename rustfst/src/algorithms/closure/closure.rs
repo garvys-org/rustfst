@@ -29,7 +29,7 @@ where
     W: Semiring,
     F: MutableFst<W>,
 {
-    let props = fst.properties_revamp();
+    let props = fst.properties();
     if let Some(start_state) = fst.start() {
         let final_states_id: Vec<_> = fst
             .final_states_iter()

@@ -76,7 +76,7 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
         self.get_trs(state_id).unsafe_unwrap()
     }
 
-    fn properties_revamp(&self) -> FstProperties {
+    fn properties(&self) -> FstProperties {
         self.op.properties()
     }
 }
@@ -232,7 +232,7 @@ where
                 fst_out.set_final(s, f_w)?;
             }
         }
-        fst_out.set_properties(self.properties_revamp());
+        fst_out.set_properties(self.properties());
         // TODO: Symbol tables should be set here
         Ok(fst_out)
     }

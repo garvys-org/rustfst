@@ -26,7 +26,7 @@ where
     //TODO: Use a borrow and not a move
     //TODO: Allow fsts of different types
     pub fn new(fst: F, closure_type: ClosureType) -> Result<Self> {
-        let props = fst.properties_revamp();
+        let props = fst.properties();
         let mut rfst = F::new();
         if let Some(isymt) = fst.input_symbols() {
             rfst.set_input_symbols(Arc::clone(isymt));
@@ -103,7 +103,7 @@ where
         self.0.get_trs_unchecked(state_id)
     }
 
-    fn properties_revamp(&self) -> FstProperties {
+    fn properties(&self) -> FstProperties {
         self.1
     }
 }

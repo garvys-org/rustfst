@@ -38,7 +38,7 @@ impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> PartialEq for RmEpsilonOp<W, F
 
 impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> RmEpsilonOp<W, F, B> {
     pub fn new(fst: B) -> Self {
-        let properties = rmepsilon_properties(fst.borrow().properties_revamp(), true);
+        let properties = rmepsilon_properties(fst.borrow().properties(), true);
         Self {
             properties,
             rmeps_state: RefCell::new(RmEpsilonState::new(

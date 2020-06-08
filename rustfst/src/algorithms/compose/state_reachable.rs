@@ -24,7 +24,7 @@ pub struct StateReachable {
 
 impl StateReachable {
     pub fn new<W: Semiring, F: ExpandedFst<W>>(fst: &F) -> Result<Self> {
-        let props = fst.properties()?;
+        let props = fst.properties_test(FstProperties::ACYCLIC)?;
         let acyclic = props.contains(FstProperties::ACYCLIC);
         if acyclic {
             Ok(Self::new_acyclic(fst))

@@ -87,7 +87,7 @@ where
             .unwrap_or_else(|| Matcher::new(Arc::clone(&fst2), MatchType::MatchInput).unwrap());
 
         let lookahead_type = if SMT::match_type() == MatchType::MatchBoth {
-            lookahead_match_type(&matcher1, &matcher2)
+            lookahead_match_type(&matcher1, &matcher2)?
         } else {
             SMT::match_type()
         };

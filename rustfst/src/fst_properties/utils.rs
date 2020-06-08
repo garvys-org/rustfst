@@ -8,6 +8,13 @@ pub fn known_properties(props: FstProperties) -> FstProperties {
         | ((props & FstProperties::neg_trinary_properties()) >> 1)
 }
 
+impl FstProperties {
+    pub fn knows(&self, props: FstProperties) -> bool {
+        let known = known_properties(*self);
+        known.contains(props)
+    }
+}
+
 /// Tests compatibility between two sets of properties.
 pub fn compat_properties(props1: FstProperties, props2: FstProperties) -> bool {
     let known_props1 = known_properties(props1);
