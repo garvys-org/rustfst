@@ -151,13 +151,20 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
 
         for s in 0..self.states.len() {
             let mut to_delete = vec![];
-            let trs_mut = Arc::make_mut(&mut self.states[s].trs.0);
+            let state = &mut self.states[s];
+            let trs_mut = Arc::make_mut(&mut state.trs.0);
             for (idx, tr) in trs_mut.iter_mut().enumerate() {
                 let t = new_id[tr.nextstate];
                 if t != -1 {
                     tr.nextstate = t as usize
                 } else {
                     to_delete.push(idx);
+                    if tr.ilabel == EPS_LABEL {
+                        state.niepsilons -= 1;
+                    }
+                    if tr.olabel == EPS_LABEL {
+                        state.noepsilons -= 1;
+                    }
                 }
             }
 
