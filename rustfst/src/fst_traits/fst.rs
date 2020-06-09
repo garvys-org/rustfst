@@ -4,7 +4,6 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::tr_filters::{InputEpsilonTrFilter, OutputEpsilonTrFilter, TrFilter};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::iterators::StateIterator;
 use crate::fst_traits::FstIterator;
@@ -131,13 +130,7 @@ pub trait CoreFst<W: Semiring> {
         }
         Ok(props)
     }
-}
 
-/// Trait defining the minimum interface necessary for a wFST.
-pub trait Fst<W: Semiring>:
-    CoreFst<W> + for<'b> StateIterator<'b> + Debug + for<'c> FstIterator<'c, W>
-{
-    // TODO: Move niepsilons and noepsilons to required methods.
     /// Returns the number of trs with epsilon input labels leaving a state.
     ///
     /// # Example :
@@ -160,14 +153,7 @@ pub trait Fst<W: Semiring>:
     /// assert_eq!(fst.num_input_epsilons(s0).unwrap(), 2);
     /// assert_eq!(fst.num_input_epsilons(s1).unwrap(), 0);
     /// ```
-    fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
-        let filter = InputEpsilonTrFilter {};
-        Ok(self
-            .get_trs(state)?
-            .iter()
-            .filter(|v| filter.keep(v))
-            .count())
-    }
+    fn num_input_epsilons(&self, state: StateId) -> Result<usize>;
 
     /// Returns the number of trs with epsilon output labels leaving a state.
     ///
@@ -191,15 +177,13 @@ pub trait Fst<W: Semiring>:
     /// assert_eq!(fst.num_output_epsilons(s0).unwrap(), 1);
     /// assert_eq!(fst.num_output_epsilons(s1).unwrap(), 0);
     /// ```
-    fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
-        let filter = OutputEpsilonTrFilter {};
-        Ok(self
-            .get_trs(state)?
-            .iter()
-            .filter(|v| filter.keep(v))
-            .count())
-    }
+    fn num_output_epsilons(&self, state: StateId) -> Result<usize>;
+}
 
+/// Trait defining the minimum interface necessary for a wFST.
+pub trait Fst<W: Semiring>:
+    CoreFst<W> + for<'b> StateIterator<'b> + Debug + for<'c> FstIterator<'c, W>
+{
     /// Returns true if the Fst is an acceptor. False otherwise.
     /// Acceptor means for all transition, transition.ilabel == transition.olabel
     fn is_acceptor(&self) -> bool {

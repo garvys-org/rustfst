@@ -7,7 +7,7 @@ use crate::algorithms::compose::compose_filters::{ComposeFilter, ComposeFilterBu
 use crate::algorithms::compose::filter_states::{FilterState, IntegerFilterState};
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, Fst};
+use crate::fst_traits::CoreFst;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 

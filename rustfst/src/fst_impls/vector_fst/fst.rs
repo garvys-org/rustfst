@@ -85,4 +85,20 @@ impl<W: Semiring> CoreFst<W> for VectorFst<W> {
     fn properties(&self) -> FstProperties {
         self.properties
     }
+
+    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+        Ok(self
+            .states
+            .get(state)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state))?
+            .niepsilons)
+    }
+
+    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+        Ok(self
+            .states
+            .get(state)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state))?
+            .noepsilons)
+    }
 }

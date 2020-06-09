@@ -74,6 +74,14 @@ impl<W: Semiring, F: CoreFst<W>> CoreFst<W> for Arc<F> {
     fn properties(&self) -> FstProperties {
         self.deref().properties()
     }
+
+    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+        self.deref().num_input_epsilons(state)
+    }
+
+    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+        self.deref().num_output_epsilons(state)
+    }
 }
 
 impl<'a, W: Semiring + 'a, F: FstIterator<'a, W>> FstIterator<'a, W> for Arc<F> {

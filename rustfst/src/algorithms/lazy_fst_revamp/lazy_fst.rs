@@ -79,6 +79,18 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
     fn properties(&self) -> FstProperties {
         self.op.properties()
     }
+
+    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+        self.cache
+            .num_input_epsilons(state)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state))
+    }
+
+    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+        self.cache
+            .num_output_epsilons(state)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state))
+    }
 }
 
 impl<'a, W, Op, Cache> StateIterator<'a> for LazyFst<W, Op, Cache>

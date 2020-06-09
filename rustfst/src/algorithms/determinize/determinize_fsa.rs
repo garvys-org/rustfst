@@ -54,6 +54,14 @@ where
     fn properties(&self) -> FstProperties {
         unimplemented!()
     }
+
+    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+        self.0.num_input_epsilons(state)
+    }
+
+    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+        self.0.num_output_epsilons(state)
+    }
 }
 
 impl<'a, W, F, CD> StateIterator<'a> for DeterminizeFsa<W, F, CD>

@@ -31,6 +31,8 @@ pub struct VectorFst<W: Semiring> {
 pub struct VectorFstState<W: Semiring> {
     pub(crate) final_weight: Option<W>,
     pub(crate) trs: TrsVec<W>,
+    pub(crate) niepsilons: usize,
+    pub(crate) noepsilons: usize,
 }
 
 impl<W: Semiring> PartialEq for VectorFst<W> {
@@ -45,6 +47,8 @@ impl<W: Semiring> VectorFstState<W> {
         Self {
             final_weight: None,
             trs: TrsVec::default(),
+            niepsilons: 0,
+            noepsilons: 0,
         }
     }
     pub fn num_trs(&self) -> usize {
