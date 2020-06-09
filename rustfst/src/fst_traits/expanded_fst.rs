@@ -58,13 +58,11 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
                     || tr1.olabel != tr2.olabel
                     || tr1.nextstate != tr2.nextstate
                 {
-                    println!("A tr1 : {:?} tr2 : {:?} for state {:?}", &tr1, &tr2, state);
                     return false;
                 }
                 let w1 = tr1.weight.quantize(KDELTA).unwrap();
                 let w2 = tr2.weight.quantize(KDELTA).unwrap();
                 if w1 != w2 {
-                    println!("B");
                     return false;
                 }
             }
