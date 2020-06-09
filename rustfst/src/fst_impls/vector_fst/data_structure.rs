@@ -1,14 +1,12 @@
 use std::sync::Arc;
 
-use crate::algorithms::tr_filters::TrFilter;
-use crate::algorithms::tr_filters::{InputEpsilonTrFilter, OutputEpsilonTrFilter};
 use crate::fst_properties::mutable_properties::add_tr_properties;
 use crate::fst_properties::properties::{EXPANDED, MUTABLE};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::CoreFst;
 use crate::semirings::Semiring;
 use crate::symbol_table::SymbolTable;
-use crate::{StateId, Trs, TrsVec};
+use crate::{StateId, Tr, Trs, TrsVec, EPS_LABEL};
 
 /// Simple concrete, mutable FST whose states and trs are stored in standard vectors.
 ///
@@ -57,14 +55,13 @@ impl<W: Semiring> VectorFstState<W> {
 }
 
 impl<W: Semiring> VectorFstState<W> {
-    pub fn num_input_epsilons(&self) -> usize {
-        let filter = InputEpsilonTrFilter {};
-        self.trs.iter().filter(|v| filter.keep(v)).count()
-    }
-
-    pub fn num_output_epsilons(&self) -> usize {
-        let filter = OutputEpsilonTrFilter {};
-        self.trs.iter().filter(|v| filter.keep(v)).count()
+    pub fn increment_num_epsilons(&mut self, tr: &Tr<W>) {
+        if tr.ilabel == EPS_LABEL {
+            self.niepsilons += 1;
+        }
+        if tr.olabel == EPS_LABEL {
+            self.noepsilons += 1;
+        }
     }
 }
 

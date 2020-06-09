@@ -135,7 +135,7 @@ pub trait CoreFst<W: Semiring> {
     ///
     /// # Example :
     /// ```
-    /// # use rustfst::fst_traits::{MutableFst, Fst};
+    /// # use rustfst::fst_traits::{MutableFst, Fst, CoreFst};
     /// # use rustfst::fst_impls::VectorFst;
     /// # use rustfst::semirings::{Semiring, IntegerWeight};
     /// # use rustfst::EPS_LABEL;
@@ -159,7 +159,7 @@ pub trait CoreFst<W: Semiring> {
     ///
     /// # Example :
     /// ```
-    /// # use rustfst::fst_traits::{MutableFst, Fst};
+    /// # use rustfst::fst_traits::{MutableFst, Fst, CoreFst};
     /// # use rustfst::fst_impls::VectorFst;
     /// # use rustfst::semirings::{Semiring, IntegerWeight};
     /// # use rustfst::EPS_LABEL;

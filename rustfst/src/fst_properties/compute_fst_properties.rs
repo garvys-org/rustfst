@@ -149,7 +149,9 @@ pub fn compute_fst_properties<W: Semiring, F: ExpandedFst<W>>(
                     comp_props |= FstProperties::WEIGHTED;
                     comp_props &= !FstProperties::UNWEIGHTED;
 
-                    if sccs[state] == sccs[tr.nextstate] {
+                    if comp_props.contains(FstProperties::UNWEIGHTED_CYCLES)
+                        && sccs[state] == sccs[tr.nextstate]
+                    {
                         comp_props |= FstProperties::WEIGHTED_CYCLES;
                         comp_props &= !FstProperties::UNWEIGHTED_CYCLES;
                     }

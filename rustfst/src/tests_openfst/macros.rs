@@ -44,6 +44,24 @@ pub fn test_correctness_properties<W: Semiring, FREF: ExpandedFst<W>, FPRED: Exp
     );
 }
 
+pub fn test_num_epsilons<W: Semiring, FREF: ExpandedFst<W>, FPRED: ExpandedFst<W>>(
+    fst_ref: &FREF,
+    fst_pred: &FPRED,
+    msg: String,
+) {
+    assert_eq!(fst_ref.num_states(), fst_pred.num_states());
+    for s in 0..fst_ref.num_states() {
+        assert_eq!(
+            fst_ref.num_input_epsilons(s).unwrap(),
+            fst_pred.num_input_epsilons(s).unwrap()
+        );
+        assert_eq!(
+            fst_ref.num_output_epsilons(s).unwrap(),
+            fst_pred.num_output_epsilons(s).unwrap()
+        );
+    }
+}
+
 pub fn test_eq_fst<
     W: Semiring + WeightQuantize,
     FREF: ExpandedFst<W> + Display,
@@ -58,6 +76,7 @@ pub fn test_eq_fst<
     let message = format!("Test {} with openfst failing : \nREF = \n{}\nPRED = \n{}\n \nREF = \n{:?}\nPRED = \n{:?}\n",
                           s, fst_ref, fst_pred, fst_ref, fst_pred);
     assert!(fst_ref.equal_quantized(fst_pred), message);
+    test_num_epsilons(fst_ref, fst_pred, message);
     test_correctness_properties(
         fst_ref,
         fst_pred,
@@ -79,6 +98,7 @@ pub fn test_isomorphic_fst<
     let message = format!("Test {} with openfst failing : \nREF = \n{}\nPRED = \n{}\n \nREF = \n{:?}\nPRED = \n{:?}\n",
                           s, fst_ref, fst_pred, fst_ref, fst_pred);
     assert!(isomorphic(fst_ref, fst_pred).unwrap(), message);
+    test_num_epsilons(fst_ref, fst_pred, message);
     test_correctness_properties(
         fst_ref,
         fst_pred,
