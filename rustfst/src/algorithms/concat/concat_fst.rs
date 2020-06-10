@@ -94,6 +94,14 @@ where
     fn properties(&self) -> FstProperties {
         self.1
     }
+
+    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+        self.0.num_input_epsilons(state)
+    }
+
+    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+        self.0.num_output_epsilons(state)
+    }
 }
 
 impl<'a, W, F> StateIterator<'a> for ConcatFst<W, F>

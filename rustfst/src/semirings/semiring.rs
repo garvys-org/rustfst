@@ -156,15 +156,16 @@ macro_rules! partial_eq_and_hash_f32 {
     ($semiring:tt) => {
         impl PartialEq for $semiring {
             fn eq(&self, other: &Self) -> bool {
-                self.value() == other.value()
-                // self.quantize(KDELTA).unwrap().value() == other.quantize(KDELTA).unwrap().value()
+                // self.value() == other.value()
+                let w1 = *self.value();
+                let w2 = *other.value();
+                w1 <= (w2 + KDELTA) && w2 <= (w1 + KDELTA)
             }
         }
 
         impl Hash for $semiring {
             fn hash<H: Hasher>(&self, state: &mut H) {
-                self.value.hash(state);
-                // self.quantize(KDELTA).unwrap().value.hash(state);
+                self.value.hash(state)
             }
         }
     };

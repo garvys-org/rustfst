@@ -15,4 +15,7 @@ pub trait FstCache<W: Semiring>: Debug {
 
     fn num_known_states(&self) -> usize;
     fn num_trs(&self, id: StateId) -> Option<usize>;
+
+    fn num_input_epsilons(&self, id: usize) -> Option<usize>;
+    fn num_output_epsilons(&self, id: usize) -> Option<usize>;
 }

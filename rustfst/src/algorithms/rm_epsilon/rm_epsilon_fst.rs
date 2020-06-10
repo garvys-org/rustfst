@@ -71,6 +71,14 @@ where
     fn properties(&self) -> FstProperties {
         self.0.properties()
     }
+
+    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+        self.0.num_input_epsilons(state)
+    }
+
+    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+        self.0.num_output_epsilons(state)
+    }
 }
 
 impl<'a, W, F, B> StateIterator<'a> for RmEpsilonFst<W, F, B>

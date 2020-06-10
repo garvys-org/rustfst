@@ -123,6 +123,14 @@ impl<W: Semiring, F: CoreFst<W>, M, T> CoreFst<W> for MatcherFst<W, F, M, T> {
     fn properties(&self) -> FstProperties {
         self.fst_add_on.properties()
     }
+
+    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+        self.fst_add_on.num_input_epsilons(state)
+    }
+
+    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+        self.fst_add_on.num_output_epsilons(state)
+    }
 }
 
 impl<'a, W, F: StateIterator<'a>, M, T> StateIterator<'a> for MatcherFst<W, F, M, T> {

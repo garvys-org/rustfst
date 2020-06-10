@@ -18,7 +18,7 @@ use crate::parsers::bin_fst::utils_parsing::{parse_final_weight, parse_fst_tr, p
 use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64};
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::SerializableSemiring;
-use crate::{Tr, Trs, TrsVec};
+use crate::{Tr, Trs, TrsVec, EPS_LABEL};
 
 impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
     fn fst_type() -> String {
@@ -139,11 +139,15 @@ fn parse_vector_fst_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], V
     let (i, final_weight) = W::parse_binary(i)?;
     let (i, num_trs) = le_i64(i)?;
     let (i, trs) = count(parse_fst_tr, num_trs as usize)(i)?;
+    let niepsilons = trs.iter().filter(|t| t.ilabel == EPS_LABEL).count();
+    let noepsilons = trs.iter().filter(|t| t.olabel == EPS_LABEL).count();
     Ok((
         i,
         VectorFstState {
             final_weight: parse_final_weight(final_weight),
             trs: TrsVec(Arc::new(trs)),
+            niepsilons,
+            noepsilons,
         },
     ))
 }

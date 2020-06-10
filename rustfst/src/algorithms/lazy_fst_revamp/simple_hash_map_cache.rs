@@ -3,7 +3,7 @@ use std::sync::Mutex;
 
 use crate::algorithms::lazy_fst_revamp::FstCache;
 use crate::semirings::Semiring;
-use crate::{StateId, Trs, TrsVec};
+use crate::{StateId, Trs, TrsVec, EPS_LABEL};
 
 #[derive(Default, Debug)]
 pub struct SimpleHashMapCache<W: Semiring> {
@@ -11,8 +11,15 @@ pub struct SimpleHashMapCache<W: Semiring> {
     // Second option: value of the start state (possibly none)
     // The second element of each tuple is the number of known states.
     start: Mutex<(Option<Option<StateId>>, usize)>,
-    trs: Mutex<(HashMap<StateId, TrsVec<W>>, usize)>,
+    trs: Mutex<(HashMap<StateId, CacheTrs<W>>, usize)>,
     final_weight: Mutex<(HashMap<StateId, Option<W>>, usize)>,
+}
+
+#[derive(Debug, Clone)]
+pub struct CacheTrs<W: Semiring> {
+    trs: TrsVec<W>,
+    niepsilons: usize,
+    noepsilons: usize,
 }
 
 impl<W: Semiring> Clone for SimpleHashMapCache<W> {
@@ -54,15 +61,30 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
             .unwrap()
             .0
             .get(&id)
-            .map(|v| v.shallow_clone())
+            .map(|v| v.trs.shallow_clone())
     }
 
     fn insert_trs(&self, id: usize, trs: TrsVec<W>) {
         let mut data = self.trs.lock().unwrap();
+        let mut niepsilons = 0;
+        let mut noepsilons = 0;
         for tr in trs.trs() {
             data.1 = std::cmp::max(data.1, tr.nextstate + 1);
+            if tr.ilabel == EPS_LABEL {
+                niepsilons += 1;
+            }
+            if tr.olabel == EPS_LABEL {
+                noepsilons += 1;
+            }
         }
-        data.0.insert(id, trs);
+        data.0.insert(
+            id,
+            CacheTrs {
+                trs,
+                niepsilons,
+                noepsilons,
+            },
+        );
     }
     fn get_final_weight(&self, id: usize) -> Option<Option<W>> {
         self.final_weight.lock().unwrap().0.get(&id).cloned()
@@ -84,6 +106,16 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
 
     fn num_trs(&self, id: usize) -> Option<usize> {
         let data = self.trs.lock().unwrap();
-        data.0.get(&id).map(|v| v.len())
+        data.0.get(&id).map(|v| v.trs.len())
+    }
+
+    fn num_input_epsilons(&self, id: usize) -> Option<usize> {
+        let data = self.trs.lock().unwrap();
+        data.0.get(&id).map(|v| v.niepsilons)
+    }
+
+    fn num_output_epsilons(&self, id: usize) -> Option<usize> {
+        let data = self.trs.lock().unwrap();
+        data.0.get(&id).map(|v| v.noepsilons)
     }
 }

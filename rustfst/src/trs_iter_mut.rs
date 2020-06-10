@@ -8,6 +8,8 @@ use crate::{Label, Semiring, StateId, Tr, EPS_LABEL};
 pub struct TrsIterMut<'a, W: Semiring> {
     trs: &'a mut Vec<Tr<W>>,
     properties: &'a mut FstProperties,
+    niepsilons: &'a mut usize,
+    noepsilons: &'a mut usize,
 }
 
 impl<'a, W: Semiring> Index<usize> for TrsIterMut<'a, W> {
@@ -18,9 +20,43 @@ impl<'a, W: Semiring> Index<usize> for TrsIterMut<'a, W> {
     }
 }
 
+// Use macro to avoid issue with the boroow checker. Indeed, If a function is used
+// instead then the whole struct is mutably borrowed.
+macro_rules! updt_nieps {
+    ($s: expr, $old_ilabel: expr, $new_ilabel: expr) => {
+        if $old_ilabel == EPS_LABEL {
+            *$s.niepsilons -= 1;
+        }
+        if $new_ilabel == EPS_LABEL {
+            *$s.niepsilons += 1;
+        }
+    };
+}
+
+macro_rules! updt_noeps {
+    ($s: expr, $old_olabel: expr, $new_olabel: expr) => {
+        if $old_olabel == EPS_LABEL {
+            *$s.noepsilons -= 1;
+        }
+        if $new_olabel == EPS_LABEL {
+            *$s.noepsilons += 1;
+        }
+    };
+}
+
 impl<'a, W: Semiring> TrsIterMut<'a, W> {
-    pub(crate) fn new(trs: &'a mut Vec<Tr<W>>, properties: &'a mut FstProperties) -> Self {
-        Self { trs, properties }
+    pub(crate) fn new(
+        trs: &'a mut Vec<Tr<W>>,
+        properties: &'a mut FstProperties,
+        niepsilons: &'a mut usize,
+        noepsilons: &'a mut usize,
+    ) -> Self {
+        Self {
+            trs,
+            properties,
+            niepsilons,
+            noepsilons,
+        }
     }
 
     pub fn get(&self, idx: usize) -> Option<&Tr<W>> {
@@ -47,6 +83,7 @@ impl<'a, W: Semiring> TrsIterMut<'a, W> {
             ilabel,
             old_tr.olabel,
         );
+        updt_nieps!(self, old_tr.ilabel, ilabel);
         old_tr.ilabel = ilabel;
         Ok(())
     }
@@ -63,6 +100,7 @@ impl<'a, W: Semiring> TrsIterMut<'a, W> {
             old_tr.ilabel,
             olabel,
         );
+        updt_noeps!(self, old_tr.olabel, olabel);
         old_tr.olabel = olabel;
         Ok(())
     }
@@ -93,6 +131,8 @@ impl<'a, W: Semiring> TrsIterMut<'a, W> {
             .get_mut(idx)
             .ok_or_else(|| format_err!("set_tr shouldn't be called when the iteration is over"))?;
         *self.properties = compute_new_properties_all(*self.properties, old_tr, &tr);
+        updt_nieps!(self, old_tr.ilabel, tr.ilabel);
+        updt_noeps!(self, old_tr.olabel, tr.olabel);
         *old_tr = tr;
         Ok(())
     }
@@ -106,6 +146,7 @@ impl<'a, W: Semiring> TrsIterMut<'a, W> {
             ilabel,
             old_tr.olabel,
         );
+        updt_nieps!(self, old_tr.ilabel, ilabel);
         old_tr.ilabel = ilabel;
     }
 
@@ -118,6 +159,7 @@ impl<'a, W: Semiring> TrsIterMut<'a, W> {
             old_tr.ilabel,
             olabel,
         );
+        updt_noeps!(self, old_tr.olabel, olabel);
         old_tr.olabel = olabel;
     }
 
@@ -130,6 +172,8 @@ impl<'a, W: Semiring> TrsIterMut<'a, W> {
             ilabel,
             olabel,
         );
+        updt_nieps!(self, old_tr.ilabel, ilabel);
+        updt_noeps!(self, old_tr.olabel, olabel);
         old_tr.ilabel = ilabel;
         old_tr.olabel = olabel;
     }
@@ -149,6 +193,8 @@ impl<'a, W: Semiring> TrsIterMut<'a, W> {
     pub unsafe fn set_tr_unchecked(&mut self, idx: usize, tr: Tr<W>) {
         let old_tr = self.trs.get_unchecked_mut(idx);
         *self.properties = compute_new_properties_all(*self.properties, old_tr, &tr);
+        updt_nieps!(self, old_tr.ilabel, tr.ilabel);
+        updt_noeps!(self, old_tr.olabel, tr.olabel);
         *old_tr = tr;
     }
 }

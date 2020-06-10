@@ -12,14 +12,12 @@ impl<W: Semiring> From<VectorFst<W>> for ConstFst<W> {
         let mut const_trs = Vec::with_capacity(ifst.states.iter().map(|s| s.trs.len()).sum());
         let mut pos = 0;
         for mut s in ifst.states.into_iter() {
-            let niepsilons = s.num_input_epsilons();
-            let noepsilons = s.num_output_epsilons();
             const_states.push(ConstState {
                 final_weight: s.final_weight,
                 pos,
                 ntrs: s.trs.len(),
-                niepsilons,
-                noepsilons,
+                niepsilons: s.niepsilons,
+                noepsilons: s.noepsilons,
             });
 
             pos += s.trs.len();

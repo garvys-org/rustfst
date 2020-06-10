@@ -68,6 +68,14 @@ impl<W: Semiring, F: CoreFst<W>, T> CoreFst<W> for FstAddOn<F, T> {
     fn properties(&self) -> FstProperties {
         self.fst.properties()
     }
+
+    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+        self.fst.num_input_epsilons(state)
+    }
+
+    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+        self.fst.num_output_epsilons(state)
+    }
 }
 
 impl<'a, F: StateIterator<'a>, T> StateIterator<'a> for FstAddOn<F, T> {
