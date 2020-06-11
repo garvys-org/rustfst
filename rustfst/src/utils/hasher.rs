@@ -15,13 +15,13 @@ impl Hasher for IdentityHasher {
     }
 
     fn write_u8(&mut self, n: u8) {
-        self.0 = u64::from(n)
+        self.0 = n as u64
     }
     fn write_u16(&mut self, n: u16) {
-        self.0 = u64::from(n)
+        self.0 = n as u64
     }
     fn write_u32(&mut self, n: u32) {
-        self.0 = u64::from(n)
+        self.0 = n as u64
     }
     fn write_u64(&mut self, n: u64) {
         self.0 = n
