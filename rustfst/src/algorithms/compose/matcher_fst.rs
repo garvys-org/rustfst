@@ -8,6 +8,7 @@ use crate::algorithms::compose::lookahead_matchers::{LabelLookAheadRelabeler, Lo
 use crate::algorithms::compose::matchers::MatchType;
 use crate::algorithms::compose::FstAddOn;
 use crate::algorithms::compose::LabelReachableData;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{
     CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, MutableFst, StateIterator,
 };
@@ -117,6 +118,18 @@ impl<W: Semiring, F: CoreFst<W>, M, T> CoreFst<W> for MatcherFst<W, F, M, T> {
 
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
         self.fst_add_on.get_trs_unchecked(state_id)
+    }
+
+    fn properties(&self) -> FstProperties {
+        self.fst_add_on.properties()
+    }
+
+    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+        self.fst_add_on.num_input_epsilons(state)
+    }
+
+    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+        self.fst_add_on.num_output_epsilons(state)
     }
 }
 

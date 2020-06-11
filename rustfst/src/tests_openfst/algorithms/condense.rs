@@ -7,13 +7,15 @@ use serde::{Deserialize, Serialize};
 
 use crate::algorithms::condense;
 use crate::fst_traits::{MutableFst, SerializableFst};
-use crate::semirings::SerializableSemiring;
+use crate::semirings::{SerializableSemiring, WeightQuantize};
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CondenseOperationResult {
     sccs: Vec<String>,
-    result: String,
+    result_path: String,
 }
 
 pub struct CondenseTestData<W, F>
@@ -27,13 +29,14 @@ where
 }
 
 impl CondenseOperationResult {
-    pub fn parse<W, F>(&self) -> CondenseTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> CondenseTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         CondenseTestData {
-            result: F::from_text_string(self.result.as_str()).unwrap(),
+            result: F::read(dir_path.as_ref().join(&self.result_path)).unwrap(),
             sccs: self.sccs.iter().map(|e| e.parse().unwrap()).collect_vec(),
             w: PhantomData,
         }
@@ -43,7 +46,7 @@ impl CondenseOperationResult {
 pub fn test_condense<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
     F: MutableFst<W> + Display + SerializableFst<W>,
-    W: SerializableSemiring,
+    W: SerializableSemiring + WeightQuantize,
 {
     // Connect
     let fst_in = test_data.raw.clone();
@@ -51,11 +54,7 @@ where
 
     assert_eq!(sccs, test_data.condense.sccs);
 
-    assert_eq!(
-        test_data.condense.result,
-        fst_condensed,
-        "{}",
-        error_message_fst!(test_data.condense.result, fst_condensed, "Condense")
-    );
+    test_eq_fst(&test_data.condense.result, &fst_condensed, "Condense");
+
     Ok(())
 }

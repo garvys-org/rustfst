@@ -4,13 +4,14 @@ use tempfile::tempdir;
 use crate::algorithms::fst_convert_from_ref;
 use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_traits::{Fst, SerializableFst};
-use crate::semirings::SerializableSemiring;
+use crate::semirings::{SerializableSemiring, WeightQuantize};
 use crate::tests_openfst::io::generate_symbol_table;
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 
 pub fn test_const_fst_text_serialization<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring,
+    W: SerializableSemiring + WeightQuantize,
 {
     let const_fst_ref: ConstFst<_> = test_data.raw.clone().into();
 
@@ -22,26 +23,21 @@ where
     let deserialized_fst = ConstFst::<W>::read_text(&path_fst_serialized)?;
 
     // Assert const fst written and then pared is equal to the orginal one.
-    assert_eq!(
-        const_fst_ref,
-        deserialized_fst,
-        "{}",
-        error_message_fst!(const_fst_ref, deserialized_fst, "Serializer ConstFst Text")
+    test_eq_fst(
+        &const_fst_ref,
+        &deserialized_fst,
+        "Serializer ConstFst Text",
     );
 
     let deserialized_fst_vec: VectorFst<_> = fst_convert_from_ref(&deserialized_fst);
 
     // Same assert but at the VectorFst level
-    assert_eq!(
-        test_data.raw,
-        deserialized_fst_vec,
-        "{}",
-        error_message_fst!(
-            test_data.raw,
-            deserialized_fst_vec,
-            "Serializer VectorFst Text"
-        )
+    test_eq_fst(
+        &test_data.raw,
+        &deserialized_fst_vec,
+        "Serializer VectorFst Text",
     );
+
     Ok(())
 }
 
@@ -49,7 +45,7 @@ pub fn test_const_fst_text_serialization_with_symt<W>(
     test_data: &FstTestData<W, VectorFst<W>>,
 ) -> Result<()>
 where
-    W: SerializableSemiring,
+    W: SerializableSemiring + WeightQuantize,
 {
     let dir = tempdir()?;
 
@@ -68,15 +64,11 @@ where
     raw_const_without_symt.take_input_symbols();
     raw_const_without_symt.take_output_symbols();
 
-    assert_eq!(
-        raw_const_without_symt,
-        deserialized_fst,
-        "{}",
-        error_message_fst!(
-            raw_const_without_symt,
-            deserialized_fst,
-            "Serializer ConstFst Text with Generated Symbol Table"
-        )
+    test_eq_fst(
+        &raw_const_without_symt,
+        &deserialized_fst,
+        "Serializer ConstFst Text with Generated Symbol Table",
     );
+
     Ok(())
 }

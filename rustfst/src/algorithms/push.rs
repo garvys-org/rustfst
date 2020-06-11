@@ -91,17 +91,26 @@ where
         return Ok(());
     }
     if at_final {
-        for s in 0..fst.num_states() {
-            if let Some(final_weight) = unsafe { fst.final_weight_unchecked_mut(s) } {
-                final_weight.divide_assign(&weight, DivideType::DivideRight)?;
+        unsafe {
+            for s in 0..fst.num_states() {
+                if let Some(mut final_weight) = fst.final_weight_unchecked(s) {
+                    final_weight.divide_assign(&weight, DivideType::DivideRight)?;
+                    fst.set_final_unchecked(s, final_weight);
+                }
             }
         }
     } else if let Some(start) = fst.start() {
-        for tr in unsafe { fst.tr_iter_unchecked_mut(start) } {
-            tr.weight.divide_assign(&weight, DivideType::DivideLeft)?;
-        }
-        if let Some(final_weight) = unsafe { fst.final_weight_unchecked_mut(start) } {
-            final_weight.divide_assign(&weight, DivideType::DivideLeft)?;
+        unsafe {
+            let mut it_tr = fst.tr_iter_unchecked_mut(start);
+            for idx_tr in 0..it_tr.len() {
+                let tr = it_tr.get_unchecked(idx_tr);
+                let weight = tr.weight.divide(&weight, DivideType::DivideLeft)?;
+                it_tr.set_weight_unchecked(idx_tr, weight);
+            }
+            if let Some(mut final_weight) = fst.final_weight_unchecked(start) {
+                final_weight.divide_assign(&weight, DivideType::DivideLeft)?;
+                fst.set_final_unchecked(start, final_weight);
+            }
         }
     }
     Ok(())
@@ -115,9 +124,9 @@ macro_rules! m_labels_pushing {
         let gdistance = if $push_type.intersects(PushType::PUSH_WEIGHTS) {
             shortest_distance(&gfst, $reweight_type == ReweightType::ReweightToInitial)?
         } else {
-            let mut rm_weight_mapper = RmWeightMapper {};
+            let rm_weight_mapper = RmWeightMapper {};
             let mut uwfst: VectorFst<_> = fst_convert_from_ref($ifst);
-            tr_map(&mut uwfst, &mut rm_weight_mapper)?;
+            tr_map(&mut uwfst, &rm_weight_mapper)?;
             let guwfst: VectorFst<$gallic_weight> = weight_convert(&uwfst, &mut mapper)?;
             shortest_distance(&guwfst, $reweight_type == ReweightType::ReweightToInitial)?
         };
@@ -162,7 +171,7 @@ pub fn push<W, F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushTy
 where
     F1: ExpandedFst<W>,
     F2: ExpandedFst<W> + MutableFst<W> + AllocableFst<W>,
-    W: 'static + WeaklyDivisibleSemiring + WeightQuantize,
+    W: WeaklyDivisibleSemiring + WeightQuantize,
     <W as Semiring>::ReverseWeight: 'static,
 {
     if push_type.intersects(PushType::PUSH_WEIGHTS) && !push_type.intersects(PushType::PUSH_LABELS)

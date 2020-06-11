@@ -1,6 +1,7 @@
 use std::fs::{read, File};
 use std::io::BufWriter;
 use std::path::Path;
+use std::sync::Arc;
 
 use anyhow::Context;
 use anyhow::Result;
@@ -10,14 +11,14 @@ use nom::IResult;
 
 use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, SerializableFst};
 use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FST_MAGIC_NUMBER};
 use crate::parsers::bin_fst::utils_parsing::{parse_final_weight, parse_fst_tr, parse_start_state};
 use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64};
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::SerializableSemiring;
-use crate::{Tr, Trs, TrsVec};
-use std::sync::Arc;
+use crate::{Tr, Trs, TrsVec, EPS_LABEL};
 
 impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
     fn fst_type() -> String {
@@ -60,8 +61,8 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
             version: 2i32,
             // TODO: Set flags if the content is aligned
             flags,
-            // TODO: Once the properties are stored, need to read them
-            properties: 3u64,
+            // Static properties are added to the property bits to be compliant with OpenFst format.
+            properties: self.properties.bits() | VectorFst::<W>::static_properties(),
             start: self.start_state.map(|v| v as i64).unwrap_or(-1),
             num_states: self.num_states() as i64,
             num_trs: num_trs as i64,
@@ -98,6 +99,7 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
             start_state,
             isymt: None,
             osymt: None,
+            properties: FstProperties::empty(),
         };
 
         for transition in parsed_fst_text.transitions.into_iter() {
@@ -115,6 +117,9 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
             let weight = final_state.weight.unwrap_or_else(W::one);
             fst.set_final(final_state.state, weight)?;
         }
+
+        // Compute properties. Should be moved elsewhere
+        fst.compute_and_update_properties_all()?;
 
         Ok(fst)
     }
@@ -134,11 +139,15 @@ fn parse_vector_fst_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], V
     let (i, final_weight) = W::parse_binary(i)?;
     let (i, num_trs) = le_i64(i)?;
     let (i, trs) = count(parse_fst_tr, num_trs as usize)(i)?;
+    let niepsilons = trs.iter().filter(|t| t.ilabel == EPS_LABEL).count();
+    let noepsilons = trs.iter().filter(|t| t.olabel == EPS_LABEL).count();
     Ok((
         i,
         VectorFstState {
             final_weight: parse_final_weight(final_weight),
             trs: TrsVec(Arc::new(trs)),
+            niepsilons,
+            noepsilons,
         },
     ))
 }
@@ -158,6 +167,7 @@ fn parse_vector_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorF
             states,
             isymt: header.isymt,
             osymt: header.osymt,
+            properties: FstProperties::from_bits_truncate(header.properties),
         },
     ))
 }

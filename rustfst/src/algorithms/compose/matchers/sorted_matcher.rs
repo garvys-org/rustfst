@@ -1,3 +1,4 @@
+use std::marker::PhantomData;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -9,7 +10,6 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst};
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL};
-use std::marker::PhantomData;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SortedMatcher<W: Semiring, F: ExpandedFst<W>> {
@@ -42,9 +42,9 @@ impl<W: Semiring, F: ExpandedFst<W>> Matcher<W> for SortedMatcher<W, F> {
         self.fst.final_weight(state)
     }
 
-    fn match_type(&self) -> MatchType {
+    fn match_type(&self, test: bool) -> Result<MatchType> {
         if self.match_type == MatchType::MatchNone {
-            return self.match_type;
+            return Ok(self.match_type);
         }
         let true_prop = if self.match_type == MatchType::MatchInput {
             FstProperties::I_LABEL_SORTED
@@ -58,14 +58,18 @@ impl<W: Semiring, F: ExpandedFst<W>> Matcher<W> for SortedMatcher<W, F> {
             FstProperties::NOT_O_LABEL_SORTED
         };
 
-        let props = self.fst.properties().unwrap();
+        let props = if test {
+            self.fst.properties_check(true_prop | false_prop)?
+        } else {
+            self.fst.properties()
+        };
 
         if props.contains(true_prop) {
-            self.match_type
+            Ok(self.match_type)
         } else if props.contains(false_prop) {
-            MatchType::MatchNone
+            Ok(MatchType::MatchNone)
         } else {
-            MatchType::MatchUnknown
+            Ok(MatchType::MatchUnknown)
         }
     }
 

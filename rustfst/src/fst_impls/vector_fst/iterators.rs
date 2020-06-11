@@ -1,7 +1,6 @@
 use std::iter::Enumerate;
 use std::iter::Map;
 use std::ops::Range;
-use std::slice;
 use std::sync::Arc;
 
 use itertools::Itertools;
@@ -9,7 +8,7 @@ use itertools::Itertools;
 use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::FstIterData;
-use crate::fst_traits::{FstIntoIterator, FstIterator, FstIteratorMut, StateIterator};
+use crate::fst_traits::{FstIntoIterator, FstIterator, StateIterator};
 use crate::semirings::Semiring;
 use crate::Tr;
 use crate::{StateId, Trs};
@@ -21,10 +20,7 @@ impl<'a, W: Semiring> StateIterator<'a> for VectorFst<W> {
     }
 }
 
-impl<W: Semiring> FstIntoIterator<W> for VectorFst<W>
-where
-    W: 'static,
-{
+impl<W: Semiring> FstIntoIterator<W> for VectorFst<W> {
     type TrsIter = std::vec::IntoIter<Tr<W>>;
     // TODO: Change this to impl once the feature has been stabilized
     // #![feature(type_alias_impl_trait)]
@@ -64,33 +60,6 @@ impl<'a, W: Semiring + 'static> FstIterator<'a, W> for VectorFst<W> {
                 trs: fst_state.trs.shallow_clone(),
                 final_weight: fst_state.final_weight.clone(),
                 num_trs: fst_state.trs.len(),
-            }))
-    }
-}
-
-impl<'a, W: Semiring + 'static> FstIteratorMut<'a, W> for VectorFst<W> {
-    type FstIter = Map<
-        Enumerate<std::slice::IterMut<'a, VectorFstState<W>>>,
-        Box<
-            dyn FnMut(
-                (StateId, &'a mut VectorFstState<W>),
-            ) -> FstIterData<&'a mut W, slice::IterMut<'a, Tr<W>>>,
-        >,
-    >;
-
-    fn fst_iter_mut(&'a mut self) -> Self::FstIter {
-        self.states
-            .iter_mut()
-            .enumerate()
-            .map(Box::new(|(state_id, fst_state)| {
-                let n = fst_state.trs.len();
-                let trs = Arc::make_mut(&mut fst_state.trs.0);
-                FstIterData {
-                    state_id,
-                    trs: trs.iter_mut(),
-                    final_weight: fst_state.final_weight.as_mut(),
-                    num_trs: n,
-                }
             }))
     }
 }

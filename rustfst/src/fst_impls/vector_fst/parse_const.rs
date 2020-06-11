@@ -13,6 +13,7 @@ use crate::fst_impls::const_fst::{
 };
 use crate::fst_impls::vector_fst::VectorFstState;
 use crate::fst_impls::{ConstFst, VectorFst};
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::SerializableFst;
 use crate::parsers::bin_fst::fst_header::FstHeader;
 use crate::parsers::bin_fst::utils_parsing::{parse_final_weight, parse_fst_tr, parse_start_state};
@@ -39,20 +40,24 @@ impl<W: SerializableSemiring> VectorFst<W> {
 struct TempState<W> {
     final_weight: Option<W>,
     ntrs: usize,
+    niepsilons: usize,
+    noepsilons: usize,
 }
 
 fn parse_const_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], TempState<W>> {
     let (i, final_weight) = W::parse_binary(i)?;
     let (i, _pos) = le_i32(i)?;
     let (i, ntrs) = le_i32(i)?;
-    let (i, _niepsilons) = le_i32(i)?;
-    let (i, _noepsilons) = le_i32(i)?;
+    let (i, niepsilons) = le_i32(i)?;
+    let (i, noepsilons) = le_i32(i)?;
 
     Ok((
         i,
         TempState {
             final_weight: parse_final_weight(final_weight),
             ntrs: ntrs as usize,
+            niepsilons: niepsilons as usize,
+            noepsilons: noepsilons as usize,
         },
     ))
 }
@@ -89,6 +94,8 @@ fn parse_const_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFs
         vector_states.push(VectorFstState {
             final_weight: temp_state.final_weight,
             trs: TrsVec(Arc::new(trs)),
+            niepsilons: temp_state.niepsilons,
+            noepsilons: temp_state.noepsilons,
         });
     }
 
@@ -99,6 +106,7 @@ fn parse_const_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFs
             states: vector_states,
             isymt: hdr.isymt,
             osymt: hdr.osymt,
+            properties: FstProperties::from_bits_truncate(hdr.properties),
         },
     ))
 }

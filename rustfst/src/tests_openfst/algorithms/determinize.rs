@@ -1,25 +1,24 @@
 use std::fmt::Display;
+use std::path::Path;
+use std::sync::Arc;
 
 use anyhow::{format_err, Result};
+use bitflags::_core::marker::PhantomData;
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::{
-    determinize::{determinize, DeterminizeType},
-    isomorphic,
-};
+use crate::algorithms::determinize::{determinize, DeterminizeType};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
+use crate::tests_openfst::macros::test_isomorphic_fst;
 use crate::tests_openfst::FstTestData;
-use bitflags::_core::marker::PhantomData;
-use std::sync::Arc;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DeterminizeOperationResult {
     det_type: String,
-    result: String,
+    result_path: String,
 }
 
 pub struct DeterminizeTestData<W, F>
@@ -33,10 +32,11 @@ where
 }
 
 impl DeterminizeOperationResult {
-    pub fn parse<W, F>(&self) -> DeterminizeTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> DeterminizeTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         DeterminizeTestData {
             det_type: match self.det_type.as_str() {
@@ -45,9 +45,9 @@ impl DeterminizeOperationResult {
                 "disambiguate" => DeterminizeType::DeterminizeDisambiguate,
                 _ => panic!("Unknown determinize type : {:?}", self.det_type),
             },
-            result: match self.result.as_str() {
+            result: match self.result_path.as_str() {
                 "error" => Err(format_err!("lol")),
-                _ => F::from_text_string(self.result.as_str()),
+                _ => F::read(dir_path.as_ref().join(&self.result_path)),
             },
             w: PhantomData,
         }
@@ -68,21 +68,17 @@ where
             (Ok(fst_expected), Ok(ref fst_determinized)) => {
                 if determinize_data.det_type == DeterminizeType::DeterminizeFunctional {
                     assert!(fst_determinized
-                        .properties()?
+                        .properties()
                         .contains(FstProperties::I_DETERMINISTIC));
                 }
-                let a = isomorphic(fst_expected, fst_determinized)?;
-                assert!(
-                    a,
-                    "{}",
-                    error_message_fst!(
-                        fst_expected,
-                        fst_determinized,
-                        format!(
-                            "Determinize fail for det_type = {:?} ",
-                            determinize_data.det_type
-                        )
-                    )
+
+                test_isomorphic_fst(
+                    fst_expected,
+                    fst_determinized,
+                    format!(
+                        "Determinize fail for det_type = {:?} ",
+                        determinize_data.det_type
+                    ),
                 );
             }
             (Ok(_fst_expected), Err(_)) => panic!(

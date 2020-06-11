@@ -9,6 +9,8 @@ use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::algorithms::{connect, reverse, shortest_distance, Queue};
 use crate::fst_impls::VectorFst;
+use crate::fst_properties::mutable_properties::shortest_path_properties;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{
     ReverseBack, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
@@ -205,6 +207,10 @@ where
     if let Some(_s_p) = s_p {
         ofst.set_start(_s_p)?;
     }
+    ofst.set_properties_with_mask(
+        shortest_path_properties(ofst.properties(), true),
+        FstProperties::all_properties(),
+    );
     Ok(ofst)
 }
 
@@ -433,6 +439,9 @@ where
     }
 
     connect(&mut ofst)?;
-
+    ofst.set_properties_with_mask(
+        shortest_path_properties(ofst.properties(), false),
+        FstProperties::all_properties(),
+    );
     Ok(ofst)
 }

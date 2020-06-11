@@ -1,5 +1,5 @@
-pub use self::data_structure::VectorFst;
-pub(crate) use self::data_structure::VectorFstState;
+pub use data_structure::VectorFst;
+pub(crate) use data_structure::VectorFstState;
 
 mod allocable_fst;
 mod data_structure;

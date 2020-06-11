@@ -1,6 +1,7 @@
 use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
+use crate::fst_properties::mutable_properties::union_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
@@ -58,9 +59,12 @@ where
     F1: AllocableFst<W> + MutableFst<W>,
     F2: ExpandedFst<W>,
 {
+    let initial_acyclic_1 = fst_1
+        .compute_and_update_properties(FstProperties::INITIAL_ACYCLIC)?
+        .contains(FstProperties::INITIAL_ACYCLIC);
+    let props1 = fst_1.properties();
+    let props2 = fst_2.properties();
     let numstates1 = fst_1.num_states();
-    let fst_props_1 = fst_1.properties()?;
-    let initial_acyclic_1 = fst_props_1.contains(FstProperties::INITIAL_ACYCLIC);
     let start2 = fst_2.start();
     if start2.is_none() {
         return Ok(());
@@ -84,6 +88,7 @@ where
     let start1 = fst_1.start();
     if start1.is_none() {
         unsafe { fst_1.set_start_unchecked(start2) };
+        fst_1.set_properties_with_mask(props2, FstProperties::copy_properties());
         return Ok(());
     }
     let start1 = unsafe { start1.unsafe_unwrap() };
@@ -106,5 +111,9 @@ where
             )
         };
     }
+    fst_1.set_properties_with_mask(
+        union_properties(props1, props2, false),
+        FstProperties::all_properties(),
+    );
     Ok(())
 }

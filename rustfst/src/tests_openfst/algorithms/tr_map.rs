@@ -1,7 +1,7 @@
 use std::fmt::Display;
+use std::path::Path;
 
 use anyhow::Result;
-use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 
 use crate::algorithms::tr_mappers::{
@@ -18,7 +18,7 @@ use crate::tests_openfst::FstTestData;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct TrMapWithWeightOperationResult {
     weight: String,
-    result: String,
+    result_path: String,
 }
 
 pub struct TrMapWithWeightTestData<W, F>
@@ -31,14 +31,15 @@ where
 }
 
 impl TrMapWithWeightOperationResult {
-    pub fn parse<W, F>(&self) -> TrMapWithWeightTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> TrMapWithWeightTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         TrMapWithWeightTestData {
             weight: W::parse_text(self.weight.as_str()).unwrap().1,
-            result: F::from_text_string(self.result.as_str()).unwrap(),
+            result: F::read(dir_path.as_ref().join(&self.result_path)).unwrap(),
         }
     }
 }
@@ -52,15 +53,10 @@ where
     let mut fst_tr_map_identity = test_data.raw.clone();
     let mut identity_mapper = IdentityTrMapper {};
     fst_tr_map_identity.tr_map(&mut identity_mapper)?;
-    assert_eq!(
-        test_data.tr_map_identity,
-        fst_tr_map_identity,
-        "{}",
-        error_message_fst!(
-            test_data.tr_map_identity,
-            fst_tr_map_identity,
-            "TrMap identity"
-        )
+    test_eq_fst(
+        &test_data.tr_map_identity,
+        &fst_tr_map_identity,
+        "TrMap Identity",
     );
     Ok(())
 }
@@ -74,15 +70,10 @@ where
     let mut fst_tr_map_invert = test_data.raw.clone();
     let mut invertweight_mapper = InvertWeightMapper {};
     fst_tr_map_invert.tr_map(&mut invertweight_mapper)?;
-    assert_eq!(
-        test_data.tr_map_invert,
-        fst_tr_map_invert,
-        "{}",
-        error_message_fst!(
-            test_data.tr_map_invert,
-            fst_tr_map_invert,
-            "TrMap InvertWeight"
-        )
+    test_eq_fst(
+        &test_data.tr_map_invert,
+        &fst_tr_map_invert,
+        "TrMap InvertWeight",
     );
     Ok(())
 }
@@ -95,15 +86,10 @@ where
     let mut fst_tr_map = test_data.raw.clone();
     let mut mapper = InputEpsilonMapper {};
     fst_tr_map.tr_map(&mut mapper)?;
-    assert_eq!(
-        test_data.tr_map_input_epsilon,
-        fst_tr_map,
-        "{}",
-        error_message_fst!(
-            test_data.tr_map_input_epsilon,
-            fst_tr_map,
-            "TrMap InputEpsilonMapper"
-        )
+    test_eq_fst(
+        &test_data.tr_map_input_epsilon,
+        &fst_tr_map,
+        "TrMap InputEpsilonMapper",
     );
     Ok(())
 }
@@ -116,15 +102,10 @@ where
     let mut fst_tr_map = test_data.raw.clone();
     let mut mapper = OutputEpsilonMapper {};
     fst_tr_map.tr_map(&mut mapper)?;
-    assert_eq!(
-        test_data.tr_map_output_epsilon,
-        fst_tr_map,
-        "{}",
-        error_message_fst!(
-            test_data.tr_map_output_epsilon,
-            fst_tr_map,
-            "TrMap OutputEpsilonMapper"
-        )
+    test_eq_fst(
+        &test_data.tr_map_output_epsilon,
+        &fst_tr_map,
+        "TrMap OutputEpsilonMapper",
     );
     Ok(())
 }

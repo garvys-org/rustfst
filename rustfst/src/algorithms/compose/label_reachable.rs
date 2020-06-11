@@ -5,7 +5,7 @@ use std::sync::Arc;
 use anyhow::Result;
 
 use crate::algorithms::compose::{IntervalSet, StateReachable};
-use crate::algorithms::tr_compares::{ilabel_compare, olabel_compare};
+use crate::algorithms::tr_compares::{ILabelCompare, OLabelCompare};
 use crate::algorithms::{fst_convert_from_ref, tr_sort};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
@@ -62,21 +62,27 @@ impl LabelReachableData {
         fst: &mut F,
         relabel_input: bool,
     ) -> Result<()> {
-        for fst_data in fst.fst_iter_mut() {
-            for tr in fst_data.trs {
-                if relabel_input {
-                    tr.ilabel = self.relabel(tr.ilabel);
-                } else {
-                    tr.olabel = self.relabel(tr.olabel);
+        for s in 0..fst.num_states() {
+            unsafe {
+                let mut it_tr = fst.tr_iter_unchecked_mut(s);
+                for idx_tr in 0..it_tr.len() {
+                    let tr = it_tr.get_unchecked(idx_tr);
+                    if relabel_input {
+                        let new_ilabel = self.relabel(tr.ilabel);
+                        it_tr.set_ilabel_unchecked(idx_tr, new_ilabel);
+                    } else {
+                        let new_olabel = self.relabel(tr.olabel);
+                        it_tr.set_olabel_unchecked(idx_tr, new_olabel);
+                    }
                 }
             }
         }
 
         if relabel_input {
-            tr_sort(fst, ilabel_compare);
+            tr_sort(fst, ILabelCompare {});
             fst.take_input_symbols();
         } else {
-            tr_sort(fst, olabel_compare);
+            tr_sort(fst, OLabelCompare {});
             fst.take_output_symbols();
         }
 
@@ -134,6 +140,7 @@ impl LabelReachable {
 
         let nstates = fst.num_states();
         Self::transform_fst(&mut fst, &mut data, &mut label2state);
+        fst.compute_and_update_properties(FstProperties::ACYCLIC)?;
         Self::find_intervals(&fst, nstates, &mut data, &mut label2state)?;
 
         Ok(data)
@@ -169,14 +176,18 @@ impl LabelReachable {
         let mut indeg = vec![0; ins];
         // Redirects labeled trs to new final states.
         for s in 0..ins {
-            for tr in unsafe { fst.tr_iter_unchecked_mut(s) } {
+            let mut it_tr = unsafe { fst.tr_iter_unchecked_mut(s) };
+            for idx_tr in 0..it_tr.len() {
+                let tr = unsafe { it_tr.get_unchecked(idx_tr) };
+
                 let label = if data.reach_input {
                     tr.ilabel
                 } else {
                     tr.olabel
                 };
-                if label != EPS_LABEL {
-                    tr.nextstate = match label2state.entry(label) {
+
+                let nextstate = if label != EPS_LABEL {
+                    match label2state.entry(label) {
                         Entry::Vacant(e) => {
                             let v = *e.insert(ons);
                             indeg.push(0);
@@ -184,9 +195,12 @@ impl LabelReachable {
                             v
                         }
                         Entry::Occupied(e) => *e.get(),
-                    };
-                }
-                indeg[tr.nextstate] += 1;
+                    }
+                } else {
+                    tr.nextstate
+                };
+                indeg[nextstate] += 1;
+                unsafe { it_tr.set_nextstate_unchecked(idx_tr, nextstate) };
             }
 
             if let Some(final_weight) = unsafe { fst.final_weight_unchecked(s) } {
@@ -229,7 +243,7 @@ impl LabelReachable {
         }
     }
 
-    fn find_intervals<W: Semiring + 'static>(
+    fn find_intervals<W: Semiring>(
         fst: &VectorFst<W>,
         ins: StateId,
         data: &mut LabelReachableData,
@@ -260,13 +274,14 @@ impl LabelReachable {
         reach_input: bool,
     ) -> Result<()> {
         self.reach_fst_input = reach_input;
-        let props = fst.properties()?;
 
         let true_prop = if self.reach_fst_input {
             FstProperties::I_LABEL_SORTED
         } else {
             FstProperties::O_LABEL_SORTED
         };
+
+        let props = fst.properties_check(true_prop)?;
 
         if !props.contains(true_prop) {
             bail!("LabelReachable::ReachInit: Fst is not sorted")

@@ -15,8 +15,8 @@ use crate::{Label, StateId, EPS_LABEL, NO_LABEL};
 
 bitflags! {
     pub struct MultiEpsMatcherFlags: u32 {
-        const MULTI_EPS_LOOP =  1u32 << 0;
-        const MULTI_EPS_LIST =  1u32 << 1;
+        const MULTI_EPS_LOOP =  1u32;
+        const MULTI_EPS_LIST =  2u32;
     }
 }
 
@@ -212,8 +212,8 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
         self.matcher.final_weight(state)
     }
 
-    fn match_type(&self) -> MatchType {
-        self.matcher.match_type()
+    fn match_type(&self, test: bool) -> Result<MatchType> {
+        self.matcher.match_type(test)
     }
 
     fn flags(&self) -> MatcherFlags {

@@ -11,11 +11,12 @@ use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
 use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MinimizeOperationResult {
     allow_nondet: bool,
-    result: String,
+    result_path: String,
 }
 
 pub struct MinimizeTestData<W, F>
@@ -29,16 +30,17 @@ where
 }
 
 impl MinimizeOperationResult {
-    pub fn parse<W, F>(&self) -> MinimizeTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> MinimizeTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         MinimizeTestData {
             allow_nondet: self.allow_nondet,
-            result: match self.result.as_str() {
+            result: match self.result_path.as_str() {
                 "error" => Err(format_err!("lol")),
-                _ => F::from_text_string(self.result.as_str()),
+                _ => F::read(dir_path.as_ref().join(&self.result_path)),
             },
             w: PhantomData,
         }
@@ -67,9 +69,9 @@ where
                     ),
                 );
             }
-            (Ok(_fst_expected), Err(_)) => panic!(
-                "Minimize fail for allow_nondet {:?}. Got Err. Expected Ok",
-                minimize_data.allow_nondet
+            (Ok(_fst_expected), Err(ref e)) => panic!(
+                "Minimize fail for allow_nondet {:?}. Got Err {:?}. Expected Ok",
+                minimize_data.allow_nondet, e
             ),
             (Err(_), Ok(_fst_minimized)) => panic!(
                 "Minimize fail for allow_nondet {:?}. Got Ok. Expected Err, \n{}",

@@ -1,17 +1,18 @@
 use std::cmp::Ordering;
-use std::slice;
 
 use anyhow::Result;
 
 use crate::algorithms::closure::ClosureType;
 use crate::algorithms::TrMapper;
-use crate::fst_traits::{ExpandedFst, FstIteratorMut};
+use crate::fst_properties::FstProperties;
+use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::tr::Tr;
+use crate::trs_iter_mut::TrsIterMut;
 use crate::{Label, StateId};
 
 /// Trait defining the methods to modify a wFST.
-pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W> {
+pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
     /// Creates an empty wFST.
     fn new() -> Self;
 
@@ -88,8 +89,8 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W
     fn add_state(&mut self) -> StateId;
     fn add_states(&mut self, n: usize);
 
-    fn tr_iter_mut(&mut self, state_id: StateId) -> Result<slice::IterMut<Tr<W>>>;
-    unsafe fn tr_iter_unchecked_mut(&mut self, state_id: StateId) -> slice::IterMut<Tr<W>>;
+    fn tr_iter_mut(&mut self, state_id: StateId) -> Result<TrsIterMut<W>>;
+    unsafe fn tr_iter_unchecked_mut(&mut self, state_id: StateId) -> TrsIterMut<W>;
 
     /// Removes a state from an FST. It also removes all the trs starting from another state and
     /// reaching this state. An error is raised if the state `state_id` doesn't exist.
@@ -261,11 +262,6 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W
     fn pop_trs(&mut self, source: StateId) -> Result<Vec<Tr<W>>>;
     unsafe fn pop_trs_unchecked(&mut self, source: StateId) -> Vec<Tr<W>>;
 
-    /// Retrieves a mutable reference to the final weight of a state (if the state is a final one).
-    fn final_weight_mut(&mut self, state_id: StateId) -> Result<Option<&mut W>>;
-
-    unsafe fn final_weight_unchecked_mut(&mut self, state_id: StateId) -> Option<&mut W>;
-
     /// Takes the final weight out of the fst, leaving a None in its place.
     ///
     /// # Errors
@@ -337,5 +333,26 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> + for<'a> FstIteratorMut<'a, W
     /// Maps a transition using a `TrMapper` object.
     fn tr_map<M: TrMapper<W>>(&mut self, mapper: &mut M) -> Result<()> {
         crate::algorithms::tr_map(self, mapper)
+    }
+
+    /// Set the internal properties of the Fst. All the set properties must be verified by the Fst!
+    fn set_properties(&mut self, props: FstProperties);
+
+    /// Set only a subset of the internal properties of the Fst.
+    fn set_properties_with_mask(&mut self, props: FstProperties, mask: FstProperties);
+
+    /// Compute the properties verified by the Fst (with a mask) and update
+    /// the internal property bits.
+    fn compute_and_update_properties(&mut self, mask: FstProperties) -> Result<FstProperties> {
+        let mut knownprops = FstProperties::empty();
+        let testprops =
+            crate::fst_properties::compute_fst_properties(self, mask, &mut knownprops, true)?;
+        self.set_properties_with_mask(testprops, knownprops);
+        Ok(testprops & mask)
+    }
+
+    /// Compute all the properties verified by the Fst and update the internal property bits.
+    fn compute_and_update_properties_all(&mut self) -> Result<FstProperties> {
+        self.compute_and_update_properties(FstProperties::all_properties())
     }
 }

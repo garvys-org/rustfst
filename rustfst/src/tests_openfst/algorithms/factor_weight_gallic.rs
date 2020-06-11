@@ -17,14 +17,16 @@ use crate::semirings::{
     GallicWeight, GallicWeightLeft, GallicWeightMin, GallicWeightRestrict, GallicWeightRight,
     SerializableSemiring, WeightQuantize,
 };
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FwGallicOperationResult {
     factor_final_weights: bool,
     factor_tr_weights: bool,
     gallic_type: String,
-    result: String,
+    result_path: String,
 }
 
 pub struct FwGallicTestData<W, F>
@@ -40,16 +42,17 @@ where
 }
 
 impl FwGallicOperationResult {
-    pub fn parse<W, F>(&self) -> FwGallicTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> FwGallicTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         FwGallicTestData {
             factor_final_weights: self.factor_final_weights,
             factor_tr_weights: self.factor_tr_weights,
             gallic_type: self.gallic_type.clone(),
-            result: F::from_text_string(self.result.as_str()).unwrap(),
+            result: F::read(dir_path.as_ref().join(&self.result_path)).unwrap(),
             w: PhantomData,
         }
     }
@@ -114,14 +117,10 @@ where
             _ => bail!("Unexpected gallic_type={:?}", data.gallic_type),
         };
 
-        assert_eq_fst!(
-        data.result,
-        fst_res,
-        format!(
+        test_eq_fst(&data.result, &fst_res,         format!(
             "Factor weight gallic failing with factor_final_weights={:?}, factor_tr_weights={:?} and gallic_type={:?}",
             data.factor_final_weights, data.factor_tr_weights, data.gallic_type
-        )
-    );
+        ));
     }
 
     Ok(())

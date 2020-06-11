@@ -1,6 +1,6 @@
 mod compute_fst_properties;
 mod mutate_properties;
-mod properties;
+pub(crate) mod properties;
 mod utils;
 
 /// Functions for getting property bit vectors when executing mutation operations.

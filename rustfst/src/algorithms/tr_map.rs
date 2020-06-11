@@ -1,5 +1,6 @@
 use anyhow::Result;
 
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::Tr;
@@ -50,6 +51,8 @@ pub trait TrMapper<S: Semiring> {
 
     /// Specifies final action the mapper requires (see above).
     fn final_action(&self) -> MapFinalAction;
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties;
 }
 
 /// Maps every transition in the FST using an `TrMapper` object.
@@ -63,6 +66,8 @@ where
         return Ok(());
     }
 
+    let inprops = ifst.properties();
+
     let final_action = mapper.final_action();
     let mut superfinal: Option<StateId> = None;
 
@@ -72,18 +77,21 @@ where
         ifst.set_final(superfinal_id, W::one()).unwrap();
     }
 
-    // TODO: Remove this collect
-    let states: Vec<_> = ifst.states_iter().collect();
-    for state in states {
-        for tr in unsafe { ifst.tr_iter_unchecked_mut(state) } {
-            mapper.tr_map(tr)?;
+    for state in 0..ifst.num_states() {
+        unsafe {
+            let mut it_tr = ifst.tr_iter_unchecked_mut(state);
+            for idx_tr in 0..it_tr.len() {
+                let mut tr = it_tr.get_unchecked(idx_tr).clone();
+                mapper.tr_map(&mut tr)?;
+                it_tr.set_tr_unchecked(idx_tr, tr);
+            }
         }
 
-        if let Some(w) = unsafe { ifst.final_weight_unchecked_mut(state) } {
+        if let Some(w) = unsafe { ifst.final_weight_unchecked(state) } {
             let mut final_tr = FinalTr {
                 ilabel: EPS_LABEL,
                 olabel: EPS_LABEL,
-                weight: w.clone(),
+                weight: w,
             };
             mapper.final_tr_map(&mut final_tr)?;
             match final_action {
@@ -152,6 +160,8 @@ where
             };
         }
     }
+
+    ifst.set_properties_with_mask(mapper.properties(inprops), FstProperties::all_properties());
 
     Ok(())
 }

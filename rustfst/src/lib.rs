@@ -180,3 +180,4 @@ pub(crate) static NO_STATE_ID: StateId = std::usize::MAX;
 pub(crate) static UNASSIGNED: usize = std::usize::MAX;
 
 pub mod trs;
+pub mod trs_iter_mut;

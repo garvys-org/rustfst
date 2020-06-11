@@ -7,9 +7,11 @@ use crate::Semiring;
 
 pub mod const_fst_bin_deserializer;
 pub mod const_fst_bin_serializer;
+pub mod const_fst_text_deserialization;
 pub mod const_fst_text_serialization;
 pub mod vector_fst_bin_deserializer;
 pub mod vector_fst_bin_serializer;
+pub mod vector_fst_text_deserialization;
 pub mod vector_fst_text_serialization;
 
 fn generate_symbol_table<W: Semiring, F: Fst<W>>(

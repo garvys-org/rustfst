@@ -32,8 +32,18 @@
 #include "symt_001/symt_001.h"
 #include "symt_002/symt_002.h"
 
+int ID_FST_NUM = 0;
+
 using namespace std;
 using json = nlohmann::json;
+
+template<class F>
+string dump_fst(const F& a, const string& dir_path) {
+    auto name = "res_" + std::to_string(ID_FST_NUM) + ".fst";
+    a.Write(dir_path + name);
+    ID_FST_NUM++;
+    return name;
+}
 
 template<class F>
 string fst_to_string(const F& a) {
@@ -53,56 +63,55 @@ string weight_to_string(const W& a) {
 }
 
 template<class F>
-void compute_fst_invert(const F& raw_fst, json& j) {
+void compute_fst_invert(const F& raw_fst, json& j, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
     fst::Invert(&fst_out);
-    j["invert"]["result"] = fst_to_string(fst_out);
+    j["invert"]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F>
-void compute_fst_project_input(const F& raw_fst, json& j) {
+void compute_fst_project_input(const F& raw_fst, json& j, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
     fst::Project(&fst_out, fst::ProjectType::PROJECT_INPUT);
-    j["project_input"]["result"] = fst_to_string(fst_out);
+    j["project_input"]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F>
-void compute_fst_project_output(const F& raw_fst, json& j) {
+void compute_fst_project_output(const F& raw_fst, json& j, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
     fst::Project(&fst_out, fst::ProjectType::PROJECT_OUTPUT);
-    j["project_output"]["result"] = fst_to_string(fst_out);
+    auto name = "fst_project_output.fst";
+    j["project_output"]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F>
-void compute_fst_reverse(const F& raw_fst, json& j) {
+void compute_fst_reverse(const F& raw_fst, json& j, const string& dir_path) {
     F fst_out;
     fst::Reverse(raw_fst, &fst_out);
-    j["reverse"]["result"] = fst_to_string(fst_out);
+    j["reverse"]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F>
-void compute_fst_remove_epsilon(const F& raw_fst, json& j) {
+void compute_fst_remove_epsilon(const F& raw_fst, json& j, const string& dir_path) {
     using Arc = typename F::Arc;
     auto fst_out = *raw_fst.Copy();
 
     auto dyn_rmeps = fst::VectorFst<Arc>(fst::RmEpsilonFst<Arc>(raw_fst));
 
     fst::RmEpsilon(&fst_out);
-    j["rmepsilon"]["result_static"] = fst_to_string(fst_out);
-    j["rmepsilon"]["result_lazy"] = fst_to_string(dyn_rmeps);
-
-
+    j["rmepsilon"]["result_static_path"] = dump_fst(fst_out, dir_path);
+    j["rmepsilon"]["result_lazy_path"] = dump_fst(dyn_rmeps, dir_path);
 }
 
 template<class F>
-void compute_fst_connect(const F& raw_fst, json& j) {
+void compute_fst_connect(const F& raw_fst, json& j, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
     fst::Connect(&fst_out);
-    j["connect"]["result"] = fst_to_string(fst_out);
+    j["connect"]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F>
-void compute_fst_condense(const F& raw_fst, json& j) {
+void compute_fst_condense(const F& raw_fst, json& j, const string& dir_path) {
     auto fst_in = *raw_fst.Copy();
     std::vector<typename F::Arc::StateId> scc;
     F fst_out;
@@ -112,7 +121,7 @@ void compute_fst_condense(const F& raw_fst, json& j) {
         sccs.push_back(std::to_string(e));
     }
     j["condense"]["sccs"] = sccs;
-    j["condense"]["result"] = fst_to_string(fst_out);
+    j["condense"]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F>
@@ -178,59 +187,62 @@ void compute_fst_shortest_distance(const F& raw_fst, json& j) {
 }
 
 template<class F>
-void compute_fst_compute_weight_pushing_initial(const F& raw_fst, json& j) {
+void compute_fst_compute_weight_pushing_initial(const F& raw_fst, json& j, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
     fst::Push(&fst_out, fst::ReweightType::REWEIGHT_TO_INITIAL);
-    j["weight_pushing_initial"]["result"] = fst_to_string(fst_out);
+    j["weight_pushing_initial"]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F>
-void compute_fst_compute_weight_pushing_final(const F& raw_fst, json& j) {
+void compute_fst_compute_weight_pushing_final(const F& raw_fst, json& j, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
     fst::Push(&fst_out, fst::ReweightType::REWEIGHT_TO_FINAL);
-    j["weight_pushing_final"]["result"] = fst_to_string(fst_out);
+    j["weight_pushing_final"]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F, class C>
-void compute_fst_compute_tr_map(const F& raw_fst, json& j, const string& name, C mapper) {
+void compute_fst_compute_tr_map(const F& raw_fst, json& j, const string& name, C mapper, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
     fst::ArcMap(&fst_out, mapper);
-    j[name]["result"] = fst_to_string(fst_out);
+    j[name]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F>
-void compute_fst_compute_tr_map_plus(const F& raw_fst, json& j, const typename F::Weight& weight) {
+void compute_fst_compute_tr_map_plus(const F& raw_fst, json& j, const typename F::Weight& weight, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
     auto mapper = fst::PlusMapper<typename F::Arc>(weight);
     fst::ArcMap(&fst_out, mapper);
     auto name = "tr_map_plus";
     j[name]["weight"] = weight_to_string(weight);
-    j[name]["result"] = fst_to_string(fst_out);
+    j[name]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F>
-void compute_fst_compute_tr_map_times(const F& raw_fst, json& j, const typename F::Weight& weight) {
+void compute_fst_compute_tr_map_times(const F& raw_fst, json& j, const typename F::Weight& weight, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
     auto mapper = fst::TimesMapper<typename F::Arc>(weight);
     fst::ArcMap(&fst_out, mapper);
     auto name = "tr_map_times";
     j[name]["weight"] = weight_to_string(weight);
-    j[name]["result"] = fst_to_string(fst_out);
+    j[name]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F, class C>
-void compute_fst_compute_tr_sort(const F& raw_fst, json& j, const string& name, C compare) {
+void compute_fst_compute_tr_sort(const F& raw_fst, json& j, const string& name, C compare, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
     fst::ArcSort(&fst_out, compare);
-    j[name]["result"] = fst_to_string(fst_out);
+    j[name]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F>
-void compute_fst_encode(const F& raw_fst, json& j) {
+void compute_fst_encode(const F& raw_fst, json& j, const string& dir_path) {
     std::vector<bool> v = {true, false};
     j["encode"] = {};
     for(bool encode_labels: v) {
         for(bool encode_weights: v) {
+            if (!encode_weights && !encode_labels) {
+                continue;
+            }
             uint32 flags = 0;
             if (encode_labels) {
                 flags |= fst::kEncodeLabels;
@@ -245,18 +257,21 @@ void compute_fst_encode(const F& raw_fst, json& j) {
             json j2;
             j2["encode_labels"] = encode_labels;
             j2["encode_weights"] = encode_weights;
-            j2["result"] = fst_to_string(fst_out);
+            j2["result_path"] = dump_fst(fst_out, dir_path);
             j["encode"].push_back(j2);
         }
     }
 }
 
 template<class F>
-void compute_fst_encode_decode(const F& raw_fst, json& j) {
+void compute_fst_encode_decode(const F& raw_fst, json& j, const string& dir_path) {
     std::vector<bool> v = {true, false};
     j["encode_decode"] = {};
     for(bool encode_labels: v) {
         for(bool encode_weights: v) {
+            if (!encode_weights && !encode_labels) {
+                continue;
+            }
             uint32 flags = 0;
             if (encode_labels) {
                 flags |= fst::kEncodeLabels;
@@ -272,17 +287,17 @@ void compute_fst_encode_decode(const F& raw_fst, json& j) {
             json j2;
             j2["encode_labels"] = encode_labels;
             j2["encode_weights"] = encode_weights;
-            j2["result"] = fst_to_string(fst_out);
+            j2["result_path"] = dump_fst(fst_out, dir_path);
             j["encode_decode"].push_back(j2);
         }
     }
 }
 
 template<class F, class C>
-void compute_fst_state_map(const F& raw_fst, json& j, const string& name, C mapper) {
+void compute_fst_state_map(const F& raw_fst, json& j, const string& name, C mapper, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
     fst::StateMap(&fst_out, mapper);
-    j[name]["result"] = fst_to_string(fst_out);
+    j[name]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 bool prop_to_bool(uint64 all_props, uint64 prop) {
@@ -290,7 +305,7 @@ bool prop_to_bool(uint64 all_props, uint64 prop) {
 }
 
 template<class F>
-void compute_fst_determinization(const F& raw_fst, json& j, fst::DeterminizeType det_type, const string& name) {
+void compute_fst_determinization(const F& raw_fst, json& j, fst::DeterminizeType det_type, const string& name, const string& dir_path) {
     fst::DeterminizeOptions<typename F::Arc> opts;
     opts.type = det_type;
     F fst_out;
@@ -298,12 +313,12 @@ void compute_fst_determinization(const F& raw_fst, json& j, fst::DeterminizeType
     bool error = prop_to_bool(fst_out.Properties(fst::kError, true), fst::kError);
     json j2;
     j2["det_type"] = name;
-    j2["result"] = error? "error": fst_to_string(fst_out);
+    j2["result_path"] = error? "error": dump_fst(fst_out, dir_path);
     j["determinize"].push_back(j2);
 }
 
 template<class F>
-void compute_fst_determinization(const F& raw_fst, json& j) {
+void compute_fst_determinization(const F& raw_fst, json& j, const string& dir_path) {
     j["determinize"] = {};
 
     // To check if a FST is determinizable, let's try to disambiguate it.
@@ -314,18 +329,17 @@ void compute_fst_determinization(const F& raw_fst, json& j) {
         return;
     }
 
-    compute_fst_determinization(raw_fst, j, fst::DeterminizeType::DETERMINIZE_FUNCTIONAL, "functional");
-    compute_fst_determinization(raw_fst, j, fst::DeterminizeType::DETERMINIZE_NONFUNCTIONAL, "nonfunctional");
-    compute_fst_determinization(raw_fst, j, fst::DeterminizeType::DETERMINIZE_DISAMBIGUATE, "disambiguate");
+    compute_fst_determinization(raw_fst, j, fst::DeterminizeType::DETERMINIZE_FUNCTIONAL, "functional", dir_path);
+    compute_fst_determinization(raw_fst, j, fst::DeterminizeType::DETERMINIZE_NONFUNCTIONAL, "nonfunctional", dir_path);
+    compute_fst_determinization(raw_fst, j, fst::DeterminizeType::DETERMINIZE_DISAMBIGUATE, "disambiguate", dir_path);
 }
 
 template<class F>
-void compute_fst_topsort(const F& raw_fst, json& j) {
+void compute_fst_topsort(const F& raw_fst, json& j, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
-    fst::ArcSort(&fst_out, fst::ILabelCompare<typename F::Arc>());
     fst::TopSort(&fst_out);
     bool error = prop_to_bool(fst_out.Properties(fst::kError, true), fst::kError);
-    j["topsort"]["result"] = error ? "error" : fst_to_string(fst_out);
+    j["topsort"]["result_path"] = error ? "error" : dump_fst(fst_out, dir_path);
 }
 
 template<class F>
@@ -369,7 +383,7 @@ void compute_fst_properties(const F& raw_fst, json& j) {
 }
 
 template<class F>
-void compute_fst_minimization(const F& raw_fst, json& j) {
+void compute_fst_minimization(const F& raw_fst, json& j, const string& dir_path) {
     j["minimize"] = {};
     std::vector<bool> v = {true, false};
     for(bool allow_nondet: v) {
@@ -379,14 +393,14 @@ void compute_fst_minimization(const F& raw_fst, json& j) {
 
         json j2;
         j2["allow_nondet"] = allow_nondet;
-        j2["result"] = error ? "error": fst_to_string(fst_out);
+        j2["result_path"] = error ? "error": dump_fst(fst_out, dir_path);
 
         j["minimize"].push_back(j2);
     }
 }
 
 template<class F>
-void compute_fst_shortest_path(const F& raw_fst, json& j) {
+void compute_fst_shortest_path(const F& raw_fst, json& j, const string& dir_path) {
     j["shortest_path"] = {};
     std::vector<bool> v = {true, false};
     for(int n = 1; n <= 5; n++) {
@@ -398,7 +412,7 @@ void compute_fst_shortest_path(const F& raw_fst, json& j) {
 
             j2["nshortest"] = n;
             j2["unique"] = unique;
-            j2["result"] = error ? "error": fst_to_string(fst_out);
+            j2["result_path"] = error ? "error": dump_fst(fst_out, dir_path);
 
             j["shortest_path"].push_back(j2);
         }
@@ -406,7 +420,7 @@ void compute_fst_shortest_path(const F& raw_fst, json& j) {
 }
 
 template<class F, fst::GallicType G>
-void _compute_fst_gallic_encode_decode(const F& raw_fst, json& j, const string& gtype_s) {
+void _compute_fst_gallic_encode_decode(const F& raw_fst, json& j, const string& gtype_s, const string& dir_path) {
     fst::ToGallicMapper<typename F::Arc, G> to_gallic;
     fst::FromGallicMapper<typename F::Arc, G> from_gallic(0);
 
@@ -417,23 +431,23 @@ void _compute_fst_gallic_encode_decode(const F& raw_fst, json& j, const string& 
 
     json j2;
     j2["gallic_type"] = gtype_s;
-    j2["result"] = fst_to_string(fst_out);
+    j2["result_path"] = dump_fst(fst_out, dir_path);
     j["gallic_encode_decode"].push_back(j2);
 }
 
 template<class F>
-void compute_fst_gallic_encode_decode(const F& raw_fst, json& j) {
+void compute_fst_gallic_encode_decode(const F& raw_fst, json& j, const string& dir_path) {
     // Encode and decode with a gallic mapper
     j["gallic_encode_decoder"] = {};
-    _compute_fst_gallic_encode_decode<F, fst::GALLIC_LEFT>(raw_fst, j, "gallic_left");
-    _compute_fst_gallic_encode_decode<F, fst::GALLIC_RIGHT>(raw_fst, j, "gallic_right");
-    _compute_fst_gallic_encode_decode<F, fst::GALLIC_RESTRICT>(raw_fst, j, "gallic_restrict");
-    _compute_fst_gallic_encode_decode<F, fst::GALLIC_MIN>(raw_fst, j, "gallic_min");
-    _compute_fst_gallic_encode_decode<F, fst::GALLIC>(raw_fst, j, "gallic");
+    _compute_fst_gallic_encode_decode<F, fst::GALLIC_LEFT>(raw_fst, j, "gallic_left", dir_path);
+    _compute_fst_gallic_encode_decode<F, fst::GALLIC_RIGHT>(raw_fst, j, "gallic_right", dir_path);
+    _compute_fst_gallic_encode_decode<F, fst::GALLIC_RESTRICT>(raw_fst, j, "gallic_restrict", dir_path);
+    _compute_fst_gallic_encode_decode<F, fst::GALLIC_MIN>(raw_fst, j, "gallic_min", dir_path);
+    _compute_fst_gallic_encode_decode<F, fst::GALLIC>(raw_fst, j, "gallic", dir_path);
 }
 
 template<class F>
-void compute_fst_factor_weight_identity(const F& raw_fst, json& j) {
+void compute_fst_factor_weight_identity(const F& raw_fst, json& j, const string& dir_path) {
     std::vector<bool> v = {false, true};
     j["factor_weight_identity"] = {};
 
@@ -460,14 +474,14 @@ void compute_fst_factor_weight_identity(const F& raw_fst, json& j) {
             json j2;
             j2["factor_final_weights"] = factor_final_weights;
             j2["factor_tr_weights"] = factor_tr_weights;
-            j2["result"] = fst_to_string(fst_out);
+            j2["result_path"] = dump_fst(fst_out, dir_path);
             j["factor_weight_identity"].push_back(j2);
         }
     }
 }
 
 template<class F, fst::GallicType G>
-void _compute_fst_factor_weight_gallic(const F& raw_fst, json& j, const string& gtype_s) {
+void _compute_fst_factor_weight_gallic(const F& raw_fst, json& j, const string& gtype_s, const string& dir_path) {
 
     std::vector<bool> v = {true, false};
 
@@ -508,25 +522,25 @@ void _compute_fst_factor_weight_gallic(const F& raw_fst, json& j, const string& 
             j2["gallic_type"] = gtype_s;
             j2["factor_final_weights"] = factor_final_weights;
             j2["factor_tr_weights"] = factor_tr_weights;
-            j2["result"] = fst_to_string(fst_out);
+            j2["result_path"] = dump_fst(fst_out, dir_path);
             j["factor_weight_gallic"].push_back(j2);
         }
     }
 }
 
 template<class F>
-void compute_fst_factor_weight_gallic(const F& raw_fst, json& j) {
+void compute_fst_factor_weight_gallic(const F& raw_fst, json& j, const string& dir_path) {
     // Encode and decode with a gallic mapper
     j["factor_weight_gallic"] = {};
-    _compute_fst_factor_weight_gallic<F, fst::GALLIC_LEFT>(raw_fst, j, "gallic_left");
-    _compute_fst_factor_weight_gallic<F, fst::GALLIC_RIGHT>(raw_fst, j, "gallic_right");
-    _compute_fst_factor_weight_gallic<F, fst::GALLIC_RESTRICT>(raw_fst, j, "gallic_restrict");
-    _compute_fst_factor_weight_gallic<F, fst::GALLIC_MIN>(raw_fst, j, "gallic_min");
-    _compute_fst_factor_weight_gallic<F, fst::GALLIC>(raw_fst, j, "gallic");
+    _compute_fst_factor_weight_gallic<F, fst::GALLIC_LEFT>(raw_fst, j, "gallic_left", dir_path);
+    _compute_fst_factor_weight_gallic<F, fst::GALLIC_RIGHT>(raw_fst, j, "gallic_right", dir_path);
+    _compute_fst_factor_weight_gallic<F, fst::GALLIC_RESTRICT>(raw_fst, j, "gallic_restrict", dir_path);
+    _compute_fst_factor_weight_gallic<F, fst::GALLIC_MIN>(raw_fst, j, "gallic_min", dir_path);
+    _compute_fst_factor_weight_gallic<F, fst::GALLIC>(raw_fst, j, "gallic", dir_path);
 }
 
 template<class F>
-void compute_fst_push(const F& raw_fst, json& j) {
+void compute_fst_push(const F& raw_fst, json& j, const string& dir_path) {
     std::vector<bool> v = {true, false};
     j["push"] = {};
     for(bool push_weights: v) {
@@ -572,7 +586,7 @@ void compute_fst_push(const F& raw_fst, json& j) {
                         j2["remove_total_weight"] = remove_total_weight;
                         j2["remove_common_affix"] = remove_common_affix;
                         j2["reweight_to_final"] = reweight_to_final;
-                        j2["result"] = fst_to_string(fst_out);
+                        j2["result_path"] = dump_fst(fst_out, dir_path);
                         j["push"].push_back(j2);
 
                     }
@@ -587,7 +601,8 @@ void do_compute_fst_replace(
         vector<pair<typename F::Arc::Label, const fst::Fst<typename F::Arc>* > > label_fst_pairs,
         int root,
         bool epsilon_on_replace,
-        json& j) {
+        json& j,
+        const string& dir_path) {
     using Weight = typename F::Weight;
     using Arc = typename F::Arc;
     fst::VectorFst<Arc> res;
@@ -602,19 +617,19 @@ void do_compute_fst_replace(
         if (label == root) {
             continue;
         }
-        label_fst_pairs_serialized.push_back(std::make_pair(label, fst_to_string(*fst)));
+        label_fst_pairs_serialized.push_back(std::make_pair(label, dump_fst(*fst, dir_path)));
     }
 
     json j2;
-    j2["label_fst_pairs"] = label_fst_pairs_serialized;
+    j2["label_fst_pairs_path"] = label_fst_pairs_serialized;
     j2["root"] = root;
     j2["epsilon_on_replace"] = epsilon_on_replace;
-    j2["result"] = fst_to_string(res);
+    j2["result_path"] = dump_fst(res, dir_path);
     j["replace"].push_back(j2);
 }
 
 template<class F>
-void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fst_test_data) {
+void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fst_test_data, const string& dir_path) {
     using MyFst = typename F::MyFst;
     using Weight = typename F::MyWeight;
     using Arc = typename F::MyArc;
@@ -675,7 +690,7 @@ void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fs
                 vector<pair<typename Arc::Label, const fst::Fst<Arc>* > > label_fst_pairs;
                 label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
                 label_fst_pairs.push_back(std::make_pair(label, &fst_1));
-                do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j);
+                do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j, dir_path);
             }
         }
     }
@@ -693,7 +708,7 @@ void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fs
                     label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
                     label_fst_pairs.push_back(std::make_pair(label_fst_1, &fst_1));
                     label_fst_pairs.push_back(std::make_pair(label_fst_2, &fst_2));
-                    do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j);
+                    do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j, dir_path);
                 }
             }
         }
@@ -714,7 +729,7 @@ void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fs
                 label_fst_pairs.push_back(std::make_pair(root, new fst::VectorFst<Arc>(raw_fst)));
                 label_fst_pairs.push_back(std::make_pair(label, &fst_1));
                 label_fst_pairs.push_back(std::make_pair(label_5, &fst_2));
-                do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j);
+                do_compute_fst_replace<MyFst>(label_fst_pairs, root, epsilon_on_replace, j, dir_path);
             }
         }
     }
@@ -726,7 +741,7 @@ void compute_fst_replace(const typename F::MyFst & raw_fst, json& j, const F& fs
 }
 
 template<class F>
-void compute_fst_union(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2) {
+void compute_fst_union(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2, const string& dir_path) {
     using Weight = typename F::Weight;
     using Arc = typename F::Arc;
     j["union"] = {};
@@ -738,15 +753,15 @@ void compute_fst_union(const F& raw_fst, json& j, const fst::VectorFst<typename 
     fst::Union(fst_1, fst_2);
 
     json j2;
-    j2["fst_2"] = fst_to_string(fst_2);
-    j2["result_static"] = fst_to_string(*fst_1);
-    j2["result_lazy"] = fst_to_string(res_lazy);
+    j2["fst_2_path"] = dump_fst(fst_2, dir_path);
+    j2["result_static_path"] = dump_fst(*fst_1, dir_path);
+    j2["result_lazy_path"] = dump_fst(res_lazy, dir_path);
 
     j["union"].push_back(j2);
 }
 
 template<class F>
-void compute_fst_concat(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2) {
+void compute_fst_concat(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2, const string& dir_path) {
     using Weight = typename F::Weight;
     using Arc = typename F::Arc;
     j["concat"] = {};
@@ -758,15 +773,15 @@ void compute_fst_concat(const F& raw_fst, json& j, const fst::VectorFst<typename
     fst::Concat(fst_1, fst_2);
 
     json j2;
-    j2["fst_2"] = fst_to_string(fst_2);
-    j2["result_static"] = fst_to_string(*fst_1);
-    j2["result_lazy"] = fst_to_string(res_lazy);
+    j2["fst_2_path"] = dump_fst(fst_2, dir_path);
+    j2["result_static_path"] = dump_fst(*fst_1, dir_path);
+    j2["result_lazy_path"] = dump_fst(res_lazy, dir_path);
 
     j["concat"].push_back(j2);
 }
 
 template<class F>
-void compute_fst_closure_plus(const F& raw_fst, json& j) {
+void compute_fst_closure_plus(const F& raw_fst, json& j, const string& dir_path) {
     using Weight = typename F::Weight;
     using Arc = typename F::Arc;
 
@@ -777,12 +792,12 @@ void compute_fst_closure_plus(const F& raw_fst, json& j) {
 
     auto lazy_fst = fst::VectorFst<Arc>(fst::ClosureFst<Arc>(raw_fst, fst::CLOSURE_PLUS));
 
-    j["closure_plus"]["result_static"] = fst_to_string(static_fst);
-    j["closure_plus"]["result_lazy"] = fst_to_string(lazy_fst);
+    j["closure_plus"]["result_static_path"] = dump_fst(static_fst, dir_path);
+    j["closure_plus"]["result_lazy_path"] = dump_fst(lazy_fst, dir_path);
 }
 
 template<class F>
-void compute_fst_closure_star(const F& raw_fst, json& j) {
+void compute_fst_closure_star(const F& raw_fst, json& j, const string& dir_path) {
     using Weight = typename F::Weight;
     using Arc = typename F::Arc;
 
@@ -793,8 +808,8 @@ void compute_fst_closure_star(const F& raw_fst, json& j) {
 
     auto lazy_fst = fst::VectorFst<Arc>(fst::ClosureFst<Arc>(raw_fst, fst::CLOSURE_STAR));
 
-    j["closure_star"]["result_static"] = fst_to_string(static_fst);
-    j["closure_star"]["result_lazy"] = fst_to_string(lazy_fst);
+    j["closure_star"]["result_static_path"] = dump_fst(static_fst, dir_path);
+    j["closure_star"]["result_lazy_path"] = dump_fst(lazy_fst, dir_path);
 }
 
 template<class F>
@@ -855,7 +870,7 @@ void compute_fst_matcher(const F& raw_fst, json& j) {
 }
 
 template<class F, class FILTER>
-void do_compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2, bool connect, FILTER filter, string filter_name) {
+void do_compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2, bool connect, FILTER filter, string filter_name, const string& dir_path) {
     using Arc = typename F::Arc;
 
     auto opts = fst::ComposeOptions();
@@ -867,15 +882,15 @@ void do_compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<type
     fst::Compose(raw_fst, fst_2, &static_fst, opts);
 
     json j2;
-    j2["fst_2"] = fst_to_string(fst_2);
-    j2["result"] = fst_to_string(static_fst);
+    j2["fst_2_path"] = dump_fst(fst_2, dir_path);
+    j2["result_path"] = dump_fst(static_fst, dir_path);
     j2["filter_name"] = filter_name;
 
     j["compose"].push_back(j2);
 }
 
 template<class F>
-void do_compute_fst_compose_lookahead(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2) {
+void do_compute_fst_compose_lookahead(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2, const string& dir_path) {
     using Arc = typename F::Arc;
 
     using MATCHER1 = fst::LabelLookAheadMatcher<fst::SortedMatcher<fst::Fst<Arc>>, fst::olabel_lookahead_flags>;
@@ -917,8 +932,8 @@ void do_compute_fst_compose_lookahead(const F& raw_fst, json& j, const fst::Vect
     auto res_lazy = fst::VectorFst<Arc>(*lol);
 
     json j2;
-    j2["fst_2"] = fst_to_string(fst_2);
-    j2["result"] = fst_to_string(res_lazy);
+    j2["fst_2_path"] = dump_fst(fst_2, dir_path);
+    j2["result_path"] = dump_fst(res_lazy, dir_path);
     j2["filter_name"] = "lookahead";
 
     j["compose"].push_back(j2);
@@ -926,20 +941,20 @@ void do_compute_fst_compose_lookahead(const F& raw_fst, json& j, const fst::Vect
 
 
 template<class F>
-void compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2) {
+void compute_fst_compose(const F& raw_fst, json& j, const fst::VectorFst<typename F::Arc>& fst_2, const string& dir_path) {
     using Weight = typename F::Weight;
     using Arc = typename F::Arc;
     j["compose"] = {};
 
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::AUTO_FILTER, "auto");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NULL_FILTER, "null");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::TRIVIAL_FILTER, "trivial");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::SEQUENCE_FILTER, "sequence");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::ALT_SEQUENCE_FILTER, "alt_sequence");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::MATCH_FILTER, "match");
-    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NO_MATCH_FILTER, "no_match");
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::AUTO_FILTER, "auto", dir_path);
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NULL_FILTER, "null", dir_path);
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::TRIVIAL_FILTER, "trivial", dir_path);
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::SEQUENCE_FILTER, "sequence", dir_path);
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::ALT_SEQUENCE_FILTER, "alt_sequence", dir_path);
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::MATCH_FILTER, "match", dir_path);
+    do_compute_fst_compose(raw_fst, j, fst_2, false, fst::NO_MATCH_FILTER, "no_match", dir_path);
 
-    do_compute_fst_compose_lookahead(raw_fst, j, fst_2);
+    do_compute_fst_compose_lookahead(raw_fst, j, fst_2, dir_path);
 }
 
 template<class F>
@@ -1008,15 +1023,20 @@ template<class F>
 void compute_fst_data(const F& fst_test_data, const string fst_name) {
     std::cout << "FST :" << fst_name << std::endl;
     json data;
+    auto dir_path = fst_name + "/";
 
     auto raw_fst = fst_test_data.get_fst();
 
+    // Force the computation of all the properties.
+    raw_fst.Properties(fst::kFstProperties, true);
+
     data["name"] = fst_name;
     data["weight_type"] = F::MyArc::Type();
-    data["raw"]["result"] = fst_to_string(raw_fst);
+    data["raw"]["result_path"] = "raw_vector.fst";
+    data["raw_text"] = fst_to_string(raw_fst);
 
     data["raw_vector_bin_path"] = "raw_vector.fst";
-    raw_fst.Write(fst_name + "/raw_vector.fst");
+    raw_fst.Write(dir_path + "raw_vector.fst");
 
     fst::SymbolTable isymt;
     isymt.AddSymbol("<eps>");
@@ -1035,126 +1055,132 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     fst_with_symt.SetOutputSymbols(&osymt);
 
     data["raw_vector_with_symt_bin_path"] = "raw_vector_with_symt.fst";
-    fst_with_symt.Write(fst_name + "/raw_vector_with_symt.fst");
+    fst_with_symt.Write(dir_path + "raw_vector_with_symt.fst");
 
     fst::FstWriteOptions write_opts("<unspecified>");
     fst::ConstFst<typename F::MyArc> raw_const_fst(raw_fst);
     // Not aligned
     write_opts.align = false;
     data["raw_const_bin_path"] = "raw_const.fst";
-    std::ofstream strm((fst_name + "/raw_const.fst").c_str(), std::ios_base::out | std::ios_base::binary);
+    std::ofstream strm((dir_path + "raw_const.fst").c_str(), std::ios_base::out | std::ios_base::binary);
     raw_const_fst.Write(strm, write_opts);
 
     // Aligned
     write_opts.align = true;
     data["raw_const_aligned_bin_path"] = "raw_const_aligned.fst";
-    std::ofstream strm_aligned((fst_name + "/raw_const_aligned.fst").c_str(), std::ios_base::out | std::ios_base::binary);
+    std::ofstream strm_aligned((dir_path + "raw_const_aligned.fst").c_str(), std::ios_base::out | std::ios_base::binary);
     raw_const_fst.Write(strm_aligned, write_opts);
 
     std::cout << "Invert" << std::endl;
-    compute_fst_invert(raw_fst, data);
+    compute_fst_invert(raw_fst, data, dir_path);
 
     std::cout << "Project Input" << std::endl;
-    compute_fst_project_input(raw_fst, data);
+    compute_fst_project_input(raw_fst, data, dir_path);
 
     std::cout << "Project Output" << std::endl;
-    compute_fst_project_output(raw_fst, data);
+    compute_fst_project_output(raw_fst, data, dir_path);
 
     std::cout << "Reverse" << std::endl;
-    compute_fst_reverse(raw_fst, data);
+    compute_fst_reverse(raw_fst, data, dir_path);
 
     std::cout << "Remove epsilon" << std::endl;
-    compute_fst_remove_epsilon(raw_fst, data);
+    compute_fst_remove_epsilon(raw_fst, data, dir_path);
 
     std::cout << "Connect" << std::endl;
-    compute_fst_connect(raw_fst, data);
+    compute_fst_connect(raw_fst, data, dir_path);
 
     std::cout << "Condense" << std::endl;
-    compute_fst_condense(raw_fst, data);
+    compute_fst_condense(raw_fst, data, dir_path);
 
     std::cout << "Shortest distance" << std::endl;
     compute_fst_shortest_distance(raw_fst, data);
 
     std::cout << "Weight pushing initial" << std::endl;
-    compute_fst_compute_weight_pushing_initial(raw_fst, data);
+    compute_fst_compute_weight_pushing_initial(raw_fst, data, dir_path);
 
     std::cout << "Weight pushing final" << std::endl;
-    compute_fst_compute_weight_pushing_final(raw_fst, data);
+    compute_fst_compute_weight_pushing_final(raw_fst, data, dir_path);
 
     std::cout << "ArcMap" << std::endl;
-    compute_fst_compute_tr_map(raw_fst, data, "tr_map_identity", fst::IdentityMapper<typename F::MyArc>());
-    compute_fst_compute_tr_map(raw_fst, data, "tr_map_rmweight", fst::RmWeightMapper<typename F::MyArc>());
-    compute_fst_compute_tr_map(raw_fst, data, "tr_map_invert", fst::InvertWeightMapper<typename F::MyArc>());
-    compute_fst_compute_tr_map(raw_fst, data, "tr_map_input_epsilon", fst::InputEpsilonMapper<typename F::MyArc>());
-    compute_fst_compute_tr_map(raw_fst, data, "tr_map_output_epsilon", fst::OutputEpsilonMapper<typename F::MyArc>());
-    compute_fst_compute_tr_map(raw_fst, data, "tr_map_quantize", fst::QuantizeMapper<typename F::MyArc>());
-    compute_fst_compute_tr_map_plus(raw_fst, data, fst_test_data.get_weight_plus_mapper());
-    compute_fst_compute_tr_map_times(raw_fst, data, fst_test_data.get_weight_times_mapper());
+    compute_fst_compute_tr_map(raw_fst, data, "tr_map_identity", fst::IdentityMapper<typename F::MyArc>(), dir_path);
+    compute_fst_compute_tr_map(raw_fst, data, "tr_map_rmweight", fst::RmWeightMapper<typename F::MyArc>(), dir_path);
+    compute_fst_compute_tr_map(raw_fst, data, "tr_map_invert", fst::InvertWeightMapper<typename F::MyArc>(), dir_path);
+    compute_fst_compute_tr_map(raw_fst, data, "tr_map_input_epsilon", fst::InputEpsilonMapper<typename F::MyArc>(), dir_path);
+    compute_fst_compute_tr_map(raw_fst, data, "tr_map_output_epsilon", fst::OutputEpsilonMapper<typename F::MyArc>(), dir_path);
+    compute_fst_compute_tr_map(raw_fst, data, "tr_map_quantize", fst::QuantizeMapper<typename F::MyArc>(), dir_path);
+    compute_fst_compute_tr_map_plus(raw_fst, data, fst_test_data.get_weight_plus_mapper(), dir_path);
+    compute_fst_compute_tr_map_times(raw_fst, data, fst_test_data.get_weight_times_mapper(), dir_path);
 
     std::cout << "ArcSort" << std::endl;
-    compute_fst_compute_tr_sort(raw_fst, data, "tr_sort_ilabel", fst::ILabelCompare<typename F::MyArc>());
-    compute_fst_compute_tr_sort(raw_fst, data, "tr_sort_olabel", fst::OLabelCompare<typename F::MyArc>());
+    compute_fst_compute_tr_sort(raw_fst, data, "tr_sort_ilabel", fst::ILabelCompare<typename F::MyArc>(), dir_path);
+    compute_fst_compute_tr_sort(raw_fst, data, "tr_sort_olabel", fst::OLabelCompare<typename F::MyArc>(), dir_path);
 
     std::cout << "Encode" << std::endl;
-    compute_fst_encode(raw_fst, data);
+    compute_fst_encode(raw_fst, data, dir_path);
 
     std::cout << "Encode / Decode" << std::endl;
-    compute_fst_encode_decode(raw_fst, data);
+    compute_fst_encode_decode(raw_fst, data, dir_path);
 
     std::cout << "StateMap" << std::endl;
-    compute_fst_state_map(raw_fst, data, "state_map_tr_sum", fst::ArcSumMapper<typename F::MyArc>(raw_fst));
-    compute_fst_state_map(raw_fst, data, "state_map_tr_unique", fst::ArcUniqueMapper<typename F::MyArc>(raw_fst));
+    compute_fst_state_map(raw_fst, data, "state_map_tr_sum", fst::ArcSumMapper<typename F::MyArc>(raw_fst), dir_path);
+    compute_fst_state_map(raw_fst, data, "state_map_tr_unique", fst::ArcUniqueMapper<typename F::MyArc>(raw_fst), dir_path);
 
     std::cout << "Determinization" << std::endl;
-    compute_fst_determinization(raw_fst, data);
+    compute_fst_determinization(raw_fst, data, dir_path);
 
     std::cout << "TopSort" << std::endl;
-    compute_fst_topsort(raw_fst, data);
+    compute_fst_topsort(raw_fst, data, dir_path);
 
     std::cout << "Properties" << std::endl;
     compute_fst_properties(raw_fst, data);
 
     std::cout << "Minimization" << std::endl;
-    compute_fst_minimization(raw_fst, data);
+    compute_fst_minimization(raw_fst, data, dir_path);
 
     std::cout << "Gallic Encode Decode" << std::endl;
-    compute_fst_gallic_encode_decode(raw_fst, data);
+    compute_fst_gallic_encode_decode(raw_fst, data, dir_path);
 
     std::cout << "Factor Weight Identity" << std::endl;
-    compute_fst_factor_weight_identity(raw_fst, data);
+    compute_fst_factor_weight_identity(raw_fst, data, dir_path);
 
     std::cout << "Factor Weight Gallic" << std::endl;
-    compute_fst_factor_weight_gallic(raw_fst, data);
+    compute_fst_factor_weight_gallic(raw_fst, data, dir_path);
 
     std::cout << "Push" << std::endl;
-    compute_fst_push(raw_fst, data);
+    compute_fst_push(raw_fst, data, dir_path);
 
    std::cout << "Replace" << std::endl;
-   compute_fst_replace(raw_fst, data, fst_test_data);
+   compute_fst_replace(raw_fst, data, fst_test_data, dir_path);
 
     std::cout << "Union" << std::endl;
-    compute_fst_union(raw_fst, data, fst_test_data.get_fst_union());
+    auto fst_union = fst_test_data.get_fst_union();
+    fst_union.Properties(fst::kFstProperties, true);
+    compute_fst_union(raw_fst, data, fst_union, dir_path);
 
     std::cout << "Concat" << std::endl;
-    compute_fst_concat(raw_fst, data, fst_test_data.get_fst_concat());
+    auto fst_concat = fst_test_data.get_fst_concat();
+    fst_concat.Properties(fst::kFstProperties, true);
+    compute_fst_concat(raw_fst, data, fst_concat, dir_path);
 
     std::cout << "Closure Plus" << std::endl;
-    compute_fst_closure_plus(raw_fst, data);
+    compute_fst_closure_plus(raw_fst, data, dir_path);
 
     std::cout << "Closure Star" << std::endl;
-    compute_fst_closure_star(raw_fst, data);
+    compute_fst_closure_star(raw_fst, data, dir_path);
 
 //    std::cout << "Matcher" << std::endl;
 //    compute_fst_matcher(raw_fst, data);
 
     std::cout << "Compose" << std::endl;
-    compute_fst_compose(raw_fst, data, fst_test_data.get_fst_compose());
+    auto fst_compose = fst_test_data.get_fst_compose();
+    fst_compose.Properties(fst::kFstProperties, true);
+    compute_fst_compose(raw_fst, data, fst_compose, dir_path);
 
     std::cout << "State Reachable" << std::endl;
     compute_fst_state_reachable(raw_fst, data);
 
     std::cout << "ShortestPath" << std::endl;
-    compute_fst_shortest_path(raw_fst, data);
+    compute_fst_shortest_path(raw_fst, data, dir_path);
 
     std::cout << "Queue" << std::endl;
     compute_fst_queue(raw_fst, data);

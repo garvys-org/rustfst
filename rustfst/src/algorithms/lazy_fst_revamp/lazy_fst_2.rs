@@ -8,6 +8,7 @@ use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::lazy_fst_revamp::fst_op_2::FstOp2;
 use crate::algorithms::lazy_fst_revamp::FstCache;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterData, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable, Trs, TrsVec};
@@ -75,6 +76,22 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
 
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
         self.get_trs(state_id).unsafe_unwrap()
+    }
+
+    fn properties(&self) -> FstProperties {
+        self.op.properties()
+    }
+
+    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+        self.cache
+            .num_input_epsilons(state)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state))
+    }
+
+    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+        self.cache
+            .num_output_epsilons(state)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state))
     }
 }
 
@@ -229,6 +246,7 @@ where
                 fst_out.set_final(s, f_w)?;
             }
         }
+        fst_out.set_properties(self.properties());
         Ok(fst_out)
     }
 }

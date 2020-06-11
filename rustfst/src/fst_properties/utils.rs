@@ -2,9 +2,18 @@ use crate::fst_properties::FstProperties;
 
 /// Both bits are set iff one bit is set.
 pub fn known_properties(props: FstProperties) -> FstProperties {
-    props
-        | ((props & FstProperties::POS_PROPERTIES) << 1)
-        | ((props & FstProperties::NEG_PROPERTIES) >> 1)
+    FstProperties::binary_properties()
+        | (props & FstProperties::trinary_properties())
+        | ((props & FstProperties::pos_trinary_properties()) << 1)
+        | ((props & FstProperties::neg_trinary_properties()) >> 1)
+}
+
+impl FstProperties {
+    /// Check that all the `props` passed as parameter are known.
+    pub fn knows(&self, props: FstProperties) -> bool {
+        let known = known_properties(*self);
+        known.contains(props)
+    }
 }
 
 /// Tests compatibility between two sets of properties.

@@ -1,5 +1,7 @@
 use anyhow::Result;
 
+use crate::fst_properties::mutable_properties::concat_properties;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
@@ -55,6 +57,8 @@ where
     F1: ExpandedFst<W> + MutableFst<W> + AllocableFst<W>,
     F2: ExpandedFst<W>,
 {
+    let props1 = fst_1.properties();
+    let props2 = fst_2.properties();
     let start1 = fst_1.start();
     if start1.is_none() {
         return Ok(());
@@ -65,7 +69,7 @@ where
     for s2 in 0..fst_2.num_states() {
         let s1 = fst_1.add_state();
         if let Some(final_weight) = unsafe { fst_2.final_weight_unchecked(s2) } {
-            unsafe { fst_1.set_final_unchecked(s1, final_weight.clone()) };
+            unsafe { fst_1.set_final_unchecked(s1, final_weight) };
         }
         unsafe { fst_1.reserve_trs_unchecked(s1, fst_2.num_trs_unchecked(s2)) };
         for tr in unsafe { fst_2.get_trs_unchecked(s2).trs() } {
@@ -79,7 +83,6 @@ where
     for s1 in 0..numstates1 {
         if let Some(weight) = unsafe { fst_1.final_weight_unchecked(s1) } {
             if let Some(_start2) = start2 {
-                let weight = weight.clone();
                 unsafe {
                     fst_1.add_tr_unchecked(
                         s1,
@@ -89,6 +92,13 @@ where
             }
             unsafe { fst_1.delete_final_weight_unchecked(s1) };
         }
+    }
+
+    if start2.is_some() {
+        fst_1.set_properties_with_mask(
+            concat_properties(props1, props2, false),
+            FstProperties::all_properties(),
+        );
     }
 
     Ok(())

@@ -1,5 +1,7 @@
 use anyhow::Result;
 
+use crate::fst_properties::mutable_properties::reweight_properties;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::{DivideType, WeaklyDivisibleSemiring};
 
@@ -53,26 +55,32 @@ where
             continue;
         }
 
-        for tr in fst.tr_iter_mut(state)? {
-            let d_ns = potentials.get(tr.nextstate).unwrap_or(&zero);
+        unsafe {
+            let mut it_tr = fst.tr_iter_unchecked_mut(state);
+            for idx_tr in 0..it_tr.len() {
+                let tr = it_tr.get_unchecked(idx_tr);
+                let d_ns = potentials.get(tr.nextstate).unwrap_or(&zero);
 
-            if d_ns.is_zero() {
-                continue;
+                if d_ns.is_zero() {
+                    continue;
+                }
+
+                let weight = match reweight_type {
+                    ReweightType::ReweightToInitial => {
+                        (&tr.weight.times(d_ns)?).divide(d_s, DivideType::DivideLeft)?
+                    }
+                    ReweightType::ReweightToFinal => {
+                        (d_s.times(&tr.weight)?).divide(&d_ns, DivideType::DivideRight)?
+                    }
+                };
+
+                it_tr.set_weight_unchecked(idx_tr, weight);
             }
-
-            tr.weight = match reweight_type {
-                ReweightType::ReweightToInitial => {
-                    (&tr.weight.times(d_ns)?).divide(d_s, DivideType::DivideLeft)?
-                }
-                ReweightType::ReweightToFinal => {
-                    (d_s.times(&tr.weight)?).divide(&d_ns, DivideType::DivideRight)?
-                }
-            };
         }
     }
 
     for state_id in 0..fst.num_states() {
-        if let Some(final_weight) = unsafe { fst.final_weight_unchecked_mut(state_id) } {
+        if let Some(mut final_weight) = unsafe { fst.final_weight_unchecked(state_id) } {
             let d_s = potentials.get(state_id).unwrap_or(&zero);
 
             match reweight_type {
@@ -86,6 +94,8 @@ where
                     final_weight.divide_assign(d_s, DivideType::DivideLeft)?;
                 }
             };
+
+            unsafe { fst.set_final_unchecked(state_id, final_weight) };
         }
     }
 
@@ -94,15 +104,19 @@ where
         let d_s = potentials.get(start_state).unwrap_or(&zero);
 
         if !d_s.is_one() && !d_s.is_zero() {
-            for tr in fst.tr_iter_mut(start_state)? {
-                tr.weight = match reweight_type {
-                    ReweightType::ReweightToInitial => d_s.times(&tr.weight)?,
-                    ReweightType::ReweightToFinal => {
-                        (W::one().divide(&d_s, DivideType::DivideRight)?).times(&tr.weight)?
-                    }
-                };
+            unsafe {
+                let mut it_tr = fst.tr_iter_unchecked_mut(start_state);
+                for idx_tr in 0..it_tr.len() {
+                    let tr = it_tr.get_unchecked(idx_tr);
+                    let weight = match reweight_type {
+                        ReweightType::ReweightToInitial => d_s.times(&tr.weight)?,
+                        ReweightType::ReweightToFinal => {
+                            (W::one().divide(&d_s, DivideType::DivideRight)?).times(&tr.weight)?
+                        }
+                    };
+                    it_tr.set_weight_unchecked(idx_tr, weight);
+                }
             }
-
             if let Some(final_weight) = fst.final_weight(start_state)? {
                 let new_weight = match reweight_type {
                     ReweightType::ReweightToInitial => d_s.times(final_weight)?,
@@ -115,6 +129,11 @@ where
             }
         }
     }
+
+    fst.set_properties_with_mask(
+        reweight_properties(fst.properties()),
+        FstProperties::all_properties(),
+    );
 
     Ok(())
 }

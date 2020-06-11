@@ -3,13 +3,14 @@ use tempfile::tempdir;
 
 use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_traits::{Fst, SerializableFst};
-use crate::semirings::SerializableSemiring;
+use crate::semirings::{SerializableSemiring, WeightQuantize};
 use crate::tests_openfst::io::generate_symbol_table;
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 
 pub fn test_const_fst_bin_serializer<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring,
+    W: SerializableSemiring + WeightQuantize,
 {
     let dir = tempdir()?;
 
@@ -20,12 +21,8 @@ where
 
     let deserialized_fst = ConstFst::<W>::read(&path_fst_serialized)?;
 
-    assert_eq!(
-        raw_const,
-        deserialized_fst,
-        "{}",
-        error_message_fst!(raw_const, deserialized_fst, "Serializer ConstFst Bin")
-    );
+    test_eq_fst(&raw_const, &deserialized_fst, "Serializer ConstFst Bin");
+
     Ok(())
 }
 
@@ -33,7 +30,7 @@ pub fn test_const_fst_bin_serializer_with_symt<W>(
     test_data: &FstTestData<W, VectorFst<W>>,
 ) -> Result<()>
 where
-    W: SerializableSemiring,
+    W: SerializableSemiring + WeightQuantize,
 {
     let dir = tempdir()?;
 
@@ -47,15 +44,11 @@ where
 
     let deserialized_fst = ConstFst::<W>::read(&path_fst_serialized)?;
 
-    assert_eq!(
-        raw_const_with_symt,
-        deserialized_fst,
-        "{}",
-        error_message_fst!(
-            raw_const_with_symt,
-            deserialized_fst,
-            "Serializer ConstFst Bin with Generated Symbol Table"
-        )
+    test_eq_fst(
+        &raw_const_with_symt,
+        &deserialized_fst,
+        "Serializer ConstFst Bin with Generated Symbol Table",
     );
+
     Ok(())
 }

@@ -5,6 +5,7 @@ use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
 use crate::algorithms::tr_filters::AnyTrFilter;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
 use crate::fst_traits::{ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
@@ -58,6 +59,10 @@ pub fn connect<W: Semiring, F: ExpandedFst<W> + MutableFst<W>>(fst: &mut F) -> R
         }
     }
     fst.del_states(dstates)?;
+    fst.set_properties_with_mask(
+        FstProperties::ACCESSIBLE | FstProperties::COACCESSIBLE,
+        FstProperties::ACCESSIBLE | FstProperties::COACCESSIBLE,
+    );
     Ok(())
 }
 
@@ -184,6 +189,7 @@ mod tests {
     use proptest::prelude::*;
 
     use crate::fst_properties::FstProperties;
+    use crate::fst_traits::CoreFst;
     use crate::proptest_fst::proptest_fst;
 
     use super::*;
@@ -192,7 +198,7 @@ mod tests {
         #[test]
         fn test_connect_proptest(mut fst in proptest_fst()) {
             connect(&mut fst).unwrap();
-            prop_assume!(fst.properties().unwrap().intersects(
+            prop_assume!(fst.properties().intersects(
                 FstProperties::ACCESSIBLE | FstProperties::COACCESSIBLE
             ));
         }

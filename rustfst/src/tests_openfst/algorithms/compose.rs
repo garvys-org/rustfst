@@ -1,4 +1,5 @@
 use std::marker::PhantomData;
+use std::path::Path;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -19,7 +20,7 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::algorithms::compose::MatcherFst;
 use crate::algorithms::compose::{compose_with_config, ComposeConfig, LabelReachableData};
 use crate::algorithms::compose::{ComposeFilterEnum, ComposeFst, ComposeFstOpOptions};
-use crate::algorithms::{tr_compares::ilabel_compare, tr_sort};
+use crate::algorithms::{tr_compares::ILabelCompare, tr_sort};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
@@ -28,8 +29,8 @@ use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ComposeOperationResult {
-    fst_2: String,
-    result: String,
+    fst_2_path: String,
+    result_path: String,
     filter_name: String,
 }
 
@@ -45,14 +46,15 @@ where
 }
 
 impl ComposeOperationResult {
-    pub fn parse<W, F>(&self) -> ComposeTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> ComposeTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         ComposeTestData {
-            fst_2: F::from_text_string(self.fst_2.as_str()).unwrap(),
-            result: F::from_text_string(self.result.as_str()).unwrap(),
+            fst_2: F::read(dir_path.as_ref().join(&self.fst_2_path)).unwrap(),
+            result: F::read(dir_path.as_ref().join(&self.result_path)).unwrap(),
             filter_name: self.filter_name.clone(),
             w: PhantomData,
         }
@@ -67,7 +69,6 @@ fn do_test_compose<W>(
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
-    // println!("Skipping simple compose for debugging");
     let mut config = ComposeConfig::default();
     config.connect = false;
     config.compose_filter = filter;
@@ -148,7 +149,8 @@ where
 
     // LabelLookAheadRelabeler::relabel(&mut fst2, graph1look.addon(), true)?;
 
-    tr_sort(&mut fst2, ilabel_compare);
+    tr_sort(&mut fst2, ILabelCompare {});
+
     let fst2 = Arc::new(fst2);
 
     let matcher1 = TMatcher1::new_with_data(
@@ -156,6 +158,7 @@ where
         MatchType::MatchOutput,
         graph1look.data(MatchType::MatchOutput).cloned(),
     )?;
+
     let matcher2 = TMatcher2::new(Arc::clone(&fst2), MatchType::MatchInput)?;
 
     let compose_filter = TComposeFilter::new(
@@ -182,6 +185,7 @@ where
     );
 
     let dyn_fst = ComposeFst::new_with_options(graph1look, fst2, compose_options)?;
+
     let static_fst: VectorFst<_> = dyn_fst.compute()?;
 
     test_eq_fst(

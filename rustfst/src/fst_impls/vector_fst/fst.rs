@@ -3,11 +3,12 @@ use std::sync::Arc;
 use anyhow::Result;
 
 use crate::fst_impls::VectorFst;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable, Trs, TrsVec};
 
-impl<W: 'static + Semiring> Fst<W> for VectorFst<W> {
+impl<W: Semiring> Fst<W> for VectorFst<W> {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.isymt.as_ref()
     }
@@ -33,7 +34,7 @@ impl<W: 'static + Semiring> Fst<W> for VectorFst<W> {
     }
 }
 
-impl<W: 'static + Semiring> CoreFst<W> for VectorFst<W> {
+impl<W: Semiring> CoreFst<W> for VectorFst<W> {
     type TRS = TrsVec<W>;
 
     fn start(&self) -> Option<StateId> {
@@ -79,5 +80,25 @@ impl<W: 'static + Semiring> CoreFst<W> for VectorFst<W> {
         let state = self.states.get_unchecked(state_id);
         // Data is not copied, only Arc
         state.trs.shallow_clone()
+    }
+
+    fn properties(&self) -> FstProperties {
+        self.properties
+    }
+
+    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+        Ok(self
+            .states
+            .get(state)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state))?
+            .niepsilons)
+    }
+
+    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+        Ok(self
+            .states
+            .get(state)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state))?
+            .noepsilons)
     }
 }

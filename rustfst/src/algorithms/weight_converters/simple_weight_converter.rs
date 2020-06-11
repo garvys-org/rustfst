@@ -1,6 +1,7 @@
 use anyhow::Result;
 
 use crate::algorithms::{FinalTr, MapFinalAction, WeightConverter};
+use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
 use crate::Tr;
 
@@ -32,5 +33,9 @@ where
 
     fn final_action(&self) -> MapFinalAction {
         MapFinalAction::MapNoSuperfinal
+    }
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties {
+        inprops
     }
 }

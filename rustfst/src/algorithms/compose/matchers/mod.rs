@@ -106,7 +106,7 @@ pub trait Matcher<W: Semiring>: Debug + Clone {
         Self: std::marker::Sized;
     fn iter(&self, state: StateId, label: Label) -> Result<Self::Iter>;
     fn final_weight(&self, state: StateId) -> Result<Option<W>>;
-    fn match_type(&self) -> MatchType;
+    fn match_type(&self, test: bool) -> Result<MatchType>;
     fn flags(&self) -> MatcherFlags;
 
     /// Indicates preference for being the side used for matching in

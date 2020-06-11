@@ -7,15 +7,17 @@ use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
 
-use super::lazy_fst::compare_fst_static_lazy;
+use crate::algorithms::fst_convert_from_ref;
+use crate::tests_openfst::macros::test_eq_fst;
 use bitflags::_core::marker::PhantomData;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ReplaceOperationResult {
     root: usize,
-    label_fst_pairs: Vec<(usize, String)>,
+    label_fst_pairs_path: Vec<(usize, String)>,
     epsilon_on_replace: bool,
-    result: String,
+    result_path: String,
 }
 
 pub struct ReplaceTestData<W, F>
@@ -31,20 +33,21 @@ where
 }
 
 impl ReplaceOperationResult {
-    pub fn parse<W, F>(&self) -> ReplaceTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> ReplaceTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         ReplaceTestData {
             root: self.root,
             label_fst_pairs: self
-                .label_fst_pairs
+                .label_fst_pairs_path
                 .iter()
-                .map(|v| (v.0, F::from_text_string(v.1.as_str()).unwrap()))
+                .map(|v| (v.0, F::read(dir_path.as_ref().join(&v.1)).unwrap()))
                 .collect(),
             epsilon_on_replace: self.epsilon_on_replace,
-            result: F::from_text_string(self.result.as_str()).unwrap(),
+            result: F::read(dir_path.as_ref().join(&self.result_path)).unwrap(),
             w: PhantomData,
         }
     }
@@ -73,18 +76,13 @@ where
             replace_test_data.epsilon_on_replace,
         )?;
 
-        assert_eq!(
-            replace_test_data.result,
-            replaced_fst,
-            "{}",
-            error_message_fst!(
-                replace_test_data.result,
-                replaced_fst,
-                format!(
-                    "Replace failed with parameters root={:?} epsilon_on_replace={:?}",
-                    replace_test_data.root, replace_test_data.epsilon_on_replace
-                )
-            )
+        test_eq_fst(
+            &replace_test_data.result,
+            &replaced_fst,
+            format!(
+                "Replace failed with parameters root={:?} epsilon_on_replace={:?}",
+                replace_test_data.root, replace_test_data.epsilon_on_replace
+            ),
         );
     }
     Ok(())
@@ -107,13 +105,13 @@ where
             replace_test_data.epsilon_on_replace,
         )?;
 
-        let replaced_lazy_fst = ReplaceFst::new(
+        let replaced_lazy_fst: VectorFst<_> = fst_convert_from_ref(&ReplaceFst::new(
             fst_list,
             replace_test_data.root,
             replace_test_data.epsilon_on_replace,
-        )?;
+        )?);
 
-        compare_fst_static_lazy(&replaced_static_fst, &replaced_lazy_fst)?;
+        test_eq_fst(&replaced_static_fst, &replaced_lazy_fst, "Replace lazy");
     }
     Ok(())
 }

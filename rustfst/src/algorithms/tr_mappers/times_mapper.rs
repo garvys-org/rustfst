@@ -1,6 +1,7 @@
 use anyhow::Result;
 
 use crate::algorithms::{FinalTr, MapFinalAction, TrMapper, WeightConverter};
+use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
 use crate::Tr;
 
@@ -36,6 +37,10 @@ impl<S: Semiring> TrMapper<S> for TimesMapper<S> {
 
     fn final_action(&self) -> MapFinalAction {
         MapFinalAction::MapNoSuperfinal
+    }
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties {
+        inprops & FstProperties::weight_invariant_properties()
     }
 }
 

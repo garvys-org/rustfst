@@ -1,9 +1,11 @@
 use std::borrow::Borrow;
 use std::f32;
 use std::hash::{Hash, Hasher};
+use std::io::Write;
 
 use anyhow::Result;
-
+use nom::number::complete::{float, le_f32};
+use nom::IResult;
 use ordered_float::OrderedFloat;
 
 use crate::parsers::bin_fst::utils_serialization::write_bin_f32;
@@ -11,9 +13,7 @@ use crate::semirings::{
     CompleteSemiring, DivideType, ReverseBack, Semiring, SemiringProperties, SerializableSemiring,
     StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use nom::number::complete::{float, le_f32};
-use nom::IResult;
-use std::io::Write;
+use crate::KDELTA;
 
 /// Log semiring: (log(e^-x + e^-y), +, inf, 0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
@@ -98,7 +98,7 @@ impl Semiring for LogWeight {
 
 impl ReverseBack<LogWeight> for LogWeight {
     fn reverse_back(&self) -> Result<LogWeight> {
-        Ok(self.clone())
+        Ok(*self)
     }
 }
 

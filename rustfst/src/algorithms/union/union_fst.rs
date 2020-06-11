@@ -3,6 +3,8 @@ use std::sync::Arc;
 use anyhow::Result;
 
 use crate::algorithms::replace::ReplaceFst;
+use crate::fst_properties::mutable_properties::union_properties;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{SymbolTable, Tr, TrsVec, EPS_LABEL};
@@ -12,7 +14,7 @@ use crate::{SymbolTable, Tr, TrsVec, EPS_LABEL};
 /// weight b, then their union transduces x to y with weight a and w to v with
 /// weight b.
 #[derive(Debug)]
-pub struct UnionFst<W: Semiring, F: Fst<W> + 'static>(ReplaceFst<W, F, F>);
+pub struct UnionFst<W: Semiring, F: Fst<W> + 'static>(ReplaceFst<W, F, F>, FstProperties);
 
 impl<W, F> UnionFst<W, F>
 where
@@ -22,6 +24,8 @@ where
     //TODO: Use a borrow and not a move
     //TODO: Allow fsts of different types
     pub fn new(fst1: F, fst2: F) -> Result<Self> {
+        let props1 = fst1.properties();
+        let props2 = fst2.properties();
         let mut rfst = F::new();
         rfst.add_states(2);
         rfst.set_start(0)?;
@@ -41,7 +45,10 @@ where
         fst_tuples.push((std::usize::MAX, fst1));
         fst_tuples.push((std::usize::MAX - 1, fst2));
 
-        Ok(UnionFst(ReplaceFst::new(fst_tuples, 0, false)?))
+        Ok(UnionFst(
+            ReplaceFst::new(fst_tuples, 0, false)?,
+            union_properties(props1, props2, true),
+        ))
     }
 
     /// Turns the Lazy FST into a static one.
@@ -83,6 +90,18 @@ where
 
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
         self.0.get_trs_unchecked(state_id)
+    }
+
+    fn properties(&self) -> FstProperties {
+        self.1
+    }
+
+    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+        self.0.num_input_epsilons(state)
+    }
+
+    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+        self.0.num_output_epsilons(state)
     }
 }
 

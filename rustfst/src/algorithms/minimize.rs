@@ -9,12 +9,13 @@ use anyhow::Result;
 use binary_heap_plus::BinaryHeap;
 use stable_bst::TreeMap;
 
+use crate::algorithms::encode::EncodeType;
 use crate::algorithms::factor_weight::factor_iterators::GallicFactorLeft;
 use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, FactorWeightType};
 use crate::algorithms::partition::Partition;
 use crate::algorithms::queues::LifoQueue;
 use crate::algorithms::reverse;
-use crate::algorithms::tr_compares::ilabel_compare;
+use crate::algorithms::tr_compares::ILabelCompare;
 use crate::algorithms::tr_mappers::QuantizeMapper;
 use crate::algorithms::tr_unique;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
@@ -42,10 +43,14 @@ use crate::{StateId, Trs};
 pub fn minimize<W, F>(ifst: &mut F, allow_nondet: bool) -> Result<()>
 where
     F: MutableFst<W> + ExpandedFst<W> + AllocableFst<W>,
-    W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
-    <W as Semiring>::ReverseWeight: 'static,
+    W: WeaklyDivisibleSemiring + WeightQuantize,
 {
-    let props = ifst.properties()?;
+    let props = ifst.compute_and_update_properties(
+        FstProperties::ACCEPTOR
+            | FstProperties::I_DETERMINISTIC
+            | FstProperties::WEIGHTED
+            | FstProperties::UNWEIGHTED,
+    )?;
 
     let allow_acyclic_minimization = if props.contains(FstProperties::I_DETERMINISTIC) {
         true
@@ -66,7 +71,7 @@ where
         push_weights(&mut gfst, ReweightType::ReweightToInitial, false)?;
         let mut quantize_mapper = QuantizeMapper {};
         tr_map(&mut gfst, &mut quantize_mapper)?;
-        let encode_table = encode(&mut gfst, true, true)?;
+        let encode_table = encode(&mut gfst, EncodeType::EncodeWeightsAndLabels)?;
         acceptor_minimize(&mut gfst, allow_acyclic_minimization)?;
         decode(&mut gfst, encode_table)?;
         let factor_opts: FactorWeightOptions = FactorWeightOptions {
@@ -92,7 +97,7 @@ where
         push_weights(ifst, ReweightType::ReweightToInitial, false)?;
         let mut quantize_mapper = QuantizeMapper {};
         tr_map(ifst, &mut quantize_mapper)?;
-        let encode_table = encode(ifst, true, true)?;
+        let encode_table = encode(ifst, EncodeType::EncodeWeightsAndLabels)?;
         acceptor_minimize(ifst, allow_acyclic_minimization)?;
         decode(ifst, encode_table)
     } else {
@@ -105,7 +110,9 @@ fn acceptor_minimize<W: Semiring, F: MutableFst<W> + ExpandedFst<W>>(
     ifst: &mut F,
     allow_acyclic_minimization: bool,
 ) -> Result<()> {
-    let props = ifst.properties()?;
+    let props = ifst.compute_and_update_properties(
+        FstProperties::ACCEPTOR | FstProperties::UNWEIGHTED | FstProperties::ACYCLIC,
+    )?;
     if !props.contains(FstProperties::ACCEPTOR | FstProperties::UNWEIGHTED) {
         bail!("FST is not an unweighted acceptor");
     }
@@ -118,7 +125,7 @@ fn acceptor_minimize<W: Semiring, F: MutableFst<W> + ExpandedFst<W>>(
 
     if allow_acyclic_minimization && props.contains(FstProperties::ACYCLIC) {
         // Acyclic minimization
-        tr_sort(ifst, ilabel_compare);
+        tr_sort(ifst, ILabelCompare {});
         let minimizer = AcyclicMinimizer::new(ifst)?;
         merge_states(minimizer.get_partition(), ifst)?;
     } else {
@@ -144,8 +151,11 @@ fn merge_states<W: Semiring, F: MutableFst<W>>(partition: Partition, fst: &mut F
     for c in 0..partition.num_classes() {
         for s in partition.iter(c) {
             if s == state_map[c].unwrap() {
-                for tr in fst.tr_iter_mut(s)? {
-                    tr.nextstate = state_map[partition.get_class_id(tr.nextstate)].unwrap();
+                let mut it_tr = fst.tr_iter_mut(s)?;
+                for idx_tr in 0..it_tr.len() {
+                    let tr = unsafe { it_tr.get_unchecked(idx_tr) };
+                    let nextstate = state_map[partition.get_class_id(tr.nextstate)].unwrap();
+                    unsafe { it_tr.set_nextstate_unchecked(idx_tr, nextstate) };
                 }
             } else {
                 let trs: Vec<_> = fst
@@ -416,7 +426,7 @@ fn pre_partition<W: Semiring, F: MutableFst<W>>(
 fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<Partition> {
     // Initialize
     let mut tr: VectorFst<W::ReverseWeight> = reverse(fst)?;
-    tr_sort(&mut tr, ilabel_compare);
+    tr_sort(&mut tr, ILabelCompare {});
     let mut partition = Partition::new(tr.num_states() - 1);
     let mut queue = LifoQueue::default();
     pre_partition(fst, &mut partition, &mut queue);

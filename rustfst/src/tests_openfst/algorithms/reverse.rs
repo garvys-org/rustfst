@@ -7,11 +7,12 @@ use crate::algorithms::MapFinalAction;
 use crate::algorithms::WeightConverter;
 use crate::algorithms::{reverse, weight_convert};
 use crate::fst_impls::VectorFst;
-use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
-use crate::semirings::WeaklyDivisibleSemiring;
+use crate::fst_traits::{AllocableFst, CoreFst, MutableFst, SerializableFst};
 use crate::semirings::{Semiring, SerializableSemiring};
+use crate::semirings::{WeaklyDivisibleSemiring, WeightQuantize};
 use crate::Tr;
 
+use crate::fst_properties::FstProperties;
 use crate::tests_openfst::FstTestData;
 
 pub struct ReverseWeightConverter {}
@@ -41,22 +42,33 @@ where
     fn final_action(&self) -> MapFinalAction {
         MapFinalAction::MapNoSuperfinal
     }
+
+    fn properties(&self, iprops: FstProperties) -> FstProperties {
+        iprops
+    }
 }
 
 pub fn test_reverse<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
     F: SerializableFst<W> + MutableFst<W> + AllocableFst<W> + Display,
-    W: SerializableSemiring + WeaklyDivisibleSemiring,
+    W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
     <W as Semiring>::ReverseWeight: SerializableSemiring,
 {
     let fst_reverse: VectorFst<_> = reverse(&test_data.raw).unwrap();
     let mut mapper = ReverseWeightConverter {};
     let fst_reverse_2: F = weight_convert(&fst_reverse, &mut mapper)?;
-    assert_eq!(
-        test_data.reverse,
-        fst_reverse_2,
-        "{}",
-        error_message_fst!(test_data.reverse, fst_reverse, "Reverse")
+
+    assert!(
+        &test_data.reverse.equal_quantized(&fst_reverse_2),
+        "Reverse"
     );
+    assert_eq!(
+        test_data.reverse.properties(),
+        fst_reverse.properties(),
+        "{}",
+        "Reverse"
+    );
+
+    // test_eq_fst(&test_data.reverse, &fst_reverse_2, "Reverse");
     Ok(())
 }

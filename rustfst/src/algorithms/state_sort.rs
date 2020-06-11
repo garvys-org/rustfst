@@ -2,6 +2,7 @@ use std::mem::swap;
 
 use anyhow::{ensure, Result};
 
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::{StateId, Trs};
@@ -23,6 +24,9 @@ where
     if fst.start().is_none() {
         return Ok(());
     }
+    // TODO: Use properties with mask once available
+    let props = fst.properties_with_mask(FstProperties::statesort_properties());
+
     let start_state = fst.start().unwrap();
 
     let mut done = vec![false; order.len()];
@@ -34,24 +38,23 @@ where
 
     fst.set_start(order[start_state])?;
 
-    let states: Vec<_> = fst.states_iter().collect();
-    for mut s1 in states {
+    for mut s1 in 0..fst.num_states() {
         if done[s1] {
             continue;
         }
         let mut final1 = unsafe { fst.final_weight_unchecked(s1) };
         let mut final2 = None;
-        let mut trsa: Vec<_> = fst.get_trs(s1)?.trs().iter().cloned().collect();
+        let mut trsa: Vec<_> = fst.get_trs(s1)?.trs().to_vec();
         let mut trsb = vec![];
         while !done[s1] {
             let s2 = order[s1];
             if !done[s2] {
                 final2 = unsafe { fst.final_weight_unchecked(s2) };
-                trsb = fst.get_trs(s2)?.trs().iter().cloned().collect();
+                trsb = fst.get_trs(s2)?.trs().to_vec();
             }
             match final1 {
                 None => fst.delete_final_weight(s2)?,
-                Some(v) => fst.set_final(s2, v.clone())?,
+                Some(v) => fst.set_final(s2, v)?,
             };
             fst.delete_trs(s2)?;
             for tr in trsa.iter() {
@@ -67,6 +70,8 @@ where
             s1 = s2;
         }
     }
+
+    fst.set_properties_with_mask(props, FstProperties::all_properties());
 
     Ok(())
 }

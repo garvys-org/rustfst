@@ -3,11 +3,12 @@ use std::sync::Arc;
 use anyhow::{format_err, Result};
 
 use crate::fst_impls::ConstFst;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{SymbolTable, TrsConst};
 
-impl<W: Semiring + 'static> Fst<W> for ConstFst<W> {
+impl<W: Semiring> Fst<W> for ConstFst<W> {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.isymt.as_ref()
     }
@@ -83,5 +84,25 @@ impl<W: Semiring> CoreFst<W> for ConstFst<W> {
             pos: state.pos,
             n: state.ntrs,
         }
+    }
+
+    fn properties(&self) -> FstProperties {
+        self.properties
+    }
+
+    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+        Ok(self
+            .states
+            .get(state)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state))?
+            .niepsilons)
+    }
+
+    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+        Ok(self
+            .states
+            .get(state)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state))?
+            .noepsilons)
     }
 }

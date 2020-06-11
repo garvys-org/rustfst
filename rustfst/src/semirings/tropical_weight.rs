@@ -14,6 +14,7 @@ use crate::semirings::{
     CompleteSemiring, DivideType, ReverseBack, Semiring, SemiringProperties, StarSemiring,
     WeaklyDivisibleSemiring, WeightQuantize,
 };
+use crate::KDELTA;
 
 /// Tropical semiring: (min, +, inf, 0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
@@ -89,7 +90,7 @@ impl Semiring for TropicalWeight {
 
 impl ReverseBack<TropicalWeight> for TropicalWeight {
     fn reverse_back(&self) -> Result<TropicalWeight> {
-        Ok(self.clone())
+        Ok(*self)
     }
 }
 

@@ -14,6 +14,7 @@ use crate::algorithms::compose::lookahead_filters::{
 use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
 use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::{Tr, EPS_LABEL};
@@ -86,7 +87,7 @@ where
             .unwrap_or_else(|| Matcher::new(Arc::clone(&fst2), MatchType::MatchInput).unwrap());
 
         let lookahead_type = if SMT::match_type() == MatchType::MatchBoth {
-            lookahead_match_type(&matcher1, &matcher2)
+            lookahead_match_type(&matcher1, &matcher2)?
         } else {
             SMT::match_type()
         };
@@ -236,6 +237,14 @@ where
 
     fn matcher2_shared(&self) -> &Arc<Self::M2> {
         self.filter.matcher2_shared()
+    }
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties {
+        let outprops = self.filter.properties(inprops);
+        if self.lookahead_type == MatchType::MatchNone {
+            panic!("Error");
+        }
+        outprops
     }
 }
 

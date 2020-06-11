@@ -27,10 +27,11 @@ pub fn condense<W: Semiring, FI: Fst<W> + ExpandedFst<W>, FO: MutableFst<W>>(
                     ofst.set_start_unchecked(c);
                 }
                 if let Some(final_weight) = ifst.final_weight_unchecked(s) {
-                    match ofst.final_weight_unchecked_mut(c) {
-                        Some(w) => w.plus_assign(final_weight)?,
-                        None => ofst.set_final_unchecked(c, final_weight.clone()),
+                    let final_weight_ofst = match ofst.final_weight_unchecked(c) {
+                        Some(w) => w.plus(final_weight)?,
+                        None => final_weight,
                     };
+                    ofst.set_final_unchecked(c, final_weight_ofst);
                 }
                 for tr in ifst.get_trs_unchecked(s).trs() {
                     let nextc = scc[tr.nextstate] as usize;

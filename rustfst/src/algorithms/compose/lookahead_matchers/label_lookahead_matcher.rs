@@ -20,7 +20,7 @@ pub struct LabelLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
     w: PhantomData<W>,
 }
 
-impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
+impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
     for LabelLookAheadMatcher<W, M, MFT>
 {
     type F = M::F;
@@ -38,8 +38,8 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
         self.matcher.final_weight(state)
     }
 
-    fn match_type(&self) -> MatchType {
-        self.matcher.match_type()
+    fn match_type(&self, test: bool) -> Result<MatchType> {
+        self.matcher.match_type(test)
     }
 
     fn flags(&self) -> MatcherFlags {
@@ -123,7 +123,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
     }
 
     fn init_lookahead_fst<LF: ExpandedFst<W>>(&mut self, lfst: &Arc<LF>) -> Result<()> {
-        let reach_input = self.match_type() == MatchType::MatchOutput;
+        let reach_input = self.match_type(false)? == MatchType::MatchOutput;
         if let Some(reachable) = &mut self.reachable {
             reachable.reach_init(lfst, reach_input)?;
         }
@@ -177,7 +177,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
                         .lookahead_weight
                         .plus_assign(lfinal.unwrap())?;
                 } else {
-                    la_matcher_data.set_lookahead_weight(lfinal.unwrap().clone());
+                    la_matcher_data.set_lookahead_weight(lfinal.unwrap());
                 }
             }
             if reach_tr_bool || reach_final {

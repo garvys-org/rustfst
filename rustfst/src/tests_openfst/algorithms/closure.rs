@@ -4,16 +4,18 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use crate::algorithms::closure::{closure, ClosureFst, ClosureType};
+use crate::algorithms::fst_convert_from_ref;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
-use crate::tests_openfst::algorithms::lazy_fst::compare_fst_static_lazy;
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SimpleStaticLazyOperationResult {
-    result_static: String,
-    result_lazy: String,
+    result_static_path: String,
+    result_lazy_path: String,
 }
 
 pub struct SimpleStaticLazyTestData<W, F>
@@ -27,14 +29,15 @@ where
 }
 
 impl SimpleStaticLazyOperationResult {
-    pub fn parse<W, F>(&self) -> SimpleStaticLazyTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> SimpleStaticLazyTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         SimpleStaticLazyTestData {
-            result_static: F::from_text_string(self.result_static.as_str()).unwrap(),
-            result_lazy: F::from_text_string(self.result_lazy.as_str()).unwrap(),
+            result_static: F::read(dir_path.as_ref().join(&self.result_static_path)).unwrap(),
+            result_lazy: F::read(dir_path.as_ref().join(&self.result_lazy_path)).unwrap(),
             w: PhantomData,
         }
     }
@@ -47,16 +50,10 @@ where
     let closure_test_data = &test_data.closure_plus;
     let mut fst_res_static = test_data.raw.clone();
     closure(&mut fst_res_static, ClosureType::ClosurePlus);
-
-    assert_eq!(
-        closure_test_data.result_static,
-        fst_res_static,
-        "{}",
-        error_message_fst!(
-            closure_test_data.result_static,
-            fst_res_static,
-            format!("Closure plus failed")
-        )
+    test_eq_fst(
+        &closure_test_data.result_static,
+        &fst_res_static,
+        "Closure plus",
     );
     Ok(())
 }
@@ -68,16 +65,10 @@ where
     let closure_test_data = &test_data.closure_star;
     let mut fst_res_static = test_data.raw.clone();
     closure(&mut fst_res_static, ClosureType::ClosureStar);
-
-    assert_eq!(
-        closure_test_data.result_static,
-        fst_res_static,
-        "{}",
-        error_message_fst!(
-            closure_test_data.result_static,
-            fst_res_static,
-            format!("Closure star failed")
-        )
+    test_eq_fst(
+        &closure_test_data.result_static,
+        &fst_res_static,
+        "Closure star",
     );
     Ok(())
 }
@@ -88,9 +79,16 @@ where
 {
     let closure_test_data = &test_data.closure_plus;
     let closure_lazy_fst_openfst = &closure_test_data.result_lazy;
-    let closure_lazy_fst = ClosureFst::new(test_data.raw.clone(), ClosureType::ClosurePlus)?;
+    let closure_lazy_fst: VectorFst<_> = fst_convert_from_ref(&ClosureFst::new(
+        test_data.raw.clone(),
+        ClosureType::ClosurePlus,
+    )?);
 
-    compare_fst_static_lazy(closure_lazy_fst_openfst, &closure_lazy_fst)?;
+    test_eq_fst(
+        closure_lazy_fst_openfst,
+        &closure_lazy_fst,
+        "Closure plus lazy",
+    );
     Ok(())
 }
 
@@ -100,8 +98,15 @@ where
 {
     let closure_test_data = &test_data.closure_star;
     let closure_lazy_fst_openfst = &closure_test_data.result_lazy;
-    let closure_lazy_fst = ClosureFst::new(test_data.raw.clone(), ClosureType::ClosureStar)?;
+    let closure_lazy_fst: VectorFst<_> = fst_convert_from_ref(&ClosureFst::new(
+        test_data.raw.clone(),
+        ClosureType::ClosureStar,
+    )?);
 
-    compare_fst_static_lazy(closure_lazy_fst_openfst, &closure_lazy_fst)?;
+    test_eq_fst(
+        closure_lazy_fst_openfst,
+        &closure_lazy_fst,
+        "Closure star lazy",
+    );
     Ok(())
 }

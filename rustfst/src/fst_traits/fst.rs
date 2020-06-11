@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use crate::algorithms::tr_filters::{InputEpsilonTrFilter, OutputEpsilonTrFilter, TrFilter};
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::iterators::StateIterator;
 use crate::fst_traits::FstIterator;
 use crate::semirings::Semiring;
@@ -114,18 +114,38 @@ pub trait CoreFst<W: Semiring> {
 
     fn get_trs(&self, state_id: StateId) -> Result<Self::TRS>;
     unsafe fn get_trs_unchecked(&self, state_id: StateId) -> Self::TRS;
-}
 
-/// Trait defining the minimum interface necessary for a wFST.
-pub trait Fst<W: Semiring>:
-    CoreFst<W> + for<'b> StateIterator<'b> + Debug + for<'c> FstIterator<'c, W>
-{
-    // TODO: Move niepsilons and noepsilons to required methods.
+    /// Retrieve the `FstProperties` stored in the Fst. As a result, all the properties returned
+    /// are verified by the Fst but some other properties might be true as well despite the flag
+    /// not being set.
+    fn properties(&self) -> FstProperties;
+
+    /// Apply a mask to the FstProperties returned.
+    fn properties_with_mask(&self, mask: FstProperties) -> FstProperties {
+        self.properties() & mask
+    }
+
+    /// Retrieve the `FstProperties` in the Fst and check that all the
+    /// properties in `props_known` are known (not the same as true). If not an error is returned.
+    ///
+    /// A property is known if we known for sure if it is true of false.
+    fn properties_check(&self, props_known: FstProperties) -> Result<FstProperties> {
+        let props = self.properties();
+        if !props.knows(props_known) {
+            bail!(
+                "Properties are not known : {:?}. Properties of the Fst : {:?}",
+                props_known,
+                props
+            )
+        }
+        Ok(props)
+    }
+
     /// Returns the number of trs with epsilon input labels leaving a state.
     ///
     /// # Example :
     /// ```
-    /// # use rustfst::fst_traits::{MutableFst, Fst};
+    /// # use rustfst::fst_traits::{MutableFst, Fst, CoreFst};
     /// # use rustfst::fst_impls::VectorFst;
     /// # use rustfst::semirings::{Semiring, IntegerWeight};
     /// # use rustfst::EPS_LABEL;
@@ -143,20 +163,13 @@ pub trait Fst<W: Semiring>:
     /// assert_eq!(fst.num_input_epsilons(s0).unwrap(), 2);
     /// assert_eq!(fst.num_input_epsilons(s1).unwrap(), 0);
     /// ```
-    fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
-        let filter = InputEpsilonTrFilter {};
-        Ok(self
-            .get_trs(state)?
-            .iter()
-            .filter(|v| filter.keep(v))
-            .count())
-    }
+    fn num_input_epsilons(&self, state: StateId) -> Result<usize>;
 
     /// Returns the number of trs with epsilon output labels leaving a state.
     ///
     /// # Example :
     /// ```
-    /// # use rustfst::fst_traits::{MutableFst, Fst};
+    /// # use rustfst::fst_traits::{MutableFst, Fst, CoreFst};
     /// # use rustfst::fst_impls::VectorFst;
     /// # use rustfst::semirings::{Semiring, IntegerWeight};
     /// # use rustfst::EPS_LABEL;
@@ -174,32 +187,13 @@ pub trait Fst<W: Semiring>:
     /// assert_eq!(fst.num_output_epsilons(s0).unwrap(), 1);
     /// assert_eq!(fst.num_output_epsilons(s1).unwrap(), 0);
     /// ```
-    fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
-        let filter = OutputEpsilonTrFilter {};
-        Ok(self
-            .get_trs(state)?
-            .iter()
-            .filter(|v| filter.keep(v))
-            .count())
-    }
+    fn num_output_epsilons(&self, state: StateId) -> Result<usize>;
+}
 
-    /// Returns true if the Fst is an acceptor. False otherwise.
-    /// Acceptor means for all transition, transition.ilabel == transition.olabel
-    fn is_acceptor(&self) -> bool {
-        let states: Vec<_> = self.states_iter().collect();
-        unsafe {
-            for state in states {
-                for tr in self.get_trs_unchecked(state).trs() {
-                    if tr.ilabel != tr.olabel {
-                        return false;
-                    }
-                }
-            }
-        }
-
-        true
-    }
-
+/// Trait defining the minimum interface necessary for a wFST.
+pub trait Fst<W: Semiring>:
+    CoreFst<W> + for<'b> StateIterator<'b> + Debug + for<'c> FstIterator<'c, W>
+{
     /// Retrieves the input `SymbolTable` associated to the Fst.
     /// If no SymbolTable has been previously attached then `None` is returned.
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>>;

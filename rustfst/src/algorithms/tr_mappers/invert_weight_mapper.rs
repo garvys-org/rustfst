@@ -1,6 +1,7 @@
 use anyhow::Result;
 
 use crate::algorithms::{FinalTr, MapFinalAction, TrMapper, WeightConverter};
+use crate::fst_properties::FstProperties;
 use crate::semirings::{DivideType, WeaklyDivisibleSemiring};
 use crate::Tr;
 
@@ -24,6 +25,10 @@ impl<S: WeaklyDivisibleSemiring> TrMapper<S> for InvertWeightMapper {
 
     fn final_action(&self) -> MapFinalAction {
         MapFinalAction::MapNoSuperfinal
+    }
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties {
+        inprops & FstProperties::weight_invariant_properties()
     }
 }
 

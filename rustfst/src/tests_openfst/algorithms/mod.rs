@@ -10,7 +10,6 @@ pub mod factor_weight_identity;
 pub mod fst_convert;
 pub mod gallic_encode_decode;
 pub mod inverse;
-pub mod lazy_fst;
 pub mod tr_map;
 pub mod tr_sort;
 // pub mod matcher;

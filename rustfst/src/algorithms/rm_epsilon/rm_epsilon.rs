@@ -8,6 +8,7 @@ use crate::algorithms::top_sort::TopOrderVisitor;
 use crate::algorithms::tr_filters::EpsilonTrFilter;
 use crate::algorithms::visitors::SccVisitor;
 use crate::algorithms::Queue;
+use crate::fst_properties::mutable_properties::rmepsilon_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
@@ -99,14 +100,15 @@ pub fn rm_epsilon_with_config<W: Semiring, F: MutableFst<W>, Q: Queue>(
     // order (cyclic).
     let mut states = vec![];
 
-    let fst_props = fst.properties()?;
+    let fst_props = fst.properties();
 
     if fst_props.contains(FstProperties::TOP_SORTED) {
         states = (0..fst.num_states()).collect();
-    } else if fst_props.contains(FstProperties::TOP_SORTED) {
+    } else if fst_props.contains(FstProperties::ACYCLIC) {
         let mut visitor = TopOrderVisitor::new();
         dfs_visit(fst, &mut visitor, &EpsilonTrFilter {}, false);
 
+        states.resize(visitor.order.len(), 0);
         for i in 0..visitor.order.len() {
             states[visitor.order[i]] = i;
         }
@@ -169,6 +171,8 @@ pub fn rm_epsilon_with_config<W: Semiring, F: MutableFst<W>, Q: Queue>(
             }
         }
     }
+
+    fst.set_properties(rmepsilon_properties(fst.properties(), false));
 
     if weight_threshold != W::zero() || state_threshold != None {
         todo!("Implement Prune!")

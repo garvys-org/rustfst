@@ -39,48 +39,46 @@ impl UnaryFstAlgorithm for MapAlgorithm {
                 Ok(fst)
             }
             "identity" => {
-                let mut mapper = tr_mappers::IdentityTrMapper {};
-                tr_map(&mut fst, &mut mapper)?;
+                let mapper = tr_mappers::IdentityTrMapper {};
+                tr_map(&mut fst, &mapper)?;
                 Ok(fst)
             }
             "input_epsilon" => {
-                let mut mapper = tr_mappers::InputEpsilonMapper {};
-                tr_map(&mut fst, &mut mapper)?;
+                let mapper = tr_mappers::InputEpsilonMapper {};
+                tr_map(&mut fst, &mapper)?;
                 Ok(fst)
             }
             "invert" => {
-                let mut mapper = tr_mappers::InvertWeightMapper {};
-                tr_map(&mut fst, &mut mapper)?;
+                let mapper = tr_mappers::InvertWeightMapper {};
+                tr_map(&mut fst, &mapper)?;
                 Ok(fst)
             }
             "output_epsilon" => {
-                let mut mapper = tr_mappers::OutputEpsilonMapper {};
-                tr_map(&mut fst, &mut mapper)?;
+                let mapper = tr_mappers::OutputEpsilonMapper {};
+                tr_map(&mut fst, &mapper)?;
                 Ok(fst)
             }
             "plus" => {
                 // Safe because there is a check at parsing time.
-                let mut mapper =
-                    tr_mappers::PlusMapper::new(unsafe { self.weight.unsafe_unwrap() });
-                tr_map(&mut fst, &mut mapper)?;
+                let mapper = tr_mappers::PlusMapper::new(unsafe { self.weight.unsafe_unwrap() });
+                tr_map(&mut fst, &mapper)?;
                 Ok(fst)
             }
             "quantize" => {
                 // TODO: Handle the delta parameter
-                let mut mapper = tr_mappers::QuantizeMapper {};
-                tr_map(&mut fst, &mut mapper)?;
+                let mapper = tr_mappers::QuantizeMapper {};
+                tr_map(&mut fst, &mapper)?;
                 Ok(fst)
             }
             "rmweight" => {
-                let mut mapper = tr_mappers::RmWeightMapper {};
-                tr_map(&mut fst, &mut mapper)?;
+                let mapper = tr_mappers::RmWeightMapper {};
+                tr_map(&mut fst, &mapper)?;
                 Ok(fst)
             }
             "times" => {
                 // Safe because there is a check at parsing time.
-                let mut mapper =
-                    tr_mappers::TimesMapper::new(unsafe { self.weight.unsafe_unwrap() });
-                tr_map(&mut fst, &mut mapper)?;
+                let mapper = tr_mappers::TimesMapper::new(unsafe { self.weight.unsafe_unwrap() });
+                tr_map(&mut fst, &mapper)?;
                 Ok(fst)
             }
             _ => bail!(

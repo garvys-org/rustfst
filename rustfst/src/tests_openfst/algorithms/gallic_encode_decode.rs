@@ -8,17 +8,19 @@ use crate::algorithms::weight_converters::FromGallicConverter;
 use crate::algorithms::weight_converters::ToGallicConverter;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
-use crate::semirings::GallicWeightLeft;
 use crate::semirings::GallicWeightMin;
 use crate::semirings::GallicWeightRestrict;
 use crate::semirings::GallicWeightRight;
 use crate::semirings::{GallicWeight, SerializableSemiring};
+use crate::semirings::{GallicWeightLeft, WeightQuantize};
+use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GallicOperationResult {
     gallic_type: String,
-    result: String,
+    result_path: String,
 }
 
 pub struct GallicTestData<W, F>
@@ -32,14 +34,15 @@ where
 }
 
 impl GallicOperationResult {
-    pub fn parse<W, F>(&self) -> GallicTestData<W, F>
+    pub fn parse<W, F, P>(&self, dir_path: P) -> GallicTestData<W, F>
     where
         F: SerializableFst<W>,
         W: SerializableSemiring,
+        P: AsRef<Path>,
     {
         GallicTestData {
             gallic_type: self.gallic_type.clone(),
-            result: F::from_text_string(self.result.as_str()).unwrap(),
+            result: F::read(dir_path.as_ref().join(&self.result_path)).unwrap(),
             w: PhantomData,
         }
     }
@@ -47,7 +50,7 @@ impl GallicOperationResult {
 
 pub fn test_gallic_encode_decode<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
-    W: SerializableSemiring,
+    W: SerializableSemiring + WeightQuantize,
 {
     for data in &test_data.gallic_encode_decode {
         let mut to_gallic = ToGallicConverter {};
@@ -84,13 +87,13 @@ where
             _ => bail!("Unexpected gallic_type={:?}", data.gallic_type),
         };
 
-        assert_eq_fst!(
-            data.result,
-            fst_res,
+        test_eq_fst(
+            &data.result,
+            &fst_res,
             format!(
                 "Gallic encode decode with failling with gallic_type={:?}",
                 data.gallic_type
-            )
+            ),
         );
     }
     Ok(())

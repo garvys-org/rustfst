@@ -149,7 +149,7 @@ where
     W: SerializableSemiring + WeightQuantize,
 {
     let ref_props = test_data.fst_properties;
-    let props = test_data.raw.properties()?;
+    let props = test_data.raw.properties();
 
     assert_eq!(props, ref_props);
 

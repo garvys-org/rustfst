@@ -7,6 +7,7 @@ use anyhow::Result;
 use crate::algorithms::factor_weight::factor_weight_op::FactorWeightOp;
 use crate::algorithms::factor_weight::{FactorIterator, FactorWeightOptions};
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::WeightQuantize;
 use crate::{SymbolTable, TrsVec};
@@ -55,6 +56,18 @@ where
 
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
         self.0.get_trs_unchecked(state_id)
+    }
+
+    fn properties(&self) -> FstProperties {
+        self.0.properties()
+    }
+
+    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+        self.0.num_input_epsilons(state)
+    }
+
+    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+        self.0.num_output_epsilons(state)
     }
 }
 

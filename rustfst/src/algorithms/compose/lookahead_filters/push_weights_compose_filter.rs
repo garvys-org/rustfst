@@ -10,6 +10,7 @@ use crate::algorithms::compose::lookahead_filters::LookAheadComposeFilterTrait;
 use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
 use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::{Tr, KDELTA};
@@ -164,6 +165,10 @@ where
 
     fn matcher2_shared(&self) -> &Arc<Self::M2> {
         self.filter.matcher2_shared()
+    }
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties {
+        self.filter.properties(inprops) & FstProperties::weight_invariant_properties()
     }
 }
 

@@ -1,6 +1,7 @@
 use anyhow::Result;
 
 use crate::algorithms::{FinalTr, MapFinalAction};
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Tr, Trs, EPS_LABEL};
@@ -12,6 +13,7 @@ pub trait WeightConverter<SI: Semiring, SO: Semiring> {
     fn tr_map(&mut self, tr: &Tr<SI>) -> Result<Tr<SO>>;
     fn final_tr_map(&mut self, final_tr: &FinalTr<SI>) -> Result<FinalTr<SO>>;
     fn final_action(&self) -> MapFinalAction;
+    fn properties(&self, iprops: FstProperties) -> FstProperties;
 }
 
 /// Convert an FST in a given Semiring to another Semiring using a WeightConverter
@@ -24,6 +26,7 @@ where
     F2: MutableFst<W2> + AllocableFst<W2>,
     M: WeightConverter<W1, W2>,
 {
+    let iprops = fst_in.properties();
     let mut fst_out = F2::new();
     let final_action = mapper.final_action();
 
@@ -121,6 +124,12 @@ where
             }
         }
     }
+
+    let oprops = fst_out.properties();
+    fst_out.set_properties_with_mask(
+        mapper.properties(iprops) | oprops,
+        FstProperties::all_properties(),
+    );
 
     Ok(fst_out)
 }

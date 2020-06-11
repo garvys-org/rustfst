@@ -1,8 +1,8 @@
 use anyhow::Result;
 
-use crate::fst_properties::compute_fst_properties;
-use crate::fst_properties::FstProperties;
-use crate::fst_traits::{Fst, FstIntoIterator};
+use crate::algorithms::fst_convert_from_ref;
+use crate::algorithms::tr_mappers::QuantizeMapper;
+use crate::fst_traits::{AllocableFst, Fst, FstIntoIterator, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
 use crate::{Trs, KDELTA};
 
@@ -31,11 +31,6 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
     /// ```
     fn num_states(&self) -> usize;
 
-    /// Compute the properties verified by the Fst.
-    fn properties(&self) -> Result<FstProperties> {
-        compute_fst_properties(self)
-    }
-
     fn equal_quantized<F2: ExpandedFst<W>>(&self, fst2: &F2) -> bool
     where
         W: WeightQuantize,
@@ -63,13 +58,11 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
                     || tr1.olabel != tr2.olabel
                     || tr1.nextstate != tr2.nextstate
                 {
-                    println!("A tr1 : {:?} tr2 : {:?} for state {:?}", &tr1, &tr2, state);
                     return false;
                 }
                 let w1 = tr1.weight.quantize(KDELTA).unwrap();
                 let w2 = tr2.weight.quantize(KDELTA).unwrap();
                 if w1 != w2 {
-                    println!("B");
                     return false;
                 }
             }
@@ -85,5 +78,15 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
         }
 
         true
+    }
+
+    fn quantize<F2: MutableFst<W> + AllocableFst<W>>(&self) -> Result<F2>
+    where
+        W: WeightQuantize,
+    {
+        let mut fst_tr_map: F2 = fst_convert_from_ref(self);
+        let mut mapper = QuantizeMapper {};
+        fst_tr_map.tr_map(&mut mapper)?;
+        Ok(fst_tr_map)
     }
 }

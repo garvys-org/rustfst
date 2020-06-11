@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator};
 use crate::semirings::Semiring;
 use crate::SymbolTable;
@@ -68,6 +69,18 @@ impl<W: Semiring, F: CoreFst<W>> CoreFst<W> for Arc<F> {
 
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
         self.deref().get_trs_unchecked(state_id)
+    }
+
+    fn properties(&self) -> FstProperties {
+        self.deref().properties()
+    }
+
+    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+        self.deref().num_input_epsilons(state)
+    }
+
+    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+        self.deref().num_output_epsilons(state)
     }
 }
 

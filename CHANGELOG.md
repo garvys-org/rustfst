@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All the lazy fsts except `rm_epsilon` are now Send and Sync.
 - Remove the `TrIterator` in favor of the `get_trs` method in the CoreFst trait.
 - Add method `read_from_const` to `VectorFst` allowing to load a `VectorFst` from a `ConstFst` file.
+- Add `compute_and_update_properties()` method to `MutableFst` trait to compute the properties verified by the `Fst` and update the internal property bits.
 
 ### Changed
 - `fst_convert` now consumes its input. Use `fst_convert_from_ref` to pass a borrow.
@@ -41,6 +42,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ComposeFst` now clonable.
 - Remove call to `collect_vec` when calling `LabelReachable.reach()`.
 - `num_trs` and `num_trs_unchecked` are now mandatory methods of the `Fst` trait. This allows removing useless calls to `Arc::clone`.
+- Now the `fst.properties()` method returns the stored property bits instead of computing all the verified properties.
+- Now `tr_sort` no longer need a sorting closure but a struct implementing `TrCompare`.
+    - `ilabel_compare` -> `ILabelCompare`
+    - `olabel_compare` -> `OLabelCompare`
+- `num_input_epsilons` and `num_output_epsilons` are now required methods of the `CoreFst` trait instead of provided.
+- `num_input_epsilons` and `num_output_epsilons` are now much faster as they leverage internal counters instead of iterating through the Trs.
 
 ### Fixed
 - Fix olabel display while drawing a FST if no symbol table is provided

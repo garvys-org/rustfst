@@ -3,6 +3,8 @@ use std::sync::Arc;
 use anyhow::Result;
 
 use crate::algorithms::replace::ReplaceFst;
+use crate::fst_properties::mutable_properties::concat_properties;
+use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{SymbolTable, Tr, TrsVec, EPS_LABEL};
@@ -12,7 +14,7 @@ use crate::{SymbolTable, Tr, TrsVec, EPS_LABEL};
 /// string w to v with weight b, then their concatenation transduces string xw
 /// to yv with Times(a, b).
 #[derive(Debug)]
-pub struct ConcatFst<W: Semiring, F: Fst<W> + 'static>(ReplaceFst<W, F, F>);
+pub struct ConcatFst<W: Semiring, F: Fst<W> + 'static>(ReplaceFst<W, F, F>, FstProperties);
 
 impl<W, F> ConcatFst<W, F>
 where
@@ -22,6 +24,8 @@ where
     //TODO: Use a borrow and not a move
     //TODO: Allow fsts of different types
     pub fn new(fst1: F, fst2: F) -> Result<Self> {
+        let props1 = fst1.properties();
+        let props2 = fst2.properties();
         let mut rfst = F::new();
         rfst.add_states(3);
         unsafe { rfst.set_start_unchecked(0) };
@@ -40,7 +44,10 @@ where
         fst_tuples.push((std::usize::MAX, fst1));
         fst_tuples.push((std::usize::MAX - 1, fst2));
 
-        Ok(ConcatFst(ReplaceFst::new(fst_tuples, 0, false)?))
+        Ok(ConcatFst(
+            ReplaceFst::new(fst_tuples, 0, false)?,
+            concat_properties(props1, props2, true),
+        ))
     }
 
     /// Turns the Lazy FST into a static one.
@@ -82,6 +89,18 @@ where
 
     unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
         self.0.get_trs_unchecked(state_id)
+    }
+
+    fn properties(&self) -> FstProperties {
+        self.1
+    }
+
+    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+        self.0.num_input_epsilons(state)
+    }
+
+    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+        self.0.num_output_epsilons(state)
     }
 }
 
