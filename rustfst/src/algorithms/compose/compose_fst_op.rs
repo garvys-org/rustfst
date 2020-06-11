@@ -1,12 +1,11 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use itertools::Itertools;
 
 use crate::algorithms::compose::compose_filters::{ComposeFilter, ComposeFilterBuilder};
 use crate::algorithms::compose::filter_states::FilterState;
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::Selector;
-use crate::algorithms::compose::matchers::MatcherFlags;
+use crate::algorithms::compose::matchers::{MatcherFlags, IterItemMatcher};
 use crate::algorithms::compose::matchers::{MatchType, Matcher, REQUIRE_PRIORITY};
 use crate::algorithms::compose::{ComposeFstOpOptions, ComposeStateTuple};
 use crate::algorithms::lazy_fst_revamp::{FstOp, StateTable};
@@ -199,22 +198,14 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
         ))
     }
 
-    fn match_tr(
-        &self,
-        sa: StateId,
-        tr: &Tr<W>,
-        match_input: bool,
-        compose_filter: &mut CFB::CF,
-        selector: Selector,
+    fn match_iter_selected(&self,
+                           sa: StateId,
+                           tr: &Tr<W>,
+                           match_input: bool,
+                           compose_filter: &mut CFB::CF,
+                           temp: impl Iterator<Item=IterItemMatcher<W>>
     ) -> Result<Vec<Tr<W>>> {
-        let label = if match_input { tr.olabel } else { tr.ilabel };
         let mut trs = vec![];
-
-        // Collect necessary here because need to borrow_mut a matcher later. To investigate.
-        let temp = match selector {
-            Selector::Fst2Matcher1 => compose_filter.matcher1().iter(sa, label)?.collect_vec(),
-            Selector::Fst1Matcher2 => compose_filter.matcher2().iter(sa, label)?.collect_vec(),
-        };
         for arca in temp {
             let mut arca = arca.into_tr(
                 sa,
@@ -238,8 +229,27 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
                 }
             }
         }
-
         Ok(trs)
+    }
+
+    fn match_tr(
+        &self,
+        sa: StateId,
+        tr: &Tr<W>,
+        match_input: bool,
+        compose_filter: &mut CFB::CF,
+        selector: Selector,
+    ) -> Result<Vec<Tr<W>>> {
+        let label = if match_input { tr.olabel } else { tr.ilabel };
+
+        match selector {
+            Selector::Fst2Matcher1 => self.match_iter_selected(
+                sa, tr, match_input, compose_filter, compose_filter.matcher1().iter(sa, label)?
+            ),
+            Selector::Fst1Matcher2 => self.match_iter_selected(
+                sa, tr, match_input, compose_filter, compose_filter.matcher2().iter(sa, label)?
+            )
+        }
     }
 }
 
