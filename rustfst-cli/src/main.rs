@@ -4,6 +4,8 @@ use anyhow::{format_err, Result};
 use clap::{App, Arg, SubCommand};
 use log::error;
 
+use crate::binary_fst_algorithm::BinaryFstAlgorithm;
+use crate::cmds::compose::ComposeAlgorithm;
 use crate::cmds::connect::ConnectAlgorithm;
 use crate::cmds::invert::InvertAlgorithm;
 use crate::cmds::map::MapAlgorithm;
@@ -17,6 +19,7 @@ use crate::cmds::topsort::TopsortAlgorithm;
 use crate::cmds::tr_sort::TrsortAlgorithm;
 use crate::unary_fst_algorithm::UnaryFstAlgorithm;
 
+pub mod binary_fst_algorithm;
 pub mod cmds;
 pub mod unary_fst_algorithm;
 
@@ -140,6 +143,10 @@ fn main() {
         .arg(Arg::with_name("remove_common_affix").long("remove_common_affix"));
     app = app.subcommand(one_in_one_out_options(push_cmd));
 
+    // Compose
+    let compose_cmd = SubCommand::with_name("compose").about("Compose algorithm");
+    app = app.subcommand(two_in_one_out_options(compose_cmd));
+
     let matches = app.get_matches();
 
     let env = env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "debug");
@@ -224,6 +231,12 @@ fn handle(matches: clap::ArgMatches) -> Result<()> {
             m.is_present("remove_common_affix"),
         )
         .run_cli_or_bench(m),
+        ("compose", Some(m)) => ComposeAlgorithm::new(
+            m.value_of("in_1.fst").unwrap(),
+            m.value_of("in_2.fst").unwrap(),
+            m.value_of("out.fst").unwrap(),
+        )
+        .run_cli_or_bench(m),
         (s, _) => Err(format_err!("Unknown subcommand {}.", s)),
     }
 }
@@ -256,6 +269,45 @@ fn one_in_one_out_options<'a, 'b>(command: clap::App<'a, 'b>) -> clap::App<'a, '
                 .default_value("3")
                 .help("Number of warm ups run before the actual benchmark.")
         ).arg(
+        Arg::with_name("export-markdown")
+            .long("export-markdown")
+            .takes_value(true)
+    )
+}
+
+fn two_in_one_out_options<'a, 'b>(command: clap::App<'a, 'b>) -> clap::App<'a, 'b> {
+    command
+        .version("1.0")
+        .author("Alexandre Caulier <alexandre.caulier@protonmail.com>")
+        .arg(
+            Arg::with_name("in_1.fst")
+                .help("Path to the first input fst file.")
+                .required(true),
+        )
+        .arg(
+            Arg::with_name("in_2.fst")
+                .help("Path to the second input fst file.")
+                .required(true),
+        )
+        .arg(
+            Arg::with_name("out.fst")
+                .help("Path to output fst file.")
+                .required(true),
+        ).arg(
+        Arg::with_name("bench")
+            .long("bench")
+            .help("Whether to run multiple times the algorithm in order to have a reliable time measurement.")
+    ).arg(
+        Arg::with_name("n_iters")
+            .long("n_iters")
+            .default_value("10")
+            .help("Number of iterations to run for the benchmark.")
+    ).arg(
+        Arg::with_name("n_warm_ups")
+            .long("n_warm_ups")
+            .default_value("3")
+            .help("Number of warm ups run before the actual benchmark.")
+    ).arg(
         Arg::with_name("export-markdown")
             .long("export-markdown")
             .takes_value(true)

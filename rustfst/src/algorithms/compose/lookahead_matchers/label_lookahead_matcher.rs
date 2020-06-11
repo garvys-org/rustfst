@@ -164,7 +164,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
             if let Some((reach_begin, reach_end, reach_weight)) = reach_tr {
                 if compute_prefix && (reach_end - reach_begin) == 1 && !reach_final {
                     let trs_owner = lfst.get_trs(lfst_state)?;
-                    let tr = trs_owner.trs().iter().skip(reach_begin).next().unwrap();
+                    let tr = &trs_owner.trs()[reach_begin];
                     la_matcher_data.set_lookahead_prefix(tr.clone());
                     compute_weight = false;
                 } else {
