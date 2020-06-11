@@ -115,11 +115,21 @@ pub trait CoreFst<W: Semiring> {
     fn get_trs(&self, state_id: StateId) -> Result<Self::TRS>;
     unsafe fn get_trs_unchecked(&self, state_id: StateId) -> Self::TRS;
 
+    /// Retrieve the `FstProperties` stored in the Fst. As a result, all the properties returned
+    /// are verified by the Fst but some other properties might be true as well despite the flag
+    /// not being set.
     fn properties(&self) -> FstProperties;
+
+    /// Apply a mask to the FstProperties returned.
     fn properties_with_mask(&self, mask: FstProperties) -> FstProperties {
         self.properties() & mask
     }
-    fn properties_test(&self, props_known: FstProperties) -> Result<FstProperties> {
+
+    /// Retrieve the `FstProperties` in the Fst and check that all the
+    /// properties in `props_known` are known (not the same as true). If not an error is returned.
+    ///
+    /// A property is known if we known for sure if it is true of false.
+    fn properties_check(&self, props_known: FstProperties) -> Result<FstProperties> {
         let props = self.properties();
         if !props.knows(props_known) {
             bail!(
@@ -184,23 +194,6 @@ pub trait CoreFst<W: Semiring> {
 pub trait Fst<W: Semiring>:
     CoreFst<W> + for<'b> StateIterator<'b> + Debug + for<'c> FstIterator<'c, W>
 {
-    /// Returns true if the Fst is an acceptor. False otherwise.
-    /// Acceptor means for all transition, transition.ilabel == transition.olabel
-    fn is_acceptor(&self) -> bool {
-        let states: Vec<_> = self.states_iter().collect();
-        unsafe {
-            for state in states {
-                for tr in self.get_trs_unchecked(state).trs() {
-                    if tr.ilabel != tr.olabel {
-                        return false;
-                    }
-                }
-            }
-        }
-
-        true
-    }
-
     /// Retrieves the input `SymbolTable` associated to the Fst.
     /// If no SymbolTable has been previously attached then `None` is returned.
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>>;

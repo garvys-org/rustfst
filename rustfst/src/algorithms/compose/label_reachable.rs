@@ -281,7 +281,7 @@ impl LabelReachable {
             FstProperties::O_LABEL_SORTED
         };
 
-        let props = fst.properties_test(true_prop)?;
+        let props = fst.properties_check(true_prop)?;
 
         if !props.contains(true_prop) {
             bail!("LabelReachable::ReachInit: Fst is not sorted")

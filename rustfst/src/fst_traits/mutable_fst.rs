@@ -335,9 +335,14 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
         crate::algorithms::tr_map(self, mapper)
     }
 
+    /// Set the internal properties of the Fst. All the set properties must be verified by the Fst!
     fn set_properties(&mut self, props: FstProperties);
+
+    /// Set only a subset of the internal properties of the Fst.
     fn set_properties_with_mask(&mut self, props: FstProperties, mask: FstProperties);
 
+    /// Compute the properties verified by the Fst (with a mask) and update
+    /// the internal property bits.
     fn compute_and_update_properties(&mut self, mask: FstProperties) -> Result<FstProperties> {
         let mut knownprops = FstProperties::empty();
         let testprops =
@@ -346,6 +351,7 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
         Ok(testprops & mask)
     }
 
+    /// Compute all the properties verified by the Fst and update the internal property bits.
     fn compute_and_update_properties_all(&mut self) -> Result<FstProperties> {
         self.compute_and_update_properties(FstProperties::all_properties())
     }

@@ -59,7 +59,7 @@ impl<W: Semiring, F: ExpandedFst<W>> Matcher<W> for SortedMatcher<W, F> {
         };
 
         let props = if test {
-            self.fst.properties_test(true_prop | false_prop)?
+            self.fst.properties_check(true_prop | false_prop)?
         } else {
             self.fst.properties()
         };

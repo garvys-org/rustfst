@@ -49,15 +49,19 @@ pub fn test_num_epsilons<W: Semiring, FREF: ExpandedFst<W>, FPRED: ExpandedFst<W
     fst_pred: &FPRED,
     msg: String,
 ) {
-    assert_eq!(fst_ref.num_states(), fst_pred.num_states());
+    assert_eq!(fst_ref.num_states(), fst_pred.num_states(), "{}", &msg);
     for s in 0..fst_ref.num_states() {
         assert_eq!(
             fst_ref.num_input_epsilons(s).unwrap(),
-            fst_pred.num_input_epsilons(s).unwrap()
+            fst_pred.num_input_epsilons(s).unwrap(),
+            "{}",
+            &msg
         );
         assert_eq!(
             fst_ref.num_output_epsilons(s).unwrap(),
-            fst_pred.num_output_epsilons(s).unwrap()
+            fst_pred.num_output_epsilons(s).unwrap(),
+            "{}",
+            &msg
         );
     }
 }
