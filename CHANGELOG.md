@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove the `TrIterator` in favor of the `get_trs` method in the CoreFst trait.
 - Add method `read_from_const` to `VectorFst` allowing to load a `VectorFst` from a `ConstFst` file.
 - Add `compute_and_update_properties()` method to `MutableFst` trait to compute the properties verified by the `Fst` and update the internal property bits.
+- Add support for `compose` in `rustfst-cli`.
 
 ### Changed
 - `fst_convert` now consumes its input. Use `fst_convert_from_ref` to pass a borrow.
