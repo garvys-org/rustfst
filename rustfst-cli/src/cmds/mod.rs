@@ -1,3 +1,4 @@
+pub mod compose;
 pub mod connect;
 pub mod invert;
 pub mod map;

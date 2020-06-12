@@ -8,6 +8,7 @@ from rustfst_python_bench.algorithms.reverse import ReverseAlgorithm
 from rustfst_python_bench.algorithms.rm_final_epsilon import RmFinalEpsilonAlgorithm
 from rustfst_python_bench.algorithms.shortestpath import ShortestPathAlgorithm
 from rustfst_python_bench.algorithms.map import MapAlgorithm
+from rustfst_python_bench.algorithms.compose import ComposeAlgorithm
 
 
 class SupportedAlgorithms(object):
@@ -36,4 +37,5 @@ SupportedAlgorithms.register("project", ProjectAlgorithm)
 SupportedAlgorithms.register("reverse", ReverseAlgorithm)
 # SupportedAlgorithms.register("rmfinalepsilon", RmFinalEpsilonAlgorithm)
 SupportedAlgorithms.register("shortestpath", ShortestPathAlgorithm)
+# SupportedAlgorithms.register("compose", ComposeAlgorithm)
 
