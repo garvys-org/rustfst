@@ -18,7 +18,6 @@ int main(int argc, char **argv) {
 
     cout << "Running benchmark for algorithm compose" << endl;
     BINARY_ALGO_BENCH(
-        auto fst_out = new VectorFst<StdArc>();
         Compose(*fst_1, *fst_2, fst_out);
     )
 }

@@ -95,6 +95,7 @@ float standard_deviation(const std::vector<float>& data) {
         auto parsing_end = high_resolution_clock::now();\
         auto parsing_duration = std::chrono::duration_cast<std::chrono::microseconds>(parsing_end - parsing_start).count() / 1000000.0;\
 \
+        auto fst_out = new VectorFst<StdArc>();\
         auto algo_start = high_resolution_clock::now();\
         code\
         auto algo_end = high_resolution_clock::now();\
