@@ -61,9 +61,6 @@ def parse():
 def bench(path_in_fst_1, path_in_fst_2, path_report_md, warmup, runs, compose_type):
     algo_name = "compose"
     algo_class = SupportedAlgorithms.get(algo_name)
-    # path_in_fst_1 = "/Users/alexandre.caulier/Documents/rustfst/kaldi_models/0001_aspire_chain_model/data/lang_pp_test/L.fst"
-    # path_in_fst_1 = "/Users/alexandre.caulier/Documents/rustfst/kaldi_models/0001_aspire_chain_model/data/lang_pp_test/L_disambig.fst"
-    # path_in_fst_2 = "/Users/alexandre.caulier/Documents/rustfst/kaldi_models/0001_aspire_chain_model/data/lang_pp_test/G.fst"
     algo = algo_class(compose_type=compose_type)
 
     with tempfile.TemporaryDirectory() as tmpdirname:
