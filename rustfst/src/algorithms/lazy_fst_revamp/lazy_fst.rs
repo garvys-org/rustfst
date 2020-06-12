@@ -9,7 +9,9 @@ use unsafe_unwrap::UnsafeUnwrap;
 use crate::algorithms::lazy_fst_revamp::fst_op::FstOp;
 use crate::algorithms::lazy_fst_revamp::FstCache;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, Fst, FstIterData, FstIterator, MutableFst, StateIterator};
+use crate::fst_traits::{
+    AllocableFst, CoreFst, Fst, FstIterData, FstIterator, MutableFst, StateIterator,
+};
 use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable, Trs, TrsVec};
 use std::collections::{HashSet, VecDeque};
@@ -212,16 +214,14 @@ where
     }
 
     /// Turns the Lazy FST into a static one.
-    pub fn compute<F2: MutableFst<W>>(&self) -> Result<F2> {
+    pub fn compute<F2: MutableFst<W> + AllocableFst<W>>(&self) -> Result<F2> {
         let start_state = self.start();
         let mut fst_out = F2::new();
         if start_state.is_none() {
             return Ok(fst_out);
         }
         let start_state = start_state.unwrap();
-        for _ in 0..=start_state {
-            fst_out.add_state();
-        }
+        fst_out.add_states(start_state + 1);
         fst_out.set_start(start_state)?;
         let mut queue = VecDeque::new();
         let mut visited_states = HashSet::new();
@@ -229,14 +229,16 @@ where
         queue.push_back(start_state);
         while !queue.is_empty() {
             let s = queue.pop_front().unwrap();
-            for tr in self.get_trs(s)?.trs() {
+            let trs_owner = unsafe { self.get_trs_unchecked(s) };
+            unsafe { fst_out.reserve_trs_unchecked(s, trs_owner.len()) };
+            for tr in trs_owner.trs() {
                 if !visited_states.contains(&tr.nextstate) {
                     queue.push_back(tr.nextstate);
                     visited_states.insert(tr.nextstate);
                 }
                 let n = fst_out.num_states();
-                for _ in n..=tr.nextstate {
-                    fst_out.add_state();
+                if tr.nextstate >= n {
+                    fst_out.add_states(tr.nextstate - n + 1)
                 }
                 fst_out.add_tr(s, tr.clone())?;
             }

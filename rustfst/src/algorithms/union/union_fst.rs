@@ -52,7 +52,7 @@ where
     }
 
     /// Turns the Lazy FST into a static one.
-    pub fn compute<F2: MutableFst<W>>(&self) -> Result<F2> {
+    pub fn compute<F2: MutableFst<W> + AllocableFst<W>>(&self) -> Result<F2> {
         self.0.compute()
     }
 }

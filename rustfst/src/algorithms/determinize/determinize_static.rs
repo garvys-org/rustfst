@@ -26,9 +26,9 @@ pub fn determinize_with_distance<W, F1, F2>(
     in_dist: Arc<Vec<W>>,
 ) -> Result<(F2, Vec<W>)>
 where
-    W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
+    W: WeaklyDivisibleSemiring + WeightQuantize,
     F1: ExpandedFst<W>,
-    F2: MutableFst<W>,
+    F2: MutableFst<W> + AllocableFst<W>,
 {
     if !W::properties().contains(SemiringProperties::LEFT_SEMIRING) {
         bail!("determinize_fsa : weight must be left distributive")
@@ -39,9 +39,9 @@ where
 
 pub fn determinize_fsa<W, F1, F2, CD>(fst_in: Arc<F1>) -> Result<F2>
 where
-    W: WeaklyDivisibleSemiring + WeightQuantize + 'static,
+    W: WeaklyDivisibleSemiring + WeightQuantize,
     F1: Fst<W>,
-    F2: MutableFst<W>,
+    F2: MutableFst<W> + AllocableFst<W>,
     CD: CommonDivisor<W>,
 {
     if !W::properties().contains(SemiringProperties::LEFT_SEMIRING) {
