@@ -188,7 +188,7 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
         ))
     }
 
-    fn match_iter_selected(
+    fn match_tr_selected(
         &self,
         sa: StateId,
         tr: &Tr<W>,
@@ -233,7 +233,7 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
         let label = if match_input { tr.olabel } else { tr.ilabel };
 
         match selector {
-            Selector::Fst2Matcher1 => self.match_iter_selected(
+            Selector::Fst2Matcher1 => self.match_tr_selected(
                 sa,
                 tr,
                 match_input,
@@ -241,7 +241,7 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
                 compose_filter.matcher1().iter(sa, label)?,
                 trs,
             ),
-            Selector::Fst1Matcher2 => self.match_iter_selected(
+            Selector::Fst1Matcher2 => self.match_tr_selected(
                 sa,
                 tr,
                 match_input,
