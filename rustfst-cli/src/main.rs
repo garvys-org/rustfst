@@ -144,16 +144,15 @@ fn main() {
     app = app.subcommand(one_in_one_out_options(push_cmd));
 
     // Compose
-    let compose_cmd = SubCommand::with_name("compose").about("Compose algorithm").arg(
-        Arg::with_name("compose_type")
-            .long("compose_type")
-            .possible_values(&[
-                "default",
-                "lookahead"
-            ])
-            .takes_value(true)
-            .default_value("default")
-    );
+    let compose_cmd = SubCommand::with_name("compose")
+        .about("Compose algorithm")
+        .arg(
+            Arg::with_name("compose_type")
+                .long("compose_type")
+                .possible_values(&["default", "lookahead"])
+                .takes_value(true)
+                .default_value("default"),
+        );
     app = app.subcommand(two_in_one_out_options(compose_cmd));
 
     let matches = app.get_matches();
@@ -244,7 +243,7 @@ fn handle(matches: clap::ArgMatches) -> Result<()> {
             m.value_of("in_1.fst").unwrap(),
             m.value_of("in_2.fst").unwrap(),
             m.value_of("out.fst").unwrap(),
-            m.value_of("compose_type").unwrap()
+            m.value_of("compose_type").unwrap(),
         )
         .run_cli_or_bench(m),
         (s, _) => Err(format_err!("Unknown subcommand {}.", s)),

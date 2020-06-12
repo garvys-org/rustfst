@@ -2,29 +2,38 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use rustfst::algorithms::compose::{compose, MatcherFst, LabelReachableData, ComposeFstOpOptions, ComposeFst};
+use rustfst::algorithms::compose::{
+    compose, ComposeFst, ComposeFstOpOptions, LabelReachableData, MatcherFst,
+};
 use rustfst::fst_impls::VectorFst;
 use rustfst::semirings::TropicalWeight;
 
 use crate::binary_fst_algorithm::BinaryFstAlgorithm;
-use rustfst::algorithms::compose::lookahead_matchers::{LabelLookAheadMatcher, LookaheadMatcher, MatcherFlagsTrait};
-use rustfst::algorithms::compose::matchers::{SortedMatcher, MatchType, Matcher, MatcherFlags};
-use rustfst::algorithms::compose::compose_filters::{AltSequenceComposeFilterBuilder, ComposeFilterBuilder};
-use rustfst::algorithms::compose::lookahead_filters::{LookAheadComposeFilterBuilder, PushWeightsComposeFilterBuilder, PushLabelsComposeFilterBuilder, SMatchOutput};
+use rustfst::algorithms::compose::compose_filters::{
+    AltSequenceComposeFilterBuilder, ComposeFilterBuilder,
+};
+use rustfst::algorithms::compose::lookahead_filters::{
+    LookAheadComposeFilterBuilder, PushLabelsComposeFilterBuilder, PushWeightsComposeFilterBuilder,
+    SMatchOutput,
+};
+use rustfst::algorithms::compose::lookahead_matchers::{
+    LabelLookAheadMatcher, LookaheadMatcher, MatcherFlagsTrait,
+};
+use rustfst::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags, SortedMatcher};
 use rustfst::algorithms::tr_compares::ILabelCompare;
 use rustfst::algorithms::tr_sort;
 
 #[derive(Debug, Clone, Copy)]
 pub enum ComposeType {
     Default,
-    LookAhead
+    LookAhead,
 }
 
 pub struct ComposeAlgorithm {
     path_in_1: String,
     path_in_2: String,
     path_out: String,
-    compose_type: ComposeType
+    compose_type: ComposeType,
 }
 
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
@@ -63,29 +72,34 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
         mut fst_2: VectorFst<TropicalWeight>,
     ) -> Result<VectorFst<TropicalWeight>> {
         match std::dbg!(self.compose_type) {
-            ComposeType::Default => {
-                compose(Arc::new(fst_1), Arc::new(fst_2))
-            },
+            ComposeType::Default => compose(Arc::new(fst_1), Arc::new(fst_2)),
             ComposeType::LookAhead => {
                 type TLaFst<S, F> = MatcherFst<
                     S,
                     F,
-                    LabelLookAheadMatcher<S, SortedMatcher<S, F>, DefaultLabelLookAheadMatcherFlags>,
+                    LabelLookAheadMatcher<
+                        S,
+                        SortedMatcher<S, F>,
+                        DefaultLabelLookAheadMatcherFlags,
+                    >,
                     LabelReachableData,
                 >;
 
-                type TMatcher1<S, F> =
-                LabelLookAheadMatcher<S, SortedMatcher<S, F>, DefaultLabelLookAheadMatcherFlags>;
+                type TMatcher1<S, F> = LabelLookAheadMatcher<
+                    S,
+                    SortedMatcher<S, F>,
+                    DefaultLabelLookAheadMatcherFlags,
+                >;
                 type TMatcher2<S, F> = SortedMatcher<S, F>;
 
                 type TSeqFilter<S, F1, F2> =
-                AltSequenceComposeFilterBuilder<S, TMatcher1<S, F1>, TMatcher2<S, F2>>;
+                    AltSequenceComposeFilterBuilder<S, TMatcher1<S, F1>, TMatcher2<S, F2>>;
                 type TLookFilter<S, F1, F2> =
-                LookAheadComposeFilterBuilder<S, TSeqFilter<S, F1, F2>, SMatchOutput>;
+                    LookAheadComposeFilterBuilder<S, TSeqFilter<S, F1, F2>, SMatchOutput>;
                 type TPushWeightsFilter<S, F1, F2> =
-                PushWeightsComposeFilterBuilder<S, TLookFilter<S, F1, F2>, SMatchOutput>;
+                    PushWeightsComposeFilterBuilder<S, TLookFilter<S, F1, F2>, SMatchOutput>;
                 type TPushLabelsFilter<S, F1, F2> =
-                PushLabelsComposeFilterBuilder<S, TPushWeightsFilter<S, F1, F2>, SMatchOutput>;
+                    PushLabelsComposeFilterBuilder<S, TPushWeightsFilter<S, F1, F2>, SMatchOutput>;
 
                 type TComposeFilter<S, F1, F2> = TPushLabelsFilter<S, F1, F2>;
 
@@ -134,13 +148,13 @@ impl ComposeAlgorithm {
         let compose_type = match compose_type {
             "default" => ComposeType::Default,
             "lookahead" => ComposeType::LookAhead,
-            _ => panic!("Unexpected compose_type : {}", compose_type)
+            _ => panic!("Unexpected compose_type : {}", compose_type),
         };
         Self {
             path_in_1: path_in_1.to_string(),
             path_in_2: path_in_2.to_string(),
             path_out: path_out.to_string(),
-            compose_type
+            compose_type,
         }
     }
 }
