@@ -138,40 +138,30 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
         match selector {
             Selector::Fst1Matcher2 => {
                 let fst = Arc::clone(compose_filter.fst1());
-                trs.extend(self.match_tr(
+                self.match_tr(
                     sa,
                     &tr_loop,
                     match_input,
                     &mut compose_filter,
                     selector,
-                )?);
+                    &mut trs,
+                )?;
                 for tr in fst.get_trs(sb)?.trs() {
-                    trs.extend(self.match_tr(
-                        sa,
-                        tr,
-                        match_input,
-                        &mut compose_filter,
-                        selector,
-                    )?);
+                    self.match_tr(sa, tr, match_input, &mut compose_filter, selector, &mut trs)?;
                 }
             }
             Selector::Fst2Matcher1 => {
                 let fst = Arc::clone(compose_filter.fst2());
-                trs.extend(self.match_tr(
+                self.match_tr(
                     sa,
                     &tr_loop,
                     match_input,
                     &mut compose_filter,
                     selector,
-                )?);
+                    &mut trs,
+                )?;
                 for tr in fst.get_trs(sb)?.trs() {
-                    trs.extend(self.match_tr(
-                        sa,
-                        tr,
-                        match_input,
-                        &mut compose_filter,
-                        selector,
-                    )?);
+                    self.match_tr(sa, tr, match_input, &mut compose_filter, selector, &mut trs)?;
                 }
             }
         }
@@ -205,8 +195,8 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
         match_input: bool,
         compose_filter: &mut CFB::CF,
         it: impl Iterator<Item = IterItemMatcher<W>>,
-    ) -> Result<Vec<Tr<W>>> {
-        let mut trs = vec![];
+        trs: &mut Vec<Tr<W>>,
+    ) -> Result<()> {
         let match_type = if match_input {
             MatchType::MatchInput
         } else {
@@ -228,7 +218,7 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
                 }
             }
         }
-        Ok(trs)
+        Ok(())
     }
 
     fn match_tr(
@@ -238,7 +228,8 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
         match_input: bool,
         compose_filter: &mut CFB::CF,
         selector: Selector,
-    ) -> Result<Vec<Tr<W>>> {
+        trs: &mut Vec<Tr<W>>,
+    ) -> Result<()> {
         let label = if match_input { tr.olabel } else { tr.ilabel };
 
         match selector {
@@ -248,6 +239,7 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
                 match_input,
                 compose_filter,
                 compose_filter.matcher1().iter(sa, label)?,
+                trs,
             ),
             Selector::Fst1Matcher2 => self.match_iter_selected(
                 sa,
@@ -255,6 +247,7 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
                 match_input,
                 compose_filter,
                 compose_filter.matcher2().iter(sa, label)?,
+                trs,
             ),
         }
     }
