@@ -1,3 +1,4 @@
+use std::collections::VecDeque;
 use std::iter::{repeat, Map, Repeat, Zip};
 use std::marker::PhantomData;
 use std::sync::Arc;
@@ -9,10 +10,11 @@ use unsafe_unwrap::UnsafeUnwrap;
 use crate::algorithms::lazy_fst_revamp::fst_op::FstOp;
 use crate::algorithms::lazy_fst_revamp::FstCache;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, Fst, FstIterData, FstIterator, MutableFst, StateIterator};
+use crate::fst_traits::{
+    AllocableFst, CoreFst, Fst, FstIterData, FstIterator, MutableFst, StateIterator,
+};
 use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable, Trs, TrsVec};
-use std::collections::{HashSet, VecDeque};
 
 #[derive(Debug, Clone)]
 pub struct LazyFst<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> {
@@ -212,34 +214,37 @@ where
     }
 
     /// Turns the Lazy FST into a static one.
-    pub fn compute<F2: MutableFst<W>>(&self) -> Result<F2> {
+    pub fn compute<F2: MutableFst<W> + AllocableFst<W>>(&self) -> Result<F2> {
         let start_state = self.start();
         let mut fst_out = F2::new();
         if start_state.is_none() {
             return Ok(fst_out);
         }
         let start_state = start_state.unwrap();
-        for _ in 0..=start_state {
-            fst_out.add_state();
-        }
+        fst_out.add_states(start_state + 1);
         fst_out.set_start(start_state)?;
         let mut queue = VecDeque::new();
-        let mut visited_states = HashSet::new();
-        visited_states.insert(start_state);
+        let mut visited_states = vec![];
+        visited_states.resize(start_state + 1, false);
+        visited_states[start_state] = true;
         queue.push_back(start_state);
         while !queue.is_empty() {
             let s = queue.pop_front().unwrap();
-            for tr in self.get_trs(s)?.trs() {
-                if !visited_states.contains(&tr.nextstate) {
+            let trs_owner = unsafe { self.get_trs_unchecked(s) };
+            for tr in trs_owner.trs() {
+                if tr.nextstate >= visited_states.len() {
+                    visited_states.resize(tr.nextstate + 1, false);
+                }
+                if !visited_states[tr.nextstate] {
                     queue.push_back(tr.nextstate);
-                    visited_states.insert(tr.nextstate);
+                    visited_states[tr.nextstate] = true;
                 }
                 let n = fst_out.num_states();
-                for _ in n..=tr.nextstate {
-                    fst_out.add_state();
+                if tr.nextstate >= n {
+                    fst_out.add_states(tr.nextstate - n + 1)
                 }
-                fst_out.add_tr(s, tr.clone())?;
             }
+            unsafe { fst_out.set_trs_unchecked(s, trs_owner.trs().to_vec()) };
             if let Some(f_w) = self.final_weight(s)? {
                 fst_out.set_final(s, f_w)?;
             }

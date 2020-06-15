@@ -1,12 +1,11 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use itertools::Itertools;
 
 use crate::algorithms::compose::compose_filters::{ComposeFilter, ComposeFilterBuilder};
 use crate::algorithms::compose::filter_states::FilterState;
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::Selector;
-use crate::algorithms::compose::matchers::MatcherFlags;
+use crate::algorithms::compose::matchers::{IterItemMatcher, MatcherFlags};
 use crate::algorithms::compose::matchers::{MatchType, Matcher, REQUIRE_PRIORITY};
 use crate::algorithms::compose::{ComposeFstOpOptions, ComposeStateTuple};
 use crate::algorithms::lazy_fst_revamp::{FstOp, StateTable};
@@ -139,40 +138,30 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
         match selector {
             Selector::Fst1Matcher2 => {
                 let fst = Arc::clone(compose_filter.fst1());
-                trs.extend(self.match_tr(
+                self.match_tr(
                     sa,
                     &tr_loop,
                     match_input,
                     &mut compose_filter,
                     selector,
-                )?);
+                    &mut trs,
+                )?;
                 for tr in fst.get_trs(sb)?.trs() {
-                    trs.extend(self.match_tr(
-                        sa,
-                        tr,
-                        match_input,
-                        &mut compose_filter,
-                        selector,
-                    )?);
+                    self.match_tr(sa, tr, match_input, &mut compose_filter, selector, &mut trs)?;
                 }
             }
             Selector::Fst2Matcher1 => {
                 let fst = Arc::clone(compose_filter.fst2());
-                trs.extend(self.match_tr(
+                self.match_tr(
                     sa,
                     &tr_loop,
                     match_input,
                     &mut compose_filter,
                     selector,
-                )?);
+                    &mut trs,
+                )?;
                 for tr in fst.get_trs(sb)?.trs() {
-                    trs.extend(self.match_tr(
-                        sa,
-                        tr,
-                        match_input,
-                        &mut compose_filter,
-                        selector,
-                    )?);
+                    self.match_tr(sa, tr, match_input, &mut compose_filter, selector, &mut trs)?;
                 }
             }
         }
@@ -199,31 +188,22 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
         ))
     }
 
-    fn match_tr(
+    fn match_tr_selected(
         &self,
         sa: StateId,
         tr: &Tr<W>,
         match_input: bool,
         compose_filter: &mut CFB::CF,
-        selector: Selector,
-    ) -> Result<Vec<Tr<W>>> {
-        let label = if match_input { tr.olabel } else { tr.ilabel };
-        let mut trs = vec![];
-
-        // Collect necessary here because need to borrow_mut a matcher later. To investigate.
-        let temp = match selector {
-            Selector::Fst2Matcher1 => compose_filter.matcher1().iter(sa, label)?.collect_vec(),
-            Selector::Fst1Matcher2 => compose_filter.matcher2().iter(sa, label)?.collect_vec(),
+        it: impl Iterator<Item = IterItemMatcher<W>>,
+        trs: &mut Vec<Tr<W>>,
+    ) -> Result<()> {
+        let match_type = if match_input {
+            MatchType::MatchInput
+        } else {
+            MatchType::MatchOutput
         };
-        for arca in temp {
-            let mut arca = arca.into_tr(
-                sa,
-                if match_input {
-                    MatchType::MatchInput
-                } else {
-                    MatchType::MatchOutput
-                },
-            )?;
+        for arca in it {
+            let mut arca = arca.into_tr(sa, match_type)?;
             let mut arcb = tr.clone();
             if match_input {
                 let fs = compose_filter.filter_tr(&mut arcb, &mut arca)?;
@@ -238,8 +218,38 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
                 }
             }
         }
+        Ok(())
+    }
 
-        Ok(trs)
+    fn match_tr(
+        &self,
+        sa: StateId,
+        tr: &Tr<W>,
+        match_input: bool,
+        compose_filter: &mut CFB::CF,
+        selector: Selector,
+        trs: &mut Vec<Tr<W>>,
+    ) -> Result<()> {
+        let label = if match_input { tr.olabel } else { tr.ilabel };
+
+        match selector {
+            Selector::Fst2Matcher1 => self.match_tr_selected(
+                sa,
+                tr,
+                match_input,
+                compose_filter,
+                compose_filter.matcher1().iter(sa, label)?,
+                trs,
+            ),
+            Selector::Fst1Matcher2 => self.match_tr_selected(
+                sa,
+                tr,
+                match_input,
+                compose_filter,
+                compose_filter.matcher2().iter(sa, label)?,
+                trs,
+            ),
+        }
     }
 }
 

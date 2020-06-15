@@ -8,7 +8,7 @@ use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
 use crate::algorithms::replace::config::ReplaceFstOptions;
 use crate::algorithms::replace::replace_fst_op::ReplaceFstOp;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
+use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{Label, SymbolTable, TrsVec};
 
@@ -41,7 +41,7 @@ where
     }
 
     /// Turns the Lazy FST into a static one.
-    pub fn compute<F2: MutableFst<W>>(&self) -> Result<F2> {
+    pub fn compute<F2: MutableFst<W> + AllocableFst<W>>(&self) -> Result<F2> {
         self.0.compute()
     }
 }

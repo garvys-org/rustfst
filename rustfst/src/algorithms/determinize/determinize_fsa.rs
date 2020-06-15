@@ -2,7 +2,7 @@ use crate::algorithms::determinize::divisors::CommonDivisor;
 use crate::algorithms::determinize::DeterminizeFsaOp;
 use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
+use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::{WeaklyDivisibleSemiring, WeightQuantize};
 use crate::{Semiring, SymbolTable, TrsVec};
 use anyhow::Result;
@@ -141,7 +141,7 @@ where
     }
 
     /// Turns the Lazy FST into a static one.
-    pub fn compute<F2: MutableFst<W>>(&self) -> Result<F2> {
+    pub fn compute<F2: MutableFst<W> + AllocableFst<W>>(&self) -> Result<F2> {
         self.0.compute()
     }
 
@@ -149,7 +149,9 @@ where
         self.0.op.out_dist()
     }
 
-    pub fn compute_with_distance<F2: MutableFst<W>>(self) -> Result<(F2, Vec<W>)> {
+    pub fn compute_with_distance<F2: MutableFst<W> + AllocableFst<W>>(
+        self,
+    ) -> Result<(F2, Vec<W>)> {
         let dfst: F2 = self.compute()?;
         let out_dist = self.out_dist()?;
         Ok((dfst, out_dist))

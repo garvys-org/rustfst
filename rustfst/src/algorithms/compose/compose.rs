@@ -8,7 +8,7 @@ use crate::algorithms::compose::compose_filters::{
 };
 use crate::algorithms::compose::matchers::SortedMatcher;
 use crate::algorithms::compose::ComposeFst;
-use crate::fst_traits::{ExpandedFst, MutableFst};
+use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 
 #[derive(PartialOrd, PartialEq, Debug, Clone, Copy)]
@@ -41,7 +41,7 @@ pub fn compose_with_config<
     W: Semiring,
     F1: ExpandedFst<W>,
     F2: ExpandedFst<W>,
-    F3: MutableFst<W>,
+    F3: MutableFst<W> + AllocableFst<W>,
 >(
     fst1: Arc<F1>,
     fst2: Arc<F2>,
@@ -113,7 +113,12 @@ pub fn compose_with_config<
 /// # Ok(())
 /// # }
 /// ```
-pub fn compose<W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>, F3: MutableFst<W>>(
+pub fn compose<
+    W: Semiring,
+    F1: ExpandedFst<W>,
+    F2: ExpandedFst<W>,
+    F3: MutableFst<W> + AllocableFst<W>,
+>(
     fst1: Arc<F1>,
     fst2: Arc<F2>,
 ) -> Result<F3> {

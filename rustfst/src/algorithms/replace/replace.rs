@@ -3,7 +3,7 @@ use std::borrow::Borrow;
 use anyhow::Result;
 
 use crate::algorithms::replace::ReplaceFst;
-use crate::fst_traits::{Fst, MutableFst};
+use crate::fst_traits::{AllocableFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::Label;
 
@@ -50,7 +50,7 @@ pub fn replace<W, F1, F2, B>(
 where
     F1: Fst<W>,
     W: Semiring,
-    F2: MutableFst<W>,
+    F2: MutableFst<W> + AllocableFst<W>,
     B: Borrow<F1>,
 {
     let fst = ReplaceFst::new(fst_list, root, epsilon_on_replace)?;
