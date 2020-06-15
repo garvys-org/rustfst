@@ -2,7 +2,6 @@ use std::fmt::Debug;
 
 use crate::semirings::Semiring;
 use crate::{StateId, TrsVec};
-use crate::fst_impls::VectorFst;
 use crate::fst_traits::MutableFst;
 
 pub trait FstCache<W: Semiring>: Debug {

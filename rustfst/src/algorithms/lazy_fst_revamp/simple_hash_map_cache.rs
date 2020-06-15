@@ -1,12 +1,9 @@
-use std::collections::HashMap;
-use std::sync::{Mutex, Arc};
+use std::sync::Mutex;
 
 use crate::algorithms::lazy_fst_revamp::FstCache;
 use crate::semirings::Semiring;
 use crate::{StateId, Trs, TrsVec, EPS_LABEL};
-use crate::fst_impls::VectorFst;
-use crate::fst_traits::{MutableFst, AllocableFst};
-use itertools::Itertools;
+use crate::fst_traits::MutableFst;
 
 #[derive(Default, Debug)]
 pub struct SimpleHashMapCache<W: Semiring> {
@@ -14,8 +11,8 @@ pub struct SimpleHashMapCache<W: Semiring> {
     // Second option: value of the start state (possibly none)
     // The second element of each tuple is the number of known states.
     start: Mutex<(Option<Option<StateId>>, usize)>,
-    trs: Mutex<(HashMap<StateId, CacheTrs<W>>, usize)>,
-    final_weight: Mutex<(HashMap<StateId, Option<W>>, usize)>,
+    trs: Mutex<(Vec<Option<CacheTrs<W>>>, usize)>,
+    final_weight: Mutex<(Vec<Option<Option<W>>>, usize)>,
 }
 
 #[derive(Debug, Clone)]
@@ -39,8 +36,8 @@ impl<W: Semiring> SimpleHashMapCache<W> {
     pub fn new() -> Self {
         Self {
             start: Mutex::new((None, 0)),
-            trs: Mutex::new((HashMap::new(), 0)),
-            final_weight: Mutex::new((HashMap::new(), 0)),
+            trs: Mutex::new((Vec::new(), 0)),
+            final_weight: Mutex::new((Vec::new(), 0)),
         }
     }
 }
@@ -59,12 +56,12 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
     }
 
     fn get_trs(&self, id: usize) -> Option<TrsVec<W>> {
-        self.trs
-            .lock()
-            .unwrap()
-            .0
-            .get(&id)
-            .map(|v| v.trs.shallow_clone())
+        let data = self.trs.lock().unwrap();
+        if id < data.0.len() {
+            data.0[id].as_ref().map(|e| e.trs.shallow_clone())
+        } else {
+            None
+        }
     }
 
     fn insert_trs(&self, id: usize, trs: TrsVec<W>) {
@@ -80,23 +77,34 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
                 noepsilons += 1;
             }
         }
-        data.0.insert(
-            id,
-            CacheTrs {
+        if id >= data.0.len() {
+            data.0.resize(id+1, None);
+        }
+        data.0[id] = Some(CacheTrs {
                 trs,
                 niepsilons,
                 noepsilons,
-            },
-        );
+            });
     }
     fn get_final_weight(&self, id: usize) -> Option<Option<W>> {
-        self.final_weight.lock().unwrap().0.get(&id).cloned()
+        let data = self.final_weight.lock().unwrap();
+        if id < data.0.len() {
+            data.0[id].clone()
+        } else {
+            // Not computed yet
+            None
+        }
     }
 
     fn insert_final_weight(&self, id: StateId, weight: Option<W>) {
         let mut data = self.final_weight.lock().unwrap();
         data.1 = std::cmp::max(data.1, id + 1);
-        data.0.insert(id, weight);
+
+        if id >= data.0.len() {
+            data.0.resize(id+1, None);
+        }
+        // First Some to mark the final weight as computed
+        data.0[id] = Some(weight);
     }
 
     fn num_known_states(&self) -> usize {
@@ -109,17 +117,17 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
 
     fn num_trs(&self, id: usize) -> Option<usize> {
         let data = self.trs.lock().unwrap();
-        data.0.get(&id).map(|v| v.trs.len())
+        data.0.get(id).map(|v| v.as_ref().map(|e| e.trs.len())).flatten()
     }
 
     fn num_input_epsilons(&self, id: usize) -> Option<usize> {
         let data = self.trs.lock().unwrap();
-        data.0.get(&id).map(|v| v.niepsilons)
+        data.0.get(id).map(|v| v.as_ref().map(|e|e.niepsilons)).flatten()
     }
 
     fn num_output_epsilons(&self, id: usize) -> Option<usize> {
         let data = self.trs.lock().unwrap();
-        data.0.get(&id).map(|v| v.noepsilons)
+        data.0.get(id).map(|v| v.as_ref().map(|e| e.noepsilons)).flatten()
     }
 
     fn into_fst<F: MutableFst<W>>(self) -> F {
@@ -135,12 +143,14 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
             let final_weights = self.final_weight.into_inner().unwrap().0;
             let trs = self.trs.into_inner().unwrap().0;
 
-            for (state_id, mut cache_trs) in trs {
+            for (state_id, cache_trs) in trs.into_iter().enumerate() {
+                let cache_trs = cache_trs.unwrap();
                 unsafe {fst_out.set_state_unchecked_noprops(state_id, cache_trs.trs, cache_trs.niepsilons, cache_trs.noepsilons)};
             }
 
-            for (state_id, final_weight) in final_weights {
-                if let Some(final_weight) = final_weight {
+            for (state_id, final_weight) in final_weights.into_iter().enumerate() {
+                // Safe as computed
+                if let Some(final_weight) = final_weight.unwrap() {
                     unsafe {fst_out.set_final_unchecked(state_id, final_weight)};
                 }
             }

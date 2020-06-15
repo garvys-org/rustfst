@@ -15,7 +15,6 @@ use crate::fst_traits::{
 };
 use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable, Trs, TrsVec};
-use crate::fst_impls::VectorFst;
 
 #[derive(Debug, Clone)]
 pub struct LazyFst<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> {

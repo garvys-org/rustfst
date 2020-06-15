@@ -279,11 +279,10 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
     }
 
     unsafe fn set_state_unchecked_noprops(&mut self, source: usize, trs: TrsVec<W>, niepsilons: usize, noepsilons: usize) {
-        let mut properties = self.properties();
         let state = &mut self.states.get_unchecked_mut(source);
         state.trs = trs;
         state.niepsilons = niepsilons;
-        state.noepsilons;
+        state.noepsilons = noepsilons;
     }
 
     fn delete_final_weight(&mut self, source: usize) -> Result<()> {
