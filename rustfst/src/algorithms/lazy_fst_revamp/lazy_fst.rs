@@ -284,6 +284,21 @@ where
         }
     }
 
+    pub fn compute_2<F2: MutableFst<W>>(self) -> Result<F2> {
+        use std::time::Instant;
+        println!("Filling cache ...");
+        let t0 = Instant::now();
+        self.fill_cache();
+        println!("Done : {:?}", t0.elapsed());
+        let props = self.properties();
+        println!("Into ...");
+        let t1 = Instant::now();
+        let mut fst_out : F2 = self.cache.into_fst();
+        println!("Done : {:?}", t1.elapsed());
+        fst_out.set_properties(props);
+        Ok(fst_out)
+    }
+
     // fn into_vector_fst(self) -> VectorFst<W> {
     //     let cache = self.cache;
     //     cache.

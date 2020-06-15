@@ -60,7 +60,13 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFst<W, CFB> {
 
     /// Turns the Lazy FST into a static one.
     pub fn compute<F2: MutableFst<W> + AllocableFst<W>>(&self) -> Result<F2> {
+        println!("Compute 1");
         self.0.compute()
+    }
+
+    pub fn compute_2<F2: MutableFst<W>>(self) -> Result<F2> {
+        println!("Compute 2");
+        self.0.compute_2()
     }
 }
 

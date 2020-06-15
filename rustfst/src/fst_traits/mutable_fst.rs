@@ -9,7 +9,7 @@ use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::trs_iter_mut::TrsIterMut;
-use crate::{Label, StateId};
+use crate::{Label, StateId, TrsVec};
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
@@ -250,6 +250,7 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
     }
 
     unsafe fn set_trs_unchecked(&mut self, source: StateId, trs: Vec<Tr<W>>);
+    unsafe fn set_state_unchecked_noprops(&mut self, source: StateId, trs: TrsVec<W>, niepsilons: usize, noepsilons: usize);
 
     /// Remove the final weight of a specific state.
     fn delete_final_weight(&mut self, source: StateId) -> Result<()>;

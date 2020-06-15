@@ -14,7 +14,7 @@ use crate::fst_traits::CoreFst;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::trs_iter_mut::TrsIterMut;
-use crate::{StateId, Tr, Trs, EPS_LABEL};
+use crate::{StateId, Tr, Trs, EPS_LABEL, TrsVec};
 
 #[inline]
 fn equal_tr<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> bool {
@@ -276,6 +276,14 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         state.niepsilons = niepsilons;
         state.noepsilons = noepsilons;
         self.set_properties(properties)
+    }
+
+    unsafe fn set_state_unchecked_noprops(&mut self, source: usize, trs: TrsVec<W>, niepsilons: usize, noepsilons: usize) {
+        let mut properties = self.properties();
+        let state = &mut self.states.get_unchecked_mut(source);
+        state.trs = trs;
+        state.niepsilons = niepsilons;
+        state.noepsilons;
     }
 
     fn delete_final_weight(&mut self, source: usize) -> Result<()> {

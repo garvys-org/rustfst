@@ -2,6 +2,8 @@ use std::fmt::Debug;
 
 use crate::semirings::Semiring;
 use crate::{StateId, TrsVec};
+use crate::fst_impls::VectorFst;
+use crate::fst_traits::MutableFst;
 
 pub trait FstCache<W: Semiring>: Debug {
     fn get_start(&self) -> Option<Option<StateId>>;
@@ -18,9 +20,6 @@ pub trait FstCache<W: Semiring>: Debug {
 
     fn num_input_epsilons(&self, id: usize) -> Option<usize>;
     fn num_output_epsilons(&self, id: usize) -> Option<usize>;
-}
 
-pub struct InnerCacheData {
-    start: Option<StateId>,
-
+    fn into_fst<F: MutableFst<W>>(self) -> F;
 }

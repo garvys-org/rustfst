@@ -1,9 +1,12 @@
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::sync::{Mutex, Arc};
 
 use crate::algorithms::lazy_fst_revamp::FstCache;
 use crate::semirings::Semiring;
 use crate::{StateId, Trs, TrsVec, EPS_LABEL};
+use crate::fst_impls::VectorFst;
+use crate::fst_traits::{MutableFst, AllocableFst};
+use itertools::Itertools;
 
 #[derive(Default, Debug)]
 pub struct SimpleHashMapCache<W: Semiring> {
@@ -117,5 +120,32 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
     fn num_output_epsilons(&self, id: usize) -> Option<usize> {
         let data = self.trs.lock().unwrap();
         data.0.get(&id).map(|v| v.noepsilons)
+    }
+
+    fn into_fst<F: MutableFst<W>>(self) -> F {
+        let mut fst_out = F::new();
+
+        // Safe because computed
+        if let Some(start) = self.get_start().unwrap() {
+            let nstates = self.num_known_states();
+            fst_out.add_states(nstates);
+
+            unsafe {fst_out.set_start_unchecked(start)};
+
+            let final_weights = self.final_weight.into_inner().unwrap().0;
+            let trs = self.trs.into_inner().unwrap().0;
+
+            for (state_id, mut cache_trs) in trs {
+                unsafe {fst_out.set_state_unchecked_noprops(state_id, cache_trs.trs, cache_trs.niepsilons, cache_trs.noepsilons)};
+            }
+
+            for (state_id, final_weight) in final_weights {
+                if let Some(final_weight) = final_weight {
+                    unsafe {fst_out.set_final_unchecked(state_id, final_weight)};
+                }
+            }
+        }
+
+        fst_out
     }
 }
