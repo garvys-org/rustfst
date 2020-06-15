@@ -230,7 +230,6 @@ where
         while !queue.is_empty() {
             let s = queue.pop_front().unwrap();
             let trs_owner = unsafe { self.get_trs_unchecked(s) };
-            unsafe { fst_out.reserve_trs_unchecked(s, trs_owner.len()) };
             for tr in trs_owner.trs() {
                 if !visited_states.contains(&tr.nextstate) {
                     queue.push_back(tr.nextstate);
@@ -240,8 +239,8 @@ where
                 if tr.nextstate >= n {
                     fst_out.add_states(tr.nextstate - n + 1)
                 }
-                fst_out.add_tr(s, tr.clone())?;
             }
+            unsafe {fst_out.set_trs_unchecked(s, trs_owner.trs().to_vec())};
             if let Some(f_w) = self.final_weight(s)? {
                 fst_out.set_final(s, f_w)?;
             }
