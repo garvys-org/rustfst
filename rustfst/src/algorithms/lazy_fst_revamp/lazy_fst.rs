@@ -1,5 +1,5 @@
 use std::collections::VecDeque;
-use std::iter::{Map, repeat, Repeat, Zip};
+use std::iter::{repeat, Map, Repeat, Zip};
 use std::marker::PhantomData;
 use std::sync::Arc;
 
@@ -7,14 +7,14 @@ use anyhow::Result;
 use itertools::izip;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::{StateId, SymbolTable, Trs, TrsVec};
 use crate::algorithms::lazy_fst_revamp::fst_op::FstOp;
 use crate::algorithms::lazy_fst_revamp::FstCache;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{
-    AllocableFst, CoreFst, Fst, FstIterator, FstIterData, MutableFst, StateIterator,
+    AllocableFst, CoreFst, Fst, FstIterData, FstIterator, MutableFst, StateIterator,
 };
 use crate::semirings::Semiring;
+use crate::{StateId, SymbolTable, Trs, TrsVec};
 
 #[derive(Debug, Clone)]
 pub struct LazyFst<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> {
@@ -225,7 +225,7 @@ where
         fst_out.set_start(start_state)?;
         let mut queue = VecDeque::new();
         let mut visited_states = vec![];
-        visited_states.resize(start_state+1, false);
+        visited_states.resize(start_state + 1, false);
         visited_states[start_state] = true;
         queue.push_back(start_state);
         while !queue.is_empty() {
@@ -244,7 +244,7 @@ where
                     fst_out.add_states(tr.nextstate - n + 1)
                 }
             }
-            unsafe {fst_out.set_trs_unchecked(s, trs_owner.trs().to_vec())};
+            unsafe { fst_out.set_trs_unchecked(s, trs_owner.trs().to_vec()) };
             if let Some(f_w) = self.final_weight(s)? {
                 fst_out.set_final(s, f_w)?;
             }

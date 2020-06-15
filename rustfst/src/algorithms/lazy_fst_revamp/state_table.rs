@@ -3,20 +3,20 @@ use std::hash::Hash;
 use std::sync::Mutex;
 
 use crate::StateId;
-use std::collections::HashMap;
 use std::collections::hash_map::Entry;
+use std::collections::HashMap;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct BiHashMap<T: Hash + Eq + Clone> {
     tuple_to_id: HashMap<T, StateId>,
-    id_to_tuple: Vec<T>
+    id_to_tuple: Vec<T>,
 }
 
 impl<T: Hash + Eq + Clone> BiHashMap<T> {
     pub fn new() -> Self {
         Self {
             tuple_to_id: HashMap::new(),
-            id_to_tuple: Vec::new()
+            id_to_tuple: Vec::new(),
         }
     }
 
