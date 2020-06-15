@@ -1,4 +1,5 @@
-use std::iter::{repeat, Map, Repeat, Zip};
+use std::collections::VecDeque;
+use std::iter::{Map, repeat, Repeat, Zip};
 use std::marker::PhantomData;
 use std::sync::Arc;
 
@@ -6,15 +7,14 @@ use anyhow::Result;
 use itertools::izip;
 use unsafe_unwrap::UnsafeUnwrap;
 
+use crate::{StateId, SymbolTable, Trs, TrsVec};
 use crate::algorithms::lazy_fst_revamp::fst_op::FstOp;
 use crate::algorithms::lazy_fst_revamp::FstCache;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{
-    AllocableFst, CoreFst, Fst, FstIterData, FstIterator, MutableFst, StateIterator,
+    AllocableFst, CoreFst, Fst, FstIterator, FstIterData, MutableFst, StateIterator,
 };
 use crate::semirings::Semiring;
-use crate::{StateId, SymbolTable, Trs, TrsVec};
-use std::collections::{HashSet, VecDeque};
 
 #[derive(Debug, Clone)]
 pub struct LazyFst<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> {
@@ -224,16 +224,20 @@ where
         fst_out.add_states(start_state + 1);
         fst_out.set_start(start_state)?;
         let mut queue = VecDeque::new();
-        let mut visited_states = HashSet::new();
-        visited_states.insert(start_state);
+        let mut visited_states = vec![];
+        visited_states.resize(start_state+1, false);
+        visited_states[start_state] = true;
         queue.push_back(start_state);
         while !queue.is_empty() {
             let s = queue.pop_front().unwrap();
             let trs_owner = unsafe { self.get_trs_unchecked(s) };
             for tr in trs_owner.trs() {
-                if !visited_states.contains(&tr.nextstate) {
+                if tr.nextstate >= visited_states.len() {
+                    visited_states.resize(tr.nextstate + 1, false);
+                }
+                if !visited_states[tr.nextstate] {
                     queue.push_back(tr.nextstate);
-                    visited_states.insert(tr.nextstate);
+                    visited_states[tr.nextstate] = true;
                 }
                 let n = fst_out.num_states();
                 if tr.nextstate >= n {
