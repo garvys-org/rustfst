@@ -19,3 +19,8 @@ pub trait FstCache<W: Semiring>: Debug {
     fn num_input_epsilons(&self, id: usize) -> Option<usize>;
     fn num_output_epsilons(&self, id: usize) -> Option<usize>;
 }
+
+pub struct InnerCacheData {
+    start: Option<StateId>,
+
+}

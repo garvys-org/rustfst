@@ -15,6 +15,7 @@ use crate::fst_traits::{
 };
 use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable, Trs, TrsVec};
+use crate::fst_impls::VectorFst;
 
 #[derive(Debug, Clone)]
 pub struct LazyFst<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> {
@@ -253,4 +254,38 @@ where
         // TODO: Symbol tables should be set here
         Ok(fst_out)
     }
+
+    fn fill_cache(&self) {
+        let start_state = self.start();
+        if start_state.is_none() {
+            return;
+        }
+        let start_state = start_state.unwrap();
+        let mut queue = VecDeque::new();
+        let mut visited_states = vec![];
+        visited_states.resize(start_state + 1, false);
+        visited_states[start_state] = true;
+        queue.push_back(start_state);
+        while !queue.is_empty() {
+            let s = queue.pop_front().unwrap();
+            let trs_owner = unsafe { self.get_trs_unchecked(s) };
+            for tr in trs_owner.trs() {
+                if tr.nextstate >= visited_states.len() {
+                    visited_states.resize(tr.nextstate + 1, false);
+                }
+                if !visited_states[tr.nextstate] {
+                    queue.push_back(tr.nextstate);
+                    visited_states[tr.nextstate] = true;
+                }
+            }
+
+            // Force computation final weight
+            unsafe {self.final_weight_unchecked(s)};
+        }
+    }
+
+    // fn into_vector_fst(self) -> VectorFst<W> {
+    //     let cache = self.cache;
+    //     cache.
+    // }
 }
