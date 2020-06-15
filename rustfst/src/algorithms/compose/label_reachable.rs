@@ -214,7 +214,6 @@ impl LabelReachable {
                         }
                         Entry::Occupied(e) => *e.get(),
                     };
-                    let final_weight = final_weight.clone();
                     unsafe {
                         fst.add_tr_unchecked(
                             s,
