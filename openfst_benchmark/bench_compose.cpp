@@ -19,5 +19,7 @@ int main(int argc, char **argv) {
     cout << "Running benchmark for algorithm compose" << endl;
     BINARY_ALGO_BENCH(
         Compose(*fst_1, *fst_2, fst_out);
+        delete fst_1;
+        delete fst_2;
     )
 }
