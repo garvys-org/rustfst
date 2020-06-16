@@ -6,7 +6,7 @@ if [[ ! -d openfst-1.7.2 || ! -d openfst-1.7.2/src ]]; then
     tar -zxvf openfst-1.7.2.tar.gz
 
     # Default sort in c++ is unstable. This is to align with rust.
-    rpl -R std::sort std::stable_sort openfst-1.7.2
+    perl -pi -e 's/std::sort/std::stable_sort/g' $(find openfst-1.7.2 -name "*.h" -o -name "*.cc")
 fi
 
 cd openfst-1.7.2
