@@ -1,12 +1,11 @@
 # Rustfst
 
-[![Build Status](https://travis-ci.com/Garvys/rustfst.svg?branch=master)](https://travis-ci.com/Garvys/rustfst)
+![rustc >= 1.41.0](https://img.shields.io/badge/rustc-%3E%3D1.41.0-brightgreen)
+[![Native Linux test status](https://github.com/Garvys/rustfst/workflows/Native%20Linux/badge.svg)](https://github.com/Garvys/rustfst/actions)
 [![Current version](https://meritbadge.herokuapp.com/rustfst)](https://crates.io/crates/rustfst)
 [![Documentation](https://docs.rs/rustfst/badge.svg)](https://docs.rs/rustfst)
 [![](https://tokei.rs/b1/github/Garvys/rustfst)](https://github.com/Garvys/rustfst)
 [![License: MIT/Apache-2.0](https://img.shields.io/crates/l/rustfst.svg)](#license)
-[![Code Coverage](https://codecov.io/gh/Garvys/rustfst/branch/master/graph/badge.svg)](https://codecov.io/gh/Garvys/rustfst/branch/master)
-[![Coverage Status](https://coveralls.io/repos/github/Garvys/rustfst/badge.svg?branch=master)](https://coveralls.io/github/Garvys/rustfst?branch=master)
 
 <!-- cargo-sync-readme start -->
 
