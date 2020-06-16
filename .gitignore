@@ -34,3 +34,8 @@ venv3
 pynini-2.0.7/
 kaldi_models/
 venv
+
+metrics
+export-markdown
+fst_output
+.dinghy.toml
