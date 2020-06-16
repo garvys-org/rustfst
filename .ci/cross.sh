@@ -49,8 +49,7 @@ case "$PLATFORM" in
         export RUSTC_TRIPLE=arm-unknown-linux-gnueabihf
         rustup target add $RUSTC_TRIPLE
         echo "[platforms.$PLATFORM]\nrustc_triple='$RUSTC_TRIPLE'\ntoolchain='$TOOLCHAIN'" > $HOME/.dinghy.toml
-        cargo dinghy --platform $PLATFORM build --release -p tract -p example-tensorflow-mobilenet-v2
-        cargo dinghy --platform $PLATFORM bench --no-run -p tract-linalg
+        cargo dinghy --platform $PLATFORM build --release -p rustfst-cli
     ;;
 
 #     "aarch64-linux-android"|"armv7-linux-androideabi"|"i686-linux-android"|"x86_64-linux-android")
@@ -140,7 +139,7 @@ case "$PLATFORM" in
     ;;
     "wasm32-unknown-unknown")
         rustup target add wasm32-unknown-unknown
-        cargo check --target wasm32-unknown-unknown -p tract-onnx -p tract-tensorflow
+        cargo check --target wasm32-unknown-unknown -p rustfst-cli
     ;;
     *)
         echo "Don't know what to do for platform: $PLATFORM"
