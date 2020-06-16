@@ -150,6 +150,6 @@ esac
 if [ -n "$AWS_ACCESS_KEY_ID" -a -e "target/$RUSTC_TRIPLE/release/rustfst-cli" ]
 then
     export RUSTC_TRIPLE
-    TASK_NAME=$(.travis/make_bundle.sh)
+    TASK_NAME=$(.ci/make_bundle.sh)
     aws s3 cp $TASK_NAME.tgz s3://tract-ci-builds/tasks/$PLATFORM/$TASK_NAME.tgz
 fi

@@ -44,7 +44,7 @@ cp target/$RUSTC_TRIPLE/release/rustfst-cli $TASK_NAME
 #    exe=`find target/$RUSTC_TRIPLE/release/ -name "$bench*" -type f -executable | head -1`
 #    cp $exe $TASK_NAME/benches/$bench
 #done
-cp .travis/bundle-entrypoint.sh $TASK_NAME/entrypoint.sh
+cp .ci/bundle-entrypoint.sh $TASK_NAME/entrypoint.sh
 tar czf $TASK_NAME.tgz $TASK_NAME/
 
 echo $TASK_NAME
