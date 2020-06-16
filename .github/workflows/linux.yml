@@ -15,6 +15,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+    - name: Cache Openfst build
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-openfst-build
+      with:
+        path: openfst-1.7.2
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
     - name: Native script
       env:
         RUST_VERSION: ${{matrix.rust}}
