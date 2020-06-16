@@ -1,0 +1,21 @@
+name: Native Linux
+
+on:
+  push:
+  schedule:
+    - cron:  '0 9 * * *'
+
+jobs:
+  linux:
+    strategy:
+      matrix:
+        rust: [ 1.40.0, stable ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Native script
+      env:
+        RUST_VERSION: ${{matrix.rust}}
+      run: .ci/native.sh
