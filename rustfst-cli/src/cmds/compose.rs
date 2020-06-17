@@ -71,7 +71,7 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
         fst_1: VectorFst<TropicalWeight>,
         mut fst_2: VectorFst<TropicalWeight>,
     ) -> Result<VectorFst<TropicalWeight>> {
-        match std::dbg!(self.compose_type) {
+        match self.compose_type {
             ComposeType::Default => compose(Arc::new(fst_1), Arc::new(fst_2)),
             ComposeType::LookAhead => {
                 type TLaFst<S, F> = MatcherFst<
