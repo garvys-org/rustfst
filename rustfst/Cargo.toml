@@ -24,6 +24,7 @@ bitflags = '1'
 generic-array = '0.12'
 itertools = '0.9'
 lru = "0.5.0"
+lfu = "0.2.3"
 nom = '5'
 num-traits = '0.2'
 ordered-float = '1'

@@ -4,6 +4,7 @@ pub use fst_op_2::FstOp2;
 pub use lazy_fst::LazyFst;
 pub use lazy_fst_2::LazyFst2;
 pub use lru_fst_cache::LruFstCache;
+pub use lfu_fst_cache::LfuFstCache;
 pub use simple_hash_map_cache::SimpleHashMapCache;
 pub use state_table::StateTable;
 
@@ -17,4 +18,5 @@ mod state_table;
 
 mod arc_cache;
 mod lru_fst_cache;
+mod lfu_fst_cache;
 
