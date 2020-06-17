@@ -17,11 +17,12 @@ pub struct LfuFstCache<W: Semiring> {
 
 impl<W: Semiring> Default for LfuFstCache<W> {
     fn default() -> Self {
-        Self {
-            start: Mutex::new((None, 0)),
-            trs: Mutex::new((lfu::LFUCache::with_capacity(1000).unwrap(), 0)),
-            final_weights: Mutex::new((lfu::LFUCache::with_capacity(1000).unwrap(), 0)),
-        }
+        unimplemented!()
+        // Self {
+        //     start: Mutex::new((None, 0)),
+        //     trs: Mutex::new((lfu::LFUCache::with_capacity(1000).unwrap(), 0)),
+        //     final_weights: Mutex::new((lfu::LFUCache::with_capacity(1000).unwrap(), 0)),
+        // }
     }
 }
 

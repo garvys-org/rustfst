@@ -7,6 +7,7 @@ pub use lru_fst_cache::LruFstCache;
 pub use lfu_fst_cache::LfuFstCache;
 pub use simple_hash_map_cache::SimpleHashMapCache;
 pub use state_table::StateTable;
+pub use two_q_fst_cache::TwoQFstCache;
 
 mod fst_cache;
 mod fst_op;
@@ -19,4 +20,5 @@ mod state_table;
 mod arc_cache;
 mod lru_fst_cache;
 mod lfu_fst_cache;
+mod two_q_fst_cache;
 
