@@ -20,7 +20,7 @@ fi
 aws s3 sync s3://tract-ci-builds/model $CACHEDIR
 FST_BENCH_RUSTFST=$CACHEDIR/rustfst/fsts_bench_rustfst_2
 
-(cd $CACHEDIR/rustfst ; [ -d fsts_bench_rustfst ] || tar zxf fsts_bench_rustfst.tgz)
+(cd $CACHEDIR/rustfst ; [ -d fsts_bench_rustfst_2 ] || tar zxf fsts_bench_rustfst_2.tgz)
 
 touch metrics
 
