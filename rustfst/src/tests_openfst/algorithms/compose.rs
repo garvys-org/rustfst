@@ -26,6 +26,7 @@ use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::macros::test_eq_fst;
 use crate::tests_openfst::FstTestData;
+use crate::algorithms::lazy_fst_revamp::SimpleHashMapCache;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ComposeOperationResult {
@@ -184,7 +185,7 @@ where
         None,
     );
 
-    let dyn_fst = ComposeFst::new_with_options(graph1look, fst2, compose_options)?;
+    let dyn_fst = ComposeFst::<_, _, SimpleHashMapCache<_>>::new_with_options(graph1look, fst2, compose_options)?;
 
     let static_fst: VectorFst<_> = dyn_fst.compute()?;
 
