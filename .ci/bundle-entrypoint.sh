@@ -16,13 +16,11 @@ fi
 
 [ -e vars ] && . ./vars
 
-#[ -d $CACHEDIR ] || mkdir $CACHEDIR
-#aws s3 sync s3://tract-ci-builds/model $CACHEDIR
-#FST_BENCH_RUSTFST=$CACHEDIR/rustfst/fsts_bench_rustfst
+[ -d $CACHEDIR ] || mkdir $CACHEDIR
+aws s3 sync s3://tract-ci-builds/model $CACHEDIR
+FST_BENCH_RUSTFST=$CACHEDIR/rustfst/fsts_bench_rustfst
 
-#(cd $CACHEDIR/rustfst ; [ -d fsts_bench_rustfst ] || tar zxf fsts_bench_rustfst.tgz)
-
-FST_BENCH_RUSTFST=kaldi_models/fsts_bench_rustfst
+(cd $CACHEDIR/rustfst ; [ -d fsts_bench_rustfst ] || tar zxf fsts_bench_rustfst.tgz)
 
 touch metrics
 
