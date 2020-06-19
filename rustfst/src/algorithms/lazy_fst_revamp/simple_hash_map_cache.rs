@@ -22,6 +22,22 @@ pub struct CacheTrs<W: Semiring> {
     pub noepsilons: usize,
 }
 
+impl<W: Semiring> SimpleHashMapCache<W> {
+    pub fn clear(&self) {
+        let mut data_start = self.start.lock().unwrap();
+        data_start.0.take();
+        data_start.1 = 0;
+
+        let mut data_trs = self.trs.lock().unwrap();
+        data_trs.0.clear();
+        data_trs.1 = 0;
+
+        let mut data_final_weights = self.final_weights.lock().unwrap();
+        data_final_weights.0.clear();
+        data_final_weights.1 = 0;
+    }
+}
+
 impl<W: Semiring> Clone for SimpleHashMapCache<W> {
     fn clone(&self) -> Self {
         Self {
@@ -116,5 +132,15 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
     fn num_output_epsilons(&self, id: usize) -> Option<usize> {
         let data = self.trs.lock().unwrap();
         data.0.get(&id).map(|v| v.noepsilons)
+    }
+
+    fn len_trs(&self) -> usize {
+        let data = self.trs.lock().unwrap();
+        data.0.len()
+    }
+
+    fn len_final_weights(&self) -> usize {
+        let data = self.final_weights.lock().unwrap();
+        data.0.len()
     }
 }

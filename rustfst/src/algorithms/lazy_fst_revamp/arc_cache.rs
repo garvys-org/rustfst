@@ -44,4 +44,12 @@ impl<W: Semiring, C: FstCache<W>> FstCache<W> for Arc<C> {
     fn num_output_epsilons(&self, id: usize) -> Option<usize> {
         self.deref().num_output_epsilons(id)
     }
+
+    fn len_trs(&self) -> usize {
+        self.deref().len_trs()
+    }
+
+    fn len_final_weights(&self) -> usize {
+        self.deref().len_final_weights()
+    }
 }

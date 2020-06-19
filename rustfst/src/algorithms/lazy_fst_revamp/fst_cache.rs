@@ -18,4 +18,7 @@ pub trait FstCache<W: Semiring>: Debug + Default {
 
     fn num_input_epsilons(&self, id: usize) -> Option<usize>;
     fn num_output_epsilons(&self, id: usize) -> Option<usize>;
+
+    fn len_trs(&self) -> usize;
+    fn len_final_weights(&self) -> usize;
 }
