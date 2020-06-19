@@ -20,9 +20,9 @@ use rustfst::algorithms::compose::lookahead_matchers::{
     LabelLookAheadMatcher, LookaheadMatcher, MatcherFlagsTrait,
 };
 use rustfst::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags, SortedMatcher};
+use rustfst::algorithms::lazy_fst_revamp::SimpleHashMapCache;
 use rustfst::algorithms::tr_compares::ILabelCompare;
 use rustfst::algorithms::tr_sort;
-use rustfst::algorithms::lazy_fst_revamp::SimpleHashMapCache;
 
 #[derive(Debug, Clone, Copy)]
 pub enum ComposeType {
@@ -136,7 +136,11 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
                     None,
                 );
 
-                let dyn_fst = ComposeFst::<_, _, SimpleHashMapCache<_>>::new_with_options(graph1look, fst_2, compose_options)?;
+                let dyn_fst = ComposeFst::<_, _, SimpleHashMapCache<_>>::new_with_options(
+                    graph1look,
+                    fst_2,
+                    compose_options,
+                )?;
 
                 dyn_fst.compute()
             }

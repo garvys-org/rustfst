@@ -6,9 +6,9 @@ use anyhow::Result;
 
 use crate::algorithms::factor_weight::factor_weight_op::FactorWeightOp;
 use crate::algorithms::factor_weight::{FactorIterator, FactorWeightOptions};
+use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
-use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache};
 use crate::semirings::WeightQuantize;
 use crate::{SymbolTable, TrsVec};
 

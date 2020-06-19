@@ -50,10 +50,11 @@ impl<W: Semiring> Clone for SimpleHashMapCache<W> {
 
 impl<W: Semiring> Default for SimpleHashMapCache<W> {
     fn default() -> Self {
-            Self {
-                start: Mutex::new((None, 0)),
-                trs: Mutex::new((HashMap::new(), 0)),
-                final_weights: Mutex::new((HashMap::new(), 0)),}
+        Self {
+            start: Mutex::new((None, 0)),
+            trs: Mutex::new((HashMap::new(), 0)),
+            final_weights: Mutex::new((HashMap::new(), 0)),
+        }
     }
 }
 

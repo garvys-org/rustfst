@@ -1,8 +1,8 @@
 use std::ops::Deref;
 use std::sync::Arc;
 
-use crate::{Semiring, TrsVec};
 use crate::algorithms::lazy_fst_revamp::FstCache;
+use crate::{Semiring, TrsVec};
 
 impl<W: Semiring, C: FstCache<W>> FstCache<W> for Arc<C> {
     fn get_start(&self) -> Option<Option<usize>> {

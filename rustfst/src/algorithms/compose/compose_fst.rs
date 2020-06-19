@@ -5,11 +5,11 @@ use crate::algorithms::compose::compose_filters::{
 };
 use crate::algorithms::compose::matchers::{GenericMatcher, Matcher};
 use crate::algorithms::compose::{ComposeFstOp, ComposeFstOpOptions, ComposeStateTuple};
+use crate::algorithms::lazy_fst_revamp::{FstCache, LazyFst, SimpleHashMapCache, StateTable};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{
     AllocableFst, CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator,
 };
-use crate::algorithms::lazy_fst_revamp::{LazyFst, SimpleHashMapCache, StateTable, FstCache};
 use crate::semirings::Semiring;
 use crate::{SymbolTable, TrsVec};
 use std::sync::Arc;
@@ -59,7 +59,7 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>, Cache: FstCache<W>> ComposeFst<W
             CFB,
             StateTable<ComposeStateTuple<<CFB::CF as ComposeFilter<W>>::FS>>,
         >,
-        fst_cache: Cache
+        fst_cache: Cache,
     ) -> Result<Self> {
         let isymt = fst1.input_symbols().cloned();
         let osymt = fst2.output_symbols().cloned();
@@ -99,7 +99,7 @@ impl<W, CFB, Cache> CoreFst<W> for ComposeFst<W, CFB, Cache>
 where
     W: Semiring,
     CFB: ComposeFilterBuilder<W>,
-    Cache: FstCache<W>
+    Cache: FstCache<W>,
 {
     type TRS = TrsVec<W>;
 
@@ -148,10 +148,9 @@ impl<'a, W, CFB, Cache> StateIterator<'a> for ComposeFst<W, CFB, Cache>
 where
     W: Semiring,
     CFB: ComposeFilterBuilder<W> + 'a,
-    Cache: FstCache<W> + 'a
+    Cache: FstCache<W> + 'a,
 {
-    type Iter =
-        <LazyFst<W, ComposeFstOp<W, CFB>, Cache> as StateIterator<'a>>::Iter;
+    type Iter = <LazyFst<W, ComposeFstOp<W, CFB>, Cache> as StateIterator<'a>>::Iter;
 
     fn states_iter(&'a self) -> Self::Iter {
         self.0.states_iter()
@@ -162,10 +161,9 @@ impl<'a, W, CFB, Cache> FstIterator<'a, W> for ComposeFst<W, CFB, Cache>
 where
     W: Semiring,
     CFB: ComposeFilterBuilder<W> + 'a,
-    Cache: FstCache<W> + 'a
+    Cache: FstCache<W> + 'a,
 {
-    type FstIter =
-        <LazyFst<W, ComposeFstOp<W, CFB>, Cache> as FstIterator<'a, W>>::FstIter;
+    type FstIter = <LazyFst<W, ComposeFstOp<W, CFB>, Cache> as FstIterator<'a, W>>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
         self.0.fst_iter()
@@ -176,7 +174,7 @@ impl<W, CFB, Cache> Fst<W> for ComposeFst<W, CFB, Cache>
 where
     W: Semiring,
     CFB: ComposeFilterBuilder<W> + 'static,
-    Cache: FstCache<W> + 'static
+    Cache: FstCache<W> + 'static,
 {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.0.input_symbols()
