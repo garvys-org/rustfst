@@ -54,6 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `num_input_epsilons` and `num_output_epsilons` are now much faster as they leverage internal counters instead of iterating through the Trs.
 - Various optimizations to significantly speed-up composition including getting rid of `bimap` for internal `StateTable`.
 - It now possible to specify the internal cache of a `ComposeFst` object.
+- Remove trait bound on Default in FstCache trait.
 
 ### Fixed
 - Fix olabel display while drawing a FST if no symbol table is provided
