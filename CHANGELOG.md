@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add method `read_from_const` to `VectorFst` allowing to load a `VectorFst` from a `ConstFst` file.
 - Add `compute_and_update_properties()` method to `MutableFst` trait to compute the properties verified by the `Fst` and update the internal property bits.
 - Add support for `compose` in `rustfst-cli`.
+- Implement `FstCache` for `Arc<FstCache>`.
+- Add a clear method for `SimpleHashMapCache`.
+- Add `len_trs` and `len_final_weights` as required methods of the `FstCache` trait.
 
 ### Changed
 - `fst_convert` now consumes its input. Use `fst_convert_from_ref` to pass a borrow.
@@ -50,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `num_input_epsilons` and `num_output_epsilons` are now required methods of the `CoreFst` trait instead of provided.
 - `num_input_epsilons` and `num_output_epsilons` are now much faster as they leverage internal counters instead of iterating through the Trs.
 - Various optimizations to significantly speed-up composition including getting rid of `bimap` for internal `StateTable`.
+- It now possible to specify the internal cache of a `ComposeFst` object.
 
 ### Fixed
 - Fix olabel display while drawing a FST if no symbol table is provided
