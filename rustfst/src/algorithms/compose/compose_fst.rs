@@ -41,7 +41,10 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>, Cache: FstCache<W>> ComposeFst<W
             CFB,
             StateTable<ComposeStateTuple<<CFB::CF as ComposeFilter<W>>::FS>>,
         >,
-    ) -> Result<Self> {
+    ) -> Result<Self>
+    where
+        Cache: Default,
+    {
         let isymt = fst1.input_symbols().cloned();
         let osymt = fst2.output_symbols().cloned();
         let compose_impl = ComposeFstOp::new(fst1, fst2, opts)?;
@@ -72,7 +75,10 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>, Cache: FstCache<W>> ComposeFst<W
     pub fn new(
         fst1: Arc<<<CFB::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
         fst2: Arc<<<CFB::CF as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
-    ) -> Result<Self> {
+    ) -> Result<Self>
+    where
+        Cache: Default,
+    {
         Self::new_with_options(fst1, fst2, ComposeFstOpOptions::default())
     }
 
