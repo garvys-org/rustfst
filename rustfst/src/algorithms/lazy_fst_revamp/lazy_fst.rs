@@ -17,7 +17,7 @@ use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable, Trs, TrsVec};
 
 #[derive(Debug, Clone)]
-pub struct LazyFst<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> {
+pub struct LazyFst<W: Semiring, Op: FstOp<W>, Cache> {
     cache: Cache,
     pub(crate) op: Op,
     w: PhantomData<W>,

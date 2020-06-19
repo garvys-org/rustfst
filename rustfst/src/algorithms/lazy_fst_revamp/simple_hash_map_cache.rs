@@ -5,21 +5,37 @@ use crate::algorithms::lazy_fst_revamp::FstCache;
 use crate::semirings::Semiring;
 use crate::{StateId, Trs, TrsVec, EPS_LABEL};
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct SimpleHashMapCache<W: Semiring> {
     // First option : has start been computed
     // Second option: value of the start state (possibly none)
     // The second element of each tuple is the number of known states.
     start: Mutex<(Option<Option<StateId>>, usize)>,
     trs: Mutex<(HashMap<StateId, CacheTrs<W>>, usize)>,
-    final_weight: Mutex<(HashMap<StateId, Option<W>>, usize)>,
+    final_weights: Mutex<(HashMap<StateId, Option<W>>, usize)>,
 }
 
 #[derive(Debug, Clone)]
 pub struct CacheTrs<W: Semiring> {
-    trs: TrsVec<W>,
-    niepsilons: usize,
-    noepsilons: usize,
+    pub trs: TrsVec<W>,
+    pub niepsilons: usize,
+    pub noepsilons: usize,
+}
+
+impl<W: Semiring> SimpleHashMapCache<W> {
+    pub fn clear(&self) {
+        let mut data_start = self.start.lock().unwrap();
+        data_start.0.take();
+        data_start.1 = 0;
+
+        let mut data_trs = self.trs.lock().unwrap();
+        data_trs.0.clear();
+        data_trs.1 = 0;
+
+        let mut data_final_weights = self.final_weights.lock().unwrap();
+        data_final_weights.0.clear();
+        data_final_weights.1 = 0;
+    }
 }
 
 impl<W: Semiring> Clone for SimpleHashMapCache<W> {
@@ -27,17 +43,17 @@ impl<W: Semiring> Clone for SimpleHashMapCache<W> {
         Self {
             start: Mutex::new(self.start.lock().unwrap().clone()),
             trs: Mutex::new(self.trs.lock().unwrap().clone()),
-            final_weight: Mutex::new(self.final_weight.lock().unwrap().clone()),
+            final_weights: Mutex::new(self.final_weights.lock().unwrap().clone()),
         }
     }
 }
 
-impl<W: Semiring> SimpleHashMapCache<W> {
-    pub fn new() -> Self {
+impl<W: Semiring> Default for SimpleHashMapCache<W> {
+    fn default() -> Self {
         Self {
             start: Mutex::new((None, 0)),
             trs: Mutex::new((HashMap::new(), 0)),
-            final_weight: Mutex::new((HashMap::new(), 0)),
+            final_weights: Mutex::new((HashMap::new(), 0)),
         }
     }
 }
@@ -87,11 +103,11 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
         );
     }
     fn get_final_weight(&self, id: usize) -> Option<Option<W>> {
-        self.final_weight.lock().unwrap().0.get(&id).cloned()
+        self.final_weights.lock().unwrap().0.get(&id).cloned()
     }
 
     fn insert_final_weight(&self, id: StateId, weight: Option<W>) {
-        let mut data = self.final_weight.lock().unwrap();
+        let mut data = self.final_weights.lock().unwrap();
         data.1 = std::cmp::max(data.1, id + 1);
         data.0.insert(id, weight);
     }
@@ -100,7 +116,7 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
         let mut n = 0;
         n = std::cmp::max(n, self.start.lock().unwrap().1);
         n = std::cmp::max(n, self.trs.lock().unwrap().1);
-        n = std::cmp::max(n, self.final_weight.lock().unwrap().1);
+        n = std::cmp::max(n, self.final_weights.lock().unwrap().1);
         n
     }
 
@@ -117,5 +133,15 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
     fn num_output_epsilons(&self, id: usize) -> Option<usize> {
         let data = self.trs.lock().unwrap();
         data.0.get(&id).map(|v| v.noepsilons)
+    }
+
+    fn len_trs(&self) -> usize {
+        let data = self.trs.lock().unwrap();
+        data.0.len()
+    }
+
+    fn len_final_weights(&self) -> usize {
+        let data = self.final_weights.lock().unwrap();
+        data.0.len()
     }
 }

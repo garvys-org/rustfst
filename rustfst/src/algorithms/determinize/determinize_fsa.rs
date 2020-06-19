@@ -135,7 +135,7 @@ where
         let isymt = fst.input_symbols().cloned();
         let osymt = fst.output_symbols().cloned();
         let fst_op = DeterminizeFsaOp::new(fst, in_dist)?;
-        let fst_cache = SimpleHashMapCache::new();
+        let fst_cache = SimpleHashMapCache::default();
         let lazy_fst = LazyFst::from_op_and_cache(fst_op, fst_cache, isymt, osymt);
         Ok(DeterminizeFsa(lazy_fst))
     }

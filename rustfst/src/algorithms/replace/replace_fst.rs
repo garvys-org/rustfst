@@ -34,7 +34,7 @@ where
         }
         let opts = ReplaceFstOptions::new(root, epsilon_on_replace);
         let fst_op = ReplaceFstOp::new(fst_list, opts)?;
-        let fst_cache = SimpleHashMapCache::new();
+        let fst_cache = SimpleHashMapCache::default();
         Ok(ReplaceFst(LazyFst::from_op_and_cache(
             fst_op, fst_cache, isymt, osymt,
         )))

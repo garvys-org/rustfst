@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use crate::semirings::Semiring;
 use crate::{StateId, TrsVec};
 
-pub trait FstCache<W: Semiring>: Debug {
+pub trait FstCache<W: Semiring>: Debug + Default {
     fn get_start(&self) -> Option<Option<StateId>>;
     fn insert_start(&self, id: Option<StateId>);
 
@@ -18,4 +18,7 @@ pub trait FstCache<W: Semiring>: Debug {
 
     fn num_input_epsilons(&self, id: usize) -> Option<usize>;
     fn num_output_epsilons(&self, id: usize) -> Option<usize>;
+
+    fn len_trs(&self) -> usize;
+    fn len_final_weights(&self) -> usize;
 }

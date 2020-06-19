@@ -153,7 +153,7 @@ where
         let isymt = fst.borrow().input_symbols().cloned();
         let osymt = fst.borrow().output_symbols().cloned();
         let fst_op = FactorWeightOp::new(fst, opts)?;
-        let fst_cache = SimpleHashMapCache::new();
+        let fst_cache = SimpleHashMapCache::default();
         let lazy_fst = LazyFst::from_op_and_cache(fst_op, fst_cache, isymt, osymt);
         Ok(FactorWeightFst(lazy_fst))
     }
