@@ -93,14 +93,13 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
             }
         }
         if id >= data.0.len() {
-            data.0.resize(id+1, None);
+            data.0.resize(id + 1, None);
         }
         data.0[id] = Some(CacheTrs {
-                trs,
-                niepsilons,
-                noepsilons,
-            },
-        );
+            trs,
+            niepsilons,
+            noepsilons,
+        });
     }
 
     fn get_final_weight(&self, id: usize) -> Option<Option<W>> {
@@ -117,7 +116,7 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
         let mut data = self.final_weights.lock().unwrap();
         data.1 = std::cmp::max(data.1, id + 1);
         if id >= data.0.len() {
-            data.0.resize(id+1, None);
+            data.0.resize(id + 1, None);
         }
         // First Some to mark the final weight as computed
         data.0[id] = Some(weight);
@@ -133,17 +132,26 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
 
     fn num_trs(&self, id: usize) -> Option<usize> {
         let data = self.trs.lock().unwrap();
-        data.0.get(id).map(|v| v.as_ref().map(|e| e.trs.len())).flatten()
+        data.0
+            .get(id)
+            .map(|v| v.as_ref().map(|e| e.trs.len()))
+            .flatten()
     }
 
     fn num_input_epsilons(&self, id: usize) -> Option<usize> {
         let data = self.trs.lock().unwrap();
-        data.0.get(id).map(|v| v.as_ref().map(|e|e.niepsilons)).flatten()
+        data.0
+            .get(id)
+            .map(|v| v.as_ref().map(|e| e.niepsilons))
+            .flatten()
     }
 
     fn num_output_epsilons(&self, id: usize) -> Option<usize> {
         let data = self.trs.lock().unwrap();
-        data.0.get(id).map(|v| v.as_ref().map(|e| e.noepsilons)).flatten()
+        data.0
+            .get(id)
+            .map(|v| v.as_ref().map(|e| e.noepsilons))
+            .flatten()
     }
 
     fn len_trs(&self) -> usize {

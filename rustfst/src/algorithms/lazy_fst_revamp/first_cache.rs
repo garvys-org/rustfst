@@ -1,12 +1,12 @@
-use crate::{Semiring, StateId, TrsVec, Trs};
 use crate::algorithms::lazy_fst_revamp::FstCache;
+use crate::{Semiring, StateId, Trs, TrsVec};
 use std::sync::Mutex;
 
 #[derive(Debug)]
 pub struct FirstCache<W: Semiring, Cache: FstCache<W>> {
     cache: Cache,
     last_trs: Mutex<Option<(StateId, TrsVec<W>)>>,
-    last_final_weight: Mutex<Option<(StateId, Option<W>)>>
+    last_final_weight: Mutex<Option<(StateId, Option<W>)>>,
 }
 
 impl<W: Semiring, Cache: FstCache<W> + Default> Default for FirstCache<W, Cache> {
@@ -14,7 +14,7 @@ impl<W: Semiring, Cache: FstCache<W> + Default> Default for FirstCache<W, Cache>
         Self {
             cache: Cache::default(),
             last_trs: Mutex::new(None),
-            last_final_weight: Mutex::new(None)
+            last_final_weight: Mutex::new(None),
         }
     }
 }
@@ -48,7 +48,7 @@ impl<W: Semiring, Cache: FstCache<W>> FstCache<W> for FirstCache<W, Cache> {
         let data = self.last_final_weight.lock().unwrap();
         if let Some((last_id_final_weight, last_final_weight)) = &*data {
             if *last_id_final_weight == id {
-                return Some(last_final_weight.clone())
+                return Some(last_final_weight.clone());
             }
         }
         self.cache.get_final_weight(id)
