@@ -5,7 +5,7 @@ use crate::algorithms::compose::compose_filters::{
 };
 use crate::algorithms::compose::matchers::{GenericMatcher, Matcher};
 use crate::algorithms::compose::{ComposeFstOp, ComposeFstOpOptions, ComposeStateTuple};
-use crate::algorithms::lazy_fst_revamp::{FstCache, LazyFst, SimpleHashMapCache, StateTable};
+use crate::algorithms::lazy_fst_revamp::{FstCache, LazyFst, SimpleHashMapCache, StateTable, SimpleVecCache};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{
     AllocableFst, CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator,
@@ -15,7 +15,7 @@ use crate::{SymbolTable, TrsVec};
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
-pub struct ComposeFst<W: Semiring, CFB: ComposeFilterBuilder<W>, Cache = SimpleHashMapCache<W>>(
+pub struct ComposeFst<W: Semiring, CFB: ComposeFilterBuilder<W>, Cache = SimpleVecCache<W>>(
     LazyFst<W, ComposeFstOp<W, CFB>, Cache>,
 );
 
@@ -95,7 +95,7 @@ impl<W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>>
         let isymt = fst1.input_symbols().cloned();
         let osymt = fst2.output_symbols().cloned();
         let compose_impl = create_base(fst1, fst2)?;
-        let fst_cache = SimpleHashMapCache::default();
+        let fst_cache = SimpleVecCache::default();
         let fst = LazyFst::from_op_and_cache(compose_impl, fst_cache, isymt, osymt);
         Ok(ComposeFst(fst))
     }
