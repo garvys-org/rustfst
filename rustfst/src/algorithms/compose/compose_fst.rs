@@ -5,7 +5,7 @@ use crate::algorithms::compose::compose_filters::{
 };
 use crate::algorithms::compose::matchers::{GenericMatcher, Matcher};
 use crate::algorithms::compose::{ComposeFstOp, ComposeFstOpOptions, ComposeStateTuple};
-use crate::algorithms::lazy_fst_revamp::{FstCache, LazyFst, SimpleHashMapCache, StateTable, SimpleVecCache};
+use crate::algorithms::lazy_fst_revamp::{FstCache, LazyFst, StateTable, SimpleVecCache};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{
     AllocableFst, CoreFst, ExpandedFst, Fst, FstIterator, MutableFst, StateIterator,
