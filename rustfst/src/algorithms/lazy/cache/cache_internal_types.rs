@@ -1,3 +1,4 @@
+use crate::algorithms::lazy::CacheStatus;
 use crate::StateId;
 use std::collections::HashMap;
 
@@ -19,9 +20,18 @@ impl<T> Default for CachedData<Option<T>> {
     }
 }
 
-impl<T> CachedData<Option<T>> {
+impl<T> Default for CachedData<CacheStatus<T>> {
+    fn default() -> Self {
+        Self {
+            data: CacheStatus::NotComputed,
+            num_known_states: 0,
+        }
+    }
+}
+
+impl<T> CachedData<CacheStatus<T>> {
     pub fn clear(&mut self) {
-        self.data.take();
+        self.data = CacheStatus::NotComputed;
         self.num_known_states = 0;
     }
 }
@@ -39,6 +49,18 @@ impl<T> CachedData<Vec<T>> {
     pub fn clear(&mut self) {
         self.data.clear();
         self.num_known_states = 0;
+    }
+}
+
+impl<T> CachedData<Vec<CacheStatus<T>>> {
+    pub fn get(&self, idx: usize) -> CacheStatus<&T> {
+        match self.data.get(idx) {
+            Some(e) => match e {
+                CacheStatus::Computed(v) => CacheStatus::Computed(v),
+                CacheStatus::NotComputed => CacheStatus::NotComputed,
+            },
+            None => CacheStatus::NotComputed,
+        }
     }
 }
 

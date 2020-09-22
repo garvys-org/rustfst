@@ -1,7 +1,7 @@
 use std::sync::Mutex;
 
 use crate::algorithms::lazy::cache::cache_internal_types::{CachedData, FinalWeight, StartState};
-use crate::algorithms::lazy::FstCache;
+use crate::algorithms::lazy::{CacheStatus, FstCache};
 use crate::semirings::Semiring;
 use crate::{StateId, Trs, TrsVec, EPS_LABEL};
 
@@ -10,9 +10,9 @@ pub struct SimpleVecCache<W: Semiring> {
     // First option : has start been computed
     // Second option: value of the start state (possibly none)
     // The second element of each tuple is the number of known states.
-    start: Mutex<CachedData<Option<StartState>>>,
-    trs: Mutex<CachedData<Vec<Option<CacheTrs<W>>>>>,
-    final_weights: Mutex<CachedData<Vec<Option<FinalWeight<W>>>>>,
+    start: Mutex<CachedData<CacheStatus<StartState>>>,
+    trs: Mutex<CachedData<Vec<CacheStatus<CacheTrs<W>>>>>,
+    final_weights: Mutex<CachedData<Vec<CacheStatus<FinalWeight<W>>>>>,
 }
 
 #[derive(Debug, Clone)]
@@ -56,7 +56,7 @@ impl<W: Semiring> Default for SimpleVecCache<W> {
 }
 
 impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
-    fn get_start(&self) -> Option<Option<StateId>> {
+    fn get_start(&self) -> CacheStatus<Option<StateId>> {
         self.start.lock().unwrap().data
     }
 
@@ -65,16 +65,12 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
         if let Some(s) = id {
             cached_data.num_known_states = std::cmp::max(cached_data.num_known_states, s + 1);
         }
-        cached_data.data = Some(id);
+        cached_data.data = CacheStatus::Computed(id);
     }
 
-    fn get_trs(&self, id: usize) -> Option<TrsVec<W>> {
+    fn get_trs(&self, id: usize) -> CacheStatus<TrsVec<W>> {
         let cached_data = self.trs.lock().unwrap();
-        if id < cached_data.data.len() {
-            cached_data.data[id].as_ref().map(|e| e.trs.shallow_clone())
-        } else {
-            None
-        }
+        cached_data.get(id).map(|e| e.trs.shallow_clone())
     }
 
     fn insert_trs(&self, id: usize, trs: TrsVec<W>) {
@@ -92,22 +88,20 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
             }
         }
         if id >= cached_data.data.len() {
-            cached_data.data.resize(id + 1, None);
+            cached_data.data.resize(id + 1, CacheStatus::NotComputed);
         }
-        cached_data.data[id] = Some(CacheTrs {
+        cached_data.data[id] = CacheStatus::Computed(CacheTrs {
             trs,
             niepsilons,
             noepsilons,
         });
     }
 
-    fn get_final_weight(&self, id: usize) -> Option<Option<W>> {
+    fn get_final_weight(&self, id: usize) -> CacheStatus<Option<W>> {
         let cached_data = self.final_weights.lock().unwrap();
-        if id < cached_data.data.len() {
-            cached_data.data[id].clone()
-        } else {
-            // Not computed yet
-            None
+        match cached_data.data.get(id) {
+            Some(e) => e.clone(),
+            None => CacheStatus::NotComputed,
         }
     }
 
@@ -115,10 +109,10 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
         let mut cached_data = self.final_weights.lock().unwrap();
         cached_data.num_known_states = std::cmp::max(cached_data.num_known_states, id + 1);
         if id >= cached_data.data.len() {
-            cached_data.data.resize(id + 1, None);
+            cached_data.data.resize(id + 1, CacheStatus::NotComputed);
         }
         // First Some to mark the final weight as computed
-        cached_data.data[id] = Some(weight);
+        cached_data.data[id] = CacheStatus::Computed(weight);
     }
 
     fn num_known_states(&self) -> usize {
@@ -131,29 +125,17 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
 
     fn num_trs(&self, id: usize) -> Option<usize> {
         let cached_data = self.trs.lock().unwrap();
-        cached_data
-            .data
-            .get(id)
-            .map(|v| v.as_ref().map(|e| e.trs.len()))
-            .flatten()
+        cached_data.get(id).map(|e| e.trs.len()).into_option()
     }
 
     fn num_input_epsilons(&self, id: usize) -> Option<usize> {
         let cached_data = self.trs.lock().unwrap();
-        cached_data
-            .data
-            .get(id)
-            .map(|v| v.as_ref().map(|e| e.niepsilons))
-            .flatten()
+        cached_data.get(id).map(|e| e.niepsilons).into_option()
     }
 
     fn num_output_epsilons(&self, id: usize) -> Option<usize> {
         let cached_data = self.trs.lock().unwrap();
-        cached_data
-            .data
-            .get(id)
-            .map(|v| v.as_ref().map(|e| e.noepsilons))
-            .flatten()
+        cached_data.get(id).map(|e| e.noepsilons).into_option()
     }
 
     fn len_trs(&self) -> usize {

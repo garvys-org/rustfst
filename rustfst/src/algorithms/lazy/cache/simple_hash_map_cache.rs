@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 
 use crate::algorithms::lazy::cache::cache_internal_types::{CachedData, StartState};
-use crate::algorithms::lazy::FstCache;
+use crate::algorithms::lazy::{CacheStatus, FstCache};
 use crate::semirings::Semiring;
 use crate::{StateId, Trs, TrsVec, EPS_LABEL};
 
@@ -11,7 +11,7 @@ pub struct SimpleHashMapCache<W: Semiring> {
     // First option : has start been computed
     // Second option: value of the start state (possibly none)
     // The second element of each tuple is the number of known states.
-    start: Mutex<CachedData<Option<StartState>>>,
+    start: Mutex<CachedData<CacheStatus<StartState>>>,
     trs: Mutex<CachedData<HashMap<StateId, CacheTrs<W>>>>,
     final_weights: Mutex<CachedData<HashMap<StateId, Option<W>>>>,
 }
@@ -57,8 +57,9 @@ impl<W: Semiring> Default for SimpleHashMapCache<W> {
 }
 
 impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
-    fn get_start(&self) -> Option<Option<StateId>> {
-        self.start.lock().unwrap().data
+    fn get_start(&self) -> CacheStatus<Option<StateId>> {
+        let res = self.start.lock().unwrap();
+        res.data
     }
 
     fn insert_start(&self, id: Option<StateId>) {
@@ -66,16 +67,14 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
         if let Some(s) = id {
             data.num_known_states = std::cmp::max(data.num_known_states, s + 1);
         }
-        data.data = Some(id);
+        data.data = CacheStatus::Computed(id);
     }
 
-    fn get_trs(&self, id: usize) -> Option<TrsVec<W>> {
-        self.trs
-            .lock()
-            .unwrap()
-            .data
-            .get(&id)
-            .map(|v| v.trs.shallow_clone())
+    fn get_trs(&self, id: usize) -> CacheStatus<TrsVec<W>> {
+        match self.trs.lock().unwrap().data.get(&id) {
+            Some(e) => CacheStatus::Computed(e.trs.shallow_clone()),
+            None => CacheStatus::NotComputed,
+        }
     }
 
     fn insert_trs(&self, id: usize, trs: TrsVec<W>) {
@@ -101,8 +100,11 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
             },
         );
     }
-    fn get_final_weight(&self, id: usize) -> Option<Option<W>> {
-        self.final_weights.lock().unwrap().data.get(&id).cloned()
+    fn get_final_weight(&self, id: usize) -> CacheStatus<Option<W>> {
+        match self.final_weights.lock().unwrap().data.get(&id) {
+            Some(e) => CacheStatus::Computed(e.clone()),
+            None => CacheStatus::NotComputed,
+        }
     }
 
     fn insert_final_weight(&self, id: StateId, weight: Option<W>) {
