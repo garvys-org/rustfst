@@ -63,12 +63,21 @@ impl<'a, W: Semiring> TrsIterMut<'a, W> {
         self.trs.get(idx)
     }
 
+    /// Get a reference to the  number `idx` `Tr` of the object.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `self.len() >= idx`
     pub unsafe fn get_unchecked(&self, idx: usize) -> &Tr<W> {
         self.trs.get_unchecked(idx)
     }
 
     pub fn len(&self) -> usize {
         self.trs.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.trs.is_empty()
     }
 
     pub fn set_ilabel(&mut self, idx: usize, ilabel: Label) -> Result<()> {
@@ -137,6 +146,11 @@ impl<'a, W: Semiring> TrsIterMut<'a, W> {
         Ok(())
     }
 
+    /// Modify the ilabel of the  number `idx` `Tr` of the object.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `self.len() >= idx`
     pub unsafe fn set_ilabel_unchecked(&mut self, idx: usize, ilabel: Label) {
         let old_tr = self.trs.get_unchecked_mut(idx);
         *self.properties = compute_new_properties_labels(
@@ -150,6 +164,11 @@ impl<'a, W: Semiring> TrsIterMut<'a, W> {
         old_tr.ilabel = ilabel;
     }
 
+    /// Modify the olabel of the  number `idx` `Tr` of the object.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `self.len() >= idx`
     pub unsafe fn set_olabel_unchecked(&mut self, idx: usize, olabel: Label) {
         let old_tr = self.trs.get_unchecked_mut(idx);
         *self.properties = compute_new_properties_labels(
@@ -163,6 +182,11 @@ impl<'a, W: Semiring> TrsIterMut<'a, W> {
         old_tr.olabel = olabel;
     }
 
+    /// Modify the labels of the  number `idx` `Tr` of the object.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `self.len() >= idx`
     pub unsafe fn set_labels_unchecked(&mut self, idx: usize, ilabel: Label, olabel: Label) {
         let old_tr = self.trs.get_unchecked_mut(idx);
         *self.properties = compute_new_properties_labels(
@@ -178,6 +202,11 @@ impl<'a, W: Semiring> TrsIterMut<'a, W> {
         old_tr.olabel = olabel;
     }
 
+    /// Modify the weight of the  number `idx` `Tr` of the object.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `self.len() >= idx`
     pub unsafe fn set_weight_unchecked(&mut self, idx: usize, weight: W) {
         let old_tr = self.trs.get_unchecked_mut(idx);
         *self.properties =
@@ -185,11 +214,21 @@ impl<'a, W: Semiring> TrsIterMut<'a, W> {
         old_tr.weight = weight;
     }
 
+    /// Modify the nextstate of the  number `idx` `Tr` of the object.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `self.len() >= idx`
     pub unsafe fn set_nextstate_unchecked(&mut self, idx: usize, nextstate: StateId) {
         keep_only_relevant_properties(self.properties);
         self.trs.get_unchecked_mut(idx).nextstate = nextstate;
     }
 
+    /// Modify the number `idx` element of the object.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `self.len() >= idx`
     pub unsafe fn set_tr_unchecked(&mut self, idx: usize, tr: Tr<W>) {
         let old_tr = self.trs.get_unchecked_mut(idx);
         *self.properties = compute_new_properties_all(*self.properties, old_tr, &tr);

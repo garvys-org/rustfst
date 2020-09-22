@@ -137,9 +137,9 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
 
         let mut nstates = 0 as usize;
 
-        for s in 0..self.states.len() {
-            if new_id[s] != -1 {
-                new_id[s] = nstates as i32;
+        for (s, lol) in new_id.iter_mut().enumerate().take(self.states.len()) {
+            if *lol != -1 {
+                *lol = nstates as i32;
                 if s != nstates {
                     self.states.swap(nstates, s);
                 }

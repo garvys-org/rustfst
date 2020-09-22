@@ -46,11 +46,12 @@ impl<W: Semiring> FstIntoIterator<W> for VectorFst<W> {
     }
 }
 
+type States<'a, W> = Enumerate<std::slice::Iter<'a, VectorFstState<W>>>;
+type StateToData<'a, W, TRS> =
+    Box<dyn FnMut((StateId, &'a VectorFstState<W>)) -> FstIterData<W, TRS>>;
+
 impl<'a, W: Semiring + 'static> FstIterator<'a, W> for VectorFst<W> {
-    type FstIter = Map<
-        Enumerate<std::slice::Iter<'a, VectorFstState<W>>>,
-        Box<dyn FnMut((StateId, &'a VectorFstState<W>)) -> FstIterData<W, Self::TRS>>,
-    >;
+    type FstIter = Map<States<'a, W>, StateToData<'a, W, Self::TRS>>;
     fn fst_iter(&'a self) -> Self::FstIter {
         self.states
             .iter()

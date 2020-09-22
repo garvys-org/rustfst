@@ -172,6 +172,13 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
     /// ```
     fn del_all_states(&mut self);
 
+    /// Remove transitions from the fst at state `state`. Transitions are specified with
+    /// their index. The `to_del` vector MUST be sorted.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
     unsafe fn del_trs_id_sorted_unchecked(&mut self, state: StateId, to_del: &Vec<usize>);
 
     /// Adds a transition to the FST. The transition will start in the state `source`.
@@ -200,7 +207,14 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
     /// # }
     /// ```
     fn add_tr(&mut self, source: StateId, tr: Tr<W>) -> Result<()>;
-    unsafe fn add_tr_unchecked(&mut self, source: StateId, tr: Tr<W>);
+
+    /// Adds a transition to the FST. The transition will start in the state `state`.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
+    unsafe fn add_tr_unchecked(&mut self, state: StateId, tr: Tr<W>);
 
     /// Adds a transition to the FST. The transition will start in the state `source`.
     ///
@@ -238,21 +252,43 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
         self.add_tr(source, Tr::new(ilabel, olabel, weight, nextstate))
     }
 
+    /// Adds a transition to the FST. The transition will start in the state `state`.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
     unsafe fn emplace_tr_unchecked<S: Into<W>>(
         &mut self,
-        source: StateId,
+        state: StateId,
         ilabel: Label,
         olabel: Label,
         weight: S,
         nextstate: StateId,
     ) {
-        self.add_tr_unchecked(source, Tr::new(ilabel, olabel, weight, nextstate))
+        self.add_tr_unchecked(state, Tr::new(ilabel, olabel, weight, nextstate))
     }
 
+    /// Set all the `Tr`s leaving the state `state` to the parameters `trs` erasing
+    /// the `Tr`s previously stored.
+    ///
+    /// Be careful as this function doesn't update the `FstProperties`.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
     unsafe fn set_trs_unchecked(&mut self, source: StateId, trs: Vec<Tr<W>>);
 
     /// Remove the final weight of a specific state.
     fn delete_final_weight(&mut self, source: StateId) -> Result<()>;
+
+    /// Remove the final weight of state `state`.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
     unsafe fn delete_final_weight_unchecked(&mut self, source: StateId);
 
     /// Deletes all the trs leaving a state.
@@ -260,6 +296,13 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
 
     /// Remove all trs leaving a state and return them.
     fn pop_trs(&mut self, source: StateId) -> Result<Vec<Tr<W>>>;
+
+    /// Remove all the `Tr` leaving the state `state` and return them.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
     unsafe fn pop_trs_unchecked(&mut self, source: StateId) -> Vec<Tr<W>>;
 
     /// Takes the final weight out of the fst, leaving a None in its place.
@@ -313,12 +356,35 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
     /// # Ok(())
     /// # }
     /// ```
-    unsafe fn take_final_weight_unchecked(&mut self, state_id: StateId) -> Option<W>;
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
+    unsafe fn take_final_weight_unchecked(&mut self, state: StateId) -> Option<W>;
 
     fn sort_trs_unchecked<F: Fn(&Tr<W>, &Tr<W>) -> Ordering>(&mut self, state: StateId, f: F);
 
+    /// Remove duplicate Trs leaving the state `state` with the same `ilabel`, `olabel`, `weight`
+    /// and `nextstate`.
+    ///
+    /// Be careful as this function doesn't update the FstProperties!
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` not present in Fst.
+    ///
     unsafe fn unique_trs_unchecked(&mut self, state: StateId);
 
+    /// Merge the Trs leaving the state `state` with the same `ilabel`, `olabel`
+    /// and `nextstate` and sum their weights.
+    ///
+    /// Be careful as this function doesn't update the FstProperties!
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` not present in Fst.
+    ///
     unsafe fn sum_trs_unchecked(&mut self, state: StateId);
 
     /// This operation computes the concatenative closure.

@@ -1,4 +1,5 @@
 use std::borrow::Borrow;
+use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
 use std::io::Write;
 use std::marker::PhantomData;
@@ -280,28 +281,28 @@ impl<W: Semiring> UnionWeightOption<GallicWeightRestrict<W>>
         let s2 = w2.0.value1();
         let n1 = s1.len_labels();
         let n2 = s2.len_labels();
-        if n1 < n2 {
-            true
-        } else if n1 > n2 {
-            false
-        } else {
-            // n1 == n2
-            if n1 == 0 {
-                return false;
-            }
-            let v1 = s1.value.unwrap_labels();
-            let v2 = s2.value.unwrap_labels();
-            for i in 0..n1 {
-                let l1 = v1[i];
-                let l2 = v2[i];
-                if l1 < l2 {
-                    return true;
-                }
-                if l1 > l2 {
+
+        match n1.cmp(&n2) {
+            Ordering::Less => true,
+            Ordering::Greater => false,
+            Ordering::Equal => {
+                if n1 == 0 {
                     return false;
                 }
+                let v1 = s1.value.unwrap_labels();
+                let v2 = s2.value.unwrap_labels();
+                for i in 0..n1 {
+                    let l1 = v1[i];
+                    let l2 = v2[i];
+                    if l1 < l2 {
+                        return true;
+                    }
+                    if l1 > l2 {
+                        return false;
+                    }
+                }
+                false
             }
-            false
         }
     }
 
