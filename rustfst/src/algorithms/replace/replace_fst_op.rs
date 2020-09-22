@@ -7,7 +7,7 @@ use std::sync::Arc;
 use anyhow::Result;
 use itertools::Itertools;
 
-use crate::algorithms::lazy_fst_revamp::FstOp;
+use crate::algorithms::lazy::FstOp;
 use crate::algorithms::replace::config::{ReplaceFstOptions, ReplaceLabelType};
 use crate::algorithms::replace::state_table::{
     ReplaceStackPrefix, ReplaceStateTable, ReplaceStateTuple,

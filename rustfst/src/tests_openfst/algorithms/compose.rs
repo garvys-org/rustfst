@@ -20,7 +20,7 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::algorithms::compose::MatcherFst;
 use crate::algorithms::compose::{compose_with_config, ComposeConfig, LabelReachableData};
 use crate::algorithms::compose::{ComposeFilterEnum, ComposeFst, ComposeFstOpOptions};
-use crate::algorithms::lazy_fst_revamp::SimpleHashMapCache;
+use crate::algorithms::lazy::SimpleHashMapCache;
 use crate::algorithms::{tr_compares::ILabelCompare, tr_sort};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;

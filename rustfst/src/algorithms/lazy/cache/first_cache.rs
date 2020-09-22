@@ -1,4 +1,4 @@
-use crate::algorithms::lazy_fst_revamp::FstCache;
+use crate::algorithms::lazy::FstCache;
 use crate::{Semiring, StateId, Trs, TrsVec};
 use std::sync::Mutex;
 

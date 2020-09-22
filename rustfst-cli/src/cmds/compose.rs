@@ -20,7 +20,7 @@ use rustfst::algorithms::compose::lookahead_matchers::{
     LabelLookAheadMatcher, LookaheadMatcher, MatcherFlagsTrait,
 };
 use rustfst::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags, SortedMatcher};
-use rustfst::algorithms::lazy_fst_revamp::SimpleHashMapCache;
+use rustfst::algorithms::lazy::SimpleHashMapCache;
 use rustfst::algorithms::tr_compares::ILabelCompare;
 use rustfst::algorithms::tr_sort;
 

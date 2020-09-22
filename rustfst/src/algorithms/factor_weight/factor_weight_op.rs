@@ -6,7 +6,7 @@ use anyhow::Result;
 
 use crate::algorithms::factor_weight::{Element, FactorWeightStateTable};
 use crate::algorithms::factor_weight::{FactorIterator, FactorWeightOptions, FactorWeightType};
-use crate::algorithms::lazy_fst_revamp::FstOp;
+use crate::algorithms::lazy::FstOp;
 use crate::fst_properties::mutable_properties::factor_weight_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;

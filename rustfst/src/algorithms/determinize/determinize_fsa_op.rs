@@ -9,7 +9,7 @@ use crate::algorithms::determinize::divisors::CommonDivisor;
 use crate::algorithms::determinize::{
     DeterminizeElement, DeterminizeStateTable, DeterminizeStateTuple, DeterminizeTr, WeightedSubset,
 };
-use crate::algorithms::lazy_fst_revamp::FstOp;
+use crate::algorithms::lazy::FstOp;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
 use crate::semirings::{DivideType, WeaklyDivisibleSemiring, WeightQuantize};

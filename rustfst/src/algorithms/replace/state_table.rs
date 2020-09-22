@@ -1,4 +1,4 @@
-use crate::algorithms::lazy_fst_revamp::StateTable;
+use crate::algorithms::lazy::StateTable;
 use crate::{Label, StateId};
 
 #[derive(Hash, Eq, PartialOrd, PartialEq, Clone, Debug)]

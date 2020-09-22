@@ -555,23 +555,23 @@ pub fn replace_properties(
     let mut no_iepsilons = !epsilon_on_call && !epsilon_on_return;
     let mut acyclic = true;
     let mut unweighted = true;
-    for i in 0..inprops.len() {
-        if !inprops[i].contains(FstProperties::ACCEPTOR) {
+    for (i, inprop) in inprops.iter().enumerate() {
+        if !inprop.contains(FstProperties::ACCEPTOR) {
             acceptor = false;
         }
-        if !inprops[i].contains(FstProperties::I_DETERMINISTIC) {
+        if !inprop.contains(FstProperties::I_DETERMINISTIC) {
             ideterministic = false;
         }
-        if !inprops[i].contains(FstProperties::NO_I_EPSILONS) {
+        if !inprop.contains(FstProperties::NO_I_EPSILONS) {
             no_iepsilons = false;
         }
-        if !inprops[i].contains(FstProperties::ACYCLIC) {
+        if !inprop.contains(FstProperties::ACYCLIC) {
             acyclic = false;
         }
-        if !inprops[i].contains(FstProperties::UNWEIGHTED) {
+        if !inprop.contains(FstProperties::UNWEIGHTED) {
             unweighted = false;
         }
-        if i != root && !inprops[i].contains(FstProperties::NO_I_EPSILONS) {
+        if i != root && !inprop.contains(FstProperties::NO_I_EPSILONS) {
             ideterministic = false;
         }
     }

@@ -81,4 +81,4 @@ pub mod tr_compares {
     pub use super::tr_sort::{ILabelCompare, OLabelCompare, TrCompare};
 }
 
-pub mod lazy_fst_revamp;
+pub mod lazy;
