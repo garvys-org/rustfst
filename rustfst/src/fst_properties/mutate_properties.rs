@@ -638,7 +638,7 @@ pub fn reverse_properties(inprops: FstProperties, has_superinitial: bool) -> Fst
 
 pub fn reweight_properties(inprops: FstProperties) -> FstProperties {
     let mut outprops = inprops & FstProperties::weight_invariant_properties();
-    outprops = outprops & !FstProperties::COACCESSIBLE;
+    outprops &= !FstProperties::COACCESSIBLE;
     outprops
 }
 

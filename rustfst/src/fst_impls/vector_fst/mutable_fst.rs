@@ -197,7 +197,7 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         self.properties = delete_all_states_properties();
     }
 
-    unsafe fn del_trs_id_sorted_unchecked(&mut self, state: usize, to_del: &Vec<usize>) {
+    unsafe fn del_trs_id_sorted_unchecked(&mut self, state: usize, to_del: &[usize]) {
         let state = &mut self.states.get_unchecked_mut(state);
         for i in to_del.iter().rev() {
             if state.trs[*i].ilabel == EPS_LABEL {

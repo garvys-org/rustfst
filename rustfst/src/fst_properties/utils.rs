@@ -10,8 +10,8 @@ pub fn known_properties(props: FstProperties) -> FstProperties {
 
 impl FstProperties {
     /// Check that all the `props` passed as parameter are known.
-    pub fn knows(&self, props: FstProperties) -> bool {
-        let known = known_properties(*self);
+    pub fn knows(self, props: FstProperties) -> bool {
+        let known = known_properties(self);
         known.contains(props)
     }
 }

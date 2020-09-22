@@ -39,7 +39,14 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
     /// assert_eq!(fst.start(), Some(s2));
     /// ```
     fn set_start(&mut self, state_id: StateId) -> Result<()>;
-    unsafe fn set_start_unchecked(&mut self, state_id: StateId);
+
+    /// The state with identifier `state_id` is now the start state.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
+    unsafe fn set_start_unchecked(&mut self, state: StateId);
 
     /// The state with identifier `state_id` is now a final state with a weight `final_weight`.
     /// If the `state_id` doesn't exist an error is raised.
@@ -65,6 +72,13 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
     /// assert_eq!(fst.final_weight(s2).unwrap(), Some(BooleanWeight::one()));
     /// ```
     fn set_final<S: Into<W>>(&mut self, state_id: StateId, final_weight: S) -> Result<()>;
+
+    /// Set the final weight of the state with state if `state_id`.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
     unsafe fn set_final_unchecked<S: Into<W>>(&mut self, state_id: StateId, final_weight: S);
 
     /// Adds a new state to the current FST. The identifier of the new state is returned
@@ -87,9 +101,18 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
     ///
     /// ```
     fn add_state(&mut self) -> StateId;
+
+    /// Add `n` states to the Fst.
     fn add_states(&mut self, n: usize);
 
-    fn tr_iter_mut(&mut self, state_id: StateId) -> Result<TrsIterMut<W>>;
+    /// Return a mutable iterator on the `Tr`s of the state `state`.
+    fn tr_iter_mut(&mut self, state: StateId) -> Result<TrsIterMut<W>>;
+    /// Return a mutable iterator on the `Tr`s of the state `state`.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
     unsafe fn tr_iter_unchecked_mut(&mut self, state_id: StateId) -> TrsIterMut<W>;
 
     /// Removes a state from an FST. It also removes all the trs starting from another state and
@@ -179,7 +202,7 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
     ///
     /// Unsafe behaviour if `state` is not present in Fst.
     ///
-    unsafe fn del_trs_id_sorted_unchecked(&mut self, state: StateId, to_del: &Vec<usize>);
+    unsafe fn del_trs_id_sorted_unchecked(&mut self, state: StateId, to_del: &[usize]);
 
     /// Adds a transition to the FST. The transition will start in the state `source`.
     ///

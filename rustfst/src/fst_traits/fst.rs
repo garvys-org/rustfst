@@ -54,8 +54,15 @@ pub trait CoreFst<W: Semiring> {
     /// assert_eq!(fst.final_weight(s2).unwrap(), Some(BooleanWeight::one()));
     /// assert!(fst.final_weight(s2 + 1).is_err());
     /// ```
-    fn final_weight(&self, state_id: StateId) -> Result<Option<W>>;
-    unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<W>;
+    fn final_weight(&self, state: StateId) -> Result<Option<W>>;
+
+    /// Retrieves the final weight of a state (if the state is a final one).
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
+    unsafe fn final_weight_unchecked(&self, state: StateId) -> Option<W>;
 
     /// Number of trs leaving a specific state in the wFST.
     ///
@@ -75,7 +82,14 @@ pub trait CoreFst<W: Semiring> {
     /// assert_eq!(fst.num_trs(s1).unwrap(), 1);
     /// ```
     fn num_trs(&self, s: StateId) -> Result<usize>;
-    unsafe fn num_trs_unchecked(&self, s: StateId) -> usize;
+
+    /// Number of trs leaving a specific state in the wFST.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
+    unsafe fn num_trs_unchecked(&self, state: StateId) -> usize;
 
     /// Returns whether or not the state with identifier passed as parameters is a final state.
     ///
@@ -101,9 +115,16 @@ pub trait CoreFst<W: Semiring> {
         let w = self.final_weight(state_id)?;
         Ok(w.is_some())
     }
+
+    /// Returns whether or not the state with identifier passed as parameters is a final state.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
     #[inline]
-    unsafe fn is_final_unchecked(&self, state_id: StateId) -> bool {
-        self.final_weight_unchecked(state_id).is_some()
+    unsafe fn is_final_unchecked(&self, state: StateId) -> bool {
+        self.final_weight_unchecked(state).is_some()
     }
 
     /// Check whether a state is the start state or not.
@@ -112,15 +133,23 @@ pub trait CoreFst<W: Semiring> {
         Some(state_id) == self.start()
     }
 
+    /// Get an iterator on the transitions leaving state `state`.
     fn get_trs(&self, state_id: StateId) -> Result<Self::TRS>;
-    unsafe fn get_trs_unchecked(&self, state_id: StateId) -> Self::TRS;
+
+    /// Get an iterator on the transitions leaving state `state`.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
+    unsafe fn get_trs_unchecked(&self, state: StateId) -> Self::TRS;
 
     /// Retrieve the `FstProperties` stored in the Fst. As a result, all the properties returned
     /// are verified by the Fst but some other properties might be true as well despite the flag
     /// not being set.
     fn properties(&self) -> FstProperties;
 
-    /// Apply a mask to the FstProperties returned.
+    /// Apply a mask to the `FstProperties` returned.
     fn properties_with_mask(&self, mask: FstProperties) -> FstProperties {
         self.properties() & mask
     }
