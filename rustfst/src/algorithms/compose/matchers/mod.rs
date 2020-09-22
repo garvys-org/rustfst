@@ -19,7 +19,7 @@ mod sorted_matcher;
 
 bitflags! {
     pub struct MatcherFlags: u32 {
-        const REQUIRE_MATCH =  1u32 << 0;
+        const REQUIRE_MATCH =  1u32;
         const INPUT_LOOKAHEAD_MATCHER =  1u32 << 4;
         const OUTPUT_LOOKAHEAD_MATCHER =  1u32 << 5;
         const LOOKAHEAD_WEIGHT =  1u32 << 6;

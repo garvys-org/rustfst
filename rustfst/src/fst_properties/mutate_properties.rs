@@ -489,7 +489,7 @@ pub fn relabel_properties(inprops: FstProperties) -> FstProperties {
         | FstProperties::NOT_COACCESSIBLE
         | FstProperties::STRING
         | FstProperties::NOT_STRING;
-    return outprops & inprops;
+    outprops & inprops
 }
 
 pub fn replace_properties(
@@ -615,7 +615,7 @@ pub fn replace_properties(
     {
         outprops |= FstProperties::O_LABEL_SORTED;
     }
-    return outprops;
+    outprops
 }
 
 pub fn reverse_properties(inprops: FstProperties, has_superinitial: bool) -> FstProperties {
@@ -633,7 +633,7 @@ pub fn reverse_properties(inprops: FstProperties, has_superinitial: bool) -> Fst
     if has_superinitial {
         outprops |= FstProperties::WEIGHTED & inprops;
     }
-    return outprops;
+    outprops
 }
 
 pub fn reweight_properties(inprops: FstProperties) -> FstProperties {
@@ -655,7 +655,7 @@ pub fn rmepsilon_properties(inprops: FstProperties, delayed: bool) -> FstPropert
     if !delayed || inprops.contains(FstProperties::ACCESSIBLE) {
         outprops |= FstProperties::NOT_ACCEPTOR & inprops;
     }
-    return outprops;
+    outprops
 }
 
 pub fn shortest_path_properties(props: FstProperties, tree: bool) -> FstProperties {
@@ -667,7 +667,7 @@ pub fn shortest_path_properties(props: FstProperties, tree: bool) -> FstProperti
     if !tree {
         outprops |= FstProperties::COACCESSIBLE;
     }
-    return outprops;
+    outprops
 }
 
 pub fn synchronization_properties(inprops: FstProperties) -> FstProperties {
@@ -685,7 +685,7 @@ pub fn synchronization_properties(inprops: FstProperties) -> FstProperties {
             | FstProperties::WEIGHTED_CYCLES)
             & inprops;
     }
-    return outprops;
+    outprops
 }
 
 pub fn union_properties(

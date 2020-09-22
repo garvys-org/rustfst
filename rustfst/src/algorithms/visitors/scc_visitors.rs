@@ -169,8 +169,8 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for SccVisitor<'
     #[inline]
     fn finish_visit(&mut self) {
         if let Some(ref mut scc) = self.scc {
-            for s in 0..scc.len() {
-                scc[s] = self.nscc - 1 - scc[s];
+            for scc_curr in scc.iter_mut() {
+                *scc_curr = self.nscc - 1 - *scc_curr;
             }
         }
     }

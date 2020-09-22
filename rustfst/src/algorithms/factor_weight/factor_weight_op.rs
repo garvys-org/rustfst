@@ -116,7 +116,7 @@ impl<W: WeightQuantize, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FstOp<W>
         let zero = W::zero();
         let elt = self.fw_state_table.find_tuple(state);
         let weight = match elt.state {
-            None => elt.weight.clone(),
+            None => elt.weight,
             Some(s) => elt
                 .weight
                 .times(self.fst.borrow().final_weight(s)?.unwrap_or_else(|| zero))

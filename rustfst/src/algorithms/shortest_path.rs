@@ -262,7 +262,7 @@ impl<'a, 'b, W: Semiring + WeightQuantize> ShortestPathCompare<'a, 'b, W> {
         } else {
             natural_less(&wy, &wx).unwrap()
         };
-        return res;
+        res
     }
 }
 
