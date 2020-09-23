@@ -41,8 +41,16 @@ impl<W: Semiring, C: FstCache<W>> FstCache<W> for Arc<C> {
         self.deref().num_input_epsilons(id)
     }
 
+    unsafe fn num_input_epsilons_unchecked(&self, id: usize) -> usize {
+        self.deref().num_input_epsilons_unchecked(id)
+    }
+
     fn num_output_epsilons(&self, id: usize) -> Option<usize> {
         self.deref().num_output_epsilons(id)
+    }
+
+    unsafe fn num_output_epsilons_unchecked(&self, id: usize) -> usize {
+        self.deref().num_output_epsilons_unchecked(id)
     }
 
     fn len_trs(&self) -> usize {

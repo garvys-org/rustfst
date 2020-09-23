@@ -72,8 +72,16 @@ impl<W: Semiring, Cache: FstCache<W>> FstCache<W> for FirstCache<W, Cache> {
         self.cache.num_input_epsilons(id)
     }
 
+    unsafe fn num_input_epsilons_unchecked(&self, id: usize) -> usize {
+        self.cache.num_input_epsilons_unchecked(id)
+    }
+
     fn num_output_epsilons(&self, id: usize) -> Option<usize> {
         self.cache.num_output_epsilons(id)
+    }
+
+    unsafe fn num_output_epsilons_unchecked(&self, id: usize) -> usize {
+        self.cache.num_output_epsilons_unchecked(id)
     }
 
     fn len_trs(&self) -> usize {

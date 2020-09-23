@@ -81,8 +81,16 @@ impl<W: Semiring, F: CoreFst<W>, T> CoreFst<W> for FstAddOn<F, T> {
         self.fst.num_input_epsilons(state)
     }
 
+    unsafe fn num_input_epsilons_unchecked(&self, state: usize) -> usize {
+        self.fst.num_input_epsilons_unchecked(state)
+    }
+
     fn num_output_epsilons(&self, state: usize) -> Result<usize> {
         self.fst.num_output_epsilons(state)
+    }
+
+    unsafe fn num_output_epsilons_unchecked(&self, state: usize) -> usize {
+        self.fst.num_output_epsilons_unchecked(state)
     }
 }
 

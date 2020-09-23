@@ -87,8 +87,16 @@ impl<W: Semiring, F: CoreFst<W>> CoreFst<W> for Arc<F> {
         self.deref().num_input_epsilons(state)
     }
 
+    unsafe fn num_input_epsilons_unchecked(&self, state: usize) -> usize {
+        self.deref().num_input_epsilons_unchecked(state)
+    }
+
     fn num_output_epsilons(&self, state: usize) -> Result<usize> {
         self.deref().num_output_epsilons(state)
+    }
+
+    unsafe fn num_output_epsilons_unchecked(&self, state: usize) -> usize {
+        self.deref().num_output_epsilons_unchecked(state)
     }
 }
 

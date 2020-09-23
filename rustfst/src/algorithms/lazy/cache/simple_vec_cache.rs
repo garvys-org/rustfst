@@ -133,9 +133,19 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
         cached_data.get(id).map(|e| e.niepsilons).into_option()
     }
 
+    unsafe fn num_input_epsilons_unchecked(&self, id: usize) -> usize {
+        let cached_data = self.trs.lock().unwrap();
+        cached_data.get_unchecked(id).niepsilons
+    }
+
     fn num_output_epsilons(&self, id: usize) -> Option<usize> {
         let cached_data = self.trs.lock().unwrap();
         cached_data.get(id).map(|e| e.noepsilons).into_option()
+    }
+
+    unsafe fn num_output_epsilons_unchecked(&self, id: usize) -> usize {
+        let cached_data = self.trs.lock().unwrap();
+        cached_data.get_unchecked(id).noepsilons
     }
 
     fn len_trs(&self) -> usize {

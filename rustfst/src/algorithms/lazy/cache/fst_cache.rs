@@ -18,7 +18,10 @@ pub trait FstCache<W: Semiring>: Debug {
     fn num_trs(&self, id: StateId) -> Option<usize>;
 
     fn num_input_epsilons(&self, id: usize) -> Option<usize>;
+    unsafe fn num_input_epsilons_unchecked(&self, id: usize) -> usize;
+
     fn num_output_epsilons(&self, id: usize) -> Option<usize>;
+    unsafe fn num_output_epsilons_unchecked(&self, id: usize) -> usize;
 
     fn len_trs(&self) -> usize;
     fn len_final_weights(&self) -> usize;

@@ -102,10 +102,18 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state))
     }
 
+    unsafe fn num_input_epsilons_unchecked(&self, state: usize) -> usize {
+        self.cache.num_input_epsilons_unchecked(state)
+    }
+
     fn num_output_epsilons(&self, state: usize) -> Result<usize> {
         self.cache
             .num_output_epsilons(state)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state))
+    }
+
+    unsafe fn num_output_epsilons_unchecked(&self, state: usize) -> usize {
+        self.cache.num_output_epsilons_unchecked(state)
     }
 }
 

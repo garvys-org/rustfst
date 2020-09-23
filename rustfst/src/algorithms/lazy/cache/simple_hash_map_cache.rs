@@ -5,6 +5,7 @@ use crate::algorithms::lazy::cache::cache_internal_types::{CachedData, StartStat
 use crate::algorithms::lazy::{CacheStatus, FstCache};
 use crate::semirings::Semiring;
 use crate::{StateId, Trs, TrsVec, EPS_LABEL};
+use unsafe_unwrap::UnsafeUnwrap;
 
 #[derive(Debug)]
 pub struct SimpleHashMapCache<W: Semiring> {
@@ -131,9 +132,19 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
         cached_data.data.get(&id).map(|v| v.niepsilons)
     }
 
+    unsafe fn num_input_epsilons_unchecked(&self, id: usize) -> usize {
+        let cached_data = self.trs.lock().unwrap();
+        cached_data.data.get(&id).unsafe_unwrap().niepsilons
+    }
+
     fn num_output_epsilons(&self, id: usize) -> Option<usize> {
         let cached_data = self.trs.lock().unwrap();
         cached_data.data.get(&id).map(|v| v.noepsilons)
+    }
+
+    unsafe fn num_output_epsilons_unchecked(&self, id: usize) -> usize {
+        let cached_data = self.trs.lock().unwrap();
+        cached_data.data.get(&id).unsafe_unwrap().noepsilons
     }
 
     fn len_trs(&self) -> usize {

@@ -187,6 +187,14 @@ pub trait CoreFst<W: Semiring> {
     /// ```
     fn num_input_epsilons(&self, state: StateId) -> Result<usize>;
 
+    /// Returns the number of trs with epsilon input labels leaving a state.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
+    unsafe fn num_input_epsilons_unchecked(&self, state: StateId) -> usize;
+
     /// Returns the number of trs with epsilon output labels leaving a state.
     ///
     /// # Example :
@@ -210,6 +218,14 @@ pub trait CoreFst<W: Semiring> {
     /// assert_eq!(fst.num_output_epsilons(s1).unwrap(), 0);
     /// ```
     fn num_output_epsilons(&self, state: StateId) -> Result<usize>;
+
+    /// Returns the number of trs with epsilon output labels leaving a state.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
+    unsafe fn num_output_epsilons_unchecked(&self, state: StateId) -> usize;
 }
 
 /// Trait defining the minimum interface necessary for a wFST.

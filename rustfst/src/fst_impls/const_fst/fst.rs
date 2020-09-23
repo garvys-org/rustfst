@@ -111,11 +111,19 @@ impl<W: Semiring> CoreFst<W> for ConstFst<W> {
             .niepsilons)
     }
 
+    unsafe fn num_input_epsilons_unchecked(&self, state: usize) -> usize {
+        self.states.get_unchecked(state).niepsilons
+    }
+
     fn num_output_epsilons(&self, state: usize) -> Result<usize> {
         Ok(self
             .states
             .get(state)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state))?
             .noepsilons)
+    }
+
+    unsafe fn num_output_epsilons_unchecked(&self, state: usize) -> usize {
+        self.states.get_unchecked(state).noepsilons
     }
 }
