@@ -2,8 +2,8 @@ use std::ops::{Shl, Shr};
 
 use bitflags::bitflags;
 
-pub(crate) const EXPANDED: u64 = 0x0000000000000001;
-pub(crate) const MUTABLE: u64 = 0x0000000000000002;
+pub(crate) const EXPANDED: u64 = 0x0000_0000_0000_0001;
+pub(crate) const MUTABLE: u64 = 0x0000_0000_0000_0002;
 
 bitflags! {
     /// The property bits here assert facts about an FST. If individual bits are
@@ -23,7 +23,7 @@ bitflags! {
         const NOT_ACCEPTOR = 0x0000_0000_0002_0000;
 
         /// ilabels unique leaving each state.
-        const I_DETERMINISTIC = 0x000_0000_00004_0000;
+        const I_DETERMINISTIC = 0x0000_0000_0004_0000;
         /// ilabels not unique leaving some state.
         const NOT_I_DETERMINISTIC = 0x0000_0000_0008_0000;
 
@@ -518,17 +518,19 @@ impl FstProperties {
 
     // Binary properties are not stored here so should be useless.
     pub(crate) fn binary_properties() -> FstProperties {
-        FstProperties::from_bits_truncate(0x0000000000000007)
+        FstProperties::from_bits_truncate(0x0000_0000_0000_0007)
     }
     pub(crate) fn trinary_properties() -> FstProperties {
-        FstProperties::from_bits_truncate(0x0000ffffffff0000)
+        FstProperties::from_bits_truncate(0x0000_ffff_ffff_0000)
     }
 
     pub(crate) fn pos_trinary_properties() -> FstProperties {
-        FstProperties::trinary_properties() & FstProperties::from_bits_truncate(0x5555555555555555)
+        FstProperties::trinary_properties()
+            & FstProperties::from_bits_truncate(0x5555_5555_5555_5555)
     }
     pub(crate) fn neg_trinary_properties() -> FstProperties {
-        FstProperties::trinary_properties() & FstProperties::from_bits_truncate(0xaaaaaaaaaaaaaaaa)
+        FstProperties::trinary_properties()
+            & FstProperties::from_bits_truncate(0xaaaa_aaaa_aaaa_aaaa)
     }
 
     pub(crate) fn all_properties() -> FstProperties {

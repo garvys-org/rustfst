@@ -469,7 +469,7 @@ pub fn rand_gen_properties(inprops: FstProperties, weighted: bool) -> FstPropert
             | FstProperties::O_LABEL_SORTED)
             & inprops;
     }
-    return outprops;
+    outprops
 }
 
 pub fn relabel_properties(inprops: FstProperties) -> FstProperties {
