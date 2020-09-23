@@ -92,9 +92,9 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
             self.fs = filter_state.clone();
             unsafe {
                 let fst1 = self.fst1();
-                let na1 = fst1.num_trs_unchecked(self.s1)?;
-                let ne1 = fst1.num_output_epsilons_unchecked(self.s1)?;
-                let fin1 = fst1.is_final_unchecked(self.s1)?;
+                let na1 = fst1.num_trs_unchecked(self.s1);
+                let ne1 = fst1.num_output_epsilons_unchecked(self.s1);
+                let fin1 = fst1.is_final_unchecked(self.s1);
                 self.alleps1 = na1 == ne1 && !fin1;
                 self.noeps1 = ne1 == 0;
             }
