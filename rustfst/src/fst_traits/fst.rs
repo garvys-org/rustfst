@@ -110,11 +110,7 @@ pub trait CoreFst<W: Semiring> {
     /// assert_eq!(fst.is_final(s2).unwrap(), true);
     /// assert!(fst.is_final(s2 + 1).is_err());
     /// ```
-    #[inline]
-    fn is_final(&self, state_id: StateId) -> Result<bool> {
-        let w = self.final_weight(state_id)?;
-        Ok(w.is_some())
-    }
+    fn is_final(&self, state_id: StateId) -> Result<bool>;
 
     /// Returns whether or not the state with identifier passed as parameters is a final state.
     ///
@@ -122,10 +118,7 @@ pub trait CoreFst<W: Semiring> {
     ///
     /// Unsafe behaviour if `state` is not present in Fst.
     ///
-    #[inline]
-    unsafe fn is_final_unchecked(&self, state: StateId) -> bool {
-        self.final_weight_unchecked(state).is_some()
-    }
+    unsafe fn is_final_unchecked(&self, state_id: StateId) -> bool;
 
     /// Check whether a state is the start state or not.
     #[inline]

@@ -147,4 +147,23 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
         let cached_data = self.final_weights.lock().unwrap();
         cached_data.data.len()
     }
+
+    fn is_final(&self, state_id: usize) -> CacheStatus<bool> {
+        let cached_data = self.final_weights.lock().unwrap();
+        match cached_data.data.get(state_id) {
+            Some(e) => match e {
+                CacheStatus::Computed(v) => CacheStatus::Computed(v.is_some()),
+                CacheStatus::NotComputed => CacheStatus::NotComputed,
+            },
+            None => CacheStatus::NotComputed,
+        }
+    }
+
+    unsafe fn is_final_unchecked(&self, state_id: usize) -> bool {
+        let cached_data = self.final_weights.lock().unwrap();
+        match cached_data.data.get_unchecked(state_id) {
+            CacheStatus::Computed(e) => e.is_some(),
+            CacheStatus::NotComputed => unreachable!(),
+        }
+    }
 }

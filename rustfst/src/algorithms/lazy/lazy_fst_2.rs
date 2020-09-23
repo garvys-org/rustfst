@@ -65,6 +65,19 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
         self.cache.num_trs(s).unsafe_unwrap()
     }
 
+    fn is_final(&self, state_id: usize) -> Result<bool> {
+        match self.cache.is_final(state_id) {
+            CacheStatus::Computed(e) => Ok(e),
+            CacheStatus::NotComputed => {
+                bail!("Final weight for state {} not computed yet", state_id)
+            }
+        }
+    }
+
+    unsafe fn is_final_unchecked(&self, state_id: usize) -> bool {
+        self.cache.is_final_unchecked(state_id)
+    }
+
     fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
         match self.cache.get_trs(state_id) {
             CacheStatus::Computed(trs) => Ok(trs),

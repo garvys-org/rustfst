@@ -145,4 +145,21 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
         let cached_data = self.final_weights.lock().unwrap();
         cached_data.data.len()
     }
+
+    fn is_final(&self, state_id: usize) -> CacheStatus<bool> {
+        match self.final_weights.lock().unwrap().data.get(&state_id) {
+            Some(e) => CacheStatus::Computed(e.is_some()),
+            None => CacheStatus::NotComputed,
+        }
+    }
+
+    unsafe fn is_final_unchecked(&self, state_id: usize) -> bool {
+        self.final_weights
+            .lock()
+            .unwrap()
+            .data
+            .get(&state_id)
+            .unwrap()
+            .is_some()
+    }
 }

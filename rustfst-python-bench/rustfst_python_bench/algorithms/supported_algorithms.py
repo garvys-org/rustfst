@@ -37,5 +37,5 @@ SupportedAlgorithms.register("project", ProjectAlgorithm)
 SupportedAlgorithms.register("reverse", ReverseAlgorithm)
 # SupportedAlgorithms.register("rmfinalepsilon", RmFinalEpsilonAlgorithm)
 SupportedAlgorithms.register("shortestpath", ShortestPathAlgorithm)
-# SupportedAlgorithms.register("compose", ComposeAlgorithm)
+SupportedAlgorithms.register("compose", ComposeAlgorithm)
 

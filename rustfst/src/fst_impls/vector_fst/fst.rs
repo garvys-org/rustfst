@@ -67,6 +67,19 @@ impl<W: Semiring> CoreFst<W> for VectorFst<W> {
         self.states.get_unchecked(s).trs.len()
     }
 
+    fn is_final(&self, state_id: usize) -> Result<bool> {
+        let s = self
+            .states
+            .get(state_id)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
+        Ok(s.final_weight.is_some())
+    }
+
+    unsafe fn is_final_unchecked(&self, state_id: usize) -> bool {
+        let s = self.states.get_unchecked(state_id);
+        s.final_weight.is_some()
+    }
+
     fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
         let state = self
             .states

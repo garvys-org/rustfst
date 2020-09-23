@@ -22,4 +22,7 @@ pub trait FstCache<W: Semiring>: Debug {
 
     fn len_trs(&self) -> usize;
     fn len_final_weights(&self) -> usize;
+
+    fn is_final(&self, state_id: StateId) -> CacheStatus<bool>;
+    unsafe fn is_final_unchecked(&self, state_id: StateId) -> bool;
 }

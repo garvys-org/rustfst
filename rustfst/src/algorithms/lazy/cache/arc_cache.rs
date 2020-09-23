@@ -52,4 +52,12 @@ impl<W: Semiring, C: FstCache<W>> FstCache<W> for Arc<C> {
     fn len_final_weights(&self) -> usize {
         self.deref().len_final_weights()
     }
+
+    fn is_final(&self, state_id: usize) -> CacheStatus<bool> {
+        self.deref().is_final(state_id)
+    }
+
+    unsafe fn is_final_unchecked(&self, state_id: usize) -> bool {
+        self.deref().is_final_unchecked(state_id)
+    }
 }

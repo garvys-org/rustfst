@@ -83,4 +83,12 @@ impl<W: Semiring, Cache: FstCache<W>> FstCache<W> for FirstCache<W, Cache> {
     fn len_final_weights(&self) -> usize {
         self.cache.len_final_weights()
     }
+
+    fn is_final(&self, state_id: usize) -> CacheStatus<bool> {
+        self.cache.is_final(state_id)
+    }
+
+    unsafe fn is_final_unchecked(&self, state_id: usize) -> bool {
+        self.cache.is_final_unchecked(state_id)
+    }
 }

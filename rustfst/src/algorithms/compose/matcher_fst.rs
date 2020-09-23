@@ -112,6 +112,14 @@ impl<W: Semiring, F: CoreFst<W>, M, T> CoreFst<W> for MatcherFst<W, F, M, T> {
         self.fst_add_on.num_trs_unchecked(s)
     }
 
+    fn is_final(&self, state_id: usize) -> Result<bool> {
+        self.fst_add_on.is_final(state_id)
+    }
+
+    unsafe fn is_final_unchecked(&self, state_id: usize) -> bool {
+        self.fst_add_on.is_final_unchecked(state_id)
+    }
+
     fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
         self.fst_add_on.get_trs(state_id)
     }
