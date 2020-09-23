@@ -2,7 +2,7 @@ use std::borrow::Borrow;
 
 use anyhow::Result;
 
-use crate::algorithms::lazy_fst_revamp::FstOp2;
+use crate::algorithms::lazy::FstOp2;
 use crate::algorithms::queues::FifoQueue;
 use crate::algorithms::rm_epsilon::{RmEpsilonConfig, RmEpsilonState};
 use crate::fst_properties::mutable_properties::rmepsilon_properties;

@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Changed
+- Change `FstCach`e API and added a `CacheStatus` object to better differentiate, computed data and not yet computed.
+- Renaming `rustfst.algorithms.lazy_fst_revamp` -> `rustfst.algorithms.lazy`
+
 ## [0.6.3] - 2020-16-09
 
 ### Added

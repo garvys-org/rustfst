@@ -6,8 +6,8 @@ use anyhow::Result;
 use itertools::izip;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::lazy_fst_revamp::fst_op_2::FstOp2;
-use crate::algorithms::lazy_fst_revamp::FstCache;
+use crate::algorithms::lazy::fst_op_2::FstOp2;
+use crate::algorithms::lazy::{CacheStatus, FstCache};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterData, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
@@ -27,25 +27,27 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
     type TRS = TrsVec<W>;
 
     fn start(&self) -> Option<usize> {
-        if let Some(start) = self.cache.get_start() {
-            start
-        } else {
-            // TODO: Need to return a Result
-            let start = self.op.compute_start().unwrap();
-            self.cache.insert_start(start.clone());
-            start
+        match self.cache.get_start() {
+            CacheStatus::Computed(start) => start,
+            CacheStatus::NotComputed => {
+                // TODO: Need to return a Result
+                let start = self.op.compute_start().unwrap();
+                self.cache.insert_start(start.clone());
+                start
+            }
         }
     }
 
     fn final_weight(&self, state_id: usize) -> Result<Option<W>> {
-        if let Some(final_weight) = self.cache.get_final_weight(state_id) {
-            Ok(final_weight)
-        } else {
-            let (trs, final_weight) = self.op.compute_trs_and_final_weight(state_id)?;
-            self.cache.insert_trs(state_id, trs);
-            self.cache
-                .insert_final_weight(state_id, final_weight.clone());
-            Ok(final_weight)
+        match self.cache.get_final_weight(state_id) {
+            CacheStatus::Computed(final_weight) => Ok(final_weight),
+            CacheStatus::NotComputed => {
+                let (trs, final_weight) = self.op.compute_trs_and_final_weight(state_id)?;
+                self.cache.insert_trs(state_id, trs);
+                self.cache
+                    .insert_final_weight(state_id, final_weight.clone());
+                Ok(final_weight)
+            }
         }
     }
 
@@ -64,13 +66,14 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
     }
 
     fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
-        if let Some(trs) = self.cache.get_trs(state_id) {
-            Ok(trs)
-        } else {
-            let (trs, final_weight) = self.op.compute_trs_and_final_weight(state_id)?;
-            self.cache.insert_trs(state_id, trs.shallow_clone());
-            self.cache.insert_final_weight(state_id, final_weight);
-            Ok(trs)
+        match self.cache.get_trs(state_id) {
+            CacheStatus::Computed(trs) => Ok(trs),
+            CacheStatus::NotComputed => {
+                let (trs, final_weight) = self.op.compute_trs_and_final_weight(state_id)?;
+                self.cache.insert_trs(state_id, trs.shallow_clone());
+                self.cache.insert_final_weight(state_id, final_weight);
+                Ok(trs)
+            }
         }
     }
 

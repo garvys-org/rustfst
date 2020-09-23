@@ -8,7 +8,7 @@ use crate::algorithms::compose::lookahead_filters::lookahead_selector::Selector;
 use crate::algorithms::compose::matchers::{IterItemMatcher, MatcherFlags};
 use crate::algorithms::compose::matchers::{MatchType, Matcher, REQUIRE_PRIORITY};
 use crate::algorithms::compose::{ComposeFstOpOptions, ComposeStateTuple};
-use crate::algorithms::lazy_fst_revamp::{FstOp, StateTable};
+use crate::algorithms::lazy::{FstOp, StateTable};
 use crate::fst_properties::mutable_properties::compose_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::CoreFst;

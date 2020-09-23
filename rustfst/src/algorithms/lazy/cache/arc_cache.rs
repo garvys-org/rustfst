@@ -1,11 +1,11 @@
 use std::ops::Deref;
 use std::sync::Arc;
 
-use crate::algorithms::lazy_fst_revamp::FstCache;
+use crate::algorithms::lazy::{CacheStatus, FstCache};
 use crate::{Semiring, TrsVec};
 
 impl<W: Semiring, C: FstCache<W>> FstCache<W> for Arc<C> {
-    fn get_start(&self) -> Option<Option<usize>> {
+    fn get_start(&self) -> CacheStatus<Option<usize>> {
         self.deref().get_start()
     }
 
@@ -13,7 +13,7 @@ impl<W: Semiring, C: FstCache<W>> FstCache<W> for Arc<C> {
         self.deref().insert_start(id)
     }
 
-    fn get_trs(&self, id: usize) -> Option<TrsVec<W>> {
+    fn get_trs(&self, id: usize) -> CacheStatus<TrsVec<W>> {
         self.deref().get_trs(id)
     }
 
@@ -21,7 +21,7 @@ impl<W: Semiring, C: FstCache<W>> FstCache<W> for Arc<C> {
         self.deref().insert_trs(id, trs)
     }
 
-    fn get_final_weight(&self, id: usize) -> Option<Option<W>> {
+    fn get_final_weight(&self, id: usize) -> CacheStatus<Option<W>> {
         self.deref().get_final_weight(id)
     }
 

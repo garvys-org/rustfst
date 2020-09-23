@@ -7,7 +7,7 @@ use std::sync::Arc;
 use anyhow::Result;
 use itertools::Itertools;
 
-use crate::algorithms::lazy_fst_revamp::FstOp;
+use crate::algorithms::lazy::FstOp;
 use crate::algorithms::replace::config::{ReplaceFstOptions, ReplaceLabelType};
 use crate::algorithms::replace::state_table::{
     ReplaceStackPrefix, ReplaceStateTable, ReplaceStateTuple,
@@ -277,11 +277,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstOp<W, F, B> {
             } else {
                 self.return_label_
             };
-            let stack = self
-                .state_table
-                .prefix_table
-                .find_tuple(tuple.prefix_id)
-                .clone();
+            let stack = self.state_table.prefix_table.find_tuple(tuple.prefix_id);
             let top = stack.top();
             let prefix_id = self.pop_prefix(stack.clone());
             let nextstate = self.state_table.tuple_table.find_id(ReplaceStateTuple::new(

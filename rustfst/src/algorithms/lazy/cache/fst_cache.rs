@@ -1,16 +1,17 @@
 use std::fmt::Debug;
 
+use crate::algorithms::lazy::CacheStatus;
 use crate::semirings::Semiring;
 use crate::{StateId, TrsVec};
 
 pub trait FstCache<W: Semiring>: Debug {
-    fn get_start(&self) -> Option<Option<StateId>>;
+    fn get_start(&self) -> CacheStatus<Option<StateId>>;
     fn insert_start(&self, id: Option<StateId>);
 
-    fn get_trs(&self, id: StateId) -> Option<TrsVec<W>>;
+    fn get_trs(&self, id: StateId) -> CacheStatus<TrsVec<W>>;
     fn insert_trs(&self, id: StateId, trs: TrsVec<W>);
 
-    fn get_final_weight(&self, id: StateId) -> Option<Option<W>>;
+    fn get_final_weight(&self, id: StateId) -> CacheStatus<Option<W>>;
     fn insert_final_weight(&self, id: StateId, weight: Option<W>);
 
     fn num_known_states(&self) -> usize;

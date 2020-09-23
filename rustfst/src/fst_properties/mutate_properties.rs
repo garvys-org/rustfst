@@ -469,7 +469,7 @@ pub fn rand_gen_properties(inprops: FstProperties, weighted: bool) -> FstPropert
             | FstProperties::O_LABEL_SORTED)
             & inprops;
     }
-    return outprops;
+    outprops
 }
 
 pub fn relabel_properties(inprops: FstProperties) -> FstProperties {
@@ -489,7 +489,7 @@ pub fn relabel_properties(inprops: FstProperties) -> FstProperties {
         | FstProperties::NOT_COACCESSIBLE
         | FstProperties::STRING
         | FstProperties::NOT_STRING;
-    return outprops & inprops;
+    outprops & inprops
 }
 
 pub fn replace_properties(
@@ -555,23 +555,23 @@ pub fn replace_properties(
     let mut no_iepsilons = !epsilon_on_call && !epsilon_on_return;
     let mut acyclic = true;
     let mut unweighted = true;
-    for i in 0..inprops.len() {
-        if !inprops[i].contains(FstProperties::ACCEPTOR) {
+    for (i, inprop) in inprops.iter().enumerate() {
+        if !inprop.contains(FstProperties::ACCEPTOR) {
             acceptor = false;
         }
-        if !inprops[i].contains(FstProperties::I_DETERMINISTIC) {
+        if !inprop.contains(FstProperties::I_DETERMINISTIC) {
             ideterministic = false;
         }
-        if !inprops[i].contains(FstProperties::NO_I_EPSILONS) {
+        if !inprop.contains(FstProperties::NO_I_EPSILONS) {
             no_iepsilons = false;
         }
-        if !inprops[i].contains(FstProperties::ACYCLIC) {
+        if !inprop.contains(FstProperties::ACYCLIC) {
             acyclic = false;
         }
-        if !inprops[i].contains(FstProperties::UNWEIGHTED) {
+        if !inprop.contains(FstProperties::UNWEIGHTED) {
             unweighted = false;
         }
-        if i != root && !inprops[i].contains(FstProperties::NO_I_EPSILONS) {
+        if i != root && !inprop.contains(FstProperties::NO_I_EPSILONS) {
             ideterministic = false;
         }
     }
@@ -615,7 +615,7 @@ pub fn replace_properties(
     {
         outprops |= FstProperties::O_LABEL_SORTED;
     }
-    return outprops;
+    outprops
 }
 
 pub fn reverse_properties(inprops: FstProperties, has_superinitial: bool) -> FstProperties {
@@ -633,12 +633,12 @@ pub fn reverse_properties(inprops: FstProperties, has_superinitial: bool) -> Fst
     if has_superinitial {
         outprops |= FstProperties::WEIGHTED & inprops;
     }
-    return outprops;
+    outprops
 }
 
 pub fn reweight_properties(inprops: FstProperties) -> FstProperties {
     let mut outprops = inprops & FstProperties::weight_invariant_properties();
-    outprops = outprops & !FstProperties::COACCESSIBLE;
+    outprops &= !FstProperties::COACCESSIBLE;
     outprops
 }
 
@@ -655,7 +655,7 @@ pub fn rmepsilon_properties(inprops: FstProperties, delayed: bool) -> FstPropert
     if !delayed || inprops.contains(FstProperties::ACCESSIBLE) {
         outprops |= FstProperties::NOT_ACCEPTOR & inprops;
     }
-    return outprops;
+    outprops
 }
 
 pub fn shortest_path_properties(props: FstProperties, tree: bool) -> FstProperties {
@@ -667,7 +667,7 @@ pub fn shortest_path_properties(props: FstProperties, tree: bool) -> FstProperti
     if !tree {
         outprops |= FstProperties::COACCESSIBLE;
     }
-    return outprops;
+    outprops
 }
 
 pub fn synchronization_properties(inprops: FstProperties) -> FstProperties {
@@ -685,7 +685,7 @@ pub fn synchronization_properties(inprops: FstProperties) -> FstProperties {
             | FstProperties::WEIGHTED_CYCLES)
             & inprops;
     }
-    return outprops;
+    outprops
 }
 
 pub fn union_properties(

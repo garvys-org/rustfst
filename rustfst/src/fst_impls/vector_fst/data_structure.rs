@@ -40,6 +40,17 @@ impl<W: Semiring> PartialEq for VectorFst<W> {
     }
 }
 
+impl<W: Semiring> Default for VectorFstState<W> {
+    fn default() -> Self {
+        Self {
+            final_weight: None,
+            trs: TrsVec::default(),
+            niepsilons: 0,
+            noepsilons: 0,
+        }
+    }
+}
+
 impl<W: Semiring> VectorFstState<W> {
     pub fn new() -> Self {
         Self {

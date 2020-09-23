@@ -75,7 +75,7 @@ pub fn rm_epsilon_with_config<W: Semiring, F: MutableFst<W>, Q: Queue>(
 ) -> Result<()> {
     let connect = opts.connect;
     let weight_threshold = opts.weight_threshold.clone();
-    let state_threshold = opts.state_threshold.clone();
+    let state_threshold = opts.state_threshold;
 
     let start_state = fst.start();
     if start_state.is_none() {

@@ -10,7 +10,12 @@ pub trait AllocableFst<W: Semiring>: Fst<W> {
     /// After calling `reserve_trs`, the capacity will be greater or equal to `num_trs` + `additionnal`
     /// This method has no effects if the capacity is already sufficient
     fn reserve_trs(&mut self, source: StateId, additional: usize) -> Result<()>;
-    unsafe fn reserve_trs_unchecked(&mut self, source: StateId, additional: usize);
+
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
+    unsafe fn reserve_trs_unchecked(&mut self, state: StateId, additional: usize);
 
     /// Reserve capacity for at least additional states.
     /// The FST may reserve more space to avoid frequent allocation.
@@ -27,13 +32,28 @@ pub trait AllocableFst<W: Semiring>: Fst<W> {
     fn shrink_to_fit_states(&mut self);
 
     /// Shrinks the capacity of the leaving trs for the given state as much as possible.
-    /// It will drop down as close as possible to theleaving trs
+    /// It will drop down as close as possible to theleaving trs.
     fn shrink_to_fit_trs(&mut self, source: StateId) -> Result<()>;
-    unsafe fn shrink_to_fit_trs_unchecked(&mut self, source: StateId);
+
+    /// Shrinks the capacity of the leaving trs for the given state as much as possible.
+    /// It will drop down as close as possible to theleaving trs.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
+    unsafe fn shrink_to_fit_trs_unchecked(&mut self, state: StateId);
 
     /// Returns the number of states the FST can hold without reallocating.
     fn states_capacity(&self) -> usize;
     /// Returns the number of trs for a given state the FST can hold without reallocating.
     fn trs_capacity(&self, source: StateId) -> Result<usize>;
-    unsafe fn trs_capacity_unchecked(&self, source: StateId) -> usize;
+
+    /// Returns the number of trs for a given state the FST can hold without reallocating.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
+    unsafe fn trs_capacity_unchecked(&self, state: StateId) -> usize;
 }

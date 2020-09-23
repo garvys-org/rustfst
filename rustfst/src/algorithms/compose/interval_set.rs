@@ -79,7 +79,7 @@ impl VectorIntervalStore {
     }
 
     pub fn count(&self) -> Option<usize> {
-        self.count.clone()
+        self.count
     }
 
     pub fn set_count(&mut self, count: usize) {

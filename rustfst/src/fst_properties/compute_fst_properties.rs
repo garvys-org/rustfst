@@ -39,8 +39,7 @@ pub fn compute_fst_properties<W: Semiring, F: ExpandedFst<W>>(
         | FstProperties::COACCESSIBLE
         | FstProperties::NOT_COACCESSIBLE;
 
-    let mut sccs = vec![];
-    if mask
+    let sccs = if mask
         .intersects(dfs_props | FstProperties::WEIGHTED_CYCLES | FstProperties::UNWEIGHTED_CYCLES)
     {
         let mut visitor = SccVisitor::new(fst, true, true);
@@ -49,8 +48,10 @@ pub fn compute_fst_properties<W: Semiring, F: ExpandedFst<W>>(
         // Retrieves props computed in the DFS.
         comp_props |= dfs_props & visitor.props;
 
-        sccs = unsafe { visitor.scc.unsafe_unwrap() };
-    }
+        unsafe { visitor.scc.unsafe_unwrap() }
+    } else {
+        vec![]
+    };
 
     if mask.intersects(!(FstProperties::binary_properties() | dfs_props)) {
         comp_props |= FstProperties::ACCEPTOR

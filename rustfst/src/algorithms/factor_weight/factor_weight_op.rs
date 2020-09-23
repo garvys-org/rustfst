@@ -6,7 +6,7 @@ use anyhow::Result;
 
 use crate::algorithms::factor_weight::{Element, FactorWeightStateTable};
 use crate::algorithms::factor_weight::{FactorIterator, FactorWeightOptions, FactorWeightType};
-use crate::algorithms::lazy_fst_revamp::FstOp;
+use crate::algorithms::lazy::FstOp;
 use crate::fst_properties::mutable_properties::factor_weight_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
@@ -116,7 +116,7 @@ impl<W: WeightQuantize, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FstOp<W>
         let zero = W::zero();
         let elt = self.fw_state_table.find_tuple(state);
         let weight = match elt.state {
-            None => elt.weight.clone(),
+            None => elt.weight,
             Some(s) => elt
                 .weight
                 .times(self.fst.borrow().final_weight(s)?.unwrap_or_else(|| zero))

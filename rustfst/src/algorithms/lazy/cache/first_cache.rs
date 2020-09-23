@@ -1,4 +1,4 @@
-use crate::algorithms::lazy_fst_revamp::FstCache;
+use crate::algorithms::lazy::{CacheStatus, FstCache};
 use crate::{Semiring, StateId, Trs, TrsVec};
 use std::sync::Mutex;
 
@@ -20,7 +20,7 @@ impl<W: Semiring, Cache: FstCache<W> + Default> Default for FirstCache<W, Cache>
 }
 
 impl<W: Semiring, Cache: FstCache<W>> FstCache<W> for FirstCache<W, Cache> {
-    fn get_start(&self) -> Option<Option<usize>> {
+    fn get_start(&self) -> CacheStatus<Option<usize>> {
         self.cache.get_start()
     }
 
@@ -28,11 +28,11 @@ impl<W: Semiring, Cache: FstCache<W>> FstCache<W> for FirstCache<W, Cache> {
         self.cache.insert_start(id)
     }
 
-    fn get_trs(&self, id: usize) -> Option<TrsVec<W>> {
+    fn get_trs(&self, id: usize) -> CacheStatus<TrsVec<W>> {
         let data = self.last_trs.lock().unwrap();
         if let Some((last_id_trs, last_trs)) = &*data {
             if *last_id_trs == id {
-                return Some(last_trs.shallow_clone());
+                return CacheStatus::Computed(last_trs.shallow_clone());
             }
         }
         self.cache.get_trs(id)
@@ -44,11 +44,11 @@ impl<W: Semiring, Cache: FstCache<W>> FstCache<W> for FirstCache<W, Cache> {
         self.cache.insert_trs(id, trs);
     }
 
-    fn get_final_weight(&self, id: usize) -> Option<Option<W>> {
+    fn get_final_weight(&self, id: usize) -> CacheStatus<Option<W>> {
         let data = self.last_final_weight.lock().unwrap();
         if let Some((last_id_final_weight, last_final_weight)) = &*data {
             if *last_id_final_weight == id {
-                return Some(last_final_weight.clone());
+                return CacheStatus::Computed(last_final_weight.clone());
             }
         }
         self.cache.get_final_weight(id)

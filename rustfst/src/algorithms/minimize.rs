@@ -69,8 +69,8 @@ where
         let mut to_gallic = ToGallicConverter {};
         let mut gfst: VectorFst<GallicWeightLeft<W>> = weight_convert(ifst, &mut to_gallic)?;
         push_weights(&mut gfst, ReweightType::ReweightToInitial, false)?;
-        let mut quantize_mapper = QuantizeMapper {};
-        tr_map(&mut gfst, &mut quantize_mapper)?;
+        let quantize_mapper = QuantizeMapper {};
+        tr_map(&mut gfst, &quantize_mapper)?;
         let encode_table = encode(&mut gfst, EncodeType::EncodeWeightsAndLabels)?;
         acceptor_minimize(&mut gfst, allow_acyclic_minimization)?;
         decode(&mut gfst, encode_table)?;
@@ -95,8 +95,8 @@ where
     } else if props.contains(FstProperties::WEIGHTED) {
         // Weighted acceptor
         push_weights(ifst, ReweightType::ReweightToInitial, false)?;
-        let mut quantize_mapper = QuantizeMapper {};
-        tr_map(ifst, &mut quantize_mapper)?;
+        let quantize_mapper = QuantizeMapper {};
+        tr_map(ifst, &quantize_mapper)?;
         let encode_table = encode(ifst, EncodeType::EncodeWeightsAndLabels)?;
         acceptor_minimize(ifst, allow_acyclic_minimization)?;
         decode(ifst, encode_table)
@@ -390,7 +390,11 @@ fn pre_partition<W: Semiring, F: MutableFst<W>>(
         let mut hash_to_class_nonfinal = HashMap::<Vec<usize>, StateId>::new();
         let mut hash_to_class_final = HashMap::<Vec<usize>, StateId>::new();
 
-        for s in 0..num_states {
+        for (s, state_to_initial_class_s) in state_to_initial_class
+            .iter_mut()
+            .enumerate()
+            .take(num_states)
+        {
             let ilabels: Vec<usize> = unsafe { fst.get_trs_unchecked(s).trs().iter() }
                 .map(|tr| tr.ilabel)
                 .collect();
@@ -403,11 +407,11 @@ fn pre_partition<W: Semiring, F: MutableFst<W>>(
 
             match this_map.entry(ilabels) {
                 Entry::Occupied(e) => {
-                    state_to_initial_class[s] = *e.get();
+                    *state_to_initial_class_s = *e.get();
                 }
                 Entry::Vacant(e) => {
                     e.insert(next_class);
-                    state_to_initial_class[s] = next_class;
+                    *state_to_initial_class_s = next_class;
                     next_class += 1;
                 }
             };

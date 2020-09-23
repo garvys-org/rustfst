@@ -23,7 +23,7 @@ impl EncodeType {
         *self == EncodeType::EncodeWeights || *self == EncodeType::EncodeWeightsAndLabels
     }
 
-    pub fn encode_labels(&self) -> bool {
-        *self == EncodeType::EncodeLabels || *self == EncodeType::EncodeWeightsAndLabels
+    pub fn encode_labels(self) -> bool {
+        self == EncodeType::EncodeLabels || self == EncodeType::EncodeWeightsAndLabels
     }
 }
