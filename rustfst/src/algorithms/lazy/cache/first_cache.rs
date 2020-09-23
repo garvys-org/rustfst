@@ -68,7 +68,7 @@ impl<W: Semiring, Cache: FstCache<W>> FstCache<W> for FirstCache<W, Cache> {
         self.cache.num_trs(id)
     }
 
-    fn num_input_epsilons(&self, id: usize) -> Option<usize> {
+    fn num_input_epsilons(&self, id: usize) -> CacheStatus<usize> {
         self.cache.num_input_epsilons(id)
     }
 
@@ -76,7 +76,7 @@ impl<W: Semiring, Cache: FstCache<W>> FstCache<W> for FirstCache<W, Cache> {
         self.cache.num_input_epsilons_unchecked(id)
     }
 
-    fn num_output_epsilons(&self, id: usize) -> Option<usize> {
+    fn num_output_epsilons(&self, id: usize) -> CacheStatus<usize> {
         self.cache.num_output_epsilons(id)
     }
 

@@ -128,9 +128,9 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
         cached_data.get(id).map(|e| e.trs.len()).into_option()
     }
 
-    fn num_input_epsilons(&self, id: usize) -> Option<usize> {
+    fn num_input_epsilons(&self, id: usize) -> CacheStatus<usize> {
         let cached_data = self.trs.lock().unwrap();
-        cached_data.get(id).map(|e| e.niepsilons).into_option()
+        cached_data.get(id).map(|e| e.niepsilons)
     }
 
     unsafe fn num_input_epsilons_unchecked(&self, id: usize) -> usize {
@@ -138,9 +138,9 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
         cached_data.get_unchecked(id).niepsilons
     }
 
-    fn num_output_epsilons(&self, id: usize) -> Option<usize> {
+    fn num_output_epsilons(&self, id: usize) -> CacheStatus<usize> {
         let cached_data = self.trs.lock().unwrap();
-        cached_data.get(id).map(|e| e.noepsilons).into_option()
+        cached_data.get(id).map(|e| e.noepsilons)
     }
 
     unsafe fn num_output_epsilons_unchecked(&self, id: usize) -> usize {

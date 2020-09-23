@@ -37,7 +37,7 @@ impl<W: Semiring, C: FstCache<W>> FstCache<W> for Arc<C> {
         self.deref().num_trs(id)
     }
 
-    fn num_input_epsilons(&self, id: usize) -> Option<usize> {
+    fn num_input_epsilons(&self, id: usize) -> CacheStatus<usize> {
         self.deref().num_input_epsilons(id)
     }
 
@@ -45,7 +45,7 @@ impl<W: Semiring, C: FstCache<W>> FstCache<W> for Arc<C> {
         self.deref().num_input_epsilons_unchecked(id)
     }
 
-    fn num_output_epsilons(&self, id: usize) -> Option<usize> {
+    fn num_output_epsilons(&self, id: usize) -> CacheStatus<usize> {
         self.deref().num_output_epsilons(id)
     }
 

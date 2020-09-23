@@ -127,9 +127,12 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
         cached_data.data.get(&id).map(|v| v.trs.len())
     }
 
-    fn num_input_epsilons(&self, id: usize) -> Option<usize> {
+    fn num_input_epsilons(&self, id: usize) -> CacheStatus<usize> {
         let cached_data = self.trs.lock().unwrap();
-        cached_data.data.get(&id).map(|v| v.niepsilons)
+        match cached_data.data.get(&id) {
+            Some(e) => CacheStatus::Computed(e.niepsilons),
+            None => CacheStatus::NotComputed,
+        }
     }
 
     unsafe fn num_input_epsilons_unchecked(&self, id: usize) -> usize {
@@ -137,9 +140,12 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
         cached_data.data.get(&id).unsafe_unwrap().niepsilons
     }
 
-    fn num_output_epsilons(&self, id: usize) -> Option<usize> {
+    fn num_output_epsilons(&self, id: usize) -> CacheStatus<usize> {
         let cached_data = self.trs.lock().unwrap();
-        cached_data.data.get(&id).map(|v| v.noepsilons)
+        match cached_data.data.get(&id) {
+            Some(e) => CacheStatus::Computed(e.noepsilons),
+            None => CacheStatus::NotComputed,
+        }
     }
 
     unsafe fn num_output_epsilons_unchecked(&self, id: usize) -> usize {
