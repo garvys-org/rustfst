@@ -90,13 +90,14 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
             self.s1 = s1;
             self.s2 = s2;
             self.fs = filter_state.clone();
-            // TODO: Could probably use unchecked here as the state should exist.
-            let fst1 = self.fst1();
-            let na1 = fst1.num_trs(self.s1)?;
-            let ne1 = fst1.num_output_epsilons(self.s1)?;
-            let fin1 = fst1.is_final(self.s1)?;
-            self.alleps1 = na1 == ne1 && !fin1;
-            self.noeps1 = ne1 == 0;
+            unsafe {
+                let fst1 = self.fst1();
+                let na1 = fst1.num_trs_unchecked(self.s1)?;
+                let ne1 = fst1.num_output_epsilons_unchecked(self.s1)?;
+                let fin1 = fst1.is_final_unchecked(self.s1)?;
+                self.alleps1 = na1 == ne1 && !fin1;
+                self.noeps1 = ne1 == 0;
+            }
         }
         Ok(())
     }
