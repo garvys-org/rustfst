@@ -47,6 +47,8 @@ where
     filter_builder: CFB,
     w: PhantomData<W>,
     smt: PhantomData<SMT>,
+    flags_matcher1: MultiEpsMatcherFlags,
+    flags_matcher2: MultiEpsMatcherFlags,
 }
 
 impl<W, CFB, SMT> ComposeFilterBuilder<W> for PushLabelsComposeFilterBuilder<W, CFB, SMT>
@@ -72,10 +74,24 @@ where
         Self: Sized,
     {
         let filter_builder = CFB::new(fst1, fst2, matcher1, matcher2)?;
+        let filter = filter_builder.build()?;
+        let flags_matcher1 = if filter.lookahead_output() {
+            MultiEpsMatcherFlags::MULTI_EPS_LIST
+        } else {
+            MultiEpsMatcherFlags::MULTI_EPS_LOOP
+        };
+        let flags_matcher2 = if filter.lookahead_output() {
+            MultiEpsMatcherFlags::MULTI_EPS_LOOP
+        } else {
+            MultiEpsMatcherFlags::MULTI_EPS_LIST
+        };
+
         Ok(Self {
             filter_builder,
             w: PhantomData,
             smt: PhantomData,
+            flags_matcher1,
+            flags_matcher2,
         })
     }
 
@@ -85,21 +101,13 @@ where
         let matcher1 = MultiEpsMatcher::new_with_opts(
             Arc::clone(filter.fst1()),
             MatchType::MatchOutput,
-            if filter.lookahead_output() {
-                MultiEpsMatcherFlags::MULTI_EPS_LIST
-            } else {
-                MultiEpsMatcherFlags::MULTI_EPS_LOOP
-            },
+            self.flags_matcher1,
             Arc::clone(filter.matcher1_shared()),
         )?;
         let matcher2 = MultiEpsMatcher::new_with_opts(
             Arc::clone(filter.fst2()),
             MatchType::MatchInput,
-            if filter.lookahead_output() {
-                MultiEpsMatcherFlags::MULTI_EPS_LOOP
-            } else {
-                MultiEpsMatcherFlags::MULTI_EPS_LIST
-            },
+            self.flags_matcher2,
             Arc::clone(filter.matcher2_shared()),
         )?;
         Ok(Self::CF {
