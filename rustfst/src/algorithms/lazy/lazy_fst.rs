@@ -267,8 +267,8 @@ where
                 }
             }
             unsafe { fst_out.set_trs_unchecked(s, trs_owner.trs().to_vec()) };
-            if let Some(f_w) = self.final_weight(s)? {
-                fst_out.set_final(s, f_w)?;
+            if let Some(f_w) = unsafe {self.final_weight_unchecked(s)} {
+                unsafe {fst_out.set_final_unchecked(s, f_w)};
             }
         }
         fst_out.set_properties(self.properties());

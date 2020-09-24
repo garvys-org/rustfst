@@ -137,11 +137,13 @@ where
         {
             return Ok(());
         }
-        self.ntrsa = if self.lookahead_output() {
-            self.filter.fst1().num_trs(s1)?
-        } else {
-            self.filter.fst2().num_trs(s2)?
-        };
+        unsafe {
+            self.ntrsa = if self.lookahead_output() {
+                self.filter.fst1().num_trs_unchecked(s1)
+            } else {
+                self.filter.fst2().num_trs_unchecked(s2)
+            };
+        }
         let fs2 = filter_state.state2();
         let flabel = fs2.state();
         self.matcher1.clear_multi_eps_labels();
