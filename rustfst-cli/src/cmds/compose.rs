@@ -142,7 +142,7 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
                     compose_options,
                 )?;
 
-                dyn_fst.compute()
+                Ok(dyn_fst.compute_2())
             }
         }
     }

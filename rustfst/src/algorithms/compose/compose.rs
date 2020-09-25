@@ -53,32 +53,32 @@ pub fn compose_with_config<
             _,
             NullComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
-        .compute()?,
+        .compute_2(),
         ComposeFilterEnum::SequenceFilter => ComposeFst::<
             _,
             SequenceComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
-        .compute()?,
+        .compute_2(),
         ComposeFilterEnum::AltSequenceFilter => ComposeFst::<
             _,
             AltSequenceComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
-        .compute()?,
+        .compute_2(),
         ComposeFilterEnum::MatchFilter => ComposeFst::<
             _,
             MatchComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
-        .compute()?,
+        .compute_2(),
         ComposeFilterEnum::NoMatchFilter => ComposeFst::<
             _,
             NoMatchComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
-        .compute()?,
+        .compute_2(),
         ComposeFilterEnum::TrivialFilter => ComposeFst::<
             _,
             TrivialComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
-        .compute()?,
+        .compute_2(),
     };
 
     if config.connect {
