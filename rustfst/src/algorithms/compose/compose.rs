@@ -48,7 +48,7 @@ pub fn compose_with_config<
     config: ComposeConfig,
 ) -> Result<F3> {
     let mut ofst: F3 = match config.compose_filter {
-        ComposeFilterEnum::AutoFilter => ComposeFst::new_auto(fst1, fst2)?.compute()?,
+        ComposeFilterEnum::AutoFilter => ComposeFst::new_auto(fst1, fst2)?.compute_2(),
         ComposeFilterEnum::NullFilter => ComposeFst::<
             _,
             NullComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,

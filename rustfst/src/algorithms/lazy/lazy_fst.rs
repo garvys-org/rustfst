@@ -7,6 +7,7 @@ use anyhow::Result;
 use itertools::izip;
 use unsafe_unwrap::UnsafeUnwrap;
 
+use crate::algorithms::lazy::cache::fst_cache::FullFstCache;
 use crate::algorithms::lazy::cache::CacheStatus;
 use crate::algorithms::lazy::fst_op::FstOp;
 use crate::algorithms::lazy::FstCache;
@@ -274,5 +275,49 @@ where
         fst_out.set_properties(self.properties());
         // TODO: Symbol tables should be set here
         Ok(fst_out)
+    }
+
+    fn fill_cache(&self) {
+        let start_state = self.start();
+        if start_state.is_none() {
+            return;
+        }
+        let start_state = start_state.unwrap();
+        let mut queue = VecDeque::new();
+        let mut visited_states = vec![];
+        visited_states.resize(start_state + 1, false);
+        visited_states[start_state] = true;
+        queue.push_back(start_state);
+        while !queue.is_empty() {
+            let s = queue.pop_front().unwrap();
+            let trs_owner = unsafe { self.get_trs_unchecked(s) };
+            for tr in trs_owner.trs() {
+                if tr.nextstate >= visited_states.len() {
+                    visited_states.resize(tr.nextstate + 1, false);
+                }
+                if !visited_states[tr.nextstate] {
+                    queue.push_back(tr.nextstate);
+                    visited_states[tr.nextstate] = true;
+                }
+            }
+
+            // Force computation final weight
+            unsafe { self.final_weight_unchecked(s) };
+        }
+    }
+
+    /// Turns the Lazy FST into a static one.
+    pub fn compute_2<F2: MutableFst<W> + AllocableFst<W>>(self) -> F2
+    where
+        Cache: FullFstCache<W>,
+    {
+        self.fill_cache();
+
+        let props = self.properties();
+        let mut fst: F2 = self.cache.into_fst();
+
+        fst.set_properties(props);
+
+        fst
     }
 }

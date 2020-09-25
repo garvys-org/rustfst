@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 
 use crate::algorithms::lazy::CacheStatus;
+use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::{StateId, TrsVec};
 
@@ -28,4 +29,8 @@ pub trait FstCache<W: Semiring>: Debug {
 
     fn is_final(&self, state_id: StateId) -> CacheStatus<bool>;
     unsafe fn is_final_unchecked(&self, state_id: StateId) -> bool;
+}
+
+pub trait FullFstCache<W: Semiring>: FstCache<W> {
+    fn into_fst<F: MutableFst<W>>(self) -> F;
 }

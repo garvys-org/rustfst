@@ -14,7 +14,7 @@ use crate::fst_traits::CoreFst;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::trs_iter_mut::TrsIterMut;
-use crate::{StateId, Tr, Trs, EPS_LABEL};
+use crate::{StateId, Tr, Trs, TrsVec, EPS_LABEL};
 
 #[inline]
 fn equal_tr<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> bool {
@@ -409,5 +409,18 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
     fn set_properties_with_mask(&mut self, props: FstProperties, mask: FstProperties) {
         self.properties &= !mask;
         self.properties |= props & mask;
+    }
+
+    unsafe fn set_state_unchecked_noprops(
+        &mut self,
+        source: usize,
+        trs: TrsVec<W>,
+        niepsilons: usize,
+        noepsilons: usize,
+    ) {
+        let state = &mut self.states.get_unchecked_mut(source);
+        state.trs = trs;
+        state.niepsilons = niepsilons;
+        state.noepsilons = noepsilons;
     }
 }

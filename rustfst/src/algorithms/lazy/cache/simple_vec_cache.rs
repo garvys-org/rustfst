@@ -1,7 +1,9 @@
 use std::sync::Mutex;
 
 use crate::algorithms::lazy::cache::cache_internal_types::{CachedData, FinalWeight, StartState};
+use crate::algorithms::lazy::cache::fst_cache::FullFstCache;
 use crate::algorithms::lazy::{CacheStatus, FstCache};
+use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::{StateId, Trs, TrsVec, EPS_LABEL};
 
@@ -175,5 +177,43 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
             CacheStatus::Computed(e) => e.is_some(),
             CacheStatus::NotComputed => unreachable!(),
         }
+    }
+}
+
+impl<W: Semiring> FullFstCache<W> for SimpleVecCache<W> {
+    fn into_fst<F: MutableFst<W>>(self) -> F {
+        let mut fst_out = F::new();
+
+        // Safe because computed
+        if let Some(start) = self.get_start().unwrap() {
+            let nstates = self.num_known_states();
+            fst_out.add_states(nstates);
+
+            unsafe { fst_out.set_start_unchecked(start) };
+
+            let final_weights = self.final_weights.into_inner().unwrap().data;
+            let trs = self.trs.into_inner().unwrap().data;
+
+            for (state_id, cache_trs) in trs.into_iter().enumerate() {
+                let cache_trs = cache_trs.unwrap();
+                unsafe {
+                    fst_out.set_state_unchecked_noprops(
+                        state_id,
+                        cache_trs.trs,
+                        cache_trs.niepsilons,
+                        cache_trs.noepsilons,
+                    )
+                };
+            }
+
+            for (state_id, final_weight) in final_weights.into_iter().enumerate() {
+                // Safe as computed
+                if let Some(final_weight) = final_weight.unwrap() {
+                    unsafe { fst_out.set_final_unchecked(state_id, final_weight) };
+                }
+            }
+        }
+
+        fst_out
     }
 }
