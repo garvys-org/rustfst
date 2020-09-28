@@ -31,6 +31,7 @@ pub trait FstCache<W: Semiring>: Debug {
     unsafe fn is_final_unchecked(&self, state_id: StateId) -> bool;
 }
 
-pub trait FullFstCache<W: Semiring>: FstCache<W> {
+pub trait FillableFstCache<W: Semiring>: FstCache<W> {
+    /// Given a cache that is full. Turn it into a MutableFst.
     fn into_fst<F: MutableFst<W>>(self) -> F;
 }

@@ -7,7 +7,7 @@ use anyhow::Result;
 use itertools::izip;
 use unsafe_unwrap::UnsafeUnwrap;
 
-use crate::algorithms::lazy::cache::fst_cache::FullFstCache;
+use crate::algorithms::lazy::cache::fst_cache::FillableFstCache;
 use crate::algorithms::lazy::cache::CacheStatus;
 use crate::algorithms::lazy::fst_op::FstOp;
 use crate::algorithms::lazy::FstCache;
@@ -307,9 +307,9 @@ where
     }
 
     /// Turns the Lazy FST into a static one.
-    pub fn compute_2<F2: MutableFst<W> + AllocableFst<W>>(self) -> F2
+    pub fn into_static_fst<F2: MutableFst<W> + AllocableFst<W>>(self) -> F2
     where
-        Cache: FullFstCache<W>,
+        Cache: FillableFstCache<W>,
     {
         self.fill_cache();
 

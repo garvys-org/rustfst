@@ -1,7 +1,7 @@
 use std::sync::Mutex;
 
 use crate::algorithms::lazy::cache::cache_internal_types::{CachedData, FinalWeight, StartState};
-use crate::algorithms::lazy::cache::fst_cache::FullFstCache;
+use crate::algorithms::lazy::cache::fst_cache::FillableFstCache;
 use crate::algorithms::lazy::{CacheStatus, FstCache};
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
@@ -180,7 +180,7 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
     }
 }
 
-impl<W: Semiring> FullFstCache<W> for SimpleVecCache<W> {
+impl<W: Semiring> FillableFstCache<W> for SimpleVecCache<W> {
     fn into_fst<F: MutableFst<W>>(self) -> F {
         let mut fst_out = F::new();
 

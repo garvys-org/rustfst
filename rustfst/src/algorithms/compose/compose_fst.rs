@@ -5,7 +5,7 @@ use crate::algorithms::compose::compose_filters::{
 };
 use crate::algorithms::compose::matchers::{GenericMatcher, Matcher};
 use crate::algorithms::compose::{ComposeFstOp, ComposeFstOpOptions, ComposeStateTuple};
-use crate::algorithms::lazy::cache::fst_cache::FullFstCache;
+use crate::algorithms::lazy::cache::fst_cache::FillableFstCache;
 use crate::algorithms::lazy::{FstCache, LazyFst, SimpleVecCache, StateTable};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{
@@ -90,9 +90,9 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>, Cache: FstCache<W>> ComposeFst<W
 
     pub fn compute_2<F2: MutableFst<W> + AllocableFst<W>>(self) -> F2
     where
-        Cache: FullFstCache<W>,
+        Cache: FillableFstCache<W>,
     {
-        self.0.compute_2()
+        self.0.into_static_fst()
     }
 }
 
