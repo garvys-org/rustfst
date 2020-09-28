@@ -37,12 +37,20 @@ impl<W: Semiring, C: FstCache<W>> FstCache<W> for Arc<C> {
         self.deref().num_trs(id)
     }
 
-    fn num_input_epsilons(&self, id: usize) -> Option<usize> {
+    fn num_input_epsilons(&self, id: usize) -> CacheStatus<usize> {
         self.deref().num_input_epsilons(id)
     }
 
-    fn num_output_epsilons(&self, id: usize) -> Option<usize> {
+    unsafe fn num_input_epsilons_unchecked(&self, id: usize) -> usize {
+        self.deref().num_input_epsilons_unchecked(id)
+    }
+
+    fn num_output_epsilons(&self, id: usize) -> CacheStatus<usize> {
         self.deref().num_output_epsilons(id)
+    }
+
+    unsafe fn num_output_epsilons_unchecked(&self, id: usize) -> usize {
+        self.deref().num_output_epsilons_unchecked(id)
     }
 
     fn len_trs(&self) -> usize {
@@ -51,5 +59,13 @@ impl<W: Semiring, C: FstCache<W>> FstCache<W> for Arc<C> {
 
     fn len_final_weights(&self) -> usize {
         self.deref().len_final_weights()
+    }
+
+    fn is_final(&self, state_id: usize) -> CacheStatus<bool> {
+        self.deref().is_final(state_id)
+    }
+
+    unsafe fn is_final_unchecked(&self, state_id: usize) -> bool {
+        self.deref().is_final_unchecked(state_id)
     }
 }

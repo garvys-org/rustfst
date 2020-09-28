@@ -112,6 +112,14 @@ impl<W: Semiring, F: CoreFst<W>, M, T> CoreFst<W> for MatcherFst<W, F, M, T> {
         self.fst_add_on.num_trs_unchecked(s)
     }
 
+    fn is_final(&self, state_id: usize) -> Result<bool> {
+        self.fst_add_on.is_final(state_id)
+    }
+
+    unsafe fn is_final_unchecked(&self, state_id: usize) -> bool {
+        self.fst_add_on.is_final_unchecked(state_id)
+    }
+
     fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
         self.fst_add_on.get_trs(state_id)
     }
@@ -128,8 +136,16 @@ impl<W: Semiring, F: CoreFst<W>, M, T> CoreFst<W> for MatcherFst<W, F, M, T> {
         self.fst_add_on.num_input_epsilons(state)
     }
 
+    unsafe fn num_input_epsilons_unchecked(&self, state: usize) -> usize {
+        self.fst_add_on.num_input_epsilons_unchecked(state)
+    }
+
     fn num_output_epsilons(&self, state: usize) -> Result<usize> {
         self.fst_add_on.num_output_epsilons(state)
+    }
+
+    unsafe fn num_output_epsilons_unchecked(&self, state: usize) -> usize {
+        self.fst_add_on.num_output_epsilons_unchecked(state)
     }
 }
 

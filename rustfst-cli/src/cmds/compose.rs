@@ -2,13 +2,6 @@ use std::sync::Arc;
 
 use anyhow::Result;
 
-use rustfst::algorithms::compose::{
-    compose, ComposeFst, ComposeFstOpOptions, LabelReachableData, MatcherFst,
-};
-use rustfst::fst_impls::VectorFst;
-use rustfst::semirings::TropicalWeight;
-
-use crate::binary_fst_algorithm::BinaryFstAlgorithm;
 use rustfst::algorithms::compose::compose_filters::{
     AltSequenceComposeFilterBuilder, ComposeFilterBuilder,
 };
@@ -20,9 +13,16 @@ use rustfst::algorithms::compose::lookahead_matchers::{
     LabelLookAheadMatcher, LookaheadMatcher, MatcherFlagsTrait,
 };
 use rustfst::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags, SortedMatcher};
-use rustfst::algorithms::lazy::SimpleHashMapCache;
+use rustfst::algorithms::compose::{
+    compose, ComposeFst, ComposeFstOpOptions, LabelReachableData, MatcherFst,
+};
+use rustfst::algorithms::lazy::SimpleVecCache;
 use rustfst::algorithms::tr_compares::ILabelCompare;
 use rustfst::algorithms::tr_sort;
+use rustfst::fst_impls::VectorFst;
+use rustfst::semirings::TropicalWeight;
+
+use crate::binary_fst_algorithm::BinaryFstAlgorithm;
 
 #[derive(Debug, Clone, Copy)]
 pub enum ComposeType {
@@ -136,13 +136,13 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
                     None,
                 );
 
-                let dyn_fst = ComposeFst::<_, _, SimpleHashMapCache<_>>::new_with_options(
+                let dyn_fst = ComposeFst::<_, _, SimpleVecCache<_>>::new_with_options(
                     graph1look,
                     fst_2,
                     compose_options,
                 )?;
 
-                dyn_fst.compute()
+                Ok(dyn_fst.compute_2())
             }
         }
     }

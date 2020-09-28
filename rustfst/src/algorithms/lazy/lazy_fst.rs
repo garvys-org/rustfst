@@ -7,6 +7,7 @@ use anyhow::Result;
 use itertools::izip;
 use unsafe_unwrap::UnsafeUnwrap;
 
+use crate::algorithms::lazy::cache::fst_cache::FillableFstCache;
 use crate::algorithms::lazy::cache::CacheStatus;
 use crate::algorithms::lazy::fst_op::FstOp;
 use crate::algorithms::lazy::FstCache;
@@ -67,6 +68,16 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
         self.cache.num_trs(s).unsafe_unwrap()
     }
 
+    fn is_final(&self, state_id: usize) -> Result<bool> {
+        self.cache
+            .is_final(state_id)
+            .ok_or_else(|| format_err!("Final weight for state {} not computed yet", state_id))
+    }
+
+    unsafe fn is_final_unchecked(&self, state_id: usize) -> bool {
+        self.cache.is_final_unchecked(state_id)
+    }
+
     fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
         match self.cache.get_trs(state_id) {
             CacheStatus::Computed(trs) => Ok(trs),
@@ -92,10 +103,18 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state))
     }
 
+    unsafe fn num_input_epsilons_unchecked(&self, state: usize) -> usize {
+        self.cache.num_input_epsilons_unchecked(state)
+    }
+
     fn num_output_epsilons(&self, state: usize) -> Result<usize> {
         self.cache
             .num_output_epsilons(state)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state))
+    }
+
+    unsafe fn num_output_epsilons_unchecked(&self, state: usize) -> usize {
+        self.cache.num_output_epsilons_unchecked(state)
     }
 }
 
@@ -249,12 +268,56 @@ where
                 }
             }
             unsafe { fst_out.set_trs_unchecked(s, trs_owner.trs().to_vec()) };
-            if let Some(f_w) = self.final_weight(s)? {
-                fst_out.set_final(s, f_w)?;
+            if let Some(f_w) = unsafe { self.final_weight_unchecked(s) } {
+                unsafe { fst_out.set_final_unchecked(s, f_w) };
             }
         }
         fst_out.set_properties(self.properties());
         // TODO: Symbol tables should be set here
         Ok(fst_out)
+    }
+
+    fn fill_cache(&self) {
+        let start_state = self.start();
+        if start_state.is_none() {
+            return;
+        }
+        let start_state = start_state.unwrap();
+        let mut queue = VecDeque::new();
+        let mut visited_states = vec![];
+        visited_states.resize(start_state + 1, false);
+        visited_states[start_state] = true;
+        queue.push_back(start_state);
+        while !queue.is_empty() {
+            let s = queue.pop_front().unwrap();
+            let trs_owner = unsafe { self.get_trs_unchecked(s) };
+            for tr in trs_owner.trs() {
+                if tr.nextstate >= visited_states.len() {
+                    visited_states.resize(tr.nextstate + 1, false);
+                }
+                if !visited_states[tr.nextstate] {
+                    queue.push_back(tr.nextstate);
+                    visited_states[tr.nextstate] = true;
+                }
+            }
+
+            // Force computation final weight
+            unsafe { self.final_weight_unchecked(s) };
+        }
+    }
+
+    /// Turns the Lazy FST into a static one.
+    pub fn into_static_fst<F2: MutableFst<W> + AllocableFst<W>>(self) -> F2
+    where
+        Cache: FillableFstCache<W>,
+    {
+        self.fill_cache();
+
+        let props = self.properties();
+        let mut fst: F2 = self.cache.into_fst();
+
+        fst.set_properties(props);
+
+        fst
     }
 }

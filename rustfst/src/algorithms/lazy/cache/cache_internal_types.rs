@@ -62,6 +62,13 @@ impl<T> CachedData<Vec<CacheStatus<T>>> {
             None => CacheStatus::NotComputed,
         }
     }
+
+    pub unsafe fn get_unchecked(&self, idx: usize) -> &T {
+        match self.data.get_unchecked(idx) {
+            CacheStatus::Computed(e) => e,
+            CacheStatus::NotComputed => unreachable!(),
+        }
+    }
 }
 
 impl<K, V> Default for CachedData<HashMap<K, V>> {

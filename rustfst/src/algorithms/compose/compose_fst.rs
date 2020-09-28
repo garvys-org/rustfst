@@ -5,6 +5,7 @@ use crate::algorithms::compose::compose_filters::{
 };
 use crate::algorithms::compose::matchers::{GenericMatcher, Matcher};
 use crate::algorithms::compose::{ComposeFstOp, ComposeFstOpOptions, ComposeStateTuple};
+use crate::algorithms::lazy::cache::fst_cache::FillableFstCache;
 use crate::algorithms::lazy::{FstCache, LazyFst, SimpleVecCache, StateTable};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{
@@ -86,6 +87,13 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>, Cache: FstCache<W>> ComposeFst<W
     pub fn compute<F2: MutableFst<W> + AllocableFst<W>>(&self) -> Result<F2> {
         self.0.compute()
     }
+
+    pub fn compute_2<F2: MutableFst<W> + AllocableFst<W>>(self) -> F2
+    where
+        Cache: FillableFstCache<W>,
+    {
+        self.0.into_static_fst()
+    }
 }
 
 impl<W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>>
@@ -129,6 +137,14 @@ where
         self.0.num_trs_unchecked(s)
     }
 
+    fn is_final(&self, state_id: usize) -> Result<bool> {
+        self.0.is_final(state_id)
+    }
+
+    unsafe fn is_final_unchecked(&self, state_id: usize) -> bool {
+        self.0.is_final_unchecked(state_id)
+    }
+
     fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
         self.0.get_trs(state_id)
     }
@@ -145,8 +161,16 @@ where
         self.0.num_input_epsilons(state)
     }
 
+    unsafe fn num_input_epsilons_unchecked(&self, state: usize) -> usize {
+        self.0.num_input_epsilons_unchecked(state)
+    }
+
     fn num_output_epsilons(&self, state: usize) -> Result<usize> {
         self.0.num_output_epsilons(state)
+    }
+
+    unsafe fn num_output_epsilons_unchecked(&self, state: usize) -> usize {
+        self.0.num_output_epsilons_unchecked(state)
     }
 }
 

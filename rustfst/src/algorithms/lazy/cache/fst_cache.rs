@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 
 use crate::algorithms::lazy::CacheStatus;
+use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::{StateId, TrsVec};
 
@@ -17,9 +18,20 @@ pub trait FstCache<W: Semiring>: Debug {
     fn num_known_states(&self) -> usize;
     fn num_trs(&self, id: StateId) -> Option<usize>;
 
-    fn num_input_epsilons(&self, id: usize) -> Option<usize>;
-    fn num_output_epsilons(&self, id: usize) -> Option<usize>;
+    fn num_input_epsilons(&self, id: usize) -> CacheStatus<usize>;
+    unsafe fn num_input_epsilons_unchecked(&self, id: usize) -> usize;
+
+    fn num_output_epsilons(&self, id: usize) -> CacheStatus<usize>;
+    unsafe fn num_output_epsilons_unchecked(&self, id: usize) -> usize;
 
     fn len_trs(&self) -> usize;
     fn len_final_weights(&self) -> usize;
+
+    fn is_final(&self, state_id: StateId) -> CacheStatus<bool>;
+    unsafe fn is_final_unchecked(&self, state_id: StateId) -> bool;
+}
+
+pub trait FillableFstCache<W: Semiring>: FstCache<W> {
+    /// Given a cache that is full. Turn it into a MutableFst.
+    fn into_fst<F: MutableFst<W>>(self) -> F;
 }

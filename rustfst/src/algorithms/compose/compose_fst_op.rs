@@ -137,7 +137,9 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
         } else {
             Tr::new(NO_LABEL, EPS_LABEL, W::one(), sb)
         };
-        let mut trs = vec![];
+        let mut trs_vec = TrsVec(Arc::new(vec![]));
+        // Safe as there is no other Arc to the same allocation.
+        let trs = Arc::get_mut(&mut trs_vec.0).unwrap();
 
         match selector {
             Selector::Fst1Matcher2 => {
@@ -147,10 +149,10 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
                     match_input,
                     &mut compose_filter,
                     selector,
-                    &mut trs,
+                    trs,
                 )?;
                 for tr in self.fst1.get_trs(sb)?.trs() {
-                    self.match_tr(sa, tr, match_input, &mut compose_filter, selector, &mut trs)?;
+                    self.match_tr(sa, tr, match_input, &mut compose_filter, selector, trs)?;
                 }
             }
             Selector::Fst2Matcher1 => {
@@ -160,14 +162,14 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
                     match_input,
                     &mut compose_filter,
                     selector,
-                    &mut trs,
+                    trs,
                 )?;
                 for tr in self.fst2.get_trs(sb)?.trs() {
-                    self.match_tr(sa, tr, match_input, &mut compose_filter, selector, &mut trs)?;
+                    self.match_tr(sa, tr, match_input, &mut compose_filter, selector, trs)?;
                 }
             }
         }
-        Ok(TrsVec(Arc::new(trs)))
+        Ok(trs_vec)
     }
 
     fn add_tr(

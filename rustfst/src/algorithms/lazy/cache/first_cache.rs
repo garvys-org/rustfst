@@ -68,12 +68,20 @@ impl<W: Semiring, Cache: FstCache<W>> FstCache<W> for FirstCache<W, Cache> {
         self.cache.num_trs(id)
     }
 
-    fn num_input_epsilons(&self, id: usize) -> Option<usize> {
+    fn num_input_epsilons(&self, id: usize) -> CacheStatus<usize> {
         self.cache.num_input_epsilons(id)
     }
 
-    fn num_output_epsilons(&self, id: usize) -> Option<usize> {
+    unsafe fn num_input_epsilons_unchecked(&self, id: usize) -> usize {
+        self.cache.num_input_epsilons_unchecked(id)
+    }
+
+    fn num_output_epsilons(&self, id: usize) -> CacheStatus<usize> {
         self.cache.num_output_epsilons(id)
+    }
+
+    unsafe fn num_output_epsilons_unchecked(&self, id: usize) -> usize {
+        self.cache.num_output_epsilons_unchecked(id)
     }
 
     fn len_trs(&self) -> usize {
@@ -82,5 +90,13 @@ impl<W: Semiring, Cache: FstCache<W>> FstCache<W> for FirstCache<W, Cache> {
 
     fn len_final_weights(&self) -> usize {
         self.cache.len_final_weights()
+    }
+
+    fn is_final(&self, state_id: usize) -> CacheStatus<bool> {
+        self.cache.is_final(state_id)
+    }
+
+    unsafe fn is_final_unchecked(&self, state_id: usize) -> bool {
+        self.cache.is_final_unchecked(state_id)
     }
 }

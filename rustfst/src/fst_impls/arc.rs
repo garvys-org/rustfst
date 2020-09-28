@@ -63,6 +63,14 @@ impl<W: Semiring, F: CoreFst<W>> CoreFst<W> for Arc<F> {
         self.deref().num_trs_unchecked(s)
     }
 
+    fn is_final(&self, state_id: usize) -> Result<bool> {
+        self.deref().is_final(state_id)
+    }
+
+    unsafe fn is_final_unchecked(&self, state_id: usize) -> bool {
+        self.deref().is_final_unchecked(state_id)
+    }
+
     fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
         self.deref().get_trs(state_id)
     }
@@ -79,8 +87,16 @@ impl<W: Semiring, F: CoreFst<W>> CoreFst<W> for Arc<F> {
         self.deref().num_input_epsilons(state)
     }
 
+    unsafe fn num_input_epsilons_unchecked(&self, state: usize) -> usize {
+        self.deref().num_input_epsilons_unchecked(state)
+    }
+
     fn num_output_epsilons(&self, state: usize) -> Result<usize> {
         self.deref().num_output_epsilons(state)
+    }
+
+    unsafe fn num_output_epsilons_unchecked(&self, state: usize) -> usize {
+        self.deref().num_output_epsilons_unchecked(state)
     }
 }
 

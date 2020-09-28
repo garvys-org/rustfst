@@ -110,11 +110,7 @@ pub trait CoreFst<W: Semiring> {
     /// assert_eq!(fst.is_final(s2).unwrap(), true);
     /// assert!(fst.is_final(s2 + 1).is_err());
     /// ```
-    #[inline]
-    fn is_final(&self, state_id: StateId) -> Result<bool> {
-        let w = self.final_weight(state_id)?;
-        Ok(w.is_some())
-    }
+    fn is_final(&self, state_id: StateId) -> Result<bool>;
 
     /// Returns whether or not the state with identifier passed as parameters is a final state.
     ///
@@ -122,10 +118,7 @@ pub trait CoreFst<W: Semiring> {
     ///
     /// Unsafe behaviour if `state` is not present in Fst.
     ///
-    #[inline]
-    unsafe fn is_final_unchecked(&self, state: StateId) -> bool {
-        self.final_weight_unchecked(state).is_some()
-    }
+    unsafe fn is_final_unchecked(&self, state_id: StateId) -> bool;
 
     /// Check whether a state is the start state or not.
     #[inline]
@@ -194,6 +187,14 @@ pub trait CoreFst<W: Semiring> {
     /// ```
     fn num_input_epsilons(&self, state: StateId) -> Result<usize>;
 
+    /// Returns the number of trs with epsilon input labels leaving a state.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
+    unsafe fn num_input_epsilons_unchecked(&self, state: StateId) -> usize;
+
     /// Returns the number of trs with epsilon output labels leaving a state.
     ///
     /// # Example :
@@ -217,6 +218,14 @@ pub trait CoreFst<W: Semiring> {
     /// assert_eq!(fst.num_output_epsilons(s1).unwrap(), 0);
     /// ```
     fn num_output_epsilons(&self, state: StateId) -> Result<usize>;
+
+    /// Returns the number of trs with epsilon output labels leaving a state.
+    ///
+    /// # Safety
+    ///
+    /// Unsafe behaviour if `state` is not present in Fst.
+    ///
+    unsafe fn num_output_epsilons_unchecked(&self, state: StateId) -> usize;
 }
 
 /// Trait defining the minimum interface necessary for a wFST.

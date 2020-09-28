@@ -65,6 +65,19 @@ impl<W: Semiring> CoreFst<W> for ConstFst<W> {
         self.states.get_unchecked(s).ntrs
     }
 
+    fn is_final(&self, state_id: usize) -> Result<bool> {
+        let s = self
+            .states
+            .get(state_id)
+            .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
+        Ok(s.final_weight.is_some())
+    }
+
+    unsafe fn is_final_unchecked(&self, state_id: usize) -> bool {
+        let s = self.states.get_unchecked(state_id);
+        s.final_weight.is_some()
+    }
+
     fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
         let state = self
             .states
@@ -98,11 +111,19 @@ impl<W: Semiring> CoreFst<W> for ConstFst<W> {
             .niepsilons)
     }
 
+    unsafe fn num_input_epsilons_unchecked(&self, state: usize) -> usize {
+        self.states.get_unchecked(state).niepsilons
+    }
+
     fn num_output_epsilons(&self, state: usize) -> Result<usize> {
         Ok(self
             .states
             .get(state)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state))?
             .noepsilons)
+    }
+
+    unsafe fn num_output_epsilons_unchecked(&self, state: usize) -> usize {
+        self.states.get_unchecked(state).noepsilons
     }
 }

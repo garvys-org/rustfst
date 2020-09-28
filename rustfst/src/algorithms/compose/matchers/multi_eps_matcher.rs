@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use itertools::Itertools;
-use nom::lib::std::collections::BTreeSet;
+use std::collections::BTreeSet;
 
 use bitflags::bitflags;
 

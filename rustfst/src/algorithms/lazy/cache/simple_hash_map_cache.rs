@@ -5,6 +5,7 @@ use crate::algorithms::lazy::cache::cache_internal_types::{CachedData, StartStat
 use crate::algorithms::lazy::{CacheStatus, FstCache};
 use crate::semirings::Semiring;
 use crate::{StateId, Trs, TrsVec, EPS_LABEL};
+use unsafe_unwrap::UnsafeUnwrap;
 
 #[derive(Debug)]
 pub struct SimpleHashMapCache<W: Semiring> {
@@ -126,14 +127,30 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
         cached_data.data.get(&id).map(|v| v.trs.len())
     }
 
-    fn num_input_epsilons(&self, id: usize) -> Option<usize> {
+    fn num_input_epsilons(&self, id: usize) -> CacheStatus<usize> {
         let cached_data = self.trs.lock().unwrap();
-        cached_data.data.get(&id).map(|v| v.niepsilons)
+        match cached_data.data.get(&id) {
+            Some(e) => CacheStatus::Computed(e.niepsilons),
+            None => CacheStatus::NotComputed,
+        }
     }
 
-    fn num_output_epsilons(&self, id: usize) -> Option<usize> {
+    unsafe fn num_input_epsilons_unchecked(&self, id: usize) -> usize {
         let cached_data = self.trs.lock().unwrap();
-        cached_data.data.get(&id).map(|v| v.noepsilons)
+        cached_data.data.get(&id).unsafe_unwrap().niepsilons
+    }
+
+    fn num_output_epsilons(&self, id: usize) -> CacheStatus<usize> {
+        let cached_data = self.trs.lock().unwrap();
+        match cached_data.data.get(&id) {
+            Some(e) => CacheStatus::Computed(e.noepsilons),
+            None => CacheStatus::NotComputed,
+        }
+    }
+
+    unsafe fn num_output_epsilons_unchecked(&self, id: usize) -> usize {
+        let cached_data = self.trs.lock().unwrap();
+        cached_data.data.get(&id).unsafe_unwrap().noepsilons
     }
 
     fn len_trs(&self) -> usize {
@@ -144,5 +161,22 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
     fn len_final_weights(&self) -> usize {
         let cached_data = self.final_weights.lock().unwrap();
         cached_data.data.len()
+    }
+
+    fn is_final(&self, state_id: usize) -> CacheStatus<bool> {
+        match self.final_weights.lock().unwrap().data.get(&state_id) {
+            Some(e) => CacheStatus::Computed(e.is_some()),
+            None => CacheStatus::NotComputed,
+        }
+    }
+
+    unsafe fn is_final_unchecked(&self, state_id: usize) -> bool {
+        self.final_weights
+            .lock()
+            .unwrap()
+            .data
+            .get(&state_id)
+            .unwrap()
+            .is_some()
     }
 }
