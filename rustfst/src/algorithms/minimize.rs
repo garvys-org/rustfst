@@ -109,6 +109,8 @@ where
 /// In place minimization for weighted final state acceptor. 
 /// If `allow_acyclic_minimization` is true and the input is acyclic, then a specific 
 /// minimization is applied. 
+///
+/// An error is returned if the input fst is not a weighted acceptor.
 pub fn acceptor_minimize<W: Semiring, F: MutableFst<W> + ExpandedFst<W>>(
     ifst: &mut F,
     allow_acyclic_minimization: bool,
