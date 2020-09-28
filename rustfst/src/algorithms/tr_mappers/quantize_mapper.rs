@@ -8,23 +8,19 @@ use crate::KDELTA;
 
 /// Mapper to quantize all weights.
 #[derive(Debug, Copy, Clone)]
-pub struct QuantizeMapper { 
-    delta: f32
+pub struct QuantizeMapper {
+    delta: f32,
 }
 
 impl QuantizeMapper {
     pub fn new(delta: f32) -> Self {
-        Self {
-            delta
-        }
+        Self { delta }
     }
 }
 
 impl Default for QuantizeMapper {
     fn default() -> Self {
-        Self {
-            delta: KDELTA,
-        }
+        Self { delta: KDELTA }
     }
 }
 
