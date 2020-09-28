@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Changed
+- `QuantizeMapper` has now a configurable delta value with default set to `KDELTA`
 - `acceptor_minimize` now public. 
 - `from_op_and_cache` is now public for `LazyFst` and `LazyFst2`
 - Change `FstCache` API and added a `CacheStatus` object to better differentiate, computed data and not yet computed.
