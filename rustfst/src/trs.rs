@@ -53,6 +53,12 @@ impl<W: Semiring> Default for TrsVec<W> {
     }
 }
 
+impl<W: Semiring> From<Vec<Tr<W>>> for TrsVec<W> {
+    fn from(v: Vec<Tr<W>>) -> Self {
+        Self(Arc::new(v))
+    }
+}
+
 #[derive(Debug, PartialOrd, PartialEq)]
 pub struct TrsConst<W: Semiring> {
     pub(crate) trs: Arc<Vec<Tr<W>>>,
