@@ -66,7 +66,7 @@ impl UnaryFstAlgorithm for MapAlgorithm {
             }
             "quantize" => {
                 // TODO: Handle the delta parameter
-                let mapper = tr_mappers::QuantizeMapper {};
+                let mapper = tr_mappers::QuantizeMapper::default();
                 tr_map(&mut fst, &mapper)?;
                 Ok(fst)
             }
