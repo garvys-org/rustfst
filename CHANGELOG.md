@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Changed
-- Change `FstCach`e API and added a `CacheStatus` object to better differentiate, computed data and not yet computed.
+- `acceptor_minimize` now public. 
+- `from_op_and_cache` is now public for `LazyFst` and `LazyFst2`
+- Change `FstCache` API and added a `CacheStatus` object to better differentiate, computed data and not yet computed.
 - Renaming `rustfst.algorithms.lazy_fst_revamp` -> `rustfst.algorithms.lazy`
 
 ## [0.6.3] - 2020-16-09
@@ -43,7 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `len_trs` and `len_final_weights` as required methods of the `FstCache` trait.
 
 ### Changed
-- `acceptor_minimize` now public. 
 - `fst_convert` now consumes its input. Use `fst_convert_from_ref` to pass a borrow.
 - `set_input_symbols`, `set_output_symbols`, `unset_input_symbols`, `unset_output_symbols` and `set_symts_from_fst` methods have been moved from `MutableFst` to `Fst`.
 - Remove `MutableFst` trait bound from input of `shortest_path`.

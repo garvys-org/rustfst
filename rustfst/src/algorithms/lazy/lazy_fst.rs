@@ -202,7 +202,7 @@ where
     Op: FstOp<W>,
     Cache: FstCache<W>,
 {
-    pub(crate) fn from_op_and_cache(
+    pub fn from_op_and_cache(
         op: Op,
         cache: Cache,
         isymt: Option<Arc<SymbolTable>>,
