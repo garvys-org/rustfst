@@ -85,7 +85,7 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
         W: WeightQuantize,
     {
         let mut fst_tr_map: F2 = fst_convert_from_ref(self);
-        let mut mapper = QuantizeMapper {};
+        let mut mapper = QuantizeMapper::default();
         fst_tr_map.tr_map(&mut mapper)?;
         Ok(fst_tr_map)
     }

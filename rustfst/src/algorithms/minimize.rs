@@ -69,7 +69,7 @@ where
         let mut to_gallic = ToGallicConverter {};
         let mut gfst: VectorFst<GallicWeightLeft<W>> = weight_convert(ifst, &mut to_gallic)?;
         push_weights(&mut gfst, ReweightType::ReweightToInitial, false)?;
-        let quantize_mapper = QuantizeMapper {};
+        let quantize_mapper = QuantizeMapper::default();
         tr_map(&mut gfst, &quantize_mapper)?;
         let encode_table = encode(&mut gfst, EncodeType::EncodeWeightsAndLabels)?;
         acceptor_minimize(&mut gfst, allow_acyclic_minimization)?;
@@ -95,7 +95,7 @@ where
     } else if props.contains(FstProperties::WEIGHTED) {
         // Weighted acceptor
         push_weights(ifst, ReweightType::ReweightToInitial, false)?;
-        let quantize_mapper = QuantizeMapper {};
+        let quantize_mapper = QuantizeMapper::default();
         tr_map(ifst, &quantize_mapper)?;
         let encode_table = encode(ifst, EncodeType::EncodeWeightsAndLabels)?;
         acceptor_minimize(ifst, allow_acyclic_minimization)?;
