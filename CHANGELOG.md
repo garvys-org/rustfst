@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add `From<Vec<Tr<W>>>` for `TrsVec`
 - Introduce new iterators to iterate on a whole Fst:
     - `FstIntoIterator` as a trait bound of `ExpandedFst`.
     - `FstIterator` as a trait bound of `Fst`.
