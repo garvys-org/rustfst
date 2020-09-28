@@ -6,7 +6,7 @@ pub use self::{
     fst_convert::{fst_convert, fst_convert_from_ref},
     inversion::invert,
     isomorphic::isomorphic,
-    minimize::{ minimize, acceptor_minimize },
+    minimize::{acceptor_minimize, minimize},
     projection::{project, ProjectType},
     push::{push, push_weights, PushType},
     queue::{Queue, QueueType},
