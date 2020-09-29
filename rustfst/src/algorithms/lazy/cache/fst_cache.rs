@@ -25,7 +25,7 @@ pub trait FstCache<W: Semiring>: Debug {
     fn len_final_weights(&self) -> usize;
 }
 
-impl<W: Semiring, C: FstCache<W>, CP: Deref<Target=C> + Debug> FstCache<W> for CP {
+impl<W: Semiring, C: FstCache<W>, CP: Deref<Target = C> + Debug> FstCache<W> for CP {
     fn get_start(&self) -> CacheStatus<Option<usize>> {
         self.deref().get_start()
     }

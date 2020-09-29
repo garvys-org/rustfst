@@ -14,7 +14,7 @@ pub trait FstOp2<W: Semiring>: Debug {
     fn properties(&self) -> FstProperties;
 }
 
-impl<W: Semiring, F: FstOp2<W>, FP: Deref<Target=F> + Debug> FstOp2<W> for FP {
+impl<W: Semiring, F: FstOp2<W>, FP: Deref<Target = F> + Debug> FstOp2<W> for FP {
     fn compute_start(&self) -> Result<Option<StateId>> {
         self.deref().compute_start()
     }
