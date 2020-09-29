@@ -7,19 +7,30 @@ use crate::Tr;
 use crate::KDELTA;
 
 /// Mapper to quantize all weights.
-pub struct QuantizeMapper {}
+#[derive(Debug, Copy, Clone)]
+pub struct QuantizeMapper {
+    delta: f32,
+}
 
-pub fn map_weight<W: WeightQuantize>(weight: &mut W) -> Result<()> {
-    weight.quantize_assign(KDELTA)
+impl QuantizeMapper {
+    pub fn new(delta: f32) -> Self {
+        Self { delta }
+    }
+}
+
+impl Default for QuantizeMapper {
+    fn default() -> Self {
+        Self { delta: KDELTA }
+    }
 }
 
 impl<S: WeightQuantize + Semiring> TrMapper<S> for QuantizeMapper {
     fn tr_map(&self, tr: &mut Tr<S>) -> Result<()> {
-        map_weight(&mut tr.weight)
+        tr.weight.quantize_assign(self.delta)
     }
 
     fn final_tr_map(&self, final_tr: &mut FinalTr<S>) -> Result<()> {
-        map_weight(&mut final_tr.weight)
+        final_tr.weight.quantize_assign(self.delta)
     }
 
     fn final_action(&self) -> MapFinalAction {
