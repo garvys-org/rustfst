@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
-- Implement `FstOp` and `FstOp2` using the deref trait.
+
+- Implement `FstOp` for `Deref<FstOp>` and `FstOp2` for `Deref<FstOp2>`
+- Implement `TrMapper<S>` for `Deref<TrMapper<S>>`
 
 ### Changed
 - `QuantizeMapper` has now a configurable delta value with default set to `KDELTA`

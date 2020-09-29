@@ -1,4 +1,5 @@
 use anyhow::Result;
+use std::ops::Deref;
 
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
@@ -53,6 +54,24 @@ pub trait TrMapper<S: Semiring> {
     fn final_action(&self) -> MapFinalAction;
 
     fn properties(&self, inprops: FstProperties) -> FstProperties;
+}
+
+impl<S: Semiring, T: TrMapper<S>, TP: Deref<Target = T>> TrMapper<S> for TP {
+    fn tr_map(&self, tr: &mut Tr<S>) -> Result<()> {
+        self.deref().tr_map(tr)
+    }
+
+    fn final_tr_map(&self, final_tr: &mut FinalTr<S>) -> Result<()> {
+        self.deref().final_tr_map(final_tr)
+    }
+
+    fn final_action(&self) -> MapFinalAction {
+        self.deref().final_action()
+    }
+
+    fn properties(&self, inprops: FstProperties) -> FstProperties {
+        self.deref().properties(inprops)
+    }
 }
 
 /// Maps every transition in the FST using an `TrMapper` object.
