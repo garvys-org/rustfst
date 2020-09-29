@@ -739,7 +739,6 @@ macro_rules! test_fst {
             }
 
             #[test]
-            #[ignore]
             fn test_rmepsilon_openfst() -> Result<()> {
                 do_run!(test_rmepsilon, $fst_name);
                 Ok(())
@@ -842,3 +841,6 @@ test_fst!(test_openfst_fst_011, "fst_011");
 test_fst!(test_openfst_fst_012, "fst_012");
 test_fst!(test_openfst_fst_013, "fst_013");
 test_fst!(test_openfst_fst_014, "fst_014");
+test_fst!(test_openfst_fst_015, "fst_015");
+test_fst!(test_openfst_fst_016, "fst_016");
+// test_fst!(test_openfst_fst_017, "fst_017");
