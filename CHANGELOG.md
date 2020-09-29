@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Implement `FstOp` for `Deref<FstOp>` and `FstOp2` for `Deref<FstOp2>`
 - Implement `TrMapper<S>` for `Deref<TrMapper<S>>`
+- Expose in `prelude`, top crate constant, traits, structs.
+- Expose in `prelude` `FstProperties`.
+- Expose in `prelude` `tr_mappers`.  
 
 ### Changed
 - `QuantizeMapper` has now a configurable delta value with default set to `KDELTA`
