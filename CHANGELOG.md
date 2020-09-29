@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+- Make `proptest_fst` public
+
 ### Changed
 - `QuantizeMapper` has now a configurable delta value with default set to `KDELTA`
 - `acceptor_minimize` now public. 
