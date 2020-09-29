@@ -12,6 +12,25 @@ static MAX_ILABEL: usize = 100;
 static MAX_OLABEL: usize = 100;
 static MAX_NUM_ARCS: usize = 500;
 
+#[derive(Debug, Clone, Copy)]
+pub struct ProptestFstConfig {
+    pub max_num_states: usize,
+    pub max_ilabel: usize,
+    pub max_olabel: usize,
+    pub max_num_arcs: usize,
+}
+
+impl Default for ProptestFstConfig {
+    fn default() -> Self {
+        Self {
+            max_num_states: MAX_NUM_STATES,
+            max_ilabel: MAX_ILABEL,
+            max_olabel: MAX_OLABEL,
+            max_num_arcs: MAX_NUM_ARCS,
+        }
+    }
+}
+
 fn proptest_weight() -> impl Strategy<Value = Option<TropicalWeight>> {
     prop_oneof![
         Just(None),
@@ -19,17 +38,17 @@ fn proptest_weight() -> impl Strategy<Value = Option<TropicalWeight>> {
     ]
 }
 
-fn proptest_trs(nstates: usize) -> impl Strategy<Value = Vec<(usize, Tr<TropicalWeight>)>> {
+fn proptest_trs(nstates: usize, max_ilabel: usize, max_olabel: usize, max_num_arcs: usize) -> impl Strategy<Value = Vec<(usize, Tr<TropicalWeight>)>> {
     proptest::collection::vec(
         (
             0..nstates,
-            0..MAX_ILABEL,
-            0..MAX_OLABEL,
+            0..max_ilabel,
+            0..max_olabel,
             proptest_weight(),
             0..nstates,
         ),
         // Number of trs
-        0..MAX_NUM_ARCS,
+        0..max_num_arcs,
     )
     .prop_map(|v| {
         v.into_iter()
@@ -48,17 +67,17 @@ fn proptest_trs(nstates: usize) -> impl Strategy<Value = Vec<(usize, Tr<Tropical
     })
 }
 
-pub(crate) fn proptest_fst() -> impl Strategy<Value = VectorFst<TropicalWeight>> {
-    let nstates_strategy = 1..MAX_NUM_STATES;
+pub fn proptest_fst_with_config(config: ProptestFstConfig) -> impl Strategy<Value = VectorFst<TropicalWeight>> {
+    let nstates_strategy = 1..config.max_num_states;
     nstates_strategy
-        .prop_flat_map(|nstates| {
+        .prop_flat_map(move |nstates| {
             (
                 // Number of states.
                 Just(nstates),
                 // Start state.
                 (0..nstates),
                 // List of states : Vec<State, Tr>.
-                proptest_trs(nstates),
+                proptest_trs(nstates, config.max_ilabel, config.max_olabel, config.max_num_arcs),
                 // List of final weight.
                 proptest::collection::vec(proptest_weight(), nstates..=nstates),
             )
@@ -86,4 +105,8 @@ pub(crate) fn proptest_fst() -> impl Strategy<Value = VectorFst<TropicalWeight>>
 
             fst
         })
+}
+
+pub fn proptest_fst() -> impl Strategy<Value = VectorFst<TropicalWeight>> {
+    proptest_fst_with_config(ProptestFstConfig::default())
 }
