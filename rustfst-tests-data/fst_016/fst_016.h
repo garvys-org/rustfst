@@ -11,9 +11,7 @@ public:
 
     MyFst get_fst() const {
         auto parsed_fst = fst::VectorFst<MyArc>::Read(std::string("fst_016/simple.fst.in"));
-        MyFst f(*parsed_fst);
-        delete parsed_fst;
-        return f;
+        return *parsed_fst;
     }
 
     fst::VectorFst<MyArc> get_fst_compose() const {
