@@ -1,4 +1,3 @@
-pub mod arc_cache;
 pub(self) mod cache_internal_types;
 pub mod cache_status;
 pub mod first_cache;
