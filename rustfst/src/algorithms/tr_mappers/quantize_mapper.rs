@@ -24,10 +24,6 @@ impl Default for QuantizeMapper {
     }
 }
 
-pub fn map_weight<W: WeightQuantize>(weight: &mut W) -> Result<()> {
-    weight.quantize_assign(KDELTA)
-}
-
 impl<S: WeightQuantize + Semiring> TrMapper<S> for QuantizeMapper {
     fn tr_map(&self, tr: &mut Tr<S>) -> Result<()> {
         tr.weight.quantize_assign(self.delta)
