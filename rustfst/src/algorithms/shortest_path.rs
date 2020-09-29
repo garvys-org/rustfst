@@ -86,7 +86,7 @@ where
         let distance_2_reversed: Vec<<W as Semiring>::ReverseWeight> =
             distance_2.into_iter().map(|v| v.into()).collect();
         let (dfst, distance_3_reversed): (VectorFst<_>, _) =
-            determinize_with_distance(Arc::new(rfst), Arc::new(distance_2_reversed))?;
+            determinize_with_distance(&rfst, Arc::new(distance_2_reversed))?;
         let distance_3: Vec<_> = distance_3_reversed
             .into_iter()
             .map(|v| v.reverse_back())
