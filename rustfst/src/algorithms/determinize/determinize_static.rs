@@ -1,5 +1,4 @@
 use std::borrow::Borrow;
-use std::sync::Arc;
 
 use anyhow::Result;
 
@@ -22,7 +21,7 @@ use crate::semirings::{
 };
 use crate::{EPS_LABEL, KDELTA};
 
-pub fn determinize_with_distance<W, F1, F2>(ifst: &F1, in_dist: Arc<Vec<W>>) -> Result<(F2, Vec<W>)>
+pub fn determinize_with_distance<W, F1, F2>(ifst: &F1, in_dist: &[W]) -> Result<(F2, Vec<W>)>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize,
     F1: ExpandedFst<W>,
@@ -31,7 +30,7 @@ where
     if !W::properties().contains(SemiringProperties::LEFT_SEMIRING) {
         bail!("determinize_fsa : weight must be left distributive")
     }
-    let fst = DeterminizeFsa::<_, F1, DefaultCommonDivisor, _>::new(ifst, Some(in_dist))?;
+    let fst = DeterminizeFsa::<_, F1, DefaultCommonDivisor, _, _>::new(ifst, Some(in_dist))?;
     fst.compute_with_distance()
 }
 
@@ -45,7 +44,7 @@ where
     if !W::properties().contains(SemiringProperties::LEFT_SEMIRING) {
         bail!("determinize_fsa : weight must be left distributive")
     }
-    let det_fsa: DeterminizeFsa<W, F1, CD, _> = DeterminizeFsa::new(fst_in, None)?;
+    let det_fsa: DeterminizeFsa<W, F1, CD, _, Vec<W>> = DeterminizeFsa::new(fst_in, None)?;
     det_fsa.compute()
 }
 

@@ -18,16 +18,26 @@ use crate::semirings::{DivideType, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::{Label, Semiring, StateId, Tr, Trs, TrsVec, KDELTA};
 
 #[derive(Debug)]
-pub struct DeterminizeFsaOp<W: Semiring, F: Fst<W>, CD: CommonDivisor<W>, B: Borrow<F> + Debug> {
+pub struct DeterminizeFsaOp<W, F, CD, B, BT>
+where
+    W: Semiring,
+    F: Fst<W>,
+    CD: CommonDivisor<W>,
+    B: Borrow<F> + Debug,
+    BT: Borrow<[W]> + Debug,
+{
     fst: B,
-    state_table: DeterminizeStateTable<W>,
+    state_table: DeterminizeStateTable<W, BT>,
     ghost: PhantomData<(CD, F)>,
 }
 
-impl<W, F: Fst<W>, CD: CommonDivisor<W>, B: Borrow<F> + Debug> FstOp<W>
-    for DeterminizeFsaOp<W, F, CD, B>
+impl<W, F, CD, B, BT> FstOp<W> for DeterminizeFsaOp<W, F, CD, B, BT>
 where
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
+    F: Fst<W>,
+    CD: CommonDivisor<W>,
+    B: Borrow<F> + Debug,
+    BT: Borrow<[W]> + Debug + PartialEq,
 {
     fn compute_start(&self) -> Result<Option<usize>> {
         if let Some(start_state) = self.fst.borrow().start() {
@@ -113,11 +123,15 @@ where
     }
 }
 
-impl<W, F: Fst<W> + Debug, CD: CommonDivisor<W>, B: Borrow<F> + Debug> DeterminizeFsaOp<W, F, CD, B>
+impl<W, F, CD, B, BT> DeterminizeFsaOp<W, F, CD, B, BT>
 where
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
+    F: Fst<W>,
+    CD: CommonDivisor<W>,
+    B: Borrow<F> + Debug,
+    BT: Borrow<[W]> + Debug + PartialEq,
 {
-    pub fn new(fst: B, in_dist: Option<Arc<Vec<W>>>) -> Result<Self> {
+    pub fn new(fst: B, in_dist: Option<BT>) -> Result<Self> {
         if !fst.borrow().properties().contains(FstProperties::ACCEPTOR) {
             bail!("DeterminizeFsaImpl : expected acceptor as argument");
         }

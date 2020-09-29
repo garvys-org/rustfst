@@ -8,8 +8,8 @@ use crate::{Semiring, SymbolTable, TrsVec};
 use anyhow::Result;
 use std::borrow::Borrow;
 use std::fmt::Debug;
-use std::sync::Arc;
 use std::marker::PhantomData;
+use std::sync::Arc;
 
 #[derive(Debug)]
 pub struct DeterminizeFsa<
@@ -17,14 +17,19 @@ pub struct DeterminizeFsa<
     F: Fst<W>,
     CD: CommonDivisor<W>,
     B: Borrow<F> + Debug,
->(LazyFst<W, DeterminizeFsaOp<W, F, CD, B>, SimpleHashMapCache<W>>, PhantomData<F>);
+    BT: Borrow<[W]> + Debug + PartialEq,
+>(
+    LazyFst<W, DeterminizeFsaOp<W, F, CD, B, BT>, SimpleHashMapCache<W>>,
+    PhantomData<F>,
+);
 
-impl<W, F, CD, B> CoreFst<W> for DeterminizeFsa<W, F, CD, B>
+impl<W, F, CD, B, BT> CoreFst<W> for DeterminizeFsa<W, F, CD, B, BT>
 where
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
     F: Fst<W>,
     CD: CommonDivisor<W>,
     B: Borrow<F> + Debug,
+    BT: Borrow<[W]> + Debug + PartialEq,
 {
     type TRS = TrsVec<W>;
 
@@ -69,44 +74,50 @@ where
     }
 }
 
-impl<'a, W, F, CD, B> StateIterator<'a> for DeterminizeFsa<W, F, CD, B>
+impl<'a, W, F, CD, B, BT> StateIterator<'a> for DeterminizeFsa<W, F, CD, B, BT>
 where
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize + 'a,
     F: Fst<W> + 'a,
     CD: CommonDivisor<W> + 'a,
     B: Borrow<F> + Debug + 'a,
+    BT: Borrow<[W]> + Debug + PartialEq + 'a,
 {
     type Iter =
-        <LazyFst<W, DeterminizeFsaOp<W, F, CD, B>, SimpleHashMapCache<W>> as StateIterator<'a>>::Iter;
+        <LazyFst<W, DeterminizeFsaOp<W, F, CD, B, BT>, SimpleHashMapCache<W>> as StateIterator<
+            'a,
+        >>::Iter;
 
     fn states_iter(&'a self) -> Self::Iter {
         self.0.states_iter()
     }
 }
 
-impl<'a, W, F, CD, B> FstIterator<'a, W> for DeterminizeFsa<W, F, CD, B>
+impl<'a, W, F, CD, B, BT> FstIterator<'a, W> for DeterminizeFsa<W, F, CD, B, BT>
 where
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
     F: Fst<W> + 'a,
     CD: CommonDivisor<W> + 'a,
     B: Borrow<F> + Debug + 'a,
+    BT: Borrow<[W]> + Debug + PartialEq + 'a,
 {
-    type FstIter = <LazyFst<W, DeterminizeFsaOp<W, F, CD, B>, SimpleHashMapCache<W>> as FstIterator<
-        'a,
-        W,
-    >>::FstIter;
+    type FstIter =
+        <LazyFst<W, DeterminizeFsaOp<W, F, CD, B, BT>, SimpleHashMapCache<W>> as FstIterator<
+            'a,
+            W,
+        >>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
         self.0.fst_iter()
     }
 }
 
-impl<W, F, CD, B> Fst<W> for DeterminizeFsa<W, F, CD, B>
+impl<W, F, CD, B, BT> Fst<W> for DeterminizeFsa<W, F, CD, B, BT>
 where
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
     F: Fst<W> + 'static,
     CD: CommonDivisor<W> + 'static,
     B: Borrow<F> + 'static + std::fmt::Debug,
+    BT: Borrow<[W]> + Debug + PartialEq + 'static,
 {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.0.input_symbols()
@@ -133,14 +144,15 @@ where
     }
 }
 
-impl<W, F, CD, B> DeterminizeFsa<W, F, CD, B>
+impl<W, F, CD, B, BT> DeterminizeFsa<W, F, CD, B, BT>
 where
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
     F: Fst<W>,
     CD: CommonDivisor<W>,
     B: Borrow<F> + Debug,
+    BT: Borrow<[W]> + PartialEq + Debug,
 {
-    pub fn new(fst: B, in_dist: Option<Arc<Vec<W>>>) -> Result<Self> {
+    pub fn new(fst: B, in_dist: Option<BT>) -> Result<Self> {
         let isymt = fst.borrow().input_symbols().cloned();
         let osymt = fst.borrow().output_symbols().cloned();
         let fst_op = DeterminizeFsaOp::new(fst, in_dist)?;
@@ -177,6 +189,8 @@ mod test {
     #[test]
     fn test_determinize_fsa_sync() {
         fn is_sync<T: Sync>() {}
-        is_sync::<DeterminizeFsa<TropicalWeight, VectorFst<_>, DefaultCommonDivisor, Arc<VectorFst<_>>>>();
+        is_sync::<
+            DeterminizeFsa<TropicalWeight, VectorFst<_>, DefaultCommonDivisor, Arc<VectorFst<_>>, Vec<TropicalWeight>>,
+        >();
     }
 }
