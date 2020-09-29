@@ -148,7 +148,7 @@ where
     W: SerializableSemiring + WeightQuantize,
 {
     let mut fst_tr_map = test_data.raw.clone();
-    let mut mapper = QuantizeMapper {};
+    let mut mapper = QuantizeMapper::default();
     fst_tr_map.tr_map(&mut mapper)?;
 
     test_eq_fst(
