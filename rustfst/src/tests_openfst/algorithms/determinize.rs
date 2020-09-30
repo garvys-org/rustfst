@@ -1,6 +1,5 @@
 use std::fmt::Display;
 use std::path::Path;
-use std::sync::Arc;
 
 use anyhow::{format_err, Result};
 use bitflags::_core::marker::PhantomData;
@@ -61,8 +60,7 @@ where
 {
     for determinize_data in &test_data.determinize {
         //        println!("det_type = {:?}", determinize_data.det_type);
-        let fst_raw = Arc::new(test_data.raw.clone());
-        let fst_res: Result<F> = determinize(fst_raw, determinize_data.det_type.clone());
+        let fst_res: Result<F> = determinize(&test_data.raw, determinize_data.det_type.clone());
 
         match (&determinize_data.result, fst_res) {
             (Ok(fst_expected), Ok(ref fst_determinized)) => {

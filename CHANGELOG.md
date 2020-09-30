@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Expose in `prelude` `tr_mappers`.  
 
 ### Changed
+
+- Lazy implementation of the determinize algorithm has been generalized to use the `Borrow` trait instead of the `Arc` object.
+- `determinize` now requires a `&Fst` instead of an `Arc`.
 - Fixed bug in `Determinize`: `HashMap` -> `BTreeMap` for `LabelMap`.
 - `NO_LABEL` and `NO_STATE_ID` are now public. 
 - Fixed bug in `RmEpsilon`: mutation had to be performed while iterating.

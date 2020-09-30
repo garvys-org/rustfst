@@ -1,5 +1,6 @@
+use std::borrow::Borrow;
 use std::fmt;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 use bimap::BiHashMap;
 
@@ -8,46 +9,50 @@ use crate::{Semiring, StateId};
 use anyhow::Result;
 
 #[derive(Debug, PartialEq)]
-struct InnerDeterminizeStateTable<W: Semiring> {
+struct InnerDeterminizeStateTable<W: Semiring, B: Borrow<[W]>> {
     table: BiHashMap<StateId, DeterminizeStateTuple<W>>,
     // Distance to final NFA states.
-    in_dist: Option<Arc<Vec<W>>>,
+    in_dist: Option<B>,
     // Distance to final DFA states.
     out_dist: Vec<Option<W>>,
 }
 
-impl<W: Semiring> InnerDeterminizeStateTable<W> {
+impl<W: Semiring, B: Borrow<[W]> + PartialEq> InnerDeterminizeStateTable<W, B> {
     fn compute_distance(&self, subset: &WeightedSubset<W>) -> Result<W> {
         let mut outd = W::zero();
         let weight_zero = W::zero();
         for element in subset.iter() {
-            let ind = if element.state < self.in_dist.as_ref().unwrap().len() {
-                &self.in_dist.as_ref().unwrap()[element.state]
-            } else {
-                &weight_zero
-            };
+            let ind = self
+                .in_dist
+                .as_ref()
+                .unwrap()
+                .borrow()
+                .get(element.state)
+                .unwrap_or(&weight_zero);
             outd.plus_assign(element.weight.times(ind)?)?;
         }
         Ok(outd)
     }
 }
 
-pub struct DeterminizeStateTable<W: Semiring>(Mutex<InnerDeterminizeStateTable<W>>);
+pub struct DeterminizeStateTable<W: Semiring, B: Borrow<[W]>>(
+    Mutex<InnerDeterminizeStateTable<W, B>>,
+);
 
-impl<W: Semiring> fmt::Debug for DeterminizeStateTable<W> {
+impl<W: Semiring, B: Borrow<[W]> + fmt::Debug> fmt::Debug for DeterminizeStateTable<W, B> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self.0.lock().unwrap())
     }
 }
 
-impl<W: Semiring> PartialEq for DeterminizeStateTable<W> {
+impl<W: Semiring, B: Borrow<[W]> + PartialEq> PartialEq for DeterminizeStateTable<W, B> {
     fn eq(&self, other: &Self) -> bool {
         self.0.lock().unwrap().eq(&*other.0.lock().unwrap())
     }
 }
 
-impl<W: Semiring> DeterminizeStateTable<W> {
-    pub fn new(in_dist: Option<Arc<Vec<W>>>) -> Self {
+impl<W: Semiring, B: Borrow<[W]>> DeterminizeStateTable<W, B> {
+    pub fn new(in_dist: Option<B>) -> Self {
         Self(Mutex::new(InnerDeterminizeStateTable {
             in_dist,
             out_dist: vec![],
@@ -55,6 +60,19 @@ impl<W: Semiring> DeterminizeStateTable<W> {
         }))
     }
 
+    /// Looks up tuple from integer ID.
+    pub fn find_tuple(&self, tuple_id: StateId) -> DeterminizeStateTuple<W> {
+        let inner = self.0.lock().unwrap();
+        inner.table.get_by_left(&tuple_id).unwrap().clone()
+    }
+
+    pub fn out_dist(self) -> Vec<Option<W>> {
+        let inner = self.0.into_inner().unwrap();
+        inner.out_dist
+    }
+}
+
+impl<W: Semiring, B: Borrow<[W]> + PartialEq> DeterminizeStateTable<W, B> {
     /// Looks up integer ID from entry. If it doesn't exist and insert
     pub fn find_id_from_ref(&self, tuple: &DeterminizeStateTuple<W>) -> Result<StateId> {
         let mut inner = self.0.lock().unwrap();
@@ -75,16 +93,5 @@ impl<W: Semiring> DeterminizeStateTable<W> {
         }
 
         Ok(*inner.table.get_by_right(tuple).unwrap())
-    }
-
-    /// Looks up tuple from integer ID.
-    pub fn find_tuple(&self, tuple_id: StateId) -> DeterminizeStateTuple<W> {
-        let inner = self.0.lock().unwrap();
-        inner.table.get_by_left(&tuple_id).unwrap().clone()
-    }
-
-    pub fn out_dist(self) -> Vec<Option<W>> {
-        let inner = self.0.into_inner().unwrap();
-        inner.out_dist
     }
 }

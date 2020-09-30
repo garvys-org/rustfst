@@ -35,7 +35,6 @@
 //! use rustfst::prelude::*;
 //! use rustfst::algorithms::determinize::{DeterminizeType, determinize};
 //! use rustfst::algorithms::rm_epsilon::rm_epsilon;
-//! use std::sync::Arc;
 //!
 //! fn main() -> Result<()> {
 //!     // Creates a empty wFST
@@ -80,7 +79,7 @@
 //!     rm_epsilon(&mut fst)?;
 //!
 //!     // - Compute an equivalent FST but deterministic.
-//!     fst = determinize(Arc::new(fst), DeterminizeType::DeterminizeFunctional)?;
+//!     fst = determinize(&fst, DeterminizeType::DeterminizeFunctional)?;
 //!
 //!     Ok(())
 //! }

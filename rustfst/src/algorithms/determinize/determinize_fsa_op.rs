@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+use std::fmt::Debug;
 use std::collections::{BTreeMap, HashMap};
 use std::collections::btree_map::Entry as EntryBTreeMap;
 use std::collections::hash_map::Entry as EntryHashMap;
@@ -18,18 +20,29 @@ use crate::{Label, Semiring, StateId, Tr, Trs, TrsVec, KDELTA};
 
 
 #[derive(Debug)]
-pub struct DeterminizeFsaOp<W: Semiring, F: Fst<W>, CD: CommonDivisor<W>> {
-    fst: Arc<F>,
-    state_table: DeterminizeStateTable<W>,
-    ghost: PhantomData<CD>,
+pub struct DeterminizeFsaOp<W, F, CD, B, BT>
+where
+    W: Semiring,
+    F: Fst<W>,
+    CD: CommonDivisor<W>,
+    B: Borrow<F> + Debug,
+    BT: Borrow<[W]> + Debug,
+{
+    fst: B,
+    state_table: DeterminizeStateTable<W, BT>,
+    ghost: PhantomData<(CD, F)>,
 }
 
-impl<W, F: Fst<W>, CD: CommonDivisor<W>> FstOp<W> for DeterminizeFsaOp<W, F, CD>
+impl<W, F, CD, B, BT> FstOp<W> for DeterminizeFsaOp<W, F, CD, B, BT>
 where
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
+    F: Fst<W>,
+    CD: CommonDivisor<W>,
+    B: Borrow<F> + Debug,
+    BT: Borrow<[W]> + Debug + PartialEq,
 {
     fn compute_start(&self) -> Result<Option<usize>> {
-        if let Some(start_state) = self.fst.start() {
+        if let Some(start_state) = self.fst.borrow().start() {
             let elt = DeterminizeElement::new(start_state, W::one());
             let tuple = DeterminizeStateTuple {
                 subset: WeightedSubset::from_vec(vec![elt]),
@@ -45,7 +58,7 @@ where
         let mut label_map: BTreeMap<Label, DeterminizeTr<W>> = BTreeMap::new();
         let src_tuple = self.state_table.find_tuple(state);
         for src_elt in src_tuple.subset.iter() {
-            for tr in self.fst.get_trs(src_elt.state)?.trs() {
+            for tr in self.fst.borrow().get_trs(src_elt.state)?.trs() {
                 let r = src_elt.weight.times(&tr.weight)?;
 
                 let dest_elt = DeterminizeElement::new(tr.nextstate, r);
@@ -92,6 +105,7 @@ where
             final_weight.plus_assign(
                 det_elt.weight.times(
                     self.fst
+                        .borrow()
                         .final_weight(det_elt.state)?
                         .unwrap_or_else(W::zero),
                 )?,
@@ -110,12 +124,16 @@ where
     }
 }
 
-impl<W, F: Fst<W>, CD: CommonDivisor<W>> DeterminizeFsaOp<W, F, CD>
+impl<W, F, CD, B, BT> DeterminizeFsaOp<W, F, CD, B, BT>
 where
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
+    F: Fst<W>,
+    CD: CommonDivisor<W>,
+    B: Borrow<F> + Debug,
+    BT: Borrow<[W]> + Debug + PartialEq,
 {
-    pub fn new(fst: Arc<F>, in_dist: Option<Arc<Vec<W>>>) -> Result<Self> {
-        if !fst.properties().contains(FstProperties::ACCEPTOR) {
+    pub fn new(fst: B, in_dist: Option<BT>) -> Result<Self> {
+        if !fst.borrow().properties().contains(FstProperties::ACCEPTOR) {
             bail!("DeterminizeFsaImpl : expected acceptor as argument");
         }
         Ok(Self {
