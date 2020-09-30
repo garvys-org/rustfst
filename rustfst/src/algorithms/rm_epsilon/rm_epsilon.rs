@@ -137,23 +137,16 @@ pub fn rm_epsilon_with_config<W: Semiring, F: MutableFst<W>, Q: Queue>(
         }
     }
 
-    let mut rmeps_state = RmEpsilonState::<_, F, _, _>::new(&*fst, opts);
+    let mut rmeps_state = RmEpsilonState::new(fst.num_states(), opts);
     let zero = W::zero();
 
-    let mut v: Vec<(_, (_, W))> = Vec::with_capacity(states.len());
     for state in states.into_iter().rev() {
-        if !noneps_in[state] {
+        if !noneps_in[state]  && (connect || weight_threshold != W::zero() || state_threshold != None){
             continue;
         }
-        let (trs, final_weight) = rmeps_state.expand(state)?;
+        let (trs, final_weight) = rmeps_state.expand::<F,_>(state, &*fst)?;
 
-        // Copy everything, not great ...
-        v.push((state, (trs, final_weight)));
-    }
-
-    for (state, (trs, final_weight)) in v.into_iter() {
         unsafe {
-            // TODO: Use these trs instead of cloning
             fst.pop_trs_unchecked(state);
             fst.set_trs_unchecked(state, trs.into_iter().rev().collect());
             if final_weight != zero {

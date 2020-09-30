@@ -1,30 +1,28 @@
 use std::borrow::Borrow;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use std::marker::PhantomData;
 
 use anyhow::Result;
 
+use crate::{StateId, Tr, Trs};
+use crate::algorithms::Queue;
 use crate::algorithms::rm_epsilon::{Element, RmEpsilonConfig};
 use crate::algorithms::shortest_distance::ShortestDistanceState;
 use crate::algorithms::tr_filters::{EpsilonTrFilter, TrFilter};
-use crate::algorithms::Queue;
-use crate::fst_traits::MutableFst;
+use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{StateId, Tr, Trs};
 
 #[derive(Clone, Eq)]
-pub struct RmEpsilonState<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> {
+pub struct RmEpsilonState<W: Semiring, Q: Queue> {
     pub visited: Vec<bool>,
     pub visited_states: Vec<StateId>,
     pub element_map: HashMap<Element, (StateId, usize)>,
     pub expand_id: usize,
-    pub sd_state: ShortestDistanceState<W, Q, F, B, EpsilonTrFilter>,
-    pub f: PhantomData<F>,
+    pub sd_state: ShortestDistanceState<W, Q, EpsilonTrFilter>,
 }
 
-impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> std::fmt::Debug
-    for RmEpsilonState<W, F, B, Q>
+impl<W: Semiring, Q: Queue> std::fmt::Debug
+    for RmEpsilonState<W, Q>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "RmEpsilonState {{ visited : {:?}, visited_states : {:?}, element_map : {:?}, expand_id : {:?}, sd_state : {:?} }}",
@@ -32,8 +30,8 @@ impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> std::fmt::Debug
     }
 }
 
-impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue + PartialEq> PartialEq
-    for RmEpsilonState<W, F, B, Q>
+impl<W: Semiring, Q: Queue + PartialEq> PartialEq
+    for RmEpsilonState<W, Q>
 {
     fn eq(&self, other: &Self) -> bool {
         self.visited.eq(&other.visited)
@@ -44,20 +42,19 @@ impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue + PartialEq> PartialE
     }
 }
 
-impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> RmEpsilonState<W, F, B, Q> {
-    pub fn new(fst: B, opts: RmEpsilonConfig<W, Q>) -> Self {
+impl<W: Semiring, Q: Queue> RmEpsilonState<W, Q> {
+    pub fn new(fst_num_states: usize, opts: RmEpsilonConfig<W, Q>) -> Self {
         Self {
-            sd_state: ShortestDistanceState::new_from_config(fst, opts.sd_opts, true),
+            sd_state: ShortestDistanceState::new_from_config(fst_num_states, opts.sd_opts, true),
             visited: vec![],
             visited_states: vec![],
             element_map: HashMap::new(),
             expand_id: 0,
-            f: PhantomData,
         }
     }
 
-    pub fn expand(&mut self, source: StateId) -> Result<(Vec<Tr<W>>, W)> {
-        let distance = self.sd_state.shortest_distance(Some(source))?;
+    pub fn expand<F: ExpandedFst<W>, B: Borrow<F>>(&mut self, source: StateId, fst: B) -> Result<(Vec<Tr<W>>, W)> {
+        let distance = self.sd_state.shortest_distance::<F, _>(Some(source), fst.borrow())?;
 
         let tr_filter = EpsilonTrFilter {};
 
@@ -74,7 +71,7 @@ impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> RmEpsilonState<W, F,
             }
             self.visited[state] = true;
             self.visited_states.push(state);
-            for tr in self.sd_state.fst.borrow().get_trs(state)?.trs() {
+            for tr in fst.borrow().get_trs(state)?.trs() {
                 // TODO: Remove this clone
                 let mut tr = tr.clone();
                 tr.weight = distance[state].times(&tr.weight)?;
@@ -116,8 +113,7 @@ impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>, Q: Queue> RmEpsilonState<W, F,
             }
             final_weight.plus_assign(
                 distance[state].times(
-                    self.sd_state
-                        .fst
+                    fst
                         .borrow()
                         .final_weight(state)?
                         .unwrap_or_else(W::zero),

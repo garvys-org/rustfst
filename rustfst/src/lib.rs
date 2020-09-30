@@ -166,17 +166,20 @@ pub const KDELTA: f32 = 1.0f32 / 1024.0f32;
 /// Module re-exporting most of the objects from this crate.
 pub mod prelude {
     pub use crate::algorithms::tr_compares::*;
+    pub use crate::algorithms::tr_mappers::*;
     pub use crate::algorithms::*;
     pub use crate::fst_impls::*;
     pub use crate::fst_traits::*;
     pub use crate::semirings::*;
     pub use crate::tr::Tr;
+    pub use crate::trs::{Trs, TrsConst, TrsVec};
+    pub use crate::*;
 }
 
 pub mod proptest_fst;
 
-pub(crate) static NO_LABEL: Label = std::usize::MAX;
-pub(crate) static NO_STATE_ID: StateId = std::usize::MAX;
+pub static NO_LABEL: Label = std::usize::MAX;
+pub static NO_STATE_ID: StateId = std::usize::MAX;
 pub(crate) static UNASSIGNED: usize = std::usize::MAX;
 
 pub mod trs;

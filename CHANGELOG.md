@@ -7,10 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+
 - Make `proptest_fst` public
+- Implement `FstOp` for `Deref<FstOp>` and `FstOp2` for `Deref<FstOp2>`
+- Implement `TrMapper<S>` for `Deref<TrMapper<S>>`
+- Expose in `prelude`, top crate constant, traits, structs.
+- Expose in `prelude` `FstProperties`.
+- Expose in `prelude` `tr_mappers`.  
 
 ### Changed
+- Fixed bug in `Determinize`: `HashMap` -> `BTreeMap` for `LabelMap`.
+- `NO_LABEL` and `NO_STATE_ID` are now public. 
+- Fixed bug in `RmEpsilon`: mutation had to be performed while iterating.
 - `QuantizeMapper` has now a configurable delta value with default set to `KDELTA`
+- Replace `FstCache` implementation for `Arc<FstCache>` by the deref trait.
 - `acceptor_minimize` now public. 
 - `from_op_and_cache` is now public for `LazyFst` and `LazyFst2`
 - Change `FstCache` API and added a `CacheStatus` object to better differentiate, computed data and not yet computed.

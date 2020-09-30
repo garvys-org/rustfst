@@ -40,11 +40,8 @@ impl<W: Semiring, Q: Queue, A: TrFilter<W>> ShortestDistanceConfig<W, Q, A> {
 pub struct ShortestDistanceState<
     W: Semiring,
     Q: Queue,
-    F: ExpandedFst<W>,
-    B: Borrow<F>,
     A: TrFilter<W>,
 > {
-    pub fst: B,
     state_queue: Q,
     tr_filter: A,
     first_path: bool,
@@ -55,15 +52,13 @@ pub struct ShortestDistanceState<
     sources: Vec<Option<StateId>>,
     retain: bool,
     source_id: usize,
-    f: PhantomData<F>,
 }
 
-impl<W: Semiring, Q: Queue + PartialEq, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>> PartialEq
-    for ShortestDistanceState<W, Q, F, B, A>
+impl<W: Semiring, Q: Queue + PartialEq, A: TrFilter<W>> PartialEq
+    for ShortestDistanceState<W, Q, A>
 {
     fn eq(&self, other: &Self) -> bool {
-        self.fst.borrow().eq(&other.fst.borrow())
-            && self.state_queue.eq(&other.state_queue)
+        self.state_queue.eq(&other.state_queue)
             && self.tr_filter.eq(&other.tr_filter)
             && self.first_path.eq(&other.first_path)
             && self.enqueued.eq(&other.enqueued)
@@ -76,12 +71,11 @@ impl<W: Semiring, Q: Queue + PartialEq, F: ExpandedFst<W>, B: Borrow<F>, A: TrFi
     }
 }
 
-impl<W: Semiring, Q: Queue, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>> std::fmt::Debug
-    for ShortestDistanceState<W, Q, F, B, A>
+impl<W: Semiring, Q: Queue, A: TrFilter<W>> std::fmt::Debug
+    for ShortestDistanceState<W, Q, A>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "ShortestDistanceState {{ ")?;
-        write!(f, "fst : {:?}, ", self.fst.borrow())?;
         write!(f, "state_queue : {:?}, ", self.state_queue)?;
         write!(f, "tr_filter : {:?}, ", self.tr_filter)?;
         write!(f, "first_path : {:?}, ", self.first_path)?;
@@ -116,28 +110,26 @@ macro_rules! ensure_source_index_is_valid {
     };
 }
 
-impl<W: Semiring, Q: Queue, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>>
-    ShortestDistanceState<W, Q, F, B, A>
+impl<W: Semiring, Q: Queue, A: TrFilter<W>>
+    ShortestDistanceState<W, Q, A>
 {
-    pub fn new(fst: B, state_queue: Q, tr_filter: A, first_path: bool, retain: bool) -> Self {
+    pub fn new(fst_num_states: usize, state_queue: Q, tr_filter: A, first_path: bool, retain: bool) -> Self {
         Self {
             state_queue,
             tr_filter,
             first_path,
-            distance: Vec::with_capacity(fst.borrow().num_states()),
-            enqueued: Vec::with_capacity(fst.borrow().num_states()),
-            adder: Vec::with_capacity(fst.borrow().num_states()),
-            radder: Vec::with_capacity(fst.borrow().num_states()),
-            sources: Vec::with_capacity(fst.borrow().num_states()),
+            distance: Vec::with_capacity(fst_num_states),
+            enqueued: Vec::with_capacity(fst_num_states),
+            adder: Vec::with_capacity(fst_num_states),
+            radder: Vec::with_capacity(fst_num_states),
+            sources: Vec::with_capacity(fst_num_states),
             source_id: 0,
             retain,
-            fst,
-            f: PhantomData,
         }
     }
-    pub fn new_from_config(fst: B, opts: ShortestDistanceConfig<W, Q, A>, retain: bool) -> Self {
+    pub fn new_from_config(fst_num_states: usize, opts: ShortestDistanceConfig<W, Q, A>, retain: bool) -> Self {
         Self::new(
-            fst,
+            fst_num_states,
             opts.state_queue,
             opts.tr_filter,
             opts.first_path,
@@ -160,8 +152,8 @@ impl<W: Semiring, Q: Queue, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>>
         }
     }
 
-    pub fn shortest_distance(&mut self, source: Option<StateId>) -> Result<Vec<W>> {
-        let start_state = match self.fst.borrow().start() {
+    pub fn shortest_distance<F: ExpandedFst<W>, B: Borrow<F>>(&mut self, source: Option<StateId>, fst: B) -> Result<Vec<W>> {
+        let start_state = match fst.borrow().start() {
             Some(start_state) => start_state,
             None => return Ok(vec![]),
         };
@@ -195,13 +187,13 @@ impl<W: Semiring, Q: Queue, F: ExpandedFst<W>, B: Borrow<F>, A: TrFilter<W>>
             let state = self.state_queue.head().unwrap();
             self.state_queue.dequeue();
             //            self.ensure_distance_index_is_valid(state);
-            if self.first_path && self.fst.borrow().is_final(state)? {
+            if self.first_path && fst.borrow().is_final(state)? {
                 break;
             }
             self.enqueued[state] = false;
             let r = self.radder[state].clone();
             self.radder[state] = W::zero();
-            for tr in self.fst.borrow().get_trs(state)?.trs() {
+            for tr in fst.borrow().get_trs(state)?.trs() {
                 let nextstate = tr.nextstate;
                 if !self.tr_filter.keep(tr) {
                     continue;
@@ -248,8 +240,8 @@ pub fn shortest_distance_with_config<W: Semiring, Q: Queue, A: TrFilter<W>, F: E
     opts: ShortestDistanceConfig<W, Q, A>,
 ) -> Result<Vec<W>> {
     let source = opts.source;
-    let mut sd_state = ShortestDistanceState::<_, _, F, _, _>::new_from_config(fst, opts, false);
-    sd_state.shortest_distance(source)
+    let mut sd_state = ShortestDistanceState::<_, _, _>::new_from_config(fst.num_states(), opts, false);
+    sd_state.shortest_distance::<F, _>(source, fst)
 }
 
 /// This operation computes the shortest distance from the initial state to every state.
