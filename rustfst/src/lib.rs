@@ -176,7 +176,7 @@ pub mod prelude {
     pub use crate::*;
 }
 
-mod proptest_fst;
+pub mod proptest_fst;
 
 pub static NO_LABEL: Label = std::usize::MAX;
 pub static NO_STATE_ID: StateId = std::usize::MAX;
