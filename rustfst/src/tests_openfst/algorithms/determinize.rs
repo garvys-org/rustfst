@@ -65,7 +65,9 @@ where
         match (&determinize_data.result, fst_res) {
             (Ok(fst_expected), Ok(ref fst_determinized)) => {
                 if determinize_data.det_type == DeterminizeType::DeterminizeFunctional {
-                    assert!(fst_determinized
+                    let mut fst = fst_determinized.clone();
+                    fst.compute_and_update_properties_all()?;
+                    assert!(fst
                         .properties()
                         .contains(FstProperties::I_DETERMINISTIC));
                 }

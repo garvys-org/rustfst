@@ -8,13 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Make `proptest_fst` public
 - Implement `FstOp` for `Deref<FstOp>` and `FstOp2` for `Deref<FstOp2>`
 - Implement `TrMapper<S>` for `Deref<TrMapper<S>>`
+- Expose in `prelude`, top crate constant, traits, structs.
+- Expose in `prelude` `FstProperties`.
+- Expose in `prelude` `tr_mappers`.  
 
 ### Changed
 
 - Lazy implementation of the determinize algorithm has been generalized to use the `Borrow` trait instead of the `Arc` object.
 - `determinize` now requires a `&Fst` instead of an `Arc`.
+- Fixed bug in `Determinize`: `HashMap` -> `BTreeMap` for `LabelMap`.
+- `NO_LABEL` and `NO_STATE_ID` are now public. 
+- Fixed bug in `RmEpsilon`: mutation had to be performed while iterating.
 - `QuantizeMapper` has now a configurable delta value with default set to `KDELTA`
 - Replace `FstCache` implementation for `Arc<FstCache>` by the deref trait.
 - `acceptor_minimize` now public. 

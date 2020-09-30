@@ -1,7 +1,8 @@
 use std::borrow::Borrow;
-use std::collections::hash_map::Entry;
-use std::collections::HashMap;
 use std::fmt::Debug;
+use std::collections::{BTreeMap, HashMap};
+use std::collections::btree_map::Entry as EntryBTreeMap;
+use std::collections::hash_map::Entry as EntryHashMap;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
@@ -16,6 +17,7 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
 use crate::semirings::{DivideType, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::{Label, Semiring, StateId, Tr, Trs, TrsVec, KDELTA};
+
 
 #[derive(Debug)]
 pub struct DeterminizeFsaOp<W, F, CD, B, BT>
@@ -53,7 +55,7 @@ where
 
     fn compute_trs(&self, state: usize) -> Result<TrsVec<W>> {
         // GetLabelMap
-        let mut label_map: HashMap<Label, DeterminizeTr<W>> = HashMap::new();
+        let mut label_map: BTreeMap<Label, DeterminizeTr<W>> = BTreeMap::new();
         let src_tuple = self.state_table.find_tuple(state);
         for src_elt in src_tuple.subset.iter() {
             for tr in self.fst.borrow().get_trs(src_elt.state)?.trs() {
@@ -63,8 +65,8 @@ where
 
                 // Filter Tr
                 match label_map.entry(tr.ilabel) {
-                    Entry::Occupied(_) => {}
-                    Entry::Vacant(e) => {
+                    EntryBTreeMap::Occupied(_) => {}
+                    EntryBTreeMap::Vacant(e) => {
                         e.insert(DeterminizeTr::from_tr(tr, 0));
                     }
                 };
@@ -78,7 +80,6 @@ where
                     .push(dest_elt);
             }
         }
-        drop(src_tuple);
 
         for det_tr in label_map.values_mut() {
             self.norm_tr(det_tr)?;
@@ -156,10 +157,10 @@ where
         let mut new_pairs = HashMap::new();
         for x in &mut det_tr.dest_tuple.subset.pairs {
             match new_pairs.entry(x.state) {
-                Entry::Vacant(e) => {
+                EntryHashMap::Vacant(e) => {
                     e.insert(x.clone());
                 }
-                Entry::Occupied(mut e) => {
+                EntryHashMap::Occupied(mut e) => {
                     e.get_mut().weight.plus_assign(&x.weight)?;
                 }
             };
