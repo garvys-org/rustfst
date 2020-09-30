@@ -843,4 +843,4 @@ test_fst!(test_openfst_fst_013, "fst_013");
 test_fst!(test_openfst_fst_014, "fst_014");
 test_fst!(test_openfst_fst_015, "fst_015");
 test_fst!(test_openfst_fst_016, "fst_016");
-// test_fst!(test_openfst_fst_017, "fst_017");
+test_fst!(test_openfst_fst_017, "fst_017");
