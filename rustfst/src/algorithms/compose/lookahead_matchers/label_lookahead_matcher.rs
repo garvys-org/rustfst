@@ -8,7 +8,7 @@ use crate::algorithms::compose::lookahead_matchers::{
 };
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::algorithms::compose::{LabelReachable, LabelReachableData};
-use crate::fst_traits::ExpandedFst;
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{Tr, Trs, EPS_LABEL};
 
@@ -108,7 +108,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         })
     }
 
-    fn create_data<F: ExpandedFst<W>>(
+    fn create_data<F: Fst<W>>(
         fst: &F,
         match_type: MatchType,
     ) -> Result<Option<Self::MatcherData>> {
@@ -122,7 +122,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         }
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W>>(&mut self, lfst: &Arc<LF>) -> Result<()> {
+    fn init_lookahead_fst<LF: Fst<W>>(&mut self, lfst: &Arc<LF>) -> Result<()> {
         let reach_input = self.match_type(false)? == MatchType::MatchOutput;
         if let Some(reachable) = &mut self.reachable {
             reachable.reach_init(lfst, reach_input)?;
@@ -130,7 +130,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         Ok(())
     }
 
-    fn lookahead_fst<LF: ExpandedFst<W>>(
+    fn lookahead_fst<LF: Fst<W>>(
         &self,
         matcher_state: usize,
         lfst: &Arc<LF>,

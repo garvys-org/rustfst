@@ -15,7 +15,7 @@ use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, Looka
 use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::ExpandedFst;
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{Tr, EPS_LABEL};
 
@@ -60,8 +60,8 @@ impl<W, F1, F2, M1, M2, CF, CFB, SMT> ComposeFilterBuilder<W>
     for LookAheadComposeFilterBuilder<W, CFB, SMT>
 where
     W: Semiring,
-    F1: ExpandedFst<W>,
-    F2: ExpandedFst<W>,
+    F1: Fst<W>,
+    F2: Fst<W>,
     M1: Matcher<W, F = F1> + LookaheadMatcher<W>,
     M2: Matcher<W, F = F2> + LookaheadMatcher<W>,
     CF: ComposeFilter<W, M1 = M1, M2 = M2> + LookAheadComposeFilterTrait<W>,

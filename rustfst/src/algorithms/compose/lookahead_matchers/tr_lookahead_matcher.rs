@@ -8,7 +8,7 @@ use crate::algorithms::compose::lookahead_matchers::{
     LookAheadMatcherData, LookaheadMatcher, MatcherFlagsTrait,
 };
 use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst};
+use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL};
 
@@ -81,14 +81,14 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
         Self::new(fst, match_type)
     }
 
-    fn create_data<F: ExpandedFst<W>>(
+    fn create_data<F: Fst<W>>(
         _fst: &F,
         _match_type: MatchType,
     ) -> Result<Option<Self::MatcherData>> {
         Ok(None)
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
+    fn init_lookahead_fst<LF: Fst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
         Ok(())
     }
 
