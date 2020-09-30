@@ -20,8 +20,10 @@ where
     // Remove epsilon
     let mut fst_rmepsilon = test_data.raw.clone();
     rm_epsilon(&mut fst_rmepsilon)?;
+    std::dbg!(fst_rmepsilon.properties());
+    std::dbg!(test_data.rmepsilon.result_static.properties());
     assert!(fst_rmepsilon
-        .properties()
+        .properties_check(FstProperties::NO_EPSILONS)?
         .contains(FstProperties::NO_EPSILONS));
     test_eq_fst(
         &test_data.rmepsilon.result_static,
