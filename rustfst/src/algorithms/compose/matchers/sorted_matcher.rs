@@ -7,18 +7,18 @@ use superslice::Ext;
 use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
 use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, ExpandedFst};
+use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL};
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct SortedMatcher<W: Semiring, F: ExpandedFst<W>> {
+pub struct SortedMatcher<W: Semiring, F: Fst<W>> {
     fst: Arc<F>,
     match_type: MatchType,
     w: PhantomData<W>,
 }
 
-impl<W: Semiring, F: ExpandedFst<W>> Matcher<W> for SortedMatcher<W, F> {
+impl<W: Semiring, F: Fst<W> + Clone> Matcher<W> for SortedMatcher<W, F> {
     type F = F;
     type Iter = IteratorSortedMatcher<W, F::TRS>;
 
@@ -173,7 +173,7 @@ impl<W: Semiring, T: Trs<W>> Iterator for IteratorSortedMatcher<W, T> {
     }
 }
 
-impl<W: Semiring, F: ExpandedFst<W>> LookaheadMatcher<W> for SortedMatcher<W, F> {
+impl<W: Semiring, F: Fst<W> + Clone> LookaheadMatcher<W> for SortedMatcher<W, F> {
     type MatcherData = ();
 
     fn data(&self) -> Option<&Arc<Self::MatcherData>> {
@@ -191,18 +191,18 @@ impl<W: Semiring, F: ExpandedFst<W>> LookaheadMatcher<W> for SortedMatcher<W, F>
         unreachable!()
     }
 
-    fn create_data<G: ExpandedFst<W>>(
+    fn create_data<G: Fst<W>>(
         _fst: &G,
         _match_type: MatchType,
     ) -> Result<Option<Self::MatcherData>> {
         unreachable!()
     }
 
-    fn init_lookahead_fst<LF: ExpandedFst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
+    fn init_lookahead_fst<LF: Fst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
         unreachable!()
     }
 
-    fn lookahead_fst<LF: ExpandedFst<W>>(
+    fn lookahead_fst<LF: Fst<W>>(
         &self,
         _matcher_state: usize,
         _lfst: &Arc<LF>,

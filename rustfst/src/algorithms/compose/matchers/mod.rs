@@ -7,7 +7,7 @@ pub use generic_matcher::GenericMatcher;
 pub use multi_eps_matcher::{MultiEpsMatcher, MultiEpsMatcherFlags};
 pub use sorted_matcher::SortedMatcher;
 
-use crate::fst_traits::ExpandedFst;
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{Label, StateId};
 use crate::{Tr, EPS_LABEL, NO_LABEL};
@@ -97,7 +97,7 @@ pub fn eps_loop<W: Semiring>(state: StateId, match_type: MatchType) -> Result<Tr
 /// More generally, they may implement matching special labels that represent
 /// sets of labels such as sigma (all), rho (rest), or phi (fail).
 pub trait Matcher<W: Semiring>: Debug + Clone {
-    type F: ExpandedFst<W>;
+    type F: Fst<W> + Clone;
 
     type Iter: Iterator<Item = IterItemMatcher<W>> + Clone;
 
