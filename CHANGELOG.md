@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Make `ComposeFst` clonable if all the elements that compose it are clonable.
 - The `Matcher` object now has a trait bound on an `Fst` instead of on an `ExpandedFst` allowing composing lazy fsts.
 - Lazy implementation of the determinize algorithm has been generalized to use the `Borrow` trait instead of the `Arc` object.
 - `determinize` now requires a `&Fst` instead of an `Arc`.

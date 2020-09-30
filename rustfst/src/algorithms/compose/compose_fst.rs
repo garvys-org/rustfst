@@ -19,6 +19,14 @@ pub struct ComposeFst<W: Semiring, CFB: ComposeFilterBuilder<W>, Cache = SimpleV
     LazyFst<W, ComposeFstOp<W, CFB>, Cache>,
 );
 
+impl<W: Semiring + Clone, CFB: ComposeFilterBuilder<W> + Clone, Cache: FstCache<W> + Clone> Clone for ComposeFst<W, CFB, Cache>
+where CFB::CF: Clone
+{
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
+
 fn create_base<W: Semiring, F1: Fst<W>, F2: Fst<W>>(
     fst1: Arc<F1>,
     fst2: Arc<F2>,
@@ -218,6 +226,21 @@ mod test {
     fn test_compose_fst_sync() {
         fn is_sync<T: Sync>() {}
         is_sync::<
+            ComposeFst<
+                TropicalWeight,
+                SequenceComposeFilterBuilder<
+                    _,
+                    SortedMatcher<_, VectorFst<_>>,
+                    SortedMatcher<_, VectorFst<_>>,
+                >,
+            >,
+        >();
+    }
+
+    #[test]
+    fn test_compose_fst_clonable() {
+        fn is_clone<T: Clone>() {}
+        is_clone::<
             ComposeFst<
                 TropicalWeight,
                 SequenceComposeFilterBuilder<

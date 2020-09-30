@@ -191,6 +191,10 @@ where
         compose_options,
     )?;
 
+    // Check clonability
+    fn is_clone<T: Clone>(_v: &T) {}
+    is_clone(&dyn_fst);
+
     let static_fst: VectorFst<_> = dyn_fst.compute()?;
 
     test_eq_fst(
