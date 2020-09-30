@@ -14,12 +14,12 @@ use crate::semirings::Semiring;
 use crate::{SymbolTable, TrsVec};
 use std::sync::Arc;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct ComposeFst<W: Semiring, CFB: ComposeFilterBuilder<W>, Cache = SimpleVecCache<W>>(
     LazyFst<W, ComposeFstOp<W, CFB>, Cache>,
 );
 
-fn create_base<W: Semiring, F1: Fst<W> + Clone, F2: Fst<W> + Clone>(
+fn create_base<W: Semiring, F1: Fst<W>, F2: Fst<W>>(
     fst1: Arc<F1>,
     fst2: Arc<F2>,
 ) -> Result<
@@ -88,7 +88,7 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>, Cache: FstCache<W>> ComposeFst<W
     }
 }
 
-impl<W: Semiring, F1: Fst<W> + Clone, F2: Fst<W> + Clone>
+impl<W: Semiring, F1: Fst<W>, F2: Fst<W>>
     ComposeFst<W, SequenceComposeFilterBuilder<W, GenericMatcher<W, F1>, GenericMatcher<W, F2>>>
 {
     pub fn new_auto(fst1: Arc<F1>, fst2: Arc<F2>) -> Result<Self> {

@@ -96,10 +96,10 @@ pub fn eps_loop<W: Semiring>(state: StateId, match_type: MatchType) -> Result<Tr
 /// simplest form, these are just some associative map or search keyed on labels.
 /// More generally, they may implement matching special labels that represent
 /// sets of labels such as sigma (all), rho (rest), or phi (fail).
-pub trait Matcher<W: Semiring>: Debug + Clone {
-    type F: Fst<W> + Clone;
+pub trait Matcher<W: Semiring>: Debug {
+    type F: Fst<W>;
 
-    type Iter: Iterator<Item = IterItemMatcher<W>> + Clone;
+    type Iter: Iterator<Item = IterItemMatcher<W>>;
 
     fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self>
     where

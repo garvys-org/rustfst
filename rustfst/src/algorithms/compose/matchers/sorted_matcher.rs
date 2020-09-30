@@ -18,7 +18,7 @@ pub struct SortedMatcher<W: Semiring, F: Fst<W>> {
     w: PhantomData<W>,
 }
 
-impl<W: Semiring, F: Fst<W> + Clone> Matcher<W> for SortedMatcher<W, F> {
+impl<W: Semiring, F: Fst<W>> Matcher<W> for SortedMatcher<W, F> {
     type F = F;
     type Iter = IteratorSortedMatcher<W, F::TRS>;
 
@@ -173,7 +173,7 @@ impl<W: Semiring, T: Trs<W>> Iterator for IteratorSortedMatcher<W, T> {
     }
 }
 
-impl<W: Semiring, F: Fst<W> + Clone> LookaheadMatcher<W> for SortedMatcher<W, F> {
+impl<W: Semiring, F: Fst<W>> LookaheadMatcher<W> for SortedMatcher<W, F> {
     type MatcherData = ();
 
     fn data(&self) -> Option<&Arc<Self::MatcherData>> {

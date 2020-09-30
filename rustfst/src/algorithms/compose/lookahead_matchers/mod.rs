@@ -82,7 +82,7 @@ pub trait LookaheadMatcher<W: Semiring>: Matcher<W> {
         match_type: MatchType,
     ) -> Result<Option<Self::MatcherData>>;
 
-    fn init_lookahead_fst<LF: Fst<W> + Clone>(&mut self, lfst: &Arc<LF>) -> Result<()>;
+    fn init_lookahead_fst<LF: Fst<W>>(&mut self, lfst: &Arc<LF>) -> Result<()>;
     // Are there paths from a state in the lookahead FST that can be read from
     // the curent matcher state?
 

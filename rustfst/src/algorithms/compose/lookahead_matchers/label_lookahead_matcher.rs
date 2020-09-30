@@ -122,7 +122,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         }
     }
 
-    fn init_lookahead_fst<LF: Fst<W> + Clone>(&mut self, lfst: &Arc<LF>) -> Result<()> {
+    fn init_lookahead_fst<LF: Fst<W>>(&mut self, lfst: &Arc<LF>) -> Result<()> {
         let reach_input = self.match_type(false)? == MatchType::MatchOutput;
         if let Some(reachable) = &mut self.reachable {
             reachable.reach_init(lfst, reach_input)?;
