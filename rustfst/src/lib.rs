@@ -172,14 +172,14 @@ pub mod prelude {
     pub use crate::fst_traits::*;
     pub use crate::semirings::*;
     pub use crate::tr::Tr;
-    pub use crate::trs::{ TrsVec, Trs, TrsConst };
+    pub use crate::trs::{Trs, TrsConst, TrsVec};
     pub use crate::*;
 }
 
 mod proptest_fst;
 
-pub(crate) static NO_LABEL: Label = std::usize::MAX;
-pub(crate) static NO_STATE_ID: StateId = std::usize::MAX;
+pub static NO_LABEL: Label = std::usize::MAX;
+pub static NO_STATE_ID: StateId = std::usize::MAX;
 pub(crate) static UNASSIGNED: usize = std::usize::MAX;
 
 pub mod trs;
