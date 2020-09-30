@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement `TrMapper<S>` for `Deref<TrMapper<S>>`
 
 ### Changed
+
+- Lazy implementation of the determinize algorithm has been generalized to use the `Borrow` trait instead of the `Arc` object.
+- `determinize` now requires a `&Fst` instead of an `Arc`.
 - `QuantizeMapper` has now a configurable delta value with default set to `KDELTA`
 - Replace `FstCache` implementation for `Arc<FstCache>` by the deref trait.
 - `acceptor_minimize` now public. 
