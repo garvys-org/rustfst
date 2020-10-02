@@ -5,7 +5,9 @@ use anyhow::Result;
 use superslice::Ext;
 
 use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
-use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
+use crate::algorithms::compose::matchers::{
+    IterItemMatcher, MatchType, Matcher, MatcherFlags, MatcherIterator,
+};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
@@ -13,26 +15,23 @@ use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SortedMatcher<W: Semiring, F: Fst<W>> {
-    fst: Arc<F>,
     match_type: MatchType,
-    w: PhantomData<W>,
+    w: PhantomData<(W, F)>,
 }
 
 impl<W: Semiring, F: Fst<W>> Matcher<W> for SortedMatcher<W, F> {
-    type F = F;
     type Iter = IteratorSortedMatcher<W, F::TRS>;
 
-    fn new(fst: Arc<F>, match_type: MatchType) -> Result<Self> {
+    fn new(fst: &impl Fst<W>, match_type: MatchType) -> Result<Self> {
         Ok(Self {
-            fst,
             match_type,
             w: PhantomData,
         })
     }
 
-    fn iter(&self, state: usize, label: usize) -> Result<Self::Iter> {
+    fn iter(&self, fst: &impl Fst<W>, state: usize, label: usize) -> Result<Self::Iter> {
         Ok(IteratorSortedMatcher::new(
-            self.fst.get_trs(state)?,
+            fst.get_trs(state)?,
             label,
             self.match_type,
         ))
@@ -79,10 +78,6 @@ impl<W: Semiring, F: Fst<W>> Matcher<W> for SortedMatcher<W, F> {
 
     fn priority(&self, state: StateId) -> Result<usize> {
         self.fst.num_trs(state)
-    }
-
-    fn fst(&self) -> &Arc<Self::F> {
-        &self.fst
     }
 }
 
@@ -152,7 +147,7 @@ impl<W: Semiring, T: Trs<W>> IteratorSortedMatcher<W, T> {
     }
 }
 
-impl<W: Semiring, T: Trs<W>> Iterator for IteratorSortedMatcher<W, T> {
+impl<W: Semiring, T: Trs<W>> MatcherIterator<W> for IteratorSortedMatcher<W, T> {
     type Item = IterItemMatcher<W>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -181,7 +176,7 @@ impl<W: Semiring, F: Fst<W>> LookaheadMatcher<W> for SortedMatcher<W, F> {
     }
 
     fn new_with_data(
-        _fst: Arc<Self::F>,
+        _fst: impl Fst<W>,
         _match_type: MatchType,
         _data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self>

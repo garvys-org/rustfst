@@ -15,40 +15,37 @@ use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL};
 #[derive(Debug, Clone)]
 pub struct TrLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
     // matcher fst
-    fst: Arc<M::F>,
     matcher: M,
     // Flags to customize the behaviour
-    mft: PhantomData<MFT>,
+    mft: PhantomData<(W, MFT)>,
 }
 
 impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
     for TrLookAheadMatcher<W, M, MFT>
 {
-    type F = M::F;
     type Iter = M::Iter;
 
-    fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self> {
+    fn new(fst: &impl Fst<W>, match_type: MatchType) -> Result<Self> {
         Ok(Self {
-            fst: Arc::clone(&fst),
             matcher: M::new(fst, match_type)?,
             mft: PhantomData,
         })
     }
 
-    fn iter(&self, state: usize, label: usize) -> Result<Self::Iter> {
-        self.matcher.iter(state, label)
+    fn iter(&self, fst: &impl Fst<W>, state: usize, label: usize) -> Result<Self::Iter> {
+        self.matcher.iter(fst, state, label)
     }
 
-    fn final_weight(&self, state: usize) -> Result<Option<W>> {
-        self.matcher.final_weight(state)
+    fn final_weight(&self, fst: &impl Fst<W>, state: usize) -> Result<Option<W>> {
+        self.matcher.final_weight(fst, state)
     }
 
-    fn match_type(&self, test: bool) -> Result<MatchType> {
-        self.matcher.match_type(test)
+    fn match_type(&self, fst: &impl Fst<W>, test: bool) -> Result<MatchType> {
+        self.matcher.match_type(fst, test)
     }
 
-    fn flags(&self) -> MatcherFlags {
-        self.matcher.flags()
+    fn flags(&self, fst: &impl Fst<W>) -> MatcherFlags {
+        self.matcher.flags(fst)
             | MatcherFlags::INPUT_LOOKAHEAD_MATCHER
             | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER
             | MFT::flags()
@@ -56,10 +53,6 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
 
     fn priority(&self, state: usize) -> Result<usize> {
         self.matcher.priority(state)
-    }
-
-    fn fst(&self) -> &Arc<Self::F> {
-        &self.fst
     }
 }
 
@@ -74,28 +67,31 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
     }
 
     fn new_with_data(
-        fst: Arc<Self::F>,
+        self_fst: &impl Fst<W>,
+        fst: &impl Fst<W>,
         match_type: MatchType,
         _data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self> {
         Self::new(fst, match_type)
     }
 
-    fn create_data<F: Fst<W>>(
-        _fst: &F,
+    fn create_data(
+        _fst2: &impl Fst<W>,
+        _fst: &impl Fst<W>,
         _match_type: MatchType,
     ) -> Result<Option<Self::MatcherData>> {
         Ok(None)
     }
 
-    fn init_lookahead_fst<LF: Fst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
+    fn init_lookahead_fst(&mut self, self_fst: &impl Fst<W>, lfst: &impl Fst<W>) -> Result<()> {
         Ok(())
     }
 
-    fn lookahead_fst<LF: Fst<W>>(
+    fn lookahead_fst(
         &self,
+        self_fst: &impl Fst<W>,
         matcher_state: StateId,
-        lfst: &Arc<LF>,
+        lfst: &impl Fst<W>,
         lfst_state: StateId,
     ) -> Result<Option<LookAheadMatcherData<W>>> {
         let mut result = false;
@@ -107,7 +103,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
         if MFT::flags().contains(MatcherFlags::LOOKAHEAD_PREFIX) {
             la_matcher_data.clear_lookahead_prefix();
         }
-        if self.fst.is_final(matcher_state)? && lfst.is_final(lfst_state)? {
+        if self_fst.is_final(matcher_state)? && lfst.is_final(lfst_state)? {
             if !MFT::flags()
                 .contains(MatcherFlags::LOOKAHEAD_WEIGHT | MatcherFlags::LOOKAHEAD_PREFIX)
             {
@@ -116,10 +112,8 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
             nprefix += 1;
             if MFT::flags().contains(MatcherFlags::LOOKAHEAD_WEIGHT) {
                 unsafe {
-                    let fw_matcher_state = self
-                        .fst
-                        .final_weight_unchecked(matcher_state)
-                        .unsafe_unwrap();
+                    let fw_matcher_state =
+                        self_fst.final_weight_unchecked(matcher_state).unsafe_unwrap();
                     let fw_lfst_state = lfst.final_weight_unchecked(lfst_state).unsafe_unwrap();
                     la_matcher_data
                         .lookahead_weight
@@ -129,7 +123,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
             result = true;
         }
         {
-            let mut iter = self.iter(matcher_state, NO_LABEL)?.peekable();
+            let mut iter = self.iter(self_fst, matcher_state, NO_LABEL)?.peekable();
             if iter.peek().is_some() {
                 if !MFT::flags()
                     .contains(MatcherFlags::LOOKAHEAD_WEIGHT | MatcherFlags::LOOKAHEAD_PREFIX)
@@ -153,7 +147,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
             }
         }
 
-        let match_type = self.match_type(false)?;
+        let match_type = self.match_type(self_fst, false)?;
         for tr in lfst.get_trs(lfst_state)?.trs() {
             let label = match match_type {
                 MatchType::MatchInput => tr.olabel,
@@ -174,7 +168,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
                 }
                 result = true;
             } else {
-                let mut iter = self.iter(matcher_state, label)?.peekable();
+                let mut iter = self.iter(self_fst, matcher_state, label)?.peekable();
                 if iter.peek().is_some() {
                     if !MFT::flags()
                         .contains(MatcherFlags::LOOKAHEAD_WEIGHT | MatcherFlags::LOOKAHEAD_PREFIX)
@@ -217,12 +211,17 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
         }
     }
 
-    fn lookahead_label(&self, state: StateId, label: Label) -> Result<bool> {
-        let mut it = self.matcher.iter(state, label)?;
+    fn lookahead_label(&self, fst: &impl Fst<W>, state: StateId, label: Label) -> Result<bool> {
+        let mut it = self.matcher.iter(fst, state, label)?;
         Ok(it.next().is_some())
     }
 
-    fn lookahead_prefix(&self, tr: &mut Tr<W>, la_matcher_data: &LookAheadMatcherData<W>) -> bool {
+    fn lookahead_prefix(
+        &self,
+        fst: &impl Fst<W>,
+        tr: &mut Tr<W>,
+        la_matcher_data: &LookAheadMatcherData<W>,
+    ) -> bool {
         la_matcher_data.default_lookahead_prefix(tr)
     }
 }

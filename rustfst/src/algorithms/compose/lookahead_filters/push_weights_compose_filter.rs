@@ -11,7 +11,7 @@ use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, Looka
 use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::ExpandedFst;
+use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::{Tr, KDELTA};
 
@@ -40,14 +40,12 @@ where
     smt: PhantomData<SMT>,
 }
 
-impl<W, F1, F2, M1, M2, CF, CFB, SMT> ComposeFilterBuilder<W>
+impl<W, M1, M2, CF, CFB, SMT> ComposeFilterBuilder<W>
     for PushWeightsComposeFilterBuilder<W, CFB, SMT>
 where
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
-    F1: ExpandedFst<W>,
-    F2: ExpandedFst<W>,
-    M1: Matcher<W, F = F1> + LookaheadMatcher<W>,
-    M2: Matcher<W, F = F2> + LookaheadMatcher<W>,
+    M1: Matcher<W> + LookaheadMatcher<W>,
+    M2: Matcher<W> + LookaheadMatcher<W>,
     CF: ComposeFilter<W, M1 = M1, M2 = M2> + LookAheadComposeFilterTrait<W>,
     CFB: ComposeFilterBuilder<W, M1 = M1, M2 = M2, CF = CF>,
     SMT: MatchTypeTrait,
@@ -57,8 +55,8 @@ where
     type M2 = M2;
 
     fn new(
-        fst1: Arc<<<Self::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
-        fst2: Arc<<<Self::CF as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
+        fst1: &impl Fst<W>,
+        fst2: &impl Fst<W>,
         matcher1: Option<Self::M1>,
         matcher2: Option<Self::M2>,
     ) -> Result<Self>
@@ -72,9 +70,9 @@ where
         })
     }
 
-    fn build(&self) -> Result<Self::CF> {
+    fn build(&self, fst1: &impl Fst<W>, fst2: &impl Fst<W>) -> Result<Self::CF> {
         Ok(PushWeightsComposeFilter::<W, CFB::CF, SMT> {
-            filter: self.filter_builder.build()?,
+            filter: self.filter_builder.build(fst1, fst2)?,
             fs: FilterState::new_no_state(),
             smt: PhantomData,
         })
@@ -94,17 +92,34 @@ where
     type M2 = CF::M2;
     type FS = PairFilterState<CF::FS, WeightFilterState<W>>;
 
-    fn start(&self) -> Self::FS {
-        Self::FS::new((self.filter.start(), WeightFilterState::new(W::one())))
+    fn start(&self, fst1: &impl Fst<W>, fst2: &impl Fst<W>) -> Self::FS {
+        Self::FS::new((
+            self.filter.start(fst1, fst2),
+            WeightFilterState::new(W::one()),
+        ))
     }
 
-    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Result<()> {
+    fn set_state(
+        &mut self,
+        fst1: &impl Fst<W>,
+        fst2: &impl Fst<W>,
+        s1: usize,
+        s2: usize,
+        filter_state: &Self::FS,
+    ) -> Result<()> {
         self.fs = filter_state.clone();
-        self.filter.set_state(s1, s2, filter_state.state1())
+        self.filter
+            .set_state(fst1, fst2, s1, s2, filter_state.state1())
     }
 
-    fn filter_tr(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
-        let fs1 = self.filter.filter_tr(arc1, arc2)?;
+    fn filter_tr(
+        &mut self,
+        fst1: &impl Fst<W>,
+        fst2: &impl Fst<W>,
+        arc1: &mut Tr<W>,
+        arc2: &mut Tr<W>,
+    ) -> Result<Self::FS> {
+        let fs1 = self.filter.filter_tr(fst1, fst2, arc1, arc2)?;
         // TODO: Find a way to avoid this unwrap. Should be safe as LaMatcherData has been computed above.
         if fs1 == CF::FS::new_no_state() {
             return Ok(FilterState::new_no_state());
@@ -137,8 +152,14 @@ where
         )))
     }
 
-    fn filter_final(&self, w1: &mut W, w2: &mut W) -> Result<()> {
-        self.filter.filter_final(w1, w2)?;
+    fn filter_final(
+        &self,
+        fst1: &impl Fst<W>,
+        fst2: &impl Fst<W>,
+        w1: &mut W,
+        w2: &mut W,
+    ) -> Result<()> {
+        self.filter.filter_final(fst1, fst2, w1, w2)?;
         if !self
             .lookahead_flags()
             .contains(MatcherFlags::LOOKAHEAD_WEIGHT)

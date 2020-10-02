@@ -269,7 +269,7 @@ impl LabelReachable {
 
     pub fn reach_init<W: Semiring, F: Fst<W>>(
         &mut self,
-        fst: &Arc<F>,
+        fst: &F,
         reach_input: bool,
     ) -> Result<()> {
         self.reach_fst_input = reach_input;

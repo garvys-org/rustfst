@@ -56,14 +56,11 @@ where
     selector: Selector,
 }
 
-impl<W, F1, F2, M1, M2, CF, CFB, SMT> ComposeFilterBuilder<W>
-    for LookAheadComposeFilterBuilder<W, CFB, SMT>
+impl<W, M1, M2, CF, CFB, SMT> ComposeFilterBuilder<W> for LookAheadComposeFilterBuilder<W, CFB, SMT>
 where
     W: Semiring,
-    F1: Fst<W>,
-    F2: Fst<W>,
-    M1: Matcher<W, F = F1> + LookaheadMatcher<W>,
-    M2: Matcher<W, F = F2> + LookaheadMatcher<W>,
+    M1: Matcher<W> + LookaheadMatcher<W>,
+    M2: Matcher<W> + LookaheadMatcher<W>,
     CF: ComposeFilter<W, M1 = M1, M2 = M2> + LookAheadComposeFilterTrait<W>,
     CFB: ComposeFilterBuilder<W, M1 = M1, M2 = M2, CF = CF>,
     SMT: MatchTypeTrait,
@@ -73,18 +70,18 @@ where
     type M2 = M2;
 
     fn new(
-        fst1: Arc<<<Self::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
-        fst2: Arc<<<Self::CF as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
+        fst1: &impl Fst<W>,
+        fst2: &impl Fst<W>,
         matcher1: Option<Self::M1>,
         matcher2: Option<Self::M2>,
     ) -> Result<Self>
     where
         Self: Sized,
     {
-        let mut matcher1 = matcher1
-            .unwrap_or_else(|| Matcher::new(Arc::clone(&fst1), MatchType::MatchOutput).unwrap());
-        let mut matcher2 = matcher2
-            .unwrap_or_else(|| Matcher::new(Arc::clone(&fst2), MatchType::MatchInput).unwrap());
+        let mut matcher1 =
+            matcher1.unwrap_or_else(|| Matcher::new(fst1, MatchType::MatchOutput).unwrap());
+        let mut matcher2 =
+            matcher2.unwrap_or_else(|| Matcher::new(fst2, MatchType::MatchInput).unwrap());
 
         let lookahead_type = if SMT::match_type() == MatchType::MatchBoth {
             lookahead_match_type(&matcher1, &matcher2)?
@@ -93,9 +90,9 @@ where
         };
 
         let flags = if lookahead_type == MatchType::MatchOutput {
-            matcher1.flags()
+            matcher1.flags(fst1)
         } else {
-            matcher2.flags()
+            matcher2.flags(fst2)
         };
 
         if lookahead_type == MatchType::MatchNone {
@@ -109,10 +106,10 @@ where
 
         match selector {
             Selector::Fst1Matcher2 => {
-                matcher2.init_lookahead_fst(&fst1)?;
+                matcher2.init_lookahead_fst(fst1)?;
             }
             Selector::Fst2Matcher1 => {
-                matcher1.init_lookahead_fst(&fst2)?;
+                matcher1.init_lookahead_fst(fst2)?;
             }
         };
 
@@ -126,8 +123,8 @@ where
         })
     }
 
-    fn build(&self) -> Result<Self::CF> {
-        let filter = self.filter_builder.build()?;
+    fn build(&self, fst1: &impl Fst<W>, fst2: &impl Fst<W>) -> Result<Self::CF> {
+        let filter = self.filter_builder.build(fst1, fst2)?;
 
         Ok(LookAheadComposeFilter::<W, CFB::CF, SMT> {
             lookahead_type: self.lookahead_type,
@@ -150,6 +147,8 @@ where
 {
     fn lookahead_filter_tr(
         &mut self,
+        fst1: &impl Fst<W>,
+        fst2: &impl Fst<W>,
         arca: &mut Tr<W>,
         arcb: &mut Tr<W>,
         fs: &CF::FS,
@@ -169,14 +168,12 @@ where
 
         self.la_matcher_data = match self.selector() {
             Selector::Fst1Matcher2 => {
-                let fst = self.fst1();
                 let matcher = self.matcher2();
-                matcher.lookahead_fst(arca.nextstate, fst, arcb.nextstate)?
+                matcher.lookahead_fst(fst2, arca.nextstate, fst1, arcb.nextstate)?
             }
             Selector::Fst2Matcher1 => {
-                let fst = self.fst2();
                 let matcher = self.matcher1();
-                matcher.lookahead_fst(arca.nextstate, fst, arcb.nextstate)?
+                matcher.lookahead_fst(fst1, arca.nextstate, fst2, arcb.nextstate)?
             }
         };
 
@@ -198,29 +195,48 @@ where
     type M2 = CF::M2;
     type FS = CF::FS;
 
-    fn start(&self) -> Self::FS {
-        self.filter.start()
+    fn start(&self, fst1: &impl Fst<W>, fst2: &impl Fst<W>) -> Self::FS {
+        self.filter.start(fst1, fst2)
     }
 
-    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Result<()> {
-        self.filter.set_state(s1, s2, filter_state)
+    fn set_state(
+        &mut self,
+        fst1: &impl Fst<W>,
+        fst2: &impl Fst<W>,
+        s1: usize,
+        s2: usize,
+        filter_state: &Self::FS,
+    ) -> Result<()> {
+        self.filter.set_state(fst1, fst2, s1, s2, filter_state)
     }
 
-    fn filter_tr(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
+    fn filter_tr(
+        &mut self,
+        fst1: &impl Fst<W>,
+        fst2: &impl Fst<W>,
+        arc1: &mut Tr<W>,
+        arc2: &mut Tr<W>,
+    ) -> Result<Self::FS> {
         self.lookahead_tr = false;
-        let fs = self.filter.filter_tr(arc1, arc2)?;
+        let fs = self.filter.filter_tr(fst1, fst2, arc1, arc2)?;
         if fs == CF::FS::new_no_state() {
             return Ok(CF::FS::new_no_state());
         }
         if self.lookahead_output() {
-            self.lookahead_filter_tr(arc1, arc2, &fs)
+            self.lookahead_filter_tr(fst1, fst2, arc1, arc2, &fs)
         } else {
-            self.lookahead_filter_tr(arc2, arc1, &fs)
+            self.lookahead_filter_tr(fst1, fst2, arc2, arc1, &fs)
         }
     }
 
-    fn filter_final(&self, w1: &mut W, w2: &mut W) -> Result<()> {
-        self.filter.filter_final(w1, w2)
+    fn filter_final(
+        &self,
+        fst1: &impl Fst<W>,
+        fst2: &impl Fst<W>,
+        w1: &mut W,
+        w2: &mut W,
+    ) -> Result<()> {
+        self.filter.filter_final(fst1, fst2, w1, w2)
     }
 
     fn matcher1(&self) -> &Self::M1 {

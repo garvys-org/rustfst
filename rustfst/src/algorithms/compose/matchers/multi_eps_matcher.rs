@@ -1,4 +1,3 @@
-use std::iter::Peekable;
 use std::marker::PhantomData;
 use std::ops::{Add, AddAssign, SubAssign};
 use std::sync::Arc;
@@ -9,7 +8,10 @@ use nom::lib::std::collections::BTreeSet;
 
 use bitflags::bitflags;
 
-use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
+use crate::algorithms::compose::matchers::{
+    IterItemMatcher, MatchType, Matcher, MatcherFlags, MatcherIterator, MatcherPeekable,
+};
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{Label, StateId, EPS_LABEL, NO_LABEL};
 
@@ -29,7 +31,7 @@ pub struct MultiEpsMatcher<W, M> {
 }
 
 pub struct IteratorMultiEpsMatcher<W: Semiring, M: Matcher<W>> {
-    iter_matcher: Option<Peekable<M::Iter>>,
+    iter_matcher: Option<MatcherPeekable<W, M::Iter>>,
     iter_labels: Option<(Vec<usize>, usize)>,
     matcher: Arc<M>,
     matcher_state: StateId,
@@ -51,12 +53,12 @@ impl<W: Semiring, M: Matcher<W>> Clone for IteratorMultiEpsMatcher<W, M> {
     }
 }
 
-impl<W: Semiring, M: Matcher<W>> Iterator for IteratorMultiEpsMatcher<W, M> {
+impl<W: Semiring, M: Matcher<W>> MatcherIterator<W> for IteratorMultiEpsMatcher<W, M> {
     type Item = IterItemMatcher<W>;
 
-    fn next(&mut self) -> Option<Self::Item> {
+    fn next(&mut self, fst: &impl Fst<W>) -> Option<Self::Item> {
         if let Some(ref mut matcher_iter) = &mut self.iter_matcher {
-            let res = matcher_iter.next();
+            let res = matcher_iter.next(fst);
             let done = res.is_none();
             if done {
                 if let Some((multi_eps_labels, pos_labels)) = &mut self.iter_labels {
@@ -67,10 +69,10 @@ impl<W: Semiring, M: Matcher<W>> Iterator for IteratorMultiEpsMatcher<W, M> {
                     while *pos_labels < multi_eps_labels.len() {
                         let mut it = self
                             .matcher
-                            .iter(self.matcher_state, multi_eps_labels[*pos_labels])
+                            .iter(fst, self.matcher_state, multi_eps_labels[*pos_labels])
                             .unwrap()
                             .peekable();
-                        if it.peek().is_some() {
+                        if it.peek(fst).is_some() {
                             *matcher_iter = it;
                             break;
                         }
@@ -82,10 +84,10 @@ impl<W: Semiring, M: Matcher<W>> Iterator for IteratorMultiEpsMatcher<W, M> {
                     } else {
                         *matcher_iter = self
                             .matcher
-                            .iter(self.matcher_state, NO_LABEL)
+                            .iter(fst, self.matcher_state, NO_LABEL)
                             .unwrap()
                             .peekable();
-                        matcher_iter.next()
+                        matcher_iter.next(fst)
                     }
                 } else {
                     res
@@ -106,7 +108,7 @@ impl<W: Semiring, M: Matcher<W>> Iterator for IteratorMultiEpsMatcher<W, M> {
 
 impl<W: Semiring, M: Matcher<W>> MultiEpsMatcher<W, M> {
     pub fn new_with_opts<IM: Into<Option<Arc<M>>>>(
-        fst: Arc<<Self as Matcher<W>>::F>,
+        fst: &impl Fst<W>,
         match_type: MatchType,
         flags: MultiEpsMatcherFlags,
         matcher: IM,
@@ -148,10 +150,9 @@ impl<W: Semiring, M: Matcher<W>> MultiEpsMatcher<W, M> {
 }
 
 impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
-    type F = M::F;
     type Iter = IteratorMultiEpsMatcher<W, M>;
 
-    fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self> {
+    fn new(fst: &impl Fst<W>, match_type: MatchType) -> Result<Self> {
         Self::new_with_opts(
             fst,
             match_type,
@@ -160,9 +161,12 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
         )
     }
 
-    fn iter(&self, state: usize, label: usize) -> Result<Self::Iter> {
+    fn iter(&self, fst: &impl Fst<W>, state: usize, label: usize) -> Result<Self::Iter> {
         let (iter_matcher, iter_labels) = if label == EPS_LABEL {
-            (Some(self.matcher.iter(state, EPS_LABEL)?.peekable()), None)
+            (
+                Some(self.matcher.iter(fst, state, EPS_LABEL)?.peekable()),
+                None,
+            )
         } else if label == NO_LABEL {
             if self.flags.contains(MultiEpsMatcherFlags::MULTI_EPS_LIST) {
                 // TODO: Didn't find a way to store the iterator in IteratorMultiEpsMatcher.
@@ -173,9 +177,9 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
                 while pos_labels < multi_eps_labels.len() {
                     let mut it = self
                         .matcher
-                        .iter(state, multi_eps_labels[pos_labels])?
+                        .iter(fst, state, multi_eps_labels[pos_labels])?
                         .peekable();
-                    if it.peek().is_some() {
+                    if it.peek(fst).is_some() {
                         iter_matcher = Some(it);
                         break;
                     }
@@ -185,10 +189,16 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
                 if pos_labels < multi_eps_labels.len() {
                     (iter_matcher, Some((multi_eps_labels, pos_labels)))
                 } else {
-                    (Some(self.matcher.iter(state, NO_LABEL)?.peekable()), None)
+                    (
+                        Some(self.matcher.iter(fst, state, NO_LABEL)?.peekable()),
+                        None,
+                    )
                 }
             } else {
-                (Some(self.matcher.iter(state, NO_LABEL)?.peekable()), None)
+                (
+                    Some(self.matcher.iter(fst, state, NO_LABEL)?.peekable()),
+                    None,
+                )
             }
         } else if self.flags.contains(MultiEpsMatcherFlags::MULTI_EPS_LOOP)
             && self.multi_eps_labels.contains(&label)
@@ -196,7 +206,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
             // Empty iter
             (None, None)
         } else {
-            (Some(self.matcher.iter(state, label)?.peekable()), None)
+            (Some(self.matcher.iter(fst, state, label)?.peekable()), None)
         };
         Ok(IteratorMultiEpsMatcher {
             iter_matcher,
@@ -208,24 +218,20 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
         })
     }
 
-    fn final_weight(&self, state: usize) -> Result<Option<W>> {
-        self.matcher.final_weight(state)
+    fn final_weight(&self, fst: &impl Fst<W>, state: usize) -> Result<Option<W>> {
+        self.matcher.final_weight(fst, state)
     }
 
-    fn match_type(&self, test: bool) -> Result<MatchType> {
-        self.matcher.match_type(test)
+    fn match_type(&self, fst: &impl Fst<W>, test: bool) -> Result<MatchType> {
+        self.matcher.match_type(fst, test)
     }
 
-    fn flags(&self) -> MatcherFlags {
-        self.matcher.flags()
+    fn flags(&self, fst: &impl Fst<W>) -> MatcherFlags {
+        self.matcher.flags(fst)
     }
 
     fn priority(&self, state: usize) -> Result<usize> {
         self.matcher.priority(state)
-    }
-
-    fn fst(&self) -> &Arc<Self::F> {
-        self.matcher.fst()
     }
 }
 

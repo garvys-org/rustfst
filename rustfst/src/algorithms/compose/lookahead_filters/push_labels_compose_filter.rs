@@ -13,7 +13,7 @@ use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::algorithms::compose::matchers::{MultiEpsMatcher, MultiEpsMatcherFlags};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::CoreFst;
+use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{Label, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
@@ -63,8 +63,8 @@ where
     type M2 = CFB::M2;
 
     fn new(
-        fst1: Arc<<<Self::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
-        fst2: Arc<<<Self::CF as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
+        fst1: &impl Fst<W>,
+        fst2: &impl Fst<W>,
         matcher1: Option<Self::M1>,
         matcher2: Option<Self::M2>,
     ) -> Result<Self>
@@ -79,11 +79,11 @@ where
         })
     }
 
-    fn build(&self) -> Result<Self::CF> {
-        let filter = self.filter_builder.build()?;
+    fn build(&self, fst1: &impl Fst<W>, fst2: &impl Fst<W>) -> Result<Self::CF> {
+        let filter = self.filter_builder.build(fst1, fst2)?;
 
         let matcher1 = MultiEpsMatcher::new_with_opts(
-            Arc::clone(filter.fst1()),
+            fst1,
             MatchType::MatchOutput,
             if filter.lookahead_output() {
                 MultiEpsMatcherFlags::MULTI_EPS_LIST
@@ -93,7 +93,7 @@ where
             Arc::clone(filter.matcher1_shared()),
         )?;
         let matcher2 = MultiEpsMatcher::new_with_opts(
-            Arc::clone(filter.fst2()),
+            fst2,
             MatchType::MatchInput,
             if filter.lookahead_output() {
                 MultiEpsMatcherFlags::MULTI_EPS_LOOP
@@ -123,13 +123,20 @@ where
     type M2 = MultiEpsMatcher<W, CF::M2>;
     type FS = PairFilterState<CF::FS, IntegerFilterState>;
 
-    fn start(&self) -> Self::FS {
-        PairFilterState::new((self.filter.start(), FilterState::new(NO_LABEL)))
+    fn start(&self, fst1: &impl Fst<W>, fst2: &impl Fst<W>) -> Self::FS {
+        PairFilterState::new((self.filter.start(fst1, fst2), FilterState::new(NO_LABEL)))
     }
 
-    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Result<()> {
+    fn set_state(
+        &mut self,
+        fst1: &impl Fst<W>,
+        fst2: &impl Fst<W>,
+        s1: usize,
+        s2: usize,
+        filter_state: &Self::FS,
+    ) -> Result<()> {
         self.fs = filter_state.clone();
-        self.filter.set_state(s1, s2, filter_state.state1())?;
+        self.filter.set_state(fst1, fst2, s1, s2, filter_state.state1())?;
         if !self
             .filter
             .lookahead_flags()
@@ -138,9 +145,9 @@ where
             return Ok(());
         }
         self.ntrsa = if self.lookahead_output() {
-            self.filter.fst1().num_trs(s1)?
+            fst1.num_trs(s1)?
         } else {
-            self.filter.fst2().num_trs(s2)?
+            fst2.num_trs(s2)?
         };
         let fs2 = filter_state.state2();
         let flabel = fs2.state();
@@ -153,13 +160,19 @@ where
         Ok(())
     }
 
-    fn filter_tr(&mut self, arc1: &mut Tr<W>, arc2: &mut Tr<W>) -> Result<Self::FS> {
+    fn filter_tr(
+        &mut self,
+        fst1: &impl Fst<W>,
+        fst2: &impl Fst<W>,
+        arc1: &mut Tr<W>,
+        arc2: &mut Tr<W>,
+    ) -> Result<Self::FS> {
         if !self
             .lookahead_flags()
             .contains(MatcherFlags::LOOKAHEAD_PREFIX)
         {
             return Ok(FilterState::new((
-                self.filter.filter_tr(arc1, arc2)?,
+                self.filter.filter_tr(fst1, fst2, arc1, arc2)?,
                 FilterState::new(NO_LABEL),
             )));
         }
@@ -172,7 +185,7 @@ where
                 return self.pushed_label_filter_tr(arc2, arc1, *flabel);
             }
         }
-        let fs1 = self.filter.filter_tr(arc1, arc2)?;
+        let fs1 = self.filter.filter_tr(fst1, fst2, arc1, arc2)?;
         if fs1 == FilterState::new_no_state() {
             return Ok(FilterState::new_no_state());
         }
@@ -186,8 +199,14 @@ where
         }
     }
 
-    fn filter_final(&self, w1: &mut W, w2: &mut W) -> Result<()> {
-        self.filter.filter_final(w1, w2)?;
+    fn filter_final(
+        &self,
+        fst1: &impl Fst<W>,
+        fst2: &impl Fst<W>,
+        w1: &mut W,
+        w2: &mut W,
+    ) -> Result<()> {
+        self.filter.filter_final(fst1, fst2, w1, w2)?;
         if !self
             .lookahead_flags()
             .contains(MatcherFlags::LOOKAHEAD_PREFIX)

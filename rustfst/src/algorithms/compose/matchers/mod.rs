@@ -97,23 +97,53 @@ pub fn eps_loop<W: Semiring>(state: StateId, match_type: MatchType) -> Result<Tr
 /// More generally, they may implement matching special labels that represent
 /// sets of labels such as sigma (all), rho (rest), or phi (fail).
 pub trait Matcher<W: Semiring>: Debug {
-    type F: Fst<W>;
+    type Iter: MatcherIterator<W, Item = IterItemMatcher<W>> + Sized;
 
-    type Iter: Iterator<Item = IterItemMatcher<W>>;
-
-    fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self>
+    fn new(fst: &impl Fst<W>, match_type: MatchType) -> Result<Self>
     where
         Self: std::marker::Sized;
-    fn iter(&self, state: StateId, label: Label) -> Result<Self::Iter>;
-    fn final_weight(&self, state: StateId) -> Result<Option<W>>;
-    fn match_type(&self, test: bool) -> Result<MatchType>;
-    fn flags(&self) -> MatcherFlags;
+    fn iter(&self, fst: &impl Fst<W>, state: StateId, label: Label) -> Result<Self::Iter>;
+    fn final_weight(&self, fst: &impl Fst<W>, state: StateId) -> Result<Option<W>>;
+    fn match_type(&self, fst: &impl Fst<W>, test: bool) -> Result<MatchType>;
+    fn flags(&self, fst: &impl Fst<W>) -> MatcherFlags;
 
     /// Indicates preference for being the side used for matching in
     /// composition. If the value is kRequirePriority, then it is
     /// mandatory that it be used. Calling this method without passing the
     /// current state of the matcher invalidates the state of the matcher.
     fn priority(&self, state: StateId) -> Result<usize>;
+}
 
-    fn fst(&self) -> &Arc<Self::F>;
+pub trait MatcherIterator<W: Semiring> : Sized {
+    type Item;
+    fn next(&mut self, fst: &impl Fst<W>) -> Option<Self::Item>;
+    fn peekable(self) -> MatcherPeekable<W, Self> {
+        MatcherPeekable {
+            next: None,
+            iter: self,
+        }
+    }
+}
+
+pub struct MatcherPeekable<W: Semiring, I: MatcherIterator<W>> {
+    iter: I,
+    next: Option<I::Item>,
+}
+
+impl<W: Semiring, I: MatcherIterator<W>> MatcherIterator<W> for MatcherPeekable<W, I> {
+    type Item = I::Item;
+
+    fn next(&mut self, fst: &impl Fst<W>) -> Option<Self::Item> {
+        self.next.take().or_else(|| self.iter.next(fst))
+    }
+
+}
+
+impl<W: Semiring, I: MatcherIterator<W>> MatcherPeekable<W, I> {
+    pub fn peek(&mut self, fst: &impl Fst<W>) -> Option<&<Self as MatcherIterator<W>>::Item> {
+        if self.next.is_none() {
+            self.next = self.iter.next(fst)
+        }
+        self.next.as_ref()
+    }
 }

@@ -70,31 +70,39 @@ pub trait LookaheadMatcher<W: Semiring>: Matcher<W> {
     fn data(&self) -> Option<&Arc<Self::MatcherData>>;
 
     fn new_with_data(
-        fst: Arc<Self::F>,
+        self_fst: &impl Fst<W>,
+        fst: &impl Fst<W>,
         match_type: MatchType,
         data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self>
     where
         Self: std::marker::Sized;
 
-    fn create_data<F: Fst<W>>(
-        fst: &F,
+    fn create_data(
+        self_fst: &impl Fst<W>,
+        fst: &impl Fst<W>,
         match_type: MatchType,
     ) -> Result<Option<Self::MatcherData>>;
 
-    fn init_lookahead_fst<LF: Fst<W>>(&mut self, lfst: &Arc<LF>) -> Result<()>;
+    fn init_lookahead_fst(&mut self, self_fst: &impl Fst<W>, lfst: &impl Fst<W>) -> Result<()>;
     // Are there paths from a state in the lookahead FST that can be read from
     // the curent matcher state?
 
-    fn lookahead_fst<LF: Fst<W>>(
+    fn lookahead_fst(
         &self,
+        self_fst: &impl Fst<W>,
         matcher_state: StateId,
-        lfst: &Arc<LF>,
+        lfst: &impl Fst<W>,
         lfst_state: StateId,
     ) -> Result<Option<LookAheadMatcherData<W>>>;
 
     // Can the label be read from the current matcher state after possibly
     // following epsilon transitions?
-    fn lookahead_label(&self, state: StateId, label: Label) -> Result<bool>;
-    fn lookahead_prefix(&self, tr: &mut Tr<W>, la_matcher_data: &LookAheadMatcherData<W>) -> bool;
+    fn lookahead_label(&self, fst: &impl Fst<W>, state: StateId, label: Label) -> Result<bool>;
+    fn lookahead_prefix(
+        &self,
+        fst: &impl Fst<W>,
+        tr: &mut Tr<W>,
+        la_matcher_data: &LookAheadMatcherData<W>,
+    ) -> bool;
 }

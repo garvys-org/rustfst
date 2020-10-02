@@ -23,43 +23,38 @@ pub struct LabelLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
 impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
     for LabelLookAheadMatcher<W, M, MFT>
 {
-    type F = M::F;
     type Iter = M::Iter;
 
-    fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self> {
+    fn new(fst: &impl Fst<W>, match_type: MatchType) -> Result<Self> {
         Self::new_with_data(fst, match_type, None)
     }
 
-    fn iter(&self, state: usize, label: usize) -> Result<Self::Iter> {
-        self.matcher.iter(state, label)
+    fn iter(&self, fst: &impl Fst<W>, state: usize, label: usize) -> Result<Self::Iter> {
+        self.matcher.iter(fst, state, label)
     }
 
-    fn final_weight(&self, state: usize) -> Result<Option<W>> {
-        self.matcher.final_weight(state)
+    fn final_weight(&self, fst: &impl Fst<W>, state: usize) -> Result<Option<W>> {
+        self.matcher.final_weight(fst, state)
     }
 
-    fn match_type(&self, test: bool) -> Result<MatchType> {
-        self.matcher.match_type(test)
+    fn match_type(&self, fst: &impl Fst<W>, test: bool) -> Result<MatchType> {
+        self.matcher.match_type(fst, test)
     }
 
-    fn flags(&self) -> MatcherFlags {
+    fn flags(&self, fst: &impl Fst<W>) -> MatcherFlags {
         if let Some(reachable) = &self.reachable {
             if reachable.reach_input() {
-                self.matcher.flags() | MFT::flags() | MatcherFlags::INPUT_LOOKAHEAD_MATCHER
+                self.matcher.flags(fst) | MFT::flags() | MatcherFlags::INPUT_LOOKAHEAD_MATCHER
             } else {
-                self.matcher.flags() | MFT::flags() | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER
+                self.matcher.flags(fst) | MFT::flags() | MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER
             }
         } else {
-            self.matcher.flags()
+            self.matcher.flags(fst)
         }
     }
 
     fn priority(&self, state: usize) -> Result<usize> {
         self.matcher.priority(state)
-    }
-
-    fn fst(&self) -> &Arc<Self::F> {
-        self.matcher.fst()
     }
 }
 
@@ -77,7 +72,8 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
     }
 
     fn new_with_data(
-        fst: Arc<Self::F>,
+        self_fst: &impl Fst<W>,
+        fst: &impl Fst<W>,
         match_type: MatchType,
         data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self> {
@@ -96,7 +92,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
             if reach_input == d.reach_input() {
                 reachable = Some(LabelReachable::new_from_data(d));
             }
-        } else if let Some(d) = Self::create_data(&fst, match_type)? {
+        } else if let Some(d) = Self::create_data(self_fst, fst, match_type)? {
             reachable = Some(LabelReachable::new_from_data(Arc::new(d)));
         }
 
@@ -108,8 +104,9 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         })
     }
 
-    fn create_data<F: Fst<W>>(
-        fst: &F,
+    fn create_data(
+        self_fst: &impl Fst<W>,
+        fst: &impl Fst<W>,
         match_type: MatchType,
     ) -> Result<Option<Self::MatcherData>> {
         let reach_input = match_type == MatchType::MatchInput;
@@ -122,18 +119,19 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         }
     }
 
-    fn init_lookahead_fst<LF: Fst<W>>(&mut self, lfst: &Arc<LF>) -> Result<()> {
-        let reach_input = self.match_type(false)? == MatchType::MatchOutput;
+    fn init_lookahead_fst(&mut self, self_fst: &impl Fst<W>, lfst: &impl Fst<W>) -> Result<()> {
+        let reach_input = self.match_type(self_fst, false)? == MatchType::MatchOutput;
         if let Some(reachable) = &mut self.reachable {
             reachable.reach_init(lfst, reach_input)?;
         }
         Ok(())
     }
 
-    fn lookahead_fst<LF: Fst<W>>(
+    fn lookahead_fst(
         &self,
+        self_fst: &impl Fst<W>,
         matcher_state: usize,
-        lfst: &Arc<LF>,
+        lfst: &impl Fst<W>,
         lfst_state: usize,
     ) -> Result<Option<LookAheadMatcherData<W>>> {
         // InitLookAheadFst
@@ -190,7 +188,12 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         }
     }
 
-    fn lookahead_label(&self, current_state: usize, label: usize) -> Result<bool> {
+    fn lookahead_label(
+        &self,
+        fst: &impl Fst<W>,
+        current_state: usize,
+        label: usize,
+    ) -> Result<bool> {
         if label == EPS_LABEL {
             return Ok(true);
         }
@@ -201,7 +204,12 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         }
     }
 
-    fn lookahead_prefix(&self, tr: &mut Tr<W>, la_matcher_data: &LookAheadMatcherData<W>) -> bool {
+    fn lookahead_prefix(
+        &self,
+        fst: &impl Fst<W>,
+        tr: &mut Tr<W>,
+        la_matcher_data: &LookAheadMatcherData<W>,
+    ) -> bool {
         la_matcher_data.default_lookahead_prefix(tr)
     }
 }

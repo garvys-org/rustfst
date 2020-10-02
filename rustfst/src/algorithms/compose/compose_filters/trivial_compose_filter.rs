@@ -7,6 +7,7 @@ use crate::algorithms::compose::compose_filters::{ComposeFilter, ComposeFilterBu
 use crate::algorithms::compose::filter_states::{FilterState, TrivialFilterState};
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_properties::FstProperties;
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::Tr;
 
@@ -32,15 +33,13 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
     type M2 = M2;
 
     fn new(
-        fst1: Arc<M1::F>,
-        fst2: Arc<M2::F>,
+        fst1: &impl Fst<W>,
+        fst2: &impl Fst<W>,
         matcher1: Option<M1>,
         matcher2: Option<M2>,
     ) -> Result<Self> {
-        let matcher1 =
-            matcher1.unwrap_or_else(|| M1::new(Arc::clone(&fst1), MatchType::MatchOutput).unwrap());
-        let matcher2 =
-            matcher2.unwrap_or_else(|| M2::new(Arc::clone(&fst2), MatchType::MatchInput).unwrap());
+        let matcher1 = matcher1.unwrap_or_else(|| M1::new(fst1, MatchType::MatchOutput).unwrap());
+        let matcher2 = matcher2.unwrap_or_else(|| M2::new(fst2, MatchType::MatchInput).unwrap());
         Ok(Self {
             matcher1: Arc::new(matcher1),
             matcher2: Arc::new(matcher2),
@@ -48,7 +47,7 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
         })
     }
 
-    fn build(&self) -> Result<Self::CF> {
+    fn build(&self, fst1: &impl Fst<W>, fst2: &impl Fst<W>) -> Result<Self::CF> {
         Ok(TrivialComposeFilter::<W, M1, M2> {
             matcher1: Arc::clone(&self.matcher1),
             matcher2: Arc::clone(&self.matcher2),
@@ -64,19 +63,38 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
     type M2 = M2;
     type FS = TrivialFilterState;
 
-    fn start(&self) -> Self::FS {
+    fn start(&self, fst1: &impl Fst<W>, fst2: &impl Fst<W>) -> Self::FS {
         Self::FS::new(true)
     }
 
-    fn set_state(&mut self, _s1: usize, _s2: usize, _filter_state: &Self::FS) -> Result<()> {
+    fn set_state(
+        &mut self,
+        fst1: &impl Fst<W>,
+        fst2: &impl Fst<W>,
+        _s1: usize,
+        _s2: usize,
+        _filter_state: &Self::FS,
+    ) -> Result<()> {
         Ok(())
     }
 
-    fn filter_tr(&mut self, _tr1: &mut Tr<W>, _tr2: &mut Tr<W>) -> Result<Self::FS> {
+    fn filter_tr(
+        &mut self,
+        fst1: &impl Fst<W>,
+        fst2: &impl Fst<W>,
+        _tr1: &mut Tr<W>,
+        _tr2: &mut Tr<W>,
+    ) -> Result<Self::FS> {
         Ok(Self::FS::new(true))
     }
 
-    fn filter_final(&self, _w1: &mut W, _w2: &mut W) -> Result<()> {
+    fn filter_final(
+        &self,
+        fst1: &impl Fst<W>,
+        fst2: &impl Fst<W>,
+        _w1: &mut W,
+        _w2: &mut W,
+    ) -> Result<()> {
         Ok(())
     }
 
