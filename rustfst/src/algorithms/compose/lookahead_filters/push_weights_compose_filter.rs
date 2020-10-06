@@ -8,8 +8,7 @@ use crate::algorithms::compose::filter_states::{FilterState, PairFilterState, We
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::{MatchTypeTrait, Selector};
 use crate::algorithms::compose::lookahead_filters::LookAheadComposeFilterTrait;
 use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
-use crate::algorithms::compose::matchers::MatcherFlags;
-use crate::algorithms::compose::matchers::{MatchType, Matcher};
+use crate::algorithms::compose::matchers::{MatchType, MatcherFlags};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
@@ -43,7 +42,7 @@ where
     CFB::CF: ComposeFilter<W, F1, F2, M1, M2>,
 {
     filter_builder: CFB,
-    ghost: PhantomData<( W, F1, F2, M1, M2, SMT)>,
+    ghost: PhantomData<(W, F1, F2, M1, M2, SMT)>,
 }
 
 impl<W, F1, F2, M1, M2, CFB, SMT> Clone
@@ -93,11 +92,13 @@ where
     }
 
     fn build(&self) -> Result<Self::CF> {
-        Ok(PushWeightsComposeFilter::<W, F1, F2, M1, M2, CFB::CF, SMT> {
-            filter: self.filter_builder.build()?,
-            fs: FilterState::new_no_state(),
-            smt: PhantomData,
-        })
+        Ok(
+            PushWeightsComposeFilter::<W, F1, F2, M1, M2, CFB::CF, SMT> {
+                filter: self.filter_builder.build()?,
+                fs: FilterState::new_no_state(),
+                smt: PhantomData,
+            },
+        )
     }
 }
 

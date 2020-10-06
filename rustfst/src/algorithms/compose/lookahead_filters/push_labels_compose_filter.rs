@@ -9,8 +9,8 @@ use crate::algorithms::compose::lookahead_filters::lookahead_selector::MatchType
 use crate::algorithms::compose::lookahead_filters::lookahead_selector::Selector;
 use crate::algorithms::compose::lookahead_filters::LookAheadComposeFilterTrait;
 use crate::algorithms::compose::lookahead_matchers::LookaheadMatcher;
+use crate::algorithms::compose::matchers::MatchType;
 use crate::algorithms::compose::matchers::MatcherFlags;
-use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::algorithms::compose::matchers::{MultiEpsMatcher, MultiEpsMatcherFlags};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst};

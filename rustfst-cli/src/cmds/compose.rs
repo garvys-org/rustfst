@@ -110,24 +110,24 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
                     S,
                     F1,
                     F2,
-                    TMatcher1<F1, S>,
-                    TMatcher2<F2, S>,
+                    TMatcher1<S, F1>,
+                    TMatcher2<S, F2>,
                     TLookFilter<S, F1, F2>,
                     SMatchOutput,
                 >;
                 type TPushLabelsFilter<S, F1, F2> = PushLabelsComposeFilterBuilder<
                     S,
-                    TLaFst<S, F1>,
+                    F1,
                     F2,
-                    TMatcher1<S, TLaFst<S, F1>>,
-                    TMatcher2<F2, S>,
+                    TMatcher1<S, F1>,
+                    TMatcher2<S, F2>,
                     TPushWeightsFilter<S, F1, F2>,
                     SMatchOutput,
                 >;
 
                 type TComposeFilter<S, F1, F2> = TPushLabelsFilter<S, F1, F2>;
 
-                let graph1look: Arc<TLaFst<TropicalWeight, _>> = Arc::new(TLaFst::new_with_relabeling(fst_1, &mut fst_2, true)?);
+                let graph1look = Arc::new(TLaFst::new_with_relabeling(fst_1, &mut fst_2, true)?);
 
                 // LabelLookAheadRelabeler::relabel(&mut fst2, graph1look.addon(), true)?;
 
@@ -143,7 +143,7 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
 
                 let matcher2 = TMatcher2::new(Arc::clone(&fst_2), MatchType::MatchInput)?;
 
-                let compose_filter = TPushLabelsFilter::new(
+                let compose_filter = TComposeFilter::new(
                     Arc::clone(&graph1look),
                     Arc::clone(&fst_2),
                     Some(matcher1),
@@ -159,7 +159,7 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
                     None,
                 );
 
-                let dyn_fst = ComposeFst::<_, _, SimpleHashMapCache<_>>::new_with_options(
+                let dyn_fst = ComposeFst::<_, _, _, _, _, _, SimpleHashMapCache<_>>::new_with_options(
                     graph1look,
                     fst_2,
                     compose_options,
