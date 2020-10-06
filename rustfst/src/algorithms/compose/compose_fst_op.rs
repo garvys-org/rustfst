@@ -11,21 +11,60 @@ use crate::algorithms::compose::{ComposeFstOpOptions, ComposeStateTuple};
 use crate::algorithms::lazy::{FstOp, StateTable};
 use crate::fst_properties::mutable_properties::compose_properties;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::CoreFst;
+use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, Trs, TrsVec, EPS_LABEL, NO_LABEL};
 
-#[derive(Debug, Clone)]
-pub struct ComposeFstOp<W: Semiring, CFB: ComposeFilterBuilder<W>> {
+#[derive(Debug)]
+pub struct ComposeFstOp<W, F1, F2, M1, M2, CFB>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, M1, M2>,
+{
     compose_filter_builder: CFB,
-    state_table: StateTable<ComposeStateTuple<<CFB::CF as ComposeFilter<W>>::FS>>,
+    state_table: StateTable<
+        ComposeStateTuple<<CFB::CF as ComposeFilter<W, F1, F2, CFB::IM1, CFB::IM2>>::FS>,
+    >,
     match_type: MatchType,
     properties: FstProperties,
-    fst1: Arc<<<CFB::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
-    fst2: Arc<<<CFB::CF as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
+    fst1: Arc<F1>,
+    fst2: Arc<F2>,
 }
 
-impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
+impl<W, F1, F2, M1, M2, CFB> Clone for ComposeFstOp<W, F1, F2, M1, M2, CFB>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, M1, M2>,
+{
+    fn clone(&self) -> Self {
+        Self {
+            compose_filter_builder: self.compose_filter_builder.clone(),
+            state_table: self.state_table.clone(),
+            match_type: self.match_type.clone(),
+            properties: self.properties.clone(),
+            fst1: Arc::clone(&self.fst1),
+            fst2: Arc::clone(&self.fst2),
+        }
+    }
+}
+
+impl<W, F1, F2, M1, M2, CFB> ComposeFstOp<W, F1, F2, M1, M2, CFB>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, M1, M2>,
+{
     // Compose specifying two matcher types Matcher1 and Matcher2. Requires input
     // FST (of the same Tr type, but o.w. arbitrary) match the corresponding
     // matcher FST types). Recommended only for advanced use in demanding or
@@ -36,13 +75,15 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
     // }
 
     pub fn new(
-        fst1: Arc<<<CFB::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
-        fst2: Arc<<<CFB::CF as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
+        fst1: Arc<F1>,
+        fst2: Arc<F2>,
         opts: ComposeFstOpOptions<
-            CFB::M1,
-            CFB::M2,
+            M1,
+            M2,
             CFB,
-            StateTable<ComposeStateTuple<<CFB::CF as ComposeFilter<W>>::FS>>,
+            StateTable<
+                ComposeStateTuple<<CFB::CF as ComposeFilter<W, F1, F2, CFB::IM1, CFB::IM2>>::FS>,
+            >,
         >,
     ) -> Result<Self> {
         let matcher1 = opts.matcher1;
@@ -69,10 +110,7 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
         })
     }
 
-    fn match_type(
-        matcher1: &<CFB::CF as ComposeFilter<W>>::M1,
-        matcher2: &<CFB::CF as ComposeFilter<W>>::M2,
-    ) -> Result<MatchType> {
+    fn match_type(matcher1: &CFB::IM1, matcher2: &CFB::IM2) -> Result<MatchType> {
         if matcher1.flags().contains(MatcherFlags::REQUIRE_MATCH)
             && matcher1.match_type(true)? != MatchType::MatchOutput
         {
@@ -174,7 +212,7 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
         &self,
         mut arc1: Tr<W>,
         arc2: Tr<W>,
-        fs: <CFB::CF as ComposeFilter<W>>::FS,
+        fs: <CFB::CF as ComposeFilter<W, F1, F2, CFB::IM1, CFB::IM2>>::FS,
     ) -> Result<Tr<W>> {
         let tuple = ComposeStateTuple {
             fs,
@@ -209,13 +247,17 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
             let mut arcb = tr.clone();
             if match_input {
                 let fs = compose_filter.filter_tr(&mut arcb, &mut arca)?;
-                if fs != <CFB::CF as ComposeFilter<W>>::FS::new_no_state() {
+                if fs
+                    != <CFB::CF as ComposeFilter<W, F1, F2, CFB::IM1, CFB::IM2>>::FS::new_no_state()
+                {
                     trs.push(self.add_tr(arcb, arca, fs)?);
                 }
             } else {
                 let fs = compose_filter.filter_tr(&mut arca, &mut arcb)?;
 
-                if fs != <CFB::CF as ComposeFilter<W>>::FS::new_no_state() {
+                if fs
+                    != <CFB::CF as ComposeFilter<W, F1, F2, CFB::IM1, CFB::IM2>>::FS::new_no_state()
+                {
                     trs.push(self.add_tr(arca, arcb, fs)?);
                 }
             }
@@ -255,7 +297,15 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>> ComposeFstOp<W, CFB> {
     }
 }
 
-impl<W: Semiring, CFB: ComposeFilterBuilder<W>> FstOp<W> for ComposeFstOp<W, CFB> {
+impl<W, F1, F2, M1, M2, CFB> FstOp<W> for ComposeFstOp<W, F1, F2, M1, M2, CFB>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, M1, M2>,
+{
     fn compute_start(&self) -> Result<Option<usize>> {
         let compose_filter = self.compose_filter_builder.build()?;
         let s1 = self.fst1.start();

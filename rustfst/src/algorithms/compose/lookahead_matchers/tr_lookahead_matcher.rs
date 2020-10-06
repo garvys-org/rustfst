@@ -13,25 +13,23 @@ use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL};
 
 #[derive(Debug, Clone)]
-pub struct TrLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
+pub struct TrLookAheadMatcher<W: Semiring, F: Fst<W>, M: Matcher<W, F>, MFT> {
     // matcher fst
-    fst: Arc<M::F>,
+    fst: Arc<F>,
     matcher: M,
-    // Flags to customize the behaviour
-    mft: PhantomData<MFT>,
+    ghost: PhantomData<(W, MFT)>,
 }
 
-impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
-    for TrLookAheadMatcher<W, M, MFT>
+impl<W: Semiring, F: Fst<W>, M: Matcher<W, F>, MFT: MatcherFlagsTrait> Matcher<W, F>
+    for TrLookAheadMatcher<W, F, M, MFT>
 {
-    type F = M::F;
     type Iter = M::Iter;
 
-    fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self> {
+    fn new(fst: Arc<F>, match_type: MatchType) -> Result<Self> {
         Ok(Self {
             fst: Arc::clone(&fst),
             matcher: M::new(fst, match_type)?,
-            mft: PhantomData,
+            ghost: PhantomData,
         })
     }
 
@@ -58,13 +56,13 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
         self.matcher.priority(state)
     }
 
-    fn fst(&self) -> &Arc<Self::F> {
+    fn fst(&self) -> &Arc<F> {
         &self.fst
     }
 }
 
-impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
-    for TrLookAheadMatcher<W, M, MFT>
+impl<W: Semiring, F: Fst<W>, M: Matcher<W, F>, MFT: MatcherFlagsTrait> LookaheadMatcher<W, F>
+    for TrLookAheadMatcher<W, F, M, MFT>
 {
     // NullAddon
     type MatcherData = ();
@@ -74,15 +72,15 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
     }
 
     fn new_with_data(
-        fst: Arc<Self::F>,
+        fst: Arc<F>,
         match_type: MatchType,
         _data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self> {
         Self::new(fst, match_type)
     }
 
-    fn create_data<F: Fst<W>>(
-        _fst: &F,
+    fn create_data<F2: Fst<W>>(
+        _fst: &F2,
         _match_type: MatchType,
     ) -> Result<Option<Self::MatcherData>> {
         Ok(None)

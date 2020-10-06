@@ -13,20 +13,23 @@ use crate::semirings::Semiring;
 use crate::{Tr, Trs, EPS_LABEL};
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct LabelLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
+pub struct LabelLookAheadMatcher<W, F, M, MFT>
+where
+    W: Semiring,
+    F: Fst<W>,
+    M: Matcher<W, F>,
+{
     matcher: M,
-    mft: PhantomData<MFT>,
     reachable: Option<LabelReachable>,
-    w: PhantomData<W>,
+    ghost: PhantomData<(W, F, MFT)>,
 }
 
-impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
-    for LabelLookAheadMatcher<W, M, MFT>
+impl<W: Semiring, F: Fst<W>, M: Matcher<W, F>, MFT: MatcherFlagsTrait> Matcher<W, F>
+    for LabelLookAheadMatcher<W, F, M, MFT>
 {
-    type F = M::F;
     type Iter = M::Iter;
 
-    fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self> {
+    fn new(fst: Arc<F>, match_type: MatchType) -> Result<Self> {
         Self::new_with_data(fst, match_type, None)
     }
 
@@ -58,13 +61,17 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
         self.matcher.priority(state)
     }
 
-    fn fst(&self) -> &Arc<Self::F> {
+    fn fst(&self) -> &Arc<F> {
         self.matcher.fst()
     }
 }
 
-impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
-    for LabelLookAheadMatcher<W, M, MFT>
+impl<W, F, M, MFT> LookaheadMatcher<W, F> for LabelLookAheadMatcher<W, F, M, MFT>
+where
+    W: Semiring + 'static,
+    F: Fst<W>,
+    M: Matcher<W, F>,
+    MFT: MatcherFlagsTrait,
 {
     type MatcherData = LabelReachableData;
 
@@ -77,7 +84,7 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
     }
 
     fn new_with_data(
-        fst: Arc<Self::F>,
+        fst: Arc<F>,
         match_type: MatchType,
         data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self> {
@@ -103,13 +110,12 @@ impl<W: Semiring + 'static, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatc
         Ok(Self {
             matcher: M::new(fst, match_type)?,
             reachable,
-            mft: PhantomData,
-            w: PhantomData,
+            ghost: PhantomData,
         })
     }
 
-    fn create_data<F: Fst<W>>(
-        fst: &F,
+    fn create_data<F2: Fst<W>>(
+        fst: &F2,
         match_type: MatchType,
     ) -> Result<Option<Self::MatcherData>> {
         let reach_input = match_type == MatchType::MatchInput;

@@ -51,32 +51,56 @@ pub fn compose_with_config<
         ComposeFilterEnum::AutoFilter => ComposeFst::new_auto(fst1, fst2)?.compute()?,
         ComposeFilterEnum::NullFilter => ComposeFst::<
             _,
-            NullComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            _,
+            _,
+            _,
+            _,
+            NullComposeFilterBuilder<_, _, _, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
         .compute()?,
         ComposeFilterEnum::SequenceFilter => ComposeFst::<
             _,
-            SequenceComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            _,
+            _,
+            _,
+            _,
+            SequenceComposeFilterBuilder<_, _, _, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
         .compute()?,
         ComposeFilterEnum::AltSequenceFilter => ComposeFst::<
             _,
-            AltSequenceComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            _,
+            _,
+            _,
+            _,
+            AltSequenceComposeFilterBuilder<_, _, _, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
         .compute()?,
         ComposeFilterEnum::MatchFilter => ComposeFst::<
             _,
-            MatchComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            _,
+            _,
+            _,
+            _,
+            MatchComposeFilterBuilder<_, _, _, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
         .compute()?,
         ComposeFilterEnum::NoMatchFilter => ComposeFst::<
             _,
-            NoMatchComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            _,
+            _,
+            _,
+            _,
+            NoMatchComposeFilterBuilder<_, _, _, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
         .compute()?,
         ComposeFilterEnum::TrivialFilter => ComposeFst::<
             _,
-            TrivialComposeFilterBuilder<_, SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            _,
+            _,
+            _,
+            _,
+            TrivialComposeFilterBuilder<_, _, _, SortedMatcher<_, _>, SortedMatcher<_, _>>,
         >::new(fst1, fst2)?
         .compute()?,
     };

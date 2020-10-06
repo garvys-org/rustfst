@@ -17,7 +17,13 @@ pub mod lookahead_selector;
 mod push_labels_compose_filter;
 mod push_weights_compose_filter;
 
-pub fn lookahead_match_type<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>(
+pub fn lookahead_match_type<
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+>(
     m1: &M1,
     m2: &M2,
 ) -> Result<MatchType> {
@@ -49,10 +55,13 @@ pub fn lookahead_match_type_2<'fst, W: Semiring + 'fst, F1: Fst<W> + 'fst, F2: F
     unimplemented!()
 }
 
-pub trait LookAheadComposeFilterTrait<W: Semiring>: ComposeFilter<W>
+pub trait LookAheadComposeFilterTrait<W: Semiring, F1: Fst<W>, F2: Fst<W>, M1, M2>:
+    ComposeFilter<W, F1, F2, M1, M2>
 where
-    Self::M1: LookaheadMatcher<W>,
-    Self::M2: LookaheadMatcher<W>,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: LookaheadMatcher<W, F1>,
+    M2: LookaheadMatcher<W, F2>,
 {
     fn lookahead_flags(&self) -> MatcherFlags;
     fn lookahead_tr(&self) -> bool;

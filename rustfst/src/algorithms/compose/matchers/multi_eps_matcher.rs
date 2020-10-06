@@ -10,6 +10,7 @@ use nom::lib::std::collections::BTreeSet;
 use bitflags::bitflags;
 
 use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{Label, StateId, EPS_LABEL, NO_LABEL};
 
@@ -21,14 +22,19 @@ bitflags! {
 }
 
 #[derive(Clone, Debug)]
-pub struct MultiEpsMatcher<W, M> {
+pub struct MultiEpsMatcher<W, F, M>
+where
+    W: Semiring,
+    F: Fst<W>,
+    M: Matcher<W, F>,
+{
     matcher: Arc<M>,
     flags: MultiEpsMatcherFlags,
-    w: PhantomData<W>,
+    ghost: PhantomData<(W, F)>,
     multi_eps_labels: CompactSet<Label>,
 }
 
-pub struct IteratorMultiEpsMatcher<W: Semiring, M: Matcher<W>> {
+pub struct IteratorMultiEpsMatcher<W: Semiring, F: Fst<W>, M: Matcher<W, F>> {
     iter_matcher: Option<Peekable<M::Iter>>,
     iter_labels: Option<(Vec<usize>, usize)>,
     matcher: Arc<M>,
@@ -37,7 +43,7 @@ pub struct IteratorMultiEpsMatcher<W: Semiring, M: Matcher<W>> {
     done: bool,
 }
 
-impl<W: Semiring, M: Matcher<W>> Clone for IteratorMultiEpsMatcher<W, M> {
+impl<W: Semiring, F: Fst<W>, M: Matcher<W, F>> Clone for IteratorMultiEpsMatcher<W, F, M> {
     fn clone(&self) -> Self {
         unimplemented!()
         // Self {
@@ -51,7 +57,7 @@ impl<W: Semiring, M: Matcher<W>> Clone for IteratorMultiEpsMatcher<W, M> {
     }
 }
 
-impl<W: Semiring, M: Matcher<W>> Iterator for IteratorMultiEpsMatcher<W, M> {
+impl<W: Semiring, F: Fst<W>, M: Matcher<W, F>> Iterator for IteratorMultiEpsMatcher<W, F, M> {
     type Item = IterItemMatcher<W>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -104,9 +110,9 @@ impl<W: Semiring, M: Matcher<W>> Iterator for IteratorMultiEpsMatcher<W, M> {
     }
 }
 
-impl<W: Semiring, M: Matcher<W>> MultiEpsMatcher<W, M> {
+impl<W: Semiring, F: Fst<W>, M: Matcher<W, F>> MultiEpsMatcher<W, F, M> {
     pub fn new_with_opts<IM: Into<Option<Arc<M>>>>(
-        fst: Arc<<Self as Matcher<W>>::F>,
+        fst: Arc<F>,
         match_type: MatchType,
         flags: MultiEpsMatcherFlags,
         matcher: IM,
@@ -117,8 +123,8 @@ impl<W: Semiring, M: Matcher<W>> MultiEpsMatcher<W, M> {
         Ok(Self {
             matcher,
             flags,
-            w: PhantomData,
             multi_eps_labels: CompactSet::new(NO_LABEL),
+            ghost: PhantomData,
         })
     }
 
@@ -147,11 +153,10 @@ impl<W: Semiring, M: Matcher<W>> MultiEpsMatcher<W, M> {
     }
 }
 
-impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
-    type F = M::F;
-    type Iter = IteratorMultiEpsMatcher<W, M>;
+impl<W: Semiring, F: Fst<W>, M: Matcher<W, F>> Matcher<W, F> for MultiEpsMatcher<W, F, M> {
+    type Iter = IteratorMultiEpsMatcher<W, F, M>;
 
-    fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self> {
+    fn new(fst: Arc<F>, match_type: MatchType) -> Result<Self> {
         Self::new_with_opts(
             fst,
             match_type,
@@ -224,7 +229,7 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for MultiEpsMatcher<W, M> {
         self.matcher.priority(state)
     }
 
-    fn fst(&self) -> &Arc<Self::F> {
+    fn fst(&self) -> &Arc<F> {
         self.matcher.fst()
     }
 }

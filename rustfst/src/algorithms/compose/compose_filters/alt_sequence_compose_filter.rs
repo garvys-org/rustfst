@@ -11,11 +11,18 @@ use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, Looka
 use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::CoreFst;
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
 #[derive(Clone, Debug)]
-pub struct AltSequenceComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
+pub struct AltSequenceComposeFilter<W: Semiring, F1, F2, M1, M2>
+where
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+{
     matcher1: Arc<M1>,
     matcher2: Arc<M2>,
     /// Current fst1 state
@@ -28,26 +35,57 @@ pub struct AltSequenceComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>>
     alleps2: bool,
     /// No epsilons leaving s2 ?
     noeps2: bool,
-    w: PhantomData<W>,
+    ghost: PhantomData<(W, F1, F2)>,
 }
 
-#[derive(Debug, Clone)]
-pub struct AltSequenceComposeFilterBuilder<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
+#[derive(Debug)]
+pub struct AltSequenceComposeFilterBuilder<W, F1, F2, M1, M2>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+    AltSequenceComposeFilter<W, F1, F2, M1, M2>: ComposeFilter<W, F1, F2, M1, M2>,
+{
     matcher1: Arc<M1>,
     matcher2: Arc<M2>,
-    w: PhantomData<W>,
+    ghost: PhantomData<(W, F1, F2)>,
 }
 
-impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
-    for AltSequenceComposeFilterBuilder<W, M1, M2>
+impl<W, F1, F2, M1, M2> Clone for AltSequenceComposeFilterBuilder<W, F1, F2, M1, M2>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+    AltSequenceComposeFilter<W, F1, F2, M1, M2>: ComposeFilter<W, F1, F2, M1, M2>,
 {
-    type CF = AltSequenceComposeFilter<W, M1, M2>;
-    type M1 = M1;
-    type M2 = M2;
+    fn clone(&self) -> Self {
+        AltSequenceComposeFilterBuilder {
+            matcher1: self.matcher1.clone(),
+            matcher2: self.matcher2.clone(),
+            ghost: PhantomData,
+        }
+    }
+}
+
+impl<W: Semiring, F1, F2, M1, M2> ComposeFilterBuilder<W, F1, F2, M1, M2>
+    for AltSequenceComposeFilterBuilder<W, F1, F2, M1, M2>
+where
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+{
+    type IM1 = M1;
+    type IM2 = M2;
+    type CF = AltSequenceComposeFilter<W, F1, F2, M1, M2>;
 
     fn new(
-        fst1: Arc<M1::F>,
-        fst2: Arc<M2::F>,
+        fst1: Arc<F1>,
+        fst2: Arc<F2>,
         matcher1: Option<M1>,
         matcher2: Option<M2>,
     ) -> Result<Self> {
@@ -58,29 +96,40 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
         Ok(Self {
             matcher1: Arc::new(matcher1),
             matcher2: Arc::new(matcher2),
-            w: PhantomData,
+            ghost: PhantomData,
         })
     }
 
     fn build(&self) -> Result<Self::CF> {
-        Ok(AltSequenceComposeFilter::<W, M1, M2> {
-            matcher1: Arc::clone(&self.matcher1),
-            matcher2: Arc::clone(&self.matcher2),
-            s1: NO_STATE_ID,
-            s2: NO_STATE_ID,
-            fs: <AltSequenceComposeFilter<W, M1, M2> as ComposeFilter<W>>::FS::new(NO_STATE_ID),
-            alleps2: false,
-            noeps2: false,
-            w: PhantomData,
-        })
+        Ok(
+            AltSequenceComposeFilter::<W, F1, F2, M1, M2> {
+                matcher1: Arc::clone(&self.matcher1),
+                matcher2: Arc::clone(&self.matcher2),
+                s1: NO_STATE_ID,
+                s2: NO_STATE_ID,
+                fs: <AltSequenceComposeFilter<W, F1, F2, M1, M2> as ComposeFilter<
+                    W,
+                    F1,
+                    F2,
+                    M1,
+                    M2,
+                >>::FS::new(NO_STATE_ID),
+                alleps2: false,
+                noeps2: false,
+                ghost: PhantomData,
+            },
+        )
     }
 }
 
-impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
-    for AltSequenceComposeFilter<W, M1, M2>
+impl<W: Semiring, F1, F2, M1, M2> ComposeFilter<W, F1, F2, M1, M2>
+    for AltSequenceComposeFilter<W, F1, F2, M1, M2>
+where
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
 {
-    type M1 = M1;
-    type M2 = M2;
     type FS = IntegerFilterState;
 
     fn start(&self) -> Self::FS {
@@ -93,7 +142,7 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
             self.s2 = s2;
             self.fs = filter_state.clone();
             // TODO: Could probably use unchecked here as the state should exist.
-            let fst2 = self.fst2();
+            let fst2 = self.matcher2().fst();
             let na2 = fst2.num_trs(self.s2)?;
             let ne2 = fst2.num_input_epsilons(self.s2)?;
             let fin2 = fst2.is_final(self.s2)?;
@@ -132,19 +181,19 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(())
     }
 
-    fn matcher1(&self) -> &Self::M1 {
+    fn matcher1(&self) -> &M1 {
         &self.matcher1
     }
 
-    fn matcher2(&self) -> &Self::M2 {
+    fn matcher2(&self) -> &M2 {
         &self.matcher2
     }
 
-    fn matcher1_shared(&self) -> &Arc<Self::M1> {
+    fn matcher1_shared(&self) -> &Arc<M1> {
         &self.matcher1
     }
 
-    fn matcher2_shared(&self) -> &Arc<Self::M2> {
+    fn matcher2_shared(&self) -> &Arc<M2> {
         &self.matcher2
     }
 
@@ -153,8 +202,13 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
     }
 }
 
-impl<W: Semiring + 'static, M1: LookaheadMatcher<W>, M2: LookaheadMatcher<W>>
-    LookAheadComposeFilterTrait<W> for AltSequenceComposeFilter<W, M1, M2>
+impl<W: Semiring + 'static, F1, F2, M1, M2> LookAheadComposeFilterTrait<W, F1, F2, M1, M2>
+    for AltSequenceComposeFilter<W, F1, F2, M1, M2>
+where
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: LookaheadMatcher<W, F1>,
+    M2: LookaheadMatcher<W, F2>,
 {
     fn lookahead_flags(&self) -> MatcherFlags {
         unreachable!()

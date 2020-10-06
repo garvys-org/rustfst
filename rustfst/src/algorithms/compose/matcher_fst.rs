@@ -46,7 +46,7 @@ impl<W, F, M> MatcherFst<W, F, M, M::MatcherData>
 where
     W: Semiring,
     F: MutableFst<W>,
-    M: LookaheadMatcher<W, F = F, MatcherData = LabelReachableData>,
+    M: LookaheadMatcher<W, F, MatcherData = LabelReachableData>,
 {
     pub fn new(mut fst: F) -> Result<Self> {
         let imatcher_data = M::create_data(&fst, MatchType::MatchInput)?;

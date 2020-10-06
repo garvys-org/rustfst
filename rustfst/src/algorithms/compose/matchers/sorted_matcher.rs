@@ -18,8 +18,7 @@ pub struct SortedMatcher<W: Semiring, F: Fst<W>> {
     w: PhantomData<W>,
 }
 
-impl<W: Semiring, F: Fst<W>> Matcher<W> for SortedMatcher<W, F> {
-    type F = F;
+impl<W: Semiring, F: Fst<W>> Matcher<W, F> for SortedMatcher<W, F> {
     type Iter = IteratorSortedMatcher<W, F::TRS>;
 
     fn new(fst: Arc<F>, match_type: MatchType) -> Result<Self> {
@@ -81,7 +80,7 @@ impl<W: Semiring, F: Fst<W>> Matcher<W> for SortedMatcher<W, F> {
         self.fst.num_trs(state)
     }
 
-    fn fst(&self) -> &Arc<Self::F> {
+    fn fst(&self) -> &Arc<F> {
         &self.fst
     }
 }
@@ -173,7 +172,7 @@ impl<W: Semiring, T: Trs<W>> Iterator for IteratorSortedMatcher<W, T> {
     }
 }
 
-impl<W: Semiring, F: Fst<W>> LookaheadMatcher<W> for SortedMatcher<W, F> {
+impl<W: Semiring, F: Fst<W>> LookaheadMatcher<W, F> for SortedMatcher<W, F> {
     type MatcherData = ();
 
     fn data(&self) -> Option<&Arc<Self::MatcherData>> {
@@ -181,7 +180,7 @@ impl<W: Semiring, F: Fst<W>> LookaheadMatcher<W> for SortedMatcher<W, F> {
     }
 
     fn new_with_data(
-        _fst: Arc<Self::F>,
+        _fst: Arc<F>,
         _match_type: MatchType,
         _data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self>

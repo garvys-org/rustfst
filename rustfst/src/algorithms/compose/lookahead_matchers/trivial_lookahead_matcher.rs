@@ -15,11 +15,10 @@ pub struct TrivialLookAheadMatcher<W, M> {
     w: PhantomData<W>,
 }
 
-impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
-    type F = M::F;
+impl<W: Semiring, F: Fst<W>, M: Matcher<W, F>> Matcher<W, F> for TrivialLookAheadMatcher<W, M> {
     type Iter = M::Iter;
 
-    fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self> {
+    fn new(fst: Arc<F>, match_type: MatchType) -> Result<Self> {
         Ok(Self {
             matcher: M::new(fst, match_type)?,
             w: PhantomData,
@@ -48,12 +47,12 @@ impl<W: Semiring, M: Matcher<W>> Matcher<W> for TrivialLookAheadMatcher<W, M> {
         self.matcher.priority(state)
     }
 
-    fn fst(&self) -> &Arc<Self::F> {
+    fn fst(&self) -> &Arc<F> {
         self.matcher.fst()
     }
 }
 
-impl<W: Semiring, M: Matcher<W>> LookaheadMatcher<W> for TrivialLookAheadMatcher<W, M> {
+impl<W: Semiring, F: Fst<W>, M: Matcher<W, F>> LookaheadMatcher<W, F> for TrivialLookAheadMatcher<W, M> {
     type MatcherData = ();
 
     fn data(&self) -> Option<&Arc<Self::MatcherData>> {
@@ -61,15 +60,15 @@ impl<W: Semiring, M: Matcher<W>> LookaheadMatcher<W> for TrivialLookAheadMatcher
     }
 
     fn new_with_data(
-        fst: Arc<Self::F>,
+        fst: Arc<F>,
         match_type: MatchType,
         _data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self> {
         Self::new(fst, match_type)
     }
 
-    fn create_data<F: Fst<W>>(
-        _fst: &F,
+    fn create_data<F2: Fst<W>>(
+        _fst: &F2,
         _match_type: MatchType,
     ) -> Result<Option<Self::MatcherData>> {
         Ok(None)

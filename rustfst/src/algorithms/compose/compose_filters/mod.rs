@@ -14,6 +14,7 @@ pub use trivial_compose_filter::{TrivialComposeFilter, TrivialComposeFilterBuild
 use crate::algorithms::compose::filter_states::FilterState;
 use crate::algorithms::compose::matchers::Matcher;
 use crate::fst_properties::FstProperties;
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr};
 
@@ -25,15 +26,23 @@ mod null_compose_filter;
 mod sequence_compose_filter;
 mod trivial_compose_filter;
 
-pub trait ComposeFilterBuilder<W: Semiring>: Debug {
-    type CF: ComposeFilter<W>;
-    type M1: Matcher<W>;
-    type M2: Matcher<W>;
+pub trait ComposeFilterBuilder<W: Semiring, F1, F2, M1, M2>: Debug + Clone
+where
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+{
+    type IM1: Matcher<W, F1>;
+    type IM2: Matcher<W, F2>;
+
+    type CF: ComposeFilter<W, F1, F2, Self::IM1, Self::IM2>;
+
     fn new(
-        fst1: Arc<<<Self::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
-        fst2: Arc<<<Self::CF as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
-        matcher1: Option<Self::M1>,
-        matcher2: Option<Self::M2>,
+        fst1: Arc<F1>,
+        fst2: Arc<F2>,
+        matcher1: Option<M1>,
+        matcher2: Option<M2>,
     ) -> Result<Self>
     where
         Self: Sized;
@@ -43,9 +52,13 @@ pub trait ComposeFilterBuilder<W: Semiring>: Debug {
 
 /// Composition filters determine which matches are allowed to proceed. The
 /// filter's state is represented by the type ComposeFilter::FS.
-pub trait ComposeFilter<W: Semiring>: Debug {
-    type M1: Matcher<W>;
-    type M2: Matcher<W>;
+pub trait ComposeFilter<W: Semiring, F1, F2, M1, M2>: Debug
+where
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+{
     type FS: FilterState;
 
     fn start(&self) -> Self::FS;
@@ -56,16 +69,18 @@ pub trait ComposeFilter<W: Semiring>: Debug {
 
     fn filter_final(&self, w1: &mut W, w2: &mut W) -> Result<()>;
 
-    fn matcher1(&self) -> &Self::M1;
-    fn matcher2(&self) -> &Self::M2;
-    fn matcher1_shared(&self) -> &Arc<Self::M1>;
-    fn matcher2_shared(&self) -> &Arc<Self::M2>;
-    fn fst1(&self) -> &Arc<<Self::M1 as Matcher<W>>::F> {
+    fn matcher1(&self) -> &M1;
+    fn matcher2(&self) -> &M2;
+    fn matcher1_shared(&self) -> &Arc<M1>;
+    fn matcher2_shared(&self) -> &Arc<M2>;
+    /*
+    fn fst1(&self) -> &Arc<F1> {
         self.matcher1().fst()
     }
-    fn fst2(&self) -> &Arc<<Self::M2 as Matcher<W>>::F> {
+    fn fst2(&self) -> &Arc<F2> {
         self.matcher2().fst()
     }
+    */
 
     fn properties(&self, inprops: FstProperties) -> FstProperties;
 }

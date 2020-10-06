@@ -7,20 +7,32 @@ use crate::algorithms::compose::matchers::{GenericMatcher, Matcher};
 use crate::algorithms::compose::{ComposeFstOp, ComposeFstOpOptions, ComposeStateTuple};
 use crate::algorithms::lazy::{FstCache, LazyFst, SimpleVecCache, StateTable};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{
-    AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator,
-};
+use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
 use crate::{SymbolTable, TrsVec};
 use std::sync::Arc;
 
 #[derive(Debug)]
-pub struct ComposeFst<W: Semiring, CFB: ComposeFilterBuilder<W>, Cache = SimpleVecCache<W>>(
-    LazyFst<W, ComposeFstOp<W, CFB>, Cache>,
-);
+pub struct ComposeFst<W, F1, F2, M1, M2, CFB, Cache = SimpleVecCache<W>>(
+    LazyFst<W, ComposeFstOp<W, F1, F2, M1, M2, CFB>, Cache>,
+)
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, M1, M2>;
 
-impl<W: Semiring + Clone, CFB: ComposeFilterBuilder<W> + Clone, Cache: FstCache<W> + Clone> Clone for ComposeFst<W, CFB, Cache>
-where CFB::CF: Clone
+impl<W, F1, F2, M1, M2, CFB, Cache> Clone for ComposeFst<W, F1, F2, M1, M2, CFB, Cache>
+where
+    W: Semiring + Clone,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, M1, M2> + Clone,
+    Cache: FstCache<W> + Clone,
 {
     fn clone(&self) -> Self {
         Self(self.0.clone())
@@ -31,7 +43,14 @@ fn create_base<W: Semiring, F1: Fst<W>, F2: Fst<W>>(
     fst1: Arc<F1>,
     fst2: Arc<F2>,
 ) -> Result<
-    ComposeFstOp<W, SequenceComposeFilterBuilder<W, GenericMatcher<W, F1>, GenericMatcher<W, F2>>>,
+    ComposeFstOp<
+        W,
+        F1,
+        F2,
+        GenericMatcher<W, F1>,
+        GenericMatcher<W, F2>,
+        SequenceComposeFilterBuilder<W, F1, F2, GenericMatcher<W, F1>, GenericMatcher<W, F2>>,
+    >,
 > {
     // TODO: change this once Lookahead matchers are supported.
     let opts = ComposeFstOpOptions::<GenericMatcher<_, _>, GenericMatcher<_, _>, _, _>::default();
@@ -39,15 +58,26 @@ fn create_base<W: Semiring, F1: Fst<W>, F2: Fst<W>>(
     Ok(compose_impl)
 }
 
-impl<W: Semiring, CFB: ComposeFilterBuilder<W>, Cache: FstCache<W>> ComposeFst<W, CFB, Cache> {
+impl<W, F1, F2, M1, M2, CFB, Cache> ComposeFst<W, F1, F2, M1, M2, CFB, Cache>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, M1, M2>,
+    Cache: FstCache<W>,
+{
     pub fn new_with_options(
-        fst1: Arc<<<CFB::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
-        fst2: Arc<<<CFB::CF as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
+        fst1: Arc<F1>,
+        fst2: Arc<F2>,
         opts: ComposeFstOpOptions<
-            CFB::M1,
-            CFB::M2,
+            M1,
+            M2,
             CFB,
-            StateTable<ComposeStateTuple<<CFB::CF as ComposeFilter<W>>::FS>>,
+            StateTable<
+                ComposeStateTuple<<CFB::CF as ComposeFilter<W, F1, F2, CFB::IM1, CFB::IM2>>::FS>,
+            >,
         >,
     ) -> Result<Self>
     where
@@ -62,13 +92,15 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>, Cache: FstCache<W>> ComposeFst<W
     }
 
     pub fn new_with_options_and_cache(
-        fst1: Arc<<<CFB::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
-        fst2: Arc<<<CFB::CF as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
+        fst1: Arc<F1>,
+        fst2: Arc<F2>,
         opts: ComposeFstOpOptions<
-            CFB::M1,
-            CFB::M2,
+            M1,
+            M2,
             CFB,
-            StateTable<ComposeStateTuple<<CFB::CF as ComposeFilter<W>>::FS>>,
+            StateTable<
+                ComposeStateTuple<<CFB::CF as ComposeFilter<W, F1, F2, CFB::IM1, CFB::IM2>>::FS>,
+            >,
         >,
         fst_cache: Cache,
     ) -> Result<Self> {
@@ -80,10 +112,7 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>, Cache: FstCache<W>> ComposeFst<W
     }
 
     // TODO: Change API, no really user friendly
-    pub fn new(
-        fst1: Arc<<<CFB::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
-        fst2: Arc<<<CFB::CF as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
-    ) -> Result<Self>
+    pub fn new(fst1: Arc<F1>, fst2: Arc<F2>) -> Result<Self>
     where
         Cache: Default,
     {
@@ -91,13 +120,24 @@ impl<W: Semiring, CFB: ComposeFilterBuilder<W>, Cache: FstCache<W>> ComposeFst<W
     }
 
     /// Turns the Lazy FST into a static one.
-    pub fn compute<F2: MutableFst<W> + AllocableFst<W>>(&self) -> Result<F2> {
+    pub fn compute<F: MutableFst<W> + AllocableFst<W>>(&self) -> Result<F> {
         self.0.compute()
     }
 }
 
-impl<W: Semiring, F1: Fst<W>, F2: Fst<W>>
-    ComposeFst<W, SequenceComposeFilterBuilder<W, GenericMatcher<W, F1>, GenericMatcher<W, F2>>>
+impl<W, F1, F2>
+    ComposeFst<
+        W,
+        F1,
+        F2,
+        GenericMatcher<W, F1>,
+        GenericMatcher<W, F2>,
+        SequenceComposeFilterBuilder<W, F1, F2, GenericMatcher<W, F1>, GenericMatcher<W, F2>>,
+    >
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
 {
     pub fn new_auto(fst1: Arc<F1>, fst2: Arc<F2>) -> Result<Self> {
         let isymt = fst1.input_symbols().cloned();
@@ -109,10 +149,14 @@ impl<W: Semiring, F1: Fst<W>, F2: Fst<W>>
     }
 }
 
-impl<W, CFB, Cache> CoreFst<W> for ComposeFst<W, CFB, Cache>
+impl<W, F1, F2, M1, M2, CFB, Cache> CoreFst<W> for ComposeFst<W, F1, F2, M1, M2, CFB, Cache>
 where
     W: Semiring,
-    CFB: ComposeFilterBuilder<W>,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, M1, M2>,
     Cache: FstCache<W>,
 {
     type TRS = TrsVec<W>;
@@ -158,36 +202,52 @@ where
     }
 }
 
-impl<'a, W, CFB, Cache> StateIterator<'a> for ComposeFst<W, CFB, Cache>
+impl<'a, W, F1, F2, M1, M2, CFB, Cache> StateIterator<'a>
+    for ComposeFst<W, F1, F2, M1, M2, CFB, Cache>
 where
     W: Semiring,
-    CFB: ComposeFilterBuilder<W> + 'a,
+    F1: Fst<W> + 'a,
+    F2: Fst<W> + 'a,
+    M1: Matcher<W, F1> + 'a,
+    M2: Matcher<W, F2> + 'a,
+    CFB: ComposeFilterBuilder<W, F1, F2, M1, M2> + 'a,
     Cache: FstCache<W> + 'a,
 {
-    type Iter = <LazyFst<W, ComposeFstOp<W, CFB>, Cache> as StateIterator<'a>>::Iter;
+    type Iter =
+        <LazyFst<W, ComposeFstOp<W, F1, F2, M1, M2, CFB>, Cache> as StateIterator<'a>>::Iter;
 
     fn states_iter(&'a self) -> Self::Iter {
         self.0.states_iter()
     }
 }
 
-impl<'a, W, CFB, Cache> FstIterator<'a, W> for ComposeFst<W, CFB, Cache>
+impl<'a, W, F1, F2, M1, M2, CFB, Cache> FstIterator<'a, W>
+    for ComposeFst<W, F1, F2, M1, M2, CFB, Cache>
 where
     W: Semiring,
-    CFB: ComposeFilterBuilder<W> + 'a,
+    F1: Fst<W> + 'a,
+    F2: Fst<W> + 'a,
+    M1: Matcher<W, F1> + 'a,
+    M2: Matcher<W, F2> + 'a,
+    CFB: ComposeFilterBuilder<W, F1, F2, M1, M2> + 'a,
     Cache: FstCache<W> + 'a,
 {
-    type FstIter = <LazyFst<W, ComposeFstOp<W, CFB>, Cache> as FstIterator<'a, W>>::FstIter;
+    type FstIter =
+        <LazyFst<W, ComposeFstOp<W, F1, F2, M1, M2, CFB>, Cache> as FstIterator<'a, W>>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
         self.0.fst_iter()
     }
 }
 
-impl<W, CFB, Cache> Fst<W> for ComposeFst<W, CFB, Cache>
+impl<W, F1, F2, M1, M2, CFB, Cache> Fst<W> for ComposeFst<W, F1, F2, M1, M2, CFB, Cache>
 where
     W: Semiring,
-    CFB: ComposeFilterBuilder<W> + 'static,
+    F1: Fst<W> + 'static,
+    F2: Fst<W> + 'static,
+    M1: Matcher<W, F1> + 'static,
+    M2: Matcher<W, F2> + 'static,
+    CFB: ComposeFilterBuilder<W, F1, F2, M1, M2> + 'static,
     Cache: FstCache<W> + 'static,
 {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
@@ -228,11 +288,11 @@ mod test {
         is_sync::<
             ComposeFst<
                 TropicalWeight,
-                SequenceComposeFilterBuilder<
-                    _,
-                    SortedMatcher<_, VectorFst<_>>,
-                    SortedMatcher<_, VectorFst<_>>,
-                >,
+                VectorFst<_>,
+                VectorFst<_>,
+                SortedMatcher<_, _>,
+                SortedMatcher<_, _>,
+                SequenceComposeFilterBuilder<_, _, _, _, _>,
             >,
         >();
     }
@@ -243,11 +303,11 @@ mod test {
         is_clone::<
             ComposeFst<
                 TropicalWeight,
-                SequenceComposeFilterBuilder<
-                    _,
-                    SortedMatcher<_, VectorFst<_>>,
-                    SortedMatcher<_, VectorFst<_>>,
-                >,
+                VectorFst<_>,
+                VectorFst<_>,
+                SortedMatcher<_, _>,
+                SortedMatcher<_, _>,
+                SequenceComposeFilterBuilder<_, _, _, _, _>,
             >,
         >();
     }

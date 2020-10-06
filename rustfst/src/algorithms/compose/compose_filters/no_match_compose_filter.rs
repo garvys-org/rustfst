@@ -7,33 +7,71 @@ use crate::algorithms::compose::compose_filters::{ComposeFilter, ComposeFilterBu
 use crate::algorithms::compose::filter_states::{FilterState, TrivialFilterState};
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_properties::FstProperties;
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{Tr, EPS_LABEL};
 
 #[derive(Debug, Clone)]
-pub struct NoMatchComposeFilter<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
-    matcher1: Arc<M1>,
-    matcher2: Arc<M2>,
-    w: PhantomData<W>,
-}
-
-#[derive(Debug, Clone)]
-pub struct NoMatchComposeFilterBuilder<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> {
-    matcher1: Arc<M1>,
-    matcher2: Arc<M2>,
-    w: PhantomData<W>,
-}
-
-impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
-    for NoMatchComposeFilterBuilder<W, M1, M2>
+pub struct NoMatchComposeFilter<W, F1, F2, M1, M2>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
 {
-    type CF = NoMatchComposeFilter<W, M1, M2>;
-    type M1 = M1;
-    type M2 = M2;
+    matcher1: Arc<M1>,
+    matcher2: Arc<M2>,
+    ghost: PhantomData<(W, F1, F2)>,
+}
+
+#[derive(Debug)]
+pub struct NoMatchComposeFilterBuilder<W, F1, F2, M1, M2>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+{
+    matcher1: Arc<M1>,
+    matcher2: Arc<M2>,
+    ghost: PhantomData<(W, F1, F2)>,
+}
+
+impl<W, F1, F2, M1, M2> Clone for NoMatchComposeFilterBuilder<W, F1, F2, M1, M2>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+{
+    fn clone(&self) -> Self {
+        NoMatchComposeFilterBuilder {
+            matcher1: self.matcher1.clone(),
+            matcher2: self.matcher2.clone(),
+            ghost: PhantomData,
+        }
+    }
+}
+
+impl<W: Semiring, F1, F2, M1, M2> ComposeFilterBuilder<W, F1, F2, M1, M2>
+    for NoMatchComposeFilterBuilder<W, F1, F2, M1, M2>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
+{
+    type IM1 = M1;
+    type IM2 = M2;
+    type CF = NoMatchComposeFilter<W, F1, F2, M1, M2>;
 
     fn new(
-        fst1: Arc<M1::F>,
-        fst2: Arc<M2::F>,
+        fst1: Arc<F1>,
+        fst2: Arc<F2>,
         matcher1: Option<M1>,
         matcher2: Option<M2>,
     ) -> Result<Self> {
@@ -44,24 +82,28 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilterBuilder<W>
         Ok(Self {
             matcher1: Arc::new(matcher1),
             matcher2: Arc::new(matcher2),
-            w: PhantomData,
+            ghost: PhantomData,
         })
     }
 
     fn build(&self) -> Result<Self::CF> {
-        Ok(NoMatchComposeFilter::<W, M1, M2> {
+        Ok(NoMatchComposeFilter::<W, F1, F2, M1, M2> {
             matcher1: Arc::clone(&self.matcher1),
             matcher2: Arc::clone(&self.matcher2),
-            w: PhantomData,
+            ghost: PhantomData,
         })
     }
 }
 
-impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
-    for NoMatchComposeFilter<W, M1, M2>
+impl<W, F1, F2, M1, M2> ComposeFilter<W, F1, F2, M1, M2>
+    for NoMatchComposeFilter<W, F1, F2, M1, M2>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    M1: Matcher<W, F1>,
+    M2: Matcher<W, F2>,
 {
-    type M1 = M1;
-    type M2 = M2;
     type FS = TrivialFilterState;
 
     fn start(&self) -> Self::FS {
@@ -82,19 +124,19 @@ impl<W: Semiring, M1: Matcher<W>, M2: Matcher<W>> ComposeFilter<W>
         Ok(())
     }
 
-    fn matcher1(&self) -> &Self::M1 {
+    fn matcher1(&self) -> &M1 {
         &self.matcher1
     }
 
-    fn matcher2(&self) -> &Self::M2 {
+    fn matcher2(&self) -> &M2 {
         &self.matcher2
     }
 
-    fn matcher1_shared(&self) -> &Arc<Self::M1> {
+    fn matcher1_shared(&self) -> &Arc<M1> {
         &self.matcher1
     }
 
-    fn matcher2_shared(&self) -> &Arc<Self::M2> {
+    fn matcher2_shared(&self) -> &Arc<M2> {
         &self.matcher2
     }
 
