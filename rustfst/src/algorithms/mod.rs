@@ -7,6 +7,7 @@ pub use self::{
     inversion::invert,
     isomorphic::isomorphic,
     minimize::{acceptor_minimize, minimize},
+    optimize::optimize,
     projection::{project, ProjectType},
     push::{push, push_weights, PushType},
     queue::{Queue, QueueType},
@@ -40,6 +41,7 @@ mod fst_convert;
 mod inversion;
 mod isomorphic;
 mod minimize;
+mod optimize;
 mod partition;
 mod projection;
 mod push;

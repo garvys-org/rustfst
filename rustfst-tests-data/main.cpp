@@ -31,10 +31,13 @@
 #include "fst_016/fst_016.h"
 #include "fst_017/fst_017.h"
 #include "fst_018/fst_018.h"
+#include "fst_019/fst_019.h"
 
 #include "symt_000/symt_000.h"
 #include "symt_001/symt_001.h"
 #include "symt_002/symt_002.h"
+
+#include "../openfst-addon/optimize.cpp"
 
 int ID_FST_NUM = 0;
 
@@ -64,6 +67,15 @@ string weight_to_string(const W& a) {
     std::stringstream ss;
     ss << a;
     return ss.str();
+}
+
+template<class F>
+void compute_fst_optimize(const F& raw_fst, json& j, const string& dir_path) {
+    auto fst_out = *raw_fst.Copy();
+    Optimize(&fst_out);
+    // std::cout << "Resuult Optimize = " << std::endl;
+    // PrintFst(fst_out);
+    j["optimize"]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F>
@@ -1189,6 +1201,9 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     std::cout << "Queue" << std::endl;
     compute_fst_queue(raw_fst, data);
 
+    std::cout << "\n\nOptimize" << std::endl;
+    compute_fst_optimize(raw_fst, data, dir_path);
+
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;
 
@@ -1313,23 +1328,24 @@ int main() {
         compute_weight_data(w1, w2, "weight_012");
     }
 
-    compute_fst_data(FstTestData000(), "fst_000");
-    compute_fst_data(FstTestData001(), "fst_001");
-    compute_fst_data(FstTestData002(), "fst_002");
-    compute_fst_data(FstTestData003(), "fst_003");
-    compute_fst_data(FstTestData004(), "fst_004");
-    compute_fst_data(FstTestData005(), "fst_005");
-    compute_fst_data(FstTestData006(), "fst_006");
-    compute_fst_data(FstTestData007(), "fst_007");
-    compute_fst_data(FstTestData008(), "fst_008");
-    compute_fst_data(FstTestData009(), "fst_009");
-    compute_fst_data(FstTestData010(), "fst_010");
-    compute_fst_data(FstTestData011(), "fst_011");
-    compute_fst_data(FstTestData012(), "fst_012");
-    compute_fst_data(FstTestData013(), "fst_013");
-    compute_fst_data(FstTestData014(), "fst_014");
-    compute_fst_data(FstTestData015(), "fst_015");
-    compute_fst_data(FstTestData016(), "fst_016");
-    compute_fst_data(FstTestData017(), "fst_017");
-    compute_fst_data(FstTestData018(), "fst_018");
+    // compute_fst_data(FstTestData000(), "fst_000");
+    // compute_fst_data(FstTestData001(), "fst_001");
+    // compute_fst_data(FstTestData002(), "fst_002");
+    // compute_fst_data(FstTestData003(), "fst_003");
+    // compute_fst_data(FstTestData004(), "fst_004");
+    // compute_fst_data(FstTestData005(), "fst_005");
+    // compute_fst_data(FstTestData006(), "fst_006");
+    // compute_fst_data(FstTestData007(), "fst_007");
+    // compute_fst_data(FstTestData008(), "fst_008");
+    // compute_fst_data(FstTestData009(), "fst_009");
+    // compute_fst_data(FstTestData010(), "fst_010");
+    // compute_fst_data(FstTestData011(), "fst_011");
+    // compute_fst_data(FstTestData012(), "fst_012");
+    // compute_fst_data(FstTestData013(), "fst_013");
+    // compute_fst_data(FstTestData014(), "fst_014");
+    // compute_fst_data(FstTestData015(), "fst_015");
+    // compute_fst_data(FstTestData016(), "fst_016");
+    // compute_fst_data(FstTestData017(), "fst_017");
+    // compute_fst_data(FstTestData018(), "fst_018");
+    compute_fst_data(FstTestData019(), "fst_019");
 }
