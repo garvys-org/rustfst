@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use anyhow::Result;
 
 use rustfst::algorithms::compose::{
@@ -77,94 +75,92 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
                 compose::<TropicalWeight, VectorFst<_>, VectorFst<_>, _, _, _>(&fst_1, &fst_2)
             }
             ComposeType::LookAhead => {
-                type TLaFst<S, F> = MatcherFst<
+                type TLaFst<'a, S, F> = MatcherFst<
                     S,
                     F,
-                    Arc<F>,
+                    &'a F,
                     LabelLookAheadMatcher<
                         S,
                         F,
-                        Arc<F>,
-                        SortedMatcher<S, F, Arc<F>>,
+                        &'a F,
+                        SortedMatcher<S, F, &'a F>,
                         DefaultLabelLookAheadMatcherFlags,
                     >,
                     LabelReachableData,
                 >;
 
-                type TMatcher1<S, F> = LabelLookAheadMatcher<
+                type TMatcher1<'a, S, F> = LabelLookAheadMatcher<
                     S,
                     F,
-                    Arc<F>,
-                    SortedMatcher<S, F, Arc<F>>,
+                    &'a F,
+                    SortedMatcher<S, F, &'a F>,
                     DefaultLabelLookAheadMatcherFlags,
                 >;
-                type TMatcher2<S, F> = SortedMatcher<S, F, Arc<F>>;
+                type TMatcher2<'a, S, F> = SortedMatcher<S, F, &'a F>;
 
-                type TSeqFilter<S, F1, F2> = AltSequenceComposeFilterBuilder<
+                type TSeqFilter<'a, S, F1, F2> = AltSequenceComposeFilterBuilder<
                     S,
                     F1,
                     F2,
-                    Arc<F1>,
-                    Arc<F2>,
-                    TMatcher1<S, F1>,
-                    TMatcher2<S, F2>,
+                    &'a F1,
+                    &'a F2,
+                    TMatcher1<'a, S, F1>,
+                    TMatcher2<'a, S, F2>,
                 >;
 
-                type TLookFilter<S, F1, F2> = LookAheadComposeFilterBuilder<
+                type TLookFilter<'a, S, F1, F2> = LookAheadComposeFilterBuilder<
                     S,
                     F1,
                     F2,
-                    Arc<F1>,
-                    Arc<F2>,
-                    TMatcher1<S, F1>,
-                    TMatcher2<S, F2>,
-                    TSeqFilter<S, F1, F2>,
+                    &'a F1,
+                    &'a F2,
+                    TMatcher1<'a, S, F1>,
+                    TMatcher2<'a, S, F2>,
+                    TSeqFilter<'a, S, F1, F2>,
                     SMatchOutput,
                 >;
-                type TPushWeightsFilter<S, F1, F2> = PushWeightsComposeFilterBuilder<
+                type TPushWeightsFilter<'a, S, F1, F2> = PushWeightsComposeFilterBuilder<
                     S,
                     F1,
                     F2,
-                    Arc<F1>,
-                    Arc<F2>,
-                    TMatcher1<S, F1>,
-                    TMatcher2<S, F2>,
-                    TLookFilter<S, F1, F2>,
+                    &'a F1,
+                    &'a F2,
+                    TMatcher1<'a, S, F1>,
+                    TMatcher2<'a, S, F2>,
+                    TLookFilter<'a, S, F1, F2>,
                     SMatchOutput,
                 >;
-                type TPushLabelsFilter<S, F1, F2> = PushLabelsComposeFilterBuilder<
+                type TPushLabelsFilter<'a, S, F1, F2> = PushLabelsComposeFilterBuilder<
                     S,
                     F1,
                     F2,
-                    Arc<F1>,
-                    Arc<F2>,
-                    TMatcher1<S, F1>,
-                    TMatcher2<S, F2>,
-                    TPushWeightsFilter<S, F1, F2>,
+                    &'a F1,
+                    &'a F2,
+                    TMatcher1<'a, S, F1>,
+                    TMatcher2<'a, S, F2>,
+                    TPushWeightsFilter<'a, S, F1, F2>,
                     SMatchOutput,
                 >;
 
-                type TComposeFilter<S, F1, F2> = TPushLabelsFilter<S, F1, F2>;
+                type TComposeFilter<'a, S, F1, F2> = TPushLabelsFilter<'a, S, F1, F2>;
 
-                let graph1look = Arc::new(TLaFst::new_with_relabeling(fst_1, &mut fst_2, true)?);
+                let graph1look = TLaFst::new_with_relabeling(fst_1, &mut fst_2, true)?;
 
                 // LabelLookAheadRelabeler::relabel(&mut fst2, graph1look.addon(), true)?;
 
                 tr_sort(&mut fst_2, ILabelCompare {});
 
-                let fst_2 = Arc::new(fst_2);
-
                 let matcher1 = TMatcher1::new_with_data(
-                    graph1look.clone(),
+                    &graph1look,
                     MatchType::MatchOutput,
                     graph1look.data(MatchType::MatchOutput).cloned(),
                 )?;
 
-                let matcher2 = TMatcher2::new(Arc::clone(&fst_2), MatchType::MatchInput)?;
+                let matcher2 = TMatcher2::new(&fst_2, MatchType::MatchInput)?;
 
                 let compose_filter = TComposeFilter::new(
-                    Arc::clone(&graph1look),
-                    Arc::clone(&fst_2),
+                    &graph1look,
+                    &fst_2,
                     Some(matcher1),
                     Some(matcher2),
                 )?;
@@ -180,8 +176,8 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
 
                 let dyn_fst =
                     ComposeFst::<_, _, _, _, _, _, _, _, SimpleHashMapCache<_>>::new_with_options(
-                        graph1look,
-                        fst_2,
+                        &graph1look,
+                        &fst_2,
                         compose_options,
                     )?;
 
