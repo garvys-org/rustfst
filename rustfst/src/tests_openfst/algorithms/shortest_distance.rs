@@ -1,14 +1,12 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::{shortest_distance, shortest_distance_default};
+use crate::algorithms::shortest_distance_default;
 use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
 use crate::tests_openfst::FstTestData;
-use crate::KDELTA;
-use itertools::Itertools;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ShorestDistanceOperationResult {

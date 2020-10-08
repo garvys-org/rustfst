@@ -4,7 +4,7 @@ use std::marker::PhantomData;
 use anyhow::{format_err, Result};
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::{shortest_path, shortest_path_default};
+use crate::algorithms::shortest_path_default;
 use crate::fst_path::check_path_in_fst;
 use crate::fst_traits::{MutableFst, PathsIterator, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;

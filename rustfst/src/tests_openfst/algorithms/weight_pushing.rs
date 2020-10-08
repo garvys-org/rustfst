@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use anyhow::Result;
 
-use crate::algorithms::{push_weights, ReweightType, push_weights_default};
+use crate::algorithms::{ReweightType, push_weights_default};
 use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::{SerializableSemiring, WeightQuantize};

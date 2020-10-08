@@ -4,7 +4,7 @@ use crate::algorithms::fst_convert_from_ref;
 use crate::algorithms::tr_mappers::QuantizeMapper;
 use crate::fst_traits::{AllocableFst, Fst, FstIntoIterator, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
-use crate::{Trs, KDELTA};
+use crate::Trs;
 
 /// Trait defining the necessary methods that should implement an ExpandedFST e.g
 /// a FST where all the states are already computed and not computed on the fly.

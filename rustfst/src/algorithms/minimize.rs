@@ -675,9 +675,8 @@ mod tests {
             .. ProptestConfig::default()
         })]
         #[test]
-        #[ignore]
         fn proptest_minimize_timeout(mut fst in any::<VectorFst::<TropicalWeight>>()) {
-            minimize(&mut fst, true).unwrap();
+            minimize(&mut fst, KSHORTESTDELTA, true).unwrap();
         }
     }
 
@@ -685,10 +684,10 @@ mod tests {
         #[test]
         #[ignore] // falls into the same infinite loop as the timeout test
         fn test_minimize_proptest(mut fst in any::<VectorFst::<TropicalWeight>>()) {
-            let det:VectorFst<_> = determinize(&fst, DeterminizeType::DeterminizeNonFunctional).unwrap();
-            minimize(&mut fst, true).unwrap();
-            let min_det:VectorFst<_> = determinize(&fst, DeterminizeType::DeterminizeNonFunctional).unwrap();
-            prop_assert!(isomorphic(&det, &min_det).unwrap())
+            let det:VectorFst<_> = determinize_default(&fst, DeterminizeType::DeterminizeNonFunctional).unwrap();
+            minimize(&mut fst, KSHORTESTDELTA, true).unwrap();
+            let min_det:VectorFst<_> = determinize_default(&fst, DeterminizeType::DeterminizeNonFunctional).unwrap();
+            prop_assert!(isomorphic_default(&det, &min_det).unwrap())
         }
     }
 }
