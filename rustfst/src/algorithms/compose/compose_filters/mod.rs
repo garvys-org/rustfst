@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::sync::Arc;
 
@@ -26,24 +27,21 @@ mod null_compose_filter;
 mod sequence_compose_filter;
 mod trivial_compose_filter;
 
-pub trait ComposeFilterBuilder<W: Semiring, F1, F2, M1, M2>: Debug + Clone
+pub trait ComposeFilterBuilder<W: Semiring, F1, F2, B1, B2, M1, M2>: Debug + Clone
 where
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: Matcher<W, F1>,
-    M2: Matcher<W, F2>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: Matcher<W, F1, B1>,
+    M2: Matcher<W, F2, B2>,
 {
-    type IM1: Matcher<W, F1>;
-    type IM2: Matcher<W, F2>;
+    type IM1: Matcher<W, F1, B1>;
+    type IM2: Matcher<W, F2, B2>;
 
-    type CF: ComposeFilter<W, F1, F2, Self::IM1, Self::IM2>;
+    type CF: ComposeFilter<W, F1, F2, B1, B2, Self::IM1, Self::IM2>;
 
-    fn new(
-        fst1: Arc<F1>,
-        fst2: Arc<F2>,
-        matcher1: Option<M1>,
-        matcher2: Option<M2>,
-    ) -> Result<Self>
+    fn new(fst1: B1, fst2: B2, matcher1: Option<M1>, matcher2: Option<M2>) -> Result<Self>
     where
         Self: Sized;
 
@@ -52,12 +50,14 @@ where
 
 /// Composition filters determine which matches are allowed to proceed. The
 /// filter's state is represented by the type ComposeFilter::FS.
-pub trait ComposeFilter<W: Semiring, F1, F2, M1, M2>: Debug
+pub trait ComposeFilter<W: Semiring, F1, F2, B1, B2, M1, M2>: Debug
 where
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: Matcher<W, F1>,
-    M2: Matcher<W, F2>,
+    B1: Borrow<F1>,
+    B2: Borrow<F2>,
+    M1: Matcher<W, F1, B1>,
+    M2: Matcher<W, F2, B2>,
 {
     type FS: FilterState;
 
@@ -73,14 +73,6 @@ where
     fn matcher2(&self) -> &M2;
     fn matcher1_shared(&self) -> &Arc<M1>;
     fn matcher2_shared(&self) -> &Arc<M2>;
-    /*
-    fn fst1(&self) -> &Arc<F1> {
-        self.matcher1().fst()
-    }
-    fn fst2(&self) -> &Arc<F2> {
-        self.matcher2().fst()
-    }
-    */
 
     fn properties(&self, inprops: FstProperties) -> FstProperties;
 }

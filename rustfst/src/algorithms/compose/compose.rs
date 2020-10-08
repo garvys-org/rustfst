@@ -1,4 +1,5 @@
-use std::sync::Arc;
+use std::borrow::Borrow;
+use std::fmt::Debug;
 
 use anyhow::Result;
 
@@ -39,12 +40,14 @@ impl Default for ComposeConfig {
 
 pub fn compose_with_config<
     W: Semiring,
+    B1: Borrow<F1> + Debug + Clone,
+    B2: Borrow<F2> + Debug + Clone,
     F1: ExpandedFst<W>,
     F2: ExpandedFst<W>,
     F3: MutableFst<W> + AllocableFst<W>,
 >(
-    fst1: Arc<F1>,
-    fst2: Arc<F2>,
+    fst1: B1,
+    fst2: B2,
     config: ComposeConfig,
 ) -> Result<F3> {
     let mut ofst: F3 = match config.compose_filter {
@@ -55,7 +58,9 @@ pub fn compose_with_config<
             _,
             _,
             _,
-            NullComposeFilterBuilder<_, _, _, SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            _,
+            _,
+            NullComposeFilterBuilder<_, _, _, _, _, SortedMatcher<_, _, _>, SortedMatcher<_, _, _>>,
         >::new(fst1, fst2)?
         .compute()?,
         ComposeFilterEnum::SequenceFilter => ComposeFst::<
@@ -64,7 +69,17 @@ pub fn compose_with_config<
             _,
             _,
             _,
-            SequenceComposeFilterBuilder<_, _, _, SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            _,
+            _,
+            SequenceComposeFilterBuilder<
+                _,
+                _,
+                _,
+                _,
+                _,
+                SortedMatcher<_, _, _>,
+                SortedMatcher<_, _, _>,
+            >,
         >::new(fst1, fst2)?
         .compute()?,
         ComposeFilterEnum::AltSequenceFilter => ComposeFst::<
@@ -73,7 +88,17 @@ pub fn compose_with_config<
             _,
             _,
             _,
-            AltSequenceComposeFilterBuilder<_, _, _, SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            _,
+            _,
+            AltSequenceComposeFilterBuilder<
+                _,
+                _,
+                _,
+                _,
+                _,
+                SortedMatcher<_, _, _>,
+                SortedMatcher<_, _, _>,
+            >,
         >::new(fst1, fst2)?
         .compute()?,
         ComposeFilterEnum::MatchFilter => ComposeFst::<
@@ -82,7 +107,17 @@ pub fn compose_with_config<
             _,
             _,
             _,
-            MatchComposeFilterBuilder<_, _, _, SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            _,
+            _,
+            MatchComposeFilterBuilder<
+                _,
+                _,
+                _,
+                _,
+                _,
+                SortedMatcher<_, _, _>,
+                SortedMatcher<_, _, _>,
+            >,
         >::new(fst1, fst2)?
         .compute()?,
         ComposeFilterEnum::NoMatchFilter => ComposeFst::<
@@ -91,7 +126,17 @@ pub fn compose_with_config<
             _,
             _,
             _,
-            NoMatchComposeFilterBuilder<_, _, _, SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            _,
+            _,
+            NoMatchComposeFilterBuilder<
+                _,
+                _,
+                _,
+                _,
+                _,
+                SortedMatcher<_, _, _>,
+                SortedMatcher<_, _, _>,
+            >,
         >::new(fst1, fst2)?
         .compute()?,
         ComposeFilterEnum::TrivialFilter => ComposeFst::<
@@ -100,7 +145,17 @@ pub fn compose_with_config<
             _,
             _,
             _,
-            TrivialComposeFilterBuilder<_, _, _, SortedMatcher<_, _>, SortedMatcher<_, _>>,
+            _,
+            _,
+            TrivialComposeFilterBuilder<
+                _,
+                _,
+                _,
+                _,
+                _,
+                SortedMatcher<_, _, _>,
+                SortedMatcher<_, _, _>,
+            >,
         >::new(fst1, fst2)?
         .compute()?,
     };
@@ -142,9 +197,11 @@ pub fn compose<
     F1: ExpandedFst<W>,
     F2: ExpandedFst<W>,
     F3: MutableFst<W> + AllocableFst<W>,
+    B1: Borrow<F1> + Debug + Clone,
+    B2: Borrow<F2> + Debug + Clone,
 >(
-    fst1: Arc<F1>,
-    fst2: Arc<F2>,
+    fst1: B1,
+    fst2: B2,
 ) -> Result<F3> {
     let config = ComposeConfig::default();
     compose_with_config(fst1, fst2, config)

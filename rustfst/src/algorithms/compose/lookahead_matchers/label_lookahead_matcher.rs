@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
@@ -13,23 +15,29 @@ use crate::semirings::Semiring;
 use crate::{Tr, Trs, EPS_LABEL};
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct LabelLookAheadMatcher<W, F, M, MFT>
+pub struct LabelLookAheadMatcher<W, F, B, M, MFT>
 where
     W: Semiring,
     F: Fst<W>,
-    M: Matcher<W, F>,
+    B: Borrow<F>,
+    M: Matcher<W, F, B>,
 {
     matcher: M,
     reachable: Option<LabelReachable>,
-    ghost: PhantomData<(W, F, MFT)>,
+    ghost: PhantomData<(W, F, B, MFT)>,
 }
 
-impl<W: Semiring, F: Fst<W>, M: Matcher<W, F>, MFT: MatcherFlagsTrait> Matcher<W, F>
-    for LabelLookAheadMatcher<W, F, M, MFT>
+impl<W, F, B, M, MFT> Matcher<W, F, B> for LabelLookAheadMatcher<W, F, B, M, MFT>
+where
+    W: Semiring,
+    F: Fst<W>,
+    B: Borrow<F> + Debug + Clone,
+    M: Matcher<W, F, B>,
+    MFT: MatcherFlagsTrait,
 {
     type Iter = M::Iter;
 
-    fn new(fst: Arc<F>, match_type: MatchType) -> Result<Self> {
+    fn new(fst: B, match_type: MatchType) -> Result<Self> {
         Self::new_with_data(fst, match_type, None)
     }
 
@@ -61,16 +69,17 @@ impl<W: Semiring, F: Fst<W>, M: Matcher<W, F>, MFT: MatcherFlagsTrait> Matcher<W
         self.matcher.priority(state)
     }
 
-    fn fst(&self) -> &Arc<F> {
+    fn fst(&self) -> &B {
         self.matcher.fst()
     }
 }
 
-impl<W, F, M, MFT> LookaheadMatcher<W, F> for LabelLookAheadMatcher<W, F, M, MFT>
+impl<W, F, B, M, MFT> LookaheadMatcher<W, F, B> for LabelLookAheadMatcher<W, F, B, M, MFT>
 where
     W: Semiring + 'static,
     F: Fst<W>,
-    M: Matcher<W, F>,
+    B: Borrow<F> + Debug + Clone,
+    M: Matcher<W, F, B>,
     MFT: MatcherFlagsTrait,
 {
     type MatcherData = LabelReachableData;
@@ -84,7 +93,7 @@ where
     }
 
     fn new_with_data(
-        fst: Arc<F>,
+        fst: B,
         match_type: MatchType,
         data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self> {
@@ -103,7 +112,7 @@ where
             if reach_input == d.reach_input() {
                 reachable = Some(LabelReachable::new_from_data(d));
             }
-        } else if let Some(d) = Self::create_data(&fst, match_type)? {
+        } else if let Some(d) = Self::create_data(fst.clone(), match_type)? {
             reachable = Some(LabelReachable::new_from_data(Arc::new(d)));
         }
 
@@ -114,34 +123,35 @@ where
         })
     }
 
-    fn create_data<F2: Fst<W>>(
-        fst: &F2,
+    fn create_data<F2: Fst<W>, BF2: Borrow<F2>>(
+        fst: BF2,
         match_type: MatchType,
     ) -> Result<Option<Self::MatcherData>> {
         let reach_input = match_type == MatchType::MatchInput;
         if (reach_input && MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER))
             || (!reach_input && MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
         {
-            Ok(Some(LabelReachable::compute_data(fst, reach_input)?))
+            Ok(Some(LabelReachable::compute_data(fst.borrow(), reach_input)?))
         } else {
             Ok(None)
         }
     }
 
-    fn init_lookahead_fst<LF: Fst<W>>(&mut self, lfst: &Arc<LF>) -> Result<()> {
+    fn init_lookahead_fst<LF: Fst<W>, BLF: Borrow<LF> + Clone>(&mut self, lfst: &BLF) -> Result<()> {
         let reach_input = self.match_type(false)? == MatchType::MatchOutput;
         if let Some(reachable) = &mut self.reachable {
-            reachable.reach_init(lfst, reach_input)?;
+            reachable.reach_init(lfst.borrow(), reach_input)?;
         }
         Ok(())
     }
 
-    fn lookahead_fst<LF: Fst<W>>(
+    fn lookahead_fst<LF: Fst<W>, BLF: Borrow<LF>>(
         &self,
         matcher_state: usize,
-        lfst: &Arc<LF>,
+        lfst: &BLF,
         lfst_state: usize,
     ) -> Result<Option<LookAheadMatcherData<W>>> {
+        let lfst = lfst.borrow();
         // InitLookAheadFst
         // let lfst_ptr = Arc::into_raw(Arc::clone(&lfst)) as *const LF as *const u32;
         // if lfst_ptr != self.lfst_ptr {

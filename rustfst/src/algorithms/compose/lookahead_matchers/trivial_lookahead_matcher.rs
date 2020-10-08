@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
@@ -15,10 +16,16 @@ pub struct TrivialLookAheadMatcher<W, M> {
     w: PhantomData<W>,
 }
 
-impl<W: Semiring, F: Fst<W>, M: Matcher<W, F>> Matcher<W, F> for TrivialLookAheadMatcher<W, M> {
+impl<W, F, B, M> Matcher<W, F, B> for TrivialLookAheadMatcher<W, M>
+where
+    W: Semiring,
+    F: Fst<W>,
+    B: Borrow<F>,
+    M: Matcher<W, F, B>,
+{
     type Iter = M::Iter;
 
-    fn new(fst: Arc<F>, match_type: MatchType) -> Result<Self> {
+    fn new(fst: B, match_type: MatchType) -> Result<Self> {
         Ok(Self {
             matcher: M::new(fst, match_type)?,
             w: PhantomData,
@@ -47,12 +54,18 @@ impl<W: Semiring, F: Fst<W>, M: Matcher<W, F>> Matcher<W, F> for TrivialLookAhea
         self.matcher.priority(state)
     }
 
-    fn fst(&self) -> &Arc<F> {
+    fn fst(&self) -> &B {
         self.matcher.fst()
     }
 }
 
-impl<W: Semiring, F: Fst<W>, M: Matcher<W, F>> LookaheadMatcher<W, F> for TrivialLookAheadMatcher<W, M> {
+impl<W, F, B, M> LookaheadMatcher<W, F, B> for TrivialLookAheadMatcher<W, M>
+where
+    W: Semiring,
+    F: Fst<W>,
+    B: Borrow<F>,
+    M: Matcher<W, F, B>,
+{
     type MatcherData = ();
 
     fn data(&self) -> Option<&Arc<Self::MatcherData>> {
@@ -60,28 +73,28 @@ impl<W: Semiring, F: Fst<W>, M: Matcher<W, F>> LookaheadMatcher<W, F> for Trivia
     }
 
     fn new_with_data(
-        fst: Arc<F>,
+        fst: B,
         match_type: MatchType,
         _data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self> {
         Self::new(fst, match_type)
     }
 
-    fn create_data<F2: Fst<W>>(
-        _fst: &F2,
+    fn create_data<F2: Fst<W>, BF2: Borrow<F2>>(
+        _fst: BF2,
         _match_type: MatchType,
     ) -> Result<Option<Self::MatcherData>> {
         Ok(None)
     }
 
-    fn init_lookahead_fst<LF: Fst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
+    fn init_lookahead_fst<LF: Fst<W>, BLF: Borrow<LF>>(&mut self, _lfst: &BLF) -> Result<()> {
         Ok(())
     }
 
-    fn lookahead_fst<LF: Fst<W>>(
+    fn lookahead_fst<LF: Fst<W>, BLF: Borrow<LF>>(
         &self,
         _matcher_state: StateId,
-        _lfst: &Arc<LF>,
+        _lfst: &BLF,
         _s: StateId,
     ) -> Result<Option<LookAheadMatcherData<W>>> {
         Ok(Some(LookAheadMatcherData::default()))

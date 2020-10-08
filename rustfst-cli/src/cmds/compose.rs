@@ -81,7 +81,8 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
                     LabelLookAheadMatcher<
                         S,
                         F,
-                        SortedMatcher<S, F>,
+                        Arc<F>,
+                        SortedMatcher<S, F, Arc<F>>,
                         DefaultLabelLookAheadMatcherFlags,
                     >,
                     LabelReachableData,
@@ -90,15 +91,25 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
                 type TMatcher1<S, F> = LabelLookAheadMatcher<
                     S,
                     F,
-                    SortedMatcher<S, F>,
+                    F,
+                    SortedMatcher<S, F, F>,
                     DefaultLabelLookAheadMatcherFlags,
                 >;
-                type TMatcher2<S, F> = SortedMatcher<S, F>;
+                type TMatcher2<S, F> = SortedMatcher<S, F, F>;
 
-                type TSeqFilter<S, F1, F2> =
-                    AltSequenceComposeFilterBuilder<S, F1, F2, TMatcher1<S, F1>, TMatcher2<S, F2>>;
+                type TSeqFilter<S, F1, F2> = AltSequenceComposeFilterBuilder<
+                    S,
+                    F1,
+                    F2,
+                    F1,
+                    F2,
+                    TMatcher1<S, F1>,
+                    TMatcher2<S, F2>,
+                >;
                 type TLookFilter<S, F1, F2> = LookAheadComposeFilterBuilder<
                     S,
+                    F1,
+                    F2,
                     F1,
                     F2,
                     TMatcher1<S, F1>,
@@ -110,6 +121,8 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
                     S,
                     F1,
                     F2,
+                    F1,
+                    F2,
                     TMatcher1<S, F1>,
                     TMatcher2<S, F2>,
                     TLookFilter<S, F1, F2>,
@@ -117,6 +130,8 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
                 >;
                 type TPushLabelsFilter<S, F1, F2> = PushLabelsComposeFilterBuilder<
                     S,
+                    F1,
+                    F2,
                     F1,
                     F2,
                     TMatcher1<S, F1>,
@@ -136,7 +151,7 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
                 let fst_2 = Arc::new(fst_2);
 
                 let matcher1 = TMatcher1::new_with_data(
-                    Arc::clone(&graph1look),
+                    graph1look,
                     MatchType::MatchOutput,
                     graph1look.data(MatchType::MatchOutput).cloned(),
                 )?;
@@ -159,11 +174,12 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
                     None,
                 );
 
-                let dyn_fst = ComposeFst::<_, _, _, _, _, _, SimpleHashMapCache<_>>::new_with_options(
-                    graph1look,
-                    fst_2,
-                    compose_options,
-                )?;
+                let dyn_fst =
+                    ComposeFst::<_, _, _, _, _, _, SimpleHashMapCache<_>>::new_with_options(
+                        graph1look,
+                        fst_2,
+                        compose_options,
+                    )?;
 
                 dyn_fst.compute()
             }

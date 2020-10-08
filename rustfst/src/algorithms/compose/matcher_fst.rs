@@ -46,11 +46,11 @@ impl<W, F, M> MatcherFst<W, F, M, M::MatcherData>
 where
     W: Semiring,
     F: MutableFst<W>,
-    M: LookaheadMatcher<W, F, MatcherData = LabelReachableData>,
+    M: LookaheadMatcher<W, F, F, MatcherData = LabelReachableData>,
 {
     pub fn new(mut fst: F) -> Result<Self> {
-        let imatcher_data = M::create_data(&fst, MatchType::MatchInput)?;
-        let omatcher_data = M::create_data(&fst, MatchType::MatchOutput)?;
+        let imatcher_data = M::create_data::<F, _>(&fst, MatchType::MatchInput)?;
+        let omatcher_data = M::create_data::<F, _>(&fst, MatchType::MatchOutput)?;
 
         let mut add_on = (imatcher_data, omatcher_data);
         LabelLookAheadRelabeler::init(&mut fst, &mut add_on)?;
@@ -71,8 +71,8 @@ where
         fst2: &mut F2,
         relabel_input: bool,
     ) -> Result<Self> {
-        let imatcher_data = M::create_data(&fst, MatchType::MatchInput)?;
-        let omatcher_data = M::create_data(&fst, MatchType::MatchOutput)?;
+        let imatcher_data = M::create_data::<F, _>(&fst, MatchType::MatchInput)?;
+        let omatcher_data = M::create_data::<F, _>(&fst, MatchType::MatchOutput)?;
 
         let mut add_on = (imatcher_data, omatcher_data);
         LabelLookAheadRelabeler::init(&mut fst, &mut add_on)?;

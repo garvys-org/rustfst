@@ -1,5 +1,7 @@
 use std::sync::Arc;
 use std::marker::PhantomData;
+use std::borrow::Borrow;
+use std::fmt::Debug;
 
 use anyhow::Result;
 
@@ -11,29 +13,33 @@ use crate::semirings::Semiring;
 use crate::{Tr, NO_LABEL};
 
 #[derive(Debug, Clone)]
-pub struct MultiEpsFilter<W, F1, F2, M1, M2, CF>
+pub struct MultiEpsFilter<W, F1, F2, B1, B2, M1, M2, CF>
 where
     W: Semiring,
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: Matcher<W, F1>,
-    M2: Matcher<W, F2>,
-    CF: ComposeFilter<W, F1, F2, M1, M2>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: Matcher<W, F1, B1>,
+    M2: Matcher<W, F2, B2>,
+    CF: ComposeFilter<W, F1, F2, B1, B2, M1, M2>,
 {
     filter: CF,
     keep_multi_eps: bool,
-    ghost: PhantomData<(W, F1, F2, M1, M2)>,
+    ghost: PhantomData<(W, F1, F2, B1, B2, M1, M2)>,
 }
 
-impl<W, F1, F2, M1, M2, CF: ComposeFilter<W, F1, F2, M1, M2>> ComposeFilter<W, F1, F2, M1, M2>
-    for MultiEpsFilter<W, F1, F2, M1, M2, CF>
+impl<W, F1, F2, B1, B2, M1, M2, CF: ComposeFilter<W, F1, F2, B1, B2, M1, M2>> ComposeFilter<W, F1, F2, B1, B2, M1, M2>
+    for MultiEpsFilter<W, F1, F2, B1, B2, M1, M2, CF>
 where
     W: Semiring,
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: Matcher<W, F1>,
-    M2: Matcher<W, F2>,
-    CF: ComposeFilter<W, F1, F2, M1, M2>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: Matcher<W, F1, B1>,
+    M2: Matcher<W, F2, B2>,
+    CF: ComposeFilter<W, F1, F2, B1, B2, M1, M2>,
 {
     type FS = CF::FS;
 

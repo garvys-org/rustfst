@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+
 use anyhow::Result;
 
 pub use lookahead_compose_filter::{LookAheadComposeFilter, LookAheadComposeFilterBuilder};
@@ -21,8 +23,10 @@ pub fn lookahead_match_type<
     W: Semiring,
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: Matcher<W, F1>,
-    M2: Matcher<W, F2>,
+    B1: Borrow<F1>,
+    B2: Borrow<F2>,
+    M1: Matcher<W, F1, B1>,
+    M2: Matcher<W, F2, B2>,
 >(
     m1: &M1,
     m2: &M2,
@@ -55,13 +59,16 @@ pub fn lookahead_match_type_2<'fst, W: Semiring + 'fst, F1: Fst<W> + 'fst, F2: F
     unimplemented!()
 }
 
-pub trait LookAheadComposeFilterTrait<W: Semiring, F1: Fst<W>, F2: Fst<W>, M1, M2>:
-    ComposeFilter<W, F1, F2, M1, M2>
+pub trait LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>:
+    ComposeFilter<W, F1, F2, B1, B2, M1, M2>
 where
+    W: Semiring,
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: LookaheadMatcher<W, F1>,
-    M2: LookaheadMatcher<W, F2>,
+    B1: Borrow<F1>,
+    B2: Borrow<F2>,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
 {
     fn lookahead_flags(&self) -> MatcherFlags;
     fn lookahead_tr(&self) -> bool;

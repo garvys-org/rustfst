@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 //! Rust implementation of Weighted Finite States Transducers.
 //!
 //! Rustfst is a library for constructing, combining, optimizing, and searching weighted

@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
@@ -12,16 +14,26 @@ use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL};
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct SortedMatcher<W: Semiring, F: Fst<W>> {
-    fst: Arc<F>,
+pub struct SortedMatcher<W, F, B>
+where
+    W: Semiring,
+    F: Fst<W>,
+    B: Borrow<F>,
+{
+    fst: B,
     match_type: MatchType,
-    w: PhantomData<W>,
+    w: PhantomData<(W, F)>,
 }
 
-impl<W: Semiring, F: Fst<W>> Matcher<W, F> for SortedMatcher<W, F> {
+impl<W, F, B> Matcher<W, F, B> for SortedMatcher<W, F, B>
+where
+    W: Semiring,
+    F: Fst<W>,
+    B: Borrow<F> + Debug,
+{
     type Iter = IteratorSortedMatcher<W, F::TRS>;
 
-    fn new(fst: Arc<F>, match_type: MatchType) -> Result<Self> {
+    fn new(fst: B, match_type: MatchType) -> Result<Self> {
         Ok(Self {
             fst,
             match_type,
@@ -31,14 +43,14 @@ impl<W: Semiring, F: Fst<W>> Matcher<W, F> for SortedMatcher<W, F> {
 
     fn iter(&self, state: usize, label: usize) -> Result<Self::Iter> {
         Ok(IteratorSortedMatcher::new(
-            self.fst.get_trs(state)?,
+            self.fst.borrow().get_trs(state)?,
             label,
             self.match_type,
         ))
     }
 
     fn final_weight(&self, state: usize) -> Result<Option<W>> {
-        self.fst.final_weight(state)
+        self.fst.borrow().final_weight(state)
     }
 
     fn match_type(&self, test: bool) -> Result<MatchType> {
@@ -58,9 +70,9 @@ impl<W: Semiring, F: Fst<W>> Matcher<W, F> for SortedMatcher<W, F> {
         };
 
         let props = if test {
-            self.fst.properties_check(true_prop | false_prop)?
+            self.fst.borrow().properties_check(true_prop | false_prop)?
         } else {
-            self.fst.properties()
+            self.fst.borrow().properties()
         };
 
         if props.contains(true_prop) {
@@ -77,10 +89,10 @@ impl<W: Semiring, F: Fst<W>> Matcher<W, F> for SortedMatcher<W, F> {
     }
 
     fn priority(&self, state: StateId) -> Result<usize> {
-        self.fst.num_trs(state)
+        self.fst.borrow().num_trs(state)
     }
 
-    fn fst(&self) -> &Arc<F> {
+    fn fst(&self) -> &B {
         &self.fst
     }
 }
@@ -172,7 +184,12 @@ impl<W: Semiring, T: Trs<W>> Iterator for IteratorSortedMatcher<W, T> {
     }
 }
 
-impl<W: Semiring, F: Fst<W>> LookaheadMatcher<W, F> for SortedMatcher<W, F> {
+impl<W, F, B> LookaheadMatcher<W, F, B> for SortedMatcher<W, F, B>
+where
+    W: Semiring,
+    F: Fst<W>,
+    B: Borrow<F> + Debug,
+{
     type MatcherData = ();
 
     fn data(&self) -> Option<&Arc<Self::MatcherData>> {
@@ -180,7 +197,7 @@ impl<W: Semiring, F: Fst<W>> LookaheadMatcher<W, F> for SortedMatcher<W, F> {
     }
 
     fn new_with_data(
-        _fst: Arc<F>,
+        _fst: B,
         _match_type: MatchType,
         _data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self>
@@ -190,21 +207,21 @@ impl<W: Semiring, F: Fst<W>> LookaheadMatcher<W, F> for SortedMatcher<W, F> {
         unreachable!()
     }
 
-    fn create_data<G: Fst<W>>(
-        _fst: &G,
+    fn create_data<F2: Fst<W>, BF2: Borrow<F2>>(
+        fst: BF2,
         _match_type: MatchType,
     ) -> Result<Option<Self::MatcherData>> {
         unreachable!()
     }
 
-    fn init_lookahead_fst<LF: Fst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
+    fn init_lookahead_fst<LF: Fst<W>, BLF: Borrow<LF>>(&mut self, _lfst: &BLF) -> Result<()> {
         unreachable!()
     }
 
-    fn lookahead_fst<LF: Fst<W>>(
+    fn lookahead_fst<LF: Fst<W>, BLF: Borrow<LF>>(
         &self,
         _matcher_state: usize,
-        _lfst: &Arc<LF>,
+        _lfst: &BLF,
         _lfst_state: usize,
     ) -> Result<Option<LookAheadMatcherData<W>>> {
         unreachable!()

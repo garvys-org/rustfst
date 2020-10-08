@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
@@ -18,18 +20,20 @@ use crate::semirings::Semiring;
 use crate::{Label, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
 #[derive(Debug, Clone)]
-pub struct PushLabelsComposeFilter<W, F1, F2, M1, M2, CF, SMT>
+pub struct PushLabelsComposeFilter<W, F1, F2, B1, B2, M1, M2, CF, SMT>
 where
     W: Semiring,
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: LookaheadMatcher<W, F1>,
-    M2: LookaheadMatcher<W, F2>,
-    CF: LookAheadComposeFilterTrait<W, F1, F2, M1, M2>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
     SMT: MatchTypeTrait,
 {
-    matcher1: MultiEpsMatcher<W, F1, M1>,
-    matcher2: MultiEpsMatcher<W, F2, M2>,
+    matcher1: MultiEpsMatcher<W, F1, B1, M1>,
+    matcher2: MultiEpsMatcher<W, F2, B2, M2>,
     filter: CF,
     fs: PairFilterState<CF::FS, IntegerFilterState>,
     ntrsa: usize,
@@ -37,31 +41,35 @@ where
 }
 
 #[derive(Debug)]
-pub struct PushLabelsComposeFilterBuilder<W, F1, F2, M1, M2, CFB, SMT>
+pub struct PushLabelsComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2, CFB, SMT>
 where
     W: Semiring,
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: LookaheadMatcher<W, F1>,
-    M2: LookaheadMatcher<W, F2>,
-    CFB: ComposeFilterBuilder<W, F1, F2, M1, M2>,
-    CFB::CF: LookAheadComposeFilterTrait<W, F1, F2, M1, M2>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>,
+    CFB::CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
     SMT: MatchTypeTrait,
 {
     filter_builder: CFB,
-    ghost: PhantomData<(W, F1, F2, M1, M2, SMT)>,
+    ghost: PhantomData<(W, F1, F2, B1, B2, M1, M2, SMT)>,
 }
 
-impl<W, F1, F2, M1, M2, CFB, SMT> Clone
-    for PushLabelsComposeFilterBuilder<W, F1, F2, M1, M2, CFB, SMT>
+impl<W, F1, F2, B1, B2, M1, M2, CFB, SMT> Clone
+    for PushLabelsComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2, CFB, SMT>
 where
     W: Semiring,
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: LookaheadMatcher<W, F1>,
-    M2: LookaheadMatcher<W, F2>,
-    CFB: ComposeFilterBuilder<W, F1, F2, M1, M2>,
-    CFB::CF: LookAheadComposeFilterTrait<W, F1, F2, M1, M2>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>,
+    CFB::CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
     SMT: MatchTypeTrait,
 {
     fn clone(&self) -> Self {
@@ -72,24 +80,26 @@ where
     }
 }
 
-impl<W, F1, F2, M1, M2, CFB, SMT> ComposeFilterBuilder<W, F1, F2, M1, M2>
-    for PushLabelsComposeFilterBuilder<W, F1, F2, M1, M2, CFB, SMT>
+impl<W, F1, F2, B1, B2, M1, M2, CFB, SMT> ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>
+    for PushLabelsComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2, CFB, SMT>
 where
     W: Semiring,
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: LookaheadMatcher<W, F1>,
-    M2: LookaheadMatcher<W, F2>,
-    CFB: ComposeFilterBuilder<W, F1, F2, M1, M2>,
-    CFB::CF: LookAheadComposeFilterTrait<W, F1, F2, M1, M2>,
+    B1: Borrow<F1> + Debug + Clone,
+    B2: Borrow<F2> + Debug + Clone,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>,
+    CFB::CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
     SMT: MatchTypeTrait,
 {
-    type IM1 = MultiEpsMatcher<W, F1, M1>;
-    type IM2 = MultiEpsMatcher<W, F2, M2>;
+    type IM1 = MultiEpsMatcher<W, F1, B1, M1>;
+    type IM2 = MultiEpsMatcher<W, F2, B2, M2>;
 
-    type CF = PushLabelsComposeFilter<W, F1, F2, M1, M2, CFB::CF, SMT>;
+    type CF = PushLabelsComposeFilter<W, F1, F2, B1, B2, M1, M2, CFB::CF, SMT>;
 
-    fn new(fst1: Arc<F1>, fst2: Arc<F2>, matcher1: Option<M1>, matcher2: Option<M2>) -> Result<Self>
+    fn new(fst1: B1, fst2: B2, matcher1: Option<M1>, matcher2: Option<M2>) -> Result<Self>
     where
         Self: Sized,
     {
@@ -104,7 +114,7 @@ where
         let filter = self.filter_builder.build()?;
 
         let matcher1 = MultiEpsMatcher::new_with_opts(
-            Arc::clone(filter.matcher1().fst()),
+            filter.matcher1().fst().clone(),
             MatchType::MatchOutput,
             if filter.lookahead_output() {
                 MultiEpsMatcherFlags::MULTI_EPS_LIST
@@ -114,7 +124,7 @@ where
             Arc::clone(filter.matcher1_shared()),
         )?;
         let matcher2 = MultiEpsMatcher::new_with_opts(
-            Arc::clone(filter.matcher2().fst()),
+            filter.matcher2().fst().clone(),
             MatchType::MatchInput,
             if filter.lookahead_output() {
                 MultiEpsMatcherFlags::MULTI_EPS_LOOP
@@ -134,16 +144,18 @@ where
     }
 }
 
-impl<W, F1, F2, M1, M2, CF, SMT>
-    ComposeFilter<W, F1, F2, MultiEpsMatcher<W, F1, M1>, MultiEpsMatcher<W, F2, M2>>
-    for PushLabelsComposeFilter<W, F1, F2, M1, M2, CF, SMT>
+impl<W, F1, F2, B1, B2, M1, M2, CF, SMT>
+    ComposeFilter<W, F1, F2, B1, B2, MultiEpsMatcher<W, F1, B1, M1>, MultiEpsMatcher<W, F2, B2, M2>>
+    for PushLabelsComposeFilter<W, F1, F2, B1, B2, M1, M2, CF, SMT>
 where
     W: Semiring,
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: LookaheadMatcher<W, F1>,
-    M2: LookaheadMatcher<W, F2>,
-    CF: LookAheadComposeFilterTrait<W, F1, F2, M1, M2>,
+    B1: Borrow<F1> + Debug + Clone,
+    B2: Borrow<F2> + Debug + Clone,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
     SMT: MatchTypeTrait,
 {
     type FS = PairFilterState<CF::FS, IntegerFilterState>;
@@ -163,9 +175,9 @@ where
             return Ok(());
         }
         self.ntrsa = if self.lookahead_output() {
-            self.filter.matcher1().fst().num_trs(s1)?
+            self.filter.matcher1().fst().borrow().num_trs(s1)?
         } else {
-            self.filter.matcher2().fst().num_trs(s2)?
+            self.filter.matcher2().fst().borrow().num_trs(s2)?
         };
         let fs2 = filter_state.state2();
         let flabel = fs2.state();
@@ -228,20 +240,20 @@ where
         Ok(())
     }
 
-    fn matcher1(&self) -> &MultiEpsMatcher<W, F1, M1> {
+    fn matcher1(&self) -> &MultiEpsMatcher<W, F1, B1, M1> {
         &self.matcher1
     }
 
-    fn matcher2(&self) -> &MultiEpsMatcher<W, F2, M2> {
+    fn matcher2(&self) -> &MultiEpsMatcher<W, F2, B2, M2> {
         &self.matcher2
     }
 
-    fn matcher1_shared(&self) -> &Arc<MultiEpsMatcher<W, F1, M1>> {
+    fn matcher1_shared(&self) -> &Arc<MultiEpsMatcher<W, F1, B1, M1>> {
         // Not supported at the moment as the MultiEpsMatcher is owned by the ComposeFilter
         unimplemented!()
     }
 
-    fn matcher2_shared(&self) -> &Arc<MultiEpsMatcher<W, F2, M2>> {
+    fn matcher2_shared(&self) -> &Arc<MultiEpsMatcher<W, F2, B2, M2>> {
         // Not supported at the moment as the MultiEpsMatcher is owned by the ComposeFilter
         unimplemented!()
     }
@@ -256,14 +268,16 @@ where
     }
 }
 
-impl<W, F1, F2, M1, M2, CF, SMT> PushLabelsComposeFilter<W, F1, F2, M1, M2, CF, SMT>
+impl<W, F1, F2, B1, B2, M1, M2, CF, SMT> PushLabelsComposeFilter<W, F1, F2, B1, B2, M1, M2, CF, SMT>
 where
     W: Semiring,
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: LookaheadMatcher<W, F1>,
-    M2: LookaheadMatcher<W, F2>,
-    CF: LookAheadComposeFilterTrait<W, F1, F2, M1, M2>,
+    B1: Borrow<F1> + Debug + Clone,
+    B2: Borrow<F2> + Debug + Clone,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
     SMT: MatchTypeTrait,
 {
     // Consumes an already pushed label.
@@ -277,8 +291,10 @@ where
             W,
             F1,
             F2,
-            MultiEpsMatcher<W, F1, M1>,
-            MultiEpsMatcher<W, F2, M2>,
+            B1,
+            B2,
+            MultiEpsMatcher<W, F1, B1, M1>,
+            MultiEpsMatcher<W, F2, B2, M2>,
         >>::FS,
     > {
         let labela = if self.lookahead_output() {
@@ -333,8 +349,10 @@ where
             W,
             F1,
             F2,
-            MultiEpsMatcher<W, F1, M1>,
-            MultiEpsMatcher<W, F2, M2>,
+            B1,
+            B2,
+            MultiEpsMatcher<W, F1, B1, M1>,
+            MultiEpsMatcher<W, F2, B2, M2>,
         >>::FS,
     > {
         let labela = if self.lookahead_output() {

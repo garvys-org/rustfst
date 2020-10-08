@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
@@ -15,14 +17,16 @@ use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuan
 use crate::{Tr, KDELTA};
 
 #[derive(Debug, Clone)]
-pub struct PushWeightsComposeFilter<W: Semiring, F1, F2, M1, M2, CF, SMT>
+pub struct PushWeightsComposeFilter<W: Semiring, F1, F2, B1, B2, M1, M2, CF, SMT>
 where
     W: Semiring,
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: LookaheadMatcher<W, F1>,
-    M2: LookaheadMatcher<W, F2>,
-    CF: LookAheadComposeFilterTrait<W, F1, F2, M1, M2>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
     SMT: MatchTypeTrait,
 {
     filter: CF,
@@ -31,30 +35,34 @@ where
 }
 
 #[derive(Debug)]
-pub struct PushWeightsComposeFilterBuilder<W, F1, F2, M1, M2, CFB, SMT>
+pub struct PushWeightsComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2, CFB, SMT>
 where
     W: Semiring,
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: LookaheadMatcher<W, F1>,
-    M2: LookaheadMatcher<W, F2>,
-    CFB: ComposeFilterBuilder<W, F1, F2, M1, M2>,
-    CFB::CF: ComposeFilter<W, F1, F2, M1, M2>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>,
+    CFB::CF: ComposeFilter<W, F1, F2, B1, B2, M1, M2>,
 {
     filter_builder: CFB,
-    ghost: PhantomData<(W, F1, F2, M1, M2, SMT)>,
+    ghost: PhantomData<(W, F1, F2, B1, B2, M1, M2, SMT)>,
 }
 
-impl<W, F1, F2, M1, M2, CFB, SMT> Clone
-    for PushWeightsComposeFilterBuilder<W, F1, F2, M1, M2, CFB, SMT>
+impl<W, F1, F2, B1, B2, M1, M2, CFB, SMT> Clone
+    for PushWeightsComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2, CFB, SMT>
 where
     W: Semiring,
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: LookaheadMatcher<W, F1>,
-    M2: LookaheadMatcher<W, F2>,
-    CFB: ComposeFilterBuilder<W, F1, F2, M1, M2>,
-    CFB::CF: LookAheadComposeFilterTrait<W, F1, F2, M1, M2>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>,
+    CFB::CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
     SMT: MatchTypeTrait,
 {
     fn clone(&self) -> Self {
@@ -65,23 +73,25 @@ where
     }
 }
 
-impl<W, F1, F2, M1, M2, CFB, SMT> ComposeFilterBuilder<W, F1, F2, M1, M2>
-    for PushWeightsComposeFilterBuilder<W, F1, F2, M1, M2, CFB, SMT>
+impl<W, F1, F2, B1, B2, M1, M2, CFB, SMT> ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>
+    for PushWeightsComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2, CFB, SMT>
 where
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
     F1: ExpandedFst<W>,
     F2: ExpandedFst<W>,
-    M1: LookaheadMatcher<W, F1>,
-    M2: LookaheadMatcher<W, F2>,
-    CFB: ComposeFilterBuilder<W, F1, F2, M1, M2>,
-    CFB::CF: LookAheadComposeFilterTrait<W, F1, F2, M1, M2>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>,
+    CFB::CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
     SMT: MatchTypeTrait,
 {
     type IM1 = M1;
     type IM2 = M2;
-    type CF = PushWeightsComposeFilter<W, F1, F2, M1, M2, CFB::CF, SMT>;
+    type CF = PushWeightsComposeFilter<W, F1, F2, B1, B2, M1, M2, CFB::CF, SMT>;
 
-    fn new(fst1: Arc<F1>, fst2: Arc<F2>, matcher1: Option<M1>, matcher2: Option<M2>) -> Result<Self>
+    fn new(fst1: B1, fst2: B2, matcher1: Option<M1>, matcher2: Option<M2>) -> Result<Self>
     where
         Self: Sized,
     {
@@ -93,7 +103,7 @@ where
 
     fn build(&self) -> Result<Self::CF> {
         Ok(
-            PushWeightsComposeFilter::<W, F1, F2, M1, M2, CFB::CF, SMT> {
+            PushWeightsComposeFilter::<W, F1, F2, B1, B2, M1, M2, CFB::CF, SMT> {
                 filter: self.filter_builder.build()?,
                 fs: FilterState::new_no_state(),
                 smt: PhantomData,
@@ -102,15 +112,17 @@ where
     }
 }
 
-impl<W, F1, F2, M1, M2, CF, SMT> ComposeFilter<W, F1, F2, M1, M2>
-    for PushWeightsComposeFilter<W, F1, F2, M1, M2, CF, SMT>
+impl<W, F1, F2, B1, B2, M1, M2, CF, SMT> ComposeFilter<W, F1, F2, B1, B2, M1, M2>
+    for PushWeightsComposeFilter<W, F1, F2, B1, B2, M1, M2, CF, SMT>
 where
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: LookaheadMatcher<W, F1>,
-    M2: LookaheadMatcher<W, F2>,
-    CF: LookAheadComposeFilterTrait<W, F1, F2, M1, M2>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
     SMT: MatchTypeTrait,
 {
     type FS = PairFilterState<CF::FS, WeightFilterState<W>>;
@@ -193,15 +205,17 @@ where
     }
 }
 
-impl<W, F1, F2, M1, M2, CF, SMT> LookAheadComposeFilterTrait<W, F1, F2, M1, M2>
-    for PushWeightsComposeFilter<W, F1, F2, M1, M2, CF, SMT>
+impl<W, F1, F2, B1, B2, M1, M2, CF, SMT> LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>
+    for PushWeightsComposeFilter<W, F1, F2, B1, B2, M1, M2, CF, SMT>
 where
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: LookaheadMatcher<W, F1>,
-    M2: LookaheadMatcher<W, F2>,
-    CF: LookAheadComposeFilterTrait<W, F1, F2, M1, M2>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
     SMT: MatchTypeTrait,
 {
     fn lookahead_flags(&self) -> MatcherFlags {
