@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::sync::Arc;
@@ -16,13 +17,13 @@ use crate::semirings::Semiring;
 use crate::SymbolTable;
 
 #[derive(Clone, PartialEq, Debug)]
-pub struct MatcherFst<W, F, M, T> {
+pub struct MatcherFst<W, F, B, M, T> {
     fst_add_on: FstAddOn<F, (Option<Arc<T>>, Option<Arc<T>>)>,
     matcher: PhantomData<M>,
-    w: PhantomData<W>,
+    w: PhantomData<(W, B)>,
 }
 
-impl<W, F, M, T> MatcherFst<W, F, M, T> {
+impl<W, F, B, M, T> MatcherFst<W, F, B, M, T> {
     pub fn fst(&self) -> &F {
         self.fst_add_on.fst()
     }
@@ -42,15 +43,16 @@ impl<W, F, M, T> MatcherFst<W, F, M, T> {
 }
 
 // TODO: To be generalized
-impl<W, F, M> MatcherFst<W, F, M, M::MatcherData>
+impl<W, F, B, M> MatcherFst<W, F, B, M, M::MatcherData>
 where
     W: Semiring,
     F: MutableFst<W>,
-    M: LookaheadMatcher<W, F = F, MatcherData = LabelReachableData>,
+    B: Borrow<F>,
+    M: LookaheadMatcher<W, F, B, MatcherData = LabelReachableData>,
 {
     pub fn new(mut fst: F) -> Result<Self> {
-        let imatcher_data = M::create_data(&fst, MatchType::MatchInput)?;
-        let omatcher_data = M::create_data(&fst, MatchType::MatchOutput)?;
+        let imatcher_data = M::create_data::<F, _>(&fst, MatchType::MatchInput)?;
+        let omatcher_data = M::create_data::<F, _>(&fst, MatchType::MatchOutput)?;
 
         let mut add_on = (imatcher_data, omatcher_data);
         LabelLookAheadRelabeler::init(&mut fst, &mut add_on)?;
@@ -71,8 +73,8 @@ where
         fst2: &mut F2,
         relabel_input: bool,
     ) -> Result<Self> {
-        let imatcher_data = M::create_data(&fst, MatchType::MatchInput)?;
-        let omatcher_data = M::create_data(&fst, MatchType::MatchOutput)?;
+        let imatcher_data = M::create_data::<F, _>(&fst, MatchType::MatchInput)?;
+        let omatcher_data = M::create_data::<F, _>(&fst, MatchType::MatchOutput)?;
 
         let mut add_on = (imatcher_data, omatcher_data);
         LabelLookAheadRelabeler::init(&mut fst, &mut add_on)?;
@@ -89,7 +91,7 @@ where
     }
 }
 
-impl<W: Semiring, F: CoreFst<W>, M, T> CoreFst<W> for MatcherFst<W, F, M, T> {
+impl<W: Semiring, F: CoreFst<W>, B: Borrow<F>, M, T> CoreFst<W> for MatcherFst<W, F, B, M, T> {
     type TRS = <FstAddOn<F, T> as CoreFst<W>>::TRS;
 
     fn start(&self) -> Option<usize> {
@@ -133,7 +135,9 @@ impl<W: Semiring, F: CoreFst<W>, M, T> CoreFst<W> for MatcherFst<W, F, M, T> {
     }
 }
 
-impl<'a, W, F: StateIterator<'a>, M, T> StateIterator<'a> for MatcherFst<W, F, M, T> {
+impl<'a, W, F: StateIterator<'a>, B: Borrow<F>, M, T> StateIterator<'a>
+    for MatcherFst<W, F, B, M, T>
+{
     type Iter = <F as StateIterator<'a>>::Iter;
 
     fn states_iter(&'a self) -> Self::Iter {
@@ -141,10 +145,11 @@ impl<'a, W, F: StateIterator<'a>, M, T> StateIterator<'a> for MatcherFst<W, F, M
     }
 }
 
-impl<'a, W, F, M, T> FstIterator<'a, W> for MatcherFst<W, F, M, T>
+impl<'a, W, F, B, M, T> FstIterator<'a, W> for MatcherFst<W, F, B, M, T>
 where
     W: Semiring,
     F: FstIterator<'a, W>,
+    B: Borrow<F>,
 {
     type FstIter = F::FstIter;
 
@@ -153,10 +158,11 @@ where
     }
 }
 
-impl<W, F, M, T> Fst<W> for MatcherFst<W, F, M, T>
+impl<W, F, B, M, T> Fst<W> for MatcherFst<W, F, B, M, T>
 where
     W: Semiring,
     F: Fst<W>,
+    B: Borrow<F> + Debug,
     M: Debug,
     T: Debug,
 {
@@ -185,10 +191,11 @@ where
     }
 }
 
-impl<W, F, M, T> ExpandedFst<W> for MatcherFst<W, F, M, T>
+impl<W, F, M, B, T> ExpandedFst<W> for MatcherFst<W, F, B, M, T>
 where
     W: Semiring,
     F: ExpandedFst<W>,
+    B: Borrow<F> + Debug + PartialEq + Clone,
     M: Debug + Clone + PartialEq,
     T: Debug + Clone + PartialEq,
 {
@@ -197,10 +204,11 @@ where
     }
 }
 
-impl<W, F, M, T> FstIntoIterator<W> for MatcherFst<W, F, M, T>
+impl<W, F, B, M, T> FstIntoIterator<W> for MatcherFst<W, F, B, M, T>
 where
     W: Semiring,
     F: FstIntoIterator<W>,
+    B: Borrow<F> + Debug + PartialEq + Clone,
     T: Debug,
 {
     type TrsIter = F::TrsIter;
