@@ -73,11 +73,14 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
         mut fst_2: VectorFst<TropicalWeight>,
     ) -> Result<VectorFst<TropicalWeight>> {
         match self.compose_type {
-            ComposeType::Default => compose(Arc::new(fst_1), Arc::new(fst_2)),
+            ComposeType::Default => {
+                compose::<TropicalWeight, VectorFst<_>, VectorFst<_>, _, _, _>(&fst_1, &fst_2)
+            }
             ComposeType::LookAhead => {
                 type TLaFst<S, F> = MatcherFst<
                     S,
                     F,
+                    Arc<F>,
                     LabelLookAheadMatcher<
                         S,
                         F,
@@ -91,27 +94,28 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
                 type TMatcher1<S, F> = LabelLookAheadMatcher<
                     S,
                     F,
-                    F,
-                    SortedMatcher<S, F, F>,
+                    Arc<F>,
+                    SortedMatcher<S, F, Arc<F>>,
                     DefaultLabelLookAheadMatcherFlags,
                 >;
-                type TMatcher2<S, F> = SortedMatcher<S, F, F>;
+                type TMatcher2<S, F> = SortedMatcher<S, F, Arc<F>>;
 
                 type TSeqFilter<S, F1, F2> = AltSequenceComposeFilterBuilder<
                     S,
                     F1,
                     F2,
-                    F1,
-                    F2,
+                    Arc<F1>,
+                    Arc<F2>,
                     TMatcher1<S, F1>,
                     TMatcher2<S, F2>,
                 >;
+
                 type TLookFilter<S, F1, F2> = LookAheadComposeFilterBuilder<
                     S,
                     F1,
                     F2,
-                    F1,
-                    F2,
+                    Arc<F1>,
+                    Arc<F2>,
                     TMatcher1<S, F1>,
                     TMatcher2<S, F2>,
                     TSeqFilter<S, F1, F2>,
@@ -121,8 +125,8 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
                     S,
                     F1,
                     F2,
-                    F1,
-                    F2,
+                    Arc<F1>,
+                    Arc<F2>,
                     TMatcher1<S, F1>,
                     TMatcher2<S, F2>,
                     TLookFilter<S, F1, F2>,
@@ -132,8 +136,8 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
                     S,
                     F1,
                     F2,
-                    F1,
-                    F2,
+                    Arc<F1>,
+                    Arc<F2>,
                     TMatcher1<S, F1>,
                     TMatcher2<S, F2>,
                     TPushWeightsFilter<S, F1, F2>,
@@ -151,7 +155,7 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
                 let fst_2 = Arc::new(fst_2);
 
                 let matcher1 = TMatcher1::new_with_data(
-                    graph1look,
+                    graph1look.clone(),
                     MatchType::MatchOutput,
                     graph1look.data(MatchType::MatchOutput).cloned(),
                 )?;
@@ -175,7 +179,7 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
                 );
 
                 let dyn_fst =
-                    ComposeFst::<_, _, _, _, _, _, SimpleHashMapCache<_>>::new_with_options(
+                    ComposeFst::<_, _, _, _, _, _, _, _, SimpleHashMapCache<_>>::new_with_options(
                         graph1look,
                         fst_2,
                         compose_options,

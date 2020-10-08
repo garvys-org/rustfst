@@ -13,7 +13,7 @@ use crate::algorithms::compose::{ComposeFstOpOptions, ComposeStateTuple};
 use crate::algorithms::lazy::{FstOp, StateTable};
 use crate::fst_properties::mutable_properties::compose_properties;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, Fst};
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, Trs, TrsVec, EPS_LABEL, NO_LABEL};
 
@@ -98,9 +98,9 @@ where
     ) -> Result<Self> {
         let matcher1 = opts.matcher1;
         let matcher2 = opts.matcher2;
-        let compose_filter_builder = opts
-            .filter_builder
-            .unwrap_or_else(|| ComposeFilterBuilder::new(fst1.clone(), fst2.clone(), matcher1, matcher2).unwrap());
+        let compose_filter_builder = opts.filter_builder.unwrap_or_else(|| {
+            ComposeFilterBuilder::new(fst1.clone(), fst2.clone(), matcher1, matcher2).unwrap()
+        });
         let compose_filter = compose_filter_builder.build()?;
         let match_type = Self::match_type(compose_filter.matcher1(), compose_filter.matcher2())?;
 

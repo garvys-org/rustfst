@@ -40,10 +40,10 @@ impl Default for ComposeConfig {
 
 pub fn compose_with_config<
     W: Semiring,
-    B1: Borrow<F1> + Debug + Clone,
-    B2: Borrow<F2> + Debug + Clone,
     F1: ExpandedFst<W>,
     F2: ExpandedFst<W>,
+    B1: Borrow<F1> + Debug + Clone,
+    B2: Borrow<F2> + Debug + Clone,
     F3: MutableFst<W> + AllocableFst<W>,
 >(
     fst1: B1,
@@ -187,7 +187,7 @@ pub fn compose_with_config<
 ///
 /// let fst_ref : VectorFst<IntegerWeight> = fst![1,2 => 3,4];
 ///
-/// let composed_fst : VectorFst<_> = compose(Arc::new(fst_1), Arc::new(fst_2))?;
+/// let composed_fst : VectorFst<_> = compose(fst_1, fst_2)?;
 /// assert_eq!(composed_fst, fst_ref);
 /// # Ok(())
 /// # }

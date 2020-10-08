@@ -9,7 +9,7 @@ use crate::algorithms::compose::compose_filters::{ComposeFilter, ComposeFilterBu
 use crate::algorithms::compose::filter_states::{FilterState, IntegerFilterState};
 use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, Fst};
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
@@ -92,10 +92,8 @@ where
     type CF = MatchComposeFilter<W, F1, F2, B1, B2, M1, M2>;
 
     fn new(fst1: B1, fst2: B2, matcher1: Option<M1>, matcher2: Option<M2>) -> Result<Self> {
-        let matcher1 =
-            matcher1.unwrap_or_else(|| M1::new(fst1, MatchType::MatchOutput).unwrap());
-        let matcher2 =
-            matcher2.unwrap_or_else(|| M2::new(fst2, MatchType::MatchInput).unwrap());
+        let matcher1 = matcher1.unwrap_or_else(|| M1::new(fst1, MatchType::MatchOutput).unwrap());
+        let matcher2 = matcher2.unwrap_or_else(|| M2::new(fst2, MatchType::MatchInput).unwrap());
         Ok(Self {
             matcher1: Arc::new(matcher1),
             matcher2: Arc::new(matcher2),

@@ -9,7 +9,7 @@ use superslice::Ext;
 use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
 use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, Fst};
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL};
 
@@ -208,7 +208,7 @@ where
     }
 
     fn create_data<F2: Fst<W>, BF2: Borrow<F2>>(
-        fst: BF2,
+        _fst: BF2,
         _match_type: MatchType,
     ) -> Result<Option<Self::MatcherData>> {
         unreachable!()

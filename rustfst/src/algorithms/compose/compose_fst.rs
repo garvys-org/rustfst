@@ -341,9 +341,11 @@ mod test {
                 TropicalWeight,
                 VectorFst<_>,
                 VectorFst<_>,
-                SortedMatcher<_, _>,
-                SortedMatcher<_, _>,
-                SequenceComposeFilterBuilder<_, _, _, _, _>,
+                Arc<_>,
+                Arc<_>,
+                SortedMatcher<_, _, _>,
+                SortedMatcher<_, _, _>,
+                SequenceComposeFilterBuilder<_, _, _, _, _, _, _>,
             >,
         >();
     }
@@ -356,9 +358,11 @@ mod test {
                 TropicalWeight,
                 VectorFst<_>,
                 VectorFst<_>,
-                SortedMatcher<_, _>,
-                SortedMatcher<_, _>,
-                SequenceComposeFilterBuilder<_, _, _, _, _>,
+                Arc<_>,
+                Arc<_>,
+                SortedMatcher<_, _, _>,
+                SortedMatcher<_, _, _>,
+                SequenceComposeFilterBuilder<_, _, _, _, _, _, _>,
             >,
         >();
     }

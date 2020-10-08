@@ -15,7 +15,7 @@ use crate::algorithms::compose::matchers::MatchType;
 use crate::algorithms::compose::matchers::MatcherFlags;
 use crate::algorithms::compose::matchers::{MultiEpsMatcher, MultiEpsMatcherFlags};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, Fst};
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{Label, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
