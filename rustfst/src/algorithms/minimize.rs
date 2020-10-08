@@ -538,3 +538,34 @@ impl TrIterCompare {
         xarc.ilabel > yarc.ilabel
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::prelude::*;
+    use algorithms::determinize::*;
+    use proptest::prelude::*;
+
+    proptest! {
+        #![proptest_config(ProptestConfig {
+            fork: true,
+            timeout: 100,
+            .. ProptestConfig::default()
+        })]
+        #[test]
+        #[ignore]
+        fn proptest_minimize_timeout(mut fst in any::<VectorFst::<TropicalWeight>>()) {
+            minimize(&mut fst, true).unwrap();
+        }
+    }
+
+    proptest! {
+        #[test]
+        #[ignore] // falls into the same infinite loop as the timeout test
+        fn test_minimize_proptest(mut fst in any::<VectorFst::<TropicalWeight>>()) {
+            let det:VectorFst<_> = determinize(&fst, DeterminizeType::DeterminizeNonFunctional).unwrap();
+            minimize(&mut fst, true).unwrap();
+            let min_det:VectorFst<_> = determinize(&fst, DeterminizeType::DeterminizeNonFunctional).unwrap();
+            prop_assert!(isomorphic(&det, &min_det).unwrap())
+        }
+    }
+}

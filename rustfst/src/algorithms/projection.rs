@@ -98,23 +98,23 @@ mod tests {
 
     use crate::fst_properties::FstProperties;
     use crate::fst_traits::CoreFst;
-    use crate::proptest_fst::proptest_fst;
+    use crate::prelude::*;
 
     use super::*;
 
     proptest! {
         #[test]
-        fn test_project_input_proptest(mut fst in proptest_fst()) {
+        fn test_project_input_proptest(mut fst in any::<VectorFst<TropicalWeight>>()) {
             project(&mut fst, ProjectType::ProjectInput);
-            prop_assume!(fst.properties().intersects(FstProperties::ACCEPTOR));
+            prop_assert!(fst.properties().intersects(FstProperties::ACCEPTOR));
         }
     }
 
     proptest! {
         #[test]
-        fn test_project_output_proptest(mut fst in proptest_fst()) {
+        fn test_project_output_proptest(mut fst in any::<VectorFst<TropicalWeight>>()) {
             project(&mut fst, ProjectType::ProjectOutput);
-            prop_assume!(fst.properties().intersects(FstProperties::ACCEPTOR));
+            prop_assert!(fst.properties().intersects(FstProperties::ACCEPTOR));
         }
     }
 }

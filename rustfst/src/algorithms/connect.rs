@@ -189,16 +189,15 @@ mod tests {
     use proptest::prelude::*;
 
     use crate::fst_properties::FstProperties;
-    use crate::fst_traits::CoreFst;
-    use crate::proptest_fst::proptest_fst;
+    use crate::prelude::*;
 
     use super::*;
 
     proptest! {
         #[test]
-        fn test_connect_proptest(mut fst in proptest_fst()) {
+        fn test_connect_proptest(mut fst in any::<VectorFst::<TropicalWeight>>()) {
             connect(&mut fst).unwrap();
-            prop_assume!(fst.properties().intersects(
+            prop_assert!(fst.properties().intersects(
                 FstProperties::ACCESSIBLE | FstProperties::COACCESSIBLE
             ));
         }
