@@ -11,7 +11,7 @@ use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{Label, StateId};
 use crate::{Tr, EPS_LABEL, NO_LABEL};
-use std::sync::Arc;
+use std::borrow::Borrow;
 
 mod generic_matcher;
 mod multi_eps_matcher;
@@ -96,12 +96,10 @@ pub fn eps_loop<W: Semiring>(state: StateId, match_type: MatchType) -> Result<Tr
 /// simplest form, these are just some associative map or search keyed on labels.
 /// More generally, they may implement matching special labels that represent
 /// sets of labels such as sigma (all), rho (rest), or phi (fail).
-pub trait Matcher<W: Semiring>: Debug {
-    type F: Fst<W>;
-
+pub trait Matcher<W: Semiring, F: Fst<W>, B: Borrow<F>>: Debug {
     type Iter: Iterator<Item = IterItemMatcher<W>>;
 
-    fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self>
+    fn new(fst: B, match_type: MatchType) -> Result<Self>
     where
         Self: std::marker::Sized;
     fn iter(&self, state: StateId, label: Label) -> Result<Self::Iter>;
@@ -115,5 +113,5 @@ pub trait Matcher<W: Semiring>: Debug {
     /// current state of the matcher invalidates the state of the matcher.
     fn priority(&self, state: StateId) -> Result<usize>;
 
-    fn fst(&self) -> &Arc<Self::F>;
+    fn fst(&self) -> &B;
 }

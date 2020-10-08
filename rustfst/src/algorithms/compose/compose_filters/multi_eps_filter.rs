@@ -1,22 +1,47 @@
 use std::sync::Arc;
+use std::marker::PhantomData;
+use std::borrow::Borrow;
+use std::fmt::Debug;
 
 use anyhow::Result;
 
 use crate::algorithms::compose::compose_filters::ComposeFilter;
+use crate::algorithms::compose::matchers::Matcher;
 use crate::fst_properties::FstProperties;
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{Tr, NO_LABEL};
 
 #[derive(Debug, Clone)]
-pub struct MultiEpsFilter<F> {
-    filter: F,
+pub struct MultiEpsFilter<W, F1, F2, B1, B2, M1, M2, CF>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: Matcher<W, F1, B1>,
+    M2: Matcher<W, F2, B2>,
+    CF: ComposeFilter<W, F1, F2, B1, B2, M1, M2>,
+{
+    filter: CF,
     keep_multi_eps: bool,
+    ghost: PhantomData<(W, F1, F2, B1, B2, M1, M2)>,
 }
 
-impl<W: Semiring, F: ComposeFilter<W>> ComposeFilter<W> for MultiEpsFilter<F> {
-    type M1 = F::M1;
-    type M2 = F::M2;
-    type FS = F::FS;
+impl<W, F1, F2, B1, B2, M1, M2, CF: ComposeFilter<W, F1, F2, B1, B2, M1, M2>> ComposeFilter<W, F1, F2, B1, B2, M1, M2>
+    for MultiEpsFilter<W, F1, F2, B1, B2, M1, M2, CF>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: Matcher<W, F1, B1>,
+    M2: Matcher<W, F2, B2>,
+    CF: ComposeFilter<W, F1, F2, B1, B2, M1, M2>,
+{
+    type FS = CF::FS;
 
     fn start(&self) -> Self::FS {
         self.filter.start()
@@ -44,19 +69,19 @@ impl<W: Semiring, F: ComposeFilter<W>> ComposeFilter<W> for MultiEpsFilter<F> {
         self.filter.filter_final(w1, w2)
     }
 
-    fn matcher1(&self) -> &Self::M1 {
+    fn matcher1(&self) -> &M1 {
         self.filter.matcher1()
     }
 
-    fn matcher2(&self) -> &Self::M2 {
+    fn matcher2(&self) -> &M2 {
         self.filter.matcher2()
     }
 
-    fn matcher1_shared(&self) -> &Arc<Self::M1> {
+    fn matcher1_shared(&self) -> &Arc<M1> {
         self.filter.matcher1_shared()
     }
 
-    fn matcher2_shared(&self) -> &Arc<Self::M2> {
+    fn matcher2_shared(&self) -> &Arc<M2> {
         self.filter.matcher2_shared()
     }
 

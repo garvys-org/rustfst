@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::sync::Arc;
 
@@ -65,31 +66,32 @@ impl<W: Semiring> LookAheadMatcherData<W> {
     }
 }
 
-pub trait LookaheadMatcher<W: Semiring>: Matcher<W> {
+pub trait LookaheadMatcher<W: Semiring, F: Fst<W>, B: Borrow<F>>: Matcher<W, F, B> {
     type MatcherData: Clone;
     fn data(&self) -> Option<&Arc<Self::MatcherData>>;
 
     fn new_with_data(
-        fst: Arc<Self::F>,
+        fst: B,
         match_type: MatchType,
         data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self>
     where
         Self: std::marker::Sized;
 
-    fn create_data<F: Fst<W>>(
-        fst: &F,
+    fn create_data<F2: Fst<W>, BF2: Borrow<F2>>(
+        fst: BF2,
         match_type: MatchType,
     ) -> Result<Option<Self::MatcherData>>;
 
-    fn init_lookahead_fst<LF: Fst<W>>(&mut self, lfst: &Arc<LF>) -> Result<()>;
+    fn init_lookahead_fst<LF: Fst<W>, BLF: Borrow<LF> + Clone>(&mut self, lfst: &BLF)
+        -> Result<()>;
     // Are there paths from a state in the lookahead FST that can be read from
     // the curent matcher state?
 
-    fn lookahead_fst<LF: Fst<W>>(
+    fn lookahead_fst<LF: Fst<W>, BLF: Borrow<LF>>(
         &self,
         matcher_state: StateId,
-        lfst: &Arc<LF>,
+        lfst: &BLF,
         lfst_state: StateId,
     ) -> Result<Option<LookAheadMatcherData<W>>>;
 

@@ -74,11 +74,12 @@ where
     config.connect = false;
     config.compose_filter = filter;
 
-    let fst_res_static: VectorFst<_> = compose_with_config(
-        Arc::new(fst_raw.clone()),
-        Arc::new(compose_test_data.fst_2.clone()),
-        config,
-    )?;
+    let fst_res_static: VectorFst<_> =
+        compose_with_config::<W, VectorFst<_>, VectorFst<_>, _, _, _>(
+            Arc::new(fst_raw.clone()),
+            Arc::new(compose_test_data.fst_2.clone()),
+            config,
+        )?;
 
     test_eq_fst(
         &compose_test_data.result,
@@ -124,22 +125,68 @@ where
     type TLaFst<S, F> = MatcherFst<
         S,
         F,
-        LabelLookAheadMatcher<S, SortedMatcher<S, F>, DefaultLabelLookAheadMatcherFlags>,
+        Arc<F>,
+        LabelLookAheadMatcher<
+            S,
+            F,
+            Arc<F>,
+            SortedMatcher<S, F, Arc<F>>,
+            DefaultLabelLookAheadMatcherFlags,
+        >,
         LabelReachableData,
     >;
 
-    type TMatcher1<S, F> =
-        LabelLookAheadMatcher<S, SortedMatcher<S, F>, DefaultLabelLookAheadMatcherFlags>;
-    type TMatcher2<S, F> = SortedMatcher<S, F>;
+    type TMatcher1<S, F> = LabelLookAheadMatcher<
+        S,
+        F,
+        Arc<F>,
+        SortedMatcher<S, F, Arc<F>>,
+        DefaultLabelLookAheadMatcherFlags,
+    >;
+    type TMatcher2<S, F> = SortedMatcher<S, F, Arc<F>>;
 
-    type TSeqFilter<S, F1, F2> =
-        AltSequenceComposeFilterBuilder<S, TMatcher1<S, F1>, TMatcher2<S, F2>>;
-    type TLookFilter<S, F1, F2> =
-        LookAheadComposeFilterBuilder<S, TSeqFilter<S, F1, F2>, SMatchOutput>;
-    type TPushWeightsFilter<S, F1, F2> =
-        PushWeightsComposeFilterBuilder<S, TLookFilter<S, F1, F2>, SMatchOutput>;
-    type TPushLabelsFilter<S, F1, F2> =
-        PushLabelsComposeFilterBuilder<S, TPushWeightsFilter<S, F1, F2>, SMatchOutput>;
+    type TSeqFilter<S, F1, F2> = AltSequenceComposeFilterBuilder<
+        S,
+        F1,
+        F2,
+        Arc<F1>,
+        Arc<F2>,
+        TMatcher1<S, F1>,
+        TMatcher2<S, F2>,
+    >;
+    type TLookFilter<S, F1, F2> = LookAheadComposeFilterBuilder<
+        S,
+        F1,
+        F2,
+        Arc<F1>,
+        Arc<F2>,
+        TMatcher1<S, F1>,
+        TMatcher2<S, F2>,
+        TSeqFilter<S, F1, F2>,
+        SMatchOutput,
+    >;
+    type TPushWeightsFilter<S, F1, F2> = PushWeightsComposeFilterBuilder<
+        S,
+        F1,
+        F2,
+        Arc<F1>,
+        Arc<F2>,
+        TMatcher1<S, F1>,
+        TMatcher2<S, F2>,
+        TLookFilter<S, F1, F2>,
+        SMatchOutput,
+    >;
+    type TPushLabelsFilter<S, F1, F2> = PushLabelsComposeFilterBuilder<
+        S,
+        F1,
+        F2,
+        Arc<F1>,
+        Arc<F2>,
+        TMatcher1<S, F1>,
+        TMatcher2<S, F2>,
+        TPushWeightsFilter<S, F1, F2>,
+        SMatchOutput,
+    >;
 
     type TComposeFilter<S, F1, F2> = TPushLabelsFilter<S, F1, F2>;
 
@@ -185,7 +232,7 @@ where
         None,
     );
 
-    let dyn_fst = ComposeFst::<_, _, SimpleHashMapCache<_>>::new_with_options(
+    let dyn_fst = ComposeFst::<_, _, _, _, _, _, _, _, SimpleHashMapCache<_>>::new_with_options(
         graph1look,
         fst2,
         compose_options,

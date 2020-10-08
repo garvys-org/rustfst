@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
@@ -8,30 +10,39 @@ use crate::algorithms::compose::lookahead_matchers::{
     LookAheadMatcherData, LookaheadMatcher, MatcherFlagsTrait,
 };
 use crate::algorithms::compose::matchers::{IterItemMatcher, MatchType, Matcher, MatcherFlags};
-use crate::fst_traits::{CoreFst, Fst};
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL};
 
 #[derive(Debug, Clone)]
-pub struct TrLookAheadMatcher<W: Semiring, M: Matcher<W>, MFT> {
+pub struct TrLookAheadMatcher<W, F, B, M, MFT>
+where
+    W: Semiring,
+    F: Fst<W>,
+    B: Borrow<F>,
+    M: Matcher<W, F, B>,
+{
     // matcher fst
-    fst: Arc<M::F>,
+    fst: B,
     matcher: M,
-    // Flags to customize the behaviour
-    mft: PhantomData<MFT>,
+    ghost: PhantomData<(W, F, MFT)>,
 }
 
-impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
-    for TrLookAheadMatcher<W, M, MFT>
+impl<W, F, B, M, MFT> Matcher<W, F, B> for TrLookAheadMatcher<W, F, B, M, MFT>
+where
+    W: Semiring,
+    F: Fst<W>,
+    B: Borrow<F> + Debug + Clone,
+    M: Matcher<W, F, B>,
+    MFT: MatcherFlagsTrait,
 {
-    type F = M::F;
     type Iter = M::Iter;
 
-    fn new(fst: Arc<Self::F>, match_type: MatchType) -> Result<Self> {
+    fn new(fst: B, match_type: MatchType) -> Result<Self> {
         Ok(Self {
-            fst: Arc::clone(&fst),
-            matcher: M::new(fst, match_type)?,
-            mft: PhantomData,
+            matcher: M::new(fst.clone(), match_type)?,
+            fst,
+            ghost: PhantomData,
         })
     }
 
@@ -58,13 +69,18 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> Matcher<W>
         self.matcher.priority(state)
     }
 
-    fn fst(&self) -> &Arc<Self::F> {
+    fn fst(&self) -> &B {
         &self.fst
     }
 }
 
-impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
-    for TrLookAheadMatcher<W, M, MFT>
+impl<W, F, B, M, MFT> LookaheadMatcher<W, F, B> for TrLookAheadMatcher<W, F, B, M, MFT>
+where
+    W: Semiring,
+    F: Fst<W>,
+    B: Borrow<F> + Debug + Clone,
+    M: Matcher<W, F, B>,
+    MFT: MatcherFlagsTrait,
 {
     // NullAddon
     type MatcherData = ();
@@ -74,28 +90,31 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
     }
 
     fn new_with_data(
-        fst: Arc<Self::F>,
+        fst: B,
         match_type: MatchType,
         _data: Option<Arc<Self::MatcherData>>,
     ) -> Result<Self> {
         Self::new(fst, match_type)
     }
 
-    fn create_data<F: Fst<W>>(
-        _fst: &F,
+    fn create_data<F2: Fst<W>, BF2: Borrow<F2>>(
+        _fst: BF2,
         _match_type: MatchType,
     ) -> Result<Option<Self::MatcherData>> {
         Ok(None)
     }
 
-    fn init_lookahead_fst<LF: Fst<W>>(&mut self, _lfst: &Arc<LF>) -> Result<()> {
+    fn init_lookahead_fst<LF: Fst<W>, BLF: Borrow<LF> + Clone>(
+        &mut self,
+        _lfst: &BLF,
+    ) -> Result<()> {
         Ok(())
     }
 
-    fn lookahead_fst<LF: Fst<W>>(
+    fn lookahead_fst<LF: Fst<W>, BLF: Borrow<LF>>(
         &self,
         matcher_state: StateId,
-        lfst: &Arc<LF>,
+        lfst: &BLF,
         lfst_state: StateId,
     ) -> Result<Option<LookAheadMatcherData<W>>> {
         let mut result = false;
@@ -107,7 +126,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
         if MFT::flags().contains(MatcherFlags::LOOKAHEAD_PREFIX) {
             la_matcher_data.clear_lookahead_prefix();
         }
-        if self.fst.is_final(matcher_state)? && lfst.is_final(lfst_state)? {
+        if self.fst.borrow().is_final(matcher_state)? && lfst.borrow().is_final(lfst_state)? {
             if !MFT::flags()
                 .contains(MatcherFlags::LOOKAHEAD_WEIGHT | MatcherFlags::LOOKAHEAD_PREFIX)
             {
@@ -118,9 +137,13 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
                 unsafe {
                     let fw_matcher_state = self
                         .fst
+                        .borrow()
                         .final_weight_unchecked(matcher_state)
                         .unsafe_unwrap();
-                    let fw_lfst_state = lfst.final_weight_unchecked(lfst_state).unsafe_unwrap();
+                    let fw_lfst_state = lfst
+                        .borrow()
+                        .final_weight_unchecked(lfst_state)
+                        .unsafe_unwrap();
                     la_matcher_data
                         .lookahead_weight
                         .plus_assign(fw_matcher_state.times(fw_lfst_state)?)?;
@@ -154,7 +177,7 @@ impl<W: Semiring, M: Matcher<W>, MFT: MatcherFlagsTrait> LookaheadMatcher<W>
         }
 
         let match_type = self.match_type(false)?;
-        for tr in lfst.get_trs(lfst_state)?.trs() {
+        for tr in lfst.borrow().get_trs(lfst_state)?.trs() {
             let label = match match_type {
                 MatchType::MatchInput => tr.olabel,
                 MatchType::MatchOutput => tr.ilabel,

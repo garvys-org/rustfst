@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
@@ -20,71 +22,101 @@ use crate::semirings::Semiring;
 use crate::{Tr, EPS_LABEL};
 
 #[derive(Clone, Debug)]
-pub struct LookAheadComposeFilter<
+pub struct LookAheadComposeFilter<W, F1, F2, B1, B2, M1, M2, CF, SMT>
+where
     W: Semiring,
-    CF: LookAheadComposeFilterTrait<W>,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
     SMT: MatchTypeTrait,
-> where
-    CF::M1: LookaheadMatcher<W>,
-    CF::M2: LookaheadMatcher<W>,
 {
     filter: CF,
     lookahead_type: MatchType,
     flags: MatcherFlags,
     lookahead_tr: bool,
-    smt: PhantomData<SMT>,
-    w: PhantomData<W>,
     selector: Selector,
     la_matcher_data: Option<LookAheadMatcherData<W>>,
+    ghost: PhantomData<(W, F1, F2, B1, B2, M1, M2, SMT)>,
 }
 
-#[derive(Debug, Clone)]
-pub struct LookAheadComposeFilterBuilder<W, CFB, SMT>
-where
-    W: Semiring,
-    CFB: ComposeFilterBuilder<W>,
-    CFB::CF: LookAheadComposeFilterTrait<W>,
-    SMT: MatchTypeTrait,
-    <CFB::CF as ComposeFilter<W>>::M1: LookaheadMatcher<W>,
-    <CFB::CF as ComposeFilter<W>>::M2: LookaheadMatcher<W>,
-{
-    filter_builder: CFB,
-    w: PhantomData<W>,
-    smt: PhantomData<SMT>,
-    lookahead_type: MatchType,
-    flags: MatcherFlags,
-    selector: Selector,
-}
-
-impl<W, F1, F2, M1, M2, CF, CFB, SMT> ComposeFilterBuilder<W>
-    for LookAheadComposeFilterBuilder<W, CFB, SMT>
+#[derive(Debug)]
+pub struct LookAheadComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2, CFB, SMT>
 where
     W: Semiring,
     F1: Fst<W>,
     F2: Fst<W>,
-    M1: Matcher<W, F = F1> + LookaheadMatcher<W>,
-    M2: Matcher<W, F = F2> + LookaheadMatcher<W>,
-    CF: ComposeFilter<W, M1 = M1, M2 = M2> + LookAheadComposeFilterTrait<W>,
-    CFB: ComposeFilterBuilder<W, M1 = M1, M2 = M2, CF = CF>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>,
+    CFB::CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
     SMT: MatchTypeTrait,
 {
-    type CF = LookAheadComposeFilter<W, CF, SMT>;
-    type M1 = M1;
-    type M2 = M2;
+    filter_builder: CFB,
+    lookahead_type: MatchType,
+    flags: MatcherFlags,
+    selector: Selector,
+    ghost: PhantomData<(W, F1, F2, B1, B2, M1, M2, SMT)>,
+}
 
-    fn new(
-        fst1: Arc<<<Self::CF as ComposeFilter<W>>::M1 as Matcher<W>>::F>,
-        fst2: Arc<<<Self::CF as ComposeFilter<W>>::M2 as Matcher<W>>::F>,
-        matcher1: Option<Self::M1>,
-        matcher2: Option<Self::M2>,
-    ) -> Result<Self>
+impl<W, F1, F2, B1, B2, M1, M2, CFB, SMT> Clone
+    for LookAheadComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2, CFB, SMT>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>,
+    CFB::CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
+    SMT: MatchTypeTrait,
+{
+    fn clone(&self) -> Self {
+        LookAheadComposeFilterBuilder {
+            filter_builder: self.filter_builder.clone(),
+            lookahead_type: self.lookahead_type.clone(),
+            flags: self.flags.clone(),
+            selector: self.selector.clone(),
+            ghost: PhantomData,
+        }
+    }
+}
+
+impl<W, F1, F2, B1, B2, M1, M2, CFB, SMT> ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>
+    for LookAheadComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2, CFB, SMT>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    B1: Borrow<F1> + Debug + Clone,
+    B2: Borrow<F2> + Debug + Clone,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>,
+    CFB::CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
+    SMT: MatchTypeTrait,
+    LookAheadComposeFilter<W, F1, F2, B1, B2, M1, M2, CFB::CF, SMT>:
+        ComposeFilter<W, F1, F2, B1, B2, M1, M2>,
+{
+    type IM1 = M1;
+    type IM2 = M2;
+    type CF = LookAheadComposeFilter<W, F1, F2, B1, B2, M1, M2, CFB::CF, SMT>;
+
+    fn new(fst1: B1, fst2: B2, matcher1: Option<M1>, matcher2: Option<M2>) -> Result<Self>
     where
         Self: Sized,
     {
-        let mut matcher1 = matcher1
-            .unwrap_or_else(|| Matcher::new(Arc::clone(&fst1), MatchType::MatchOutput).unwrap());
-        let mut matcher2 = matcher2
-            .unwrap_or_else(|| Matcher::new(Arc::clone(&fst2), MatchType::MatchInput).unwrap());
+        let mut matcher1 =
+            matcher1.unwrap_or_else(|| Matcher::new(fst1.clone(), MatchType::MatchOutput).unwrap());
+        let mut matcher2 =
+            matcher2.unwrap_or_else(|| Matcher::new(fst2.clone(), MatchType::MatchInput).unwrap());
 
         let lookahead_type = if SMT::match_type() == MatchType::MatchBoth {
             lookahead_match_type(&matcher1, &matcher2)?
@@ -118,35 +150,41 @@ where
 
         Ok(Self {
             filter_builder: CFB::new(fst1, fst2, Some(matcher1), Some(matcher2))?,
-            w: PhantomData,
-            smt: PhantomData,
             lookahead_type,
             flags,
             selector,
+            ghost: PhantomData,
         })
     }
 
     fn build(&self) -> Result<Self::CF> {
         let filter = self.filter_builder.build()?;
 
-        Ok(LookAheadComposeFilter::<W, CFB::CF, SMT> {
-            lookahead_type: self.lookahead_type,
-            flags: self.flags,
-            smt: PhantomData,
-            lookahead_tr: false,
-            w: PhantomData,
-            selector: self.selector,
-            filter,
-            la_matcher_data: None,
-        })
+        Ok(
+            LookAheadComposeFilter::<W, F1, F2, B1, B2, M1, M2, CFB::CF, SMT> {
+                lookahead_type: self.lookahead_type,
+                flags: self.flags,
+                lookahead_tr: false,
+                selector: self.selector,
+                filter,
+                la_matcher_data: None,
+                ghost: PhantomData,
+            },
+        )
     }
 }
 
-impl<W: Semiring, CF: LookAheadComposeFilterTrait<W>, SMT: MatchTypeTrait>
-    LookAheadComposeFilter<W, CF, SMT>
+impl<W, F1, F2, B1, B2, M1, M2, CF, SMT> LookAheadComposeFilter<W, F1, F2, B1, B2, M1, M2, CF, SMT>
 where
-    CF::M1: LookaheadMatcher<W>,
-    CF::M2: LookaheadMatcher<W>,
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
+    SMT: MatchTypeTrait,
 {
     fn lookahead_filter_tr(
         &mut self,
@@ -169,12 +207,12 @@ where
 
         self.la_matcher_data = match self.selector() {
             Selector::Fst1Matcher2 => {
-                let fst = self.fst1();
+                let fst = self.matcher1().fst();
                 let matcher = self.matcher2();
                 matcher.lookahead_fst(arca.nextstate, fst, arcb.nextstate)?
             }
             Selector::Fst2Matcher1 => {
-                let fst = self.fst2();
+                let fst = self.matcher2().fst();
                 let matcher = self.matcher1();
                 matcher.lookahead_fst(arca.nextstate, fst, arcb.nextstate)?
             }
@@ -188,14 +226,19 @@ where
     }
 }
 
-impl<W: Semiring, CF: LookAheadComposeFilterTrait<W>, SMT: MatchTypeTrait> ComposeFilter<W>
-    for LookAheadComposeFilter<W, CF, SMT>
+impl<W, F1, F2, B1, B2, M1, M2, CF, SMT> ComposeFilter<W, F1, F2, B1, B2, M1, M2>
+    for LookAheadComposeFilter<W, F1, F2, B1, B2, M1, M2, CF, SMT>
 where
-    CF::M1: LookaheadMatcher<W>,
-    CF::M2: LookaheadMatcher<W>,
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
+    SMT: MatchTypeTrait,
 {
-    type M1 = CF::M1;
-    type M2 = CF::M2;
     type FS = CF::FS;
 
     fn start(&self) -> Self::FS {
@@ -223,19 +266,19 @@ where
         self.filter.filter_final(w1, w2)
     }
 
-    fn matcher1(&self) -> &Self::M1 {
+    fn matcher1(&self) -> &M1 {
         self.filter.matcher1()
     }
 
-    fn matcher2(&self) -> &Self::M2 {
+    fn matcher2(&self) -> &M2 {
         self.filter.matcher2()
     }
 
-    fn matcher1_shared(&self) -> &Arc<Self::M1> {
+    fn matcher1_shared(&self) -> &Arc<M1> {
         self.filter.matcher1_shared()
     }
 
-    fn matcher2_shared(&self) -> &Arc<Self::M2> {
+    fn matcher2_shared(&self) -> &Arc<M2> {
         self.filter.matcher2_shared()
     }
 
@@ -248,11 +291,18 @@ where
     }
 }
 
-impl<W: Semiring, CF: LookAheadComposeFilterTrait<W>, SMT: MatchTypeTrait>
-    LookAheadComposeFilterTrait<W> for LookAheadComposeFilter<W, CF, SMT>
+impl<W, F1, F2, B1, B2, M1, M2, CF, SMT> LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>
+    for LookAheadComposeFilter<W, F1, F2, B1, B2, M1, M2, CF, SMT>
 where
-    CF::M1: LookaheadMatcher<W>,
-    CF::M2: LookaheadMatcher<W>,
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    B1: Borrow<F1> + Debug,
+    B2: Borrow<F2> + Debug,
+    M1: LookaheadMatcher<W, F1, B1>,
+    M2: LookaheadMatcher<W, F2, B2>,
+    CF: LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>,
+    SMT: MatchTypeTrait,
 {
     fn lookahead_flags(&self) -> MatcherFlags {
         self.flags
