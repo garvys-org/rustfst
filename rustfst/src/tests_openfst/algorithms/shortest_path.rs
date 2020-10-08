@@ -10,7 +10,7 @@ use crate::fst_traits::{MutableFst, PathsIterator, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
 use crate::semirings::{Semiring, SerializableSemiring};
-use crate::tests_openfst::macros::test_correctness_properties;
+use crate::tests_openfst::utils::test_correctness_properties;
 use crate::tests_openfst::FstTestData;
 use crate::FstPath;
 use std::path::Path;

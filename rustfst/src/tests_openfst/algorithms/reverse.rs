@@ -14,6 +14,7 @@ use crate::Tr;
 
 use crate::fst_properties::FstProperties;
 use crate::tests_openfst::FstTestData;
+use crate::tests_openfst::utils::test_eq_fst;
 
 pub struct ReverseWeightConverter {}
 
@@ -58,17 +59,6 @@ where
     let mut mapper = ReverseWeightConverter {};
     let fst_reverse_2: F = weight_convert(&fst_reverse, &mut mapper)?;
 
-    assert!(
-        &test_data.reverse.equal_quantized(&fst_reverse_2),
-        "Reverse"
-    );
-    assert_eq!(
-        test_data.reverse.properties(),
-        fst_reverse.properties(),
-        "{}",
-        "Reverse"
-    );
-
-    // test_eq_fst(&test_data.reverse, &fst_reverse_2, "Reverse");
+    test_eq_fst(&test_data.reverse, &fst_reverse_2, "Reverse");
     Ok(())
 }

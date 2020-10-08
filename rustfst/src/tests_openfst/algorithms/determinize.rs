@@ -11,7 +11,7 @@ use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
-use crate::tests_openfst::macros::test_isomorphic_fst;
+use crate::tests_openfst::utils::test_isomorphic_fst;
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]

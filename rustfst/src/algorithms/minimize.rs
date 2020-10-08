@@ -150,12 +150,12 @@ where
 }
 
 pub fn print_fst2<W: Semiring, F: ExpandedFst<W>>(fst: &F) {
-    for s in 0..fst.num_states() {
-        println!("s = {} num_arcs = {}", s, fst.num_trs(s).unwrap());
-        for tr in fst.get_trs(s).unwrap().trs() {
-            println!("{} {:?}", tr.ilabel, &tr.weight);
-        }
-    }
+    // for s in 0..fst.num_states() {
+    //     println!("s = {} num_arcs = {}", s, fst.num_trs(s).unwrap());
+    //     for tr in fst.get_trs(s).unwrap().trs() {
+    //         println!("{} {:?}", tr.ilabel, &tr.weight);
+    //     }
+    // }
 }
 
 /// In place minimization for weighted final state acceptor.

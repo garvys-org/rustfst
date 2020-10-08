@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::algorithms::condense;
 use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::{SerializableSemiring, WeightQuantize};
-use crate::tests_openfst::macros::test_eq_fst;
+use crate::tests_openfst::utils::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 use std::path::Path;
 

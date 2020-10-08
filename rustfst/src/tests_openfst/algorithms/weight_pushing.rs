@@ -6,7 +6,7 @@ use crate::algorithms::{push_weights, ReweightType, push_weights_default};
 use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::{SerializableSemiring, WeightQuantize};
-use crate::tests_openfst::macros::test_eq_fst;
+use crate::tests_openfst::utils::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 
 pub fn test_weight_pushing_initial<W, F>(test_data: &FstTestData<W, F>) -> Result<()>

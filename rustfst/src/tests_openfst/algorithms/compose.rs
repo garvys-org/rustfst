@@ -25,7 +25,7 @@ use crate::algorithms::{tr_compares::ILabelCompare, tr_sort};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
-use crate::tests_openfst::macros::test_eq_fst;
+use crate::tests_openfst::utils::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]

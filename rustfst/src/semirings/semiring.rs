@@ -55,6 +55,8 @@ pub trait Semiring: Clone + PartialEq + PartialOrd + Debug + Hash + Eq + Sync + 
     }
     fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()>;
 
+    fn approx_equal<P: Borrow<Self>>(&self, rhs: P, delta: f32) -> bool;
+
     /// Borrow underneath value.
     fn value(&self) -> &Self::Type;
     /// Move underneath value.

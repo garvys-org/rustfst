@@ -6,7 +6,7 @@ use crate::algorithms::tr_sum;
 use crate::algorithms::tr_unique;
 use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::{SerializableSemiring, WeightQuantize};
-use crate::tests_openfst::macros::test_eq_fst;
+use crate::tests_openfst::utils::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 
 pub fn test_state_map_tr_sum<W, F>(test_data: &FstTestData<W, F>) -> Result<()>

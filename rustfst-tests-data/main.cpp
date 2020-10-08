@@ -1331,25 +1331,25 @@ int main() {
         compute_weight_data(w1, w2, "weight_012");
     }
 
-    // compute_fst_data(FstTestData000(), "fst_000");
-    // compute_fst_data(FstTestData001(), "fst_001");
-    // compute_fst_data(FstTestData002(), "fst_002");
-    // compute_fst_data(FstTestData003(), "fst_003");
-    // compute_fst_data(FstTestData004(), "fst_004");
-    // compute_fst_data(FstTestData005(), "fst_005");
-    // compute_fst_data(FstTestData006(), "fst_006");
-    // compute_fst_data(FstTestData007(), "fst_007");
-    // compute_fst_data(FstTestData008(), "fst_008");
-    // compute_fst_data(FstTestData009(), "fst_009");
-    // compute_fst_data(FstTestData010(), "fst_010");
-    // compute_fst_data(FstTestData011(), "fst_011");
-    // compute_fst_data(FstTestData012(), "fst_012");
-    // compute_fst_data(FstTestData013(), "fst_013");
-    // compute_fst_data(FstTestData014(), "fst_014");
-    // compute_fst_data(FstTestData015(), "fst_015");
-    // compute_fst_data(FstTestData016(), "fst_016");
-    // compute_fst_data(FstTestData017(), "fst_017");
-    // compute_fst_data(FstTestData018(), "fst_018");
-    // compute_fst_data(FstTestData019(), "fst_019");
+    compute_fst_data(FstTestData000(), "fst_000");
+    compute_fst_data(FstTestData001(), "fst_001");
+    compute_fst_data(FstTestData002(), "fst_002");
+    compute_fst_data(FstTestData003(), "fst_003");
+    compute_fst_data(FstTestData004(), "fst_004");
+    compute_fst_data(FstTestData005(), "fst_005");
+    compute_fst_data(FstTestData006(), "fst_006");
+    compute_fst_data(FstTestData007(), "fst_007");
+    compute_fst_data(FstTestData008(), "fst_008");
+    compute_fst_data(FstTestData009(), "fst_009");
+    compute_fst_data(FstTestData010(), "fst_010");
+    compute_fst_data(FstTestData011(), "fst_011");
+    compute_fst_data(FstTestData012(), "fst_012");
+    compute_fst_data(FstTestData013(), "fst_013");
+    compute_fst_data(FstTestData014(), "fst_014");
+    compute_fst_data(FstTestData015(), "fst_015");
+    compute_fst_data(FstTestData016(), "fst_016");
+    compute_fst_data(FstTestData017(), "fst_017");
+    compute_fst_data(FstTestData018(), "fst_018");
+    compute_fst_data(FstTestData019(), "fst_019");
     compute_fst_data(FstTestData020(), "fst_020");
 }

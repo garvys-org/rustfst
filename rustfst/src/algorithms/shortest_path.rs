@@ -269,10 +269,10 @@ impl<'a, 'b, W: Semiring + WeightQuantize> ShortestPathCompare<'a, 'b, W> {
         let wy = self.pweight(&py.0).times(&py.1).unwrap();
         let res = if px.0.is_none() && py.0.is_some() {
             natural_less(&wy, &wx).unwrap()
-                || (wy.quantize(self.delta).unwrap() == wx.quantize(self.delta).unwrap())
+                || wx.approx_equal(&wy, self.delta)
         } else if px.0.is_some() && py.0.is_none() {
             natural_less(&wy, &wx).unwrap()
-                && !(wy.quantize(self.delta).unwrap() == wx.quantize(self.delta).unwrap())
+                && !wx.approx_equal(&wy, self.delta)
         } else {
             natural_less(&wy, &wx).unwrap()
         };

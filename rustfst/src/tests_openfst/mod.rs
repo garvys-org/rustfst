@@ -100,8 +100,7 @@ use self::fst_impls::test_fst_into_iterator::{
 use self::misc::test_del_all_states;
 use crate::tests_openfst::algorithms::queue::{test_queue, QueueOperationResult};
 
-#[macro_use]
-mod macros;
+mod utils;
 
 mod algorithms;
 mod fst_impls;

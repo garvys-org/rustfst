@@ -5,7 +5,7 @@ use anyhow::Result;
 
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{StateId, Tr, Trs};
+use crate::{StateId, Tr, Trs, KDELTA};
 use std::marker::PhantomData;
 
 struct Isomorphism<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> {
@@ -14,6 +14,7 @@ struct Isomorphism<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> {
     state_pairs: Vec<Option<StateId>>,
     queue: VecDeque<(StateId, StateId)>,
     w: PhantomData<W>,
+    delta: f32
 }
 
 /// Compare trs in the order input label, output label, weight and nextstate.
@@ -46,13 +47,14 @@ pub fn tr_compare<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> Ordering {
 }
 
 impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W, F1, F2> {
-    fn new(fst_1: &'a F1, fst_2: &'a F2) -> Self {
+    fn new(fst_1: &'a F1, fst_2: &'a F2, delta: f32) -> Self {
         Self {
             fst_1,
             fst_2,
             state_pairs: vec![None; fst_1.num_states()],
             queue: VecDeque::new(),
             w: PhantomData,
+            delta
         }
     }
 
@@ -69,8 +71,16 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
     }
 
     fn ismorphic_state(&mut self, s1: StateId, s2: StateId) -> Result<bool> {
-        if !(self.fst_1.final_weight(s1)? == self.fst_2.final_weight(s2)?) {
-            return Ok(false);
+        let fw1 = self.fst_1.final_weight(s1)?;
+        let fw2 = self.fst_2.final_weight(s2)?;
+        let fw_equal = match (fw1, fw2) {
+            (Some(w1), Some(w2)) => w1.approx_equal(w2, self.delta),
+            (Some(_), None) => false,
+            (None, Some(_)) => false,
+            (None, None) => true
+        };
+        if !fw_equal {
+            return Ok(false)
         }
 
         let ntrs1 = self.fst_1.num_trs(s1)?;
@@ -97,7 +107,7 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
             if arc1.olabel != arc2.olabel {
                 return Ok(false);
             }
-            if !(arc1.weight == arc2.weight) {
+            if !(arc1.weight.approx_equal(&arc2.weight, self.delta)) {
                 return Ok(false);
             }
             if !(self.pair_state(arc1.nextstate, arc2.nextstate)) {
@@ -105,7 +115,7 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
             }
             if i > 0 {
                 let arc0 = trs1[i - 1];
-                if arc1 == arc0 {
+                if arc1.ilabel == arc0.ilabel && arc1.olabel == arc0.olabel && arc1.weight.approx_equal(&arc0.weight, self.delta) {
                     bail!("Isomorphic: Non-determinism as an unweighted automaton")
                 }
             }
@@ -137,19 +147,28 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
     }
 }
 
+pub fn isomorphic_default<W, F1, F2>(fst_1: &F1, fst_2: &F2) -> Result<bool>
+    where
+        W: Semiring,
+        F1: ExpandedFst<W>,
+        F2: ExpandedFst<W>,
+{
+    isomorphic(fst_1, fst_2, KDELTA)
+}
+
 /// This operation determines if two transducers with a certain required determinism
 /// have the same states, irrespective of numbering, and the same transitions with
 /// the same labels and weights, irrespective of ordering.
 ///
 /// In other words, Isomorphic(A, B) is true if and only if the states of A can
 /// be renumbered and the transitions leaving each state reordered so that Equal(A, B) is true.
-pub fn isomorphic<W, F1, F2>(fst_1: &F1, fst_2: &F2) -> Result<bool>
+pub fn isomorphic<W, F1, F2>(fst_1: &F1, fst_2: &F2, delta: f32) -> Result<bool>
 where
     W: Semiring,
     F1: ExpandedFst<W>,
     F2: ExpandedFst<W>,
 {
-    let mut iso = Isomorphism::new(fst_1, fst_2);
+    let mut iso = Isomorphism::new(fst_1, fst_2, delta);
     iso.isomorphic()
 }
 
@@ -171,10 +190,10 @@ mod test {
         )?;
 
         let mut fst_2 = fst_1.clone();
-        assert!(isomorphic(&fst_1, &fst_2)?);
+        assert!(isomorphic_default(&fst_1, &fst_2)?);
 
         fst_2.add_tr(0, Tr::new(33, 45, LogWeight::new(0.3), 1))?;
-        assert!(!isomorphic(&fst_1, &fst_2)?);
+        assert!(!isomorphic_default(&fst_1, &fst_2)?);
 
         Ok(())
     }
@@ -191,7 +210,7 @@ mod test {
              0\n",
         )?;
 
-        assert!(isomorphic(&fst_1, &fst_2)?);
+        assert!(isomorphic_default(&fst_1, &fst_2)?);
 
         Ok(())
     }

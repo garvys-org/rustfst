@@ -14,6 +14,7 @@ use crate::semirings::{
     StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::KDELTA;
+use crate::semirings::utils_float::float_approx_equal;
 
 /// Probability semiring: (x, +, 0.0, 1.0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
@@ -50,6 +51,10 @@ impl Semiring for ProbabilityWeight {
     fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         self.value.0 *= rhs.borrow().value.0;
         Ok(())
+    }
+
+    fn approx_equal<P: Borrow<Self>>(&self, rhs: P, delta: f32) -> bool {
+        float_approx_equal(self.value.0, rhs.borrow().value.0, delta)
     }
 
     fn value(&self) -> &Self::Type {

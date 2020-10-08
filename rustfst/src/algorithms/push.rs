@@ -53,7 +53,7 @@ where
     W::ReverseWeight: WeightQuantize
 {
     let dist = shortest_distance(fst, reweight_type == ReweightType::ReweightToInitial, delta)?;
-    dbg!(&dist);
+
     if remove_total_weight {
         let total_weight =
             compute_total_weight(fst, &dist, reweight_type == ReweightType::ReweightToInitial)?;

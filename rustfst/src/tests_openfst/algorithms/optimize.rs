@@ -5,7 +5,7 @@ use anyhow::Result;
 use crate::algorithms::optimize;
 use crate::fst_traits::{MutableFst, SerializableFst, AllocableFst};
 use crate::semirings::{SerializableSemiring, WeightQuantize, WeaklyDivisibleSemiring};
-use crate::tests_openfst::macros::test_eq_fst;
+use crate::tests_openfst::utils::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 
 pub fn test_optimize<W, F>(test_data: &FstTestData<W, F>) -> Result<()>

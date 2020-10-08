@@ -5,7 +5,7 @@ pub use self::{
     connect::connect,
     fst_convert::{fst_convert, fst_convert_from_ref},
     inversion::invert,
-    isomorphic::isomorphic,
+    isomorphic::{isomorphic, isomorphic_default},
     minimize::{acceptor_minimize, minimize, minimize_default},
     optimize::optimize,
     projection::{project, ProjectType},

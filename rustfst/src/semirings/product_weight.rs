@@ -69,6 +69,10 @@ where
         Ok(())
     }
 
+    fn approx_equal<P: Borrow<Self>>(&self, rhs: P, delta: f32) -> bool {
+        self.value1().approx_equal(rhs.borrow().value1(), delta) && self.value2().approx_equal(rhs.borrow().value2(), delta)
+    }
+
     fn value(&self) -> &<Self as Semiring>::Type {
         &self.weight
     }

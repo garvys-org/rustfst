@@ -5,7 +5,7 @@ use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::FstTestData;
 
-use crate::tests_openfst::macros::test_eq_fst;
+use crate::tests_openfst::utils::test_eq_fst;
 use anyhow::Result;
 
 pub fn test_fst_convert<W, F>(test_data: &FstTestData<W, F>) -> Result<()>

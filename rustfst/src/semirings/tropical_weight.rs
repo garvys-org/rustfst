@@ -15,6 +15,7 @@ use crate::semirings::{
     WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::KDELTA;
+use crate::semirings::utils_float::float_approx_equal;
 
 /// Tropical semiring: (min, +, inf, 0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
@@ -61,6 +62,10 @@ impl Semiring for TropicalWeight {
             self.value.0 += f2;
         }
         Ok(())
+    }
+
+    fn approx_equal<P: Borrow<Self>>(&self, rhs: P, delta: f32) -> bool {
+        float_approx_equal(self.value.0, rhs.borrow().value.0, delta)
     }
 
     fn value(&self) -> &Self::Type {

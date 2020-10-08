@@ -223,7 +223,7 @@ impl<W: Semiring + WeightQuantize, Q: Queue, A: TrFilter<W>>
                 let na = self.adder.get_mut(nextstate).unwrap();
                 let nr = self.radder.get_mut(nextstate).unwrap();
                 let weight = r.times(&tr.weight)?;
-                if nd.quantize(self.delta)? != nd.plus(&weight)?.quantize(self.delta)? {
+                if !nd.approx_equal(nd.plus(&weight)?, self.delta) {
                     na.plus_assign(&weight)?;
                     *nd = na.clone();
                     nr.plus_assign(&weight)?;
