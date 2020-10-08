@@ -16,7 +16,7 @@ use crate::algorithms::lazy::FstOp;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
 use crate::semirings::{DivideType, WeaklyDivisibleSemiring, WeightQuantize};
-use crate::{Label, Semiring, StateId, Tr, Trs, TrsVec, KDELTA};
+use crate::{Label, Semiring, StateId, Tr, Trs, TrsVec};
 
 
 #[derive(Debug)]
@@ -30,6 +30,7 @@ where
 {
     fst: B,
     state_table: DeterminizeStateTable<W, BT>,
+    delta: f32,
     ghost: PhantomData<(CD, F)>,
 }
 
@@ -132,13 +133,14 @@ where
     B: Borrow<F> + Debug,
     BT: Borrow<[W]> + Debug + PartialEq,
 {
-    pub fn new(fst: B, in_dist: Option<BT>) -> Result<Self> {
+    pub fn new(fst: B, in_dist: Option<BT>, delta: f32) -> Result<Self> {
         if !fst.borrow().properties().contains(FstProperties::ACCEPTOR) {
             bail!("DeterminizeFsaImpl : expected acceptor as argument");
         }
         Ok(Self {
             fst,
             state_table: DeterminizeStateTable::new(in_dist),
+            delta,
             ghost: PhantomData,
         })
     }
@@ -172,7 +174,7 @@ where
             dest_elt.weight = dest_elt
                 .weight
                 .divide(&det_tr.weight, DivideType::DivideLeft)?;
-            dest_elt.weight.quantize_assign(KDELTA)?;
+            dest_elt.weight.quantize_assign(self.delta)?;
         }
 
         Ok(())

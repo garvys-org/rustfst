@@ -31,19 +31,34 @@ use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{
     GallicWeightLeft, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::Tr;
 use crate::EPS_LABEL;
 use crate::KDELTA;
 use crate::NO_STATE_ID;
 use crate::{StateId, Trs};
+use crate::{Tr, KSHORTESTDELTA};
+
+pub fn minimize_default<W, F>(ifst: &mut F) -> Result<()>
+    where
+        F: MutableFst<W> + ExpandedFst<W> + AllocableFst<W>,
+        W: WeaklyDivisibleSemiring + WeightQuantize,
+        W::ReverseWeight: WeightQuantize
+{
+    minimize(ifst, KSHORTESTDELTA, false)
+}
+
 
 /// In place minimization of deterministic weighted automata and transducers,
 /// and also non-deterministic ones if they use an idempotent semiring.
 /// For transducers, the algorithm produces a compact factorization of the minimal transducer.
-pub fn minimize<W, F>(ifst: &mut F, allow_nondet: bool) -> Result<()>
+pub fn minimize<W, F>(
+    ifst: &mut F,
+    delta: f32,
+    allow_nondet: bool
+) -> Result<()>
 where
     F: MutableFst<W> + ExpandedFst<W> + AllocableFst<W>,
     W: WeaklyDivisibleSemiring + WeightQuantize,
+    W::ReverseWeight: WeightQuantize
 {
     let props = ifst.compute_and_update_properties(
         FstProperties::ACCEPTOR
@@ -67,13 +82,36 @@ where
     if !props.contains(FstProperties::ACCEPTOR) {
         // Weighted transducer
         let mut to_gallic = ToGallicConverter {};
+        // dbg!(ifst.properties().contains(FstProperties::I_DETERMINISTIC));
+        println!("==============================================================================");
+        println!("To Gallic");
+        print_fst2(ifst);
         let mut gfst: VectorFst<GallicWeightLeft<W>> = weight_convert(ifst, &mut to_gallic)?;
-        push_weights(&mut gfst, ReweightType::ReweightToInitial, false)?;
-        let quantize_mapper = QuantizeMapper::default();
+        // dbg!(gfst.properties().contains(FstProperties::I_DETERMINISTIC));
+        println!("==============================================================================");
+        println!("Push weights");
+        print_fst2(&gfst);
+        push_weights(&mut gfst, ReweightType::ReweightToInitial, delta, false)?;
+        // dbg!(gfst.properties().contains(FstProperties::I_DETERMINISTIC));
+        let quantize_mapper = QuantizeMapper::new(delta);
+        println!("==============================================================================");
+        println!("Quantize");
+        print_fst2(&gfst);
         tr_map(&mut gfst, &quantize_mapper)?;
+        // dbg!(gfst.properties().contains(FstProperties::I_DETERMINISTIC));
+        println!("==============================================================================");
+        println!("Encode");
+        print_fst2(&gfst);
         let encode_table = encode(&mut gfst, EncodeType::EncodeWeightsAndLabels)?;
+        // dbg!(gfst.properties().contains(FstProperties::I_DETERMINISTIC));
+        println!("==============================================================================");
+        println!("Acceptor minimize");
+        print_fst2(&gfst);
         acceptor_minimize(&mut gfst, allow_acyclic_minimization)?;
+        // dbg!(gfst.properties().contains(FstProperties::I_DETERMINISTIC));
+        println!("Decode");
         decode(&mut gfst, encode_table)?;
+        // dbg!(gfst.properties().contains(FstProperties::I_DETERMINISTIC));
         let factor_opts: FactorWeightOptions = FactorWeightOptions {
             delta: KDELTA,
             mode: FactorWeightType::FACTOR_FINAL_WEIGHTS | FactorWeightType::FACTOR_ARC_WEIGHTS,
@@ -82,20 +120,25 @@ where
             increment_final_ilabel: false,
             increment_final_olabel: false,
         };
+        println!("Factorweight");
         let fwfst: VectorFst<_> =
             factor_weight::<_, VectorFst<GallicWeightLeft<W>>, _, _, GallicFactorLeft<W>>(
                 &gfst,
                 factor_opts,
             )?;
+        // dbg!(fwfst.properties().contains(FstProperties::I_DETERMINISTIC));
+        println!("From Gallic");
         let mut from_gallic = FromGallicConverter {
             superfinal_label: EPS_LABEL,
         };
         *ifst = weight_convert(&fwfst, &mut from_gallic)?;
+        println!("Done");
+        // dbg!(ifst.properties().contains(FstProperties::I_DETERMINISTIC));
         Ok(())
     } else if props.contains(FstProperties::WEIGHTED) {
         // Weighted acceptor
-        push_weights(ifst, ReweightType::ReweightToInitial, false)?;
-        let quantize_mapper = QuantizeMapper::default();
+        push_weights(ifst, ReweightType::ReweightToInitial, delta, false)?;
+        let quantize_mapper = QuantizeMapper::new(delta);
         tr_map(ifst, &quantize_mapper)?;
         let encode_table = encode(ifst, EncodeType::EncodeWeightsAndLabels)?;
         acceptor_minimize(ifst, allow_acyclic_minimization)?;
@@ -103,6 +146,15 @@ where
     } else {
         // Unweighted acceptor
         acceptor_minimize(ifst, allow_acyclic_minimization)
+    }
+}
+
+pub fn print_fst2<W: Semiring, F: ExpandedFst<W>>(fst: &F) {
+    for s in 0..fst.num_states() {
+        println!("s = {} num_arcs = {}", s, fst.num_trs(s).unwrap());
+        for tr in fst.get_trs(s).unwrap().trs() {
+            println!("{} {:?}", tr.ilabel, &tr.weight);
+        }
     }
 }
 
@@ -115,6 +167,14 @@ pub fn acceptor_minimize<W: Semiring, F: MutableFst<W> + ExpandedFst<W>>(
     ifst: &mut F,
     allow_acyclic_minimization: bool,
 ) -> Result<()> {
+    // for s in 1..160 {
+    //     println!("[AcceptorMinimize] s = {} num_arcs = {}", s, ifst.num_trs(s).unwrap());
+    //     for tr in ifst.get_trs(s).unwrap().trs() {
+    //         print!("{} ", tr.ilabel);
+    //     }
+    //     print!("\n");
+    // }
+
     let props = ifst.compute_and_update_properties(
         FstProperties::ACCEPTOR | FstProperties::UNWEIGHTED | FstProperties::ACYCLIC,
     )?;
@@ -130,14 +190,18 @@ pub fn acceptor_minimize<W: Semiring, F: MutableFst<W> + ExpandedFst<W>>(
 
     if allow_acyclic_minimization && props.contains(FstProperties::ACYCLIC) {
         // Acyclic minimization
+        println!("Acyclic Minimize");
         tr_sort(ifst, ILabelCompare {});
         let minimizer = AcyclicMinimizer::new(ifst)?;
         merge_states(minimizer.get_partition(), ifst)?;
     } else {
+        println!("Cyclic Minimize");
         let p = cyclic_minimize(ifst)?;
+        println!("Merge states");
         merge_states(p, ifst)?;
     }
 
+    println!("TrUnique");
     tr_unique(ifst);
 
     Ok(())
@@ -145,6 +209,8 @@ pub fn acceptor_minimize<W: Semiring, F: MutableFst<W> + ExpandedFst<W>>(
 
 fn merge_states<W: Semiring, F: MutableFst<W>>(partition: Partition, fst: &mut F) -> Result<()> {
     let mut state_map = vec![None; partition.num_classes()];
+    println!("num_states = {}", fst.num_states());
+    dbg!("Part 1");
     for (i, s) in state_map
         .iter_mut()
         .enumerate()
@@ -152,6 +218,9 @@ fn merge_states<W: Semiring, F: MutableFst<W>>(partition: Partition, fst: &mut F
     {
         *s = partition.iter(i).next();
     }
+
+    dbg!("Part 2");
+    dbg!(partition.num_classes());
 
     for c in 0..partition.num_classes() {
         for s in partition.iter(c) {
@@ -181,7 +250,9 @@ fn merge_states<W: Semiring, F: MutableFst<W>>(partition: Partition, fst: &mut F
     }
 
     fst.set_start(state_map[partition.get_class_id(fst.start().unwrap())].unwrap())?;
+    dbg!("connect");
     connect(fst)?;
+    dbg!("connected");
     Ok(())
 }
 
@@ -383,6 +454,35 @@ impl<'a, W: Semiring, F: MutableFst<W>> StateComparator<'a, W, F> {
     }
 }
 
+struct StateIlabelHasher<'a, W: Semiring, F: Fst<W>> {
+    fst: &'a F,
+    ghost: PhantomData<W>,
+}
+
+impl<'a, W: Semiring, F: Fst<W>> StateIlabelHasher<'a, W, F> {
+    pub fn new(fst: &'a F) -> Self {
+        Self {
+            fst,
+            ghost: PhantomData,
+        }
+    }
+
+    pub fn get_hash(&self, state: StateId) -> usize {
+        let p1 = 7603;
+        let p2 = 433024223;
+        let mut result = p2;
+        let mut current_ilabel = std::usize::MAX;
+        for tr in self.fst.get_trs(state).unwrap().trs() {
+            let this_label = tr.ilabel;
+            if this_label != current_ilabel {
+                result = p1 * result + this_label;
+                current_ilabel = this_label;
+            }
+        }
+        return result;
+    }
+}
+
 fn pre_partition<W: Semiring, F: MutableFst<W>>(
     fst: &F,
     partition: &mut Partition,
@@ -390,19 +490,31 @@ fn pre_partition<W: Semiring, F: MutableFst<W>>(
 ) {
     let mut next_class: StateId = 0;
     let num_states = fst.num_states();
+    println!("[PrePartition] num_states = {}", num_states);
     let mut state_to_initial_class: Vec<StateId> = vec![0; num_states];
     {
-        let mut hash_to_class_nonfinal = HashMap::<Vec<usize>, StateId>::new();
-        let mut hash_to_class_final = HashMap::<Vec<usize>, StateId>::new();
+        let hasher = StateIlabelHasher::new(fst);
+        let mut hash_to_class_nonfinal = HashMap::<usize, StateId>::new();
+        let mut hash_to_class_final = HashMap::<usize, StateId>::new();
+
+        // for s in 1..160 {
+        //     println!("[PrePartition] s = {} num_arcs = {} fw = {:?} hasher = {}", s, fst.num_trs(s).unwrap(), fst.final_weight(s).unwrap(), hasher.get_hash(s));
+        //     for tr in fst.get_trs(s).unwrap().trs() {
+        //         print!("{} ", tr.ilabel);
+        //     }
+        //     print!("\n");
+        // }
 
         for (s, state_to_initial_class_s) in state_to_initial_class
             .iter_mut()
             .enumerate()
             .take(num_states)
         {
-            let ilabels: Vec<usize> = unsafe { fst.get_trs_unchecked(s).trs().iter() }
-                .map(|tr| tr.ilabel)
-                .collect();
+            let zero = W::zero();
+            let final_weight = fst.final_weight(s).unwrap();
+            if final_weight == Some(zero) {
+                panic!("oups")
+            }
 
             let this_map = if unsafe { fst.is_final_unchecked(s) } {
                 &mut hash_to_class_final
@@ -410,7 +522,7 @@ fn pre_partition<W: Semiring, F: MutableFst<W>>(
                 &mut hash_to_class_nonfinal
             };
 
-            match this_map.entry(ilabels) {
+            match this_map.entry(hasher.get_hash(s)) {
                 Entry::Occupied(e) => {
                     *state_to_initial_class_s = *e.get();
                 }
@@ -420,8 +532,13 @@ fn pre_partition<W: Semiring, F: MutableFst<W>>(
                     next_class += 1;
                 }
             };
+
+            // println!("s = {} next_class = {}", s, next_class);
         }
     }
+
+    println!("[Prepartition] next_class = {}", next_class);
+
     partition.allocate_classes(next_class);
     for (s, c) in state_to_initial_class.iter().enumerate().take(num_states) {
         partition.add(s, *c);
@@ -434,17 +551,23 @@ fn pre_partition<W: Semiring, F: MutableFst<W>>(
 
 fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<Partition> {
     // Initialize
+    println!("[Cyclic Minimize] Initialize");
     let mut tr: VectorFst<W::ReverseWeight> = reverse(fst)?;
     tr_sort(&mut tr, ILabelCompare {});
+    println!("[Cyclic Minimize] tr.num_states() = {}", tr.num_states());
     let mut partition = Partition::new(tr.num_states() - 1);
     let mut queue = LifoQueue::default();
     pre_partition(fst, &mut partition, &mut queue);
 
     // Compute
+    println!("[Cyclic Minimize] Compute");
+    println!("[Cyclic Minimize] queue.head() = {:?}", queue.head());
     while !queue.is_empty() {
         let c = queue.head().unwrap();
         queue.dequeue();
 
+        // Split
+        // println!("[Cyclic Minimize] Split on C = {}", c);
         // TODO: Avoid this clone :o
         // Here we need to pointer to the partition that is valid even if the partition changes.
         let comp = TrIterCompare {

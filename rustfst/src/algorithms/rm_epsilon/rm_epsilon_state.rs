@@ -10,9 +10,9 @@ use crate::algorithms::rm_epsilon::{Element, RmEpsilonConfig};
 use crate::algorithms::shortest_distance::ShortestDistanceState;
 use crate::algorithms::tr_filters::{EpsilonTrFilter, TrFilter};
 use crate::fst_traits::ExpandedFst;
-use crate::semirings::Semiring;
+use crate::semirings::{Semiring, WeightQuantize};
 
-#[derive(Clone, Eq)]
+#[derive(Clone)]
 pub struct RmEpsilonState<W: Semiring, Q: Queue> {
     pub visited: Vec<bool>,
     pub visited_states: Vec<StateId>,
@@ -30,19 +30,19 @@ impl<W: Semiring, Q: Queue> std::fmt::Debug
     }
 }
 
-impl<W: Semiring, Q: Queue + PartialEq> PartialEq
-    for RmEpsilonState<W, Q>
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.visited.eq(&other.visited)
-            && self.visited_states.eq(&other.visited_states)
-            && self.element_map.eq(&other.element_map)
-            && self.expand_id.eq(&other.expand_id)
-            && self.sd_state.eq(&other.sd_state)
-    }
-}
+// impl<W: Semiring, Q: Queue + PartialEq> PartialEq
+//     for RmEpsilonState<W, Q>
+// {
+//     fn eq(&self, other: &Self) -> bool {
+//         self.visited.eq(&other.visited)
+//             && self.visited_states.eq(&other.visited_states)
+//             && self.element_map.eq(&other.element_map)
+//             && self.expand_id.eq(&other.expand_id)
+//             && self.sd_state.eq(&other.sd_state)
+//     }
+// }
 
-impl<W: Semiring, Q: Queue> RmEpsilonState<W, Q> {
+impl<W: Semiring + WeightQuantize, Q: Queue> RmEpsilonState<W, Q> {
     pub fn new(fst_num_states: usize, opts: RmEpsilonConfig<W, Q>) -> Self {
         Self {
             sd_state: ShortestDistanceState::new_from_config(fst_num_states, opts.sd_opts, true),

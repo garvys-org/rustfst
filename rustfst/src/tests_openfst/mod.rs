@@ -178,7 +178,7 @@ pub struct ParsedFstTestData {
     compose: Vec<ComposeOperationResult>,
     state_reachable: StateReachableOperationResult,
     queue: QueueOperationResult,
-    optimize: FstOperationResult
+    optimize: FstOperationResult,
 }
 
 pub struct FstTestData<W, F: SerializableFst<W>>
@@ -235,7 +235,7 @@ where
     pub compose: Vec<ComposeTestData<W, F>>,
     pub state_reachable: StateReachableTestData,
     pub queue: QueueOperationResult,
-    pub optimize: F
+    pub optimize: F,
 }
 
 impl<W, F> FstTestData<W, F>
@@ -354,7 +354,7 @@ where
                 .collect(),
             state_reachable: data.state_reachable.parse(),
             queue: data.queue.clone(),
-            optimize: data.optimize.parse(absolute_path_folder)
+            optimize: data.optimize.parse(absolute_path_folder),
         }
     }
 }
@@ -536,8 +536,6 @@ macro_rules! test_fst {
                 Ok(())
             }
 
-            // Random errors happended. Probably due to hashing changes
-            // #[ignore]
             #[test]
             fn test_encode_openfst() -> Result<()> {
                 do_run!(test_encode, $fst_name);
@@ -856,3 +854,4 @@ test_fst!(test_openfst_fst_016, "fst_016");
 test_fst!(test_openfst_fst_017, "fst_017");
 test_fst!(test_openfst_fst_018, "fst_018");
 test_fst!(test_openfst_fst_019, "fst_019");
+test_fst!(test_openfst_fst_020, "fst_020");

@@ -11,7 +11,7 @@ use crate::algorithms::Queue;
 use crate::fst_properties::mutable_properties::rmepsilon_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
-use crate::semirings::Semiring;
+use crate::semirings::{Semiring, WeightQuantize};
 use crate::{Trs, EPS_LABEL};
 
 /// This operation removes epsilon-transitions (when both the input and
@@ -63,13 +63,13 @@ use crate::{Trs, EPS_LABEL};
 ///
 /// ![rmepsilon_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/rmepsilon_out.svg?sanitize=true)
 ///
-pub fn rm_epsilon<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<()> {
+pub fn rm_epsilon<W: Semiring + WeightQuantize, F: MutableFst<W>>(fst: &mut F) -> Result<()> {
     let tr_filter = EpsilonTrFilter {};
     let queue = AutoQueue::new(fst, None, &tr_filter)?;
     let opts = RmEpsilonConfig::new_with_default(queue);
     rm_epsilon_with_config(fst, opts)
 }
-pub fn rm_epsilon_with_config<W: Semiring, F: MutableFst<W>, Q: Queue>(
+pub fn rm_epsilon_with_config<W: Semiring + WeightQuantize, F: MutableFst<W>, Q: Queue>(
     fst: &mut F,
     opts: RmEpsilonConfig<W, Q>,
 ) -> Result<()> {

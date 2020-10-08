@@ -5,7 +5,7 @@ use anyhow::{format_err, Result};
 use bitflags::_core::marker::PhantomData;
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::determinize::{determinize, DeterminizeType};
+use crate::algorithms::determinize::{DeterminizeType, determinize_default};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
@@ -60,7 +60,7 @@ where
 {
     for determinize_data in &test_data.determinize {
         //        println!("det_type = {:?}", determinize_data.det_type);
-        let fst_res: Result<F> = determinize(&test_data.raw, determinize_data.det_type.clone());
+        let fst_res: Result<F> = determinize_default(&test_data.raw, determinize_data.det_type.clone());
 
         match (&determinize_data.result, fst_res) {
             (Ok(fst_expected), Ok(ref fst_determinized)) => {

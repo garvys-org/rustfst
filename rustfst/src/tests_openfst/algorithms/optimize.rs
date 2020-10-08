@@ -12,6 +12,7 @@ pub fn test_optimize<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
     where
         F: MutableFst<W> + Display + SerializableFst<W> + AllocableFst<W>,
         W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
+        W::ReverseWeight: WeightQuantize
 {
     let mut fst_optimize = test_data.raw.clone();
     optimize(&mut fst_optimize)?;

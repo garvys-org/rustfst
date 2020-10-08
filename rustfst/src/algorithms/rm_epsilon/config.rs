@@ -2,7 +2,7 @@ use crate::algorithms::shortest_distance::ShortestDistanceConfig;
 use crate::algorithms::tr_filters::EpsilonTrFilter;
 use crate::algorithms::Queue;
 use crate::semirings::Semiring;
-use crate::StateId;
+use crate::{StateId, KSHORTESTDELTA};
 
 pub struct RmEpsilonConfig<W: Semiring, Q: Queue> {
     pub sd_opts: ShortestDistanceConfig<W, Q, EpsilonTrFilter>,
@@ -17,9 +17,10 @@ impl<W: Semiring, Q: Queue> RmEpsilonConfig<W, Q> {
         connect: bool,
         weight_threshold: W,
         state_threshold: Option<StateId>,
+        delta: f32,
     ) -> Self {
         Self {
-            sd_opts: ShortestDistanceConfig::new_with_default(EpsilonTrFilter {}, queue),
+            sd_opts: ShortestDistanceConfig::new_with_default(EpsilonTrFilter {}, queue, delta),
             connect,
             weight_threshold,
             state_threshold,
@@ -27,6 +28,6 @@ impl<W: Semiring, Q: Queue> RmEpsilonConfig<W, Q> {
     }
 
     pub fn new_with_default(queue: Q) -> Self {
-        Self::new(queue, true, W::zero(), None)
+        Self::new(queue, true, W::zero(), None, KSHORTESTDELTA)
     }
 }

@@ -22,19 +22,20 @@ use crate::algorithms::rm_epsilon::rm_epsilon_op::RmEpsilonOp;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::{Semiring, SymbolTable, TrsVec};
+use crate::semirings::WeightQuantize;
 
 /// The result of weight factoring is a transducer equivalent to the
 /// input whose path weights have been factored according to the FactorIterator.
 /// States and transitions will be added as necessary. The algorithm is a
 /// generalization to arbitrary weights of the second step of the input
 /// epsilon-normalization algorithm. This version is a Delayed FST.
-pub struct RmEpsilonFst<W: Semiring, F: MutableFst<W>, B: Borrow<F>>(
+pub struct RmEpsilonFst<W: Semiring + WeightQuantize, F: MutableFst<W>, B: Borrow<F>>(
     LazyFst2<W, RmEpsilonOp<W, F, B>, SimpleHashMapCache<W>>,
 );
 
 impl<W, F, B> CoreFst<W> for RmEpsilonFst<W, F, B>
 where
-    W: Semiring,
+    W: Semiring + WeightQuantize,
     F: MutableFst<W>,
     B: Borrow<F>,
 {
@@ -83,7 +84,7 @@ where
 
 impl<'a, W, F, B> StateIterator<'a> for RmEpsilonFst<W, F, B>
 where
-    W: Semiring,
+    W: Semiring + WeightQuantize,
     F: MutableFst<W> + 'a,
     B: Borrow<F> + 'a,
 {
@@ -97,7 +98,7 @@ where
 
 impl<'a, W, F, B> FstIterator<'a, W> for RmEpsilonFst<W, F, B>
 where
-    W: Semiring,
+    W: Semiring + WeightQuantize,
     F: MutableFst<W> + 'a,
     B: Borrow<F> + 'a,
 {
@@ -111,7 +112,7 @@ where
 
 impl<W, F, B> Fst<W> for RmEpsilonFst<W, F, B>
 where
-    W: Semiring,
+    W: Semiring + WeightQuantize,
     F: MutableFst<W> + 'static,
     B: Borrow<F> + 'static,
 {
@@ -142,7 +143,7 @@ where
 
 impl<W, F, B> Debug for RmEpsilonFst<W, F, B>
 where
-    W: Semiring,
+    W: Semiring + WeightQuantize,
     F: MutableFst<W>,
     B: Borrow<F>,
 {
@@ -153,7 +154,7 @@ where
 
 impl<'a, W, F, B> RmEpsilonFst<W, F, B>
 where
-    W: Semiring,
+    W: Semiring + WeightQuantize,
     F: MutableFst<W>,
     B: Borrow<F>,
 {

@@ -32,6 +32,7 @@
 #include "fst_017/fst_017.h"
 #include "fst_018/fst_018.h"
 #include "fst_019/fst_019.h"
+#include "fst_020/fst_020.h"
 
 #include "symt_000/symt_000.h"
 #include "symt_001/symt_001.h"
@@ -401,13 +402,15 @@ void compute_fst_properties(const F& raw_fst, json& j) {
 template<class F>
 void compute_fst_minimization(const F& raw_fst, json& j, const string& dir_path) {
     j["minimize"] = {};
+    auto delta = fst::kShortestDelta;
     std::vector<bool> v = {true, false};
     for(bool allow_nondet: v) {
         auto fst_out = *raw_fst.Copy();
-        fst::Minimize(&fst_out, (fst::VectorFst<typename F::Arc>*)nullptr, fst::kShortestDelta, allow_nondet);
+        fst::Minimize(&fst_out, (fst::VectorFst<typename F::Arc>*)nullptr, delta, allow_nondet);
         bool error = prop_to_bool(fst_out.Properties(fst::kError, true), fst::kError);
 
         json j2;
+        j2["delta"] = delta;
         j2["allow_nondet"] = allow_nondet;
         j2["result_path"] = error ? "error": dump_fst(fst_out, dir_path);
 
@@ -1347,5 +1350,6 @@ int main() {
     // compute_fst_data(FstTestData016(), "fst_016");
     // compute_fst_data(FstTestData017(), "fst_017");
     // compute_fst_data(FstTestData018(), "fst_018");
-    compute_fst_data(FstTestData019(), "fst_019");
+    // compute_fst_data(FstTestData019(), "fst_019");
+    compute_fst_data(FstTestData020(), "fst_020");
 }

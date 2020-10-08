@@ -15,6 +15,7 @@ use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MinimizeOperationResult {
+    delta: f32,
     allow_nondet: bool,
     result_path: String,
 }
@@ -24,6 +25,7 @@ where
     F: SerializableFst<W>,
     W: SerializableSemiring,
 {
+    delta: f32,
     allow_nondet: bool,
     result: Result<F>,
     w: PhantomData<W>,
@@ -37,6 +39,7 @@ impl MinimizeOperationResult {
         P: AsRef<Path>,
     {
         MinimizeTestData {
+            delta: self.delta,
             allow_nondet: self.allow_nondet,
             result: match self.result_path.as_str() {
                 "error" => Err(format_err!("lol")),
@@ -51,12 +54,13 @@ pub fn test_minimize<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
     F: SerializableFst<W> + MutableFst<W> + AllocableFst<W> + Display,
     W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
+    W::ReverseWeight: WeightQuantize
 {
     for minimize_data in &test_data.minimize {
         //        println!("Minimize : allow_nondet = {}", minimize_data.allow_nondet);
         let mut fst_raw = test_data.raw.clone();
         let fst_res: Result<F> =
-            minimize(&mut fst_raw, minimize_data.allow_nondet).map(|_| fst_raw);
+            minimize(&mut fst_raw, minimize_data.delta, minimize_data.allow_nondet).map(|_| fst_raw);
 
         match (&minimize_data.result, fst_res) {
             (Ok(fst_expected), Ok(ref fst_minimized)) => {

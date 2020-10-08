@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use anyhow::Result;
 
-use crate::algorithms::{push_weights, ReweightType};
+use crate::algorithms::{push_weights, ReweightType, push_weights_default};
 use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::{SerializableSemiring, WeightQuantize};
@@ -13,13 +13,13 @@ pub fn test_weight_pushing_initial<W, F>(test_data: &FstTestData<W, F>) -> Resul
 where
     F: SerializableFst<W> + MutableFst<W> + Display,
     W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
+    W::ReverseWeight: WeightQuantize
 {
     // Weight pushing initial
     let mut fst_weight_push_initial = test_data.raw.clone();
-    push_weights(
+    push_weights_default(
         &mut fst_weight_push_initial,
         ReweightType::ReweightToInitial,
-        false,
     )?;
     test_eq_fst(
         &test_data.weight_pushing_initial,
@@ -33,13 +33,13 @@ pub fn test_weight_pushing_final<W, F>(test_data: &FstTestData<W, F>) -> Result<
 where
     F: SerializableFst<W> + MutableFst<W> + Display,
     W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
+    W::ReverseWeight: WeightQuantize
 {
     // Weight pushing final
     let mut fst_weight_push_final = test_data.raw.clone();
-    push_weights(
+    push_weights_default(
         &mut fst_weight_push_final,
         ReweightType::ReweightToFinal,
-        false,
     )?;
     test_eq_fst(
         &test_data.weight_pushing_final,

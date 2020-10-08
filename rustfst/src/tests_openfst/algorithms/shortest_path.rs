@@ -4,7 +4,7 @@ use std::marker::PhantomData;
 use anyhow::{format_err, Result};
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::shortest_path;
+use crate::algorithms::{shortest_path, shortest_path_default};
 use crate::fst_path::check_path_in_fst;
 use crate::fst_traits::{MutableFst, PathsIterator, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
@@ -64,7 +64,7 @@ where
         //     "ShortestPath : unique = {} and nshortest = {}",
         //     data.unique, data.nshortest
         // );
-        let fst_res: Result<F> = shortest_path(&test_data.raw, data.nshortest, data.unique);
+        let fst_res: Result<F> = shortest_path_default(&test_data.raw, data.nshortest, data.unique);
         match (&data.result, &fst_res) {
             (Ok(fst_expected), Ok(ref fst_shortest)) => {
                 // Comparing directly the fsts doesn't work because there is undefined behaviour

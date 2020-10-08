@@ -2,12 +2,19 @@ use crate::algorithms::encode::EncodeType;
 use crate::algorithms::encode::EncodeType::*;
 use crate::algorithms::*;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{MutableFst, AllocableFst};
+use crate::fst_traits::{AllocableFst, MutableFst};
 use crate::semirings::{SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::Semiring;
 use anyhow::Result;
 
-pub fn optimize<W: Semiring + WeaklyDivisibleSemiring + WeightQuantize, F: MutableFst<W> + AllocableFst<W>>(fst: &mut F) -> Result<()> {
+pub fn optimize<
+    W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
+    F: MutableFst<W> + AllocableFst<W>,
+>(
+    fst: &mut F,
+) -> Result<()>
+    where W::ReverseWeight: WeightQuantize
+{
     // fst.compute_and_update_properties_all()?;
     // println!("{}", fst.properties().bits());
     if fst.properties().contains(FstProperties::ACCEPTOR) {
@@ -19,22 +26,42 @@ pub fn optimize<W: Semiring + WeaklyDivisibleSemiring + WeightQuantize, F: Mutab
     }
 }
 
-fn determinize<W: Semiring + WeaklyDivisibleSemiring + WeightQuantize, F: MutableFst<W> + AllocableFst<W>>(fst: &mut F) -> Result<()> {
-    *fst = determinize::determinize(fst, determinize::DeterminizeType::DeterminizeFunctional)?;
+fn determinize<
+    W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
+    F: MutableFst<W> + AllocableFst<W>,
+>(
+    fst: &mut F,
+) -> Result<()> {
+    *fst = determinize::determinize_default(fst, determinize::DeterminizeType::DeterminizeFunctional)?;
     Ok(())
 }
 
-fn encode_deter_mini_decode<W: Semiring + WeaklyDivisibleSemiring + WeightQuantize, F: MutableFst<W> + AllocableFst<W>>(fst: &mut F, encoder: EncodeType) -> Result<()> {
+fn encode_deter_mini_decode<
+    W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
+    F: MutableFst<W> + AllocableFst<W>,
+
+>(
+    fst: &mut F,
+    encoder: EncodeType,
+) -> Result<()>
+    where W::ReverseWeight: WeightQuantize{
     let table = encode::encode(fst, encoder)?;
     dbg!("encoded");
     determinize(fst)?;
     dbg!("det");
-    minimize(fst, false)?;
+    minimize_default(fst)?;
     dbg!("mini");
     encode::decode(fst, table)
 }
 
-fn optimize_transducer<W: Semiring + WeaklyDivisibleSemiring + WeightQuantize, F: MutableFst<W> + AllocableFst<W>>(fst: &mut F) -> Result<()> {
+fn optimize_transducer<
+    W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
+    F: MutableFst<W> + AllocableFst<W>,
+>(
+    fst: &mut F,
+) -> Result<()>
+    where W::ReverseWeight: WeightQuantize
+{
     if !fst.properties().contains(FstProperties::NO_EPSILONS) {
         println!("RmEpsilon");
         rm_epsilon::rm_epsilon(fst)?;
@@ -53,7 +80,7 @@ fn optimize_transducer<W: Semiring + WeaklyDivisibleSemiring + WeightQuantize, F
             }
         } else {
             println!("IDeterministic -> Minimize");
-            minimize(fst, false)?;
+            minimize_default(fst)?;
         }
     } else {
         println!("W idempotent");
@@ -75,7 +102,7 @@ fn optimize_transducer<W: Semiring + WeaklyDivisibleSemiring + WeightQuantize, F
             }
         } else {
             println!("IDeterministic -> Minimize");
-            minimize(fst, false)?;
+            minimize_default(fst)?;
             // dbg!(fst.properties().contains(FstProperties::I_DETERMINISTIC));
         }
     }
@@ -83,7 +110,14 @@ fn optimize_transducer<W: Semiring + WeaklyDivisibleSemiring + WeightQuantize, F
     Ok(())
 }
 
-fn optimize_acceptor<W: Semiring + WeaklyDivisibleSemiring + WeightQuantize, F: MutableFst<W> + AllocableFst<W>>(fst: &mut F) -> Result<()> {
+fn optimize_acceptor<
+    W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
+    F: MutableFst<W> + AllocableFst<W>,
+>(
+    fst: &mut F,
+) -> Result<()>
+    where W::ReverseWeight: WeightQuantize
+{
     if !fst.properties().contains(FstProperties::NO_EPSILONS) {
         rm_epsilon::rm_epsilon(fst)?;
     }
@@ -92,10 +126,10 @@ fn optimize_acceptor<W: Semiring + WeaklyDivisibleSemiring + WeightQuantize, F: 
         if !fst.properties().contains(FstProperties::I_DETERMINISTIC) {
             if fst.properties().contains(FstProperties::ACYCLIC) {
                 determinize(fst)?;
-                minimize(fst, false)?;
+                minimize_default(fst)?;
             }
         } else {
-            minimize(fst, false)?;
+            minimize_default(fst)?;
         }
     } else {
         if !fst.properties().contains(FstProperties::I_DETERMINISTIC) {
@@ -108,10 +142,10 @@ fn optimize_acceptor<W: Semiring + WeaklyDivisibleSemiring + WeightQuantize, F: 
                 tr_sum(fst)
             } else {
                 determinize(fst)?;
-                minimize(fst, false)?;
+                minimize_default(fst)?;
             }
         } else {
-            minimize(fst, false)?;
+            minimize_default(fst)?;
         }
     }
     Ok(())

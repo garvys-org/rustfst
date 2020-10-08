@@ -1,7 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::shortest_distance;
+use crate::algorithms::{shortest_distance, shortest_distance_default};
 use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
@@ -43,18 +43,19 @@ pub fn test_shortest_distance<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
     F: SerializableFst<W> + MutableFst<W>,
     W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
+    W::ReverseWeight: WeightQuantize
 {
     for data in &test_data.shortest_distance {
-        let distance = shortest_distance(&test_data.raw, data.reverse)?;
+        let distance = shortest_distance_default(&test_data.raw, data.reverse)?;
         assert_eq!(
-            data.result
-                .iter()
-                .map(|w| w.quantize(KDELTA).unwrap())
-                .collect_vec(),
-            distance
-                .iter()
-                .map(|w| w.quantize(KDELTA).unwrap())
-                .collect_vec(),
+            data.result,
+                // .iter()
+                // .map(|w| w.quantize(KDELTA).unwrap())
+                // .collect_vec(),
+            distance,
+                // .iter()
+                // .map(|w| w.quantize(KDELTA).unwrap())
+                // .collect_vec(),
             "Test failing for ShortestDistance with reverse={}",
             data.reverse
         );

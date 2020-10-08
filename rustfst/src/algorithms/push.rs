@@ -15,6 +15,7 @@ use crate::semirings::{
     GallicWeightLeft, GallicWeightRight, StringWeightLeft, StringWeightRight,
     WeaklyDivisibleSemiring, WeightQuantize,
 };
+use crate::KDELTA;
 
 bitflags! {
     /// Configuration to control the behaviour of the pushing algorithm.
@@ -26,6 +27,15 @@ bitflags! {
     }
 }
 
+pub fn push_weights_default<W, F>(fst: &mut F, reweight_type: ReweightType) -> Result<()>
+    where
+        F: MutableFst<W>,
+        W: WeaklyDivisibleSemiring + WeightQuantize,
+        W::ReverseWeight: WeightQuantize
+{
+    push_weights(fst, reweight_type, KDELTA, false)
+}
+
 /// Pushes the weights in FST in the direction defined by TYPE. If
 /// pushing towards the initial state, the sum of the weight of the
 /// outgoing transitions and final weight at a non-initial state is
@@ -34,13 +44,16 @@ bitflags! {
 pub fn push_weights<W, F>(
     fst: &mut F,
     reweight_type: ReweightType,
+    delta: f32,
     remove_total_weight: bool,
 ) -> Result<()>
 where
     F: MutableFst<W>,
-    W: WeaklyDivisibleSemiring,
+    W: WeaklyDivisibleSemiring + WeightQuantize,
+    W::ReverseWeight: WeightQuantize
 {
-    let dist = shortest_distance(fst, reweight_type == ReweightType::ReweightToInitial)?;
+    let dist = shortest_distance(fst, reweight_type == ReweightType::ReweightToInitial, delta)?;
+    dbg!(&dist);
     if remove_total_weight {
         let total_weight =
             compute_total_weight(fst, &dist, reweight_type == ReweightType::ReweightToInitial)?;
@@ -117,18 +130,18 @@ where
 }
 
 macro_rules! m_labels_pushing {
-    ($ifst: ident, $reweight_type: ident, $push_type: ident, $gallic_weight: ty, $string_weight: ident, $gallic_factor: ty) => {{
+    ($ifst: ident, $reweight_type: ident, $push_type: ident, $delta: ident, $gallic_weight: ty, $string_weight: ident, $gallic_factor: ty) => {{
         // Labels pushing with potentially weights pushing
         let mut mapper = ToGallicConverter {};
         let mut gfst: VectorFst<$gallic_weight> = weight_convert($ifst, &mut mapper)?;
         let gdistance = if $push_type.intersects(PushType::PUSH_WEIGHTS) {
-            shortest_distance(&gfst, $reweight_type == ReweightType::ReweightToInitial)?
+            shortest_distance(&gfst, $reweight_type == ReweightType::ReweightToInitial, $delta)?
         } else {
             let rm_weight_mapper = RmWeightMapper {};
             let mut uwfst: VectorFst<_> = fst_convert_from_ref($ifst);
             tr_map(&mut uwfst, &rm_weight_mapper)?;
             let guwfst: VectorFst<$gallic_weight> = weight_convert(&uwfst, &mut mapper)?;
-            shortest_distance(&guwfst, $reweight_type == ReweightType::ReweightToInitial)?
+            shortest_distance(&guwfst, $reweight_type == ReweightType::ReweightToInitial, $delta)?
         };
         if $push_type.intersects(PushType::REMOVE_COMMON_AFFIX | PushType::REMOVE_TOTAL_WEIGHT) {
             let mut total_weight = compute_total_weight(
@@ -165,14 +178,24 @@ macro_rules! m_labels_pushing {
     }};
 }
 
+pub fn push_default<W, F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType) -> Result<F2>
+    where
+        F1: ExpandedFst<W>,
+        F2: ExpandedFst<W> + MutableFst<W> + AllocableFst<W>,
+        W: WeaklyDivisibleSemiring + WeightQuantize,
+        <W as Semiring>::ReverseWeight: 'static + WeightQuantize,
+{
+    push(ifst, reweight_type, push_type, KDELTA)
+}
+
 /// Pushes the weights and/or labels of the input FST into the output
 /// mutable FST by pushing weights and/or labels towards the initial state or final states.
-pub fn push<W, F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType) -> Result<F2>
+pub fn push<W, F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType, delta: f32) -> Result<F2>
 where
     F1: ExpandedFst<W>,
     F2: ExpandedFst<W> + MutableFst<W> + AllocableFst<W>,
     W: WeaklyDivisibleSemiring + WeightQuantize,
-    <W as Semiring>::ReverseWeight: 'static,
+    <W as Semiring>::ReverseWeight: 'static + WeightQuantize,
 {
     if push_type.intersects(PushType::PUSH_WEIGHTS) && !push_type.intersects(PushType::PUSH_LABELS)
     {
@@ -181,6 +204,7 @@ where
         push_weights(
             &mut ofst,
             reweight_type,
+            delta,
             push_type.intersects(PushType::REMOVE_TOTAL_WEIGHT),
         )?;
         Ok(ofst)
@@ -190,6 +214,7 @@ where
                 ifst,
                 reweight_type,
                 push_type,
+                delta,
                 GallicWeightLeft<W>,
                 StringWeightLeft,
                 GallicFactorLeft<W>
@@ -198,6 +223,7 @@ where
                 ifst,
                 reweight_type,
                 push_type,
+                delta,
                 GallicWeightRight<W>,
                 StringWeightRight,
                 GallicFactorRight<W>

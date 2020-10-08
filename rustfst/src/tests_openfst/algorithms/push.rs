@@ -1,7 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::{push, PushType, ReweightType};
+use crate::algorithms::{PushType, ReweightType, push_default};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
@@ -56,6 +56,7 @@ impl PushOperationResult {
 pub fn test_push<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
+    W::ReverseWeight: WeightQuantize
 {
     for push_test_data in &test_data.push {
         //        println!(
@@ -88,7 +89,7 @@ where
             ReweightType::ReweightToInitial
         };
 
-        let pushed_fst: VectorFst<W> = push(&test_data.raw, reweight_type, push_type)?;
+        let pushed_fst: VectorFst<W> = push_default(&test_data.raw, reweight_type, push_type)?;
 
         test_eq_fst(
             &push_test_data.result,
