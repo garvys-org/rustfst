@@ -6,14 +6,14 @@ use anyhow::Result;
 
 use crate::{StateId, Tr, Trs};
 use crate::algorithms::Queue;
-use crate::algorithms::rm_epsilon::{Element, RmEpsilonConfig};
+use crate::algorithms::rm_epsilon::{Element, RmEpsilonInternalConfig};
 use crate::algorithms::shortest_distance::ShortestDistanceState;
 use crate::algorithms::tr_filters::{EpsilonTrFilter, TrFilter};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::{Semiring, WeightQuantize};
 
 #[derive(Clone)]
-pub struct RmEpsilonState<W: Semiring, Q: Queue> {
+pub(crate) struct RmEpsilonState<W: Semiring, Q: Queue> {
     pub visited: Vec<bool>,
     pub visited_states: Vec<StateId>,
     pub element_map: HashMap<Element, (StateId, usize)>,
@@ -43,7 +43,7 @@ impl<W: Semiring, Q: Queue> std::fmt::Debug
 // }
 
 impl<W: Semiring + WeightQuantize, Q: Queue> RmEpsilonState<W, Q> {
-    pub fn new(fst_num_states: usize, opts: RmEpsilonConfig<W, Q>) -> Self {
+    pub fn new(fst_num_states: usize, opts: RmEpsilonInternalConfig<W, Q>) -> Self {
         Self {
             sd_state: ShortestDistanceState::new_from_config(fst_num_states, opts.sd_opts, true),
             visited: vec![],

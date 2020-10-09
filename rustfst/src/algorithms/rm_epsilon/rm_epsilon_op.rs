@@ -4,7 +4,7 @@ use anyhow::Result;
 
 use crate::algorithms::lazy::FstOp2;
 use crate::algorithms::queues::FifoQueue;
-use crate::algorithms::rm_epsilon::{RmEpsilonConfig, RmEpsilonState};
+use crate::algorithms::rm_epsilon::{RmEpsilonInternalConfig, RmEpsilonState};
 use crate::fst_properties::mutable_properties::rmepsilon_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
@@ -46,7 +46,7 @@ impl<W: Semiring + WeightQuantize, F: MutableFst<W>, B: Borrow<F>> RmEpsilonOp<W
             properties,
             rmeps_state: RefCell::new(RmEpsilonState::new(
                 fst.borrow().num_states(),
-                RmEpsilonConfig::new_with_default(FifoQueue::default()),
+                RmEpsilonInternalConfig::new_with_default(FifoQueue::default()),
             )),
             fst,
             ghost: PhantomData

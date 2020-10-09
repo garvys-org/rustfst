@@ -15,7 +15,7 @@ pub use self::{
     reverse::reverse,
     reweight::{reweight, ReweightType},
     rm_final_epsilon::rm_final_epsilon,
-    shortest_distance::{shortest_distance, shortest_distance_default},
+    shortest_distance::{shortest_distance, shortest_distance_with_config, ShortestDistanceConfig},
     shortest_path::{shortest_path, shortest_path_default},
     state_sort::state_sort,
     top_sort::top_sort,

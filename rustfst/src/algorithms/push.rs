@@ -7,7 +7,7 @@ use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, Facto
 use crate::algorithms::fst_convert::fst_convert_from_ref;
 use crate::algorithms::tr_mappers::RmWeightMapper;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
-use crate::algorithms::{reweight, shortest_distance, tr_map, weight_convert, ReweightType};
+use crate::algorithms::{reweight, tr_map, weight_convert, ReweightType, shortest_distance_with_config, ShortestDistanceConfig};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::{DivideType, Semiring};
@@ -52,7 +52,7 @@ where
     W: WeaklyDivisibleSemiring + WeightQuantize,
     W::ReverseWeight: WeightQuantize
 {
-    let dist = shortest_distance(fst, reweight_type == ReweightType::ReweightToInitial, delta)?;
+    let dist = shortest_distance_with_config(fst, reweight_type == ReweightType::ReweightToInitial, ShortestDistanceConfig::new(delta))?;
 
     if remove_total_weight {
         let total_weight =
@@ -135,13 +135,13 @@ macro_rules! m_labels_pushing {
         let mut mapper = ToGallicConverter {};
         let mut gfst: VectorFst<$gallic_weight> = weight_convert($ifst, &mut mapper)?;
         let gdistance = if $push_type.intersects(PushType::PUSH_WEIGHTS) {
-            shortest_distance(&gfst, $reweight_type == ReweightType::ReweightToInitial, $delta)?
+            shortest_distance_with_config(&gfst, $reweight_type == ReweightType::ReweightToInitial, ShortestDistanceConfig::new($delta))?
         } else {
             let rm_weight_mapper = RmWeightMapper {};
             let mut uwfst: VectorFst<_> = fst_convert_from_ref($ifst);
             tr_map(&mut uwfst, &rm_weight_mapper)?;
             let guwfst: VectorFst<$gallic_weight> = weight_convert(&uwfst, &mut mapper)?;
-            shortest_distance(&guwfst, $reweight_type == ReweightType::ReweightToInitial, $delta)?
+            shortest_distance_with_config(&guwfst, $reweight_type == ReweightType::ReweightToInitial, ShortestDistanceConfig::new($delta))?
         };
         if $push_type.intersects(PushType::REMOVE_COMMON_AFFIX | PushType::REMOVE_TOTAL_WEIGHT) {
             let mut total_weight = compute_total_weight(

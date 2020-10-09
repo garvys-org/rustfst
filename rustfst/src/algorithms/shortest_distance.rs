@@ -11,7 +11,7 @@ use crate::semirings::{ReverseBack, Semiring, SemiringProperties, WeightQuantize
 use crate::{StateId, Trs, KSHORTESTDELTA};
 use std::borrow::Borrow;
 
-pub struct ShortestDistanceConfig<W: Semiring, Q: Queue, A: TrFilter<W>> {
+pub(crate) struct ShortestDistanceInternalConfig<W: Semiring, Q: Queue, A: TrFilter<W>> {
     pub tr_filter: A,
     pub state_queue: Q,
     pub source: Option<StateId>,
@@ -21,7 +21,7 @@ pub struct ShortestDistanceConfig<W: Semiring, Q: Queue, A: TrFilter<W>> {
     weight: PhantomData<W>,
 }
 
-impl<W: Semiring, Q: Queue, A: TrFilter<W>> ShortestDistanceConfig<W, Q, A> {
+impl<W: Semiring, Q: Queue, A: TrFilter<W>> ShortestDistanceInternalConfig<W, Q, A> {
     pub fn new(tr_filter: A, state_queue: Q, source: Option<StateId>, delta: f32, first_path: bool) -> Self {
         Self {
             tr_filter,
@@ -39,7 +39,7 @@ impl<W: Semiring, Q: Queue, A: TrFilter<W>> ShortestDistanceConfig<W, Q, A> {
 }
 
 #[derive(Clone)]
-pub struct ShortestDistanceState<
+pub(crate) struct ShortestDistanceState<
     W: Semiring,
     Q: Queue,
     A: TrFilter<W>,
@@ -56,24 +56,6 @@ pub struct ShortestDistanceState<
     source_id: usize,
     delta: f32,
 }
-
-// impl<W: Semiring, Q: Queue + PartialEq, A: TrFilter<W>> PartialEq
-//     for ShortestDistanceState<W, Q, A>
-// {
-//     fn eq(&self, other: &Self) -> bool {
-//         self.state_queue.eq(&other.state_queue)
-//             && self.tr_filter.eq(&other.tr_filter)
-//             && self.first_path.eq(&other.first_path)
-//             && self.enqueued.eq(&other.enqueued)
-//             && self.distance.eq(&other.distance)
-//             && self.adder.eq(&other.adder)
-//             && self.radder.eq(&other.radder)
-//             && self.sources.eq(&other.sources)
-//             && self.retain.eq(&other.retain)
-//             && self.source_id.eq(&other.source_id)
-//             && self.delta.eq(&other.delta)
-//     }
-// }
 
 impl<W: Semiring, Q: Queue, A: TrFilter<W>> std::fmt::Debug
     for ShortestDistanceState<W, Q, A>
@@ -133,7 +115,7 @@ impl<W: Semiring + WeightQuantize, Q: Queue, A: TrFilter<W>>
             delta
         }
     }
-    pub fn new_from_config(fst_num_states: usize, opts: ShortestDistanceConfig<W, Q, A>, retain: bool) -> Self {
+    pub fn new_from_config(fst_num_states: usize, opts: ShortestDistanceInternalConfig<W, Q, A>, retain: bool) -> Self {
         Self::new(
             fst_num_states,
             opts.state_queue,
@@ -242,19 +224,40 @@ impl<W: Semiring + WeightQuantize, Q: Queue, A: TrFilter<W>>
     }
 }
 
-pub fn shortest_distance_with_config<W: Semiring + WeightQuantize, Q: Queue, A: TrFilter<W>, F: ExpandedFst<W>>(
+pub(crate) fn shortest_distance_with_internal_config<W: Semiring + WeightQuantize, Q: Queue, A: TrFilter<W>, F: ExpandedFst<W>>(
     fst: &F,
-    opts: ShortestDistanceConfig<W, Q, A>,
+    opts: ShortestDistanceInternalConfig<W, Q, A>,
 ) -> Result<Vec<W>> {
     let source = opts.source;
     let mut sd_state = ShortestDistanceState::<_, _, _>::new_from_config(fst.num_states(), opts, false);
     sd_state.shortest_distance::<F, _>(source, fst)
 }
 
-pub fn shortest_distance_default<W: Semiring + WeightQuantize, F: ExpandedFst<W>>(fst: &F, reverse: bool) -> Result<Vec<W>>
+#[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
+pub struct ShortestDistanceConfig {
+    delta: f32
+}
+
+impl Default for ShortestDistanceConfig {
+    fn default() -> Self {
+        Self {
+            delta: KSHORTESTDELTA
+        }
+    }
+}
+
+impl ShortestDistanceConfig {
+    pub fn new(delta: f32) -> Self {
+        Self {
+            delta
+        }
+    }
+}
+
+pub fn shortest_distance<W: Semiring + WeightQuantize, F: ExpandedFst<W>>(fst: &F, reverse: bool) -> Result<Vec<W>>
     where W::ReverseWeight: WeightQuantize
 {
-    shortest_distance(fst, reverse, KSHORTESTDELTA)
+    shortest_distance_with_config(fst, reverse, ShortestDistanceConfig::default())
 }
 
 /// This operation computes the shortest distance from the initial state to every state.
@@ -290,20 +293,21 @@ pub fn shortest_distance_default<W: Semiring + WeightQuantize, F: ExpandedFst<W>
 /// # Ok(())
 /// # }
 /// ```
-pub fn shortest_distance<W: Semiring + WeightQuantize, F: ExpandedFst<W>>(fst: &F, reverse: bool, delta: f32) -> Result<Vec<W>>
+pub fn shortest_distance_with_config<W: Semiring + WeightQuantize, F: ExpandedFst<W>>(fst: &F, reverse: bool, config: ShortestDistanceConfig) -> Result<Vec<W>>
 where W::ReverseWeight: WeightQuantize
 {
+    let delta = config.delta;
     if !reverse {
         let tr_filter = AnyTrFilter {};
         let queue = AutoQueue::new(fst, None, &tr_filter)?;
-        let config = ShortestDistanceConfig::new_with_default(tr_filter, queue, delta);
-        shortest_distance_with_config(fst, config)
+        let config = ShortestDistanceInternalConfig::new_with_default(tr_filter, queue, delta);
+        shortest_distance_with_internal_config(fst, config)
     } else {
         let tr_filter = AnyTrFilter {};
         let rfst: VectorFst<_> = crate::algorithms::reverse(fst)?;
         let state_queue = AutoQueue::new(&rfst, None, &tr_filter)?;
-        let ropts = ShortestDistanceConfig::new_with_default(tr_filter, state_queue, delta);
-        let rdistance = shortest_distance_with_config(&rfst, ropts)?;
+        let ropts = ShortestDistanceInternalConfig::new_with_default(tr_filter, state_queue, delta);
+        let rdistance = shortest_distance_with_internal_config(&rfst, ropts)?;
         let mut distance = Vec::with_capacity(rdistance.len() - 1); //reversing added one state
         while distance.len() < rdistance.len() - 1 {
             distance.push(rdistance[distance.len() + 1].reverse_back()?);
@@ -321,7 +325,7 @@ fn shortest_distance_3<W: Semiring + WeightQuantize, F: MutableFst<W>>(fst: &F, 
     let weight_properties = W::properties();
 
     if weight_properties.contains(SemiringProperties::RIGHT_SEMIRING) {
-        let distance = shortest_distance(fst, false, delta)?;
+        let distance = shortest_distance_with_config(fst, false, ShortestDistanceConfig::new(delta))?;
         let mut sum = W::zero();
         for state in 0..distance.len() {
             sum.plus_assign(
@@ -330,7 +334,7 @@ fn shortest_distance_3<W: Semiring + WeightQuantize, F: MutableFst<W>>(fst: &F, 
         }
         Ok(sum)
     } else {
-        let distance = shortest_distance(fst, true, delta)?;
+        let distance = shortest_distance_with_config(fst, true, ShortestDistanceConfig::new(delta))?;
         if let Some(state) = fst.start() {
             if state < distance.len() {
                 Ok(distance[state].clone())

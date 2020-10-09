@@ -1,7 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::shortest_distance_default;
+use crate::algorithms::shortest_distance;
 use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
@@ -44,7 +44,7 @@ where
     W::ReverseWeight: WeightQuantize
 {
     for data in &test_data.shortest_distance {
-        let distance = shortest_distance_default(&test_data.raw, data.reverse)?;
+        let distance = shortest_distance(&test_data.raw, data.reverse)?;
         assert_eq!(
             data.result,
                 // .iter()

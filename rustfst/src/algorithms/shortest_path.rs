@@ -6,7 +6,7 @@ use unsafe_unwrap::UnsafeUnwrap;
 use crate::algorithms::determinize::determinize_with_distance;
 use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::tr_filters::AnyTrFilter;
-use crate::algorithms::{connect, reverse, shortest_distance, Queue};
+use crate::algorithms::{connect, reverse, Queue, shortest_distance_with_config, ShortestDistanceConfig};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::mutable_properties::shortest_path_properties;
 use crate::fst_properties::FstProperties;
@@ -78,7 +78,7 @@ where
         bail!("ShortestPath : Weight need to have the Path property and be distributive")
     }
 
-    let mut distance = shortest_distance(ifst, false, delta)?;
+    let mut distance = shortest_distance_with_config(ifst, false, ShortestDistanceConfig::new(delta))?;
 
     let rfst: VectorFst<_> = reverse(ifst)?;
     let mut d = W::zero();
