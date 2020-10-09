@@ -1,19 +1,4 @@
 
-
-// template <class F>
-// void PrintFst(const F& fst) {
-//   for (fst::StateIterator<F> siter(fst); !siter.Done(); siter.Next())  {
-//       auto state_id = siter.Value();
-//       for (fst::ArcIterator<F> aiter(fst, state_id); !aiter.Done(); aiter.Next()) {
-//         auto &arc = aiter.Value();
-//         std::cout << state_id << "\t" << arc.nextstate << "\t" << arc.ilabel << "\t" << arc.olabel << "\t" << arc.weight << std::endl;
-//       }
-//       if (fst.Final(state_id) != F::Weight::Zero()) {
-//         std::cout << state_id << "\t" << fst.Final(state_id) << std::endl;
-//       }
-//   }
-// }
-
 const uint64 kDoNotEncodeWeights = fst::kAcyclic | fst::kUnweighted | fst::kUnweightedCycles;
 
 template <class Arc>
@@ -21,23 +6,18 @@ void OptimizeTransducer(fst::MutableFst<Arc> *fst, bool compute_props = false) {
   using Weight = typename Arc::Weight;
   // If the FST is not (known to be) epsilon-free, perform epsilon-removal.
   if (fst->Properties(fst::kNoEpsilons, compute_props) != fst::kNoEpsilons) {
-    std::cout << "RmEpsilon" << std::endl;
     RmEpsilon(fst);
   }
   // Combines identically labeled arcs with the same source and destination,
   // and sums their weights.
-  std::cout << "ArcSum" << std::endl;
   StateMap(fst, fst::ArcSumMapper<Arc>(*fst));
   // The FST has non-idempotent weights; limiting optimization possibilities.
   if (!(Weight::Properties() & fst::kIdempotent)) {
-    std::cout << "W not idempotent" << std::endl;
     if (fst->Properties(fst::kIDeterministic, compute_props) != fst::kIDeterministic) {
-      std::cout << "Not IDeterministic" << std::endl;
       // But "any acyclic weighted automaton over a zero-sum-free semiring has
       // the twins property and is determinizable" (Mohri 2006). We just have to
       // encode labels.
       if (fst->Properties(fst::kAcyclic, compute_props)) {
-        std::cout << "Acyclic -> encode, determinize, minimimize and decode" << std::endl;
         fst::EncodeMapper<Arc> encoder(fst::kEncodeLabels, fst::ENCODE);
         Encode(fst, &encoder);
         {
@@ -48,21 +28,17 @@ void OptimizeTransducer(fst::MutableFst<Arc> *fst, bool compute_props = false) {
         Decode(fst, encoder);
       }
     } else {
-      std::cout << "IDeterministic -> Minimize" << std::endl;
       Minimize(fst);
     }
   } else {
-    std::cout << "W idempotent" << std::endl;
     // If the FST is not (known to be) deterministic, determinize it.
     if (fst->Properties(fst::kIDeterministic, compute_props) != fst::kIDeterministic) {
-      std::cout << "Not IDeterministic" << std::endl;
       // FST labels are always encoded before determinization and minimization.
       // If the FST is not known to have no weighted cycles, its weights are
       // also
       // encoded before determinization and minimization.
       if (!fst->Properties(kDoNotEncodeWeights, compute_props)) {
         {
-          std::cout << "EncodeWeights and Labels -> encode, deter, min, decode, arcsum" << std::endl;
           fst::EncodeMapper<Arc> encoder(fst::kEncodeLabels | fst::kEncodeWeights, fst::ENCODE);
           Encode(fst, &encoder);
           {
@@ -74,7 +50,6 @@ void OptimizeTransducer(fst::MutableFst<Arc> *fst, bool compute_props = false) {
         }
         StateMap(fst, fst::ArcSumMapper<Arc>(*fst));
       } else {
-        std::cout << "EncodeLabels -> encode, deter, min, decode" << std::endl;
         fst::EncodeMapper<Arc> encoder(fst::kEncodeLabels, fst::ENCODE);
         Encode(fst, &encoder);
         {
@@ -85,10 +60,7 @@ void OptimizeTransducer(fst::MutableFst<Arc> *fst, bool compute_props = false) {
         Decode(fst, encoder);
       }
     } else {
-      std::cout << "IDeterministic -> Minimize" << std::endl;
       Minimize(fst);
-      std::cout << "After Minimize" << std::endl;
-      // PrintFst(*fst);
     }
   }
 }
