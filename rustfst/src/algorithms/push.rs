@@ -27,13 +27,40 @@ bitflags! {
     }
 }
 
-pub fn push_weights_default<W, F>(fst: &mut F, reweight_type: ReweightType) -> Result<()>
+#[derive(Clone, Debug, Copy, PartialOrd, PartialEq)]
+pub struct PushWeightsConfig {
+    delta: f32,
+    remove_total_weight: bool
+}
+
+impl Default for PushWeightsConfig {
+    fn default() -> Self {
+        Self{
+            delta: KDELTA, remove_total_weight: false
+        }
+    }
+}
+
+impl PushWeightsConfig {
+    pub fn new(delta: f32, remove_total_weight: bool) -> Self {
+        Self {delta, remove_total_weight}
+    }
+
+    pub fn with_delta(self, delta: f32) -> Self {
+        Self {delta, ..self}
+    }
+
+    pub fn with_remove_total_weight(self, remove_total_weight: bool) -> Self {
+        Self {remove_total_weight, ..self}
+    }
+}
+
+pub fn push_weights<W, F>(fst: &mut F, reweight_type: ReweightType) -> Result<()>
     where
         F: MutableFst<W>,
-        W: WeaklyDivisibleSemiring + WeightQuantize,
-        W::ReverseWeight: WeightQuantize
+        W: WeaklyDivisibleSemiring
 {
-    push_weights(fst, reweight_type, KDELTA, false)
+    push_weights_with_config(fst, reweight_type, PushWeightsConfig::default())
 }
 
 /// Pushes the weights in FST in the direction defined by TYPE. If
@@ -41,16 +68,17 @@ pub fn push_weights_default<W, F>(fst: &mut F, reweight_type: ReweightType) -> R
 /// outgoing transitions and final weight at a non-initial state is
 /// equal to One() in the resulting machine. If pushing towards the
 /// final state, the same property holds on the reverse machine.
-pub fn push_weights<W, F>(
+pub fn push_weights_with_config<W, F>(
     fst: &mut F,
     reweight_type: ReweightType,
-    delta: f32,
-    remove_total_weight: bool,
+    config: PushWeightsConfig
 ) -> Result<()>
 where
     F: MutableFst<W>,
     W: WeaklyDivisibleSemiring
 {
+    let remove_total_weight = config.remove_total_weight;
+    let delta = config.delta;
     let dist = shortest_distance_with_config(fst, reweight_type == ReweightType::ReweightToInitial, ShortestDistanceConfig::new(delta))?;
 
     if remove_total_weight {
@@ -224,11 +252,11 @@ where
     {
         // Only weights pushing
         let mut ofst = fst_convert_from_ref(ifst);
-        push_weights(
+        let push_weights_config = PushWeightsConfig::new(delta, push_type.intersects(PushType::REMOVE_TOTAL_WEIGHT));
+        push_weights_with_config(
             &mut ofst,
             reweight_type,
-            delta,
-            push_type.intersects(PushType::REMOVE_TOTAL_WEIGHT),
+            push_weights_config,
         )?;
         Ok(ofst)
     } else if push_type.intersects(PushType::PUSH_LABELS) {

@@ -9,7 +9,7 @@ pub use self::{
     minimize::{acceptor_minimize, minimize, minimize_with_config, MinimizeConfig},
     optimize::optimize,
     projection::{project, ProjectType},
-    push::{push, push_with_config, PushConfig, push_weights, push_weights_default, PushType},
+    push::{push, push_with_config, PushConfig, push_weights, push_weights_with_config, PushWeightsConfig, PushType},
     queue::{Queue, QueueType},
     relabel_pairs::relabel_pairs,
     reverse::reverse,

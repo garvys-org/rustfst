@@ -14,7 +14,7 @@ use crate::algorithms::factor_weight::factor_iterators::GallicFactorLeft;
 use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, FactorWeightType};
 use crate::algorithms::partition::Partition;
 use crate::algorithms::queues::LifoQueue;
-use crate::algorithms::reverse;
+use crate::algorithms::{reverse, PushWeightsConfig, push_weights_with_config};
 use crate::algorithms::tr_compares::ILabelCompare;
 use crate::algorithms::tr_mappers::QuantizeMapper;
 use crate::algorithms::tr_unique;
@@ -23,7 +23,7 @@ use crate::algorithms::Queue;
 use crate::algorithms::{
     connect,
     encode::{decode, encode},
-    push_weights, tr_map, tr_sort, weight_convert, ReweightType,
+    tr_map, tr_sort, weight_convert, ReweightType,
 };
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
@@ -127,7 +127,8 @@ where
         // Weighted transducer
         let mut to_gallic = ToGallicConverter {};
         let mut gfst: VectorFst<GallicWeightLeft<W>> = weight_convert(ifst, &mut to_gallic)?;
-        push_weights(&mut gfst, ReweightType::ReweightToInitial, delta, false)?;
+        let push_weights_config = PushWeightsConfig::default().with_delta(delta);
+        push_weights_with_config(&mut gfst, ReweightType::ReweightToInitial, push_weights_config)?;
 
         let quantize_mapper = QuantizeMapper::new(delta);
         tr_map(&mut gfst, &quantize_mapper)?;
@@ -161,7 +162,8 @@ where
         Ok(())
     } else if props.contains(FstProperties::WEIGHTED) {
         // Weighted acceptor
-        push_weights(ifst, ReweightType::ReweightToInitial, delta, false)?;
+        let push_weights_config = PushWeightsConfig::default().with_delta(delta);
+        push_weights_with_config(ifst, ReweightType::ReweightToInitial, push_weights_config)?;
         let quantize_mapper = QuantizeMapper::new(delta);
         tr_map(ifst, &quantize_mapper)?;
         let encode_table = encode(ifst, EncodeType::EncodeWeightsAndLabels)?;
