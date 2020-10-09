@@ -24,7 +24,8 @@ impl UnaryFstAlgorithm for ShortestPathAlgorithm {
     }
 
     fn run_algorithm(&self, fst: VectorFst<TropicalWeight>) -> Result<VectorFst<TropicalWeight>> {
-        shortest_path(&fst, self.nshortest, self.unique)
+        let config = ShortestPathConfig::default().with_nshortest(self.nshortest).with_unique(self.unique);
+        shortest_path_with_config(&fst, config)
     }
 }
 

@@ -49,8 +49,7 @@ pub fn push_weights<W, F>(
 ) -> Result<()>
 where
     F: MutableFst<W>,
-    W: WeaklyDivisibleSemiring + WeightQuantize,
-    W::ReverseWeight: WeightQuantize
+    W: WeaklyDivisibleSemiring
 {
     let dist = shortest_distance_with_config(fst, reweight_type == ReweightType::ReweightToInitial, ShortestDistanceConfig::new(delta))?;
 
@@ -178,25 +177,49 @@ macro_rules! m_labels_pushing {
     }};
 }
 
-pub fn push_default<W, F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType) -> Result<F2>
+#[derive(Clone, Copy, Debug, PartialOrd, PartialEq)]
+pub struct PushConfig {
+    delta: f32,
+}
+
+impl Default for PushConfig {
+    fn default() -> Self {
+        Self {
+            delta: KDELTA,
+        }
+    }
+}
+
+impl PushConfig {
+    pub fn new(delta: f32) -> Self {
+        Self {delta}
+    }
+
+    pub fn with_delta(self, delta: f32) -> Self {
+        Self {delta, ..self}
+    }
+}
+
+pub fn push<W, F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType) -> Result<F2>
     where
         F1: ExpandedFst<W>,
         F2: ExpandedFst<W> + MutableFst<W> + AllocableFst<W>,
         W: WeaklyDivisibleSemiring + WeightQuantize,
         <W as Semiring>::ReverseWeight: 'static + WeightQuantize,
 {
-    push(ifst, reweight_type, push_type, KDELTA)
+    push_with_config(ifst, reweight_type, push_type, PushConfig::default())
 }
 
 /// Pushes the weights and/or labels of the input FST into the output
 /// mutable FST by pushing weights and/or labels towards the initial state or final states.
-pub fn push<W, F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType, delta: f32) -> Result<F2>
+pub fn push_with_config<W, F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType, config: PushConfig) -> Result<F2>
 where
     F1: ExpandedFst<W>,
     F2: ExpandedFst<W> + MutableFst<W> + AllocableFst<W>,
     W: WeaklyDivisibleSemiring + WeightQuantize,
-    <W as Semiring>::ReverseWeight: 'static + WeightQuantize,
+    <W as Semiring>::ReverseWeight: 'static,
 {
+    let delta = config.delta;
     if push_type.intersects(PushType::PUSH_WEIGHTS) && !push_type.intersects(PushType::PUSH_LABELS)
     {
         // Only weights pushing

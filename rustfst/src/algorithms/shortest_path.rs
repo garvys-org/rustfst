@@ -19,7 +19,41 @@ use crate::Tr;
 use bitflags::_core::fmt::Formatter;
 use std::fmt::Debug;
 
-pub fn shortest_path_default<W, FI, FO>(ifst: &FI, nshortest: usize, unique: bool) -> Result<FO>
+#[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
+pub struct ShortestPathConfig {
+    delta: f32,
+    nshortest: usize,
+    unique: bool
+}
+
+impl Default for ShortestPathConfig {
+    fn default() -> Self {
+        Self {delta: KSHORTESTDELTA, nshortest: 1, unique: false}
+    }
+}
+
+impl ShortestPathConfig {
+    pub fn new(delta: f32, nshortest: usize, unique: bool) -> Self {
+        Self {delta, nshortest, unique}
+    }
+
+    pub fn with_delta(self, delta: f32) -> Self {
+        Self {delta, ..self}
+    }
+
+    pub fn with_nshortest(self, nshortest: usize) -> Self {
+        Self {nshortest, ..self}
+    }
+
+    pub fn with_unique(self, unique: bool) -> Self {
+        Self {
+            unique, ..self
+        }
+    }
+
+}
+
+pub fn shortest_path<W, FI, FO>(ifst: &FI) -> Result<FO>
     where
         FI: ExpandedFst<W>,
         FO: MutableFst<W>,
@@ -29,7 +63,7 @@ pub fn shortest_path_default<W, FI, FO>(ifst: &FI, nshortest: usize, unique: boo
         + From<<W as Semiring>::ReverseWeight>,
         <W as Semiring>::ReverseWeight: WeightQuantize + WeaklyDivisibleSemiring,
 {
-    shortest_path(ifst, nshortest, unique, KSHORTESTDELTA)
+    shortest_path_with_config(ifst, ShortestPathConfig::default())
 }
 
 /// Creates an FST containing the n-shortest paths in the input FST. The n-shortest paths are the
@@ -49,7 +83,7 @@ pub fn shortest_path_default<W, FI, FO>(ifst: &FI, nshortest: usize, unique: boo
 ///
 /// ![shortestpath_out_n_2](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/shortestpath_out_n_2.svg?sanitize=true)
 ///
-pub fn shortest_path<W, FI, FO>(ifst: &FI, nshortest: usize, unique: bool, delta: f32) -> Result<FO>
+pub fn shortest_path_with_config<W, FI, FO>(ifst: &FI, config: ShortestPathConfig) -> Result<FO>
 where
     FI: ExpandedFst<W>,
     FO: MutableFst<W>,
@@ -59,6 +93,9 @@ where
         + From<<W as Semiring>::ReverseWeight>,
     <W as Semiring>::ReverseWeight: WeightQuantize + WeaklyDivisibleSemiring,
 {
+    let nshortest = config.nshortest;
+    let unique = config.unique;
+    let delta = config.delta;
     if nshortest == 0 {
         return Ok(FO::new());
     }
