@@ -104,7 +104,7 @@ impl Partition {
         }
 
         if this_class.yes_head >= 0 {
-            self.elements[this_class.yes_head as usize].prev_element = elt_prev_elt;
+            self.elements[this_class.yes_head as usize].prev_element = element_id as i32;
         } else {
             self.visited_classes.push(elt_class_id);
         }

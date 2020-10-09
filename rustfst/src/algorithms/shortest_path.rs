@@ -6,7 +6,7 @@ use unsafe_unwrap::UnsafeUnwrap;
 use crate::algorithms::determinize::determinize_with_distance;
 use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::tr_filters::AnyTrFilter;
-use crate::algorithms::{connect, reverse, shortest_distance, Queue};
+use crate::algorithms::{connect, reverse, Queue, shortest_distance_with_config, ShortestDistanceConfig};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::mutable_properties::shortest_path_properties;
 use crate::fst_properties::FstProperties;
@@ -14,10 +14,57 @@ use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{
     ReverseBack, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::{StateId, Trs};
-use crate::{Tr, KDELTA};
+use crate::{StateId, Trs, KSHORTESTDELTA};
+use crate::Tr;
 use bitflags::_core::fmt::Formatter;
 use std::fmt::Debug;
+
+#[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
+pub struct ShortestPathConfig {
+    delta: f32,
+    nshortest: usize,
+    unique: bool
+}
+
+impl Default for ShortestPathConfig {
+    fn default() -> Self {
+        Self {delta: KSHORTESTDELTA, nshortest: 1, unique: false}
+    }
+}
+
+impl ShortestPathConfig {
+    pub fn new(delta: f32, nshortest: usize, unique: bool) -> Self {
+        Self {delta, nshortest, unique}
+    }
+
+    pub fn with_delta(self, delta: f32) -> Self {
+        Self {delta, ..self}
+    }
+
+    pub fn with_nshortest(self, nshortest: usize) -> Self {
+        Self {nshortest, ..self}
+    }
+
+    pub fn with_unique(self, unique: bool) -> Self {
+        Self {
+            unique, ..self
+        }
+    }
+
+}
+
+pub fn shortest_path<W, FI, FO>(ifst: &FI) -> Result<FO>
+    where
+        FI: ExpandedFst<W>,
+        FO: MutableFst<W>,
+        W: Semiring
+        + WeightQuantize
+        + Into<<W as Semiring>::ReverseWeight>
+        + From<<W as Semiring>::ReverseWeight>,
+        <W as Semiring>::ReverseWeight: WeightQuantize + WeaklyDivisibleSemiring,
+{
+    shortest_path_with_config(ifst, ShortestPathConfig::default())
+}
 
 /// Creates an FST containing the n-shortest paths in the input FST. The n-shortest paths are the
 /// n-lowest weight paths w.r.t. the natural semiring order.
@@ -36,7 +83,7 @@ use std::fmt::Debug;
 ///
 /// ![shortestpath_out_n_2](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/shortestpath_out_n_2.svg?sanitize=true)
 ///
-pub fn shortest_path<W, FI, FO>(ifst: &FI, nshortest: usize, unique: bool) -> Result<FO>
+pub fn shortest_path_with_config<W, FI, FO>(ifst: &FI, config: ShortestPathConfig) -> Result<FO>
 where
     FI: ExpandedFst<W>,
     FO: MutableFst<W>,
@@ -46,6 +93,9 @@ where
         + From<<W as Semiring>::ReverseWeight>,
     <W as Semiring>::ReverseWeight: WeightQuantize + WeaklyDivisibleSemiring,
 {
+    let nshortest = config.nshortest;
+    let unique = config.unique;
+    let delta = config.delta;
     if nshortest == 0 {
         return Ok(FO::new());
     }
@@ -65,7 +115,7 @@ where
         bail!("ShortestPath : Weight need to have the Path property and be distributive")
     }
 
-    let mut distance = shortest_distance(ifst, false)?;
+    let mut distance = shortest_distance_with_config(ifst, false, ShortestDistanceConfig::new(delta))?;
 
     let rfst: VectorFst<_> = reverse(ifst)?;
     let mut d = W::zero();
@@ -80,17 +130,17 @@ where
     let mut distance_2 = vec![d];
     distance_2.append(&mut distance);
     let mut fst_res: FO = if !unique {
-        n_shortest_path(&rfst, &distance_2, nshortest)?
+        n_shortest_path(&rfst, &distance_2, nshortest, delta)?
     } else {
         let distance_2_reversed: Vec<<W as Semiring>::ReverseWeight> =
             distance_2.into_iter().map(|v| v.into()).collect();
         let (dfst, distance_3_reversed): (VectorFst<_>, _) =
-            determinize_with_distance(&rfst, &distance_2_reversed)?;
+            determinize_with_distance(&rfst, &distance_2_reversed, delta)?;
         let distance_3: Vec<_> = distance_3_reversed
             .into_iter()
             .map(|v| v.reverse_back())
             .collect::<Result<Vec<_>>>()?;
-        n_shortest_path(&dfst, &distance_3, nshortest)?
+        n_shortest_path(&dfst, &distance_3, nshortest, delta)?
     };
 
     fst_res.set_symts_from_fst(ifst);
@@ -222,13 +272,15 @@ struct ShortestPathCompare<'a, 'b, W: Semiring> {
     distance: &'b [W],
     weight_zero: W,
     weight_one: W,
+    delta: f32,
 }
 
 impl<'a, 'b, W: Semiring + WeightQuantize> ShortestPathCompare<'a, 'b, W> {
-    pub fn new(pairs: &'a RefCell<Vec<(Option<StateId>, W)>>, distance: &'b [W]) -> Self {
+    pub fn new(pairs: &'a RefCell<Vec<(Option<StateId>, W)>>, distance: &'b [W], delta: f32) -> Self {
         Self {
             pairs,
             distance,
+            delta,
             weight_zero: W::zero(),
             weight_one: W::one(),
         }
@@ -254,10 +306,10 @@ impl<'a, 'b, W: Semiring + WeightQuantize> ShortestPathCompare<'a, 'b, W> {
         let wy = self.pweight(&py.0).times(&py.1).unwrap();
         let res = if px.0.is_none() && py.0.is_some() {
             natural_less(&wy, &wx).unwrap()
-                || (wy.quantize(KDELTA).unwrap() == wx.quantize(KDELTA).unwrap())
+                || wx.approx_equal(&wy, self.delta)
         } else if px.0.is_some() && py.0.is_none() {
             natural_less(&wy, &wx).unwrap()
-                && !(wy.quantize(KDELTA).unwrap() == wx.quantize(KDELTA).unwrap())
+                && !wx.approx_equal(&wy, self.delta)
         } else {
             natural_less(&wy, &wx).unwrap()
         };
@@ -334,7 +386,7 @@ impl<F: Fn(&usize, &usize) -> bool> Heap<F> {
     }
 }
 
-fn n_shortest_path<W, FI, FO>(ifst: &FI, distance: &[W], nshortest: usize) -> Result<FO>
+fn n_shortest_path<W, FI, FO>(ifst: &FI, distance: &[W], nshortest: usize, delta: f32) -> Result<FO>
 where
     W: Semiring + WeightQuantize,
     FI: MutableFst<W::ReverseWeight>,
@@ -363,7 +415,7 @@ where
     let pairs = RefCell::new(vec![(None, W::zero()); final_state + 1]);
     pairs.borrow_mut()[final_state] = (Some(istart), W::one());
 
-    let shortest_path_compare = ShortestPathCompare::new(&pairs, distance);
+    let shortest_path_compare = ShortestPathCompare::new(&pairs, distance, delta);
 
     let mut heap = Heap::new(|v1, v2| shortest_path_compare.compare(*v1, *v2));
     heap.push(final_state);

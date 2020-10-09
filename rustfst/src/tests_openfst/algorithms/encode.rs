@@ -9,7 +9,7 @@ use crate::algorithms::encode::{decode, encode, EncodeType};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::{SerializableSemiring, WeightQuantize};
-use crate::tests_openfst::macros::test_eq_fst;
+use crate::tests_openfst::utils::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]

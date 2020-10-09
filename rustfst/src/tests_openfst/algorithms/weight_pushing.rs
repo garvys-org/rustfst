@@ -2,11 +2,11 @@ use std::fmt::Display;
 
 use anyhow::Result;
 
-use crate::algorithms::{push_weights, ReweightType};
+use crate::algorithms::{ReweightType, push_weights};
 use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::{SerializableSemiring, WeightQuantize};
-use crate::tests_openfst::macros::test_eq_fst;
+use crate::tests_openfst::utils::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 
 pub fn test_weight_pushing_initial<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
@@ -19,7 +19,6 @@ where
     push_weights(
         &mut fst_weight_push_initial,
         ReweightType::ReweightToInitial,
-        false,
     )?;
     test_eq_fst(
         &test_data.weight_pushing_initial,
@@ -39,7 +38,6 @@ where
     push_weights(
         &mut fst_weight_push_final,
         ReweightType::ReweightToFinal,
-        false,
     )?;
     test_eq_fst(
         &test_data.weight_pushing_final,

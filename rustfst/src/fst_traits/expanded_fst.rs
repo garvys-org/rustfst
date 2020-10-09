@@ -4,7 +4,7 @@ use crate::algorithms::fst_convert_from_ref;
 use crate::algorithms::tr_mappers::QuantizeMapper;
 use crate::fst_traits::{AllocableFst, Fst, FstIntoIterator, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
-use crate::{Trs, KDELTA};
+use crate::Trs;
 
 /// Trait defining the necessary methods that should implement an ExpandedFST e.g
 /// a FST where all the states are already computed and not computed on the fly.
@@ -31,9 +31,7 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
     /// ```
     fn num_states(&self) -> usize;
 
-    fn equal_quantized<F2: ExpandedFst<W>>(&self, fst2: &F2) -> bool
-    where
-        W: WeightQuantize,
+    fn approx_equal<F2: ExpandedFst<W>>(&self, fst2: &F2, delta: f32) -> bool
     {
         let n = self.num_states();
         if fst2.num_states() != n {
@@ -60,19 +58,25 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
                 {
                     return false;
                 }
-                let w1 = tr1.weight.quantize(KDELTA).unwrap();
-                let w2 = tr2.weight.quantize(KDELTA).unwrap();
-                if w1 != w2 {
+
+                if !tr1.weight.approx_equal(&tr2.weight, delta) {
                     return false;
                 }
             }
 
             let fw1 =
-                unsafe { self.final_weight_unchecked(state) }.map(|w| w.quantize(KDELTA).unwrap());
+                unsafe { self.final_weight_unchecked(state) };
             let fw2 =
-                unsafe { fst2.final_weight_unchecked(state) }.map(|w| w.quantize(KDELTA).unwrap());
+                unsafe { fst2.final_weight_unchecked(state) };
 
-            if fw1 != fw2 {
+            let fw_equal = match (fw1, fw2) {
+                (Some(w1), Some(w2)) => w1.approx_equal(w2, delta),
+                (Some(_), None) => false,
+                (None, Some(_)) => false,
+                (None, None) => true
+            };
+
+            if !fw_equal {
                 return false;
             }
         }

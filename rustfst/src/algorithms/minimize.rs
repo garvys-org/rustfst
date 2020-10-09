@@ -14,7 +14,7 @@ use crate::algorithms::factor_weight::factor_iterators::GallicFactorLeft;
 use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, FactorWeightType};
 use crate::algorithms::partition::Partition;
 use crate::algorithms::queues::LifoQueue;
-use crate::algorithms::reverse;
+use crate::algorithms::{reverse, PushWeightsConfig, push_weights_with_config};
 use crate::algorithms::tr_compares::ILabelCompare;
 use crate::algorithms::tr_mappers::QuantizeMapper;
 use crate::algorithms::tr_unique;
@@ -23,7 +23,7 @@ use crate::algorithms::Queue;
 use crate::algorithms::{
     connect,
     encode::{decode, encode},
-    push_weights, tr_map, tr_sort, weight_convert, ReweightType,
+    tr_map, tr_sort, weight_convert, ReweightType,
 };
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
@@ -31,20 +31,79 @@ use crate::fst_traits::{AllocableFst, CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::{
     GallicWeightLeft, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::Tr;
 use crate::EPS_LABEL;
 use crate::KDELTA;
 use crate::NO_STATE_ID;
 use crate::{StateId, Trs};
+use crate::{Tr, KSHORTESTDELTA};
+use itertools::Itertools;
+
+#[derive(Clone, Copy, PartialOrd, PartialEq)]
+pub struct MinimizeConfig {
+    delta: f32,
+    allow_nondet: bool
+}
+
+impl MinimizeConfig {
+    pub fn new(delta: f32, allow_nondet: bool) -> Self {
+        Self {
+            delta, allow_nondet
+        }
+    }
+
+    pub fn with_delta(self, delta: f32) -> Self {
+        Self {
+            delta,
+            .. self
+        }
+    }
+
+    pub fn with_allow_nondet(self, allow_nondet: bool) -> Self {
+        Self {
+            allow_nondet,
+            .. self
+        }
+    }
+
+}
+
+impl Default for MinimizeConfig {
+    fn default() -> Self {
+        Self {
+            delta: KSHORTESTDELTA,
+            allow_nondet: false
+        }
+    }
+}
 
 /// In place minimization of deterministic weighted automata and transducers,
 /// and also non-deterministic ones if they use an idempotent semiring.
 /// For transducers, the algorithm produces a compact factorization of the minimal transducer.
-pub fn minimize<W, F>(ifst: &mut F, allow_nondet: bool) -> Result<()>
+pub fn minimize<W, F>(ifst: &mut F) -> Result<()>
+    where
+        F: MutableFst<W> + ExpandedFst<W> + AllocableFst<W>,
+        W: WeaklyDivisibleSemiring + WeightQuantize,
+        W::ReverseWeight: WeightQuantize
+{
+    minimize_with_config(ifst, MinimizeConfig::default())
+}
+
+
+/// In place minimization of deterministic weighted automata and transducers,
+/// and also non-deterministic ones if they use an idempotent semiring.
+/// For transducers, the algorithm produces a compact factorization of the minimal transducer.
+pub fn minimize_with_config<W, F>(
+    ifst: &mut F,
+    config: MinimizeConfig
+) -> Result<()>
 where
     F: MutableFst<W> + ExpandedFst<W> + AllocableFst<W>,
     W: WeaklyDivisibleSemiring + WeightQuantize,
+    W::ReverseWeight: WeightQuantize
 {
+    let delta = config.delta;
+    let allow_nondet = config.allow_nondet;
+
     let props = ifst.compute_and_update_properties(
         FstProperties::ACCEPTOR
             | FstProperties::I_DETERMINISTIC
@@ -68,12 +127,18 @@ where
         // Weighted transducer
         let mut to_gallic = ToGallicConverter {};
         let mut gfst: VectorFst<GallicWeightLeft<W>> = weight_convert(ifst, &mut to_gallic)?;
-        push_weights(&mut gfst, ReweightType::ReweightToInitial, false)?;
-        let quantize_mapper = QuantizeMapper::default();
+        let push_weights_config = PushWeightsConfig::default().with_delta(delta);
+        push_weights_with_config(&mut gfst, ReweightType::ReweightToInitial, push_weights_config)?;
+
+        let quantize_mapper = QuantizeMapper::new(delta);
         tr_map(&mut gfst, &quantize_mapper)?;
+
         let encode_table = encode(&mut gfst, EncodeType::EncodeWeightsAndLabels)?;
+
         acceptor_minimize(&mut gfst, allow_acyclic_minimization)?;
+
         decode(&mut gfst, encode_table)?;
+
         let factor_opts: FactorWeightOptions = FactorWeightOptions {
             delta: KDELTA,
             mode: FactorWeightType::FACTOR_FINAL_WEIGHTS | FactorWeightType::FACTOR_ARC_WEIGHTS,
@@ -82,20 +147,24 @@ where
             increment_final_ilabel: false,
             increment_final_olabel: false,
         };
+
         let fwfst: VectorFst<_> =
             factor_weight::<_, VectorFst<GallicWeightLeft<W>>, _, _, GallicFactorLeft<W>>(
                 &gfst,
                 factor_opts,
             )?;
+
         let mut from_gallic = FromGallicConverter {
             superfinal_label: EPS_LABEL,
         };
         *ifst = weight_convert(&fwfst, &mut from_gallic)?;
+
         Ok(())
     } else if props.contains(FstProperties::WEIGHTED) {
         // Weighted acceptor
-        push_weights(ifst, ReweightType::ReweightToInitial, false)?;
-        let quantize_mapper = QuantizeMapper::default();
+        let push_weights_config = PushWeightsConfig::default().with_delta(delta);
+        push_weights_with_config(ifst, ReweightType::ReweightToInitial, push_weights_config)?;
+        let quantize_mapper = QuantizeMapper::new(delta);
         tr_map(ifst, &quantize_mapper)?;
         let encode_table = encode(ifst, EncodeType::EncodeWeightsAndLabels)?;
         acceptor_minimize(ifst, allow_acyclic_minimization)?;
@@ -115,6 +184,7 @@ pub fn acceptor_minimize<W: Semiring, F: MutableFst<W> + ExpandedFst<W>>(
     ifst: &mut F,
     allow_acyclic_minimization: bool,
 ) -> Result<()> {
+
     let props = ifst.compute_and_update_properties(
         FstProperties::ACCEPTOR | FstProperties::UNWEIGHTED | FstProperties::ACYCLIC,
     )?;
@@ -145,6 +215,7 @@ pub fn acceptor_minimize<W: Semiring, F: MutableFst<W> + ExpandedFst<W>>(
 
 fn merge_states<W: Semiring, F: MutableFst<W>>(partition: Partition, fst: &mut F) -> Result<()> {
     let mut state_map = vec![None; partition.num_classes()];
+
     for (i, s) in state_map
         .iter_mut()
         .enumerate()
@@ -181,7 +252,9 @@ fn merge_states<W: Semiring, F: MutableFst<W>>(partition: Partition, fst: &mut F
     }
 
     fst.set_start(state_map[partition.get_class_id(fst.start().unwrap())].unwrap())?;
+
     connect(fst)?;
+
     Ok(())
 }
 
@@ -390,6 +463,7 @@ fn pre_partition<W: Semiring, F: MutableFst<W>>(
 ) {
     let mut next_class: StateId = 0;
     let num_states = fst.num_states();
+
     let mut state_to_initial_class: Vec<StateId> = vec![0; num_states];
     {
         let mut hash_to_class_nonfinal = HashMap::<Vec<usize>, StateId>::new();
@@ -400,15 +474,13 @@ fn pre_partition<W: Semiring, F: MutableFst<W>>(
             .enumerate()
             .take(num_states)
         {
-            let ilabels: Vec<usize> = unsafe { fst.get_trs_unchecked(s).trs().iter() }
-                .map(|tr| tr.ilabel)
-                .collect();
-
             let this_map = if unsafe { fst.is_final_unchecked(s) } {
                 &mut hash_to_class_final
             } else {
                 &mut hash_to_class_nonfinal
             };
+
+            let ilabels = fst.get_trs(s).unwrap().trs().iter().map(|e| e.ilabel).dedup().collect_vec();
 
             match this_map.entry(ilabels) {
                 Entry::Occupied(e) => {
@@ -422,6 +494,7 @@ fn pre_partition<W: Semiring, F: MutableFst<W>>(
             };
         }
     }
+
     partition.allocate_classes(next_class);
     for (s, c) in state_to_initial_class.iter().enumerate().take(num_states) {
         partition.add(s, *c);
@@ -436,6 +509,7 @@ fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<Partiti
     // Initialize
     let mut tr: VectorFst<W::ReverseWeight> = reverse(fst)?;
     tr_sort(&mut tr, ILabelCompare {});
+
     let mut partition = Partition::new(tr.num_states() - 1);
     let mut queue = LifoQueue::default();
     pre_partition(fst, &mut partition, &mut queue);
@@ -445,6 +519,7 @@ fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<Partiti
         let c = queue.head().unwrap();
         queue.dequeue();
 
+        // Split
         // TODO: Avoid this clone :o
         // Here we need to pointer to the partition that is valid even if the partition changes.
         let comp = TrIterCompare {
@@ -554,7 +629,8 @@ mod tests {
         #[test]
         #[ignore]
         fn proptest_minimize_timeout(mut fst in any::<VectorFst::<TropicalWeight>>()) {
-            minimize(&mut fst, true).unwrap();
+            let config = MinimizeConfig::default().with_allow_nondet(true);
+            minimize_with_config(&mut fst, config).unwrap();
         }
     }
 
@@ -562,9 +638,11 @@ mod tests {
         #[test]
         #[ignore] // falls into the same infinite loop as the timeout test
         fn test_minimize_proptest(mut fst in any::<VectorFst::<TropicalWeight>>()) {
-            let det:VectorFst<_> = determinize(&fst, DeterminizeType::DeterminizeNonFunctional).unwrap();
-            minimize(&mut fst, true).unwrap();
-            let min_det:VectorFst<_> = determinize(&fst, DeterminizeType::DeterminizeNonFunctional).unwrap();
+            let det:VectorFst<_> = determinize(&fst).unwrap();
+            let min_config = MinimizeConfig::default().with_allow_nondet(true);
+            minimize_with_config(&mut fst, min_config).unwrap();
+            let det_config = DeterminizeConfig::default().with_det_type(DeterminizeType::DeterminizeNonFunctional);
+            let min_det:VectorFst<_> = determinize_with_config(&fst, det_config).unwrap();
             prop_assert!(isomorphic(&det, &min_det).unwrap())
         }
     }

@@ -3,7 +3,7 @@ use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::queues::AutoQueue;
-use crate::algorithms::rm_epsilon::{RmEpsilonConfig, RmEpsilonState};
+use crate::algorithms::rm_epsilon::{RmEpsilonInternalConfig, RmEpsilonState};
 use crate::algorithms::top_sort::TopOrderVisitor;
 use crate::algorithms::tr_filters::EpsilonTrFilter;
 use crate::algorithms::visitors::SccVisitor;
@@ -66,12 +66,12 @@ use crate::{Trs, EPS_LABEL};
 pub fn rm_epsilon<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<()> {
     let tr_filter = EpsilonTrFilter {};
     let queue = AutoQueue::new(fst, None, &tr_filter)?;
-    let opts = RmEpsilonConfig::new_with_default(queue);
-    rm_epsilon_with_config(fst, opts)
+    let opts = RmEpsilonInternalConfig::new_with_default(queue);
+    rm_epsilon_with_internal_config(fst, opts)
 }
-pub fn rm_epsilon_with_config<W: Semiring, F: MutableFst<W>, Q: Queue>(
+pub(crate) fn rm_epsilon_with_internal_config<W: Semiring, F: MutableFst<W>, Q: Queue>(
     fst: &mut F,
-    opts: RmEpsilonConfig<W, Q>,
+    opts: RmEpsilonInternalConfig<W, Q>,
 ) -> Result<()> {
     let connect = opts.connect;
     let weight_threshold = opts.weight_threshold.clone();

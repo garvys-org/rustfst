@@ -115,6 +115,10 @@ macro_rules! gallic_weight {
                 self.0.times_assign(&rhs.borrow().0)
             }
 
+            fn approx_equal<P: Borrow<Self>>(&self, rhs: P, delta: f32) -> bool {
+                self.0.approx_equal(&rhs.borrow().0, delta)
+            }
+
             fn value(&self) -> &Self::Type {
                 &self.0
             }
@@ -363,6 +367,10 @@ impl<W: Semiring> Semiring for GallicWeight<W> {
 
     fn times_assign<P: Borrow<Self>>(&mut self, rhs: P) -> Result<()> {
         self.0.times_assign(&rhs.borrow().0)
+    }
+
+    fn approx_equal<P: Borrow<Self>>(&self, rhs: P, delta: f32) -> bool {
+        self.0.approx_equal(&rhs.borrow().0, delta)
     }
 
     fn value(&self) -> &Self::Type {

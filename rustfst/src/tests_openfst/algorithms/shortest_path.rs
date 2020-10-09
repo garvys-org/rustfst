@@ -4,16 +4,16 @@ use std::marker::PhantomData;
 use anyhow::{format_err, Result};
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::shortest_path;
 use crate::fst_path::check_path_in_fst;
 use crate::fst_traits::{MutableFst, PathsIterator, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
 use crate::semirings::{Semiring, SerializableSemiring};
-use crate::tests_openfst::macros::test_correctness_properties;
+use crate::tests_openfst::utils::test_correctness_properties;
 use crate::tests_openfst::FstTestData;
 use crate::FstPath;
 use std::path::Path;
+use crate::algorithms::{shortest_path_with_config, ShortestPathConfig};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ShorestPathOperationResult {
@@ -60,11 +60,8 @@ where
     W: Into<<W as Semiring>::ReverseWeight> + From<<W as Semiring>::ReverseWeight>,
 {
     for data in &test_data.shortest_path {
-        // println!(
-        //     "ShortestPath : unique = {} and nshortest = {}",
-        //     data.unique, data.nshortest
-        // );
-        let fst_res: Result<F> = shortest_path(&test_data.raw, data.nshortest, data.unique);
+        let config = ShortestPathConfig::default().with_nshortest(data.nshortest).with_unique(data.unique);
+        let fst_res: Result<F> = shortest_path_with_config(&test_data.raw, config);
         match (&data.result, &fst_res) {
             (Ok(fst_expected), Ok(ref fst_shortest)) => {
                 // Comparing directly the fsts doesn't work because there is undefined behaviour

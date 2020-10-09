@@ -127,6 +127,20 @@ impl<W: Semiring, O: UnionWeightOption<W>> Semiring for UnionWeight<W, O> {
         Ok(())
     }
 
+    fn approx_equal<P: Borrow<Self>>(&self, rhs: P, delta: f32) -> bool {
+        if self.len() != rhs.borrow().len() {
+            return false;
+        }
+        let it1 = self.iter();
+        let it2 = rhs.borrow().iter();
+        for (w1, w2) in it1.zip(it2) {
+            if !w1.approx_equal(w2, delta) {
+                return false;
+            }
+        }
+        true
+    }
+
     fn value(&self) -> &Self::Type {
         &self.list
     }

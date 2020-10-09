@@ -8,7 +8,7 @@ use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuan
 use crate::tests_openfst::FstTestData;
 
 use crate::algorithms::fst_convert_from_ref;
-use crate::tests_openfst::macros::test_eq_fst;
+use crate::tests_openfst::utils::test_eq_fst;
 use bitflags::_core::marker::PhantomData;
 use std::path::Path;
 

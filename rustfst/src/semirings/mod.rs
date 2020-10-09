@@ -15,6 +15,7 @@ mod string_variant;
 mod string_weight;
 mod tropical_weight;
 mod union_weight;
+pub(crate) mod utils_float;
 
 pub use self::boolean_weight::BooleanWeight;
 pub use self::gallic_weight::{
