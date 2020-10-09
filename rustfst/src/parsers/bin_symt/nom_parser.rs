@@ -26,7 +26,10 @@ pub(crate) fn parse_symbol_table_bin(i: &[u8]) -> IResult<&[u8], SymbolTable> {
 
     let mut symt = SymbolTable::empty();
     for (key, symbol) in pairs_idx_symbols.into_iter() {
-        symt.add_symbol_key(symbol, key as usize);
+        let inserted_label = symt.add_symbol(symbol);
+        if inserted_label != key as usize {
+            bail!("SymbolTable must contain increasing labels with no hole. Expected : {} and Got : {}", inserted_label, key)
+        }
     }
 
     Ok((i, symt))
@@ -40,7 +43,7 @@ pub(crate) fn write_bin_symt<W: Write>(file: &mut W, symt: &SymbolTable) -> Resu
     write_bin_i64(file, symt.len() as i64)?;
     for (label, symbol) in symt.iter() {
         OpenFstString::new(symbol).write(file)?;
-        write_bin_i64(file, *label as i64)?;
+        write_bin_i64(file, label as i64)?;
     }
 
     Ok(())

@@ -1,5 +1,3 @@
-use std::collections::hash_map::{Entry, Iter, Keys};
-use std::collections::HashMap;
 use std::fmt;
 use std::fs::{read, File};
 use std::io::{BufWriter, LineWriter, Write};
@@ -11,12 +9,12 @@ use itertools::Itertools;
 use crate::parsers::bin_symt::nom_parser::{parse_symbol_table_bin, write_bin_symt};
 use crate::parsers::text_symt::parsed_text_symt::ParsedTextSymt;
 use crate::{Label, Symbol, EPS_SYMBOL};
+use crate::algorithms::lazy::BiHashMap;
 
 /// A symbol table stores a bidirectional mapping between transition labels and "symbols" (strings).
 #[derive(PartialEq, Debug, Clone)]
 pub struct SymbolTable {
-    label_to_symbol: HashMap<Label, Symbol>,
-    symbol_to_label: HashMap<Symbol, Label>,
+    bimap: BiHashMap<Symbol>
 }
 
 impl Default for SymbolTable {
@@ -43,8 +41,7 @@ impl SymbolTable {
 
     pub fn empty() -> Self {
         SymbolTable {
-            label_to_symbol: HashMap::new(),
-            symbol_to_label: HashMap::new(),
+            bimap: BiHashMap::new()
         }
     }
 
@@ -70,32 +67,14 @@ impl SymbolTable {
     /// assert_eq!(symt.len(), 4);
     /// # }
     /// ```
-    pub fn add_symbol<S: Into<String>>(&mut self, sym: S) -> Label {
-        let label = self.len();
-        let sym = sym.into();
-
-        // Only insert if
-        match self.symbol_to_label.entry(sym.clone()) {
-            Entry::Occupied(e) => *e.get(),
-            Entry::Vacant(e) => {
-                e.insert(label);
-                self.label_to_symbol.entry(label).or_insert(sym);
-                label
-            }
-        }
+    pub fn add_symbol(&mut self, sym: impl Into<String>) -> Label {
+        self.bimap.get_id_or_insert(sym.into())
     }
 
     pub fn add_symbols<S: Into<String>, P: IntoIterator<Item = S>>(&mut self, symbols: P) {
         for symbol in symbols.into_iter() {
             self.add_symbol(symbol.into());
         }
-    }
-
-    pub(crate) fn add_symbol_key<S: Into<String>>(&mut self, sym: S, key: usize) {
-        let sym = sym.into();
-        self.symbol_to_label.insert(sym.clone(), key);
-        self.label_to_symbol.insert(key, sym);
-        // TODO: Add some checks here
     }
 
     /// Returns the number of symbols stored in the symbol table.
@@ -109,7 +88,7 @@ impl SymbolTable {
     /// # }
     /// ```
     pub fn len(&self) -> usize {
-        self.label_to_symbol.len()
+        self.bimap.len()
     }
 
     /// Given a symbol, returns the label corresponding.
@@ -125,8 +104,9 @@ impl SymbolTable {
     /// assert_eq!(symt.get_label("d"), None);
     /// # }
     /// ```
-    pub fn get_label<S: Into<String>>(&self, sym: S) -> Option<Label> {
-        self.symbol_to_label.get(&sym.into()).cloned()
+    // TODO: Find a way to put AsRef<str>
+    pub fn get_label(&self, sym: impl AsRef<String>) -> Option<Label> {
+        self.bimap.get_id(sym)
     }
 
     /// Given a label, returns the symbol corresponding.
@@ -143,7 +123,7 @@ impl SymbolTable {
     /// # }
     /// ```
     pub fn get_symbol(&self, label: Label) -> Option<&str> {
-        self.label_to_symbol.get(&label).map(|v| v.as_str())
+        self.bimap.get_tuple(label).map(|v| v.as_str())
     }
 
     /// Given a symbol, returns whether it is present in the table.
@@ -156,8 +136,9 @@ impl SymbolTable {
     /// assert!(symt.contains_symbol("a"));
     /// # }
     /// ```
-    pub fn contains_symbol<S: Into<String>>(&self, sym: S) -> bool {
-        self.get_label(sym.into()).is_some()
+    // TODO: Find a way to put AsRef<str>
+    pub fn contains_symbol(&self, sym: impl AsRef<String>) -> bool {
+        self.get_label(sym).is_some()
     }
 
     /// Given a label, returns whether it is present in the table.
@@ -178,8 +159,7 @@ impl SymbolTable {
     /// Reserves capacity for at least additional more elements to be inserted in the `SymbolTable`.
     /// The collection may reserve more space to avoid frequent reallocations.
     pub fn reserve(&mut self, additional: usize) {
-        self.label_to_symbol.reserve(additional);
-        self.symbol_to_label.reserve(additional);
+        self.bimap.reserve(additional)
     }
 
     /// An iterator on all the labels stored in the `SymbolTable`.
@@ -194,8 +174,8 @@ impl SymbolTable {
     ///
     /// # }
     /// ```
-    pub fn labels(&self) -> Keys<Label, Symbol> {
-        self.label_to_symbol.keys()
+    pub fn labels(&self) -> impl Iterator<Item=Label>{
+        self.bimap.iter_ids()
     }
 
     /// An iterator on all the symbols stored in the `SymbolTable`.
@@ -213,14 +193,14 @@ impl SymbolTable {
     /// }
     /// # }
     /// ```
-    pub fn symbols(&self) -> Keys<Symbol, Label> {
-        self.symbol_to_label.keys()
+    pub fn symbols(&self) -> impl Iterator<Item=&Symbol> {
+        self.bimap.iter_tuples()
     }
 
     /// An iterator on all the labels stored in the `SymbolTable`.
     /// The iterator element is `(&'a Label, &'a Symbol)`.
-    pub fn iter(&self) -> Iter<Label, Symbol> {
-        self.label_to_symbol.iter()
+    pub fn iter(&self) -> impl Iterator<Item=(Label, &Symbol)> {
+        self.bimap.iter()
     }
 
     /// Adds another SymbolTable to this table.
@@ -231,16 +211,16 @@ impl SymbolTable {
     }
 
     fn from_parsed_symt_text(parsed_symt_text: ParsedTextSymt) -> Result<Self> {
-        let mut label_to_symbol: HashMap<Label, Symbol> = HashMap::new();
-        let mut symbol_to_label: HashMap<Symbol, Label> = HashMap::new();
+        let mut bimap = BiHashMap::new();
         for (symbol, label) in parsed_symt_text.pairs.into_iter() {
-            label_to_symbol.insert(label, symbol.clone());
-            symbol_to_label.insert(symbol, label);
+            let inserted_label = bimap.get_id_or_insert(symbol);
+            if inserted_label != label {
+                bail!("The SymbolTable should contain labels with increasing ids and no hole. Expected {} and got {}", inserted_label, label)
+            }
         }
 
         Ok(SymbolTable {
-            symbol_to_label,
-            label_to_symbol,
+            bimap
         })
     }
 
