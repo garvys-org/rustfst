@@ -8,9 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added the `optimize` algorithms.
+- Added the `optimize` algorithm.
 - Added the `approx_equal` method to the Semiring trait and implement it for all semirings in the crate.
-- In order to handle default parmeters, some algorithms have multiple version:
+- In order to handle default parmeters, some algorithms now have multiple versions:
     - Simple: `minimize`. Advanced: `minimize_with_config` configurable through `MinimizeConfig`.
     - Simple: `push`. Advanced: `push_with_config` configurable through `PushConfig`.
     - Simple: `push_weights`. Advanced: `push_weights_with_config` configurable through `PushWeightsConfig`.
