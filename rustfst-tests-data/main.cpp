@@ -37,7 +37,7 @@
 #include "symt_001/symt_001.h"
 #include "symt_002/symt_002.h"
 
-#include "../openfst-addon/optimize.cpp"
+#include "../openfst_addon/optimize.cpp"
 
 int ID_FST_NUM = 0;
 
@@ -73,8 +73,6 @@ template<class F>
 void compute_fst_optimize(const F& raw_fst, json& j, const string& dir_path) {
     auto fst_out = *raw_fst.Copy();
     Optimize(&fst_out);
-    // std::cout << "Resuult Optimize = " << std::endl;
-    // PrintFst(fst_out);
     j["optimize"]["result_path"] = dump_fst(fst_out, dir_path);
 }
 

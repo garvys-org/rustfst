@@ -184,10 +184,8 @@ void Optimize(fst::MutableFst<Arc> *fst, bool compute_props = false) {
   using fst::kAcceptor;
   if (fst->Properties(kAcceptor, compute_props) != kAcceptor) {
     // The FST is (may be) a transducer.
-    std::cout << "Optimize transducer" << std::endl;
     OptimizeTransducer(fst, compute_props);
   } else {
-    std::cout << "Optimize acceptor" << std::endl;
     // The FST is (known to be) an acceptor.
     OptimizeAcceptor(fst, compute_props);
   }
