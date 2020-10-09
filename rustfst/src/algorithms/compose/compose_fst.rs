@@ -76,7 +76,8 @@ fn create_base<
     >,
 > {
     // TODO: change this once Lookahead matchers are supported.
-    let opts = ComposeFstOpOptions::<GenericMatcher<_, _, _>, GenericMatcher<_, _, _>, _, _>::default();
+    let opts =
+        ComposeFstOpOptions::<GenericMatcher<_, _, _>, GenericMatcher<_, _, _>, _, _>::default();
     let compose_impl = ComposeFstOp::new(fst1, fst2, opts)?;
     Ok(compose_impl)
 }

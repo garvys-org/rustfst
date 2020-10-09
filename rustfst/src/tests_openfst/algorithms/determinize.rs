@@ -5,7 +5,7 @@ use anyhow::{format_err, Result};
 use bitflags::_core::marker::PhantomData;
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::determinize::{DeterminizeType, DeterminizeConfig, determinize_with_config};
+use crate::algorithms::determinize::{determinize_with_config, DeterminizeConfig, DeterminizeType};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
@@ -67,9 +67,7 @@ where
                 if determinize_data.det_type == DeterminizeType::DeterminizeFunctional {
                     let mut fst = fst_determinized.clone();
                     fst.compute_and_update_properties_all()?;
-                    assert!(fst
-                        .properties()
-                        .contains(FstProperties::I_DETERMINISTIC));
+                    assert!(fst.properties().contains(FstProperties::I_DETERMINISTIC));
                 }
 
                 test_isomorphic_fst(

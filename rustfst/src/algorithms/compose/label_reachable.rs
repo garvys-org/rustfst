@@ -267,11 +267,7 @@ impl LabelReachable {
         Ok(())
     }
 
-    pub fn reach_init<W: Semiring, F: Fst<W>>(
-        &mut self,
-        fst: &F,
-        reach_input: bool,
-    ) -> Result<()> {
+    pub fn reach_init<W: Semiring, F: Fst<W>>(&mut self, fst: &F, reach_input: bool) -> Result<()> {
         self.reach_fst_input = reach_input;
 
         let true_prop = if self.reach_fst_input {

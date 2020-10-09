@@ -13,7 +13,8 @@ pub fn optimize<
 >(
     fst: &mut F,
 ) -> Result<()>
-    where W::ReverseWeight: WeightQuantize
+where
+    W::ReverseWeight: WeightQuantize,
 {
     if fst.properties().contains(FstProperties::ACCEPTOR) {
         optimize_acceptor(fst)
@@ -35,12 +36,13 @@ fn determinize<
 fn encode_deter_mini_decode<
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
     F: MutableFst<W> + AllocableFst<W>,
-
 >(
     fst: &mut F,
     encoder: EncodeType,
 ) -> Result<()>
-    where W::ReverseWeight: WeightQuantize{
+where
+    W::ReverseWeight: WeightQuantize,
+{
     let table = encode::encode(fst, encoder)?;
     determinize(fst)?;
     minimize(fst)?;
@@ -53,7 +55,8 @@ fn optimize_transducer<
 >(
     fst: &mut F,
 ) -> Result<()>
-    where W::ReverseWeight: WeightQuantize
+where
+    W::ReverseWeight: WeightQuantize,
 {
     if !fst.properties().contains(FstProperties::NO_EPSILONS) {
         rm_epsilon::rm_epsilon(fst)?;
@@ -94,7 +97,8 @@ fn optimize_acceptor<
 >(
     fst: &mut F,
 ) -> Result<()>
-    where W::ReverseWeight: WeightQuantize
+where
+    W::ReverseWeight: WeightQuantize,
 {
     if !fst.properties().contains(FstProperties::NO_EPSILONS) {
         rm_epsilon::rm_epsilon(fst)?;

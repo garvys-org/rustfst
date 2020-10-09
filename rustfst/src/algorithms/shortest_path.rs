@@ -6,7 +6,9 @@ use unsafe_unwrap::UnsafeUnwrap;
 use crate::algorithms::determinize::determinize_with_distance;
 use crate::algorithms::queues::AutoQueue;
 use crate::algorithms::tr_filters::AnyTrFilter;
-use crate::algorithms::{connect, reverse, Queue, shortest_distance_with_config, ShortestDistanceConfig};
+use crate::algorithms::{
+    connect, reverse, shortest_distance_with_config, Queue, ShortestDistanceConfig,
+};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::mutable_properties::shortest_path_properties;
 use crate::fst_properties::FstProperties;
@@ -14,8 +16,8 @@ use crate::fst_traits::{CoreFst, ExpandedFst, MutableFst};
 use crate::semirings::{
     ReverseBack, Semiring, SemiringProperties, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::{StateId, Trs, KSHORTESTDELTA};
 use crate::Tr;
+use crate::{StateId, Trs, KSHORTESTDELTA};
 use bitflags::_core::fmt::Formatter;
 use std::fmt::Debug;
 
@@ -23,45 +25,50 @@ use std::fmt::Debug;
 pub struct ShortestPathConfig {
     delta: f32,
     nshortest: usize,
-    unique: bool
+    unique: bool,
 }
 
 impl Default for ShortestPathConfig {
     fn default() -> Self {
-        Self {delta: KSHORTESTDELTA, nshortest: 1, unique: false}
+        Self {
+            delta: KSHORTESTDELTA,
+            nshortest: 1,
+            unique: false,
+        }
     }
 }
 
 impl ShortestPathConfig {
     pub fn new(delta: f32, nshortest: usize, unique: bool) -> Self {
-        Self {delta, nshortest, unique}
-    }
-
-    pub fn with_delta(self, delta: f32) -> Self {
-        Self {delta, ..self}
-    }
-
-    pub fn with_nshortest(self, nshortest: usize) -> Self {
-        Self {nshortest, ..self}
-    }
-
-    pub fn with_unique(self, unique: bool) -> Self {
         Self {
-            unique, ..self
+            delta,
+            nshortest,
+            unique,
         }
     }
 
+    pub fn with_delta(self, delta: f32) -> Self {
+        Self { delta, ..self }
+    }
+
+    pub fn with_nshortest(self, nshortest: usize) -> Self {
+        Self { nshortest, ..self }
+    }
+
+    pub fn with_unique(self, unique: bool) -> Self {
+        Self { unique, ..self }
+    }
 }
 
 pub fn shortest_path<W, FI, FO>(ifst: &FI) -> Result<FO>
-    where
-        FI: ExpandedFst<W>,
-        FO: MutableFst<W>,
-        W: Semiring
+where
+    FI: ExpandedFst<W>,
+    FO: MutableFst<W>,
+    W: Semiring
         + WeightQuantize
         + Into<<W as Semiring>::ReverseWeight>
         + From<<W as Semiring>::ReverseWeight>,
-        <W as Semiring>::ReverseWeight: WeightQuantize + WeaklyDivisibleSemiring,
+    <W as Semiring>::ReverseWeight: WeightQuantize + WeaklyDivisibleSemiring,
 {
     shortest_path_with_config(ifst, ShortestPathConfig::default())
 }
@@ -115,7 +122,8 @@ where
         bail!("ShortestPath : Weight need to have the Path property and be distributive")
     }
 
-    let mut distance = shortest_distance_with_config(ifst, false, ShortestDistanceConfig::new(delta))?;
+    let mut distance =
+        shortest_distance_with_config(ifst, false, ShortestDistanceConfig::new(delta))?;
 
     let rfst: VectorFst<_> = reverse(ifst)?;
     let mut d = W::zero();
@@ -276,7 +284,11 @@ struct ShortestPathCompare<'a, 'b, W: Semiring> {
 }
 
 impl<'a, 'b, W: Semiring + WeightQuantize> ShortestPathCompare<'a, 'b, W> {
-    pub fn new(pairs: &'a RefCell<Vec<(Option<StateId>, W)>>, distance: &'b [W], delta: f32) -> Self {
+    pub fn new(
+        pairs: &'a RefCell<Vec<(Option<StateId>, W)>>,
+        distance: &'b [W],
+        delta: f32,
+    ) -> Self {
         Self {
             pairs,
             distance,
@@ -305,11 +317,9 @@ impl<'a, 'b, W: Semiring + WeightQuantize> ShortestPathCompare<'a, 'b, W> {
         let wx = self.pweight(&px.0).times(&px.1).unwrap();
         let wy = self.pweight(&py.0).times(&py.1).unwrap();
         let res = if px.0.is_none() && py.0.is_some() {
-            natural_less(&wy, &wx).unwrap()
-                || wx.approx_equal(&wy, self.delta)
+            natural_less(&wy, &wx).unwrap() || wx.approx_equal(&wy, self.delta)
         } else if px.0.is_some() && py.0.is_none() {
-            natural_less(&wy, &wx).unwrap()
-                && !wx.approx_equal(&wy, self.delta)
+            natural_less(&wy, &wx).unwrap() && !wx.approx_equal(&wy, self.delta)
         } else {
             natural_less(&wy, &wx).unwrap()
         };

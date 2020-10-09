@@ -54,14 +54,16 @@ pub fn test_minimize<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
 where
     F: SerializableFst<W> + MutableFst<W> + AllocableFst<W> + Display,
     W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
-    W::ReverseWeight: WeightQuantize
+    W::ReverseWeight: WeightQuantize,
 {
     for minimize_data in &test_data.minimize {
         //        println!("Minimize : allow_nondet = {}", minimize_data.allow_nondet);
         let mut fst_raw = test_data.raw.clone();
-        let fst_res: Result<F> =
-            minimize_with_config(&mut fst_raw, MinimizeConfig::new(
-                minimize_data.delta, minimize_data.allow_nondet)).map(|_| fst_raw);
+        let fst_res: Result<F> = minimize_with_config(
+            &mut fst_raw,
+            MinimizeConfig::new(minimize_data.delta, minimize_data.allow_nondet),
+        )
+        .map(|_| fst_raw);
 
         match (&minimize_data.result, fst_res) {
             (Ok(fst_expected), Ok(ref fst_minimized)) => {

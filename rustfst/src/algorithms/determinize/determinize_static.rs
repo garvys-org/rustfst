@@ -21,7 +21,11 @@ use crate::semirings::{
 };
 use crate::{EPS_LABEL, KDELTA};
 
-pub fn determinize_with_distance<W, F1, F2>(ifst: &F1, in_dist: &[W], delta: f32) -> Result<(F2, Vec<W>)>
+pub fn determinize_with_distance<W, F1, F2>(
+    ifst: &F1,
+    in_dist: &[W],
+    delta: f32,
+) -> Result<(F2, Vec<W>)>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize,
     F1: ExpandedFst<W>,
@@ -116,26 +120,20 @@ where
 #[derive(Clone, Debug, Copy, PartialOrd, PartialEq)]
 pub struct DeterminizeConfig {
     delta: f32,
-    det_type: DeterminizeType
+    det_type: DeterminizeType,
 }
 
 impl DeterminizeConfig {
     pub fn new(delta: f32, det_type: DeterminizeType) -> Self {
-        Self {
-            delta, det_type
-        }
+        Self { delta, det_type }
     }
 
     pub fn with_delta(self, delta: f32) -> Self {
-        Self {
-            delta, .. self
-        }
+        Self { delta, ..self }
     }
 
     pub fn with_det_type(self, det_type: DeterminizeType) -> Self {
-        Self {
-            det_type, .. self
-        }
+        Self { det_type, ..self }
     }
 }
 
@@ -143,18 +141,17 @@ impl Default for DeterminizeConfig {
     fn default() -> Self {
         Self {
             delta: KDELTA,
-            det_type: DeterminizeType::DeterminizeFunctional
+            det_type: DeterminizeType::DeterminizeFunctional,
         }
     }
 }
 
 pub fn determinize<W, F1, F2>(fst_in: &F1) -> Result<F2>
-    where
-        W: WeaklyDivisibleSemiring + WeightQuantize,
-        F1: ExpandedFst<W>,
-        F2: MutableFst<W> + AllocableFst<W>,
+where
+    W: WeaklyDivisibleSemiring + WeightQuantize,
+    F1: ExpandedFst<W>,
+    F2: MutableFst<W> + AllocableFst<W>,
 {
-
     determinize_with_config(fst_in, DeterminizeConfig::default())
 }
 
@@ -233,8 +230,7 @@ mod tests {
 
         ref_fst.add_tr(s0, Tr::new(1, 1, TropicalWeight::new(2.0), s1))?;
 
-        let determinized_fst: VectorFst<TropicalWeight> =
-            determinize(&input_fst)?;
+        let determinized_fst: VectorFst<TropicalWeight> = determinize(&input_fst)?;
 
         assert_eq!(determinized_fst, ref_fst);
         Ok(())
@@ -268,8 +264,7 @@ mod tests {
         ref_fst.add_tr(s0, Tr::new(1, 1, TropicalWeight::new(2.0), s1))?;
         ref_fst.add_tr(s1, Tr::new(2, 2, TropicalWeight::new(4.0), s2))?;
 
-        let determinized_fst: VectorFst<TropicalWeight> =
-            determinize(&input_fst)?;
+        let determinized_fst: VectorFst<TropicalWeight> = determinize(&input_fst)?;
 
         assert_eq!(determinized_fst, ref_fst);
         Ok(())

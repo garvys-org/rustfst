@@ -7,7 +7,10 @@ use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, Facto
 use crate::algorithms::fst_convert::fst_convert_from_ref;
 use crate::algorithms::tr_mappers::RmWeightMapper;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
-use crate::algorithms::{reweight, tr_map, weight_convert, ReweightType, shortest_distance_with_config, ShortestDistanceConfig};
+use crate::algorithms::{
+    reweight, shortest_distance_with_config, tr_map, weight_convert, ReweightType,
+    ShortestDistanceConfig,
+};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::{DivideType, Semiring};
@@ -30,35 +33,42 @@ bitflags! {
 #[derive(Clone, Debug, Copy, PartialOrd, PartialEq)]
 pub struct PushWeightsConfig {
     delta: f32,
-    remove_total_weight: bool
+    remove_total_weight: bool,
 }
 
 impl Default for PushWeightsConfig {
     fn default() -> Self {
-        Self{
-            delta: KDELTA, remove_total_weight: false
+        Self {
+            delta: KDELTA,
+            remove_total_weight: false,
         }
     }
 }
 
 impl PushWeightsConfig {
     pub fn new(delta: f32, remove_total_weight: bool) -> Self {
-        Self {delta, remove_total_weight}
+        Self {
+            delta,
+            remove_total_weight,
+        }
     }
 
     pub fn with_delta(self, delta: f32) -> Self {
-        Self {delta, ..self}
+        Self { delta, ..self }
     }
 
     pub fn with_remove_total_weight(self, remove_total_weight: bool) -> Self {
-        Self {remove_total_weight, ..self}
+        Self {
+            remove_total_weight,
+            ..self
+        }
     }
 }
 
 pub fn push_weights<W, F>(fst: &mut F, reweight_type: ReweightType) -> Result<()>
-    where
-        F: MutableFst<W>,
-        W: WeaklyDivisibleSemiring
+where
+    F: MutableFst<W>,
+    W: WeaklyDivisibleSemiring,
 {
     push_weights_with_config(fst, reweight_type, PushWeightsConfig::default())
 }
@@ -71,15 +81,19 @@ pub fn push_weights<W, F>(fst: &mut F, reweight_type: ReweightType) -> Result<()
 pub fn push_weights_with_config<W, F>(
     fst: &mut F,
     reweight_type: ReweightType,
-    config: PushWeightsConfig
+    config: PushWeightsConfig,
 ) -> Result<()>
 where
     F: MutableFst<W>,
-    W: WeaklyDivisibleSemiring
+    W: WeaklyDivisibleSemiring,
 {
     let remove_total_weight = config.remove_total_weight;
     let delta = config.delta;
-    let dist = shortest_distance_with_config(fst, reweight_type == ReweightType::ReweightToInitial, ShortestDistanceConfig::new(delta))?;
+    let dist = shortest_distance_with_config(
+        fst,
+        reweight_type == ReweightType::ReweightToInitial,
+        ShortestDistanceConfig::new(delta),
+    )?;
 
     if remove_total_weight {
         let total_weight =
@@ -162,13 +176,21 @@ macro_rules! m_labels_pushing {
         let mut mapper = ToGallicConverter {};
         let mut gfst: VectorFst<$gallic_weight> = weight_convert($ifst, &mut mapper)?;
         let gdistance = if $push_type.intersects(PushType::PUSH_WEIGHTS) {
-            shortest_distance_with_config(&gfst, $reweight_type == ReweightType::ReweightToInitial, ShortestDistanceConfig::new($delta))?
+            shortest_distance_with_config(
+                &gfst,
+                $reweight_type == ReweightType::ReweightToInitial,
+                ShortestDistanceConfig::new($delta),
+            )?
         } else {
             let rm_weight_mapper = RmWeightMapper {};
             let mut uwfst: VectorFst<_> = fst_convert_from_ref($ifst);
             tr_map(&mut uwfst, &rm_weight_mapper)?;
             let guwfst: VectorFst<$gallic_weight> = weight_convert(&uwfst, &mut mapper)?;
-            shortest_distance_with_config(&guwfst, $reweight_type == ReweightType::ReweightToInitial, ShortestDistanceConfig::new($delta))?
+            shortest_distance_with_config(
+                &guwfst,
+                $reweight_type == ReweightType::ReweightToInitial,
+                ShortestDistanceConfig::new($delta),
+            )?
         };
         if $push_type.intersects(PushType::REMOVE_COMMON_AFFIX | PushType::REMOVE_TOTAL_WEIGHT) {
             let mut total_weight = compute_total_weight(
@@ -212,35 +234,38 @@ pub struct PushConfig {
 
 impl Default for PushConfig {
     fn default() -> Self {
-        Self {
-            delta: KDELTA,
-        }
+        Self { delta: KDELTA }
     }
 }
 
 impl PushConfig {
     pub fn new(delta: f32) -> Self {
-        Self {delta}
+        Self { delta }
     }
 
     pub fn with_delta(self, delta: f32) -> Self {
-        Self {delta, ..self}
+        Self { delta, ..self }
     }
 }
 
 pub fn push<W, F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType) -> Result<F2>
-    where
-        F1: ExpandedFst<W>,
-        F2: ExpandedFst<W> + MutableFst<W> + AllocableFst<W>,
-        W: WeaklyDivisibleSemiring + WeightQuantize,
-        <W as Semiring>::ReverseWeight: 'static,
+where
+    F1: ExpandedFst<W>,
+    F2: ExpandedFst<W> + MutableFst<W> + AllocableFst<W>,
+    W: WeaklyDivisibleSemiring + WeightQuantize,
+    <W as Semiring>::ReverseWeight: 'static,
 {
     push_with_config(ifst, reweight_type, push_type, PushConfig::default())
 }
 
 /// Pushes the weights and/or labels of the input FST into the output
 /// mutable FST by pushing weights and/or labels towards the initial state or final states.
-pub fn push_with_config<W, F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType, config: PushConfig) -> Result<F2>
+pub fn push_with_config<W, F1, F2>(
+    ifst: &F1,
+    reweight_type: ReweightType,
+    push_type: PushType,
+    config: PushConfig,
+) -> Result<F2>
 where
     F1: ExpandedFst<W>,
     F2: ExpandedFst<W> + MutableFst<W> + AllocableFst<W>,
@@ -252,12 +277,9 @@ where
     {
         // Only weights pushing
         let mut ofst = fst_convert_from_ref(ifst);
-        let push_weights_config = PushWeightsConfig::new(delta, push_type.intersects(PushType::REMOVE_TOTAL_WEIGHT));
-        push_weights_with_config(
-            &mut ofst,
-            reweight_type,
-            push_weights_config,
-        )?;
+        let push_weights_config =
+            PushWeightsConfig::new(delta, push_type.intersects(PushType::REMOVE_TOTAL_WEIGHT));
+        push_weights_with_config(&mut ofst, reweight_type, push_weights_config)?;
         Ok(ofst)
     } else if push_type.intersects(PushType::PUSH_LABELS) {
         match reweight_type {

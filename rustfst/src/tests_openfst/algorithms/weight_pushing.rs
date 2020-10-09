@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use anyhow::Result;
 
-use crate::algorithms::{ReweightType, push_weights};
+use crate::algorithms::{push_weights, ReweightType};
 use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::{SerializableSemiring, WeightQuantize};
@@ -35,10 +35,7 @@ where
 {
     // Weight pushing final
     let mut fst_weight_push_final = test_data.raw.clone();
-    push_weights(
-        &mut fst_weight_push_final,
-        ReweightType::ReweightToFinal,
-    )?;
+    push_weights(&mut fst_weight_push_final, ReweightType::ReweightToFinal)?;
     test_eq_fst(
         &test_data.weight_pushing_final,
         &fst_weight_push_final,

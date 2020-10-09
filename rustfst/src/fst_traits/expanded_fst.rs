@@ -31,8 +31,7 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
     /// ```
     fn num_states(&self) -> usize;
 
-    fn approx_equal<F2: ExpandedFst<W>>(&self, fst2: &F2, delta: f32) -> bool
-    {
+    fn approx_equal<F2: ExpandedFst<W>>(&self, fst2: &F2, delta: f32) -> bool {
         let n = self.num_states();
         if fst2.num_states() != n {
             println!("Not the same number of states");
@@ -64,16 +63,14 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
                 }
             }
 
-            let fw1 =
-                unsafe { self.final_weight_unchecked(state) };
-            let fw2 =
-                unsafe { fst2.final_weight_unchecked(state) };
+            let fw1 = unsafe { self.final_weight_unchecked(state) };
+            let fw2 = unsafe { fst2.final_weight_unchecked(state) };
 
             let fw_equal = match (fw1, fw2) {
                 (Some(w1), Some(w2)) => w1.approx_equal(w2, delta),
                 (Some(_), None) => false,
                 (None, Some(_)) => false,
-                (None, None) => true
+                (None, None) => true,
             };
 
             if !fw_equal {

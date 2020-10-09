@@ -4,7 +4,7 @@ use crate::fst_properties::mutable_properties::reweight_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::{DivideType, WeaklyDivisibleSemiring};
-use crate::{EPS_LABEL, Tr};
+use crate::{Tr, EPS_LABEL};
 
 /// Different types of reweighting.
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
@@ -100,7 +100,6 @@ where
         }
     }
 
-
     // Handles potential of the start state
     if let Some(start_state) = fst.start() {
         let d_s = potentials.get(start_state).unwrap_or(&zero);
@@ -114,9 +113,9 @@ where
                         let tr = it_tr.get_unchecked(idx_tr);
                         let weight = match reweight_type {
                             ReweightType::ReweightToInitial => d_s.times(&tr.weight)?,
-                            ReweightType::ReweightToFinal => {
-                                (W::one().divide(&d_s, DivideType::DivideRight)?).times(&tr.weight)?
-                            }
+                            ReweightType::ReweightToFinal => (W::one()
+                                .divide(&d_s, DivideType::DivideRight)?)
+                            .times(&tr.weight)?,
                         };
                         it_tr.set_weight_unchecked(idx_tr, weight);
                     }
@@ -135,7 +134,9 @@ where
                 let s = fst.add_state();
                 let weight = match reweight_type {
                     ReweightType::ReweightToInitial => d_s.clone(),
-                    ReweightType::ReweightToFinal => W::one().divide(d_s, DivideType::DivideRight)?
+                    ReweightType::ReweightToFinal => {
+                        W::one().divide(d_s, DivideType::DivideRight)?
+                    }
                 };
                 fst.add_tr(s, Tr::new(EPS_LABEL, EPS_LABEL, weight, start_state))?;
                 fst.set_start(s)?;

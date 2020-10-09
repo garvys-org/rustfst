@@ -14,7 +14,7 @@ struct Isomorphism<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> {
     state_pairs: Vec<Option<StateId>>,
     queue: VecDeque<(StateId, StateId)>,
     w: PhantomData<W>,
-    delta: f32
+    delta: f32,
 }
 
 /// Compare trs in the order input label, output label, weight and nextstate.
@@ -54,7 +54,7 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
             state_pairs: vec![None; fst_1.num_states()],
             queue: VecDeque::new(),
             w: PhantomData,
-            delta
+            delta,
         }
     }
 
@@ -77,10 +77,10 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
             (Some(w1), Some(w2)) => w1.approx_equal(w2, self.delta),
             (Some(_), None) => false,
             (None, Some(_)) => false,
-            (None, None) => true
+            (None, None) => true,
         };
         if !fw_equal {
-            return Ok(false)
+            return Ok(false);
         }
 
         let ntrs1 = self.fst_1.num_trs(s1)?;
@@ -115,7 +115,10 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
             }
             if i > 0 {
                 let arc0 = trs1[i - 1];
-                if arc1.ilabel == arc0.ilabel && arc1.olabel == arc0.olabel && arc1.weight.approx_equal(&arc0.weight, self.delta) {
+                if arc1.ilabel == arc0.ilabel
+                    && arc1.olabel == arc0.olabel
+                    && arc1.weight.approx_equal(&arc0.weight, self.delta)
+                {
                     bail!("Isomorphic: Non-determinism as an unweighted automaton")
                 }
             }
@@ -147,24 +150,19 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
     }
 }
 
-
 pub struct IsomorphicConfig {
-    delta: f32
+    delta: f32,
 }
 
 impl Default for IsomorphicConfig {
     fn default() -> Self {
-        Self {
-            delta: KDELTA
-        }
+        Self { delta: KDELTA }
     }
 }
 
 impl IsomorphicConfig {
     pub fn new(delta: f32) -> Self {
-        Self {
-            delta
-        }
+        Self { delta }
     }
 }
 
@@ -175,10 +173,10 @@ impl IsomorphicConfig {
 /// In other words, Isomorphic(A, B) is true if and only if the states of A can
 /// be renumbered and the transitions leaving each state reordered so that Equal(A, B) is true.
 pub fn isomorphic<W, F1, F2>(fst_1: &F1, fst_2: &F2) -> Result<bool>
-    where
-        W: Semiring,
-        F1: ExpandedFst<W>,
-        F2: ExpandedFst<W>,
+where
+    W: Semiring,
+    F1: ExpandedFst<W>,
+    F2: ExpandedFst<W>,
 {
     isomorphic_with_config(fst_1, fst_2, IsomorphicConfig::default())
 }
@@ -189,7 +187,11 @@ pub fn isomorphic<W, F1, F2>(fst_1: &F1, fst_2: &F2) -> Result<bool>
 ///
 /// In other words, Isomorphic(A, B) is true if and only if the states of A can
 /// be renumbered and the transitions leaving each state reordered so that Equal(A, B) is true.
-pub fn isomorphic_with_config<W, F1, F2>(fst_1: &F1, fst_2: &F2, config: IsomorphicConfig) -> Result<bool>
+pub fn isomorphic_with_config<W, F1, F2>(
+    fst_1: &F1,
+    fst_2: &F2,
+    config: IsomorphicConfig,
+) -> Result<bool>
 where
     W: Semiring,
     F1: ExpandedFst<W>,

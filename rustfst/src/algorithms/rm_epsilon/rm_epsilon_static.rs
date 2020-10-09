@@ -141,10 +141,12 @@ pub(crate) fn rm_epsilon_with_internal_config<W: Semiring, F: MutableFst<W>, Q: 
     let zero = W::zero();
 
     for state in states.into_iter().rev() {
-        if !noneps_in[state]  && (connect || weight_threshold != W::zero() || state_threshold != None){
+        if !noneps_in[state]
+            && (connect || weight_threshold != W::zero() || state_threshold != None)
+        {
             continue;
         }
-        let (trs, final_weight) = rmeps_state.expand::<F,_>(state, &*fst)?;
+        let (trs, final_weight) = rmeps_state.expand::<F, _>(state, &*fst)?;
 
         unsafe {
             fst.pop_trs_unchecked(state);

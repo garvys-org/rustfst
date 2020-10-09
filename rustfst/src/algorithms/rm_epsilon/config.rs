@@ -20,7 +20,11 @@ impl<W: Semiring, Q: Queue> RmEpsilonInternalConfig<W, Q> {
         delta: f32,
     ) -> Self {
         Self {
-            sd_opts: ShortestDistanceInternalConfig::new_with_default(EpsilonTrFilter {}, queue, delta),
+            sd_opts: ShortestDistanceInternalConfig::new_with_default(
+                EpsilonTrFilter {},
+                queue,
+                delta,
+            ),
             connect,
             weight_threshold,
             state_threshold,

@@ -1,8 +1,8 @@
 use std::borrow::Borrow;
-use std::fmt::Debug;
-use std::collections::{BTreeMap, HashMap};
 use std::collections::btree_map::Entry as EntryBTreeMap;
 use std::collections::hash_map::Entry as EntryHashMap;
+use std::collections::{BTreeMap, HashMap};
+use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
@@ -17,7 +17,6 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
 use crate::semirings::{DivideType, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::{Label, Semiring, StateId, Tr, Trs, TrsVec};
-
 
 #[derive(Debug)]
 pub struct DeterminizeFsaOp<W, F, CD, B, BT>

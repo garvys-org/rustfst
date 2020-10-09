@@ -4,13 +4,13 @@ use std::collections::HashMap;
 
 use anyhow::Result;
 
-use crate::{StateId, Tr, Trs};
-use crate::algorithms::Queue;
 use crate::algorithms::rm_epsilon::{Element, RmEpsilonInternalConfig};
 use crate::algorithms::shortest_distance::ShortestDistanceState;
 use crate::algorithms::tr_filters::{EpsilonTrFilter, TrFilter};
+use crate::algorithms::Queue;
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
+use crate::{StateId, Tr, Trs};
 
 #[derive(Clone)]
 pub(crate) struct RmEpsilonState<W: Semiring, Q: Queue> {
@@ -21,9 +21,7 @@ pub(crate) struct RmEpsilonState<W: Semiring, Q: Queue> {
     pub sd_state: ShortestDistanceState<W, Q, EpsilonTrFilter>,
 }
 
-impl<W: Semiring, Q: Queue> std::fmt::Debug
-    for RmEpsilonState<W, Q>
-{
+impl<W: Semiring, Q: Queue> std::fmt::Debug for RmEpsilonState<W, Q> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "RmEpsilonState {{ visited : {:?}, visited_states : {:?}, element_map : {:?}, expand_id : {:?}, sd_state : {:?} }}",
                self.visited, self.visited_states, self.element_map, self.expand_id, self.sd_state)
@@ -41,8 +39,14 @@ impl<W: Semiring, Q: Queue> RmEpsilonState<W, Q> {
         }
     }
 
-    pub fn expand<F: ExpandedFst<W>, B: Borrow<F>>(&mut self, source: StateId, fst: B) -> Result<(Vec<Tr<W>>, W)> {
-        let distance = self.sd_state.shortest_distance::<F, _>(Some(source), fst.borrow())?;
+    pub fn expand<F: ExpandedFst<W>, B: Borrow<F>>(
+        &mut self,
+        source: StateId,
+        fst: B,
+    ) -> Result<(Vec<Tr<W>>, W)> {
+        let distance = self
+            .sd_state
+            .shortest_distance::<F, _>(Some(source), fst.borrow())?;
 
         let tr_filter = EpsilonTrFilter {};
 
@@ -100,12 +104,7 @@ impl<W: Semiring, Q: Queue> RmEpsilonState<W, Q> {
                 }
             }
             final_weight.plus_assign(
-                distance[state].times(
-                    fst
-                        .borrow()
-                        .final_weight(state)?
-                        .unwrap_or_else(W::zero),
-                )?,
+                distance[state].times(fst.borrow().final_weight(state)?.unwrap_or_else(W::zero))?,
             )?;
         }
 

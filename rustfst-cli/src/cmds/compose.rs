@@ -158,12 +158,8 @@ impl BinaryFstAlgorithm for ComposeAlgorithm {
 
                 let matcher2 = TMatcher2::new(&fst_2, MatchType::MatchInput)?;
 
-                let compose_filter = TComposeFilter::new(
-                    &graph1look,
-                    &fst_2,
-                    Some(matcher1),
-                    Some(matcher2),
-                )?;
+                let compose_filter =
+                    TComposeFilter::new(&graph1look, &fst_2, Some(matcher1), Some(matcher2))?;
 
                 let compose_options = ComposeFstOpOptions::<_, _, TComposeFilter<_, _, _>, _>::new(
                     // compose_filter.matcher1(),

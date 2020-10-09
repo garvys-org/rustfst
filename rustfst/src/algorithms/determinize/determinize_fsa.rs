@@ -190,7 +190,13 @@ mod test {
     fn test_determinize_fsa_sync() {
         fn is_sync<T: Sync>() {}
         is_sync::<
-            DeterminizeFsa<TropicalWeight, VectorFst<_>, DefaultCommonDivisor, Arc<VectorFst<_>>, Vec<TropicalWeight>>,
+            DeterminizeFsa<
+                TropicalWeight,
+                VectorFst<_>,
+                DefaultCommonDivisor,
+                Arc<VectorFst<_>>,
+                Vec<TropicalWeight>,
+            >,
         >();
     }
 }

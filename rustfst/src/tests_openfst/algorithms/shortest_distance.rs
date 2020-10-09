@@ -46,13 +46,13 @@ where
         let distance = shortest_distance(&test_data.raw, data.reverse)?;
         assert_eq!(
             data.result,
-                // .iter()
-                // .map(|w| w.quantize(KDELTA).unwrap())
-                // .collect_vec(),
+            // .iter()
+            // .map(|w| w.quantize(KDELTA).unwrap())
+            // .collect_vec(),
             distance,
-                // .iter()
-                // .map(|w| w.quantize(KDELTA).unwrap())
-                // .collect_vec(),
+            // .iter()
+            // .map(|w| w.quantize(KDELTA).unwrap())
+            // .collect_vec(),
             "Test failing for ShortestDistance with reverse={}",
             data.reverse
         );
