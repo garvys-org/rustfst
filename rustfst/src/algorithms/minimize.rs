@@ -636,10 +636,11 @@ mod tests {
         #[test]
         #[ignore] // falls into the same infinite loop as the timeout test
         fn test_minimize_proptest(mut fst in any::<VectorFst::<TropicalWeight>>()) {
-            let det:VectorFst<_> = determinize_default(&fst, DeterminizeType::DeterminizeNonFunctional).unwrap();
-            let config = MinimizeConfig::default().with_allow_nondet(true);
-            minimize_with_config(&mut fst, config).unwrap();
-            let min_det:VectorFst<_> = determinize_default(&fst, DeterminizeType::DeterminizeNonFunctional).unwrap();
+            let det:VectorFst<_> = determinize(&fst).unwrap();
+            let min_config = MinimizeConfig::default().with_allow_nondet(true);
+            minimize_with_config(&mut fst, min_config).unwrap();
+            let det_config = DeterminizeConfig::default().with_det_type(DeterminizeType::DeterminizeNonFunctional);
+            let min_det:VectorFst<_> = determinize_with_config(&fst, det_config).unwrap();
             prop_assert!(isomorphic(&det, &min_det).unwrap())
         }
     }

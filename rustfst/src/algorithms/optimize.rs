@@ -28,7 +28,7 @@ fn determinize<
 >(
     fst: &mut F,
 ) -> Result<()> {
-    *fst = determinize::determinize_default(fst, determinize::DeterminizeType::DeterminizeFunctional)?;
+    *fst = determinize::determinize(fst)?;
     Ok(())
 }
 

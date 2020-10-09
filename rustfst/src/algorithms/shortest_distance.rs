@@ -97,7 +97,7 @@ macro_rules! ensure_source_index_is_valid {
     };
 }
 
-impl<W: Semiring + WeightQuantize, Q: Queue, A: TrFilter<W>>
+impl<W: Semiring, Q: Queue, A: TrFilter<W>>
     ShortestDistanceState<W, Q, A>
 {
     pub fn new(fst_num_states: usize, state_queue: Q, tr_filter: A, first_path: bool, retain: bool, delta: f32) -> Self {
@@ -224,7 +224,7 @@ impl<W: Semiring + WeightQuantize, Q: Queue, A: TrFilter<W>>
     }
 }
 
-pub(crate) fn shortest_distance_with_internal_config<W: Semiring + WeightQuantize, Q: Queue, A: TrFilter<W>, F: ExpandedFst<W>>(
+pub(crate) fn shortest_distance_with_internal_config<W: Semiring, Q: Queue, A: TrFilter<W>, F: ExpandedFst<W>>(
     fst: &F,
     opts: ShortestDistanceInternalConfig<W, Q, A>,
 ) -> Result<Vec<W>> {
@@ -254,8 +254,7 @@ impl ShortestDistanceConfig {
     }
 }
 
-pub fn shortest_distance<W: Semiring + WeightQuantize, F: ExpandedFst<W>>(fst: &F, reverse: bool) -> Result<Vec<W>>
-    where W::ReverseWeight: WeightQuantize
+pub fn shortest_distance<W: Semiring, F: ExpandedFst<W>>(fst: &F, reverse: bool) -> Result<Vec<W>>
 {
     shortest_distance_with_config(fst, reverse, ShortestDistanceConfig::default())
 }
@@ -293,8 +292,7 @@ pub fn shortest_distance<W: Semiring + WeightQuantize, F: ExpandedFst<W>>(fst: &
 /// # Ok(())
 /// # }
 /// ```
-pub fn shortest_distance_with_config<W: Semiring + WeightQuantize, F: ExpandedFst<W>>(fst: &F, reverse: bool, config: ShortestDistanceConfig) -> Result<Vec<W>>
-where W::ReverseWeight: WeightQuantize
+pub fn shortest_distance_with_config<W: Semiring, F: ExpandedFst<W>>(fst: &F, reverse: bool, config: ShortestDistanceConfig) -> Result<Vec<W>>
 {
     let delta = config.delta;
     if !reverse {

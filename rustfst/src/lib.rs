@@ -70,7 +70,7 @@
 //!     connect(&mut fst)?;
 //!
 //!     // - Optimize the FST by merging states with the same behaviour.
-//!     minimize(&mut fst, true)?;
+//!     minimize(&mut fst)?;
 //!
 //!     // - Copy all the input labels in the output.
 //!     project(&mut fst, ProjectType::ProjectInput);
@@ -79,7 +79,7 @@
 //!     rm_epsilon(&mut fst)?;
 //!
 //!     // - Compute an equivalent FST but deterministic.
-//!     fst = determinize(&fst, DeterminizeType::DeterminizeFunctional)?;
+//!     fst = determinize(&fst)?;
 //!
 //!     Ok(())
 //! }

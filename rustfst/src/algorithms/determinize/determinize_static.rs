@@ -113,13 +113,49 @@ where
     }
 }
 
-pub fn determinize_default<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) -> Result<F2>
+#[derive(Clone, Debug, Copy, PartialOrd, PartialEq)]
+pub struct DeterminizeConfig {
+    delta: f32,
+    det_type: DeterminizeType
+}
+
+impl DeterminizeConfig {
+    pub fn new(delta: f32, det_type: DeterminizeType) -> Self {
+        Self {
+            delta, det_type
+        }
+    }
+
+    pub fn with_delta(self, delta: f32) -> Self {
+        Self {
+            delta, .. self
+        }
+    }
+
+    pub fn with_det_type(self, det_type: DeterminizeType) -> Self {
+        Self {
+            det_type, .. self
+        }
+    }
+}
+
+impl Default for DeterminizeConfig {
+    fn default() -> Self {
+        Self {
+            delta: KDELTA,
+            det_type: DeterminizeType::DeterminizeFunctional
+        }
+    }
+}
+
+pub fn determinize<W, F1, F2>(fst_in: &F1) -> Result<F2>
     where
         W: WeaklyDivisibleSemiring + WeightQuantize,
         F1: ExpandedFst<W>,
         F2: MutableFst<W> + AllocableFst<W>,
 {
-    determinize(fst_in, det_type, KDELTA)
+
+    determinize_with_config(fst_in, DeterminizeConfig::default())
 }
 
 /// This operations creates an equivalent FST that has the property that no
@@ -136,12 +172,14 @@ pub fn determinize_default<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType) ->
 ///
 /// ![determinize_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/determinize_out.svg?sanitize=true)
 ///
-pub fn determinize<W, F1, F2>(fst_in: &F1, det_type: DeterminizeType, delta: f32) -> Result<F2>
+pub fn determinize_with_config<W, F1, F2>(fst_in: &F1, config: DeterminizeConfig) -> Result<F2>
 where
     W: WeaklyDivisibleSemiring + WeightQuantize,
     F1: ExpandedFst<W>,
     F2: MutableFst<W> + AllocableFst<W>,
 {
+    let delta = config.delta;
+    let det_type = config.det_type;
     let iprops = fst_in.borrow().properties();
     let mut fst_res: F2 = if iprops.contains(FstProperties::ACCEPTOR) {
         determinize_fsa::<_, F1, _, DefaultCommonDivisor>(fst_in, delta)?
@@ -196,7 +234,7 @@ mod tests {
         ref_fst.add_tr(s0, Tr::new(1, 1, TropicalWeight::new(2.0), s1))?;
 
         let determinized_fst: VectorFst<TropicalWeight> =
-            determinize_default(&input_fst, DeterminizeType::DeterminizeFunctional)?;
+            determinize(&input_fst)?;
 
         assert_eq!(determinized_fst, ref_fst);
         Ok(())
@@ -231,7 +269,7 @@ mod tests {
         ref_fst.add_tr(s1, Tr::new(2, 2, TropicalWeight::new(4.0), s2))?;
 
         let determinized_fst: VectorFst<TropicalWeight> =
-            determinize_default(&input_fst, DeterminizeType::DeterminizeFunctional)?;
+            determinize(&input_fst)?;
 
         assert_eq!(determinized_fst, ref_fst);
         Ok(())

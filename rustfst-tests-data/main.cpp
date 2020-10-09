@@ -32,8 +32,6 @@
 #include "fst_017/fst_017.h"
 #include "fst_018/fst_018.h"
 #include "fst_019/fst_019.h"
-#include "fst_020/fst_020.h"
-#include "fst_021/fst_021.h"
 
 #include "symt_000/symt_000.h"
 #include "symt_001/symt_001.h"
@@ -1205,7 +1203,7 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     std::cout << "Queue" << std::endl;
     compute_fst_queue(raw_fst, data);
 
-    std::cout << "\n\nOptimize" << std::endl;
+    std::cout << "Optimize" << std::endl;
     compute_fst_optimize(raw_fst, data, dir_path);
 
     std::ofstream o(fst_name + "/metadata.json");
@@ -1352,6 +1350,4 @@ int main() {
     compute_fst_data(FstTestData017(), "fst_017");
     compute_fst_data(FstTestData018(), "fst_018");
     compute_fst_data(FstTestData019(), "fst_019");
-    compute_fst_data(FstTestData020(), "fst_020");
-    compute_fst_data(FstTestData021(), "fst_021");
 }
