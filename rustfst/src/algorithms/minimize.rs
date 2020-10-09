@@ -38,29 +38,72 @@ use crate::{StateId, Trs};
 use crate::{Tr, KSHORTESTDELTA};
 use itertools::Itertools;
 
-pub fn minimize_default<W, F>(ifst: &mut F) -> Result<()>
+#[derive(Clone, Copy, PartialOrd, PartialEq)]
+pub struct MinimizeConfig {
+    delta: f32,
+    allow_nondet: bool
+}
+
+impl MinimizeConfig {
+    pub fn new(delta: f32, allow_nondet: bool) -> Self {
+        Self {
+            delta, allow_nondet
+        }
+    }
+
+    pub fn with_delta(self, delta: f32) -> Self {
+        Self {
+            delta,
+            .. self
+        }
+    }
+
+    pub fn with_allow_nondet(self, allow_nondet: bool) -> Self {
+        Self {
+            allow_nondet,
+            .. self
+        }
+    }
+
+}
+
+impl Default for MinimizeConfig {
+    fn default() -> Self {
+        Self {
+            delta: KSHORTESTDELTA,
+            allow_nondet: false
+        }
+    }
+}
+
+/// In place minimization of deterministic weighted automata and transducers,
+/// and also non-deterministic ones if they use an idempotent semiring.
+/// For transducers, the algorithm produces a compact factorization of the minimal transducer.
+pub fn minimize<W, F>(ifst: &mut F) -> Result<()>
     where
         F: MutableFst<W> + ExpandedFst<W> + AllocableFst<W>,
         W: WeaklyDivisibleSemiring + WeightQuantize,
         W::ReverseWeight: WeightQuantize
 {
-    minimize(ifst, KSHORTESTDELTA, false)
+    minimize_with_config(ifst, MinimizeConfig::default())
 }
 
 
 /// In place minimization of deterministic weighted automata and transducers,
 /// and also non-deterministic ones if they use an idempotent semiring.
 /// For transducers, the algorithm produces a compact factorization of the minimal transducer.
-pub fn minimize<W, F>(
+pub fn minimize_with_config<W, F>(
     ifst: &mut F,
-    delta: f32,
-    allow_nondet: bool
+    config: MinimizeConfig
 ) -> Result<()>
 where
     F: MutableFst<W> + ExpandedFst<W> + AllocableFst<W>,
     W: WeaklyDivisibleSemiring + WeightQuantize,
     W::ReverseWeight: WeightQuantize
 {
+    let delta = config.delta;
+    let allow_nondet = config.allow_nondet;
+
     let props = ifst.compute_and_update_properties(
         FstProperties::ACCEPTOR
             | FstProperties::I_DETERMINISTIC
@@ -584,7 +627,8 @@ mod tests {
         #[test]
         #[ignore]
         fn proptest_minimize_timeout(mut fst in any::<VectorFst::<TropicalWeight>>()) {
-            minimize(&mut fst, KSHORTESTDELTA, true).unwrap();
+            let config = MinimizeConfig::default().with_allow_nondet(true);
+            minimize_with_config(&mut fst, config).unwrap();
         }
     }
 
@@ -593,9 +637,10 @@ mod tests {
         #[ignore] // falls into the same infinite loop as the timeout test
         fn test_minimize_proptest(mut fst in any::<VectorFst::<TropicalWeight>>()) {
             let det:VectorFst<_> = determinize_default(&fst, DeterminizeType::DeterminizeNonFunctional).unwrap();
-            minimize(&mut fst, KSHORTESTDELTA, true).unwrap();
+            let config = MinimizeConfig::default().with_allow_nondet(true);
+            minimize_with_config(&mut fst, config).unwrap();
             let min_det:VectorFst<_> = determinize_default(&fst, DeterminizeType::DeterminizeNonFunctional).unwrap();
-            prop_assert!(isomorphic_default(&det, &min_det).unwrap())
+            prop_assert!(isomorphic(&det, &min_det).unwrap())
         }
     }
 }

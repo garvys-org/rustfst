@@ -147,13 +147,25 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
     }
 }
 
-pub fn isomorphic_default<W, F1, F2>(fst_1: &F1, fst_2: &F2) -> Result<bool>
-    where
-        W: Semiring,
-        F1: ExpandedFst<W>,
-        F2: ExpandedFst<W>,
-{
-    isomorphic(fst_1, fst_2, KDELTA)
+
+pub struct IsomorphicConfig {
+    delta: f32
+}
+
+impl Default for IsomorphicConfig {
+    fn default() -> Self {
+        Self {
+            delta: KDELTA
+        }
+    }
+}
+
+impl IsomorphicConfig {
+    pub fn new(delta: f32) -> Self {
+        Self {
+            delta
+        }
+    }
 }
 
 /// This operation determines if two transducers with a certain required determinism
@@ -162,13 +174,28 @@ pub fn isomorphic_default<W, F1, F2>(fst_1: &F1, fst_2: &F2) -> Result<bool>
 ///
 /// In other words, Isomorphic(A, B) is true if and only if the states of A can
 /// be renumbered and the transitions leaving each state reordered so that Equal(A, B) is true.
-pub fn isomorphic<W, F1, F2>(fst_1: &F1, fst_2: &F2, delta: f32) -> Result<bool>
+pub fn isomorphic<W, F1, F2>(fst_1: &F1, fst_2: &F2) -> Result<bool>
+    where
+        W: Semiring,
+        F1: ExpandedFst<W>,
+        F2: ExpandedFst<W>,
+{
+    isomorphic_with_config(fst_1, fst_2, IsomorphicConfig::default())
+}
+
+/// This operation determines if two transducers with a certain required determinism
+/// have the same states, irrespective of numbering, and the same transitions with
+/// the same labels and weights, irrespective of ordering.
+///
+/// In other words, Isomorphic(A, B) is true if and only if the states of A can
+/// be renumbered and the transitions leaving each state reordered so that Equal(A, B) is true.
+pub fn isomorphic_with_config<W, F1, F2>(fst_1: &F1, fst_2: &F2, config: IsomorphicConfig) -> Result<bool>
 where
     W: Semiring,
     F1: ExpandedFst<W>,
     F2: ExpandedFst<W>,
 {
-    let mut iso = Isomorphism::new(fst_1, fst_2, delta);
+    let mut iso = Isomorphism::new(fst_1, fst_2, config.delta);
     iso.isomorphic()
 }
 
@@ -190,10 +217,10 @@ mod test {
         )?;
 
         let mut fst_2 = fst_1.clone();
-        assert!(isomorphic_default(&fst_1, &fst_2)?);
+        assert!(isomorphic(&fst_1, &fst_2)?);
 
         fst_2.add_tr(0, Tr::new(33, 45, LogWeight::new(0.3), 1))?;
-        assert!(!isomorphic_default(&fst_1, &fst_2)?);
+        assert!(!isomorphic(&fst_1, &fst_2)?);
 
         Ok(())
     }
@@ -210,7 +237,7 @@ mod test {
              0\n",
         )?;
 
-        assert!(isomorphic_default(&fst_1, &fst_2)?);
+        assert!(isomorphic(&fst_1, &fst_2)?);
 
         Ok(())
     }

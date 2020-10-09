@@ -4,7 +4,7 @@ use std::marker::PhantomData;
 use anyhow::{format_err, Result};
 use serde::{Deserialize, Serialize};
 
-use crate::algorithms::minimize;
+use crate::algorithms::{minimize_with_config, MinimizeConfig};
 use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
@@ -60,7 +60,8 @@ where
         //        println!("Minimize : allow_nondet = {}", minimize_data.allow_nondet);
         let mut fst_raw = test_data.raw.clone();
         let fst_res: Result<F> =
-            minimize(&mut fst_raw, minimize_data.delta, minimize_data.allow_nondet).map(|_| fst_raw);
+            minimize_with_config(&mut fst_raw, MinimizeConfig::new(
+                minimize_data.delta, minimize_data.allow_nondet)).map(|_| fst_raw);
 
         match (&minimize_data.result, fst_res) {
             (Ok(fst_expected), Ok(ref fst_minimized)) => {

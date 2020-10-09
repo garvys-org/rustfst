@@ -15,13 +15,9 @@ pub fn optimize<
 ) -> Result<()>
     where W::ReverseWeight: WeightQuantize
 {
-    // fst.compute_and_update_properties_all()?;
-    // println!("{}", fst.properties().bits());
     if fst.properties().contains(FstProperties::ACCEPTOR) {
-        println!("Optimize acceptor");
         optimize_acceptor(fst)
     } else {
-        println!("Optimize transducer");
         optimize_transducer(fst)
     }
 }
@@ -46,11 +42,8 @@ fn encode_deter_mini_decode<
 ) -> Result<()>
     where W::ReverseWeight: WeightQuantize{
     let table = encode::encode(fst, encoder)?;
-    dbg!("encoded");
     determinize(fst)?;
-    dbg!("det");
-    minimize_default(fst)?;
-    dbg!("mini");
+    minimize(fst)?;
     encode::decode(fst, table)
 }
 
@@ -63,50 +56,35 @@ fn optimize_transducer<
     where W::ReverseWeight: WeightQuantize
 {
     if !fst.properties().contains(FstProperties::NO_EPSILONS) {
-        println!("RmEpsilon");
         rm_epsilon::rm_epsilon(fst)?;
     }
-    // fst.compute_and_update_properties_all()?;
-    println!("ArcSum");
+
     tr_sum(fst);
-    // fst.compute_and_update_properties_all()?;
+
     if !W::properties().contains(SemiringProperties::IDEMPOTENT) {
-        println!("W not idempotent");
         if !fst.properties().contains(FstProperties::I_DETERMINISTIC) {
-            println!("Not IDeterministic");
             if fst.properties().contains(FstProperties::ACYCLIC) {
-                println!("Acyclic -> encode, determinize, minimimize and decode");
                 encode_deter_mini_decode(fst, EncodeLabels)?;
             }
         } else {
-            println!("IDeterministic -> Minimize");
-            minimize_default(fst)?;
+            minimize(fst)?;
         }
     } else {
-        println!("W idempotent");
         if !fst.properties().contains(FstProperties::I_DETERMINISTIC) {
-            println!("Not IDeterministic");
             if !fst.properties().intersects(
                 FstProperties::ACYCLIC
                     | FstProperties::UNWEIGHTED
                     | FstProperties::UNWEIGHTED_CYCLES,
             ) {
-                println!("EncodeWeights and Labels -> encode, deter, min, decode, arcsum");
                 encode_deter_mini_decode(fst, EncodeWeightsAndLabels)?;
-                // FIXME: Missing ArcSum no ?
-                println!("TrSum");
                 tr_sum(fst);
             } else {
-                println!("EncodeLabels -> encode, deter, min, decode");
                 encode_deter_mini_decode(fst, EncodeLabels)?;
             }
         } else {
-            println!("IDeterministic -> Minimize");
-            minimize_default(fst)?;
-            // dbg!(fst.properties().contains(FstProperties::I_DETERMINISTIC));
+            minimize(fst)?;
         }
     }
-    println!("Props output = {:?}", fst.properties());
     Ok(())
 }
 
@@ -126,10 +104,10 @@ fn optimize_acceptor<
         if !fst.properties().contains(FstProperties::I_DETERMINISTIC) {
             if fst.properties().contains(FstProperties::ACYCLIC) {
                 determinize(fst)?;
-                minimize_default(fst)?;
+                minimize(fst)?;
             }
         } else {
-            minimize_default(fst)?;
+            minimize(fst)?;
         }
     } else {
         if !fst.properties().contains(FstProperties::I_DETERMINISTIC) {
@@ -142,10 +120,10 @@ fn optimize_acceptor<
                 tr_sum(fst)
             } else {
                 determinize(fst)?;
-                minimize_default(fst)?;
+                minimize(fst)?;
             }
         } else {
-            minimize_default(fst)?;
+            minimize(fst)?;
         }
     }
     Ok(())
