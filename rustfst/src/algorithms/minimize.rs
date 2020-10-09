@@ -252,9 +252,9 @@ fn merge_states<W: Semiring, F: MutableFst<W>>(partition: Partition, fst: &mut F
     }
 
     fst.set_start(state_map[partition.get_class_id(fst.start().unwrap())].unwrap())?;
-    dbg!("connect");
+
     connect(fst)?;
-    dbg!("connected");
+
     Ok(())
 }
 

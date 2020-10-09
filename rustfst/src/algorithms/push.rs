@@ -233,7 +233,7 @@ pub fn push<W, F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushTy
         F1: ExpandedFst<W>,
         F2: ExpandedFst<W> + MutableFst<W> + AllocableFst<W>,
         W: WeaklyDivisibleSemiring + WeightQuantize,
-        <W as Semiring>::ReverseWeight: 'static + WeightQuantize,
+        <W as Semiring>::ReverseWeight: 'static,
 {
     push_with_config(ifst, reweight_type, push_type, PushConfig::default())
 }

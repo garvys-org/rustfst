@@ -17,9 +17,6 @@ pub fn test_optimize<W, F>(test_data: &FstTestData<W, F>) -> Result<()>
     let mut fst_optimize = test_data.raw.clone();
     optimize(&mut fst_optimize)?;
 
-    println!("Result optimize = ");
-    println!("{}", &fst_optimize);
-
     test_eq_fst(&test_data.optimize, &fst_optimize, "Optimize");
 
     Ok(())

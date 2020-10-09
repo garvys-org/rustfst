@@ -8,7 +8,7 @@ use crate::algorithms::rm_epsilon::{RmEpsilonInternalConfig, RmEpsilonState};
 use crate::fst_properties::mutable_properties::rmepsilon_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
-use crate::semirings::{Semiring, WeightQuantize};
+use crate::semirings::Semiring;
 use crate::TrsVec;
 use itertools::Itertools;
 use std::cell::RefCell;
@@ -39,7 +39,7 @@ impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> std::fmt::Debug for RmEpsilonO
 //     }
 // }
 
-impl<W: Semiring + WeightQuantize, F: MutableFst<W>, B: Borrow<F>> RmEpsilonOp<W, F, B> {
+impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> RmEpsilonOp<W, F, B> {
     pub fn new(fst: B) -> Self {
         let properties = rmepsilon_properties(fst.borrow().properties(), true);
         Self {
@@ -54,7 +54,7 @@ impl<W: Semiring + WeightQuantize, F: MutableFst<W>, B: Borrow<F>> RmEpsilonOp<W
     }
 }
 
-impl<W: Semiring + WeightQuantize, F: MutableFst<W>, B: Borrow<F>> FstOp2<W> for RmEpsilonOp<W, F, B> {
+impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> FstOp2<W> for RmEpsilonOp<W, F, B> {
     fn compute_start(&self) -> Result<Option<usize>> {
         Ok(self.fst.borrow().start())
     }

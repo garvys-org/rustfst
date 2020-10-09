@@ -56,7 +56,6 @@ impl PushOperationResult {
 pub fn test_push<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
-    W::ReverseWeight: WeightQuantize
 {
     for push_test_data in &test_data.push {
         //        println!(
