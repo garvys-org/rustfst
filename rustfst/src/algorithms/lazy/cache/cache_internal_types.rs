@@ -1,6 +1,9 @@
+use std::cmp::Eq;
+use std::collections::HashMap;
+use std::hash::Hash;
+
 use crate::algorithms::lazy::CacheStatus;
 use crate::StateId;
-use std::collections::HashMap;
 
 pub type StartState = Option<StateId>;
 pub type FinalWeight<W> = Option<W>;
@@ -64,7 +67,7 @@ impl<T> CachedData<Vec<CacheStatus<T>>> {
     }
 }
 
-impl<K, V> Default for CachedData<HashMap<K, V>> {
+impl<K: Hash + Eq, V> Default for CachedData<HashMap<K, V>> {
     fn default() -> Self {
         Self {
             data: HashMap::new(),
