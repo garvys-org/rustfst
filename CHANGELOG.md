@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added a `BuildHasher` generic parameter to `SymbolTable` as long as a method `with_hasher`.
 - Added the `optimize` algorithm.
 - Added the `approx_equal` method to the Semiring trait and implement it for all semirings in the crate.
 - In order to handle default parmeters, some algorithms now have multiple versions:
@@ -26,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Change internal implementation of `SymbolTable`: now used a Vec and a `HashMap` instead of two `HashMap`s. As a result, doesn't support `SymbolTable` with hole anymore.
 - Change implementation of `Default` for `SymbolTable` object: now adds `EPS`.
 - `equal_quantized` in `ExpandedFst` trait has been renamed to `approx_equal`
 - Fix bug in `reverse` happening when the `Fst` was `INITIAL_CYCLIC`.
