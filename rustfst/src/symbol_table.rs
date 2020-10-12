@@ -86,9 +86,9 @@ impl SymbolTable {
 
 impl<H: BuildHasher> SymbolTable<H> {
     pub fn with_hasher(hasher_builder: H) -> Self {
-        Self {
-            bimap: BiHashMapString::with_hasher(hasher_builder),
-        }
+        let mut bimap = BiHashMapString::with_hasher(hasher_builder);
+        bimap.get_id_or_insert(EPS_SYMBOL);
+        Self { bimap }
     }
 
     pub fn is_empty(&self) -> bool {
