@@ -16,6 +16,7 @@ mod string_weight;
 mod tropical_weight;
 mod union_weight;
 pub(crate) mod utils_float;
+pub use utils_float::float_approx_equal;
 
 pub use self::boolean_weight::BooleanWeight;
 pub use self::gallic_weight::{
