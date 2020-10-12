@@ -17,22 +17,14 @@ fn parse_row_symt(i: &[u8]) -> IResult<&[u8], (i64, OpenFstString)> {
     Ok((i, (key, symbol)))
 }
 
-pub(crate) fn parse_symbol_table_bin(i: &[u8]) -> IResult<&[u8], SymbolTable> {
+pub(crate) fn parse_symbol_table_bin(i: &[u8]) -> IResult<&[u8], Vec<(i64, OpenFstString)>> {
     let (i, _magic_number) = verify(le_i32, |v| *v == SYMBOL_TABLE_MAGIC_NUMBER)(i)?;
     let (i, _name) = OpenFstString::parse(i)?;
     let (i, _available_key) = le_i64(i)?;
     let (i, num_symbols) = le_i64(i)?;
     let (i, pairs_idx_symbols) = count(parse_row_symt, num_symbols as usize)(i)?;
 
-    let mut symt = SymbolTable::empty();
-    for (key, symbol) in pairs_idx_symbols.into_iter() {
-        let inserted_label = symt.add_symbol(symbol);
-        if inserted_label != key as usize {
-            bail!("SymbolTable must contain increasing labels with no hole. Expected : {} and Got : {}", inserted_label, key)
-        }
-    }
-
-    Ok((i, symt))
+    Ok((i, pairs_idx_symbols))
 }
 
 pub(crate) fn write_bin_symt<W: Write>(file: &mut W, symt: &SymbolTable) -> Result<()> {

@@ -10,6 +10,7 @@ use crate::parsers::bin_symt::nom_parser::{parse_symbol_table_bin, write_bin_sym
 use crate::parsers::text_symt::parsed_text_symt::ParsedTextSymt;
 use crate::{Label, Symbol, EPS_SYMBOL};
 use crate::algorithms::lazy::BiHashMap;
+use crate::parsers::bin_fst::fst_header::OpenFstString;
 
 /// A symbol table stores a bidirectional mapping between transition labels and "symbols" (strings).
 #[derive(PartialEq, Debug, Clone)]
@@ -243,6 +244,16 @@ impl SymbolTable {
         Ok(())
     }
 
+    pub(crate) fn from_pairs_idx_symbols(Vec<i64, OpenFstString>) -> Self {
+        let mut symt = SymbolTable::empty();
+        for (key, symbol) in pairs_idx_symbols.into_iter() {
+            let inserted_label = symt.add_symbol(symbol);
+            if inserted_label != key as usize {
+                bail!("SymbolTable must contain increasing labels with no hole. Expected : {} and Got : {}", inserted_label, key)
+            }
+        }
+    }
+
     pub fn read<P: AsRef<Path>>(path_bin_symt: P) -> Result<Self> {
         let data = read(path_bin_symt.as_ref()).with_context(|| {
             format!(
@@ -253,6 +264,7 @@ impl SymbolTable {
 
         let (_, symt) = parse_symbol_table_bin(&data)
             .map_err(|e| format_err!("Error while parsing binary SymbolTable : {:?}", e))?;
+
 
         Ok(symt)
     }
