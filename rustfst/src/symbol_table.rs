@@ -13,10 +13,16 @@ use crate::parsers::text_symt::parsed_text_symt::ParsedTextSymt;
 use crate::{Label, Symbol, EPS_SYMBOL};
 
 /// A symbol table stores a bidirectional mapping between transition labels and "symbols" (strings).
-#[derive(PartialEq, Debug, Clone, Default)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct SymbolTable {
     label_to_symbol: HashMap<Label, Symbol>,
     symbol_to_label: HashMap<Symbol, Label>,
+}
+
+impl Default for SymbolTable {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl SymbolTable {

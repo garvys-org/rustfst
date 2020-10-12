@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Change implementation of `Default` for `SymbolTable` object: now adds `EPS`.
 - `equal_quantized` in `ExpandedFst` trait has been renamed to `approx_equal`
 - Fix bug in `reverse` happening when the `Fst` was `INITIAL_CYCLIC`.
 - Fix bug in `minimize` in the partitionning.
