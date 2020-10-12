@@ -12,6 +12,7 @@ use crate::semirings::{
 };
 #[cfg(test)]
 use crate::semirings::{LogWeight, TropicalWeight};
+use crate::parsers::nom_utils::NomCustomError;
 
 /// Product semiring: W1 * W2.
 #[derive(Debug, Eq, PartialOrd, PartialEq, Clone, Default, Hash)]
@@ -185,7 +186,7 @@ where
         format!("{}_X_{}", W1::weight_type(), W2::weight_type())
     }
 
-    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
         let (i, weight_1) = W1::parse_binary(i)?;
         let (i, weight_2) = W2::parse_binary(i)?;
         Ok((i, Self::new((weight_1, weight_2))))

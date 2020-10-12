@@ -19,6 +19,7 @@ use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64}
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::SerializableSemiring;
 use crate::{Tr, Trs, TrsVec, EPS_LABEL};
+use crate::parsers::nom_utils::NomCustomError;
 
 impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
     fn fst_type() -> String {
@@ -135,7 +136,7 @@ struct Transition {
     nextstate: i32,
 }
 
-fn parse_vector_fst_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFstState<W>> {
+fn parse_vector_fst_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFstState<W>, NomCustomError<&[u8]>> {
     let (i, final_weight) = W::parse_binary(i)?;
     let (i, num_trs) = le_i64(i)?;
     let (i, trs) = count(parse_fst_tr, num_trs as usize)(i)?;
@@ -152,7 +153,7 @@ fn parse_vector_fst_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], V
     ))
 }
 
-fn parse_vector_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFst<W>> {
+fn parse_vector_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFst<W>, NomCustomError<&[u8]>> {
     let (i, header) = FstHeader::parse(
         i,
         VECTOR_MIN_FILE_VERSION,

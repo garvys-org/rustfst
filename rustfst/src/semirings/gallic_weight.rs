@@ -16,6 +16,7 @@ use crate::semirings::{
 };
 use crate::semirings::{ProductWeight, ReverseBack};
 use crate::Label;
+use crate::parsers::nom_utils::NomCustomError;
 
 /// Product of StringWeightLeft and an arbitrary weight.
 #[derive(PartialOrd, PartialEq, Eq, Clone, Hash, Debug)]
@@ -226,7 +227,7 @@ macro_rules! gallic_weight {
                 }
             }
 
-            fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
+            fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
                 let (i, w) = ProductWeight::<$string_weight, W>::parse_binary(i)?;
                 Ok((i, Self(w)))
             }
@@ -481,7 +482,7 @@ impl<W: SerializableSemiring> SerializableSemiring for GallicWeight<W> {
         "gallic".to_string()
     }
 
-    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
         let (i, w) = UnionWeight::<
             GallicWeightRestrict<W>,
             GallicUnionWeightOption<GallicWeightRestrict<W>>,

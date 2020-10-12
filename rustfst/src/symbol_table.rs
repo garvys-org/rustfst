@@ -8,14 +8,86 @@ use itertools::Itertools;
 
 use crate::parsers::bin_symt::nom_parser::{parse_symbol_table_bin, write_bin_symt};
 use crate::parsers::text_symt::parsed_text_symt::ParsedTextSymt;
-use crate::{Label, Symbol, EPS_SYMBOL};
-use crate::algorithms::lazy::BiHashMap;
-use crate::parsers::bin_fst::fst_header::OpenFstString;
+use crate::{Label, EPS_SYMBOL};
+use std::collections::HashMap;
+use std::hash::BuildHasher;
+use std::collections::hash_map::{RandomState, Entry};
+
+#[derive(Clone, Debug, Default)]
+pub(crate) struct BiHashMapString<H : BuildHasher = RandomState> {
+    string_to_id: HashMap<String, usize, H>,
+    id_to_string: Vec<String>,
+}
+
+impl<H: BuildHasher> PartialEq for BiHashMapString<H> {
+    fn eq(&self, other: &Self) -> bool {
+        self.string_to_id.eq(&other.string_to_id) && self.id_to_string.eq(&other.id_to_string)
+    }
+}
+
+impl BiHashMapString {
+    pub fn new() -> Self {
+        Self {
+            string_to_id: HashMap::new(),
+            id_to_string: Vec::new()
+        }
+    }
+}
+
+impl<H: BuildHasher> BiHashMapString<H> {
+    pub fn with_hasher(hash_builder: H) -> Self {
+        Self {
+            string_to_id: HashMap::with_hasher(hash_builder),
+            id_to_string: Vec::new()
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        self.id_to_string.len()
+    }
+
+    pub fn reserve(&mut self, additional: usize) {
+        self.string_to_id.reserve(additional);
+        self.id_to_string.reserve(additional);
+    }
+
+    pub fn get_id_or_insert(&mut self, v: impl Into<String>) -> usize {
+        match self.string_to_id.entry(v.into()) {
+            Entry::Occupied(e) => *e.get(),
+            Entry::Vacant(e) => {
+                let n = self.id_to_string.len();
+                self.id_to_string.push(e.key().clone());
+                e.insert(n);
+                n
+            }
+        }
+    }
+
+    pub fn get_id(&self, v: impl AsRef<str>) -> Option<usize> {
+        self.string_to_id.get(v.as_ref()).cloned()
+    }
+
+    pub fn get_string(&self, id: usize) -> Option<&str> {
+        self.id_to_string.get(id).map(|s| s.as_str())
+    }
+
+    pub fn iter_ids(&self) -> impl Iterator<Item=usize> {
+        0..self.id_to_string.len()
+    }
+
+    pub fn iter_strings(&self) -> impl Iterator<Item=&str> {
+        self.string_to_id.keys().map(|s| s.as_str())
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item=(usize, &str)> {
+        self.id_to_string.iter().map(|s| s.as_str()).enumerate()
+    }
+}
 
 /// A symbol table stores a bidirectional mapping between transition labels and "symbols" (strings).
 #[derive(PartialEq, Debug, Clone)]
 pub struct SymbolTable {
-    bimap: BiHashMap<Symbol>
+    bimap: BiHashMapString
 }
 
 impl Default for SymbolTable {
@@ -42,7 +114,7 @@ impl SymbolTable {
 
     pub fn empty() -> Self {
         SymbolTable {
-            bimap: BiHashMap::new()
+            bimap: BiHashMapString::new()
         }
     }
 
@@ -105,8 +177,7 @@ impl SymbolTable {
     /// assert_eq!(symt.get_label("d"), None);
     /// # }
     /// ```
-    // TODO: Find a way to put AsRef<str>
-    pub fn get_label(&self, sym: impl AsRef<String>) -> Option<Label> {
+    pub fn get_label(&self, sym: impl AsRef<str>) -> Option<Label> {
         self.bimap.get_id(sym)
     }
 
@@ -124,7 +195,7 @@ impl SymbolTable {
     /// # }
     /// ```
     pub fn get_symbol(&self, label: Label) -> Option<&str> {
-        self.bimap.get_tuple(label).map(|v| v.as_str())
+        self.bimap.get_string(label)
     }
 
     /// Given a symbol, returns whether it is present in the table.
@@ -137,8 +208,7 @@ impl SymbolTable {
     /// assert!(symt.contains_symbol("a"));
     /// # }
     /// ```
-    // TODO: Find a way to put AsRef<str>
-    pub fn contains_symbol(&self, sym: impl AsRef<String>) -> bool {
+    pub fn contains_symbol(&self, sym: impl AsRef<str>) -> bool {
         self.get_label(sym).is_some()
     }
 
@@ -194,25 +264,25 @@ impl SymbolTable {
     /// }
     /// # }
     /// ```
-    pub fn symbols(&self) -> impl Iterator<Item=&Symbol> {
-        self.bimap.iter_tuples()
+    pub fn symbols(&self) -> impl Iterator<Item=&str> {
+        self.bimap.iter_strings()
     }
 
     /// An iterator on all the labels stored in the `SymbolTable`.
     /// The iterator element is `(&'a Label, &'a Symbol)`.
-    pub fn iter(&self) -> impl Iterator<Item=(Label, &Symbol)> {
+    pub fn iter(&self) -> impl Iterator<Item=(Label, &str)> {
         self.bimap.iter()
     }
 
     /// Adds another SymbolTable to this table.
     pub fn add_table(&mut self, other: &SymbolTable) {
         for symbol in other.symbols() {
-            self.add_symbol(symbol.as_str());
+            self.add_symbol(symbol);
         }
     }
 
     fn from_parsed_symt_text(parsed_symt_text: ParsedTextSymt) -> Result<Self> {
-        let mut bimap = BiHashMap::new();
+        let mut bimap = BiHashMapString::new();
         for (symbol, label) in parsed_symt_text.pairs.into_iter() {
             let inserted_label = bimap.get_id_or_insert(symbol);
             if inserted_label != label {
@@ -242,16 +312,6 @@ impl SymbolTable {
         write!(writer, "{}", self)?;
 
         Ok(())
-    }
-
-    pub(crate) fn from_pairs_idx_symbols(Vec<i64, OpenFstString>) -> Self {
-        let mut symt = SymbolTable::empty();
-        for (key, symbol) in pairs_idx_symbols.into_iter() {
-            let inserted_label = symt.add_symbol(symbol);
-            if inserted_label != key as usize {
-                bail!("SymbolTable must contain increasing labels with no hole. Expected : {} and Got : {}", inserted_label, key)
-            }
-        }
     }
 
     pub fn read<P: AsRef<Path>>(path_bin_symt: P) -> Result<Self> {

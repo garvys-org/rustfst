@@ -8,6 +8,7 @@ use bitflags::bitflags;
 use anyhow::Result;
 use nom::IResult;
 use std::io::Write;
+use crate::parsers::nom_utils::NomCustomError;
 
 bitflags! {
     /// Properties verified by the Semiring.
@@ -175,7 +176,7 @@ macro_rules! partial_eq_and_hash_f32 {
 
 pub trait SerializableSemiring: Semiring + Display {
     fn weight_type() -> String;
-    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self>;
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>>;
     fn write_binary<F: Write>(&self, file: &mut F) -> Result<()>;
 
     fn parse_text(i: &str) -> IResult<&str, Self>;

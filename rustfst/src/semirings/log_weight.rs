@@ -15,6 +15,7 @@ use crate::semirings::{
     StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
 use crate::KDELTA;
+use crate::parsers::nom_utils::NomCustomError;
 
 /// Log semiring: (log(e^-x + e^-y), +, inf, 0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
@@ -143,7 +144,7 @@ impl SerializableSemiring for LogWeight {
         "log".to_string()
     }
 
-    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
         let (i, weight) = le_f32(i)?;
         Ok((i, Self::new(weight)))
     }

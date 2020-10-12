@@ -18,6 +18,7 @@ use crate::semirings::{
     DivideType, ReverseBack, Semiring, SemiringProperties, SerializableSemiring,
     WeaklyDivisibleSemiring, WeightQuantize,
 };
+use crate::parsers::nom_utils::NomCustomError;
 
 pub trait UnionWeightOption<W: Semiring>:
     Debug + Hash + Clone + PartialOrd + Eq + Sync + 'static
@@ -301,7 +302,7 @@ where
         format!("{}_union", W::weight_type())
     }
 
-    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
         let (i, n) = le_i32(i)?;
         let (i, labels) = count(W::parse_binary, n as usize)(i)?;
         Ok((i, Self::new(labels)))

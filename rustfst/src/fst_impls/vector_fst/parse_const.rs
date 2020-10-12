@@ -19,6 +19,7 @@ use crate::parsers::bin_fst::fst_header::FstHeader;
 use crate::parsers::bin_fst::utils_parsing::{parse_final_weight, parse_fst_tr, parse_start_state};
 use crate::semirings::SerializableSemiring;
 use crate::{Tr, TrsVec};
+use crate::parsers::nom_utils::NomCustomError;
 
 impl<W: SerializableSemiring> VectorFst<W> {
     /// Load a VectorFst directly from a ConstFst file.
@@ -44,7 +45,7 @@ struct TempState<W> {
     noepsilons: usize,
 }
 
-fn parse_const_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], TempState<W>> {
+fn parse_const_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], TempState<W>, NomCustomError<&[u8]>> {
     let (i, final_weight) = W::parse_binary(i)?;
     let (i, _pos) = le_i32(i)?;
     let (i, ntrs) = le_i32(i)?;
@@ -62,7 +63,7 @@ fn parse_const_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], TempSt
     ))
 }
 
-fn parse_const_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFst<W>> {
+fn parse_const_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], VectorFst<W>, NomCustomError<&[u8]>> {
     let stream_len = i.len();
 
     let (mut i, hdr) = FstHeader::parse(

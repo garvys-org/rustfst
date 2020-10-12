@@ -30,20 +30,12 @@ impl<T: Hash + Eq + Clone> BiHashMap<T> {
 }
 
 impl<T: Hash + Eq + Clone, H: BuildHasher> BiHashMap<T, H> {
+    #[allow(unused)]
     pub fn with_hasher(hash_builder: H) -> Self {
         Self {
             tuple_to_id: HashMap::with_hasher(hash_builder),
             id_to_tuple: Vec::new()
         }
-    }
-
-    pub fn len(&self) -> usize {
-        self.id_to_tuple.len()
-    }
-
-    pub fn reserve(&mut self, additional: usize) {
-        self.tuple_to_id.reserve(additional);
-        self.id_to_tuple.reserve(additional);
     }
 
     pub fn get_id_or_insert(&mut self, tuple: T) -> usize {
@@ -58,28 +50,8 @@ impl<T: Hash + Eq + Clone, H: BuildHasher> BiHashMap<T, H> {
         }
     }
 
-    pub fn get_id(&self, tuple: impl AsRef<T>) -> Option<usize> {
-        self.tuple_to_id.get(tuple.as_ref()).cloned()
-    }
-
-    pub fn get_tuple(&self, id: usize) -> Option<&T> {
-        self.id_to_tuple.get(id)
-    }
-
     pub fn get_tuple_unchecked(&self, id: usize) -> T {
         self.id_to_tuple[id].clone()
-    }
-
-    pub fn iter_ids(&self) -> impl Iterator<Item=usize> {
-        0..self.id_to_tuple.len()
-    }
-
-    pub fn iter_tuples(&self) -> impl Iterator<Item=&T> {
-        self.tuple_to_id.keys()
-    }
-
-    pub fn iter(&self) -> impl Iterator<Item=(usize, &T)> {
-        self.id_to_tuple.iter().enumerate()
     }
 }
 
