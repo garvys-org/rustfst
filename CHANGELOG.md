@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added a `BuildHasher` generic parameter to `SymbolTable` as long as a method `with_hasher`.
+- Added a `BuildHasher` generic parameter to `SymbolTable` as well as a method `with_hasher`.
 - Added the `optimize` algorithm.
 - Added the `approx_equal` method to the Semiring trait and implement it for all semirings in the crate.
 - In order to handle default parmeters, some algorithms now have multiple versions:
