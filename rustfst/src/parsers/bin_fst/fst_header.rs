@@ -12,6 +12,7 @@ use crate::parsers::bin_fst::utils_serialization::{
     write_bin_i32, write_bin_i64, write_bin_u32, write_bin_u64,
 };
 use crate::parsers::bin_symt::nom_parser::{parse_symbol_table_bin, write_bin_symt};
+use crate::parsers::nom_utils::NomCustomError;
 use crate::SymbolTable;
 use std::sync::Arc;
 
@@ -47,7 +48,10 @@ pub(crate) struct OpenFstString {
     s: String,
 }
 
-fn optionally_parse_symt(i: &[u8], parse_symt: bool) -> IResult<&[u8], Option<SymbolTable>> {
+fn optionally_parse_symt(
+    i: &[u8],
+    parse_symt: bool,
+) -> IResult<&[u8], Option<SymbolTable>, NomCustomError<&[u8]>> {
     if parse_symt {
         let (i, symt) = parse_symbol_table_bin(i)?;
         Ok((i, Some(symt)))
@@ -70,7 +74,7 @@ impl FstHeader {
         min_file_version: i32,
         fst_loading_type: S1,
         tr_loading_type: S2,
-    ) -> IResult<&[u8], FstHeader> {
+    ) -> IResult<&[u8], FstHeader, NomCustomError<&[u8]>> {
         let (i, magic_number) = verify(le_i32, |v: &i32| *v == FST_MAGIC_NUMBER)(i)?;
         let (i, fst_type) = verify(OpenFstString::parse, |v| {
             v.s.as_str() == fst_loading_type.as_ref()
@@ -141,7 +145,7 @@ impl OpenFstString {
             s: _s,
         }
     }
-    pub(crate) fn parse(i: &[u8]) -> IResult<&[u8], OpenFstString> {
+    pub(crate) fn parse(i: &[u8]) -> IResult<&[u8], OpenFstString, NomCustomError<&[u8]>> {
         let (i, n) = le_i32(i)?;
         let (i, s) = take(n as usize)(i)?;
         Ok((

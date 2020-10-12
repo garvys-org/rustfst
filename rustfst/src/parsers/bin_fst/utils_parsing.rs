@@ -1,6 +1,7 @@
 use nom::number::complete::le_i32;
 use nom::IResult;
 
+use crate::parsers::nom_utils::NomCustomError;
 use crate::semirings::SerializableSemiring;
 use crate::StateId;
 use crate::Tr;
@@ -26,7 +27,9 @@ pub(crate) fn parse_final_weight<W: SerializableSemiring>(weight: W) -> Option<W
     }
 }
 
-pub(crate) fn parse_fst_tr<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], Tr<W>> {
+pub(crate) fn parse_fst_tr<W: SerializableSemiring>(
+    i: &[u8],
+) -> IResult<&[u8], Tr<W>, NomCustomError<&[u8]>> {
     let (i, ilabel) = le_i32(i)?;
     let (i, olabel) = le_i32(i)?;
     let (i, weight) = W::parse_binary(i)?;

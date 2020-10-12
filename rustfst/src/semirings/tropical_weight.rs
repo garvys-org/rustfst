@@ -9,6 +9,7 @@ use nom::IResult;
 use ordered_float::OrderedFloat;
 
 use crate::parsers::bin_fst::utils_serialization::write_bin_f32;
+use crate::parsers::nom_utils::NomCustomError;
 use crate::semirings::semiring::SerializableSemiring;
 use crate::semirings::utils_float::float_approx_equal;
 use crate::semirings::{
@@ -135,7 +136,7 @@ impl SerializableSemiring for TropicalWeight {
         "tropical".to_string()
     }
 
-    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
         let (i, weight) = le_f32(i)?;
         Ok((i, Self::new(weight)))
     }

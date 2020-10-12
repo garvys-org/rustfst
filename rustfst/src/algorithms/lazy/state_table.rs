@@ -4,12 +4,20 @@ use std::sync::Mutex;
 
 use crate::StateId;
 use std::collections::hash_map::Entry;
+use std::collections::hash_map::RandomState;
 use std::collections::HashMap;
+use std::hash::BuildHasher;
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct BiHashMap<T: Hash + Eq + Clone> {
-    tuple_to_id: HashMap<T, StateId>,
+#[derive(Clone, Debug, Default)]
+pub(crate) struct BiHashMap<T: Hash + Eq + Clone, H: BuildHasher = RandomState> {
+    tuple_to_id: HashMap<T, StateId, H>,
     id_to_tuple: Vec<T>,
+}
+
+impl<T: Hash + Eq + Clone, H: BuildHasher> PartialEq for BiHashMap<T, H> {
+    fn eq(&self, other: &Self) -> bool {
+        self.tuple_to_id.eq(&other.tuple_to_id) && self.id_to_tuple.eq(&other.id_to_tuple)
+    }
 }
 
 impl<T: Hash + Eq + Clone> BiHashMap<T> {
@@ -19,8 +27,18 @@ impl<T: Hash + Eq + Clone> BiHashMap<T> {
             id_to_tuple: Vec::new(),
         }
     }
+}
 
-    pub fn get_id(&mut self, tuple: T) -> usize {
+impl<T: Hash + Eq + Clone, H: BuildHasher> BiHashMap<T, H> {
+    #[allow(unused)]
+    pub fn with_hasher(hash_builder: H) -> Self {
+        Self {
+            tuple_to_id: HashMap::with_hasher(hash_builder),
+            id_to_tuple: Vec::new(),
+        }
+    }
+
+    pub fn get_id_or_insert(&mut self, tuple: T) -> usize {
         match self.tuple_to_id.entry(tuple) {
             Entry::Occupied(e) => *e.get(),
             Entry::Vacant(e) => {
@@ -32,7 +50,7 @@ impl<T: Hash + Eq + Clone> BiHashMap<T> {
         }
     }
 
-    pub fn get_tuple(&self, id: usize) -> T {
+    pub fn get_tuple_unchecked(&self, id: usize) -> T {
         self.id_to_tuple[id].clone()
     }
 }
@@ -83,17 +101,17 @@ impl<T: Hash + Eq + Clone> StateTable<T> {
     /// Looks up integer ID from entry. If it doesn't exist and insert
     pub fn find_id_from_ref(&self, tuple: &T) -> StateId {
         let mut table = self.table.lock().unwrap();
-        table.get_id(tuple.clone())
+        table.get_id_or_insert(tuple.clone())
     }
 
     pub fn find_id(&self, tuple: T) -> StateId {
         let mut table = self.table.lock().unwrap();
-        table.get_id(tuple)
+        table.get_id_or_insert(tuple)
     }
 
     /// Looks up tuple from integer ID.
     pub fn find_tuple(&self, tuple_id: StateId) -> T {
         let table = self.table.lock().unwrap();
-        table.get_tuple(tuple_id)
+        table.get_tuple_unchecked(tuple_id)
     }
 }

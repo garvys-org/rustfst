@@ -7,6 +7,7 @@ use std::marker::PhantomData;
 use anyhow::Result;
 use nom::IResult;
 
+use crate::parsers::nom_utils::NomCustomError;
 use crate::semirings::Semiring;
 #[cfg(test)]
 use crate::semirings::TropicalWeight;
@@ -226,7 +227,7 @@ macro_rules! gallic_weight {
                 }
             }
 
-            fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
+            fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
                 let (i, w) = ProductWeight::<$string_weight, W>::parse_binary(i)?;
                 Ok((i, Self(w)))
             }
@@ -481,7 +482,7 @@ impl<W: SerializableSemiring> SerializableSemiring for GallicWeight<W> {
         "gallic".to_string()
     }
 
-    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self> {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
         let (i, w) = UnionWeight::<
             GallicWeightRestrict<W>,
             GallicUnionWeightOption<GallicWeightRestrict<W>>,
