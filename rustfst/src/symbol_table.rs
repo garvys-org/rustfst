@@ -9,85 +9,14 @@ use itertools::Itertools;
 use crate::parsers::bin_symt::nom_parser::{parse_symbol_table_bin, write_bin_symt};
 use crate::parsers::text_symt::parsed_text_symt::ParsedTextSymt;
 use crate::{Label, EPS_SYMBOL};
+use std::collections::hash_map::{Entry, RandomState};
 use std::collections::HashMap;
 use std::hash::BuildHasher;
-use std::collections::hash_map::{RandomState, Entry};
-
-#[derive(Clone, Debug, Default)]
-pub(crate) struct BiHashMapString<H : BuildHasher = RandomState> {
-    string_to_id: HashMap<String, usize, H>,
-    id_to_string: Vec<String>,
-}
-
-impl<H: BuildHasher> PartialEq for BiHashMapString<H> {
-    fn eq(&self, other: &Self) -> bool {
-        self.string_to_id.eq(&other.string_to_id) && self.id_to_string.eq(&other.id_to_string)
-    }
-}
-
-impl BiHashMapString {
-    pub fn new() -> Self {
-        Self {
-            string_to_id: HashMap::new(),
-            id_to_string: Vec::new()
-        }
-    }
-}
-
-impl<H: BuildHasher> BiHashMapString<H> {
-    pub fn with_hasher(hash_builder: H) -> Self {
-        Self {
-            string_to_id: HashMap::with_hasher(hash_builder),
-            id_to_string: Vec::new()
-        }
-    }
-
-    pub fn len(&self) -> usize {
-        self.id_to_string.len()
-    }
-
-    pub fn reserve(&mut self, additional: usize) {
-        self.string_to_id.reserve(additional);
-        self.id_to_string.reserve(additional);
-    }
-
-    pub fn get_id_or_insert(&mut self, v: impl Into<String>) -> usize {
-        match self.string_to_id.entry(v.into()) {
-            Entry::Occupied(e) => *e.get(),
-            Entry::Vacant(e) => {
-                let n = self.id_to_string.len();
-                self.id_to_string.push(e.key().clone());
-                e.insert(n);
-                n
-            }
-        }
-    }
-
-    pub fn get_id(&self, v: impl AsRef<str>) -> Option<usize> {
-        self.string_to_id.get(v.as_ref()).cloned()
-    }
-
-    pub fn get_string(&self, id: usize) -> Option<&str> {
-        self.id_to_string.get(id).map(|s| s.as_str())
-    }
-
-    pub fn iter_ids(&self) -> impl Iterator<Item=usize> {
-        0..self.id_to_string.len()
-    }
-
-    pub fn iter_strings(&self) -> impl Iterator<Item=&str> {
-        self.string_to_id.keys().map(|s| s.as_str())
-    }
-
-    pub fn iter(&self) -> impl Iterator<Item=(usize, &str)> {
-        self.id_to_string.iter().map(|s| s.as_str()).enumerate()
-    }
-}
 
 /// A symbol table stores a bidirectional mapping between transition labels and "symbols" (strings).
-#[derive(PartialEq, Debug, Clone)]
-pub struct SymbolTable {
-    bimap: BiHashMapString
+#[derive(Debug, Clone)]
+pub struct SymbolTable<H: BuildHasher = RandomState> {
+    bimap: BiHashMapString<H>,
 }
 
 impl Default for SymbolTable {
@@ -114,7 +43,51 @@ impl SymbolTable {
 
     pub fn empty() -> Self {
         SymbolTable {
-            bimap: BiHashMapString::new()
+            bimap: BiHashMapString::new(),
+        }
+    }
+
+    fn from_parsed_symt_text(parsed_symt_text: ParsedTextSymt) -> Result<Self> {
+        let mut bimap = BiHashMapString::new();
+        for (symbol, label) in parsed_symt_text.pairs.into_iter() {
+            let inserted_label = bimap.get_id_or_insert(symbol);
+            if inserted_label != label {
+                bail!("The SymbolTable should contain labels with increasing ids and no hole. Expected {} and got {}", inserted_label, label)
+            }
+        }
+
+        Ok(SymbolTable { bimap })
+    }
+
+    pub fn from_text_string(symt_string: &str) -> Result<Self> {
+        let parsed_symt = ParsedTextSymt::from_string(symt_string)?;
+        Self::from_parsed_symt_text(parsed_symt)
+    }
+
+    pub fn read_text<P: AsRef<Path>>(path_text_symt: P) -> Result<Self> {
+        let parsed_symt = ParsedTextSymt::from_path(path_text_symt)?;
+        Self::from_parsed_symt_text(parsed_symt)
+    }
+
+    pub fn read<P: AsRef<Path>>(path_bin_symt: P) -> Result<Self> {
+        let data = read(path_bin_symt.as_ref()).with_context(|| {
+            format!(
+                "Can't open SymbolTable binary file : {:?}",
+                path_bin_symt.as_ref()
+            )
+        })?;
+
+        let (_, symt) = parse_symbol_table_bin(&data)
+            .map_err(|e| format_err!("Error while parsing binary SymbolTable : {:?}", e))?;
+
+        Ok(symt)
+    }
+}
+
+impl<H: BuildHasher> SymbolTable<H> {
+    pub fn with_hasher(hasher_builder: H) -> Self {
+        Self {
+            bimap: BiHashMapString::with_hasher(hasher_builder),
         }
     }
 
@@ -245,7 +218,7 @@ impl SymbolTable {
     ///
     /// # }
     /// ```
-    pub fn labels(&self) -> impl Iterator<Item=Label>{
+    pub fn labels(&self) -> impl Iterator<Item = Label> {
         self.bimap.iter_ids()
     }
 
@@ -264,13 +237,13 @@ impl SymbolTable {
     /// }
     /// # }
     /// ```
-    pub fn symbols(&self) -> impl Iterator<Item=&str> {
+    pub fn symbols(&self) -> impl Iterator<Item = &str> {
         self.bimap.iter_strings()
     }
 
     /// An iterator on all the labels stored in the `SymbolTable`.
     /// The iterator element is `(&'a Label, &'a Symbol)`.
-    pub fn iter(&self) -> impl Iterator<Item=(Label, &str)> {
+    pub fn iter(&self) -> impl Iterator<Item = (Label, &str)> {
         self.bimap.iter()
     }
 
@@ -281,30 +254,6 @@ impl SymbolTable {
         }
     }
 
-    fn from_parsed_symt_text(parsed_symt_text: ParsedTextSymt) -> Result<Self> {
-        let mut bimap = BiHashMapString::new();
-        for (symbol, label) in parsed_symt_text.pairs.into_iter() {
-            let inserted_label = bimap.get_id_or_insert(symbol);
-            if inserted_label != label {
-                bail!("The SymbolTable should contain labels with increasing ids and no hole. Expected {} and got {}", inserted_label, label)
-            }
-        }
-
-        Ok(SymbolTable {
-            bimap
-        })
-    }
-
-    pub fn from_text_string(symt_string: &str) -> Result<Self> {
-        let parsed_symt = ParsedTextSymt::from_string(symt_string)?;
-        Self::from_parsed_symt_text(parsed_symt)
-    }
-
-    pub fn read_text<P: AsRef<Path>>(path_text_symt: P) -> Result<Self> {
-        let parsed_symt = ParsedTextSymt::from_path(path_text_symt)?;
-        Self::from_parsed_symt_text(parsed_symt)
-    }
-
     pub fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Result<()> {
         let buffer = File::create(path_output.as_ref())?;
         let mut writer = BufWriter::new(LineWriter::new(buffer));
@@ -312,21 +261,6 @@ impl SymbolTable {
         write!(writer, "{}", self)?;
 
         Ok(())
-    }
-
-    pub fn read<P: AsRef<Path>>(path_bin_symt: P) -> Result<Self> {
-        let data = read(path_bin_symt.as_ref()).with_context(|| {
-            format!(
-                "Can't open SymbolTable binary file : {:?}",
-                path_bin_symt.as_ref()
-            )
-        })?;
-
-        let (_, symt) = parse_symbol_table_bin(&data)
-            .map_err(|e| format_err!("Error while parsing binary SymbolTable : {:?}", e))?;
-
-
-        Ok(symt)
     }
 
     pub fn write<P: AsRef<Path>>(&self, path_bin_symt: P) -> Result<()> {
@@ -347,12 +281,18 @@ impl SymbolTable {
     }
 }
 
-impl fmt::Display for SymbolTable {
+impl<H: BuildHasher> fmt::Display for SymbolTable<H> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for (label, symbol) in self.iter().sorted_by_key(|k| k.0) {
             writeln!(f, "{}\t{}", symbol, label)?;
         }
         Ok(())
+    }
+}
+
+impl<H: BuildHasher> PartialEq for SymbolTable<H> {
+    fn eq(&self, other: &Self) -> bool {
+        self.bimap.eq(&other.bimap)
     }
 }
 
@@ -378,6 +318,77 @@ macro_rules! symt {
             temp_vec
         }
     };
+}
+
+#[derive(Clone, Debug, Default)]
+pub(crate) struct BiHashMapString<H: BuildHasher = RandomState> {
+    string_to_id: HashMap<String, usize, H>,
+    id_to_string: Vec<String>,
+}
+
+impl<H: BuildHasher> PartialEq for BiHashMapString<H> {
+    fn eq(&self, other: &Self) -> bool {
+        self.string_to_id.eq(&other.string_to_id) && self.id_to_string.eq(&other.id_to_string)
+    }
+}
+
+impl BiHashMapString {
+    pub fn new() -> Self {
+        Self {
+            string_to_id: HashMap::new(),
+            id_to_string: Vec::new(),
+        }
+    }
+}
+
+impl<H: BuildHasher> BiHashMapString<H> {
+    pub fn with_hasher(hash_builder: H) -> Self {
+        Self {
+            string_to_id: HashMap::with_hasher(hash_builder),
+            id_to_string: Vec::new(),
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        self.id_to_string.len()
+    }
+
+    pub fn reserve(&mut self, additional: usize) {
+        self.string_to_id.reserve(additional);
+        self.id_to_string.reserve(additional);
+    }
+
+    pub fn get_id_or_insert(&mut self, v: impl Into<String>) -> usize {
+        match self.string_to_id.entry(v.into()) {
+            Entry::Occupied(e) => *e.get(),
+            Entry::Vacant(e) => {
+                let n = self.id_to_string.len();
+                self.id_to_string.push(e.key().clone());
+                e.insert(n);
+                n
+            }
+        }
+    }
+
+    pub fn get_id(&self, v: impl AsRef<str>) -> Option<usize> {
+        self.string_to_id.get(v.as_ref()).cloned()
+    }
+
+    pub fn get_string(&self, id: usize) -> Option<&str> {
+        self.id_to_string.get(id).map(|s| s.as_str())
+    }
+
+    pub fn iter_ids(&self) -> impl Iterator<Item = usize> {
+        0..self.id_to_string.len()
+    }
+
+    pub fn iter_strings(&self) -> impl Iterator<Item = &str> {
+        self.string_to_id.keys().map(|s| s.as_str())
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = (usize, &str)> {
+        self.id_to_string.iter().map(|s| s.as_str()).enumerate()
+    }
 }
 
 #[cfg(test)]

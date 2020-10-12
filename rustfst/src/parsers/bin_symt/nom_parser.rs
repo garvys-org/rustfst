@@ -5,10 +5,11 @@ use nom::IResult;
 
 use crate::parsers::bin_fst::fst_header::OpenFstString;
 use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64};
+use crate::parsers::nom_utils::NomCustomError;
 use crate::SymbolTable;
 use anyhow::Result;
+use bitflags::_core::hash::BuildHasher;
 use std::io::Write;
-use crate::parsers::nom_utils::NomCustomError;
 
 static SYMBOL_TABLE_MAGIC_NUMBER: i32 = 2_125_658_996;
 
@@ -18,7 +19,9 @@ fn parse_row_symt(i: &[u8]) -> IResult<&[u8], (i64, OpenFstString), NomCustomErr
     Ok((i, (key, symbol)))
 }
 
-pub(crate) fn parse_symbol_table_bin(i: &[u8]) -> IResult<&[u8], SymbolTable, NomCustomError<&[u8]>> {
+pub(crate) fn parse_symbol_table_bin(
+    i: &[u8],
+) -> IResult<&[u8], SymbolTable, NomCustomError<&[u8]>> {
     let (i, _magic_number) = verify(le_i32, |v| *v == SYMBOL_TABLE_MAGIC_NUMBER)(i)?;
     let (i, _name) = OpenFstString::parse(i)?;
     let (i, _available_key) = le_i64(i)?;
@@ -31,14 +34,17 @@ pub(crate) fn parse_symbol_table_bin(i: &[u8]) -> IResult<&[u8], SymbolTable, No
         if inserted_label != key as usize {
             return Err(nom::Err::Error(NomCustomError::SymbolTableError(
                 format!("SymbolTable must contain increasing labels with no hole. Expected : {} and Got : {}", inserted_label, key)
-            )))
+            )));
         }
     }
 
     Ok((i, symt))
 }
 
-pub(crate) fn write_bin_symt<W: Write>(file: &mut W, symt: &SymbolTable) -> Result<()> {
+pub(crate) fn write_bin_symt<W: Write, H: BuildHasher>(
+    file: &mut W,
+    symt: &SymbolTable<H>,
+) -> Result<()> {
     write_bin_i32(file, SYMBOL_TABLE_MAGIC_NUMBER)?;
     OpenFstString::new("rustfst_symboltable").write(file)?;
     // TODO: Might not be available

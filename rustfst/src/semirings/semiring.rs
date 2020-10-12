@@ -5,10 +5,10 @@ use std::hash::Hash;
 
 use bitflags::bitflags;
 
+use crate::parsers::nom_utils::NomCustomError;
 use anyhow::Result;
 use nom::IResult;
 use std::io::Write;
-use crate::parsers::nom_utils::NomCustomError;
 
 bitflags! {
     /// Properties verified by the Semiring.

@@ -6,13 +6,13 @@ use std::io::Write;
 use anyhow::Result;
 use nom::IResult;
 
+use crate::parsers::nom_utils::NomCustomError;
 use crate::semirings::{
     DivideType, ReverseBack, Semiring, SemiringProperties, SerializableSemiring,
     WeaklyDivisibleSemiring, WeightQuantize,
 };
 #[cfg(test)]
 use crate::semirings::{LogWeight, TropicalWeight};
-use crate::parsers::nom_utils::NomCustomError;
 
 /// Product semiring: W1 * W2.
 #[derive(Debug, Eq, PartialOrd, PartialEq, Clone, Default, Hash)]

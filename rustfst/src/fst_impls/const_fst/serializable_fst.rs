@@ -21,10 +21,10 @@ use crate::fst_traits::{ExpandedFst, Fst, SerializableFst};
 use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FST_MAGIC_NUMBER};
 use crate::parsers::bin_fst::utils_parsing::{parse_final_weight, parse_fst_tr, parse_start_state};
 use crate::parsers::bin_fst::utils_serialization::write_bin_i32;
+use crate::parsers::nom_utils::NomCustomError;
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::SerializableSemiring;
 use crate::{Tr, EPS_LABEL};
-use crate::parsers::nom_utils::NomCustomError;
 
 impl<W: SerializableSemiring> SerializableFst<W> for ConstFst<W> {
     fn fst_type() -> String {
@@ -185,7 +185,9 @@ impl<W: SerializableSemiring> SerializableFst<W> for ConstFst<W> {
     }
 }
 
-fn parse_const_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], ConstState<W>, NomCustomError<&[u8]>> {
+fn parse_const_state<W: SerializableSemiring>(
+    i: &[u8],
+) -> IResult<&[u8], ConstState<W>, NomCustomError<&[u8]>> {
     let (i, final_weight) = W::parse_binary(i)?;
     let (i, pos) = le_i32(i)?;
     let (i, ntrs) = le_i32(i)?;
@@ -204,7 +206,9 @@ fn parse_const_state<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], ConstS
     ))
 }
 
-fn parse_const_fst<W: SerializableSemiring>(i: &[u8]) -> IResult<&[u8], ConstFst<W>, NomCustomError<&[u8]>> {
+fn parse_const_fst<W: SerializableSemiring>(
+    i: &[u8],
+) -> IResult<&[u8], ConstFst<W>, NomCustomError<&[u8]>> {
     let stream_len = i.len();
 
     let (mut i, hdr) = FstHeader::parse(

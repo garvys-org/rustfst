@@ -14,11 +14,11 @@ use nom::number::complete::le_i32;
 use nom::IResult;
 
 use crate::parsers::bin_fst::utils_serialization::write_bin_i32;
+use crate::parsers::nom_utils::NomCustomError;
 use crate::semirings::{
     DivideType, ReverseBack, Semiring, SemiringProperties, SerializableSemiring,
     WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::parsers::nom_utils::NomCustomError;
 
 pub trait UnionWeightOption<W: Semiring>:
     Debug + Hash + Clone + PartialOrd + Eq + Sync + 'static

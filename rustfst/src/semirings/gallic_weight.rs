@@ -7,6 +7,7 @@ use std::marker::PhantomData;
 use anyhow::Result;
 use nom::IResult;
 
+use crate::parsers::nom_utils::NomCustomError;
 use crate::semirings::Semiring;
 #[cfg(test)]
 use crate::semirings::TropicalWeight;
@@ -16,7 +17,6 @@ use crate::semirings::{
 };
 use crate::semirings::{ProductWeight, ReverseBack};
 use crate::Label;
-use crate::parsers::nom_utils::NomCustomError;
 
 /// Product of StringWeightLeft and an arbitrary weight.
 #[derive(PartialOrd, PartialEq, Eq, Clone, Hash, Debug)]

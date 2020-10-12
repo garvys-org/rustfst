@@ -12,9 +12,9 @@ use crate::parsers::bin_fst::utils_serialization::{
     write_bin_i32, write_bin_i64, write_bin_u32, write_bin_u64,
 };
 use crate::parsers::bin_symt::nom_parser::{parse_symbol_table_bin, write_bin_symt};
+use crate::parsers::nom_utils::NomCustomError;
 use crate::SymbolTable;
 use std::sync::Arc;
-use crate::parsers::nom_utils::NomCustomError;
 
 // Identifies stream data as an FST (and its endianity).
 pub(crate) static FST_MAGIC_NUMBER: i32 = 2_125_659_606;
@@ -48,7 +48,10 @@ pub(crate) struct OpenFstString {
     s: String,
 }
 
-fn optionally_parse_symt(i: &[u8], parse_symt: bool) -> IResult<&[u8], Option<SymbolTable>, NomCustomError<&[u8]>> {
+fn optionally_parse_symt(
+    i: &[u8],
+    parse_symt: bool,
+) -> IResult<&[u8], Option<SymbolTable>, NomCustomError<&[u8]>> {
     if parse_symt {
         let (i, symt) = parse_symbol_table_bin(i)?;
         Ok((i, Some(symt)))

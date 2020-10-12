@@ -4,12 +4,12 @@ use std::sync::Mutex;
 
 use crate::StateId;
 use std::collections::hash_map::Entry;
+use std::collections::hash_map::RandomState;
 use std::collections::HashMap;
-use std::collections::hash_map::{RandomState};
 use std::hash::BuildHasher;
 
 #[derive(Clone, Debug, Default)]
-pub(crate) struct BiHashMap<T: Hash + Eq + Clone, H : BuildHasher = RandomState> {
+pub(crate) struct BiHashMap<T: Hash + Eq + Clone, H: BuildHasher = RandomState> {
     tuple_to_id: HashMap<T, StateId, H>,
     id_to_tuple: Vec<T>,
 }
@@ -24,7 +24,7 @@ impl<T: Hash + Eq + Clone> BiHashMap<T> {
     pub fn new() -> Self {
         Self {
             tuple_to_id: HashMap::new(),
-            id_to_tuple: Vec::new()
+            id_to_tuple: Vec::new(),
         }
     }
 }
@@ -34,7 +34,7 @@ impl<T: Hash + Eq + Clone, H: BuildHasher> BiHashMap<T, H> {
     pub fn with_hasher(hash_builder: H) -> Self {
         Self {
             tuple_to_id: HashMap::with_hasher(hash_builder),
-            id_to_tuple: Vec::new()
+            id_to_tuple: Vec::new(),
         }
     }
 
