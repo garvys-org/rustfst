@@ -25,7 +25,7 @@ use crate::algorithms::{tr_compares::ILabelCompare, tr_sort};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::SerializableFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
-use crate::tests_openfst::macros::test_eq_fst;
+use crate::tests_openfst::utils::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -74,12 +74,11 @@ where
     config.connect = false;
     config.compose_filter = filter;
 
-    let fst_res_static: VectorFst<_> =
-        compose_with_config::<W, VectorFst<_>, VectorFst<_>, _, _, _>(
-            Arc::new(fst_raw.clone()),
-            Arc::new(compose_test_data.fst_2.clone()),
-            config,
-        )?;
+    let fst_res_static: VectorFst<_> = compose_with_config::<W, VectorFst<_>, VectorFst<_>, _, _, _>(
+        Arc::new(fst_raw.clone()),
+        Arc::new(compose_test_data.fst_2.clone()),
+        config,
+    )?;
 
     test_eq_fst(
         &compose_test_data.result,

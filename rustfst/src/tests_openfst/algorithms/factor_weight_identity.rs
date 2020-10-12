@@ -13,7 +13,7 @@ use crate::semirings::WeightQuantize;
 use crate::tests_openfst::FstTestData;
 
 use crate::algorithms::fst_convert_from_ref;
-use crate::tests_openfst::macros::test_eq_fst;
+use crate::tests_openfst::utils::test_eq_fst;
 use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]

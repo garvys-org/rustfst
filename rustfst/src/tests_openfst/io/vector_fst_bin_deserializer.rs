@@ -3,7 +3,7 @@ use anyhow::Result;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{Fst, SerializableFst};
 use crate::semirings::{SerializableSemiring, WeightQuantize};
-use crate::tests_openfst::macros::test_eq_fst;
+use crate::tests_openfst::utils::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 
 pub fn test_vector_fst_bin_deserializer<W>(test_data: &FstTestData<W, VectorFst<W>>) -> Result<()>

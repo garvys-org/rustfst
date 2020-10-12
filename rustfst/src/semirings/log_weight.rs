@@ -9,6 +9,7 @@ use nom::IResult;
 use ordered_float::OrderedFloat;
 
 use crate::parsers::bin_fst::utils_serialization::write_bin_f32;
+use crate::semirings::utils_float::float_approx_equal;
 use crate::semirings::{
     CompleteSemiring, DivideType, ReverseBack, Semiring, SemiringProperties, SerializableSemiring,
     StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
@@ -71,6 +72,10 @@ impl Semiring for LogWeight {
             self.value.0 += f2;
         }
         Ok(())
+    }
+
+    fn approx_equal<P: Borrow<Self>>(&self, rhs: P, delta: f32) -> bool {
+        float_approx_equal(self.value.0, rhs.borrow().value.0, delta)
     }
 
     fn value(&self) -> &Self::Type {

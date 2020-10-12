@@ -14,6 +14,7 @@ pub mod tr_map;
 pub mod tr_sort;
 // pub mod matcher;
 pub mod minimize;
+pub mod optimize;
 pub mod project;
 pub mod properties;
 pub mod push;

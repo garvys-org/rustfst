@@ -30,10 +30,14 @@
 #include "fst_015/fst_015.h"
 #include "fst_016/fst_016.h"
 #include "fst_017/fst_017.h"
+#include "fst_018/fst_018.h"
+#include "fst_019/fst_019.h"
 
 #include "symt_000/symt_000.h"
 #include "symt_001/symt_001.h"
 #include "symt_002/symt_002.h"
+
+#include "../openfst_addon/optimize.cpp"
 
 int ID_FST_NUM = 0;
 
@@ -63,6 +67,13 @@ string weight_to_string(const W& a) {
     std::stringstream ss;
     ss << a;
     return ss.str();
+}
+
+template<class F>
+void compute_fst_optimize(const F& raw_fst, json& j, const string& dir_path) {
+    auto fst_out = *raw_fst.Copy();
+    Optimize(&fst_out);
+    j["optimize"]["result_path"] = dump_fst(fst_out, dir_path);
 }
 
 template<class F>
@@ -388,13 +399,15 @@ void compute_fst_properties(const F& raw_fst, json& j) {
 template<class F>
 void compute_fst_minimization(const F& raw_fst, json& j, const string& dir_path) {
     j["minimize"] = {};
+    auto delta = fst::kShortestDelta;
     std::vector<bool> v = {true, false};
     for(bool allow_nondet: v) {
         auto fst_out = *raw_fst.Copy();
-        fst::Minimize(&fst_out, (fst::VectorFst<typename F::Arc>*)nullptr, fst::kShortestDelta, allow_nondet);
+        fst::Minimize(&fst_out, (fst::VectorFst<typename F::Arc>*)nullptr, delta, allow_nondet);
         bool error = prop_to_bool(fst_out.Properties(fst::kError, true), fst::kError);
 
         json j2;
+        j2["delta"] = delta;
         j2["allow_nondet"] = allow_nondet;
         j2["result_path"] = error ? "error": dump_fst(fst_out, dir_path);
 
@@ -1188,6 +1201,9 @@ void compute_fst_data(const F& fst_test_data, const string fst_name) {
     std::cout << "Queue" << std::endl;
     compute_fst_queue(raw_fst, data);
 
+    std::cout << "Optimize" << std::endl;
+    compute_fst_optimize(raw_fst, data, dir_path);
+
     std::ofstream o(fst_name + "/metadata.json");
     o << std::setw(4) << data << std::endl;
 
@@ -1330,4 +1346,6 @@ int main() {
     compute_fst_data(FstTestData015(), "fst_015");
     compute_fst_data(FstTestData016(), "fst_016");
     compute_fst_data(FstTestData017(), "fst_017");
+    compute_fst_data(FstTestData018(), "fst_018");
+    compute_fst_data(FstTestData019(), "fst_019");
 }

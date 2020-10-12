@@ -7,7 +7,10 @@ use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, Facto
 use crate::algorithms::fst_convert::fst_convert_from_ref;
 use crate::algorithms::tr_mappers::RmWeightMapper;
 use crate::algorithms::weight_converters::{FromGallicConverter, ToGallicConverter};
-use crate::algorithms::{reweight, shortest_distance, tr_map, weight_convert, ReweightType};
+use crate::algorithms::{
+    reweight, shortest_distance_with_config, tr_map, weight_convert, ReweightType,
+    ShortestDistanceConfig,
+};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::{DivideType, Semiring};
@@ -15,6 +18,7 @@ use crate::semirings::{
     GallicWeightLeft, GallicWeightRight, StringWeightLeft, StringWeightRight,
     WeaklyDivisibleSemiring, WeightQuantize,
 };
+use crate::KDELTA;
 
 bitflags! {
     /// Configuration to control the behaviour of the pushing algorithm.
@@ -26,21 +30,71 @@ bitflags! {
     }
 }
 
+#[derive(Clone, Debug, Copy, PartialOrd, PartialEq)]
+pub struct PushWeightsConfig {
+    delta: f32,
+    remove_total_weight: bool,
+}
+
+impl Default for PushWeightsConfig {
+    fn default() -> Self {
+        Self {
+            delta: KDELTA,
+            remove_total_weight: false,
+        }
+    }
+}
+
+impl PushWeightsConfig {
+    pub fn new(delta: f32, remove_total_weight: bool) -> Self {
+        Self {
+            delta,
+            remove_total_weight,
+        }
+    }
+
+    pub fn with_delta(self, delta: f32) -> Self {
+        Self { delta, ..self }
+    }
+
+    pub fn with_remove_total_weight(self, remove_total_weight: bool) -> Self {
+        Self {
+            remove_total_weight,
+            ..self
+        }
+    }
+}
+
+pub fn push_weights<W, F>(fst: &mut F, reweight_type: ReweightType) -> Result<()>
+where
+    F: MutableFst<W>,
+    W: WeaklyDivisibleSemiring,
+{
+    push_weights_with_config(fst, reweight_type, PushWeightsConfig::default())
+}
+
 /// Pushes the weights in FST in the direction defined by TYPE. If
 /// pushing towards the initial state, the sum of the weight of the
 /// outgoing transitions and final weight at a non-initial state is
 /// equal to One() in the resulting machine. If pushing towards the
 /// final state, the same property holds on the reverse machine.
-pub fn push_weights<W, F>(
+pub fn push_weights_with_config<W, F>(
     fst: &mut F,
     reweight_type: ReweightType,
-    remove_total_weight: bool,
+    config: PushWeightsConfig,
 ) -> Result<()>
 where
     F: MutableFst<W>,
     W: WeaklyDivisibleSemiring,
 {
-    let dist = shortest_distance(fst, reweight_type == ReweightType::ReweightToInitial)?;
+    let remove_total_weight = config.remove_total_weight;
+    let delta = config.delta;
+    let dist = shortest_distance_with_config(
+        fst,
+        reweight_type == ReweightType::ReweightToInitial,
+        ShortestDistanceConfig::new(delta),
+    )?;
+
     if remove_total_weight {
         let total_weight =
             compute_total_weight(fst, &dist, reweight_type == ReweightType::ReweightToInitial)?;
@@ -117,18 +171,26 @@ where
 }
 
 macro_rules! m_labels_pushing {
-    ($ifst: ident, $reweight_type: ident, $push_type: ident, $gallic_weight: ty, $string_weight: ident, $gallic_factor: ty) => {{
+    ($ifst: ident, $reweight_type: ident, $push_type: ident, $delta: ident, $gallic_weight: ty, $string_weight: ident, $gallic_factor: ty) => {{
         // Labels pushing with potentially weights pushing
         let mut mapper = ToGallicConverter {};
         let mut gfst: VectorFst<$gallic_weight> = weight_convert($ifst, &mut mapper)?;
         let gdistance = if $push_type.intersects(PushType::PUSH_WEIGHTS) {
-            shortest_distance(&gfst, $reweight_type == ReweightType::ReweightToInitial)?
+            shortest_distance_with_config(
+                &gfst,
+                $reweight_type == ReweightType::ReweightToInitial,
+                ShortestDistanceConfig::new($delta),
+            )?
         } else {
             let rm_weight_mapper = RmWeightMapper {};
             let mut uwfst: VectorFst<_> = fst_convert_from_ref($ifst);
             tr_map(&mut uwfst, &rm_weight_mapper)?;
             let guwfst: VectorFst<$gallic_weight> = weight_convert(&uwfst, &mut mapper)?;
-            shortest_distance(&guwfst, $reweight_type == ReweightType::ReweightToInitial)?
+            shortest_distance_with_config(
+                &guwfst,
+                $reweight_type == ReweightType::ReweightToInitial,
+                ShortestDistanceConfig::new($delta),
+            )?
         };
         if $push_type.intersects(PushType::REMOVE_COMMON_AFFIX | PushType::REMOVE_TOTAL_WEIGHT) {
             let mut total_weight = compute_total_weight(
@@ -165,8 +227,27 @@ macro_rules! m_labels_pushing {
     }};
 }
 
-/// Pushes the weights and/or labels of the input FST into the output
-/// mutable FST by pushing weights and/or labels towards the initial state or final states.
+#[derive(Clone, Copy, Debug, PartialOrd, PartialEq)]
+pub struct PushConfig {
+    delta: f32,
+}
+
+impl Default for PushConfig {
+    fn default() -> Self {
+        Self { delta: KDELTA }
+    }
+}
+
+impl PushConfig {
+    pub fn new(delta: f32) -> Self {
+        Self { delta }
+    }
+
+    pub fn with_delta(self, delta: f32) -> Self {
+        Self { delta, ..self }
+    }
+}
+
 pub fn push<W, F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType) -> Result<F2>
 where
     F1: ExpandedFst<W>,
@@ -174,15 +255,31 @@ where
     W: WeaklyDivisibleSemiring + WeightQuantize,
     <W as Semiring>::ReverseWeight: 'static,
 {
+    push_with_config(ifst, reweight_type, push_type, PushConfig::default())
+}
+
+/// Pushes the weights and/or labels of the input FST into the output
+/// mutable FST by pushing weights and/or labels towards the initial state or final states.
+pub fn push_with_config<W, F1, F2>(
+    ifst: &F1,
+    reweight_type: ReweightType,
+    push_type: PushType,
+    config: PushConfig,
+) -> Result<F2>
+where
+    F1: ExpandedFst<W>,
+    F2: ExpandedFst<W> + MutableFst<W> + AllocableFst<W>,
+    W: WeaklyDivisibleSemiring + WeightQuantize,
+    <W as Semiring>::ReverseWeight: 'static,
+{
+    let delta = config.delta;
     if push_type.intersects(PushType::PUSH_WEIGHTS) && !push_type.intersects(PushType::PUSH_LABELS)
     {
         // Only weights pushing
         let mut ofst = fst_convert_from_ref(ifst);
-        push_weights(
-            &mut ofst,
-            reweight_type,
-            push_type.intersects(PushType::REMOVE_TOTAL_WEIGHT),
-        )?;
+        let push_weights_config =
+            PushWeightsConfig::new(delta, push_type.intersects(PushType::REMOVE_TOTAL_WEIGHT));
+        push_weights_with_config(&mut ofst, reweight_type, push_weights_config)?;
         Ok(ofst)
     } else if push_type.intersects(PushType::PUSH_LABELS) {
         match reweight_type {
@@ -190,6 +287,7 @@ where
                 ifst,
                 reweight_type,
                 push_type,
+                delta,
                 GallicWeightLeft<W>,
                 StringWeightLeft,
                 GallicFactorLeft<W>
@@ -198,6 +296,7 @@ where
                 ifst,
                 reweight_type,
                 push_type,
+                delta,
                 GallicWeightRight<W>,
                 StringWeightRight,
                 GallicFactorRight<W>

@@ -6,7 +6,7 @@ use crate::algorithms::fst_convert_from_ref;
 use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_traits::Fst;
 use crate::semirings::{SerializableSemiring, WeightQuantize};
-use crate::tests_openfst::macros::test_eq_fst;
+use crate::tests_openfst::utils::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 use crate::SymbolTable;
 

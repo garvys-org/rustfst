@@ -1,7 +1,7 @@
-use std::sync::Arc;
-use std::marker::PhantomData;
 use std::borrow::Borrow;
 use std::fmt::Debug;
+use std::marker::PhantomData;
+use std::sync::Arc;
 
 use anyhow::Result;
 
@@ -29,8 +29,8 @@ where
     ghost: PhantomData<(W, F1, F2, B1, B2, M1, M2)>,
 }
 
-impl<W, F1, F2, B1, B2, M1, M2, CF: ComposeFilter<W, F1, F2, B1, B2, M1, M2>> ComposeFilter<W, F1, F2, B1, B2, M1, M2>
-    for MultiEpsFilter<W, F1, F2, B1, B2, M1, M2, CF>
+impl<W, F1, F2, B1, B2, M1, M2, CF: ComposeFilter<W, F1, F2, B1, B2, M1, M2>>
+    ComposeFilter<W, F1, F2, B1, B2, M1, M2> for MultiEpsFilter<W, F1, F2, B1, B2, M1, M2, CF>
 where
     W: Semiring,
     F1: Fst<W>,

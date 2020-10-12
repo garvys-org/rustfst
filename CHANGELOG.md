@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added the `optimize` algorithm.
+- Added the `approx_equal` method to the Semiring trait and implement it for all semirings in the crate.
+- In order to handle default parmeters, some algorithms now have multiple versions:
+    - Simple: `minimize`. Advanced: `minimize_with_config` configurable through `MinimizeConfig`.
+    - Simple: `push`. Advanced: `push_with_config` configurable through `PushConfig`.
+    - Simple: `push_weights`. Advanced: `push_weights_with_config` configurable through `PushWeightsConfig`.
+    - Simple: `shortest_distance`. Advanced: `shortest_distance_with_config` configurable through `ShortestDistanceConfig`.
+    - Simple: `shortest_path`. Advanced: `shortest_path_with_config` configurable through `ShortestPathConfig`.
+    - Simple: `isomorphic`. Advanced: `isomorphic_with_config` configurable through `IsomorphicConfig`.
 - Make `proptest_fst` public
 - Implement `FstOp` for `Deref<FstOp>` and `FstOp2` for `Deref<FstOp2>`
 - Implement `TrMapper<S>` for `Deref<TrMapper<S>>`
@@ -18,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Change implementation of `Default` for `SymbolTable` object: now adds `EPS`.
+- `equal_quantized` in `ExpandedFst` trait has been renamed to `approx_equal`
+- Fix bug in `reverse` happening when the `Fst` was `INITIAL_CYCLIC`.
+- Fix bug in `minimize` in the partitionning.
 - Make `ComposeFst` clonable if all the elements that compose it are clonable.
 - The `Matcher` object now has a trait bound on an `Fst` instead of on an `ExpandedFst` allowing composing lazy fsts.
 - Lazy implementation of the determinize algorithm has been generalized to use the `Borrow` trait instead of the `Arc` object.

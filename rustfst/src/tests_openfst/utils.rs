@@ -5,6 +5,7 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::WeightQuantize;
 use crate::Semiring;
+use crate::KDELTA;
 
 pub fn test_correctness_properties<W: Semiring, FREF: ExpandedFst<W>, FPRED: ExpandedFst<W>>(
     fst_ref: &FREF,
@@ -79,7 +80,7 @@ pub fn test_eq_fst<
     let s = s.into();
     let message = format!("Test {} with openfst failing : \nREF = \n{}\nPRED = \n{}\n \nREF = \n{:?}\nPRED = \n{:?}\n",
                           s, fst_ref, fst_pred, fst_ref, fst_pred);
-    assert!(fst_ref.equal_quantized(fst_pred), message);
+    assert!(fst_ref.approx_equal(fst_pred, KDELTA), message);
     test_num_epsilons(fst_ref, fst_pred, message);
     test_correctness_properties(
         fst_ref,

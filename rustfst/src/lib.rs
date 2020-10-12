@@ -70,7 +70,7 @@
 //!     connect(&mut fst)?;
 //!
 //!     // - Optimize the FST by merging states with the same behaviour.
-//!     minimize(&mut fst, true)?;
+//!     minimize(&mut fst)?;
 //!
 //!     // - Copy all the input labels in the output.
 //!     project(&mut fst, ProjectType::ProjectInput);
@@ -79,7 +79,7 @@
 //!     rm_epsilon(&mut fst)?;
 //!
 //!     // - Compute an equivalent FST but deterministic.
-//!     fst = determinize(&fst, DeterminizeType::DeterminizeFunctional)?;
+//!     fst = determinize(&fst)?;
 //!
 //!     Ok(())
 //! }
@@ -161,6 +161,7 @@ mod parsers;
 
 /// A representable float near .001. (Used in Quantize)
 pub const KDELTA: f32 = 1.0f32 / 1024.0f32;
+pub const KSHORTESTDELTA: f32 = 1e-6;
 
 /// Module re-exporting most of the objects from this crate.
 pub mod prelude {

@@ -36,6 +36,10 @@ impl Semiring for IntegerWeight {
         Ok(())
     }
 
+    fn approx_equal<P: Borrow<Self>>(&self, rhs: P, _delta: f32) -> bool {
+        self.value == rhs.borrow().value
+    }
+
     fn value(&self) -> &Self::Type {
         &self.value
     }

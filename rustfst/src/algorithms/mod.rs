@@ -5,17 +5,21 @@ pub use self::{
     connect::connect,
     fst_convert::{fst_convert, fst_convert_from_ref},
     inversion::invert,
-    isomorphic::isomorphic,
-    minimize::{acceptor_minimize, minimize},
+    isomorphic::{isomorphic, isomorphic_with_config, IsomorphicConfig},
+    minimize::{acceptor_minimize, minimize, minimize_with_config, MinimizeConfig},
+    optimize::optimize,
     projection::{project, ProjectType},
-    push::{push, push_weights, PushType},
+    push::{
+        push, push_weights, push_weights_with_config, push_with_config, PushConfig, PushType,
+        PushWeightsConfig,
+    },
     queue::{Queue, QueueType},
     relabel_pairs::relabel_pairs,
     reverse::reverse,
     reweight::{reweight, ReweightType},
     rm_final_epsilon::rm_final_epsilon,
-    shortest_distance::shortest_distance,
-    shortest_path::shortest_path,
+    shortest_distance::{shortest_distance, shortest_distance_with_config, ShortestDistanceConfig},
+    shortest_path::{shortest_path, shortest_path_with_config, ShortestPathConfig},
     state_sort::state_sort,
     top_sort::top_sort,
     tr_map::{tr_map, FinalTr, MapFinalAction, TrMapper},
@@ -40,6 +44,7 @@ mod fst_convert;
 mod inversion;
 mod isomorphic;
 mod minimize;
+mod optimize;
 mod partition;
 mod projection;
 mod push;

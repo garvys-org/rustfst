@@ -26,7 +26,8 @@ impl UnaryFstAlgorithm for MinimizeAlgorithm {
         &self,
         mut fst: VectorFst<TropicalWeight>,
     ) -> Result<VectorFst<TropicalWeight>> {
-        minimize(&mut fst, self.allow_nondet)?;
+        let config = MinimizeConfig::default().with_allow_nondet(self.allow_nondet);
+        minimize_with_config(&mut fst, config)?;
         Ok(fst)
     }
 }

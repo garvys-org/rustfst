@@ -152,10 +152,10 @@ where
     B: Borrow<F> + Debug,
     BT: Borrow<[W]> + PartialEq + Debug,
 {
-    pub fn new(fst: B, in_dist: Option<BT>) -> Result<Self> {
+    pub fn new(fst: B, in_dist: Option<BT>, delta: f32) -> Result<Self> {
         let isymt = fst.borrow().input_symbols().cloned();
         let osymt = fst.borrow().output_symbols().cloned();
-        let fst_op = DeterminizeFsaOp::new(fst, in_dist)?;
+        let fst_op = DeterminizeFsaOp::new(fst, in_dist, delta)?;
         let fst_cache = SimpleHashMapCache::default();
         let lazy_fst = LazyFst::from_op_and_cache(fst_op, fst_cache, isymt, osymt);
         Ok(DeterminizeFsa(lazy_fst, PhantomData))
@@ -190,7 +190,13 @@ mod test {
     fn test_determinize_fsa_sync() {
         fn is_sync<T: Sync>() {}
         is_sync::<
-            DeterminizeFsa<TropicalWeight, VectorFst<_>, DefaultCommonDivisor, Arc<VectorFst<_>>, Vec<TropicalWeight>>,
+            DeterminizeFsa<
+                TropicalWeight,
+                VectorFst<_>,
+                DefaultCommonDivisor,
+                Arc<VectorFst<_>>,
+                Vec<TropicalWeight>,
+            >,
         >();
     }
 }

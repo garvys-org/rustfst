@@ -131,13 +131,19 @@ where
         if (reach_input && MFT::flags().contains(MatcherFlags::INPUT_LOOKAHEAD_MATCHER))
             || (!reach_input && MFT::flags().contains(MatcherFlags::OUTPUT_LOOKAHEAD_MATCHER))
         {
-            Ok(Some(LabelReachable::compute_data(fst.borrow(), reach_input)?))
+            Ok(Some(LabelReachable::compute_data(
+                fst.borrow(),
+                reach_input,
+            )?))
         } else {
             Ok(None)
         }
     }
 
-    fn init_lookahead_fst<LF: Fst<W>, BLF: Borrow<LF> + Clone>(&mut self, lfst: &BLF) -> Result<()> {
+    fn init_lookahead_fst<LF: Fst<W>, BLF: Borrow<LF> + Clone>(
+        &mut self,
+        lfst: &BLF,
+    ) -> Result<()> {
         let reach_input = self.match_type(false)? == MatchType::MatchOutput;
         if let Some(reachable) = &mut self.reachable {
             reachable.reach_init(lfst.borrow(), reach_input)?;
