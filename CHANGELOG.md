@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Lazy implementation of the compose algorithm has been generalized to use the `Borrow` trait instead of the `Arc` object.
 - Change internal implementation of `SymbolTable`: now used a Vec and a `HashMap` instead of two `HashMap`s. As a result, doesn't support `SymbolTable` with hole anymore.
 - Change implementation of `Default` for `SymbolTable` object: now adds `EPS`.
 - `equal_quantized` in `ExpandedFst` trait has been renamed to `approx_equal`
