@@ -161,7 +161,6 @@ mod parsers;
 
 pub use crate::parsers::nom_utils::NomCustomError;
 
-
 /// A representable float near .001. (Used in Quantize)
 pub const KDELTA: f32 = 1.0f32 / 1024.0f32;
 pub const KSHORTESTDELTA: f32 = 1e-6;
