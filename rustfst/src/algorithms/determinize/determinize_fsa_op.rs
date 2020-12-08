@@ -41,7 +41,7 @@ where
     B: Borrow<F> + Debug,
     BT: Borrow<[W]> + Debug + PartialEq,
 {
-    fn compute_start(&self) -> Result<Option<usize>> {
+    fn compute_start(&self) -> Result<Option<StateId>> {
         if let Some(start_state) = self.fst.borrow().start() {
             let elt = DeterminizeElement::new(start_state, W::one());
             let tuple = DeterminizeStateTuple {
@@ -53,7 +53,7 @@ where
         Ok(None)
     }
 
-    fn compute_trs(&self, state: usize) -> Result<TrsVec<W>> {
+    fn compute_trs(&self, state: StateId) -> Result<TrsVec<W>> {
         // GetLabelMap
         let mut label_map: BTreeMap<Label, DeterminizeTr<W>> = BTreeMap::new();
         let src_tuple = self.state_table.find_tuple(state);
@@ -98,7 +98,7 @@ where
         Ok(TrsVec(Arc::new(trs)))
     }
 
-    fn compute_final_weight(&self, state: usize) -> Result<Option<W>> {
+    fn compute_final_weight(&self, state: StateId) -> Result<Option<W>> {
         let tuple = self.state_table.find_tuple(state);
         let mut final_weight = W::zero();
         for det_elt in tuple.subset.iter() {

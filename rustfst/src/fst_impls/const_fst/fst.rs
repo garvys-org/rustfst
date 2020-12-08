@@ -6,7 +6,7 @@ use crate::fst_impls::ConstFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
-use crate::{SymbolTable, TrsConst};
+use crate::{SymbolTable, TrsConst, StateId};
 
 impl<W: Semiring> Fst<W> for ConstFst<W> {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
@@ -37,38 +37,38 @@ impl<W: Semiring> Fst<W> for ConstFst<W> {
 impl<W: Semiring> CoreFst<W> for ConstFst<W> {
     type TRS = TrsConst<W>;
 
-    fn start(&self) -> Option<usize> {
+    fn start(&self) -> Option<StateId> {
         self.start
     }
 
-    fn final_weight(&self, state_id: usize) -> Result<Option<W>> {
+    fn final_weight(&self, state_id: StateId) -> Result<Option<W>> {
         let s = self
             .states
-            .get(state_id)
+            .get(state_id as usize)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
         Ok(s.final_weight.clone())
     }
 
-    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<W> {
-        self.states.get_unchecked(state_id).final_weight.clone()
+    unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<W> {
+        self.states.get_unchecked(state_id as usize).final_weight.clone()
     }
 
-    fn num_trs(&self, s: usize) -> Result<usize> {
+    fn num_trs(&self, s: StateId) -> Result<usize> {
         Ok(self
             .states
-            .get(s)
+            .get(s as usize)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", s))?
             .ntrs)
     }
 
-    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
-        self.states.get_unchecked(s).ntrs
+    unsafe fn num_trs_unchecked(&self, s: StateId) -> usize {
+        self.states.get_unchecked(s as usize).ntrs
     }
 
-    fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
+    fn get_trs(&self, state_id: StateId) -> Result<Self::TRS> {
         let state = self
             .states
-            .get(state_id)
+            .get(state_id as usize)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state_id))?;
         Ok(TrsConst {
             trs: Arc::clone(&self.trs),
@@ -77,8 +77,8 @@ impl<W: Semiring> CoreFst<W> for ConstFst<W> {
         })
     }
 
-    unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
-        let state = self.states.get_unchecked(state_id);
+    unsafe fn get_trs_unchecked(&self, state_id: StateId) -> Self::TRS {
+        let state = self.states.get_unchecked(state_id as usize);
         TrsConst {
             trs: Arc::clone(&self.trs),
             pos: state.pos,
@@ -90,18 +90,18 @@ impl<W: Semiring> CoreFst<W> for ConstFst<W> {
         self.properties
     }
 
-    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+    fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
         Ok(self
             .states
-            .get(state)
+            .get(state as usize)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state))?
             .niepsilons)
     }
 
-    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+    fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
         Ok(self
             .states
-            .get(state)
+            .get(state as usize)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state))?
             .noepsilons)
     }

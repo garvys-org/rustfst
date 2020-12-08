@@ -12,7 +12,7 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::algorithms::compose::{LabelReachable, LabelReachableData};
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
-use crate::{Tr, Trs, EPS_LABEL};
+use crate::{Tr, Trs, EPS_LABEL, Label, StateId};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelLookAheadMatcher<W, F, B, M, MFT>
@@ -41,11 +41,11 @@ where
         Self::new_with_data(fst, match_type, None)
     }
 
-    fn iter(&self, state: usize, label: usize) -> Result<Self::Iter> {
+    fn iter(&self, state: StateId, label: Label) -> Result<Self::Iter> {
         self.matcher.iter(state, label)
     }
 
-    fn final_weight(&self, state: usize) -> Result<Option<W>> {
+    fn final_weight(&self, state: StateId) -> Result<Option<W>> {
         self.matcher.final_weight(state)
     }
 
@@ -212,7 +212,7 @@ where
         }
     }
 
-    fn lookahead_label(&self, current_state: usize, label: usize) -> Result<bool> {
+    fn lookahead_label(&self, current_state: usize, label: Label) -> Result<bool> {
         if label == EPS_LABEL {
             return Ok(true);
         }

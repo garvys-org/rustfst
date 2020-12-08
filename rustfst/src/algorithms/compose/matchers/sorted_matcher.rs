@@ -41,7 +41,7 @@ where
         })
     }
 
-    fn iter(&self, state: usize, label: usize) -> Result<Self::Iter> {
+    fn iter(&self, state: StateId, label: Label) -> Result<Self::Iter> {
         Ok(IteratorSortedMatcher::new(
             self.fst.borrow().get_trs(state)?,
             label,
@@ -49,7 +49,7 @@ where
         ))
     }
 
-    fn final_weight(&self, state: usize) -> Result<Option<W>> {
+    fn final_weight(&self, state: StateId) -> Result<Option<W>> {
         self.fst.borrow().final_weight(state)
     }
 
@@ -227,7 +227,7 @@ where
         unreachable!()
     }
 
-    fn lookahead_label(&self, _state: usize, _label: usize) -> Result<bool> {
+    fn lookahead_label(&self, _state: StateId, _label: Label) -> Result<bool> {
         unreachable!()
     }
 

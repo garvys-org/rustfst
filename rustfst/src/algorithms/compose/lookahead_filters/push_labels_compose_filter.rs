@@ -17,7 +17,7 @@ use crate::algorithms::compose::matchers::{MultiEpsMatcher, MultiEpsMatcherFlags
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
-use crate::{Label, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
+use crate::{Label, StateId, Tr, EPS_LABEL, NO_LABEL, NO_STATE_ID};
 
 #[derive(Debug, Clone)]
 pub struct PushLabelsComposeFilter<W, F1, F2, B1, B2, M1, M2, CF, SMT>
@@ -164,7 +164,7 @@ where
         PairFilterState::new((self.filter.start(), FilterState::new(NO_LABEL)))
     }
 
-    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Result<()> {
+    fn set_state(&mut self, s1: StateId, s2: StateId, filter_state: &Self::FS) -> Result<()> {
         self.fs = filter_state.clone();
         self.filter.set_state(s1, s2, filter_state.state1())?;
         if !self

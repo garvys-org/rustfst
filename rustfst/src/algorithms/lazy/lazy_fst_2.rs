@@ -51,17 +51,17 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
         }
     }
 
-    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<W> {
+    unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<W> {
         self.final_weight(state_id).unsafe_unwrap()
     }
 
-    fn num_trs(&self, s: usize) -> Result<usize> {
+    fn num_trs(&self, s: StateId) -> Result<usize> {
         self.cache
             .num_trs(s)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", s))
     }
 
-    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+    unsafe fn num_trs_unchecked(&self, s: StateId) -> usize {
         self.cache.num_trs(s).unsafe_unwrap()
     }
 
@@ -77,7 +77,7 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
         }
     }
 
-    unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
+    unsafe fn get_trs_unchecked(&self, state_id: StateId) -> Self::TRS {
         self.get_trs(state_id).unsafe_unwrap()
     }
 
@@ -85,13 +85,13 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
         self.op.properties()
     }
 
-    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+    fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
         self.cache
             .num_input_epsilons(state)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state))
     }
 
-    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+    fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
         self.cache
             .num_output_epsilons(state)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state))

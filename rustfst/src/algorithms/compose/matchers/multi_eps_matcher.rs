@@ -198,7 +198,7 @@ where
         )
     }
 
-    fn iter(&self, state: usize, label: usize) -> Result<Self::Iter> {
+    fn iter(&self, state: StateId, label: Label) -> Result<Self::Iter> {
         let (iter_matcher, iter_labels) = if label == EPS_LABEL {
             (Some(self.matcher.iter(state, EPS_LABEL)?.peekable()), None)
         } else if label == NO_LABEL {
@@ -246,7 +246,7 @@ where
         })
     }
 
-    fn final_weight(&self, state: usize) -> Result<Option<W>> {
+    fn final_weight(&self, state: StateId) -> Result<Option<W>> {
         self.matcher.final_weight(state)
     }
 
@@ -258,7 +258,7 @@ where
         self.matcher.flags()
     }
 
-    fn priority(&self, state: usize) -> Result<usize> {
+    fn priority(&self, state: StateId) -> Result<usize> {
         self.matcher.priority(state)
     }
 

@@ -27,15 +27,15 @@ impl<W: Semiring> InnerStateTable<W> {
 
     fn find_id_or_insert_bimap(&mut self, elt: &Element<W>) -> StateId {
         if !self.bimap.contains_right(elt) {
-            let n = self.bimap.len();
+            let n = self.bimap.len() as StateId;
             self.bimap.insert(n, elt.clone());
             return n;
         }
         *self.bimap.get_by_right(elt).unwrap()
     }
 
-    pub fn insert_bimap(&mut self, tuple: Element<W>) -> usize {
-        let n = self.bimap.len();
+    pub fn insert_bimap(&mut self, tuple: Element<W>) -> StateId {
+        let n = self.bimap.len() as StateId;
         self.bimap.insert(n, tuple);
         n
     }

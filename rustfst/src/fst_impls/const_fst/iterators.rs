@@ -67,7 +67,7 @@ impl<'a, W> StateIterator<'a> for ConstFst<W> {
 type States<'a, W> =
     Enumerate<Zip<std::slice::Iter<'a, ConstState<W>>, RepeatN<&'a Arc<Vec<Tr<W>>>>>>;
 type StateToData<'a, W, TRS> =
-    Box<dyn FnMut((StateId, (&'a ConstState<W>, &'a Arc<Vec<Tr<W>>>))) -> FstIterData<W, TRS>>;
+    Box<dyn FnMut((usize, (&'a ConstState<W>, &'a Arc<Vec<Tr<W>>>))) -> FstIterData<W, TRS>>;
 
 impl<'a, W: Semiring + 'static> FstIterator<'a, W> for ConstFst<W> {
     type FstIter = Map<States<'a, W>, StateToData<'a, W, Self::TRS>>;
@@ -76,7 +76,7 @@ impl<'a, W: Semiring + 'static> FstIterator<'a, W> for ConstFst<W> {
         izip!(self.states.iter(), it)
             .enumerate()
             .map(Box::new(|(state_id, (fst_state, trs))| FstIterData {
-                state_id,
+                state_id: state_id as StateId,
                 trs: TrsConst {
                     trs: Arc::clone(trs),
                     pos: fst_state.pos,

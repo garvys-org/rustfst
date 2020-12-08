@@ -10,7 +10,7 @@ use crate::algorithms::compose::matchers::Matcher;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
-use crate::{Tr, NO_LABEL};
+use crate::{Tr, StateId, NO_LABEL};
 
 #[derive(Debug, Clone)]
 pub struct MultiEpsFilter<W, F1, F2, B1, B2, M1, M2, CF>
@@ -47,7 +47,7 @@ where
         self.filter.start()
     }
 
-    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Result<()> {
+    fn set_state(&mut self, s1: StateId, s2: StateId, filter_state: &Self::FS) -> Result<()> {
         self.filter.set_state(s1, s2, filter_state)
     }
 

@@ -317,7 +317,7 @@ where
     M2: Matcher<W, F2, B2>,
     CFB: ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>,
 {
-    fn compute_start(&self) -> Result<Option<usize>> {
+    fn compute_start(&self) -> Result<Option<StateId>> {
         let compose_filter = self.compose_filter_builder.build()?;
         let s1 = self.fst1.borrow().start();
         if s1.is_none() {
@@ -334,7 +334,7 @@ where
         Ok(Some(self.state_table.find_id(tuple)))
     }
 
-    fn compute_trs(&self, state: usize) -> Result<TrsVec<W>> {
+    fn compute_trs(&self, state: StateId) -> Result<TrsVec<W>> {
         let tuple = self.state_table.find_tuple(state);
         let s1 = tuple.s1;
         let s2 = tuple.s2;
@@ -349,7 +349,7 @@ where
         res
     }
 
-    fn compute_final_weight(&self, state: usize) -> Result<Option<W>> {
+    fn compute_final_weight(&self, state: StateId) -> Result<Option<W>> {
         let tuple = self.state_table.find_tuple(state);
 
         // Construct a new ComposeFilter each time to avoid mutating the internal state.

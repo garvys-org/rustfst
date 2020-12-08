@@ -133,7 +133,7 @@ where
         Self::FS::new(0)
     }
 
-    fn set_state(&mut self, s1: usize, s2: usize, filter_state: &Self::FS) -> Result<()> {
+    fn set_state(&mut self, s1: StateId, s2: StateId, filter_state: &Self::FS) -> Result<()> {
         if !(self.s1 == s1 && self.s2 == s2 && &self.fs == filter_state) {
             self.s1 = s1;
             self.s2 = s2;

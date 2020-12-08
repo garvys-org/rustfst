@@ -6,7 +6,7 @@ use anyhow::Result;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator};
 use crate::semirings::Semiring;
-use crate::SymbolTable;
+use crate::{StateId, SymbolTable };
 
 impl<W: Semiring, F: Fst<W>> Fst<W> for Arc<F> {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
@@ -43,31 +43,31 @@ impl<W: Semiring, F: ExpandedFst<W>> ExpandedFst<W> for Arc<F> {
 impl<W: Semiring, F: CoreFst<W>> CoreFst<W> for Arc<F> {
     type TRS = F::TRS;
 
-    fn start(&self) -> Option<usize> {
+    fn start(&self) -> Option<StateId> {
         self.deref().start()
     }
 
-    fn final_weight(&self, state_id: usize) -> Result<Option<W>> {
+    fn final_weight(&self, state_id: StateId) -> Result<Option<W>> {
         self.deref().final_weight(state_id)
     }
 
-    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<W> {
+    unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<W> {
         self.deref().final_weight_unchecked(state_id)
     }
 
-    fn num_trs(&self, s: usize) -> Result<usize> {
+    fn num_trs(&self, s: StateId) -> Result<usize> {
         self.deref().num_trs(s)
     }
 
-    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+    unsafe fn num_trs_unchecked(&self, s: StateId) -> usize {
         self.deref().num_trs_unchecked(s)
     }
 
-    fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
+    fn get_trs(&self, state_id: StateId) -> Result<Self::TRS> {
         self.deref().get_trs(state_id)
     }
 
-    unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
+    unsafe fn get_trs_unchecked(&self, state_id: StateId) -> Self::TRS {
         self.deref().get_trs_unchecked(state_id)
     }
 
@@ -75,11 +75,11 @@ impl<W: Semiring, F: CoreFst<W>> CoreFst<W> for Arc<F> {
         self.deref().properties()
     }
 
-    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+    fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
         self.deref().num_input_epsilons(state)
     }
 
-    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+    fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
         self.deref().num_output_epsilons(state)
     }
 }

@@ -74,7 +74,7 @@ impl Default for StringWeightVariant {
 }
 
 impl From<Vec<Label>> for StringWeightVariant {
-    fn from(l: Vec<usize>) -> Self {
+    fn from(l: Vec<Label>) -> Self {
         StringWeightVariant::Labels(l)
     }
 }

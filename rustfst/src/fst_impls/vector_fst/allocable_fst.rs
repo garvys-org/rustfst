@@ -6,7 +6,7 @@ use anyhow::Result;
 use std::sync::Arc;
 
 impl<W: 'static + Semiring> AllocableFst<W> for VectorFst<W> {
-    fn reserve_trs(&mut self, source: usize, additional: usize) -> Result<()> {
+    fn reserve_trs(&mut self, source: StateId, additional: usize) -> Result<()> {
         let trs = &mut self
             .states
             .get_mut(source)
@@ -18,7 +18,7 @@ impl<W: 'static + Semiring> AllocableFst<W> for VectorFst<W> {
     }
 
     #[inline]
-    unsafe fn reserve_trs_unchecked(&mut self, source: usize, additional: usize) {
+    unsafe fn reserve_trs_unchecked(&mut self, source: StateId, additional: usize) {
         let trs = &mut self.states.get_unchecked_mut(source).trs;
         Arc::make_mut(&mut trs.0).reserve(additional)
     }

@@ -3,8 +3,7 @@ use nom::IResult;
 
 use crate::parsers::nom_utils::NomCustomError;
 use crate::semirings::SerializableSemiring;
-use crate::StateId;
-use crate::Tr;
+use crate::{Tr, StateId, Label };
 use crate::NO_STATE_ID;
 
 #[inline]
@@ -37,10 +36,10 @@ pub(crate) fn parse_fst_tr<W: SerializableSemiring>(
     Ok((
         i,
         Tr {
-            ilabel: ilabel as usize,
-            olabel: olabel as usize,
+            ilabel: ilabel as Label,
+            olabel: olabel as Label,
             weight,
-            nextstate: nextstate as usize,
+            nextstate: nextstate as StateId,
         },
     ))
 }

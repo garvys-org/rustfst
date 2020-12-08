@@ -190,13 +190,13 @@ macro_rules! string_semiring {
         }
 
         impl From<Vec<Label>> for $semiring {
-            fn from(l: Vec<usize>) -> Self {
+            fn from(l: Vec<Label>) -> Self {
                 Self::new(l.into())
             }
         }
 
         impl From<Label> for $semiring {
-            fn from(l: usize) -> Self {
+            fn from(l: Label) -> Self {
                 Self::new(vec![l].into())
             }
         }

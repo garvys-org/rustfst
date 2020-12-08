@@ -10,7 +10,7 @@ use crate::{StateId, TrsVec};
 pub trait FstOp<W: Semiring>: Debug {
     // was FstImpl
     fn compute_start(&self) -> Result<Option<StateId>>;
-    fn compute_trs(&self, id: usize) -> Result<TrsVec<W>>;
+    fn compute_trs(&self, id: StateId) -> Result<TrsVec<W>>;
     fn compute_final_weight(&self, id: StateId) -> Result<Option<W>>;
 
     // Computed at construction time
@@ -22,7 +22,7 @@ impl<W: Semiring, F: FstOp<W>, FP: Deref<Target = F> + Debug> FstOp<W> for FP {
         self.deref().compute_start()
     }
 
-    fn compute_trs(&self, id: usize) -> Result<TrsVec<W>> {
+    fn compute_trs(&self, id: StateId) -> Result<TrsVec<W>> {
         self.deref().compute_trs(id)
     }
 
