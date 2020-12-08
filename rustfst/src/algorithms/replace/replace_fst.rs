@@ -10,7 +10,7 @@ use crate::algorithms::replace::replace_fst_op::ReplaceFstOp;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
-use crate::{StateId, Label, SymbolTable, TrsVec};
+use crate::{Label, StateId, SymbolTable, TrsVec};
 
 /// ReplaceFst supports lazy replacement of trs in one FST with another FST.
 /// This replacement is recursive. ReplaceFst can be used to support a variety of

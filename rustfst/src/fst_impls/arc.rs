@@ -6,7 +6,7 @@ use anyhow::Result;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator};
 use crate::semirings::Semiring;
-use crate::{StateId, SymbolTable };
+use crate::{StateId, SymbolTable};
 
 impl<W: Semiring, F: Fst<W>> Fst<W> for Arc<F> {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {

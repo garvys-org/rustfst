@@ -11,7 +11,7 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
-use crate::{ Tr, StateId };
+use crate::{StateId, Tr};
 
 #[derive(Debug, Clone)]
 pub struct TrivialComposeFilter<W, F1, F2, B1, B2, M1, M2>

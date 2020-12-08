@@ -6,7 +6,7 @@ use crate::fst_impls::ConstFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst};
 use crate::semirings::Semiring;
-use crate::{SymbolTable, TrsConst, StateId};
+use crate::{StateId, SymbolTable, TrsConst};
 
 impl<W: Semiring> Fst<W> for ConstFst<W> {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
@@ -50,7 +50,10 @@ impl<W: Semiring> CoreFst<W> for ConstFst<W> {
     }
 
     unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<W> {
-        self.states.get_unchecked(state_id as usize).final_weight.clone()
+        self.states
+            .get_unchecked(state_id as usize)
+            .final_weight
+            .clone()
     }
 
     fn num_trs(&self, s: StateId) -> Result<usize> {

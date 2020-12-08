@@ -51,7 +51,10 @@ impl<W: Semiring> CoreFst<W> for VectorFst<W> {
 
     #[inline]
     unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<W> {
-        self.states.get_unchecked(state_id as usize).final_weight.clone()
+        self.states
+            .get_unchecked(state_id as usize)
+            .final_weight
+            .clone()
     }
 
     fn num_trs(&self, s: StateId) -> Result<usize> {

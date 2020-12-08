@@ -3,8 +3,8 @@ use nom::IResult;
 
 use crate::parsers::nom_utils::NomCustomError;
 use crate::semirings::SerializableSemiring;
-use crate::{Tr, StateId, Label };
 use crate::NO_STATE_ID;
+use crate::{Label, StateId, Tr};
 
 #[inline]
 pub(crate) fn parse_start_state(s: i64) -> Option<StateId> {

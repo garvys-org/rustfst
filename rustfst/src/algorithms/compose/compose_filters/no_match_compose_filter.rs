@@ -11,7 +11,7 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
-use crate::{Tr, StateId, EPS_LABEL};
+use crate::{StateId, Tr, EPS_LABEL};
 
 #[derive(Debug, Clone)]
 pub struct NoMatchComposeFilter<W, F1, F2, B1, B2, M1, M2>

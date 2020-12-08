@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 use std::hash::Hash;
 
-use crate::{ NO_STATE_ID, StateId };
+use crate::{StateId, NO_STATE_ID};
 
 use self::super::FilterState;
 

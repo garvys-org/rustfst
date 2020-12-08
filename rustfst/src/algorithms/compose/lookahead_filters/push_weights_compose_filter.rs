@@ -14,7 +14,7 @@ use crate::algorithms::compose::matchers::{MatchType, MatcherFlags};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
-use crate::{Tr, StateId, KDELTA};
+use crate::{StateId, Tr, KDELTA};
 
 #[derive(Debug, Clone)]
 pub struct PushWeightsComposeFilter<W: Semiring, F1, F2, B1, B2, M1, M2, CF, SMT>

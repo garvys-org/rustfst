@@ -10,7 +10,7 @@ use crate::algorithms::lazy::{LazyFst, SimpleHashMapCache};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::WeightQuantize;
-use crate::{SymbolTable, StateId, TrsVec};
+use crate::{StateId, SymbolTable, TrsVec};
 
 /// The result of weight factoring is a transducer equivalent to the
 /// input whose path weights have been factored according to the FactorIterator.

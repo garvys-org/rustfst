@@ -12,7 +12,7 @@ use crate::algorithms::compose::matchers::{MatchType, Matcher, MatcherFlags};
 use crate::algorithms::compose::{LabelReachable, LabelReachableData};
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
-use crate::{Tr, Trs, EPS_LABEL, Label, StateId};
+use crate::{Label, StateId, Tr, Trs, EPS_LABEL};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelLookAheadMatcher<W, F, B, M, MFT>

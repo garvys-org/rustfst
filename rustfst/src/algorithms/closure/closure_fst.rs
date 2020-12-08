@@ -8,7 +8,7 @@ use crate::fst_properties::mutable_properties::closure_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
-use crate::{SymbolTable, Tr, TrsVec, EPS_LABEL, NO_LABEL, StateId};
+use crate::{StateId, SymbolTable, Tr, TrsVec, EPS_LABEL, NO_LABEL};
 
 /// Computes the concatenative closure. This version is a delayed FST. If an FST
 /// transduces string x to y with weight a, then its closure transduces x to y

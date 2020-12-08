@@ -21,7 +21,7 @@ use crate::algorithms::lazy::{LazyFst2, SimpleHashMapCache};
 use crate::algorithms::rm_epsilon::rm_epsilon_op::RmEpsilonOp;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
-use crate::{StateId, Semiring, SymbolTable, TrsVec};
+use crate::{Semiring, StateId, SymbolTable, TrsVec};
 
 /// The result of weight factoring is a transducer equivalent to the
 /// input whose path weights have been factored according to the FactorIterator.

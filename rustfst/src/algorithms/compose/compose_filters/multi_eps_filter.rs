@@ -10,7 +10,7 @@ use crate::algorithms::compose::matchers::Matcher;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
-use crate::{Tr, StateId, NO_LABEL};
+use crate::{StateId, Tr, NO_LABEL};
 
 #[derive(Debug, Clone)]
 pub struct MultiEpsFilter<W, F1, F2, B1, B2, M1, M2, CF>
