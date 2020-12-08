@@ -65,7 +65,7 @@ where
         }
     }
 
-    fn priority(&self, state: usize) -> Result<usize> {
+    fn priority(&self, state: StateId) -> Result<usize> {
         self.matcher.priority(state)
     }
 
@@ -153,9 +153,9 @@ where
 
     fn lookahead_fst<LF: Fst<W>, BLF: Borrow<LF>>(
         &self,
-        matcher_state: usize,
+        matcher_state: StateId,
         lfst: &BLF,
-        lfst_state: usize,
+        lfst_state: StateId,
     ) -> Result<Option<LookAheadMatcherData<W>>> {
         let lfst = lfst.borrow();
         // InitLookAheadFst
@@ -212,7 +212,7 @@ where
         }
     }
 
-    fn lookahead_label(&self, current_state: usize, label: Label) -> Result<bool> {
+    fn lookahead_label(&self, current_state: StateId, label: Label) -> Result<bool> {
         if label == EPS_LABEL {
             return Ok(true);
         }
