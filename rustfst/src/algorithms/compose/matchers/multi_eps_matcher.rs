@@ -2,7 +2,6 @@ use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::iter::Peekable;
 use std::marker::PhantomData;
-use std::ops::{Add, AddAssign, SubAssign};
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -94,7 +93,7 @@ where
                     while *pos_labels < multi_eps_labels.len() {
                         let mut it = self
                             .matcher
-                            .iter(self.matcher_state, multi_eps_labels[*pos_labels])
+                            .iter(self.matcher_state, multi_eps_labels[*pos_labels] as Label)
                             .unwrap()
                             .peekable();
                         if it.peek().is_some() {
@@ -267,6 +266,29 @@ where
     }
 }
 
+trait CompactSetKey: Copy + Ord {
+    fn add(self, v: usize) -> Self;
+    fn sub(self, v: usize) -> Self;
+}
+
+impl CompactSetKey for usize {
+    fn add(self, v: usize) -> Self {
+        self + v
+    }
+    fn sub(self, v: usize) -> Self {
+        self - v
+    }
+}
+
+impl CompactSetKey for u32 {
+    fn add(self, v: usize) -> Self {
+        self + v as u32
+    }
+    fn sub(self, v: usize) -> Self {
+        self - v as u32
+    }
+}
+
 #[derive(Clone, Debug)]
 struct CompactSet<K> {
     set: BTreeSet<K>,
@@ -275,7 +297,7 @@ struct CompactSet<K> {
     no_key: K,
 }
 
-impl<K: Copy + Ord + AddAssign<usize> + SubAssign<usize> + Add<usize, Output = K>> CompactSet<K> {
+impl<K: Copy + Ord> CompactSet<K> {
     pub fn new(no_key: K) -> Self {
         Self {
             set: BTreeSet::new(),
@@ -292,18 +314,6 @@ impl<K: Copy + Ord + AddAssign<usize> + SubAssign<usize> + Add<usize, Output = K
         }
         if self.max_key == self.no_key || self.max_key > key {
             self.max_key = key;
-        }
-    }
-
-    pub fn erase(&mut self, key: K) {
-        self.set.remove(&key);
-        if self.set.is_empty() {
-            self.min_key = self.no_key;
-            self.max_key = self.no_key;
-        } else if key == self.min_key {
-            self.min_key += 1;
-        } else if key == self.max_key {
-            self.max_key -= 1;
         }
     }
 
@@ -326,12 +336,28 @@ impl<K: Copy + Ord + AddAssign<usize> + SubAssign<usize> + Add<usize, Output = K
     pub fn upper_bound(&self) -> K {
         self.max_key
     }
+}
+
+impl<K: CompactSetKey> CompactSet<K> {
+    pub fn erase(&mut self, key: K) {
+        self.set.remove(&key);
+        if self.set.is_empty() {
+            self.min_key = self.no_key;
+            self.max_key = self.no_key;
+        } else if key == self.min_key {
+            self.min_key = self.min_key.add(1);
+        } else if key == self.max_key {
+            self.max_key = self.max_key.sub(1);
+        }
+    }
 
     pub fn contains(&self, key: &K) -> bool {
         if self.min_key == self.no_key || *key < self.min_key || *key > self.max_key {
             // out of range
             false
-        } else if self.min_key != self.no_key && self.max_key + 1 == self.min_key + self.set.len() {
+        } else if self.min_key != self.no_key
+            && self.max_key.add(1) as K == self.min_key.add(self.set.len())
+        {
             // dense range
             true
         } else {

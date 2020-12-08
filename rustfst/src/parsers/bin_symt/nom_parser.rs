@@ -6,7 +6,7 @@ use nom::IResult;
 use crate::parsers::bin_fst::fst_header::OpenFstString;
 use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64};
 use crate::parsers::nom_utils::NomCustomError;
-use crate::SymbolTable;
+use crate::{Label, SymbolTable};
 use anyhow::Result;
 use bitflags::_core::hash::BuildHasher;
 use std::io::Write;
@@ -31,7 +31,7 @@ pub(crate) fn parse_symbol_table_bin(
     let mut symt = SymbolTable::empty();
     for (key, symbol) in pairs_idx_symbols.into_iter() {
         let inserted_label = symt.add_symbol(symbol);
-        if inserted_label != key as usize {
+        if inserted_label != key as Label {
             return Err(nom::Err::Error(NomCustomError::SymbolTableError(
                 format!("SymbolTable must contain increasing labels with no hole. Expected : {} and Got : {}", inserted_label, key)
             )));

@@ -55,7 +55,7 @@ pub fn connect<W: Semiring, F: ExpandedFst<W> + MutableFst<W>>(fst: &mut F) -> R
     let mut dstates = Vec::with_capacity(visitor.access.len());
     for s in 0..visitor.access.len() {
         if !visitor.access[s] || !visitor.coaccess[s] {
-            dstates.push(s);
+            dstates.push(s as StateId);
         }
     }
     fst.del_states(dstates)?;
@@ -69,7 +69,7 @@ pub fn connect<W: Semiring, F: ExpandedFst<W> + MutableFst<W>>(fst: &mut F) -> R
 struct ConnectVisitor<'a, W: Semiring, F: Fst<W>> {
     access: Vec<bool>,
     coaccess: Vec<bool>,
-    start: usize,
+    start: StateId,
     fst: &'a F,
     nstates: usize,
     dfnumber: Vec<i32>,
@@ -100,8 +100,9 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> ConnectVisitor<'a, W, F> {
 impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for ConnectVisitor<'a, W, F> {
     fn init_visit(&mut self, _fst: &'a F) {}
 
-    fn init_state(&mut self, s: usize, root: usize) -> bool {
+    fn init_state(&mut self, s: StateId, root: StateId) -> bool {
         self.scc_stack.push(s);
+        let s = s as usize;
         self.dfnumber[s] = self.nstates as i32;
         self.lowlink[s] = self.nstates as i32;
         self.onstack[s] = true;
@@ -110,11 +111,11 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for ConnectVisit
         true
     }
 
-    fn tree_tr(&mut self, _s: usize, _tr: &Tr<W>) -> bool {
+    fn tree_tr(&mut self, _s: StateId, _tr: &Tr<W>) -> bool {
         true
     }
 
-    fn back_tr(&mut self, s: usize, tr: &Tr<W>) -> bool {
+    fn back_tr(&mut self, s: StateId, tr: &Tr<W>) -> bool {
         let t = tr.nextstate;
         if self.dfnumber[t] < self.lowlink[s] {
             self.lowlink[s] = self.dfnumber[t];
@@ -125,8 +126,9 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for ConnectVisit
         true
     }
 
-    fn forward_or_cross_tr(&mut self, s: usize, tr: &Tr<W>) -> bool {
-        let t = tr.nextstate;
+    fn forward_or_cross_tr(&mut self, s: StateId, tr: &Tr<W>) -> bool {
+        let t = tr.nextstate as usize;
+        let s = s as usize;
         if self.dfnumber[t] < self.dfnumber[s]
             && self.onstack[t]
             && self.dfnumber[t] < self.lowlink[s]
@@ -140,7 +142,8 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for ConnectVisit
     }
 
     #[inline]
-    fn finish_state(&mut self, s: usize, parent: Option<usize>, _tr: Option<&Tr<W>>) {
+    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, _tr: Option<&Tr<W>>) {
+        let s = s as usize;
         if unsafe { self.fst.is_final_unchecked(s) } {
             self.coaccess[s] = true;
         }
@@ -171,6 +174,7 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for ConnectVisit
             }
         }
         if let Some(_p) = parent {
+            let _p = _p as usize;
             if self.coaccess[s] {
                 self.coaccess[_p] = true;
             }

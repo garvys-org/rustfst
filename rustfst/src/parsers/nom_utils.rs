@@ -2,6 +2,7 @@ use nom::bytes::complete::take_while;
 use nom::character::complete::digit1;
 use nom::combinator::map_res;
 use nom::IResult;
+use std::str::FromStr;
 
 use nom::error::ErrorKind;
 use nom::error::ParseError;
@@ -22,7 +23,7 @@ impl<I> ParseError<I> for NomCustomError<I> {
     }
 }
 
-pub fn num(i: &str) -> IResult<&str, usize> {
+pub fn num<V: FromStr>(i: &str) -> IResult<&str, V> {
     map_res(digit1, |s: &str| s.parse())(i)
 }
 

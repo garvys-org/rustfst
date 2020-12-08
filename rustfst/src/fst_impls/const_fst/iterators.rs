@@ -13,17 +13,6 @@ use crate::semirings::Semiring;
 use crate::Tr;
 use crate::{StateId, TrsConst};
 
-impl<W> ConstFst<W> {
-    fn state_range(&self) -> Range<usize> {
-        0..self.states.len()
-    }
-
-    #[allow(unused)]
-    fn tr_range(&self, state: &ConstState<W>) -> Range<usize> {
-        state.pos..state.pos + state.ntrs
-    }
-}
-
 impl<W: Semiring> FstIntoIterator<W> for ConstFst<W>
 where
     W: 'static,
@@ -48,7 +37,7 @@ where
             izip!(self.states.into_iter(), v_trs.into_iter())
                 .enumerate()
                 .map(|(state_id, (const_state, trs_from_state))| FstIterData {
-                    state_id,
+                    state_id: state_id as StateId,
                     trs: trs_from_state.into_iter(),
                     final_weight: const_state.final_weight,
                     num_trs: const_state.ntrs,
@@ -60,7 +49,7 @@ where
 impl<'a, W> StateIterator<'a> for ConstFst<W> {
     type Iter = Range<StateId>;
     fn states_iter(&'a self) -> Self::Iter {
-        self.state_range()
+        0..(self.states.len() as StateId)
     }
 }
 

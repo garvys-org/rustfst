@@ -220,9 +220,9 @@ where
 
     fn lookahead_fst<LF: Fst<W>, BLF: Borrow<LF>>(
         &self,
-        _matcher_state: usize,
+        _matcher_state: StateId,
         _lfst: &BLF,
-        _lfst_state: usize,
+        _lfst_state: StateId,
     ) -> Result<Option<LookAheadMatcherData<W>>> {
         unreachable!()
     }

@@ -19,7 +19,7 @@ use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64}
 use crate::parsers::nom_utils::NomCustomError;
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::SerializableSemiring;
-use crate::{Tr, Trs, TrsVec, EPS_LABEL};
+use crate::{StateId, Tr, Trs, TrsVec, EPS_LABEL};
 
 impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
     fn fst_type() -> String {
@@ -44,7 +44,7 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
         let mut file = BufWriter::new(File::create(path_bin_fst)?);
 
         let num_trs: usize = (0..self.num_states())
-            .map(|s: usize| unsafe { self.num_trs_unchecked(s) })
+            .map(|s: usize| unsafe { self.num_trs_unchecked(s as StateId) })
             .sum();
 
         let mut flags = FstFlags::empty();
@@ -74,6 +74,7 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
 
         // FstBody
         for state in 0..self.num_states() {
+            let state = state as StateId;
             let f_weight = unsafe { self.final_weight_unchecked(state).unwrap_or_else(W::zero) };
             f_weight.write_binary(&mut file)?;
             write_bin_i64(&mut file, unsafe { self.num_trs_unchecked(state) } as i64)?;

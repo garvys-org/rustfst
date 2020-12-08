@@ -9,7 +9,6 @@ use nom::IResult;
 use crate::parsers::nom_utils::num;
 use crate::parsers::text_fst::parsed_text_fst::{FinalState, RowParsed, Transition};
 use crate::semirings::SerializableSemiring;
-use crate::{Label, StateId};
 
 fn optional_weight<W: SerializableSemiring>(i: &str) -> IResult<&str, Option<W>> {
     opt(preceded(tab, W::parse_text))(i)
@@ -28,11 +27,11 @@ fn transition<W: SerializableSemiring>(i: &str) -> IResult<&str, RowParsed<W>> {
     Ok((
         i,
         RowParsed::Transition(Transition {
-            state: state as StateId,
-            ilabel: ilabel as Label,
-            olabel: olabel as Label,
+            state: state,
+            ilabel: ilabel,
+            olabel: olabel,
             weight,
-            nextstate: nextstate as StateId,
+            nextstate: nextstate,
         }),
     ))
 }
@@ -43,7 +42,7 @@ fn final_state<W: SerializableSemiring>(i: &str) -> IResult<&str, RowParsed<W>> 
     Ok((
         i,
         RowParsed::FinalState(FinalState {
-            state: state as StateId,
+            state: state,
             weight,
         }),
     ))
@@ -53,7 +52,7 @@ fn infinity_final_state<W: SerializableSemiring>(i: &str) -> IResult<&str, RowPa
     let (i, state) = num(i)?;
     let (i, _) = tab(i)?;
     let (i, _) = tag("Infinity")(i)?;
-    Ok((i, RowParsed::InfinityFinalState(state as StateId)))
+    Ok((i, RowParsed::InfinityFinalState(state)))
 }
 
 fn row_parsed<W: SerializableSemiring>(i: &str) -> IResult<&str, RowParsed<W>> {

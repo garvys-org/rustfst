@@ -271,7 +271,7 @@ macro_rules! string_semiring {
                     Self::new(StringWeightVariant::Infinity)
                 } else {
                     Self::new(StringWeightVariant::Labels(
-                        labels.into_iter().map(|e| e as usize).collect(),
+                        labels.into_iter().map(|e| e as Label).collect(),
                     ))
                 };
                 Ok((i, weight))

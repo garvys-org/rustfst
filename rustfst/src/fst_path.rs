@@ -107,8 +107,8 @@ pub fn check_path_in_fst<W: Semiring, F: Fst<W>>(fst: &F, fst_path: &FstPath<W>)
         while !queue.is_empty() {
             let lol = queue.pop_front().unwrap();
             let state = lol.state;
-            let next_ilabel_idx = lol.next_ilabel_idx;
-            let next_olabel_idx = lol.next_olabel_idx;
+            let next_ilabel_idx = lol.next_ilabel_idx as usize;
+            let next_olabel_idx = lol.next_olabel_idx as usize;
             let weight_curr = lol.weight_curr;
 
             if next_ilabel_idx >= fst_path.ilabels.len()
@@ -151,8 +151,8 @@ pub fn check_path_in_fst<W: Semiring, F: Fst<W>>(fst: &F, fst_path: &FstPath<W>)
                     };
                 queue.push_back(BfsState {
                     state: tr.nextstate,
-                    next_ilabel_idx: new_next_ilabel_idx,
-                    next_olabel_idx: new_next_olabel_idx,
+                    next_ilabel_idx: new_next_ilabel_idx as Label,
+                    next_olabel_idx: new_next_olabel_idx as Label,
                     weight_curr: weight_curr.times(&tr.weight).unwrap(),
                 })
             }
