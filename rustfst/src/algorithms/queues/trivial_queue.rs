@@ -14,7 +14,7 @@ impl Queue for TrivialQueue {
         self.state
     }
 
-    fn enqueue(&mut self, state: usize) {
+    fn enqueue(&mut self, state: StateId) {
         self.state = Some(state);
     }
 
@@ -22,7 +22,7 @@ impl Queue for TrivialQueue {
         self.state = None;
     }
 
-    fn update(&mut self, _state: usize) {}
+    fn update(&mut self, _state: StateId) {}
 
     fn is_empty(&self) -> bool {
         self.state.is_none()

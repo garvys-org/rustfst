@@ -6,11 +6,11 @@ use crate::StateId;
 pub struct LifoQueue(Vec<StateId>);
 
 impl Queue for LifoQueue {
-    fn head(&mut self) -> Option<usize> {
+    fn head(&mut self) -> Option<StateId> {
         self.0.last().cloned()
     }
 
-    fn enqueue(&mut self, state: usize) {
+    fn enqueue(&mut self, state: StateId) {
         self.0.push(state)
     }
 
@@ -18,7 +18,7 @@ impl Queue for LifoQueue {
         self.0.pop();
     }
 
-    fn update(&mut self, _state: usize) {}
+    fn update(&mut self, _state: StateId) {}
 
     fn is_empty(&self) -> bool {
         self.0.is_empty()

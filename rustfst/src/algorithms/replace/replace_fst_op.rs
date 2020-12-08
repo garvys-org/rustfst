@@ -57,10 +57,10 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> std::fmt::Debug for ReplaceFstOp<W, F
 }
 
 impl<W: Semiring, F: Fst<W>, B: Borrow<F>> FstOp<W> for ReplaceFstOp<W, F, B> {
-    fn compute_start(&self) -> Result<Option<usize>> {
+    fn compute_start(&self) -> Result<Option<StateId>> {
         if self.fst_array.is_empty() {
             Ok(None)
-        } else if let Some(fst_start) = self.fst_array[self.root].borrow().start() {
+        } else if let Some(fst_start) = self.fst_array[self.root as usize].borrow().start() {
             let prefix = self.get_prefix_id(ReplaceStackPrefix::new());
             let start = self.state_table.tuple_table.find_id(ReplaceStateTuple::new(
                 prefix,
@@ -73,7 +73,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> FstOp<W> for ReplaceFstOp<W, F, B> {
         }
     }
 
-    fn compute_trs(&self, state: usize) -> Result<TrsVec<W>> {
+    fn compute_trs(&self, state: StateId) -> Result<TrsVec<W>> {
         let tuple = self.state_table.tuple_table.find_tuple(state);
         let mut trs = vec![];
         if let Some(fst_state) = tuple.fst_state {
@@ -99,7 +99,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> FstOp<W> for ReplaceFstOp<W, F, B> {
         Ok(TrsVec(Arc::new(trs)))
     }
 
-    fn compute_final_weight(&self, state: usize) -> Result<Option<W>> {
+    fn compute_final_weight(&self, state: StateId) -> Result<Option<W>> {
         let tuple = self.state_table.tuple_table.find_tuple(state);
         if tuple.prefix_id == 0 {
             self.fst_array
@@ -287,7 +287,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstOp<W, F, B> {
             ));
             if let Some(weight) = self
                 .fst_array
-                .get(tuple.fst_id.unwrap())
+                .get(tuple.fst_id.unwrap() as usize)
                 .unwrap()
                 .borrow()
                 .final_weight(fst_state)

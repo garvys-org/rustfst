@@ -38,32 +38,33 @@ impl TopOrderQueue {
 }
 
 impl Queue for TopOrderQueue {
-    fn head(&mut self) -> Option<usize> {
-        self.state[self.front]
+    fn head(&mut self) -> Option<StateId> {
+        self.state[self.front as usize]
     }
 
-    fn enqueue(&mut self, state: usize) {
+    fn enqueue(&mut self, state: StateId) {
+        let u_state = state as usize;
         if self.back.is_none() || self.front > self.back.unwrap() {
-            self.front = self.order[state];
-            self.back = Some(self.order[state]);
-        } else if self.order[state] > self.back.unwrap() {
-            self.back = Some(self.order[state]);
-        } else if self.order[state] < self.front {
-            self.front = self.order[state];
+            self.front = self.order[u_state];
+            self.back = Some(self.order[u_state]);
+        } else if self.order[u_state] > self.back.unwrap() {
+            self.back = Some(self.order[u_state]);
+        } else if self.order[u_state] < self.front {
+            self.front = self.order[u_state];
         }
-        self.state[self.order[state]] = Some(state);
+        self.state[self.order[u_state] as usize] = Some(state);
     }
 
     fn dequeue(&mut self) {
-        self.state[self.front] = None;
+        self.state[self.front as usize] = None;
         if self.back.is_some() {
-            while self.front <= self.back.unwrap() && self.state[self.front].is_none() {
+            while self.front <= self.back.unwrap() && self.state[self.front as usize].is_none() {
                 self.front += 1;
             }
         }
     }
 
-    fn update(&mut self, _state: usize) {}
+    fn update(&mut self, _state: StateId) {}
 
     fn is_empty(&self) -> bool {
         if let Some(back_) = self.back {
@@ -76,7 +77,7 @@ impl Queue for TopOrderQueue {
     fn clear(&mut self) {
         if let Some(back_) = self.back {
             for s in self.front..=back_ {
-                self.state[s] = None;
+                self.state[s as usize] = None;
             }
         }
         self.front = 0;

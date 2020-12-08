@@ -57,7 +57,7 @@ impl<W: Semiring, F: CoreFst<W>, T> CoreFst<W> for FstAddOn<F, T> {
         self.fst.num_trs_unchecked(s)
     }
 
-    fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
+    fn get_trs(&self, state_id: StateId) -> Result<Self::TRS> {
         self.fst.get_trs(state_id)
     }
 

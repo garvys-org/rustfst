@@ -116,7 +116,7 @@ where
 #[derive(Clone)]
 pub struct StatesIteratorLazyFst<'a, T> {
     pub(crate) fst: &'a T,
-    pub(crate) s: usize,
+    pub(crate) s: StateId,
 }
 
 impl<'a, W, Op, Cache> Iterator for StatesIteratorLazyFst<'a, LazyFst<W, Op, Cache>>
@@ -129,7 +129,7 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         let num_known_states = self.fst.cache.num_known_states();
-        if self.s < num_known_states {
+        if (self.s as usize) < num_known_states {
             let s_cur = self.s;
             // Force expansion of the state
             self.fst.get_trs(self.s).unwrap();
@@ -221,31 +221,30 @@ where
     pub fn compute<F2: MutableFst<W> + AllocableFst<W>>(&self) -> Result<F2> {
         let start_state = self.start();
         let mut fst_out = F2::new();
-        if start_state.is_none() {
-            return Ok(fst_out);
-        }
-        let start_state = start_state.unwrap();
-        fst_out.add_states(start_state + 1);
+        let start_state = match start_state {
+            Some(s) => s,
+            None => return Ok(fst_out),
+        };
+        fst_out.add_states(start_state as usize + 1);
         fst_out.set_start(start_state)?;
         let mut queue = VecDeque::new();
         let mut visited_states = vec![];
-        visited_states.resize(start_state + 1, false);
-        visited_states[start_state] = true;
+        visited_states.resize(start_state as usize + 1, false);
+        visited_states[start_state as usize] = true;
         queue.push_back(start_state);
-        while !queue.is_empty() {
-            let s = queue.pop_front().unwrap();
+        while let Some(s) = queue.pop_front() {
             let trs_owner = unsafe { self.get_trs_unchecked(s) };
             for tr in trs_owner.trs() {
-                if tr.nextstate >= visited_states.len() {
-                    visited_states.resize(tr.nextstate + 1, false);
+                if (tr.nextstate as usize) >= visited_states.len() {
+                    visited_states.resize(tr.nextstate as usize + 1, false);
                 }
-                if !visited_states[tr.nextstate] {
+                if !visited_states[tr.nextstate as usize] {
                     queue.push_back(tr.nextstate);
-                    visited_states[tr.nextstate] = true;
+                    visited_states[tr.nextstate as usize] = true;
                 }
                 let n = fst_out.num_states();
-                if tr.nextstate >= n {
-                    fst_out.add_states(tr.nextstate - n + 1)
+                if (tr.nextstate as usize) >= n {
+                    fst_out.add_states(tr.nextstate as usize - n + 1)
                 }
             }
             unsafe { fst_out.set_trs_unchecked(s, trs_owner.trs().to_vec()) };

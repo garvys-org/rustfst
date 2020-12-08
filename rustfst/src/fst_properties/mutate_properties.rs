@@ -521,7 +521,7 @@ pub fn replace_properties(
 
     if access_props == (FstProperties::ACCESSIBLE | FstProperties::COACCESSIBLE) {
         outprops |= access_props;
-        if inprops[root].contains(FstProperties::INITIAL_CYCLIC) {
+        if inprops[root as usize].contains(FstProperties::INITIAL_CYCLIC) {
             outprops |= FstProperties::INITIAL_CYCLIC;
         }
         let mut props = FstProperties::empty();
@@ -571,7 +571,7 @@ pub fn replace_properties(
         if !inprop.contains(FstProperties::UNWEIGHTED) {
             unweighted = false;
         }
-        if i != root && !inprop.contains(FstProperties::NO_I_EPSILONS) {
+        if i != root as usize && !inprop.contains(FstProperties::NO_I_EPSILONS) {
             ideterministic = false;
         }
     }
@@ -590,7 +590,7 @@ pub fn replace_properties(
     if unweighted {
         outprops |= FstProperties::UNWEIGHTED;
     }
-    if inprops[root].contains(FstProperties::INITIAL_ACYCLIC) {
+    if inprops[root as usize].contains(FstProperties::INITIAL_ACYCLIC) {
         outprops |= FstProperties::INITIAL_ACYCLIC;
     }
     // We assume that all terminals are positive. The resulting ReplaceFst is

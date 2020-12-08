@@ -63,23 +63,26 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
     fn insert_start(&self, id: Option<StateId>) {
         let mut cached_data = self.start.lock().unwrap();
         if let Some(s) = id {
-            cached_data.num_known_states = std::cmp::max(cached_data.num_known_states, s + 1);
+            cached_data.num_known_states =
+                std::cmp::max(cached_data.num_known_states, s as usize + 1);
         }
         cached_data.data = CacheStatus::Computed(id);
     }
 
-    fn get_trs(&self, id: usize) -> CacheStatus<TrsVec<W>> {
+    fn get_trs(&self, id: StateId) -> CacheStatus<TrsVec<W>> {
+        let id = id as usize;
         let cached_data = self.trs.lock().unwrap();
         cached_data.get(id).map(|e| e.trs.shallow_clone())
     }
 
-    fn insert_trs(&self, id: usize, trs: TrsVec<W>) {
+    fn insert_trs(&self, id: StateId, trs: TrsVec<W>) {
+        let id = id as usize;
         let mut cached_data = self.trs.lock().unwrap();
         let mut niepsilons = 0;
         let mut noepsilons = 0;
         for tr in trs.trs() {
             cached_data.num_known_states =
-                std::cmp::max(cached_data.num_known_states, tr.nextstate + 1);
+                std::cmp::max(cached_data.num_known_states, tr.nextstate as usize + 1);
             if tr.ilabel == EPS_LABEL {
                 niepsilons += 1;
             }
@@ -97,7 +100,8 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
         });
     }
 
-    fn get_final_weight(&self, id: usize) -> CacheStatus<Option<W>> {
+    fn get_final_weight(&self, id: StateId) -> CacheStatus<Option<W>> {
+        let id = id as usize;
         let cached_data = self.final_weights.lock().unwrap();
         match cached_data.data.get(id) {
             Some(e) => e.clone(),
@@ -106,6 +110,7 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
     }
 
     fn insert_final_weight(&self, id: StateId, weight: Option<W>) {
+        let id = id as usize;
         let mut cached_data = self.final_weights.lock().unwrap();
         cached_data.num_known_states = std::cmp::max(cached_data.num_known_states, id + 1);
         if id >= cached_data.data.len() {
@@ -123,17 +128,20 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
         n
     }
 
-    fn num_trs(&self, id: usize) -> Option<usize> {
+    fn num_trs(&self, id: StateId) -> Option<usize> {
+        let id = id as usize;
         let cached_data = self.trs.lock().unwrap();
         cached_data.get(id).map(|e| e.trs.len()).into_option()
     }
 
-    fn num_input_epsilons(&self, id: usize) -> Option<usize> {
+    fn num_input_epsilons(&self, id: StateId) -> Option<usize> {
+        let id = id as usize;
         let cached_data = self.trs.lock().unwrap();
         cached_data.get(id).map(|e| e.niepsilons).into_option()
     }
 
-    fn num_output_epsilons(&self, id: usize) -> Option<usize> {
+    fn num_output_epsilons(&self, id: StateId) -> Option<usize> {
+        let id = id as usize;
         let cached_data = self.trs.lock().unwrap();
         cached_data.get(id).map(|e| e.noepsilons).into_option()
     }
