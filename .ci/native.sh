@@ -30,6 +30,7 @@ fi
 cargo clean -p rustfst
 cargo clean -p rustfst-cli
 
+cargo build --feature "state-label-u32 "
 cargo build --all
 cargo test --all
 cargo check --benches --all # running benches on travis is useless
