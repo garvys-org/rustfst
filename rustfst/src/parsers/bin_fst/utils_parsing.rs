@@ -3,12 +3,11 @@ use nom::IResult;
 
 use crate::parsers::nom_utils::NomCustomError;
 use crate::semirings::SerializableSemiring;
-use crate::NO_STATE_ID;
 use crate::{Label, StateId, Tr};
 
 #[inline]
 pub(crate) fn parse_start_state(s: i64) -> Option<StateId> {
-    if s == (NO_STATE_ID as i64) {
+    if s == -1 {
         None
     } else {
         Some(s as StateId)
