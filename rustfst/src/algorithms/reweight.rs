@@ -4,7 +4,7 @@ use crate::fst_properties::mutable_properties::reweight_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::{DivideType, WeaklyDivisibleSemiring};
-use crate::{Tr, EPS_LABEL};
+use crate::{StateId, Tr, EPS_LABEL};
 
 /// Different types of reweighting.
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
@@ -35,9 +35,9 @@ where
         return Ok(());
     }
 
-    for state in 0..num_states {
+    for state in 0..(num_states as StateId) {
         // This handles elements past the end of the potentials array.
-        if state >= potentials.len() {
+        if state as usize >= potentials.len() {
             match reweight_type {
                 ReweightType::ReweightToInitial => {}
                 ReweightType::ReweightToFinal => {
@@ -50,7 +50,7 @@ where
             continue;
         }
 
-        let d_s = potentials.get(state).unwrap_or(&zero);
+        let d_s = potentials.get(state as usize).unwrap_or(&zero);
 
         if d_s.is_zero() {
             continue;
@@ -60,7 +60,7 @@ where
             let mut it_tr = fst.tr_iter_unchecked_mut(state);
             for idx_tr in 0..it_tr.len() {
                 let tr = it_tr.get_unchecked(idx_tr);
-                let d_ns = potentials.get(tr.nextstate).unwrap_or(&zero);
+                let d_ns = potentials.get(tr.nextstate as usize).unwrap_or(&zero);
 
                 if d_ns.is_zero() {
                     continue;
@@ -80,9 +80,9 @@ where
         }
     }
 
-    for state_id in 0..fst.num_states() {
+    for state_id in 0..(fst.num_states() as StateId) {
         if let Some(mut final_weight) = unsafe { fst.final_weight_unchecked(state_id) } {
-            let d_s = potentials.get(state_id).unwrap_or(&zero);
+            let d_s = potentials.get(state_id as usize).unwrap_or(&zero);
 
             match reweight_type {
                 ReweightType::ReweightToFinal => {
@@ -102,7 +102,7 @@ where
 
     // Handles potential of the start state
     if let Some(start_state) = fst.start() {
-        let d_s = potentials.get(start_state).unwrap_or(&zero);
+        let d_s = potentials.get(start_state as usize).unwrap_or(&zero);
 
         if !d_s.is_one() && !d_s.is_zero() {
             fst.compute_and_update_properties(FstProperties::INITIAL_ACYCLIC)?;

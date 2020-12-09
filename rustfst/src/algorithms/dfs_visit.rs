@@ -102,12 +102,13 @@ pub fn dfs_visit<'a, W: Semiring, F: ExpandedFst<W>, V: Visitor<'a, W, F>, A: Tr
     access_only: bool,
 ) {
     visitor.init_visit(fst);
-    let start = fst.start();
-    if start.is_none() {
-        visitor.finish_visit();
-        return;
-    }
-    let start = unsafe { start.unsafe_unwrap() };
+    let start = match fst.start() {
+        None => {
+            visitor.finish_visit();
+            return;
+        }
+        Some(s) => s,
+    };
 
     let nstates = fst.num_states();
     let mut state_color = vec![DfsStateColor::White; nstates];
@@ -117,10 +118,10 @@ pub fn dfs_visit<'a, W: Semiring, F: ExpandedFst<W>, V: Visitor<'a, W, F>, A: Tr
     let mut dfs = true;
     let mut root = start;
     loop {
-        if !dfs || root >= nstates {
+        if !dfs || (root as usize) >= nstates {
             break;
         }
-        state_color[root] = DfsStateColor::Grey;
+        state_color[root as usize] = DfsStateColor::Grey;
         state_stack.push(DfsState::new(fst, root));
         dfs = visitor.init_state(root, root);
         let mut state_stack_next = None;
@@ -129,7 +130,7 @@ pub fn dfs_visit<'a, W: Semiring, F: ExpandedFst<W>, V: Visitor<'a, W, F>, A: Tr
             let s = dfs_state.state_id;
             let aiter = &mut dfs_state.tr_iter;
             if !dfs || aiter.done() {
-                state_color[s] = DfsStateColor::Black;
+                state_color[s as usize] = DfsStateColor::Black;
                 state_stack.pop();
                 if !state_stack.is_empty() {
                     let parent_state = unsafe { state_stack.last_mut().unsafe_unwrap() };
@@ -142,7 +143,7 @@ pub fn dfs_visit<'a, W: Semiring, F: ExpandedFst<W>, V: Visitor<'a, W, F>, A: Tr
                 continue;
             }
             let tr = aiter.value();
-            let next_color = state_color[tr.nextstate];
+            let next_color = state_color[tr.nextstate as usize];
             if !(tr_filter.keep(tr)) {
                 aiter.next();
                 continue;
@@ -153,7 +154,7 @@ pub fn dfs_visit<'a, W: Semiring, F: ExpandedFst<W>, V: Visitor<'a, W, F>, A: Tr
                     if !dfs {
                         break;
                     }
-                    state_color[tr.nextstate] = DfsStateColor::Grey;
+                    state_color[tr.nextstate as usize] = DfsStateColor::Grey;
                     state_stack_next = Some(DfsState::new(fst, tr.nextstate));
                     dfs = visitor.init_state(tr.nextstate, root);
                 }
@@ -179,7 +180,7 @@ pub fn dfs_visit<'a, W: Semiring, F: ExpandedFst<W>, V: Visitor<'a, W, F>, A: Tr
 
         root = if root == start { 0 } else { root + 1 };
 
-        while root < nstates && state_color[root] != DfsStateColor::White {
+        while (root as usize) < nstates && state_color[root as usize] != DfsStateColor::White {
             root += 1;
         }
     }

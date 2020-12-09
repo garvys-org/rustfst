@@ -44,7 +44,7 @@ impl AutoQueue {
                 .scc
                 .unwrap()
                 .into_iter()
-                .map(|v| v as usize)
+                .map(|v| v as StateId)
                 .collect();
             let n_sccs = scc_visitor.nscc as usize;
 
@@ -125,7 +125,8 @@ impl AutoQueue {
                     continue;
                 }
                 if sccs[state as usize] == sccs[tr.nextstate as usize] {
-                    let queue_type = unsafe { queue_types.get_unchecked_mut(sccs[state as usize]) };
+                    let queue_type =
+                        unsafe { queue_types.get_unchecked_mut(sccs[state as usize] as usize) };
                     if compare.is_none() || compare.as_ref().unwrap()(&tr.weight, &W::one())? {
                         *queue_type = QueueType::FifoQueue;
                     } else if *queue_type == QueueType::TrivialQueue

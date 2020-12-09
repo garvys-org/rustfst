@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
-use crate::Tr;
+use crate::{StateId, Tr};
 
 pub trait TrCompare {
     fn compare<W: Semiring>(a: &Tr<W>, b: &Tr<W>) -> Ordering;
@@ -55,7 +55,7 @@ where
     C: TrCompare,
 {
     let props = fst.properties();
-    for state in 0..fst.num_states() {
+    for state in 0..(fst.num_states() as StateId) {
         fst.sort_trs_unchecked(state, C::compare);
     }
     fst.set_properties_with_mask(C::properties(props), FstProperties::all_properties());

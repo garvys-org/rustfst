@@ -174,9 +174,11 @@ impl LabelReachable {
         data: &mut LabelReachableData,
         label2state: &mut HashMap<Label, StateId>,
     ) {
-        let ins = fst.num_states() as StateId;
-        let mut ons = ins;
+        let ins = fst.num_states();
         let mut indeg = vec![0; ins];
+
+        let ins = ins as StateId;
+        let mut ons = ins;
         // Redirects labeled trs to new final states.
         for s in 0..ins {
             let mut it_tr = unsafe { fst.tr_iter_unchecked_mut(s) };
@@ -230,7 +232,7 @@ impl LabelReachable {
         }
 
         // Adds new final states to the FST.
-        while fst.num_states() < ons {
+        while fst.num_states() < (ons as usize) {
             let s = fst.add_state();
             unsafe { fst.set_final_unchecked(s, W::one()) };
         }
@@ -261,9 +263,9 @@ impl LabelReachable {
 
         for (label, state) in label2state.iter() {
             let i = state2index[*state as usize];
-            label2index.insert(*label, i);
+            label2index.insert(*label, i as Label);
             if *label == NO_LABEL {
-                data.final_label = i;
+                data.final_label = i as Label;
             }
         }
         label2state.clear();

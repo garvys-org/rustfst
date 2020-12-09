@@ -44,7 +44,7 @@ where
     M: Matcher<W, F, B>,
 {
     iter_matcher: Option<Peekable<M::Iter>>,
-    iter_labels: Option<(Vec<usize>, usize)>,
+    iter_labels: Option<(Vec<Label>, usize)>,
     matcher: Arc<M>,
     matcher_state: StateId,
     done: bool,

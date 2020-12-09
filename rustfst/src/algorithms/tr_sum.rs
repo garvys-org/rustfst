@@ -7,7 +7,7 @@ use crate::semirings::Semiring;
 pub fn tr_sum<W: Semiring, F: MutableFst<W>>(ifst: &mut F) {
     let props = ifst.properties();
     unsafe {
-        for s in 0..ifst.num_states() {
+        for s in ifst.states_range() {
             ifst.sum_trs_unchecked(s);
         }
     }

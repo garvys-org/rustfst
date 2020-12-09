@@ -17,7 +17,7 @@ pub(crate) struct RmEpsilonState<W: Semiring, Q: Queue> {
     pub visited: Vec<bool>,
     pub visited_states: Vec<StateId>,
     pub element_map: HashMap<Element, (StateId, usize)>,
-    pub expand_id: usize,
+    pub expand_id: StateId,
     pub sd_state: ShortestDistanceState<W, Q, EpsilonTrFilter>,
 }
 
@@ -55,23 +55,23 @@ impl<W: Semiring, Q: Queue> RmEpsilonState<W, Q> {
         let mut trs = vec![];
         let mut final_weight = W::zero();
         while let Some(state) = eps_queue.pop() {
-            while self.visited.len() <= state {
+            while self.visited.len() <= (state as usize) {
                 self.visited.push(false);
             }
-            if self.visited[state] {
+            if self.visited[state as usize] {
                 continue;
             }
-            self.visited[state] = true;
+            self.visited[state as usize] = true;
             self.visited_states.push(state);
             for tr in fst.borrow().get_trs(state)?.trs() {
                 // TODO: Remove this clone
                 let mut tr = tr.clone();
-                tr.weight = distance[state].times(&tr.weight)?;
+                tr.weight = distance[state as usize].times(&tr.weight)?;
                 if tr_filter.keep(&tr) {
-                    while self.visited.len() <= tr.nextstate {
+                    while self.visited.len() <= (tr.nextstate as usize) {
                         self.visited.push(false);
                     }
-                    if !self.visited[tr.nextstate] {
+                    if !self.visited[(tr.nextstate as usize)] {
                         eps_queue.push(tr.nextstate);
                     }
                 } else {
@@ -104,12 +104,13 @@ impl<W: Semiring, Q: Queue> RmEpsilonState<W, Q> {
                 }
             }
             final_weight.plus_assign(
-                distance[state].times(fst.borrow().final_weight(state)?.unwrap_or_else(W::zero))?,
+                distance[state as usize]
+                    .times(fst.borrow().final_weight(state)?.unwrap_or_else(W::zero))?,
             )?;
         }
 
         while let Some(s) = self.visited_states.pop() {
-            self.visited[s] = false;
+            self.visited[s as usize] = false;
         }
 
         self.expand_id += 1;

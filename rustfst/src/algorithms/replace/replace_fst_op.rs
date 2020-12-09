@@ -84,7 +84,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> FstOp<W> for ReplaceFstOp<W, F, B> {
 
             for tr in self
                 .fst_array
-                .get(tuple.fst_id.unwrap())
+                .get(tuple.fst_id.unwrap() as usize)
                 .unwrap()
                 .borrow()
                 .get_trs(fst_state)?
@@ -103,7 +103,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> FstOp<W> for ReplaceFstOp<W, F, B> {
         let tuple = self.state_table.tuple_table.find_tuple(state);
         if tuple.prefix_id == 0 {
             self.fst_array
-                .get(tuple.fst_id.unwrap())
+                .get(tuple.fst_id.unwrap() as usize)
                 .unwrap()
                 .borrow()
                 .final_weight(tuple.fst_state.unwrap())
@@ -141,7 +141,7 @@ where
     let mut root_fst_idx: usize = 0;
     for i in 0..fst_list.len() {
         let label = fst_list[i].0;
-        if label > fst_list.len() {
+        if (label as usize) > fst_list.len() {
             dense_range = false;
         }
         if label == root_label {
@@ -169,7 +169,7 @@ where
     }
     let props = crate::fst_properties::mutable_properties::replace_properties(
         &inprops,
-        root_fst_idx,
+        root_fst_idx as Label,
         epsilon_on_input(call_label_type),
         epsilon_on_input(return_label_type),
         epsilon_on_output(call_label_type),
@@ -237,7 +237,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstOp<W, F, B> {
         for (label, fst) in fst_list.into_iter() {
             replace_fst_impl
                 .nonterminal_hash
-                .insert(label, replace_fst_impl.fst_array.len());
+                .insert(label, replace_fst_impl.fst_array.len() as StateId);
             replace_fst_impl.nonterminal_set.insert(label);
             replace_fst_impl.fst_array.push(fst);
         }
@@ -260,7 +260,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstOp<W, F, B> {
         let fst_state = tuple.fst_state?;
         if self
             .fst_array
-            .get(tuple.fst_id.unwrap())
+            .get(tuple.fst_id.unwrap() as usize)
             .unwrap()
             .borrow()
             .is_final(fst_state)
@@ -334,7 +334,13 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstOp<W, F, B> {
             if let Some(nonterminal) = self.nonterminal_hash.get(&tr.olabel) {
                 let p = self.state_table.prefix_table.find_tuple(tuple.prefix_id);
                 let nt_prefix = self.push_prefix(p, tuple.fst_id, Some(tr.nextstate));
-                if let Some(nt_start) = self.fst_array.get(*nonterminal).unwrap().borrow().start() {
+                if let Some(nt_start) = self
+                    .fst_array
+                    .get(*nonterminal as usize)
+                    .unwrap()
+                    .borrow()
+                    .start()
+                {
                     let nt_nextstate = self.state_table.tuple_table.find_id(
                         ReplaceStateTuple::new(nt_prefix, Some(*nonterminal), Some(nt_start)),
                     );

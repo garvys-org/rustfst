@@ -84,7 +84,7 @@ where
         self.0.num_trs_unchecked(s)
     }
 
-    fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
+    fn get_trs(&self, state_id: StateId) -> Result<Self::TRS> {
         self.0.get_trs(state_id)
     }
 

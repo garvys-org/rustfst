@@ -54,23 +54,27 @@ where
             let nextstate = tr.nextstate;
             let weight = &tr.weight;
 
-            d[state_id][nextstate].plus_assign(weight)?;
+            d[state_id as usize][nextstate as usize].plus_assign(weight)?;
         }
     }
 
     for k in fst.states_iter() {
-        let closure_d_k_k = d[k][k].closure();
+        let u_k = k as usize;
+        let closure_d_k_k = d[u_k][u_k].closure();
         for i in fst.states_iter().filter(|s| *s != k) {
+            let i = i as usize;
             for j in fst.states_iter().filter(|s| *s != k) {
-                let a = (d[i][k].times(&closure_d_k_k)?).times(&d[k][j])?;
+                let j = j as usize;
+                let a = (d[i][u_k].times(&closure_d_k_k)?).times(&d[u_k][j])?;
                 d[i][j].plus_assign(a)?;
             }
         }
         for i in fst.states_iter().filter(|s| *s != k) {
-            d[k][i] = closure_d_k_k.times(&d[k][i])?;
-            d[i][k] = d[i][k].times(&closure_d_k_k)?;
+            let i = i as usize;
+            d[u_k][i] = closure_d_k_k.times(&d[u_k][i])?;
+            d[i][u_k] = d[i][u_k].times(&closure_d_k_k)?;
         }
-        d[k][k] = closure_d_k_k;
+        d[u_k][u_k] = closure_d_k_k;
     }
 
     Ok(d)

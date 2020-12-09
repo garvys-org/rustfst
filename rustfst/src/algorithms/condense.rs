@@ -5,7 +5,7 @@ use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::algorithms::visitors::SccVisitor;
 use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
-use crate::Trs;
+use crate::{StateId, Trs};
 
 // Returns an acyclic FST where each SCC in the input FST has been condensed to
 // a single state with transitions between SCCs retained and within SCCs
@@ -22,7 +22,9 @@ pub fn condense<W: Semiring, FI: Fst<W> + ExpandedFst<W>, FO: MutableFst<W>>(
         ofst.add_states(num_condensed_states);
         unsafe {
             for (s, &c) in scc.iter().enumerate() {
-                let c = c as usize;
+                let c = c as StateId;
+                let s = s as StateId;
+
                 if s == ifst.start().unwrap() {
                     ofst.set_start_unchecked(c);
                 }
@@ -34,7 +36,7 @@ pub fn condense<W: Semiring, FI: Fst<W> + ExpandedFst<W>, FO: MutableFst<W>>(
                     ofst.set_final_unchecked(c, final_weight_ofst);
                 }
                 for tr in ifst.get_trs_unchecked(s).trs() {
-                    let nextc = scc[tr.nextstate] as usize;
+                    let nextc = scc[tr.nextstate as usize] as StateId;
                     if nextc != c {
                         let mut condensed_tr = tr.clone();
                         condensed_tr.nextstate = nextc;

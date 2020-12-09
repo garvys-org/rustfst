@@ -6,7 +6,7 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
-use crate::{Trs, EPS_LABEL};
+use crate::{StateId, Trs, EPS_LABEL};
 
 /// Performs the union of two wFSTs. If A transduces string `x` to `y` with weight `a`
 /// and `B` transduces string `w` to `v` with weight `b`, then their union transduces `x` to `y`
@@ -64,7 +64,7 @@ where
         .contains(FstProperties::INITIAL_ACYCLIC);
     let props1 = fst_1.properties();
     let props2 = fst_2.properties();
-    let numstates1 = fst_1.num_states();
+    let numstates1 = fst_1.num_states() as StateId;
     let start2 = fst_2.start();
     if start2.is_none() {
         return Ok(());
@@ -72,7 +72,7 @@ where
     let start2 = unsafe { start2.unsafe_unwrap() };
     fst_1.reserve_states(fst_2.num_states() + if initial_acyclic_1 { 1 } else { 0 });
 
-    for s2 in 0..fst_2.num_states() {
+    for s2 in 0..(fst_2.num_states() as StateId) {
         let s1 = fst_1.add_state();
         if let Some(final_weight) = unsafe { fst_2.final_weight_unchecked(s2) } {
             unsafe { fst_1.set_final_unchecked(s1, final_weight.clone()) };

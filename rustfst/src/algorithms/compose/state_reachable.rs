@@ -53,13 +53,13 @@ impl StateReachable {
         let mut isets: Vec<IntervalSet> = vec![];
         isets.resize_with(scc.len(), Default::default);
         for (s, &c) in scc.iter().enumerate() {
-            let c = c as usize;
-            isets[s] = reachable.isets[c].clone();
-            state2index[s] = reachable.state2index[c];
+            let c = c as StateId;
+            isets[s] = reachable.isets[c as usize].clone();
+            state2index[s] = reachable.state2index[c as usize];
 
             // Checks that each final state in an input FST is not contained in a
             // cycle (i.e., not in a non-trivial SCC).
-            if unsafe { cfst.is_final_unchecked(c) } && nscc[c] > 1 {
+            if unsafe { cfst.is_final_unchecked(c) } && nscc[c as usize] > 1 {
                 bail!("StateReachable: Final state contained in a cycle")
             }
         }
@@ -78,8 +78,8 @@ impl StateReachable {
     #[allow(unused)]
     // Can reach this final state from current state?
     pub fn reach(&self, current_state: StateId, s: StateId) -> Result<bool> {
-        if let Some(i) = self.state2index.get(s) {
-            Ok(self.isets[current_state].member(*i))
+        if let Some(i) = self.state2index.get(s as usize) {
+            Ok(self.isets[current_state as usize].member(*i))
         } else {
             bail!("StateReachable: State non-final {}", s)
         }

@@ -6,7 +6,7 @@ use crate::algorithms::encode::{EncodeTable, EncodeTableMut, EncodeType};
 use crate::algorithms::{FinalTr, MapFinalAction, TrMapper};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
-use crate::{Semiring, Tr};
+use crate::{Label, Semiring, Tr};
 
 struct EncodeMapper<W: Semiring> {
     encode_table: EncodeTable<W>,
@@ -31,7 +31,7 @@ impl<W: Semiring> EncodeMapper<W> {
 impl<W: Semiring> TrMapper<W> for EncodeMapper<W> {
     fn tr_map(&self, tr: &mut Tr<W>) -> Result<()> {
         let tuple = self.encode_table.0.borrow().tr_to_tuple(tr);
-        let label = self.encode_table.0.borrow_mut().encode(tuple);
+        let label = self.encode_table.0.borrow_mut().encode(tuple) as Label;
         tr.ilabel = label;
         if self.encode_labels() {
             tr.olabel = label;
@@ -45,7 +45,7 @@ impl<W: Semiring> TrMapper<W> for EncodeMapper<W> {
     fn final_tr_map(&self, final_tr: &mut FinalTr<W>) -> Result<()> {
         if self.encode_weights() {
             let tuple = self.encode_table.0.borrow().final_tr_to_tuple(final_tr);
-            let label = self.encode_table.0.borrow_mut().encode(tuple);
+            let label = self.encode_table.0.borrow_mut().encode(tuple) as Label;
             final_tr.ilabel = label;
             if self.encode_labels() {
                 final_tr.olabel = label;

@@ -60,12 +60,12 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
 
     // Maintains state correspondences and queue.
     fn pair_state(&mut self, s1: StateId, s2: StateId) -> bool {
-        if self.state_pairs[s1] == Some(s2) {
+        if self.state_pairs[s1 as usize] == Some(s2) {
             return true; // already seen this pair
-        } else if self.state_pairs[s1].is_some() {
+        } else if self.state_pairs[s1 as usize].is_some() {
             return false; // s1 already paired with another s2
         }
-        self.state_pairs[s1] = Some(s2);
+        self.state_pairs[s1 as usize] = Some(s2);
         self.queue.push_back((s1, s2));
         true
     }

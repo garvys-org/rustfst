@@ -116,7 +116,8 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for ConnectVisit
     }
 
     fn back_tr(&mut self, s: StateId, tr: &Tr<W>) -> bool {
-        let t = tr.nextstate;
+        let t = tr.nextstate as usize;
+        let s = s as usize;
         if self.dfnumber[t] < self.lowlink[s] {
             self.lowlink[s] = self.dfnumber[t];
         }
@@ -144,7 +145,7 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for ConnectVisit
     #[inline]
     fn finish_state(&mut self, s: StateId, parent: Option<StateId>, _tr: Option<&Tr<W>>) {
         let s = s as usize;
-        if unsafe { self.fst.is_final_unchecked(s) } {
+        if unsafe { self.fst.is_final_unchecked(s as StateId) } {
             self.coaccess[s] = true;
         }
         if self.dfnumber[s] == self.lowlink[s] {
@@ -153,7 +154,7 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for ConnectVisit
             let mut t;
             loop {
                 i -= 1;
-                t = self.scc_stack[i];
+                t = self.scc_stack[i] as usize;
                 if self.coaccess[t] {
                     scc_coaccess = true;
                 }
@@ -162,19 +163,20 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for ConnectVisit
                 }
             }
             loop {
-                t = unsafe { *self.scc_stack.last().unsafe_unwrap() };
+                t = unsafe { *self.scc_stack.last().unsafe_unwrap() } as usize;
                 if scc_coaccess {
                     self.coaccess[t] = true;
                 }
                 self.onstack[t] = false;
                 self.scc_stack.pop();
-                if s == t {
+                if s == (t as usize) {
                     break;
                 }
             }
         }
         if let Some(_p) = parent {
             let _p = _p as usize;
+            let s = s as usize;
             if self.coaccess[s] {
                 self.coaccess[_p] = true;
             }

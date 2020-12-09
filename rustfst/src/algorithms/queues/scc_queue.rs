@@ -40,7 +40,7 @@ impl Queue for SccQueue {
         } else if (self.sccs[u_state] as i32) < self.front {
             self.front = self.sccs[u_state] as i32;
         }
-        self.queues[self.sccs[u_state]].enqueue(state);
+        self.queues[self.sccs[u_state] as usize].enqueue(state);
     }
 
     fn dequeue(&mut self) {
@@ -48,7 +48,7 @@ impl Queue for SccQueue {
     }
 
     fn update(&mut self, state: StateId) {
-        self.queues[self.sccs[state]].update(state)
+        self.queues[self.sccs[state as usize] as usize].update(state)
     }
 
     fn is_empty(&self) -> bool {

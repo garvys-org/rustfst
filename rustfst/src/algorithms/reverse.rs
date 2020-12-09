@@ -5,7 +5,7 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
-use crate::{Trs, EPS_LABEL};
+use crate::{StateId, Trs, EPS_LABEL};
 
 /// Reverses an FST. The reversed result is written to an output mutable FST.
 /// If A transduces string x to y with weight a, then the reverse of A
@@ -42,15 +42,15 @@ where
     ofst.add_states(ifst.num_states());
 
     let mut c_trs = vec![0; ifst.num_states() + 1];
-    for is in 0..ifst.num_states() {
+    for is in ifst.states_iter() {
         for iarc in unsafe { ifst.get_trs_unchecked(is).trs() } {
-            c_trs[iarc.nextstate + 1] += 1;
+            c_trs[iarc.nextstate as usize + 1] += 1;
         }
     }
 
     let mut states_trs: Vec<_> = c_trs.into_iter().map(Vec::with_capacity).collect();
 
-    for is in 0..ifst.num_states() {
+    for is in ifst.states_iter() {
         let os = is + 1;
         if Some(is) == istart {
             ofst.set_final(os, W::ReverseWeight::one())?;
@@ -64,13 +64,13 @@ where
             let nos = itr.nextstate + 1;
             let weight = itr.weight.reverse()?;
             let w = Tr::new(itr.ilabel, itr.olabel, weight, os);
-            states_trs[nos].push(w);
+            states_trs[nos as usize].push(w);
         }
     }
     states_trs
         .into_iter()
         .enumerate()
-        .for_each(|(s, trs)| unsafe { ofst.set_trs_unchecked(s, trs) });
+        .for_each(|(s, trs)| unsafe { ofst.set_trs_unchecked(s as StateId, trs) });
     ofst.set_start(ostart)?;
 
     ofst.set_symts_from_fst(ifst);

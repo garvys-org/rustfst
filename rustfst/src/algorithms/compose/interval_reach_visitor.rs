@@ -30,27 +30,27 @@ impl<'a, W: Semiring, F: Fst<W>> Visitor<'a, W, F> for IntervalReachVisitor<'a, 
 
     /// Invoked when state discovered (2nd arg is DFS tree root).
     fn init_state(&mut self, s: StateId, _root: StateId) -> bool {
-        while self.isets.len() <= s {
+        while self.isets.len() <= (s as usize) {
             self.isets.push(IntervalSet::default());
         }
-        while self.state2index.len() <= s {
+        while self.state2index.len() <= (s as usize) {
             self.state2index.push(UNASSIGNED);
         }
         if let Some(final_weight) = self.fst.final_weight(s).unwrap() {
             if !final_weight.is_zero() {
-                let interval_set = &mut self.isets[s];
+                let interval_set = &mut self.isets[s as usize];
                 if self.index == UNASSIGNED {
                     if self.fst.num_trs(s).unwrap() > 0 {
                         panic!("IntervalReachVisitor: state2index map must be empty for this FST")
                     }
-                    let index = self.state2index[s];
+                    let index = self.state2index[s as usize];
                     if index == UNASSIGNED {
                         panic!("IntervalReachVisitor: state2index map incomplete")
                     }
                     interval_set.push(IntInterval::new(index, index + 1));
                 } else {
                     interval_set.push(IntInterval::new(self.index, self.index + 1));
-                    self.state2index[s] = self.index;
+                    self.state2index[s as usize] = self.index;
                     self.index += 1;
                 }
             }
@@ -70,7 +70,7 @@ impl<'a, W: Semiring, F: Fst<W>> Visitor<'a, W, F> for IntervalReachVisitor<'a, 
 
     /// Invoked when forward or cross transition to black/finished state examined.
     fn forward_or_cross_tr(&mut self, s: StateId, tr: &Tr<W>) -> bool {
-        union_vec_isets_unordered(&mut self.isets, s, tr.nextstate);
+        union_vec_isets_unordered(&mut self.isets, s as usize, tr.nextstate as usize);
         true
     }
 
@@ -81,12 +81,12 @@ impl<'a, W: Semiring, F: Fst<W>> Visitor<'a, W, F> for IntervalReachVisitor<'a, 
             && self.fst.is_final(s).unwrap()
             && !self.fst.final_weight(s).unwrap().unwrap().is_zero()
         {
-            let intervals = &mut self.isets[s].intervals.intervals;
+            let intervals = &mut self.isets[s as usize].intervals.intervals;
             intervals[0].end = self.index;
         }
-        self.isets[s].normalize();
+        self.isets[s as usize].normalize();
         if let Some(p) = parent {
-            union_vec_isets_unordered(&mut self.isets, p, s);
+            union_vec_isets_unordered(&mut self.isets, p as usize, s as usize);
         }
     }
 
