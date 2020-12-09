@@ -10,7 +10,7 @@ use crate::{Semiring, Trs};
 fn do_test_fst_into_iterator<W: Semiring, F: ExpandedFst<W>>(fst: F) -> Result<()> {
     let mut fst_data_ref = vec![];
 
-    for state in 0..fst.num_states() {
+    for state in fst.states_range() {
         fst_data_ref.push((
             state,
             fst.get_trs(state)?.trs().iter().cloned().collect_vec(),
@@ -36,7 +36,7 @@ fn do_test_fst_into_iterator<W: Semiring, F: ExpandedFst<W>>(fst: F) -> Result<(
 fn do_test_fst_iterator<W: Semiring, F: ExpandedFst<W>>(fst: &F) -> Result<()> {
     let mut fst_data_ref = vec![];
 
-    for state in 0..fst.num_states() {
+    for state in fst.states_range() {
         fst_data_ref.push((
             state,
             fst.get_trs(state)?.trs().iter().cloned().collect_vec(),

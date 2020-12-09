@@ -5,7 +5,7 @@ use proptest::prelude::*;
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::MutableFst;
 use crate::semirings::{Semiring, TropicalWeight};
-use crate::Tr;
+use crate::{Label, StateId, Tr};
 
 static MAX_NUM_STATES: usize = 10;
 static MAX_ILABEL: usize = 10;
@@ -70,9 +70,9 @@ impl<W: Arbitrary + Semiring> Arbitrary for Tr<W> {
             any::<W>(),
         )
             .prop_map(move |(nextstate, ilabel, olabel, weight)| Tr {
-                nextstate,
-                ilabel,
-                olabel,
+                nextstate: nextstate as StateId,
+                ilabel: ilabel as Label,
+                olabel: olabel as Label,
                 weight,
             })
             .boxed()
@@ -110,19 +110,19 @@ impl<W: Arbitrary + Semiring> Arbitrary for VectorFst<W> {
                 fst.add_states(states.len());
 
                 // Set start state.
-                fst.set_start(start_state).unwrap();
+                fst.set_start(start_state as StateId).unwrap();
 
                 // Add trs.
                 for (state, trs) in states.into_iter().enumerate() {
                     for tr in trs {
-                        unsafe { fst.add_tr_unchecked(state, tr) };
+                        unsafe { fst.add_tr_unchecked(state as StateId, tr) };
                     }
                 }
 
                 // Set final weights.
                 for (idx, final_weight) in final_weights.into_iter().enumerate() {
                     if let Some(_final_weight) = final_weight {
-                        unsafe { fst.set_final_unchecked(idx, _final_weight) };
+                        unsafe { fst.set_final_unchecked(idx as StateId, _final_weight) };
                     }
                 }
 

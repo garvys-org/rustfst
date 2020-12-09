@@ -85,7 +85,7 @@ mod tests {
         let num_states = fst.num_states();
 
         let super_final_state = add_super_final_state(&mut fst);
-        assert_eq!(num_states, super_final_state);
+        assert_eq!(num_states, super_final_state as usize);
         assert!(!fst.is_final(s2)?);
         assert_eq!(1, fst.num_trs(s2)?);
         assert!(!fst.is_final(s3)?);
@@ -139,7 +139,7 @@ mod tests {
         let num_states = fst.num_states();
 
         let super_final_state = add_super_final_state(&mut fst);
-        assert_eq!(num_states, super_final_state);
+        assert_eq!(num_states, super_final_state as usize);
         assert!(!fst.is_final(s3)?);
         assert_eq!(1, fst.num_trs(s3)?);
         assert_eq!(
@@ -165,7 +165,7 @@ mod tests {
         let num_states = fst.num_states();
 
         let super_final_state = add_super_final_state(&mut fst);
-        assert_eq!(num_states, super_final_state);
+        assert_eq!(num_states, super_final_state as usize);
         assert_eq!(
             Some(TropicalWeight::one()),
             fst.final_weight(super_final_state)?

@@ -51,7 +51,7 @@ pub fn test_num_epsilons<W: Semiring, FREF: ExpandedFst<W>, FPRED: ExpandedFst<W
     msg: String,
 ) {
     assert_eq!(fst_ref.num_states(), fst_pred.num_states(), "{}", &msg);
-    for s in 0..fst_ref.num_states() {
+    for s in fst_ref.states_range() {
         assert_eq!(
             fst_ref.num_input_epsilons(s).unwrap(),
             fst_pred.num_input_epsilons(s).unwrap(),
