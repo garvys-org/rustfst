@@ -16,6 +16,10 @@ license = 'MIT/Apache-2.0'
 repository = 'https://github.com/Garvys/rustfst'
 edition = '2018'
 
+[features]
+default = []
+state-label-u32 = []
+
 [dependencies]
 anyhow = '1'
 bimap = '0.3'

@@ -122,11 +122,17 @@ mod tests_openfst;
 mod symbol_table;
 
 /// Type used for the input label and output label of a transition in a wFST -> usize
+#[cfg(feature = "state-label-u32")]
+pub type Label = u32;
+#[cfg(not(feature = "state-label-u32"))]
 pub type Label = usize;
 /// Symbol to map in the Symbol Table -> String
 pub type Symbol = String;
 
 /// Type used to identify a state in a wFST -> usize
+#[cfg(feature = "state-label-u32")]
+pub type StateId = u32;
+#[cfg(not(feature = "state-label-u32"))]
 pub type StateId = usize;
 
 /// Epsilon label representing the epsilon transition (empty transition) = `0`.
@@ -180,8 +186,16 @@ pub mod prelude {
 
 pub mod proptest_fst;
 
+#[cfg(feature = "state-label-u32")]
+pub static NO_LABEL: Label = std::u32::MAX;
+#[cfg(not(feature = "state-label-u32"))]
 pub static NO_LABEL: Label = std::usize::MAX;
+
+#[cfg(feature = "state-label-u32")]
+pub static NO_STATE_ID: StateId = std::u32::MAX;
+#[cfg(not(feature = "state-label-u32"))]
 pub static NO_STATE_ID: StateId = std::usize::MAX;
+
 pub(crate) static UNASSIGNED: usize = std::usize::MAX;
 
 pub mod trs;
