@@ -18,7 +18,7 @@ use crate::semirings::{
     GallicWeightLeft, GallicWeightRight, StringWeightLeft, StringWeightRight,
     WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::KDELTA;
+use crate::{StateId, KDELTA};
 
 bitflags! {
     /// Configuration to control the behaviour of the pushing algorithm.
@@ -116,21 +116,17 @@ where
     F: ExpandedFst<W>,
 {
     if reverse {
-        if let Some(start) = fst.start() {
-            if start < dist.len() {
-                Ok(dist[start].clone())
-            } else {
-                Ok(W::zero())
-            }
-        } else {
-            Ok(W::zero())
-        }
+        Ok(fst
+            .start()
+            .and_then(|start| dist.get(start as usize))
+            .cloned()
+            .unwrap_or(W::zero()))
     } else {
         let mut sum = W::zero();
         for (s, dist_s) in dist.iter().enumerate() {
-            sum.plus_assign(
-                dist_s.times(unsafe { fst.final_weight_unchecked(s) }.unwrap_or_else(W::zero))?,
-            )?;
+            sum.plus_assign(dist_s.times(
+                unsafe { fst.final_weight_unchecked(s as StateId) }.unwrap_or_else(W::zero),
+            )?)?;
         }
         Ok(sum)
     }
@@ -146,7 +142,7 @@ where
     }
     if at_final {
         unsafe {
-            for s in 0..fst.num_states() {
+            for s in fst.states_range() {
                 if let Some(mut final_weight) = fst.final_weight_unchecked(s) {
                     final_weight.divide_assign(&weight, DivideType::DivideRight)?;
                     fst.set_final_unchecked(s, final_weight);

@@ -32,7 +32,7 @@ pub(crate) fn tr_compare<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> Ordering {
 pub fn tr_unique<W: Semiring, F: MutableFst<W>>(ifst: &mut F) {
     let props = ifst.properties();
     unsafe {
-        for s in 0..ifst.num_states() {
+        for s in ifst.states_range() {
             ifst.unique_trs_unchecked(s);
         }
     }

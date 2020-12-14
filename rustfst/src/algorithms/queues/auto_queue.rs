@@ -12,7 +12,7 @@ use super::{
     natural_less, FifoQueue, LifoQueue, NaturalShortestFirstQueue, SccQueue, StateOrderQueue,
     TopOrderQueue, TrivialQueue,
 };
-use crate::Trs;
+use crate::{StateId, Trs};
 
 #[derive(Debug)]
 pub struct AutoQueue {
@@ -44,7 +44,7 @@ impl AutoQueue {
                 .scc
                 .unwrap()
                 .into_iter()
-                .map(|v| v as usize)
+                .map(|v| v as StateId)
                 .collect();
             let n_sccs = scc_visitor.nscc as usize;
 
@@ -105,7 +105,7 @@ impl AutoQueue {
         A: TrFilter<W>,
     >(
         fst: &F,
-        sccs: &[usize],
+        sccs: &[StateId],
         compare: Option<C>,
         queue_types: &mut Vec<QueueType>,
         all_trivial: &mut bool,
@@ -119,13 +119,14 @@ impl AutoQueue {
             .iter_mut()
             .for_each(|v| *v = QueueType::TrivialQueue);
 
-        for state in 0..fst.num_states() {
+        for state in 0..(fst.num_states() as StateId) {
             for tr in unsafe { fst.get_trs_unchecked(state).trs() } {
                 if !tr_filter.keep(tr) {
                     continue;
                 }
-                if sccs[state] == sccs[tr.nextstate] {
-                    let queue_type = unsafe { queue_types.get_unchecked_mut(sccs[state]) };
+                if sccs[state as usize] == sccs[tr.nextstate as usize] {
+                    let queue_type =
+                        unsafe { queue_types.get_unchecked_mut(sccs[state as usize] as usize) };
                     if compare.is_none() || compare.as_ref().unwrap()(&tr.weight, &W::one())? {
                         *queue_type = QueueType::FifoQueue;
                     } else if *queue_type == QueueType::TrivialQueue
@@ -157,11 +158,11 @@ impl AutoQueue {
 }
 
 impl Queue for AutoQueue {
-    fn head(&mut self) -> Option<usize> {
+    fn head(&mut self) -> Option<StateId> {
         self.queue.head()
     }
 
-    fn enqueue(&mut self, state: usize) {
+    fn enqueue(&mut self, state: StateId) {
         self.queue.enqueue(state)
     }
 
@@ -169,7 +170,7 @@ impl Queue for AutoQueue {
         self.queue.dequeue()
     }
 
-    fn update(&mut self, state: usize) {
+    fn update(&mut self, state: StateId) {
         self.queue.update(state)
     }
 

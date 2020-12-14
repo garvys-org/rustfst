@@ -1,3 +1,5 @@
+use crate::Label;
+use crate::StateId;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
@@ -14,8 +16,8 @@ use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ReplaceOperationResult {
-    root: usize,
-    label_fst_pairs_path: Vec<(usize, String)>,
+    root: Label,
+    label_fst_pairs_path: Vec<(Label, String)>,
     epsilon_on_replace: bool,
     result_path: String,
 }
@@ -25,8 +27,8 @@ where
     F: SerializableFst<W>,
     W: SerializableSemiring,
 {
-    pub root: usize,
-    pub label_fst_pairs: Vec<(usize, F)>,
+    pub root: Label,
+    pub label_fst_pairs: Vec<(Label, F)>,
     pub epsilon_on_replace: bool,
     pub result: F,
     w: PhantomData<W>,
@@ -59,7 +61,7 @@ where
 {
     for replace_test_data in &test_data.replace {
         let mut fst_list = vec![];
-        fst_list.push((replace_test_data.root, test_data.raw.clone()));
+        fst_list.push((replace_test_data.root as StateId, test_data.raw.clone()));
         fst_list.extend_from_slice(replace_test_data.label_fst_pairs.as_slice());
         let replaced_fst: VectorFst<_> = replace(
             fst_list.clone(),
@@ -68,7 +70,7 @@ where
         )?;
 
         // Try givinf borrowed fst as parameters.
-        let fst_list_2: Vec<(usize, &VectorFst<W>)> =
+        let fst_list_2: Vec<(Label, &VectorFst<W>)> =
             fst_list.iter().map(|v| (v.0, &v.1)).collect();
         let _replaced_fst_2: VectorFst<W> = replace::<_, VectorFst<_>, _, _>(
             fst_list_2,
@@ -97,7 +99,7 @@ where
         fst_list.push((replace_test_data.root, test_data.raw.clone()));
         fst_list.extend_from_slice(replace_test_data.label_fst_pairs.as_slice());
 
-        let fst_list_2: Vec<(usize, &VectorFst<W>)> =
+        let fst_list_2: Vec<(Label, &VectorFst<W>)> =
             fst_list.iter().map(|v| (v.0, &v.1)).collect();
         let replaced_static_fst: VectorFst<_> = replace::<_, VectorFst<_>, _, _>(
             fst_list_2,

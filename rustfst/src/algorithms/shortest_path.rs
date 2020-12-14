@@ -129,9 +129,9 @@ where
     let mut d = W::zero();
     for rarc in rfst.get_trs(0)?.trs() {
         let state = rarc.nextstate - 1;
-        if state < distance.len() {
+        if (state as usize) < distance.len() {
             let rweight: W = rarc.weight.reverse_back()?;
-            d.plus_assign(rweight.times(&distance[state])?)?;
+            d.plus_assign(rweight.times(&distance[state as usize])?)?;
         }
     }
 
@@ -187,9 +187,9 @@ where
     enqueued.resize(ifst.num_states(), false);
     parent.resize(ifst.num_states(), None);
 
-    distance[source] = W::one();
-    parent[source] = None;
-    enqueued[source] = true;
+    distance[source as usize] = W::one();
+    parent[source as usize] = None;
+    enqueued[source as usize] = true;
 
     queue.enqueue(source);
 
@@ -197,8 +197,8 @@ where
         // Safe because non empty
         let s = unsafe { queue.head().unsafe_unwrap() };
         queue.dequeue();
-        enqueued[s] = false;
-        let sd = distance[s].clone();
+        enqueued[s as usize] = false;
+        let sd = distance[s as usize].clone();
 
         if let Some(final_weight) = unsafe { ifst.final_weight_unchecked(s) } {
             let plus = f_distance.plus(&sd.times(final_weight)?)?;
@@ -209,16 +209,17 @@ where
         }
 
         for (pos, tr) in unsafe { ifst.get_trs_unchecked(s).trs().iter().enumerate() } {
-            let nd = &mut distance[tr.nextstate];
+            let nextstate = tr.nextstate as usize;
+            let nd = &mut distance[nextstate];
             let weight = sd.times(&tr.weight)?;
             if *nd != nd.plus(&weight)? {
                 *nd = nd.plus(&weight)?;
-                parent[tr.nextstate] = Some((s, pos));
-                if !enqueued[tr.nextstate] {
-                    queue.enqueue(tr.nextstate);
-                    enqueued[tr.nextstate] = true;
+                parent[nextstate] = Some((s, pos));
+                if !enqueued[nextstate] {
+                    queue.enqueue(nextstate as StateId);
+                    enqueued[nextstate] = true;
                 } else {
-                    queue.update(tr.nextstate);
+                    queue.update(nextstate as StateId);
                 }
             }
         }
@@ -250,7 +251,7 @@ where
                 ofst.set_final(s_p.unwrap(), final_weight.clone())?;
             }
         } else {
-            let pos = parent[d.unwrap()].unwrap().1;
+            let pos = parent[d.unwrap() as usize].unwrap().1;
             let mut tr = ifst.get_trs(state)?.trs()[pos].clone();
             tr.nextstate = d_p.unwrap();
             ofst.add_tr(s_p.unwrap(), tr)?;
@@ -258,7 +259,7 @@ where
 
         // Next iteration
         d = Some(state);
-        nextstate = parent[state].map(|v| v.0);
+        nextstate = parent[state as usize].map(|v| v.0);
     }
 
     if let Some(_s_p) = s_p {
@@ -300,8 +301,9 @@ impl<'a, 'b, W: Semiring + WeightQuantize> ShortestPathCompare<'a, 'b, W> {
 
     fn pweight(&self, state: &Option<StateId>) -> &W {
         if let Some(_state) = state {
-            if *_state < self.distance.len() {
-                &self.distance[*_state]
+            let _state = *_state as usize;
+            if _state < self.distance.len() {
+                &self.distance[_state]
             } else {
                 &self.weight_zero
             }
@@ -312,8 +314,8 @@ impl<'a, 'b, W: Semiring + WeightQuantize> ShortestPathCompare<'a, 'b, W> {
 
     fn compare(&self, x: StateId, y: StateId) -> bool {
         let b = self.pairs.borrow();
-        let px = &b[x];
-        let py = &b[y];
+        let px = &b[x as usize];
+        let py = &b[y as usize];
         let wx = self.pweight(&px.0).times(&px.1).unwrap();
         let wy = self.pweight(&py.0).times(&py.1).unwrap();
         let res = if px.0.is_none() && py.0.is_some() {
@@ -327,18 +329,18 @@ impl<'a, 'b, W: Semiring + WeightQuantize> ShortestPathCompare<'a, 'b, W> {
     }
 }
 
-struct Heap<F> {
-    data: Vec<usize>,
+struct Heap<V, F> {
+    data: Vec<V>,
     less: F,
 }
 
-impl<F> Debug for Heap<F> {
+impl<V: Debug, F> Debug for Heap<V, F> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         self.data.fmt(f)
     }
 }
 
-impl<F: Fn(&usize, &usize) -> bool> Heap<F> {
+impl<V: Copy, F: Fn(&V, &V) -> bool> Heap<V, F> {
     fn new(f: F) -> Self {
         Self {
             data: vec![],
@@ -354,7 +356,7 @@ impl<F: Fn(&usize, &usize) -> bool> Heap<F> {
             }
         }
     }
-    fn push(&mut self, v: usize) {
+    fn push(&mut self, v: V) {
         self.data.push(v);
         self.sift_up(self.len() - 1);
     }
@@ -378,7 +380,7 @@ impl<F: Fn(&usize, &usize) -> bool> Heap<F> {
             self.sift_down(biggest_child_idx);
         }
     }
-    fn pop(&mut self) -> Result<usize> {
+    fn pop(&mut self) -> Result<V> {
         let top_val = self.data[0];
         if self.len() == 1 {
             self.data.remove(0);
@@ -412,7 +414,9 @@ where
     }
 
     let istart = ifst.start();
-    if istart.is_none() || distance.len() <= istart.unwrap() || distance[istart.unwrap()].is_zero()
+    if istart.is_none()
+        || distance.len() <= istart.unwrap() as usize
+        || distance[istart.unwrap() as usize].is_zero()
     {
         // No start state or start state is unreachable
         return Ok(ofst);
@@ -422,8 +426,8 @@ where
     ofst.set_start(ostart)?;
     let final_state = ofst.add_state();
     ofst.set_final(final_state, W::one())?;
-    let pairs = RefCell::new(vec![(None, W::zero()); final_state + 1]);
-    pairs.borrow_mut()[final_state] = (Some(istart), W::one());
+    let pairs = RefCell::new(vec![(None, W::zero()); final_state as usize + 1]);
+    pairs.borrow_mut()[final_state as usize] = (Some(istart), W::one());
 
     let shortest_path_compare = ShortestPathCompare::new(&pairs, distance, delta);
 
@@ -432,16 +436,17 @@ where
 
     let weight_threshold = W::zero();
     let state_threshold: Option<StateId> = None;
-    let limit = distance[istart].times(weight_threshold)?;
+    let limit = distance[istart as usize].times(weight_threshold)?;
 
     let mut r = vec![];
 
     while !heap.is_empty() {
         let state = heap.pop().unwrap();
-        let p = pairs.borrow()[state].clone();
+        let p = pairs.borrow()[state as usize].clone();
         let p_first_real = p.0.map(|v| v as i32).unwrap_or(-1) + 1;
 
         let d = if let Some(lol) = p.0 {
+            let lol = lol as usize;
             if lol < distance.len() {
                 distance[lol].clone()
             } else {
@@ -451,7 +456,7 @@ where
             W::one()
         };
         if natural_less(&limit, &d.times(&p.1)?)?
-            || (state_threshold.is_some() && ofst.num_states() >= state_threshold.unwrap())
+            || (state_threshold.is_some() && ofst.num_states() >= state_threshold.unwrap() as usize)
         {
             continue;
         }
@@ -482,7 +487,7 @@ where
             let weight = p.1.times(&tr.weight)?;
             let next = ofst.add_state();
             pairs.borrow_mut().push((Some(tr.nextstate), weight));
-            tr.nextstate = state;
+            tr.nextstate = state as StateId;
             ofst.add_tr(next, tr)?;
             heap.push(next);
         }

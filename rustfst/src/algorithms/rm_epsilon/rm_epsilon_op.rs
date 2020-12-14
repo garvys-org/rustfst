@@ -9,7 +9,7 @@ use crate::fst_properties::mutable_properties::rmepsilon_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
-use crate::TrsVec;
+use crate::{StateId, TrsVec};
 use itertools::Itertools;
 use std::cell::RefCell;
 use std::marker::PhantomData;
@@ -55,11 +55,11 @@ impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> RmEpsilonOp<W, F, B> {
 }
 
 impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> FstOp2<W> for RmEpsilonOp<W, F, B> {
-    fn compute_start(&self) -> Result<Option<usize>> {
+    fn compute_start(&self) -> Result<Option<StateId>> {
         Ok(self.fst.borrow().start())
     }
 
-    fn compute_trs_and_final_weight(&self, state: usize) -> Result<(TrsVec<W>, Option<W>)> {
+    fn compute_trs_and_final_weight(&self, state: StateId) -> Result<(TrsVec<W>, Option<W>)> {
         let (trs, final_weight) = self
             .rmeps_state
             .borrow_mut()

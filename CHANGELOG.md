@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.7.4] - 2020-12-10
 
+## Added
+- `states_range` available on `ExpandedFst` trait
+- feature `state-label-u32` is now supported. Label and StateId will be stored as u32 with this feature.
+
 ## Changed
 - Fix compilation with rust 1.41
 

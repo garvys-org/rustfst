@@ -22,12 +22,12 @@ where
 
     let mut finals = HashSet::new();
 
-    for s in 0..ifst.num_states() {
+    for s in ifst.states_range() {
         if unsafe { ifst.is_final_unchecked(s) } {
             let mut future_coaccess = false;
 
             for tr in unsafe { ifst.get_trs_unchecked(s).trs() } {
-                if visitors.coaccess[tr.nextstate] {
+                if visitors.coaccess[tr.nextstate as usize] {
                     future_coaccess = true;
                     break;
                 }
@@ -40,21 +40,22 @@ where
     }
 
     let mut trs_to_del = vec![];
-    for state in 0..ifst.num_states() {
+    for state in ifst.states_range() {
         let mut weight = None;
         trs_to_del.clear();
 
         for (idx, tr) in unsafe { ifst.get_trs_unchecked(state).trs().iter().enumerate() } {
             if finals.contains(&tr.nextstate) && tr.ilabel == EPS_LABEL && tr.olabel == EPS_LABEL {
                 unsafe {
-                    if weight.is_none() {
-                        weight = Some(ifst.final_weight_unchecked(state).unwrap_or_else(W::zero));
-                    }
-                    weight.as_mut().unsafe_unwrap().plus_assign(
-                        ifst.final_weight_unchecked(tr.nextstate)
-                            .unsafe_unwrap()
-                            .times(&tr.weight)?,
-                    )?
+                    weight
+                        .get_or_insert_with(|| {
+                            ifst.final_weight_unchecked(state).unwrap_or_else(W::zero)
+                        })
+                        .plus_assign(
+                            ifst.final_weight_unchecked(tr.nextstate)
+                                .unsafe_unwrap()
+                                .times(&tr.weight)?,
+                        )?
                 };
                 trs_to_del.push(idx);
             }

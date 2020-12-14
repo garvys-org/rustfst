@@ -174,29 +174,29 @@ impl<W: Semiring, Q: Queue, A: TrFilter<W>> ShortestDistanceState<W, Q, A> {
             self.enqueued.clear();
         }
 
-        let source = source.unwrap_or(start_state);
+        let source = source.unwrap_or(start_state) as usize;
         self.ensure_distance_index_is_valid(source);
         if self.retain {
             self.ensure_sources_index_is_valid(source);
-            self.sources[source] = Some(self.source_id);
+            self.sources[source] = Some(self.source_id as StateId);
         }
         self.distance[source] = W::one();
         self.adder[source] = W::one();
         self.radder[source] = W::one();
         self.enqueued[source] = true;
-        self.state_queue.enqueue(source);
+        self.state_queue.enqueue(source as StateId);
         while !self.state_queue.is_empty() {
-            let state = self.state_queue.head().unwrap();
+            let state = self.state_queue.head().unwrap() as usize;
             self.state_queue.dequeue();
             //            self.ensure_distance_index_is_valid(state);
-            if self.first_path && fst.borrow().is_final(state)? {
+            if self.first_path && fst.borrow().is_final(state as StateId)? {
                 break;
             }
             self.enqueued[state] = false;
             let r = self.radder[state].clone();
             self.radder[state] = W::zero();
-            for tr in fst.borrow().get_trs(state)?.trs() {
-                let nextstate = tr.nextstate;
+            for tr in fst.borrow().get_trs(state as StateId)?.trs() {
+                let nextstate = tr.nextstate as usize;
                 if !self.tr_filter.keep(tr) {
                     continue;
                 }
@@ -206,12 +206,12 @@ impl<W: Semiring, Q: Queue, A: TrFilter<W>> ShortestDistanceState<W, Q, A> {
                 ensure_distance_index_is_valid!(self, nextstate);
                 if self.retain {
                     ensure_source_index_is_valid!(self, nextstate);
-                    if self.sources[nextstate] != Some(self.source_id) {
+                    if self.sources[nextstate] != Some(self.source_id as StateId) {
                         self.distance[nextstate] = W::zero();
                         self.adder[nextstate] = W::zero();
                         self.radder[nextstate] = W::zero();
                         self.enqueued[nextstate] = false;
-                        self.sources[nextstate] = Some(self.source_id);
+                        self.sources[nextstate] = Some(self.source_id as StateId);
                     }
                 }
                 let nd = self.distance.get_mut(nextstate).unwrap();
@@ -223,10 +223,10 @@ impl<W: Semiring, Q: Queue, A: TrFilter<W>> ShortestDistanceState<W, Q, A> {
                     *nd = na.clone();
                     nr.plus_assign(&weight)?;
                     if !self.enqueued[state] {
-                        self.state_queue.enqueue(nextstate);
+                        self.state_queue.enqueue(nextstate as StateId);
                         self.enqueued[nextstate] = true;
                     } else {
-                        self.state_queue.update(nextstate);
+                        self.state_queue.update(nextstate as StateId);
                     }
                 }
             }
@@ -351,7 +351,8 @@ where
         let mut sum = W::zero();
         for state in 0..distance.len() {
             sum.plus_assign(
-                distance[state].times(fst.final_weight(state)?.unwrap_or_else(W::zero))?,
+                distance[state]
+                    .times(fst.final_weight(state as StateId)?.unwrap_or_else(W::zero))?,
             )?;
         }
         Ok(sum)
@@ -359,6 +360,7 @@ where
         let distance =
             shortest_distance_with_config(fst, true, ShortestDistanceConfig::new(delta))?;
         if let Some(state) = fst.start() {
+            let state = state as usize;
             if state < distance.len() {
                 Ok(distance[state].clone())
             } else {

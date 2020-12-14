@@ -110,7 +110,7 @@ impl<W: SerializableSemiring> SerializableFst<W> for ConstFst<W> {
         {
             let pos = const_trs.len();
             // Some states might not have outgoing trs.
-            const_states.resize_with(_state, || ConstState {
+            const_states.resize_with(_state as usize, || ConstState {
                 final_weight: None,
                 pos,
                 ntrs: 0,
@@ -156,7 +156,7 @@ impl<W: SerializableSemiring> SerializableFst<W> for ConstFst<W> {
             let weight = final_state.weight.unwrap_or_else(W::one);
             unsafe {
                 const_states
-                    .get_unchecked_mut(final_state.state)
+                    .get_unchecked_mut(final_state.state as usize)
                     .final_weight = Some(weight)
             };
         }

@@ -27,7 +27,7 @@ impl<W: Semiring, B: Borrow<[W]> + PartialEq> InnerDeterminizeStateTable<W, B> {
                 .as_ref()
                 .unwrap()
                 .borrow()
-                .get(element.state)
+                .get(element.state as usize)
                 .unwrap_or(&weight_zero);
             outd.plus_assign(element.weight.times(ind)?)?;
         }
@@ -78,7 +78,7 @@ impl<W: Semiring, B: Borrow<[W]> + PartialEq> DeterminizeStateTable<W, B> {
         let mut inner = self.0.lock().unwrap();
         if !inner.table.contains_right(tuple) {
             let n = inner.table.len();
-            inner.table.insert(n, tuple.clone());
+            inner.table.insert(n as StateId, tuple.clone());
 
             if inner.in_dist.is_some() {
                 if n >= inner.out_dist.len() {
@@ -89,7 +89,7 @@ impl<W: Semiring, B: Borrow<[W]> + PartialEq> DeterminizeStateTable<W, B> {
                 }
             }
 
-            return Ok(n);
+            return Ok(n as StateId);
         }
 
         Ok(*inner.table.get_by_right(tuple).unwrap())

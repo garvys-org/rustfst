@@ -3,17 +3,18 @@ use crate::StateId;
 
 #[derive(Debug, Default, Clone)]
 pub struct StateOrderQueue {
-    front: StateId,
-    back: Option<StateId>,
+    front: usize,
+    back: Option<usize>,
     enqueued: Vec<bool>,
 }
 
 impl Queue for StateOrderQueue {
-    fn head(&mut self) -> Option<usize> {
-        Some(self.front)
+    fn head(&mut self) -> Option<StateId> {
+        Some(self.front as StateId)
     }
 
-    fn enqueue(&mut self, state: usize) {
+    fn enqueue(&mut self, state: StateId) {
+        let state = state as usize;
         if self.back.is_none() || self.front > self.back.unwrap() {
             self.front = state;
             self.back = Some(state)
@@ -38,7 +39,7 @@ impl Queue for StateOrderQueue {
         }
     }
 
-    fn update(&mut self, _state: usize) {}
+    fn update(&mut self, _state: StateId) {}
 
     fn is_empty(&self) -> bool {
         if let Some(back_) = self.back {

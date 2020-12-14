@@ -62,8 +62,9 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> SccVisitor<'a, W, F> {
 impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for SccVisitor<'a, W, F> {
     fn init_visit(&mut self, _fst: &'a F) {}
 
-    fn init_state(&mut self, s: usize, root: usize) -> bool {
+    fn init_state(&mut self, s: StateId, root: StateId) -> bool {
         self.scc_stack.push(s);
+        let s = s as usize;
         self.dfnumber[s] = self.nstates as i32;
         self.lowlink[s] = self.nstates as i32;
         self.onstack[s] = true;
@@ -82,12 +83,13 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for SccVisitor<'
         true
     }
 
-    fn tree_tr(&mut self, _s: usize, _tr: &Tr<W>) -> bool {
+    fn tree_tr(&mut self, _s: StateId, _tr: &Tr<W>) -> bool {
         true
     }
 
-    fn back_tr(&mut self, s: usize, tr: &Tr<W>) -> bool {
-        let t = tr.nextstate;
+    fn back_tr(&mut self, s: StateId, tr: &Tr<W>) -> bool {
+        let t = tr.nextstate as usize;
+        let s = s as usize;
         if self.dfnumber[t] < self.lowlink[s] {
             self.lowlink[s] = self.dfnumber[t];
         }
@@ -96,15 +98,16 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for SccVisitor<'
         }
         self.props |= FstProperties::CYCLIC;
         self.props &= !FstProperties::ACYCLIC;
-        if t == self.start {
+        if t == self.start as usize {
             self.props |= FstProperties::INITIAL_CYCLIC;
             self.props &= !FstProperties::INITIAL_ACYCLIC;
         }
         true
     }
 
-    fn forward_or_cross_tr(&mut self, s: usize, tr: &Tr<W>) -> bool {
-        let t = tr.nextstate;
+    fn forward_or_cross_tr(&mut self, s: StateId, tr: &Tr<W>) -> bool {
+        let t = tr.nextstate as usize;
+        let s = s as usize;
         if self.dfnumber[t] < self.dfnumber[s]
             && self.onstack[t]
             && self.dfnumber[t] < self.lowlink[s]
@@ -118,17 +121,18 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for SccVisitor<'
     }
 
     #[inline]
-    fn finish_state(&mut self, s: usize, parent: Option<usize>, _tr: Option<&Tr<W>>) {
+    fn finish_state(&mut self, s: StateId, parent: Option<StateId>, _tr: Option<&Tr<W>>) {
         if unsafe { self.fst.is_final_unchecked(s) } {
-            self.coaccess[s] = true;
+            self.coaccess[s as usize] = true;
         }
+        let s = s as usize;
         if self.dfnumber[s] == self.lowlink[s] {
             let mut scc_coaccess = false;
             let mut i = self.scc_stack.len();
-            let mut t;
+            let mut t: usize;
             loop {
                 i -= 1;
-                t = self.scc_stack[i];
+                t = self.scc_stack[i] as usize;
                 if self.coaccess[t] {
                     scc_coaccess = true;
                 }
@@ -137,7 +141,7 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for SccVisitor<'
                 }
             }
             loop {
-                t = unsafe { *self.scc_stack.last().unsafe_unwrap() };
+                t = unsafe { *self.scc_stack.last().unsafe_unwrap() } as usize;
                 if let Some(ref mut scc) = self.scc {
                     scc[t] = self.nscc;
                 }
@@ -157,6 +161,7 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for SccVisitor<'
             self.nscc += 1;
         }
         if let Some(_p) = parent {
+            let _p = _p as usize;
             if self.coaccess[s] {
                 self.coaccess[_p] = true;
             }

@@ -7,11 +7,12 @@ use crate::algorithms::compose::StateReachable;
 use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::tests_openfst::FstTestData;
+use crate::StateId;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ReachabilityTestResult {
-    state: usize,
-    final_state: usize,
+    state: StateId,
+    final_state: StateId,
     reachable: bool,
     error: bool,
 }

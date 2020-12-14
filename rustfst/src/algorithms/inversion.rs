@@ -32,7 +32,7 @@ use crate::semirings::Semiring;
 pub fn invert<W: Semiring, F: MutableFst<W>>(fst: &mut F) {
     let props = fst.properties();
 
-    for state in 0..fst.num_states() {
+    for state in fst.states_range() {
         unsafe {
             let mut it_tr = fst.tr_iter_unchecked_mut(state);
             for idx_tr in 0..it_tr.len() {

@@ -58,7 +58,7 @@ where
     let map_olabels = iterator_to_hashmap(opairs)
         .with_context(|| format_err!("Error while creating the HashMap for opairs"))?;
 
-    for state_id in 0..fst.num_states() {
+    for state_id in fst.states_range() {
         unsafe {
             let mut it_tr = fst.tr_iter_unchecked_mut(state_id);
             for idx_tr in 0..it_tr.len() {

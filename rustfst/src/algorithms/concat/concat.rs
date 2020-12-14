@@ -4,8 +4,7 @@ use crate::fst_properties::mutable_properties::concat_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
-use crate::tr::Tr;
-use crate::{Trs, EPS_LABEL};
+use crate::{StateId, Tr, Trs, EPS_LABEL};
 
 /// Performs the concatenation of two wFSTs. If `A` transduces string `x` to `y` with weight `a`
 /// and `B` transduces string `w` to `v` with weight `b`, then their concatenation
@@ -66,7 +65,7 @@ where
     let numstates1 = fst_1.num_states();
     fst_1.reserve_states(fst_2.num_states());
 
-    for s2 in 0..fst_2.num_states() {
+    for s2 in fst_2.states_iter() {
         let s1 = fst_1.add_state();
         if let Some(final_weight) = unsafe { fst_2.final_weight_unchecked(s2) } {
             unsafe { fst_1.set_final_unchecked(s1, final_weight) };
@@ -74,19 +73,24 @@ where
         unsafe { fst_1.reserve_trs_unchecked(s1, fst_2.num_trs_unchecked(s2)) };
         for tr in unsafe { fst_2.get_trs_unchecked(s2).trs() } {
             let mut new_tr = tr.clone();
-            new_tr.nextstate += numstates1;
+            new_tr.nextstate += numstates1 as StateId;
             unsafe { fst_1.add_tr_unchecked(s1, new_tr) };
         }
     }
 
     let start2 = fst_2.start();
-    for s1 in 0..numstates1 {
+    for s1 in 0..(numstates1 as StateId) {
         if let Some(weight) = unsafe { fst_1.final_weight_unchecked(s1) } {
             if let Some(_start2) = start2 {
                 unsafe {
                     fst_1.add_tr_unchecked(
                         s1,
-                        Tr::new(EPS_LABEL, EPS_LABEL, weight, _start2 + numstates1),
+                        Tr::new(
+                            EPS_LABEL,
+                            EPS_LABEL,
+                            weight,
+                            _start2 + (numstates1 as StateId),
+                        ),
                     )
                 };
             }

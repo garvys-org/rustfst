@@ -9,7 +9,7 @@ use crate::algorithms::visitors::SccVisitor;
 use crate::fst_properties::{known_properties, FstProperties};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
-use crate::{Tr, Trs};
+use crate::{StateId, Tr, Trs};
 
 /// Computes all the FstProperties of the FST bit don't attach them to the FST.
 pub fn compute_fst_properties<W: Semiring, F: ExpandedFst<W>>(
@@ -80,6 +80,7 @@ pub fn compute_fst_properties<W: Semiring, F: ExpandedFst<W>>(
 
         let mut nfinal = 0;
         for state in 0..fst.num_states() {
+            let state = state as StateId;
             let mut ilabels = if mask
                 .intersects(FstProperties::I_DETERMINISTIC | FstProperties::NOT_I_DETERMINISTIC)
             {
@@ -151,7 +152,7 @@ pub fn compute_fst_properties<W: Semiring, F: ExpandedFst<W>>(
                     comp_props &= !FstProperties::UNWEIGHTED;
 
                     if comp_props.contains(FstProperties::UNWEIGHTED_CYCLES)
-                        && sccs[state] == sccs[tr.nextstate]
+                        && sccs[state as usize] == sccs[tr.nextstate as usize]
                     {
                         comp_props |= FstProperties::WEIGHTED_CYCLES;
                         comp_props &= !FstProperties::UNWEIGHTED_CYCLES;

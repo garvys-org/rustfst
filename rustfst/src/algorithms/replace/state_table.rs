@@ -33,7 +33,7 @@ impl ReplaceStackPrefix {
 #[derive(Hash, Eq, PartialOrd, PartialEq, Clone, Debug)]
 pub struct ReplaceStateTuple {
     /// Index in prefix table.
-    pub prefix_id: usize,
+    pub prefix_id: StateId,
     /// Current FST being walked.
     pub fst_id: Option<StateId>,
     /// Current state in FST being walked (not to be
@@ -42,7 +42,7 @@ pub struct ReplaceStateTuple {
 }
 
 impl ReplaceStateTuple {
-    pub fn new(prefix_id: usize, fst_id: Option<StateId>, fst_state: Option<StateId>) -> Self {
+    pub fn new(prefix_id: StateId, fst_id: Option<StateId>, fst_state: Option<StateId>) -> Self {
         Self {
             prefix_id,
             fst_id,

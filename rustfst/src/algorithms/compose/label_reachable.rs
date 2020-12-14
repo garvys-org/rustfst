@@ -33,7 +33,7 @@ impl LabelReachableData {
 
     pub fn interval_set(&self, s: StateId) -> Result<&IntervalSet> {
         self.interval_sets
-            .get(s)
+            .get(s as usize)
             .ok_or_else(|| format_err!("Missing state {}", s))
     }
 
@@ -54,7 +54,10 @@ impl LabelReachableData {
             return EPS_LABEL;
         }
         let n = self.label2index.len();
-        *self.label2index.entry(label).or_insert_with(|| n + 1)
+        *self
+            .label2index
+            .entry(label)
+            .or_insert_with(|| n as Label + 1)
     }
 
     pub fn relabel_fst<W: Semiring, F: MutableFst<W>>(
@@ -62,7 +65,7 @@ impl LabelReachableData {
         fst: &mut F,
         relabel_input: bool,
     ) -> Result<()> {
-        for s in 0..fst.num_states() {
+        for s in 0..(fst.num_states() as StateId) {
             unsafe {
                 let mut it_tr = fst.tr_iter_unchecked_mut(s);
                 for idx_tr in 0..it_tr.len() {
@@ -101,10 +104,10 @@ impl LabelReachableData {
         }
 
         if avoid_collisions {
-            for i in 1..=self.label2index.len() {
+            for i in 1..=(self.label2index.len() as Label) {
                 let it = self.label2index.get(&i);
                 if it.is_none() || it.unwrap() == &self.final_label {
-                    pairs.push((i, self.label2index.len() + 1));
+                    pairs.push((i, self.label2index.len() as Label + 1));
                 }
             }
         }
@@ -141,7 +144,7 @@ impl LabelReachable {
         let nstates = fst.num_states();
         Self::transform_fst(&mut fst, &mut data, &mut label2state);
         fst.compute_and_update_properties(FstProperties::ACYCLIC)?;
-        Self::find_intervals(&fst, nstates, &mut data, &mut label2state)?;
+        Self::find_intervals(&fst, nstates as StateId, &mut data, &mut label2state)?;
 
         Ok(data)
     }
@@ -172,8 +175,10 @@ impl LabelReachable {
         label2state: &mut HashMap<Label, StateId>,
     ) {
         let ins = fst.num_states();
-        let mut ons = ins;
         let mut indeg = vec![0; ins];
+
+        let ins = ins as StateId;
+        let mut ons = ins;
         // Redirects labeled trs to new final states.
         for s in 0..ins {
             let mut it_tr = unsafe { fst.tr_iter_unchecked_mut(s) };
@@ -199,7 +204,7 @@ impl LabelReachable {
                 } else {
                     tr.nextstate
                 };
-                indeg[nextstate] += 1;
+                indeg[nextstate as usize] += 1;
                 unsafe { it_tr.set_nextstate_unchecked(idx_tr, nextstate) };
             }
 
@@ -220,14 +225,14 @@ impl LabelReachable {
                             Tr::new(NO_LABEL, NO_LABEL, final_weight, nextstate),
                         )
                     };
-                    indeg[nextstate] += 1;
+                    indeg[nextstate as usize] += 1;
                     unsafe { fst.delete_final_weight_unchecked(s) }
                 }
             }
         }
 
         // Adds new final states to the FST.
-        while fst.num_states() < ons {
+        while fst.num_states() < (ons as usize) {
             let s = fst.add_state();
             unsafe { fst.set_final_unchecked(s, W::one()) };
         }
@@ -236,7 +241,7 @@ impl LabelReachable {
         let start = fst.add_state();
         unsafe { fst.set_start_unchecked(start) };
         for s in 0..start {
-            if indeg[s] == 0 {
+            if indeg[s as usize] == 0 {
                 unsafe { fst.add_tr_unchecked(start, Tr::new(0, 0, W::one(), s)) };
             }
         }
@@ -252,15 +257,15 @@ impl LabelReachable {
         let state2index = &state_reachable.state2index;
         let interval_sets = &mut data.interval_sets;
         *interval_sets = state_reachable.isets;
-        interval_sets.resize_with(ins, IntervalSet::default);
+        interval_sets.resize_with(ins as usize, IntervalSet::default);
 
         let label2index = &mut data.label2index;
 
         for (label, state) in label2state.iter() {
-            let i = state2index[*state];
-            label2index.insert(*label, i);
+            let i = state2index[*state as usize];
+            label2index.insert(*label, i as Label);
             if *label == NO_LABEL {
-                data.final_label = i;
+                data.final_label = i as Label;
             }
         }
         label2state.clear();
@@ -290,7 +295,10 @@ impl LabelReachable {
         if label == EPS_LABEL {
             return Ok(false);
         }
-        Ok(self.data.interval_set(current_state)?.member(label))
+        Ok(self
+            .data
+            .interval_set(current_state)?
+            .member(label as usize))
     }
 
     // Can reach final state (via epsilon transitions) from this state?
@@ -298,7 +306,7 @@ impl LabelReachable {
         Ok(self
             .data
             .interval_set(current_state)?
-            .member(self.data.final_label()))
+            .member(self.data.final_label() as usize))
     }
 
     pub fn reach<'a, W: Semiring + 'a, T: Trs<W>>(
@@ -338,8 +346,10 @@ impl LabelReachable {
             let mut begin_low;
             let mut end_low = aiter_begin;
             for interval in interval_set.iter() {
-                begin_low = self.lower_bound(trs_slice, end_low, aiter_end, interval.begin);
-                end_low = self.lower_bound(trs_slice, begin_low, aiter_end, interval.end);
+                begin_low =
+                    self.lower_bound(trs_slice, end_low, aiter_end, interval.begin as StateId);
+                end_low =
+                    self.lower_bound(trs_slice, begin_low, aiter_end, interval.end as StateId);
                 if end_low - begin_low > 0 {
                     if reach_begin == UNASSIGNED {
                         reach_begin = begin_low;

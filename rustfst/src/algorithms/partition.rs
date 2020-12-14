@@ -1,4 +1,5 @@
 use crate::algorithms::Queue;
+use crate::StateId;
 
 #[derive(Debug, Clone)]
 pub struct Partition {
@@ -168,7 +169,7 @@ impl Partition {
         for visited_class in visited_classes {
             let new_class = self.split_refine(visited_class);
             if new_class != -1 && queue.as_ref().is_some() {
-                queue.as_mut().unwrap().enqueue(new_class as usize);
+                queue.as_mut().unwrap().enqueue(new_class as StateId);
             }
         }
         self.visited_classes.clear();

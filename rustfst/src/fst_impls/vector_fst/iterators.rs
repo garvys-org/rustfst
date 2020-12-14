@@ -16,7 +16,7 @@ use crate::{StateId, Trs};
 impl<'a, W: Semiring> StateIterator<'a> for VectorFst<W> {
     type Iter = Range<StateId>;
     fn states_iter(&'a self) -> Self::Iter {
-        0..self.states.len()
+        0..(self.states.len() as StateId)
     }
 }
 
@@ -36,7 +36,7 @@ impl<W: Semiring> FstIntoIterator<W> for VectorFst<W> {
                     let mut trs = fst_state.trs.0;
                     let trs_vec = Arc::make_mut(&mut trs).drain(..).collect_vec();
                     FstIterData {
-                        state_id,
+                        state_id: state_id as StateId,
                         num_trs: trs_vec.len(),
                         trs: trs_vec.into_iter(),
                         final_weight: fst_state.final_weight,
@@ -48,7 +48,7 @@ impl<W: Semiring> FstIntoIterator<W> for VectorFst<W> {
 
 type States<'a, W> = Enumerate<std::slice::Iter<'a, VectorFstState<W>>>;
 type StateToData<'a, W, TRS> =
-    Box<dyn FnMut((StateId, &'a VectorFstState<W>)) -> FstIterData<W, TRS>>;
+    Box<dyn FnMut((usize, &'a VectorFstState<W>)) -> FstIterData<W, TRS>>;
 
 impl<'a, W: Semiring + 'static> FstIterator<'a, W> for VectorFst<W> {
     type FstIter = Map<States<'a, W>, StateToData<'a, W, Self::TRS>>;
@@ -57,7 +57,7 @@ impl<'a, W: Semiring + 'static> FstIterator<'a, W> for VectorFst<W> {
             .iter()
             .enumerate()
             .map(Box::new(|(state_id, fst_state)| FstIterData {
-                state_id,
+                state_id: state_id as StateId,
                 trs: fst_state.trs.shallow_clone(),
                 final_weight: fst_state.final_weight.clone(),
                 num_trs: fst_state.trs.len(),

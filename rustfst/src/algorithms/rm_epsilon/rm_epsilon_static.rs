@@ -1,5 +1,4 @@
 use anyhow::Result;
-use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::queues::AutoQueue;
@@ -12,7 +11,7 @@ use crate::fst_properties::mutable_properties::rmepsilon_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
-use crate::{Trs, EPS_LABEL};
+use crate::{StateId, Trs, EPS_LABEL};
 
 /// This operation removes epsilon-transitions (when both the input and
 /// output labels are an epsilon) from a transducer. The result will be an
@@ -77,21 +76,20 @@ pub(crate) fn rm_epsilon_with_internal_config<W: Semiring, F: MutableFst<W>, Q: 
     let weight_threshold = opts.weight_threshold.clone();
     let state_threshold = opts.state_threshold;
 
-    let start_state = fst.start();
-    if start_state.is_none() {
-        return Ok(());
-    }
-    let start_state = unsafe { start_state.unsafe_unwrap() };
+    let start_state = match fst.start() {
+        None => return Ok(()),
+        Some(s) => s,
+    };
 
     // noneps_in[s] will be set to true iff s admits a non-epsilon incoming
     // transition or is the start state.
     let mut noneps_in = vec![false; fst.num_states()];
-    noneps_in[start_state] = true;
+    noneps_in[start_state as usize] = true;
 
-    for state in 0..fst.num_states() {
+    for state in fst.states_iter() {
         for tr in fst.get_trs(state)?.trs() {
             if tr.ilabel != EPS_LABEL || tr.olabel != EPS_LABEL {
-                noneps_in[tr.nextstate] = true;
+                noneps_in[tr.nextstate as usize] = true;
             }
         }
     }
@@ -103,14 +101,14 @@ pub(crate) fn rm_epsilon_with_internal_config<W: Semiring, F: MutableFst<W>, Q: 
     let fst_props = fst.properties();
 
     if fst_props.contains(FstProperties::TOP_SORTED) {
-        states = (0..fst.num_states()).collect();
+        states = fst.states_iter().collect();
     } else if fst_props.contains(FstProperties::ACYCLIC) {
         let mut visitor = TopOrderVisitor::new();
         dfs_visit(fst, &mut visitor, &EpsilonTrFilter {}, false);
 
         states.resize(visitor.order.len(), 0);
         for i in 0..visitor.order.len() {
-            states[visitor.order[i]] = i;
+            states[visitor.order[i] as usize] = i as StateId;
         }
     } else {
         let mut visitor = SccVisitor::new(fst, true, false);
@@ -131,7 +129,7 @@ pub(crate) fn rm_epsilon_with_internal_config<W: Semiring, F: MutableFst<W>, Q: 
         for i in 0..first.len() {
             let mut opt_j = first[i];
             while let Some(j) = opt_j {
-                states.push(j);
+                states.push(j as StateId);
                 opt_j = next[j];
             }
         }
@@ -141,7 +139,7 @@ pub(crate) fn rm_epsilon_with_internal_config<W: Semiring, F: MutableFst<W>, Q: 
     let zero = W::zero();
 
     for state in states.into_iter().rev() {
-        if !noneps_in[state]
+        if !noneps_in[state as usize]
             && (connect || weight_threshold != W::zero() || state_threshold != None)
         {
             continue;
@@ -160,8 +158,8 @@ pub(crate) fn rm_epsilon_with_internal_config<W: Semiring, F: MutableFst<W>, Q: 
     }
 
     if connect || weight_threshold != W::zero() || state_threshold != None {
-        for s in 0..fst.num_states() {
-            if !noneps_in[s] {
+        for s in 0..(fst.num_states() as StateId) {
+            if !noneps_in[s as usize] {
                 fst.delete_trs(s)?;
             }
         }

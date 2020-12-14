@@ -28,7 +28,7 @@ impl TopOrderVisitor {
 impl<'a, W: Semiring, F: 'a + Fst<W>> Visitor<'a, W, F> for TopOrderVisitor {
     fn init_visit(&mut self, _fst: &'a F) {}
 
-    fn init_state(&mut self, _s: usize, _root: usize) -> bool {
+    fn init_state(&mut self, _s: StateId, _root: StateId) -> bool {
         true
     }
 
@@ -54,7 +54,7 @@ impl<'a, W: Semiring, F: 'a + Fst<W>> Visitor<'a, W, F> for TopOrderVisitor {
             self.order = vec![0; self.finish.len()];
 
             for s in 0..self.finish.len() {
-                self.order[self.finish[self.finish.len() - s - 1]] = s;
+                self.order[self.finish[self.finish.len() - s - 1] as usize] = s as StateId;
             }
         }
     }

@@ -6,10 +6,10 @@ use anyhow::Result;
 use std::sync::Arc;
 
 impl<W: 'static + Semiring> AllocableFst<W> for VectorFst<W> {
-    fn reserve_trs(&mut self, source: usize, additional: usize) -> Result<()> {
+    fn reserve_trs(&mut self, source: StateId, additional: usize) -> Result<()> {
         let trs = &mut self
             .states
-            .get_mut(source)
+            .get_mut(source as usize)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
             .trs;
 
@@ -18,8 +18,8 @@ impl<W: 'static + Semiring> AllocableFst<W> for VectorFst<W> {
     }
 
     #[inline]
-    unsafe fn reserve_trs_unchecked(&mut self, source: usize, additional: usize) {
-        let trs = &mut self.states.get_unchecked_mut(source).trs;
+    unsafe fn reserve_trs_unchecked(&mut self, source: StateId, additional: usize) {
+        let trs = &mut self.states.get_unchecked_mut(source as usize).trs;
         Arc::make_mut(&mut trs.0).reserve(additional)
     }
 
@@ -43,7 +43,7 @@ impl<W: 'static + Semiring> AllocableFst<W> for VectorFst<W> {
     fn shrink_to_fit_trs(&mut self, source: StateId) -> Result<()> {
         let trs = &mut self
             .states
-            .get_mut(source)
+            .get_mut(source as usize)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
             .trs;
         Arc::make_mut(&mut trs.0).shrink_to_fit();
@@ -52,7 +52,7 @@ impl<W: 'static + Semiring> AllocableFst<W> for VectorFst<W> {
 
     #[inline]
     unsafe fn shrink_to_fit_trs_unchecked(&mut self, source: StateId) {
-        Arc::make_mut(&mut self.states.get_unchecked_mut(source).trs.0).shrink_to_fit()
+        Arc::make_mut(&mut self.states.get_unchecked_mut(source as usize).trs.0).shrink_to_fit()
     }
 
     #[inline]
@@ -63,7 +63,7 @@ impl<W: 'static + Semiring> AllocableFst<W> for VectorFst<W> {
     fn trs_capacity(&self, source: StateId) -> Result<usize> {
         Ok(self
             .states
-            .get(source)
+            .get(source as usize)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", source))?
             .trs
             .0
@@ -72,6 +72,6 @@ impl<W: 'static + Semiring> AllocableFst<W> for VectorFst<W> {
 
     #[inline]
     unsafe fn trs_capacity_unchecked(&self, source: StateId) -> usize {
-        self.states.get_unchecked(source).trs.0.capacity()
+        self.states.get_unchecked(source as usize).trs.0.capacity()
     }
 }

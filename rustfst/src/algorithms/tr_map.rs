@@ -96,7 +96,7 @@ where
         ifst.set_final(superfinal_id, W::one()).unwrap();
     }
 
-    for state in 0..ifst.num_states() {
+    for state in 0..(ifst.num_states() as StateId) {
         unsafe {
             let mut it_tr = ifst.tr_iter_unchecked_mut(state);
             for idx_tr in 0..it_tr.len() {

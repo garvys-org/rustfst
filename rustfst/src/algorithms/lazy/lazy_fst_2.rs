@@ -26,7 +26,7 @@ pub struct LazyFst2<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> {
 impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, Op, Cache> {
     type TRS = TrsVec<W>;
 
-    fn start(&self) -> Option<usize> {
+    fn start(&self) -> Option<StateId> {
         match self.cache.get_start() {
             CacheStatus::Computed(start) => start,
             CacheStatus::NotComputed => {
@@ -38,7 +38,7 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
         }
     }
 
-    fn final_weight(&self, state_id: usize) -> Result<Option<W>> {
+    fn final_weight(&self, state_id: StateId) -> Result<Option<W>> {
         match self.cache.get_final_weight(state_id) {
             CacheStatus::Computed(final_weight) => Ok(final_weight),
             CacheStatus::NotComputed => {
@@ -51,21 +51,21 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
         }
     }
 
-    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<W> {
+    unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<W> {
         self.final_weight(state_id).unsafe_unwrap()
     }
 
-    fn num_trs(&self, s: usize) -> Result<usize> {
+    fn num_trs(&self, s: StateId) -> Result<usize> {
         self.cache
             .num_trs(s)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", s))
     }
 
-    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+    unsafe fn num_trs_unchecked(&self, s: StateId) -> usize {
         self.cache.num_trs(s).unsafe_unwrap()
     }
 
-    fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
+    fn get_trs(&self, state_id: StateId) -> Result<Self::TRS> {
         match self.cache.get_trs(state_id) {
             CacheStatus::Computed(trs) => Ok(trs),
             CacheStatus::NotComputed => {
@@ -77,7 +77,7 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
         }
     }
 
-    unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
+    unsafe fn get_trs_unchecked(&self, state_id: StateId) -> Self::TRS {
         self.get_trs(state_id).unsafe_unwrap()
     }
 
@@ -85,13 +85,13 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
         self.op.properties()
     }
 
-    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+    fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
         self.cache
             .num_input_epsilons(state)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state))
     }
 
-    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+    fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
         self.cache
             .num_output_epsilons(state)
             .ok_or_else(|| format_err!("State {:?} doesn't exist", state))
@@ -115,7 +115,7 @@ where
 #[derive(Clone)]
 pub struct StatesIteratorLazyFst<'a, T> {
     pub(crate) fst: &'a T,
-    pub(crate) s: usize,
+    pub(crate) s: StateId,
 }
 
 impl<'a, W, Op, Cache> Iterator for StatesIteratorLazyFst<'a, LazyFst2<W, Op, Cache>>
@@ -128,7 +128,7 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         let num_known_states = self.fst.cache.num_known_states();
-        if self.s < num_known_states {
+        if (self.s as usize) < num_known_states {
             let s_cur = self.s;
             // Force expansion of the state
             self.fst.get_trs(self.s).unwrap();
@@ -220,10 +220,10 @@ where
     pub fn compute<F2: MutableFst<W>>(&self) -> Result<F2> {
         let start_state = self.start();
         let mut fst_out = F2::new();
-        if start_state.is_none() {
-            return Ok(fst_out);
-        }
-        let start_state = start_state.unwrap();
+        let start_state = match start_state {
+            Some(s) => s,
+            None => return Ok(fst_out),
+        };
         for _ in 0..=start_state {
             fst_out.add_state();
         }
@@ -232,15 +232,14 @@ where
         let mut visited_states = HashSet::new();
         visited_states.insert(start_state);
         queue.push_back(start_state);
-        while !queue.is_empty() {
-            let s = queue.pop_front().unwrap();
+        while let Some(s) = queue.pop_front() {
             for tr in self.get_trs(s)?.trs() {
                 if !visited_states.contains(&tr.nextstate) {
                     queue.push_back(tr.nextstate);
                     visited_states.insert(tr.nextstate);
                 }
                 let n = fst_out.num_states();
-                for _ in n..=tr.nextstate {
+                for _ in n..=(tr.nextstate as usize) {
                     fst_out.add_state();
                 }
                 fst_out.add_tr(s, tr.clone())?;

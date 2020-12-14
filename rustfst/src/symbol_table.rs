@@ -51,7 +51,7 @@ impl SymbolTable {
         let mut bimap = BiHashMapString::new();
         for (symbol, label) in parsed_symt_text.pairs.into_iter() {
             let inserted_label = bimap.get_id_or_insert(symbol);
-            if inserted_label != label {
+            if inserted_label as Label != label {
                 bail!("The SymbolTable should contain labels with increasing ids and no hole. Expected {} and got {}", inserted_label, label)
             }
         }
@@ -114,7 +114,7 @@ impl<H: BuildHasher> SymbolTable<H> {
     /// # }
     /// ```
     pub fn add_symbol(&mut self, sym: impl Into<String>) -> Label {
-        self.bimap.get_id_or_insert(sym.into())
+        self.bimap.get_id_or_insert(sym.into()) as Label
     }
 
     pub fn add_symbols<S: Into<String>, P: IntoIterator<Item = S>>(&mut self, symbols: P) {
@@ -151,7 +151,7 @@ impl<H: BuildHasher> SymbolTable<H> {
     /// # }
     /// ```
     pub fn get_label(&self, sym: impl AsRef<str>) -> Option<Label> {
-        self.bimap.get_id(sym)
+        self.bimap.get_id(sym).map(|it| it as Label)
     }
 
     /// Given a label, returns the symbol corresponding.
@@ -168,7 +168,7 @@ impl<H: BuildHasher> SymbolTable<H> {
     /// # }
     /// ```
     pub fn get_symbol(&self, label: Label) -> Option<&str> {
-        self.bimap.get_string(label)
+        self.bimap.get_string(label as usize)
     }
 
     /// Given a symbol, returns whether it is present in the table.
@@ -219,7 +219,7 @@ impl<H: BuildHasher> SymbolTable<H> {
     /// # }
     /// ```
     pub fn labels(&self) -> impl Iterator<Item = Label> {
-        self.bimap.iter_ids()
+        self.bimap.iter_ids().map(|it| it as Label)
     }
 
     /// An iterator on all the symbols stored in the `SymbolTable`.
@@ -244,7 +244,7 @@ impl<H: BuildHasher> SymbolTable<H> {
     /// An iterator on all the labels stored in the `SymbolTable`.
     /// The iterator element is `(&'a Label, &'a Symbol)`.
     pub fn iter(&self) -> impl Iterator<Item = (Label, &str)> {
-        self.bimap.iter()
+        self.bimap.iter().map(|(label, sym)| (label as Label, sym))
     }
 
     /// Adds another SymbolTable to this table.

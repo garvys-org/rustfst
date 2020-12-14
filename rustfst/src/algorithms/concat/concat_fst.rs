@@ -7,7 +7,7 @@ use crate::fst_properties::mutable_properties::concat_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::Semiring;
-use crate::{SymbolTable, Tr, TrsVec, EPS_LABEL};
+use crate::{StateId, SymbolTable, Tr, TrsVec, EPS_LABEL, NO_LABEL};
 
 /// Computes the concatenation (product) of two FSTs; this version is a delayed
 /// FST. If FST1 transduces string x to y with weight a and FST2 transduces
@@ -36,13 +36,13 @@ where
         if let Some(osymt) = fst1.output_symbols() {
             rfst.set_output_symbols(Arc::clone(osymt));
         }
-        unsafe { rfst.add_tr_unchecked(0, Tr::new(EPS_LABEL, std::usize::MAX, W::one(), 1)) };
-        unsafe { rfst.add_tr_unchecked(1, Tr::new(EPS_LABEL, std::usize::MAX - 1, W::one(), 2)) };
+        unsafe { rfst.add_tr_unchecked(0, Tr::new(EPS_LABEL, NO_LABEL, W::one(), 1)) };
+        unsafe { rfst.add_tr_unchecked(1, Tr::new(EPS_LABEL, NO_LABEL - 1, W::one(), 2)) };
 
         let mut fst_tuples = Vec::with_capacity(3);
         fst_tuples.push((0, rfst));
-        fst_tuples.push((std::usize::MAX, fst1));
-        fst_tuples.push((std::usize::MAX - 1, fst2));
+        fst_tuples.push((NO_LABEL, fst1));
+        fst_tuples.push((NO_LABEL - 1, fst2));
 
         Ok(ConcatFst(
             ReplaceFst::new(fst_tuples, 0, false)?,
@@ -63,31 +63,31 @@ where
 {
     type TRS = TrsVec<W>;
 
-    fn start(&self) -> Option<usize> {
+    fn start(&self) -> Option<StateId> {
         self.0.start()
     }
 
-    fn final_weight(&self, state_id: usize) -> Result<Option<W>> {
+    fn final_weight(&self, state_id: StateId) -> Result<Option<W>> {
         self.0.final_weight(state_id)
     }
 
-    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<W> {
+    unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<W> {
         self.0.final_weight_unchecked(state_id)
     }
 
-    fn num_trs(&self, s: usize) -> Result<usize> {
+    fn num_trs(&self, s: StateId) -> Result<usize> {
         self.0.num_trs(s)
     }
 
-    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+    unsafe fn num_trs_unchecked(&self, s: StateId) -> usize {
         self.0.num_trs_unchecked(s)
     }
 
-    fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
+    fn get_trs(&self, state_id: StateId) -> Result<Self::TRS> {
         self.0.get_trs(state_id)
     }
 
-    unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
+    unsafe fn get_trs_unchecked(&self, state_id: StateId) -> Self::TRS {
         self.0.get_trs_unchecked(state_id)
     }
 
@@ -95,11 +95,11 @@ where
         self.1
     }
 
-    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+    fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
         self.0.num_input_epsilons(state)
     }
 
-    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+    fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
         self.0.num_output_epsilons(state)
     }
 }

@@ -27,11 +27,11 @@ fn transition<W: SerializableSemiring>(i: &str) -> IResult<&str, RowParsed<W>> {
     Ok((
         i,
         RowParsed::Transition(Transition {
-            state,
-            ilabel,
-            olabel,
+            state: state,
+            ilabel: ilabel,
+            olabel: olabel,
             weight,
-            nextstate,
+            nextstate: nextstate,
         }),
     ))
 }
@@ -39,7 +39,13 @@ fn transition<W: SerializableSemiring>(i: &str) -> IResult<&str, RowParsed<W>> {
 fn final_state<W: SerializableSemiring>(i: &str) -> IResult<&str, RowParsed<W>> {
     let (i, state) = num(i)?;
     let (i, weight) = optional_weight(i)?;
-    Ok((i, RowParsed::FinalState(FinalState { state, weight })))
+    Ok((
+        i,
+        RowParsed::FinalState(FinalState {
+            state: state,
+            weight,
+        }),
+    ))
 }
 
 fn infinity_final_state<W: SerializableSemiring>(i: &str) -> IResult<&str, RowParsed<W>> {

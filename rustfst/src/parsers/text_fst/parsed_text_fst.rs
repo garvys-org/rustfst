@@ -152,7 +152,7 @@ impl<W: SerializableSemiring> ParsedTextFst<W> {
             .chain(it_final_states)
             .chain(it_start_state)
             .max();
-        max_state.map(|n| n + 1).unwrap_or(0)
+        max_state.map(|n| n as usize + 1).unwrap_or(0)
     }
 }
 

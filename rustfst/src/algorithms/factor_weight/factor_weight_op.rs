@@ -11,7 +11,7 @@ use crate::fst_properties::mutable_properties::factor_weight_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
 use crate::semirings::{Semiring, WeightQuantize};
-use crate::{Tr, Trs, TrsVec};
+use crate::{StateId, Tr, Trs, TrsVec};
 
 pub struct FactorWeightOp<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> {
     opts: FactorWeightOptions,
@@ -40,7 +40,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> std::fmt::Debu
 impl<W: WeightQuantize, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FstOp<W>
     for FactorWeightOp<W, F, B, FI>
 {
-    fn compute_start(&self) -> Result<Option<usize>> {
+    fn compute_start(&self) -> Result<Option<StateId>> {
         match self.fst.borrow().start() {
             None => Ok(None),
             Some(s) => {
@@ -53,7 +53,7 @@ impl<W: WeightQuantize, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FstOp<W>
         }
     }
 
-    fn compute_trs(&self, state: usize) -> Result<TrsVec<W>> {
+    fn compute_trs(&self, state: StateId) -> Result<TrsVec<W>> {
         let elt = self.fw_state_table.find_tuple(state);
         let mut trs = vec![];
         if let Some(old_state) = elt.state {
@@ -112,7 +112,7 @@ impl<W: WeightQuantize, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FstOp<W>
         Ok(TrsVec(Arc::new(trs)))
     }
 
-    fn compute_final_weight(&self, state: usize) -> Result<Option<W>> {
+    fn compute_final_weight(&self, state: StateId) -> Result<Option<W>> {
         let zero = W::zero();
         let elt = self.fw_state_table.find_tuple(state);
         let weight = match elt.state {

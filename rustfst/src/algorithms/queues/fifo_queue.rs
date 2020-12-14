@@ -8,11 +8,11 @@ use crate::StateId;
 pub struct FifoQueue(VecDeque<StateId>);
 
 impl Queue for FifoQueue {
-    fn head(&mut self) -> Option<usize> {
+    fn head(&mut self) -> Option<StateId> {
         self.0.front().cloned()
     }
 
-    fn enqueue(&mut self, state: usize) {
+    fn enqueue(&mut self, state: StateId) {
         self.0.push_back(state)
     }
 
@@ -20,7 +20,7 @@ impl Queue for FifoQueue {
         self.0.pop_front();
     }
 
-    fn update(&mut self, _state: usize) {}
+    fn update(&mut self, _state: StateId) {}
 
     fn is_empty(&self) -> bool {
         self.0.is_empty()

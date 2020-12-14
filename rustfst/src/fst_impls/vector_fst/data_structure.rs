@@ -78,7 +78,7 @@ impl<W: Semiring> VectorFstState<W> {
 
 impl<W: Semiring> VectorFst<W> {
     pub fn update_properties_after_add_tr(&mut self, state: StateId) {
-        let vector_state = unsafe { self.states.get_unchecked(state) };
+        let vector_state = unsafe { self.states.get_unchecked(state as usize) };
 
         // Safe because at least one Tr has been added
         let new_tr = vector_state.trs.last().unwrap();

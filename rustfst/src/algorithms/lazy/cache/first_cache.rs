@@ -20,15 +20,15 @@ impl<W: Semiring, Cache: FstCache<W> + Default> Default for FirstCache<W, Cache>
 }
 
 impl<W: Semiring, Cache: FstCache<W>> FstCache<W> for FirstCache<W, Cache> {
-    fn get_start(&self) -> CacheStatus<Option<usize>> {
+    fn get_start(&self) -> CacheStatus<Option<StateId>> {
         self.cache.get_start()
     }
 
-    fn insert_start(&self, id: Option<usize>) {
+    fn insert_start(&self, id: Option<StateId>) {
         self.cache.insert_start(id)
     }
 
-    fn get_trs(&self, id: usize) -> CacheStatus<TrsVec<W>> {
+    fn get_trs(&self, id: StateId) -> CacheStatus<TrsVec<W>> {
         let data = self.last_trs.lock().unwrap();
         if let Some((last_id_trs, last_trs)) = &*data {
             if *last_id_trs == id {
@@ -38,13 +38,13 @@ impl<W: Semiring, Cache: FstCache<W>> FstCache<W> for FirstCache<W, Cache> {
         self.cache.get_trs(id)
     }
 
-    fn insert_trs(&self, id: usize, trs: TrsVec<W>) {
+    fn insert_trs(&self, id: StateId, trs: TrsVec<W>) {
         let mut data = self.last_trs.lock().unwrap();
         *data = Some((id, trs.shallow_clone()));
         self.cache.insert_trs(id, trs);
     }
 
-    fn get_final_weight(&self, id: usize) -> CacheStatus<Option<W>> {
+    fn get_final_weight(&self, id: StateId) -> CacheStatus<Option<W>> {
         let data = self.last_final_weight.lock().unwrap();
         if let Some((last_id_final_weight, last_final_weight)) = &*data {
             if *last_id_final_weight == id {
@@ -54,7 +54,7 @@ impl<W: Semiring, Cache: FstCache<W>> FstCache<W> for FirstCache<W, Cache> {
         self.cache.get_final_weight(id)
     }
 
-    fn insert_final_weight(&self, id: usize, weight: Option<W>) {
+    fn insert_final_weight(&self, id: StateId, weight: Option<W>) {
         let mut data = self.last_final_weight.lock().unwrap();
         *data = Some((id, weight.clone()));
         self.cache.insert_final_weight(id, weight)
@@ -64,15 +64,15 @@ impl<W: Semiring, Cache: FstCache<W>> FstCache<W> for FirstCache<W, Cache> {
         self.cache.num_known_states()
     }
 
-    fn num_trs(&self, id: usize) -> Option<usize> {
+    fn num_trs(&self, id: StateId) -> Option<usize> {
         self.cache.num_trs(id)
     }
 
-    fn num_input_epsilons(&self, id: usize) -> Option<usize> {
+    fn num_input_epsilons(&self, id: StateId) -> Option<usize> {
         self.cache.num_input_epsilons(id)
     }
 
-    fn num_output_epsilons(&self, id: usize) -> Option<usize> {
+    fn num_output_epsilons(&self, id: StateId) -> Option<usize> {
         self.cache.num_output_epsilons(id)
     }
 

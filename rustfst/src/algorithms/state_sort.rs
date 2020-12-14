@@ -31,24 +31,22 @@ where
 
     let mut done = vec![false; order.len()];
 
-    if cfg!(debug_assertions) {
-        assert!(start_state < order.len());
-        assert!(order[start_state] < fst.num_states());
-    }
+    debug_assert!((start_state as usize) < order.len());
+    debug_assert!((order[start_state as usize] as usize) < fst.num_states());
 
-    fst.set_start(order[start_state])?;
+    fst.set_start(order[start_state as usize])?;
 
-    for mut s1 in 0..fst.num_states() {
-        if done[s1] {
+    for mut s1 in fst.states_range() {
+        if done[s1 as usize] {
             continue;
         }
         let mut final1 = unsafe { fst.final_weight_unchecked(s1) };
         let mut final2 = None;
         let mut trsa: Vec<_> = fst.get_trs(s1)?.trs().to_vec();
         let mut trsb = vec![];
-        while !done[s1] {
-            let s2 = order[s1];
-            if !done[s2] {
+        while !done[s1 as usize] {
+            let s2 = order[s1 as usize];
+            if !done[s2 as usize] {
                 final2 = unsafe { fst.final_weight_unchecked(s2) };
                 trsb = fst.get_trs(s2)?.trs().to_vec();
             }
@@ -59,10 +57,10 @@ where
             fst.delete_trs(s2)?;
             for tr in trsa.iter() {
                 let mut tr = tr.clone();
-                tr.nextstate = order[tr.nextstate];
+                tr.nextstate = order[tr.nextstate as usize];
                 fst.add_tr(s2, tr)?;
             }
-            done[s1] = true;
+            done[s1 as usize] = true;
 
             // next
             swap(&mut trsa, &mut trsb);

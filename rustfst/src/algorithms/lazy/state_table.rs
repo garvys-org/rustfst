@@ -38,11 +38,11 @@ impl<T: Hash + Eq + Clone, H: BuildHasher> BiHashMap<T, H> {
         }
     }
 
-    pub fn get_id_or_insert(&mut self, tuple: T) -> usize {
+    pub fn get_id_or_insert(&mut self, tuple: T) -> StateId {
         match self.tuple_to_id.entry(tuple) {
             Entry::Occupied(e) => *e.get(),
             Entry::Vacant(e) => {
-                let n = self.id_to_tuple.len();
+                let n = self.id_to_tuple.len() as StateId;
                 self.id_to_tuple.push(e.key().clone());
                 e.insert(n);
                 n
@@ -50,8 +50,8 @@ impl<T: Hash + Eq + Clone, H: BuildHasher> BiHashMap<T, H> {
         }
     }
 
-    pub fn get_tuple_unchecked(&self, id: usize) -> T {
-        self.id_to_tuple[id].clone()
+    pub fn get_tuple_unchecked(&self, id: StateId) -> T {
+        self.id_to_tuple[id as usize].clone()
     }
 }
 

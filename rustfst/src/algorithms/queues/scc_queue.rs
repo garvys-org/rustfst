@@ -23,31 +23,32 @@ impl SccQueue {
 }
 
 impl Queue for SccQueue {
-    fn head(&mut self) -> Option<usize> {
+    fn head(&mut self) -> Option<StateId> {
         while self.front <= self.back && self.queues[self.front as usize].is_empty() {
             self.front += 1;
         }
         self.queues[self.front as usize].head()
     }
 
-    fn enqueue(&mut self, state: usize) {
+    fn enqueue(&mut self, state: StateId) {
+        let u_state = state as usize;
         if self.front > self.back {
-            self.front = self.sccs[state] as i32;
-            self.back = self.sccs[state] as i32;
-        } else if (self.sccs[state] as i32) > self.back {
-            self.back = self.sccs[state] as i32;
-        } else if (self.sccs[state] as i32) < self.front {
-            self.front = self.sccs[state] as i32;
+            self.front = self.sccs[u_state] as i32;
+            self.back = self.sccs[u_state] as i32;
+        } else if (self.sccs[u_state] as i32) > self.back {
+            self.back = self.sccs[u_state] as i32;
+        } else if (self.sccs[u_state] as i32) < self.front {
+            self.front = self.sccs[u_state] as i32;
         }
-        self.queues[self.sccs[state]].enqueue(state);
+        self.queues[self.sccs[u_state] as usize].enqueue(state);
     }
 
     fn dequeue(&mut self) {
         self.queues[self.front as usize].dequeue()
     }
 
-    fn update(&mut self, state: usize) {
-        self.queues[self.sccs[state]].update(state)
+    fn update(&mut self, state: StateId) {
+        self.queues[self.sccs[state as usize] as usize].update(state)
     }
 
     fn is_empty(&self) -> bool {

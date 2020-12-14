@@ -21,7 +21,7 @@ impl<W: Semiring, C: Clone + Fn(&W, &W) -> Result<bool>> StateWeightCompare<W, C
     }
 
     pub fn compare(&self, s1: StateId, s2: StateId) -> Result<bool> {
-        (self.less)(&self.weights[s1], &self.weights[s2])
+        (self.less)(&self.weights[s1 as usize], &self.weights[s2 as usize])
     }
 }
 
@@ -49,11 +49,11 @@ impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> ShortestFirstQueue<C> {
 }
 
 impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> Queue for ShortestFirstQueue<C> {
-    fn head(&mut self) -> Option<usize> {
+    fn head(&mut self) -> Option<StateId> {
         self.heap.peek().cloned()
     }
 
-    fn enqueue(&mut self, state: usize) {
+    fn enqueue(&mut self, state: StateId) {
         self.heap.push(state);
     }
 
@@ -61,7 +61,7 @@ impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> Queue for ShortestFirstQu
         self.heap.pop();
     }
 
-    fn update(&mut self, _state: usize) {
+    fn update(&mut self, _state: StateId) {
         unimplemented!()
     }
 
@@ -100,11 +100,11 @@ impl NaturalShortestFirstQueue {
 }
 
 impl Queue for NaturalShortestFirstQueue {
-    fn head(&mut self) -> Option<usize> {
+    fn head(&mut self) -> Option<StateId> {
         self.queue.head()
     }
 
-    fn enqueue(&mut self, state: usize) {
+    fn enqueue(&mut self, state: StateId) {
         self.queue.enqueue(state)
     }
 
@@ -112,7 +112,7 @@ impl Queue for NaturalShortestFirstQueue {
         self.queue.dequeue()
     }
 
-    fn update(&mut self, state: usize) {
+    fn update(&mut self, state: StateId) {
         self.queue.update(state)
     }
 

@@ -1,10 +1,11 @@
 use anyhow::Result;
+use std::ops::Range;
 
 use crate::algorithms::fst_convert_from_ref;
 use crate::algorithms::tr_mappers::QuantizeMapper;
 use crate::fst_traits::{AllocableFst, Fst, FstIntoIterator, MutableFst};
 use crate::semirings::{Semiring, WeightQuantize};
-use crate::Trs;
+use crate::{StateId, Trs};
 
 /// Trait defining the necessary methods that should implement an ExpandedFST e.g
 /// a FST where all the states are already computed and not computed on the fly.
@@ -31,6 +32,10 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
     /// ```
     fn num_states(&self) -> usize;
 
+    fn states_range(&self) -> Range<StateId> {
+        0..(self.num_states() as StateId)
+    }
+
     fn approx_equal<F2: ExpandedFst<W>>(&self, fst2: &F2, delta: f32) -> bool {
         let n = self.num_states();
         if fst2.num_states() != n {
@@ -41,7 +46,7 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
             println!("Not the same start state");
             return false;
         }
-        for state in 0..n {
+        for state in 0..(n as StateId) {
             let trs1 = unsafe { self.get_trs_unchecked(state) };
             let trs2 = unsafe { fst2.get_trs_unchecked(state) };
 

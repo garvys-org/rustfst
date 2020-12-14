@@ -4,7 +4,7 @@ use crate::algorithms::lazy::{LazyFst, SimpleHashMapCache};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::semirings::{WeaklyDivisibleSemiring, WeightQuantize};
-use crate::{Semiring, SymbolTable, TrsVec};
+use crate::{Semiring, StateId, SymbolTable, TrsVec};
 use anyhow::Result;
 use std::borrow::Borrow;
 use std::fmt::Debug;
@@ -33,31 +33,31 @@ where
 {
     type TRS = TrsVec<W>;
 
-    fn start(&self) -> Option<usize> {
+    fn start(&self) -> Option<StateId> {
         self.0.start()
     }
 
-    fn final_weight(&self, state_id: usize) -> Result<Option<W>> {
+    fn final_weight(&self, state_id: StateId) -> Result<Option<W>> {
         self.0.final_weight(state_id)
     }
 
-    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<W> {
+    unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<W> {
         self.0.final_weight_unchecked(state_id)
     }
 
-    fn num_trs(&self, s: usize) -> Result<usize> {
+    fn num_trs(&self, s: StateId) -> Result<usize> {
         self.0.num_trs(s)
     }
 
-    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+    unsafe fn num_trs_unchecked(&self, s: StateId) -> usize {
         self.0.num_trs_unchecked(s)
     }
 
-    fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
+    fn get_trs(&self, state_id: StateId) -> Result<Self::TRS> {
         self.0.get_trs(state_id)
     }
 
-    unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
+    unsafe fn get_trs_unchecked(&self, state_id: StateId) -> Self::TRS {
         self.0.get_trs_unchecked(state_id)
     }
 
@@ -65,11 +65,11 @@ where
         unimplemented!()
     }
 
-    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+    fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
         self.0.num_input_epsilons(state)
     }
 
-    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+    fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
         self.0.num_output_epsilons(state)
     }
 }

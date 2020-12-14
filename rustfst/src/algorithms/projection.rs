@@ -66,7 +66,7 @@ pub fn project<W: Semiring, F: MutableFst<W>>(fst: &mut F, project_type: Project
     let props = fst.properties();
     match project_type {
         ProjectType::ProjectInput => {
-            for state in 0..fst.num_states() {
+            for state in fst.states_range() {
                 let mut it_trs = unsafe { fst.tr_iter_unchecked_mut(state) };
                 for idx_tr in 0..it_trs.len() {
                     let tr = unsafe { it_trs.get_unchecked(idx_tr) };
@@ -76,7 +76,7 @@ pub fn project<W: Semiring, F: MutableFst<W>>(fst: &mut F, project_type: Project
             }
         }
         ProjectType::ProjectOutput => {
-            for state in 0..fst.num_states() {
+            for state in fst.states_range() {
                 let mut it_trs = unsafe { fst.tr_iter_unchecked_mut(state) };
                 for idx_tr in 0..it_trs.len() {
                     let tr = unsafe { it_trs.get_unchecked(idx_tr) };

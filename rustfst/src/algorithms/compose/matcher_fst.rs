@@ -14,7 +14,7 @@ use crate::fst_traits::{
     CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, MutableFst, StateIterator,
 };
 use crate::semirings::Semiring;
-use crate::SymbolTable;
+use crate::{StateId, SymbolTable};
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct MatcherFst<W, F, B, M, T> {
@@ -94,31 +94,31 @@ where
 impl<W: Semiring, F: CoreFst<W>, B: Borrow<F>, M, T> CoreFst<W> for MatcherFst<W, F, B, M, T> {
     type TRS = <FstAddOn<F, T> as CoreFst<W>>::TRS;
 
-    fn start(&self) -> Option<usize> {
+    fn start(&self) -> Option<StateId> {
         self.fst_add_on.start()
     }
 
-    fn final_weight(&self, state_id: usize) -> Result<Option<W>> {
+    fn final_weight(&self, state_id: StateId) -> Result<Option<W>> {
         self.fst_add_on.final_weight(state_id)
     }
 
-    unsafe fn final_weight_unchecked(&self, state_id: usize) -> Option<W> {
+    unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<W> {
         self.fst_add_on.final_weight_unchecked(state_id)
     }
 
-    fn num_trs(&self, s: usize) -> Result<usize> {
+    fn num_trs(&self, s: StateId) -> Result<usize> {
         self.fst_add_on.num_trs(s)
     }
 
-    unsafe fn num_trs_unchecked(&self, s: usize) -> usize {
+    unsafe fn num_trs_unchecked(&self, s: StateId) -> usize {
         self.fst_add_on.num_trs_unchecked(s)
     }
 
-    fn get_trs(&self, state_id: usize) -> Result<Self::TRS> {
+    fn get_trs(&self, state_id: StateId) -> Result<Self::TRS> {
         self.fst_add_on.get_trs(state_id)
     }
 
-    unsafe fn get_trs_unchecked(&self, state_id: usize) -> Self::TRS {
+    unsafe fn get_trs_unchecked(&self, state_id: StateId) -> Self::TRS {
         self.fst_add_on.get_trs_unchecked(state_id)
     }
 
@@ -126,11 +126,11 @@ impl<W: Semiring, F: CoreFst<W>, B: Borrow<F>, M, T> CoreFst<W> for MatcherFst<W
         self.fst_add_on.properties()
     }
 
-    fn num_input_epsilons(&self, state: usize) -> Result<usize> {
+    fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
         self.fst_add_on.num_input_epsilons(state)
     }
 
-    fn num_output_epsilons(&self, state: usize) -> Result<usize> {
+    fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
         self.fst_add_on.num_output_epsilons(state)
     }
 }

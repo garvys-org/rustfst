@@ -30,7 +30,7 @@ impl<W: Semiring> TrMapper<W> for DecodeMapper<W> {
             .encode_table
             .0
             .borrow_mut()
-            .decode(tr.ilabel)
+            .decode(tr.ilabel as usize)
             .unwrap()
             .clone();
         tr.ilabel = tuple.ilabel;
