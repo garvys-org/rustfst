@@ -4,12 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.7.4] - 2020-12-10
+## [0.8.0] - 2020-16-10
 
 ## Added
 - `states_range` for `ExpandedFst` trait
 - feature `state-label-u32` is now supported. Label and StateId will be stored as u32 with this feature.
 - `compute_num_known_trs` for `FstCache` trait. 
+
+## [0.7.4] - 2020-12-10
 
 ## Changed
 - Fix compilation with rust 1.41
@@ -368,7 +370,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - First released version of rustfst
 
-[Unreleased]: https://github.com/garvys/rustfst/compare/0.7.4...HEAD
+[Unreleased]: https://github.com/garvys/rustfst/compare/0.8.0...HEAD
+[0.8.0]: https://github.com/garvys/rustfst/compare/0.7.4...0.8.0
 [0.7.4]: https://github.com/garvys/rustfst/compare/0.7.3...0.7.4
 [0.7.3]: https://github.com/garvys/rustfst/compare/0.7.2...0.7.3
 [0.7.2]: https://github.com/garvys/rustfst/compare/0.7.1...0.7.2
