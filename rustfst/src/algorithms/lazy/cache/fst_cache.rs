@@ -16,6 +16,8 @@ pub trait FstCache<W: Semiring>: Debug {
     fn insert_final_weight(&self, id: StateId, weight: Option<W>);
 
     fn num_known_states(&self) -> usize;
+    fn compute_num_known_trs(&self) -> usize;
+
     fn num_trs(&self, id: StateId) -> Option<usize>;
 
     fn num_input_epsilons(&self, id: StateId) -> Option<usize>;
@@ -52,6 +54,10 @@ impl<W: Semiring, C: FstCache<W>, CP: Deref<Target = C> + Debug> FstCache<W> for
 
     fn num_known_states(&self) -> usize {
         self.deref().num_known_states()
+    }
+
+    fn compute_num_known_trs(&self) -> usize {
+        self.deref().compute_num_known_trs()
     }
 
     fn num_trs(&self, id: StateId) -> Option<usize> {

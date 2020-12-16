@@ -93,6 +93,7 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
         if id >= cached_data.data.len() {
             cached_data.data.resize(id + 1, CacheStatus::NotComputed);
         }
+
         cached_data.data[id] = CacheStatus::Computed(CacheTrs {
             trs,
             niepsilons,
@@ -126,6 +127,16 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
         n = std::cmp::max(n, self.trs.lock().unwrap().num_known_states);
         n = std::cmp::max(n, self.final_weights.lock().unwrap().num_known_states);
         n
+    }
+
+    fn compute_num_known_trs(&self) -> usize {
+        let cached_data = self.trs.lock().unwrap();
+        cached_data
+            .data
+            .iter()
+            .flat_map(|it| it.to_option())
+            .map(|it| it.trs.trs().len())
+            .sum()
     }
 
     fn num_trs(&self, id: StateId) -> Option<usize> {
