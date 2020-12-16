@@ -1,4 +1,3 @@
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Mutex;
 
 use crate::algorithms::lazy::cache::cache_internal_types::{CachedData, FinalWeight, StartState};
@@ -14,7 +13,6 @@ pub struct SimpleVecCache<W: Semiring> {
     start: Mutex<CachedData<CacheStatus<StartState>>>,
     trs: Mutex<CachedData<Vec<CacheStatus<CacheTrs<W>>>>>,
     final_weights: Mutex<CachedData<Vec<CacheStatus<FinalWeight<W>>>>>,
-    num_known_trs: AtomicUsize,
 }
 
 #[derive(Debug, Clone)]
@@ -43,7 +41,6 @@ impl<W: Semiring> Clone for SimpleVecCache<W> {
             start: Mutex::new(self.start.lock().unwrap().clone()),
             trs: Mutex::new(self.trs.lock().unwrap().clone()),
             final_weights: Mutex::new(self.final_weights.lock().unwrap().clone()),
-            num_known_trs: AtomicUsize::new(self.num_known_trs.load(Ordering::SeqCst)),
         }
     }
 }
@@ -54,7 +51,6 @@ impl<W: Semiring> Default for SimpleVecCache<W> {
             start: Mutex::new(CachedData::default()),
             trs: Mutex::new(CachedData::default()),
             final_weights: Mutex::new(CachedData::default()),
-            num_known_trs: 0.into(),
         }
     }
 }
@@ -97,8 +93,7 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
         if id >= cached_data.data.len() {
             cached_data.data.resize(id + 1, CacheStatus::NotComputed);
         }
-        self.num_known_trs
-            .fetch_add(trs.trs().len(), Ordering::SeqCst);
+
         cached_data.data[id] = CacheStatus::Computed(CacheTrs {
             trs,
             niepsilons,
@@ -134,8 +129,14 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
         n
     }
 
-    fn num_known_trs(&self) -> usize {
-        self.num_known_trs.load(Ordering::SeqCst)
+    fn compute_num_known_trs(&self) -> usize {
+        let cached_data = self.trs.lock().unwrap();
+        cached_data
+            .data
+            .iter()
+            .flat_map(|it| it.to_option())
+            .map(|it| it.trs.trs().len())
+            .sum()
     }
 
     fn num_trs(&self, id: StateId) -> Option<usize> {

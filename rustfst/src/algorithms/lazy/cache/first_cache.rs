@@ -64,8 +64,8 @@ impl<W: Semiring, Cache: FstCache<W>> FstCache<W> for FirstCache<W, Cache> {
         self.cache.num_known_states()
     }
 
-    fn num_known_trs(&self) -> usize {
-        self.cache.num_known_trs()
+    fn compute_num_known_trs(&self) -> usize {
+        self.cache.compute_num_known_trs()
     }
 
     fn num_trs(&self, id: StateId) -> Option<usize> {

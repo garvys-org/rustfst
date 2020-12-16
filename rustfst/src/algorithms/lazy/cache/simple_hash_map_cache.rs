@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Mutex;
 
 use crate::algorithms::lazy::cache::cache_internal_types::{CachedData, StartState};
@@ -15,7 +14,6 @@ pub struct SimpleHashMapCache<W: Semiring> {
     start: Mutex<CachedData<CacheStatus<StartState>>>,
     trs: Mutex<CachedData<HashMap<StateId, CacheTrs<W>>>>,
     final_weights: Mutex<CachedData<HashMap<StateId, Option<W>>>>,
-    num_known_trs: AtomicUsize,
 }
 
 #[derive(Debug, Clone)]
@@ -44,7 +42,6 @@ impl<W: Semiring> Clone for SimpleHashMapCache<W> {
             start: Mutex::new(self.start.lock().unwrap().clone()),
             trs: Mutex::new(self.trs.lock().unwrap().clone()),
             final_weights: Mutex::new(self.final_weights.lock().unwrap().clone()),
-            num_known_trs: AtomicUsize::new(self.num_known_trs.load(Ordering::SeqCst)),
         }
     }
 }
@@ -55,7 +52,6 @@ impl<W: Semiring> Default for SimpleHashMapCache<W> {
             start: Mutex::new(CachedData::default()),
             trs: Mutex::new(CachedData::default()),
             final_weights: Mutex::new(CachedData::default()),
-            num_known_trs: 0.into(),
         }
     }
 }
@@ -95,8 +91,6 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
                 noepsilons += 1;
             }
         }
-        self.num_known_trs
-            .fetch_add(trs.trs().len(), Ordering::SeqCst);
         cached_data.data.insert(
             id,
             CacheTrs {
@@ -107,8 +101,13 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
         );
     }
 
-    fn num_known_trs(&self) -> usize {
-        self.num_known_trs.load(Ordering::SeqCst)
+    fn compute_num_known_trs(&self) -> usize {
+        let cached_data = self.trs.lock().unwrap();
+        cached_data
+            .data
+            .values()
+            .map(|it| it.trs.trs().len())
+            .sum()
     }
 
     fn get_final_weight(&self, id: StateId) -> CacheStatus<Option<W>> {
