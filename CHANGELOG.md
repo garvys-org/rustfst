@@ -369,7 +369,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.7] - 2018-10-23
 ### Added
 - First released version of rustfst
-    
+
 [Unreleased]: https://github.com/garvys/rustfst/compare/0.8.0...HEAD
 [0.8.0]: https://github.com/garvys/rustfst/compare/0.7.4...0.8.0
 [0.7.4]: https://github.com/garvys/rustfst/compare/0.7.3...0.7.4
