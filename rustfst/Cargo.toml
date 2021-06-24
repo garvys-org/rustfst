@@ -27,7 +27,7 @@ binary-heap-plus = '0.1'
 bitflags = '1'
 generic-array = '0.12'
 itertools = '0.9'
-nom = '5'
+nom = '6'
 num-traits = '0.2'
 ordered-float = '1'
 serde = { version = '1', features = ['derive'] }

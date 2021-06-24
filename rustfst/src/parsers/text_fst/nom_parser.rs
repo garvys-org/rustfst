@@ -2,7 +2,7 @@ use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::character::complete::tab;
 use nom::combinator::opt;
-use nom::multi::separated_list;
+use nom::multi::separated_list0;
 use nom::sequence::preceded;
 use nom::IResult;
 
@@ -60,5 +60,5 @@ fn row_parsed<W: SerializableSemiring>(i: &str) -> IResult<&str, RowParsed<W>> {
 }
 
 pub fn vec_rows_parsed<W: SerializableSemiring>(i: &str) -> IResult<&str, Vec<RowParsed<W>>> {
-    separated_list(tag("\n"), row_parsed)(i)
+    separated_list0(tag("\n"), row_parsed)(i)
 }

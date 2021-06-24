@@ -9,7 +9,7 @@ use std::marker::PhantomData;
 use anyhow::Result;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
-use nom::multi::{count, separated_list};
+use nom::multi::{count, separated_list0};
 use nom::number::complete::le_i32;
 use nom::IResult;
 
@@ -268,7 +268,7 @@ where
     }
 
     fn parse_text_non_empty_set(i: &str) -> IResult<&str, Self> {
-        let (i, weights) = separated_list(tag(","), W::parse_text)(i)?;
+        let (i, weights) = separated_list0(tag(","), W::parse_text)(i)?;
         Ok((i, Self::new(weights)))
     }
 }
