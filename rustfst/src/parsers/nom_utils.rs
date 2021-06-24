@@ -5,7 +5,7 @@ use nom::IResult;
 use std::str::FromStr;
 
 use nom::error::ErrorKind;
-use nom::error::ParseError;
+use nom::error::{ParseError, FromExternalError};
 
 #[derive(Debug, PartialEq)]
 pub enum NomCustomError<I> {
@@ -20,6 +20,12 @@ impl<I> ParseError<I> for NomCustomError<I> {
 
     fn append(_: I, _: ErrorKind, other: Self) -> Self {
         other
+    }
+}
+
+impl<I, E> FromExternalError<I, E> for NomCustomError<I> {
+    fn from_external_error(input: I, kind: ErrorKind, _e: E) -> Self {
+        NomCustomError::Nom(input, kind)
     }
 }
 

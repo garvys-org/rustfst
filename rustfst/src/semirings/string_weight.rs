@@ -5,7 +5,7 @@ use std::io::Write;
 use anyhow::Result;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
-use nom::multi::{count, separated_list};
+use nom::multi::{count, separated_list0};
 use nom::number::complete::le_i32;
 use nom::IResult;
 
@@ -249,7 +249,7 @@ macro_rules! string_semiring {
             }
 
             fn parse_text_labels(i: &str) -> IResult<&str, Self> {
-                let (i, labels) = separated_list(tag("_"), num)(i)?;
+                let (i, labels) = separated_list0(tag("_"), num)(i)?;
                 Ok((i, <$semiring>::new(StringWeightVariant::Labels(labels))))
             }
         }
