@@ -1,9 +1,17 @@
 use std::collections::HashMap;
+use std::fs::{read, File};
+use std::io::BufWriter;
+use std::path::Path;
 use std::sync::Mutex;
 
-use crate::algorithms::lazy::cache::cache_internal_types::{CachedData, StartState};
+use anyhow::{anyhow, format_err, Context, Result};
+use nom::IResult;
+
+use super::SerializableCache;
+use crate::algorithms::lazy::cache::cache_internal_types::{CacheTrs, CachedData, StartState};
 use crate::algorithms::lazy::{CacheStatus, FstCache};
-use crate::semirings::Semiring;
+use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64, write_bin_u64};
+use crate::semirings::{Semiring, SerializableSemiring};
 use crate::{StateId, Trs, TrsVec, EPS_LABEL};
 
 #[derive(Debug)]
@@ -14,13 +22,6 @@ pub struct SimpleHashMapCache<W: Semiring> {
     start: Mutex<CachedData<CacheStatus<StartState>>>,
     trs: Mutex<CachedData<HashMap<StateId, CacheTrs<W>>>>,
     final_weights: Mutex<CachedData<HashMap<StateId, Option<W>>>>,
-}
-
-#[derive(Debug, Clone)]
-pub struct CacheTrs<W: Semiring> {
-    pub trs: TrsVec<W>,
-    pub niepsilons: usize,
-    pub noepsilons: usize,
 }
 
 impl<W: Semiring> SimpleHashMapCache<W> {
@@ -103,11 +104,7 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
 
     fn compute_num_known_trs(&self) -> usize {
         let cached_data = self.trs.lock().unwrap();
-        cached_data
-            .data
-            .values()
-            .map(|it| it.trs.trs().len())
-            .sum()
+        cached_data.data.values().map(|it| it.trs.trs().len()).sum()
     }
 
     fn get_final_weight(&self, id: StateId) -> CacheStatus<Option<W>> {
@@ -155,4 +152,82 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
         let cached_data = self.final_weights.lock().unwrap();
         cached_data.data.len()
     }
+}
+
+impl<W: SerializableSemiring> SerializableCache for SimpleHashMapCache<W> {
+    /// Loads a SimpleHashMapCache from a file in binary format.
+    fn read<P: AsRef<Path>>(path: P) -> Result<Self> {
+        let data = read(path.as_ref())
+            .with_context(|| format!("Can't open file : {:?}", path.as_ref()))?;
+
+        // Parse SimpleHashMapCache
+        let (_, simple_vec_cache) = parse_simple_hashmap_cache(&data)
+            .map_err(|e| format_err!("Error while parsing binary SimpleHashMapCache : {:?}", e))?;
+
+        Ok(simple_vec_cache)
+    }
+
+    /// Writes a SimpleHashMapCache to a file in binary format.
+    fn write<P: AsRef<Path>>(&self, path: P) -> Result<()> {
+        let mut file = BufWriter::new(File::create(path)?);
+
+        // Start state serialization
+        match self.get_start() {
+            CacheStatus::Computed(v) => {
+                write_bin_i64(&mut file, v.map_or_else(|| -1, |v| v as i64))?
+            }
+            CacheStatus::NotComputed => write_bin_i64(&mut file, -2)?,
+        };
+
+        // Trs & final states serialization
+        // TODO: avoid loop accross all known states -> Need to handle properly final states
+        let num_states = self.num_known_states();
+        write_bin_u64(&mut file, num_states as u64)?;
+        for state in 0..num_states {
+            let state = state as StateId;
+            if let Some(cache_trs) = self
+                .trs
+                .lock()
+                .map_err(|err| anyhow!("{}", err))?
+                .get(state)
+            {
+                // Write state (non written states are NotComputed)
+                write_bin_u64(&mut file, state as u64)?;
+
+                // Write final weight for state (not written final weights are NotComputed)
+                match &self.get_final_weight(state) {
+                    CacheStatus::Computed(final_weight) => {
+                        if let Some(final_weight) = final_weight {
+                            final_weight.write_binary(&mut file)?
+                        } else {
+                            write_bin_i64(&mut file, -1)?
+                        }
+                    }
+                    CacheStatus::NotComputed => write_bin_i64(&mut file, -2)?,
+                };
+
+                // Write CacheTrs trs
+                write_bin_u64(&mut file, cache_trs.trs.len() as u64)?;
+                for tr in cache_trs.trs.iter() {
+                    write_bin_i32(&mut file, tr.ilabel as i32)?;
+                    write_bin_i32(&mut file, tr.olabel as i32)?;
+                    tr.weight.write_binary(&mut file)?;
+                    write_bin_i32(&mut file, tr.nextstate as i32)?;
+                }
+
+                // Write CacheTrs niepsilons
+                write_bin_u64(&mut file, cache_trs.niepsilons as u64)?;
+
+                // Write CacheTrs noepsilons
+                write_bin_u64(&mut file, cache_trs.noepsilons as u64)?;
+            }
+        }
+        Ok(())
+    }
+}
+
+pub fn parse_simple_hashmap_cache<W: SerializableSemiring>(
+    i: &[u8],
+) -> IResult<&[u8], SimpleHashMapCache<W>> {
+    unimplemented!()
 }

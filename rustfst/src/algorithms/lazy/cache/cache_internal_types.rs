@@ -3,10 +3,18 @@ use std::collections::HashMap;
 use std::hash::Hash;
 
 use crate::algorithms::lazy::CacheStatus;
-use crate::StateId;
+use crate::semirings::Semiring;
+use crate::{StateId, TrsVec};
 
 pub type StartState = Option<StateId>;
 pub type FinalWeight<W> = Option<W>;
+
+#[derive(Debug, Clone)]
+pub struct CacheTrs<W: Semiring> {
+    pub trs: TrsVec<W>,
+    pub niepsilons: usize,
+    pub noepsilons: usize,
+}
 
 #[derive(Debug)]
 pub struct CachedData<T> {
@@ -80,6 +88,12 @@ impl<K, V> CachedData<HashMap<K, V>> {
     pub fn clear(&mut self) {
         self.data.clear();
         self.num_known_states = 0;
+    }
+}
+
+impl<K: Hash + Eq, V: Semiring> CachedData<HashMap<K, CacheTrs<V>>> {
+    pub fn get(&self, idx: K) -> Option<&CacheTrs<V>> {
+        self.data.get(&idx)
     }
 }
 
