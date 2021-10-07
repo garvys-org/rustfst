@@ -97,6 +97,12 @@ impl<K: Hash + Eq, V: Semiring> CachedData<HashMap<K, CacheTrs<V>>> {
     }
 }
 
+impl<K: Hash + Eq, V: Semiring> CachedData<HashMap<K, FinalWeight<V>>> {
+    pub fn get(&self, idx: K) -> Option<&FinalWeight<V>> {
+        self.data.get(&idx)
+    }
+}
+
 impl<T: Clone> Clone for CachedData<T> {
     fn clone(&self) -> Self {
         Self {

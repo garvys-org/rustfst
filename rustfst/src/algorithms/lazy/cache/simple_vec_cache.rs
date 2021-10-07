@@ -1,9 +1,11 @@
 use std::fs::{read, File};
 use std::io::BufWriter;
 use std::path::Path;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
+use crate::parsers::nom_utils::NomCustomError;
 use anyhow::{anyhow, format_err, Context, Result};
+use nom::multi::count;
 use nom::IResult;
 
 use super::SerializableCache;
@@ -11,7 +13,12 @@ use crate::algorithms::lazy::cache::cache_internal_types::{
     CacheTrs, CachedData, FinalWeight, StartState,
 };
 use crate::algorithms::lazy::{CacheStatus, FstCache};
-use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64, write_bin_u64};
+use crate::parsers::bin_fst::utils_parsing::{
+    parse_bin_i64, parse_bin_u64, parse_bin_u8, parse_final_weight, parse_fst_tr, parse_start_state,
+};
+use crate::parsers::bin_fst::utils_serialization::{
+    write_bin_i32, write_bin_i64, write_bin_u64, write_bin_u8,
+};
 use crate::semirings::{Semiring, SerializableSemiring};
 use crate::{StateId, Trs, TrsVec, EPS_LABEL};
 
@@ -188,18 +195,29 @@ impl<W: SerializableSemiring> SerializableCache for SimpleVecCache<W> {
     fn write<P: AsRef<Path>>(&self, path: P) -> Result<()> {
         let mut file = BufWriter::new(File::create(path)?);
 
+        // Num known states serialization
+        let num_known_states = self.num_known_states();
+        write_bin_u64(&mut file, num_known_states as u64)?;
+
         // Start state serialization
         match self.get_start() {
             CacheStatus::Computed(v) => {
-                write_bin_i64(&mut file, v.map_or_else(|| -1, |v| v as i64))?
+                // Mark as computed
+                write_bin_u8(&mut file, 1)?;
+                write_bin_i64(&mut file, v.map_or_else(|| -1, |v| v as i64))?;
             }
-            CacheStatus::NotComputed => write_bin_i64(&mut file, -2)?,
+            CacheStatus::NotComputed => {
+                // Mark state as NotComputed
+                write_bin_u8(&mut file, 0)?;
+            }
         };
 
-        // Trs & final states serialization
-        let num_states = self.num_known_states();
-        write_bin_u64(&mut file, num_states as u64)?;
-        for state in 0..num_states {
+        // Num computed states serialization
+        let num_computed_states = self.len_trs();
+        write_bin_u64(&mut file, num_computed_states as u64)?;
+
+        // Computed states serialization
+        for state in 0..num_computed_states {
             let state = state as StateId;
             if let CacheStatus::Computed(cache_trs) = self
                 .trs
@@ -207,20 +225,8 @@ impl<W: SerializableSemiring> SerializableCache for SimpleVecCache<W> {
                 .map_err(|err| anyhow!("{}", err))?
                 .get(state)
             {
-                // Write state (non written states are NotComputed)
-                write_bin_u64(&mut file, state as u64)?;
-
-                // Write final weight for state (not written final weights are NotComputed)
-                match &self.get_final_weight(state) {
-                    CacheStatus::Computed(final_weight) => {
-                        if let Some(final_weight) = final_weight {
-                            final_weight.write_binary(&mut file)?
-                        } else {
-                            write_bin_i64(&mut file, -1)?
-                        }
-                    }
-                    CacheStatus::NotComputed => write_bin_i64(&mut file, -2)?,
-                };
+                // Mark as computed
+                write_bin_u8(&mut file, 1)?;
 
                 // Write CacheTrs trs
                 write_bin_u64(&mut file, cache_trs.trs.len() as u64)?;
@@ -236,7 +242,33 @@ impl<W: SerializableSemiring> SerializableCache for SimpleVecCache<W> {
 
                 // Write CacheTrs noepsilons
                 write_bin_u64(&mut file, cache_trs.noepsilons as u64)?;
+            } else {
+                // Mark as NotComputed
+                write_bin_u8(&mut file, 0)?;
             }
+        }
+
+        // Num final states serialization
+        let num_final_states = self.len_final_weights();
+        write_bin_u64(&mut file, num_final_states as u64)?;
+
+        // Final states serialization
+        for f_state in 0..num_final_states {
+            // Write final weight for state
+            match &self.get_final_weight(f_state) {
+                CacheStatus::Computed(final_weight) => {
+                    // Mark as Computed
+                    write_bin_u8(&mut file, 1)?;
+                    final_weight
+                        .as_ref()
+                        .unwrap_or(&W::zero())
+                        .write_binary(&mut file)?
+                }
+                CacheStatus::NotComputed => {
+                    // Mark as NotComputed
+                    write_bin_u8(&mut file, 0)?;
+                }
+            };
         }
         Ok(())
     }
@@ -244,6 +276,85 @@ impl<W: SerializableSemiring> SerializableCache for SimpleVecCache<W> {
 
 pub fn parse_simple_vec_cache<W: SerializableSemiring>(
     i: &[u8],
-) -> IResult<&[u8], SimpleVecCache<W>> {
-    unimplemented!()
+) -> IResult<&[u8], SimpleVecCache<W>, NomCustomError<&[u8]>> {
+    // Parse num known states
+    let (i, num_known_states) = parse_bin_u64(i)?;
+
+    // Parse start node
+    let (i, maybe_start_node) = parse_bin_u8(i)?;
+    let (i, start_node) = if maybe_start_node == 1 {
+        let (i, start_state) = parse_bin_i64(i)?;
+        (i, CacheStatus::Computed(parse_start_state(start_state)))
+    } else {
+        (i, CacheStatus::NotComputed)
+    };
+
+    // Parse states
+    let (i, num_states) = parse_bin_u64(i)?;
+    let (i, trs_data) = count(parse_cache_trs::<W>, num_states as usize)(i)?;
+
+    // Parse final weights
+    let (i, num_final_weights) = parse_bin_u64(i)?;
+    let (i, final_weights_data) = count(
+        parse_simple_vec_final_weights::<W>,
+        num_final_weights as usize,
+    )(i)?;
+
+    Ok((
+        i,
+        SimpleVecCache {
+            start: Mutex::new(CachedData {
+                data: start_node,
+                num_known_states: num_known_states as usize,
+            }),
+            trs: Mutex::new(CachedData {
+                data: trs_data,
+                num_known_states: num_known_states as usize,
+            }),
+            final_weights: Mutex::new(CachedData {
+                data: final_weights_data,
+                num_known_states: num_known_states as usize,
+            }),
+        },
+    ))
+}
+
+fn parse_cache_trs<W: SerializableSemiring>(
+    i: &[u8],
+) -> IResult<&[u8], CacheStatus<CacheTrs<W>>, NomCustomError<&[u8]>> {
+    let (i, is_computed) = parse_bin_u8(i)?;
+
+    if is_computed == 0 {
+        Ok((i, CacheStatus::NotComputed))
+    } else {
+        let (i, num_trs) = parse_bin_i64(i)?;
+        let (i, trs) = count(parse_fst_tr::<W>, num_trs as usize)(i)?;
+        let (i, niepsilons) = parse_bin_u64(i)?;
+        let (i, noepsilons) = parse_bin_u64(i)?;
+
+        Ok((
+            i,
+            CacheStatus::Computed(CacheTrs {
+                trs: TrsVec(Arc::new(trs)),
+                niepsilons: niepsilons as usize,
+                noepsilons: noepsilons as usize,
+            }),
+        ))
+    }
+}
+
+fn parse_simple_vec_final_weights<W: SerializableSemiring>(
+    i: &[u8],
+) -> IResult<&[u8], CacheStatus<FinalWeight<W>>, NomCustomError<&[u8]>> {
+    let (i, is_computed) = parse_bin_u8(i)?;
+
+    if is_computed == 0 {
+        Ok((i, CacheStatus::NotComputed))
+    } else {
+        let (i, raw_final_weight) = W::parse_binary(i)?;
+        Ok((
+            i,
+            CacheStatus::Computed(parse_final_weight(raw_final_weight)),
+        ))
+    }
 }

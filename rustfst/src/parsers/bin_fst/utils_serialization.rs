@@ -26,3 +26,8 @@ pub(crate) fn write_bin_f32<F: Write>(file: &mut F, i: f32) -> Result<()> {
     file.write_all(&i.to_bits().to_le_bytes())
         .map_err(|e| e.into())
 }
+
+#[inline]
+pub(crate) fn write_bin_u8<F: Write>(file: &mut F, i: u8) -> Result<()> {
+    file.write_all(&i.to_le_bytes()).map_err(|e| e.into())
+}

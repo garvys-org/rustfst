@@ -2,14 +2,21 @@ use std::collections::HashMap;
 use std::fs::{read, File};
 use std::io::BufWriter;
 use std::path::Path;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
+use crate::parsers::nom_utils::NomCustomError;
 use anyhow::{anyhow, format_err, Context, Result};
+use nom::multi::{count, fold_many_m_n};
 use nom::IResult;
 
 use super::SerializableCache;
-use crate::algorithms::lazy::cache::cache_internal_types::{CacheTrs, CachedData, StartState};
+use crate::algorithms::lazy::cache::cache_internal_types::{
+    CacheTrs, CachedData, FinalWeight, StartState,
+};
 use crate::algorithms::lazy::{CacheStatus, FstCache};
+use crate::parsers::bin_fst::utils_parsing::{
+    parse_bin_i64, parse_bin_u64, parse_bin_u8, parse_final_weight, parse_fst_tr, parse_start_state,
+};
 use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64, write_bin_u64};
 use crate::semirings::{Semiring, SerializableSemiring};
 use crate::{StateId, Trs, TrsVec, EPS_LABEL};
@@ -72,7 +79,7 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
     }
 
     fn get_trs(&self, id: StateId) -> CacheStatus<TrsVec<W>> {
-        match self.trs.lock().unwrap().data.get(&id) {
+        match self.trs.lock().unwrap().get(id) {
             Some(e) => CacheStatus::Computed(e.trs.shallow_clone()),
             None => CacheStatus::NotComputed,
         }
@@ -108,7 +115,7 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
     }
 
     fn get_final_weight(&self, id: StateId) -> CacheStatus<Option<W>> {
-        match self.final_weights.lock().unwrap().data.get(&id) {
+        match self.final_weights.lock().unwrap().get(id) {
             Some(e) => CacheStatus::Computed(e.clone()),
             None => CacheStatus::NotComputed,
         }
@@ -130,17 +137,17 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
 
     fn num_trs(&self, id: StateId) -> Option<usize> {
         let cached_data = self.trs.lock().unwrap();
-        cached_data.data.get(&id).map(|v| v.trs.len())
+        cached_data.get(id).map(|v| v.trs.len())
     }
 
     fn num_input_epsilons(&self, id: StateId) -> Option<usize> {
         let cached_data = self.trs.lock().unwrap();
-        cached_data.data.get(&id).map(|v| v.niepsilons)
+        cached_data.get(id).map(|v| v.niepsilons)
     }
 
     fn num_output_epsilons(&self, id: StateId) -> Option<usize> {
         let cached_data = self.trs.lock().unwrap();
-        cached_data.data.get(&id).map(|v| v.noepsilons)
+        cached_data.get(id).map(|v| v.noepsilons)
     }
 
     fn len_trs(&self) -> usize {
@@ -171,6 +178,10 @@ impl<W: SerializableSemiring> SerializableCache for SimpleHashMapCache<W> {
     fn write<P: AsRef<Path>>(&self, path: P) -> Result<()> {
         let mut file = BufWriter::new(File::create(path)?);
 
+        // Num known states serialization
+        let num_known_states = self.num_known_states();
+        write_bin_u64(&mut file, num_known_states as u64)?;
+
         // Start state serialization
         match self.get_start() {
             CacheStatus::Computed(v) => {
@@ -179,48 +190,57 @@ impl<W: SerializableSemiring> SerializableCache for SimpleHashMapCache<W> {
             CacheStatus::NotComputed => write_bin_i64(&mut file, -2)?,
         };
 
-        // Trs & final states serialization
-        // TODO: avoid loop accross all known states -> Need to handle properly final states
-        let num_states = self.num_known_states();
-        write_bin_u64(&mut file, num_states as u64)?;
-        for state in 0..num_states {
-            let state = state as StateId;
-            if let Some(cache_trs) = self
-                .trs
-                .lock()
-                .map_err(|err| anyhow!("{}", err))?
-                .get(state)
-            {
-                // Write state (non written states are NotComputed)
-                write_bin_u64(&mut file, state as u64)?;
+        // Num computed states
+        let num_visited_states = self.len_trs();
+        write_bin_u64(&mut file, num_visited_states as u64)?;
 
-                // Write final weight for state (not written final weights are NotComputed)
-                match &self.get_final_weight(state) {
-                    CacheStatus::Computed(final_weight) => {
-                        if let Some(final_weight) = final_weight {
-                            final_weight.write_binary(&mut file)?
-                        } else {
-                            write_bin_i64(&mut file, -1)?
-                        }
-                    }
-                    CacheStatus::NotComputed => write_bin_i64(&mut file, -2)?,
-                };
+        // Computed states serialization
+        for (state, cache_trs) in self
+            .trs
+            .lock()
+            .map_err(|err| anyhow!("{}", err))?
+            .data
+            .iter()
+        {
+            // Write state
+            write_bin_u64(&mut file, *state as u64)?;
 
-                // Write CacheTrs trs
-                write_bin_u64(&mut file, cache_trs.trs.len() as u64)?;
-                for tr in cache_trs.trs.iter() {
-                    write_bin_i32(&mut file, tr.ilabel as i32)?;
-                    write_bin_i32(&mut file, tr.olabel as i32)?;
-                    tr.weight.write_binary(&mut file)?;
-                    write_bin_i32(&mut file, tr.nextstate as i32)?;
-                }
-
-                // Write CacheTrs niepsilons
-                write_bin_u64(&mut file, cache_trs.niepsilons as u64)?;
-
-                // Write CacheTrs noepsilons
-                write_bin_u64(&mut file, cache_trs.noepsilons as u64)?;
+            // Write CacheTrs trs
+            write_bin_u64(&mut file, cache_trs.trs.len() as u64)?;
+            for tr in cache_trs.trs.iter() {
+                write_bin_i32(&mut file, tr.ilabel as i32)?;
+                write_bin_i32(&mut file, tr.olabel as i32)?;
+                tr.weight.write_binary(&mut file)?;
+                write_bin_i32(&mut file, tr.nextstate as i32)?;
             }
+
+            // Write CacheTrs niepsilons
+            write_bin_u64(&mut file, cache_trs.niepsilons as u64)?;
+
+            // Write CacheTrs noepsilons
+            write_bin_u64(&mut file, cache_trs.noepsilons as u64)?;
+        }
+
+        // Num computed final weights
+        let num_final_weights = self.len_final_weights();
+        write_bin_u64(&mut file, num_final_weights as u64)?;
+
+        // Final weights serialization
+        for (state, final_weight) in self
+            .final_weights
+            .lock()
+            .map_err(|err| anyhow!("{}", err))?
+            .data
+            .iter()
+        {
+            // Write state
+            write_bin_u64(&mut file, *state as u64)?;
+
+            // Write final weight for state
+            final_weight
+                .as_ref()
+                .unwrap_or(&W::zero())
+                .write_binary(&mut file)?
         }
         Ok(())
     }
@@ -228,6 +248,96 @@ impl<W: SerializableSemiring> SerializableCache for SimpleHashMapCache<W> {
 
 pub fn parse_simple_hashmap_cache<W: SerializableSemiring>(
     i: &[u8],
-) -> IResult<&[u8], SimpleHashMapCache<W>> {
-    unimplemented!()
+) -> IResult<&[u8], SimpleHashMapCache<W>, NomCustomError<&[u8]>> {
+    // Parse num known states
+    let (i, num_known_states) = parse_bin_u64(i)?;
+
+    // Parse start node
+    let (i, maybe_start_node) = parse_bin_u8(i)?;
+    let (i, start_node) = if maybe_start_node == 1 {
+        let (i, start_state) = parse_bin_i64(i)?;
+        (i, CacheStatus::Computed(parse_start_state(start_state)))
+    } else {
+        (i, CacheStatus::NotComputed)
+    };
+
+    // Parse num computed states
+    let (i, num_computed_states) = parse_bin_u64(i)?;
+
+    let (i, trs_data) = fold_many_m_n(
+        num_computed_states as usize,
+        num_computed_states as usize,
+        parse_hashmap_cache_trs::<W>,
+        HashMap::<StateId, CacheTrs<W>>::new(),
+        |mut acc: HashMap<StateId, CacheTrs<W>>,
+         item: (StateId, CacheTrs<W>)|
+         -> HashMap<StateId, CacheTrs<W>> {
+            acc.insert(item.0, item.1);
+            acc
+        },
+    )(i)?;
+
+    // Parse num computed final weights
+    let (i, num_computed_final_weights) = parse_bin_u64(i)?;
+
+    let (i, final_weights_data) = fold_many_m_n(
+        num_computed_final_weights as usize,
+        num_computed_final_weights as usize,
+        parse_cache_final_weights::<W>,
+        HashMap::<StateId, FinalWeight<W>>::new(),
+        |mut acc: HashMap<StateId, FinalWeight<W>>,
+         item: (StateId, FinalWeight<W>)|
+         -> HashMap<StateId, FinalWeight<W>> {
+            acc.insert(item.0, item.1);
+            acc
+        },
+    )(i)?;
+
+    Ok((
+        i,
+        SimpleHashMapCache {
+            start: Mutex::new(CachedData {
+                data: start_node,
+                num_known_states: num_known_states as usize,
+            }),
+            trs: Mutex::new(CachedData {
+                data: trs_data,
+                num_known_states: num_known_states as usize,
+            }),
+            final_weights: Mutex::new(CachedData {
+                data: final_weights_data,
+                num_known_states: num_known_states as usize,
+            }),
+        },
+    ))
+}
+
+fn parse_hashmap_cache_trs<W: SerializableSemiring>(
+    i: &[u8],
+) -> IResult<&[u8], (StateId, CacheTrs<W>), NomCustomError<&[u8]>> {
+    let (i, state) = parse_bin_i64(i)?;
+    let (i, num_trs) = parse_bin_i64(i)?;
+    let (i, trs) = count(parse_fst_tr::<W>, num_trs as usize)(i)?;
+    let (i, niepsilons) = parse_bin_u64(i)?;
+    let (i, noepsilons) = parse_bin_u64(i)?;
+
+    Ok((
+        i,
+        (
+            state as StateId,
+            CacheTrs {
+                trs: TrsVec(Arc::new(trs)),
+                niepsilons: niepsilons as usize,
+                noepsilons: noepsilons as usize,
+            },
+        ),
+    ))
+}
+
+fn parse_cache_final_weights<W: SerializableSemiring>(
+    i: &[u8],
+) -> IResult<&[u8], (StateId, FinalWeight<W>), NomCustomError<&[u8]>> {
+    let (i, state) = parse_bin_i64(i)?;
+    let (i, raw_final_weight) = W::parse_binary(i)?;
+    Ok((i, (state as StateId, parse_final_weight(raw_final_weight))))
 }

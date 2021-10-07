@@ -1,9 +1,24 @@
-use nom::number::complete::le_i32;
+use nom::number::complete::{le_i32, le_i64, le_u64, le_u8};
 use nom::IResult;
 
 use crate::parsers::nom_utils::NomCustomError;
 use crate::semirings::SerializableSemiring;
 use crate::{Label, StateId, Tr};
+
+#[inline]
+pub(crate) fn parse_bin_i64(i: &[u8]) -> IResult<&[u8], i64, NomCustomError<&[u8]>> {
+    le_i64(i)
+}
+
+#[inline]
+pub(crate) fn parse_bin_u64(i: &[u8]) -> IResult<&[u8], u64, NomCustomError<&[u8]>> {
+    le_u64(i)
+}
+
+#[inline]
+pub(crate) fn parse_bin_u8(i: &[u8]) -> IResult<&[u8], u8, NomCustomError<&[u8]>> {
+    le_u8(i)
+}
 
 #[inline]
 pub(crate) fn parse_start_state(s: i64) -> Option<StateId> {
