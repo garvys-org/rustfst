@@ -82,7 +82,6 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
     }
 
     fn get_trs(&self, id: StateId) -> CacheStatus<TrsVec<W>> {
-        let id = id as usize;
         let cached_data = self.trs.lock().unwrap();
         cached_data.get(id).map(|e| e.trs.shallow_clone())
     }
@@ -152,19 +151,16 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
     }
 
     fn num_trs(&self, id: StateId) -> Option<usize> {
-        let id = id as usize;
         let cached_data = self.trs.lock().unwrap();
         cached_data.get(id).map(|e| e.trs.len()).into_option()
     }
 
     fn num_input_epsilons(&self, id: StateId) -> Option<usize> {
-        let id = id as usize;
         let cached_data = self.trs.lock().unwrap();
         cached_data.get(id).map(|e| e.niepsilons).into_option()
     }
 
     fn num_output_epsilons(&self, id: StateId) -> Option<usize> {
-        let id = id as usize;
         let cached_data = self.trs.lock().unwrap();
         cached_data.get(id).map(|e| e.noepsilons).into_option()
     }
@@ -198,15 +194,15 @@ impl<W: SerializableSemiring> SerializableCache for SimpleVecCache<W> {
         let mut file = BufWriter::new(File::create(path)?);
 
         // Serialize SimpleVecCache
-        serialize_simple_vec_cache(&self, &mut file)?;
+        serialize_simple_vec_cache(&mut file, &self)?;
 
         Ok(())
     }
 }
 
 pub fn serialize_simple_vec_cache<F: Write, W: SerializableSemiring>(
-    cache: &SimpleVecCache<W>,
     writter: &mut F,
+    cache: &SimpleVecCache<W>,
 ) -> Result<()> {
     // Num known states serialization
     let num_known_states = cache.num_known_states();
@@ -238,6 +234,7 @@ pub fn serialize_simple_vec_cache<F: Write, W: SerializableSemiring>(
 
     // Final states serialization
     for f_state in 0..num_final_states {
+        let f_state = f_state as StateId;
         // Write final weight for state
         write_cache_final_weight(writter, &cache.get_final_weight(f_state))?;
     }

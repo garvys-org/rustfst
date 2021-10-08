@@ -183,15 +183,15 @@ impl<W: SerializableSemiring> SerializableCache for SimpleHashMapCache<W> {
         let mut file = BufWriter::new(File::create(path)?);
 
         // Serialize SimpleHashMapCache
-        serialize_simple_hashmap_cache(&self, &mut file)?;
+        serialize_simple_hashmap_cache(&mut file, &self)?;
 
         Ok(())
     }
 }
 
 pub fn serialize_simple_hashmap_cache<F: Write, W: SerializableSemiring>(
-    cache: &SimpleHashMapCache<W>,
     writter: &mut F,
+    cache: &SimpleHashMapCache<W>,
 ) -> Result<()> {
     // Num known states serialization
     let num_known_states = cache.num_known_states();

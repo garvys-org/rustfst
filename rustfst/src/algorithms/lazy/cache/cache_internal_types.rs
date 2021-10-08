@@ -64,8 +64,8 @@ impl<T> CachedData<Vec<T>> {
 }
 
 impl<T> CachedData<Vec<CacheStatus<T>>> {
-    pub fn get(&self, idx: usize) -> CacheStatus<&T> {
-        match self.data.get(idx) {
+    pub fn get(&self, idx: StateId) -> CacheStatus<&T> {
+        match self.data.get(idx as usize) {
             Some(e) => match e {
                 CacheStatus::Computed(v) => CacheStatus::Computed(v),
                 CacheStatus::NotComputed => CacheStatus::NotComputed,
