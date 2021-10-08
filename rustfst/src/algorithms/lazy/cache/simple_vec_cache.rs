@@ -1,5 +1,6 @@
 use std::fs::{read, File};
 use std::io::BufWriter;
+use std::io::Write;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 
@@ -14,10 +15,11 @@ use crate::algorithms::lazy::cache::cache_internal_types::{
 };
 use crate::algorithms::lazy::{CacheStatus, FstCache};
 use crate::parsers::bin_fst::utils_parsing::{
-    parse_bin_i64, parse_bin_u64, parse_bin_u8, parse_final_weight, parse_fst_tr, parse_start_state,
+    parse_bin_fst_tr, parse_bin_i64, parse_bin_u64, parse_bin_u8, parse_final_weight,
+    parse_start_state,
 };
 use crate::parsers::bin_fst::utils_serialization::{
-    write_bin_i32, write_bin_i64, write_bin_u64, write_bin_u8,
+    write_bin_fst_tr, write_bin_i64, write_bin_u64, write_bin_u8, write_final_weight,
 };
 use crate::semirings::{Semiring, SerializableSemiring};
 use crate::{StateId, Trs, TrsVec, EPS_LABEL};
@@ -195,83 +197,115 @@ impl<W: SerializableSemiring> SerializableCache for SimpleVecCache<W> {
     fn write<P: AsRef<Path>>(&self, path: P) -> Result<()> {
         let mut file = BufWriter::new(File::create(path)?);
 
-        // Num known states serialization
-        let num_known_states = self.num_known_states();
-        write_bin_u64(&mut file, num_known_states as u64)?;
+        // Serialize SimpleVecCache
+        serialize_simple_vec_cache(&self, &mut file)?;
 
-        // Start state serialization
-        match self.get_start() {
-            CacheStatus::Computed(v) => {
-                // Mark as computed
-                write_bin_u8(&mut file, 1)?;
-                write_bin_i64(&mut file, v.map_or_else(|| -1, |v| v as i64))?;
-            }
-            CacheStatus::NotComputed => {
-                // Mark state as NotComputed
-                write_bin_u8(&mut file, 0)?;
-            }
-        };
+        Ok(())
+    }
+}
 
-        // Num computed states serialization
-        let num_computed_states = self.len_trs();
-        write_bin_u64(&mut file, num_computed_states as u64)?;
+pub fn serialize_simple_vec_cache<F: Write, W: SerializableSemiring>(
+    cache: &SimpleVecCache<W>,
+    writter: &mut F,
+) -> Result<()> {
+    // Num known states serialization
+    let num_known_states = cache.num_known_states();
+    write_bin_u64(writter, num_known_states as u64)?;
 
-        // Computed states serialization
-        for state in 0..num_computed_states {
-            let state = state as StateId;
-            if let CacheStatus::Computed(cache_trs) = self
+    // Start state serialization
+    write_cache_start_state(writter, &cache.get_start())?;
+
+    // Num computed states serialization
+    let num_computed_states = cache.len_trs();
+    write_bin_u64(writter, num_computed_states as u64)?;
+
+    // Computed states serialization
+    for state in 0..num_computed_states {
+        let state = state as StateId;
+        write_cache_trs(
+            writter,
+            &cache
                 .trs
                 .lock()
                 .map_err(|err| anyhow!("{}", err))?
-                .get(state)
-            {
-                // Mark as computed
-                write_bin_u8(&mut file, 1)?;
-
-                // Write CacheTrs trs
-                write_bin_u64(&mut file, cache_trs.trs.len() as u64)?;
-                for tr in cache_trs.trs.iter() {
-                    write_bin_i32(&mut file, tr.ilabel as i32)?;
-                    write_bin_i32(&mut file, tr.olabel as i32)?;
-                    tr.weight.write_binary(&mut file)?;
-                    write_bin_i32(&mut file, tr.nextstate as i32)?;
-                }
-
-                // Write CacheTrs niepsilons
-                write_bin_u64(&mut file, cache_trs.niepsilons as u64)?;
-
-                // Write CacheTrs noepsilons
-                write_bin_u64(&mut file, cache_trs.noepsilons as u64)?;
-            } else {
-                // Mark as NotComputed
-                write_bin_u8(&mut file, 0)?;
-            }
-        }
-
-        // Num final states serialization
-        let num_final_states = self.len_final_weights();
-        write_bin_u64(&mut file, num_final_states as u64)?;
-
-        // Final states serialization
-        for f_state in 0..num_final_states {
-            // Write final weight for state
-            match &self.get_final_weight(f_state) {
-                CacheStatus::Computed(final_weight) => {
-                    // Mark as Computed
-                    write_bin_u8(&mut file, 1)?;
-                    final_weight
-                        .as_ref()
-                        .unwrap_or(&W::zero())
-                        .write_binary(&mut file)?
-                }
-                CacheStatus::NotComputed => {
-                    // Mark as NotComputed
-                    write_bin_u8(&mut file, 0)?;
-                }
-            };
-        }
-        Ok(())
+                .get(state),
+        )?;
     }
+
+    // Num final states serialization
+    let num_final_states = cache.len_final_weights();
+    write_bin_u64(writter, num_final_states as u64)?;
+
+    // Final states serialization
+    for f_state in 0..num_final_states {
+        // Write final weight for state
+        write_cache_final_weight(writter, &cache.get_final_weight(f_state))?;
+    }
+
+    Ok(())
+}
+
+fn write_cache_trs<F: Write, W: SerializableSemiring>(
+    writter: &mut F,
+    cache_trs: &CacheStatus<&CacheTrs<W>>,
+) -> Result<()> {
+    match cache_trs {
+        CacheStatus::Computed(cache_trs) => {
+            // Mark as computed
+            write_bin_u8(writter, 1)?;
+            // Write CacheTrs trs
+            write_bin_u64(writter, cache_trs.trs.len() as u64)?;
+            for tr in cache_trs.trs.iter() {
+                write_bin_fst_tr(writter, tr)?;
+            }
+            // Write CacheTrs niepsilons
+            write_bin_u64(writter, cache_trs.niepsilons as u64)?;
+            // Write CacheTrs noepsilons
+            write_bin_u64(writter, cache_trs.noepsilons as u64)?;
+        }
+        CacheStatus::NotComputed => {
+            // Mark as NotComputed
+            write_bin_u8(writter, 0)?;
+        }
+    }
+    Ok(())
+}
+
+fn write_cache_final_weight<F: Write, W: SerializableSemiring>(
+    writter: &mut F,
+    cache_final_weight: &CacheStatus<FinalWeight<W>>,
+) -> Result<()> {
+    match cache_final_weight {
+        CacheStatus::Computed(final_weight) => {
+            // Mark as Computed
+            write_bin_u8(writter, 1)?;
+            write_final_weight(writter, &final_weight)?;
+        }
+        CacheStatus::NotComputed => {
+            // Mark as NotComputed
+            write_bin_u8(writter, 0)?;
+        }
+    }
+
+    Ok(())
+}
+
+fn write_cache_start_state<F: Write>(
+    writter: &mut F,
+    cache_start_state: &CacheStatus<StartState>,
+) -> Result<()> {
+    match cache_start_state {
+        CacheStatus::Computed(v) => {
+            // Mark as computed
+            write_bin_u8(writter, 1)?;
+            write_bin_i64(writter, v.map_or_else(|| -1, |v| v as i64))?;
+        }
+        CacheStatus::NotComputed => {
+            // Mark state as NotComputed
+            write_bin_u8(writter, 0)?;
+        }
+    }
+    Ok(())
 }
 
 pub fn parse_simple_vec_cache<W: SerializableSemiring>(
@@ -281,13 +315,7 @@ pub fn parse_simple_vec_cache<W: SerializableSemiring>(
     let (i, num_known_states) = parse_bin_u64(i)?;
 
     // Parse start node
-    let (i, maybe_start_node) = parse_bin_u8(i)?;
-    let (i, start_node) = if maybe_start_node == 1 {
-        let (i, start_state) = parse_bin_i64(i)?;
-        (i, CacheStatus::Computed(parse_start_state(start_state)))
-    } else {
-        (i, CacheStatus::NotComputed)
-    };
+    let (i, start_node) = parse_cache_start_state(i)?;
 
     // Parse states
     let (i, num_states) = parse_bin_u64(i)?;
@@ -295,10 +323,8 @@ pub fn parse_simple_vec_cache<W: SerializableSemiring>(
 
     // Parse final weights
     let (i, num_final_weights) = parse_bin_u64(i)?;
-    let (i, final_weights_data) = count(
-        parse_simple_vec_final_weights::<W>,
-        num_final_weights as usize,
-    )(i)?;
+    let (i, final_weights_data) =
+        count(parse_cache_final_weight::<W>, num_final_weights as usize)(i)?;
 
     Ok((
         i,
@@ -328,7 +354,7 @@ fn parse_cache_trs<W: SerializableSemiring>(
         Ok((i, CacheStatus::NotComputed))
     } else {
         let (i, num_trs) = parse_bin_i64(i)?;
-        let (i, trs) = count(parse_fst_tr::<W>, num_trs as usize)(i)?;
+        let (i, trs) = count(parse_bin_fst_tr::<W>, num_trs as usize)(i)?;
         let (i, niepsilons) = parse_bin_u64(i)?;
         let (i, noepsilons) = parse_bin_u64(i)?;
 
@@ -343,7 +369,7 @@ fn parse_cache_trs<W: SerializableSemiring>(
     }
 }
 
-fn parse_simple_vec_final_weights<W: SerializableSemiring>(
+fn parse_cache_final_weight<W: SerializableSemiring>(
     i: &[u8],
 ) -> IResult<&[u8], CacheStatus<FinalWeight<W>>, NomCustomError<&[u8]>> {
     let (i, is_computed) = parse_bin_u8(i)?;
@@ -356,5 +382,88 @@ fn parse_simple_vec_final_weights<W: SerializableSemiring>(
             i,
             CacheStatus::Computed(parse_final_weight(raw_final_weight)),
         ))
+    }
+}
+
+fn parse_cache_start_state(
+    i: &[u8],
+) -> IResult<&[u8], CacheStatus<StartState>, NomCustomError<&[u8]>> {
+    let (i, is_computed) = parse_bin_u8(i)?;
+    if is_computed == 0 {
+        Ok((i, CacheStatus::NotComputed))
+    } else {
+        let (i, raw_start_state) = parse_bin_i64(i)?;
+        Ok((i, CacheStatus::Computed(parse_start_state(raw_start_state))))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::prelude::Tr;
+    use crate::semirings::TropicalWeight;
+    use anyhow::anyhow;
+
+    #[test]
+    fn test_read_write_cache_start_state_computed() -> Result<()> {
+        let cache_start_state = CacheStatus::Computed(StartState::default());
+        let mut buffer = Vec::new();
+        write_cache_start_state(&mut buffer, &cache_start_state)?;
+        let (_, parsed_cache_start_state) =
+            parse_cache_start_state(&buffer).map_err(|err| anyhow!("{}", err))?;
+        assert_eq!(cache_start_state, parsed_cache_start_state);
+        Ok(())
+    }
+
+    #[test]
+    fn test_read_write_cache_start_state_not_computed() -> Result<()> {
+        let cache_start_state = CacheStatus::NotComputed;
+        let mut buffer = Vec::new();
+        write_cache_start_state(&mut buffer, &cache_start_state)?;
+        let (_, parsed_cache_start_state) =
+            parse_cache_start_state(&buffer).map_err(|err| anyhow!("{}", err))?;
+        assert_eq!(cache_start_state, parsed_cache_start_state);
+        Ok(())
+    }
+
+    #[test]
+    fn test_read_write_cache_final_weight_computed() -> Result<()> {
+        let cache_final_weight = CacheStatus::Computed(FinalWeight::<TropicalWeight>::default());
+        let mut buffer = Vec::new();
+        write_cache_final_weight(&mut buffer, &cache_final_weight)?;
+        let (_, parsed_cache_final_weight) =
+            parse_cache_final_weight(&buffer).map_err(|err| anyhow!("{}", err))?;
+        assert_eq!(cache_final_weight, parsed_cache_final_weight);
+        Ok(())
+    }
+
+    #[test]
+    fn test_read_write_cache_final_weight_not_computed() -> Result<()> {
+        let cache_final_weight: CacheStatus<FinalWeight<TropicalWeight>> = CacheStatus::NotComputed;
+        let mut buffer = Vec::new();
+        write_cache_final_weight(&mut buffer, &cache_final_weight)?;
+        let (_, parsed_cache_final_weight) =
+            parse_cache_final_weight(&buffer).map_err(|err| anyhow!("{}", err))?;
+        assert_eq!(cache_final_weight, parsed_cache_final_weight);
+        Ok(())
+    }
+
+    #[test]
+    fn test_read_write_cache_trs() -> Result<()> {
+        let mut trs = TrsVec::<TropicalWeight>::default();
+        trs.push(Tr::new(0, 1, TropicalWeight::one(), 2));
+        trs.push(Tr::new(0, 1, TropicalWeight::one(), 0));
+        trs.push(Tr::new(0, 1, TropicalWeight::zero(), 10));
+        let cache_trs = CacheTrs {
+            trs,
+            niepsilons: 3,
+            noepsilons: 2,
+        };
+        let computed_cache_trs = CacheStatus::Computed(&cache_trs);
+        let mut buffer = Vec::new();
+        write_cache_trs(&mut buffer, &computed_cache_trs)?;
+        let (_, parsed_cache_trs) = parse_cache_trs(&buffer).map_err(|err| anyhow!("{}", err))?;
+        assert_eq!(CacheStatus::Computed(cache_trs), parsed_cache_trs);
+        Ok(())
     }
 }

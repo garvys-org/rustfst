@@ -16,7 +16,9 @@ use crate::fst_impls::{ConstFst, VectorFst};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::SerializableFst;
 use crate::parsers::bin_fst::fst_header::FstHeader;
-use crate::parsers::bin_fst::utils_parsing::{parse_final_weight, parse_fst_tr, parse_start_state};
+use crate::parsers::bin_fst::utils_parsing::{
+    parse_bin_fst_tr, parse_final_weight, parse_start_state,
+};
 use crate::parsers::nom_utils::NomCustomError;
 use crate::semirings::SerializableSemiring;
 use crate::{Tr, TrsVec};
@@ -94,7 +96,7 @@ fn parse_const_fst<W: SerializableSemiring>(
 
     let mut vector_states = Vec::with_capacity(temp_states.len());
     for temp_state in temp_states {
-        let (j, trs) = count(parse_fst_tr, temp_state.ntrs)(i)?;
+        let (j, trs) = count(parse_bin_fst_tr, temp_state.ntrs)(i)?;
         i = j;
         vector_states.push(VectorFstState {
             final_weight: temp_state.final_weight,

@@ -1,3 +1,5 @@
+use std::cmp::{Eq, PartialEq};
+
 /// This enumeration represents the computation status in a cache.
 #[derive(Debug, Clone, Copy)]
 pub enum CacheStatus<T> {
@@ -81,6 +83,21 @@ impl<T> CacheStatus<T> {
         match self {
             Self::Computed(v) => Self::Computed(v),
             Self::NotComputed => (f)(),
+        }
+    }
+}
+
+impl<T: Eq> PartialEq for CacheStatus<T> {
+    fn eq(&self, other: &Self) -> bool {
+        match self {
+            Self::Computed(v) => match other {
+                Self::Computed(v_other) => v == v_other,
+                Self::NotComputed => false,
+            },
+            Self::NotComputed => match other {
+                Self::Computed(_) => false,
+                Self::NotComputed => true,
+            },
         }
     }
 }

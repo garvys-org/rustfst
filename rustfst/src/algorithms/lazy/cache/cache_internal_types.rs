@@ -9,7 +9,7 @@ use crate::{StateId, TrsVec};
 pub type StartState = Option<StateId>;
 pub type FinalWeight<W> = Option<W>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CacheTrs<W: Semiring> {
     pub trs: TrsVec<W>,
     pub niepsilons: usize,

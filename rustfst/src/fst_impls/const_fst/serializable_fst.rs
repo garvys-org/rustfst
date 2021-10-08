@@ -19,7 +19,9 @@ use crate::fst_impls::ConstFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ExpandedFst, Fst, SerializableFst};
 use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FST_MAGIC_NUMBER};
-use crate::parsers::bin_fst::utils_parsing::{parse_final_weight, parse_fst_tr, parse_start_state};
+use crate::parsers::bin_fst::utils_parsing::{
+    parse_bin_fst_tr, parse_final_weight, parse_start_state,
+};
 use crate::parsers::bin_fst::utils_serialization::write_bin_i32;
 use crate::parsers::nom_utils::NomCustomError;
 use crate::parsers::text_fst::ParsedTextFst;
@@ -231,7 +233,7 @@ fn parse_const_fst<W: SerializableSemiring>(
     if aligned && hdr.num_trs > 0 && pos % CONST_ARCH_ALIGNMENT > 0 {
         i = take(CONST_ARCH_ALIGNMENT - (pos % CONST_ARCH_ALIGNMENT))(i)?.0;
     }
-    let (i, const_trs) = count(parse_fst_tr, hdr.num_trs as usize)(i)?;
+    let (i, const_trs) = count(parse_bin_fst_tr, hdr.num_trs as usize)(i)?;
 
     Ok((
         i,
