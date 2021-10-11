@@ -50,9 +50,13 @@ pub fn write_final_weight<F: Write, W: SerializableSemiring>(
     writter: &mut F,
     final_weight: &Option<W>,
 ) -> Result<()> {
-    final_weight
-        .as_ref()
-        .unwrap_or(&W::zero())
-        .write_binary(writter)?;
+    if let Some(final_weight) = final_weight {
+        // Write as Some
+        write_bin_u8(writter, 1)?;
+        final_weight.write_binary(writter)?;
+    } else {
+        // Write as None
+        write_bin_u8(writter, 0)?;
+    };
     Ok(())
 }

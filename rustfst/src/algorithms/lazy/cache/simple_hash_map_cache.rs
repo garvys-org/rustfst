@@ -11,13 +11,10 @@ use nom::multi::{count, fold_many_m_n};
 use nom::IResult;
 
 use super::SerializableCache;
-use crate::algorithms::lazy::cache::cache_internal_types::{
-    CacheTrs, CachedData, FinalWeight, StartState,
-};
+use crate::algorithms::lazy::cache::cache_internal_types::{CacheTrs, CachedData, StartState};
 use crate::algorithms::lazy::{CacheStatus, FstCache};
 use crate::parsers::bin_fst::utils_parsing::{
-    parse_bin_fst_tr, parse_bin_i64, parse_bin_u64, parse_bin_u8, parse_final_weight,
-    parse_start_state,
+    parse_bin_fst_tr, parse_bin_i64, parse_bin_u64, parse_bin_u8, parse_start_state,
 };
 use crate::parsers::bin_fst::utils_serialization::{
     write_bin_fst_tr, write_bin_i64, write_bin_u64, write_bin_u8, write_final_weight,
@@ -183,13 +180,33 @@ impl<W: SerializableSemiring> SerializableCache for SimpleHashMapCache<W> {
         let mut file = BufWriter::new(File::create(path)?);
 
         // Serialize SimpleHashMapCache
-        serialize_simple_hashmap_cache(&mut file, &self)?;
+        write_simple_hashmap_cache(&mut file, &self)?;
 
         Ok(())
     }
 }
 
-pub fn serialize_simple_hashmap_cache<F: Write, W: SerializableSemiring>(
+impl<W: SerializableSemiring> PartialEq for SimpleHashMapCache<W> {
+    fn eq(&self, other: &Self) -> bool {
+        let cache_start_eq = self.get_start() == other.get_start();
+        let cache_trs_eq = self.trs.lock().unwrap().data.iter().eq(other
+            .trs
+            .lock()
+            .unwrap()
+            .data
+            .iter());
+        let cache_final_weights_eq = self.final_weights.lock().unwrap().data.iter().eq(other
+            .final_weights
+            .lock()
+            .unwrap()
+            .data
+            .iter());
+
+        cache_start_eq & cache_trs_eq & cache_final_weights_eq
+    }
+}
+
+pub fn write_simple_hashmap_cache<F: Write, W: SerializableSemiring>(
     writter: &mut F,
     cache: &SimpleHashMapCache<W>,
 ) -> Result<()> {
@@ -275,12 +292,12 @@ fn write_cache_trs<F: Write, W: SerializableSemiring>(
 
 fn write_cache_final_weight<F: Write, W: SerializableSemiring>(
     writter: &mut F,
-    final_weight: &FinalWeight<W>,
+    final_weight: &Option<W>,
     state: &StateId,
 ) -> Result<()> {
     // Write state
     write_bin_u64(writter, *state as u64)?;
-    write_final_weight(writter, final_weight)?;
+    write_final_weight(writter, &final_weight)?;
     Ok(())
 }
 
@@ -316,10 +333,10 @@ pub fn parse_simple_hashmap_cache<W: SerializableSemiring>(
         num_computed_final_weights as usize,
         num_computed_final_weights as usize,
         parse_cache_final_weight::<W>,
-        HashMap::<StateId, FinalWeight<W>>::new(),
-        |mut acc: HashMap<StateId, FinalWeight<W>>,
-         item: (StateId, FinalWeight<W>)|
-         -> HashMap<StateId, FinalWeight<W>> {
+        HashMap::<StateId, Option<W>>::new(),
+        |mut acc: HashMap<StateId, Option<W>>,
+         item: (StateId, Option<W>)|
+         -> HashMap<StateId, Option<W>> {
             acc.insert(item.0, item.1);
             acc
         },
@@ -368,10 +385,15 @@ fn parse_hashmap_cache_trs<W: SerializableSemiring>(
 
 fn parse_cache_final_weight<W: SerializableSemiring>(
     i: &[u8],
-) -> IResult<&[u8], (StateId, FinalWeight<W>), NomCustomError<&[u8]>> {
+) -> IResult<&[u8], (StateId, Option<W>), NomCustomError<&[u8]>> {
     let (i, state) = parse_bin_i64(i)?;
-    let (i, raw_final_weight) = W::parse_binary(i)?;
-    Ok((i, (state as StateId, parse_final_weight(raw_final_weight))))
+    let (i, is_some) = parse_bin_u8(i)?;
+    if is_some == 1 {
+        let (i, final_weight) = W::parse_binary(i)?;
+        Ok((i, (state as StateId, Some(final_weight))))
+    } else {
+        Ok((i, (state as StateId, None)))
+    }
 }
 
 fn parse_cache_start_state(
@@ -417,7 +439,7 @@ mod tests {
 
     #[test]
     fn test_read_write_cache_final_weight() -> Result<()> {
-        let final_weight = FinalWeight::<TropicalWeight>::default();
+        let final_weight = Some(TropicalWeight::new(1.0));
         let mut buffer = Vec::new();
         write_cache_final_weight(&mut buffer, &final_weight, &0)?;
         let (_, (parsed_state, parsed_final_weight)) =
@@ -444,6 +466,48 @@ mod tests {
             parse_hashmap_cache_trs(&buffer).map_err(|err| anyhow!("{}", err))?;
         assert_eq!(cache_trs, parsed_cache_trs);
         assert_eq!(0, parsed_state);
+        Ok(())
+    }
+
+    #[test]
+    fn simple_vec_cache_eq() -> Result<()> {
+        let mut trs = TrsVec::<TropicalWeight>::default();
+        trs.push(Tr::new(0, 1, TropicalWeight::one(), 2));
+        trs.push(Tr::new(0, 1, TropicalWeight::one(), 0));
+        trs.push(Tr::new(0, 1, TropicalWeight::zero(), 10));
+
+        let cache_a = SimpleHashMapCache::default();
+        cache_a.insert_start(Some(1));
+        cache_a.insert_trs(2, trs.clone());
+        cache_a.insert_final_weight(0, Some(TropicalWeight::one()));
+
+        let cache_b = SimpleHashMapCache::default();
+        cache_b.insert_start(Some(1));
+        cache_b.insert_trs(2, trs);
+        cache_b.insert_final_weight(0, Some(TropicalWeight::one()));
+        assert_eq!(cache_a, cache_b);
+        Ok(())
+    }
+
+    #[test]
+    fn test_read_write_simple_vec_cache() -> Result<()> {
+        let mut trs = TrsVec::<TropicalWeight>::default();
+        trs.push(Tr::new(0, 1, TropicalWeight::one(), 2));
+        trs.push(Tr::new(0, 1, TropicalWeight::one(), 0));
+        trs.push(Tr::new(0, 1, TropicalWeight::zero(), 10));
+
+        let cache = SimpleHashMapCache::default();
+        cache.insert_start(Some(1));
+        cache.insert_trs(2, trs.clone());
+        cache.insert_final_weight(0, Some(TropicalWeight::one()));
+        cache.insert_final_weight(0, Some(TropicalWeight::zero()));
+
+        let mut buffer = Vec::new();
+        write_simple_hashmap_cache(&mut buffer, &cache)?;
+        let (_, parsed_cache) =
+            parse_simple_hashmap_cache(&buffer).map_err(|err| anyhow!("{}", err))?;
+
+        assert_eq!(cache, parsed_cache);
         Ok(())
     }
 }

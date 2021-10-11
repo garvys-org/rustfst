@@ -7,7 +7,6 @@ use crate::semirings::Semiring;
 use crate::{StateId, TrsVec};
 
 pub type StartState = Option<StateId>;
-pub type FinalWeight<W> = Option<W>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CacheTrs<W: Semiring> {
@@ -97,8 +96,8 @@ impl<K: Hash + Eq, V: Semiring> CachedData<HashMap<K, CacheTrs<V>>> {
     }
 }
 
-impl<K: Hash + Eq, V: Semiring> CachedData<HashMap<K, FinalWeight<V>>> {
-    pub fn get(&self, idx: K) -> Option<&FinalWeight<V>> {
+impl<K: Hash + Eq, V: Semiring> CachedData<HashMap<K, Option<V>>> {
+    pub fn get(&self, idx: K) -> Option<&Option<V>> {
         self.data.get(&idx)
     }
 }
