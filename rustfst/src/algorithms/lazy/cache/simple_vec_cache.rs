@@ -200,18 +200,15 @@ impl<W: SerializableSemiring> SerializableCache for SimpleVecCache<W> {
 impl<W: SerializableSemiring> PartialEq for SimpleVecCache<W> {
     fn eq(&self, other: &Self) -> bool {
         let cache_start_eq = self.get_start() == other.get_start();
-        let cache_trs_eq = self.trs.lock().unwrap().data.iter().eq(other
-            .trs
-            .lock()
-            .unwrap()
-            .data
-            .iter());
-        let cache_final_weights_eq = self.final_weights.lock().unwrap().data.iter().eq(other
-            .final_weights
-            .lock()
-            .unwrap()
-            .data
-            .iter());
+        let cache_trs_a = self.trs.lock().unwrap();
+        let cache_trs_b = other.trs.lock().unwrap();
+        let cache_trs_eq = (cache_trs_a.data == cache_trs_b.data)
+            & (cache_trs_a.num_known_states == cache_trs_b.num_known_states);
+
+        let cache_final_weights_a = self.final_weights.lock().unwrap();
+        let cache_final_weights_b = other.final_weights.lock().unwrap();
+        let cache_final_weights_eq = (cache_final_weights_a.data == cache_final_weights_a.data)
+            & (cache_final_weights_b.num_known_states == cache_final_weights_b.num_known_states);
 
         cache_start_eq & cache_trs_eq & cache_final_weights_eq
     }
@@ -519,16 +516,24 @@ mod tests {
 
     #[test]
     fn test_read_write_simple_vec_cache() -> Result<()> {
-        let mut trs = TrsVec::<TropicalWeight>::default();
-        trs.push(Tr::new(0, 1, TropicalWeight::one(), 2));
-        trs.push(Tr::new(0, 1, TropicalWeight::one(), 0));
-        trs.push(Tr::new(0, 1, TropicalWeight::zero(), 10));
+        let mut trs_1 = TrsVec::<TropicalWeight>::default();
+        trs_1.push(Tr::new(0, 1, TropicalWeight::one(), 2));
+        trs_1.push(Tr::new(0, 1, TropicalWeight::one(), 0));
+        trs_1.push(Tr::new(0, 1, TropicalWeight::zero(), 5));
+
+        let mut trs_2 = TrsVec::<TropicalWeight>::default();
+        trs_2.push(Tr::new(0, 1, TropicalWeight::new(0.5), 2));
+
+        let mut trs_3 = TrsVec::<TropicalWeight>::default();
+        trs_3.push(Tr::new(0, 1, TropicalWeight::one(), 1));
 
         let cache = SimpleVecCache::default();
         cache.insert_start(Some(1));
-        cache.insert_trs(2, trs.clone());
+        cache.insert_trs(2, trs_1);
+        cache.insert_trs(3, trs_2);
+        cache.insert_trs(1, trs_3);
         cache.insert_final_weight(0, Some(TropicalWeight::one()));
-        cache.insert_final_weight(0, Some(TropicalWeight::zero()));
+        cache.insert_final_weight(3, Some(TropicalWeight::zero()));
 
         let mut buffer = Vec::new();
         write_simple_vec_cache(&mut buffer, &cache)?;
