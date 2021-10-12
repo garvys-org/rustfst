@@ -9,7 +9,7 @@ use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::lazy::cache::CacheStatus;
 use crate::algorithms::lazy::fst_op::FstOp;
-use crate::algorithms::lazy::FstCache;
+use crate::algorithms::lazy::{FstCache, SerializableCache};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{
     AllocableFst, CoreFst, Fst, FstIterData, FstIterator, MutableFst, StateIterator,

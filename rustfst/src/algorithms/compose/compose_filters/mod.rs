@@ -12,7 +12,7 @@ pub use null_compose_filter::{NullComposeFilter, NullComposeFilterBuilder};
 pub use sequence_compose_filter::{SequenceComposeFilter, SequenceComposeFilterBuilder};
 pub use trivial_compose_filter::{TrivialComposeFilter, TrivialComposeFilterBuilder};
 
-use crate::algorithms::compose::filter_states::FilterState;
+use crate::algorithms::compose::filter_states::{FilterState, SerializableFilterState};
 use crate::algorithms::compose::matchers::Matcher;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
@@ -59,7 +59,7 @@ where
     M1: Matcher<W, F1, B1>,
     M2: Matcher<W, F2, B2>,
 {
-    type FS: FilterState;
+    type FS: FilterState + SerializableFilterState;
 
     fn start(&self) -> Self::FS;
 

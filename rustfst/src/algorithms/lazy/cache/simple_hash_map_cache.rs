@@ -518,6 +518,7 @@ mod tests {
         cache.insert_trs(1, trs_3);
         cache.insert_final_weight(0, Some(TropicalWeight::one()));
         cache.insert_final_weight(3, Some(TropicalWeight::zero()));
+        cache.insert_final_weight(2, None);
 
         let mut buffer = Vec::new();
         write_simple_hashmap_cache(&mut buffer, &cache)?;

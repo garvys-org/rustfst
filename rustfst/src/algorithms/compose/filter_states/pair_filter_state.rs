@@ -1,4 +1,8 @@
-use self::super::FilterState;
+use self::super::{FilterState, SerializableFilterState};
+use crate::parsers::nom_utils::NomCustomError;
+use anyhow::Result;
+use nom::IResult;
+use std::io::Write;
 
 /// Filter state that is the combination of two filter states.
 #[derive(Debug, PartialEq, Clone, Eq, Hash)]
@@ -21,6 +25,15 @@ impl<FS1: FilterState, FS2: FilterState> FilterState for PairFilterState<FS1, FS
 
     fn state(&self) -> &Self::Type {
         &self.state
+    }
+}
+
+impl<FS1: FilterState, FS2: FilterState> SerializableFilterState for PairFilterState<FS1, FS2> {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
+        unimplemented!()
+    }
+    fn write_binary<W: Write>(&self, writer: &mut W) -> Result<()> {
+        unimplemented!()
     }
 }
 

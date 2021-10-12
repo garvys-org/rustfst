@@ -534,6 +534,7 @@ mod tests {
         cache.insert_trs(1, trs_3);
         cache.insert_final_weight(0, Some(TropicalWeight::one()));
         cache.insert_final_weight(3, Some(TropicalWeight::zero()));
+        cache.insert_final_weight(1, None);
 
         let mut buffer = Vec::new();
         write_simple_vec_cache(&mut buffer, &cache)?;
