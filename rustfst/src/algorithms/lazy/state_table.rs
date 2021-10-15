@@ -8,21 +8,15 @@ use std::collections::hash_map::RandomState;
 use std::collections::HashMap;
 use std::hash::BuildHasher;
 
+use crate::algorithms::lazy::SerializableInternalState;
 use crate::parsers::nom_utils::NomCustomError;
+use crate::parsers::{parse_bin_u64, write_bin_u64, SerializeBinary};
 use nom::multi::{count, fold_many_m_n};
-use crate::algorithms::compose::filter_states::{FilterState, SerializableFilterState};
 use nom::IResult;
 use std::fs::{read, File};
 use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
-
-use crate::parsers::bin_fst::utils_parsing::{
-    parse_bin_u64
-};
-use crate::parsers::bin_fst::utils_serialization::{
-   write_bin_u64
-};
 
 use anyhow::{anyhow, Context, Result};
 
@@ -134,10 +128,9 @@ impl<T: Hash + Eq + Clone> StateTable<T> {
     }
 }
 
-
-impl<T: FilterState + SerializableFilterState> StateTable<T> {
+impl<T: SerializeBinary + Hash + Eq + Clone + 'static> SerializableInternalState for StateTable<T> {
     /// Loads a StateTable from a file in binary format.
-    pub fn read<P: AsRef<Path>>(path: P) -> Result<Self> {
+    fn read<P: AsRef<Path>>(path: P) -> Result<Self> {
         let data = read(path.as_ref())
             .with_context(|| format!("Can't open file : {:?}", path.as_ref()))?;
 
@@ -149,7 +142,7 @@ impl<T: FilterState + SerializableFilterState> StateTable<T> {
     }
 
     /// Writes a StateTable to a file in binary format.
-    pub fn write<P: AsRef<Path>>(&self, path: P) -> Result<()> {
+    fn write<P: AsRef<Path>>(&self, path: P) -> Result<()> {
         let mut file = BufWriter::new(File::create(path)?);
 
         // Write StateTable
@@ -159,7 +152,7 @@ impl<T: FilterState + SerializableFilterState> StateTable<T> {
     }
 }
 
-fn write_state_table<F: Write, T: FilterState + SerializableFilterState>(
+fn write_state_table<F: Write, T: SerializeBinary + Hash + Eq + Clone>(
     writter: &mut F,
     state_table: &StateTable<T>,
 ) -> Result<()> {
@@ -167,8 +160,7 @@ fn write_state_table<F: Write, T: FilterState + SerializableFilterState>(
     write_bin_u64(writter, table.tuple_to_id.len() as u64)?;
 
     // Final weights serialization
-    for (tuple, state) in table.tuple_to_id.iter()
-    {
+    for (tuple, state) in table.tuple_to_id.iter() {
         (*tuple).write_binary(writter)?;
         write_bin_u64(writter, *state as u64)?;
     }
@@ -181,18 +173,16 @@ fn write_state_table<F: Write, T: FilterState + SerializableFilterState>(
     Ok(())
 }
 
-fn parse_state_table<T: FilterState + SerializableFilterState>(
+fn parse_state_table<T: SerializeBinary + Hash + Eq + Clone>(
     i: &[u8],
 ) -> IResult<&[u8], StateTable<T>, NomCustomError<&[u8]>> {
-    let (i, tuple_to_id_len) = parse_bin_u64(i)?; 
+    let (i, tuple_to_id_len) = parse_bin_u64(i)?;
     let (i, tuple_to_id) = fold_many_m_n(
         tuple_to_id_len as usize,
         tuple_to_id_len as usize,
         parse_tuple_to_id,
         HashMap::<T, StateId>::new(),
-        |mut acc: HashMap<T, StateId>,
-         item: (T, StateId)|
-         -> HashMap<T, StateId> {
+        |mut acc, item| {
             acc.insert(item.0, item.1);
             acc
         },
@@ -200,17 +190,18 @@ fn parse_state_table<T: FilterState + SerializableFilterState>(
 
     let (i, id_to_tuple_len) = parse_bin_u64(i)?;
     let (i, id_to_tuple) = count(T::parse_binary, id_to_tuple_len as usize)(i)?;
-    Ok((i, StateTable{
-        table: Mutex::new(
-            BiHashMap {
+    Ok((
+        i,
+        StateTable {
+            table: Mutex::new(BiHashMap {
                 tuple_to_id,
                 id_to_tuple,
-            }
-        )
-    }))
+            }),
+        },
+    ))
 }
 
-fn parse_tuple_to_id<T: FilterState + SerializableFilterState>(
+fn parse_tuple_to_id<T: SerializeBinary>(
     i: &[u8],
 ) -> IResult<&[u8], (T, StateId), NomCustomError<&[u8]>> {
     let (i, tuple) = T::parse_binary(i)?;

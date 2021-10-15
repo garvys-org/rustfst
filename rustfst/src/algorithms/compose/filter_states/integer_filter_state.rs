@@ -3,8 +3,9 @@ use std::hash::Hash;
 
 use crate::{StateId, NO_STATE_ID};
 
-use self::super::{FilterState, SerializableFilterState};
+use self::super::FilterState;
 use crate::parsers::nom_utils::NomCustomError;
+use crate::parsers::{parse_bin_u64, write_bin_u64, SerializeBinary};
 use anyhow::Result;
 use nom::IResult;
 use std::io::Write;
@@ -30,12 +31,19 @@ impl FilterState for IntegerFilterState {
     }
 }
 
-impl SerializableFilterState for IntegerFilterState {
+impl SerializeBinary for IntegerFilterState {
     fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
-        unimplemented!()
+        let (i, state) = parse_bin_u64(i)?;
+        Ok((
+            i,
+            Self {
+                state: state as StateId,
+            },
+        ))
     }
     fn write_binary<W: Write>(&self, writer: &mut W) -> Result<()> {
-        unimplemented!()
+        write_bin_u64(writer, self.state as u64)?;
+        Ok(())
     }
 }
 

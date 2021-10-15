@@ -1,9 +1,11 @@
 use std::fmt::Debug;
 use std::hash::Hash;
 
-use self::super::{FilterState, SerializableFilterState};
+use self::super::FilterState;
 use crate::parsers::nom_utils::NomCustomError;
+use crate::parsers::{parse_bin_u64, write_bin_u64, SerializeBinary};
 use anyhow::Result;
+use nom::multi::count;
 use nom::IResult;
 use std::io::Write;
 
@@ -29,11 +31,23 @@ impl FilterState for ListFilterState {
     }
 }
 
-impl SerializableFilterState for ListFilterState {
+impl SerializeBinary for ListFilterState {
     fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
-        unimplemented!()
+        let (i, num_states) = parse_bin_u64(i)?;
+        let (i, state) = count(parse_bin_u64, num_states as usize)(i)?;
+        Ok((
+            i,
+            Self {
+                state: state.into_iter().map(|it| it as usize).collect(),
+            },
+        ))
     }
     fn write_binary<W: Write>(&self, writer: &mut W) -> Result<()> {
-        unimplemented!()
+        let num_states = self.state.len();
+        write_bin_u64(writer, num_states as u64)?;
+        for state in self.state.iter() {
+            write_bin_u64(writer, *state as u64)?
+        }
+        Ok(())
     }
 }

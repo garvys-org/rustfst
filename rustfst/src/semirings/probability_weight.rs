@@ -4,12 +4,13 @@ use std::hash::{Hash, Hasher};
 use std::io::Write;
 
 use anyhow::Result;
-use nom::number::complete::{float, le_f32};
+use nom::number::complete::float;
 use nom::IResult;
 use ordered_float::OrderedFloat;
 
-use crate::parsers::bin_fst::utils_serialization::write_bin_f32;
 use crate::parsers::nom_utils::NomCustomError;
+use crate::parsers::parse_bin_f32;
+use crate::parsers::write_bin_f32;
 use crate::semirings::utils_float::float_approx_equal;
 use crate::semirings::{
     CompleteSemiring, DivideType, ReverseBack, Semiring, SemiringProperties, SerializableSemiring,
@@ -103,7 +104,7 @@ impl SerializableSemiring for ProbabilityWeight {
     }
 
     fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
-        let (i, weight) = le_f32(i)?;
+        let (i, weight) = parse_bin_f32(i)?;
         Ok((i, Self::new(weight)))
     }
 

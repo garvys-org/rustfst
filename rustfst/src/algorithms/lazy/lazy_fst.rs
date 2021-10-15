@@ -257,3 +257,49 @@ where
         Ok(fst_out)
     }
 }
+
+use std::borrow::Borrow;
+use std::fmt::Debug;
+
+use crate::algorithms::compose::compose_filters::{ComposeFilter, ComposeFilterBuilder};
+use crate::algorithms::compose::matchers::Matcher;
+use crate::algorithms::compose::{ComposeFstOp, ComposeStateTuple};
+use crate::algorithms::lazy::StateTable;
+use crate::parsers::SerializeBinary;
+
+impl<W, F1, F2, B1, B2, M1, M2, CFB, Cache>
+    LazyFst<W, ComposeFstOp<W, F1, F2, B1, B2, M1, M2, CFB>, Cache>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    B1: Borrow<F1> + Debug + Clone,
+    B2: Borrow<F2> + Debug + Clone,
+    M1: Matcher<W, F1, B1>,
+    M2: Matcher<W, F2, B2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>,
+    <CFB::CF as ComposeFilter<W, F1, F2, B1, B2, CFB::IM1, CFB::IM2>>::FS: SerializeBinary,
+{
+    pub fn get_state_table(
+        &self,
+    ) -> &StateTable<
+        ComposeStateTuple<<CFB::CF as ComposeFilter<W, F1, F2, B1, B2, CFB::IM1, CFB::IM2>>::FS>,
+    > {
+        self.op.get_state_table()
+    }
+}
+
+pub trait AccessibleInternalState {
+    type InternalState: SerializableInternalState;
+    fn get_state_table(&self) -> &Self::InternalState;
+}
+
+use std::path::Path;
+
+pub trait SerializableInternalState: Sized {
+    /// Loads a StateTable from a file in binary format.
+    fn read<P: AsRef<Path>>(path: P) -> Result<Self>;
+
+    /// Writes a StateTable to a file in binary format.
+    fn write<P: AsRef<Path>>(&self, path: P) -> Result<()>;
+}

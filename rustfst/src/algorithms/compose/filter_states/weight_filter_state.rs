@@ -1,10 +1,11 @@
-use self::super::{FilterState, SerializableFilterState};
+use self::super::FilterState;
 use crate::parsers::nom_utils::NomCustomError;
+use crate::parsers::SerializeBinary;
 use anyhow::Result;
 use nom::IResult;
 use std::io::Write;
 
-use crate::semirings::Semiring;
+use crate::semirings::{Semiring, SerializableSemiring};
 
 /// Filter state that is a weight implementing the Semiring trait.
 #[derive(Debug, PartialEq, Clone, Eq, Hash)]
@@ -28,11 +29,13 @@ impl<W: Semiring> FilterState for WeightFilterState<W> {
     }
 }
 
-impl<T: Semiring> SerializableFilterState for WeightFilterState<T> {
+impl<T: SerializableSemiring> SerializeBinary for WeightFilterState<T> {
     fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
-        unimplemented!()
+        let (i, state) = T::parse_binary(i)?;
+        Ok((i, Self { state }))
     }
     fn write_binary<W: Write>(&self, writer: &mut W) -> Result<()> {
-        unimplemented!()
+        self.state.write_binary(writer)?;
+        Ok(())
     }
 }

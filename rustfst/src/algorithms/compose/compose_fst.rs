@@ -7,9 +7,12 @@ use crate::algorithms::compose::compose_filters::{
 };
 use crate::algorithms::compose::matchers::{GenericMatcher, Matcher};
 use crate::algorithms::compose::{ComposeFstOp, ComposeFstOpOptions, ComposeStateTuple};
-use crate::algorithms::lazy::{FstCache, LazyFst, SimpleVecCache, StateTable};
+use crate::algorithms::lazy::{
+    AccessibleInternalState, FstCache, LazyFst, SimpleVecCache, StateTable,
+};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
+use crate::parsers::SerializeBinary;
 use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable, TrsVec};
 use std::sync::Arc;
@@ -188,6 +191,29 @@ where
         let fst_cache = SimpleVecCache::default();
         let fst = LazyFst::from_op_and_cache(compose_impl, fst_cache, isymt, osymt);
         Ok(ComposeFst(fst))
+    }
+}
+
+impl<W, F1, F2, B1, B2, M1, M2, CFB, Cache> AccessibleInternalState
+    for ComposeFst<W, F1, F2, B1, B2, M1, M2, CFB, Cache>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    B1: Borrow<F1> + Debug + Clone,
+    B2: Borrow<F2> + Debug + Clone,
+    M1: Matcher<W, F1, B1>,
+    M2: Matcher<W, F2, B2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>,
+    <CFB::CF as ComposeFilter<W, F1, F2, B1, B2, CFB::IM1, CFB::IM2>>::FS:
+        SerializeBinary + 'static,
+{
+    type InternalState = StateTable<
+        ComposeStateTuple<<CFB::CF as ComposeFilter<W, F1, F2, B1, B2, CFB::IM1, CFB::IM2>>::FS>,
+    >;
+
+    fn get_state_table(&self) -> &Self::InternalState {
+        self.0.get_state_table()
     }
 }
 

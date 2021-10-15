@@ -17,9 +17,10 @@ use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FS
 use crate::parsers::bin_fst::utils_parsing::{
     parse_bin_fst_tr, parse_final_weight, parse_start_state,
 };
-use crate::parsers::bin_fst::utils_serialization::{write_bin_fst_tr, write_bin_i64};
+use crate::parsers::bin_fst::utils_serialization::write_bin_fst_tr;
 use crate::parsers::nom_utils::NomCustomError;
 use crate::parsers::text_fst::ParsedTextFst;
+use crate::parsers::write_bin_i64;
 use crate::semirings::SerializableSemiring;
 use crate::{StateId, Tr, Trs, TrsVec, EPS_LABEL};
 

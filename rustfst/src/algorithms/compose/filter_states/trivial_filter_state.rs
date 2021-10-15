@@ -1,5 +1,6 @@
-use self::super::{FilterState, SerializableFilterState};
+use self::super::FilterState;
 use crate::parsers::nom_utils::NomCustomError;
+use crate::parsers::{parse_bin_u8, write_bin_u8, SerializeBinary};
 use anyhow::Result;
 use nom::IResult;
 use std::io::Write;
@@ -26,11 +27,21 @@ impl FilterState for TrivialFilterState {
     }
 }
 
-impl SerializableFilterState for TrivialFilterState {
+impl SerializeBinary for TrivialFilterState {
     fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
-        unimplemented!()
+        let (i, state) = parse_bin_u8(i)?;
+        if state == 1 {
+            Ok((i, Self { state: true }))
+        } else {
+            Ok((i, Self { state: false }))
+        }
     }
     fn write_binary<W: Write>(&self, writer: &mut W) -> Result<()> {
-        unimplemented!()
+        if self.state {
+            write_bin_u8(writer, 1)?;
+        } else {
+            write_bin_u8(writer, 0)?;
+        }
+        Ok(())
     }
 }

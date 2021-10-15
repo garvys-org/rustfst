@@ -12,12 +12,10 @@ use nom::IResult;
 use super::SerializableCache;
 use crate::algorithms::lazy::cache::cache_internal_types::{CacheTrs, CachedData, StartState};
 use crate::algorithms::lazy::{CacheStatus, FstCache};
-use crate::parsers::bin_fst::utils_parsing::{
-    parse_bin_fst_tr, parse_bin_i64, parse_bin_u64, parse_bin_u8, parse_start_state,
-};
-use crate::parsers::bin_fst::utils_serialization::{
-    write_bin_fst_tr, write_bin_i64, write_bin_u64, write_bin_u8, write_final_weight,
-};
+use crate::parsers::bin_fst::utils_parsing::{parse_bin_fst_tr, parse_start_state};
+use crate::parsers::bin_fst::utils_serialization::{write_bin_fst_tr, write_final_weight};
+use crate::parsers::{parse_bin_i64, parse_bin_u64, parse_bin_u8};
+use crate::parsers::{write_bin_i64, write_bin_u64, write_bin_u8};
 use crate::semirings::{Semiring, SerializableSemiring};
 use crate::{StateId, Trs, TrsVec, EPS_LABEL};
 
