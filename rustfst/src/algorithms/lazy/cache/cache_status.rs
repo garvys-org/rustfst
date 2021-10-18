@@ -89,15 +89,12 @@ impl<T> CacheStatus<T> {
 
 impl<T: Eq> PartialEq for CacheStatus<T> {
     fn eq(&self, other: &Self) -> bool {
-        match self {
-            Self::Computed(v) => match other {
-                Self::Computed(v_other) => v == v_other,
-                Self::NotComputed => false,
-            },
-            Self::NotComputed => match other {
-                Self::Computed(_) => false,
-                Self::NotComputed => true,
-            },
+        match (self, other) {
+            (Self::Computed(lhs), Self::Computed(rhs)) => lhs == rhs,
+            (Self::NotComputed, Self::NotComputed) => true,
+            (Self::Computed(_), Self::NotComputed) | (Self::NotComputed, Self::Computed(_)) => {
+                false
+            }
         }
     }
 }

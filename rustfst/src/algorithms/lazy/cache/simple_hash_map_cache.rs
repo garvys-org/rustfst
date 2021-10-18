@@ -3,20 +3,23 @@ use std::fs::{read, File};
 use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 use crate::parsers::nom_utils::NomCustomError;
 use anyhow::{anyhow, format_err, Context, Result};
-use nom::multi::{count, fold_many_m_n};
+use nom::multi::fold_many_m_n;
 use nom::IResult;
 
+use super::utils_parsing::{
+    parse_cache_start_state, parse_hashmap_cache_final_weight, parse_hashmap_cache_trs,
+};
+use super::utils_serialization::{
+    write_cache_start_state, write_hashmap_cache_final_weight, write_hashmap_cache_trs,
+};
 use super::SerializableCache;
 use crate::algorithms::lazy::cache::cache_internal_types::{CacheTrs, CachedData, StartState};
 use crate::algorithms::lazy::{CacheStatus, FstCache};
-use crate::parsers::bin_fst::utils_parsing::{parse_bin_fst_tr, parse_start_state};
-use crate::parsers::bin_fst::utils_serialization::{write_bin_fst_tr, write_final_weight};
-use crate::parsers::{parse_bin_i64, parse_bin_u64, parse_bin_u8};
-use crate::parsers::{write_bin_i64, write_bin_u64, write_bin_u8};
+use crate::parsers::{parse_bin_u64, write_bin_u64};
 use crate::semirings::{Semiring, SerializableSemiring};
 use crate::{StateId, Trs, TrsVec, EPS_LABEL};
 
@@ -167,10 +170,10 @@ impl<W: SerializableSemiring> SerializableCache for SimpleHashMapCache<W> {
             .with_context(|| format!("Can't open file : {:?}", path.as_ref()))?;
 
         // Parse SimpleHashMapCache
-        let (_, simple_vec_cache) = parse_simple_hashmap_cache(&data)
+        let (_, cache) = parse_simple_hashmap_cache(&data)
             .map_err(|e| format_err!("Error while parsing binary SimpleHashMapCache : {:?}", e))?;
 
-        Ok(simple_vec_cache)
+        Ok(cache)
     }
 
     /// Writes a SimpleHashMapCache to a file in binary format.
@@ -231,7 +234,7 @@ pub fn write_simple_hashmap_cache<F: Write, W: SerializableSemiring>(
         .iter()
     {
         // Write CacheTrs trs
-        write_cache_trs(writter, cache_trs, state)?;
+        write_hashmap_cache_trs(writter, cache_trs, state)?;
     }
 
     // Final weights num known states serialization
@@ -255,58 +258,8 @@ pub fn write_simple_hashmap_cache<F: Write, W: SerializableSemiring>(
         .iter()
     {
         // Write final weight for state
-        write_cache_final_weight(writter, final_weight, state)?;
+        write_hashmap_cache_final_weight(writter, final_weight, state)?;
     }
-    Ok(())
-}
-
-fn write_cache_start_state<F: Write>(
-    writter: &mut F,
-    cache_start_state: &CacheStatus<StartState>,
-) -> Result<()> {
-    match cache_start_state {
-        CacheStatus::Computed(v) => {
-            // Mark as computed
-            write_bin_u8(writter, 1)?;
-            write_bin_i64(writter, v.map_or_else(|| -1, |v| v as i64))?;
-        }
-        CacheStatus::NotComputed => {
-            // Mark state as NotComputed
-            write_bin_u8(writter, 0)?;
-        }
-    }
-    Ok(())
-}
-
-fn write_cache_trs<F: Write, W: SerializableSemiring>(
-    writter: &mut F,
-    cache_trs: &CacheTrs<W>,
-    state: &StateId,
-) -> Result<()> {
-    // Write state
-    write_bin_u64(writter, *state as u64)?;
-
-    // Write CacheTrs trs
-    write_bin_u64(writter, cache_trs.trs.len() as u64)?;
-    for tr in cache_trs.trs.iter() {
-        write_bin_fst_tr(writter, tr)?;
-    }
-    // Write CacheTrs niepsilons
-    write_bin_u64(writter, cache_trs.niepsilons as u64)?;
-    // Write CacheTrs noepsilons
-    write_bin_u64(writter, cache_trs.noepsilons as u64)?;
-
-    Ok(())
-}
-
-fn write_cache_final_weight<F: Write, W: SerializableSemiring>(
-    writter: &mut F,
-    final_weight: &Option<W>,
-    state: &StateId,
-) -> Result<()> {
-    // Write state
-    write_bin_u64(writter, *state as u64)?;
-    write_final_weight(writter, &final_weight)?;
     Ok(())
 }
 
@@ -339,7 +292,7 @@ pub fn parse_simple_hashmap_cache<W: SerializableSemiring>(
     let (i, final_weights_data) = fold_many_m_n(
         num_computed_final_weights as usize,
         num_computed_final_weights as usize,
-        parse_cache_final_weight::<W>,
+        parse_hashmap_cache_final_weight::<W>,
         HashMap::<StateId, Option<W>>::new(),
         |mut acc: HashMap<StateId, Option<W>>,
          item: (StateId, Option<W>)|
@@ -366,53 +319,6 @@ pub fn parse_simple_hashmap_cache<W: SerializableSemiring>(
             }),
         },
     ))
-}
-
-fn parse_hashmap_cache_trs<W: SerializableSemiring>(
-    i: &[u8],
-) -> IResult<&[u8], (StateId, CacheTrs<W>), NomCustomError<&[u8]>> {
-    let (i, state) = parse_bin_i64(i)?;
-    let (i, num_trs) = parse_bin_i64(i)?;
-    let (i, trs) = count(parse_bin_fst_tr::<W>, num_trs as usize)(i)?;
-    let (i, niepsilons) = parse_bin_u64(i)?;
-    let (i, noepsilons) = parse_bin_u64(i)?;
-
-    Ok((
-        i,
-        (
-            state as StateId,
-            CacheTrs {
-                trs: TrsVec(Arc::new(trs)),
-                niepsilons: niepsilons as usize,
-                noepsilons: noepsilons as usize,
-            },
-        ),
-    ))
-}
-
-fn parse_cache_final_weight<W: SerializableSemiring>(
-    i: &[u8],
-) -> IResult<&[u8], (StateId, Option<W>), NomCustomError<&[u8]>> {
-    let (i, state) = parse_bin_i64(i)?;
-    let (i, is_some) = parse_bin_u8(i)?;
-    if is_some == 1 {
-        let (i, final_weight) = W::parse_binary(i)?;
-        Ok((i, (state as StateId, Some(final_weight))))
-    } else {
-        Ok((i, (state as StateId, None)))
-    }
-}
-
-fn parse_cache_start_state(
-    i: &[u8],
-) -> IResult<&[u8], CacheStatus<StartState>, NomCustomError<&[u8]>> {
-    let (i, is_computed) = parse_bin_u8(i)?;
-    if is_computed == 0 {
-        Ok((i, CacheStatus::NotComputed))
-    } else {
-        let (i, raw_start_state) = parse_bin_i64(i)?;
-        Ok((i, CacheStatus::Computed(parse_start_state(raw_start_state))))
-    }
 }
 
 #[cfg(test)]
@@ -448,9 +354,9 @@ mod tests {
     fn test_read_write_cache_final_weight() -> Result<()> {
         let final_weight = Some(TropicalWeight::new(1.0));
         let mut buffer = Vec::new();
-        write_cache_final_weight(&mut buffer, &final_weight, &0)?;
+        write_hashmap_cache_final_weight(&mut buffer, &final_weight, &0)?;
         let (_, (parsed_state, parsed_final_weight)) =
-            parse_cache_final_weight(&buffer).map_err(|err| anyhow!("{}", err))?;
+            parse_hashmap_cache_final_weight(&buffer).map_err(|err| anyhow!("{}", err))?;
         assert_eq!(final_weight, parsed_final_weight);
         assert_eq!(0, parsed_state);
         Ok(())
@@ -468,7 +374,7 @@ mod tests {
             noepsilons: 2,
         };
         let mut buffer = Vec::new();
-        write_cache_trs(&mut buffer, &cache_trs, &0)?;
+        write_hashmap_cache_trs(&mut buffer, &cache_trs, &0)?;
         let (_, (parsed_state, parsed_cache_trs)) =
             parse_hashmap_cache_trs(&buffer).map_err(|err| anyhow!("{}", err))?;
         assert_eq!(cache_trs, parsed_cache_trs);
