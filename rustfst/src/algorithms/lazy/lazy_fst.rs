@@ -1,6 +1,9 @@
 use std::collections::VecDeque;
+use std::fmt::Debug;
 use std::iter::{repeat, Map, Repeat, Zip};
 use std::marker::PhantomData;
+use std::ops::Deref;
+use std::path::Path;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -8,13 +11,13 @@ use itertools::izip;
 use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::lazy::cache::CacheStatus;
-use crate::algorithms::lazy::fst_op::FstOp;
+use crate::algorithms::lazy::fst_op::{AccessibleOpState, FstOp, SerializableOpState};
 use crate::algorithms::lazy::{FstCache, SerializableCache};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{
     AllocableFst, CoreFst, Fst, FstIterData, FstIterator, MutableFst, StateIterator,
 };
-use crate::semirings::Semiring;
+use crate::semirings::{Semiring, SerializableSemiring};
 use crate::{StateId, SymbolTable, Trs, TrsVec};
 
 #[derive(Debug, Clone)]
@@ -258,48 +261,28 @@ where
     }
 }
 
-use std::borrow::Borrow;
-use std::fmt::Debug;
-
-use crate::algorithms::compose::compose_filters::{ComposeFilter, ComposeFilterBuilder};
-use crate::algorithms::compose::matchers::Matcher;
-use crate::algorithms::compose::{ComposeFstOp, ComposeStateTuple};
-use crate::algorithms::lazy::StateTable;
-use crate::parsers::SerializeBinary;
-
-impl<W, F1, F2, B1, B2, M1, M2, CFB, Cache>
-    LazyFst<W, ComposeFstOp<W, F1, F2, B1, B2, M1, M2, CFB>, Cache>
+impl<W, Op, Cache> SerializableLazyFst for LazyFst<W, Op, Cache>
 where
-    W: Semiring,
-    F1: Fst<W>,
-    F2: Fst<W>,
-    B1: Borrow<F1> + Debug + Clone,
-    B2: Borrow<F2> + Debug + Clone,
-    M1: Matcher<W, F1, B1>,
-    M2: Matcher<W, F2, B2>,
-    CFB: ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>,
-    <CFB::CF as ComposeFilter<W, F1, F2, B1, B2, CFB::IM1, CFB::IM2>>::FS: SerializeBinary,
+    W: SerializableSemiring,
+    Op: FstOp<W> + AccessibleOpState,
+    Op::FstOpState: SerializableOpState,
+    Cache: FstCache<W> + SerializableCache,
 {
-    pub fn get_state_table(
-        &self,
-    ) -> &StateTable<
-        ComposeStateTuple<<CFB::CF as ComposeFilter<W, F1, F2, B1, B2, CFB::IM1, CFB::IM2>>::FS>,
-    > {
-        self.op.get_state_table()
+    /// Writes LazyFst interal states to a directory of files in binary format.
+    fn write<P: AsRef<Path>>(&self, cache_dir: P, op_state_dir: P) -> Result<()> {
+        self.cache.write(cache_dir)?;
+        self.op.get_op_state().write(op_state_dir)?;
+        Ok(())
     }
 }
 
-pub trait AccessibleInternalState {
-    type InternalState: SerializableInternalState;
-    fn get_state_table(&self) -> &Self::InternalState;
+pub trait SerializableLazyFst {
+    /// Writes LazyFst interal states to a directory of files in binary format.
+    fn write<P: AsRef<Path>>(&self, cache_dir: P, op_state_dir: P) -> Result<()>;
 }
 
-use std::path::Path;
-
-pub trait SerializableInternalState: Sized {
-    /// Loads a StateTable from a file in binary format.
-    fn read<P: AsRef<Path>>(path: P) -> Result<Self>;
-
-    /// Writes a StateTable to a file in binary format.
-    fn write<P: AsRef<Path>>(&self, path: P) -> Result<()>;
+impl<C: SerializableLazyFst, CP: Deref<Target = C> + Debug> SerializableLazyFst for CP {
+    fn write<P: AsRef<Path>>(&self, cache_dir: P, op_state_dir: P) -> Result<()> {
+        self.deref().write(cache_dir, op_state_dir)
+    }
 }

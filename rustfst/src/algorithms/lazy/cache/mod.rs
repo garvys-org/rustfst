@@ -13,11 +13,27 @@ pub use self::simple_vec_cache::SimpleVecCache;
 
 use anyhow::Result;
 use std::path::Path;
+use std::sync::Arc;
 
 /// Trait definining the methods a cache must implement to be serialized and deserialized.
-pub trait SerializableCache: Sized {
+pub trait SerializableCache {
     /// Loads a cache from a file in binary format.
-    fn read<P: AsRef<Path>>(path: P) -> Result<Self>;
+    fn read<P: AsRef<Path>>(path: P) -> Result<Self>
+    where
+        Self: Sized;
     /// Writes a cache to a file in binary format.
     fn write<P: AsRef<Path>>(&self, path: P) -> Result<()>;
+}
+
+impl<C: SerializableCache> SerializableCache for Arc<C> {
+    fn read<P: AsRef<Path>>(path: P) -> Result<Self>
+    where
+        Self: Sized,
+    {
+        Ok(Arc::new(C::read(path)?))
+    }
+
+    fn write<P: AsRef<Path>>(&self, path: P) -> Result<()> {
+        (**self).write(path)
+    }
 }

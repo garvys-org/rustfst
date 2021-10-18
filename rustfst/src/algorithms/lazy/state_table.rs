@@ -8,17 +8,13 @@ use std::collections::hash_map::RandomState;
 use std::collections::HashMap;
 use std::hash::BuildHasher;
 
-use crate::algorithms::lazy::SerializableInternalState;
 use crate::parsers::nom_utils::NomCustomError;
 use crate::parsers::{parse_bin_u64, write_bin_u64, SerializeBinary};
 use nom::multi::{count, fold_many_m_n};
 use nom::IResult;
-use std::fs::{read, File};
-use std::io::BufWriter;
 use std::io::Write;
-use std::path::Path;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, Result};
 
 #[derive(Clone, Debug, Default)]
 pub(crate) struct BiHashMap<T: Hash + Eq + Clone, H: BuildHasher = RandomState> {
@@ -128,77 +124,51 @@ impl<T: Hash + Eq + Clone> StateTable<T> {
     }
 }
 
-impl<T: SerializeBinary + Hash + Eq + Clone + 'static> SerializableInternalState for StateTable<T> {
-    /// Loads a StateTable from a file in binary format.
-    fn read<P: AsRef<Path>>(path: P) -> Result<Self> {
-        let data = read(path.as_ref())
-            .with_context(|| format!("Can't open file : {:?}", path.as_ref()))?;
+impl<T: SerializeBinary + Hash + Eq + Clone> SerializeBinary for StateTable<T> {
+    /// Parse a struct of type Self from a binary buffer.
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
+        let (i, tuple_to_id_len) = parse_bin_u64(i)?;
+        let (i, tuple_to_id) = fold_many_m_n(
+            tuple_to_id_len as usize,
+            tuple_to_id_len as usize,
+            parse_tuple_to_id,
+            HashMap::<T, StateId>::new(),
+            |mut acc, item| {
+                acc.insert(item.0, item.1);
+                acc
+            },
+        )(i)?;
 
-        // Parse StateTable
-        let (_, state_table) = parse_state_table(&data)
-            .map_err(|e| format_err!("Error while parsing binary StateTable : {:?}", e))?;
-
-        Ok(state_table)
+        let (i, id_to_tuple_len) = parse_bin_u64(i)?;
+        let (i, id_to_tuple) = count(T::parse_binary, id_to_tuple_len as usize)(i)?;
+        Ok((
+            i,
+            StateTable {
+                table: Mutex::new(BiHashMap {
+                    tuple_to_id,
+                    id_to_tuple,
+                }),
+            },
+        ))
     }
+    /// Writes a struct to a writable buffer.
+    fn write_binary<WB: Write>(&self, writer: &mut WB) -> Result<()> {
+        let table = self.table.lock().map_err(|err| anyhow!("{}", err))?;
+        write_bin_u64(writer, table.tuple_to_id.len() as u64)?;
 
-    /// Writes a StateTable to a file in binary format.
-    fn write<P: AsRef<Path>>(&self, path: P) -> Result<()> {
-        let mut file = BufWriter::new(File::create(path)?);
+        // Final weights serialization
+        for (tuple, state) in table.tuple_to_id.iter() {
+            (*tuple).write_binary(writer)?;
+            write_bin_u64(writer, *state as u64)?;
+        }
 
-        // Write StateTable
-        write_state_table(&mut file, &self)?;
+        write_bin_u64(writer, table.id_to_tuple.len() as u64)?;
+        for tuple in table.id_to_tuple.iter() {
+            (*tuple).write_binary(writer)?;
+        }
 
         Ok(())
     }
-}
-
-fn write_state_table<F: Write, T: SerializeBinary + Hash + Eq + Clone>(
-    writter: &mut F,
-    state_table: &StateTable<T>,
-) -> Result<()> {
-    let table = state_table.table.lock().map_err(|err| anyhow!("{}", err))?;
-    write_bin_u64(writter, table.tuple_to_id.len() as u64)?;
-
-    // Final weights serialization
-    for (tuple, state) in table.tuple_to_id.iter() {
-        (*tuple).write_binary(writter)?;
-        write_bin_u64(writter, *state as u64)?;
-    }
-
-    write_bin_u64(writter, table.id_to_tuple.len() as u64)?;
-    for tuple in table.id_to_tuple.iter() {
-        (*tuple).write_binary(writter)?;
-    }
-
-    Ok(())
-}
-
-fn parse_state_table<T: SerializeBinary + Hash + Eq + Clone>(
-    i: &[u8],
-) -> IResult<&[u8], StateTable<T>, NomCustomError<&[u8]>> {
-    let (i, tuple_to_id_len) = parse_bin_u64(i)?;
-    let (i, tuple_to_id) = fold_many_m_n(
-        tuple_to_id_len as usize,
-        tuple_to_id_len as usize,
-        parse_tuple_to_id,
-        HashMap::<T, StateId>::new(),
-        |mut acc, item| {
-            acc.insert(item.0, item.1);
-            acc
-        },
-    )(i)?;
-
-    let (i, id_to_tuple_len) = parse_bin_u64(i)?;
-    let (i, id_to_tuple) = count(T::parse_binary, id_to_tuple_len as usize)(i)?;
-    Ok((
-        i,
-        StateTable {
-            table: Mutex::new(BiHashMap {
-                tuple_to_id,
-                id_to_tuple,
-            }),
-        },
-    ))
 }
 
 fn parse_tuple_to_id<T: SerializeBinary>(
