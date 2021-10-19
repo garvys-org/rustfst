@@ -179,3 +179,54 @@ fn parse_tuple_to_id<T: SerializeBinary>(
 
     Ok((i, (tuple, state as StateId)))
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::algorithms::compose::filter_states::{FilterState, IntegerFilterState};
+    use crate::algorithms::compose::ComposeStateTuple;
+    use crate::StateId;
+    use anyhow::Result;
+
+    #[test]
+    fn test_read_write_state_table_empty() -> Result<()> {
+        let state_table = StateTable::<ComposeStateTuple<IntegerFilterState>>::new();
+
+        let mut buffer = Vec::new();
+        state_table.write_binary(&mut buffer)?;
+        let (_, parsed_state_table) =
+            StateTable::<ComposeStateTuple<IntegerFilterState>>::parse_binary(&buffer)
+                .map_err(|err| anyhow!("{}", err))?;
+
+        assert_eq!(state_table, parsed_state_table);
+        Ok(())
+    }
+
+    #[test]
+    fn test_read_write_state_table() -> Result<()> {
+        let fs1 = IntegerFilterState::new(1);
+        let fs2 = IntegerFilterState::new(2);
+        let tuple_1 = ComposeStateTuple {
+            fs: fs1,
+            s1: 1 as StateId,
+            s2: 2 as StateId,
+        };
+        let tuple_2 = ComposeStateTuple {
+            fs: fs2,
+            s1: 1 as StateId,
+            s2: 2 as StateId,
+        };
+        let state_table = StateTable::new();
+        state_table.find_id(tuple_1);
+        state_table.find_id(tuple_2);
+
+        let mut buffer = Vec::new();
+        state_table.write_binary(&mut buffer)?;
+        let (_, parsed_state_table) =
+            StateTable::<ComposeStateTuple<IntegerFilterState>>::parse_binary(&buffer)
+                .map_err(|err| anyhow!("{}", err))?;
+
+        assert_eq!(state_table, parsed_state_table);
+        Ok(())
+    }
+}
