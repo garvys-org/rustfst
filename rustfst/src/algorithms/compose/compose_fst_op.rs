@@ -1,8 +1,12 @@
 use std::borrow::Borrow;
 use std::fmt::Debug;
+use std::fs::{read, File};
+use std::hash::Hash;
+use std::io::BufWriter;
+use std::path::Path;
 use std::sync::Arc;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 
 use crate::algorithms::compose::compose_filters::{ComposeFilter, ComposeFilterBuilder};
 use crate::algorithms::compose::filter_states::FilterState;
@@ -10,12 +14,49 @@ use crate::algorithms::compose::lookahead_filters::lookahead_selector::Selector;
 use crate::algorithms::compose::matchers::{IterItemMatcher, MatcherFlags};
 use crate::algorithms::compose::matchers::{MatchType, Matcher, REQUIRE_PRIORITY};
 use crate::algorithms::compose::{ComposeFstOpOptions, ComposeStateTuple};
-use crate::algorithms::lazy::{FstOp, StateTable};
+use crate::algorithms::lazy::{AccessibleOpState, FstOp, SerializableOpState, StateTable};
 use crate::fst_properties::mutable_properties::compose_properties;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
+use crate::parsers::SerializeBinary;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, Trs, TrsVec, EPS_LABEL, NO_LABEL};
+
+#[derive(Debug, Clone)]
+pub struct ComposeFstOpState<T: Hash + Eq + Clone> {
+    state_table: StateTable<T>,
+}
+
+impl<T: Hash + Eq + Clone> ComposeFstOpState<T> {
+    pub fn new() -> Self {
+        ComposeFstOpState {
+            state_table: StateTable::<T>::new(),
+        }
+    }
+}
+
+impl<T: Hash + Eq + Clone + SerializeBinary> SerializableOpState for ComposeFstOpState<T> {
+    /// Loads a ComposeFstOpState from a file in binary format.
+    fn read<P: AsRef<Path>>(path: P) -> Result<Self> {
+        let data = read(path.as_ref())
+            .with_context(|| format!("Can't open file : {:?}", path.as_ref()))?;
+
+        // Parse StateTable
+        let (_, state_table) = StateTable::<T>::parse_binary(&data)
+            .map_err(|e| format_err!("Error while parsing binary StateTable : {:?}", e))?;
+
+        Ok(Self { state_table })
+    }
+
+    /// Writes a ComposeFstOpState to a file in binary format.
+    fn write<P: AsRef<Path>>(&self, path: P) -> Result<()> {
+        let mut file = BufWriter::new(File::create(path)?);
+
+        // Write StateTable
+        self.state_table.write_binary(&mut file)?;
+        Ok(())
+    }
+}
 
 #[derive(Debug)]
 pub struct ComposeFstOp<W, F1, F2, B1, B2, M1, M2, CFB>
@@ -30,7 +71,7 @@ where
     CFB: ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>,
 {
     compose_filter_builder: CFB,
-    state_table: StateTable<
+    compose_state: ComposeFstOpState<
         ComposeStateTuple<<CFB::CF as ComposeFilter<W, F1, F2, B1, B2, CFB::IM1, CFB::IM2>>::FS>,
     >,
     match_type: MatchType,
@@ -53,7 +94,7 @@ where
     fn clone(&self) -> Self {
         Self {
             compose_filter_builder: self.compose_filter_builder.clone(),
-            state_table: self.state_table.clone(),
+            compose_state: self.compose_state.clone(),
             match_type: self.match_type.clone(),
             properties: self.properties.clone(),
             fst1: self.fst1.clone(),
@@ -89,7 +130,7 @@ where
             M1,
             M2,
             CFB,
-            StateTable<
+            ComposeFstOpState<
                 ComposeStateTuple<
                     <CFB::CF as ComposeFilter<W, F1, F2, B1, B2, CFB::IM1, CFB::IM2>>::FS,
                 >,
@@ -111,7 +152,7 @@ where
 
         Ok(Self {
             compose_filter_builder,
-            state_table: opts.state_table.unwrap_or_else(StateTable::new),
+            compose_state: opts.op_state.unwrap_or_else(ComposeFstOpState::new),
             match_type,
             properties,
             fst1,
@@ -233,7 +274,7 @@ where
             arc1.ilabel,
             arc2.olabel,
             arc1.weight,
-            self.state_table.find_id(tuple),
+            self.compose_state.state_table.find_id(tuple),
         ))
     }
 
@@ -306,6 +347,28 @@ where
     }
 }
 
+impl<W, F1, F2, B1, B2, M1, M2, CFB> AccessibleOpState
+    for ComposeFstOp<W, F1, F2, B1, B2, M1, M2, CFB>
+where
+    W: Semiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    B1: Borrow<F1> + Debug + Clone,
+    B2: Borrow<F2> + Debug + Clone,
+    M1: Matcher<W, F1, B1>,
+    M2: Matcher<W, F2, B2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>,
+    <CFB::CF as ComposeFilter<W, F1, F2, B1, B2, CFB::IM1, CFB::IM2>>::FS: SerializeBinary,
+{
+    type FstOpState = ComposeFstOpState<
+        ComposeStateTuple<<CFB::CF as ComposeFilter<W, F1, F2, B1, B2, CFB::IM1, CFB::IM2>>::FS>,
+    >;
+
+    fn get_op_state(&self) -> &Self::FstOpState {
+        &self.compose_state
+    }
+}
+
 impl<W, F1, F2, B1, B2, M1, M2, CFB> FstOp<W> for ComposeFstOp<W, F1, F2, B1, B2, M1, M2, CFB>
 where
     W: Semiring,
@@ -331,11 +394,11 @@ where
         let s2 = s2.unwrap();
         let fs = compose_filter.start();
         let tuple = ComposeStateTuple { s1, s2, fs };
-        Ok(Some(self.state_table.find_id(tuple)))
+        Ok(Some(self.compose_state.state_table.find_id(tuple)))
     }
 
     fn compute_trs(&self, state: StateId) -> Result<TrsVec<W>> {
-        let tuple = self.state_table.find_tuple(state);
+        let tuple = self.compose_state.state_table.find_tuple(state);
         let s1 = tuple.s1;
         let s2 = tuple.s2;
 
@@ -350,7 +413,7 @@ where
     }
 
     fn compute_final_weight(&self, state: StateId) -> Result<Option<W>> {
-        let tuple = self.state_table.find_tuple(state);
+        let tuple = self.compose_state.state_table.find_tuple(state);
 
         // Construct a new ComposeFilter each time to avoid mutating the internal state.
         let mut compose_filter = self.compose_filter_builder.build()?;

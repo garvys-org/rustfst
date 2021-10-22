@@ -6,11 +6,11 @@ use anyhow::Result;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::multi::{count, separated_list0};
-use nom::number::complete::le_i32;
 use nom::IResult;
 
-use crate::parsers::bin_fst::utils_serialization::write_bin_i32;
 use crate::parsers::nom_utils::{num, NomCustomError};
+use crate::parsers::parse_bin_i32;
+use crate::parsers::write_bin_i32;
 use crate::semirings::string_variant::StringWeightVariant;
 use crate::semirings::{
     DivideType, ReverseBack, Semiring, SemiringProperties, SerializableSemiring,
@@ -264,8 +264,8 @@ macro_rules! string_semiring {
             }
 
             fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
-                let (i, n) = le_i32(i)?;
-                let (i, labels) = count(le_i32, n as usize)(i)?;
+                let (i, n) = parse_bin_i32(i)?;
+                let (i, labels) = count(parse_bin_i32, n as usize)(i)?;
                 // Check for infinity
                 let weight = if labels == vec![-1] {
                     Self::new(StringWeightVariant::Infinity)

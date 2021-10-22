@@ -5,7 +5,7 @@ use nom::IResult;
 use std::str::FromStr;
 
 use nom::error::ErrorKind;
-use nom::error::{ParseError, FromExternalError};
+use nom::error::{FromExternalError, ParseError};
 
 #[derive(Debug, PartialEq)]
 pub enum NomCustomError<I> {

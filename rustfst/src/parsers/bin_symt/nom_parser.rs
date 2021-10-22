@@ -1,11 +1,11 @@
 use nom::combinator::verify;
 use nom::multi::count;
-use nom::number::complete::{le_i32, le_i64};
 use nom::IResult;
 
 use crate::parsers::bin_fst::fst_header::OpenFstString;
-use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64};
 use crate::parsers::nom_utils::NomCustomError;
+use crate::parsers::{parse_bin_i32, parse_bin_i64};
+use crate::parsers::{write_bin_i32, write_bin_i64};
 use crate::{Label, SymbolTable};
 use anyhow::Result;
 use bitflags::_core::hash::BuildHasher;
@@ -15,17 +15,17 @@ static SYMBOL_TABLE_MAGIC_NUMBER: i32 = 2_125_658_996;
 
 fn parse_row_symt(i: &[u8]) -> IResult<&[u8], (i64, OpenFstString), NomCustomError<&[u8]>> {
     let (i, symbol) = OpenFstString::parse(i)?;
-    let (i, key) = le_i64(i)?;
+    let (i, key) = parse_bin_i64(i)?;
     Ok((i, (key, symbol)))
 }
 
 pub(crate) fn parse_symbol_table_bin(
     i: &[u8],
 ) -> IResult<&[u8], SymbolTable, NomCustomError<&[u8]>> {
-    let (i, _magic_number) = verify(le_i32, |v| *v == SYMBOL_TABLE_MAGIC_NUMBER)(i)?;
+    let (i, _magic_number) = verify(parse_bin_i32, |v| *v == SYMBOL_TABLE_MAGIC_NUMBER)(i)?;
     let (i, _name) = OpenFstString::parse(i)?;
-    let (i, _available_key) = le_i64(i)?;
-    let (i, num_symbols) = le_i64(i)?;
+    let (i, _available_key) = parse_bin_i64(i)?;
+    let (i, num_symbols) = parse_bin_i64(i)?;
     let (i, pairs_idx_symbols) = count(parse_row_symt, num_symbols as usize)(i)?;
 
     let mut symt = SymbolTable::empty();

@@ -4,6 +4,11 @@ use std::hash::Hash;
 use crate::{StateId, NO_STATE_ID};
 
 use self::super::FilterState;
+use crate::parsers::nom_utils::NomCustomError;
+use crate::parsers::{parse_bin_u64, write_bin_u64, SerializeBinary};
+use anyhow::Result;
+use nom::IResult;
+use std::io::Write;
 
 /// Filter state that is a signed integral type.
 #[derive(Debug, PartialEq, Clone, Eq, Hash)]
@@ -23,6 +28,22 @@ impl FilterState for IntegerFilterState {
 
     fn state(&self) -> &Self::Type {
         &self.state
+    }
+}
+
+impl SerializeBinary for IntegerFilterState {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
+        let (i, state) = parse_bin_u64(i)?;
+        Ok((
+            i,
+            Self {
+                state: state as StateId,
+            },
+        ))
+    }
+    fn write_binary<W: Write>(&self, writer: &mut W) -> Result<()> {
+        write_bin_u64(writer, self.state as u64)?;
+        Ok(())
     }
 }
 

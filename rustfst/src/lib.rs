@@ -178,6 +178,7 @@ pub mod prelude {
     pub use crate::algorithms::*;
     pub use crate::fst_impls::*;
     pub use crate::fst_traits::*;
+    pub use crate::parsers::SerializeBinary;
     pub use crate::semirings::*;
     pub use crate::tr::Tr;
     pub use crate::trs::{Trs, TrsConst, TrsVec};
