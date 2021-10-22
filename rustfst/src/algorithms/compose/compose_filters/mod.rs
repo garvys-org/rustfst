@@ -16,7 +16,6 @@ use crate::algorithms::compose::filter_states::FilterState;
 use crate::algorithms::compose::matchers::Matcher;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
-use crate::parsers::SerializeBinary;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr};
 
