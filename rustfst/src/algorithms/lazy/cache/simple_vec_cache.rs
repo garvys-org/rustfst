@@ -16,7 +16,9 @@ use super::utils_serialization::{
     write_cache_start_state, write_vec_cache_final_weight, write_vec_cache_trs,
 };
 use super::SerializableCache;
-use crate::algorithms::lazy::cache::cache_internal_types::{CacheTrs, CachedData, StartState};
+use crate::algorithms::lazy::cache::cache_internal_types::{
+    CacheTrs, CachedData, FinalWeight, StartState,
+};
 use crate::algorithms::lazy::{CacheStatus, FstCache};
 use crate::parsers::{parse_bin_u64, write_bin_u64};
 use crate::semirings::{Semiring, SerializableSemiring};
@@ -29,7 +31,7 @@ pub struct SimpleVecCache<W: Semiring> {
     // The second element of each tuple is the number of known states.
     start: Mutex<CachedData<CacheStatus<StartState>>>,
     trs: Mutex<CachedData<Vec<CacheStatus<CacheTrs<W>>>>>,
-    final_weights: Mutex<CachedData<Vec<CacheStatus<Option<W>>>>>,
+    final_weights: Mutex<CachedData<Vec<CacheStatus<FinalWeight<W>>>>>,
 }
 
 impl<W: Semiring> SimpleVecCache<W> {
@@ -66,11 +68,11 @@ impl<W: Semiring> Default for SimpleVecCache<W> {
 }
 
 impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
-    fn get_start(&self) -> CacheStatus<Option<StateId>> {
+    fn get_start(&self) -> CacheStatus<StartState> {
         self.start.lock().unwrap().data
     }
 
-    fn insert_start(&self, id: Option<StateId>) {
+    fn insert_start(&self, id: StartState) {
         let mut cached_data = self.start.lock().unwrap();
         if let Some(s) = id {
             cached_data.num_known_states =
@@ -110,7 +112,7 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
         });
     }
 
-    fn get_final_weight(&self, id: StateId) -> CacheStatus<Option<W>> {
+    fn get_final_weight(&self, id: StateId) -> CacheStatus<FinalWeight<W>> {
         let id = id as usize;
         let cached_data = self.final_weights.lock().unwrap();
         match cached_data.data.get(id) {
@@ -119,7 +121,7 @@ impl<W: Semiring> FstCache<W> for SimpleVecCache<W> {
         }
     }
 
-    fn insert_final_weight(&self, id: StateId, weight: Option<W>) {
+    fn insert_final_weight(&self, id: StateId, weight: FinalWeight<W>) {
         let id = id as usize;
         let mut cached_data = self.final_weights.lock().unwrap();
         cached_data.num_known_states = std::cmp::max(cached_data.num_known_states, id + 1);
@@ -341,7 +343,8 @@ mod tests {
 
     #[test]
     fn test_read_write_cache_final_weight_computed() -> Result<()> {
-        let cache_final_weight: CacheStatus<Option<TropicalWeight>> = CacheStatus::Computed(None);
+        let cache_final_weight: CacheStatus<FinalWeight<TropicalWeight>> =
+            CacheStatus::Computed(None);
         let mut buffer = Vec::new();
         write_vec_cache_final_weight(&mut buffer, &cache_final_weight)?;
         let (_, parsed_cache_final_weight) =
@@ -352,7 +355,7 @@ mod tests {
 
     #[test]
     fn test_read_write_cache_final_weight_not_computed() -> Result<()> {
-        let cache_final_weight: CacheStatus<Option<TropicalWeight>> = CacheStatus::NotComputed;
+        let cache_final_weight: CacheStatus<FinalWeight<TropicalWeight>> = CacheStatus::NotComputed;
         let mut buffer = Vec::new();
         write_vec_cache_final_weight(&mut buffer, &cache_final_weight)?;
         let (_, parsed_cache_final_weight) =

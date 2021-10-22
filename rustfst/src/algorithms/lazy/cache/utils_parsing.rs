@@ -3,7 +3,7 @@ use std::sync::Arc;
 use nom::multi::count;
 use nom::IResult;
 
-use crate::algorithms::lazy::cache::cache_internal_types::{CacheTrs, StartState};
+use crate::algorithms::lazy::cache::cache_internal_types::{CacheTrs, FinalWeight, StartState};
 use crate::algorithms::lazy::CacheStatus;
 use crate::parsers::bin_fst::utils_parsing::{parse_bin_fst_tr, parse_start_state};
 use crate::parsers::nom_utils::NomCustomError;
@@ -70,7 +70,7 @@ pub(crate) fn parse_hashmap_cache_trs<W: SerializableSemiring>(
 
 pub(crate) fn parse_vec_cache_final_weight<W: SerializableSemiring>(
     i: &[u8],
-) -> IResult<&[u8], CacheStatus<Option<W>>, NomCustomError<&[u8]>> {
+) -> IResult<&[u8], CacheStatus<FinalWeight<W>>, NomCustomError<&[u8]>> {
     let (i, is_computed) = parse_bin_u8(i)?;
 
     if is_computed == 0 {
@@ -88,7 +88,7 @@ pub(crate) fn parse_vec_cache_final_weight<W: SerializableSemiring>(
 
 pub(crate) fn parse_hashmap_cache_final_weight<W: SerializableSemiring>(
     i: &[u8],
-) -> IResult<&[u8], (StateId, Option<W>), NomCustomError<&[u8]>> {
+) -> IResult<&[u8], (StateId, FinalWeight<W>), NomCustomError<&[u8]>> {
     let (i, state) = parse_bin_i64(i)?;
     let (i, is_some) = parse_bin_u8(i)?;
     if is_some == 1 {

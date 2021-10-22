@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use std::io::Write;
 
-use crate::algorithms::lazy::cache::cache_internal_types::{CacheTrs, StartState};
+use crate::algorithms::lazy::cache::cache_internal_types::{CacheTrs, FinalWeight, StartState};
 use crate::algorithms::lazy::CacheStatus;
 use crate::parsers::bin_fst::utils_serialization::{write_bin_fst_tr, write_final_weight};
 use crate::parsers::{write_bin_i64, write_bin_u64, write_bin_u8};
@@ -75,7 +75,7 @@ pub(crate) fn write_hashmap_cache_trs<F: Write, W: SerializableSemiring>(
 
 pub(crate) fn write_vec_cache_final_weight<F: Write, W: SerializableSemiring>(
     writter: &mut F,
-    cache_final_weight: &CacheStatus<Option<W>>,
+    cache_final_weight: &CacheStatus<FinalWeight<W>>,
 ) -> Result<()> {
     match cache_final_weight {
         CacheStatus::Computed(final_weight) => {
@@ -94,7 +94,7 @@ pub(crate) fn write_vec_cache_final_weight<F: Write, W: SerializableSemiring>(
 
 pub(crate) fn write_hashmap_cache_final_weight<F: Write, W: SerializableSemiring>(
     writter: &mut F,
-    final_weight: &Option<W>,
+    final_weight: &FinalWeight<W>,
     state: &StateId,
 ) -> Result<()> {
     // Write state

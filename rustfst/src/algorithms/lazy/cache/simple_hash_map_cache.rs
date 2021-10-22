@@ -17,7 +17,9 @@ use super::utils_serialization::{
     write_cache_start_state, write_hashmap_cache_final_weight, write_hashmap_cache_trs,
 };
 use super::SerializableCache;
-use crate::algorithms::lazy::cache::cache_internal_types::{CacheTrs, CachedData, StartState};
+use crate::algorithms::lazy::cache::cache_internal_types::{
+    CacheTrs, CachedData, FinalWeight, StartState,
+};
 use crate::algorithms::lazy::{CacheStatus, FstCache};
 use crate::parsers::{parse_bin_u64, write_bin_u64};
 use crate::semirings::{Semiring, SerializableSemiring};
@@ -30,7 +32,7 @@ pub struct SimpleHashMapCache<W: Semiring> {
     // The second element of each tuple is the number of known states.
     start: Mutex<CachedData<CacheStatus<StartState>>>,
     trs: Mutex<CachedData<HashMap<StateId, CacheTrs<W>>>>,
-    final_weights: Mutex<CachedData<HashMap<StateId, Option<W>>>>,
+    final_weights: Mutex<CachedData<HashMap<StateId, FinalWeight<W>>>>,
 }
 
 impl<W: Semiring> SimpleHashMapCache<W> {
@@ -67,12 +69,12 @@ impl<W: Semiring> Default for SimpleHashMapCache<W> {
 }
 
 impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
-    fn get_start(&self) -> CacheStatus<Option<StateId>> {
+    fn get_start(&self) -> CacheStatus<StartState> {
         let res = self.start.lock().unwrap();
         res.data
     }
 
-    fn insert_start(&self, id: Option<StateId>) {
+    fn insert_start(&self, id: StartState) {
         let mut data = self.start.lock().unwrap();
         if let Some(s) = id {
             data.num_known_states = std::cmp::max(data.num_known_states, s as usize + 1);
@@ -116,14 +118,14 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
         cached_data.data.values().map(|it| it.trs.trs().len()).sum()
     }
 
-    fn get_final_weight(&self, id: StateId) -> CacheStatus<Option<W>> {
+    fn get_final_weight(&self, id: StateId) -> CacheStatus<FinalWeight<W>> {
         match self.final_weights.lock().unwrap().get(id) {
             Some(e) => CacheStatus::Computed(e.clone()),
             None => CacheStatus::NotComputed,
         }
     }
 
-    fn insert_final_weight(&self, id: StateId, weight: Option<W>) {
+    fn insert_final_weight(&self, id: StateId, weight: FinalWeight<W>) {
         let mut cached_data = self.final_weights.lock().unwrap();
         cached_data.num_known_states = std::cmp::max(cached_data.num_known_states, id as usize + 1);
         cached_data.data.insert(id, weight);

@@ -60,7 +60,7 @@ where
     M1: Matcher<W, F1, B1>,
     M2: Matcher<W, F2, B2>,
 {
-    type FS: FilterState + SerializeBinary;
+    type FS: FilterState;
 
     fn start(&self) -> Self::FS;
 
