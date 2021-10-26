@@ -8,7 +8,6 @@ use anyhow::Result;
 use itertools::Itertools;
 use nom::bytes::complete::take;
 use nom::multi::count;
-use nom::number::complete::le_i32;
 use nom::IResult;
 
 use crate::fst_impls::const_fst::data_structure::ConstState;
@@ -19,10 +18,13 @@ use crate::fst_impls::ConstFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ExpandedFst, Fst, SerializableFst};
 use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FST_MAGIC_NUMBER};
-use crate::parsers::bin_fst::utils_parsing::{parse_final_weight, parse_fst_tr, parse_start_state};
-use crate::parsers::bin_fst::utils_serialization::write_bin_i32;
+use crate::parsers::bin_fst::utils_parsing::{
+    parse_bin_fst_tr, parse_final_weight, parse_start_state,
+};
 use crate::parsers::nom_utils::NomCustomError;
+use crate::parsers::parse_bin_i32;
 use crate::parsers::text_fst::ParsedTextFst;
+use crate::parsers::write_bin_i32;
 use crate::semirings::SerializableSemiring;
 use crate::{Tr, EPS_LABEL};
 
@@ -189,10 +191,10 @@ fn parse_const_state<W: SerializableSemiring>(
     i: &[u8],
 ) -> IResult<&[u8], ConstState<W>, NomCustomError<&[u8]>> {
     let (i, final_weight) = W::parse_binary(i)?;
-    let (i, pos) = le_i32(i)?;
-    let (i, ntrs) = le_i32(i)?;
-    let (i, niepsilons) = le_i32(i)?;
-    let (i, noepsilons) = le_i32(i)?;
+    let (i, pos) = parse_bin_i32(i)?;
+    let (i, ntrs) = parse_bin_i32(i)?;
+    let (i, niepsilons) = parse_bin_i32(i)?;
+    let (i, noepsilons) = parse_bin_i32(i)?;
 
     Ok((
         i,
@@ -231,7 +233,7 @@ fn parse_const_fst<W: SerializableSemiring>(
     if aligned && hdr.num_trs > 0 && pos % CONST_ARCH_ALIGNMENT > 0 {
         i = take(CONST_ARCH_ALIGNMENT - (pos % CONST_ARCH_ALIGNMENT))(i)?.0;
     }
-    let (i, const_trs) = count(parse_fst_tr, hdr.num_trs as usize)(i)?;
+    let (i, const_trs) = count(parse_bin_fst_tr, hdr.num_trs as usize)(i)?;
 
     Ok((
         i,

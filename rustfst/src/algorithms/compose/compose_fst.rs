@@ -1,16 +1,22 @@
 use anyhow::Result;
 use std::borrow::Borrow;
 use std::fmt::Debug;
+use std::path::Path;
 
 use crate::algorithms::compose::compose_filters::{
     ComposeFilter, ComposeFilterBuilder, SequenceComposeFilterBuilder,
 };
 use crate::algorithms::compose::matchers::{GenericMatcher, Matcher};
-use crate::algorithms::compose::{ComposeFstOp, ComposeFstOpOptions, ComposeStateTuple};
-use crate::algorithms::lazy::{FstCache, LazyFst, SimpleVecCache, StateTable};
+use crate::algorithms::compose::{
+    ComposeFstOp, ComposeFstOpOptions, ComposeFstOpState, ComposeStateTuple,
+};
+use crate::algorithms::lazy::{
+    FstCache, LazyFst, SerializableCache, SerializableLazyFst, SimpleVecCache,
+};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
-use crate::semirings::Semiring;
+use crate::parsers::SerializeBinary;
+use crate::semirings::{Semiring, SerializableSemiring};
 use crate::{StateId, SymbolTable, TrsVec};
 use std::sync::Arc;
 
@@ -101,7 +107,7 @@ where
             M1,
             M2,
             CFB,
-            StateTable<
+            ComposeFstOpState<
                 ComposeStateTuple<
                     <CFB::CF as ComposeFilter<W, F1, F2, B1, B2, CFB::IM1, CFB::IM2>>::FS,
                 >,
@@ -126,7 +132,7 @@ where
             M1,
             M2,
             CFB,
-            StateTable<
+            ComposeFstOpState<
                 ComposeStateTuple<
                     <CFB::CF as ComposeFilter<W, F1, F2, B1, B2, CFB::IM1, CFB::IM2>>::FS,
                 >,
@@ -188,6 +194,25 @@ where
         let fst_cache = SimpleVecCache::default();
         let fst = LazyFst::from_op_and_cache(compose_impl, fst_cache, isymt, osymt);
         Ok(ComposeFst(fst))
+    }
+}
+
+impl<W, F1, F2, B1, B2, M1, M2, CFB, Cache> SerializableLazyFst
+    for ComposeFst<W, F1, F2, B1, B2, M1, M2, CFB, Cache>
+where
+    W: SerializableSemiring,
+    F1: Fst<W>,
+    F2: Fst<W>,
+    B1: Borrow<F1> + Debug + Clone,
+    B2: Borrow<F2> + Debug + Clone,
+    Cache: FstCache<W> + SerializableCache,
+    M1: Matcher<W, F1, B1>,
+    M2: Matcher<W, F2, B2>,
+    CFB: ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>,
+    <CFB::CF as ComposeFilter<W, F1, F2, B1, B2, CFB::IM1, CFB::IM2>>::FS: SerializeBinary,
+{
+    fn write<P: AsRef<Path>>(&self, cache_dir: P, op_state_dir: P) -> Result<()> {
+        self.0.write(cache_dir, op_state_dir)
     }
 }
 

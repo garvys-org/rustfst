@@ -1,7 +1,7 @@
 pub use self::add_on::FstAddOn;
 pub use self::compose::{compose, compose_with_config, ComposeConfig, ComposeFilterEnum};
 pub use self::compose_fst::ComposeFst;
-pub use self::compose_fst_op::ComposeFstOp;
+pub use self::compose_fst_op::{ComposeFstOp, ComposeFstOpState};
 pub use self::compose_fst_op_options::ComposeFstOpOptions;
 pub use self::compose_state_tuple::ComposeStateTuple;
 pub use self::interval_reach_visitor::IntervalReachVisitor;

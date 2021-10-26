@@ -13,7 +13,9 @@ use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, Looka
 use crate::algorithms::compose::matchers::{MatchType, MatcherFlags};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ExpandedFst, Fst};
-use crate::semirings::{DivideType, Semiring, WeaklyDivisibleSemiring, WeightQuantize};
+use crate::semirings::{
+    DivideType, Semiring, SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize,
+};
 use crate::{StateId, Tr, KDELTA};
 
 #[derive(Debug, Clone)]
@@ -76,7 +78,7 @@ where
 impl<W, F1, F2, B1, B2, M1, M2, CFB, SMT> ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2>
     for PushWeightsComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2, CFB, SMT>
 where
-    W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
+    W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
     F1: ExpandedFst<W>,
     F2: ExpandedFst<W>,
     B1: Borrow<F1> + Debug,
@@ -115,7 +117,7 @@ where
 impl<W, F1, F2, B1, B2, M1, M2, CF, SMT> ComposeFilter<W, F1, F2, B1, B2, M1, M2>
     for PushWeightsComposeFilter<W, F1, F2, B1, B2, M1, M2, CF, SMT>
 where
-    W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
+    W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
     F1: Fst<W>,
     F2: Fst<W>,
     B1: Borrow<F1> + Debug,
@@ -208,7 +210,7 @@ where
 impl<W, F1, F2, B1, B2, M1, M2, CF, SMT> LookAheadComposeFilterTrait<W, F1, F2, B1, B2, M1, M2>
     for PushWeightsComposeFilter<W, F1, F2, B1, B2, M1, M2, CF, SMT>
 where
-    W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
+    W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
     F1: Fst<W>,
     F2: Fst<W>,
     B1: Borrow<F1> + Debug,

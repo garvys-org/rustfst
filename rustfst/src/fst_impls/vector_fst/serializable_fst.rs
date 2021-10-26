@@ -14,10 +14,13 @@ use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, SerializableFst};
 use crate::parsers::bin_fst::fst_header::{FstFlags, FstHeader, OpenFstString, FST_MAGIC_NUMBER};
-use crate::parsers::bin_fst::utils_parsing::{parse_final_weight, parse_fst_tr, parse_start_state};
-use crate::parsers::bin_fst::utils_serialization::{write_bin_i32, write_bin_i64};
+use crate::parsers::bin_fst::utils_parsing::{
+    parse_bin_fst_tr, parse_final_weight, parse_start_state,
+};
+use crate::parsers::bin_fst::utils_serialization::write_bin_fst_tr;
 use crate::parsers::nom_utils::NomCustomError;
 use crate::parsers::text_fst::ParsedTextFst;
+use crate::parsers::write_bin_i64;
 use crate::semirings::SerializableSemiring;
 use crate::{StateId, Tr, Trs, TrsVec, EPS_LABEL};
 
@@ -80,10 +83,7 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
             write_bin_i64(&mut file, unsafe { self.num_trs_unchecked(state) } as i64)?;
 
             for tr in unsafe { self.get_trs_unchecked(state).trs() } {
-                write_bin_i32(&mut file, tr.ilabel as i32)?;
-                write_bin_i32(&mut file, tr.olabel as i32)?;
-                tr.weight.write_binary(&mut file)?;
-                write_bin_i32(&mut file, tr.nextstate as i32)?;
+                write_bin_fst_tr(&mut file, tr)?;
             }
         }
 
@@ -142,7 +142,7 @@ fn parse_vector_fst_state<W: SerializableSemiring>(
 ) -> IResult<&[u8], VectorFstState<W>, NomCustomError<&[u8]>> {
     let (i, final_weight) = W::parse_binary(i)?;
     let (i, num_trs) = le_i64(i)?;
-    let (i, trs) = count(parse_fst_tr, num_trs as usize)(i)?;
+    let (i, trs) = count(parse_bin_fst_tr, num_trs as usize)(i)?;
     let niepsilons = trs.iter().filter(|t| t.ilabel == EPS_LABEL).count();
     let noepsilons = trs.iter().filter(|t| t.olabel == EPS_LABEL).count();
     Ok((

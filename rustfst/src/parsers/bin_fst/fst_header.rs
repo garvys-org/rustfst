@@ -3,16 +3,14 @@ use std::io::Write;
 use anyhow::Result;
 use nom::bytes::complete::take;
 use nom::combinator::{map_res, verify};
-use nom::number::complete::{le_i32, le_i64, le_u32, le_u64};
 use nom::IResult;
 
 use bitflags::bitflags;
 
-use crate::parsers::bin_fst::utils_serialization::{
-    write_bin_i32, write_bin_i64, write_bin_u32, write_bin_u64,
-};
 use crate::parsers::bin_symt::nom_parser::{parse_symbol_table_bin, write_bin_symt};
 use crate::parsers::nom_utils::NomCustomError;
+use crate::parsers::{parse_bin_i32, parse_bin_i64, parse_bin_u32, parse_bin_u64};
+use crate::parsers::{write_bin_i32, write_bin_i64, write_bin_u32, write_bin_u64};
 use crate::SymbolTable;
 use std::sync::Arc;
 
@@ -75,21 +73,21 @@ impl FstHeader {
         fst_loading_type: S1,
         tr_loading_type: S2,
     ) -> IResult<&[u8], FstHeader, NomCustomError<&[u8]>> {
-        let (i, magic_number) = verify(le_i32, |v: &i32| *v == FST_MAGIC_NUMBER)(i)?;
+        let (i, magic_number) = verify(parse_bin_i32, |v: &i32| *v == FST_MAGIC_NUMBER)(i)?;
         let (i, fst_type) = verify(OpenFstString::parse, |v| {
             v.s.as_str() == fst_loading_type.as_ref()
         })(i)?;
         let (i, tr_type) = verify(OpenFstString::parse, |v| {
             v.s.as_str() == tr_loading_type.as_ref()
         })(i)?;
-        let (i, version) = verify(le_i32, |v: &i32| *v >= min_file_version)(i)?;
-        let (i, flags) = map_res(le_u32, |v: u32| {
+        let (i, version) = verify(parse_bin_i32, |v: &i32| *v >= min_file_version)(i)?;
+        let (i, flags) = map_res(parse_bin_u32, |v: u32| {
             FstFlags::from_bits(v).ok_or_else(|| "Could not parse Fst Flags")
         })(i)?;
-        let (i, properties) = le_u64(i)?;
-        let (i, start) = le_i64(i)?;
-        let (i, num_states) = le_i64(i)?;
-        let (i, num_trs) = le_i64(i)?;
+        let (i, properties) = parse_bin_u64(i)?;
+        let (i, start) = parse_bin_i64(i)?;
+        let (i, num_states) = parse_bin_i64(i)?;
+        let (i, num_trs) = parse_bin_i64(i)?;
 
         let (i, isymt) = optionally_parse_symt(i, flags.contains(FstFlags::HAS_ISYMBOLS))?;
         let (i, osymt) = optionally_parse_symt(i, flags.contains(FstFlags::HAS_OSYMBOLS))?;
@@ -146,7 +144,7 @@ impl OpenFstString {
         }
     }
     pub(crate) fn parse(i: &[u8]) -> IResult<&[u8], OpenFstString, NomCustomError<&[u8]>> {
-        let (i, n) = le_i32(i)?;
+        let (i, n) = parse_bin_i32(i)?;
         let (i, s) = take(n as usize)(i)?;
         Ok((
             i,
