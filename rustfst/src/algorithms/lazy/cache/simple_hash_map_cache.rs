@@ -199,8 +199,8 @@ impl<W: SerializableSemiring> PartialEq for SimpleHashMapCache<W> {
 
         let cache_final_weights_a = self.final_weights.lock().unwrap();
         let cache_final_weights_b = other.final_weights.lock().unwrap();
-        let cache_final_weights_eq = (cache_final_weights_a.data == cache_final_weights_a.data)
-            & (cache_final_weights_b.num_known_states == cache_final_weights_b.num_known_states);
+        let cache_final_weights_eq = (cache_final_weights_a.data == cache_final_weights_b.data)
+            & (cache_final_weights_a.num_known_states == cache_final_weights_b.num_known_states);
 
         cache_start_eq & cache_trs_eq & cache_final_weights_eq
     }
