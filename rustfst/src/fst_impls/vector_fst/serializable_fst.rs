@@ -1,9 +1,6 @@
-use std::fs::{read, File};
-use std::io::BufWriter;
-use std::path::Path;
+use std::io::Write;
 use std::sync::Arc;
 
-use anyhow::Context;
 use anyhow::Result;
 use nom::multi::count;
 use nom::number::complete::le_i64;
@@ -23,29 +20,30 @@ use crate::parsers::text_fst::ParsedTextFst;
 use crate::parsers::write_bin_i64;
 use crate::semirings::SerializableSemiring;
 use crate::{StateId, Tr, Trs, TrsVec, EPS_LABEL};
+use crate::prelude::SerializeBinary;
 
-impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
-    fn fst_type() -> String {
-        "vector".to_string()
+impl<W: SerializableSemiring> SerializeBinary for VectorFst<W> {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
+        let (i, header) = FstHeader::parse(
+            i,
+            VECTOR_MIN_FILE_VERSION,
+            VectorFst::<W>::fst_type(),
+            Tr::<W>::tr_type(),
+        )?;
+        let (i, states) = count(parse_vector_fst_state, header.num_states as usize)(i)?;
+        Ok((
+            i,
+            VectorFst {
+                start_state: parse_start_state(header.start),
+                states,
+                isymt: header.isymt,
+                osymt: header.osymt,
+                properties: FstProperties::from_bits_truncate(header.properties),
+            },
+        ))
     }
 
-    fn read<P: AsRef<Path>>(path_bin_fst: P) -> Result<Self> {
-        let data = read(path_bin_fst.as_ref()).with_context(|| {
-            format!(
-                "Can't open VectorFst binary file : {:?}",
-                path_bin_fst.as_ref()
-            )
-        })?;
-
-        let (_, parsed_fst) = parse_vector_fst(&data)
-            .map_err(|e| format_err!("Error while parsing binary VectorFst : {:?}", e))?;
-
-        Ok(parsed_fst)
-    }
-
-    fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Result<()> {
-        let mut file = BufWriter::new(File::create(path_bin_fst)?);
-
+    fn write_binary<WB: Write>(&self, writer: &mut WB) -> Result<()> {
         let num_trs: usize = (0..self.num_states())
             .map(|s: usize| unsafe { self.num_trs_unchecked(s as StateId) })
             .sum();
@@ -73,21 +71,27 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
             isymt: self.input_symbols().cloned(),
             osymt: self.output_symbols().cloned(),
         };
-        hdr.write(&mut file)?;
+        hdr.write(writer)?;
 
         // FstBody
         for state in 0..self.num_states() {
             let state = state as StateId;
             let f_weight = unsafe { self.final_weight_unchecked(state).unwrap_or_else(W::zero) };
-            f_weight.write_binary(&mut file)?;
-            write_bin_i64(&mut file, unsafe { self.num_trs_unchecked(state) } as i64)?;
+            f_weight.write_binary(writer)?;
+            write_bin_i64(writer, unsafe { self.num_trs_unchecked(state) } as i64)?;
 
             for tr in unsafe { self.get_trs_unchecked(state).trs() } {
-                write_bin_fst_tr(&mut file, tr)?;
+                write_bin_fst_tr(writer, tr)?;
             }
         }
 
         Ok(())
+    }
+}
+
+impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
+    fn fst_type() -> String {
+        "vector".to_string()
     }
 
     fn from_parsed_fst_text(parsed_fst_text: ParsedTextFst<W>) -> Result<Self> {
@@ -152,28 +156,6 @@ fn parse_vector_fst_state<W: SerializableSemiring>(
             trs: TrsVec(Arc::new(trs)),
             niepsilons,
             noepsilons,
-        },
-    ))
-}
-
-fn parse_vector_fst<W: SerializableSemiring>(
-    i: &[u8],
-) -> IResult<&[u8], VectorFst<W>, NomCustomError<&[u8]>> {
-    let (i, header) = FstHeader::parse(
-        i,
-        VECTOR_MIN_FILE_VERSION,
-        VectorFst::<W>::fst_type(),
-        Tr::<W>::tr_type(),
-    )?;
-    let (i, states) = count(parse_vector_fst_state, header.num_states as usize)(i)?;
-    Ok((
-        i,
-        VectorFst {
-            start_state: parse_start_state(header.start),
-            states,
-            isymt: header.isymt,
-            osymt: header.osymt,
-            properties: FstProperties::from_bits_truncate(header.properties),
         },
     ))
 }

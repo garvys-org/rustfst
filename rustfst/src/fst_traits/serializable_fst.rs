@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{BufWriter, LineWriter, Write};
 use std::path::Path;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::fst_traits::ExpandedFst;
@@ -10,19 +10,36 @@ use crate::parsers::text_fst::ParsedTextFst;
 use crate::semirings::SerializableSemiring;
 use crate::Trs;
 use crate::{DrawingConfig, StateId};
+use crate::parsers::SerializeBinary;
 
-/// Trait definining the methods an Fst must implement to be serialized and deserialized.
-pub trait SerializableFst<W: SerializableSemiring>: ExpandedFst<W> {
-    /// String identifying the type of the FST. Will be used when serialiing and
+/// Trait defining the methods an Fst must implement to be serialized and deserialized.
+pub trait SerializableFst<W: SerializableSemiring>: ExpandedFst<W> + SerializeBinary {
+    /// String identifying the type of the FST. Will be used when serializing and
     /// deserializing an FST in binary format.
     fn fst_type() -> String;
 
     // BINARY
 
     /// Loads an FST from a file in binary format.
-    fn read<P: AsRef<Path>>(path_bin_fst: P) -> Result<Self>;
+    fn read<P: AsRef<Path>>(path_bin_fst: P) -> Result<Self> {
+        let data = std::fs::read(path_bin_fst.as_ref()).with_context(|| {
+            format!(
+                "Can't open {} fst binary file : {:?}",
+                Self::fst_type(),
+                path_bin_fst.as_ref()
+            )
+        })?;
+
+        let (_, parsed_fst) = Self::parse_binary(&data)
+            .map_err(|_| format_err!("Error while parsing binary ConstFst"))?;
+
+        Ok(parsed_fst)
+    }
     /// Writes the FST to a file in binary format.
-    fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Result<()>;
+    fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Result<()> {
+        let mut file = BufWriter::new(File::create(path_bin_fst)?);
+        self.write_binary(&mut file)
+    }
 
     // TEXT
 
