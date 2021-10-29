@@ -32,3 +32,8 @@ pub fn parse_bin_f32(i: &[u8]) -> IResult<&[u8], f32, NomCustomError<&[u8]>> {
 pub fn parse_bin_u8(i: &[u8]) -> IResult<&[u8], u8, NomCustomError<&[u8]>> {
     le_u8(i)
 }
+
+#[inline]
+pub fn parse_bin_bool(i: &[u8]) -> IResult<&[u8], bool, NomCustomError<&[u8]>> {
+    le_u8(i).map(|(s, v)| (s, v != 0))
+}

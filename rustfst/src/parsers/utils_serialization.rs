@@ -31,3 +31,8 @@ pub fn write_bin_f32<F: Write>(file: &mut F, i: f32) -> Result<()> {
 pub(crate) fn write_bin_u8<F: Write>(file: &mut F, i: u8) -> Result<()> {
     file.write_all(&i.to_le_bytes()).map_err(|e| e.into())
 }
+
+#[inline]
+pub(crate) fn write_bin_bool<F: Write>(file: &mut F, i: bool) -> Result<()> {
+    file.write_all(&((if i { 1u8 } else { 0u8 }).to_le_bytes())).map_err(|e| e.into())
+}
