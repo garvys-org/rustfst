@@ -1,4 +1,5 @@
 use std::fmt::Debug;
+use std::marker::PhantomData;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -11,14 +12,19 @@ use crate::{StateId, SymbolTable};
 /// Adds an object of type T to an FST.
 /// The resulting type is a new FST implementation.
 #[derive(Debug, PartialEq, Clone)]
-pub struct FstAddOn<F, T> {
+pub struct FstAddOn<W, F, T>
+    where
+        W: Semiring,
+        F: Fst<W>
+{
     pub(crate) fst: F,
     pub(crate) add_on: T,
+    w: PhantomData<W>,
 }
 
-impl<F, T> FstAddOn<F, T> {
+impl<W: Semiring, F: Fst<W>, T> FstAddOn<W, F, T> {
     pub fn new(fst: F, add_on: T) -> Self {
-        Self { fst, add_on }
+        Self { fst, add_on, w: PhantomData }
     }
 
     pub fn fst(&self) -> &F {
@@ -34,7 +40,7 @@ impl<F, T> FstAddOn<F, T> {
     }
 }
 
-impl<W: Semiring, F: CoreFst<W>, T> CoreFst<W> for FstAddOn<F, T> {
+impl<W: Semiring, F: Fst<W>, T> CoreFst<W> for FstAddOn<W, F, T> {
     type TRS = F::TRS;
 
     fn start(&self) -> Option<StateId> {
@@ -78,7 +84,7 @@ impl<W: Semiring, F: CoreFst<W>, T> CoreFst<W> for FstAddOn<F, T> {
     }
 }
 
-impl<'a, F: StateIterator<'a>, T> StateIterator<'a> for FstAddOn<F, T> {
+impl<'a, W: Semiring, F: Fst<W>, T> StateIterator<'a> for FstAddOn<W, F, T> {
     type Iter = <F as StateIterator<'a>>::Iter;
 
     fn states_iter(&'a self) -> Self::Iter {
@@ -86,19 +92,19 @@ impl<'a, F: StateIterator<'a>, T> StateIterator<'a> for FstAddOn<F, T> {
     }
 }
 
-impl<'a, W, F, T> FstIterator<'a, W> for FstAddOn<F, T>
+impl<'a, W, F, T> FstIterator<'a, W> for FstAddOn<W, F, T>
 where
     W: Semiring + 'a,
-    F: FstIterator<'a, W>,
+    F: Fst<W>,
 {
-    type FstIter = F::FstIter;
+    type FstIter = <F as FstIterator<'a, W>>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
         self.fst.fst_iter()
     }
 }
 
-impl<W, F, T: Debug> Fst<W> for FstAddOn<F, T>
+impl<W, F, T: Debug> Fst<W> for FstAddOn<W, F, T>
 where
     W: Semiring,
     F: Fst<W>,
@@ -128,7 +134,7 @@ where
     }
 }
 
-impl<W, F, T> ExpandedFst<W> for FstAddOn<F, T>
+impl<W, F, T> ExpandedFst<W> for FstAddOn<W, F, T>
 where
     W: Semiring,
     F: ExpandedFst<W>,
@@ -139,14 +145,14 @@ where
     }
 }
 
-impl<W, F, T> FstIntoIterator<W> for FstAddOn<F, T>
+impl<W, F, T> FstIntoIterator<W> for FstAddOn<W, F, T>
 where
     W: Semiring,
-    F: FstIntoIterator<W>,
+    F: FstIntoIterator<W> + Fst<W> ,
     T: Debug,
 {
     type TrsIter = F::TrsIter;
-    type FstIter = F::FstIter;
+    type FstIter = <F as FstIntoIterator<W>>::FstIter;
 
     fn fst_into_iter(self) -> Self::FstIter {
         self.fst.fst_into_iter()

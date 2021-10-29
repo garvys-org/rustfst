@@ -17,13 +17,13 @@ use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable};
 
 #[derive(Clone, PartialEq, Debug)]
-pub struct MatcherFst<W, F, B, M, T> {
-    fst_add_on: FstAddOn<F, (Option<Arc<T>>, Option<Arc<T>>)>,
+pub struct MatcherFst<W: Semiring, F: Fst<W>, B, M, T> {
+    fst_add_on: FstAddOn<W, F, (Option<Arc<T>>, Option<Arc<T>>)>,
     matcher: PhantomData<M>,
     w: PhantomData<(W, B)>,
 }
 
-impl<W, F, B, M, T> MatcherFst<W, F, B, M, T> {
+impl<W: Semiring, F: Fst<W>, B, M, T> MatcherFst<W, F, B, M, T> {
     pub fn fst(&self) -> &F {
         self.fst_add_on.fst()
     }
@@ -91,8 +91,8 @@ where
     }
 }
 
-impl<W: Semiring, F: CoreFst<W>, B: Borrow<F>, M, T> CoreFst<W> for MatcherFst<W, F, B, M, T> {
-    type TRS = <FstAddOn<F, T> as CoreFst<W>>::TRS;
+impl<W: Semiring, F: Fst<W>, B: Borrow<F>, M, T> CoreFst<W> for MatcherFst<W, F, B, M, T> {
+    type TRS = <FstAddOn<W, F, T> as CoreFst<W>>::TRS;
 
     fn start(&self) -> Option<StateId> {
         self.fst_add_on.start()
@@ -135,7 +135,7 @@ impl<W: Semiring, F: CoreFst<W>, B: Borrow<F>, M, T> CoreFst<W> for MatcherFst<W
     }
 }
 
-impl<'a, W, F: StateIterator<'a>, B: Borrow<F>, M, T> StateIterator<'a>
+impl<'a, W: Semiring, F: Fst<W>, B: Borrow<F>, M, T> StateIterator<'a>
     for MatcherFst<W, F, B, M, T>
 {
     type Iter = <F as StateIterator<'a>>::Iter;
@@ -148,10 +148,10 @@ impl<'a, W, F: StateIterator<'a>, B: Borrow<F>, M, T> StateIterator<'a>
 impl<'a, W, F, B, M, T> FstIterator<'a, W> for MatcherFst<W, F, B, M, T>
 where
     W: Semiring,
-    F: FstIterator<'a, W>,
+    F: Fst<W>,
     B: Borrow<F>,
 {
-    type FstIter = F::FstIter;
+    type FstIter = <F as FstIterator<'a, W>>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
         self.fst_add_on.fst_iter()
@@ -207,12 +207,12 @@ where
 impl<W, F, B, M, T> FstIntoIterator<W> for MatcherFst<W, F, B, M, T>
 where
     W: Semiring,
-    F: FstIntoIterator<W>,
+    F: Fst<W> + FstIntoIterator<W>,
     B: Borrow<F> + Debug + PartialEq + Clone,
     T: Debug,
 {
     type TrsIter = F::TrsIter;
-    type FstIter = F::FstIter;
+    type FstIter = <F as FstIntoIterator<W>>::FstIter;
 
     fn fst_into_iter(self) -> Self::FstIter {
         self.fst_add_on.fst_into_iter()
