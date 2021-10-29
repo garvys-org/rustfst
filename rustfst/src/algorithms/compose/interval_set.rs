@@ -150,6 +150,23 @@ pub struct IntervalSet {
     pub(crate) intervals: VectorIntervalStore,
 }
 
+impl SerializeBinary for IntervalSet {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
+        let (i, intervals) = VectorIntervalStore::parse_binary(i)?;
+        Ok((
+            i,
+            IntervalSet {
+                intervals
+            },
+        ))
+    }
+
+    fn write_binary<WB: Write>(&self, writer: &mut WB) -> anyhow::Result<()> {
+        self.intervals.write_binary(writer)?;
+        Ok(())
+    }
+}
+
 impl IntervalSet {
     pub fn len(&self) -> usize {
         self.intervals.len()
