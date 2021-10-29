@@ -121,6 +121,30 @@ impl VectorIntervalStore {
     }
 }
 
+impl SerializeBinary for VectorIntervalStore {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
+        let (i, interval_count) = parse_bin_i64(i).map(|(s, v)| (s, v as usize))?;
+        let (i, intervals) = count(IntInterval::parse_binary,  interval_count)(i)?;
+        let (i, store_count) = parse_bin_i32(i)?;
+        Ok((
+            i,
+            VectorIntervalStore {
+                intervals,
+                count: Some(store_count as usize)
+            },
+        ))
+    }
+
+    fn write_binary<WB: Write>(&self, writer: &mut WB) -> anyhow::Result<()> {
+        write_bin_i64(writer, self.intervals.len() as i64)?;
+        for interval in self.intervals.iter() {
+            interval.write_binary(writer)?;
+        }
+        write_bin_i32(writer, self.count.unwrap_or_default() as i32)?;
+        Ok(())
+    }
+}
+
 #[derive(PartialOrd, PartialEq, Default, Clone, Debug)]
 pub struct IntervalSet {
     pub(crate) intervals: VectorIntervalStore,
