@@ -27,7 +27,7 @@ impl<W: SerializableSemiring> SerializeBinary for VectorFst<W> {
         let (i, header) = FstHeader::parse(
             i,
             VECTOR_MIN_FILE_VERSION,
-            VectorFst::<W>::fst_type(),
+            Some(VectorFst::<W>::fst_type()),
             Tr::<W>::tr_type(),
         )?;
         let (i, states) = count(parse_vector_fst_state, header.num_states as usize)(i)?;

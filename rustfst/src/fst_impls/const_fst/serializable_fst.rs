@@ -32,7 +32,7 @@ impl<W: SerializableSemiring> SerializeBinary for ConstFst<W> {
         let (mut i, hdr) = FstHeader::parse(
             i,
             CONST_MIN_FILE_VERSION,
-            ConstFst::<W>::fst_type(),
+            Some(ConstFst::<W>::fst_type()),
             Tr::<W>::tr_type(),
         )?;
         let aligned = hdr.version == CONST_ALIGNED_FILE_VERSION;
