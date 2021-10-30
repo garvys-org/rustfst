@@ -20,11 +20,12 @@ pub struct FstAddOn<W, F, T>
     pub(crate) fst: F,
     pub(crate) add_on: T,
     w: PhantomData<W>,
+    fst_type: String
 }
 
 impl<W: Semiring, F: Fst<W>, T> FstAddOn<W, F, T> {
-    pub fn new(fst: F, add_on: T) -> Self {
-        Self { fst, add_on, w: PhantomData }
+    pub fn new(fst: F, add_on: T, fst_type: String) -> Self {
+        Self { fst, add_on, w: PhantomData, fst_type }
     }
 
     pub fn fst(&self) -> &F {

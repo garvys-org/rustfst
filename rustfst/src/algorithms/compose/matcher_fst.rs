@@ -58,8 +58,12 @@ where
         LabelLookAheadRelabeler::init(&mut fst, &mut add_on)?;
 
         let add_on = (add_on.0.map(Arc::new), add_on.1.map(Arc::new));
-
-        let fst_add_on = FstAddOn::new(fst, add_on);
+        let fst_type = if add_on.0.is_some() {
+            "ilabel_lookahead".to_string()
+        } else {
+            "olabel_lookahead".to_string()
+        };
+        let fst_add_on = FstAddOn::new(fst, add_on, fst_type);
         Ok(Self {
             fst_add_on,
             matcher: PhantomData,
@@ -81,8 +85,12 @@ where
         LabelLookAheadRelabeler::relabel(fst2, &mut add_on, relabel_input)?;
 
         let add_on = (add_on.0.map(Arc::new), add_on.1.map(Arc::new));
-
-        let fst_add_on = FstAddOn::new(fst, add_on);
+        let fst_type = if add_on.0.is_some() {
+            "ilabel_lookahead".to_string()
+        } else {
+            "olabel_lookahead".to_string()
+        };
+        let fst_add_on = FstAddOn::new(fst, add_on, fst_type);
         Ok(Self {
             fst_add_on,
             matcher: PhantomData,
