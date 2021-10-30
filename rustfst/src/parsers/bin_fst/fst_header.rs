@@ -159,6 +159,10 @@ impl OpenFstString {
         write_bin_i32(file, self.n)?;
         file.write_all(self.s.as_bytes()).map_err(|e| e.into())
     }
+
+    pub(crate) fn s(&self) -> &String {
+        &self.s
+    }
 }
 
 impl Into<String> for OpenFstString {

@@ -1,13 +1,20 @@
 use std::fmt::Debug;
+use std::io::Write;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
 use anyhow::Result;
+use nom::combinator::verify;
+use nom::IResult;
 
+use crate::{NomCustomError, StateId, SymbolTable, Tr};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, StateIterator};
+use crate::fst_properties::properties::EXPANDED;
+use crate::fst_traits::{CoreFst, ExpandedFst, Fst, FstIntoIterator, FstIterator, SerializableFst, StateIterator};
+use crate::parsers::{parse_bin_bool, parse_bin_i32, write_bin_bool, write_bin_i32};
+use crate::parsers::bin_fst::fst_header::{FST_MAGIC_NUMBER, FstFlags, FstHeader, OpenFstString};
+use crate::prelude::{SerializableSemiring, SerializeBinary};
 use crate::semirings::Semiring;
-use crate::{StateId, SymbolTable};
 
 /// Adds an object of type T to an FST.
 /// The resulting type is a new FST implementation.
@@ -157,5 +164,84 @@ where
 
     fn fst_into_iter(self) -> Self::FstIter {
         self.fst.fst_into_iter()
+    }
+}
+
+static ADD_ON_MAGIC_NUMBER: i32 = 446681434;
+static ADD_ON_MIN_FILE_VERSION: i32 = 1;
+static ADD_ON_FILE_VERSION: i32 = 1;
+
+impl<W, F, AO1, AO2> SerializeBinary for FstAddOn<W, F, (Option<Arc<AO1>>, Option<Arc<AO2>>)>
+where
+    W: SerializableSemiring,
+    F: SerializableFst<W>,
+    AO1: SerializeBinary + Debug + Clone + PartialEq,
+    AO2: SerializeBinary + Debug + Clone + PartialEq,
+{
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
+
+        let (i, hdr) = FstHeader::parse(
+            i,
+            ADD_ON_MIN_FILE_VERSION,
+            Option::<&str>::None,
+            Tr::<W>::tr_type(),
+        )?;
+
+        let (i, _) = verify(parse_bin_i32, |v: &i32| *v == ADD_ON_MAGIC_NUMBER)(i)?;
+        let (i, fst) = F::parse_binary(i)?;
+
+        let (i, _have_addon) = verify(parse_bin_bool, |v| *v)(i)?;
+
+        let (i, have_addon1) = parse_bin_bool(i)?;
+        let (i, add_on_1) = if have_addon1 {
+            let (s, a) = AO1::parse_binary(i)?;
+            (s, Some(a))
+        } else {
+            (i, None)
+        };
+        let (i, have_addon2) = parse_bin_bool(i)?;
+        let (i, add_on_2) = if have_addon2 {
+            let (s, a) = AO2::parse_binary(i)?;
+            (s, Some(a))
+        } else {
+            (i, None)
+        };
+
+        let add_on = (add_on_1.map(Arc::new), add_on_2.map(Arc::new));
+        let fst_add_on = FstAddOn::new(fst, add_on, hdr.fst_type.s().clone());
+        Ok((i, fst_add_on))
+    }
+
+    fn write_binary<WB: Write>(&self, writer: &mut WB) -> Result<()> {
+        let hdr = FstHeader {
+            magic_number: FST_MAGIC_NUMBER,
+            fst_type: OpenFstString::new(&self.fst_type),
+            tr_type: OpenFstString::new(Tr::<W>::tr_type()),
+            version: ADD_ON_FILE_VERSION,
+            flags: FstFlags::empty(),
+            properties: self.properties().bits() | EXPANDED,
+            start: -1,
+            num_states: 0,
+            num_trs: 0,
+            isymt: None,
+            osymt: None,
+        };
+        hdr.write(writer)?;
+        write_bin_i32(writer, ADD_ON_MAGIC_NUMBER)?;
+        self.fst.write_binary(writer)?;
+        write_bin_bool(writer, true)?;
+        if let Some(add_on) = self.add_on.0.as_ref() {
+            write_bin_bool(writer, true)?;
+            add_on.write_binary(writer)?;
+        } else {
+            write_bin_bool(writer, false)?;
+        }
+        if let Some(add_on) = self.add_on.1.as_ref() {
+            write_bin_bool(writer, true)?;
+            add_on.write_binary(writer)?;
+        } else {
+            write_bin_bool(writer, false)?;
+        }
+        Ok(())
     }
 }
