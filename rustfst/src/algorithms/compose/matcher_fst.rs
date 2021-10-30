@@ -42,6 +42,23 @@ impl<W: Semiring, F: Fst<W>, B, M, T> MatcherFst<W, F, B, M, T> {
     }
 }
 
+impl<W, F, B, M> MatcherFst<W, F, B, M, M::MatcherData>
+where
+    W: Semiring,
+    F: Fst<W>,
+    B: Borrow<F>,
+    M: LookaheadMatcher<W, F, B, MatcherData = LabelReachableData>,
+{
+    pub fn new_with_fst_add_on(fst_add_on: FstAddOn<W, F, (Option<Arc<M::MatcherData>>, Option<Arc<M::MatcherData>>)>) -> Result<Self> {
+        Ok(Self {
+            fst_add_on,
+            matcher: PhantomData,
+            w: PhantomData
+        })
+    }
+
+}
+
 // TODO: To be generalized
 impl<W, F, B, M> MatcherFst<W, F, B, M, M::MatcherData>
 where
