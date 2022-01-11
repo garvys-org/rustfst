@@ -1,19 +1,9 @@
-use crate::{wrap, RUSTFST_FFI_RESULT};
+use crate::{wrap, CLabel, CStateId, RUSTFST_FFI_RESULT};
 
 use ffi_convert::*;
 use rustfst::prelude::{Label, StateId, Tr};
 use rustfst::semirings::TropicalWeight;
 use rustfst::Semiring;
-
-#[cfg(feature = "state-label-u32")]
-pub type CLabel = libc::u32;
-#[cfg(not(feature = "state-label-u32"))]
-pub type CLabel = libc::size_t;
-
-#[cfg(feature = "state-label-u32")]
-pub type CStateId = libc::u32;
-#[cfg(not(feature = "state-label-u32"))]
-pub type CStateId = libc::size_t;
 
 #[derive(Debug)]
 #[repr(C)]

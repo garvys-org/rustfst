@@ -1,8 +1,19 @@
 pub mod tr;
+pub mod trs;
 use std::cell::RefCell;
 
 use anyhow::Result;
 use ffi_convert::{CReprOf, RawPointerConverter};
+
+#[cfg(feature = "state-label-u32")]
+pub type CLabel = libc::u32;
+#[cfg(not(feature = "state-label-u32"))]
+pub type CLabel = libc::size_t;
+
+#[cfg(feature = "state-label-u32")]
+pub type CStateId = libc::u32;
+#[cfg(not(feature = "state-label-u32"))]
+pub type CStateId = libc::size_t;
 
 #[repr(C)]
 #[allow(non_camel_case_types)]
