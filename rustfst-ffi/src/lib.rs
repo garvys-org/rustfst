@@ -1,3 +1,4 @@
+//pub mod symbol_table;
 pub mod tr;
 pub mod trs;
 use std::cell::RefCell;
@@ -60,3 +61,18 @@ pub extern "C" fn rustfst_ffi_get_last_error(
         })
     })
 }
+
+macro_rules! get_mut {
+    ($typ:ty,$opaque:ident) => {{
+        &mut unsafe { <$typ as ffi_convert::RawBorrowMut<$typ>>::raw_borrow_mut($opaque) }?.0
+    }};
+}
+
+macro_rules! get {
+    ($typ:ty,$opaque:ident) => {{
+        &unsafe { <$typ as ffi_convert::RawBorrow<$typ>>::raw_borrow($opaque) }?.0
+    }};
+}
+
+pub(crate) use get;
+pub(crate) use get_mut;

@@ -1,4 +1,4 @@
-from ctypes import byref, c_void_p
+from ctypes import byref, c_void_p, string_at
 from rustfst.utils import (
     lib,
     check_ffi_error,
@@ -39,6 +39,13 @@ class Trs:
         check_ffi_error(exit_code, err_msg)
 
         return Trs(new_trs_ptr)
+
+    def __repr__(self) -> str:
+        string = c_void_p()
+        exit_code = lib.trs_vec_display(self._ptr, byref(string))
+        err_msg = "Something went wrong when displaying Trs"
+        check_ffi_error(exit_code, err_msg)
+        return string_at(string).decode('utf8')
 
     def __del__(self):
         lib.trs_vec_delete(self._ptr)
