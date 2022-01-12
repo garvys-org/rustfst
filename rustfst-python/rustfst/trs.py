@@ -1,4 +1,4 @@
-from ctypes import byref, c_void_p, string_at
+from ctypes import byref, c_void_p, c_size_t, string_at
 from rustfst.utils import (
     lib,
     check_ffi_error,
@@ -31,6 +31,14 @@ class Trs:
             index
         )
         check_ffi_error(exit_code, err_msg)
+        return Tr(removed_tr)
+
+    def len(self):
+        num_trs = c_size_t()
+        ret_code = lib.trs_vec_len(self._ptr, byref(num_trs))
+        err_msg = "`len` failed"
+        check_ffi_error(ret_code, err_msg)
+        return int(num_trs.value)
 
     def shallow_clone(self):
         new_trs_ptr = c_void_p()

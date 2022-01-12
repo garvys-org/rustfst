@@ -21,17 +21,23 @@ class Tr:
             nextstate: The destination state for the arc.
     """
 
-    def __init__(self, ilabel, olabel, weight, nextstate):
-        self._ptr = c_void_p()
-        exit_code = lib.tr_new(
-            c_size_t(ilabel),
-            c_size_t(olabel),
-            c_float(weight),
-            c_size_t(nextstate),
-            byref(self._ptr),
-        )
-        err_msg = "Something went wrong when creating the Tr struct"
-        check_ffi_error(exit_code, err_msg)
+    def __init__(self, ptr=None, olabel=None, weight=None, nextstate=None):
+        if ptr and olabel == None and weight == None and nextstate == None:
+            self._ptr = ptr
+        else:
+            ilabel = ptr
+            ptr = c_void_p()
+            exit_code = lib.tr_new(
+                c_size_t(ilabel),
+                c_size_t(olabel),
+                c_float(weight),
+                c_size_t(nextstate),
+                byref(ptr),
+            )
+            err_msg = "Something went wrong when creating the Tr struct"
+            check_ffi_error(exit_code, err_msg)
+
+            self._ptr = ptr
 
     @property
     def ilabel(self):
@@ -92,6 +98,12 @@ class Tr:
         exit_code = lib.tr_set_next_state(self._ptr, next_state)
         err_msg = "Something went wrong when setting Tr next_state value"
         check_ffi_error(exit_code, err_msg)
+
+    def __eq__(self, other):
+        return self.ilabel == other.ilabel \
+        and self.olabel == other.olabel \
+        and self.weight == other.weight \
+        and self.next_state == other.next_state
 
     def __repr__(self):
         """x.__repr__() <==> repr(x)"""

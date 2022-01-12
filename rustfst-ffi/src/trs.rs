@@ -61,6 +61,15 @@ pub extern "C" fn trs_vec_shallow_clone(
 }
 
 #[no_mangle]
+pub extern "C" fn trs_vec_len(trs: *const CTrs, num_trs: *mut libc::size_t) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let trs = get!(CTrs, trs);
+        unsafe { *num_trs = trs.len() as libc::size_t };
+        Ok(())
+    })
+}
+
+#[no_mangle]
 pub extern "C" fn trs_vec_display(
     trs: *const CTrs,
     string: *mut *const libc::c_char,
