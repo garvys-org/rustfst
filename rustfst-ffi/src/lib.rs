@@ -1,7 +1,8 @@
-//pub mod symbol_table;
+pub mod symbol_table;
 pub mod tr;
 pub mod trs;
 use std::cell::RefCell;
+use std::ffi::CString;
 
 use anyhow::Result;
 use ffi_convert::{CReprOf, RawPointerConverter};
@@ -59,6 +60,14 @@ pub extern "C" fn rustfst_ffi_get_last_error(
             unsafe { *error = result as _ }
             Ok(())
         })
+    })
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn rustfst_destroy_string(string: *mut libc::c_char) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        CString::drop_raw_pointer(string)?;
+        Ok(())
     })
 }
 
