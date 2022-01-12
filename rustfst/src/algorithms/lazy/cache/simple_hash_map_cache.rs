@@ -103,11 +103,7 @@ impl<W: Semiring> FstCache<W> for SimpleHashMapCache<W> {
 
     fn compute_num_known_trs(&self) -> usize {
         let cached_data = self.trs.lock().unwrap();
-        cached_data
-            .data
-            .values()
-            .map(|it| it.trs.trs().len())
-            .sum()
+        cached_data.data.values().map(|it| it.trs.trs().len()).sum()
     }
 
     fn get_final_weight(&self, id: StateId) -> CacheStatus<Option<W>> {
