@@ -1,17 +1,18 @@
 use crate::{get, get_mut, wrap, RUSTFST_FFI_RESULT};
 use ffi_convert::*;
 use std::ffi::{CStr, CString};
+use std::sync::Arc;
 
-use anyhow::format_err;
+use anyhow::{anyhow, format_err};
 use rustfst::SymbolTable;
 
 #[derive(RawPointerConverter)]
-pub struct CSymbolTable(SymbolTable);
+pub struct CSymbolTable(pub Arc<SymbolTable>);
 
 #[no_mangle]
 pub extern "C" fn symt_new(new_struct: *mut *const CSymbolTable) -> RUSTFST_FFI_RESULT {
     wrap(|| {
-        let table = SymbolTable::new();
+        let table = Arc::new(SymbolTable::new());
         let raw_ptr = CSymbolTable(table).into_raw_pointer();
         unsafe { *new_struct = raw_ptr };
         Ok(())
@@ -27,7 +28,11 @@ pub extern "C" fn symt_add_symbol(
     wrap(|| {
         let symt = get_mut!(CSymbolTable, symt);
         let symbol: String = unsafe { CStr::from_ptr(symbol) }.as_rust()?;
-        let res = symt.add_symbol(&symbol);
+        let res = Arc::get_mut(symt)
+            .ok_or(anyhow!(
+                "Could not get a mutable reference to the symbol table"
+            ))?
+            .add_symbol(&symbol);
         unsafe { *integer_key = res as libc::size_t };
         Ok(())
     })
@@ -41,7 +46,11 @@ pub extern "C" fn symt_add_table(
     wrap(|| {
         let symt = get_mut!(CSymbolTable, symt);
         let other_symt = get!(CSymbolTable, other_symt);
-        symt.add_table(&other_symt);
+        Arc::get_mut(symt)
+            .ok_or(anyhow!(
+                "Could not get a mutable reference to the symbol table"
+            ))?
+            .add_table(&other_symt);
         Ok(())
     })
 }
@@ -97,7 +106,7 @@ pub extern "C" fn symt_from_path(
             SymbolTable::read_text(&path)?
         };
 
-        let raw_ptr = CSymbolTable(symb).into_raw_pointer();
+        let raw_ptr = CSymbolTable(Arc::new(symb)).into_raw_pointer();
         unsafe { *table_ptr = raw_ptr };
         Ok(())
     })
@@ -180,7 +189,7 @@ pub extern "C" fn symt_copy(
 
 /// drop impl
 #[no_mangle]
-pub extern "C" fn symt_destroy(symt_ptr: *mut SymbolTable) -> RUSTFST_FFI_RESULT {
+pub extern "C" fn symt_destroy(symt_ptr: *mut CSymbolTable) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         if symt_ptr.is_null() {
             return Ok(());

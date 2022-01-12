@@ -1,6 +1,8 @@
+pub mod fst;
 pub mod symbol_table;
 pub mod tr;
 pub mod trs;
+
 use std::cell::RefCell;
 use std::ffi::CString;
 

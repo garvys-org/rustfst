@@ -1,7 +1,7 @@
 from rustfst.utils import lib, check_ffi_error
 import ctypes
 
-class SymbolTable(object):
+class SymbolTable:
     """
      SymbolTable(ptr=None)
       SymbolTable class
