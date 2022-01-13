@@ -1,4 +1,5 @@
 pub mod fst;
+pub mod iterators;
 pub mod symbol_table;
 pub mod tr;
 pub mod trs;

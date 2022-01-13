@@ -7,7 +7,7 @@ use anyhow::{anyhow, format_err};
 use rustfst::SymbolTable;
 
 #[derive(RawPointerConverter)]
-pub struct CSymbolTable(pub Arc<SymbolTable>);
+pub struct CSymbolTable(pub(crate) Arc<SymbolTable>);
 
 #[no_mangle]
 pub extern "C" fn symt_new(new_struct: *mut *const CSymbolTable) -> RUSTFST_FFI_RESULT {

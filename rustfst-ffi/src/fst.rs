@@ -12,7 +12,7 @@ use rustfst::Semiring;
 use std::ffi::CStr;
 
 #[derive(RawPointerConverter)]
-pub struct CFst(VectorFst<TropicalWeight>);
+pub struct CFst(pub(crate) VectorFst<TropicalWeight>);
 
 #[no_mangle]
 pub extern "C" fn fst_new(ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {

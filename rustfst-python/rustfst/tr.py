@@ -86,7 +86,7 @@ class Tr:
 
     @property
     def next_state(self):
-        next_state = c_void_p()
+        next_state = c_size_t()
         exit_code = lib.tr_next_state(self._ptr, byref(next_state))
         err_msg = "Something went wrong when reading Tr ilabel value"
         check_ffi_error(exit_code, err_msg)

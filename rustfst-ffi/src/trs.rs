@@ -9,7 +9,7 @@ use rustfst::semirings::TropicalWeight;
 use rustfst::Trs;
 
 #[derive(RawPointerConverter)]
-pub struct CTrs(TrsVec<TropicalWeight>);
+pub struct CTrs(pub(crate) TrsVec<TropicalWeight>);
 
 #[no_mangle]
 pub extern "C" fn trs_vec_new(new_struct: *mut *const CTrs) -> RUSTFST_FFI_RESULT {
