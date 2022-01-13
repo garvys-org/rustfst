@@ -1,10 +1,13 @@
 use crate::fst::CFst;
 use crate::tr::CTr;
-use crate::{get, get_mut, wrap, RUSTFST_FFI_RESULT};
+use crate::{get, get_mut, wrap, CStateId, RUSTFST_FFI_RESULT};
 use anyhow::{anyhow, Result};
 use ffi_convert::*;
 use rustfst::fst_traits::CoreFst;
-use rustfst::prelude::{StateId, Tr, TropicalWeight, VectorFst};
+use rustfst::prelude::{StateId, StateIterator, Tr, TropicalWeight, VectorFst};
+
+use std::iter::Peekable;
+use std::ops::Range;
 
 #[derive(Debug)]
 pub struct TrsIterator<'a, F: CoreFst<TropicalWeight>> {
@@ -100,7 +103,6 @@ pub extern "C" fn trs_iterator_next(
         let res = trs_iter
             .next()
             .ok_or_else(|| anyhow!("Iteration is done!"))?;
-        println!("{:?}", trs_iter);
         let ctr = Box::into_raw(Box::new(CTr::c_repr_of(res.clone())?));
         unsafe { *tr_ptr = ctr };
         Ok(())
@@ -131,6 +133,65 @@ pub extern "C" fn trs_iterator_reset(iter_ptr: *mut CTrsIterator) -> RUSTFST_FFI
 
 #[no_mangle]
 pub extern "C" fn trs_iterator_destroy(iter_ptr: *mut CTrsIterator) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        if iter_ptr.is_null() {
+            return Ok(());
+        }
+
+        unsafe {
+            Box::from_raw(iter_ptr);
+        }
+        Ok(())
+    })
+}
+
+#[derive(RawPointerConverter)]
+pub struct CStateIterator(pub(crate) Peekable<Range<CStateId>>);
+
+#[no_mangle]
+pub extern "C" fn state_iterator_new(
+    fst_ptr: *mut CFst,
+    iter_ptr: *mut *const CStateIterator,
+) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let fst = get!(CFst, fst_ptr);
+        let state_iter = fst.states_iter().peekable();
+        let raw_ptr = CStateIterator(state_iter).into_raw_pointer();
+        unsafe { *iter_ptr = raw_ptr };
+        Ok(())
+    })
+}
+
+#[no_mangle]
+pub extern "C" fn state_iterator_next(
+    iter_ptr: *mut CStateIterator,
+    state: *mut CStateId,
+) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let state_iter = get_mut!(CStateIterator, iter_ptr);
+        let res = state_iter
+            .next()
+            .ok_or_else(|| anyhow!("Iteration is done!"))?;
+        unsafe { *state = res };
+        Ok(())
+    })
+}
+
+#[no_mangle]
+pub extern "C" fn state_iterator_done(
+    iter_ptr: *mut CStateIterator,
+    done: *mut libc::size_t,
+) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let trs_iter = get_mut!(CStateIterator, iter_ptr);
+        let res = trs_iter.peek().is_some();
+        unsafe { *done = res as libc::size_t };
+        Ok(())
+    })
+}
+
+#[no_mangle]
+pub extern "C" fn state_iterator_destroy(iter_ptr: *mut CStateIterator) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         if iter_ptr.is_null() {
             return Ok(());
