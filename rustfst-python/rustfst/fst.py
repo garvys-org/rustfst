@@ -258,7 +258,7 @@ class Fst(object):
             return self
 
         table = syms._ptr
-        ret_code = lib.set_input_symbols(self._fst, table)
+        ret_code = lib.fst_set_input_symbols(self._fst, table)
         err_msg = "Error setting input symbols"
         check_ffi_error(ret_code, err_msg)
 
