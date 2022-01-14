@@ -7,6 +7,7 @@ use ffi_convert::*;
 use rustfst::fst_impls::VectorFst;
 use rustfst::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, SerializableFst};
 use rustfst::semirings::TropicalWeight;
+use rustfst::DrawingConfig;
 use rustfst::Semiring;
 
 use std::ffi::CStr;
@@ -80,10 +81,11 @@ pub extern "C" fn fst_num_trs(
 }
 
 #[no_mangle]
-pub extern "C" fn fst_add_state(fst: *mut CFst) -> RUSTFST_FFI_RESULT {
+pub extern "C" fn fst_add_state(fst: *mut CFst, state: *mut CStateId) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, fst);
-        fst.add_state();
+        let res = fst.add_state();
+        unsafe { *state = res }
         Ok(())
     })
 }
@@ -113,15 +115,16 @@ pub extern "C" fn fst_delete_states(fst: *mut CFst) -> RUSTFST_FFI_RESULT {
 #[no_mangle]
 pub extern "C" fn fst_input_symbols(
     fst: *const CFst,
-    input_symt: *mut CSymbolTable,
+    mut input_symt: *mut CSymbolTable,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
-        let res = fst
-            .input_symbols()
-            .ok_or_else(|| anyhow!("No input symbols set"))?;
-        let symt = CSymbolTable(res.clone());
-        unsafe { *input_symt = symt };
+        fst.input_symbols()
+            .map(|it| {
+                let symt = CSymbolTable(it.clone());
+                unsafe { *input_symt = symt }
+            })
+            .unwrap_or_else(|| input_symt = std::ptr::null_mut());
         Ok(())
     })
 }
@@ -151,15 +154,16 @@ pub extern "C" fn fst_unset_input_symbols(fst: *mut CFst) -> RUSTFST_FFI_RESULT 
 #[no_mangle]
 pub extern "C" fn fst_output_symbols(
     fst: *const CFst,
-    output_symt: *mut CSymbolTable,
+    mut output_symt: *mut CSymbolTable,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
-        let res = fst
-            .output_symbols()
-            .ok_or_else(|| anyhow!("No output symbols set"))?;
-        let symt = CSymbolTable(res.clone());
-        unsafe { *output_symt = symt };
+        fst.output_symbols()
+            .map(|it| {
+                let symt = CSymbolTable(it.clone());
+                unsafe { *output_symt = symt }
+            })
+            .unwrap_or_else(|| output_symt = std::ptr::null_mut());
         Ok(())
     })
 }
@@ -261,6 +265,62 @@ pub extern "C" fn fst_equals(
         let other_fst = get!(CFst, other_fst);
         let res = fst.eq(other_fst);
         unsafe { *is_equal = res as usize }
+        Ok(())
+    })
+}
+
+#[no_mangle]
+pub extern "C" fn fst_draw(
+    fst_ptr: *mut CFst,
+    isyms: *const CSymbolTable,
+    osyms: *const CSymbolTable,
+    fname: *const libc::c_char,
+    title: *const libc::c_char,
+    acceptor: libc::size_t,
+    width: libc::c_float,
+    height: libc::c_float,
+    portrait: libc::size_t,
+    vertical: libc::size_t,
+    ranksep: libc::c_float,
+    nodesep: libc::c_float,
+    fontsize: libc::size_t,
+    show_weight_one: libc::size_t,
+    print_weight: libc::size_t,
+) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let fst = get_mut!(CFst, fst_ptr);
+
+        if !isyms.is_null() {
+            let isymt = get!(CSymbolTable, isyms);
+            fst.set_input_symbols(isymt.clone());
+        }
+
+        if !osyms.is_null() {
+            let osymt = get!(CSymbolTable, osyms);
+            fst.set_output_symbols(osymt.clone());
+        }
+
+        let drawing_config = DrawingConfig {
+            vertical: if vertical > 0 { true } else { false },
+            size: if (width > 0.0) && (height > 0.0) {
+                Some((width, height))
+            } else {
+                None
+            },
+            title: unsafe { CStr::from_ptr(title).as_rust()? },
+            portrait: if portrait > 0 { true } else { false },
+            ranksep: if ranksep > 0.0 { Some(ranksep) } else { None },
+            nodesep: if nodesep > 0.0 { Some(nodesep) } else { None },
+            fontsize: fontsize as u32,
+            acceptor: if acceptor > 0 { true } else { false },
+            show_weight_one: if show_weight_one > 0 { true } else { false },
+            print_weight: if print_weight > 0 { true } else { false },
+        };
+
+        println!("{:?}", drawing_config);
+
+        fst.draw(unsafe { CStr::from_ptr(fname).as_rust()? }, &drawing_config)?;
+
         Ok(())
     })
 }

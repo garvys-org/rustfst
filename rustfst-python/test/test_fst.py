@@ -7,6 +7,9 @@ def test_small_fst():
     s1 = fst.add_state()
     s2 = fst.add_state()
 
+    assert s1 == 0
+    assert s2 == 1
+
     fst.set_start(s1)
     fst.set_final(s2)
     assert fst.start() == s1

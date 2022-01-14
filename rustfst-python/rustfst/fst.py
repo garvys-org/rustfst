@@ -337,6 +337,65 @@ class Fst(object):
         """
         return StateIterator(self)
 
+    def draw(self, filename, isymbols=None, osymbols=None,
+                 acceptor=False, title="", width=8.5, height=11, portrait=False,
+                 vertical=False, ranksep=0.4, nodesep=0.25, fontsize=14,
+                 show_weight_one=True, print_weight=True):
+        """
+            draw(self, filename, isymbols=None, osymbols=None, ssymbols=None,
+                 acceptor=False, title="", width=8.5, height=11, portrait=False,
+                 vertical=False, ranksep=0.4, nodesep=0.25, fontsize=14,
+                 precision=5, show_weight_one=False, print_weight=True):
+            Writes out the FST in Graphviz text format.
+            This method writes out the FST in the dot graph description language. The
+            graph can be rendered using the `dot` executable provided by Graphviz.
+            Args:
+              filename: The string location of the output dot/Graphviz file.
+              isymbols: An optional symbol table used to label input symbols.
+              osymbols: An optional symbol table used to label output symbols.
+              acceptor: Should the figure be rendered in acceptor format if possible?
+              title: An optional string indicating the figure title.
+              width: The figure width, in inches.
+              height: The figure height, in inches.
+              portrait: Should the figure be rendered in portrait rather than
+                  landscape?
+              vertical: Should the figure be rendered bottom-to-top rather than
+                  left-to-right?
+              ranksep: The minimum separation separation between ranks, in inches.
+              nodesep: The minimum separation between nodes, in inches.
+              fontsize: Font size, in points.
+              precision: Numeric precision for floats, in number of chars.
+              show_weight_one: Should weights equivalent to semiring One be printed?
+              print_weight: Should weights be print
+            See also: `text`.
+            """
+        isymbols = isymbols or self.input_symbols()
+        osymbols = osymbols or self.output_symbols()
+
+        isymbols_ptr = isymbols._ptr if isymbols is not None else None
+        osymbols_ptr = osymbols._ptr if osymbols is not None else None
+
+        ret_code = lib.fst_draw(
+            self._fst,
+            isymbols_ptr,
+            osymbols_ptr,
+            filename.encode("utf-8"),
+            title.encode("utf-8"),
+            ctypes.c_size_t(acceptor),
+            ctypes.c_float(width),
+            ctypes.c_float(height),
+            ctypes.c_size_t(portrait),
+            ctypes.c_size_t(vertical),
+            ctypes.c_float(ranksep),
+            ctypes.c_float(nodesep),
+            ctypes.c_size_t(fontsize),
+            ctypes.c_size_t(show_weight_one),
+            ctypes.c_size_t(print_weight)
+        )
+
+        err_msg = "fst draw failed"
+        check_ffi_error(ret_code, err_msg) 
+
     @classmethod
     def read(cls, filename):
         """
