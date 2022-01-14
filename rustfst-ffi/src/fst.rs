@@ -251,6 +251,21 @@ pub extern "C" fn fst_start(fst: *const CFst, state: *mut CStateId) -> RUSTFST_F
 }
 
 #[no_mangle]
+pub extern "C" fn fst_equals(
+    fst: *const CFst,
+    other_fst: *const CFst,
+    is_equal: *mut libc::size_t,
+) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let fst = get!(CFst, fst);
+        let other_fst = get!(CFst, other_fst);
+        let res = fst.eq(other_fst);
+        unsafe { *is_equal = res as usize }
+        Ok(())
+    })
+}
+
+#[no_mangle]
 pub extern "C" fn fst_weight_one(weight_one: *mut libc::c_float) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let weight = TropicalWeight::one();

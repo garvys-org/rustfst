@@ -370,6 +370,25 @@ class Fst(object):
         err_msg = "Write failed. file: {}".format(filename)
         check_ffi_error(ret_code, err_msg)
 
+    def equals(self, other):
+        """
+        equals(self, other)
+            Check if this Fst is equal to the other
+        :param other: Fst instance
+        :return: bool
+        """
+        is_equal = ctypes.c_size_t()
+
+        ret_code = lib.fst_equals(self._fst, other._fst, ctypes.byref(is_equal))
+        err_msg = "Error checking equality"
+        check_ffi_error(ret_code, err_msg)
+
+        return bool(is_equal.value)
+
+    def __eq__(self, y):
+        """ x.__eq__(y) <==> x==y """
+        return self.equals(y)
+
     def __str__(self):
         return self.text()
 
