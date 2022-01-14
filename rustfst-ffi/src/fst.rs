@@ -250,6 +250,24 @@ pub extern "C" fn fst_start(fst: *const CFst, state: *mut CStateId) -> RUSTFST_F
     })
 }
 
+#[no_mangle]
+pub extern "C" fn fst_weight_one(weight_one: *mut libc::c_float) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let weight = TropicalWeight::one();
+        unsafe { *weight_one = *weight.value() };
+        Ok(())
+    })
+}
+
+#[no_mangle]
+pub extern "C" fn fst_weight_zero(weight_zero: *mut libc::c_float) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let weight = TropicalWeight::zero();
+        unsafe { *weight_zero = *weight.value() };
+        Ok(())
+    })
+}
+
 /// drop impl
 #[no_mangle]
 pub extern "C" fn fst_destroy(fst_ptr: *mut CFst) -> RUSTFST_FFI_RESULT {
