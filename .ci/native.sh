@@ -52,7 +52,13 @@ else
 fi
 . venv3/bin/activate
 
-pip install -e rustfst-python-bench
+pip install pytest==6.2.5
+pip install -r rustfst-python/requirements-setup.txt
+python rustfst-python/setup.py develop
+
+# Run rustfst python binding testsi
+python -m pytest -vv -s --cache-clear --disable-warnings rustfst-python
+
 # Run benches on a small FST to check that the script is working fine.
 python rustfst-python-bench/rustfst_python_bench/bench_all.py rustfst-tests-data/fst_003/raw_vector.fst report.md
 python rustfst-python-bench/rustfst_python_bench/bench_all_detailed.py rustfst-tests-data/fst_003/raw_vector.fst report2.md
