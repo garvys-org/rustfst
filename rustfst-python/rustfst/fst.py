@@ -5,7 +5,7 @@ from rustfst.utils import (
 )
 
 from rustfst.symbol_table import SymbolTable
-from rustfst.iterators import TrsIterator, StateIterator
+from rustfst.iterators import TrsIterator, MutableTrsIterator, StateIterator
 from rustfst.weight import weight_one
 
 class Fst(object):
@@ -73,7 +73,7 @@ class Fst(object):
 
     def trs(self, state):
         """
-        arcs(self, state)
+        trs(self, state)
             Returns an iterator over trs leaving the specified state.
             Args:
               state: The source state ID.
@@ -82,6 +82,18 @@ class Fst(object):
             See also: `mutable_trs`, `states`.
         """
         return TrsIterator(self, state)
+
+    def mutable_trs(self, state):
+        """
+        mutable_trs(self, state)
+            Returns a mutable iterator over trs leaving the specified state.
+            Args:
+              state: The source state ID.
+            Returns:
+              A MutableTrsIterator.
+            See also: `trs`, `states`.
+        """
+        return MutableTrsIterator(self, state)
 
     def final(self, state):
         """
@@ -333,7 +345,7 @@ class Fst(object):
             Returns an iterator over all states in the FST.
             Returns:
               A StateIterator object for the FST.
-            See also: `arcs`, `mutable_arcs`.
+            See also: `trs`, `mutable_trs`.
         """
         return StateIterator(self)
 
@@ -364,7 +376,6 @@ class Fst(object):
               ranksep: The minimum separation separation between ranks, in inches.
               nodesep: The minimum separation between nodes, in inches.
               fontsize: Font size, in points.
-              precision: Numeric precision for floats, in number of chars.
               show_weight_one: Should weights equivalent to semiring One be printed?
               print_weight: Should weights be print
             See also: `text`.
