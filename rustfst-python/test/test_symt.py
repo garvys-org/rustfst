@@ -1,5 +1,7 @@
 from rustfst import SymbolTable
-EPS_SYMBOL="<eps>"
+
+EPS_SYMBOL = "<eps>"
+
 
 def test_symt():
     symt = SymbolTable()
@@ -12,19 +14,19 @@ def test_symt():
     assert symt.find("a") == 1
     assert symt.find("b") == 2
 
-    assert symt.member(EPS_SYMBOL) == True
-    assert symt.member("a") == True
-    assert symt.member("b") == True
-    assert symt.member("c") == False
+    assert symt.member(EPS_SYMBOL) is True
+    assert symt.member("a") is True
+    assert symt.member("b") is True
+    assert symt.member("c") is False
 
     assert symt.find(0) == EPS_SYMBOL
     assert symt.find(1) == "a"
     assert symt.find(2) == "b"
 
-    assert symt.member(0) == True
-    assert symt.member(1) == True
-    assert symt.member(2) == True
-    assert symt.member(3) == False
+    assert symt.member(0) is True
+    assert symt.member(1) is True
+    assert symt.member(2) is True
+    assert symt.member(3) is False
 
 
 def test_symt_add_twice_symbol():
@@ -34,7 +36,6 @@ def test_symt_add_twice_symbol():
 
     assert symt.num_symbols() == 2
     assert symt.find("a") == 1
-
 
 
 def test_add_table():

@@ -1,5 +1,6 @@
 from rustfst import Fst, Tr, SymbolTable
 
+
 def test_small_fst():
     fst = Fst()
 
@@ -16,7 +17,6 @@ def test_small_fst():
     assert fst.is_final(s2)
     assert fst.final(s2) == 0.0
 
-
     # Trs
     tr_1 = Tr(3, 5, 10.0, s2)
     fst.add_tr(s1, tr_1)
@@ -27,14 +27,18 @@ def test_small_fst():
     fst.add_tr(s1, tr_2)
     assert fst.num_trs(s1) == 2
 
+
 def test_fst_del_states():
     fst = Fst()
 
     # States
-    s1 = fst.add_state()
-    s2 = fst.add_state()
+    fst.add_state()
+    fst.add_state()
 
     fst.delete_states()
+
+    assert fst.num_states() == 0
+
 
 def test_fst_states_iterator():
     fst = Fst()
@@ -48,6 +52,7 @@ def test_fst_states_iterator():
 
     for idx, state in enumerate(fst.states()):
         assert state == idx
+
 
 def test_fst_trs_iterator():
     fst = Fst()
@@ -69,6 +74,7 @@ def test_fst_trs_iterator():
     for i, tr in enumerate(fst.trs(s1)):
         assert tr == trs[i]
 
+
 def test_fst_read_write():
     fst = Fst()
 
@@ -89,6 +95,7 @@ def test_fst_read_write():
     read_fst = Fst.read("/tmp/test.fst")
 
     assert fst == read_fst
+
 
 def test_fst_symt():
     fst = Fst()

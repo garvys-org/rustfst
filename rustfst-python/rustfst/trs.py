@@ -5,7 +5,7 @@ from rustfst.utils import (
 )
 
 from rustfst.tr import Tr
-from typing import List
+
 
 class Trs:
     """Structure representing list of transitions."""
@@ -20,7 +20,7 @@ class Trs:
             self._ptr = ptr
 
     def push(self, tr: Tr):
-        exit_code = lib.trs_vec_push(self._ptr, tr._ptr)
+        exit_code = lib.trs_vec_push(self._ptr, tr.ptr)
         err_msg = "Something went wrong when adding new transition"
         check_ffi_error(exit_code, err_msg)
 
@@ -53,7 +53,7 @@ class Trs:
         exit_code = lib.trs_vec_display(self._ptr, byref(string))
         err_msg = "Something went wrong when displaying Trs"
         check_ffi_error(exit_code, err_msg)
-        return string_at(string).decode('utf8')
+        return string_at(string).decode("utf8")
 
     def __del__(self):
         lib.trs_vec_delete(self._ptr)

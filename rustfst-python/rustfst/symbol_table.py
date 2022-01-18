@@ -1,14 +1,16 @@
 from rustfst.utils import lib, check_ffi_error
 import ctypes
 
+
 class SymbolTable:
     """
-     SymbolTable(ptr=None)
-      SymbolTable class
-      This class wraps the SymbolTable struct
-      Args:
-        ptr: An optional pointer pointing to an existing SymbolTable rust struct.
+    SymbolTable(ptr=None)
+     SymbolTable class
+     This class wraps the SymbolTable struct
+     Args:
+       ptr: An optional pointer pointing to an existing SymbolTable rust struct.
     """
+
     def __init__(self, ptr=None):
         if ptr:
             self._ptr = ptr
@@ -23,8 +25,8 @@ class SymbolTable:
     @property
     def ptr(self):
         return self._ptr
-    
-    def add_symbol(self, symbol): 
+
+    def add_symbol(self, symbol):
         """
         add_symbol(self, symbol, key=-1)
             Adds a symbol to the table and returns the index.
@@ -55,11 +57,11 @@ class SymbolTable:
             Args:
               syms: A SymbolTable to be merged with the current table.
         """
-        ret_code = lib.symt_add_table(self._ptr, syms._ptr)
+        ret_code = lib.symt_add_table(self._ptr, syms.ptr)
         err_msg = "`add_table` failed"
         check_ffi_error(ret_code, err_msg)
 
-    def copy(self):  
+    def copy(self):
         """
         copy(self)
             Returns a mutable copy of the SymbolTable.
@@ -72,7 +74,7 @@ class SymbolTable:
 
         return SymbolTable(ptr=clone)
 
-    def find(self, key):  
+    def find(self, key):
         """
         find(self, key)
             Given a symbol or index, finds the other one.
@@ -88,10 +90,9 @@ class SymbolTable:
         """
         if isinstance(key, int):
             return self._find_index(key)
-        elif isinstance(key, str):
+        if isinstance(key, str):
             return self._find_symbol(key)
-        else:
-            raise "key can only be a string or integer. Not {}".format(type(key))
+        raise "key can only be a string or integer. Not {}".format(type(key))
 
     def _find_index(self, key):
         key = ctypes.c_size_t(key)
@@ -100,10 +101,10 @@ class SymbolTable:
         err_msg = "`find` failed"
         check_ffi_error(ret_code, err_msg)
 
-        return ctypes.string_at(symbol).decode('utf8')
+        return ctypes.string_at(symbol).decode("utf8")
 
     def _find_symbol(self, symbol):
-        symbol = symbol.encode('utf-8')
+        symbol = symbol.encode("utf-8")
         index = ctypes.c_size_t()
         ret_code = lib.symt_find_symbol(self._ptr, symbol, ctypes.byref(index))
         err_msg = "`find` failed"
@@ -111,7 +112,7 @@ class SymbolTable:
 
         return int(index.value)
 
-    def member(self, key):  
+    def member(self, key):
         """
         member(self, key)
             Given a symbol or index, returns whether it is found in the table.
@@ -131,8 +132,10 @@ class SymbolTable:
             index = ctypes.c_size_t(key)
             ret_code = lib.symt_member_index(self._ptr, index, ctypes.byref(is_present))
         elif isinstance(key, str):
-            symbol = key.encode('utf-8')
-            ret_code = lib.symt_member_symbol(self._ptr, symbol, ctypes.byref(is_present))
+            symbol = key.encode("utf-8")
+            ret_code = lib.symt_member_symbol(
+                self._ptr, symbol, ctypes.byref(is_present)
+            )
         else:
             raise "key can only be a string or integer. Not {}".format(type(key))
 
@@ -141,7 +144,7 @@ class SymbolTable:
 
         return bool(is_present.value)
 
-    def num_symbols(self):  
+    def num_symbols(self):
         """
         num_symbols(self)
             Returns the number of symbols in the symbol table.
@@ -152,9 +155,9 @@ class SymbolTable:
         check_ffi_error(ret_code, err_msg)
 
         return int(num_symbols.value)
-    
+
     @classmethod
-    def read(cls, filename):  
+    def read(cls, filename):
         """
         SymbolTable.read(filename)
             Reads symbol table from binary file.
@@ -166,8 +169,9 @@ class SymbolTable:
             See also: `SymbolTable.read_fst`, `SymbolTable.read_text`.
         """
         symt = ctypes.pointer(ctypes.c_void_p())
-        ret_code = lib.symt_from_path(ctypes.byref(symt), str(filename).encode("utf-8"),
-                                                ctypes.c_size_t(1))
+        ret_code = lib.symt_from_path(
+            ctypes.byref(symt), str(filename).encode("utf-8"), ctypes.c_size_t(1)
+        )
 
         err_msg = "Read failed for bin file : {}".format(filename)
         check_ffi_error(ret_code, err_msg)
@@ -175,7 +179,7 @@ class SymbolTable:
         return cls(ptr=symt)
 
     @classmethod
-    def read_text(cls, filename):  
+    def read_text(cls, filename):
         """
         SymbolTable.read_text(filename)
             Reads symbol table from text file.
@@ -189,15 +193,16 @@ class SymbolTable:
             See also: `SymbolTable.read`, `SymbolTable.read_fst`.
         """
         symt = ctypes.pointer(ctypes.c_void_p())
-        ret_code = lib.symt_from_path(ctypes.byref(symt), str(filename).encode("utf-8"),
-                                                ctypes.c_size_t(0))
-        
+        ret_code = lib.symt_from_path(
+            ctypes.byref(symt), str(filename).encode("utf-8"), ctypes.c_size_t(0)
+        )
+
         err_msg = "Read failed for text file : {}".format(filename)
         check_ffi_error(ret_code, err_msg)
 
         return cls(ptr=symt)
 
-    def write(self, filename):  
+    def write(self, filename):
         """
         write(self, filename)
             Serializes symbol table to a file.
@@ -207,13 +212,14 @@ class SymbolTable:
             Raises:
               FstIOError: Write failed.
         """
-        ret_code = lib.symt_write_file(self._ptr, str(filename).encode("utf-8"),
-                                                 ctypes.c_size_t(1))
+        ret_code = lib.symt_write_file(
+            self._ptr, str(filename).encode("utf-8"), ctypes.c_size_t(1)
+        )
 
         err_msg = "Write failed for bin file : {}".format(filename)
         check_ffi_error(ret_code, err_msg)
 
-    def write_text(self, filename):  
+    def write_text(self, filename):
         """
         write_text(self, filename)
             Writes symbol table to text file.
@@ -223,8 +229,9 @@ class SymbolTable:
             Raises:
               FstIOError: Write failed.
         """
-        ret_code = lib.symt_write_file(self._ptr, str(filename).encode("utf-8"),
-                                                 ctypes.c_size_t(0))
+        ret_code = lib.symt_write_file(
+            self._ptr, str(filename).encode("utf-8"), ctypes.c_size_t(0)
+        )
 
         err_msg = "Write failed for text file : {}".format(filename)
         check_ffi_error(ret_code, err_msg)

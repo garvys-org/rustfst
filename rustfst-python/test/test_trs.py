@@ -1,5 +1,6 @@
 from rustfst import Trs, Tr
 
+
 def test_trs():
     a = Tr(1, 1, 1.0, 2)
     b = Tr(2, 2, 2.0, 3)

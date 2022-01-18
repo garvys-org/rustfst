@@ -40,7 +40,7 @@ cargo doc --all --no-deps
 ./build_bench.sh
 python3 --version
 
-if which python3.6 
+if which python3.6
 then
     virtualenv venv3 -p python3.6
 elif which python3.7
@@ -52,14 +52,20 @@ else
 fi
 . venv3/bin/activate
 
+(pip freeze | grep black 1>/dev/null 2>&1) || pip install black==19.10b0
 pip install pytest==6.2.5
 pip install -r rustfst-python/requirements-setup.txt
 python rustfst-python/setup.py develop
 
-# Run rustfst python binding testsi
+# Check format
+black --check . || fail "Format your code by running black ."
+
+# Run linting check
+python -m pytest -vv -s --cache-clear --disable-warnings -n auto "$ROOT_DIR/linting/linting_test.py"
+
+# Run rustfst python binding tests
 python -m pytest -vv -s --cache-clear --disable-warnings rustfst-python
 
 # Run benches on a small FST to check that the script is working fine.
 python rustfst-python-bench/rustfst_python_bench/bench_all.py rustfst-tests-data/fst_003/raw_vector.fst report.md
 python rustfst-python-bench/rustfst_python_bench/bench_all_detailed.py rustfst-tests-data/fst_003/raw_vector.fst report2.md
-

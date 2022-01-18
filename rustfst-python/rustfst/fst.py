@@ -8,7 +8,8 @@ from rustfst.symbol_table import SymbolTable
 from rustfst.iterators import TrsIterator, MutableTrsIterator, StateIterator
 from rustfst.weight import weight_one
 
-class Fst(object):
+
+class Fst:
     """
     Fst(ptr=None)
       This class wraps a mutable FST and exposes all methods.
@@ -49,7 +50,7 @@ class Fst(object):
               SnipsFstException: If State index out of range.
             See also: `add_state`.
         """
-        ret_code = lib.fst_add_tr(self._fst, ctypes.c_size_t(state),tr._ptr)
+        ret_code = lib.fst_add_tr(self._fst, ctypes.c_size_t(state), tr.ptr)
         err_msg = "Error during `add_tr`"
         check_ffi_error(ret_code, err_msg)
 
@@ -137,12 +138,11 @@ class Fst(object):
 
         ret_code = lib.fst_input_symbols(self._fst, ctypes.byref(table))
         err_msg = "Error getting input symbols"
-        check_ffi_error(ret_code, err_msg) 
+        check_ffi_error(ret_code, err_msg)
 
         if table.contents:
             return SymbolTable(ptr=table)
-        else:
-            return None
+        return None
 
     def is_final(self, state_id):
         """
@@ -156,7 +156,7 @@ class Fst(object):
 
         ret_code = lib.fst_is_final(self._fst, state, ctypes.byref(is_final))
         err_msg = "Error checking if state is final"
-        check_ffi_error(ret_code, err_msg) 
+        check_ffi_error(ret_code, err_msg)
 
         return bool(is_final.value)
 
@@ -176,7 +176,7 @@ class Fst(object):
         state = ctypes.c_size_t(state)
         ret_code = lib.fst_num_trs(self._fst, state, ctypes.byref(num_trs))
         err_msg = "Error getting number of trs"
-        check_ffi_error(ret_code, err_msg) 
+        check_ffi_error(ret_code, err_msg)
 
         return int(num_trs.value)
 
@@ -188,7 +188,7 @@ class Fst(object):
         num_states = ctypes.c_size_t()
         ret_code = lib.fst_num_states(self._fst, ctypes.byref(num_states))
         err_msg = "Error getting number of states"
-        check_ffi_error(ret_code, err_msg) 
+        check_ffi_error(ret_code, err_msg)
 
         return int(num_states.value)
 
@@ -221,12 +221,11 @@ class Fst(object):
 
         ret_code = lib.fst_output_symbols(self._fst, ctypes.byref(table))
         err_msg = "Error getting output symbols"
-        check_ffi_error(ret_code, err_msg) 
+        check_ffi_error(ret_code, err_msg)
 
         if table.contents:
             return SymbolTable(ptr=table)
-        else:
-            return None
+        return None
 
     def set_final(self, state, weight=None):
         """
@@ -269,7 +268,7 @@ class Fst(object):
             self._input_symbols = None
             return self
 
-        table = syms._ptr
+        table = syms.ptr
         ret_code = lib.fst_set_input_symbols(self._fst, table)
         err_msg = "Error setting input symbols"
         check_ffi_error(ret_code, err_msg)
@@ -298,7 +297,7 @@ class Fst(object):
             self._output_symbols = None
             return self
 
-        table = syms._ptr
+        table = syms.ptr
 
         ret_code = lib.fst_set_output_symbols(self._fst, table)
         err_msg = "Error setting output symbols"
@@ -326,7 +325,6 @@ class Fst(object):
         err_msg = "Error setting start state"
         check_ffi_error(ret_code, err_msg)
 
-
     def start(self):
         """
         start(self)
@@ -349,42 +347,55 @@ class Fst(object):
         """
         return StateIterator(self)
 
-    def draw(self, filename, isymbols=None, osymbols=None,
-                 acceptor=False, title="", width=8.5, height=11, portrait=False,
-                 vertical=False, ranksep=0.4, nodesep=0.25, fontsize=14,
-                 show_weight_one=True, print_weight=True):
+    def draw(
+        self,
+        filename,
+        isymbols=None,
+        osymbols=None,
+        acceptor=False,
+        title="",
+        width=8.5,
+        height=11,
+        portrait=False,
+        vertical=False,
+        ranksep=0.4,
+        nodesep=0.25,
+        fontsize=14,
+        show_weight_one=True,
+        print_weight=True,
+    ):
         """
-            draw(self, filename, isymbols=None, osymbols=None, ssymbols=None,
-                 acceptor=False, title="", width=8.5, height=11, portrait=False,
-                 vertical=False, ranksep=0.4, nodesep=0.25, fontsize=14,
-                 precision=5, show_weight_one=False, print_weight=True):
-            Writes out the FST in Graphviz text format.
-            This method writes out the FST in the dot graph description language. The
-            graph can be rendered using the `dot` executable provided by Graphviz.
-            Args:
-              filename: The string location of the output dot/Graphviz file.
-              isymbols: An optional symbol table used to label input symbols.
-              osymbols: An optional symbol table used to label output symbols.
-              acceptor: Should the figure be rendered in acceptor format if possible?
-              title: An optional string indicating the figure title.
-              width: The figure width, in inches.
-              height: The figure height, in inches.
-              portrait: Should the figure be rendered in portrait rather than
-                  landscape?
-              vertical: Should the figure be rendered bottom-to-top rather than
-                  left-to-right?
-              ranksep: The minimum separation separation between ranks, in inches.
-              nodesep: The minimum separation between nodes, in inches.
-              fontsize: Font size, in points.
-              show_weight_one: Should weights equivalent to semiring One be printed?
-              print_weight: Should weights be print
-            See also: `text`.
-            """
+        draw(self, filename, isymbols=None, osymbols=None, ssymbols=None,
+             acceptor=False, title="", width=8.5, height=11, portrait=False,
+             vertical=False, ranksep=0.4, nodesep=0.25, fontsize=14,
+             precision=5, show_weight_one=False, print_weight=True):
+        Writes out the FST in Graphviz text format.
+        This method writes out the FST in the dot graph description language. The
+        graph can be rendered using the `dot` executable provided by Graphviz.
+        Args:
+          filename: The string location of the output dot/Graphviz file.
+          isymbols: An optional symbol table used to label input symbols.
+          osymbols: An optional symbol table used to label output symbols.
+          acceptor: Should the figure be rendered in acceptor format if possible?
+          title: An optional string indicating the figure title.
+          width: The figure width, in inches.
+          height: The figure height, in inches.
+          portrait: Should the figure be rendered in portrait rather than
+              landscape?
+          vertical: Should the figure be rendered bottom-to-top rather than
+              left-to-right?
+          ranksep: The minimum separation separation between ranks, in inches.
+          nodesep: The minimum separation between nodes, in inches.
+          fontsize: Font size, in points.
+          show_weight_one: Should weights equivalent to semiring One be printed?
+          print_weight: Should weights be print
+        See also: `text`.
+        """
         isymbols = isymbols or self.input_symbols()
         osymbols = osymbols or self.output_symbols()
 
-        isymbols_ptr = isymbols._ptr if isymbols is not None else None
-        osymbols_ptr = osymbols._ptr if osymbols is not None else None
+        isymbols_ptr = isymbols.ptr if isymbols is not None else None
+        osymbols_ptr = osymbols.ptr if osymbols is not None else None
 
         ret_code = lib.fst_draw(
             self._fst,
@@ -401,11 +412,11 @@ class Fst(object):
             ctypes.c_float(nodesep),
             ctypes.c_size_t(fontsize),
             ctypes.c_size_t(show_weight_one),
-            ctypes.c_size_t(print_weight)
+            ctypes.c_size_t(print_weight),
         )
 
         err_msg = "fst draw failed"
-        check_ffi_error(ret_code, err_msg) 
+        check_ffi_error(ret_code, err_msg)
 
     @classmethod
     def read(cls, filename):
@@ -449,14 +460,14 @@ class Fst(object):
         """
         is_equal = ctypes.c_size_t()
 
-        ret_code = lib.fst_equals(self._fst, other._fst, ctypes.byref(is_equal))
+        ret_code = lib.fst_equals(self._fst, other.fst, ctypes.byref(is_equal))
         err_msg = "Error checking equality"
         check_ffi_error(ret_code, err_msg)
 
         return bool(is_equal.value)
 
     def __eq__(self, y):
-        """ x.__eq__(y) <==> x==y """
+        """x.__eq__(y) <==> x==y"""
         return self.equals(y)
 
     def __str__(self):

@@ -1,8 +1,9 @@
 from rustfst import Fst, TrsIterator, MutableTrsIterator, StateIterator, Tr
 import pytest
 
+
 def test_trs_iterator():
-    
+
     fst = Fst()
     s1 = fst.add_state()
     s2 = fst.add_state()
@@ -28,8 +29,9 @@ def test_trs_iterator():
     for tr in trs_it:
         assert tr == tr1
 
+
 def test_mut_trs_iterator():
-    
+
     fst = Fst()
     s1 = fst.add_state()
     s2 = fst.add_state()
@@ -59,8 +61,9 @@ def test_mut_trs_iterator():
     trs_it = fst.trs(s1)
     assert next(trs_it).ilabel == 10
 
+
 def test_state_iterator():
-    
+
     fst = Fst()
     s1 = fst.add_state()
     s2 = fst.add_state()

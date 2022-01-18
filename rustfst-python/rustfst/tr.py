@@ -22,7 +22,7 @@ class Tr:
     """
 
     def __init__(self, ptr=None, olabel=None, weight=None, nextstate=None):
-        if ptr and olabel == None and weight == None and nextstate == None:
+        if ptr and olabel is None and weight is None and nextstate is None:
             self._ptr = ptr
         else:
             ilabel = ptr
@@ -100,10 +100,12 @@ class Tr:
         check_ffi_error(exit_code, err_msg)
 
     def __eq__(self, other):
-        return self.ilabel == other.ilabel \
-        and self.olabel == other.olabel \
-        and self.weight == other.weight \
-        and self.next_state == other.next_state
+        return (
+            self.ilabel == other.ilabel
+            and self.olabel == other.olabel
+            and self.weight == other.weight
+            and self.next_state == other.next_state
+        )
 
     def __repr__(self):
         """x.__repr__() <==> repr(x)"""
