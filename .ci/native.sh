@@ -53,7 +53,7 @@ fi
 . venv3/bin/activate
 
 (pip freeze | grep black 1>/dev/null 2>&1) || pip install black==19.10b0
-pip install pytest==6.2.5
+pip install pylint==2.6.0 pytest==6.2.5
 pip install -r rustfst-python/requirements-setup.txt
 python rustfst-python/setup.py develop
 
@@ -61,7 +61,8 @@ python rustfst-python/setup.py develop
 black --check . || fail "Format your code by running black ."
 
 # Run linting check
-python -m pytest -vv -s --cache-clear --disable-warnings -n auto "$ROOT_DIR/linting/linting_test.py"
+export ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
+python -m pytest -vv -s --cache-clear --disable-warnings "$ROOT_DIR/rustfst-python/linting/linting_test.py"
 
 # Run rustfst python binding tests
 python -m pytest -vv -s --cache-clear --disable-warnings rustfst-python
