@@ -5,12 +5,13 @@ from rustfst.utils import (
 )
 
 from rustfst.tr import Tr
+from __future__ import annotations
 
 
 class Trs:
     """Structure representing list of transitions."""
 
-    def __init__(self, ptr=None):
+    def __init__(self, ptr=None) -> Trs:
         if ptr is None:
             self._ptr = c_void_p()
             exit_code = lib.trs_vec_new(byref(self._ptr))
@@ -24,7 +25,7 @@ class Trs:
         err_msg = "Something went wrong when adding new transition"
         check_ffi_error(exit_code, err_msg)
 
-    def remove(self, index):
+    def remove(self, index: int) -> Tr:
         removed_tr = c_void_p()
         exit_code = lib.trs_vec_remove(self._ptr, index, byref(removed_tr))
         err_msg = "Something went wrong when removing transition at index: " + str(
@@ -33,14 +34,14 @@ class Trs:
         check_ffi_error(exit_code, err_msg)
         return Tr(removed_tr)
 
-    def len(self):
+    def len(self) -> int:
         num_trs = c_size_t()
         ret_code = lib.trs_vec_len(self._ptr, byref(num_trs))
         err_msg = "`len` failed"
         check_ffi_error(ret_code, err_msg)
         return int(num_trs.value)
 
-    def shallow_clone(self):
+    def shallow_clone(self) -> Trs:
         new_trs_ptr = c_void_p()
         exit_code = lib.trs_vec_shallow_clone(self._ptr, new_trs_ptr)
         err_msg = "Something went wrong when cloning Trs"

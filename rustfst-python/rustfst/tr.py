@@ -9,6 +9,9 @@ from rustfst.utils import (
     check_ffi_error,
 )
 
+from typing import Optional
+from __future__ import annotations
+
 
 class Tr:
     """
@@ -21,7 +24,13 @@ class Tr:
             nextstate: The destination state for the arc.
     """
 
-    def __init__(self, ptr=None, olabel=None, weight=None, nextstate=None):
+    def __init__(
+        self,
+        ptr=None,
+        olabel: Optional[int] = None,
+        weight: Optional[float] = None,
+        nextstate: Optional[int] = None,
+    ) -> Tr:
         if ptr and olabel is None and weight is None and nextstate is None:
             self._ptr = ptr
         else:
@@ -40,37 +49,37 @@ class Tr:
             self._ptr = ptr
 
     @property
-    def ilabel(self):
+    def ilabel(self) -> int:
         ilabel = c_size_t()
         exit_code = lib.tr_ilabel(self._ptr, byref(ilabel))
         err_msg = "Something went wrong when reading Tr ilabel value"
         check_ffi_error(exit_code, err_msg)
-        return ilabel.value
+        return int(ilabel.value)
 
     @ilabel.setter
-    def ilabel(self, value):
+    def ilabel(self, value: int):
         ilabel = c_size_t(value)
         exit_code = lib.tr_set_ilabel(self._ptr, ilabel)
         err_msg = "Something went wrong when setting Tr ilabel value"
         check_ffi_error(exit_code, err_msg)
 
     @property
-    def olabel(self):
+    def olabel(self) -> int:
         olabel = c_size_t()
         exit_code = lib.tr_olabel(self._ptr, byref(olabel))
         err_msg = "Something went wrong when reading Tr ilabel value"
         check_ffi_error(exit_code, err_msg)
-        return olabel.value
+        return int(olabel.value)
 
     @olabel.setter
-    def olabel(self, value):
+    def olabel(self, value: int):
         olabel = c_size_t(value)
         exit_code = lib.tr_set_olabel(self._ptr, olabel)
         err_msg = "Something went wrong when setting Tr olabel value"
         check_ffi_error(exit_code, err_msg)
 
     @property
-    def weight(self):
+    def weight(self) -> float:
         weight = c_float()
         exit_code = lib.tr_weight(self._ptr, byref(weight))
         err_msg = "Something went wrong when reading Tr ilabel value"
@@ -78,28 +87,28 @@ class Tr:
         return weight.value
 
     @weight.setter
-    def weight(self, value):
+    def weight(self, value: float):
         weight = c_float(value)
         exit_code = lib.tr_set_weight(self._ptr, weight)
         err_msg = "Something went wrong when setting Tr weight value"
         check_ffi_error(exit_code, err_msg)
 
     @property
-    def next_state(self):
+    def next_state(self) -> int:
         next_state = c_size_t()
         exit_code = lib.tr_next_state(self._ptr, byref(next_state))
         err_msg = "Something went wrong when reading Tr ilabel value"
         check_ffi_error(exit_code, err_msg)
-        return next_state.value
+        return int(next_state.value)
 
     @next_state.setter
-    def next_state(self, next_state):
+    def next_state(self, next_state: int):
         next_state = c_size_t(next_state)
         exit_code = lib.tr_set_next_state(self._ptr, next_state)
         err_msg = "Something went wrong when setting Tr next_state value"
         check_ffi_error(exit_code, err_msg)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Tr):
         return (
             self.ilabel == other.ilabel
             and self.olabel == other.olabel

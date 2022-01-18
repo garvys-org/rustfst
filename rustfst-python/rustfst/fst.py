@@ -6,7 +6,11 @@ from rustfst.utils import (
 
 from rustfst.symbol_table import SymbolTable
 from rustfst.iterators import TrsIterator, MutableTrsIterator, StateIterator
+from rustfst.tr import Tr
 from rustfst.weight import weight_one
+from __future__ import annotations
+from typing import Optional
+from pathlib import Path
 
 
 class Fst:
@@ -17,7 +21,7 @@ class Fst:
         ptr: An optional pointer pointing to an existing Fst rust struct.
     """
 
-    def __init__(self, ptr=None):
+    def __init__(self, ptr=None) -> Fst:
         if ptr:
             self._fst = ptr
         else:
@@ -36,7 +40,7 @@ class Fst:
     def ptr(self):
         return self._fst
 
-    def add_tr(self, state, tr):
+    def add_tr(self, state: int, tr: Tr) -> Fst:
         """
         add_tr(self, state, tr)
             Adds a new tr to the FST and return self. Note the tr should be considered
@@ -56,7 +60,7 @@ class Fst:
 
         return self
 
-    def add_state(self):
+    def add_state(self) -> int:
         """
         add_state(self)
             Adds a new state to the FST and returns the state ID.
@@ -72,7 +76,7 @@ class Fst:
 
         return state_id.value
 
-    def trs(self, state):
+    def trs(self, state: int) -> TrsIterator:
         """
         trs(self, state)
             Returns an iterator over trs leaving the specified state.
@@ -84,7 +88,7 @@ class Fst:
         """
         return TrsIterator(self, state)
 
-    def mutable_trs(self, state):
+    def mutable_trs(self, state: int) -> MutableTrsIterator:
         """
         mutable_trs(self, state)
             Returns a mutable iterator over trs leaving the specified state.
@@ -96,7 +100,7 @@ class Fst:
         """
         return MutableTrsIterator(self, state)
 
-    def final(self, state):
+    def final(self, state: int) -> Optional[float]:
         """
         final(self, state)
             Returns the final weight of a state.
@@ -114,6 +118,9 @@ class Fst:
         err_msg = "Error setting final state"
         check_ffi_error(ret_code, err_msg)
 
+        if weight is None:
+            return None
+
         return weight.value
 
     def delete_states(self):
@@ -125,7 +132,7 @@ class Fst:
         err_msg = "Error deleting states"
         check_ffi_error(ret_code, err_msg)
 
-    def input_symbols(self):
+    def input_symbols(self) -> Optional[SymbolTable]:
         """
         input_symbols(self)
             Returns the FST's input symbol table, or None if none is present.
@@ -144,7 +151,7 @@ class Fst:
             return SymbolTable(ptr=table)
         return None
 
-    def is_final(self, state_id):
+    def is_final(self, state_id: int) -> bool:
         """
         is_final(state)
         Check wether state is final
@@ -160,7 +167,7 @@ class Fst:
 
         return bool(is_final.value)
 
-    def num_trs(self, state):
+    def num_trs(self, state: int) -> int:
         """
         num_trs(self, state)
             Returns the number of trs leaving a state.
@@ -180,7 +187,7 @@ class Fst:
 
         return int(num_trs.value)
 
-    def num_states(self):
+    def num_states(self) -> int:
         """
         num_states(self)
             Returns the number of states.
@@ -192,7 +199,7 @@ class Fst:
 
         return int(num_states.value)
 
-    def remove_input_symbols(self, symbols):
+    def remove_input_symbols(self, symbols: list[int]) -> Fst:
         """
         remove_input_symbols(self, symbols)
             Args:
@@ -208,7 +215,7 @@ class Fst:
 
         return self
 
-    def output_symbols(self):
+    def output_symbols(self) -> Optional[SymbolTable]:
         """
         output_symbols(self)
             Returns the FST's output symbol table, or None if none is present.
@@ -227,7 +234,7 @@ class Fst:
             return SymbolTable(ptr=table)
         return None
 
-    def set_final(self, state, weight=None):
+    def set_final(self, state: int, weight: float = None):
         """
         set_final(self, state, weight)
             Sets the final weight for a state.
@@ -249,7 +256,7 @@ class Fst:
         err_msg = "Error setting final state"
         check_ffi_error(ret_code, err_msg)
 
-    def set_input_symbols(self, syms):
+    def set_input_symbols(self, syms: SymbolTable) -> Fst:
         """
         set_input_symbols(self, syms)
             Sets the input symbol table.
@@ -278,7 +285,7 @@ class Fst:
 
         return self
 
-    def set_output_symbols(self, syms):
+    def set_output_symbols(self, syms: SymbolTable) -> Fst:
         """
         set_output_symbols(self, syms)
             Sets the output symbol table.
@@ -308,7 +315,7 @@ class Fst:
 
         return self
 
-    def set_start(self, state):
+    def set_start(self, state: int):
         """
         set_start(self, state)
             Sets a state to be the initial state state.
@@ -325,7 +332,7 @@ class Fst:
         err_msg = "Error setting start state"
         check_ffi_error(ret_code, err_msg)
 
-    def start(self):
+    def start(self) -> Optional[int]:
         """
         start(self)
             Returns the start state.
@@ -335,9 +342,11 @@ class Fst:
         err_msg = "Error getting start state"
         check_ffi_error(ret_code, err_msg)
 
+        if start is None:
+            return None
         return int(start.value)
 
-    def states(self):
+    def states(self) -> StateIterator:
         """
         states(self)
             Returns an iterator over all states in the FST.
@@ -349,20 +358,20 @@ class Fst:
 
     def draw(
         self,
-        filename,
-        isymbols=None,
-        osymbols=None,
-        acceptor=False,
-        title="",
-        width=8.5,
-        height=11,
-        portrait=False,
-        vertical=False,
-        ranksep=0.4,
-        nodesep=0.25,
-        fontsize=14,
-        show_weight_one=True,
-        print_weight=True,
+        filename: str,
+        isymbols: Optional[SymbolTable] = None,
+        osymbols: Optional[SymbolTable] = None,
+        acceptor: bool = False,
+        title: str = "",
+        width: float = 8.5,
+        height: float = 11,
+        portrait: bool = False,
+        vertical: bool = False,
+        ranksep: float = 0.4,
+        nodesep: float = 0.25,
+        fontsize: int = 14,
+        show_weight_one: bool = True,
+        print_weight: bool = True,
     ):
         """
         draw(self, filename, isymbols=None, osymbols=None, ssymbols=None,
@@ -419,7 +428,7 @@ class Fst:
         check_ffi_error(ret_code, err_msg)
 
     @classmethod
-    def read(cls, filename):
+    def read(cls, filename: Path) -> Fst:
         """
         Fst.read(filename)
             Reads an FST from a file.
@@ -437,7 +446,7 @@ class Fst:
 
         return cls(ptr=fst)
 
-    def write(self, filename):
+    def write(self, filename: Path):
         """
         write(self, filename)
             Serializes FST to a file.
@@ -451,7 +460,7 @@ class Fst:
         err_msg = "Write failed. file: {}".format(filename)
         check_ffi_error(ret_code, err_msg)
 
-    def equals(self, other):
+    def equals(self, other: Fst) -> bool:
         """
         equals(self, other)
             Check if this Fst is equal to the other
@@ -466,7 +475,7 @@ class Fst:
 
         return bool(is_equal.value)
 
-    def __eq__(self, y):
+    def __eq__(self, y: Fst):
         """x.__eq__(y) <==> x==y"""
         return self.equals(y)
 

@@ -1,5 +1,7 @@
 from rustfst.utils import lib, check_ffi_error
 import ctypes
+from pathlib import Path
+from __future__ import annotations
 
 
 class SymbolTable:
@@ -11,7 +13,7 @@ class SymbolTable:
        ptr: An optional pointer pointing to an existing SymbolTable rust struct.
     """
 
-    def __init__(self, ptr=None):
+    def __init__(self, ptr=None) -> SymbolTable:
         if ptr:
             self._ptr = ptr
         else:
@@ -26,7 +28,7 @@ class SymbolTable:
     def ptr(self):
         return self._ptr
 
-    def add_symbol(self, symbol):
+    def add_symbol(self, symbol: str) -> int:
         """
         add_symbol(self, symbol, key=-1)
             Adds a symbol to the table and returns the index.
@@ -48,7 +50,7 @@ class SymbolTable:
 
         return int(integer_key.value)
 
-    def add_table(self, syms):
+    def add_table(self, syms: SymbolTable):
         """
         add_table(self, syms)
             Adds another SymbolTable to this table.
@@ -61,7 +63,7 @@ class SymbolTable:
         err_msg = "`add_table` failed"
         check_ffi_error(ret_code, err_msg)
 
-    def copy(self):
+    def copy(self) -> SymbolTable:
         """
         copy(self)
             Returns a mutable copy of the SymbolTable.
@@ -94,7 +96,7 @@ class SymbolTable:
             return self._find_symbol(key)
         raise "key can only be a string or integer. Not {}".format(type(key))
 
-    def _find_index(self, key):
+    def _find_index(self, key: int) -> str:
         key = ctypes.c_size_t(key)
         symbol = ctypes.c_void_p()
         ret_code = lib.symt_find_index(self._ptr, key, ctypes.byref(symbol))
@@ -103,7 +105,7 @@ class SymbolTable:
 
         return ctypes.string_at(symbol).decode("utf8")
 
-    def _find_symbol(self, symbol):
+    def _find_symbol(self, symbol: str) -> int:
         symbol = symbol.encode("utf-8")
         index = ctypes.c_size_t()
         ret_code = lib.symt_find_symbol(self._ptr, symbol, ctypes.byref(index))
@@ -112,7 +114,7 @@ class SymbolTable:
 
         return int(index.value)
 
-    def member(self, key):
+    def member(self, key) -> bool:
         """
         member(self, key)
             Given a symbol or index, returns whether it is found in the table.
@@ -144,7 +146,7 @@ class SymbolTable:
 
         return bool(is_present.value)
 
-    def num_symbols(self):
+    def num_symbols(self) -> int:
         """
         num_symbols(self)
             Returns the number of symbols in the symbol table.
@@ -157,7 +159,7 @@ class SymbolTable:
         return int(num_symbols.value)
 
     @classmethod
-    def read(cls, filename):
+    def read(cls, filename: Path) -> SymbolTable:
         """
         SymbolTable.read(filename)
             Reads symbol table from binary file.
@@ -179,7 +181,7 @@ class SymbolTable:
         return cls(ptr=symt)
 
     @classmethod
-    def read_text(cls, filename):
+    def read_text(cls, filename: Path) -> SymbolTable:
         """
         SymbolTable.read_text(filename)
             Reads symbol table from text file.
@@ -202,7 +204,7 @@ class SymbolTable:
 
         return cls(ptr=symt)
 
-    def write(self, filename):
+    def write(self, filename: Path):
         """
         write(self, filename)
             Serializes symbol table to a file.
@@ -219,7 +221,7 @@ class SymbolTable:
         err_msg = "Write failed for bin file : {}".format(filename)
         check_ffi_error(ret_code, err_msg)
 
-    def write_text(self, filename):
+    def write_text(self, filename: Path):
         """
         write_text(self, filename)
             Writes symbol table to text file.

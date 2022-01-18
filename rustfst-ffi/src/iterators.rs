@@ -300,14 +300,14 @@ pub extern "C" fn state_iterator_new(
 #[no_mangle]
 pub extern "C" fn state_iterator_next(
     iter_ptr: *mut CStateIterator,
-    state: *mut CStateId,
+    mut state: *mut CStateId,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let state_iter = get_mut!(CStateIterator, iter_ptr);
-        let res = state_iter
+        state_iter
             .next()
-            .ok_or_else(|| anyhow!("Iteration is done!"))?;
-        unsafe { *state = res };
+            .map(|it| unsafe { *state = it })
+            .unwrap_or_else(|| state = std::ptr::null_mut());
         Ok(())
     })
 }

@@ -221,14 +221,13 @@ pub extern "C" fn fst_is_final(
 pub extern "C" fn fst_final_weight(
     fst: *const CFst,
     state_id: CStateId,
-    final_weight: *mut libc::c_float,
+    mut final_weight: *mut libc::c_float,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
-        let res = fst
-            .final_weight(state_id)?
-            .ok_or_else(|| anyhow!("State '{:?}' is NOT final", state_id))?;
-        unsafe { *final_weight = *res.value() };
+        fst.final_weight(state_id)?
+            .map(|it| unsafe { *final_weight = *it.value() })
+            .unwrap_or_else(|| final_weight = std::ptr::null_mut());
         Ok(())
     })
 }
@@ -243,13 +242,12 @@ pub extern "C" fn fst_set_start(fst: *mut CFst, state: CStateId) -> RUSTFST_FFI_
 }
 
 #[no_mangle]
-pub extern "C" fn fst_start(fst: *const CFst, state: *mut CStateId) -> RUSTFST_FFI_RESULT {
+pub extern "C" fn fst_start(fst: *const CFst, mut state: *mut CStateId) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
-        let res = fst
-            .start()
-            .ok_or_else(|| anyhow!("FST has no start state"))?;
-        unsafe { *state = res }
+        fst.start()
+            .map(|it| unsafe { *state = it })
+            .unwrap_or_else(|| state = std::ptr::null_mut());
         Ok(())
     })
 }
@@ -316,8 +314,6 @@ pub extern "C" fn fst_draw(
             show_weight_one: if show_weight_one > 0 { true } else { false },
             print_weight: if print_weight > 0 { true } else { false },
         };
-
-        println!("{:?}", drawing_config);
 
         fst.draw(unsafe { CStr::from_ptr(fname).as_rust()? }, &drawing_config)?;
 
