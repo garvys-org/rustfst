@@ -1,7 +1,7 @@
 use crate::fst::CFst;
 use crate::tr::CTr;
 use crate::{get, get_mut, wrap, CStateId, RUSTFST_FFI_RESULT};
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use ffi_convert::*;
 use rustfst::fst_traits::{CoreFst, MutableFst};
 use rustfst::prelude::{StateIterator, Tr, TropicalWeight, TrsVec};

@@ -1,11 +1,8 @@
+from __future__ import annotations
 import ctypes
 from typing import Optional
 from rustfst.utils import lib, check_ffi_error
 from rustfst.tr import Tr
-from rustfst.fst import Fst
-
-from __future__ import annotations
-from typing import Optional
 
 
 class TrsIterator:

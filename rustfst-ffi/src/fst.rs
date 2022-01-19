@@ -2,7 +2,6 @@ use crate::symbol_table::CSymbolTable;
 use crate::tr::CTr;
 use crate::{get, get_mut, wrap, CStateId, RUSTFST_FFI_RESULT};
 
-use anyhow::anyhow;
 use ffi_convert::*;
 use rustfst::fst_impls::VectorFst;
 use rustfst::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, SerializableFst};

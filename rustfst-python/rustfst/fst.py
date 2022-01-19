@@ -1,3 +1,4 @@
+from __future__ import annotations
 import ctypes
 from rustfst.utils import (
     lib,
@@ -8,7 +9,6 @@ from rustfst.symbol_table import SymbolTable
 from rustfst.iterators import TrsIterator, MutableTrsIterator, StateIterator
 from rustfst.tr import Tr
 from rustfst.weight import weight_one
-from __future__ import annotations
 from typing import Optional
 from pathlib import Path
 
@@ -469,7 +469,7 @@ class Fst:
         """
         is_equal = ctypes.c_size_t()
 
-        ret_code = lib.fst_equals(self._fst, other.fst, ctypes.byref(is_equal))
+        ret_code = lib.fst_equals(self._fst, other.ptr, ctypes.byref(is_equal))
         err_msg = "Error checking equality"
         check_ffi_error(ret_code, err_msg)
 

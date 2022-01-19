@@ -1,7 +1,7 @@
+from __future__ import annotations
 from rustfst.utils import lib, check_ffi_error
 import ctypes
 from pathlib import Path
-from __future__ import annotations
 
 
 class SymbolTable:

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from ctypes import (
     c_size_t,
     byref,
@@ -10,7 +11,6 @@ from rustfst.utils import (
 )
 
 from typing import Optional
-from __future__ import annotations
 
 
 class Tr:
@@ -47,6 +47,10 @@ class Tr:
             check_ffi_error(exit_code, err_msg)
 
             self._ptr = ptr
+
+    @property
+    def ptr(self):
+        return self._ptr
 
     @property
     def ilabel(self) -> int:
