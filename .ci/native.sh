@@ -18,7 +18,7 @@ then
   sudo apt-get install software-properties-common
   sudo add-apt-repository -y ppa:deadsnakes/ppa
   sudo apt-get update
-  sudo apt-get install python3.6
+  sudo apt-get install python3.7
   wget https://github.com/sharkdp/hyperfine/releases/download/v1.6.0/hyperfine_1.6.0_amd64.deb
   sudo dpkg -i hyperfine_1.6.0_amd64.deb
   sudo apt-get install virtualenv
@@ -40,10 +40,7 @@ cargo doc --all --no-deps
 ./build_bench.sh
 python3 --version
 
-if which python3.6
-then
-    virtualenv venv3 -p python3.6
-elif which python3.7
+if which python3.7
 then
     virtualenv venv3 -p python3.7
 else
