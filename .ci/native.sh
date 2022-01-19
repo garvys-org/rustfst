@@ -58,7 +58,7 @@ pip install -r rustfst-python/requirements-setup.txt
 python rustfst-python/setup.py develop
 
 # Check format
-black --check . || fail "Format your code by running black ."
+black --check . || fail "Format your code by running black ." 1
 
 # Run linting check
 export ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"

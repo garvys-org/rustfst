@@ -23,5 +23,9 @@ def all_python_files(package_path):
     return files
 
 
-run_linting_test(ROOT_PATH / "rustfst")
-run_linting_test(ROOT_PATH / "test")
+def test_code():
+    run_linting_test(ROOT_PATH / "rustfst")
+
+
+def test_test():
+    run_linting_test(ROOT_PATH / "test")
