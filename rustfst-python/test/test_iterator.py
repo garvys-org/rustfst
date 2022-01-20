@@ -17,7 +17,7 @@ def test_trs_iterator():
 
     assert tr.ilabel == 1
     assert tr.olabel == 18
-    assert tr.weight == pytest.approx(2.33)
+    assert pytest.approx(tr.weight) == pytest.approx(2.33)
     assert tr.next_state == s2
 
     assert trs_it.done()
@@ -45,7 +45,7 @@ def test_mut_trs_iterator():
 
     assert tr.ilabel == 1
     assert tr.olabel == 18
-    assert tr.weight == pytest.approx(2.33)
+    assert pytest.approx(tr.weight) == pytest.approx(2.33)
     assert tr.next_state == s2
 
     next(trs_it)

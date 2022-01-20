@@ -1,4 +1,5 @@
 from rustfst import Fst, Tr, SymbolTable
+import pytest
 
 
 def test_small_fst():
@@ -15,7 +16,7 @@ def test_small_fst():
     fst.set_final(s2)
     assert fst.start() == s1
     assert fst.is_final(s2)
-    assert fst.final(s2) == 0.0
+    assert pytest.approx(fst.final(s2)) == pytest.approx(0.0)
 
     # Trs
     tr_1 = Tr(3, 5, 10.0, s2)
