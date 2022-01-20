@@ -1,6 +1,7 @@
 from rustfst import Tr
 import pytest
 
+
 def test_tr():
     a = Tr(1, 1, 1.0, 2)
 
