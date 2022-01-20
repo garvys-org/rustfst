@@ -65,5 +65,6 @@ python -m pytest -vv -s --cache-clear --disable-warnings "$ROOT_DIR/rustfst-pyth
 python -m pytest -vv -s --cache-clear --disable-warnings rustfst-python
 
 # Run benches on a small FST to check that the script is working fine.
+pip install -e rustfst-python-bench
 python rustfst-python-bench/rustfst_python_bench/bench_all.py rustfst-tests-data/fst_003/raw_vector.fst report.md
 python rustfst-python-bench/rustfst_python_bench/bench_all_detailed.py rustfst-tests-data/fst_003/raw_vector.fst report2.md
