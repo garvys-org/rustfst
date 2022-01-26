@@ -1,7 +1,7 @@
 use crate::{wrap, CLabel, CStateId, RUSTFST_FFI_RESULT};
 
 use ffi_convert::*;
-use rustfst::prelude::{Label, StateId, Tr};
+use rustfst::prelude::{StateId, Tr};
 use rustfst::semirings::TropicalWeight;
 use rustfst::Semiring;
 
@@ -50,13 +50,13 @@ pub extern "C" fn tr_new(
     new_struct: *mut *const CTr,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
-        let tr = Tr::new(
-            ilabel as Label,
-            olabel as Label,
-            weight as f32,
-            nextstate as StateId,
-        );
-        let raw_pointer: *mut CTr = Box::into_raw(Box::new(CTr::c_repr_of(tr).unwrap()));
+        let tr = CTr {
+            ilabel,
+            olabel,
+            weight: CTropicalWeight { value: weight },
+            nextstate,
+        };
+        let raw_pointer: *mut CTr = Box::into_raw(Box::new(tr));
         unsafe { *new_struct = raw_pointer };
         Ok(())
     })

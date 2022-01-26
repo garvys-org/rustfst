@@ -5,6 +5,7 @@ from rustfst.utils import (
     check_ffi_error,
 )
 
+from rustfst.drawing_config import DrawingConfig
 from rustfst.symbol_table import SymbolTable
 from rustfst.iterators import TrsIterator, MutableTrsIterator, StateIterator
 from rustfst.tr import Tr
@@ -361,17 +362,7 @@ class Fst:
         filename: str,
         isymbols: Optional[SymbolTable] = None,
         osymbols: Optional[SymbolTable] = None,
-        acceptor: bool = False,
-        title: str = "",
-        width: float = 8.5,
-        height: float = 11,
-        portrait: bool = False,
-        vertical: bool = False,
-        ranksep: float = 0.4,
-        nodesep: float = 0.25,
-        fontsize: int = 14,
-        show_weight_one: bool = True,
-        print_weight: bool = True,
+        drawing_config: DrawingConfig = DrawingConfig(),
     ):
         """
         draw(self, filename, isymbols=None, osymbols=None, ssymbols=None,
@@ -385,19 +376,7 @@ class Fst:
           filename: The string location of the output dot/Graphviz file.
           isymbols: An optional symbol table used to label input symbols.
           osymbols: An optional symbol table used to label output symbols.
-          acceptor: Should the figure be rendered in acceptor format if possible?
-          title: An optional string indicating the figure title.
-          width: The figure width, in inches.
-          height: The figure height, in inches.
-          portrait: Should the figure be rendered in portrait rather than
-              landscape?
-          vertical: Should the figure be rendered bottom-to-top rather than
-              left-to-right?
-          ranksep: The minimum separation separation between ranks, in inches.
-          nodesep: The minimum separation between nodes, in inches.
-          fontsize: Font size, in points.
-          show_weight_one: Should weights equivalent to semiring One be printed?
-          print_weight: Should weights be print
+          drawing_config: Drawing configuration to use.
         See also: `text`.
         """
         isymbols = isymbols or self.input_symbols()
@@ -406,22 +385,42 @@ class Fst:
         isymbols_ptr = isymbols.ptr if isymbols is not None else None
         osymbols_ptr = osymbols.ptr if osymbols is not None else None
 
+        if drawing_config.width is None:
+            width = ctypes.c_float(-1.0)
+        else:
+            width = ctypes.c_float(drawing_config.width)
+
+        if drawing_config.height is None:
+            height = ctypes.c_float(-1.0)
+        else:
+            height = ctypes.c_float(drawing_config.height)
+
+        if drawing_config.ranksep is None:
+            ranksep = ctypes.c_float(-1.0)
+        else:
+            ranksep = ctypes.c_float(drawing_config.ranksep)
+
+        if drawing_config.nodesep is None:
+            nodesep = ctypes.c_float(-1.0)
+        else:
+            nodesep = ctypes.c_float(drawing_config.nodesep)
+
         ret_code = lib.fst_draw(
             self._fst,
             isymbols_ptr,
             osymbols_ptr,
             filename.encode("utf-8"),
-            title.encode("utf-8"),
-            ctypes.c_size_t(acceptor),
-            ctypes.c_float(width),
-            ctypes.c_float(height),
-            ctypes.c_size_t(portrait),
-            ctypes.c_size_t(vertical),
-            ctypes.c_float(ranksep),
-            ctypes.c_float(nodesep),
-            ctypes.c_size_t(fontsize),
-            ctypes.c_size_t(show_weight_one),
-            ctypes.c_size_t(print_weight),
+            drawing_config.title.encode("utf-8"),
+            ctypes.c_size_t(drawing_config.acceptor),
+            width,
+            height,
+            ctypes.c_size_t(drawing_config.portrait),
+            ctypes.c_size_t(drawing_config.vertical),
+            ranksep,
+            nodesep,
+            ctypes.c_size_t(drawing_config.fontsize),
+            ctypes.c_size_t(drawing_config.show_weight_one),
+            ctypes.c_size_t(drawing_config.print_weight),
         )
 
         err_msg = "fst draw failed"

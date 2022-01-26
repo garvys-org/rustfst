@@ -286,7 +286,6 @@ pub extern "C" fn fst_draw(
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, fst_ptr);
-
         if !isyms.is_null() {
             let isymt = get!(CSymbolTable, isyms);
             fst.set_input_symbols(isymt.clone());
@@ -299,21 +298,22 @@ pub extern "C" fn fst_draw(
 
         let drawing_config = DrawingConfig {
             vertical: if vertical > 0 { true } else { false },
-            size: if (width > 0.0) && (height > 0.0) {
+            size: if width >= 0.0 && height >= 0.0 {
                 Some((width, height))
             } else {
                 None
             },
             title: unsafe { CStr::from_ptr(title).as_rust()? },
             portrait: if portrait > 0 { true } else { false },
-            ranksep: if ranksep > 0.0 { Some(ranksep) } else { None },
-            nodesep: if nodesep > 0.0 { Some(nodesep) } else { None },
+            ranksep: if ranksep >= 0.0 { Some(ranksep) } else { None },
+            nodesep: if nodesep >= 0.0 { Some(nodesep) } else { None },
             fontsize: fontsize as u32,
             acceptor: if acceptor > 0 { true } else { false },
             show_weight_one: if show_weight_one > 0 { true } else { false },
             print_weight: if print_weight > 0 { true } else { false },
         };
 
+        println!("{:?}", drawing_config);
         fst.draw(unsafe { CStr::from_ptr(fname).as_rust()? }, &drawing_config)?;
 
         Ok(())
