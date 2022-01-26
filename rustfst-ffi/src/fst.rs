@@ -313,7 +313,6 @@ pub extern "C" fn fst_draw(
             print_weight: if print_weight > 0 { true } else { false },
         };
 
-        println!("{:?}", drawing_config);
         fst.draw(unsafe { CStr::from_ptr(fname).as_rust()? }, &drawing_config)?;
 
         Ok(())
