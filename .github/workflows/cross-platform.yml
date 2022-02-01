@@ -1,6 +1,7 @@
 name: Embedded targets
 
 on:
+  pull_request:
   push:
   schedule:
     - cron:  '0 5 * * *'
