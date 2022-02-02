@@ -1,9 +1,6 @@
-use std::fs::{read, File};
-use std::io::BufWriter;
-use std::path::Path;
+use std::io::Write;
 use std::sync::Arc;
 
-use anyhow::Context;
 use anyhow::Result;
 use itertools::Itertools;
 use nom::bytes::complete::take;
@@ -22,34 +19,52 @@ use crate::parsers::bin_fst::utils_parsing::{
     parse_bin_fst_tr, parse_final_weight, parse_start_state,
 };
 use crate::parsers::nom_utils::NomCustomError;
-use crate::parsers::parse_bin_i32;
+use crate::parsers::{parse_bin_i32, SerializeBinary};
 use crate::parsers::text_fst::ParsedTextFst;
 use crate::parsers::write_bin_i32;
 use crate::semirings::SerializableSemiring;
 use crate::{Tr, EPS_LABEL};
 
-impl<W: SerializableSemiring> SerializableFst<W> for ConstFst<W> {
-    fn fst_type() -> String {
-        "const".to_string()
+impl<W: SerializableSemiring> SerializeBinary for ConstFst<W> {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
+        let stream_len = i.len();
+
+        let (mut i, hdr) = FstHeader::parse(
+            i,
+            CONST_MIN_FILE_VERSION,
+            Some(ConstFst::<W>::fst_type()),
+            Tr::<W>::tr_type(),
+        )?;
+        let aligned = hdr.version == CONST_ALIGNED_FILE_VERSION;
+        let pos = stream_len - i.len();
+
+        // Align input
+        if aligned && hdr.num_states > 0 && pos % CONST_ARCH_ALIGNMENT > 0 {
+            i = take(CONST_ARCH_ALIGNMENT - (pos % CONST_ARCH_ALIGNMENT))(i)?.0;
+        }
+        let (mut i, const_states) = count(parse_const_state, hdr.num_states as usize)(i)?;
+        let pos = stream_len - i.len();
+
+        // Align input
+        if aligned && hdr.num_trs > 0 && pos % CONST_ARCH_ALIGNMENT > 0 {
+            i = take(CONST_ARCH_ALIGNMENT - (pos % CONST_ARCH_ALIGNMENT))(i)?.0;
+        }
+        let (i, const_trs) = count(parse_bin_fst_tr, hdr.num_trs as usize)(i)?;
+
+        Ok((
+            i,
+            ConstFst {
+                start: parse_start_state(hdr.start),
+                states: const_states,
+                trs: Arc::new(const_trs),
+                isymt: hdr.isymt,
+                osymt: hdr.osymt,
+                properties: FstProperties::from_bits_truncate(hdr.properties),
+            },
+        ))
     }
 
-    fn read<P: AsRef<Path>>(path_bin_fst: P) -> Result<Self> {
-        let data = read(path_bin_fst.as_ref()).with_context(|| {
-            format!(
-                "Can't open ConstFst binary file : {:?}",
-                path_bin_fst.as_ref()
-            )
-        })?;
-
-        let (_, parsed_fst) = parse_const_fst(&data)
-            .map_err(|_| format_err!("Error while parsing binary ConstFst"))?;
-
-        Ok(parsed_fst)
-    }
-
-    fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Result<()> {
-        let mut file = BufWriter::new(File::create(path_bin_fst)?);
-
+    fn write_binary<WB: Write>(&self, writer: &mut WB) -> Result<()> {
         let mut flags = FstFlags::empty();
         if self.input_symbols().is_some() {
             flags |= FstFlags::HAS_ISYMBOLS;
@@ -72,27 +87,33 @@ impl<W: SerializableSemiring> SerializableFst<W> for ConstFst<W> {
             isymt: self.input_symbols().cloned(),
             osymt: self.output_symbols().cloned(),
         };
-        hdr.write(&mut file)?;
+        hdr.write(writer)?;
 
         let zero = W::zero();
         for const_state in &self.states {
             let f_weight = const_state.final_weight.as_ref().unwrap_or_else(|| &zero);
-            f_weight.write_binary(&mut file)?;
+            f_weight.write_binary(writer)?;
 
-            write_bin_i32(&mut file, const_state.pos as i32)?;
-            write_bin_i32(&mut file, const_state.ntrs as i32)?;
-            write_bin_i32(&mut file, const_state.niepsilons as i32)?;
-            write_bin_i32(&mut file, const_state.noepsilons as i32)?;
+            write_bin_i32(writer, const_state.pos as i32)?;
+            write_bin_i32(writer, const_state.ntrs as i32)?;
+            write_bin_i32(writer, const_state.niepsilons as i32)?;
+            write_bin_i32(writer, const_state.noepsilons as i32)?;
         }
 
         for tr in &*self.trs {
-            write_bin_i32(&mut file, tr.ilabel as i32)?;
-            write_bin_i32(&mut file, tr.olabel as i32)?;
-            tr.weight.write_binary(&mut file)?;
-            write_bin_i32(&mut file, tr.nextstate as i32)?;
+            write_bin_i32(writer, tr.ilabel as i32)?;
+            write_bin_i32(writer, tr.olabel as i32)?;
+            tr.weight.write_binary(writer)?;
+            write_bin_i32(writer, tr.nextstate as i32)?;
         }
 
         Ok(())
+    }
+}
+
+impl<W: SerializableSemiring> SerializableFst<W> for ConstFst<W> {
+    fn fst_type() -> String {
+        "const".to_string()
     }
 
     fn from_parsed_fst_text(mut parsed_fst_text: ParsedTextFst<W>) -> Result<Self> {
@@ -204,46 +225,6 @@ fn parse_const_state<W: SerializableSemiring>(
             ntrs: ntrs as usize,
             niepsilons: niepsilons as usize,
             noepsilons: noepsilons as usize,
-        },
-    ))
-}
-
-fn parse_const_fst<W: SerializableSemiring>(
-    i: &[u8],
-) -> IResult<&[u8], ConstFst<W>, NomCustomError<&[u8]>> {
-    let stream_len = i.len();
-
-    let (mut i, hdr) = FstHeader::parse(
-        i,
-        CONST_MIN_FILE_VERSION,
-        ConstFst::<W>::fst_type(),
-        Tr::<W>::tr_type(),
-    )?;
-    let aligned = hdr.version == CONST_ALIGNED_FILE_VERSION;
-    let pos = stream_len - i.len();
-
-    // Align input
-    if aligned && hdr.num_states > 0 && pos % CONST_ARCH_ALIGNMENT > 0 {
-        i = take(CONST_ARCH_ALIGNMENT - (pos % CONST_ARCH_ALIGNMENT))(i)?.0;
-    }
-    let (mut i, const_states) = count(parse_const_state, hdr.num_states as usize)(i)?;
-    let pos = stream_len - i.len();
-
-    // Align input
-    if aligned && hdr.num_trs > 0 && pos % CONST_ARCH_ALIGNMENT > 0 {
-        i = take(CONST_ARCH_ALIGNMENT - (pos % CONST_ARCH_ALIGNMENT))(i)?.0;
-    }
-    let (i, const_trs) = count(parse_bin_fst_tr, hdr.num_trs as usize)(i)?;
-
-    Ok((
-        i,
-        ConstFst {
-            start: parse_start_state(hdr.start),
-            states: const_states,
-            trs: Arc::new(const_trs),
-            isymt: hdr.isymt,
-            osymt: hdr.osymt,
-            properties: FstProperties::from_bits_truncate(hdr.properties),
         },
     ))
 }

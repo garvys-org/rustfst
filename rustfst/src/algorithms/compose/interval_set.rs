@@ -1,10 +1,16 @@
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 use std::collections::HashSet;
+use std::io::Write;
 use std::slice::Iter as IterSlice;
 use std::vec::IntoIter as IntoIterVec;
+use nom::IResult;
+use nom::multi::count;
 use superslice::Ext;
 use unsafe_unwrap::UnsafeUnwrap;
+use crate::NomCustomError;
+use crate::parsers::{parse_bin_i32, parse_bin_i64, write_bin_i32, write_bin_i64};
+use crate::prelude::SerializeBinary;
 
 /// Half-open integral interval [a, b) of signed integers of type T.
 #[derive(PartialEq, Clone, Eq, Debug, Serialize, Deserialize)]
@@ -44,6 +50,26 @@ impl Ord for IntInterval {
                 Ordering::Equal
             }
         }
+    }
+}
+
+impl SerializeBinary for IntInterval {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
+        let (i, begin) = parse_bin_i32(i).map(|(s, v)| (s, v as usize))?;
+        let (i, end) = parse_bin_i32(i).map(|(s, v)| (s, v as usize))?;
+        Ok((
+            i,
+            IntInterval {
+                begin,
+                end
+            },
+        ))
+    }
+
+    fn write_binary<WB: Write>(&self, writer: &mut WB) -> anyhow::Result<()> {
+        write_bin_i32(writer, self.begin as i32)?;
+        write_bin_i32(writer, self.end as i32)?;
+        Ok(())
     }
 }
 
@@ -95,9 +121,50 @@ impl VectorIntervalStore {
     }
 }
 
+impl SerializeBinary for VectorIntervalStore {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
+        let (i, interval_count) = parse_bin_i64(i).map(|(s, v)| (s, v as usize))?;
+        let (i, intervals) = count(IntInterval::parse_binary,  interval_count)(i)?;
+        let (i, store_count) = parse_bin_i32(i)?;
+        Ok((
+            i,
+            VectorIntervalStore {
+                intervals,
+                count: Some(store_count as usize)
+            },
+        ))
+    }
+
+    fn write_binary<WB: Write>(&self, writer: &mut WB) -> anyhow::Result<()> {
+        write_bin_i64(writer, self.intervals.len() as i64)?;
+        for interval in self.intervals.iter() {
+            interval.write_binary(writer)?;
+        }
+        write_bin_i32(writer, self.count.unwrap_or_default() as i32)?;
+        Ok(())
+    }
+}
+
 #[derive(PartialOrd, PartialEq, Default, Clone, Debug)]
 pub struct IntervalSet {
     pub(crate) intervals: VectorIntervalStore,
+}
+
+impl SerializeBinary for IntervalSet {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
+        let (i, intervals) = VectorIntervalStore::parse_binary(i)?;
+        Ok((
+            i,
+            IntervalSet {
+                intervals
+            },
+        ))
+    }
+
+    fn write_binary<WB: Write>(&self, writer: &mut WB) -> anyhow::Result<()> {
+        self.intervals.write_binary(writer)?;
+        Ok(())
+    }
 }
 
 impl IntervalSet {
@@ -149,7 +216,7 @@ impl IntervalSet {
         elt.begin + 1 == elt.end
     }
 
-    // Sorts, collapses overlapping and adjacent interals, and sets count.
+    // Sorts, collapses overlapping and adjacent intervals, and sets count.
     pub fn normalize(&mut self) {
         let intervals = &mut self.intervals.intervals;
         intervals.sort();

@@ -76,7 +76,7 @@ fn parse_const_fst<W: SerializableSemiring>(
         i,
         CONST_MIN_FILE_VERSION,
         // Intentional as the ConstFst file is being parsed.
-        ConstFst::<W>::fst_type(),
+        Some(ConstFst::<W>::fst_type()),
         Tr::<W>::tr_type(),
     )?;
     let aligned = hdr.version == CONST_ALIGNED_FILE_VERSION;

@@ -70,12 +70,12 @@ impl FstHeader {
     pub(crate) fn parse<S1: AsRef<str>, S2: AsRef<str>>(
         i: &[u8],
         min_file_version: i32,
-        fst_loading_type: S1,
+        fst_loading_type: Option<S1>, // Do not verify if None
         tr_loading_type: S2,
     ) -> IResult<&[u8], FstHeader, NomCustomError<&[u8]>> {
         let (i, magic_number) = verify(parse_bin_i32, |v: &i32| *v == FST_MAGIC_NUMBER)(i)?;
         let (i, fst_type) = verify(OpenFstString::parse, |v| {
-            v.s.as_str() == fst_loading_type.as_ref()
+            fst_loading_type.is_none() || v.s.as_str() == fst_loading_type.as_ref().unwrap().as_ref()
         })(i)?;
         let (i, tr_type) = verify(OpenFstString::parse, |v| {
             v.s.as_str() == tr_loading_type.as_ref()
@@ -158,6 +158,10 @@ impl OpenFstString {
     pub(crate) fn write<W: Write>(&self, file: &mut W) -> Result<()> {
         write_bin_i32(file, self.n)?;
         file.write_all(self.s.as_bytes()).map_err(|e| e.into())
+    }
+
+    pub(crate) fn s(&self) -> &String {
+        &self.s
     }
 }
 

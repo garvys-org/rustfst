@@ -1,8 +1,11 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use std::io::Write;
 use std::sync::Arc;
 
 use anyhow::Result;
+use nom::IResult;
+use nom::multi::count;
 
 use crate::algorithms::compose::{IntervalSet, StateReachable};
 use crate::algorithms::tr_compares::{ILabelCompare, OLabelCompare};
@@ -11,7 +14,8 @@ use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
-use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL, UNASSIGNED};
+use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL, UNASSIGNED, NomCustomError};
+use crate::parsers::{parse_bin_bool, parse_bin_i64, parse_bin_i32, parse_bin_u32, SerializeBinary, write_bin_bool, write_bin_i64, write_bin_u32, write_bin_i32};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LabelReachableData {
@@ -113,6 +117,73 @@ impl LabelReachableData {
         }
 
         pairs
+    }
+}
+
+fn parse_label_map(i: &[u8]) -> IResult<&[u8], HashMap<Label, Label>, NomCustomError<&[u8]>> {
+    let mut stream = i;
+    let r = parse_bin_i64(stream).map(|(s, v)| (s, v as usize))?;
+    stream = r.0;
+    let map_size = r.1;
+    let mut map = HashMap::with_capacity(map_size);
+    for _ in 0..map_size {
+        let r = parse_bin_i32(stream).map(|(s, v)| (s, v as Label))?;
+        let key = r.1;
+        let r = parse_bin_i32(r.0).map(|(s, v)| (s, v as Label))?;
+        stream = r.0;
+        let val = r.1;
+        map.insert(key, val);
+    }
+    Ok((stream, map))
+}
+
+fn write_label_map<WB: Write>(writer: &mut WB, map: &HashMap<Label, Label>) -> Result<()> {
+    write_bin_i64(writer, map.len() as i64)?;
+    for (k, v) in map.iter() {
+        write_bin_i32(writer, *k as i32)?;
+        write_bin_i32(writer, *v as i32)?;
+    }
+    Ok(())
+}
+
+impl SerializeBinary for LabelReachableData {
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
+        let (i, reach_input) = parse_bin_bool(i)?;
+        let (i, have_relabel_data) = parse_bin_bool(i)?;
+        let (i, label2index) = if have_relabel_data {
+            parse_label_map(i)?
+        } else {
+            (i, Default::default())
+        };
+        let (i, final_label) = parse_bin_u32(i).map(|(s, v)| (s, v as Label))?;
+        let (i, set_count) = parse_bin_i64(i).map(|(s, v)| (s, v as usize))?;
+        let (i, interval_sets) = count(IntervalSet::parse_binary,  set_count)(i)?;
+        Ok((
+            i,
+            LabelReachableData {
+                reach_input,
+                final_label,
+                label2index,
+                interval_sets
+            }
+        ))
+    }
+
+    fn write_binary<WB: Write>(&self, writer: &mut WB) -> Result<()> {
+        write_bin_bool(writer, self.reach_input)?;
+        // OpenFst checks keep_relabel_data here which is missing in this struct.
+        // Instead we check if we have any data in label2index;
+        let have_relabel_data = !self.label2index.is_empty();
+        write_bin_bool(writer, have_relabel_data)?;
+        if have_relabel_data {
+            write_label_map(writer, &self.label2index)?;
+        }
+        write_bin_u32(writer, self.final_label as u32)?;
+        write_bin_i64(writer, self.interval_sets.len() as i64)?;
+        for interval_set in self.interval_sets.iter() {
+            interval_set.write_binary(writer)?;
+        }
+        Ok(())
     }
 }
 
