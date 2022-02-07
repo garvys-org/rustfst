@@ -27,7 +27,7 @@ class Fst:
             self._fst = ptr
         else:
             fst_ptr = ctypes.pointer(ctypes.c_void_p())
-            ret_code = lib.fst_new(ctypes.byref(fst_ptr))
+            ret_code = lib.vec_fst_new(ctypes.byref(fst_ptr))
 
             err_msg = "Something went wrong when creating the Fst struct"
             check_ffi_error(ret_code, err_msg)
@@ -55,7 +55,7 @@ class Fst:
               SnipsFstException: If State index out of range.
             See also: `add_state`.
         """
-        ret_code = lib.fst_add_tr(self._fst, ctypes.c_size_t(state), tr.ptr)
+        ret_code = lib.vec_fst_add_tr(self._fst, ctypes.c_size_t(state), tr.ptr)
         err_msg = "Error during `add_tr`"
         check_ffi_error(ret_code, err_msg)
 
@@ -71,7 +71,7 @@ class Fst:
         """
         state_id = ctypes.c_size_t()
 
-        ret_code = lib.fst_add_state(self._fst, ctypes.byref(state_id))
+        ret_code = lib.vec_fst_add_state(self._fst, ctypes.byref(state_id))
         err_msg = "Error during `add_state`"
         check_ffi_error(ret_code, err_msg)
 
@@ -115,7 +115,7 @@ class Fst:
         state = ctypes.c_size_t(state)
         weight = ctypes.c_float()
 
-        ret_code = lib.fst_final_weight(self._fst, state, ctypes.byref(weight))
+        ret_code = lib.vec_fst_final_weight(self._fst, state, ctypes.byref(weight))
         err_msg = "Error setting final state"
         check_ffi_error(ret_code, err_msg)
 
@@ -129,7 +129,7 @@ class Fst:
         delete_states(self)
             Delete the states
         """
-        ret_code = lib.fst_delete_states(self._fst)
+        ret_code = lib.vec_fst_delete_states(self._fst)
         err_msg = "Error deleting states"
         check_ffi_error(ret_code, err_msg)
 
@@ -144,7 +144,7 @@ class Fst:
 
         table = ctypes.pointer(ctypes.c_void_p())
 
-        ret_code = lib.fst_input_symbols(self._fst, ctypes.byref(table))
+        ret_code = lib.vec_fst_input_symbols(self._fst, ctypes.byref(table))
         err_msg = "Error getting input symbols"
         check_ffi_error(ret_code, err_msg)
 
@@ -162,7 +162,7 @@ class Fst:
         state = ctypes.c_size_t(state_id)
         is_final = ctypes.c_size_t()
 
-        ret_code = lib.fst_is_final(self._fst, state, ctypes.byref(is_final))
+        ret_code = lib.vec_fst_is_final(self._fst, state, ctypes.byref(is_final))
         err_msg = "Error checking if state is final"
         check_ffi_error(ret_code, err_msg)
 
@@ -182,7 +182,7 @@ class Fst:
         """
         num_trs = ctypes.c_size_t()
         state = ctypes.c_size_t(state)
-        ret_code = lib.fst_num_trs(self._fst, state, ctypes.byref(num_trs))
+        ret_code = lib.vec_fst_num_trs(self._fst, state, ctypes.byref(num_trs))
         err_msg = "Error getting number of trs"
         check_ffi_error(ret_code, err_msg)
 
@@ -194,7 +194,7 @@ class Fst:
             Returns the number of states.
         """
         num_states = ctypes.c_size_t()
-        ret_code = lib.fst_num_states(self._fst, ctypes.byref(num_states))
+        ret_code = lib.vec_fst_num_states(self._fst, ctypes.byref(num_states))
         err_msg = "Error getting number of states"
         check_ffi_error(ret_code, err_msg)
 
@@ -210,7 +210,7 @@ class Fst:
         """
         symbols_ptr = (ctypes.c_int * len(symbols))(*symbols)
         symbols_len = ctypes.c_size_t(len(symbols))
-        ret_code = lib.fst_remove_input_symbols(self._fst, symbols_ptr, symbols_len)
+        ret_code = lib.vec_fst_remove_input_symbols(self._fst, symbols_ptr, symbols_len)
         err_msg = "Error during remove_input_symbols"
         check_ffi_error(ret_code, err_msg)
 
@@ -227,7 +227,7 @@ class Fst:
 
         table = ctypes.pointer(ctypes.c_void_p())
 
-        ret_code = lib.fst_output_symbols(self._fst, ctypes.byref(table))
+        ret_code = lib.vec_fst_output_symbols(self._fst, ctypes.byref(table))
         err_msg = "Error getting output symbols"
         check_ffi_error(ret_code, err_msg)
 
@@ -253,7 +253,7 @@ class Fst:
         state = ctypes.c_size_t(state)
         weight = ctypes.c_float(weight)
 
-        ret_code = lib.fst_set_final(self._fst, state, ctypes.byref(weight))
+        ret_code = lib.vec_fst_set_final(self._fst, state, ctypes.byref(weight))
         err_msg = "Error setting final state"
         check_ffi_error(ret_code, err_msg)
 
@@ -269,7 +269,7 @@ class Fst:
             See also: `set_output_symbols`.
         """
         if syms is None:
-            ret_code = lib.fst_unset_input_symbols(self._fst)
+            ret_code = lib.vec_fst_unset_input_symbols(self._fst)
             err_msg = "Error unsetting input symbols"
             check_ffi_error(ret_code, err_msg)
             # detach symbol table from fst
@@ -277,7 +277,7 @@ class Fst:
             return self
 
         table = syms.ptr
-        ret_code = lib.fst_set_input_symbols(self._fst, table)
+        ret_code = lib.vec_fst_set_input_symbols(self._fst, table)
         err_msg = "Error setting input symbols"
         check_ffi_error(ret_code, err_msg)
 
@@ -307,7 +307,7 @@ class Fst:
 
         table = syms.ptr
 
-        ret_code = lib.fst_set_output_symbols(self._fst, table)
+        ret_code = lib.vec_fst_set_output_symbols(self._fst, table)
         err_msg = "Error setting output symbols"
         check_ffi_error(ret_code, err_msg)
 
@@ -329,7 +329,7 @@ class Fst:
             See also: `set_final`.
         """
         state_id = ctypes.c_size_t(state)
-        ret_code = lib.fst_set_start(self._fst, state_id)
+        ret_code = lib.vec_fst_set_start(self._fst, state_id)
         err_msg = "Error setting start state"
         check_ffi_error(ret_code, err_msg)
 
@@ -339,7 +339,7 @@ class Fst:
             Returns the start state.
         """
         start = ctypes.c_size_t()
-        ret_code = lib.fst_start(self._fst, ctypes.byref(start))
+        ret_code = lib.vec_fst_start(self._fst, ctypes.byref(start))
         err_msg = "Error getting start state"
         check_ffi_error(ret_code, err_msg)
 
@@ -405,7 +405,7 @@ class Fst:
         else:
             nodesep = ctypes.c_float(drawing_config.nodesep)
 
-        ret_code = lib.fst_draw(
+        ret_code = lib.vec_fst_draw(
             self._fst,
             isymbols_ptr,
             osymbols_ptr,
@@ -439,7 +439,9 @@ class Fst:
               errors.SnipsFstException: Read failed.
         """
         fst = ctypes.pointer(ctypes.c_void_p())
-        ret_code = lib.fst_from_path(ctypes.byref(fst), str(filename).encode("utf-8"))
+        ret_code = lib.vec_fst_from_path(
+            ctypes.byref(fst), str(filename).encode("utf-8")
+        )
         err_msg = "Read failed. file: {}".format(filename)
         check_ffi_error(ret_code, err_msg)
 
@@ -455,7 +457,7 @@ class Fst:
             Raises:
               errors.SnipsFstException: Write failed.
         """
-        ret_code = lib.fst_write_file(self._fst, str(filename).encode("utf-8"))
+        ret_code = lib.vec_fst_write_file(self._fst, str(filename).encode("utf-8"))
         err_msg = "Write failed. file: {}".format(filename)
         check_ffi_error(ret_code, err_msg)
 
@@ -468,7 +470,7 @@ class Fst:
         """
         is_equal = ctypes.c_size_t()
 
-        ret_code = lib.fst_equals(self._fst, other.ptr, ctypes.byref(is_equal))
+        ret_code = lib.vec_fst_equals(self._fst, other.ptr, ctypes.byref(is_equal))
         err_msg = "Error checking equality"
         check_ffi_error(ret_code, err_msg)
 
@@ -485,4 +487,4 @@ class Fst:
         return "<rustfst.fst.Fst at {}>".format(id(self))
 
     def __del__(self):
-        lib.fst_destroy(self._fst)
+        lib.vec_fst_destroy(self._fst)

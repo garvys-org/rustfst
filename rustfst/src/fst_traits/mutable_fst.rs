@@ -1,11 +1,11 @@
-use std::cmp::Ordering;
-
 use anyhow::Result;
+use std::cmp::Ordering;
+use std::sync::Arc;
 
 use crate::algorithms::closure::ClosureType;
 use crate::algorithms::TrMapper;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::ExpandedFst;
+use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::trs_iter_mut::TrsIterMut;
@@ -443,5 +443,19 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
     /// Compute all the properties verified by the Fst and update the internal property bits.
     fn compute_and_update_properties_all(&mut self) -> Result<FstProperties> {
         self.compute_and_update_properties(FstProperties::all_properties())
+    }
+
+    fn set_symts_from_fst<W2: Semiring, OF: Fst<W2>>(&mut self, other_fst: &OF) {
+        if let Some(symt) = other_fst.input_symbols() {
+            self.set_input_symbols(Arc::clone(symt));
+        } else {
+            self.take_input_symbols();
+        }
+
+        if let Some(symt) = other_fst.output_symbols() {
+            self.set_output_symbols(Arc::clone(symt));
+        } else {
+            self.take_output_symbols();
+        }
     }
 }

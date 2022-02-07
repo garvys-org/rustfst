@@ -244,20 +244,6 @@ pub trait Fst<W: Semiring>:
     /// Removes the output symbol table from the Fst and retrieves it.
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>>;
 
-    fn set_symts_from_fst<W2: Semiring, OF: Fst<W2>>(&mut self, other_fst: &OF) {
-        if let Some(symt) = other_fst.input_symbols() {
-            self.set_input_symbols(Arc::clone(symt));
-        } else {
-            self.take_input_symbols();
-        }
-
-        if let Some(symt) = other_fst.output_symbols() {
-            self.set_output_symbols(Arc::clone(symt));
-        } else {
-            self.take_output_symbols();
-        }
-    }
-
     fn final_states_iter(&self) -> FinalStatesIterator<W, Self>
     where
         Self: std::marker::Sized,
