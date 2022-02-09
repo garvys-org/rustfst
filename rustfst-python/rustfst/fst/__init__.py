@@ -13,6 +13,7 @@ from rustfst.weight import weight_one
 from typing import Optional
 from pathlib import Path
 
+
 class Fst:
     """
     Fst(ptr=None)
@@ -229,7 +230,6 @@ class Fst:
 
         return self
 
-
     def remove_input_symbols(self, symbols: list[int]) -> Fst:
         """
         remove_input_symbols(self, symbols)
@@ -262,7 +262,6 @@ class Fst:
 
         return self
 
-
     def __eq__(self, y: Fst):
         """x.__eq__(y) <==> x==y"""
         return self.equals(y)
@@ -275,5 +274,3 @@ class Fst:
 
     def __del__(self):
         lib.fst_destroy(self._fst)
-
-

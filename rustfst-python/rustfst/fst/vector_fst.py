@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 import ctypes
 from rustfst.utils import (
@@ -15,6 +14,7 @@ from rustfst.weight import weight_one
 from typing import Optional
 from pathlib import Path
 
+
 class VectorFst(Fst):
     def __init__(self, ptr=None):
         if ptr:
@@ -26,6 +26,7 @@ class VectorFst(Fst):
             err_msg = "Something went wrong when creating the Fst struct"
             check_ffi_error(ret_code, err_msg)
             self._fst = fst_ptr
+        super().__init__(self._fst)
 
     def add_tr(self, state: int, tr: Tr) -> Fst:
         """
@@ -85,10 +86,6 @@ class VectorFst(Fst):
         err_msg = "Error setting final state"
         check_ffi_error(ret_code, err_msg)
 
-
-
-
-
     def mutable_trs(self, state: int) -> MutableTrsIterator:
         """
         mutable_trs(self, state)
@@ -101,8 +98,6 @@ class VectorFst(Fst):
         """
         return MutableTrsIterator(self, state)
 
-
-
     def delete_states(self):
         """
         delete_states(self)
@@ -111,11 +106,6 @@ class VectorFst(Fst):
         ret_code = lib.vec_fst_delete_states(self._fst)
         err_msg = "Error deleting states"
         check_ffi_error(ret_code, err_msg)
-
-
-
-
-
 
     def num_states(self) -> int:
         """
@@ -128,8 +118,6 @@ class VectorFst(Fst):
         check_ffi_error(ret_code, err_msg)
 
         return int(num_states.value)
-
-
 
     def set_start(self, state: int):
         """
@@ -147,8 +135,6 @@ class VectorFst(Fst):
         ret_code = lib.vec_fst_set_start(self._fst, state_id)
         err_msg = "Error setting start state"
         check_ffi_error(ret_code, err_msg)
-
-
 
     def states(self) -> StateIterator:
         """

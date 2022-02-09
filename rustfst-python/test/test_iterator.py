@@ -1,10 +1,10 @@
-from rustfst import Fst, TrsIterator, MutableTrsIterator, StateIterator, Tr
+from rustfst import VectorFst, TrsIterator, MutableTrsIterator, StateIterator, Tr
 import pytest
 
 
 def test_trs_iterator():
 
-    fst = Fst()
+    fst = VectorFst()
     s1 = fst.add_state()
     s2 = fst.add_state()
     fst.set_start(s1)
@@ -32,7 +32,7 @@ def test_trs_iterator():
 
 def test_mut_trs_iterator():
 
-    fst = Fst()
+    fst = VectorFst()
     s1 = fst.add_state()
     s2 = fst.add_state()
     fst.set_start(s1)
@@ -64,7 +64,7 @@ def test_mut_trs_iterator():
 
 def test_state_iterator():
 
-    fst = Fst()
+    fst = VectorFst()
     s1 = fst.add_state()
     s2 = fst.add_state()
     fst.set_start(s1)

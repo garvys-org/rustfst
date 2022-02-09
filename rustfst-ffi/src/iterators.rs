@@ -3,7 +3,7 @@ use crate::tr::CTr;
 use crate::{get, get_mut, wrap, CStateId, RUSTFST_FFI_RESULT};
 use anyhow::Result;
 use ffi_convert::*;
-use rustfst::fst_traits::{CoreFst, MutableFst};
+use rustfst::fst_traits::MutableFst;
 use rustfst::prelude::{StateIterator, Tr, TropicalWeight, TrsVec};
 use rustfst::trs_iter_mut::TrsIterMut;
 use std::iter::Peekable;
@@ -45,7 +45,7 @@ pub extern "C" fn trs_iterator_new(
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst_ptr);
-        fst.get_trs(state_id)
+        fst.fst_get_trs(state_id)
             .map(|trs| {
                 let raw_ptr = {
                     let trs_iterator = TrsIterator { trs: trs, index: 0 };

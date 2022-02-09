@@ -6,13 +6,6 @@ from rustfst.utils import (
 )
 
 from rustfst.fst import Fst
-from rustfst.symbol_table import SymbolTable
-from rustfst.drawing_config import DrawingConfig
-from rustfst.iterators import MutableTrsIterator, StateIterator
-from rustfst.tr import Tr
-from rustfst.weight import weight_one
-from typing import Optional
-from pathlib import Path
 
 
 class ConcatFst(Fst):
