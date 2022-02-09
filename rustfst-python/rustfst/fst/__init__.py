@@ -5,13 +5,9 @@ from rustfst.utils import (
     check_ffi_error,
 )
 
-from rustfst.drawing_config import DrawingConfig
 from rustfst.symbol_table import SymbolTable
-from rustfst.iterators import TrsIterator, MutableTrsIterator, StateIterator
-from rustfst.tr import Tr
-from rustfst.weight import weight_one
+from rustfst.iterators import TrsIterator
 from typing import Optional
-from pathlib import Path
 
 
 class Fst:

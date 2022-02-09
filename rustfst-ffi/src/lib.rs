@@ -1,3 +1,4 @@
+pub mod algorithms;
 pub mod fst;
 pub mod iterators;
 pub mod symbol_table;
