@@ -9,7 +9,7 @@ use rustfst::fst_impls::VectorFst;
 use rustfst::semirings::TropicalWeight;
 
 #[no_mangle]
-pub extern "C" fn fst_union(ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
+pub extern "C" fn fst_reverse(ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst_ptr = unsafe { *ptr };
         let fst = get!(CFst, fst_ptr);
