@@ -82,7 +82,7 @@ class VectorFst(Fst):
         state = ctypes.c_size_t(state)
         weight = ctypes.c_float(weight)
 
-        ret_code = lib.vec_fst_set_final(self._fst, state, ctypes.byref(weight))
+        ret_code = lib.vec_fst_set_final(self._fst, state, weight)
         err_msg = "Error setting final state"
         check_ffi_error(ret_code, err_msg)
 

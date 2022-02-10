@@ -29,6 +29,14 @@ def test_small_fst():
     assert fst.num_trs(s1) == 2
 
 
+def test_final_weight():
+    fst = VectorFst()
+    s1 = fst.add_state()
+    fst.set_final(s1, 2.3)
+
+    assert pytest.approx(fst.final(s1)) == pytest.approx(2.3)
+
+
 def test_fst_del_states():
     fst = VectorFst()
 
