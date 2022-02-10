@@ -58,6 +58,22 @@ pub struct CComposeConfig {
 }
 
 #[no_mangle]
+pub extern "C" fn fst_compose_config_new(
+    compose_filter: libc::size_t,
+    connect: bool,
+    config: *mut *const CComposeConfig,
+) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let compose_config = CComposeConfig {
+            compose_filter: CComposeFilterEnum(compose_filter as usize),
+            connect,
+        };
+        unsafe { *config = compose_config.into_raw_pointer() };
+        Ok(())
+    })
+}
+
+#[no_mangle]
 pub extern "C" fn fst_compose(
     fst_1: *const CFst,
     fst_2: *const CFst,

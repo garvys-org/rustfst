@@ -50,6 +50,22 @@ pub struct CDeterminizeConfig {
 }
 
 #[no_mangle]
+pub extern "C" fn fst_determinize_config_new(
+    delta: libc::c_float,
+    det_type: libc::size_t,
+    config: *mut *const CDeterminizeConfig,
+) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let determinize_config = CDeterminizeConfig {
+            delta: delta as f32,
+            det_type: CDeterminizeType(det_type as usize),
+        };
+        unsafe { *config = determinize_config.into_raw_pointer() };
+        Ok(())
+    })
+}
+
+#[no_mangle]
 pub extern "C" fn fst_determinize(ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst_ptr = unsafe { *ptr };

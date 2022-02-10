@@ -8,12 +8,30 @@ use rustfst::algorithms::{shortest_path, shortest_path_with_config, ShortestPath
 use rustfst::fst_impls::VectorFst;
 use rustfst::semirings::TropicalWeight;
 
-#[derive(AsRust, CReprOf, CDrop)]
+#[derive(AsRust, CReprOf, CDrop, RawPointerConverter)]
 #[target_type(ShortestPathConfig)]
 pub struct CShortestPathConfig {
     delta: f32,
     nshortest: usize,
     unique: bool,
+}
+
+#[no_mangle]
+pub extern "C" fn fst_shortest_path_config_new(
+    delta: libc::c_float,
+    nshortest: libc::size_t,
+    unique: bool,
+    ptr: *mut *const CShortestPathConfig,
+) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let config = CShortestPathConfig {
+            delta,
+            nshortest,
+            unique,
+        };
+        unsafe { *ptr = config.into_raw_pointer() };
+        Ok(())
+    })
 }
 
 #[no_mangle]

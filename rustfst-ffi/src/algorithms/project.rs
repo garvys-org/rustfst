@@ -39,6 +39,18 @@ impl CReprOf<ProjectType> for CProjectType {
 }
 
 #[no_mangle]
+pub extern "C" fn fst_project_type_new(
+    project_type: libc::c_float,
+    ptr: *mut *const CProjectType,
+) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let project_type = CProjectType(project_type as usize);
+        unsafe { *ptr = project_type.into_raw_pointer() };
+        Ok(())
+    })
+}
+
+#[no_mangle]
 pub extern "C" fn fst_project(ptr: *mut CFst, config: *const CProjectType) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, ptr);
