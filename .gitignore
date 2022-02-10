@@ -39,3 +39,6 @@ metrics
 export-markdown
 fst_output
 .dinghy.toml
+*.dot
+*.svg
+*.egg-info/

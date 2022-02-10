@@ -1,23 +1,23 @@
 from __future__ import annotations
-import ctypes
 from rustfst.utils import (
     lib,
     check_ffi_error,
 )
 
-from rustfst.fst import Fst
+from rustfst.fst.vector_fst import VectorFst
 
 
-class ConcatFst(Fst):
-    def __init__(self, ptr=None):
-        if ptr:
-            self._fst = ptr
-        else:
-            fst_ptr = ctypes.pointer(ctypes.c_void_p())
-            ret_code = lib.vec_fst_new(ctypes.byref(fst_ptr))
+def concat(fst: VectorFst, other_fst: VectorFst) -> VectorFst:
+    """
+    concat(fst, other_fst)
+    compute the concat of two FSTs.
+    :param fst: Fst
+    :param other_fst: Fst
+    :return: Fst
+    """
 
-            err_msg = "Something went wrong when creating the Fst struct"
-            check_ffi_error(ret_code, err_msg)
-            self._fst = fst_ptr
+    ret_code = lib.fst_concat(fst.ptr, other_fst.ptr)
+    err_msg = "Error during concat"
+    check_ffi_error(ret_code, err_msg)
 
-        super().__init__(self._fst)
+    return fst

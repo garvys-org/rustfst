@@ -11,7 +11,7 @@ use rustfst::algorithms::compose::{
 use rustfst::fst_impls::VectorFst;
 use rustfst::semirings::TropicalWeight;
 
-#[derive(RawPointerConverter)]
+#[derive(RawPointerConverter, Debug)]
 pub struct CComposeFilterEnum(pub(crate) usize);
 
 impl AsRust<ComposeFilterEnum> for CComposeFilterEnum {
@@ -50,7 +50,7 @@ impl CReprOf<ComposeFilterEnum> for CComposeFilterEnum {
     }
 }
 
-#[derive(AsRust, CReprOf, CDrop, RawPointerConverter)]
+#[derive(AsRust, CReprOf, CDrop, RawPointerConverter, Debug)]
 #[target_type(ComposeConfig)]
 pub struct CComposeConfig {
     pub compose_filter: CComposeFilterEnum,

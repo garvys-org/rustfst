@@ -19,14 +19,10 @@ class Fst:
     """
 
     def __init__(self, ptr) -> Fst:
-        self._ptr = ptr
+        self.fst = ptr
         # add shims for symbol tables (prevent early gc of the tables)
         self._input_symbols = None
         self._output_symbols = None
-
-    @property
-    def ptr(self):
-        return self._fst
 
     def start(self) -> Optional[int]:
         """

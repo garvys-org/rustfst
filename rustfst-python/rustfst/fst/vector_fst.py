@@ -18,15 +18,15 @@ from pathlib import Path
 class VectorFst(Fst):
     def __init__(self, ptr=None):
         if ptr:
-            self._fst = ptr
+            self.ptr = ptr
         else:
             fst_ptr = ctypes.pointer(ctypes.c_void_p())
             ret_code = lib.vec_fst_new(ctypes.byref(fst_ptr))
 
             err_msg = "Something went wrong when creating the Fst struct"
             check_ffi_error(ret_code, err_msg)
-            self._fst = fst_ptr
-        super().__init__(self._fst)
+            self.ptr = fst_ptr
+        super().__init__(self.ptr)
 
     def add_tr(self, state: int, tr: Tr) -> Fst:
         """
@@ -264,3 +264,18 @@ class VectorFst(Fst):
         check_ffi_error(ret_code, err_msg)
 
         return bool(is_equal.value)
+
+    def compose(self, other: VectorFst):
+        from rustfst.algorithms.compose import compose
+
+        return compose(self, other)
+
+    def concat(self, other: VectorFst):
+        from rustfst.algorithms.concat import concat
+
+        return concat(self, other)
+
+    def compose_with_config(self, other: VectorFst, config):
+        from rustfst.algorithms.compose import compose_with_config
+
+        return compose_with_config(self, other, config)
