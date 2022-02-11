@@ -12,11 +12,11 @@ class TrsIterator:
     """
 
     def __init__(self, fst: Fst, state: int) -> TrsIterator:
-        self._fst = fst  # reference fst to prolong its lifetime (prevent early gc)
+        self.ptr = fst  # reference fst to prolong its lifetime (prevent early gc)
         state = ctypes.c_size_t(state)
         iter_ptr = ctypes.pointer(ctypes.c_void_p())
 
-        ret_code = lib.trs_iterator_new(fst._fst, state, ctypes.byref(iter_ptr))
+        ret_code = lib.trs_iterator_new(fst.ptr, state, ctypes.byref(iter_ptr))
         err_msg = "`__init__` failed"
         check_ffi_error(ret_code, err_msg)
 
@@ -81,11 +81,11 @@ class MutableTrsIterator:
     """
 
     def __init__(self, fst: Fst, state_id: int) -> MutableTrsIterator:
-        self._fst = fst  # reference fst to prolong its lifetime (prevent early gc)
+        self.ptr = fst  # reference fst to prolong its lifetime (prevent early gc)
         state_id = ctypes.c_size_t(state_id)
         iter_ptr = ctypes.pointer(ctypes.c_void_p())
 
-        ret_code = lib.mut_trs_iterator_new(fst._fst, state_id, ctypes.byref(iter_ptr))
+        ret_code = lib.mut_trs_iterator_new(fst.ptr, state_id, ctypes.byref(iter_ptr))
         err_msg = "`__init__` failed"
         check_ffi_error(ret_code, err_msg)
 
@@ -169,10 +169,10 @@ class StateIterator:
     """
 
     def __init__(self, fst: Fst) -> StateIterator:
-        self._fst = fst  # reference fst to prolong its lifetime (prevent early gc)
+        self.ptr = fst  # reference fst to prolong its lifetime (prevent early gc)
         iter_ptr = ctypes.pointer(ctypes.c_void_p())
 
-        ret_code = lib.state_iterator_new(fst._fst, ctypes.byref(iter_ptr))
+        ret_code = lib.state_iterator_new(fst.ptr, ctypes.byref(iter_ptr))
         err_msg = "`__init__` failed"
         check_ffi_error(ret_code, err_msg)
 

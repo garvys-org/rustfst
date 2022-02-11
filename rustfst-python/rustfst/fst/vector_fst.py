@@ -42,7 +42,7 @@ class VectorFst(Fst):
               SnipsFstException: If State index out of range.
             See also: `add_state`.
         """
-        ret_code = lib.vec_fst_add_tr(self._fst, ctypes.c_size_t(state), tr.ptr)
+        ret_code = lib.vec_fst_add_tr(self.ptr, ctypes.c_size_t(state), tr.ptr)
         err_msg = "Error during `add_tr`"
         check_ffi_error(ret_code, err_msg)
 
@@ -58,7 +58,7 @@ class VectorFst(Fst):
         """
         state_id = ctypes.c_size_t()
 
-        ret_code = lib.vec_fst_add_state(self._fst, ctypes.byref(state_id))
+        ret_code = lib.vec_fst_add_state(self.ptr, ctypes.byref(state_id))
         err_msg = "Error during `add_state`"
         check_ffi_error(ret_code, err_msg)
 
@@ -82,7 +82,7 @@ class VectorFst(Fst):
         state = ctypes.c_size_t(state)
         weight = ctypes.c_float(weight)
 
-        ret_code = lib.vec_fst_set_final(self._fst, state, weight)
+        ret_code = lib.vec_fst_set_final(self.ptr, state, weight)
         err_msg = "Error setting final state"
         check_ffi_error(ret_code, err_msg)
 
@@ -103,7 +103,7 @@ class VectorFst(Fst):
         delete_states(self)
             Delete the states
         """
-        ret_code = lib.vec_fst_delete_states(self._fst)
+        ret_code = lib.vec_fst_delete_states(self.ptr)
         err_msg = "Error deleting states"
         check_ffi_error(ret_code, err_msg)
 
@@ -113,7 +113,7 @@ class VectorFst(Fst):
             Returns the number of states.
         """
         num_states = ctypes.c_size_t()
-        ret_code = lib.vec_fst_num_states(self._fst, ctypes.byref(num_states))
+        ret_code = lib.vec_fst_num_states(self.ptr, ctypes.byref(num_states))
         err_msg = "Error getting number of states"
         check_ffi_error(ret_code, err_msg)
 
@@ -132,7 +132,7 @@ class VectorFst(Fst):
             See also: `set_final`.
         """
         state_id = ctypes.c_size_t(state)
-        ret_code = lib.vec_fst_set_start(self._fst, state_id)
+        ret_code = lib.vec_fst_set_start(self.ptr, state_id)
         err_msg = "Error setting start state"
         check_ffi_error(ret_code, err_msg)
 
@@ -195,7 +195,7 @@ class VectorFst(Fst):
             nodesep = ctypes.c_float(drawing_config.nodesep)
 
         ret_code = lib.vec_fst_draw(
-            self._fst,
+            self.ptr,
             isymbols_ptr,
             osymbols_ptr,
             filename.encode("utf-8"),
@@ -246,7 +246,7 @@ class VectorFst(Fst):
             Raises:
               errors.SnipsFstException: Write failed.
         """
-        ret_code = lib.vec_fst_write_file(self._fst, str(filename).encode("utf-8"))
+        ret_code = lib.vec_fst_write_file(self.ptr, str(filename).encode("utf-8"))
         err_msg = "Write failed. file: {}".format(filename)
         check_ffi_error(ret_code, err_msg)
 
@@ -259,7 +259,7 @@ class VectorFst(Fst):
         """
         is_equal = ctypes.c_size_t()
 
-        ret_code = lib.vec_fst_equals(self._fst, other.ptr, ctypes.byref(is_equal))
+        ret_code = lib.vec_fst_equals(self.ptr, other.ptr, ctypes.byref(is_equal))
         err_msg = "Error checking equality"
         check_ffi_error(ret_code, err_msg)
 

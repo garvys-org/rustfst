@@ -82,7 +82,7 @@ def test_compose_fst():
 
 
 def test_compose_config():
-    compose_filter = ComposeFilter.TrivialFilter
+    compose_filter = ComposeFilter.TRIVIALFILTER
     compose_config = ComposeConfig(compose_filter, True)  # Checked on debug print
 
     # FST 1
