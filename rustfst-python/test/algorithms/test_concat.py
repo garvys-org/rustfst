@@ -1,5 +1,6 @@
 from rustfst import VectorFst, Tr
-from rustfst import DrawingConfig
+
+# from rustfst import DrawingConfig
 
 
 def test_concat_fst():
@@ -18,8 +19,8 @@ def test_concat_fst():
     tr1_2 = Tr(3, 4, 2.5, s2)
     fst1.add_tr(s2, tr1_2)
 
-    d = DrawingConfig()
-    fst1.draw("concat_1.dot", None, None, d)
+    # d = DrawingConfig()
+    # fst1.draw("concat_1.dot", None, None, d)
 
     # FST 2
     fst2 = VectorFst()
@@ -36,7 +37,7 @@ def test_concat_fst():
     tr2_2 = Tr(4, 5, 2.0, s2)
     fst2.add_tr(s1, tr2_2)
 
-    fst2.draw("concat_2.dot", None, None, d)
+    # fst2.draw("concat_2.dot", None, None, d)
 
     # Expected FST
     expected_fst = VectorFst()
@@ -64,6 +65,6 @@ def test_concat_fst():
     expected_fst.add_tr(s3, tr3_5)
 
     fst3 = fst1.concat(fst2)
-    fst3.draw("concat_res.dot", None, None, d)
+    # fst3.draw("concat_res.dot", None, None, d)
 
     assert fst3 == expected_fst

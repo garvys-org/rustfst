@@ -35,27 +35,29 @@ pub extern "C" fn fst_shortest_path_config_new(
 }
 
 #[no_mangle]
-pub extern "C" fn fst_shortest_path(ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
+pub extern "C" fn fst_shortest_path(
+    ptr: *const CFst,
+    res_fst: *mut *const CFst,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
-        let fst_ptr = unsafe { *ptr };
-        let fst = get!(CFst, fst_ptr);
+        let fst = get!(CFst, ptr);
         let vec_fst: &VectorFst<TropicalWeight> = fst
             .downcast_ref()
             .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
-        let res_fst: VectorFst<TropicalWeight> = shortest_path(vec_fst)?;
-        unsafe { *ptr = CFst(Box::new(res_fst)).into_raw_pointer() };
+        let res: VectorFst<TropicalWeight> = shortest_path(vec_fst)?;
+        unsafe { *res_fst = CFst(Box::new(res)).into_raw_pointer() };
         Ok(())
     })
 }
 
 #[no_mangle]
 pub extern "C" fn fst_shortest_path_with_config(
-    ptr: *mut *const CFst,
+    ptr: *const CFst,
     config: *const CShortestPathConfig,
+    res_fst: *mut *const CFst,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
-        let fst_ptr = unsafe { *ptr };
-        let fst = get!(CFst, fst_ptr);
+        let fst = get!(CFst, ptr);
         let vec_fst: &VectorFst<TropicalWeight> = fst
             .downcast_ref()
             .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
@@ -65,9 +67,8 @@ pub extern "C" fn fst_shortest_path_with_config(
                 config,
             )?
         };
-        let res_fst: VectorFst<TropicalWeight> =
-            shortest_path_with_config(vec_fst, config.as_rust()?)?;
-        unsafe { *ptr = CFst(Box::new(res_fst)).into_raw_pointer() };
+        let res: VectorFst<TropicalWeight> = shortest_path_with_config(vec_fst, config.as_rust()?)?;
+        unsafe { *res_fst = CFst(Box::new(res)).into_raw_pointer() };
         Ok(())
     })
 }

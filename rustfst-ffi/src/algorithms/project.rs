@@ -40,7 +40,7 @@ impl CReprOf<ProjectType> for CProjectType {
 
 #[no_mangle]
 pub extern "C" fn fst_project_type_new(
-    project_type: libc::c_float,
+    project_type: libc::size_t,
     ptr: *mut *const CProjectType,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {

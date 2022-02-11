@@ -155,5 +155,5 @@ def test_compose_config():
     tr3_4 = Tr(3, 8, 3.5, s4)
     expected_fst.add_tr(s4, tr3_4)
 
-    fst3 = fst1.compose_with_config(fst2, compose_config)
+    fst3 = fst1.compose(fst2, compose_config)
     assert fst3 == expected_fst

@@ -14,6 +14,8 @@ from rustfst.weight import weight_one
 from typing import Optional
 from pathlib import Path
 
+from typing import List
+
 
 class VectorFst(Fst):
     def __init__(self, ptr=None):
@@ -265,9 +267,11 @@ class VectorFst(Fst):
 
         return bool(is_equal.value)
 
-    def compose(self, other: VectorFst):
-        from rustfst.algorithms.compose import compose
+    def compose(self, other: VectorFst, config=None):
+        from rustfst.algorithms.compose import compose, compose_with_config
 
+        if config:
+            return compose_with_config(self, other, config)
         return compose(self, other)
 
     def concat(self, other: VectorFst):
@@ -275,7 +279,48 @@ class VectorFst(Fst):
 
         return concat(self, other)
 
-    def compose_with_config(self, other: VectorFst, config):
-        from rustfst.algorithms.compose import compose_with_config
+    def determinize(self, config=None):
+        from rustfst.algorithms.determinize import determinize, determinize_with_config
 
-        return compose_with_config(self, other, config)
+        if config:
+            determinize_with_config(self, config)
+        return determinize(self)
+
+    def project(self, proj_type=None):
+        from rustfst.algorithms.project import project, ProjectType
+
+        if proj_type:
+            project(self, proj_type)
+        proj_type = ProjectType.PROJECT_INPUT
+        return project(self, proj_type)
+
+    def replace(
+        self,
+        root_label: int,
+        fst_list: List[(int, VectorFst)],
+        epsilon_on_replace: bool,
+    ):
+        from rustfst.algorithms.replace import replace
+
+        complete_fst_list = [(root_label, self)] + fst_list
+        return replace(root_label, complete_fst_list, epsilon_on_replace)
+
+    def reverse(self):
+        from rustfst.algorithms.reverse import reverse
+
+        return reverse(self)
+
+    def shortest_path(self, config):
+        from rustfst.algorithms.shortest_path import (
+            shortestpath,
+            shortestpath_with_config,
+        )
+
+        if config:
+            return shortestpath_with_config(self, config)
+        return shortestpath(self)
+
+    def union(self, other_fst: VectorFst):
+        from rustfst.algorithms.union import union
+
+        return union(self, other_fst)

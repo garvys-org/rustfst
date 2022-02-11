@@ -8,6 +8,8 @@ use ffi_convert::RawPointerConverter;
 use rustfst::algorithms::replace::replace;
 use rustfst::prelude::{Label, TropicalWeight, VectorFst};
 
+#[repr(C)]
+#[derive(Debug)]
 pub struct CLabelFstPair {
     pub label: CLabel,
     pub fst: *const CFst,
@@ -15,15 +17,15 @@ pub struct CLabelFstPair {
 
 #[no_mangle]
 pub extern "C" fn fst_replace(
-    fst_list_ptr: *const CLabelFstPair,
-    fst_list_ptr_len: libc::size_t,
     root: CLabel,
+    fst_list_ptr: *mut CLabelFstPair,
+    fst_list_ptr_len: libc::size_t,
     epsilon_on_replace: bool,
     replaced_fst: *mut *const CFst,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let label_fst_pairs =
-            unsafe { std::slice::from_raw_parts(fst_list_ptr, fst_list_ptr_len as usize) };
+            unsafe { std::slice::from_raw_parts_mut(fst_list_ptr, fst_list_ptr_len as usize) };
         let fst_list = label_fst_pairs
             .into_iter()
             .map(|pair| -> Result<(CLabel, &VectorFst<TropicalWeight>)> {
@@ -35,7 +37,7 @@ pub extern "C" fn fst_replace(
                 Ok((pair.label as Label, vec_fst))
             })
             .collect::<Result<Vec<(CLabel, &VectorFst<TropicalWeight>)>>>()?;
-
+        println!("ok2");
         let res_fst: VectorFst<TropicalWeight> = replace::<
             TropicalWeight,
             VectorFst<TropicalWeight>,

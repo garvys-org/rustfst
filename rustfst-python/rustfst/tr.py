@@ -5,6 +5,7 @@ from ctypes import (
     c_float,
     c_void_p,
 )
+from rustfst.weight import weight_one
 from rustfst.utils import (
     lib,
     check_ffi_error,
@@ -34,6 +35,9 @@ class Tr:
         if ptr and olabel is None and weight is None and nextstate is None:
             self._ptr = ptr
         else:
+            if weight is None:
+                weight = weight_one()
+
             ilabel = ptr
             ptr = c_void_p()
             exit_code = lib.tr_new(
