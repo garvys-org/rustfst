@@ -1,6 +1,6 @@
 from rustfst import VectorFst, Tr
 
-# from rustfst import DrawingConfig
+# rom rustfst import DrawingConfig
 
 
 def test_reverse():
@@ -46,13 +46,13 @@ def test_reverse():
     tr1_2 = Tr(3, 5, 1.0, s3)
     expected_fst.add_tr(s4, tr1_2)
 
-    tr1_3 = Tr(5, 6, 1.5, s3)
+    tr1_3 = Tr(1, 2, 1.0, s2)
     expected_fst.add_tr(s3, tr1_3)
 
-    tr1_4 = Tr(1, 2, 1.0, s2)
+    tr1_4 = Tr(3, 4, 2.0, s2)
     expected_fst.add_tr(s3, tr1_4)
 
-    tr1_5 = Tr(3, 4, 2.0, s2)
+    tr1_5 = Tr(5, 6, 1.5, s3)
     expected_fst.add_tr(s3, tr1_5)
     # expected_fst.draw("reversed_fst_expected.dot", None, None, d)
 

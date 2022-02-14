@@ -1,5 +1,6 @@
 from rustfst import VectorFst, Tr
 from rustfst import DrawingConfig
+from rustfst.algorithms.determinize import DeterminizeConfig, DeterminizeType
 
 
 def test_determinize_fst():
@@ -12,12 +13,12 @@ def test_determinize_fst():
     s4 = fst1.add_state()
 
     fst1.set_start(s1)
-    fst1.set_final(s4)
+    fst1.set_final(s4, 0.0)
 
     tr1_1 = Tr(1, 2, 1.0, s2)
     fst1.add_tr(s1, tr1_1)
 
-    tr1_2 = Tr(1, 2, 2.0, s3)
+    tr1_2 = Tr(1, 3, 2.0, s3)
     fst1.add_tr(s1, tr1_2)
 
     tr1_3 = Tr(4, 5, 3.0, s4)
@@ -59,5 +60,6 @@ def test_determinize_fst():
     tr1_5 = Tr(0, 8, None, s5)
     expected_fst.add_tr(s4, tr1_5)
 
-    fst1.determinize()
+    config = DeterminizeConfig(DeterminizeType.DETERMINIZE_DISAMBIGUATE)
+    fst1.determinize(config)
     fst1.draw("res.dot", None, None, d)

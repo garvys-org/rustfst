@@ -84,12 +84,12 @@ pub extern "C" fn fst_determinize(
 
 #[no_mangle]
 pub extern "C" fn fst_determinize_with_config(
-    ptr: *mut *const CFst,
+    ptr: *const CFst,
     config: *const CDeterminizeConfig,
+    det_fst: *mut *const CFst,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
-        let fst_ptr = unsafe { *ptr };
-        let fst = get!(CFst, fst_ptr);
+        let fst = get!(CFst, ptr);
         let vec_fst: &VectorFst<TropicalWeight> = fst
             .downcast_ref()
             .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
@@ -101,7 +101,7 @@ pub extern "C" fn fst_determinize_with_config(
         let fst: VectorFst<TropicalWeight> =
             determinize_with_config(vec_fst, det_config.as_rust()?)?;
         let fst_ptr = CFst(Box::new(fst)).into_raw_pointer();
-        unsafe { *ptr = fst_ptr };
+        unsafe { *det_fst = fst_ptr };
         Ok(())
     })
 }

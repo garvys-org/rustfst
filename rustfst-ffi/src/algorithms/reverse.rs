@@ -9,15 +9,14 @@ use rustfst::fst_impls::VectorFst;
 use rustfst::semirings::TropicalWeight;
 
 #[no_mangle]
-pub extern "C" fn fst_reverse(ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
+pub extern "C" fn fst_reverse(ptr: *const CFst, res_ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
     wrap(|| {
-        let fst_ptr = unsafe { *ptr };
-        let fst = get!(CFst, fst_ptr);
+        let fst = get!(CFst, ptr);
         let vec_fst: &VectorFst<TropicalWeight> = fst
             .downcast_ref()
             .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
         let res_fst: VectorFst<TropicalWeight> = reverse(vec_fst)?;
-        unsafe { *ptr = CFst(Box::new(res_fst)).into_raw_pointer() };
+        unsafe { *res_ptr = CFst(Box::new(res_fst)).into_raw_pointer() };
         Ok(())
     })
 }

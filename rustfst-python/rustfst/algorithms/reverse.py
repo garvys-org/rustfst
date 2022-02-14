@@ -15,8 +15,10 @@ def reverse(fst: VectorFst):
     :param fst: Fst
     :return: Fst
     """
-    ret_code = lib.fst_reverse(ctypes.byref(fst.ptr))
+
+    reversed_fst = ctypes.c_void_p()
+    ret_code = lib.fst_reverse(fst.ptr, ctypes.byref(reversed_fst))
     err_msg = "Error during reverse"
     check_ffi_error(ret_code, err_msg)
 
-    return fst
+    return VectorFst(ptr=reversed_fst)

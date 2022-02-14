@@ -37,7 +37,6 @@ pub extern "C" fn fst_replace(
                 Ok((pair.label as Label, vec_fst))
             })
             .collect::<Result<Vec<(CLabel, &VectorFst<TropicalWeight>)>>>()?;
-        println!("ok2");
         let res_fst: VectorFst<TropicalWeight> = replace::<
             TropicalWeight,
             VectorFst<TropicalWeight>,
