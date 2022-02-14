@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{BufWriter, LineWriter, Write};
 use std::path::Path;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::fst_traits::ExpandedFst;
@@ -19,10 +19,34 @@ pub trait SerializableFst<W: SerializableSemiring>: ExpandedFst<W> {
 
     // BINARY
 
+    /// Loads an FST from the binary format data in a `Read`.
+    fn load(input: &[u8]) -> Result<Self>;
+
+    /// Store the FST in binary format to a `Write`.
+    fn store<O: Write>(&self, output: O) -> Result<()>;
+
     /// Loads an FST from a file in binary format.
-    fn read<P: AsRef<Path>>(path_bin_fst: P) -> Result<Self>;
+    fn read<P: AsRef<Path>>(path_bin_fst: P) -> Result<Self> {
+        let data: Vec<u8> = std::fs::read(path_bin_fst.as_ref()).with_context(|| {
+            format!(
+                "Can't open {}Fst binary file : {:?}",
+                Self::fst_type(),
+                path_bin_fst.as_ref()
+            )
+        })?;
+        Self::load(&data)
+    }
     /// Writes the FST to a file in binary format.
-    fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Result<()>;
+    fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Result<()> {
+        let output = std::fs::File::create(path_bin_fst.as_ref()).with_context(|| {
+            format!(
+                "Cannot create {}Fst binary file : {:?}",
+                Self::fst_type(),
+                path_bin_fst.as_ref(),
+            )
+        })?;
+        self.store(BufWriter::new(output))
+    }
 
     // TEXT
 
