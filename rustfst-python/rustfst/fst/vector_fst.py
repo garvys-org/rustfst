@@ -170,8 +170,6 @@ class VectorFst(Fst):
           drawing_config: Drawing configuration to use.
         See also: `text`.
         """
-        isymbols = isymbols or self.input_symbols()
-        osymbols = osymbols or self.output_symbols()
 
         isymbols_ptr = isymbols.ptr if isymbols is not None else None
         osymbols_ptr = osymbols.ptr if osymbols is not None else None
@@ -283,7 +281,7 @@ class VectorFst(Fst):
         from rustfst.algorithms.determinize import determinize, determinize_with_config
 
         if config:
-            determinize_with_config(self, config)
+            return determinize_with_config(self, config)
         return determinize(self)
 
     def project(self, proj_type=None):

@@ -97,7 +97,6 @@ pub extern "C" fn fst_determinize_with_config(
         let det_config = unsafe {
             <CDeterminizeConfig as ffi_convert::RawBorrow<CDeterminizeConfig>>::raw_borrow(config)?
         };
-
         let fst: VectorFst<TropicalWeight> =
             determinize_with_config(vec_fst, det_config.as_rust()?)?;
         let fst_ptr = CFst(Box::new(fst)).into_raw_pointer();

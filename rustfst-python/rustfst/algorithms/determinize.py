@@ -45,7 +45,7 @@ def determinize(fst: VectorFst) -> VectorFst:
     err_msg = "Error during determinization"
     check_ffi_error(ret_code, err_msg)
 
-    return det_fst
+    return VectorFst(ptr=det_fst)
 
 
 def determinize_with_config(fst: VectorFst, config: DeterminizeConfig) -> VectorFst:
@@ -63,4 +63,4 @@ def determinize_with_config(fst: VectorFst, config: DeterminizeConfig) -> Vector
     err_msg = "Error during determinization"
     check_ffi_error(ret_code, err_msg)
 
-    return fst
+    return VectorFst(ptr=det_fst)

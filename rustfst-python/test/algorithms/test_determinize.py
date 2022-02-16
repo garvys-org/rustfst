@@ -31,7 +31,7 @@ def test_determinize_fst():
     fst1.add_tr(s3, tr1_5)
 
     d = DrawingConfig()
-    fst1.draw("det.dot", None, None, d)
+    fst1.draw("det_in.dot", None, None, d)
 
     # Expected FST
     expected_fst = VectorFst()
@@ -59,7 +59,10 @@ def test_determinize_fst():
 
     tr1_5 = Tr(0, 8, None, s5)
     expected_fst.add_tr(s4, tr1_5)
+    expected_fst.draw("det_expected.dot", None, None, d)
 
     config = DeterminizeConfig(DeterminizeType.DETERMINIZE_DISAMBIGUATE)
-    fst1.determinize(config)
-    fst1.draw("res.dot", None, None, d)
+    det_fst = fst1.determinize(config)
+    det_fst.draw("det_res.dot", None, None, d)
+
+    assert det_fst == expected_fst
