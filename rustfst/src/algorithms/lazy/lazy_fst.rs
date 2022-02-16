@@ -236,7 +236,7 @@ where
         visited_states[start_state as usize] = true;
         queue.push_back(start_state);
         while let Some(s) = queue.pop_front() {
-            let trs_owner = unsafe { self.get_trs_unchecked(s) };
+            let trs_owner = self.get_trs(s)?;
             for tr in trs_owner.trs() {
                 if (tr.nextstate as usize) >= visited_states.len() {
                     visited_states.resize(tr.nextstate as usize + 1, false);

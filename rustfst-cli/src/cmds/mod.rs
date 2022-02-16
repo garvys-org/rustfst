@@ -1,5 +1,6 @@
 pub mod compose;
 pub mod connect;
+pub mod determinize;
 pub mod invert;
 pub mod map;
 pub mod minimize;
