@@ -16,20 +16,6 @@ class LabelFstPair(ctypes.Structure):
     ]
 
 
-# pub struct CLabelFstPair {
-#    pub label: CLabel,
-#    pub fst: *const CFst,
-# }
-#
-##[no_mangle]
-# pub extern "C" fn fst_replace(
-#    fst_list_ptr: *const CLabelFstPair,
-#    fst_list_ptr_len: libc::size_t,
-#    root: CLabel,
-#    epsilon_on_replace: bool,
-#    replaced_fst: *mut *const CFst,
-
-
 def replace(
     root_idx: int, fst_list: List[(int, VectorFst)], epsilon_on_replace: bool
 ) -> VectorFst:
