@@ -265,6 +265,18 @@ class VectorFst(Fst):
 
         return bool(is_equal.value)
 
+    def copy(self) -> VectorFst:
+        """
+        copy fst(self, other)
+        :return: Fst
+        """
+        cloned_fst = ctypes.c_size_t()
+        ret_code = lib.vec_fst_copy(self.ptr, ctypes.byref(cloned_fst))
+        err_msg = "Error copying fst"
+        check_ffi_error(ret_code, err_msg)
+
+        return VectorFst(cloned_fst)
+
     def compose(self, other: VectorFst, config=None):
         from rustfst.algorithms.compose import compose, compose_with_config
 
@@ -332,3 +344,8 @@ class VectorFst(Fst):
         from rustfst.algorithms.tr_sort import tr_sort
 
         tr_sort(self, ilabel_cmp)
+
+    def tr_unique(self):
+        from rustfst.algorithms.tr_unique import tr_unique
+
+        tr_unique(self)

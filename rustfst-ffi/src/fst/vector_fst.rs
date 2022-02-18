@@ -193,3 +193,19 @@ pub fn vec_fst_equals(
         Ok(())
     })
 }
+
+#[no_mangle]
+pub extern "C" fn vec_fst_copy(
+    fst_ptr: *const CFst,
+    clone_ptr: *mut *const CFst,
+) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let fst = get!(CFst, fst_ptr);
+        let vec_fst: &VectorFst<TropicalWeight> = fst
+            .downcast_ref()
+            .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
+        let clone = vec_fst.clone();
+        unsafe { *clone_ptr = CFst(Box::new(clone)).into_raw_pointer() };
+        Ok(())
+    })
+}

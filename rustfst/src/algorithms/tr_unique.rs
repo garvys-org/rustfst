@@ -18,6 +18,12 @@ pub(crate) fn tr_compare<W: Semiring>(tr_1: &Tr<W>, tr_2: &Tr<W>) -> Ordering {
     if tr_1.olabel > tr_2.olabel {
         return Ordering::Greater;
     }
+    if tr_1.weight < tr_2.weight {
+        return Ordering::Less;
+    }
+    if tr_1.weight > tr_2.weight {
+        return Ordering::Greater;
+    }
     if tr_1.nextstate < tr_2.nextstate {
         return Ordering::Less;
     }
