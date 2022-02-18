@@ -1,6 +1,7 @@
 pub mod compose;
 pub mod concat;
 pub mod determinize;
+pub mod optimize;
 pub mod project;
 pub mod replace;
 pub mod reverse;

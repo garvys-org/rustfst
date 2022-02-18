@@ -64,7 +64,7 @@ export ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
 python -m pytest -vv -s --cache-clear --disable-warnings "$ROOT_DIR/rustfst-python/linting/linting_test.py"
 
 # Run rustfst python binding tests
-python -m pytest -vv -s --cache-clear --disable-warnings .
+python -m pytest -vv -s --cache-clear --disable-warnings ./tests
 
 # Run benches on a small FST to check that the script is working fine.
 cd ..

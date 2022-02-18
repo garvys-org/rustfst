@@ -322,3 +322,8 @@ class VectorFst(Fst):
         from rustfst.algorithms.union import union
 
         return union(self, other_fst)
+
+    def optimize(self):
+        from rustfst.algorithms.optimize import optimize
+
+        optimize(self)
