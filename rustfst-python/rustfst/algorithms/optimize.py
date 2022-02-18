@@ -15,5 +15,5 @@ def optimize(fst: VectorFst):
     """
 
     ret_code = lib.fst_optimize(fst.ptr)
-    err_msg = "Error during reverse"
+    err_msg = "Error during optimize"
     check_ffi_error(ret_code, err_msg)

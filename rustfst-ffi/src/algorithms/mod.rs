@@ -6,6 +6,7 @@ pub mod project;
 pub mod replace;
 pub mod reverse;
 pub mod shortest_path;
+pub mod tr_sort;
 pub mod union;
 
 #[derive(Debug)]

@@ -50,7 +50,7 @@ class TrsIterator:
         if tr_ptr is None:
             return None
 
-        return Tr(ptr=tr_ptr)
+        return Tr(tr_ptr)
 
     def reset(self):
         """
@@ -148,7 +148,7 @@ class MutableTrsIterator:
         if tr_ptr is None:
             return None
 
-        return Tr(ptr=tr_ptr)
+        return Tr(tr_ptr)
 
     def __iter__(self) -> MutableTrsIterator:
         """x.__iter__() <==> iter(x)"""

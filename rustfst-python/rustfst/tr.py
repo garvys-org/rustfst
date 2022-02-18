@@ -27,18 +27,17 @@ class Tr:
 
     def __init__(
         self,
-        ptr=None,
+        ilabel=None,
         olabel: Optional[int] = None,
         weight: Optional[float] = None,
         nextstate: Optional[int] = None,
     ) -> Tr:
-        if ptr and olabel is None and weight is None and nextstate is None:
-            self._ptr = ptr
+        if ilabel and olabel is None and weight is None and nextstate is None:
+            self._ptr = ilabel
         else:
             if weight is None:
                 weight = weight_one()
 
-            ilabel = ptr
             ptr = c_void_p()
             exit_code = lib.tr_new(
                 c_size_t(ilabel),

@@ -3,7 +3,7 @@ from rustfst import VectorFst, Tr
 # from rustfst import DrawingConfig
 
 
-def test_determinize_fst():
+def test_optimize_fst():
     # FST 1
     fst1 = VectorFst()
 

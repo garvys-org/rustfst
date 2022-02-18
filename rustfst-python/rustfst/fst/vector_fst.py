@@ -327,3 +327,8 @@ class VectorFst(Fst):
         from rustfst.algorithms.optimize import optimize
 
         optimize(self)
+
+    def tr_sort(self, ilabel_cmp: bool = True):
+        from rustfst.algorithms.tr_sort import tr_sort
+
+        tr_sort(self, ilabel_cmp)
