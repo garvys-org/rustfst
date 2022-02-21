@@ -61,7 +61,7 @@ black --check . || fail "Format your code by running black ." 1
 
 # Run linting check
 export ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
-python -m pytest -vv -s --cache-clear --disable-warnings "$ROOT_DIR/rustfst-python/linting/linting_test.py"
+python -m pytest -vv -s --cache-clear --disable-warnings "$ROOT_DIR/linting/linting_test.py"
 
 # Run rustfst python binding tests
 python -m pytest -vv -s --cache-clear --disable-warnings ./tests
