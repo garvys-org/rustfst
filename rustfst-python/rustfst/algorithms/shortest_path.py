@@ -11,7 +11,7 @@ KSHORTESTDELTA = 1e-6
 
 
 class ShortestPathConfig:
-    def __init__(self, nshortest: int, unique: bool, delta=None):
+    def __init__(self, nshortest: int = 1, unique: bool = False, delta=None):
         if delta is None:
             delta = KSHORTESTDELTA
         config = ctypes.pointer(ctypes.c_void_p())

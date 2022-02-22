@@ -330,7 +330,7 @@ class VectorFst(Fst):
 
         rm_epsilon(self)
 
-    def shortest_path(self, config):
+    def shortest_path(self, config=None):
         from rustfst.algorithms.shortest_path import (
             shortestpath,
             shortestpath_with_config,
