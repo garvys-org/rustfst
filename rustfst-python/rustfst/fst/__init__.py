@@ -204,7 +204,7 @@ class Fst:
             See also: `set_input_symbols`.
         """
         if syms is None:
-            ret_code = lib.snips_fst_unset_output_symbols(self.ptr)
+            ret_code = lib.fst_unset_output_symbols(self.ptr)
             err_msg = "Error unsetting output symbols"
             check_ffi_error(ret_code, err_msg)
             # detach symbol table from fst

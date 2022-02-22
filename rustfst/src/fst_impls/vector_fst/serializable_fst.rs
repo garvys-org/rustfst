@@ -37,8 +37,17 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
             )
         })?;
 
-        let (_, parsed_fst) = parse_vector_fst(&data)
-            .map_err(|e| format_err!("Error while parsing binary VectorFst : {:?}", e))?;
+        let (_, parsed_fst) = parse_vector_fst(&data).map_err(|e| {
+            e.map(|e_inner| match e_inner {
+                NomCustomError::Nom(_, k) => {
+                    format_err!("Error while parsing binary VectorFst. Error kind {:?}", k)
+                }
+                NomCustomError::SymbolTableError(e) => format_err!(
+                    "Error while parsing symbolTable from binary VectorFst : {}",
+                    e.to_owned()
+                ),
+            })
+        })?;
 
         Ok(parsed_fst)
     }

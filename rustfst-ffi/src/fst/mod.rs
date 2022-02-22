@@ -1,4 +1,5 @@
 pub mod concat_fst;
+pub mod const_fst;
 pub mod vector_fst;
 
 use crate::symbol_table::CSymbolTable;
@@ -10,11 +11,11 @@ use anyhow::Result;
 use downcast_rs::Downcast;
 use ffi_convert::*;
 use rustfst::algorithms::concat::ConcatFst;
-use rustfst::fst_impls::VectorFst;
+use rustfst::fst_impls::{ConstFst, VectorFst};
 use rustfst::fst_traits::{Fst, MutableFst, SerializableFst};
 use rustfst::semirings::TropicalWeight;
 use rustfst::Semiring;
-use rustfst::{StateId, SymbolTable, TrsVec};
+use rustfst::{StateId, SymbolTable, Trs, TrsVec};
 use std::ffi::CStr;
 use std::sync::Arc;
 
@@ -45,7 +46,7 @@ pub trait BindableFst: Downcast {
 
 downcast_rs::impl_downcast!(BindableFst);
 
-impl<F: Fst<TropicalWeight, TRS = TrsVec<TropicalWeight>> + 'static> BindableFst for F {
+impl<F: Fst<TropicalWeight> + 'static> BindableFst for F {
     fn fst_start(&self) -> Option<StateId> {
         self.start()
     }
@@ -56,7 +57,9 @@ impl<F: Fst<TropicalWeight, TRS = TrsVec<TropicalWeight>> + 'static> BindableFst
         self.num_trs(s)
     }
     fn fst_get_trs(&self, state_id: StateId) -> Result<TrsVec<TropicalWeight>> {
+        // TODO: make that more efficienctly
         self.get_trs(state_id)
+            .map(|it| TrsVec::from(it.trs().to_vec()))
     }
     fn fst_input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.input_symbols()
@@ -83,6 +86,9 @@ pub struct CFst(pub(crate) Box<dyn BindableFst>);
 
 #[derive(RawPointerConverter)]
 pub struct CVecFst(pub(crate) Box<VectorFst<TropicalWeight>>);
+
+#[derive(RawPointerConverter)]
+pub struct CConstFst(pub(crate) Box<ConstFst<TropicalWeight>>);
 
 #[derive(RawPointerConverter)]
 pub struct CConcatFst(pub(crate) Box<ConcatFst<TropicalWeight, VectorFst<TropicalWeight>>>);
