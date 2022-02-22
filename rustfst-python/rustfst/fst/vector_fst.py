@@ -289,6 +289,11 @@ class VectorFst(Fst):
 
         return concat(self, other)
 
+    def connect(self):
+        from rustfst.algorithms.connect import connect
+
+        connect(self)
+
     def determinize(self, config=None):
         from rustfst.algorithms.determinize import determinize, determinize_with_config
 

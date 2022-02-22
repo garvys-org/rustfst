@@ -1,5 +1,6 @@
 pub mod compose;
 pub mod concat;
+pub mod connect;
 pub mod determinize;
 pub mod optimize;
 pub mod project;
