@@ -349,3 +349,8 @@ class VectorFst(Fst):
         from rustfst.algorithms.tr_unique import tr_unique
 
         tr_unique(self)
+
+    def __add__(self, y):
+        """x.__add__(y) <==> x+y"""
+        x = self.copy()
+        return x.concat(y)

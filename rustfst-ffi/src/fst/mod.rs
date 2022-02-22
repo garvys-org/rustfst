@@ -1,5 +1,6 @@
 pub mod concat_fst;
 pub mod const_fst;
+pub mod utils;
 pub mod vector_fst;
 
 use crate::symbol_table::CSymbolTable;
