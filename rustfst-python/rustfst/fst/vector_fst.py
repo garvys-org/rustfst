@@ -325,6 +325,11 @@ class VectorFst(Fst):
 
         return reverse(self)
 
+    def rm_epsilon(self):
+        from rustfst.algorithms.rm_epsilon import rm_epsilon
+
+        rm_epsilon(self)
+
     def shortest_path(self, config):
         from rustfst.algorithms.shortest_path import (
             shortestpath,
