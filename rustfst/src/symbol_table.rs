@@ -7,6 +7,7 @@ use anyhow::{Context, Result};
 use itertools::Itertools;
 
 use crate::parsers::bin_symt::nom_parser::{parse_symbol_table_bin, write_bin_symt};
+use crate::parsers::nom_utils::NomCustomError;
 use crate::parsers::text_symt::parsed_text_symt::ParsedTextSymt;
 use crate::{Label, EPS_SYMBOL};
 use std::collections::hash_map::{Entry, RandomState};
@@ -77,8 +78,17 @@ impl SymbolTable {
             )
         })?;
 
-        let (_, symt) = parse_symbol_table_bin(&data)
-            .map_err(|e| format_err!("Error while parsing binary SymbolTable : {:?}", e))?;
+        let (_, symt) = parse_symbol_table_bin(&data).map_err(|e| {
+            e.map(|e_inner| match e_inner {
+                NomCustomError::Nom(_, k) => {
+                    format_err!("Error while parsing binary SymbolTable. Error kind {:?}", k)
+                }
+                NomCustomError::SymbolTableError(e) => format_err!(
+                    "Error while parsing symbolTable from binary : {}",
+                    e.to_owned()
+                ),
+            })
+        })?;
 
         Ok(symt)
     }

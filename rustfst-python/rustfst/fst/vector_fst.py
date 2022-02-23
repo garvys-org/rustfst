@@ -270,7 +270,7 @@ class VectorFst(Fst):
         copy fst(self, other)
         :return: Fst
         """
-        cloned_fst = ctypes.c_size_t()
+        cloned_fst = ctypes.pointer(ctypes.c_void_p())
         ret_code = lib.vec_fst_copy(self.ptr, ctypes.byref(cloned_fst))
         err_msg = "Error copying fst"
         check_ffi_error(ret_code, err_msg)
@@ -313,7 +313,7 @@ class VectorFst(Fst):
         self,
         root_label: int,
         fst_list: List[(int, VectorFst)],
-        epsilon_on_replace: bool,
+        epsilon_on_replace: bool = False,
     ):
         from rustfst.algorithms.replace import replace
 
@@ -363,4 +363,5 @@ class VectorFst(Fst):
     def __add__(self, y):
         """x.__add__(y) <==> x+y"""
         x = self.copy()
+
         return x.concat(y)

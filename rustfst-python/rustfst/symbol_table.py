@@ -234,5 +234,24 @@ class SymbolTable:
         err_msg = "Write failed for text file : {}".format(filename)
         check_ffi_error(ret_code, err_msg)
 
+    def equals(self, other: SymbolTable) -> bool:
+        """
+        equals(self, other)
+            Check if this SymbolTable is equal to the other
+        :param other: SymbolTable instance
+        :return: bool
+        """
+        is_equal = ctypes.c_size_t()
+
+        ret_code = lib.symt_equals(self.ptr, other.ptr, ctypes.byref(is_equal))
+        err_msg = "Error checking equality"
+        check_ffi_error(ret_code, err_msg)
+
+        return bool(is_equal.value)
+
+    def __eq__(self, y):
+        """x.__eq__(y) <==> x==y"""
+        return self.equals(y)
+
     def __del__(self):
         lib.symt_destroy(self.ptr)

@@ -27,8 +27,7 @@ def replace(
     :param epsilon_on_replace: bool
     :return: Fst
     """
-
-    pairs = [LabelFstPair(ctypes.c_size_t(label), fst.ptr) for (label, fst) in fst_list]
+    pairs = [LabelFstPair(label, fst.ptr) for (label, fst) in fst_list]
     pairs_array = (LabelFstPair * len(pairs))(*pairs)
     res_fst = ctypes.pointer(ctypes.c_void_p())
     ret_code = lib.fst_replace(
