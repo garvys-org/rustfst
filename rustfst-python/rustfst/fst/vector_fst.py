@@ -360,6 +360,11 @@ class VectorFst(Fst):
 
         tr_unique(self)
 
+    def isomorphic(self, other: VectorFst):
+        from rustfst.algorithms.isomorphic import isomorphic
+
+        return isomorphic(self, other)
+
     def __add__(self, y):
         """x.__add__(y) <==> x+y"""
         x = self.copy()

@@ -2,6 +2,7 @@ pub mod compose;
 pub mod concat;
 pub mod connect;
 pub mod determinize;
+pub mod isomorphic;
 pub mod optimize;
 pub mod project;
 pub mod replace;
