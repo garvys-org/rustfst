@@ -359,9 +359,11 @@ impl AcyclicMinimizer {
                     NO_STATE_ID
                 });
             }
-            pairs.extend(it_partition.drain(..).map(|s| {
-                (s, *equiv_classes.get(&(s as StateId)).unwrap())
-            }));
+            pairs.extend(
+                it_partition
+                    .drain(..)
+                    .map(|s| (s, *equiv_classes.get(&(s as StateId)).unwrap())),
+            );
             for (s, c) in pairs.drain(..) {
                 let old_class = state_cmp.partition.get_class_id(s);
                 let new_class = if classes_to_add.contains(&s) {
