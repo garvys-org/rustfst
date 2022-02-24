@@ -1,7 +1,5 @@
 from rustfst import VectorFst, Tr
 
-# from rustfst import DrawingConfig
-
 
 def test_rm_epsilon():
     # FST 1
@@ -33,9 +31,6 @@ def test_rm_epsilon():
     tr1_6 = Tr(0, 0, 5.0, s4)
     fst1.add_tr(s3, tr1_6)
 
-    # d = DrawingConfig()
-    # fst1.draw("rm_eps_in.dot", None, None, d)
-
     # Expected FST
     expected_fst = VectorFst()
 
@@ -51,8 +46,7 @@ def test_rm_epsilon():
 
     tr1_2 = Tr(1, 0, 3.0, s2)
     expected_fst.add_tr(s1, tr1_2)
-    # expected_fst.draw("rm_eps_e.dot", None, None, d)
 
     fst1.rm_epsilon()
-    # fst1.draw("rm_eps_out.dot", None, None, d)
+
     assert expected_fst == fst1

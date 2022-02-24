@@ -1,6 +1,4 @@
 from rustfst import VectorFst, Tr
-from rustfst import DrawingConfig
-
 from rustfst.algorithms.shortest_path import ShortestPathConfig
 
 
@@ -31,9 +29,6 @@ def test_shortest_path():
     tr1_5 = Tr(5, 5, 4.0, s4)
     fst1.add_tr(s3, tr1_5)
 
-    d = DrawingConfig()
-    fst1.draw("shortest_path_input.dot", None, None, d)
-
     # Expected FST
     expected_fst = VectorFst()
 
@@ -49,7 +44,6 @@ def test_shortest_path():
 
     tr1_2 = Tr(3, 3, 4.0, s1)
     expected_fst.add_tr(s2, tr1_2)
-    expected_fst.draw("shortest_path_expected.dot", None, None, d)
 
     config = ShortestPathConfig(1, True)
     shortes_path = fst1.shortest_path(config)

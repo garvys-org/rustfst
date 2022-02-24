@@ -1,6 +1,4 @@
 from rustfst import VectorFst, Tr
-
-# from rustfst import DrawingConfig
 from rustfst.algorithms.project import ProjectType
 
 
@@ -24,9 +22,6 @@ def test_project_input():
     tr1_3 = Tr(4, 5, 3.0, s3)
     fst1.add_tr(s2, tr1_3)
 
-    # d = DrawingConfig()
-    # fst1.draw("proj_input.dot", None, None, d)
-
     # Expected FST
     expected_fst = VectorFst()
 
@@ -47,7 +42,6 @@ def test_project_input():
     expected_fst.add_tr(s2, tr1_3)
 
     fst2 = fst1.project()
-    # expected_fst.draw("proj_input_res.dot", None, None, d)
 
     assert expected_fst == fst2
 
@@ -72,9 +66,6 @@ def test_project_output():
     tr1_3 = Tr(4, 5, 3.0, s3)
     fst1.add_tr(s2, tr1_3)
 
-    # d = DrawingConfig()
-    # fst1.draw("proj_intput.dot", None, None, d)
-
     # Expected FST
     expected_fst = VectorFst()
 
@@ -96,6 +87,5 @@ def test_project_output():
 
     project_type = ProjectType.PROJECT_OUTPUT
     fst2 = fst1.project(project_type)
-    # expected_fst.draw("proj_output_res.dot", None, None, d)
 
     assert expected_fst == fst2

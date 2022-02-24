@@ -1,7 +1,5 @@
 from rustfst import VectorFst, Tr
 
-# from rustfst import DrawingConfig
-
 
 def test_isomorphic_1():
     # FST 1

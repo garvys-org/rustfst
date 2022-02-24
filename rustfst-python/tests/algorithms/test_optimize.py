@@ -1,7 +1,5 @@
 from rustfst import VectorFst, Tr
 
-# from rustfst import DrawingConfig
-
 
 def test_optimize_fst():
     # FST 1
@@ -30,9 +28,6 @@ def test_optimize_fst():
     tr1_5 = Tr(7, 8, 5.0, s4)
     fst1.add_tr(s3, tr1_5)
 
-    # d = DrawingConfig()
-    # fst1.draw("optimize.dot", None, None, d)
-
     # Expected FST
     expected_fst = VectorFst()
 
@@ -58,6 +53,5 @@ def test_optimize_fst():
     expected_fst.add_tr(s3, tr_5)
 
     fst1.optimize()
-    # fst1.draw("optimize_out.dot", None, None, d)
 
     assert fst1 == expected_fst

@@ -1,7 +1,5 @@
 from rustfst import VectorFst, Tr
 
-# from rustfst import DrawingConfig
-
 
 def test_replace():
     # FST 1
@@ -144,10 +142,6 @@ def test_replace():
     tr_11 = Tr(2, 2, None, s11)
     expected_fst.add_tr(s10, tr_11)
 
-    # d = DrawingConfig()
-    # expected_fst.draw("replace_expected.dot", None, None, d)
-
     replaced_fst = fst1.replace(100, [(10, fst2), (11, fst3), (12, fst4)], False)
-    # replaced_fst.draw("replace_res.dot", None, None, d)
 
     assert replaced_fst == expected_fst

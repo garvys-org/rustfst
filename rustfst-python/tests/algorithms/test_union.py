@@ -1,5 +1,4 @@
 from rustfst import VectorFst, Tr
-from rustfst import DrawingConfig
 
 
 def test_union():
@@ -22,9 +21,6 @@ def test_union():
     tr1_3 = Tr(4, 5, 3.0, s3)
     fst1.add_tr(s2, tr1_3)
 
-    d = DrawingConfig()
-    # fst1.draw("union_1.dot", None, None, d)
-
     # FST 2
     fst2 = VectorFst()
 
@@ -39,8 +35,6 @@ def test_union():
 
     tr2_2 = Tr(3, 4, 2.5, s2)
     fst2.add_tr(s2, tr2_2)
-
-    # fst2.draw("concat_2.dot", None, None, d)
 
     # Expected FST
     expected_fst = VectorFst()
@@ -72,9 +66,7 @@ def test_union():
 
     tr_6 = Tr(3, 4, 2.5, s5)
     expected_fst.add_tr(s5, tr_6)
-    expected_fst.draw("union_expected.dot", None, None, d)
 
     union_fst = fst1.union(fst2)
-    union_fst.draw("union_res.dot", None, None, d)
 
     assert union_fst == expected_fst
