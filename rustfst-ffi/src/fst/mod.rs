@@ -20,6 +20,10 @@ use rustfst::{StateId, SymbolTable, Trs, TrsVec};
 use std::ffi::CStr;
 use std::sync::Arc;
 
+/// This trait is an alias for the FST trait.
+/// It makes the FST trait Boxable and downcastable to one of the supported C Fst structs.
+/// This trait allows to share Fst trait methods accross FST types by sharing a common input type in the binded methods.
+/// This generic Fst type can then be downcast to the appropriate Fst type (VectorFst, ConstFst, ..) in order to get access to specific methods (add_tr, ..).
 pub trait BindableFst: Downcast {
     fn fst_start(&self) -> Option<StateId>;
     fn fst_final_weight(&self, state: StateId) -> Result<Option<TropicalWeight>>;
@@ -58,9 +62,7 @@ impl<F: Fst<TropicalWeight> + 'static> BindableFst for F {
         self.num_trs(s)
     }
     fn fst_get_trs(&self, state_id: StateId) -> Result<TrsVec<TropicalWeight>> {
-        // TODO: make that more efficienctly
-        self.get_trs(state_id)
-            .map(|it| TrsVec::from(it.trs().to_vec()))
+        self.get_trs(state_id).map(|it| it.to_trs_vec())
     }
     fn fst_input_symbols(&self) -> Option<&Arc<SymbolTable>> {
         self.input_symbols()
@@ -93,6 +95,28 @@ pub struct CConstFst(pub(crate) Box<ConstFst<TropicalWeight>>);
 
 #[derive(RawPointerConverter)]
 pub struct CConcatFst(pub(crate) Box<ConcatFst<TropicalWeight, VectorFst<TropicalWeight>>>);
+
+macro_rules! as_fst {
+    ($typ:ty,$fst:ident) => {{
+        $fst.downcast_ref::<$typ>()
+            .ok_or_else(|| anyhow!("Could not downcast to {} FST", stringify!($typ)))?
+    }};
+}
+
+macro_rules! as_mut_fst {
+    ($typ:ty,$fst:ident) => {{
+        $fst.downcast_mut::<$typ>()
+            .ok_or_else(|| anyhow!("Could not downcast to {} FST", stringify!($typ)))?
+    }};
+}
+
+pub(crate) use as_fst;
+pub(crate) use as_mut_fst;
+//macro_rules! as_const_fst {
+//    ($typ:ty,$opaque:ident) => {{
+//        &unsafe { <$typ as ffi_convert::RawBorrow<$typ>>::raw_borrow($opaque) }?.0
+//    }};
+//}
 
 /// Core FST methods
 /// As defined in fst_traits

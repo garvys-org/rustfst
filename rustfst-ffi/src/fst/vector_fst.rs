@@ -17,9 +17,7 @@ pub fn vec_fst_new(ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
 pub fn vec_fst_set_start(fst: *mut CFst, state: CStateId) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let c_fst = get_mut!(CFst, fst);
-        let vec_fst: &mut VectorFst<TropicalWeight> = c_fst
-            .downcast_mut()
-            .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
+        let vec_fst = as_mut_fst!(VectorFst<TropicalWeight>, c_fst);
         vec_fst.set_start(state)?;
         Ok(())
     })
@@ -33,9 +31,7 @@ pub fn vec_fst_set_final(
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, fst);
-        let vec_fst: &mut VectorFst<TropicalWeight> = fst
-            .downcast_mut()
-            .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
+        let vec_fst = as_mut_fst!(VectorFst<TropicalWeight>, fst);
         vec_fst.set_final(state, TropicalWeight::new(weight as f32))?;
         Ok(())
     })
@@ -45,9 +41,7 @@ pub fn vec_fst_set_final(
 pub fn vec_fst_add_state(fst: *mut CFst, state: *mut CStateId) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, fst);
-        let vec_fst: &mut VectorFst<TropicalWeight> = fst
-            .downcast_mut()
-            .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
+        let vec_fst = as_mut_fst!(VectorFst<TropicalWeight>, fst);
         let res = vec_fst.add_state();
         unsafe { *state = res }
         Ok(())
@@ -58,9 +52,7 @@ pub fn vec_fst_add_state(fst: *mut CFst, state: *mut CStateId) -> RUSTFST_FFI_RE
 pub fn vec_fst_delete_states(fst: *mut CFst) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, fst);
-        let vec_fst: &mut VectorFst<TropicalWeight> = fst
-            .downcast_mut()
-            .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
+        let vec_fst = as_mut_fst!(VectorFst<TropicalWeight>, fst);
         vec_fst.del_all_states();
         Ok(())
     })
@@ -71,9 +63,7 @@ pub fn vec_fst_add_tr(fst: *mut CFst, state: CStateId, tr: *const CTr) -> RUSTFS
     wrap(|| {
         let fst = get_mut!(CFst, fst);
         let tr = unsafe { <CTr as ffi_convert::RawBorrow<CTr>>::raw_borrow(tr)? }.as_rust()?;
-        let vec_fst: &mut VectorFst<TropicalWeight> = fst
-            .downcast_mut()
-            .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
+        let vec_fst = as_mut_fst!(VectorFst<TropicalWeight>, fst);
         vec_fst.add_tr(state, tr)?;
         Ok(())
     })
@@ -95,9 +85,7 @@ pub fn vec_fst_write_file(fst: *const CFst, path: *const libc::c_char) -> RUSTFS
     wrap(|| {
         let fst = get!(CFst, fst);
         let path = unsafe { CStr::from_ptr(path) }.as_rust()?;
-        let vec_fst: &VectorFst<TropicalWeight> = fst
-            .downcast_ref()
-            .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
+        let vec_fst = as_fst!(VectorFst<TropicalWeight>, fst);
         vec_fst.write(&path)?;
         Ok(())
     })
@@ -123,9 +111,7 @@ pub fn vec_fst_draw(
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, fst_ptr);
-        let vec_fst: &mut VectorFst<TropicalWeight> = fst
-            .downcast_mut()
-            .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
+        let vec_fst = as_mut_fst!(VectorFst<TropicalWeight>, fst);
 
         if !isyms.is_null() {
             let isymt = get!(CSymbolTable, isyms);
@@ -164,9 +150,7 @@ pub fn vec_fst_draw(
 pub fn vec_fst_num_states(fst: *const CFst, num_states: *mut libc::size_t) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
-        let vec_fst: &VectorFst<TropicalWeight> = fst
-            .downcast_ref()
-            .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
+        let vec_fst = as_fst!(VectorFst<TropicalWeight>, fst);
         let res = vec_fst.num_states();
         unsafe { *num_states = res };
         Ok(())
@@ -182,12 +166,8 @@ pub fn vec_fst_equals(
     wrap(|| {
         let fst = get!(CFst, fst);
         let other_fst = get!(CFst, other_fst);
-        let vec_fst: &VectorFst<TropicalWeight> = fst
-            .downcast_ref()
-            .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
-        let other_vec_fst: &VectorFst<TropicalWeight> = other_fst
-            .downcast_ref()
-            .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
+        let vec_fst = as_fst!(VectorFst<TropicalWeight>, fst);
+        let other_vec_fst = as_fst!(VectorFst<TropicalWeight>, other_fst);
         let res = vec_fst.eq(other_vec_fst);
         unsafe { *is_equal = res as usize }
         Ok(())
@@ -201,9 +181,7 @@ pub extern "C" fn vec_fst_copy(
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst_ptr);
-        let vec_fst: &VectorFst<TropicalWeight> = fst
-            .downcast_ref()
-            .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
+        let vec_fst = as_fst!(VectorFst<TropicalWeight>, fst);
         let clone = vec_fst.clone();
         unsafe { *clone_ptr = CFst(Box::new(clone)).into_raw_pointer() };
         Ok(())

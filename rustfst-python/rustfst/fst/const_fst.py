@@ -93,7 +93,7 @@ class ConstFst(Fst):
     def read(cls, filename: Path) -> Fst:
         """
         Fst.read(filename)
-            Reads an FST from a file.
+            Read a Fst at a given path.
             Args:
               filename: The string location of the input file.
             Returns:

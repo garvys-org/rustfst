@@ -29,7 +29,7 @@ class ShortestPathConfig:
 def shortestpath(fst: VectorFst) -> VectorFst:
     """
     shortestpath(fst)
-    construct an FST containing the shortest path of the input FST
+    construct a FST containing the shortest path of the input FST
     :param fst: Fst
     :return: Fst
     """
@@ -45,7 +45,7 @@ def shortestpath(fst: VectorFst) -> VectorFst:
 def shortestpath_with_config(fst: VectorFst, config: ShortestPathConfig) -> VectorFst:
     """
     shortestpath(fst,config)
-    construct an FST containing the n-shortest path(s) in the input FST
+    construct a FST containing the n-shortest path(s) in the input FST
     :param fst: Fst
     :param config: ShortestPathConfig
     :return: Fst

@@ -96,7 +96,7 @@ class Fst:
     def is_final(self, state_id: int) -> bool:
         """
         is_final(state)
-        Check wether state is final
+        Check if a state is final
         :param state_id:
         :return: bool
         """
@@ -112,7 +112,7 @@ class Fst:
     def is_start(self, state_id: int) -> bool:
         """
         is_start(state)
-        Check wether state is a start
+        Check if a state is a start
         :param state_id:
         :return: bool
         """

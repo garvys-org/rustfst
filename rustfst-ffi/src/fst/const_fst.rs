@@ -18,9 +18,7 @@ pub fn const_fst_write_file(fst: *const CFst, path: *const libc::c_char) -> RUST
     wrap(|| {
         let fst = get!(CFst, fst);
         let path = unsafe { CStr::from_ptr(path) }.as_rust()?;
-        let const_fst: &ConstFst<TropicalWeight> = fst
-            .downcast_ref()
-            .ok_or_else(|| anyhow!("Could not downcast to const FST"))?;
+        let const_fst = as_fst!(ConstFst<TropicalWeight>, fst);
         const_fst.write(&path)?;
         Ok(())
     })
@@ -35,12 +33,8 @@ pub fn const_fst_equals(
     wrap(|| {
         let fst = get!(CFst, fst);
         let other_fst = get!(CFst, other_fst);
-        let const_fst: &ConstFst<TropicalWeight> = fst
-            .downcast_ref()
-            .ok_or_else(|| anyhow!("Could not downcast to const FST"))?;
-        let other_const_fst: &ConstFst<TropicalWeight> = other_fst
-            .downcast_ref()
-            .ok_or_else(|| anyhow!("Could not downcast to const FST"))?;
+        let const_fst = as_fst!(ConstFst<TropicalWeight>, fst);
+        let other_const_fst = as_fst!(ConstFst<TropicalWeight>, other_fst);
         let res = const_fst.eq(other_const_fst);
         unsafe { *is_equal = res as usize }
         Ok(())
@@ -54,9 +48,7 @@ pub extern "C" fn const_fst_copy(
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst_ptr);
-        let const_fst: &ConstFst<TropicalWeight> = fst
-            .downcast_ref()
-            .ok_or_else(|| anyhow!("Could not downcast to const FST"))?;
+        let const_fst = as_fst!(ConstFst<TropicalWeight>, fst);
         let clone = const_fst.clone();
         unsafe { *clone_ptr = CFst(Box::new(clone)).into_raw_pointer() };
         Ok(())
@@ -83,9 +75,7 @@ pub fn const_fst_draw(
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, fst_ptr);
-        let const_fst: &mut ConstFst<TropicalWeight> = fst
-            .downcast_mut()
-            .ok_or_else(|| anyhow!("Could not downcast to const FST"))?;
+        let const_fst = as_mut_fst!(ConstFst<TropicalWeight>, fst);
 
         if !isyms.is_null() {
             let isymt = get!(CSymbolTable, isyms);

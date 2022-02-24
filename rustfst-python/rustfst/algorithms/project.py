@@ -17,7 +17,7 @@ class ProjectType(Enum):
 def project(fst: VectorFst, proj_type: ProjectType) -> VectorFst:
     """
     project(fst)
-    convert an FST to an acceptor using input or output labels.
+    convert a FST to an acceptor using input or output labels.
     :param fst: Fst
     :return: Fst
     """

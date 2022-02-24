@@ -8,7 +8,7 @@ from rustfst.tr import Tr
 class TrsIterator:
     """
     TrsIterator(fst, state)
-      This class is used for iterating over the trs leaving some state of an FST.
+      This class is used for iterating over the trs leaving some state of a FST.
     """
 
     def __init__(self, fst: Fst, state: int) -> TrsIterator:
@@ -76,7 +76,7 @@ class TrsIterator:
 class MutableTrsIterator:
     """
     MutableTrsIterator(ifst, state)
-      This class is used for iterating over the trs leaving some state of an FST,
+      This class is used for iterating over the trs leaving some state of a FST,
       also permitting mutation of the current tr.
     """
 
@@ -165,7 +165,7 @@ class MutableTrsIterator:
 class StateIterator:
     """
     StateIterator(fst)
-      This class is used for iterating over the states in an FST.
+      This class is used for iterating over the states in a FST.
     """
 
     def __init__(self, fst: Fst) -> StateIterator:

@@ -13,7 +13,7 @@ from rustfst.utils import (
 def acceptor(astring, symbol_table: SymbolTable, weight=None):
     """
     Creates an acceptor from a string.
-    This function creates an FST which accepts its input with a fixed weight
+    This function creates a FST which accepts its input with a fixed weight
     (defaulting to semiring One).
     Args:
       astring: The input string.
@@ -43,7 +43,7 @@ def transducer(istring, ostring, isymt: SymbolTable, osymt: SymbolTable, weight=
     transducer(istring, ostring, weight=None,
                isymt, osymt)
     Creates a transducer from a pair of strings or acceptor FSTs.
-    This function creates an FST which transduces from the first string to
+    This function creates a FST which transduces from the first string to
     the second with a fixed weight (defaulting to semiring One).
     Args:
       istring: The input string

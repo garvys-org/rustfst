@@ -21,7 +21,7 @@ def replace(
 ) -> VectorFst:
     """
     replace(fst)
-    constructively replaces arcs in an FST with other FST(s).
+    constructively replaces arcs in a FST with other FST(s).
     :param root_idx: int
     :param fst_list: List[(int, VectorFst)]
     :param epsilon_on_replace: bool
