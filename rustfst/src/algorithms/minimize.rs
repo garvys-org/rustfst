@@ -331,18 +331,18 @@ impl AcyclicMinimizer {
     }
 
     fn refine<W: Semiring, F: MutableFst<W>>(&mut self, fst: &mut F) {
-        let state_cmp = StateComparator {
+        let mut state_cmp = StateComparator {
             fst,
-            // This clone is necessary for the moment because the partition is modified while
-            // still needing the StateComparator.
-            // TODO: Find a way to remove the clone.
-            partition: self.partition.clone(),
+            partition: std::mem::replace(&mut self.partition, Partition::empty_new()),
             w: PhantomData,
         };
-
-        let height = self.partition.num_classes();
+        let mut classes_to_add = HashSet::new();
+        let mut pairs = Vec::new();
+        let mut it_partition = Vec::new();
+        let height = state_cmp.partition.num_classes();
         for h in 0..height {
-            // We need here a binary search tree in order to order the states id and create a partition.
+            // We need here a search tree with a custom comparator in order to order the states
+            // id and create a partition.
             // For now uses the crate `stable_bst` which is quite old but seems to do the job
             // TODO: Bench the performances of the implementation. Maybe re-write it.
             let mut equiv_classes =
@@ -350,38 +350,37 @@ impl AcyclicMinimizer {
                     state_cmp.compare(*a, *b).unwrap()
                 });
 
-            let it_partition: Vec<_> = self.partition.iter(h).collect();
+            it_partition.extend(state_cmp.partition.iter(h));
             equiv_classes.insert(it_partition[0] as StateId, h as StateId);
-
-            let mut classes_to_add = vec![];
-            for e in it_partition.iter().skip(1) {
-                // TODO: Remove double lookup
-                if equiv_classes.contains_key(&(*e as StateId)) {
-                    equiv_classes.insert(*e as StateId, NO_STATE_ID);
+            classes_to_add.clear();
+            for &e in it_partition.iter().skip(1) {
+                equiv_classes.get_or_insert(e as StateId, || {
+                    classes_to_add.insert(e);
+                    NO_STATE_ID
+                });
+            }
+            pairs.extend(it_partition.drain(..).map(|s| {
+                (s, *equiv_classes.get(&(s as StateId)).unwrap())
+            }));
+            for (s, c) in pairs.drain(..) {
+                let old_class = state_cmp.partition.get_class_id(s);
+                let new_class = if classes_to_add.contains(&s) {
+                    debug_assert_eq!(c, NO_STATE_ID);
+                    state_cmp.partition.add_class()
+                } else if c != NO_STATE_ID {
+                    c as usize
                 } else {
-                    classes_to_add.push(e);
-                    equiv_classes.insert(*e as StateId, NO_STATE_ID);
-                }
-            }
-
-            for v in classes_to_add {
-                equiv_classes.insert(*v as StateId, self.partition.add_class() as StateId);
-            }
-
-            for s in it_partition {
-                let old_class = self.partition.get_class_id(s);
-                let new_class = *equiv_classes.get(&(s as StateId)).unwrap();
-                if new_class == NO_STATE_ID {
                     // The behaviour here is a bit different compared to the c++ because here
                     // when inserting an equivalent key it modifies the key
                     // which is not the case in c++.
                     continue;
-                }
-                if old_class != (new_class as usize) {
-                    self.partition.move_element(s, new_class as usize);
+                };
+                if old_class != new_class {
+                    state_cmp.partition.move_element(s, new_class);
                 }
             }
         }
+        self.partition = state_cmp.partition;
     }
 
     pub fn get_partition(self) -> Partition {
@@ -626,6 +625,68 @@ mod tests {
     use crate::prelude::*;
     use algorithms::determinize::*;
     use proptest::prelude::*;
+
+    #[test]
+    fn test_minimize_issue_158() {
+        let text_fst = r#"0	5	101	101	0
+0	4	100	100	0
+0	3	99	99	0
+0	2	98	98	0
+0	1	97	97	0
+1	10	101	101	0
+1	9	100	100	0
+1	8	99	99	0
+1	7	98	98	0
+1	6	97	97	0
+2	11	101	101	0
+2	10	100	100	0
+2	9	99	99	0
+2	8	98	98	0
+2	7	97	97	0
+3	11	100	100	0
+3	10	99	99	0
+3	9	98	98	0
+3	8	97	97	0
+4	11	99	99	0
+4	10	98	98	0
+4	9	97	97	0
+5	11	98	98	0
+5	10	97	97	0
+6	15	101	101	0
+6	14	100	100	0
+6	13	99	99	0
+6	12	98	98	0
+7	16	101	101	0
+7	15	100	100	0
+7	14	99	99	0
+7	13	98	98	0
+7	12	97	97	0
+8	16	100	100	0
+8	15	99	99	0
+8	14	98	98	0
+8	13	97	97	0
+9	16	99	99	0
+9	15	98	98	0
+9	14	97	97	0
+10	16	98	98	0
+10	15	97	97	0
+11	16	97	97	0
+12	17	101	101	0
+13	17	100	100	0
+14	17	99	99	0
+15	17	98	98	0
+16	17	97	97	0
+17	18	32	32	0
+18	0
+        "#;
+        let path = fst_path![97, 98, 97, 100, 32];
+        let mut fst: VectorFst<TropicalWeight> = VectorFst::from_text_string(text_fst).unwrap();
+        let accept1 = check_path_in_fst(&fst, &path);
+        minimize(&mut fst).unwrap();
+        let accept2 = check_path_in_fst(&fst, &path);
+
+        assert_eq!(accept1, accept2);
+    }
 
     proptest! {
         #![proptest_config(ProptestConfig {

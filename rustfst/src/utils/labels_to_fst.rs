@@ -218,7 +218,7 @@ macro_rules! fst {
                 W::one()
             }
             acceptor(
-                &vec![$($x),*],
+                &[$($x),*],
                 semiring_one()
             )
         }
@@ -229,8 +229,8 @@ macro_rules! fst {
                 W::one()
             }
             transducer(
-                &vec![$($x),*],
-                &vec![$($y),*],
+                &[$($x),*],
+                &[$($y),*],
                 semiring_one()
             )
         }
@@ -241,7 +241,7 @@ macro_rules! fst {
                 W::new(v)
             }
             acceptor(
-                &vec![$($x),*],
+                &[$($x),*],
                 semiring_new($weight)
             )
         }
@@ -252,8 +252,8 @@ macro_rules! fst {
                 W::new(v)
             }
             transducer(
-                &vec![$($x),*],
-                &vec![$($y),*],
+                &[$($x),*],
+                &[$($y),*],
                 semiring_new($weight)
             )
         }
