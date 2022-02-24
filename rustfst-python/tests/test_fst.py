@@ -80,8 +80,13 @@ def test_fst_trs_iterator():
 
     trs = [tr_1, tr_2]
 
+    num_trs = fst.num_trs(s1)
+    idx = 0
     for i, tr in enumerate(fst.trs(s1)):
+        idx += 1
         assert tr == trs[i]
+
+    assert num_trs == idx
 
 
 def test_fst_read_write():

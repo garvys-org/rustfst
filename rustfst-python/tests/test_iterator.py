@@ -74,5 +74,9 @@ def test_state_iterator():
 
     states_it = StateIterator(fst)
 
+    num_visited_states = 0
     for idx, state in enumerate(states_it):
+        num_visited_states += 1
         assert idx == state
+
+    assert num_visited_states == fst.num_states()

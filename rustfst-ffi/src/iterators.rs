@@ -319,7 +319,7 @@ pub extern "C" fn state_iterator_done(
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let trs_iter = get_mut!(CStateIterator, iter_ptr);
-        let res = trs_iter.peek().is_some();
+        let res = !trs_iter.peek().is_some();
         unsafe { *done = res as libc::size_t };
         Ok(())
     })
