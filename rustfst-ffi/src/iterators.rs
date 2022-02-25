@@ -40,7 +40,7 @@ pub struct CTrsIterator(pub(crate) TrsIterator);
 #[no_mangle]
 pub extern "C" fn trs_iterator_new(
     fst_ptr: *mut CFst,
-    state_id: libc::size_t,
+    state_id: CStateId,
     mut iter_ptr: *mut *const CTrsIterator,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
@@ -180,7 +180,7 @@ impl<'a> RawPointerConverter<CMutTrsIterator<'a>> for CMutTrsIterator<'a> {
 #[no_mangle]
 pub extern "C" fn mut_trs_iterator_new(
     fst_ptr: *mut CVecFst,
-    state_id: libc::size_t,
+    state_id: CStateId,
     mut iter_ptr: *mut *const CMutTrsIterator,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {

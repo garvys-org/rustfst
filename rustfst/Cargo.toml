@@ -17,7 +17,7 @@ repository = 'https://github.com/Garvys/rustfst'
 edition = '2018'
 
 [features]
-default = []
+default = ["state-label-u32"]
 state-label-u32 = []
 
 [dependencies]
