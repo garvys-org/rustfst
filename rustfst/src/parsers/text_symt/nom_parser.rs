@@ -1,5 +1,5 @@
 use nom::bytes::complete::tag;
-use nom::character::complete::tab;
+use nom::character::complete::space1;
 use nom::multi::many0;
 use nom::sequence::terminated;
 use nom::IResult;
@@ -10,7 +10,7 @@ use crate::{Label, Symbol};
 
 fn row(i: &str) -> IResult<&str, (Symbol, Label)> {
     let (i, symbol) = word(i)?;
-    let (i, _) = tab(i)?;
+    let (i, _) = space1(i)?;
     let (i, label) = num(i)?;
     Ok((i, (symbol, label)))
 }

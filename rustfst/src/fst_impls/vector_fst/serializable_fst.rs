@@ -1,9 +1,6 @@
-use std::fs::{read, File};
-use std::io::BufWriter;
-use std::path::Path;
+use std::io::Write;
 use std::sync::Arc;
 
-use anyhow::Context;
 use anyhow::Result;
 use nom::multi::count;
 use nom::number::complete::le_i64;
@@ -29,14 +26,7 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
         "vector".to_string()
     }
 
-    fn read<P: AsRef<Path>>(path_bin_fst: P) -> Result<Self> {
-        let data = read(path_bin_fst.as_ref()).with_context(|| {
-            format!(
-                "Can't open VectorFst binary file : {:?}",
-                path_bin_fst.as_ref()
-            )
-        })?;
-
+    fn load(data: &[u8]) -> Result<Self> {
         let (_, parsed_fst) = parse_vector_fst(&data).map_err(|e| {
             e.map(|e_inner| match e_inner {
                 NomCustomError::Nom(_, k) => {
@@ -52,9 +42,7 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
         Ok(parsed_fst)
     }
 
-    fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Result<()> {
-        let mut file = BufWriter::new(File::create(path_bin_fst)?);
-
+    fn store<O: Write>(&self, mut output: O) -> Result<()> {
         let num_trs: usize = (0..self.num_states())
             .map(|s: usize| unsafe { self.num_trs_unchecked(s as StateId) })
             .sum();
@@ -82,17 +70,17 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
             isymt: self.input_symbols().cloned(),
             osymt: self.output_symbols().cloned(),
         };
-        hdr.write(&mut file)?;
+        hdr.write(&mut output)?;
 
         // FstBody
         for state in 0..self.num_states() {
             let state = state as StateId;
             let f_weight = unsafe { self.final_weight_unchecked(state).unwrap_or_else(W::zero) };
-            f_weight.write_binary(&mut file)?;
-            write_bin_i64(&mut file, unsafe { self.num_trs_unchecked(state) } as i64)?;
+            f_weight.write_binary(&mut output)?;
+            write_bin_i64(&mut output, unsafe { self.num_trs_unchecked(state) } as i64)?;
 
             for tr in unsafe { self.get_trs_unchecked(state).trs() } {
-                write_bin_fst_tr(&mut file, tr)?;
+                write_bin_fst_tr(&mut output, tr)?;
             }
         }
 

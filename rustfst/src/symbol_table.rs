@@ -393,7 +393,7 @@ impl<H: BuildHasher> BiHashMapString<H> {
     }
 
     pub fn iter_strings(&self) -> impl Iterator<Item = &str> {
-        self.string_to_id.keys().map(|s| s.as_str())
+        self.id_to_string.iter().map(|s| s.as_str())
     }
 
     pub fn iter(&self) -> impl Iterator<Item = (usize, &str)> {

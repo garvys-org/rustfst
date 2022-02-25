@@ -1,9 +1,6 @@
-use std::fs::{read, File};
-use std::io::BufWriter;
-use std::path::Path;
+use std::io::Write;
 use std::sync::Arc;
 
-use anyhow::Context;
 use anyhow::Result;
 use itertools::Itertools;
 use nom::bytes::complete::take;
@@ -33,23 +30,14 @@ impl<W: SerializableSemiring> SerializableFst<W> for ConstFst<W> {
         "const".to_string()
     }
 
-    fn read<P: AsRef<Path>>(path_bin_fst: P) -> Result<Self> {
-        let data = read(path_bin_fst.as_ref()).with_context(|| {
-            format!(
-                "Can't open ConstFst binary file : {:?}",
-                path_bin_fst.as_ref()
-            )
-        })?;
-
-        let (_, parsed_fst) = parse_const_fst(&data)
+    fn load(data: &[u8]) -> Result<Self> {
+        let (_, parsed_fst) = parse_const_fst(data)
             .map_err(|_| format_err!("Error while parsing binary ConstFst"))?;
 
         Ok(parsed_fst)
     }
 
-    fn write<P: AsRef<Path>>(&self, path_bin_fst: P) -> Result<()> {
-        let mut file = BufWriter::new(File::create(path_bin_fst)?);
-
+    fn store<O: Write>(&self, mut output: O) -> Result<()> {
         let mut flags = FstFlags::empty();
         if self.input_symbols().is_some() {
             flags |= FstFlags::HAS_ISYMBOLS;
@@ -72,24 +60,24 @@ impl<W: SerializableSemiring> SerializableFst<W> for ConstFst<W> {
             isymt: self.input_symbols().cloned(),
             osymt: self.output_symbols().cloned(),
         };
-        hdr.write(&mut file)?;
+        hdr.write(&mut output)?;
 
         let zero = W::zero();
         for const_state in &self.states {
             let f_weight = const_state.final_weight.as_ref().unwrap_or_else(|| &zero);
-            f_weight.write_binary(&mut file)?;
+            f_weight.write_binary(&mut output)?;
 
-            write_bin_i32(&mut file, const_state.pos as i32)?;
-            write_bin_i32(&mut file, const_state.ntrs as i32)?;
-            write_bin_i32(&mut file, const_state.niepsilons as i32)?;
-            write_bin_i32(&mut file, const_state.noepsilons as i32)?;
+            write_bin_i32(&mut output, const_state.pos as i32)?;
+            write_bin_i32(&mut output, const_state.ntrs as i32)?;
+            write_bin_i32(&mut output, const_state.niepsilons as i32)?;
+            write_bin_i32(&mut output, const_state.noepsilons as i32)?;
         }
 
         for tr in &*self.trs {
-            write_bin_i32(&mut file, tr.ilabel as i32)?;
-            write_bin_i32(&mut file, tr.olabel as i32)?;
-            tr.weight.write_binary(&mut file)?;
-            write_bin_i32(&mut file, tr.nextstate as i32)?;
+            write_bin_i32(&mut output, tr.ilabel as i32)?;
+            write_bin_i32(&mut output, tr.olabel as i32)?;
+            tr.weight.write_binary(&mut output)?;
+            write_bin_i32(&mut output, tr.nextstate as i32)?;
         }
 
         Ok(())

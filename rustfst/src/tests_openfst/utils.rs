@@ -80,7 +80,7 @@ pub fn test_eq_fst<
     let s = s.into();
     let message = format!("Test {} with openfst failing : \nREF = \n{}\nPRED = \n{}\n \nREF = \n{:?}\nPRED = \n{:?}\n",
                           s, fst_ref, fst_pred, fst_ref, fst_pred);
-    assert!(fst_ref.approx_equal(fst_pred, KDELTA), message);
+    assert!(fst_ref.approx_equal(fst_pred, KDELTA), "{}", message);
     test_num_epsilons(fst_ref, fst_pred, message);
     test_correctness_properties(
         fst_ref,
@@ -102,7 +102,7 @@ pub fn test_isomorphic_fst<
     let s = s.into();
     let message = format!("Test {} with openfst failing : \nREF = \n{}\nPRED = \n{}\n \nREF = \n{:?}\nPRED = \n{:?}\n",
                           s, fst_ref, fst_pred, fst_ref, fst_pred);
-    assert!(isomorphic(fst_ref, fst_pred).unwrap(), message);
+    assert!(isomorphic(fst_ref, fst_pred).unwrap(), "{}", message);
     test_num_epsilons(fst_ref, fst_pred, message);
     test_correctness_properties(
         fst_ref,
