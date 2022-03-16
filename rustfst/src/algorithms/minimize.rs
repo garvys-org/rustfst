@@ -695,7 +695,6 @@ mod tests {
             .. ProptestConfig::default()
         })]
         #[test]
-        #[ignore]
         fn proptest_minimize_timeout(mut fst in any::<VectorFst::<TropicalWeight>>()) {
             let config = MinimizeConfig::default().with_allow_nondet(true);
             minimize_with_config(&mut fst, config).unwrap();
