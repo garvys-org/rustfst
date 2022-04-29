@@ -57,7 +57,7 @@ where
     W::ReverseWeight: WeightQuantize,
 {
     for minimize_data in &test_data.minimize {
-        //        println!("Minimize : allow_nondet = {}", minimize_data.allow_nondet);
+        println!("Minimize : allow_nondet = {}", minimize_data.allow_nondet);
         let mut fst_raw = test_data.raw.clone();
         let fst_res: Result<F> = minimize_with_config(
             &mut fst_raw,
