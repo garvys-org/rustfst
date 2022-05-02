@@ -39,7 +39,7 @@ set -ex
 
 #./build_bench.sh
 echo $PYTHON_VERSION
-$($PYTHON_VERSION) --version
+$PYTHON_VERSION --version
 
 #if which python3.8
 #then
