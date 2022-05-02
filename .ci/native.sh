@@ -24,20 +24,20 @@ then
   sudo apt-get install virtualenv
 fi
 
-#./build_openfst.sh
-#./run_openfst.sh
-#
-#cargo clean -p rustfst
-#cargo clean -p rustfst-cli
-#
-#cargo build --manifest-path rustfst/Cargo.toml --features "state-label-u32"
-#cargo test --manifest-path rustfst/Cargo.toml  --features "state-label-u32"
-#cargo build --all
-#cargo test --all
-#cargo check --benches --all # running benches on travis is useless
-#cargo doc --all --no-deps
-#
-#./build_bench.sh
+./build_openfst.sh
+./run_openfst.sh
+
+cargo clean -p rustfst
+cargo clean -p rustfst-cli
+
+cargo build --manifest-path rustfst/Cargo.toml --features "state-label-u32"
+cargo test --manifest-path rustfst/Cargo.toml  --features "state-label-u32"
+cargo build --all
+cargo test --all
+cargo check --benches --all # running benches on travis is useless
+cargo doc --all --no-deps
+
+./build_bench.sh
 python3 --version
 
 if which python3.8
