@@ -24,25 +24,25 @@ then
   sudo apt-get install virtualenv
 fi
 
-./build_openfst.sh
-./run_openfst.sh
-
-cargo clean -p rustfst
-cargo clean -p rustfst-cli
-
-cargo build --manifest-path rustfst/Cargo.toml --features "state-label-u32"
-cargo test --manifest-path rustfst/Cargo.toml  --features "state-label-u32"
-cargo build --all
-cargo test --all
-cargo check --benches --all # running benches on travis is useless
-cargo doc --all --no-deps
+#./build_openfst.sh
+#./run_openfst.sh
+#
+#cargo clean -p rustfst
+#cargo clean -p rustfst-cli
+#
+#cargo build --manifest-path rustfst/Cargo.toml --features "state-label-u32"
+#cargo test --manifest-path rustfst/Cargo.toml  --features "state-label-u32"
+#cargo build --all
+#cargo test --all
+#cargo check --benches --all # running benches on travis is useless
+#cargo doc --all --no-deps
 
 ./build_bench.sh
 python3 --version
 
 if which python3.7
 then
-    virtualenv venv3 -p python3.7
+    virtualenv venv3 -p "$(which python3.7)"
 else
     echo "No suitable python version found."
     exit 2
