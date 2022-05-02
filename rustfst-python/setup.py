@@ -7,7 +7,7 @@ from setuptools_rust import Binding, RustExtension
 
 packages = [p for p in find_packages() if "tests" not in p]
 
-PACKAGE_NAME = "rustfst-python"
+PACKAGE_NAME = "rustfst"
 RUST_EXTENSION_NAME = "rustfst-python.rustfst.dylib"
 REPO_ROOT_PATH = Path(__file__).resolve().parents[1]
 CARGO_ROOT_PATH = REPO_ROOT_PATH / "rustfst-ffi"
