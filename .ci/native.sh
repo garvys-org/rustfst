@@ -44,7 +44,7 @@ $PYTHON_VERSION --version
 ($PYTHON_VERSION -m pip freeze | grep black 1>/dev/null 2>&1) || $PYTHON_VERSION -m pip install black==22.3.0
 $PYTHON_VERSION -m pip install pylint==2.6.0 pytest==6.2.5
 $PYTHON_VERSION -m pip install -r rustfst-python/requirements-setup.txt
-$PYTHON_VERSION -m python rustfst-python/setup.py develop
+$PYTHON_VERSION rustfst-python/setup.py develop
 
 # Check format
 $PYTHON_VERSION -m black --check . || fail "Format your code by running black ." 1
