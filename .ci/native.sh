@@ -2,42 +2,45 @@
 
 set -ex
 
-#which rustup || curl https://sh.rustup.rs -sSf | sh -s -- -y
-#
-#. $HOME/.cargo/env
-#
-#: "${RUST_VERSION:=stable}"
-#rustup toolchain add $RUST_VERSION
-#rustup default $RUST_VERSION
-#
-#rustc --version
-#
-#if [ `uname` = "Linux" ]
-#then
-#  sudo apt-get update
-#  sudo apt-get install software-properties-common
-#  sudo add-apt-repository -y ppa:deadsnakes/ppa
-#  sudo apt-get update
-##  sudo apt-get install python3.7
-#  wget https://github.com/sharkdp/hyperfine/releases/download/v1.6.0/hyperfine_1.6.0_amd64.deb
-#  sudo dpkg -i hyperfine_1.6.0_amd64.deb
-##  sudo apt-get install virtualenv
-#fi
-#
-#./build_openfst.sh
-#./run_openfst.sh
-#
-#cargo clean -p rustfst
-#cargo clean -p rustfst-cli
-#
-#cargo build --manifest-path rustfst/Cargo.toml --features "state-label-u32"
-#cargo test --manifest-path rustfst/Cargo.toml  --features "state-label-u32"
-#cargo build --all
-#cargo test --all
-#cargo check --benches --all # running benches on travis is useless
-#cargo doc --all --no-deps
+which rustup || curl https://sh.rustup.rs -sSf | sh -s -- -y
 
-#./build_bench.sh
+. $HOME/.cargo/env
+
+: "${RUST_VERSION:=stable}"
+rustup toolchain add $RUST_VERSION
+rustup default $RUST_VERSION
+
+rustc --version
+
+if [ `uname` = "Linux" ]
+then
+  sudo apt-get update
+  sudo apt-get install software-properties-common
+  sudo add-apt-repository -y ppa:deadsnakes/ppa
+  sudo apt-get update
+  wget https://github.com/sharkdp/hyperfine/releases/download/v1.6.0/hyperfine_1.6.0_amd64.deb
+  sudo dpkg -i hyperfine_1.6.0_amd64.deb
+fi
+
+if [ `uname` ]
+then
+  brew install hyperfine
+fi
+
+./build_openfst.sh
+./run_openfst.sh
+
+cargo clean -p rustfst
+cargo clean -p rustfst-cli
+
+cargo build --manifest-path rustfst/Cargo.toml --features "state-label-u32"
+cargo test --manifest-path rustfst/Cargo.toml  --features "state-label-u32"
+cargo build --all
+cargo test --all
+cargo check --benches --all # running benches on travis is useless
+cargo doc --all --no-deps
+
+./build_bench.sh
 echo $PYTHON_VERSION
 $PYTHON_VERSION --version
 
