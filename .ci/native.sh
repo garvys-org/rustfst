@@ -36,8 +36,8 @@ fi
 #cargo test --all
 #cargo check --benches --all # running benches on travis is useless
 #cargo doc --all --no-deps
-
-./build_bench.sh
+#
+#./build_bench.sh
 python3 --version
 
 if which python3.7
