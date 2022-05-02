@@ -38,28 +38,29 @@ set -ex
 #cargo doc --all --no-deps
 
 #./build_bench.sh
-python3 --version
+echo $PYTHON_VERSION
+$($PYTHON_VERSION) --version
 
-if which python3.8
-then
-    virtualenv venv3 -p "$(which python3.8)"
-else
-    echo "No suitable python version found."
-    exit 2
-fi
-. venv3/bin/activate
+#if which python3.8
+#then
+#    virtualenv venv3 -p "$(which python3.8)"
+#else
+#    echo "No suitable python version found."
+#    exit 2
+#fi
+#. venv3/bin/activate
 
-(pip freeze | grep black 1>/dev/null 2>&1) || pip install black==22.3.0
-pip install pylint==2.6.0 pytest==6.2.5
-pip install -r rustfst-python/requirements-setup.txt
-python rustfst-python/setup.py develop
+($($PYTHON_VERSION) -m pip freeze | grep black 1>/dev/null 2>&1) || $($PYTHON_VERSION) -m pip install black==22.3.0
+$($PYTHON_VERSION) -m pip install pylint==2.6.0 pytest==6.2.5
+$($PYTHON_VERSION) -m pip install -r rustfst-python/requirements-setup.txt
+$($PYTHON_VERSION) -m python rustfst-python/setup.py develop
 
 # Check format
-black --check . || fail "Format your code by running black ." 1
+$($PYTHON_VERSION) -m black --check . || fail "Format your code by running black ." 1
 
 # Run linting check
 export ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
-python -m pytest -vv -s --cache-clear --disable-warnings "$ROOT_DIR/rustfst-python/linting/linting_test.py"
+$($PYTHON_VERSION) -m python -m pytest -vv -s --cache-clear --disable-warnings "$ROOT_DIR/rustfst-python/linting/linting_test.py"
 
 # Run rustfst python binding tests
 python -m pytest -vv -s --cache-clear --disable-warnings rustfst-python

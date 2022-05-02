@@ -31,4 +31,5 @@ jobs:
     - name: Native script
       env:
         RUST_VERSION: ${{matrix.rust}}
+        PYTHON_VERSION: "python3.8"
       run: .ci/native.sh
