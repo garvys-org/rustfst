@@ -192,7 +192,7 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for ConnectVisit
 
 #[cfg(test)]
 mod tests {
-    use proptest::prelude::*;
+    use ::proptest::prelude::*;
 
     use crate::fst_properties::FstProperties;
     use crate::prelude::*;
