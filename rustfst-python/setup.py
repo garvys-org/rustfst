@@ -1,5 +1,6 @@
 import os
 import sys
+import rustfst
 from pathlib import Path
 
 from setuptools import setup, find_packages
@@ -28,7 +29,7 @@ else:
 
 setup(
     name=PACKAGE_NAME,
-    version="0.1.0",
+    version=rustfst.__version__,
     description="Python wrapper for Rust FST",
     extras_require={"tests": ["pytest>=6,<7"]},
     packages=packages,
