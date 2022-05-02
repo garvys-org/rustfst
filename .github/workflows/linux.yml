@@ -13,6 +13,8 @@ jobs:
         rust: [ 1.49.0, stable ]
         os: [ubuntu-latest, macos-latest]
 
+    runs-on: ${{ matrix.os }}
+    
     steps:
     - uses: actions/checkout@v1
     - name: Cache Openfst build
