@@ -1,6 +1,5 @@
 import os
 import sys
-import rustfst
 from pathlib import Path
 
 from setuptools import setup, find_packages
@@ -9,7 +8,8 @@ from setuptools_rust import Binding, RustExtension
 packages = [p for p in find_packages() if "tests" not in p]
 
 PACKAGE_NAME = "rustfst"
-RUST_EXTENSION_NAME = "rustfst-python.rustfst.dylib"
+VERSION = "0.9.1-alpha.0"
+RUST_EXTENSION_NAME = "rustfst.rustfst.dylib"
 REPO_ROOT_PATH = Path(__file__).resolve().parents[1]
 CARGO_ROOT_PATH = REPO_ROOT_PATH / "rustfst-ffi"
 CARGO_FILE_PATH = CARGO_ROOT_PATH / "Cargo.toml"
@@ -29,7 +29,7 @@ else:
 
 setup(
     name=PACKAGE_NAME,
-    version=rustfst.__version__,
+    version=VERSION,
     description="Python wrapper for Rust FST",
     extras_require={"tests": ["pytest>=6,<7"]},
     packages=packages,
