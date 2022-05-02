@@ -16,9 +16,13 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+      with:
+        python-version: '3.8' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+        architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
     - name: Cache Openfst build
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       env:
         cache-name: cache-openfst-build
       with:
