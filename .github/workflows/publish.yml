@@ -1,4 +1,4 @@
-name: Publish Rust Crates and Python Packages
+name: Publish
 
 on:
   push:
@@ -46,7 +46,7 @@ jobs:
           TWINE_USERNAME: "__token__"
           TWINE_PASSWORD: ${{ secrets.TEST_PYPI_PASSWORD }}
         run: |
-          ./ci/native.sh
+          .ci/native.sh
           . venv3/bin/activate
           pip install wheel twine
           python rustfst-python/setup.py sdist bdist_wheel
