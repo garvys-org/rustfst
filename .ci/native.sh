@@ -40,9 +40,9 @@ fi
 #./build_bench.sh
 python3 --version
 
-if which python3.7
+if which python3.8
 then
-    virtualenv venv3 -p "$(which python3.7)"
+    virtualenv venv3 -p "$(which python3.8)"
 else
     echo "No suitable python version found."
     exit 2
