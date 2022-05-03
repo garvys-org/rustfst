@@ -9,7 +9,7 @@ use crate::fst_traits::{AllocableFst, MutableFst, SerializableFst};
 use crate::semirings::SerializableSemiring;
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
-use crate::tests_openfst::utils::test_eq_fst;
+use crate::tests_openfst::utils::test_isomorphic_fst;
 use crate::tests_openfst::FstTestData;
 use std::path::Path;
 
@@ -57,7 +57,7 @@ where
     W::ReverseWeight: WeightQuantize,
 {
     for minimize_data in &test_data.minimize {
-        //        println!("Minimize : allow_nondet = {}", minimize_data.allow_nondet);
+        println!("Minimize : allow_nondet = {}", minimize_data.allow_nondet);
         let mut fst_raw = test_data.raw.clone();
         let fst_res: Result<F> = minimize_with_config(
             &mut fst_raw,
@@ -67,7 +67,7 @@ where
 
         match (&minimize_data.result, fst_res) {
             (Ok(fst_expected), Ok(ref fst_minimized)) => {
-                test_eq_fst(
+                test_isomorphic_fst(
                     fst_expected,
                     fst_minimized,
                     format!(

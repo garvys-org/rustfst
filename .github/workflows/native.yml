@@ -1,0 +1,39 @@
+name: Native
+
+on:
+  pull_request:
+  push:
+    branches:
+      - 'main'
+    tags:
+      - 'rustfst-v**'
+  schedule:
+    - cron:  '0 9 * * *'
+
+jobs:
+  native:
+    strategy:
+      matrix:
+        rust: [ 1.49.0, stable ]
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+      with:
+        python-version: '3.7' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+        architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+    - name: Cache Openfst build
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-openfst-build
+      with:
+        path: openfst-1.7.2
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+    - name: Native script
+      env:
+        RUST_VERSION: ${{matrix.rust}}
+        PYTHON_VERSION: "python3.7"
+      run: .ci/native.sh

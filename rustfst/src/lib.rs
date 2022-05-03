@@ -185,6 +185,7 @@ pub mod prelude {
     pub use crate::*;
 }
 
+#[cfg(test)]
 pub mod proptest_fst;
 
 #[cfg(feature = "state-label-u32")]

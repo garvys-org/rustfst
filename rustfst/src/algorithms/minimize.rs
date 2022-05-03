@@ -33,10 +33,11 @@ use crate::semirings::{
 };
 use crate::EPS_LABEL;
 use crate::KDELTA;
-use crate::NO_STATE_ID;
 use crate::{Label, StateId, Trs};
 use crate::{Tr, KSHORTESTDELTA};
 use itertools::Itertools;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 #[derive(Clone, Copy, PartialOrd, PartialEq)]
 pub struct MinimizeConfig {
@@ -209,25 +210,24 @@ pub fn acceptor_minimize<W: Semiring, F: MutableFst<W> + ExpandedFst<W>>(
     Ok(())
 }
 
-fn merge_states<W: Semiring, F: MutableFst<W>>(partition: Partition, fst: &mut F) -> Result<()> {
-    let mut state_map = vec![None; partition.num_classes()];
+fn merge_states<W: Semiring, F: MutableFst<W>>(
+    partition: Rc<RefCell<Partition>>,
+    fst: &mut F,
+) -> Result<()> {
+    let mut state_map = vec![None; partition.borrow().num_classes()];
 
-    for (i, s) in state_map
-        .iter_mut()
-        .enumerate()
-        .take(partition.num_classes())
-    {
-        *s = partition.iter(i).next();
+    for i in 0..partition.borrow().num_classes() {
+        state_map[i] = partition.borrow().iter(i).next();
     }
 
-    for c in 0..partition.num_classes() {
-        for s in partition.iter(c) {
+    for c in 0..partition.borrow().num_classes() {
+        for s in partition.borrow().iter(c) {
             if s == state_map[c].unwrap() {
                 let mut it_tr = fst.tr_iter_mut(s as StateId)?;
                 for idx_tr in 0..it_tr.len() {
                     let tr = unsafe { it_tr.get_unchecked(idx_tr) };
                     let nextstate =
-                        state_map[partition.get_class_id(tr.nextstate as usize)].unwrap();
+                        state_map[partition.borrow().get_class_id(tr.nextstate as usize)].unwrap();
                     unsafe { it_tr.set_nextstate_unchecked(idx_tr, nextstate as StateId) };
                 }
             } else {
@@ -237,8 +237,9 @@ fn merge_states<W: Semiring, F: MutableFst<W>>(partition: Partition, fst: &mut F
                     .iter()
                     .cloned()
                     .map(|mut tr| {
-                        tr.nextstate = state_map[partition.get_class_id(tr.nextstate as usize)]
-                            .unwrap() as StateId;
+                        tr.nextstate = state_map
+                            [partition.borrow().get_class_id(tr.nextstate as usize)]
+                        .unwrap() as StateId;
                         tr
                     })
                     .collect();
@@ -250,8 +251,10 @@ fn merge_states<W: Semiring, F: MutableFst<W>>(partition: Partition, fst: &mut F
     }
 
     fst.set_start(
-        state_map[partition.get_class_id(fst.start().unwrap() as usize) as usize].unwrap()
-            as StateId,
+        state_map[partition
+            .borrow()
+            .get_class_id(fst.start().unwrap() as usize) as usize]
+            .unwrap() as StateId,
     )?;
 
     connect(fst)?;
@@ -297,13 +300,13 @@ pub fn fst_depth<W: Semiring, F: Fst<W>>(
 }
 
 struct AcyclicMinimizer {
-    partition: Partition,
+    partition: Rc<RefCell<Partition>>,
 }
 
 impl AcyclicMinimizer {
     pub fn new<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<Self> {
         let mut c = Self {
-            partition: Partition::empty_new(),
+            partition: Rc::new(RefCell::new(Partition::empty_new())),
         };
         c.initialize(fst)?;
         c.refine(fst);
@@ -321,28 +324,26 @@ impl AcyclicMinimizer {
             &mut fully_examined_states,
             &mut heights,
         )?;
-        self.partition.initialize(heights.len());
+        self.partition.borrow_mut().initialize(heights.len());
         self.partition
+            .borrow_mut()
             .allocate_classes((heights.iter().max().unwrap() + 1) as usize);
         for (s, h) in heights.iter().enumerate() {
-            self.partition.add(s, *h as usize);
+            self.partition.borrow_mut().add(s, *h as usize);
         }
         Ok(())
     }
 
     fn refine<W: Semiring, F: MutableFst<W>>(&mut self, fst: &mut F) {
-        let mut state_cmp = StateComparator {
+        let state_cmp = StateComparator {
             fst,
-            partition: std::mem::replace(&mut self.partition, Partition::empty_new()),
+            partition: Rc::clone(&self.partition),
             w: PhantomData,
         };
-        let mut classes_to_add = HashSet::new();
-        let mut pairs = Vec::new();
-        let mut it_partition = Vec::new();
-        let height = state_cmp.partition.num_classes();
+
+        let height = self.partition.borrow().num_classes();
         for h in 0..height {
-            // We need here a search tree with a custom comparator in order to order the states
-            // id and create a partition.
+            // We need here a binary search tree in order to order the states id and create a partition.
             // For now uses the crate `stable_bst` which is quite old but seems to do the job
             // TODO: Bench the performances of the implementation. Maybe re-write it.
             let mut equiv_classes =
@@ -350,49 +351,36 @@ impl AcyclicMinimizer {
                     state_cmp.compare(*a, *b).unwrap()
                 });
 
-            it_partition.extend(state_cmp.partition.iter(h));
+            let it_partition: Vec<_> = self.partition.borrow().iter(h).collect();
             equiv_classes.insert(it_partition[0] as StateId, h as StateId);
-            classes_to_add.clear();
-            for &e in it_partition.iter().skip(1) {
-                equiv_classes.get_or_insert(e as StateId, || {
-                    classes_to_add.insert(e);
-                    NO_STATE_ID
+
+            for e in it_partition.iter().skip(1) {
+                equiv_classes.get_or_insert(*e as StateId, || {
+                    self.partition.borrow_mut().add_class() as StateId
                 });
             }
-            pairs.extend(
-                it_partition
-                    .drain(..)
-                    .map(|s| (s, *equiv_classes.get(&(s as StateId)).unwrap())),
-            );
-            for (s, c) in pairs.drain(..) {
-                let old_class = state_cmp.partition.get_class_id(s);
-                let new_class = if classes_to_add.contains(&s) {
-                    debug_assert_eq!(c, NO_STATE_ID);
-                    state_cmp.partition.add_class()
-                } else if c != NO_STATE_ID {
-                    c as usize
-                } else {
-                    // The behaviour here is a bit different compared to the c++ because here
-                    // when inserting an equivalent key it modifies the key
-                    // which is not the case in c++.
-                    continue;
-                };
-                if old_class != new_class {
-                    state_cmp.partition.move_element(s, new_class);
+
+            for s in it_partition {
+                let old_class = self.partition.borrow().get_class_id(s);
+                let new_class = *equiv_classes.get(&(s as StateId)).unwrap();
+
+                if old_class != (new_class as usize) {
+                    self.partition
+                        .borrow_mut()
+                        .move_element(s, new_class as usize);
                 }
             }
         }
-        self.partition = state_cmp.partition;
     }
 
-    pub fn get_partition(self) -> Partition {
+    pub fn get_partition(self) -> Rc<RefCell<Partition>> {
         self.partition
     }
 }
 
 struct StateComparator<'a, W: Semiring, F: MutableFst<W>> {
     fst: &'a F,
-    partition: Partition,
+    partition: Rc<RefCell<Partition>>,
     w: PhantomData<W>,
 }
 
@@ -426,8 +414,14 @@ impl<'a, W: Semiring, F: MutableFst<W>> StateComparator<'a, W, F> {
             if arc1.ilabel > arc2.ilabel {
                 return Ok(false);
             }
-            let id_1 = self.partition.get_class_id(arc1.nextstate as usize);
-            let id_2 = self.partition.get_class_id(arc2.nextstate as usize);
+            let id_1 = self
+                .partition
+                .borrow()
+                .get_class_id(arc1.nextstate as usize);
+            let id_2 = self
+                .partition
+                .borrow()
+                .get_class_id(arc2.nextstate as usize);
             if id_1 < id_2 {
                 return Ok(true);
             }
@@ -460,7 +454,7 @@ impl<'a, W: Semiring, F: MutableFst<W>> StateComparator<'a, W, F> {
 
 fn pre_partition<W: Semiring, F: MutableFst<W>>(
     fst: &F,
-    partition: &mut Partition,
+    partition: &Rc<RefCell<Partition>>,
     queue: &mut LifoQueue,
 ) {
     let mut next_class: StateId = 0;
@@ -504,9 +498,9 @@ fn pre_partition<W: Semiring, F: MutableFst<W>>(
         }
     }
 
-    partition.allocate_classes(next_class as usize);
+    partition.borrow_mut().allocate_classes(next_class as usize);
     for (s, c) in state_to_initial_class.iter().enumerate().take(num_states) {
-        partition.add(s, *c as usize);
+        partition.borrow_mut().add(s, *c as usize);
     }
 
     for c in 0..next_class {
@@ -514,35 +508,33 @@ fn pre_partition<W: Semiring, F: MutableFst<W>>(
     }
 }
 
-fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<Partition> {
+fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<Rc<RefCell<Partition>>> {
     // Initialize
     let mut tr: VectorFst<W::ReverseWeight> = reverse(fst)?;
     tr_sort(&mut tr, ILabelCompare {});
 
-    let mut partition = Partition::new(tr.num_states() - 1);
+    let partition = Rc::new(RefCell::new(Partition::new(tr.num_states() - 1)));
     let mut queue = LifoQueue::default();
-    pre_partition(fst, &mut partition, &mut queue);
+    pre_partition(fst, &partition, &mut queue);
+
+    let comp = TrIterCompare {
+        partition: Rc::clone(&partition),
+    };
+
+    let mut aiter_queue = BinaryHeap::new_by(|v1, v2| {
+        if comp.compare(v1, v2) {
+            Ordering::Less
+        } else {
+            Ordering::Greater
+        }
+    });
 
     // Compute
     while let Some(c) = queue.head() {
         queue.dequeue();
 
         // Split
-        // TODO: Avoid this clone :o
-        // Here we need to pointer to the partition that is valid even if the partition changes.
-        let comp = TrIterCompare {
-            partition: partition.clone(),
-        };
-        let mut aiter_queue = BinaryHeap::new_by(|v1, v2| {
-            if comp.compare(v1, v2) {
-                Ordering::Less
-            } else {
-                Ordering::Greater
-            }
-        });
-
-        // Split
-        for s in partition.iter(c as usize) {
+        for s in partition.borrow().iter(c as usize) {
             if tr.num_trs(s as StateId + 1)? > 0 {
                 aiter_queue.push(TrsIterCollected {
                     idx: 0,
@@ -558,15 +550,15 @@ fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<Partiti
             if aiter.done() {
                 continue;
             }
-            let tr = aiter.peek().unwrap();
+            let tr = aiter.value().unwrap();
             let from_state = tr.nextstate - 1;
             let from_label = tr.ilabel;
             if prev_label != from_label as i32 {
-                partition.finalize_split(&mut Some(&mut queue));
+                partition.borrow_mut().finalize_split(&mut Some(&mut queue));
             }
-            let from_class = partition.get_class_id(from_state as usize);
-            if partition.get_class_size(from_class) > 1 {
-                partition.split_on(from_state as usize);
+            let from_class = partition.borrow().get_class_id(from_state as usize);
+            if partition.borrow().get_class_size(from_class) > 1 {
+                partition.borrow_mut().split_on(from_state as usize);
             }
             prev_label = from_label as i32;
             aiter.next();
@@ -575,7 +567,7 @@ fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<Partiti
             }
         }
 
-        partition.finalize_split(&mut Some(&mut queue));
+        partition.borrow_mut().finalize_split(&mut Some(&mut queue));
     }
 
     // Get Partition
@@ -589,7 +581,7 @@ struct TrsIterCollected<W: Semiring, T: Trs<W>> {
 }
 
 impl<W: Semiring, T: Trs<W>> TrsIterCollected<W, T> {
-    fn peek(&self) -> Option<&Tr<W>> {
+    fn value(&self) -> Option<&Tr<W>> {
         self.trs.trs().get(self.idx)
     }
 
@@ -604,7 +596,7 @@ impl<W: Semiring, T: Trs<W>> TrsIterCollected<W, T> {
 
 #[derive(Clone)]
 struct TrIterCompare {
-    partition: Partition,
+    partition: Rc<RefCell<Partition>>,
 }
 
 impl TrIterCompare {
@@ -616,8 +608,8 @@ impl TrIterCompare {
     where
         W: Semiring,
     {
-        let xarc = x.peek().unwrap();
-        let yarc = y.peek().unwrap();
+        let xarc = x.value().unwrap();
+        let yarc = y.value().unwrap();
         xarc.ilabel > yarc.ilabel
     }
 }
@@ -625,8 +617,8 @@ impl TrIterCompare {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
+    use ::proptest::prelude::*;
     use algorithms::determinize::*;
-    use proptest::prelude::*;
 
     #[test]
     fn test_minimize_issue_158() {
@@ -691,14 +683,8 @@ mod tests {
     }
 
     proptest! {
-        #![proptest_config(ProptestConfig {
-            fork: true,
-            timeout: 100,
-            .. ProptestConfig::default()
-        })]
         #[test]
-        #[ignore]
-        fn proptest_minimize_timeout(mut fst in any::<VectorFst::<TropicalWeight>>()) {
+        fn test_proptest_minimize_timeout(mut fst in any::<VectorFst::<TropicalWeight>>()) {
             let config = MinimizeConfig::default().with_allow_nondet(true);
             minimize_with_config(&mut fst, config).unwrap();
         }
@@ -708,7 +694,7 @@ mod tests {
         #[test]
         #[ignore] // falls into the same infinite loop as the timeout test
         fn test_minimize_proptest(mut fst in any::<VectorFst::<TropicalWeight>>()) {
-            let det:VectorFst<_> = determinize(&fst).unwrap();
+            let det:VectorFst<_> = determinize_with_config(&fst, DeterminizeConfig::default().with_det_type(DeterminizeType::DeterminizeNonFunctional)).unwrap();
             let min_config = MinimizeConfig::default().with_allow_nondet(true);
             minimize_with_config(&mut fst, min_config).unwrap();
             let det_config = DeterminizeConfig::default().with_det_type(DeterminizeType::DeterminizeNonFunctional);

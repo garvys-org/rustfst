@@ -94,7 +94,7 @@ pub fn project<W: Semiring, F: MutableFst<W>>(fst: &mut F, project_type: Project
 
 #[cfg(test)]
 mod tests {
-    use proptest::prelude::*;
+    use ::proptest::prelude::*;
 
     use crate::fst_properties::FstProperties;
     use crate::fst_traits::CoreFst;

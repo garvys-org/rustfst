@@ -121,6 +121,22 @@ At the moment, the main algorithm missing in `Rustfst` is the composition that w
 The documentation of the last released version is available here :
 https://docs.rs/rustfst
 
+## Release process
+1. Use the script `update_version.sh` to update the version of every package.
+2. Push 
+3. Push a new tag with the prefix `rustfst-v`
+
+Example :
+```bash
+./update_version.sh 0.9.1-alpha.6
+git commit -am "Release 0.9.1-alpha.6"
+git push
+git tag -a rustfst-v0.9.1-alpha.6 -m "Release rustfst 0.9.1-alpha.6"  
+git push --tags
+```
+
+Optionally, if this is a major release, create a GitHub release in the UI.
+
 ## License
    
 Licensed under either of

@@ -29,6 +29,7 @@ report2.md
 
 rustfst-python-bench
 venv3
+venv38
 
 .idea
 pynini-2.0.7/
@@ -42,3 +43,6 @@ fst_output
 *.dot
 *.svg
 *.egg-info/
+build/
+dist/
+wheels/

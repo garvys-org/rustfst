@@ -15,6 +15,7 @@ struct Isomorphism<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> {
     queue: VecDeque<(StateId, StateId)>,
     w: PhantomData<W>,
     delta: f32,
+    non_det: bool,
 }
 
 /// Compare trs in the order input label, output label, weight and nextstate.
@@ -55,6 +56,7 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
             queue: VecDeque::new(),
             w: PhantomData,
             delta,
+            non_det: false,
         }
     }
 
@@ -119,7 +121,10 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
                     && arc1.olabel == arc0.olabel
                     && arc1.weight.approx_equal(&arc0.weight, self.delta)
                 {
-                    bail!("Isomorphic: Non-determinism as an unweighted automaton")
+                    // Any subsequent matching failure maybe a false negative
+                    // since we only consider one permutation when pairing destination
+                    // states of nondeterministic transitions.
+                    self.non_det = true;
                 }
             }
         }
@@ -142,6 +147,9 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
         while !self.queue.is_empty() {
             let (s1, s2) = self.queue.pop_front().unwrap();
             if !self.ismorphic_state(s1, s2)? {
+                if self.non_det {
+                    bail!("Isomorphic: Non-determinism as an unweighted automaton. state1 = {} state2 = {}", s1, s2)
+                }
                 return Ok(false);
             }
         }
