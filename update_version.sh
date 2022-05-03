@@ -13,5 +13,5 @@ echo "NEW VERSION $NEW_VERSION" >&2
 
 perl -p -i -e "s/^version = \".*\"\$/version = \"$NEW_VERSION\"/g" rustfst/Cargo.toml
 perl -p -i -e "s/^version = \".*\"\$/version = \"$NEW_VERSION\"/g" rustfst-ffi/Cargo.toml
-perl -p -i -e "s/^version = \".*\"\$/version = \"$NEW_VERSION\"/g" amstram-cli/Cargo.toml
+perl -p -i -e "s/^version = \".*\"\$/version = \"$NEW_VERSION\"/g" rustfst-cli/Cargo.toml
 perl -p -i -e "s/^VERSION = \".*\"\$/VERSION = \"$NEW_VERSION\"/g" rustfst-python/setup.py
