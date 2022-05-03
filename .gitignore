@@ -40,3 +40,7 @@ metrics
 export-markdown
 fst_output
 .dinghy.toml
+rustfst.egg-info/
+rustfst_python.egg-info/
+build/
+dist/
