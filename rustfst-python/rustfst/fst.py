@@ -116,7 +116,7 @@ class Fst:
         weight = ctypes.c_float()
 
         ret_code = lib.fst_final_weight(self._fst, state, ctypes.byref(weight))
-        err_msg = "Error setting final state"
+        err_msg = "Error getting final weight"
         check_ffi_error(ret_code, err_msg)
 
         if weight is None:
