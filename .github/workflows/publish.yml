@@ -54,3 +54,21 @@ jobs:
           mkdir -p wheels
           python3.7 -m cibuildwheel --output-dir wheels rustfst-python
           python3.7 -m twine upload -u "__token__" -p ${{ secrets.TEST_PYPI_PASSWORD }} -r testpypi --verbose wheels/*
+
+  public-rust-crate:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Rust Stable
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          default: true
+      - name: Publish
+        env:
+          CARGO_REGISTRY_TOKEN_FIXME: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          cd rustfst
+          cargo publish
+
