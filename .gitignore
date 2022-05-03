@@ -44,3 +44,4 @@ rustfst.egg-info/
 rustfst_python.egg-info/
 build/
 dist/
+wheels/
