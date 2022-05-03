@@ -2,7 +2,11 @@ name: Native
 
 on:
   pull_request:
-  push:
+  #  push:
+  #    branches:
+  #      - 'main'
+  #    tags:
+  #      - 'rustfst-v**'
   schedule:
     - cron:  '0 9 * * *'
 
