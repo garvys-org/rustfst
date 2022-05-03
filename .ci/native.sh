@@ -53,8 +53,7 @@ $PYTHON_VERSION rustfst-python/setup.py develop
 $PYTHON_VERSION -m black --check . || fail "Format your code by running black ." 1
 
 # Run linting check
-export ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
-$PYTHON_VERSION -m pytest -vv -s --cache-clear --disable-warnings "$ROOT_DIR/rustfst-python/linting/linting_test.py"
+$PYTHON_VERSION -m pytest -vv -s --cache-clear --disable-warnings rustfst-python/linting/linting_test.py
 
 # Run rustfst python binding tests
 #$PYTHON_VERSION -m pytest -vv -s --cache-clear --disable-warnings rustfst-python
