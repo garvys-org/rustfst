@@ -31,7 +31,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-18.04, macos-10.15 ]
+        os:
+        - ubuntu-18.04
+#        - macos-10.15
 
     runs-on: ${{ matrix.os }}
 
@@ -43,8 +45,8 @@ jobs:
           architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
       - name: Build and publish
         env:
-          CIBW_ENVIRONMENT: PATH="/root/.cargo/env:$PATH"
-          CIBW_ENVIRONMENT_PASS_LINUX: PATH="/root/.cargo/env:$PATH"
+          CIBW_ENVIRONMENT: PATH="/root/.cargo/bin:$HOME/.cargo/bin:$PATH"
+          CIBW_ENVIRONMENT_PASS_LINUX: PATH="/root/.cargo/bin:$HOME/.cargo/bin:$PATH"
           CIBW_BEFORE_BUILD: "which rustup || curl https://sh.rustup.rs -sSf | sh -s -- -y; . $HOME/.cargo/env; rustup toolchain add stable; rustup default stable; python -m pip install setuptools_rust; rustc --version; cargo --help"
         run: |
           python3.7 -m pip install wheel twine setuptools_rust cibuildwheel==2.5.0
