@@ -48,4 +48,4 @@ jobs:
           python3.7 -m pip wheel -e rustfst-python -w wheels/
           echo "LOL"
           ls wheels/
-          python3.7 -m twine upload -u "__token__" -p ${{ secrets.TEST_PYPI_PASSWORD }} testpypi wheels/*
+          python3.7 -m twine upload -u "__token__" -p ${{ secrets.TEST_PYPI_PASSWORD }} -r testpypi wheels/*
