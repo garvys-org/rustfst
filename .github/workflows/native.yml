@@ -40,7 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [ ${{ env.RUST_MIN_VERSION }}, stable ]
+        rust: [ $RUST_MIN_VERSION, stable ]
 
     steps:
       - uses: actions/checkout@v3
