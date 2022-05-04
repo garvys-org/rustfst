@@ -82,6 +82,7 @@ jobs:
             openfst-1.7.2/src/include/
             openfst-1.7.2/lib/libfst.a
             openfst-1.7.2/bin/
+            openfst-1.7.2/lib/
           if-no-files-found: error
 
 #  generate-openfst-output:
@@ -188,10 +189,10 @@ jobs:
       - name: Generate outputs
         run: ./run_openfst.sh
       - name: Install Hyperfine MacOS
-        if: ${{ runner.os }} == 'macOS'
+        if: runner.os == 'macOS'
         run: brew install hyperfine
       - name: Install Hyperfine Linux
-        if: ${{ runner.os }} == 'Linux'
+        if: runner.os == 'Linux'
         run: |
           wget https://github.com/sharkdp/hyperfine/releases/download/v1.6.0/hyperfine_1.6.0_amd64.deb
           sudo dpkg -i hyperfine_1.6.0_amd64.deb
@@ -231,7 +232,7 @@ jobs:
         run: |
           pip install pylint==2.6.0 pytest==6.2.5
           pip install -r rustfst-python/requirements-setup.txt
-          pip install -e rustfst-python
+          python rustfst-python/setup.py develop
       - name: Test rustfst-python
         run: |
           python -m pytest -vv -s --cache-clear --disable-warnings rustfst-python/linting/linting_test.py
