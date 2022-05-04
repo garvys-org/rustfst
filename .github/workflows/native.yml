@@ -84,27 +84,27 @@ jobs:
             openfst-1.7.2/bin/
           if-no-files-found: error
 
-  generate-openfst-output:
-    name: Generate OpenFST outputs on the Test Suite
-    needs: openfst
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
-        with:
-          name: openfst-${{ runner.os }}
-          path: openfst-1.7.2
-      - name: Generate outputs
-        run: ./run_openfst.sh
-      - uses: actions/upload-artifact@v3
-        with:
-          name: openfst-test-data
-          path: |
-            rustfst-tests-data/fst_*/*
-            !rustfst-tests-data/fst_*/*.h
-            rustfst-tests-data/symt_*/*
-            !rustfst-tests-data/symt_*/*.h
-            rustfst-tests-data/weights/*.json
+#  generate-openfst-output:
+#    name: Generate OpenFST outputs on the Test Suite
+#    needs: openfst
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - uses: actions/download-artifact@v3
+#        with:
+#          name: openfst-${{ runner.os }}
+#          path: openfst-1.7.2
+#      - name: Generate outputs
+#        run: ./run_openfst.sh
+#      - uses: actions/upload-artifact@v3
+#        with:
+#          name: openfst-test-data
+#          path: |
+#            rustfst-tests-data/fst_*/*
+#            !rustfst-tests-data/fst_*/*.h
+#            rustfst-tests-data/symt_*/*
+#            !rustfst-tests-data/symt_*/*.h
+#            rustfst-tests-data/weights/*.json
 
   rust-tests:
     name: Run rust tests
@@ -116,7 +116,7 @@ jobs:
         rust: [ 1.49.0, stable ]
         os: [ubuntu-latest, macos-latest]
         cargo-args:
-          - ''
+          - --all --benches --examples --bins --tests
           - --manifest-path rustfst/Cargo.toml --features "state-label-u32"
 
     runs-on: ${{ matrix.os }}
@@ -130,10 +130,12 @@ jobs:
           default: true
       - uses: actions/download-artifact@v3
         with:
-          name: openfst-test-data
-          path: rustfst-tests-data
+          name: openfst-${{ runner.os }}
+          path: openfst-1.7.2
+      - name: Generate outputs
+        run: ./run_openfst.sh
       - name: Cargo test
-        run: cargo test --all --benches --examples --bins --tests ${{ matrix.cargo-args }}
+        run: cargo test ${{ matrix.cargo-args }}
 
   rust-doc:
     name: Try generating Rust Documentation
@@ -156,7 +158,7 @@ jobs:
       - name: Cargo doc
         run: cargo doc --all --no-deps
 
-  bench:
+  rustfst-python-bench:
     name: Run dummy benchmark
     needs: generate-openfst-output
 
@@ -182,10 +184,8 @@ jobs:
         with:
           name: openfst-${{ runner.os }}
           path: openfst-1.7.2
-      - uses: actions/download-artifact@v3
-        with:
-          name: openfst-test-data
-          path: rustfst-tests-data
+      - name: Generate outputs
+        run: ./run_openfst.sh
       - name: Build benchmark
         run: ./build_bench.sh
       - name: Test benchmark
@@ -193,3 +193,33 @@ jobs:
           python -m pip install -e rustfst-python-bench
           python rustfst-python-bench/rustfst_python_bench/bench_all.py rustfst-tests-data/fst_003/raw_vector.fst report.md
           python rustfst-python-bench/rustfst_python_bench/bench_all_detailed.py rustfst-tests-data/fst_003/raw_vector.fst report2.md
+
+  rustfst-python:
+    name: Build and Test rustfst-python
+    needs: generate-openfst-output
+
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: [ 1.49.0, stable ]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          default: true
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ env.PYTHON_VERSION }} # Version range or exact version of a Python version to use, using SemVer's version range syntax
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+      - name: Build rustfst-python
+        run: |
+          pip install pylint==2.6.0 pytest==6.2.5
+          pip install -r rustfst-python/requirements-setup.txt
+          pip install -e rustfst-python
+      - name: Test rustfst-python
+        run: |
+          python -m pytest -vv -s --cache-clear --disable-warnings rustfst-python/linting/linting_test.py
+          python -m pytest -vv -s --cache-clear --disable-warnings rustfst-python
