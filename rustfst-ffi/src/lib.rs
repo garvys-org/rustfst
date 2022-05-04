@@ -1,3 +1,4 @@
+pub mod algorithms;
 pub mod fst;
 pub mod iterators;
 pub mod symbol_table;
@@ -10,14 +11,14 @@ use std::ffi::CString;
 use anyhow::Result;
 use ffi_convert::{CReprOf, RawPointerConverter};
 
-#[cfg(feature = "state-label-u32")]
-pub type CLabel = libc::u32;
-#[cfg(not(feature = "state-label-u32"))]
+#[cfg(feature = "rustfst-state-label-u32")]
+pub type CLabel = libc::c_uint;
+#[cfg(not(feature = "rustfst-state-label-u32"))]
 pub type CLabel = libc::size_t;
 
-#[cfg(feature = "state-label-u32")]
-pub type CStateId = libc::u32;
-#[cfg(not(feature = "state-label-u32"))]
+#[cfg(feature = "rustfst-state-label-u32")]
+pub type CStateId = libc::c_uint;
+#[cfg(not(feature = "rustfst-state-label-u32"))]
 pub type CStateId = libc::size_t;
 
 #[repr(C)]

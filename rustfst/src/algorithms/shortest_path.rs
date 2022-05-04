@@ -23,9 +23,9 @@ use std::fmt::Debug;
 
 #[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
 pub struct ShortestPathConfig {
-    delta: f32,
-    nshortest: usize,
-    unique: bool,
+    pub delta: f32,
+    pub nshortest: usize,
+    pub unique: bool,
 }
 
 impl Default for ShortestPathConfig {

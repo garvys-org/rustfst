@@ -1,4 +1,4 @@
-use crate::{get, get_mut, wrap, RUSTFST_FFI_RESULT};
+use crate::{get, get_mut, wrap, CStateId, RUSTFST_FFI_RESULT};
 use ffi_convert::*;
 use std::ffi::{CStr, CString};
 use std::sync::Arc;
@@ -58,13 +58,13 @@ pub extern "C" fn symt_add_table(
 #[no_mangle]
 pub extern "C" fn symt_find_index(
     symt: *const CSymbolTable,
-    key: *const libc::size_t,
+    key: CStateId,
     symbol: *mut *const libc::c_char,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let symt = get!(CSymbolTable, symt);
         let found_symbol = symt
-            .get_symbol(key as usize)
+            .get_symbol(key)
             .ok_or_else(|| format_err!("No symbol found at index:{}", key as i32))?;
         unsafe {
             *symbol = CString::c_repr_of(found_symbol.to_string())?.into_raw_pointer()
@@ -105,7 +105,6 @@ pub extern "C" fn symt_from_path(
         } else {
             SymbolTable::read_text(&path)?
         };
-
         let raw_ptr = CSymbolTable(Arc::new(symb)).into_raw_pointer();
         unsafe { *table_ptr = raw_ptr };
         Ok(())
@@ -135,12 +134,12 @@ pub extern "C" fn symt_write_file(
 #[no_mangle]
 pub extern "C" fn symt_member_index(
     symt: *const CSymbolTable,
-    key: *const libc::size_t,
+    key: CStateId,
     is_present: *mut libc::size_t,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let symt = get!(CSymbolTable, symt);
-        let res = symt.contains_label(key as usize);
+        let res = symt.contains_label(key);
         unsafe { *is_present = res as libc::size_t };
         Ok(())
     })
@@ -183,6 +182,21 @@ pub extern "C" fn symt_copy(
         let clone = symt.clone();
         let raw_ptr = CSymbolTable(clone).into_raw_pointer();
         unsafe { *cloned_symt = raw_ptr };
+        Ok(())
+    })
+}
+
+#[no_mangle]
+pub fn symt_equals(
+    symt: *const CSymbolTable,
+    other_symt: *const CSymbolTable,
+    is_equal: *mut libc::size_t,
+) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let symt = get!(CSymbolTable, symt);
+        let other_symt = get!(CSymbolTable, other_symt);
+        let res = symt.eq(other_symt);
+        unsafe { *is_equal = res as usize }
         Ok(())
     })
 }

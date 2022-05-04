@@ -8,15 +8,15 @@ from rustfst.tr import Tr
 class TrsIterator:
     """
     TrsIterator(fst, state)
-      This class is used for iterating over the trs leaving some state of an FST.
+      This class is used for iterating over the trs leaving some state of a FST.
     """
 
     def __init__(self, fst: Fst, state: int) -> TrsIterator:
-        self._fst = fst  # reference fst to prolong its lifetime (prevent early gc)
+        self.ptr = fst  # reference fst to prolong its lifetime (prevent early gc)
         state = ctypes.c_size_t(state)
         iter_ptr = ctypes.pointer(ctypes.c_void_p())
 
-        ret_code = lib.trs_iterator_new(fst._fst, state, ctypes.byref(iter_ptr))
+        ret_code = lib.trs_iterator_new(fst.ptr, state, ctypes.byref(iter_ptr))
         err_msg = "`__init__` failed"
         check_ffi_error(ret_code, err_msg)
 
@@ -50,7 +50,7 @@ class TrsIterator:
         if tr_ptr is None:
             return None
 
-        return Tr(ptr=tr_ptr)
+        return Tr(tr_ptr)
 
     def reset(self):
         """
@@ -76,16 +76,16 @@ class TrsIterator:
 class MutableTrsIterator:
     """
     MutableTrsIterator(ifst, state)
-      This class is used for iterating over the trs leaving some state of an FST,
+      This class is used for iterating over the trs leaving some state of a FST,
       also permitting mutation of the current tr.
     """
 
     def __init__(self, fst: Fst, state_id: int) -> MutableTrsIterator:
-        self._fst = fst  # reference fst to prolong its lifetime (prevent early gc)
+        self.ptr = fst  # reference fst to prolong its lifetime (prevent early gc)
         state_id = ctypes.c_size_t(state_id)
         iter_ptr = ctypes.pointer(ctypes.c_void_p())
 
-        ret_code = lib.mut_trs_iterator_new(fst._fst, state_id, ctypes.byref(iter_ptr))
+        ret_code = lib.mut_trs_iterator_new(fst.ptr, state_id, ctypes.byref(iter_ptr))
         err_msg = "`__init__` failed"
         check_ffi_error(ret_code, err_msg)
 
@@ -148,7 +148,7 @@ class MutableTrsIterator:
         if tr_ptr is None:
             return None
 
-        return Tr(ptr=tr_ptr)
+        return Tr(tr_ptr)
 
     def __iter__(self) -> MutableTrsIterator:
         """x.__iter__() <==> iter(x)"""
@@ -165,14 +165,14 @@ class MutableTrsIterator:
 class StateIterator:
     """
     StateIterator(fst)
-      This class is used for iterating over the states in an FST.
+      This class is used for iterating over the states in a FST.
     """
 
     def __init__(self, fst: Fst) -> StateIterator:
-        self._fst = fst  # reference fst to prolong its lifetime (prevent early gc)
+        self.ptr = fst  # reference fst to prolong its lifetime (prevent early gc)
         iter_ptr = ctypes.pointer(ctypes.c_void_p())
 
-        ret_code = lib.state_iterator_new(fst._fst, ctypes.byref(iter_ptr))
+        ret_code = lib.state_iterator_new(fst.ptr, ctypes.byref(iter_ptr))
         err_msg = "`__init__` failed"
         check_ffi_error(ret_code, err_msg)
 

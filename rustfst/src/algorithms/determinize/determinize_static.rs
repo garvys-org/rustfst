@@ -119,8 +119,8 @@ where
 
 #[derive(Clone, Debug, Copy, PartialOrd, PartialEq)]
 pub struct DeterminizeConfig {
-    delta: f32,
-    det_type: DeterminizeType,
+    pub delta: f32,
+    pub det_type: DeterminizeType,
 }
 
 impl DeterminizeConfig {

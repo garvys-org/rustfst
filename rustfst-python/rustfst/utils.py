@@ -13,7 +13,7 @@ from ctypes import (
 from pathlib import Path
 from typing import Union
 
-dylib_dir = Path(__file__).parent
+dylib_dir = Path(__file__).parent / "dylib"
 dylib_path = list(dylib_dir.glob("*.so"))[0]
 lib = cdll.LoadLibrary(str(dylib_path))
 
