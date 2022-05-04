@@ -165,7 +165,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: stable
         os: [ ubuntu-latest, macos-latest ]
 
     runs-on: ${{ matrix.os }}
@@ -175,7 +174,7 @@ jobs:
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.rust }}
+          toolchain: stable
           default: true
       - uses: actions/setup-python@v3
         with:
