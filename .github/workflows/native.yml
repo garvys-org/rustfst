@@ -234,6 +234,4 @@ jobs:
           pip install -r rustfst-python/requirements-setup.txt
           pip install -e rustfst-python
       - name: Test rustfst-python
-        run: |
-          python -m pytest -vv -s --cache-clear --disable-warnings rustfst-python/linting/linting_test.py
-          python -m pytest -vv -s --cache-clear --disable-warnings rustfst-python
+        run: python -m pytest -s --cache-clear --disable-warnings rustfst-python
