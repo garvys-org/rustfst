@@ -232,8 +232,8 @@ jobs:
         run: |
           pip install pylint==2.6.0 pytest==6.2.5
           pip install -r rustfst-python/requirements-setup.txt
-          python rustfst-python/setup.py develop
+          pip install -e rustfst-python
       - name: Test rustfst-python
         run: |
           python -m pytest -vv -s --cache-clear --disable-warnings rustfst-python/linting/linting_test.py
-#          python -m pytest -vv -s --cache-clear --disable-warnings rustfst-python
+          python -m pytest -vv -s --cache-clear --disable-warnings rustfst-python
