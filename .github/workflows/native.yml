@@ -87,7 +87,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: openfst-test-data
-          path: openfst-1.7.2
+          path: rustfst-tests-data
       - name: Cargo test
         run: cargo test --all --benches --examples --bins --tests ${{ matrix.cargo-args }}
 
