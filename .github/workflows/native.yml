@@ -139,7 +139,7 @@ jobs:
 
   rust-doc:
     name: Try generating Rust Documentation
-    needs: generate-openfst-output
+    needs: openfst
 
     runs-on: ubuntu-latest
 
@@ -160,7 +160,7 @@ jobs:
 
   rustfst-python-bench:
     name: Run dummy benchmark
-    needs: generate-openfst-output
+    needs: openfst
 
     runs-on: ubuntu-latest
 
@@ -204,7 +204,7 @@ jobs:
 
   rustfst-python:
     name: Build and Test rustfst-python
-    needs: generate-openfst-output
+    needs: openfst
 
     strategy:
       fail-fast: false
