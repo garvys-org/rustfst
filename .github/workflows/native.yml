@@ -186,6 +186,14 @@ jobs:
           path: openfst-1.7.2
       - name: Generate outputs
         run: ./run_openfst.sh
+      - name: Install Hyperfine MacOS
+        if: ${{ runner.os }} == 'macOS'
+        run: brew install hyperfine
+      - name: Install Hyperfine MacOS
+        if: ${{ runner.os }} == 'Linux'
+        run: |
+          wget https://github.com/sharkdp/hyperfine/releases/download/v1.6.0/hyperfine_1.6.0_amd64.deb
+          sudo dpkg -i hyperfine_1.6.0_amd64.deb
       - name: Build benchmark
         run: ./build_bench.sh
       - name: Test benchmark
