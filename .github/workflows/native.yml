@@ -50,7 +50,7 @@ jobs:
           default: true
           components: rustfmt
       - name: Cargo fmt --check
-        run: cargo fmt --check
+        run: cargo fmt --all -- --check
 
 
   openfst:
