@@ -10,9 +10,51 @@ on:
   schedule:
     - cron:  '0 9 * * *'
 
+env:
+  PYTHON_VERSION: '3.7'
+
 jobs:
+
+  python-fmt:
+    name: Check python formatting
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ env.PYTHON_VERSION }} # Version range or exact version of a Python version to use, using SemVer's version range syntax
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+      - name: Check formatting
+        run: |
+          pip install black==22.3.0
+          python -m black --check . || fail "Format your code by running black ." 1
+
+  rust-fmt:
+    name: Check rust formatting
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: [ 1.49.0, stable ]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          default: true
+      - name: Cargo fmt --check
+        run: cargo fmt --check
+
+
   openfst:
     name: Fetch or Build OpenFST
+    needs: [python-fmt, rust-fmt]
 
     strategy:
       fail-fast: false
@@ -93,6 +135,7 @@ jobs:
 
   rust-doc:
     name: Try generating Rust Documentation
+    needs: generate-openfst-output
 
     runs-on: ubuntu-latest
 
@@ -113,7 +156,7 @@ jobs:
 
   bench:
     name: Run dummy benchmark
-    needs: openfst
+    needs: generate-openfst-output
 
     runs-on: ubuntu-latest
 
@@ -129,9 +172,22 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           default: true
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ env.PYTHON_VERSION }} # Version range or exact version of a Python version to use, using SemVer's version range syntax
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
       - uses: actions/download-artifact@v3
         with:
           name: openfst-${{ runner.os }}
           path: openfst-1.7.2
+      - uses: actions/download-artifact@v3
+        with:
+          name: openfst-test-data
+          path: rustfst-tests-data
       - name: Build benchmark
         run: ./build_bench.sh
+      - name: Test benchmark
+        run: |
+          python -m pip install -e rustfst-python-bench
+          python rustfst-python-bench/rustfst_python_bench/bench_all.py rustfst-tests-data/fst_003/raw_vector.fst report.md
+          python rustfst-python-bench/rustfst_python_bench/bench_all_detailed.py rustfst-tests-data/fst_003/raw_vector.fst report2.md
