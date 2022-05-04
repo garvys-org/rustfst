@@ -40,8 +40,9 @@ metrics
 export-markdown
 fst_output
 .dinghy.toml
-rustfst.egg-info/
-rustfst_python.egg-info/
+*.dot
+*.svg
+*.egg-info/
 build/
 dist/
 wheels/

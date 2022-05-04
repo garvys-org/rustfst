@@ -54,3 +54,15 @@ def test_add_table():
     assert symt1.find("a") == 1
     assert symt1.find("b") == 2
     assert symt1.find("c") == 3
+
+
+def test_eq_table():
+    symt1 = SymbolTable()
+    symt1.add_symbol("a")
+    symt1.add_symbol("b")
+
+    symt2 = SymbolTable()
+    symt2.add_symbol("a")
+    symt2.add_symbol("b")
+
+    assert symt1 == symt2

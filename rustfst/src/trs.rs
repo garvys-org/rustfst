@@ -5,6 +5,7 @@ use std::sync::Arc;
 
 pub trait Trs<W: Semiring>: std::ops::Deref<Target = [Tr<W>]> + Debug {
     fn trs(&self) -> &[Tr<W>];
+    fn to_trs_vec(&self) -> TrsVec<W>;
     fn shallow_clone(&self) -> Self;
 }
 
@@ -14,6 +15,10 @@ pub struct TrsVec<W: Semiring>(pub(crate) Arc<Vec<Tr<W>>>);
 impl<W: Semiring> Trs<W> for TrsVec<W> {
     fn trs(&self) -> &[Tr<W>] {
         self.0.as_slice()
+    }
+
+    fn to_trs_vec(&self) -> TrsVec<W> {
+        self.shallow_clone()
     }
 
     fn shallow_clone(&self) -> Self {
@@ -69,6 +74,10 @@ pub struct TrsConst<W: Semiring> {
 impl<W: Semiring> Trs<W> for TrsConst<W> {
     fn trs(&self) -> &[Tr<W>] {
         &self.trs[self.pos..self.pos + self.n]
+    }
+
+    fn to_trs_vec(&self) -> TrsVec<W> {
+        TrsVec(Arc::clone(&self.trs))
     }
 
     // Doesn't clone the data, only the Arc

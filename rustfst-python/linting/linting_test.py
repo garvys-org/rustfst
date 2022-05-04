@@ -27,5 +27,5 @@ def test_code():
     run_linting_test(ROOT_PATH / "rustfst")
 
 
-def test_test():
-    run_linting_test(ROOT_PATH / "test")
+def test_tests():
+    run_linting_test(ROOT_PATH / "tests")

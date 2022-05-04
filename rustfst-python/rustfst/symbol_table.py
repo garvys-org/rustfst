@@ -15,18 +15,14 @@ class SymbolTable:
 
     def __init__(self, ptr=None) -> SymbolTable:
         if ptr:
-            self._ptr = ptr
+            self.ptr = ptr
         else:
             symt_ptr = ctypes.pointer(ctypes.c_void_p())
             ret_code = lib.symt_new(ctypes.byref(symt_ptr))
             err_msg = "__init__ failed"
             check_ffi_error(ret_code, err_msg)
 
-            self._ptr = symt_ptr
-
-    @property
-    def ptr(self):
-        return self._ptr
+            self.ptr = symt_ptr
 
     def add_symbol(self, symbol: str) -> int:
         """
@@ -44,7 +40,7 @@ class SymbolTable:
             symbol = ctypes.c_char_p(symbol)
 
         integer_key = ctypes.c_size_t()
-        ret_code = lib.symt_add_symbol(self._ptr, symbol, ctypes.byref(integer_key))
+        ret_code = lib.symt_add_symbol(self.ptr, symbol, ctypes.byref(integer_key))
         err_msg = "`add_symbol` failed"
         check_ffi_error(ret_code, err_msg)
 
@@ -59,7 +55,7 @@ class SymbolTable:
             Args:
               syms: A SymbolTable to be merged with the current table.
         """
-        ret_code = lib.symt_add_table(self._ptr, syms.ptr)
+        ret_code = lib.symt_add_table(self.ptr, syms.ptr)
         err_msg = "`add_table` failed"
         check_ffi_error(ret_code, err_msg)
 
@@ -70,7 +66,7 @@ class SymbolTable:
         """
         clone = ctypes.pointer(ctypes.c_void_p())
 
-        ret_code = lib.symt_copy(self._ptr, ctypes.byref(clone))
+        ret_code = lib.symt_copy(self.ptr, ctypes.byref(clone))
         err_msg = "`copy` failed."
         check_ffi_error(ret_code, err_msg)
 
@@ -99,7 +95,7 @@ class SymbolTable:
     def _find_index(self, key: int) -> str:
         key = ctypes.c_size_t(key)
         symbol = ctypes.c_void_p()
-        ret_code = lib.symt_find_index(self._ptr, key, ctypes.byref(symbol))
+        ret_code = lib.symt_find_index(self.ptr, key, ctypes.byref(symbol))
         err_msg = "`find` failed"
         check_ffi_error(ret_code, err_msg)
 
@@ -108,7 +104,7 @@ class SymbolTable:
     def _find_symbol(self, symbol: str) -> int:
         symbol = symbol.encode("utf-8")
         index = ctypes.c_size_t()
-        ret_code = lib.symt_find_symbol(self._ptr, symbol, ctypes.byref(index))
+        ret_code = lib.symt_find_symbol(self.ptr, symbol, ctypes.byref(index))
         err_msg = "`find` failed"
         check_ffi_error(ret_code, err_msg)
 
@@ -132,11 +128,11 @@ class SymbolTable:
 
         if isinstance(key, int):
             index = ctypes.c_size_t(key)
-            ret_code = lib.symt_member_index(self._ptr, index, ctypes.byref(is_present))
+            ret_code = lib.symt_member_index(self.ptr, index, ctypes.byref(is_present))
         elif isinstance(key, str):
             symbol = key.encode("utf-8")
             ret_code = lib.symt_member_symbol(
-                self._ptr, symbol, ctypes.byref(is_present)
+                self.ptr, symbol, ctypes.byref(is_present)
             )
         else:
             raise "key can only be a string or integer. Not {}".format(type(key))
@@ -152,7 +148,7 @@ class SymbolTable:
             Returns the number of symbols in the symbol table.
         """
         num_symbols = ctypes.c_size_t()
-        ret_code = lib.symt_num_symbols(self._ptr, ctypes.byref(num_symbols))
+        ret_code = lib.symt_num_symbols(self.ptr, ctypes.byref(num_symbols))
         err_msg = "`num_symbols` failed"
         check_ffi_error(ret_code, err_msg)
 
@@ -215,7 +211,7 @@ class SymbolTable:
               FstIOError: Write failed.
         """
         ret_code = lib.symt_write_file(
-            self._ptr, str(filename).encode("utf-8"), ctypes.c_size_t(1)
+            self.ptr, str(filename).encode("utf-8"), ctypes.c_size_t(1)
         )
 
         err_msg = "Write failed for bin file : {}".format(filename)
@@ -232,11 +228,30 @@ class SymbolTable:
               FstIOError: Write failed.
         """
         ret_code = lib.symt_write_file(
-            self._ptr, str(filename).encode("utf-8"), ctypes.c_size_t(0)
+            self.ptr, str(filename).encode("utf-8"), ctypes.c_size_t(0)
         )
 
         err_msg = "Write failed for text file : {}".format(filename)
         check_ffi_error(ret_code, err_msg)
 
+    def equals(self, other: SymbolTable) -> bool:
+        """
+        equals(self, other)
+            Check if this SymbolTable is equal to the other
+        :param other: SymbolTable instance
+        :return: bool
+        """
+        is_equal = ctypes.c_size_t()
+
+        ret_code = lib.symt_equals(self.ptr, other.ptr, ctypes.byref(is_equal))
+        err_msg = "Error checking equality"
+        check_ffi_error(ret_code, err_msg)
+
+        return bool(is_equal.value)
+
+    def __eq__(self, y):
+        """x.__eq__(y) <==> x==y"""
+        return self.equals(y)
+
     def __del__(self):
-        lib.symt_destroy(self._ptr)
+        lib.symt_destroy(self.ptr)

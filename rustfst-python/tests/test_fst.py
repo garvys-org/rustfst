@@ -1,9 +1,9 @@
-from rustfst import Fst, Tr, SymbolTable
+from rustfst import VectorFst, Tr, SymbolTable
 import pytest
 
 
 def test_small_fst():
-    fst = Fst()
+    fst = VectorFst()
 
     # States
     s1 = fst.add_state()
@@ -29,8 +29,16 @@ def test_small_fst():
     assert fst.num_trs(s1) == 2
 
 
+def test_final_weight():
+    fst = VectorFst()
+    s1 = fst.add_state()
+    fst.set_final(s1, 2.3)
+
+    assert pytest.approx(fst.final(s1)) == pytest.approx(2.3)
+
+
 def test_fst_del_states():
-    fst = Fst()
+    fst = VectorFst()
 
     # States
     fst.add_state()
@@ -42,7 +50,7 @@ def test_fst_del_states():
 
 
 def test_fst_states_iterator():
-    fst = Fst()
+    fst = VectorFst()
 
     # States
     s1 = fst.add_state()
@@ -56,7 +64,7 @@ def test_fst_states_iterator():
 
 
 def test_fst_trs_iterator():
-    fst = Fst()
+    fst = VectorFst()
 
     # States
     s1 = fst.add_state()
@@ -72,12 +80,17 @@ def test_fst_trs_iterator():
 
     trs = [tr_1, tr_2]
 
+    num_trs = fst.num_trs(s1)
+    idx = 0
     for i, tr in enumerate(fst.trs(s1)):
+        idx += 1
         assert tr == trs[i]
+
+    assert num_trs == idx
 
 
 def test_fst_read_write():
-    fst = Fst()
+    fst = VectorFst()
 
     # States
     s1 = fst.add_state()
@@ -93,13 +106,13 @@ def test_fst_read_write():
 
     fst.write("/tmp/test.fst")
 
-    read_fst = Fst.read("/tmp/test.fst")
+    read_fst = VectorFst.read("/tmp/test.fst")
 
     assert fst == read_fst
 
 
 def test_fst_symt():
-    fst = Fst()
+    fst = VectorFst()
     s1 = fst.add_state()
     s2 = fst.add_state()
     fst.set_start(s1)

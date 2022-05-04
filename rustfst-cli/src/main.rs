@@ -7,6 +7,7 @@ use log::error;
 use crate::binary_fst_algorithm::BinaryFstAlgorithm;
 use crate::cmds::compose::ComposeAlgorithm;
 use crate::cmds::connect::ConnectAlgorithm;
+use crate::cmds::determinize::DeterminizeAlgorithm;
 use crate::cmds::invert::InvertAlgorithm;
 use crate::cmds::map::MapAlgorithm;
 use crate::cmds::minimize::MinimizeAlgorithm;
@@ -28,6 +29,18 @@ fn main() {
         .version("1.0")
         .author("Alexandre Caulier <alexandre.caulier@protonmail.com>")
         .about("Rustfst CLI");
+
+    // Determinize
+    let determinize_cmd = SubCommand::with_name("determinize")
+        .about("Determinize algorithm.")
+        .arg(
+            Arg::with_name("det_type")
+                .long("det_type")
+                .possible_values(&["functional", "nonfunctional", "disambiguate"])
+                .takes_value(true)
+                .default_value("functional"),
+        );
+    app = app.subcommand(one_in_one_out_options(determinize_cmd));
 
     // Minimization
     let minimize_cmd = SubCommand::with_name("minimize")
@@ -176,6 +189,12 @@ fn handle(matches: clap::ArgMatches) -> Result<()> {
             m.value_of("in.fst").unwrap(),
             m.is_present("allow_nondet"),
             m.value_of("out.fst").unwrap(),
+        )
+        .run_cli_or_bench(m),
+        ("determinize", Some(m)) => DeterminizeAlgorithm::new(
+            m.value_of("in.fst").unwrap(),
+            m.value_of("out.fst").unwrap(),
+            m.value_of("det_type").unwrap(),
         )
         .run_cli_or_bench(m),
         ("connect", Some(m)) => ConnectAlgorithm::new(

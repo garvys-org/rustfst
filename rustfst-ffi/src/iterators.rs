@@ -1,9 +1,9 @@
-use crate::fst::CFst;
+use crate::fst::{CFst, CVecFst};
 use crate::tr::CTr;
 use crate::{get, get_mut, wrap, CStateId, RUSTFST_FFI_RESULT};
 use anyhow::Result;
 use ffi_convert::*;
-use rustfst::fst_traits::{CoreFst, MutableFst};
+use rustfst::fst_traits::MutableFst;
 use rustfst::prelude::{StateIterator, Tr, TropicalWeight, TrsVec};
 use rustfst::trs_iter_mut::TrsIterMut;
 use std::iter::Peekable;
@@ -40,12 +40,12 @@ pub struct CTrsIterator(pub(crate) TrsIterator);
 #[no_mangle]
 pub extern "C" fn trs_iterator_new(
     fst_ptr: *mut CFst,
-    state_id: libc::size_t,
+    state_id: CStateId,
     mut iter_ptr: *mut *const CTrsIterator,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst_ptr);
-        fst.get_trs(state_id)
+        fst.fst_get_trs(state_id)
             .map(|trs| {
                 let raw_ptr = {
                     let trs_iterator = TrsIterator { trs: trs, index: 0 };
@@ -179,12 +179,12 @@ impl<'a> RawPointerConverter<CMutTrsIterator<'a>> for CMutTrsIterator<'a> {
 
 #[no_mangle]
 pub extern "C" fn mut_trs_iterator_new(
-    fst_ptr: *mut CFst,
-    state_id: libc::size_t,
+    fst_ptr: *mut CVecFst,
+    state_id: CStateId,
     mut iter_ptr: *mut *const CMutTrsIterator,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
-        let fst = get_mut!(CFst, fst_ptr);
+        let fst = get_mut!(CVecFst, fst_ptr);
         fst.tr_iter_mut(state_id)
             .map(|trs| {
                 let raw_ptr = {
@@ -285,11 +285,11 @@ pub struct CStateIterator(pub(crate) Peekable<Range<CStateId>>);
 
 #[no_mangle]
 pub extern "C" fn state_iterator_new(
-    fst_ptr: *mut CFst,
+    fst_ptr: *mut CVecFst,
     iter_ptr: *mut *const CStateIterator,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
-        let fst = get!(CFst, fst_ptr);
+        let fst = get!(CVecFst, fst_ptr);
         let state_iter = fst.states_iter().peekable();
         let raw_ptr = CStateIterator(state_iter).into_raw_pointer();
         unsafe { *iter_ptr = raw_ptr };
@@ -319,7 +319,7 @@ pub extern "C" fn state_iterator_done(
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let trs_iter = get_mut!(CStateIterator, iter_ptr);
-        let res = trs_iter.peek().is_some();
+        let res = !trs_iter.peek().is_some();
         unsafe { *done = res as libc::size_t };
         Ok(())
     })
