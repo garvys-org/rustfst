@@ -9,7 +9,7 @@ packages = [p for p in find_packages() if "tests" not in p]
 
 PACKAGE_NAME = "rustfst-python"
 RUST_EXTENSION_NAME = "rustfst.dylib.dylib"
-VERSION = "0.9.1-alpha.6"
+VERSION = "0.9.1-alpha.8"
 REPO_ROOT_PATH = Path(__file__).resolve().parents[1]
 CARGO_ROOT_PATH = REPO_ROOT_PATH / "rustfst-ffi"
 CARGO_FILE_PATH = CARGO_ROOT_PATH / "Cargo.toml"
