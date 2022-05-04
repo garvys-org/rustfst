@@ -11,7 +11,8 @@ on:
     - cron:  '0 9 * * *'
 
 env:
-  PYTHON_VERSION: '3.7'
+  PYTHON_VERSION: 3.7
+  RUST_MIN_VERSION: 1.49.0
 
 jobs:
 
@@ -39,7 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [ 1.49.0, stable ]
+        rust: [ ${{ env.RUST_MIN_VERSION }}, stable ]
 
     steps:
       - uses: actions/checkout@v3
@@ -49,9 +50,8 @@ jobs:
           toolchain: ${{ matrix.rust }}
           default: true
           components: rustfmt
-      - name: Cargo fmt --check
+      - name: Cargo fmt check
         run: cargo fmt --all -- --check
-
 
   openfst:
     name: Fetch or Build OpenFST
@@ -114,7 +114,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [ 1.49.0, stable ]
+        rust: [ ${{ env.RUST_MIN_VERSION }}, stable ]
         os: [ubuntu-latest, macos-latest]
         cargo-args:
           - --all --benches --examples --bins --tests
@@ -147,7 +147,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [ 1.49.0, stable ]
+        rust: [ ${{ env.RUST_MIN_VERSION }}, stable ]
 
     steps:
       - uses: actions/checkout@v3
@@ -166,7 +166,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [ 1.49.0, stable ]
+        rust: [ ${{ env.RUST_MIN_VERSION }}, stable ]
         os: [ ubuntu-latest, macos-latest ]
 
     runs-on: ${{ matrix.os }}
@@ -212,7 +212,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [ 1.49.0, stable ]
+        rust: [ ${{ env.RUST_MIN_VERSION }}, stable ]
         os: [ubuntu-latest, macos-latest]
 
     runs-on: ${{ matrix.os }}
@@ -237,3 +237,22 @@ jobs:
         run: |
           python -m pytest -vv -s --cache-clear --disable-warnings rustfst-python/linting/linting_test.py
 #          python -m pytest -vv -s --cache-clear --disable-warnings rustfst-python
+
+  publish-rust-crate:
+    name: Publish Rust Crate
+    needs: [ rust-doc, rust-tests, rustfst-python-bench, rustfst-python ]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/rustfst-v')
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Rust Stable
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          default: true
+      - name: Publish rustfst
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          cd rustfst
+          cargo publish
