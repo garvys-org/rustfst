@@ -11,8 +11,58 @@ on:
     - cron:  '0 9 * * *'
 
 jobs:
-  native:
+  openfst:
+    name: Fetch or Build OpenFST
+
     strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Cache Openfst build
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: openfst-1.7.2
+          key: ${{ runner.os }}-openfst-1.7.2-build
+      - name: Build Openfst if necessary
+        if: steps.cache.outputs.cache-hit != 'true
+        run: ./build_openfst.sh
+      - uses: actions/upload-artifact@v3
+        with:
+          name: openfst-${{ runner.os }}
+          path: openfst-1.7.2
+
+  generate-openfst-output:
+    name: Generate OpenFST outputs on the Test Suite
+    needs: openfst
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: openfst-${{ runner.os }}
+      - name: Generate outputs
+        run: ./run_openfst.sh
+      - uses: actions/upload-artifact@v3
+        with:
+          name: openfst-test-data
+          path: |
+            rustfst-tests-data/fst_*/*
+            !rustfst-tests-data/fst_*/*.h
+            rustfst-tests-data/symt_*/*
+            !rustfst-tests-data/symt_*/*.h
+
+  rust-tests:
+    name: Run rust tests
+    needs: generate-openfst-output
+
+    strategy:
+      fail-fast: false
       matrix:
         rust: [ 1.49.0, stable ]
         os: [ubuntu-latest, macos-latest]
@@ -20,20 +70,19 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-python@v3
-      with:
-        python-version: '3.7' # Version range or exact version of a Python version to use, using SemVer's version range syntax
-        architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
-    - name: Cache Openfst build
-      uses: actions/cache@v3
-      env:
-        cache-name: cache-openfst-build
-      with:
-        path: openfst-1.7.2
-        key: ${{ runner.os }}-build-${{ env.cache-name }}
-    - name: Native script
-      env:
-        RUST_VERSION: ${{matrix.rust}}
-        PYTHON_VERSION: "python3.7"
-      run: .ci/native.sh
+      - uses: actions/checkout@v3
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          default: true
+      - uses: actions/download-artifact@v3
+        with:
+          name: openfst-test-data
+      - name: Cargo test
+        run: cargo test
+
+
+
+
+
