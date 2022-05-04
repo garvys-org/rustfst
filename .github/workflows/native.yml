@@ -30,7 +30,7 @@ jobs:
           path: openfst-1.7.2
           key: ${{ runner.os }}-openfst-1.7.2-build
       - name: Build Openfst if necessary
-        if: steps.cache.outputs.cache-hit != 'true
+        if: steps.cache.outputs.cache-hit != 'true'
         run: ./build_openfst.sh
       - uses: actions/upload-artifact@v3
         with:
