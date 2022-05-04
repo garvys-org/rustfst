@@ -107,7 +107,7 @@ jobs:
 #            rustfst-tests-data/weights/*.json
 
   rust-tests:
-    name: Run rust tests
+    name: rust-tests
     needs: openfst
 
     strategy:
@@ -138,7 +138,7 @@ jobs:
         run: cargo test ${{ matrix.cargo-args }}
 
   rust-doc:
-    name: Try generating Rust Documentation
+    name: rust-doc
     needs: openfst
 
     runs-on: ubuntu-latest
@@ -159,15 +159,16 @@ jobs:
         run: cargo doc --all --no-deps
 
   rustfst-python-bench:
-    name: Run dummy benchmark
+    name: rustfst-python-bench
     needs: openfst
-
-    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         rust: [ 1.49.0, stable ]
+        os: [ ubuntu-latest, macos-latest ]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v3
@@ -189,7 +190,7 @@ jobs:
       - name: Install Hyperfine MacOS
         if: ${{ runner.os }} == 'macOS'
         run: brew install hyperfine
-      - name: Install Hyperfine MacOS
+      - name: Install Hyperfine Linux
         if: ${{ runner.os }} == 'Linux'
         run: |
           wget https://github.com/sharkdp/hyperfine/releases/download/v1.6.0/hyperfine_1.6.0_amd64.deb
@@ -198,12 +199,13 @@ jobs:
         run: ./build_bench.sh
       - name: Test benchmark
         run: |
+          chmod +x openfst-1.7.2/bin/fst*
           python -m pip install -e rustfst-python-bench
           python rustfst-python-bench/rustfst_python_bench/bench_all.py rustfst-tests-data/fst_003/raw_vector.fst report.md
           python rustfst-python-bench/rustfst_python_bench/bench_all_detailed.py rustfst-tests-data/fst_003/raw_vector.fst report2.md
 
   rustfst-python:
-    name: Build and Test rustfst-python
+    name: rustfst-python
     needs: openfst
 
     strategy:
