@@ -108,7 +108,7 @@ jobs:
 
   rust-tests:
     name: Run rust tests
-    needs: generate-openfst-output
+    needs: openfst
 
     strategy:
       fail-fast: false
