@@ -35,7 +35,11 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: openfst-${{ runner.os }}
-          path: openfst-1.7.2
+          path: |
+            openfst-1.7.2/src/include/
+            openfst-1.7.2/lib/libfst.a
+            openfst-1.7.2/bin/
+          if-no-files-found: error
 
   generate-openfst-output:
     name: Generate OpenFST outputs on the Test Suite
@@ -83,6 +87,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: openfst-test-data
+          path: openfst-1.7.2
       - name: Cargo test
         run: cargo test --all --benches --examples --bins --tests ${{ matrix.cargo-args }}
 
@@ -106,7 +111,27 @@ jobs:
       - name: Cargo doc
         run: cargo doc --all --no-deps
 
+  bench:
+    name: Run dummy benchmark
+    needs: openfst
 
+    runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: [ 1.49.0, stable ]
 
-
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          default: true
+      - uses: actions/download-artifact@v3
+        with:
+          name: openfst-${{ runner.os }}
+          path: openfst-1.7.2
+      - name: Build benchmark
+        run: ./build_bench.sh
