@@ -46,6 +46,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: openfst-${{ runner.os }}
+          path: openfst-1.7.2
       - name: Generate outputs
         run: ./run_openfst.sh
       - uses: actions/upload-artifact@v3
@@ -66,6 +67,9 @@ jobs:
       matrix:
         rust: [ 1.49.0, stable ]
         os: [ubuntu-latest, macos-latest]
+        cargo-args:
+          - ''
+          - --manifest-path rustfst/Cargo.toml --features "state-label-u32"
 
     runs-on: ${{ matrix.os }}
 
@@ -80,7 +84,27 @@ jobs:
         with:
           name: openfst-test-data
       - name: Cargo test
-        run: cargo test
+        run: cargo test --all --benches --examples --bins --tests ${{ matrix.cargo-args }}
+
+  rust-doc:
+    name: Try generating Rust Documentation
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: [ 1.49.0, stable ]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          default: true
+      - name: Cargo doc
+        run: cargo doc --all --no-deps
 
 
 
