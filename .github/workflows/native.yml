@@ -12,7 +12,7 @@ on:
 
 env:
   PYTHON_VERSION: 3.7
-  RUST_MIN_VERSION: 1.49.0
+  RUST_VERSIONS: [1.49.0, stable]
 
 jobs:
 
@@ -40,7 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [ $RUST_MIN_VERSION, stable ]
+        rust: ${{ env.RUST_VERSIONS }}
 
     steps:
       - uses: actions/checkout@v3
@@ -114,7 +114,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [ $RUST_MIN_VERSION, stable ]
+        rust: ${{ env.RUST_VERSIONS }}
         os: [ubuntu-latest, macos-latest]
         cargo-args:
           - --all --benches --examples --bins --tests
@@ -147,7 +147,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [ $RUST_MIN_VERSION, stable ]
+        rust: ${{ env.RUST_VERSIONS }}
 
     steps:
       - uses: actions/checkout@v3
@@ -166,7 +166,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [ $RUST_MIN_VERSION, stable ]
+        rust: ${{ env.RUST_VERSIONS }}
         os: [ ubuntu-latest, macos-latest ]
 
     runs-on: ${{ matrix.os }}
@@ -212,7 +212,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [ $RUST_MIN_VERSION, stable ]
+        rust: ${{ env.RUST_VERSIONS }}
         os: [ubuntu-latest, macos-latest]
 
     runs-on: ${{ matrix.os }}
