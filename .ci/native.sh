@@ -45,8 +45,8 @@ echo $PYTHON_VERSION
 $PYTHON_VERSION --version
 
 ($PYTHON_VERSION -m pip freeze | grep black 1>/dev/null 2>&1) || $PYTHON_VERSION -m pip install black==21.7b0
-$PYTHON_VERSION -mpip install pylint==2.6.0 pytest==6.2.5
-$PYTHON_VERSION -mpip install -r rustfst-python/requirements-setup.txt
+$PYTHON_VERSION -m pip install pylint==2.6.0 pytest==6.2.5
+$PYTHON_VERSION -m pip install -r rustfst-python/requirements-setup.txt
 
 cd rustfst-python
 $PYTHON_VERSION -m setup.py develop
