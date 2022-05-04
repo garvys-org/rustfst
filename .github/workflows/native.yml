@@ -114,7 +114,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [ ${{ env.RUST_MIN_VERSION }}, stable ]
+        rust: [ $RUST_MIN_VERSION, stable ]
         os: [ubuntu-latest, macos-latest]
         cargo-args:
           - --all --benches --examples --bins --tests
@@ -147,7 +147,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [ ${{ env.RUST_MIN_VERSION }}, stable ]
+        rust: [ $RUST_MIN_VERSION, stable ]
 
     steps:
       - uses: actions/checkout@v3
@@ -166,7 +166,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [ ${{ env.RUST_MIN_VERSION }}, stable ]
+        rust: [ $RUST_MIN_VERSION, stable ]
         os: [ ubuntu-latest, macos-latest ]
 
     runs-on: ${{ matrix.os }}
@@ -212,7 +212,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [ ${{ env.RUST_MIN_VERSION }}, stable ]
+        rust: [ $RUST_MIN_VERSION, stable ]
         os: [ubuntu-latest, macos-latest]
 
     runs-on: ${{ matrix.os }}
