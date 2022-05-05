@@ -201,7 +201,7 @@ jobs:
         run: |
           chmod +x openfst-1.7.2/bin/fst*
           python -m pip install -e rustfst-python-bench
-          python rustfst-python-bench/rustfst_python_bench/bench_all.py -w 1 -r 1 debug rustfst-tests-data/fst_003/raw_vector.fst report.md
+          python rustfst-python-bench/rustfst_python_bench/bench_all.py -w 1 -r 2 debug rustfst-tests-data/fst_003/raw_vector.fst report.md
           python rustfst-python-bench/rustfst_python_bench/bench_all_detailed.py -w 1 -r 2 debug rustfst-tests-data/fst_003/raw_vector.fst report2.md
 
   rustfst-python:
