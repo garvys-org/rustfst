@@ -83,17 +83,7 @@ jobs:
             openfst-1.7.2/bin/
             openfst-1.7.2/lib/
           if-no-files-found: error
-      - name: Generate outputs
-        run: ./run_openfst.sh
-      - uses: actions/upload-artifact@v3
-        with:
-          name: openfst-test-data-${{ runner.os }}
-          path: |
-            rustfst-tests-data/fst_*/*
-            !rustfst-tests-data/fst_*/*.h
-            rustfst-tests-data/symt_*/*
-            !rustfst-tests-data/symt_*/*.h
-            rustfst-tests-data/weights/*.json
+
 
 #  generate-openfst-output:
 #    name: Generate OpenFST outputs on the Test Suite
@@ -141,8 +131,10 @@ jobs:
           default: true
       - uses: actions/download-artifact@v3
         with:
-          name: openfst-test-data-${{ runner.os }}
-          path: rustfst-test-data
+          name: openfst-${{ runner.os }}
+          path: openfst-1.7.2
+      - name: Generate outputs
+        run: ./run_openfst.sh
       - name: Cargo test
         run: cargo test ${{ matrix.cargo-args }}
 
@@ -193,10 +185,8 @@ jobs:
         with:
           name: openfst-${{ runner.os }}
           path: openfst-1.7.2
-      - uses: actions/download-artifact@v3
-        with:
-          name: openfst-test-data-${{ runner.os }}
-          path: rustfst-test-data
+      - name: Generate outputs
+        run: ./run_openfst.sh
       - name: Install Hyperfine MacOS
         if: runner.os == 'macOS'
         run: brew install hyperfine
