@@ -195,13 +195,13 @@ jobs:
           wget https://github.com/sharkdp/hyperfine/releases/download/v1.6.0/hyperfine_1.6.0_amd64.deb
           sudo dpkg -i hyperfine_1.6.0_amd64.deb
       - name: Build benchmark
-        run: ./build_bench.sh
+        run: ./build_bench.sh debug
       - name: Test benchmark
         run: |
           chmod +x openfst-1.7.2/bin/fst*
           python -m pip install -e rustfst-python-bench
-          python rustfst-python-bench/rustfst_python_bench/bench_all.py rustfst-tests-data/fst_003/raw_vector.fst report.md
-          python rustfst-python-bench/rustfst_python_bench/bench_all_detailed.py rustfst-tests-data/fst_003/raw_vector.fst report2.md
+          python rustfst-python-bench/rustfst_python_bench/bench_all.py -w 1 -r 1 debug rustfst-tests-data/fst_003/raw_vector.fst report.md
+          python rustfst-python-bench/rustfst_python_bench/bench_all_detailed.py -w 1 -r 1 debug rustfst-tests-data/fst_003/raw_vector.fst report2.md
 
   rustfst-python:
     name: rustfst-python
