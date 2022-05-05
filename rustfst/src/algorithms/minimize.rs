@@ -517,9 +517,7 @@ fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<Rc<RefC
     let mut queue = LifoQueue::default();
     pre_partition(fst, &partition, &mut queue);
 
-    let comp = TrIterCompare {
-        partition: Rc::clone(&partition),
-    };
+    let comp = TrIterCompare {};
 
     let mut aiter_queue = BinaryHeap::new_by(|v1, v2| {
         if comp.compare(v1, v2) {
@@ -594,10 +592,8 @@ impl<W: Semiring, T: Trs<W>> TrsIterCollected<W, T> {
     }
 }
 
-#[derive(Clone)]
-struct TrIterCompare {
-    partition: Rc<RefCell<Partition>>,
-}
+#[derive(Debug, Clone)]
+struct TrIterCompare {}
 
 impl TrIterCompare {
     fn compare<W: Semiring, T: Trs<W>>(
