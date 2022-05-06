@@ -1,0 +1,12 @@
+site_name: rustfst-python
+site_url: https://github.com/Garvys/rustfst
+nav:
+    - Home: index.md
+    - About: about.md
+    - API : api.md
+theme: material
+repo_url: https://github.com/Garvys/rustfst
+repo_name: rustfst
+plugins:
+  - search
+  - mkdocstrings

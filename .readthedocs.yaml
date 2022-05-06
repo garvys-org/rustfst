@@ -14,8 +14,10 @@ build:
 
 
 # Build documentation in the docs/ directory with Sphinx
-sphinx:
-  configuration: rustfst-python/docs/source/conf.py
+#sphinx:
+#  configuration: rustfst-python/docs/source/conf.py
+mkdocs:
+  configuration: rustfst-python/mkdocs/mkdocs.yml
 
 # If using Sphinx, optionally build your docs in additional formats such as PDF
 # formats:
