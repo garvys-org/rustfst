@@ -5,13 +5,19 @@ import subprocess
 import tempfile
 
 from rustfst_python_bench.algorithms.supported_algorithms import SupportedAlgorithms
-from rustfst_python_bench.constants import RUSTFST_CLI, BENCH_OPENFST_BINS
+from rustfst_python_bench.constants import get_rusftfst_cli_dir, BENCH_OPENFST_BINS
 from rustfst_python_bench.utils import header_report
 
 
 def parse():
     parser = argparse.ArgumentParser(
         description="Script to bench all CLIs of OpenFST and RustFST"
+    )
+
+    parser.add_argument(
+        "compilation_mode",
+        type=str,
+        choices=["debug", "release"]
     )
 
     parser.add_argument(
@@ -45,11 +51,13 @@ def parse():
     return args
 
 
-def bench_algo(algo_name, path_in_fst, results_dir, path_report_md, warmup, runs, algo):
+def bench_algo(algo_name, path_in_fst, results_dir, path_report_md, warmup, runs, algo, compilation_mode):
 
     path_out_rustfst = os.path.join(results_dir, f'{algo_name}_rustfst.fst')
 
-    cmd_rustfst = f"{RUSTFST_CLI} {algo.rustfst_subcommand()} {algo.get_cli_args()} {path_in_fst} {path_out_rustfst} " \
+    rustfst_cli = get_rusftfst_cli_dir(compilation_mode)
+
+    cmd_rustfst = f"{rustfst_cli} {algo.rustfst_subcommand()} {algo.get_cli_args()} {path_in_fst} {path_out_rustfst} " \
                   f"--bench --export-markdown {path_report_md} --n_iters {runs} --n_warm_ups {warmup}"
 
     subprocess.check_call([cmd_rustfst], shell=True)
@@ -76,7 +84,7 @@ def bench_algo(algo_name, path_in_fst, results_dir, path_report_md, warmup, runs
     algo.check_correctness(path_out_openfst, path_out_rustfst)
 
 
-def bench(path_in_fst, path_report_md, warmup, runs):
+def bench(compilation_mode: str, path_in_fst: str, path_report_md: str, warmup, runs):
 
     with io.open(path_report_md, mode="w") as report_f:
         report_f.write("# Benchmark OpenFST C++ functions vs RustFST Rust functions\n")
@@ -89,7 +97,7 @@ def bench(path_in_fst, path_report_md, warmup, runs):
                 params = algo_class.get_parameters()
                 report_f.write(f"## {algoname.capitalize()}\n")
                 for param in params:
-                    bench_algo(algoname, path_in_fst, tmpdirname, report_path_temp, warmup, runs, param)
+                    bench_algo(algoname, path_in_fst, tmpdirname, report_path_temp, warmup, runs, param, compilation_mode)
 
                     with io.open(report_path_temp, mode="r") as f:
 
@@ -102,7 +110,13 @@ def bench(path_in_fst, path_report_md, warmup, runs):
 
 def main():
     args = parse()
-    bench(args.path_in_fst, args.path_report_md, args.warmup, args.runs)
+    bench(
+        compilation_mode=args.compilation_mode,
+        path_in_fst=args.path_in_fst,
+        path_report_md=args.path_report_md,
+        warmup=args.warmup,
+        runs=args.runs
+    )
 
 
 if __name__ == '__main__':
