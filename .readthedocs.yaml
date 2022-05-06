@@ -29,5 +29,4 @@ python:
   - requirements: rustfst-python/requirements-setup.txt
   - method: pip
     path: rustfst-python
-  - method: pip
-    path: jinja2<3.1.0
+  - requirements: rustfst-python/mkdocs/requirements.txt
