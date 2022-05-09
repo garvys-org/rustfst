@@ -233,6 +233,20 @@ jobs:
       - name: Test rustfst-python
         run: python -m pytest -s --cache-clear --disable-warnings rustfst-python
 
+  publish-python-doc:
+    name: Publish rustfst-python's doc
+#    needs: [ rust-doc, rust-tests, rustfst-python-bench, rustfst-python ]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/readthedocs'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install -r requirements-mkdocs.txt
+      - run: mkdocs build
+
+
   publish-rust-crate:
     name: Publish Rust Crate to Crates.io
     needs: [ rust-doc, rust-tests, rustfst-python-bench, rustfst-python ]
