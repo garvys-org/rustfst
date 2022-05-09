@@ -4,7 +4,7 @@ from pathlib import Path
 
 import mkdocs_gen_files
 
-path_root = Path(__file__).resolve().parents[2].resolve()
+path_root = Path(__file__).resolve().parents[1].resolve()
 path_rustfst_module = path_root / "rustfst-python/rustfst"
 path_rustfst_python = path_root / "rustfst-python"
 path_docs = path_root / "docs"
