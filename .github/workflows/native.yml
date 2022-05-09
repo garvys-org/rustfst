@@ -237,7 +237,7 @@ jobs:
     name: Publish rustfst-python's doc
 #    needs: [ rust-doc, rust-tests, rustfst-python-bench, rustfst-python ]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/readthedocs'
+#    if: github.ref == 'refs/heads/readthedocs'
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
