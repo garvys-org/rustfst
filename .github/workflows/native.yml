@@ -245,6 +245,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: pip install -r requirements-mkdocs.txt
       - run: mkdocs build
+      - run: mkdocs gh-deploy --force
 
 
   publish-rust-crate:
