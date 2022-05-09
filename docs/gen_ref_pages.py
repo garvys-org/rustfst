@@ -5,13 +5,13 @@ from pathlib import Path
 import mkdocs_gen_files
 
 path_root = Path(__file__).resolve().parents[1].resolve()
-path_rustfst_module = path_root / "rustfst-python/rustfst"
 path_rustfst_python = path_root / "rustfst-python"
-path_docs = path_root / "docs"
-path_reference = path_root / "docs" / "reference"
+path_rustfst_module = path_rustfst_python / "rustfst"
+path_reference = Path("reference")
 
 nav = mkdocs_gen_files.Nav()
 
+print(path_rustfst_module)
 for path in sorted(path_rustfst_module.rglob("*.py")):  #
     print(path)
 

@@ -71,7 +71,7 @@ class SymbolTable:
 
         return SymbolTable(ptr=clone)
 
-    def find(self, key: Union[int, str]):
+    def find(self, key: Union[int, str]) -> Union[int, str]:
         """
         Given a symbol or index, finds the other one.
         This method returns the index associated with a symbol key, or the symbol
@@ -108,7 +108,7 @@ class SymbolTable:
 
         return int(index.value)
 
-    def member(self, key) -> bool:
+    def member(self, key: Union[int, str]) -> bool:
         """
         Given a symbol or index, returns whether it is found in the table.
         This method returns a boolean indicating whether the given symbol or index
@@ -243,7 +243,7 @@ class SymbolTable:
 
         return bool(is_equal.value)
 
-    def __eq__(self, y):
+    def __eq__(self, other: SymbolTable) -> bool:
         """
         Check if this `SymbolTable` is equal to the other
 
@@ -252,7 +252,7 @@ class SymbolTable:
         Returns:
              bool
         """
-        return self.equals(y)
+        return self.equals(other)
 
     def __del__(self):
         lib.symt_destroy(self.ptr)

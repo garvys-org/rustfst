@@ -18,6 +18,7 @@ plugins:
   - mkdocstrings:
       watch:
         - docs/gen_ref_pages.py
+        - rustfst-python/rustfst
       default_handler: python
       handlers:
         python:

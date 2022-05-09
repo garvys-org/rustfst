@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+from typing import Optional
+
 from rustfst.weight import weight_one
 from rustfst.fst.vector_fst import VectorFst
 from rustfst.symbol_table import SymbolTable
@@ -10,7 +13,9 @@ from rustfst.utils import (
 )
 
 
-def acceptor(astring, symbol_table: SymbolTable, weight=None):
+def acceptor(
+    astring: str, symbol_table: SymbolTable, weight: Optional[float] = None
+) -> VectorFst:
     """
     Creates an acceptor from a string.
     This function creates a FST which accepts its input with a fixed weight
@@ -38,10 +43,14 @@ def acceptor(astring, symbol_table: SymbolTable, weight=None):
     return VectorFst(ptr=acceptor_fst_ptr)
 
 
-def transducer(istring, ostring, isymt: SymbolTable, osymt: SymbolTable, weight=None):
+def transducer(
+    istring: str,
+    ostring: str,
+    isymt: SymbolTable,
+    osymt: SymbolTable,
+    weight: Optional[float] = None,
+) -> VectorFst:
     """
-    transducer(istring, ostring, weight=None,
-               isymt, osymt)
     Creates a transducer from a pair of strings or acceptor FSTs.
     This function creates a FST which transduces from the first string to
     the second with a fixed weight (defaulting to semiring One).
@@ -73,9 +82,8 @@ def transducer(istring, ostring, isymt: SymbolTable, osymt: SymbolTable, weight=
     return VectorFst(ptr=transducer_fst_ptr)
 
 
-def epsilon_machine(weight=None):
+def epsilon_machine(weight: Optional[float] = None) -> VectorFst:
     """
-    epsilon_machine(arc_type="standard")
     Constructs a single-state, no-arc FST accepting epsilon.
     This function creates an unweighted FST with a single state which is both
     initial and final.
