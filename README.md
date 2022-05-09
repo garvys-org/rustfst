@@ -46,7 +46,6 @@ use anyhow::Result;
 use rustfst::prelude::*;
 use rustfst::algorithms::determinize::{DeterminizeType, determinize};
 use rustfst::algorithms::rm_epsilon::rm_epsilon;
-use std::sync::Arc;
 
 fn main() -> Result<()> {
     // Creates a empty wFST
@@ -82,7 +81,7 @@ fn main() -> Result<()> {
     connect(&mut fst)?;
 
     // - Optimize the FST by merging states with the same behaviour.
-    minimize(&mut fst, true)?;
+    minimize(&mut fst)?;
 
     // - Copy all the input labels in the output.
     project(&mut fst, ProjectType::ProjectInput);
@@ -91,15 +90,11 @@ fn main() -> Result<()> {
     rm_epsilon(&mut fst)?;
 
     // - Compute an equivalent FST but deterministic.
-    fst = determinize(Arc::new(fst), DeterminizeType::DeterminizeFunctional)?;
+    fst = determinize(&fst)?;
 
     Ok(())
 }
 ```
-
-## Status
-
-A big number of algorithms are already implemented. The main one missing is the Composition.
 
 <!-- cargo-sync-readme end -->
 

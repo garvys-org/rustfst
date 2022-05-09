@@ -16,13 +16,12 @@ from typing import Optional
 
 class Tr:
     """
-    Tr(ilabel, olabel, weight, next_state)
-        Structure representing a transition from a state to another state in a FST.
-        Attributes:
-            ilabel: The input label.
-            olabel: The output label.
-            weight: The arc weight.
-            nextstate: The destination state for the arc.
+    Structure representing a transition from a state to another state in a FST.
+    Attributes:
+        ilabel: The input label.
+        olabel: The output label.
+        weight: The arc weight.
+        nextstate: The destination state for the arc.
     """
 
     def __init__(

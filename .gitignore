@@ -46,3 +46,8 @@ fst_output
 build/
 dist/
 wheels/
+
+rustfst-python/mkdocs/reference
+rustfst-python/mkdocs/site
+rustfst-python/mkdocs/docs/reference
+

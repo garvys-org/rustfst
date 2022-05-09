@@ -2,12 +2,7 @@ site_name: rustfst-python
 site_url: https://github.com/Garvys/rustfst
 nav:
     - Home: index.md
-    - About: about.md
-    - API : api.md
     - Code Reference: reference/
-#    - Code Reference:
-#      - algorithms:
-#        - reverse: reference/rustfst/algorithms/reverse.md
 
 theme: material
 repo_url: https://github.com/Garvys/rustfst
@@ -19,9 +14,9 @@ plugins:
       - docs/gen_ref_pages.py
   - literate-nav:
       nav_file: SUMMARY.md
+  - section-index
   - mkdocstrings:
       watch:
-        - ../rustfst
         - docs/gen_ref_pages.py
       default_handler: python
       handlers:
@@ -29,9 +24,10 @@ plugins:
           rendering:
             enable_inventory: true
             heading_level: 3
-            separate_signature: true
+            separate_signature: false
             show_signature_annotations: true
-            show_if_no_docstring: true
+            show_if_no_docstring: false
             show_category_heading: true
-            show_object_full_path: true
+            show_object_full_path: false
+            show_submodules: yes
 

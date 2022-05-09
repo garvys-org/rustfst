@@ -7,7 +7,7 @@ import mkdocs_gen_files
 path_rustfst_python = Path(__file__).resolve().parents[2].resolve()
 path_rustfst_module = path_rustfst_python / "rustfst"
 path_docs = path_rustfst_python / "mkdocs" / "docs"
-path_reference = path_rustfst_python / "mkdocs" / "reference"
+path_reference = path_rustfst_python / "mkdocs" / "docs" / "reference"
 
 nav = mkdocs_gen_files.Nav()
 
@@ -26,8 +26,9 @@ for path in sorted(path_rustfst_module.rglob("*.py")):  #
     print(f"Parts = {parts}")
 
     if parts[-1] == "__init__":  #
-
         parts = parts[:-1]
+        doc_path = doc_path.with_name("index.md")
+        full_doc_path = full_doc_path.with_name("index.md")
 
     elif parts[-1] == "__main__":
         continue
