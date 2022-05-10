@@ -1,1 +1,0 @@
-::: rustfst.fst.const_fst

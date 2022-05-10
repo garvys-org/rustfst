@@ -1,1 +1,0 @@
-::: rustfst.fst.vector_fst

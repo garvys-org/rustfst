@@ -1,1 +1,0 @@
-::: rustfst.symbol_table
