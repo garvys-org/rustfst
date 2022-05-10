@@ -251,7 +251,11 @@ jobs:
       - run: pip install -r rustfst-python/requirements-setup.txt
       - run: pip install -e rustfst-python
       - run: pip install -r requirements-mkdocs.txt
+      - run: git fetch origin gh-pages --depth=1
       - run: mike deploy --push latest
+        env: 
+          GIT_COMMITTER_NAME: garvys-ci-bot
+          GIT_COMMITTER_EMAIL: alexandre.caulier.a@gmail.com
 
 
   publish-rust-crate:
