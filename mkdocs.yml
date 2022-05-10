@@ -8,6 +8,7 @@ theme: material
 repo_url: https://github.com/Garvys/rustfst
 repo_name: rustfst
 plugins:
+  - macros
   - mike:
       version_selector: true
   - search
@@ -33,6 +34,7 @@ plugins:
             show_category_heading: true
             show_object_full_path: false
             show_submodules: yes
+            members_order: source
 extra:
   version:
     default: latest

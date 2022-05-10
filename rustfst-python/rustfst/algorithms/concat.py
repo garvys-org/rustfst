@@ -9,11 +9,12 @@ from rustfst.fst.vector_fst import VectorFst
 
 def concat(fst: VectorFst, other_fst: VectorFst) -> VectorFst:
     """
-    concat(fst, other_fst)
-    compute the concat of two FSTs.
-    :param fst: Fst
-    :param other_fst: Fst
-    :return: Fst
+    Compute the concatenation of two FSTs.
+    Args:
+        fst: Left fst.
+        other_fst: Right fst.
+    Returns:
+        Resulting fst.
     """
 
     ret_code = lib.fst_concat(fst.ptr, other_fst.ptr)

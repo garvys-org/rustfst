@@ -8,12 +8,13 @@ from rustfst.utils import (
 from rustfst.fst.vector_fst import VectorFst
 
 
-def connect(fst: VectorFst):
+def connect(fst: VectorFst) -> VectorFst:
     """
-    connect(fst)
-    connect an fst
-    :param fst: Fst
-    :return: Fst
+    Remove useless states in an Fst.
+    Args:
+        fst: Fst to trim.
+    Returns:
+        Fst where the useless states have been removed.
     """
 
     connectd_fst = ctypes.c_void_p()

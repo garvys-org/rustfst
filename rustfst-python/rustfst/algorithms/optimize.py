@@ -9,9 +9,9 @@ from rustfst.fst.vector_fst import VectorFst
 
 def optimize(fst: VectorFst):
     """
-    optimize(fst)
-    omptimize an fst
-    :param fst: Fst
+    Optimize an fst.
+    Args:
+        fst: Fst to optimize.
     """
 
     ret_code = lib.fst_optimize(fst.ptr)
