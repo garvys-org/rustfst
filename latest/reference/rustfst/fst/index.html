@@ -3593,16 +3593,11 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal">361</span>
 <span class="normal">362</span>
 <span class="normal">363</span>
-<span class="normal">364</span>
-<span class="normal">365</span>
-<span class="normal">366</span>
-<span class="normal">367</span>
-<span class="normal">368</span>
-<span class="normal">369</span>
-<span class="normal">370</span>
-<span class="normal">371</span>
-<span class="normal">372</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">VectorFst</span><span class="p">(</span><span class="n">Fst</span><span class="p">):</span>
+<span class="normal">364</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">VectorFst</span><span class="p">(</span><span class="n">Fst</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates an empty VectorFst.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">ptr</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">ptr</span>
         <span class="k">else</span><span class="p">:</span>
@@ -3616,17 +3611,16 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <span class="k">def</span> <span class="nf">add_tr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">tr</span><span class="p">:</span> <span class="n">Tr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        add_tr(self, state, tr)</span>
-<span class="sd">            Adds a new tr to the FST and return self. Note the tr should be considered</span>
-<span class="sd">            consumed and is not safe to use it after.</span>
-<span class="sd">            Args:</span>
-<span class="sd">              state: The integer index of the source state.</span>
-<span class="sd">              tr: The tr to add.</span>
-<span class="sd">            Returns:</span>
-<span class="sd">              self.</span>
-<span class="sd">            Raises:</span>
-<span class="sd">              SnipsFstException: If State index out of range.</span>
-<span class="sd">            See also: `add_state`.</span>
+<span class="sd">        Adds a new tr to the FST and return self. Note the tr should be considered</span>
+<span class="sd">        consumed and is not safe to use it after.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          state: The integer index of the source state.</span>
+<span class="sd">          tr: The tr to add.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          self.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">          SnipsFstException: If State index out of range.</span>
+<span class="sd">        See also: `add_state`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_add_tr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">state</span><span class="p">),</span> <span class="n">tr</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
         <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error during `add_tr`&quot;</span>
@@ -3636,11 +3630,10 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <span class="k">def</span> <span class="nf">add_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        add_state(self)</span>
-<span class="sd">            Adds a new state to the FST and returns the state ID.</span>
-<span class="sd">            Returns:</span>
-<span class="sd">              The integer index of the new state.</span>
-<span class="sd">            See also: `add_tr`, `set_start`, `set_final`.</span>
+<span class="sd">        Adds a new state to the FST and returns the state ID.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          The integer index of the new state.</span>
+<span class="sd">        See also: `add_tr`, `set_start`, `set_final`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">state_id</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
 
@@ -3652,15 +3645,14 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <span class="k">def</span> <span class="nf">set_final</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        set_final(self, state, weight)</span>
-<span class="sd">            Sets the final weight for a state.</span>
-<span class="sd">            Args:</span>
-<span class="sd">              state: The integer index of a state.</span>
-<span class="sd">              weight: A float indicating the desired final weight; if</span>
-<span class="sd">                  omitted, it is set to semiring One.</span>
-<span class="sd">            Raises:</span>
-<span class="sd">              errors.FstException: State index out of range or Incompatible or invalid weight.</span>
-<span class="sd">            See also: `set_start`.</span>
+<span class="sd">        Sets the final weight for a state.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          state: The integer index of a state.</span>
+<span class="sd">          weight: A float indicating the desired final weight; if</span>
+<span class="sd">              omitted, it is set to semiring One.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">          errors.FstException: State index out of range or Incompatible or invalid weight.</span>
+<span class="sd">        See also: `set_start`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">weight</span> <span class="o">=</span> <span class="n">weight_one</span><span class="p">()</span>
@@ -3674,20 +3666,18 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <span class="k">def</span> <span class="nf">mutable_trs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MutableTrsIterator</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        mutable_trs(self, state)</span>
-<span class="sd">            Returns a mutable iterator over trs leaving the specified state.</span>
-<span class="sd">            Args:</span>
-<span class="sd">              state: The source state ID.</span>
-<span class="sd">            Returns:</span>
-<span class="sd">              A MutableTrsIterator.</span>
-<span class="sd">            See also: `trs`, `states`.</span>
+<span class="sd">        Returns a mutable iterator over trs leaving the specified state.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          state: The source state ID.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          A MutableTrsIterator.</span>
+<span class="sd">        See also: `trs`, `states`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">MutableTrsIterator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">delete_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        delete_states(self)</span>
-<span class="sd">            Delete the states</span>
+<span class="sd">        Delete all the states</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_delete_states</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
         <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error deleting states&quot;</span>
@@ -3695,8 +3685,9 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <span class="k">def</span> <span class="nf">num_states</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        num_states(self)</span>
-<span class="sd">            Returns the number of states.</span>
+<span class="sd">        Returns the number of states.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Number of states present in the Fst.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">num_states</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_num_states</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">num_states</span><span class="p">))</span>
@@ -3707,15 +3698,14 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <span class="k">def</span> <span class="nf">set_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        set_start(self, state)</span>
-<span class="sd">            Sets a state to be the initial state state.</span>
-<span class="sd">            Args:</span>
-<span class="sd">              state: The integer index of a state.</span>
-<span class="sd">            Returns:</span>
-<span class="sd">              self.</span>
-<span class="sd">            Raises:</span>
-<span class="sd">              SnipsFstException: If State index out of range.</span>
-<span class="sd">            See also: `set_final`.</span>
+<span class="sd">        Sets a state to be the initial state state.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          state: The integer index of a state.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          self.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">          SnipsFstException: If State index out of range.</span>
+<span class="sd">        See also: `set_final`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">state_id</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_set_start</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">state_id</span><span class="p">)</span>
@@ -3724,11 +3714,10 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <span class="k">def</span> <span class="nf">states</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StateIterator</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        states(self)</span>
-<span class="sd">            Returns an iterator over all states in the FST.</span>
-<span class="sd">            Returns:</span>
-<span class="sd">              A StateIterator object for the FST.</span>
-<span class="sd">            See also: `trs`, `mutable_trs`.</span>
+<span class="sd">        Returns an iterator over all states in the FST.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          A StateIterator object for the FST.</span>
+<span class="sd">        See also: `trs`, `mutable_trs`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">StateIterator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
@@ -3740,10 +3729,6 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
         <span class="n">drawing_config</span><span class="p">:</span> <span class="n">DrawingConfig</span> <span class="o">=</span> <span class="n">DrawingConfig</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        draw(self, filename, isymbols=None, osymbols=None, ssymbols=None,</span>
-<span class="sd">             acceptor=False, title=&quot;&quot;, width=8.5, height=11, portrait=False,</span>
-<span class="sd">             vertical=False, ranksep=0.4, nodesep=0.25, fontsize=14,</span>
-<span class="sd">             precision=5, show_weight_one=False, print_weight=True):</span>
 <span class="sd">        Writes out the FST in Graphviz text format.</span>
 <span class="sd">        This method writes out the FST in the dot graph description language. The</span>
 <span class="sd">        graph can be rendered using the `dot` executable provided by Graphviz.</span>
@@ -3802,14 +3787,13 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Fst.read(filename)</span>
-<span class="sd">            Read a Fst at a given path.</span>
-<span class="sd">            Args:</span>
-<span class="sd">              filename: The string location of the input file.</span>
-<span class="sd">            Returns:</span>
-<span class="sd">              An FST.</span>
-<span class="sd">            Raises:</span>
-<span class="sd">              errors.SnipsFstException: Read failed.</span>
+<span class="sd">        Read a Fst at a given path.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          filename: The string location of the input file.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          An FST.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">          ValueError: Read failed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_from_path</span><span class="p">(</span>
@@ -3822,13 +3806,12 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        write(self, filename)</span>
-<span class="sd">            Serializes FST to a file.</span>
-<span class="sd">            This method writes the FST to a file in vector binary format.</span>
-<span class="sd">            Args:</span>
-<span class="sd">              filename: The string location of the output file.</span>
-<span class="sd">            Raises:</span>
-<span class="sd">              errors.SnipsFstException: Write failed.</span>
+<span class="sd">        Serializes FST to a file.</span>
+<span class="sd">        This method writes the FST to a file in vector binary format.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          filename: The string location of the output file.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">          ValueError: Write failed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
         <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Write failed. file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -3836,10 +3819,11 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Fst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        equals(self, other)</span>
-<span class="sd">            Check if this Fst is equal to the other</span>
-<span class="sd">        :param other: Fst instance</span>
-<span class="sd">        :return: bool</span>
+<span class="sd">        Check if this Fst is equal to the other.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            other: Fst instance</span>
+<span class="sd">        Returns:</span>
+<span class="sd">             Whether both Fst are equals.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">is_equal</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
 
@@ -3851,8 +3835,8 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        copy fst(self, other)</span>
-<span class="sd">        :return: Fst</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A copy of the Fst.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cloned_fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">cloned_fst</span><span class="p">))</span>
@@ -3986,11 +3970,11 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">368</span>
-<span class="normal">369</span>
-<span class="normal">370</span>
-<span class="normal">371</span>
-<span class="normal">372</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;x.__add__(y) &lt;==&gt; x+y&quot;&quot;&quot;</span>
     <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
@@ -4001,6 +3985,57 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
   </div>
 
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h8 class="doc doc-heading" id="rustfst.fst.vector_fst.VectorFst.__init__">
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">ptr</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
+
+
+</h8>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Creates an empty VectorFst.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates an empty VectorFst.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ptr</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">ptr</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fst_ptr</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
+        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_new</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">fst_ptr</span><span class="p">))</span>
+
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Something went wrong when creating the Fst struct&quot;</span>
+        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">fst_ptr</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+    </div>
+
+  </div>
 
 
 
@@ -4017,17 +4052,30 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <div class="doc doc-contents ">
 
-      <p>add_state(self)
-    Adds a new state to the FST and returns the state ID.
-    Returns:
-      The integer index of the new state.
-    See also: <code>add_tr</code>, <code>set_start</code>, <code>set_final</code>.</p>
+      <p>Adds a new state to the FST and returns the state ID.</p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>The integer index of the new state.</p></td>
+        </tr>
+    </tbody>
+  </table>
+      <p>See also: <code>add_tr</code>, <code>set_start</code>, <code>set_final</code>.</p>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">55</span>
 <span class="normal">56</span>
 <span class="normal">57</span>
 <span class="normal">58</span>
@@ -4039,13 +4087,13 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal">64</span>
 <span class="normal">65</span>
 <span class="normal">66</span>
-<span class="normal">67</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">add_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="normal">67</span>
+<span class="normal">68</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">add_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    add_state(self)</span>
-<span class="sd">        Adds a new state to the FST and returns the state ID.</span>
-<span class="sd">        Returns:</span>
-<span class="sd">          The integer index of the new state.</span>
-<span class="sd">        See also: `add_tr`, `set_start`, `set_final`.</span>
+<span class="sd">    Adds a new state to the FST and returns the state ID.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      The integer index of the new state.</span>
+<span class="sd">    See also: `add_tr`, `set_start`, `set_final`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">state_id</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
 
@@ -4075,24 +4123,83 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <div class="doc doc-contents ">
 
-      <p>add_tr(self, state, tr)
-    Adds a new tr to the FST and return self. Note the tr should be considered
-    consumed and is not safe to use it after.
-    Args:
-      state: The integer index of the source state.
-      tr: The tr to add.
-    Returns:
-      self.
-    Raises:
-      SnipsFstException: If State index out of range.
-    See also: <code>add_state</code>.</p>
+      <p>Adds a new tr to the FST and return self. Note the tr should be considered
+consumed and is not safe to use it after.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>state</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>The integer index of the source state.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>tr</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.tr.Tr" href="../tr/#rustfst.tr.Tr">Tr</a></code>
+          </td>
+          <td><p>The tr to add.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.Fst" href="#rustfst.fst.Fst">Fst</a></code>
+          </td>
+          <td><p>self.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>SnipsFstException</code>
+          </td>
+          <td><p>If State index out of range.</p></td>
+        </tr>
+    </tbody>
+  </table>
+      <p>See also: <code>add_state</code>.</p>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span>
 <span class="normal">39</span>
@@ -4107,19 +4214,20 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal">48</span>
 <span class="normal">49</span>
 <span class="normal">50</span>
-<span class="normal">51</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">add_tr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">tr</span><span class="p">:</span> <span class="n">Tr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">add_tr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">tr</span><span class="p">:</span> <span class="n">Tr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    add_tr(self, state, tr)</span>
-<span class="sd">        Adds a new tr to the FST and return self. Note the tr should be considered</span>
-<span class="sd">        consumed and is not safe to use it after.</span>
-<span class="sd">        Args:</span>
-<span class="sd">          state: The integer index of the source state.</span>
-<span class="sd">          tr: The tr to add.</span>
-<span class="sd">        Returns:</span>
-<span class="sd">          self.</span>
-<span class="sd">        Raises:</span>
-<span class="sd">          SnipsFstException: If State index out of range.</span>
-<span class="sd">        See also: `add_state`.</span>
+<span class="sd">    Adds a new tr to the FST and return self. Note the tr should be considered</span>
+<span class="sd">    consumed and is not safe to use it after.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      state: The integer index of the source state.</span>
+<span class="sd">      tr: The tr to add.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      self.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">      SnipsFstException: If State index out of range.</span>
+<span class="sd">    See also: `add_state`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_add_tr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">state</span><span class="p">),</span> <span class="n">tr</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
     <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error during `add_tr`&quot;</span>
@@ -4150,25 +4258,41 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <div class="doc doc-contents ">
 
-      <p>copy fst(self, other)
-:return: Fst</p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>A copy of the Fst.</p></td>
+        </tr>
+    </tbody>
+  </table>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">268</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
 <span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+<span class="normal">270</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    copy fst(self, other)</span>
-<span class="sd">    :return: Fst</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A copy of the Fst.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">cloned_fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">cloned_fst</span><span class="p">))</span>
@@ -4197,22 +4321,19 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <div class="doc doc-contents ">
 
-      <p>delete_states(self)
-    Delete the states</p>
+      <p>Delete all the states</p>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">103</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">102</span>
+<span class="normal">103</span>
 <span class="normal">104</span>
 <span class="normal">105</span>
 <span class="normal">106</span>
 <span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">delete_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">108</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">delete_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    delete_states(self)</span>
-<span class="sd">        Delete the states</span>
+<span class="sd">    Delete all the states</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_delete_states</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
     <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error deleting states&quot;</span>
@@ -4239,11 +4360,7 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <div class="doc doc-contents ">
 
-      <p>draw(self, filename, isymbols=None, osymbols=None, ssymbols=None,
-     acceptor=False, title="", width=8.5, height=11, portrait=False,
-     vertical=False, ranksep=0.4, nodesep=0.25, fontsize=14,
-     precision=5, show_weight_one=False, print_weight=True):
-Writes out the FST in Graphviz text format.
+      <p>Writes out the FST in Graphviz text format.
 This method writes out the FST in the dot graph description language. The
 graph can be rendered using the <code>dot</code> executable provided by Graphviz.</p>
 
@@ -4304,7 +4421,10 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">151</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
 <span class="normal">152</span>
 <span class="normal">153</span>
 <span class="normal">154</span>
@@ -4362,14 +4482,7 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal">206</span>
 <span class="normal">207</span>
 <span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">draw</span><span class="p">(</span>
+<span class="normal">209</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">draw</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">isymbols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -4377,10 +4490,6 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
     <span class="n">drawing_config</span><span class="p">:</span> <span class="n">DrawingConfig</span> <span class="o">=</span> <span class="n">DrawingConfig</span><span class="p">(),</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    draw(self, filename, isymbols=None, osymbols=None, ssymbols=None,</span>
-<span class="sd">         acceptor=False, title=&quot;&quot;, width=8.5, height=11, portrait=False,</span>
-<span class="sd">         vertical=False, ranksep=0.4, nodesep=0.25, fontsize=14,</span>
-<span class="sd">         precision=5, show_weight_one=False, print_weight=True):</span>
 <span class="sd">    Writes out the FST in Graphviz text format.</span>
 <span class="sd">    This method writes out the FST in the dot graph description language. The</span>
 <span class="sd">    graph can be rendered using the `dot` executable provided by Graphviz.</span>
@@ -4456,32 +4565,73 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <div class="doc doc-contents ">
 
-      <p>equals(self, other)
-    Check if this Fst is equal to the other
-:param other: Fst instance
-:return: bool</p>
+      <p>Check if this Fst is equal to the other.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>other</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.Fst" href="#rustfst.fst.Fst">Fst</a></code>
+          </td>
+          <td><p>Fst instance</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Whether both Fst are equals.</p></td>
+        </tr>
+    </tbody>
+  </table>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">253</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
 <span class="normal">254</span>
 <span class="normal">255</span>
 <span class="normal">256</span>
 <span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Fst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal">258</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Fst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    equals(self, other)</span>
-<span class="sd">        Check if this Fst is equal to the other</span>
-<span class="sd">    :param other: Fst instance</span>
-<span class="sd">    :return: bool</span>
+<span class="sd">    Check if this Fst is equal to the other.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        other: Fst instance</span>
+<span class="sd">    Returns:</span>
+<span class="sd">         Whether both Fst are equals.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">is_equal</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
 
@@ -4512,13 +4662,50 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <div class="doc doc-contents ">
 
-      <p>mutable_trs(self, state)
-    Returns a mutable iterator over trs leaving the specified state.
-    Args:
-      state: The source state ID.
-    Returns:
-      A MutableTrsIterator.
-    See also: <code>trs</code>, <code>states</code>.</p>
+      <p>Returns a mutable iterator over trs leaving the specified state.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>state</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>The source state ID.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.iterators.MutableTrsIterator" href="../iterators/#rustfst.iterators.MutableTrsIterator">MutableTrsIterator</a></code>
+          </td>
+          <td><p>A MutableTrsIterator.</p></td>
+        </tr>
+    </tbody>
+  </table>
+      <p>See also: <code>trs</code>, <code>states</code>.</p>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
@@ -4531,16 +4718,14 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal"> 97</span>
 <span class="normal"> 98</span>
 <span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">mutable_trs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MutableTrsIterator</span><span class="p">:</span>
+<span class="normal">100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">mutable_trs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MutableTrsIterator</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    mutable_trs(self, state)</span>
-<span class="sd">        Returns a mutable iterator over trs leaving the specified state.</span>
-<span class="sd">        Args:</span>
-<span class="sd">          state: The source state ID.</span>
-<span class="sd">        Returns:</span>
-<span class="sd">          A MutableTrsIterator.</span>
-<span class="sd">        See also: `trs`, `states`.</span>
+<span class="sd">    Returns a mutable iterator over trs leaving the specified state.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      state: The source state ID.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      A MutableTrsIterator.</span>
+<span class="sd">    See also: `trs`, `states`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">MutableTrsIterator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -4564,12 +4749,31 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <div class="doc doc-contents ">
 
-      <p>num_states(self)
-    Returns the number of states.</p>
+      <p>Returns the number of states.</p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>Number of states present in the Fst.</p></td>
+        </tr>
+    </tbody>
+  </table>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">112</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
 <span class="normal">113</span>
 <span class="normal">114</span>
 <span class="normal">115</span>
@@ -4578,11 +4782,11 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal">118</span>
 <span class="normal">119</span>
 <span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">num_states</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="normal">121</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">num_states</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    num_states(self)</span>
-<span class="sd">        Returns the number of states.</span>
+<span class="sd">    Returns the number of states.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Number of states present in the Fst.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">num_states</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_num_states</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">num_states</span><span class="p">))</span>
@@ -4616,18 +4820,78 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <div class="doc doc-contents ">
 
-      <p>Fst.read(filename)
-    Read a Fst at a given path.
-    Args:
-      filename: The string location of the input file.
-    Returns:
-      An FST.
-    Raises:
-      errors.SnipsFstException: Read failed.</p>
+      <p>Read a Fst at a given path.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>filename</code></td>
+          <td>
+                <code><span title="pathlib.Path">Path</span></code>
+          </td>
+          <td><p>The string location of the input file.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.Fst" href="#rustfst.fst.Fst">Fst</a></code>
+          </td>
+          <td><p>An FST.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>ValueError</code>
+          </td>
+          <td><p>Read failed.</p></td>
+        </tr>
+    </tbody>
+  </table>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">218</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
 <span class="normal">219</span>
 <span class="normal">220</span>
 <span class="normal">221</span>
@@ -4638,25 +4902,16 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal">226</span>
 <span class="normal">227</span>
 <span class="normal">228</span>
-<span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">229</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Fst.read(filename)</span>
-<span class="sd">        Read a Fst at a given path.</span>
-<span class="sd">        Args:</span>
-<span class="sd">          filename: The string location of the input file.</span>
-<span class="sd">        Returns:</span>
-<span class="sd">          An FST.</span>
-<span class="sd">        Raises:</span>
-<span class="sd">          errors.SnipsFstException: Read failed.</span>
+<span class="sd">    Read a Fst at a given path.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      filename: The string location of the input file.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      An FST.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: Read failed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_from_path</span><span class="p">(</span>
@@ -4690,20 +4945,65 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <div class="doc doc-contents ">
 
-      <p>set_final(self, state, weight)
-    Sets the final weight for a state.
-    Args:
-      state: The integer index of a state.
-      weight: A float indicating the desired final weight; if
-          omitted, it is set to semiring One.
-    Raises:
-      errors.FstException: State index out of range or Incompatible or invalid weight.
-    See also: <code>set_start</code>.</p>
+      <p>Sets the final weight for a state.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>state</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>The integer index of a state.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>weight</code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td><p>A float indicating the desired final weight; if
+  omitted, it is set to semiring One.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>errors.<span title="errors.FstException">FstException</span></code>
+          </td>
+          <td><p>State index out of range or Incompatible or invalid weight.</p></td>
+        </tr>
+    </tbody>
+  </table>
+      <p>See also: <code>set_start</code>.</p>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">69</span>
-<span class="normal">70</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">70</span>
 <span class="normal">71</span>
 <span class="normal">72</span>
 <span class="normal">73</span>
@@ -4724,15 +5024,14 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal">88</span>
 <span class="normal">89</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">set_final</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    set_final(self, state, weight)</span>
-<span class="sd">        Sets the final weight for a state.</span>
-<span class="sd">        Args:</span>
-<span class="sd">          state: The integer index of a state.</span>
-<span class="sd">          weight: A float indicating the desired final weight; if</span>
-<span class="sd">              omitted, it is set to semiring One.</span>
-<span class="sd">        Raises:</span>
-<span class="sd">          errors.FstException: State index out of range or Incompatible or invalid weight.</span>
-<span class="sd">        See also: `set_start`.</span>
+<span class="sd">    Sets the final weight for a state.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      state: The integer index of a state.</span>
+<span class="sd">      weight: A float indicating the desired final weight; if</span>
+<span class="sd">          omitted, it is set to semiring One.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">      errors.FstException: State index out of range or Incompatible or invalid weight.</span>
+<span class="sd">    See also: `set_start`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">weight</span> <span class="o">=</span> <span class="n">weight_one</span><span class="p">()</span>
@@ -4764,19 +5063,72 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <div class="doc doc-contents ">
 
-      <p>set_start(self, state)
-    Sets a state to be the initial state state.
-    Args:
-      state: The integer index of a state.
-    Returns:
-      self.
-    Raises:
-      SnipsFstException: If State index out of range.
-    See also: <code>set_final</code>.</p>
+      <p>Sets a state to be the initial state state.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>state</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>The integer index of a state.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+          </td>
+          <td><p>self.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>SnipsFstException</code>
+          </td>
+          <td><p>If State index out of range.</p></td>
+        </tr>
+    </tbody>
+  </table>
+      <p>See also: <code>set_final</code>.</p>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">124</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">123</span>
+<span class="normal">124</span>
 <span class="normal">125</span>
 <span class="normal">126</span>
 <span class="normal">127</span>
@@ -4789,19 +5141,16 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal">134</span>
 <span class="normal">135</span>
 <span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">set_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="normal">137</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">set_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    set_start(self, state)</span>
-<span class="sd">        Sets a state to be the initial state state.</span>
-<span class="sd">        Args:</span>
-<span class="sd">          state: The integer index of a state.</span>
-<span class="sd">        Returns:</span>
-<span class="sd">          self.</span>
-<span class="sd">        Raises:</span>
-<span class="sd">          SnipsFstException: If State index out of range.</span>
-<span class="sd">        See also: `set_final`.</span>
+<span class="sd">    Sets a state to be the initial state state.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      state: The integer index of a state.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      self.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">      SnipsFstException: If State index out of range.</span>
+<span class="sd">    See also: `set_final`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">state_id</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_set_start</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">state_id</span><span class="p">)</span>
@@ -4829,29 +5178,42 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <div class="doc doc-contents ">
 
-      <p>states(self)
-    Returns an iterator over all states in the FST.
-    Returns:
-      A StateIterator object for the FST.
-    See also: <code>trs</code>, <code>mutable_trs</code>.</p>
+      <p>Returns an iterator over all states in the FST.</p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.iterators.StateIterator" href="../iterators/#rustfst.iterators.StateIterator">StateIterator</a></code>
+          </td>
+          <td><p>A StateIterator object for the FST.</p></td>
+        </tr>
+    </tbody>
+  </table>
+      <p>See also: <code>trs</code>, <code>mutable_trs</code>.</p>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">141</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
 <span class="normal">142</span>
 <span class="normal">143</span>
 <span class="normal">144</span>
 <span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">states</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StateIterator</span><span class="p">:</span>
+<span class="normal">146</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">states</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StateIterator</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    states(self)</span>
-<span class="sd">        Returns an iterator over all states in the FST.</span>
-<span class="sd">        Returns:</span>
-<span class="sd">          A StateIterator object for the FST.</span>
-<span class="sd">        See also: `trs`, `mutable_trs`.</span>
+<span class="sd">    Returns an iterator over all states in the FST.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      A StateIterator object for the FST.</span>
+<span class="sd">    See also: `trs`, `mutable_trs`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">StateIterator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -4878,37 +5240,72 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <div class="doc doc-contents ">
 
-      <p>write(self, filename)
-    Serializes FST to a file.
-    This method writes the FST to a file in vector binary format.
-    Args:
-      filename: The string location of the output file.
-    Raises:
-      errors.SnipsFstException: Write failed.</p>
+      <p>Serializes FST to a file.
+This method writes the FST to a file in vector binary format.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>filename</code></td>
+          <td>
+                <code><span title="pathlib.Path">Path</span></code>
+          </td>
+          <td><p>The string location of the output file.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>ValueError</code>
+          </td>
+          <td><p>Write failed.</p></td>
+        </tr>
+    </tbody>
+  </table>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">239</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
 <span class="normal">240</span>
 <span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="normal">242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    write(self, filename)</span>
-<span class="sd">        Serializes FST to a file.</span>
-<span class="sd">        This method writes the FST to a file in vector binary format.</span>
-<span class="sd">        Args:</span>
-<span class="sd">          filename: The string location of the output file.</span>
-<span class="sd">        Raises:</span>
-<span class="sd">          errors.SnipsFstException: Write failed.</span>
+<span class="sd">    Serializes FST to a file.</span>
+<span class="sd">    This method writes the FST to a file in vector binary format.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      filename: The string location of the output file.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: Write failed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
     <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Write failed. file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
