@@ -238,6 +238,9 @@ jobs:
 #    needs: [ rust-doc, rust-tests, rustfst-python-bench, rustfst-python ]
     runs-on: ubuntu-latest
 #    if: github.ref == 'refs/heads/readthedocs'
+    env:
+      GIT_COMMITTER_NAME: garvys-ci-bot
+      GIT_COMMITTER_EMAIL: alexandre.caulier.a@gmail.com
     steps:
       - uses: actions/checkout@v3
       - name: Install Rust
@@ -253,9 +256,6 @@ jobs:
       - run: pip install -r requirements-mkdocs.txt
       - run: git fetch origin gh-pages --depth=1
       - run: mike deploy --push latest
-        env: 
-          GIT_COMMITTER_NAME: garvys-ci-bot
-          GIT_COMMITTER_EMAIL: alexandre.caulier.a@gmail.com
 
 
   publish-rust-crate:
