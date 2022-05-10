@@ -251,8 +251,7 @@ jobs:
       - run: pip install -r rustfst-python/requirements-setup.txt
       - run: pip install -e rustfst-python
       - run: pip install -r requirements-mkdocs.txt
-      - run: mkdocs build
-      - run: mkdocs gh-deploy --force
+      - run: mike deploy --push latest
 
 
   publish-rust-crate:

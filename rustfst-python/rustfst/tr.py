@@ -26,11 +26,20 @@ class Tr:
 
     def __init__(
         self,
-        ilabel=None,
+        ilabel: Optional[int] = None,
         olabel: Optional[int] = None,
         weight: Optional[float] = None,
         nextstate: Optional[int] = None,
-    ) -> Tr:
+    ):
+        """
+        Create a new transition.
+
+        Args:
+            ilabel: The input label.
+            olabel: The outpit label.
+            weight: The transition's weight
+            nextstate: The destination state for the transition.
+        """
         if ilabel and olabel is None and weight is None and nextstate is None:
             self._ptr = ilabel
         else:

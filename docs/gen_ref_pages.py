@@ -11,20 +11,15 @@ path_reference = Path("reference")
 
 nav = mkdocs_gen_files.Nav()
 
-print(path_rustfst_module)
 for path in sorted(path_rustfst_module.rglob("*.py")):  #
-    print(path)
 
     module_path = path.relative_to(path_rustfst_python).with_suffix("")  #
-    print(f"Module path = {module_path}")
 
     doc_path = path.relative_to(path_rustfst_python).with_suffix(".md")  #
-    print(f"Doc path = {doc_path}")
 
     full_doc_path = path_reference / doc_path  #
 
     parts = list(module_path.parts)
-    print(f"Parts = {parts}")
 
     if parts[-1] == "__init__":  #
         parts = parts[:-1]
@@ -42,7 +37,6 @@ for path in sorted(path_rustfst_module.rglob("*.py")):  #
 
         print("::: " + identifier, file=fd)  #
 
-    print(f"Full doc path = {full_doc_path}")
     mkdocs_gen_files.set_edit_path(full_doc_path, path)
 
 with mkdocs_gen_files.open(path_reference / "SUMMARY.md", "w") as nav_file:  #
