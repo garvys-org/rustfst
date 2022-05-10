@@ -240,9 +240,16 @@ jobs:
 #    if: github.ref == 'refs/heads/readthedocs'
     steps:
       - uses: actions/checkout@v3
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          default: true
       - uses: actions/setup-python@v3
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install -r rustfst-python/requirements-setup.txt
+      - run: pip install -e rustfst-python
       - run: pip install -r requirements-mkdocs.txt
       - run: mkdocs build
       - run: mkdocs gh-deploy --force
