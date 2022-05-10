@@ -9,9 +9,9 @@ repo_url: https://github.com/Garvys/rustfst
 repo_name: rustfst
 plugins:
   - search
-  - gen-files:
-      scripts:
-      - docs/gen_ref_pages.py
+#  - gen-files:
+#      scripts:
+#      - docs/gen_ref_pages.py
   - literate-nav:
       nav_file: SUMMARY.md
   - section-index

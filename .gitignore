@@ -50,6 +50,5 @@ wheels/
 rustfst-python/mkdocs/reference
 rustfst-python/mkdocs/site
 rustfst-python/mkdocs/docs/reference
-docs/reference
 site
 
