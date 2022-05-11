@@ -1,0 +1,7 @@
+jinja2<3.1.0
+mkdocstrings[python]
+mkdocs-material
+mkdocs-literate-nav
+mkdocs-gen-files
+mkdocs-section-index
+mike

@@ -32,6 +32,12 @@ jobs:
         run: |
           pip install black==22.3.0
           python -m black --check . || fail "Format your code by running black ." 1
+      - name: carotte
+        env:
+          LOL: ${{ github.ref }}
+          LOL2: ${{ github.ref_name }}
+        run: exit 1
+
 
   rust-fmt:
     name: Check rust formatting
@@ -235,6 +241,30 @@ jobs:
       - name: Test rustfst-python
         run: python -m pytest -s --cache-clear --disable-warnings rustfst-python
 
+  python-doc:
+    name: python-doc
+    needs: openfst
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          default: true
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ env.PYTHON_VERSION }} # Version range or exact version of a Python version to use, using SemVer's version range syntax
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+      - name: Build rustfst-python
+        run: |
+          pip install -r rustfst-python/requirements-setup.txt
+          pip install -e rustfst-python
+      - name: Install mkdocs
+        run: pip install -r requirements-mkdocs.txt
+      - name: Test doc generation
+        run: mkdocs build -s
+
   publish-python-doc:
     name: Publish rustfst-python's doc
     needs: [ rust-doc, rust-tests, rustfst-python-bench, rustfst-python ]
@@ -257,7 +287,17 @@ jobs:
       - run: git config user.name ${{ env.GIT_COMMITTER_NAME }}
       - run: git config user.email ${{ env.GIT_COMMITTER_EMAIL }}
       - run: git fetch origin gh-pages --depth=1
-      - run: mike deploy --push latest
+      - run: mkdocs build -s
+      - name: Deploy Doc to latest
+        if: ${{ github.ref == 'refs/heads/readthedocs' }}
+        run: mike deploy --push latest
+      - name: Retrieve tag
+        uses: olegtarasov/get-tag@v2.1
+        id: tagName
+        if: startsWith(github.ref, 'refs/tags/rustfst-v')
+      - name: Deploy Doc to tag
+        if: startsWith(github.ref, 'refs/tags/rustfst-v')
+        run: mike deploy --push $GIT_TAG_NAME
 
 
   publish-rust-crate:
