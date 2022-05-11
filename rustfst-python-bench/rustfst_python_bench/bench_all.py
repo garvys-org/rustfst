@@ -6,13 +6,19 @@ import subprocess
 import tempfile
 
 from rustfst_python_bench.algorithms.supported_algorithms import SupportedAlgorithms
-from rustfst_python_bench.constants import OPENFST_BINS, RUSTFST_CLI
+from rustfst_python_bench.constants import OPENFST_BINS, get_rusftfst_cli_dir
 from rustfst_python_bench.utils import header_report
 
 
 def parse():
     parser = argparse.ArgumentParser(
         description="Script to bench all CLIs of OpenFST and RustFST"
+    )
+
+    parser.add_argument(
+        "compilation_mode",
+        type=str,
+        choices=["debug", "release"]
     )
 
     parser.add_argument(
@@ -46,15 +52,16 @@ def parse():
     return args
 
 
-def bench_algo(algo_name, path_in_fst, results_dir, path_report_md, warmup, runs, algo):
+def bench_algo(algo_name, path_in_fst, results_dir, path_report_md, warmup, runs, algo, compilation_mode):
 
     openfst_cli = os.path.join(OPENFST_BINS, algo.openfst_cli())
+    rustfst_cli = get_rusftfst_cli_dir(compilation_mode)
 
     path_out_openfst = os.path.join(results_dir, f'{algo_name}_openfst.fst')
     path_out_rustfst = os.path.join(results_dir, f'{algo_name}_rustfst.fst')
 
     cmd_openfst = f"{openfst_cli} {algo.get_cli_args()} {path_in_fst} {path_out_openfst}"
-    cmd_rustfst = f"{RUSTFST_CLI} {algo.rustfst_subcommand()} {algo.get_cli_args()} {path_in_fst} {path_out_rustfst}"
+    cmd_rustfst = f"{rustfst_cli} {algo.rustfst_subcommand()} {algo.get_cli_args()} {path_in_fst} {path_out_rustfst}"
 
     cmd = f"hyperfine -w {warmup} -r {runs} '{cmd_openfst}' '{cmd_rustfst}'" \
           f" --export-markdown {path_report_md} --show-output"
@@ -63,7 +70,7 @@ def bench_algo(algo_name, path_in_fst, results_dir, path_report_md, warmup, runs
     algo.check_correctness(path_out_openfst, path_out_rustfst)
 
 
-def bench(path_in_fst, path_report_md, warmup, runs):
+def bench(path_in_fst, path_report_md, warmup, runs, compilation_mode):
 
     with io.open(path_report_md, mode="w") as report_f:
         report_f.write("# Benchmark OpenFST CLI vs RustFST CLI\n")
@@ -76,7 +83,7 @@ def bench(path_in_fst, path_report_md, warmup, runs):
                     params = algo.get_parameters()
                     report_f.write(f"## {algoname.capitalize()}\n")
                     for param in params:
-                        bench_algo(algoname, path_in_fst, tmpdirname, report_path_temp, warmup, runs, param)
+                        bench_algo(algoname, path_in_fst, tmpdirname, report_path_temp, warmup, runs, param, compilation_mode)
 
                         with io.open(report_path_temp, mode="r") as f:
 
@@ -90,7 +97,7 @@ def bench(path_in_fst, path_report_md, warmup, runs):
 
 def main():
     args = parse()
-    bench(args.path_in_fst, args.path_report_md, args.warmup, args.runs)
+    bench(args.path_in_fst, args.path_report_md, args.warmup, args.runs, args.compilation_mode)
 
 
 if __name__ == '__main__':
