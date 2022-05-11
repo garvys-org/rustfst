@@ -15,6 +15,7 @@ class DeterminizeType(Enum):
     """
     Enumeration defining the type of the determinization to perform.
     """
+
     DETERMINIZE_FUNCTIONAL = 0
     """
     Input transducer is known to be functional (or error).
@@ -34,6 +35,7 @@ class DeterminizeConfig:
     """
     Struct containing the parameters controlling the determinization algorithm.
     """
+
     def __init__(self, det_type: DeterminizeType, delta=None):
         """
         Creates the configuration object.
