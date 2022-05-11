@@ -16,7 +16,6 @@
 [![PyPI version](https://badge.fury.io/py/rustfst-python.svg)](https://badge.fury.io/py/rustfst-python)
 [![PyPI download month](https://img.shields.io/pypi/dm/rustfst-python.svg)](https://pypi.python.org/pypi/rustfst-python/)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/rustfst-python.svg)](https://pypi.python.org/pypi/rustfst-python/)
-[![Native Linux test status](https://github.com/Garvys/rustfst/workflows/pages-build-deployment/badge.svg)](https://github.com/Garvys/rustfst/actions)
 
 
 <!-- cargo-sync-readme start -->
