@@ -1,5 +1,7 @@
 from __future__ import annotations
 import ctypes
+from typing import Optional
+
 from rustfst.utils import (
     lib,
     check_ffi_error,
@@ -36,7 +38,7 @@ class DeterminizeConfig:
     Struct containing the parameters controlling the determinization algorithm.
     """
 
-    def __init__(self, det_type: DeterminizeType, delta=None):
+    def __init__(self, det_type: DeterminizeType, delta: Optional[float] = None):
         """
         Creates the configuration object.
         Args:

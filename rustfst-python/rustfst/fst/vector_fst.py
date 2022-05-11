@@ -75,7 +75,7 @@ class VectorFst(Fst):
           weight: A float indicating the desired final weight; if
               omitted, it is set to semiring One.
         Raises:
-          errors.FstException: State index out of range or Incompatible or invalid weight.
+          ValueError: State index out of range or Incompatible or invalid weight.
         See also: `set_start`.
         """
         if weight is None:
@@ -125,10 +125,8 @@ class VectorFst(Fst):
         Sets a state to be the initial state state.
         Args:
           state: The integer index of a state.
-        Returns:
-          self.
         Raises:
-          SnipsFstException: If State index out of range.
+          ValueError: If State index out of range.
         See also: `set_final`.
         """
         state_id = ctypes.c_size_t(state)
@@ -215,7 +213,7 @@ class VectorFst(Fst):
         Args:
           filename: The string location of the input file.
         Returns:
-          An FST.
+          An Fst.
         Raises:
           ValueError: Read failed.
         """
@@ -269,35 +267,35 @@ class VectorFst(Fst):
 
         return VectorFst(cloned_fst)
 
-    def compose(self, other: VectorFst, config=None):
+    def compose(self, other: VectorFst, config=None) -> VectorFst:
         from rustfst.algorithms.compose import compose, compose_with_config
 
         if config:
             return compose_with_config(self, other, config)
         return compose(self, other)
 
-    def concat(self, other: VectorFst):
+    def concat(self, other: VectorFst) -> VectorFst:
         from rustfst.algorithms.concat import concat
 
         return concat(self, other)
 
-    def connect(self):
+    def connect(self) -> VectorFst:
         from rustfst.algorithms.connect import connect
 
-        connect(self)
+        return connect(self)
 
-    def determinize(self, config=None):
+    def determinize(self, config=None) -> VectorFst:
         from rustfst.algorithms.determinize import determinize, determinize_with_config
 
         if config:
             return determinize_with_config(self, config)
         return determinize(self)
 
-    def project(self, proj_type=None):
+    def project(self, proj_type=None) -> VectorFst:
         from rustfst.algorithms.project import project, ProjectType
 
         if proj_type:
-            project(self, proj_type)
+            return project(self, proj_type)
         proj_type = ProjectType.PROJECT_INPUT
         return project(self, proj_type)
 
@@ -306,13 +304,13 @@ class VectorFst(Fst):
         root_label: int,
         fst_list: List[(int, VectorFst)],
         epsilon_on_replace: bool = False,
-    ):
+    ) -> VectorFst:
         from rustfst.algorithms.replace import replace
 
         complete_fst_list = [(root_label, self)] + fst_list
         return replace(root_label, complete_fst_list, epsilon_on_replace)
 
-    def reverse(self):
+    def reverse(self) -> VectorFst:
         from rustfst.algorithms.reverse import reverse
 
         return reverse(self)
@@ -322,7 +320,7 @@ class VectorFst(Fst):
 
         rm_epsilon(self)
 
-    def shortest_path(self, config=None):
+    def shortest_path(self, config=None) -> VectorFst:
         from rustfst.algorithms.shortest_path import (
             shortestpath,
             shortestpath_with_config,
@@ -332,7 +330,7 @@ class VectorFst(Fst):
             return shortestpath_with_config(self, config)
         return shortestpath(self)
 
-    def union(self, other_fst: VectorFst):
+    def union(self, other_fst: VectorFst) -> VectorFst:
         from rustfst.algorithms.union import union
 
         return union(self, other_fst)
@@ -352,12 +350,12 @@ class VectorFst(Fst):
 
         tr_unique(self)
 
-    def isomorphic(self, other: VectorFst):
+    def isomorphic(self, other: VectorFst) -> bool:
         from rustfst.algorithms.isomorphic import isomorphic
 
         return isomorphic(self, other)
 
-    def __add__(self, y):
+    def __add__(self, y) -> VectorFst:
         """x.__add__(y) <==> x+y"""
         x = self.copy()
 
