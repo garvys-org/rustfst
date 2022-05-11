@@ -4,4 +4,5 @@ mkdocs-material
 mkdocs-literate-nav
 mkdocs-gen-files
 mkdocs-section-index
+mkdocs-macros-plugin
 mike
