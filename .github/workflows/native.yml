@@ -32,11 +32,6 @@ jobs:
         run: |
           pip install black==22.3.0
           python -m black --check . || fail "Format your code by running black ." 1
-      - name: carotte
-        env:
-          LOL: ${{ github.ref }}
-          LOL2: ${{ github.ref_name }}
-        run: exit 1
 
 
   rust-fmt:
@@ -289,7 +284,7 @@ jobs:
       - run: git fetch origin gh-pages --depth=1
       - run: mkdocs build -s
       - name: Deploy Doc to latest
-        if: ${{ github.ref == 'refs/heads/readthedocs' }}
+        if: ${{ github.ref == 'refs/heads/main' }}
         run: mike deploy --push latest
       - name: Retrieve tag
         uses: olegtarasov/get-tag@v2.1
