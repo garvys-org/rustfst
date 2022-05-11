@@ -33,6 +33,18 @@ setup(
     description="Python wrapper for Rust FST",
     extras_require={"tests": ["pytest>=6,<7"]},
     options={"bdist_wheel": {"universal": True}},
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Rust",
+        "Topic :: Scientific/Engineering :: Mathematics",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "Topic :: Text Processing",
+    ],
     packages=packages,
     include_package_data=True,
     rust_extensions=[
