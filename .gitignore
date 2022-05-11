@@ -30,6 +30,7 @@ report2.md
 rustfst-python-bench
 venv3
 venv38
+venv*
 
 .idea
 pynini-2.0.7/
@@ -46,3 +47,9 @@ fst_output
 build/
 dist/
 wheels/
+
+rustfst-python/mkdocs/reference
+rustfst-python/mkdocs/site
+rustfst-python/mkdocs/docs/reference
+site
+

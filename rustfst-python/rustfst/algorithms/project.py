@@ -10,16 +10,28 @@ from enum import Enum
 
 
 class ProjectType(Enum):
+    """
+    Different types of labels projection in a Fst.
+    """
+
     PROJECT_INPUT = 0
+    """
+    Input projection : output labels are replaced with input ones.
+    """
     PROJECT_OUTPUT = 1
+    """
+    Output projection : input labels are replaced with output ones.
+    """
 
 
 def project(fst: VectorFst, proj_type: ProjectType) -> VectorFst:
     """
-    project(fst)
-    convert a FST to an acceptor using input or output labels.
-    :param fst: Fst
-    :return: Fst
+    Convert a Fst to an acceptor using input or output labels.
+    Args:
+        fst: Fst on which to apply the algorithm.
+        proj_type: Whether to replace input labels or output labels.
+    Returns:
+        The resulting Fst.
     """
     config = ctypes.pointer(ctypes.c_void_p())
     ret_code = lib.fst_project_type_new(
@@ -34,3 +46,9 @@ def project(fst: VectorFst, proj_type: ProjectType) -> VectorFst:
     check_ffi_error(ret_code, err_msg)
 
     return fst
+
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod()

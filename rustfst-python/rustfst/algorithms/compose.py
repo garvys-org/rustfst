@@ -41,11 +41,12 @@ class ComposeConfig:
 
 def compose(fst: VectorFst, other_fst: VectorFst) -> VectorFst:
     """
-    compose(fst, other_fst)
-    compute the composition of two FSTs.
-    :param fst: Fst
-    :param other_fst: Fst
-    :return: Fst
+    Compute the composition of two FSTs.
+    Args:
+        fst: Left fst.
+        other_fst: Right fst.
+    Returns:
+        Resulting fst.
     """
 
     composition = ctypes.pointer(ctypes.c_void_p())
@@ -60,12 +61,13 @@ def compose_with_config(
     fst: VectorFst, other_fst: VectorFst, config: ComposeConfig
 ) -> VectorFst:
     """
-    compose(fst, other_fst)
-    compute the composition of two FSTs.
-    :param fst: Fst
-    :param other_fst: Fst
-    :param config: ComposeConfig
-    :return: Fst
+    Compute the composition of two FSTs parametrized with a config.
+    Args:
+        fst: Left fst.
+        other_fst: Right fst.
+        config: Config parameters of the composition.
+    Returns:
+        Resulting fst.
     """
 
     composition = ctypes.pointer(ctypes.c_void_p())

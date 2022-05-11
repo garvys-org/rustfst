@@ -12,6 +12,9 @@ class Trs:
     """Structure representing list of transitions."""
 
     def __init__(self, ptr=None) -> Trs:
+        """
+        Create an empty list of transitions.
+        """
         if ptr is None:
             self._ptr = c_void_p()
             exit_code = lib.trs_vec_new(byref(self._ptr))
@@ -21,6 +24,11 @@ class Trs:
             self._ptr = ptr
 
     def push(self, tr: Tr):
+        """
+        Add a new transition to the list.
+        Args:
+            tr: The transition to add.
+        """
         exit_code = lib.trs_vec_push(self._ptr, tr.ptr)
         err_msg = "Something went wrong when adding new transition"
         check_ffi_error(exit_code, err_msg)
@@ -35,6 +43,12 @@ class Trs:
         return Tr(removed_tr)
 
     def len(self) -> int:
+        """
+        Compute the number of transitions in the list.
+        Returns:
+            The number of transitions.
+
+        """
         num_trs = c_size_t()
         ret_code = lib.trs_vec_len(self._ptr, byref(num_trs))
         err_msg = "`len` failed"

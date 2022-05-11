@@ -19,6 +19,9 @@ from typing import List
 
 class VectorFst(Fst):
     def __init__(self, ptr=None):
+        """
+        Creates an empty VectorFst.
+        """
         if ptr:
             self.ptr = ptr
         else:
@@ -32,17 +35,16 @@ class VectorFst(Fst):
 
     def add_tr(self, state: int, tr: Tr) -> Fst:
         """
-        add_tr(self, state, tr)
-            Adds a new tr to the FST and return self. Note the tr should be considered
-            consumed and is not safe to use it after.
-            Args:
-              state: The integer index of the source state.
-              tr: The tr to add.
-            Returns:
-              self.
-            Raises:
-              SnipsFstException: If State index out of range.
-            See also: `add_state`.
+        Adds a new tr to the FST and return self. Note the tr should be considered
+        consumed and is not safe to use it after.
+        Args:
+          state: The integer index of the source state.
+          tr: The tr to add.
+        Returns:
+          self.
+        Raises:
+          SnipsFstException: If State index out of range.
+        See also: `add_state`.
         """
         ret_code = lib.vec_fst_add_tr(self.ptr, ctypes.c_size_t(state), tr.ptr)
         err_msg = "Error during `add_tr`"
@@ -52,11 +54,10 @@ class VectorFst(Fst):
 
     def add_state(self) -> int:
         """
-        add_state(self)
-            Adds a new state to the FST and returns the state ID.
-            Returns:
-              The integer index of the new state.
-            See also: `add_tr`, `set_start`, `set_final`.
+        Adds a new state to the FST and returns the state ID.
+        Returns:
+          The integer index of the new state.
+        See also: `add_tr`, `set_start`, `set_final`.
         """
         state_id = ctypes.c_size_t()
 
@@ -68,15 +69,14 @@ class VectorFst(Fst):
 
     def set_final(self, state: int, weight: float = None):
         """
-        set_final(self, state, weight)
-            Sets the final weight for a state.
-            Args:
-              state: The integer index of a state.
-              weight: A float indicating the desired final weight; if
-                  omitted, it is set to semiring One.
-            Raises:
-              errors.FstException: State index out of range or Incompatible or invalid weight.
-            See also: `set_start`.
+        Sets the final weight for a state.
+        Args:
+          state: The integer index of a state.
+          weight: A float indicating the desired final weight; if
+              omitted, it is set to semiring One.
+        Raises:
+          ValueError: State index out of range or Incompatible or invalid weight.
+        See also: `set_start`.
         """
         if weight is None:
             weight = weight_one()
@@ -90,20 +90,18 @@ class VectorFst(Fst):
 
     def mutable_trs(self, state: int) -> MutableTrsIterator:
         """
-        mutable_trs(self, state)
-            Returns a mutable iterator over trs leaving the specified state.
-            Args:
-              state: The source state ID.
-            Returns:
-              A MutableTrsIterator.
-            See also: `trs`, `states`.
+        Returns a mutable iterator over trs leaving the specified state.
+        Args:
+          state: The source state ID.
+        Returns:
+          A MutableTrsIterator.
+        See also: `trs`, `states`.
         """
         return MutableTrsIterator(self, state)
 
     def delete_states(self):
         """
-        delete_states(self)
-            Delete the states
+        Delete all the states
         """
         ret_code = lib.vec_fst_delete_states(self.ptr)
         err_msg = "Error deleting states"
@@ -111,8 +109,9 @@ class VectorFst(Fst):
 
     def num_states(self) -> int:
         """
-        num_states(self)
-            Returns the number of states.
+        Returns the number of states.
+        Returns:
+            Number of states present in the Fst.
         """
         num_states = ctypes.c_size_t()
         ret_code = lib.vec_fst_num_states(self.ptr, ctypes.byref(num_states))
@@ -123,15 +122,12 @@ class VectorFst(Fst):
 
     def set_start(self, state: int):
         """
-        set_start(self, state)
-            Sets a state to be the initial state state.
-            Args:
-              state: The integer index of a state.
-            Returns:
-              self.
-            Raises:
-              SnipsFstException: If State index out of range.
-            See also: `set_final`.
+        Sets a state to be the initial state state.
+        Args:
+          state: The integer index of a state.
+        Raises:
+          ValueError: If State index out of range.
+        See also: `set_final`.
         """
         state_id = ctypes.c_size_t(state)
         ret_code = lib.vec_fst_set_start(self.ptr, state_id)
@@ -140,11 +136,10 @@ class VectorFst(Fst):
 
     def states(self) -> StateIterator:
         """
-        states(self)
-            Returns an iterator over all states in the FST.
-            Returns:
-              A StateIterator object for the FST.
-            See also: `trs`, `mutable_trs`.
+        Returns an iterator over all states in the FST.
+        Returns:
+          A StateIterator object for the FST.
+        See also: `trs`, `mutable_trs`.
         """
         return StateIterator(self)
 
@@ -156,10 +151,6 @@ class VectorFst(Fst):
         drawing_config: DrawingConfig = DrawingConfig(),
     ):
         """
-        draw(self, filename, isymbols=None, osymbols=None, ssymbols=None,
-             acceptor=False, title="", width=8.5, height=11, portrait=False,
-             vertical=False, ranksep=0.4, nodesep=0.25, fontsize=14,
-             precision=5, show_weight_one=False, print_weight=True):
         Writes out the FST in Graphviz text format.
         This method writes out the FST in the dot graph description language. The
         graph can be rendered using the `dot` executable provided by Graphviz.
@@ -218,14 +209,13 @@ class VectorFst(Fst):
     @classmethod
     def read(cls, filename: Path) -> Fst:
         """
-        Fst.read(filename)
-            Read a Fst at a given path.
-            Args:
-              filename: The string location of the input file.
-            Returns:
-              An FST.
-            Raises:
-              errors.SnipsFstException: Read failed.
+        Read a Fst at a given path.
+        Args:
+          filename: The string location of the input file.
+        Returns:
+          An Fst.
+        Raises:
+          ValueError: Read failed.
         """
         fst = ctypes.pointer(ctypes.c_void_p())
         ret_code = lib.vec_fst_from_path(
@@ -238,13 +228,12 @@ class VectorFst(Fst):
 
     def write(self, filename: Path):
         """
-        write(self, filename)
-            Serializes FST to a file.
-            This method writes the FST to a file in vector binary format.
-            Args:
-              filename: The string location of the output file.
-            Raises:
-              errors.SnipsFstException: Write failed.
+        Serializes FST to a file.
+        This method writes the FST to a file in vector binary format.
+        Args:
+          filename: The string location of the output file.
+        Raises:
+          ValueError: Write failed.
         """
         ret_code = lib.vec_fst_write_file(self.ptr, str(filename).encode("utf-8"))
         err_msg = "Write failed. file: {}".format(filename)
@@ -252,10 +241,11 @@ class VectorFst(Fst):
 
     def equals(self, other: Fst) -> bool:
         """
-        equals(self, other)
-            Check if this Fst is equal to the other
-        :param other: Fst instance
-        :return: bool
+        Check if this Fst is equal to the other.
+        Args:
+            other: Fst instance
+        Returns:
+             Whether both Fst are equals.
         """
         is_equal = ctypes.c_size_t()
 
@@ -267,8 +257,8 @@ class VectorFst(Fst):
 
     def copy(self) -> VectorFst:
         """
-        copy fst(self, other)
-        :return: Fst
+        Returns:
+            A copy of the Fst.
         """
         cloned_fst = ctypes.pointer(ctypes.c_void_p())
         ret_code = lib.vec_fst_copy(self.ptr, ctypes.byref(cloned_fst))
@@ -277,35 +267,35 @@ class VectorFst(Fst):
 
         return VectorFst(cloned_fst)
 
-    def compose(self, other: VectorFst, config=None):
+    def compose(self, other: VectorFst, config=None) -> VectorFst:
         from rustfst.algorithms.compose import compose, compose_with_config
 
         if config:
             return compose_with_config(self, other, config)
         return compose(self, other)
 
-    def concat(self, other: VectorFst):
+    def concat(self, other: VectorFst) -> VectorFst:
         from rustfst.algorithms.concat import concat
 
         return concat(self, other)
 
-    def connect(self):
+    def connect(self) -> VectorFst:
         from rustfst.algorithms.connect import connect
 
-        connect(self)
+        return connect(self)
 
-    def determinize(self, config=None):
+    def determinize(self, config=None) -> VectorFst:
         from rustfst.algorithms.determinize import determinize, determinize_with_config
 
         if config:
             return determinize_with_config(self, config)
         return determinize(self)
 
-    def project(self, proj_type=None):
+    def project(self, proj_type=None) -> VectorFst:
         from rustfst.algorithms.project import project, ProjectType
 
         if proj_type:
-            project(self, proj_type)
+            return project(self, proj_type)
         proj_type = ProjectType.PROJECT_INPUT
         return project(self, proj_type)
 
@@ -314,13 +304,13 @@ class VectorFst(Fst):
         root_label: int,
         fst_list: List[(int, VectorFst)],
         epsilon_on_replace: bool = False,
-    ):
+    ) -> VectorFst:
         from rustfst.algorithms.replace import replace
 
         complete_fst_list = [(root_label, self)] + fst_list
         return replace(root_label, complete_fst_list, epsilon_on_replace)
 
-    def reverse(self):
+    def reverse(self) -> VectorFst:
         from rustfst.algorithms.reverse import reverse
 
         return reverse(self)
@@ -330,7 +320,7 @@ class VectorFst(Fst):
 
         rm_epsilon(self)
 
-    def shortest_path(self, config=None):
+    def shortest_path(self, config=None) -> VectorFst:
         from rustfst.algorithms.shortest_path import (
             shortestpath,
             shortestpath_with_config,
@@ -340,7 +330,7 @@ class VectorFst(Fst):
             return shortestpath_with_config(self, config)
         return shortestpath(self)
 
-    def union(self, other_fst: VectorFst):
+    def union(self, other_fst: VectorFst) -> VectorFst:
         from rustfst.algorithms.union import union
 
         return union(self, other_fst)
@@ -360,12 +350,12 @@ class VectorFst(Fst):
 
         tr_unique(self)
 
-    def isomorphic(self, other: VectorFst):
+    def isomorphic(self, other: VectorFst) -> bool:
         from rustfst.algorithms.isomorphic import isomorphic
 
         return isomorphic(self, other)
 
-    def __add__(self, y):
+    def __add__(self, y) -> VectorFst:
         """x.__add__(y) <==> x+y"""
         x = self.copy()
 

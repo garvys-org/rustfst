@@ -16,22 +16,30 @@ from typing import Optional
 
 class Tr:
     """
-    Tr(ilabel, olabel, weight, next_state)
-        Structure representing a transition from a state to another state in a FST.
-        Attributes:
-            ilabel: The input label.
-            olabel: The output label.
-            weight: The arc weight.
-            nextstate: The destination state for the arc.
+    Structure representing a transition from a state to another state in a FST.
+    Attributes:
+        ilabel: The input label.
+        olabel: The output label.
+        weight: The arc weight.
+        nextstate: The destination state for the arc.
     """
 
     def __init__(
         self,
-        ilabel=None,
+        ilabel: Optional[int] = None,
         olabel: Optional[int] = None,
         weight: Optional[float] = None,
         nextstate: Optional[int] = None,
-    ) -> Tr:
+    ):
+        """
+        Create a new transition.
+
+        Args:
+            ilabel: The input label.
+            olabel: The outpit label.
+            weight: The transition's weight
+            nextstate: The destination state for the transition.
+        """
         if ilabel and olabel is None and weight is None and nextstate is None:
             self._ptr = ilabel
         else:

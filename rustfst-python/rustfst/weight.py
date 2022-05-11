@@ -5,7 +5,12 @@ from rustfst.utils import (
 )
 
 
-def weight_one():
+def weight_one() -> float:
+    """
+    Compute One() in the Tropical Semiring.
+    Returns:
+        Float value corresponding to One() in the Tropical Semiring.
+    """
     weight = ctypes.c_float()
     ret_code = lib.fst_weight_one(ctypes.byref(weight))
     err_msg = "weight_one failed"
@@ -13,7 +18,12 @@ def weight_one():
     return float(weight.value)
 
 
-def weight_zero():
+def weight_zero() -> float:
+    """
+    Compute Zero() in the Tropical Semiring.
+    Returns:
+        Float value corresponding to Zero() in the Tropical Semiring.
+    """
     weight = ctypes.c_float()
     ret_code = lib.fst_weight_zero(ctypes.byref(weight))
     err_msg = "weight_zero failed"

@@ -84,10 +84,6 @@
 //!     Ok(())
 //! }
 //! ```
-//!
-//! ## Status
-//!
-//! A big number of algorithms are already implemented. The main one missing is the Composition.
 
 #[warn(missing_docs)]
 #[cfg(test)]

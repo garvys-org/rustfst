@@ -1,15 +1,27 @@
 # Rustfst
 
-![rustc >= 1.41.0](https://img.shields.io/badge/rustc-%3E%3D1.41.0-brightgreen)
-[![Native Linux test status](https://github.com/Garvys/rustfst/workflows/Native%20Linux/badge.svg)](https://github.com/Garvys/rustfst/actions)
-[![Current version](https://meritbadge.herokuapp.com/rustfst)](https://crates.io/crates/rustfst)
+[![License: MIT/Apache-2.0](https://img.shields.io/crates/l/rustfst.svg)](#license)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
+[![macOS](https://svgshare.com/i/ZjP.svg)](https://svgshare.com/i/ZjP.svg)
+[![Linux](https://svgshare.com/i/Zhy.svg)](https://svgshare.com/i/Zhy.svg)
+[![Github tag](https://badgen.net/github/tag/garvys/rustfst)](https://github.com/garvys/rustfst/tags/)
+
+
+#### Rust
+![rustc >= 1.49.0](https://img.shields.io/badge/rustc-%3E%3D1.49.0-brightgreen)
+[![Native Linux test status](https://github.com/Garvys/rustfst/workflows/Native/badge.svg)](https://github.com/Garvys/rustfst/actions)
 [![Documentation](https://docs.rs/rustfst/badge.svg)](https://docs.rs/rustfst)
 [![](https://tokei.rs/b1/github/Garvys/rustfst)](https://github.com/Garvys/rustfst)
-[![License: MIT/Apache-2.0](https://img.shields.io/crates/l/rustfst.svg)](#license)
+#### Python
+[![PyPI version](https://badge.fury.io/py/rustfst-python.svg)](https://badge.fury.io/py/rustfst-python)
+[![PyPI download month](https://img.shields.io/pypi/dm/rustfst-python.svg)](https://pypi.python.org/pypi/rustfst-python/)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/rustfst-python.svg)](https://pypi.python.org/pypi/rustfst-python/)
+
 
 <!-- cargo-sync-readme start -->
 
-Rust implementation of Weighted Finite States Transducers.
+This repo contains a **Rust** implementation of Weighted Finite States Transducers.
+Along with a **Python** binding.
 
 Rustfst is a library for constructing, combining, optimizing, and searching weighted
 finite-state transducers (FSTs). Weighted finite-state transducers are automata where
@@ -46,7 +58,6 @@ use anyhow::Result;
 use rustfst::prelude::*;
 use rustfst::algorithms::determinize::{DeterminizeType, determinize};
 use rustfst::algorithms::rm_epsilon::rm_epsilon;
-use std::sync::Arc;
 
 fn main() -> Result<()> {
     // Creates a empty wFST
@@ -82,7 +93,7 @@ fn main() -> Result<()> {
     connect(&mut fst)?;
 
     // - Optimize the FST by merging states with the same behaviour.
-    minimize(&mut fst, true)?;
+    minimize(&mut fst)?;
 
     // - Copy all the input labels in the output.
     project(&mut fst, ProjectType::ProjectInput);
@@ -91,15 +102,11 @@ fn main() -> Result<()> {
     rm_epsilon(&mut fst)?;
 
     // - Compute an equivalent FST but deterministic.
-    fst = determinize(Arc::new(fst), DeterminizeType::DeterminizeFunctional)?;
+    fst = determinize(&fst)?;
 
     Ok(())
 }
 ```
-
-## Status
-
-A big number of algorithms are already implemented. The main one missing is the Composition.
 
 <!-- cargo-sync-readme end -->
 
@@ -136,6 +143,15 @@ git push --tags
 ```
 
 Optionally, if this is a major release, create a GitHub release in the UI.
+
+## Projects contained in this repository
+This repository contains two main projects:
+- `rustfst` is the Rust re-implementation.
+  - Crate available on crates.io [here](https://crates.io/crates/rustfst)
+  - Documentation available on docs.rs [here](https://docs.rs/rustfst/latest/rustfst/)
+- `rustfst-python` is the python binding of `rustfst`.
+  - Package available on Pypi [here](https://pypi.org/project/rustfst-python/)
+  - Documentation available on Github Pages [here](https://garvys.github.io/rustfst)
 
 ## License
    

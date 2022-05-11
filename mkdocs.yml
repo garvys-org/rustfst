@@ -1,0 +1,42 @@
+site_name: rustfst-python
+site_url: https://github.com/Garvys/rustfst
+nav:
+    - Home: index.md
+    - Code Reference: reference/
+
+theme: material
+repo_url: https://github.com/Garvys/rustfst
+repo_name: rustfst
+plugins:
+  - macros
+  - mike:
+      version_selector: true
+  - search
+  - gen-files:
+      scripts:
+      - docs/gen_ref_pages.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - section-index
+  - mkdocstrings:
+      watch:
+        - docs/gen_ref_pages.py
+        - rustfst-python/rustfst
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            enable_inventory: true
+            heading_level: 3
+            separate_signature: false
+            show_signature_annotations: true
+            show_if_no_docstring: false
+            show_category_heading: true
+            show_object_full_path: false
+            show_submodules: yes
+            members_order: source
+extra:
+  version:
+    default: latest
+    provider: mike
+

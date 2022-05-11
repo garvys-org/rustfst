@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+from typing import Union
+
 from rustfst.utils import lib, check_ffi_error
 import ctypes
 from pathlib import Path
@@ -6,14 +9,13 @@ from pathlib import Path
 
 class SymbolTable:
     """
-    SymbolTable(ptr=None)
-     SymbolTable class
-     This class wraps the SymbolTable struct
-     Args:
-       ptr: An optional pointer pointing to an existing SymbolTable rust struct.
+    `SymbolTable` class. This class wraps the `SymbolTable` struct.
     """
 
-    def __init__(self, ptr=None) -> SymbolTable:
+    def __init__(self, ptr=None):
+        """
+        Creates an empty `SymbolTable`.
+        """
         if ptr:
             self.ptr = ptr
         else:
@@ -26,13 +28,12 @@ class SymbolTable:
 
     def add_symbol(self, symbol: str) -> int:
         """
-        add_symbol(self, symbol, key=-1)
-            Adds a symbol to the table and returns the index.
-            This method adds a symbol to the table.
-            Args:
-              symbol: A symbol unicode string.
-            Returns:
-              The integer key of the new symbol.
+        Adds a symbol to the table and returns the index.
+
+        Args:
+          symbol: A symbol unicode string.
+        Returns:
+          The integer key of the new symbol.
         """
         try:
             symbol = symbol.encode("utf-8")
@@ -48,12 +49,10 @@ class SymbolTable:
 
     def add_table(self, syms: SymbolTable):
         """
-        add_table(self, syms)
-            Adds another SymbolTable to this table.
-            This method merges another symbol table into the current table. All key
-            values will be offset by the current available key.
-            Args:
-              syms: A SymbolTable to be merged with the current table.
+        This method merges another symbol table into the current table. All key
+        values will be offset by the current available key.
+        Args:
+          syms: A `SymbolTable` to be merged with the current table.
         """
         ret_code = lib.symt_add_table(self.ptr, syms.ptr)
         err_msg = "`add_table` failed"
@@ -61,8 +60,8 @@ class SymbolTable:
 
     def copy(self) -> SymbolTable:
         """
-        copy(self)
-            Returns a mutable copy of the SymbolTable.
+        Returns:
+            A mutable copy of the `SymbolTable`.
         """
         clone = ctypes.pointer(ctypes.c_void_p())
 
@@ -72,19 +71,18 @@ class SymbolTable:
 
         return SymbolTable(ptr=clone)
 
-    def find(self, key):
+    def find(self, key: Union[int, str]) -> Union[int, str]:
         """
-        find(self, key)
-            Given a symbol or index, finds the other one.
-            This method returns the index associated with a symbol key, or the symbol
-            associated with a index key.
-            Args:
-              key: Either a string or an index.
-            Returns:
-              If key is a string, the associated index; if key is an integer, the
-                  associated symbol.
-            Raises:
-              KeyError: Key not found.
+        Given a symbol or index, finds the other one.
+        This method returns the index associated with a symbol key, or the symbol
+        associated with a index key.
+        Args:
+          key: Either a string or an index.
+        Returns:
+          If key is a string, the associated index; if key is an integer, the
+              associated symbol.
+        Raises:
+          KeyError: Key not found.
         """
         if isinstance(key, int):
             return self._find_index(key)
@@ -110,17 +108,16 @@ class SymbolTable:
 
         return int(index.value)
 
-    def member(self, key) -> bool:
+    def member(self, key: Union[int, str]) -> bool:
         """
-        member(self, key)
-            Given a symbol or index, returns whether it is found in the table.
-            This method returns a boolean indicating whether the given symbol or index
-            is present in the table. If one intends to perform subsequent lookup, it is
-            better to simply call the find method, catching the KeyError.
-            Args:
-              key: Either a string or an index.
-            Returns:
-              Whether or not the key is present (as a string or a index) in the table.
+        Given a symbol or index, returns whether it is found in the table.
+        This method returns a boolean indicating whether the given symbol or index
+        is present in the table. If one intends to perform subsequent lookup, it is
+        better to simply call the find method, catching the KeyError.
+        Args:
+          key: Either a string or an index.
+        Returns:
+          Whether or not the key is present (as a string or a index) in the table.
         """
         is_present = ctypes.c_size_t()
 
@@ -144,8 +141,8 @@ class SymbolTable:
 
     def num_symbols(self) -> int:
         """
-        num_symbols(self)
-            Returns the number of symbols in the symbol table.
+        Returns:
+            The number of symbols in the symbol table.
         """
         num_symbols = ctypes.c_size_t()
         ret_code = lib.symt_num_symbols(self.ptr, ctypes.byref(num_symbols))
@@ -157,14 +154,13 @@ class SymbolTable:
     @classmethod
     def read(cls, filename: Path) -> SymbolTable:
         """
-        SymbolTable.read(filename)
-            Reads symbol table from binary file.
-            This class method creates a new SymbolTable from a symbol table binary file.
-            Args:
-              filename: The string location of the input binary file.
-            Returns:
-              A new SymbolTable instance.
-            See also: `SymbolTable.read_fst`, `SymbolTable.read_text`.
+        Reads symbol table from binary file.
+        This class method creates a new SymbolTable from a symbol table binary file.
+        Args:
+          filename: The string location of the input binary file.
+        Returns:
+          A new SymbolTable instance.
+        See also: `SymbolTable.read_fst`, `SymbolTable.read_text`.
         """
         symt = ctypes.pointer(ctypes.c_void_p())
         ret_code = lib.symt_from_path(
@@ -179,16 +175,14 @@ class SymbolTable:
     @classmethod
     def read_text(cls, filename: Path) -> SymbolTable:
         """
-        SymbolTable.read_text(filename)
-            Reads symbol table from text file.
-            This class method creates a new SymbolTable from a symbol table text file.
-            Args:
-              filename: The string location of the input text file.
-              allow_negative_labels: Should negative labels be allowed? (Not
-                  recommended; may cause conflicts).
-            Returns:
-              A new SymbolTable instance.
-            See also: `SymbolTable.read`, `SymbolTable.read_fst`.
+        Reads symbol table from text file.
+        This class method creates a new SymbolTable from a symbol table text file.
+        Args:
+          filename: The string location of the input text file.
+
+        Returns:
+          A new SymbolTable instance.
+        See also: `SymbolTable.read`, `SymbolTable.read_fst`.
         """
         symt = ctypes.pointer(ctypes.c_void_p())
         ret_code = lib.symt_from_path(
@@ -202,13 +196,12 @@ class SymbolTable:
 
     def write(self, filename: Path):
         """
-        write(self, filename)
-            Serializes symbol table to a file.
-            This methods writes the SymbolTable to a file in binary format.
-            Args:
-              filename: The string location of the output file.
-            Raises:
-              FstIOError: Write failed.
+        Serializes symbol table to a file.
+        This methods writes the SymbolTable to a file in binary format.
+        Args:
+          filename: The string location of the output file.
+        Raises:
+          FstIOError: Write failed.
         """
         ret_code = lib.symt_write_file(
             self.ptr, str(filename).encode("utf-8"), ctypes.c_size_t(1)
@@ -219,13 +212,12 @@ class SymbolTable:
 
     def write_text(self, filename: Path):
         """
-        write_text(self, filename)
-            Writes symbol table to text file.
-            This method writes the SymbolTable to a file in human-readable format.
-            Args:
-              filename: The string location of the output file.
-            Raises:
-              FstIOError: Write failed.
+        Writes symbol table to text file.
+        This method writes the SymbolTable to a file in human-readable format.
+        Args:
+          filename: The string location of the output file.
+        Raises:
+          FstIOError: Write failed.
         """
         ret_code = lib.symt_write_file(
             self.ptr, str(filename).encode("utf-8"), ctypes.c_size_t(0)
@@ -236,10 +228,12 @@ class SymbolTable:
 
     def equals(self, other: SymbolTable) -> bool:
         """
-        equals(self, other)
-            Check if this SymbolTable is equal to the other
-        :param other: SymbolTable instance
-        :return: bool
+        Check if this SymbolTable is equal to the other
+
+        Params:
+            other: SymbolTable instance
+        Returns:
+             bool
         """
         is_equal = ctypes.c_size_t()
 
@@ -249,9 +243,16 @@ class SymbolTable:
 
         return bool(is_equal.value)
 
-    def __eq__(self, y):
-        """x.__eq__(y) <==> x==y"""
-        return self.equals(y)
+    def __eq__(self, other: SymbolTable) -> bool:
+        """
+        Check if this `SymbolTable` is equal to the other
+
+        Params:
+            other: SymbolTable instance
+        Returns:
+             bool
+        """
+        return self.equals(other)
 
     def __del__(self):
         lib.symt_destroy(self.ptr)

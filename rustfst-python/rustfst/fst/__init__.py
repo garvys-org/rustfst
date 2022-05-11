@@ -18,7 +18,7 @@ class Fst:
         ptr: An optional pointer pointing to an existing Fst rust struct.
     """
 
-    def __init__(self, ptr) -> Fst:
+    def __init__(self, ptr):
         self.ptr = ptr
         # add shims for symbol tables (prevent early gc of the tables)
         self._input_symbols = None

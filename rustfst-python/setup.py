@@ -7,6 +7,15 @@ from setuptools_rust import Binding, RustExtension
 
 packages = [p for p in find_packages() if "tests" not in p]
 
+root = Path(__file__).resolve().parents[2]
+
+readme = ""
+readme_path = root / "README.md"
+if readme_path.exists():
+    with readme_path.open() as f:
+        readme = f.read()
+
+
 PACKAGE_NAME = "rustfst-python"
 RUST_EXTENSION_NAME = "rustfst.dylib.dylib"
 VERSION = "0.9.1-alpha.8"
@@ -30,9 +39,24 @@ else:
 setup(
     name=PACKAGE_NAME,
     version=VERSION,
-    description="Python wrapper for Rust FST",
+    description="Library for constructing, combining, optimizing, and searching weighted finite-state "
+    "transducers (FSTs). Re-implementation of OpenFst in Rust.",
+    longdescription=readme,
     extras_require={"tests": ["pytest>=6,<7"]},
     options={"bdist_wheel": {"universal": True}},
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Rust",
+        "Topic :: Scientific/Engineering :: Mathematics",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "Topic :: Text Processing",
+        "License :: OSI Approved :: Apache Software License",
+    ],
     packages=packages,
     include_package_data=True,
     rust_extensions=[
@@ -44,4 +68,14 @@ setup(
         )
     ],
     zip_safe=False,
+    url="https://github.com/Garvys/rustfst",
+    author="Alexandre Caulier, Emrick Sinitambirivoutin",
+    author_email="alexandre.caulier.a@gmail.com, emrick.sinitambirivoutin@sonos.com",
+    keywords="fst openfst graph transducer acceptor shortest-path minimize determinize wfst",
+    project_urls={
+        "Documentation": "https://garvys.github.io/rustfst/",
+        "Source": "https://github.com/Garvys/rustfst",
+    },
+    python_requires=">=3.7",
+    license="Apache License, Version 2.0",
 )
