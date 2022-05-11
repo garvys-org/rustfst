@@ -1008,12 +1008,69 @@
 
     <div class="doc doc-contents ">
 
-      <p>compose(fst, other_fst)
-compute the composition of two FSTs.
-:param fst: Fst
-:param other_fst: Fst
-:param config: ComposeConfig
-:return: Fst</p>
+      <p>Compute the composition of two FSTs parametrized with a config.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fst</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Left fst.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>other_fst</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Right fst.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>config</code></td>
+          <td>
+                <code><span title="rustfst.algorithms.compose.ComposeConfig">ComposeConfig</span></code>
+          </td>
+          <td><p>Config parameters of the composition.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Resulting fst.</p></td>
+        </tr>
+    </tbody>
+  </table>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/algorithms/compose.py</code></summary>
@@ -1036,16 +1093,18 @@ compute the composition of two FSTs.
 <span class="normal">76</span>
 <span class="normal">77</span>
 <span class="normal">78</span>
-<span class="normal">79</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compose_with_config</span><span class="p">(</span>
+<span class="normal">79</span>
+<span class="normal">80</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compose_with_config</span><span class="p">(</span>
     <span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">other_fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ComposeConfig</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    compose(fst, other_fst)</span>
-<span class="sd">    compute the composition of two FSTs.</span>
-<span class="sd">    :param fst: Fst</span>
-<span class="sd">    :param other_fst: Fst</span>
-<span class="sd">    :param config: ComposeConfig</span>
-<span class="sd">    :return: Fst</span>
+<span class="sd">    Compute the composition of two FSTs parametrized with a config.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        fst: Left fst.</span>
+<span class="sd">        other_fst: Right fst.</span>
+<span class="sd">        config: Config parameters of the composition.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Resulting fst.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">composition</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>

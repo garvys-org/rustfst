@@ -694,13 +694,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#rustfst.symbol_table.SymbolTable.__eq__" class="md-nav__link">
-    __eq__()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.__init__" class="md-nav__link">
     __init__()
   </a>
@@ -724,13 +717,6 @@
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.copy" class="md-nav__link">
     copy()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rustfst.symbol_table.SymbolTable.equals" class="md-nav__link">
-    equals()
   </a>
   
 </li>
@@ -780,6 +766,20 @@
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.write_text" class="md-nav__link">
     write_text()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.symbol_table.SymbolTable.equals" class="md-nav__link">
+    equals()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.symbol_table.SymbolTable.__eq__" class="md-nav__link">
+    __eq__()
   </a>
   
 </li>
@@ -954,13 +954,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#rustfst.symbol_table.SymbolTable.__eq__" class="md-nav__link">
-    __eq__()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.__init__" class="md-nav__link">
     __init__()
   </a>
@@ -984,13 +977,6 @@
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.copy" class="md-nav__link">
     copy()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rustfst.symbol_table.SymbolTable.equals" class="md-nav__link">
-    equals()
   </a>
   
 </li>
@@ -1040,6 +1026,20 @@
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.write_text" class="md-nav__link">
     write_text()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.symbol_table.SymbolTable.equals" class="md-nav__link">
+    equals()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.symbol_table.SymbolTable.__eq__" class="md-nav__link">
+    __eq__()
   </a>
   
 </li>
@@ -1634,93 +1634,6 @@
 
 <h5 id="rustfst.symbol_table.SymbolTable-functions">Functions</h5>
 
-
-  <div class="doc doc-object doc-function">
-
-
-
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.__eq__">
-<code class="highlight language-python"><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
-
-
-</h6>
-
-
-    <div class="doc doc-contents ">
-
-      <p>Check if this <code>SymbolTable</code> is equal to the other</p>
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>other</code></td>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
-          </td>
-          <td><p>SymbolTable instance</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>bool</code>
-          </td>
-          <td><p>bool</p></td>
-        </tr>
-    </tbody>
-  </table>
-
-        <details class="quote">
-          <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Check if this `SymbolTable` is equal to the other</span>
-
-<span class="sd">    Params:</span>
-<span class="sd">        other: SymbolTable instance</span>
-<span class="sd">    Returns:</span>
-<span class="sd">         bool</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-        </details>
-    </div>
-
-  </div>
-
-
-
   <div class="doc doc-object doc-function">
 
 
@@ -1768,8 +1681,6 @@
     </div>
 
   </div>
-
-
 
 
 
@@ -2017,104 +1928,6 @@ values will be offset by the current available key.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.equals">
-<code class="highlight language-python"><span class="n">equals</span><span class="p">(</span><span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
-
-
-</h6>
-
-
-    <div class="doc doc-contents ">
-
-      <p>Check if this SymbolTable is equal to the other</p>
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>other</code></td>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
-          </td>
-          <td><p>SymbolTable instance</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>bool</code>
-          </td>
-          <td><p>bool</p></td>
-        </tr>
-    </tbody>
-  </table>
-
-        <details class="quote">
-          <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">229</span>
-<span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span>
-<span class="normal">244</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Check if this SymbolTable is equal to the other</span>
-
-<span class="sd">    Params:</span>
-<span class="sd">        other: SymbolTable instance</span>
-<span class="sd">    Returns:</span>
-<span class="sd">         bool</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">is_equal</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
-
-    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">symt_equals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">is_equal</span><span class="p">))</span>
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error checking equality&quot;</span>
-    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">is_equal</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-        </details>
-    </div>
-
-  </div>
-
-
-
-  <div class="doc doc-object doc-function">
-
-
-
 <h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.find">
 <code class="highlight language-python"><span class="n">find</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span></code>
 
@@ -2231,6 +2044,8 @@ associated with a index key.</p>
     </div>
 
   </div>
+
+
 
 
 
@@ -2841,6 +2656,191 @@ This method writes the SymbolTable to a file in human-readable format.</p>
     </div>
 
   </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.equals">
+<code class="highlight language-python"><span class="n">equals</span><span class="p">(</span><span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
+
+
+</h6>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Check if this SymbolTable is equal to the other</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>other</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
+          </td>
+          <td><p>SymbolTable instance</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>bool</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+        <details class="quote">
+          <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if this SymbolTable is equal to the other</span>
+
+<span class="sd">    Params:</span>
+<span class="sd">        other: SymbolTable instance</span>
+<span class="sd">    Returns:</span>
+<span class="sd">         bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">is_equal</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
+
+    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">symt_equals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">is_equal</span><span class="p">))</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error checking equality&quot;</span>
+    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">is_equal</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.__eq__">
+<code class="highlight language-python"><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
+
+
+</h6>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Check if this <code>SymbolTable</code> is equal to the other</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>other</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
+          </td>
+          <td><p>SymbolTable instance</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>bool</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+        <details class="quote">
+          <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if this `SymbolTable` is equal to the other</span>
+
+<span class="sd">    Params:</span>
+<span class="sd">        other: SymbolTable instance</span>
+<span class="sd">    Returns:</span>
+<span class="sd">         bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+    </div>
+
+  </div>
+
 
 
 

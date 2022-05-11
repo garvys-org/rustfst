@@ -729,15 +729,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#rustfst.trs.Trs.len" class="md-nav__link">
-    len()
+  <a href="#rustfst.trs.Trs.push" class="md-nav__link">
+    push()
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#rustfst.trs.Trs.push" class="md-nav__link">
-    push()
+  <a href="#rustfst.trs.Trs.len" class="md-nav__link">
+    len()
   </a>
   
 </li>
@@ -891,15 +891,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#rustfst.trs.Trs.len" class="md-nav__link">
-    len()
+  <a href="#rustfst.trs.Trs.push" class="md-nav__link">
+    push()
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#rustfst.trs.Trs.push" class="md-nav__link">
-    push()
+  <a href="#rustfst.trs.Trs.len" class="md-nav__link">
+    len()
   </a>
   
 </li>
@@ -1124,7 +1124,6 @@
 
 <h5 id="rustfst.trs.Trs-functions">Functions</h5>
 
-
   <div class="doc doc-object doc-function">
 
 
@@ -1163,6 +1162,72 @@
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">exit_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ptr</span> <span class="o">=</span> <span class="n">ptr</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h6 class="doc doc-heading" id="rustfst.trs.Trs.push">
+<code class="highlight language-python"><span class="n">push</span><span class="p">(</span><span class="n">tr</span><span class="p">:</span> <span class="n">Tr</span><span class="p">)</span></code>
+
+
+</h6>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Add a new transition to the list.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>tr</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.tr.Tr" href="../tr/#rustfst.tr.Tr">Tr</a></code>
+          </td>
+          <td><p>The transition to add.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+        <details class="quote">
+          <summary>Source code in <code>rustfst/trs.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tr</span><span class="p">:</span> <span class="n">Tr</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add a new transition to the list.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        tr: The transition to add.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">exit_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">trs_vec_push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ptr</span><span class="p">,</span> <span class="n">tr</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Something went wrong when adding new transition&quot;</span>
+    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">exit_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
         </details>
     </div>
@@ -1236,71 +1301,6 @@
 
   </div>
 
-
-
-  <div class="doc doc-object doc-function">
-
-
-
-<h6 class="doc doc-heading" id="rustfst.trs.Trs.push">
-<code class="highlight language-python"><span class="n">push</span><span class="p">(</span><span class="n">tr</span><span class="p">:</span> <span class="n">Tr</span><span class="p">)</span></code>
-
-
-</h6>
-
-
-    <div class="doc doc-contents ">
-
-      <p>Add a new transition to the list.</p>
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>tr</code></td>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.tr.Tr" href="../tr/#rustfst.tr.Tr">Tr</a></code>
-          </td>
-          <td><p>The transition to add.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-        <details class="quote">
-          <summary>Source code in <code>rustfst/trs.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tr</span><span class="p">:</span> <span class="n">Tr</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Add a new transition to the list.</span>
-<span class="sd">    Args:</span>
-<span class="sd">        tr: The transition to add.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">exit_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">trs_vec_push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ptr</span><span class="p">,</span> <span class="n">tr</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Something went wrong when adding new transition&quot;</span>
-    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">exit_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-        </details>
-    </div>
-
-  </div>
 
 
 

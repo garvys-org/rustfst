@@ -885,12 +885,88 @@
 
     <div class="doc doc-contents ">
 
-      <p>replace(fst)
-constructively replaces arcs in a FST with other FST(s).
-:param root_idx: int
-:param fst_list: List[(int, VectorFst)]
-:param epsilon_on_replace: bool
-:return: Fst</p>
+      <p>Recursively replaces trs in the root FSTs with other FSTs.</p>
+<p>Replace supports replacement of trs in one Fst with another FST. This
+replacement is recursive. Replace takes an array of FST(s). One FST
+represents the root (or topology) machine. The root FST refers to other FSTs
+by recursively replacing trs labeled as non-terminals with the matching
+non-terminal FST. Currently Replace uses the output symbols of the trs to
+determine whether the transition is a non-terminal transition or not. A non-terminal can be
+any label that is not a non-zero terminal label in the output alphabet.</p>
+<p>Note that input argument is a vector of pairs. These correspond to the tuple
+of non-terminal Label and corresponding FST.</p>
+<p>Root Fst :</p>
+<p><img alt="replace_in_1" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_1.svg?sanitize=true" /></p>
+<p>Fst for non-terminal #NAME :</p>
+<p><img alt="replace_in_2" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_2.svg?sanitize=true" /></p>
+<p>Fst for non-terminal #FIRSTNAME :</p>
+<p><img alt="replace_in_3" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_3.svg?sanitize=true" /></p>
+<p>Fst for non-terminal #LASTNAME :</p>
+<p><img alt="replace_in_4" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_4.svg?sanitize=true" /></p>
+<p>Output :</p>
+<p><img alt="replace_out" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_out.svg?sanitize=true" /></p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>root_idx</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>fst_list</code></td>
+          <td>
+                <code><span title="typing.List">List</span>[int, <a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a>]</code>
+          </td>
+          <td></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>epsilon_on_replace</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>The resulting Fst.</p></td>
+        </tr>
+    </tbody>
+  </table>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/algorithms/replace.py</code></summary>
@@ -918,16 +994,86 @@ constructively replaces arcs in a FST with other FST(s).
 <span class="normal">40</span>
 <span class="normal">41</span>
 <span class="normal">42</span>
-<span class="normal">43</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">replace</span><span class="p">(</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">replace</span><span class="p">(</span>
     <span class="n">root_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fst_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[(</span><span class="nb">int</span><span class="p">,</span> <span class="n">VectorFst</span><span class="p">)],</span> <span class="n">epsilon_on_replace</span><span class="p">:</span> <span class="nb">bool</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    replace(fst)</span>
-<span class="sd">    constructively replaces arcs in a FST with other FST(s).</span>
-<span class="sd">    :param root_idx: int</span>
-<span class="sd">    :param fst_list: List[(int, VectorFst)]</span>
-<span class="sd">    :param epsilon_on_replace: bool</span>
-<span class="sd">    :return: Fst</span>
+<span class="sd">    Recursively replaces trs in the root FSTs with other FSTs.</span>
+
+<span class="sd">    Replace supports replacement of trs in one Fst with another FST. This</span>
+<span class="sd">    replacement is recursive. Replace takes an array of FST(s). One FST</span>
+<span class="sd">    represents the root (or topology) machine. The root FST refers to other FSTs</span>
+<span class="sd">    by recursively replacing trs labeled as non-terminals with the matching</span>
+<span class="sd">    non-terminal FST. Currently Replace uses the output symbols of the trs to</span>
+<span class="sd">    determine whether the transition is a non-terminal transition or not. A non-terminal can be</span>
+<span class="sd">    any label that is not a non-zero terminal label in the output alphabet.</span>
+
+<span class="sd">    Note that input argument is a vector of pairs. These correspond to the tuple</span>
+<span class="sd">    of non-terminal Label and corresponding FST.</span>
+
+<span class="sd">    Root Fst :</span>
+
+<span class="sd">    ![replace_in_1](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_1.svg?sanitize=true)</span>
+
+<span class="sd">    Fst for non-terminal #NAME :</span>
+
+<span class="sd">    ![replace_in_2](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_2.svg?sanitize=true)</span>
+
+<span class="sd">    Fst for non-terminal #FIRSTNAME :</span>
+
+<span class="sd">    ![replace_in_3](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_3.svg?sanitize=true)</span>
+
+<span class="sd">    Fst for non-terminal #LASTNAME :</span>
+
+<span class="sd">    ![replace_in_4](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_4.svg?sanitize=true)</span>
+
+<span class="sd">    Output :</span>
+
+<span class="sd">    ![replace_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_out.svg?sanitize=true)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        root_idx:</span>
+<span class="sd">        fst_list:</span>
+<span class="sd">        epsilon_on_replace:</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The resulting Fst.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">pairs</span> <span class="o">=</span> <span class="p">[</span><span class="n">LabelFstPair</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">fst</span><span class="p">)</span> <span class="ow">in</span> <span class="n">fst_list</span><span class="p">]</span>
     <span class="n">pairs_array</span> <span class="o">=</span> <span class="p">(</span><span class="n">LabelFstPair</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">pairs</span><span class="p">))(</span><span class="o">*</span><span class="n">pairs</span><span class="p">)</span>
