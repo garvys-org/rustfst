@@ -265,7 +265,7 @@ jobs:
     name: Publish rustfst-python's doc
     needs: [ rust-doc, rust-tests, rustfst-python-bench, rustfst-python ]
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/readthedocs' }}
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/rustfst-v')
 
     steps:
       - uses: actions/checkout@v3
@@ -285,7 +285,7 @@ jobs:
       - run: git fetch origin gh-pages --depth=1
       - run: mkdocs build -s
       - name: Deploy Doc to latest
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: github.ref == 'refs/heads/main'
         run: mike deploy --push latest
       - name: Retrieve tag
         uses: olegtarasov/get-tag@v2.1
