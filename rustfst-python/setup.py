@@ -41,7 +41,8 @@ setup(
     version=VERSION,
     description="Library for constructing, combining, optimizing, and searching weighted finite-state "
     "transducers (FSTs). Re-implementation of OpenFst in Rust.",
-    longdescription=readme,
+    long_description=readme,
+    long_description_content_type="text/markdown",
     extras_require={"tests": ["pytest>=6,<7"]},
     options={"bdist_wheel": {"universal": True}},
     classifiers=[
