@@ -33,23 +33,25 @@ def replace(
     Note that input argument is a vector of pairs. These correspond to the tuple
     of non-terminal Label and corresponding FST.
 
-    Root Fst :
+    Examples:
+
+    - Root Fst :
 
     ![replace_in_1](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_1.svg?sanitize=true)
 
-    Fst for non-terminal #NAME :
+    - Fst for non-terminal #NAME :
 
     ![replace_in_2](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_2.svg?sanitize=true)
 
-    Fst for non-terminal #FIRSTNAME :
+    - Fst for non-terminal #FIRSTNAME :
 
     ![replace_in_3](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_3.svg?sanitize=true)
 
-    Fst for non-terminal #LASTNAME :
+    - Fst for non-terminal #LASTNAME :
 
     ![replace_in_4](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_4.svg?sanitize=true)
 
-    Output :
+    - Output :
 
     ![replace_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_out.svg?sanitize=true)
 
