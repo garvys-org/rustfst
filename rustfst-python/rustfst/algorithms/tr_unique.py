@@ -9,8 +9,10 @@ from rustfst.fst.vector_fst import VectorFst
 
 def tr_unique(fst: VectorFst):
     """
-    tr_unique(fst)
-    :param fst: Fst
+    Keep a single instance of trs leaving the same state, going to the same state and
+    with the same input labels, output labels and weight.
+    Args:
+        fst: Fst to modify
     """
 
     ret_code = lib.fst_tr_unique(fst.ptr)
