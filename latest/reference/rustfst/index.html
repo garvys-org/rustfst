@@ -7467,8 +7467,32 @@ of ambiguous outputs.</p>
 
     <div class="doc doc-contents ">
 
-      <p>tr_unique(fst)
-:param fst: Fst</p>
+      <p>Keep a single instance of trs leaving the same state, going to the same state and
+with the same input labels, output labels and weight.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fst</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Fst to modify</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/algorithms/tr_unique.py</code></summary>
@@ -7480,10 +7504,14 @@ of ambiguous outputs.</p>
 <span class="normal">15</span>
 <span class="normal">16</span>
 <span class="normal">17</span>
-<span class="normal">18</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">tr_unique</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">):</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">tr_unique</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    tr_unique(fst)</span>
-<span class="sd">    :param fst: Fst</span>
+<span class="sd">    Keep a single instance of trs leaving the same state, going to the same state and</span>
+<span class="sd">    with the same input labels, output labels and weight.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        fst: Fst to modify</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_tr_unique</span><span class="p">(</span><span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
@@ -8392,15 +8420,28 @@ determine whether the transition is a non-terminal transition or not. A non-term
 any label that is not a non-zero terminal label in the output alphabet.</p>
 <p>Note that input argument is a vector of pairs. These correspond to the tuple
 of non-terminal Label and corresponding FST.</p>
-<p>Root Fst :</p>
+
+<p><strong>Examples:</strong></p>
+    
+      <ul>
+<li>Root Fst :</li>
+</ul>
 <p><img alt="replace_in_1" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_1.svg?sanitize=true" /></p>
-<p>Fst for non-terminal #NAME :</p>
+<ul>
+<li>Fst for non-terminal #NAME :</li>
+</ul>
 <p><img alt="replace_in_2" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_2.svg?sanitize=true" /></p>
-<p>Fst for non-terminal #FIRSTNAME :</p>
+<ul>
+<li>Fst for non-terminal #FIRSTNAME :</li>
+</ul>
 <p><img alt="replace_in_3" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_3.svg?sanitize=true" /></p>
-<p>Fst for non-terminal #LASTNAME :</p>
+<ul>
+<li>Fst for non-terminal #LASTNAME :</li>
+</ul>
 <p><img alt="replace_in_4" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_4.svg?sanitize=true" /></p>
-<p>Output :</p>
+<ul>
+<li>Output :</li>
+</ul>
 <p><img alt="replace_out" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_out.svg?sanitize=true" /></p>
 
   <p><strong>Parameters:</strong></p>
@@ -8526,7 +8567,9 @@ of non-terminal Label and corresponding FST.</p>
 <span class="normal">75</span>
 <span class="normal">76</span>
 <span class="normal">77</span>
-<span class="normal">78</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">replace</span><span class="p">(</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">replace</span><span class="p">(</span>
     <span class="n">root_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fst_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[(</span><span class="nb">int</span><span class="p">,</span> <span class="n">VectorFst</span><span class="p">)],</span> <span class="n">epsilon_on_replace</span><span class="p">:</span> <span class="nb">bool</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -8543,23 +8586,25 @@ of non-terminal Label and corresponding FST.</p>
 <span class="sd">    Note that input argument is a vector of pairs. These correspond to the tuple</span>
 <span class="sd">    of non-terminal Label and corresponding FST.</span>
 
-<span class="sd">    Root Fst :</span>
+<span class="sd">    Examples:</span>
+
+<span class="sd">    - Root Fst :</span>
 
 <span class="sd">    ![replace_in_1](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_1.svg?sanitize=true)</span>
 
-<span class="sd">    Fst for non-terminal #NAME :</span>
+<span class="sd">    - Fst for non-terminal #NAME :</span>
 
 <span class="sd">    ![replace_in_2](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_2.svg?sanitize=true)</span>
 
-<span class="sd">    Fst for non-terminal #FIRSTNAME :</span>
+<span class="sd">    - Fst for non-terminal #FIRSTNAME :</span>
 
 <span class="sd">    ![replace_in_3](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_3.svg?sanitize=true)</span>
 
-<span class="sd">    Fst for non-terminal #LASTNAME :</span>
+<span class="sd">    - Fst for non-terminal #LASTNAME :</span>
 
 <span class="sd">    ![replace_in_4](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_4.svg?sanitize=true)</span>
 
-<span class="sd">    Output :</span>
+<span class="sd">    - Output :</span>
 
 <span class="sd">    ![replace_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_out.svg?sanitize=true)</span>
 
@@ -8642,11 +8687,76 @@ of non-terminal Label and corresponding FST.</p>
 
     <div class="doc doc-contents ">
 
-      <p>union(fst, other_fst)
-compute the union of two FSTs.
-:param fst: Fst
-:param other_fst: Fst
-:return: Fst</p>
+      <p>Performs the union of two wFSTs. If A transduces string <code>x</code> to <code>y</code> with weight <code>a</code>
+and <code>B</code> transduces string <code>w</code> to <code>v</code> with weight <code>b</code>, then their union transduces <code>x</code> to <code>y</code>
+with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <code>b</code>.</p>
+
+<p><strong>Examples:</strong></p>
+    
+      <ul>
+<li>Input Fst 1:</li>
+</ul>
+<p><img alt="union_in_1" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/union_in_1.svg?sanitize=true" /></p>
+<ul>
+<li>Input Fst 2:</li>
+</ul>
+<p><img alt="union_in_2" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/union_in_2.svg?sanitize=true" /></p>
+<ul>
+<li>Union:</li>
+</ul>
+<p><img alt="union_out" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/union_out.svg?sanitize=true" /></p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fst</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>other_fst</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>The resulting Fst.</p></td>
+        </tr>
+    </tbody>
+  </table>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/algorithms/union.py</code></summary>
@@ -8663,13 +8773,49 @@ compute the union of two FSTs.
 <span class="normal">20</span>
 <span class="normal">21</span>
 <span class="normal">22</span>
-<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">other_fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">other_fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    union(fst, other_fst)</span>
-<span class="sd">    compute the union of two FSTs.</span>
-<span class="sd">    :param fst: Fst</span>
-<span class="sd">    :param other_fst: Fst</span>
-<span class="sd">    :return: Fst</span>
+<span class="sd">    Performs the union of two wFSTs. If A transduces string `x` to `y` with weight `a`</span>
+<span class="sd">    and `B` transduces string `w` to `v` with weight `b`, then their union transduces `x` to `y`</span>
+<span class="sd">    with weight `a` and `w` to `v` with weight `b`.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">    - Input Fst 1:</span>
+
+<span class="sd">    ![union_in_1](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/union_in_1.svg?sanitize=true)</span>
+
+<span class="sd">    - Input Fst 2:</span>
+
+<span class="sd">    ![union_in_2](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/union_in_2.svg?sanitize=true)</span>
+
+<span class="sd">    - Union:</span>
+
+<span class="sd">    ![union_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/union_out.svg?sanitize=true)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fst:</span>
+<span class="sd">        other_fst:</span>
+<span class="sd">    Returns:</span>
+<span class="sd">         The resulting Fst.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_union</span><span class="p">(</span><span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">other_fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>

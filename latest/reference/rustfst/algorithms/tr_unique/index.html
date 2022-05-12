@@ -884,8 +884,32 @@
 
     <div class="doc doc-contents ">
 
-      <p>tr_unique(fst)
-:param fst: Fst</p>
+      <p>Keep a single instance of trs leaving the same state, going to the same state and
+with the same input labels, output labels and weight.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fst</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Fst to modify</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/algorithms/tr_unique.py</code></summary>
@@ -897,10 +921,14 @@
 <span class="normal">15</span>
 <span class="normal">16</span>
 <span class="normal">17</span>
-<span class="normal">18</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">tr_unique</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">):</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">tr_unique</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    tr_unique(fst)</span>
-<span class="sd">    :param fst: Fst</span>
+<span class="sd">    Keep a single instance of trs leaving the same state, going to the same state and</span>
+<span class="sd">    with the same input labels, output labels and weight.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        fst: Fst to modify</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_tr_unique</span><span class="p">(</span><span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>

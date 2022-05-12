@@ -895,15 +895,28 @@ determine whether the transition is a non-terminal transition or not. A non-term
 any label that is not a non-zero terminal label in the output alphabet.</p>
 <p>Note that input argument is a vector of pairs. These correspond to the tuple
 of non-terminal Label and corresponding FST.</p>
-<p>Root Fst :</p>
+
+<p><strong>Examples:</strong></p>
+    
+      <ul>
+<li>Root Fst :</li>
+</ul>
 <p><img alt="replace_in_1" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_1.svg?sanitize=true" /></p>
-<p>Fst for non-terminal #NAME :</p>
+<ul>
+<li>Fst for non-terminal #NAME :</li>
+</ul>
 <p><img alt="replace_in_2" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_2.svg?sanitize=true" /></p>
-<p>Fst for non-terminal #FIRSTNAME :</p>
+<ul>
+<li>Fst for non-terminal #FIRSTNAME :</li>
+</ul>
 <p><img alt="replace_in_3" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_3.svg?sanitize=true" /></p>
-<p>Fst for non-terminal #LASTNAME :</p>
+<ul>
+<li>Fst for non-terminal #LASTNAME :</li>
+</ul>
 <p><img alt="replace_in_4" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_4.svg?sanitize=true" /></p>
-<p>Output :</p>
+<ul>
+<li>Output :</li>
+</ul>
 <p><img alt="replace_out" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_out.svg?sanitize=true" /></p>
 
   <p><strong>Parameters:</strong></p>
@@ -1029,7 +1042,9 @@ of non-terminal Label and corresponding FST.</p>
 <span class="normal">75</span>
 <span class="normal">76</span>
 <span class="normal">77</span>
-<span class="normal">78</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">replace</span><span class="p">(</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">replace</span><span class="p">(</span>
     <span class="n">root_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fst_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[(</span><span class="nb">int</span><span class="p">,</span> <span class="n">VectorFst</span><span class="p">)],</span> <span class="n">epsilon_on_replace</span><span class="p">:</span> <span class="nb">bool</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1046,23 +1061,25 @@ of non-terminal Label and corresponding FST.</p>
 <span class="sd">    Note that input argument is a vector of pairs. These correspond to the tuple</span>
 <span class="sd">    of non-terminal Label and corresponding FST.</span>
 
-<span class="sd">    Root Fst :</span>
+<span class="sd">    Examples:</span>
+
+<span class="sd">    - Root Fst :</span>
 
 <span class="sd">    ![replace_in_1](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_1.svg?sanitize=true)</span>
 
-<span class="sd">    Fst for non-terminal #NAME :</span>
+<span class="sd">    - Fst for non-terminal #NAME :</span>
 
 <span class="sd">    ![replace_in_2](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_2.svg?sanitize=true)</span>
 
-<span class="sd">    Fst for non-terminal #FIRSTNAME :</span>
+<span class="sd">    - Fst for non-terminal #FIRSTNAME :</span>
 
 <span class="sd">    ![replace_in_3](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_3.svg?sanitize=true)</span>
 
-<span class="sd">    Fst for non-terminal #LASTNAME :</span>
+<span class="sd">    - Fst for non-terminal #LASTNAME :</span>
 
 <span class="sd">    ![replace_in_4](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_4.svg?sanitize=true)</span>
 
-<span class="sd">    Output :</span>
+<span class="sd">    - Output :</span>
 
 <span class="sd">    ![replace_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_out.svg?sanitize=true)</span>
 
