@@ -41,8 +41,8 @@ pub trait BindableFst: Downcast {
     }
 
     fn fst_get_trs(&self, state_id: StateId) -> Result<TrsVec<TropicalWeight>>;
-    fn fst_input_symbols(&self) -> Option<&Arc<SymbolTable>>;
-    fn fst_output_symbols(&self) -> Option<&Arc<SymbolTable>>;
+    fn fst_input_symbols(&self) -> Option<Arc<SymbolTable>>;
+    fn fst_output_symbols(&self) -> Option<Arc<SymbolTable>>;
     fn fst_set_input_symbols(&mut self, symt: Arc<SymbolTable>);
     fn fst_set_output_symbols(&mut self, symt: Arc<SymbolTable>);
     fn fst_take_input_symbols(&mut self) -> Option<Arc<SymbolTable>>;
@@ -64,11 +64,11 @@ impl<F: Fst<TropicalWeight> + 'static> BindableFst for F {
     fn fst_get_trs(&self, state_id: StateId) -> Result<TrsVec<TropicalWeight>> {
         self.get_trs(state_id).map(|it| it.to_trs_vec())
     }
-    fn fst_input_symbols(&self) -> Option<&Arc<SymbolTable>> {
-        self.input_symbols()
+    fn fst_input_symbols(&self) -> Option<Arc<SymbolTable>> {
+        self.input_symbols().map(|it| it.clone())
     }
-    fn fst_output_symbols(&self) -> Option<&Arc<SymbolTable>> {
-        self.output_symbols()
+    fn fst_output_symbols(&self) -> Option<Arc<SymbolTable>> {
+        self.output_symbols().map(|it| it.clone())
     }
     fn fst_set_input_symbols(&mut self, symt: Arc<SymbolTable>) {
         self.set_input_symbols(symt)
@@ -219,13 +219,13 @@ pub fn fst_is_start(
 #[no_mangle]
 pub fn fst_input_symbols(
     fst: *const CFst,
-    mut input_symt: *mut CSymbolTable,
+    mut input_symt: *mut *const CSymbolTable,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
         fst.fst_input_symbols()
             .map(|it| {
-                let symt = CSymbolTable(it.clone());
+                let symt = CSymbolTable(it.clone()).into_raw_pointer();
                 unsafe { *input_symt = symt }
             })
             .unwrap_or_else(|| input_symt = std::ptr::null_mut());
@@ -238,13 +238,13 @@ pub fn fst_input_symbols(
 #[no_mangle]
 pub fn fst_output_symbols(
     fst: *const CFst,
-    mut output_symt: *mut CSymbolTable,
+    mut output_symt: *mut *const CSymbolTable,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
         fst.fst_output_symbols()
             .map(|it| {
-                let symt = CSymbolTable(it.clone());
+                let symt = CSymbolTable(it).into_raw_pointer();
                 unsafe { *output_symt = symt }
             })
             .unwrap_or_else(|| output_symt = std::ptr::null_mut());

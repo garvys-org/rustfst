@@ -18,11 +18,10 @@ class Fst:
         ptr: An optional pointer pointing to an existing Fst rust struct.
     """
 
-    def __init__(self, ptr):
+    def __init__(self, ptr, isymt=None, osymt=None):
         self.ptr = ptr
-        # add shims for symbol tables (prevent early gc of the tables)
-        self._input_symbols = None
-        self._output_symbols = None
+        self._input_symbols = isymt
+        self._output_symbols = osymt
 
     def start(self) -> Optional[int]:
         """
@@ -129,13 +128,12 @@ class Fst:
         """
         input_symbols(self)
             Returns the FST's input symbol table, or None if none is present.
-            See also: `input_symbols`.
+            See also: `output_symbols`.
         """
         if self._input_symbols:
             return self._input_symbols
 
         table = ctypes.pointer(ctypes.c_void_p())
-
         ret_code = lib.fst_input_symbols(self.ptr, ctypes.byref(table))
         err_msg = "Error getting input symbols"
         check_ffi_error(ret_code, err_msg)
