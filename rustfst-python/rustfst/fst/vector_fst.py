@@ -22,8 +22,28 @@ class VectorFst(Fst):
         """
         Creates an empty VectorFst.
         """
+        self._input_symbols = None
+        self._output_symbols = None
+
         if ptr:
             self.ptr = ptr
+
+            # Check if isymt inside
+            isymt = ctypes.pointer(ctypes.c_void_p())
+            ret_code = lib.fst_input_symbols(self.ptr, ctypes.byref(isymt))
+            err_msg = "Error getting input symbols"
+            check_ffi_error(ret_code, err_msg)
+            if isymt.contents:
+                self._input_symbols = SymbolTable(ptr=isymt)
+
+            # Check if osymt inside
+            osymt = ctypes.pointer(ctypes.c_void_p())
+            ret_code = lib.fst_output_symbols(self.ptr, ctypes.byref(osymt))
+            err_msg = "Error getting input symbols"
+            check_ffi_error(ret_code, err_msg)
+            if osymt.contents:
+                self._output_symbols = SymbolTable(ptr=osymt)
+
         else:
             fst_ptr = ctypes.pointer(ctypes.c_void_p())
             ret_code = lib.vec_fst_new(ctypes.byref(fst_ptr))
@@ -31,7 +51,8 @@ class VectorFst(Fst):
             err_msg = "Something went wrong when creating the Fst struct"
             check_ffi_error(ret_code, err_msg)
             self.ptr = fst_ptr
-        super().__init__(self.ptr)
+
+        super().__init__(self.ptr, self._input_symbols, self._output_symbols)
 
     def add_tr(self, state: int, tr: Tr) -> Fst:
         """
