@@ -1,4 +1,3 @@
-from sys import exec_prefix
 from rustfst import VectorFst, Tr, SymbolTable
 import pytest
 
@@ -205,10 +204,10 @@ def test_fst_with_symt_mut_fail():
     output_symt = SymbolTable()
     fst.set_output_symbols(output_symt)
 
-    with pytest.raises(Exception) as exec_info:
+    with pytest.raises(Exception) as err:
         fst.input_symbols().add_symbol("d")
 
     assert (
-        str(exec_info.value)
+        str(err.value)
         == '`add_symbol` failed: "Could not get a mutable reference to the symbol table"'
     )
