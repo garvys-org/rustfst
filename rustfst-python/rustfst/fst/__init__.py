@@ -128,7 +128,7 @@ class Fst:
         """
         input_symbols(self)
             Returns the FST's input symbol table, or None if none is present.
-            See also: `input_symbols`.
+            See also: `output_symbols`.
         """
         if self._input_symbols:
             return self._input_symbols

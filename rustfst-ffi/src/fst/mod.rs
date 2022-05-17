@@ -68,7 +68,7 @@ impl<F: Fst<TropicalWeight> + 'static> BindableFst for F {
         self.input_symbols().map(|it| it.clone())
     }
     fn fst_output_symbols(&self) -> Option<Arc<SymbolTable>> {
-        self.output_symbols().map(|it| it.clone()).clone()
+        self.output_symbols().map(|it| it.clone())
     }
     fn fst_set_input_symbols(&mut self, symt: Arc<SymbolTable>) {
         self.set_input_symbols(symt)
