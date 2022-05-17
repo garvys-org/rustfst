@@ -119,10 +119,6 @@ I did a benchmark some time ago on almost every linear fst algorithm and compare
 
 Spoiler alert: `Rustfst` is faster on all those algorithms 😅
 
-For the other algorithms, i'm finishing the implementation then will do another round of benchmarks.
-
-At the moment, the main algorithm missing in `Rustfst` is the composition that will be implemented shortly. All the important algorithms like minimization, determinization ... are already implemented but not benched and thus not (necessarily) optimized.
-
 ## Documentation
 
 The documentation of the last released version is available here :
