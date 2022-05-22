@@ -2,142 +2,142 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>None</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/drawing_config/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/iterators/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/symbol_table/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/tr/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/trs/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/utils/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/weight/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/algorithms/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/algorithms/compose/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/algorithms/concat/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/algorithms/connect/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/algorithms/determinize/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/algorithms/isomorphic/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/algorithms/optimize/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/algorithms/project/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/algorithms/replace/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/algorithms/reverse/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/algorithms/rm_epsilon/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/algorithms/shortest_path/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/algorithms/tr_sort/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/algorithms/tr_unique/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/algorithms/union/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/fst/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/fst/const_fst/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/fst/vector_fst/</loc>
-         <lastmod>2022-05-21</lastmod>
+         <lastmod>2022-05-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
