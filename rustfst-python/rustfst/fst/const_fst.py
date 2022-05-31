@@ -148,3 +148,11 @@ class ConstFst(Fst):
         check_ffi_error(ret_code, err_msg)
 
         return ConstFst(cloned_fst)
+
+    def __str__(self):
+        s = ctypes.c_void_p()
+        ret_code = lib.const_fst_display(self.ptr, ctypes.byref(s))
+        err_msg = "Error displaying ConstFst"
+        check_ffi_error(ret_code, err_msg)
+
+        return ctypes.string_at(s).decode("utf8")

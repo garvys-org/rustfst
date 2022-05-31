@@ -2,6 +2,7 @@ use super::*;
 use anyhow::anyhow;
 use rustfst::fst_traits::ExpandedFst;
 use rustfst::DrawingConfig;
+use std::ffi::CString;
 
 #[no_mangle]
 pub fn vec_fst_new(ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
@@ -184,6 +185,20 @@ pub extern "C" fn vec_fst_copy(
         let vec_fst = as_fst!(VectorFst<TropicalWeight>, fst);
         let clone = vec_fst.clone();
         unsafe { *clone_ptr = CFst(Box::new(clone)).into_raw_pointer() };
+        Ok(())
+    })
+}
+
+#[no_mangle]
+pub extern "C" fn vec_fst_display(
+    fst_ptr: *const CFst,
+    s: *mut *const libc::c_char,
+) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let fst = get!(CFst, fst_ptr);
+        let vec_fst = as_fst!(VectorFst<TropicalWeight>, fst);
+        let res = format!("{}", vec_fst);
+        unsafe { *s = CString::c_repr_of(res)?.into_raw_pointer() as *const libc::c_char };
         Ok(())
     })
 }

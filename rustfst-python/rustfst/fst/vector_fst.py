@@ -403,3 +403,11 @@ class VectorFst(Fst):
         x = self.copy()
 
         return x.concat(y)
+
+    def __str__(self):
+        s = ctypes.c_void_p()
+        ret_code = lib.vec_fst_display(self.ptr, ctypes.byref(s))
+        err_msg = "Error displaying VectorFst"
+        check_ffi_error(ret_code, err_msg)
+
+        return ctypes.string_at(s).decode("utf8")

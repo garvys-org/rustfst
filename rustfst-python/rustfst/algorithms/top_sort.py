@@ -10,8 +10,7 @@ from rustfst.fst.vector_fst import VectorFst
 
 def top_sort(fst: VectorFst) -> VectorFst:
     """
-    This operation topologically sorts its input. When sorted, all transitions are from
-    lower to higher state IDs.
+    This operation topologically sorts its input. When sorted, all transitions are from lower to higher state IDs.
 
     Examples :
 
