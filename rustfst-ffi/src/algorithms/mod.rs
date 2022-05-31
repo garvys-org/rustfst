@@ -9,6 +9,7 @@ pub mod replace;
 pub mod reverse;
 pub mod rm_epsilon;
 pub mod shortest_path;
+pub mod top_sort;
 pub mod tr_sort;
 pub mod tr_unique;
 pub mod union;

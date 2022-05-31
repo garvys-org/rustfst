@@ -133,9 +133,7 @@ class Tr:
 
     def __repr__(self):
         """x.__repr__() <==> repr(x)"""
-        return "<Tr ilabel={}, olabel={}, weight={}, next_state={}>".format(
-            self.ilabel, self.olabel, self.weight, self.next_state
-        )
+        return f"<Tr ilabel={self.ilabel}, olabel={self.olabel}, weight={self.weight}, next_state={self.next_state}>"
 
     def __del__(self):
         lib.tr_delete(self._ptr)

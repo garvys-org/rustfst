@@ -67,7 +67,7 @@ class TrsIterator:
 
     def __repr__(self):
         """x.__repr__() <==> repr(x)"""
-        return "<TrsIterator at 0x{:x}>".format(id(self))
+        return f"<TrsIterator at 0x{id(self):x}>"
 
     def __del__(self):
         lib.trs_iterator_destroy(self._ptr)
@@ -156,7 +156,7 @@ class MutableTrsIterator:
 
     def __repr__(self):
         """x.__repr__() <==> repr(x)"""
-        return "<MutableTrsIterator at 0x{:x}>".format(id(self))
+        return f"<MutableTrsIterator at 0x{id(self):x}>"
 
     def __del__(self):
         lib.mut_trs_iterator_destroy(self._ptr)
@@ -213,7 +213,7 @@ class StateIterator:
 
     def __repr__(self):
         """x.__repr__() <==> repr(x)"""
-        return "<StateIterator at 0x{:x}>".format(id(self))
+        return f"<StateIterator at 0x{id(self):x}>"
 
     def __del__(self):
         lib.state_iterator_destroy(self._ptr)

@@ -161,16 +161,15 @@ class Fst:
             return SymbolTable(ptr=table)
         return None
 
-    def set_input_symbols(self, syms: SymbolTable) -> Fst:
+    def set_input_symbols(self, syms: Optional[SymbolTable]) -> Fst:
         """
-        set_input_symbols(self, syms)
-            Sets the input symbol table.
-            Passing None as a value will delete the input symbol table.
-            Args:
-              syms: A SymbolTable.
-            Returns:
-              self.
-            See also: `set_output_symbols`.
+        Sets the input symbol table.
+        Passing None as a value will delete the input symbol table.
+        Args:
+          syms: A SymbolTable.
+        Returns:
+          self.
+        See also: `set_output_symbols`.
         """
         if syms is None:
             ret_code = lib.fst_unset_input_symbols(self.ptr)
@@ -190,16 +189,15 @@ class Fst:
 
         return self
 
-    def set_output_symbols(self, syms: SymbolTable) -> Fst:
+    def set_output_symbols(self, syms: Optional[SymbolTable]) -> Fst:
         """
-        set_output_symbols(self, syms)
-            Sets the output symbol table.
-            Passing None as a value will delete the output symbol table.
-            Args:
-              syms: A SymbolTable.
-            Returns:
-              self.
-            See also: `set_input_symbols`.
+        Sets the output symbol table.
+        Passing None as a value will delete the output symbol table.
+        Args:
+          syms: A SymbolTable.
+        Returns:
+          self.
+        See also: `set_input_symbols`.
         """
         if syms is None:
             ret_code = lib.fst_unset_output_symbols(self.ptr)
@@ -256,11 +254,8 @@ class Fst:
         """x.__eq__(y) <==> x==y"""
         return self.equals(y)
 
-    def __str__(self):
-        return self.text()
-
     def __repr__(self):
-        return "<rustfst.fst.Fst at {}>".format(id(self))
+        return f"<rustfst.fst.Fst at {id(self)}>"
 
     def __del__(self):
         lib.fst_destroy(self.ptr)

@@ -242,7 +242,7 @@ class VectorFst(Fst):
         ret_code = lib.vec_fst_from_path(
             ctypes.byref(fst), str(filename).encode("utf-8")
         )
-        err_msg = "Read failed. file: {}".format(filename)
+        err_msg = f"Read failed. file: {filename}"
         check_ffi_error(ret_code, err_msg)
 
         return cls(ptr=fst)
@@ -257,7 +257,7 @@ class VectorFst(Fst):
           ValueError: Write failed.
         """
         ret_code = lib.vec_fst_write_file(self.ptr, str(filename).encode("utf-8"))
-        err_msg = "Write failed. file: {}".format(filename)
+        err_msg = f"Write failed. file: {filename}"
         check_ffi_error(ret_code, err_msg)
 
     def equals(self, other: Fst) -> bool:
@@ -304,6 +304,28 @@ class VectorFst(Fst):
         from rustfst.algorithms.connect import connect
 
         return connect(self)
+
+    def top_sort(self) -> VectorFst:
+        """
+        This operation topologically sorts its input. When sorted, all transitions are from
+        lower to higher state IDs.
+
+        Examples :
+
+        - Input
+
+        ![topsort_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_in.svg?sanitize=true)
+
+        - Output
+
+        ![topsort_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_out.svg?sanitize=true)
+
+        Returns:
+            Equivalent top sorted Fst. Modification also happens in-place.
+        """
+        from rustfst.algorithms.top_sort import top_sort
+
+        return top_sort(self)
 
     def determinize(self, config=None) -> VectorFst:
         from rustfst.algorithms.determinize import determinize, determinize_with_config
@@ -381,3 +403,11 @@ class VectorFst(Fst):
         x = self.copy()
 
         return x.concat(y)
+
+    def __str__(self):
+        s = ctypes.c_void_p()
+        ret_code = lib.vec_fst_display(self.ptr, ctypes.byref(s))
+        err_msg = "Error displaying VectorFst"
+        check_ffi_error(ret_code, err_msg)
+
+        return ctypes.string_at(s).decode("utf8")

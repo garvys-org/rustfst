@@ -1,6 +1,7 @@
 use super::*;
 use anyhow::anyhow;
 use rustfst::DrawingConfig;
+use std::ffi::CString;
 
 #[no_mangle]
 pub fn const_fst_from_path(ptr: *mut *const CFst, path: *const libc::c_char) -> RUSTFST_FFI_RESULT {
@@ -106,6 +107,20 @@ pub fn const_fst_draw(
 
         const_fst.draw(unsafe { CStr::from_ptr(fname).as_rust()? }, &drawing_config)?;
 
+        Ok(())
+    })
+}
+
+#[no_mangle]
+pub extern "C" fn const_fst_display(
+    fst_ptr: *const CFst,
+    s: *mut *const libc::c_char,
+) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let fst = get!(CFst, fst_ptr);
+        let vec_fst = as_fst!(ConstFst<TropicalWeight>, fst);
+        let res = format!("{}", vec_fst);
+        unsafe { *s = CString::c_repr_of(res)?.into_raw_pointer() as *const libc::c_char };
         Ok(())
     })
 }

@@ -88,7 +88,7 @@ class SymbolTable:
             return self._find_index(key)
         if isinstance(key, str):
             return self._find_symbol(key)
-        raise "key can only be a string or integer. Not {}".format(type(key))
+        raise f"key can only be a string or integer. Not {type(key)}"
 
     def _find_index(self, key: int) -> str:
         key = ctypes.c_size_t(key)
@@ -132,7 +132,7 @@ class SymbolTable:
                 self.ptr, symbol, ctypes.byref(is_present)
             )
         else:
-            raise "key can only be a string or integer. Not {}".format(type(key))
+            raise f"key can only be a string or integer. Not {type(key)}"
 
         err_msg = "`member` failed"
         check_ffi_error(ret_code, err_msg)
@@ -167,7 +167,7 @@ class SymbolTable:
             ctypes.byref(symt), str(filename).encode("utf-8"), ctypes.c_size_t(1)
         )
 
-        err_msg = "Read failed for bin file : {}".format(filename)
+        err_msg = f"Read failed for bin file : {filename}"
         check_ffi_error(ret_code, err_msg)
 
         return cls(ptr=symt)
@@ -189,7 +189,7 @@ class SymbolTable:
             ctypes.byref(symt), str(filename).encode("utf-8"), ctypes.c_size_t(0)
         )
 
-        err_msg = "Read failed for text file : {}".format(filename)
+        err_msg = f"Read failed for text file : {filename}"
         check_ffi_error(ret_code, err_msg)
 
         return cls(ptr=symt)
@@ -207,7 +207,7 @@ class SymbolTable:
             self.ptr, str(filename).encode("utf-8"), ctypes.c_size_t(1)
         )
 
-        err_msg = "Write failed for bin file : {}".format(filename)
+        err_msg = f"Write failed for bin file : {filename}"
         check_ffi_error(ret_code, err_msg)
 
     def write_text(self, filename: Path):
@@ -223,7 +223,7 @@ class SymbolTable:
             self.ptr, str(filename).encode("utf-8"), ctypes.c_size_t(0)
         )
 
-        err_msg = "Write failed for text file : {}".format(filename)
+        err_msg = f"Write failed for text file : {filename}"
         check_ffi_error(ret_code, err_msg)
 
     def equals(self, other: SymbolTable) -> bool:
