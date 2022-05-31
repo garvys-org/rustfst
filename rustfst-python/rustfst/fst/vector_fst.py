@@ -305,6 +305,28 @@ class VectorFst(Fst):
 
         return connect(self)
 
+    def top_sort(self) -> VectorFst:
+        """
+        This operation topologically sorts its input. When sorted, all transitions are from
+        lower to higher state IDs.
+
+        Examples :
+
+        - Input
+
+        ![topsort_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_in.svg?sanitize=true)
+
+        - Output
+
+        ![topsort_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_out.svg?sanitize=true)
+
+        Returns:
+            Equivalent top sorted Fst. Modification also happens in-place.
+        """
+        from rustfst.algorithms.top_sort import top_sort
+
+        return top_sort(self)
+
     def determinize(self, config=None) -> VectorFst:
         from rustfst.algorithms.determinize import determinize, determinize_with_config
 
