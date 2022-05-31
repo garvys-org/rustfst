@@ -211,3 +211,17 @@ def test_fst_with_symt_mut_fail():
         str(err.value)
         == '`add_symbol` failed: "Could not get a mutable reference to the symbol table"'
     )
+
+
+def test_fst_print():
+    fst = VectorFst()
+
+    # States
+    s1 = fst.add_state()
+    s2 = fst.add_state()
+
+    fst.set_start(s1)
+    fst.set_final(s2)
+
+    # Check print is not crashing
+    print(fst)

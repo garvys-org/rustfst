@@ -46,4 +46,4 @@ def check_ffi_error(exit_code, error_context_msg):
                 ffi_error_message = string_at(ptr).decode("utf8")
             else:
                 ffi_error_message = "see stderr"
-        raise ValueError("%s: %s" % (error_context_msg, ffi_error_message))
+        raise ValueError(f"{error_context_msg}: {ffi_error_message}")

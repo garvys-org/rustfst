@@ -242,7 +242,7 @@ class VectorFst(Fst):
         ret_code = lib.vec_fst_from_path(
             ctypes.byref(fst), str(filename).encode("utf-8")
         )
-        err_msg = "Read failed. file: {}".format(filename)
+        err_msg = f"Read failed. file: {filename}"
         check_ffi_error(ret_code, err_msg)
 
         return cls(ptr=fst)
@@ -257,7 +257,7 @@ class VectorFst(Fst):
           ValueError: Write failed.
         """
         ret_code = lib.vec_fst_write_file(self.ptr, str(filename).encode("utf-8"))
-        err_msg = "Write failed. file: {}".format(filename)
+        err_msg = f"Write failed. file: {filename}"
         check_ffi_error(ret_code, err_msg)
 
     def equals(self, other: Fst) -> bool:

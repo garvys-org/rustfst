@@ -92,36 +92,34 @@ class ConstFst(Fst):
     @classmethod
     def read(cls, filename: Path) -> Fst:
         """
-        Fst.read(filename)
-            Read a Fst at a given path.
-            Args:
-              filename: The string location of the input file.
-            Returns:
-              An FST.
-            Raises:
-              errors.SnipsFstException: Read failed.
+        Read a Fst at a given path.
+        Args:
+          filename: The string location of the input file.
+        Returns:
+          An FST.
+        Raises:
+          ValueError: Read failed.
         """
         fst = ctypes.pointer(ctypes.c_void_p())
         ret_code = lib.const_fst_from_path(
             ctypes.byref(fst), str(filename).encode("utf-8")
         )
-        err_msg = "Read failed. file: {}".format(filename)
+        err_msg = f"Read failed. file: {filename}"
         check_ffi_error(ret_code, err_msg)
 
         return cls(ptr=fst)
 
     def write(self, filename: Path):
         """
-        write(self, filename)
-            Serializes FST to a file.
-            This method writes the FST to a file in consttor binary format.
-            Args:
-              filename: The string location of the output file.
-            Raises:
-              errors.SnipsFstException: Write failed.
+        Serializes FST to a file.
+        This method writes the FST to a file in binary format.
+        Args:
+          filename: The string location of the output file.
+        Raises:
+          ValueError: Write failed.
         """
         ret_code = lib.const_fst_write_file(self.ptr, str(filename).encode("utf-8"))
-        err_msg = "Write failed. file: {}".format(filename)
+        err_msg = f"Write failed. file: {filename}"
         check_ffi_error(ret_code, err_msg)
 
     def equals(self, other: Fst) -> bool:
