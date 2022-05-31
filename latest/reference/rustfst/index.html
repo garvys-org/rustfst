@@ -475,6 +475,20 @@
   
   
     <li class="md-nav__item">
+      <a href="algorithms/top_sort/" class="md-nav__link">
+        top_sort
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="algorithms/tr_sort/" class="md-nav__link">
         tr_sort
       </a>
@@ -1087,6 +1101,13 @@
   
     <nav class="md-nav" aria-label="Modules">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.top_sort" class="md-nav__link">
+    top_sort
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#rustfst.algorithms.replace" class="md-nav__link">
@@ -2084,9 +2105,7 @@ left-to-right?</p></td>
 <span class="normal">136</span>
 <span class="normal">137</span>
 <span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Tr</span><span class="p">:</span>
+<span class="normal">139</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Tr</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Structure representing a transition from a state to another state in a FST.</span>
 <span class="sd">    Attributes:</span>
@@ -2205,9 +2224,7 @@ left-to-right?</p></td>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;&lt;Tr ilabel=</span><span class="si">{}</span><span class="s2">, olabel=</span><span class="si">{}</span><span class="s2">, weight=</span><span class="si">{}</span><span class="s2">, next_state=</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ilabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">olabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_state</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;Tr ilabel=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ilabel</span><span class="si">}</span><span class="s2">, olabel=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">olabel</span><span class="si">}</span><span class="s2">, weight=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="si">}</span><span class="s2">, next_state=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">next_state</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">lib</span><span class="o">.</span><span class="n">tr_delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ptr</span><span class="p">)</span>
@@ -2397,13 +2414,9 @@ left-to-right?</p></td>
           <summary>Source code in <code>rustfst/tr.py</code></summary>
           <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">134</span>
 <span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;&lt;Tr ilabel=</span><span class="si">{}</span><span class="s2">, olabel=</span><span class="si">{}</span><span class="s2">, weight=</span><span class="si">{}</span><span class="s2">, next_state=</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ilabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">olabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_state</span>
-    <span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;Tr ilabel=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ilabel</span><span class="si">}</span><span class="s2">, olabel=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">olabel</span><span class="si">}</span><span class="s2">, weight=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="si">}</span><span class="s2">, next_state=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">next_state</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 </code></pre></div></td></tr></table></div>
         </details>
     </div>
@@ -3196,7 +3209,7 @@ left-to-right?</p></td>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_index</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_symbol</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="s2">&quot;key can only be a string or integer. Not </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="sa">f</span><span class="s2">&quot;key can only be a string or integer. Not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
 
     <span class="k">def</span> <span class="nf">_find_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">key</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
@@ -3240,7 +3253,7 @@ left-to-right?</p></td>
                 <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">is_present</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="s2">&quot;key can only be a string or integer. Not </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="sa">f</span><span class="s2">&quot;key can only be a string or integer. Not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
 
         <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;`member` failed&quot;</span>
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
@@ -3275,7 +3288,7 @@ left-to-right?</p></td>
             <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">symt</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Read failed for bin file : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Read failed for bin file : </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">symt</span><span class="p">)</span>
@@ -3297,7 +3310,7 @@ left-to-right?</p></td>
             <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">symt</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Read failed for text file : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Read failed for text file : </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">symt</span><span class="p">)</span>
@@ -3315,7 +3328,7 @@ left-to-right?</p></td>
             <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Write failed for bin file : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed for bin file : </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">write_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
@@ -3331,7 +3344,7 @@ left-to-right?</p></td>
             <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Write failed for text file : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed for text file : </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -3783,7 +3796,7 @@ associated with a index key.</p>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_index</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_symbol</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-    <span class="k">raise</span> <span class="s2">&quot;key can only be a string or integer. Not </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+    <span class="k">raise</span> <span class="sa">f</span><span class="s2">&quot;key can only be a string or integer. Not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
 </code></pre></div></td></tr></table></div>
         </details>
     </div>
@@ -3909,7 +3922,7 @@ better to simply call the find method, catching the KeyError.</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">is_present</span><span class="p">)</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="s2">&quot;key can only be a string or integer. Not </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="sa">f</span><span class="s2">&quot;key can only be a string or integer. Not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
 
     <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;`member` failed&quot;</span>
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
@@ -4085,7 +4098,7 @@ This class method creates a new SymbolTable from a symbol table binary file.</p>
         <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">symt</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="p">)</span>
 
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Read failed for bin file : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Read failed for bin file : </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">symt</span><span class="p">)</span>
@@ -4198,7 +4211,7 @@ This class method creates a new SymbolTable from a symbol table text file.</p>
         <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">symt</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="p">)</span>
 
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Read failed for text file : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Read failed for text file : </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">symt</span><span class="p">)</span>
@@ -4297,7 +4310,7 @@ This methods writes the SymbolTable to a file in binary format.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="p">)</span>
 
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Write failed for bin file : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed for bin file : </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
         </details>
@@ -4394,7 +4407,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="p">)</span>
 
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Write failed for text file : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed for text file : </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
         </details>
@@ -4782,7 +4795,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;&lt;TrsIterator at 0x</span><span class="si">{:x}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;TrsIterator at 0x</span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">lib</span><span class="o">.</span><span class="n">trs_iterator_destroy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ptr</span><span class="p">)</span>
@@ -5002,7 +5015,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">69</span>
 <span class="normal">70</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;&lt;TrsIterator at 0x</span><span class="si">{:x}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;TrsIterator at 0x</span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 </code></pre></div></td></tr></table></div>
         </details>
     </div>
@@ -5213,7 +5226,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;&lt;MutableTrsIterator at 0x</span><span class="si">{:x}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;MutableTrsIterator at 0x</span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">lib</span><span class="o">.</span><span class="n">mut_trs_iterator_destroy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ptr</span><span class="p">)</span>
@@ -5522,7 +5535,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">158</span>
 <span class="normal">159</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;&lt;MutableTrsIterator at 0x</span><span class="si">{:x}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;MutableTrsIterator at 0x</span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 </code></pre></div></td></tr></table></div>
         </details>
     </div>
@@ -5668,7 +5681,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;&lt;StateIterator at 0x</span><span class="si">{:x}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;StateIterator at 0x</span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">lib</span><span class="o">.</span><span class="n">state_iterator_destroy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ptr</span><span class="p">)</span>
@@ -5845,7 +5858,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">215</span>
 <span class="normal">216</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;&lt;StateIterator at 0x</span><span class="si">{:x}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;StateIterator at 0x</span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 </code></pre></div></td></tr></table></div>
         </details>
     </div>
@@ -6333,6 +6346,168 @@ initial and final.</p>
 
 
 <h5 id="rustfst.algorithms-modules">Modules</h5>
+
+  <div class="doc doc-object doc-module">
+
+
+
+<h6 class="doc doc-heading" id="rustfst.algorithms.top_sort">
+        <code>top_sort</code>
+
+
+
+</h6>
+
+    <div class="doc doc-contents ">
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+<h7 id="rustfst.algorithms.top_sort-attributes">Attributes</h7>
+<h7 id="rustfst.algorithms.top_sort-classes">Classes</h7>
+<h7 id="rustfst.algorithms.top_sort-functions">Functions</h7>
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h8 class="doc doc-heading" id="rustfst.algorithms.top_sort.top_sort">
+<code class="highlight language-python"><span class="n">top_sort</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
+
+
+</h8>
+
+
+    <div class="doc doc-contents ">
+
+      <p>This operation topologically sorts its input. When sorted, all transitions are from lower to higher state IDs.</p>
+<p>Examples :</p>
+<ul>
+<li>Input</li>
+</ul>
+<p><img alt="topsort_in" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_in.svg?sanitize=true" /></p>
+<ul>
+<li>Output</li>
+</ul>
+<p><img alt="topsort_out" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_out.svg?sanitize=true" /></p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fst</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Fst to top_sort.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Equivalent top sorted Fst. Modification also happens in-place.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+        <details class="quote">
+          <summary>Source code in <code>rustfst/algorithms/top_sort.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">top_sort</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This operation topologically sorts its input. When sorted, all transitions are from lower to higher state IDs.</span>
+
+<span class="sd">    Examples :</span>
+
+<span class="sd">    - Input</span>
+
+<span class="sd">    ![topsort_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_in.svg?sanitize=true)</span>
+
+<span class="sd">    - Output</span>
+
+<span class="sd">    ![topsort_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_out.svg?sanitize=true)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fst: Fst to top_sort.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Equivalent top sorted Fst. Modification also happens in-place.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">top_sorted_fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">()</span>
+    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_top_sort</span><span class="p">(</span><span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">top_sorted_fst</span><span class="p">))</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error during top_sort&quot;</span>
+    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">VectorFst</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">top_sorted_fst</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
 
   <div class="doc doc-object doc-module">
 
@@ -9276,12 +9451,7 @@ construct a FST containing the n-shortest path(s) in the input FST
 <span class="normal">258</span>
 <span class="normal">259</span>
 <span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Fst</span><span class="p">:</span>
+<span class="normal">261</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Fst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fst(ptr=None)</span>
 <span class="sd">      This class wraps a mutable FST and exposes all methods.</span>
@@ -9432,16 +9602,15 @@ construct a FST containing the n-shortest path(s) in the input FST
             <span class="k">return</span> <span class="n">SymbolTable</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">table</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">set_input_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syms</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">set_input_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syms</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        set_input_symbols(self, syms)</span>
-<span class="sd">            Sets the input symbol table.</span>
-<span class="sd">            Passing None as a value will delete the input symbol table.</span>
-<span class="sd">            Args:</span>
-<span class="sd">              syms: A SymbolTable.</span>
-<span class="sd">            Returns:</span>
-<span class="sd">              self.</span>
-<span class="sd">            See also: `set_output_symbols`.</span>
+<span class="sd">        Sets the input symbol table.</span>
+<span class="sd">        Passing None as a value will delete the input symbol table.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          syms: A SymbolTable.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          self.</span>
+<span class="sd">        See also: `set_output_symbols`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">syms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_unset_input_symbols</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
@@ -9461,16 +9630,15 @@ construct a FST containing the n-shortest path(s) in the input FST
 
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="nf">set_output_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syms</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">set_output_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syms</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        set_output_symbols(self, syms)</span>
-<span class="sd">            Sets the output symbol table.</span>
-<span class="sd">            Passing None as a value will delete the output symbol table.</span>
-<span class="sd">            Args:</span>
-<span class="sd">              syms: A SymbolTable.</span>
-<span class="sd">            Returns:</span>
-<span class="sd">              self.</span>
-<span class="sd">            See also: `set_input_symbols`.</span>
+<span class="sd">        Sets the output symbol table.</span>
+<span class="sd">        Passing None as a value will delete the output symbol table.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          syms: A SymbolTable.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          self.</span>
+<span class="sd">        See also: `set_input_symbols`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">syms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_unset_output_symbols</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
@@ -9527,11 +9695,8 @@ construct a FST containing the n-shortest path(s) in the input FST
         <span class="sd">&quot;&quot;&quot;x.__eq__(y) &lt;==&gt; x==y&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
-
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;&lt;rustfst.fst.Fst at </span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;rustfst.fst.Fst at </span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">lib</span><span class="o">.</span><span class="n">fst_destroy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
@@ -10042,7 +10207,7 @@ Check if a state is a start
 
 
 <h8 class="doc doc-heading" id="rustfst.fst.Fst.set_input_symbols">
-<code class="highlight language-python"><span class="n">set_input_symbols</span><span class="p">(</span><span class="n">syms</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fst</span></code>
+<code class="highlight language-python"><span class="n">set_input_symbols</span><span class="p">(</span><span class="n">syms</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Fst</span></code>
 
 
 </h8>
@@ -10050,14 +10215,51 @@ Check if a state is a start
 
     <div class="doc doc-contents ">
 
-      <p>set_input_symbols(self, syms)
-    Sets the input symbol table.
-    Passing None as a value will delete the input symbol table.
-    Args:
-      syms: A SymbolTable.
-    Returns:
-      self.
-    See also: <code>set_output_symbols</code>.</p>
+      <p>Sets the input symbol table.
+Passing None as a value will delete the input symbol table.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>syms</code></td>
+          <td>
+                <code><span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="symbol_table/#rustfst.symbol_table.SymbolTable">SymbolTable</a>]</code>
+          </td>
+          <td><p>A SymbolTable.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.Fst" href="fst/#rustfst.fst.Fst">Fst</a></code>
+          </td>
+          <td><p>self.</p></td>
+        </tr>
+    </tbody>
+  </table>
+      <p>See also: <code>set_output_symbols</code>.</p>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/__init__.py</code></summary>
@@ -10087,17 +10289,15 @@ Check if a state is a start
 <span class="normal">187</span>
 <span class="normal">188</span>
 <span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">set_input_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syms</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
+<span class="normal">190</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">set_input_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syms</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    set_input_symbols(self, syms)</span>
-<span class="sd">        Sets the input symbol table.</span>
-<span class="sd">        Passing None as a value will delete the input symbol table.</span>
-<span class="sd">        Args:</span>
-<span class="sd">          syms: A SymbolTable.</span>
-<span class="sd">        Returns:</span>
-<span class="sd">          self.</span>
-<span class="sd">        See also: `set_output_symbols`.</span>
+<span class="sd">    Sets the input symbol table.</span>
+<span class="sd">    Passing None as a value will delete the input symbol table.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      syms: A SymbolTable.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      self.</span>
+<span class="sd">    See also: `set_output_symbols`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">syms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_unset_input_symbols</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
@@ -10129,7 +10329,7 @@ Check if a state is a start
 
 
 <h8 class="doc doc-heading" id="rustfst.fst.Fst.set_output_symbols">
-<code class="highlight language-python"><span class="n">set_output_symbols</span><span class="p">(</span><span class="n">syms</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fst</span></code>
+<code class="highlight language-python"><span class="n">set_output_symbols</span><span class="p">(</span><span class="n">syms</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Fst</span></code>
 
 
 </h8>
@@ -10137,18 +10337,56 @@ Check if a state is a start
 
     <div class="doc doc-contents ">
 
-      <p>set_output_symbols(self, syms)
-    Sets the output symbol table.
-    Passing None as a value will delete the output symbol table.
-    Args:
-      syms: A SymbolTable.
-    Returns:
-      self.
-    See also: <code>set_input_symbols</code>.</p>
+      <p>Sets the output symbol table.
+Passing None as a value will delete the output symbol table.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>syms</code></td>
+          <td>
+                <code><span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="symbol_table/#rustfst.symbol_table.SymbolTable">SymbolTable</a>]</code>
+          </td>
+          <td><p>A SymbolTable.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.Fst" href="fst/#rustfst.fst.Fst">Fst</a></code>
+          </td>
+          <td><p>self.</p></td>
+        </tr>
+    </tbody>
+  </table>
+      <p>See also: <code>set_input_symbols</code>.</p>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/__init__.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">193</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">192</span>
+<span class="normal">193</span>
 <span class="normal">194</span>
 <span class="normal">195</span>
 <span class="normal">196</span>
@@ -10174,18 +10412,15 @@ Check if a state is a start
 <span class="normal">216</span>
 <span class="normal">217</span>
 <span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">set_output_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syms</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
+<span class="normal">219</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">set_output_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syms</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    set_output_symbols(self, syms)</span>
-<span class="sd">        Sets the output symbol table.</span>
-<span class="sd">        Passing None as a value will delete the output symbol table.</span>
-<span class="sd">        Args:</span>
-<span class="sd">          syms: A SymbolTable.</span>
-<span class="sd">        Returns:</span>
-<span class="sd">          self.</span>
-<span class="sd">        See also: `set_input_symbols`.</span>
+<span class="sd">    Sets the output symbol table.</span>
+<span class="sd">    Passing None as a value will delete the output symbol table.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      syms: A SymbolTable.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      self.</span>
+<span class="sd">    See also: `set_input_symbols`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">syms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_unset_output_symbols</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
@@ -10234,7 +10469,9 @@ Check if a state is a start
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/__init__.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">223</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
 <span class="normal">224</span>
 <span class="normal">225</span>
 <span class="normal">226</span>
@@ -10246,9 +10483,7 @@ Check if a state is a start
 <span class="normal">232</span>
 <span class="normal">233</span>
 <span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">remove_input_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
+<span class="normal">235</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">remove_input_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    remove_input_symbols(self, symbols)</span>
 <span class="sd">        Args:</span>
@@ -10292,7 +10527,9 @@ Check if a state is a start
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/__init__.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">239</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
 <span class="normal">240</span>
 <span class="normal">241</span>
 <span class="normal">242</span>
@@ -10304,9 +10541,7 @@ Check if a state is a start
 <span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">remove_output_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
+<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">remove_output_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    remove_output_symbols(self, symbols)</span>
 <span class="sd">        Args:</span>
@@ -10346,9 +10581,9 @@ Check if a state is a start
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/__init__.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Fst</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Fst</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;x.__eq__(y) &lt;==&gt; x==y&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -10356,7 +10591,6 @@ Check if a state is a start
     </div>
 
   </div>
-
 
 
 
@@ -10556,7 +10790,13 @@ Check if a state is a start
 <span class="normal">149</span>
 <span class="normal">150</span>
 <span class="normal">151</span>
-<span class="normal">152</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ConstFst</span><span class="p">(</span><span class="n">Fst</span><span class="p">):</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ConstFst</span><span class="p">(</span><span class="n">Fst</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">ptr</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">ptr</span>
@@ -10636,36 +10876,34 @@ Check if a state is a start
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Fst.read(filename)</span>
-<span class="sd">            Read a Fst at a given path.</span>
-<span class="sd">            Args:</span>
-<span class="sd">              filename: The string location of the input file.</span>
-<span class="sd">            Returns:</span>
-<span class="sd">              An FST.</span>
-<span class="sd">            Raises:</span>
-<span class="sd">              errors.SnipsFstException: Read failed.</span>
+<span class="sd">        Read a Fst at a given path.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          filename: The string location of the input file.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          An FST.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">          ValueError: Read failed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_from_path</span><span class="p">(</span>
             <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">fst</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Read failed. file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Read failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">fst</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        write(self, filename)</span>
-<span class="sd">            Serializes FST to a file.</span>
-<span class="sd">            This method writes the FST to a file in consttor binary format.</span>
-<span class="sd">            Args:</span>
-<span class="sd">              filename: The string location of the output file.</span>
-<span class="sd">            Raises:</span>
-<span class="sd">              errors.SnipsFstException: Write failed.</span>
+<span class="sd">        Serializes FST to a file.</span>
+<span class="sd">        This method writes the FST to a file in binary format.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          filename: The string location of the output file.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">          ValueError: Write failed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Write failed. file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Fst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -10694,6 +10932,14 @@ Check if a state is a start
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ConstFst</span><span class="p">(</span><span class="n">cloned_fst</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">()</span>
+        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error displaying ConstFst&quot;</span>
+        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">string_at</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
           </details>
 
@@ -10943,14 +11189,67 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <div class="doc doc-contents ">
 
-      <p>Fst.read(filename)
-    Read a Fst at a given path.
-    Args:
-      filename: The string location of the input file.
-    Returns:
-      An FST.
-    Raises:
-      errors.SnipsFstException: Read failed.</p>
+      <p>Read a Fst at a given path.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>filename</code></td>
+          <td>
+                <code><span title="pathlib.Path">Path</span></code>
+          </td>
+          <td><p>The string location of the input file.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.Fst" href="fst/#rustfst.fst.Fst">Fst</a></code>
+          </td>
+          <td><p>An FST.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>ValueError</code>
+          </td>
+          <td><p>Read failed.</p></td>
+        </tr>
+    </tbody>
+  </table>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
@@ -10972,24 +11271,22 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal">107</span>
 <span class="normal">108</span>
 <span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Fst.read(filename)</span>
-<span class="sd">        Read a Fst at a given path.</span>
-<span class="sd">        Args:</span>
-<span class="sd">          filename: The string location of the input file.</span>
-<span class="sd">        Returns:</span>
-<span class="sd">          An FST.</span>
-<span class="sd">        Raises:</span>
-<span class="sd">          errors.SnipsFstException: Read failed.</span>
+<span class="sd">    Read a Fst at a given path.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      filename: The string location of the input file.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      An FST.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: Read failed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_from_path</span><span class="p">(</span>
         <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">fst</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Read failed. file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Read failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">fst</span><span class="p">)</span>
@@ -11014,17 +11311,55 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
     <div class="doc doc-contents ">
 
-      <p>write(self, filename)
-    Serializes FST to a file.
-    This method writes the FST to a file in consttor binary format.
-    Args:
-      filename: The string location of the output file.
-    Raises:
-      errors.SnipsFstException: Write failed.</p>
+      <p>Serializes FST to a file.
+This method writes the FST to a file in binary format.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>filename</code></td>
+          <td>
+                <code><span title="pathlib.Path">Path</span></code>
+          </td>
+          <td><p>The string location of the output file.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>ValueError</code>
+          </td>
+          <td><p>Write failed.</p></td>
+        </tr>
+    </tbody>
+  </table>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">113</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">112</span>
+<span class="normal">113</span>
 <span class="normal">114</span>
 <span class="normal">115</span>
 <span class="normal">116</span>
@@ -11034,20 +11369,17 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal">120</span>
 <span class="normal">121</span>
 <span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="normal">123</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    write(self, filename)</span>
-<span class="sd">        Serializes FST to a file.</span>
-<span class="sd">        This method writes the FST to a file in consttor binary format.</span>
-<span class="sd">        Args:</span>
-<span class="sd">          filename: The string location of the output file.</span>
-<span class="sd">        Raises:</span>
-<span class="sd">          errors.SnipsFstException: Write failed.</span>
+<span class="sd">    Serializes FST to a file.</span>
+<span class="sd">    This method writes the FST to a file in binary format.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      filename: The string location of the output file.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: Write failed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Write failed. file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
         </details>
@@ -11077,7 +11409,9 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">127</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
 <span class="normal">128</span>
 <span class="normal">129</span>
 <span class="normal">130</span>
@@ -11088,9 +11422,7 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal">135</span>
 <span class="normal">136</span>
 <span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Fst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal">138</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Fst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    equals(self, other)</span>
 <span class="sd">        Check if this Fst is equal to the other</span>
@@ -11130,7 +11462,9 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">142</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
 <span class="normal">143</span>
 <span class="normal">144</span>
 <span class="normal">145</span>
@@ -11138,9 +11472,7 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal">147</span>
 <span class="normal">148</span>
 <span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
+<span class="normal">150</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    copy fst(self, other)</span>
 <span class="sd">    :return: Fst</span>
@@ -11156,6 +11488,7 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
     </div>
 
   </div>
+
 
 
 
@@ -11588,7 +11921,37 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal">380</span>
 <span class="normal">381</span>
 <span class="normal">382</span>
-<span class="normal">383</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">VectorFst</span><span class="p">(</span><span class="n">Fst</span><span class="p">):</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">VectorFst</span><span class="p">(</span><span class="n">Fst</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates an empty VectorFst.</span>
@@ -11813,7 +12176,7 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_from_path</span><span class="p">(</span>
             <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">fst</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Read failed. file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Read failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">fst</span><span class="p">)</span>
@@ -11828,7 +12191,7 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="sd">          ValueError: Write failed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Write failed. file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Fst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -11875,6 +12238,28 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
         <span class="kn">from</span> <span class="nn">rustfst.algorithms.connect</span> <span class="kn">import</span> <span class="n">connect</span>
 
         <span class="k">return</span> <span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">top_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This operation topologically sorts its input. When sorted, all transitions are from</span>
+<span class="sd">        lower to higher state IDs.</span>
+
+<span class="sd">        Examples :</span>
+
+<span class="sd">        - Input</span>
+
+<span class="sd">        ![topsort_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_in.svg?sanitize=true)</span>
+
+<span class="sd">        - Output</span>
+
+<span class="sd">        ![topsort_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_out.svg?sanitize=true)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Equivalent top sorted Fst. Modification also happens in-place.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">rustfst.algorithms.top_sort</span> <span class="kn">import</span> <span class="n">top_sort</span>
+
+        <span class="k">return</span> <span class="n">top_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">determinize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">rustfst.algorithms.determinize</span> <span class="kn">import</span> <span class="n">determinize</span><span class="p">,</span> <span class="n">determinize_with_config</span>
@@ -11952,6 +12337,14 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">()</span>
+        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error displaying VectorFst&quot;</span>
+        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">string_at</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
           </details>
 
@@ -13045,7 +13438,7 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_from_path</span><span class="p">(</span>
         <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">fst</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Read failed. file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Read failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">fst</span><span class="p">)</span>
@@ -13138,7 +13531,7 @@ This method writes the FST to a file in vector binary format.</p>
 <span class="sd">      ValueError: Write failed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Write failed. file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
         </details>
@@ -13310,6 +13703,100 @@ This method writes the FST to a file in vector binary format.</p>
 
 
 
+  <div class="doc doc-object doc-function">
+
+
+
+<h10 class="doc doc-heading" id="rustfst.fst.vector_fst.VectorFst.top_sort">
+<code class="highlight language-python"><span class="n">top_sort</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
+
+
+</h10>
+
+
+    <div class="doc doc-contents ">
+
+      <p>This operation topologically sorts its input. When sorted, all transitions are from
+lower to higher state IDs.</p>
+<p>Examples :</p>
+<ul>
+<li>Input</li>
+</ul>
+<p><img alt="topsort_in" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_in.svg?sanitize=true" /></p>
+<ul>
+<li>Output</li>
+</ul>
+<p><img alt="topsort_out" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_out.svg?sanitize=true" /></p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Equivalent top sorted Fst. Modification also happens in-place.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+        <details class="quote">
+          <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">top_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This operation topologically sorts its input. When sorted, all transitions are from</span>
+<span class="sd">    lower to higher state IDs.</span>
+
+<span class="sd">    Examples :</span>
+
+<span class="sd">    - Input</span>
+
+<span class="sd">    ![topsort_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_in.svg?sanitize=true)</span>
+
+<span class="sd">    - Output</span>
+
+<span class="sd">    ![topsort_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_out.svg?sanitize=true)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Equivalent top sorted Fst. Modification also happens in-place.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">rustfst.algorithms.top_sort</span> <span class="kn">import</span> <span class="n">top_sort</span>
+
+    <span class="k">return</span> <span class="n">top_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
 
 
 
@@ -13338,11 +13825,11 @@ This method writes the FST to a file in vector binary format.</p>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span>
-<span class="normal">383</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;x.__add__(y) &lt;==&gt; x+y&quot;&quot;&quot;</span>
     <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
@@ -13352,6 +13839,7 @@ This method writes the FST to a file in vector binary format.</p>
     </div>
 
   </div>
+
 
 
 

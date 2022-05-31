@@ -111,6 +111,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/algorithms/top_sort/</loc>
+         <lastmod>2022-05-31</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/algorithms/tr_sort/</loc>
          <lastmod>2022-05-31</lastmod>
          <changefreq>daily</changefreq>

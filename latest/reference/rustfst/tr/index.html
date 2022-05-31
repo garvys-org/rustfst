@@ -475,6 +475,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../algorithms/top_sort/" class="md-nav__link">
+        top_sort
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../algorithms/tr_sort/" class="md-nav__link">
         tr_sort
       </a>
@@ -1131,9 +1145,7 @@
 <span class="normal">136</span>
 <span class="normal">137</span>
 <span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Tr</span><span class="p">:</span>
+<span class="normal">139</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Tr</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Structure representing a transition from a state to another state in a FST.</span>
 <span class="sd">    Attributes:</span>
@@ -1252,9 +1264,7 @@
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;&lt;Tr ilabel=</span><span class="si">{}</span><span class="s2">, olabel=</span><span class="si">{}</span><span class="s2">, weight=</span><span class="si">{}</span><span class="s2">, next_state=</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ilabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">olabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_state</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;Tr ilabel=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ilabel</span><span class="si">}</span><span class="s2">, olabel=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">olabel</span><span class="si">}</span><span class="s2">, weight=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="si">}</span><span class="s2">, next_state=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">next_state</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">lib</span><span class="o">.</span><span class="n">tr_delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ptr</span><span class="p">)</span>
@@ -1444,13 +1454,9 @@
           <summary>Source code in <code>rustfst/tr.py</code></summary>
           <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">134</span>
 <span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">136</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;&lt;Tr ilabel=</span><span class="si">{}</span><span class="s2">, olabel=</span><span class="si">{}</span><span class="s2">, weight=</span><span class="si">{}</span><span class="s2">, next_state=</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ilabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">olabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_state</span>
-    <span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;Tr ilabel=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ilabel</span><span class="si">}</span><span class="s2">, olabel=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">olabel</span><span class="si">}</span><span class="s2">, weight=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="si">}</span><span class="s2">, next_state=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">next_state</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 </code></pre></div></td></tr></table></div>
         </details>
     </div>

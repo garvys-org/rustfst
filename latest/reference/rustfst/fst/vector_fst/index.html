@@ -475,6 +475,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../algorithms/top_sort/" class="md-nav__link">
+        top_sort
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../algorithms/tr_sort/" class="md-nav__link">
         tr_sort
       </a>
@@ -754,6 +768,13 @@
           <li class="md-nav__item">
   <a href="#rustfst.fst.vector_fst.VectorFst.copy" class="md-nav__link">
     copy()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.fst.vector_fst.VectorFst.top_sort" class="md-nav__link">
+    top_sort()
   </a>
   
 </li>
@@ -1063,6 +1084,13 @@
           <li class="md-nav__item">
   <a href="#rustfst.fst.vector_fst.VectorFst.copy" class="md-nav__link">
     copy()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.fst.vector_fst.VectorFst.top_sort" class="md-nav__link">
+    top_sort()
   </a>
   
 </li>
@@ -1516,7 +1544,37 @@
 <span class="normal">380</span>
 <span class="normal">381</span>
 <span class="normal">382</span>
-<span class="normal">383</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">VectorFst</span><span class="p">(</span><span class="n">Fst</span><span class="p">):</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">VectorFst</span><span class="p">(</span><span class="n">Fst</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates an empty VectorFst.</span>
@@ -1741,7 +1799,7 @@
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_from_path</span><span class="p">(</span>
             <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">fst</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Read failed. file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Read failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">fst</span><span class="p">)</span>
@@ -1756,7 +1814,7 @@
 <span class="sd">          ValueError: Write failed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Write failed. file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Fst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -1803,6 +1861,28 @@
         <span class="kn">from</span> <span class="nn">rustfst.algorithms.connect</span> <span class="kn">import</span> <span class="n">connect</span>
 
         <span class="k">return</span> <span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">top_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This operation topologically sorts its input. When sorted, all transitions are from</span>
+<span class="sd">        lower to higher state IDs.</span>
+
+<span class="sd">        Examples :</span>
+
+<span class="sd">        - Input</span>
+
+<span class="sd">        ![topsort_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_in.svg?sanitize=true)</span>
+
+<span class="sd">        - Output</span>
+
+<span class="sd">        ![topsort_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_out.svg?sanitize=true)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Equivalent top sorted Fst. Modification also happens in-place.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">rustfst.algorithms.top_sort</span> <span class="kn">import</span> <span class="n">top_sort</span>
+
+        <span class="k">return</span> <span class="n">top_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">determinize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">rustfst.algorithms.determinize</span> <span class="kn">import</span> <span class="n">determinize</span><span class="p">,</span> <span class="n">determinize_with_config</span>
@@ -1880,6 +1960,14 @@
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">()</span>
+        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error displaying VectorFst&quot;</span>
+        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">string_at</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
           </details>
 
@@ -2973,7 +3061,7 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_from_path</span><span class="p">(</span>
         <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">fst</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Read failed. file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Read failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">fst</span><span class="p">)</span>
@@ -3066,7 +3154,7 @@ This method writes the FST to a file in vector binary format.</p>
 <span class="sd">      ValueError: Write failed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">vec_fst_write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Write failed. file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
         </details>
@@ -3238,6 +3326,100 @@ This method writes the FST to a file in vector binary format.</p>
 
 
 
+  <div class="doc doc-object doc-function">
+
+
+
+<h6 class="doc doc-heading" id="rustfst.fst.vector_fst.VectorFst.top_sort">
+<code class="highlight language-python"><span class="n">top_sort</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
+
+
+</h6>
+
+
+    <div class="doc doc-contents ">
+
+      <p>This operation topologically sorts its input. When sorted, all transitions are from
+lower to higher state IDs.</p>
+<p>Examples :</p>
+<ul>
+<li>Input</li>
+</ul>
+<p><img alt="topsort_in" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_in.svg?sanitize=true" /></p>
+<ul>
+<li>Output</li>
+</ul>
+<p><img alt="topsort_out" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_out.svg?sanitize=true" /></p>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Equivalent top sorted Fst. Modification also happens in-place.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+        <details class="quote">
+          <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">top_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This operation topologically sorts its input. When sorted, all transitions are from</span>
+<span class="sd">    lower to higher state IDs.</span>
+
+<span class="sd">    Examples :</span>
+
+<span class="sd">    - Input</span>
+
+<span class="sd">    ![topsort_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_in.svg?sanitize=true)</span>
+
+<span class="sd">    - Output</span>
+
+<span class="sd">    ![topsort_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_out.svg?sanitize=true)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Equivalent top sorted Fst. Modification also happens in-place.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">rustfst.algorithms.top_sort</span> <span class="kn">import</span> <span class="n">top_sort</span>
+
+    <span class="k">return</span> <span class="n">top_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
 
 
 
@@ -3266,11 +3448,11 @@ This method writes the FST to a file in vector binary format.</p>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span>
-<span class="normal">383</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;x.__add__(y) &lt;==&gt; x+y&quot;&quot;&quot;</span>
     <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
@@ -3280,6 +3462,7 @@ This method writes the FST to a file in vector binary format.</p>
     </div>
 
   </div>
+
 
 
 

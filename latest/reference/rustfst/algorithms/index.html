@@ -477,6 +477,20 @@
   
   
     <li class="md-nav__item">
+      <a href="top_sort/" class="md-nav__link">
+        top_sort
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="tr_sort/" class="md-nav__link">
         tr_sort
       </a>
@@ -784,6 +798,53 @@
   
     <nav class="md-nav" aria-label="Modules">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.top_sort" class="md-nav__link">
+    top_sort
+  </a>
+  
+    <nav class="md-nav" aria-label="top_sort">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.top_sort-attributes" class="md-nav__link">
+    Attributes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.top_sort-classes" class="md-nav__link">
+    Classes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.top_sort-functions" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.top_sort.top_sort" class="md-nav__link">
+    top_sort()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#rustfst.algorithms.replace" class="md-nav__link">
@@ -1970,6 +2031,168 @@ initial and final.</p>
 
 
 <h3 id="rustfst.algorithms-modules">Modules</h3>
+
+  <div class="doc doc-object doc-module">
+
+
+
+<h4 class="doc doc-heading" id="rustfst.algorithms.top_sort">
+        <code>top_sort</code>
+
+
+
+</h4>
+
+    <div class="doc doc-contents ">
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+<h5 id="rustfst.algorithms.top_sort-attributes">Attributes</h5>
+<h5 id="rustfst.algorithms.top_sort-classes">Classes</h5>
+<h5 id="rustfst.algorithms.top_sort-functions">Functions</h5>
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h6 class="doc doc-heading" id="rustfst.algorithms.top_sort.top_sort">
+<code class="highlight language-python"><span class="n">top_sort</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
+
+
+</h6>
+
+
+    <div class="doc doc-contents ">
+
+      <p>This operation topologically sorts its input. When sorted, all transitions are from lower to higher state IDs.</p>
+<p>Examples :</p>
+<ul>
+<li>Input</li>
+</ul>
+<p><img alt="topsort_in" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_in.svg?sanitize=true" /></p>
+<ul>
+<li>Output</li>
+</ul>
+<p><img alt="topsort_out" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_out.svg?sanitize=true" /></p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fst</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Fst to top_sort.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Equivalent top sorted Fst. Modification also happens in-place.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+        <details class="quote">
+          <summary>Source code in <code>rustfst/algorithms/top_sort.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">top_sort</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This operation topologically sorts its input. When sorted, all transitions are from lower to higher state IDs.</span>
+
+<span class="sd">    Examples :</span>
+
+<span class="sd">    - Input</span>
+
+<span class="sd">    ![topsort_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_in.svg?sanitize=true)</span>
+
+<span class="sd">    - Output</span>
+
+<span class="sd">    ![topsort_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/topsort_out.svg?sanitize=true)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fst: Fst to top_sort.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Equivalent top sorted Fst. Modification also happens in-place.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">top_sorted_fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">()</span>
+    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_top_sort</span><span class="p">(</span><span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">top_sorted_fst</span><span class="p">))</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error during top_sort&quot;</span>
+    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">VectorFst</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">top_sorted_fst</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
 
   <div class="doc doc-object doc-module">
 
