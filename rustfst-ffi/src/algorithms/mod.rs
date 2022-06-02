@@ -5,6 +5,7 @@ pub mod determinize;
 pub mod isomorphic;
 pub mod optimize;
 pub mod project;
+pub mod randgen;
 pub mod replace;
 pub mod reverse;
 pub mod rm_epsilon;
@@ -13,7 +14,6 @@ pub mod top_sort;
 pub mod tr_sort;
 pub mod tr_unique;
 pub mod union;
-pub mod randgen;
 
 #[derive(Debug)]
 pub struct EnumConversionError {}
