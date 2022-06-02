@@ -13,6 +13,7 @@ pub mod top_sort;
 pub mod tr_sort;
 pub mod tr_unique;
 pub mod union;
+pub mod randgen;
 
 #[derive(Debug)]
 pub struct EnumConversionError {}
