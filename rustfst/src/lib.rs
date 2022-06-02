@@ -91,8 +91,6 @@ extern crate counter;
 #[macro_use]
 extern crate anyhow;
 #[cfg(test)]
-extern crate rand;
-#[cfg(test)]
 extern crate serde;
 #[cfg(test)]
 extern crate serde_json;

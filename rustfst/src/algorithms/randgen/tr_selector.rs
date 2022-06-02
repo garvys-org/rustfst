@@ -1,0 +1,45 @@
+use crate::prelude::Fst;
+use crate::{Semiring, StateId};
+use anyhow::Result;
+use rand::distributions::{Distribution, Uniform};
+use rand_chacha::rand_core::SeedableRng;
+use rand_chacha::ChaCha8Rng;
+
+/// TrSelector implementors are used to select a random transition given an FST
+/// state s, returning a number N such that 0 <= N <= NumTrs(s). If N is
+/// NumArcs(s), then the final weight is selected; otherwise the N-th arc is
+/// selected. It is assumed these are not applied to any state which is neither
+/// final nor has any arcs leaving it.
+pub trait TrSelector {
+    fn select_tr<W: Semiring, F: Fst<W>>(&mut self, fst: &F, state: StateId) -> Result<usize>;
+}
+
+/// Randomly selects a transition using the uniform distribution.
+pub struct UniformTrSelector {
+    rng: ChaCha8Rng,
+}
+
+impl UniformTrSelector {
+    pub fn new() -> Self {
+        Self {
+            rng: ChaCha8Rng::from_entropy(),
+        }
+    }
+    pub fn from_seed(seed: u64) -> Self {
+        Self {
+            rng: ChaCha8Rng::seed_from_u64(seed),
+        }
+    }
+}
+
+impl TrSelector for UniformTrSelector {
+    fn select_tr<W: Semiring, F: Fst<W>>(&mut self, fst: &F, state: StateId) -> Result<usize> {
+        let mut n = fst.num_trs(state)?;
+        if fst.is_final(state)? {
+            n += 1;
+        }
+        let uniform = Uniform::new_inclusive(0, n - 1);
+        let res = uniform.sample(&mut self.rng);
+        Ok(res)
+    }
+}

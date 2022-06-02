@@ -49,6 +49,7 @@ mod partition;
 mod projection;
 mod push;
 mod queue;
+pub mod randgen;
 mod relabel_pairs;
 pub mod replace;
 mod reverse;
