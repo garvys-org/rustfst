@@ -1,9 +1,8 @@
-use crate::algorithms::dfs_visit::Visitor;
-use crate::fst_impls::VectorFst;
-use crate::fst_traits::{CoreFst, MutableFst};
-use crate::prelude::Fst;
-use crate::{Semiring, StateId, Tr};
 use anyhow::Result;
+
+use crate::algorithms::dfs_visit::Visitor;
+use crate::fst_traits::{Fst, MutableFst};
+use crate::{Semiring, StateId, Tr};
 
 pub struct RandGenVisitor<'a, W: Semiring, FI: Fst<W>, FO: MutableFst<W>> {
     ofst: FO,

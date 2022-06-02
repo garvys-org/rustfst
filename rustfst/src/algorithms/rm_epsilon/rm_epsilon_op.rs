@@ -27,7 +27,7 @@ impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> std::fmt::Debug for RmEpsilonO
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "RmEpsilonImpl {{ rmeps_state : {:?}}}",
+            "RmEpsilonOp {{ rmeps_state : {:?}}}",
             self.rmeps_state.borrow()
         )
     }

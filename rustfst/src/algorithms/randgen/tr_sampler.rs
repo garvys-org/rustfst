@@ -1,5 +1,6 @@
 use std::borrow::Borrow;
 use std::collections::HashMap;
+use std::fmt::{Debug, Formatter};
 use std::marker::PhantomData;
 
 use anyhow::Result;
@@ -19,6 +20,25 @@ pub struct TrSampler<W: Semiring, F: Fst<W>, B: Borrow<F>, S: TrSelector> {
     fst: B,
     sample_map: HashMap<usize, usize>,
     ghost: PhantomData<(W, F)>,
+}
+
+impl<W, F, B, S> Debug for TrSampler<W, F, B, S>
+where
+    W: Semiring,
+    F: Fst<W>,
+    B: Borrow<F>,
+    S: TrSelector,
+{
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "TrSampler {{ max_length : {:?}, selector : {:?}, fst : {:?}, sample_map : {:?} }}",
+            self.max_length,
+            self.selector,
+            self.fst.borrow(),
+            self.sample_map
+        )
+    }
 }
 
 impl<W, F, B, S> TrSampler<W, F, B, S>

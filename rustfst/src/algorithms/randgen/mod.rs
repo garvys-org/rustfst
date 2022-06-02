@@ -1,12 +1,11 @@
 use anyhow::Result;
 
-use crate::algorithms::randgen::tr_selector::UniformTrSelector;
 use crate::algorithms::tr_filters::AnyTrFilter;
 use crate::fst_impls::VectorFst;
 pub use randgen_config::RandGenConfig;
 pub use randgen_fst::RandGenFst;
 use tr_sampler::TrSampler;
-pub use tr_selector::TrSelector;
+pub use tr_selector::{TrSelector, UniformTrSelector};
 
 use crate::fst_traits::Fst;
 use crate::prelude::dfs_visit::dfs_visit;
@@ -86,14 +85,14 @@ mod tests {
         assert_eq!(paths.len(), 2);
 
         for path in paths {
-            assert!(path.ilabels == vec![1, 2, 3] || path.ilabels == vec![4,5]);
-            assert!(path.olabels == vec![1, 2, 3] || path.olabels == vec![4,5]);
+            assert!(path.ilabels == vec![1, 2, 3] || path.ilabels == vec![4, 5]);
+            assert!(path.olabels == vec![1, 2, 3] || path.olabels == vec![4, 5]);
         }
 
         Ok(())
     }
 
-        #[test]
+    #[test]
     fn test_randgen_unweighted() -> Result<()> {
         let mut fst: VectorFst<TropicalWeight> = acceptor(&[1, 2, 3], TropicalWeight::one());
         union(
@@ -110,8 +109,8 @@ mod tests {
         assert_eq!(paths.len(), 10);
 
         for path in paths {
-            assert!(path.ilabels == vec![1, 2, 3] || path.ilabels == vec![4,5]);
-            assert!(path.olabels == vec![1, 2, 3] || path.olabels == vec![4,5]);
+            assert!(path.ilabels == vec![1, 2, 3] || path.ilabels == vec![4, 5]);
+            assert!(path.olabels == vec![1, 2, 3] || path.olabels == vec![4, 5]);
         }
 
         Ok(())

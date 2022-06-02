@@ -10,11 +10,9 @@ use crate::algorithms::lazy::FstOp2;
 use crate::algorithms::randgen::rand_state::RandState;
 use crate::algorithms::randgen::tr_sampler::TrSampler;
 use crate::algorithms::randgen::TrSelector;
-use crate::algorithms::weight_convert::WeightConverter;
 use crate::fst_properties::mutable_properties::rand_gen_properties;
 use crate::fst_properties::FstProperties;
 use crate::prelude::Fst;
-use crate::semirings::LogWeight;
 use crate::{Semiring, StateId, Tr, Trs, TrsVec, NO_STATE_ID};
 
 pub struct RandGenFstOp<W, F, B, S>
@@ -67,7 +65,17 @@ where
     S: TrSelector,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        todo!()
+        write!(
+            f,
+            "RandGenFstOp {{ fst : {:?}, sampler : {:?}, npath : {:?}, state_table : {:?}, weighted : {:?}, remove_total_weight : {:?}, superfinal : {:?} }}",
+            self.fst.borrow(),
+            self.sampler.borrow(),
+            self.npath,
+            self.state_table.borrow(),
+            self.weighted,
+            self.remove_total_weight,
+            self.superfinal
+        )
     }
 }
 
