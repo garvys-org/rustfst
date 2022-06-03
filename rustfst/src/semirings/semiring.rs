@@ -27,12 +27,13 @@ bitflags! {
     }
 }
 
-/// For some operations, the weight set associated to a wFST must have the structure of a semiring.
+/// The weight on an Fst must implement the `Semiring` trait.
+/// Indeed, the weight set associated to a Fst must have the structure of a semiring.
 /// `(S, +, *, 0, 1)` is a semiring if `(S, +, 0)` is a commutative monoid with identity element 0,
 /// `(S, *, 1)` is a monoid with identity element `1`, `*` distributes over `+`,
 /// `0` is an annihilator for `*`.
 /// Thus, a semiring is a ring that may lack negation.
-/// For more information : https://cs.nyu.edu/~mohri/pub/hwa.pdf
+/// For more information : <https://cs.nyu.edu/~mohri/pub/hwa.pdf>
 pub trait Semiring: Clone + PartialEq + PartialOrd + Debug + Hash + Eq + Sync + 'static {
     type Type: Clone + Debug;
     type ReverseWeight: Semiring + ReverseBack<Self>;

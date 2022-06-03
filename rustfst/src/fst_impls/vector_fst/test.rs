@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use rand::{rngs::StdRng, Rng, SeedableRng};
+    use rand::{rngs::StdRng, SeedableRng};
 
     use anyhow::Result;
 
@@ -11,6 +11,7 @@ mod tests {
     use crate::semirings::{ProbabilityWeight, Semiring, TropicalWeight};
     use crate::tr::Tr;
     use crate::{SymbolTable, Trs};
+    use rand::seq::SliceRandom;
     use std::sync::Arc;
 
     #[test]
@@ -141,7 +142,7 @@ mod tests {
 
         // Select randomly n_final_states
         let mut rg = StdRng::from_seed([53; 32]);
-        rg.shuffle(&mut states);
+        states.shuffle(&mut rg);
         let final_states: Vec<_> = states.into_iter().take(n_final_states).collect();
 
         // Set those as final with a weight equals to its position in the vector
@@ -239,7 +240,7 @@ mod tests {
 
         // Sample n_states_to_delete to remove from the FST
         let mut rg = StdRng::from_seed([53; 32]);
-        rg.shuffle(&mut states);
+        states.shuffle(&mut rg);
         let states_to_delete: Vec<_> = states.into_iter().take(n_states_to_delete).collect();
 
         fst.del_states(states_to_delete)?;

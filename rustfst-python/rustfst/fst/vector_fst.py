@@ -398,11 +398,43 @@ class VectorFst(Fst):
 
         return isomorphic(self, other)
 
-    def __add__(self, y) -> VectorFst:
-        """x.__add__(y) <==> x+y"""
+    def __add__(self, other: VectorFst) -> VectorFst:
+        """
+        `fst_1 + fst_2` is a shortcut to perform the concatenation of `fst_1` and `fst_2`.
+        Args:
+            other: VectorFst to concatenate after the current Fst.
+
+        Returns:
+            The concatenated Fst.
+        """
         x = self.copy()
 
-        return x.concat(y)
+        return x.concat(other)
+
+    def __mul__(self, other: VectorFst) -> VectorFst:
+        """
+        `fst_1 * fst_2` is a shortcut to perform the composition of `fst_1` and `fst_2`.
+        Args:
+            other: VectorFst to compose with.
+
+        Returns:
+            The composed Fst.
+
+        """
+        return self.compose(other)
+
+    def __or__(self, other: VectorFst) -> VectorFst:
+        """
+        `fst_1 | fst_2` is a shortcut to perform the union of `fst_1` and `fst_2`.
+        Args:
+            other: VectorFst to perform the union with.
+
+        Returns:
+            The resulting Fst.
+        """
+        x = self.copy()
+
+        return x.union(other)
 
     def __str__(self):
         s = ctypes.c_void_p()
