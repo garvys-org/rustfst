@@ -21,7 +21,7 @@ mod randgen_visitor;
 mod tr_sampler;
 mod tr_selector;
 
-/// Randomly generate paths through an FST; details controlled by
+/// Randomly generate paths through an Fst; execution controlled by
 /// RandGenConfig.
 pub fn randgen_with_config<
     W: Semiring<Type = f32>,
@@ -51,7 +51,7 @@ pub fn randgen_with_config<
     }
 }
 
-/// Randomly generate a path through an FST with the uniform distribution
+/// Randomly generate a path through an Fst with the uniform distribution
 /// over the transitions.
 pub fn randgen<W: Semiring<Type = f32>, FI: Fst<W>, FO: MutableFst<W>>(ifst: &FI) -> Result<FO> {
     let selector = UniformTrSelector::new();

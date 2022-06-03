@@ -12,6 +12,7 @@ use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::prelude::randgen::TrSelector;
 use crate::{Semiring, StateId, SymbolTable, TrsVec};
 
+/// Delayed Fst sampling Fst paths through the input Fst.
 pub struct RandGenFst<W: Semiring<Type = f32>, F: Fst<W>, B: Borrow<F>, S: TrSelector>(
     LazyFst2<W, RandGenFstOp<W, F, B, S>, SimpleHashMapCache<W>>,
 );

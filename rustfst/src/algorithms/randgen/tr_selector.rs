@@ -6,9 +6,9 @@ use rand_chacha::rand_core::SeedableRng;
 use rand_chacha::ChaCha8Rng;
 use std::fmt::Debug;
 
-/// TrSelector implementors are used to select a random transition given an FST
-/// state s, returning a number N such that 0 <= N <= NumTrs(s). If N is
-/// NumArcs(s), then the final weight is selected; otherwise the N-th arc is
+/// `TrSelector` implementors are used to select a random transition given an Fst
+/// state `s`, returning a number `N` such that 0 <= `N` <= `fst.num_trs(s)`. If `N` is
+/// `fst.num_trs(s)`, then the final weight is selected; otherwise the `N`-th transition is
 /// selected. It is assumed these are not applied to any state which is neither
 /// final nor has any arcs leaving it.
 pub trait TrSelector: Debug {

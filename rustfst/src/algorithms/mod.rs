@@ -49,11 +49,15 @@ mod partition;
 mod projection;
 mod push;
 mod queue;
+
+/// Module providing functions to randomly generate paths through an Fst. A static and a delayed version are available.
 pub mod randgen;
 mod relabel_pairs;
 pub mod replace;
 mod reverse;
 mod reweight;
+
+/// Module providing functions to remove epsilon transitions from an Fst. A static and a delayed version are available.
 pub mod rm_epsilon;
 mod rm_final_epsilon;
 mod shortest_distance;
@@ -67,7 +71,7 @@ pub(crate) mod tr_unique;
 pub mod union;
 mod weight_convert;
 
-/// Module that provides different structures implementing the `Queue` trait.
+/// Module providing different structures implementing the `Queue` trait.
 pub mod queues;
 
 /// Function objects to restrict which trs are traversed in an FST.
@@ -78,7 +82,7 @@ pub mod tr_mappers;
 
 pub(crate) mod visitors;
 
-/// Module that provides structures implementing the `WeightConverter` trait.
+/// Module providing structures implementing the `WeightConverter` trait.
 pub mod weight_converters;
 
 /// Functions to compare / sort the Trs of an FST.
@@ -87,4 +91,5 @@ pub mod tr_compares {
     pub use super::tr_sort::{ILabelCompare, OLabelCompare, TrCompare};
 }
 
+/// Module providing the necessary functions to implement a new Delayed Fst.
 pub mod lazy;

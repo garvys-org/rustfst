@@ -137,13 +137,13 @@ pub const EPS_SYMBOL: &str = "<eps>";
 /// A few utilities to manipulate wFSTs.
 pub mod utils;
 
-/// Provides algorithms that are generic to all wFST.
+/// Provides algorithms that are generic to all Fst.
 pub mod algorithms;
 
 /// Provides the `FstProperties` struct and some utils functions around it.
 /// Useful to assert some properties on a Fst.
 pub mod fst_properties;
-/// Implementation of the transitions inside a wFST.
+/// Implementation of the transitions inside a Fst.
 mod tr;
 
 #[macro_use]

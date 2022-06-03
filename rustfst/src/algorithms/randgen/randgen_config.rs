@@ -1,6 +1,6 @@
 use crate::algorithms::randgen::TrSelector;
 
-/// Config for random path generation.
+/// Configuration struct for random path generation.
 pub struct RandGenConfig<S: TrSelector> {
     /// How an arc is selected at a state.
     pub selector: S,
