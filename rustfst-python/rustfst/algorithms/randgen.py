@@ -9,12 +9,12 @@ from rustfst.utils import (
 
 def randgen(
     ifst: Fst,
-    npath=1,
-    seed=0,
-    select="uniform",
-    max_length=2147483647,
-    weight=False,
-    remove_total_weight=False,
+    npath: int = 1,
+    seed: int = 0,
+    select: str = "uniform",
+    max_length: int = 2147483647,
+    weight: bool = False,
+    remove_total_weight: bool = False,
 ) -> VectorFst:
     """
     Randomly generate successful paths in an FST.
