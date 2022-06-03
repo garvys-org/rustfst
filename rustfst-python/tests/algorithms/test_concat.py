@@ -1,4 +1,5 @@
 from rustfst import VectorFst, Tr
+from rustfst.algorithms.concat import concat_list
 
 
 def test_concat_fst():
@@ -60,3 +61,7 @@ def test_concat_fst():
     fst3 = fst1.concat(fst2)
 
     assert fst3 == expected_fst
+
+
+def test_concat_list():
+    concat_list([VectorFst(), VectorFst(), VectorFst()])

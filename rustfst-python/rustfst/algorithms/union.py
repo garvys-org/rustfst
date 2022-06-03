@@ -1,5 +1,8 @@
 from __future__ import annotations
-from rustfst.utils import (
+
+from typing import List
+
+from rustfst.ffi_utils import (
     lib,
     check_ffi_error,
 )
@@ -39,3 +42,23 @@ def union(fst: VectorFst, other_fst: VectorFst) -> VectorFst:
     check_ffi_error(ret_code, err_msg)
 
     return fst
+
+
+def union_list(fsts: List[VectorFst]) -> VectorFst:
+    """
+    Computes the union of a list of Fsts.
+
+    Args:
+        fsts: The list of Fsts to produce the union.
+
+    Returns:
+        The resulting Fst.
+
+    """
+    if not fsts:
+        raise ValueError("fsts must be at least of len 1")
+    fsts = [f.copy() for f in fsts]
+    res_fst = fsts[0]
+    for f in fsts[1:]:
+        res_fst = union(res_fst, f)
+    return res_fst

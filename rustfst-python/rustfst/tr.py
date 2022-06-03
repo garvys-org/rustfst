@@ -6,7 +6,7 @@ from ctypes import (
     c_void_p,
 )
 from rustfst.weight import weight_one
-from rustfst.utils import (
+from rustfst.ffi_utils import (
     lib,
     check_ffi_error,
 )
