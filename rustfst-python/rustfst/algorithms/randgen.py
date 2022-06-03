@@ -45,19 +45,22 @@ def randgen(
       ValueError: when something wrong happened.
     """
 
+    if select != "uniform":
+        raise ValueError(
+            f"Only the uniform distribution is supported for now. Found {select}"
+        )
+
     npath = ctypes.c_size_t(npath)
     seed = ctypes.c_size_t(seed)
     max_length = ctypes.c_size_t(max_length)
     weight = ctypes.c_bool(weight)
     remove_total_weight = ctypes.c_bool(remove_total_weight)
-    select = select.encode("utf-8")
     randgen_fst = ctypes.pointer(ctypes.c_void_p())
 
     ret_code = lib.fst_randgen(
         ifst.ptr,
         npath,
         seed,
-        select,
         max_length,
         weight,
         remove_total_weight,

@@ -26,6 +26,7 @@ bimap = '0.3'
 binary-heap-plus = '0.1'
 bitflags = '1'
 generic-array = '0.12'
+getrandom = { version = "0.2", features = ["js"] }
 itertools = '0.9'
 nom = '6'
 num-traits = '0.2'

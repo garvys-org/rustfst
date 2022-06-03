@@ -64,7 +64,6 @@ mod tests {
     use super::*;
     use crate::algorithms::union::union;
     use crate::fst_traits::PathsIterator;
-    use crate::prelude::fst;
     use crate::semirings::TropicalWeight;
     use crate::utils::acceptor;
 

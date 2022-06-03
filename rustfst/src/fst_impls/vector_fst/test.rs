@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use rand::{rngs::StdRng, Rng, SeedableRng};
+    use rand::{rngs::StdRng, SeedableRng};
 
     use anyhow::Result;
 

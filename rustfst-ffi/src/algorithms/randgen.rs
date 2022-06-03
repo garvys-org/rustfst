@@ -14,7 +14,6 @@ pub extern "C" fn fst_randgen(
     ptr: *const CFst,
     npath: libc::size_t,
     seed: libc::size_t,
-    select: *const libc::c_char,
     max_length: libc::size_t,
     weight: bool,
     remove_total_weight: bool,
@@ -23,7 +22,6 @@ pub extern "C" fn fst_randgen(
     wrap(|| {
         let ifst = get!(CFst, ptr);
         let ifst = as_fst!(VectorFst<TropicalWeight>, ifst);
-        // let select : String = select.as_rust()?;
 
         let config = RandGenConfig::new(UniformTrSelector::from_seed(seed as u64))
             .with_npath(npath)
