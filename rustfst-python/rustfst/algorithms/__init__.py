@@ -7,7 +7,7 @@ from rustfst.fst.vector_fst import VectorFst
 from rustfst.symbol_table import SymbolTable
 
 import ctypes
-from rustfst.utils import (
+from rustfst.ffi_utils import (
     lib,
     check_ffi_error,
 )

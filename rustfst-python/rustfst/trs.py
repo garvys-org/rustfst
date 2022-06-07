@@ -1,6 +1,6 @@
 from __future__ import annotations
 from ctypes import byref, c_void_p, c_size_t, string_at
-from rustfst.utils import (
+from rustfst.ffi_utils import (
     lib,
     check_ffi_error,
 )

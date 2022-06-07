@@ -1,4 +1,5 @@
 from rustfst import VectorFst, Tr
+from rustfst.algorithms.union import union_list
 
 
 def test_union():
@@ -70,3 +71,7 @@ def test_union():
     union_fst = fst1.union(fst2)
 
     assert union_fst == expected_fst
+
+
+def test_union_list():
+    union_list([VectorFst(), VectorFst(), VectorFst()])
