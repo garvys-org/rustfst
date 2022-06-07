@@ -3,6 +3,7 @@ use anyhow::{format_err, Result};
 use std::sync::Arc;
 
 /// Wrapper around `FstPath` to nicely handle `SymbolTable`s.
+#[derive(Debug, Clone)]
 pub struct StringPath<W: Semiring> {
     fst_path: FstPath<W>,
     isymt: Arc<SymbolTable>,

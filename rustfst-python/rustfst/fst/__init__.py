@@ -82,13 +82,12 @@ class Fst:
 
     def trs(self, state: int) -> TrsIterator:
         """
-        trs(self, state)
-            Returns an iterator over trs leaving the specified state.
-            Args:
-              state: The source state ID.
-            Returns:
-              An TrsIterator.
-            See also: `mutable_trs`, `states`.
+        Returns an iterator over trs leaving the specified state.
+        Args:
+          state: The source state ID.
+        Returns:
+          An TrsIterator.
+        See also: `mutable_trs`, `states`.
         """
         return TrsIterator(self, state)
 

@@ -2,7 +2,6 @@ from __future__ import annotations
 import ctypes
 from typing import Optional
 
-from rustfst import Fst
 from rustfst.utils import lib, check_ffi_error
 from rustfst.tr import Tr
 
@@ -110,7 +109,7 @@ class MutableTrsIterator:
 
     def __next__(self):
         """
-        Advances the internal tr iteractor.
+        Advances the internal tr iterator.
         :return: None
         """
         ret_code = lib.mut_trs_iterator_next(self._ptr)
