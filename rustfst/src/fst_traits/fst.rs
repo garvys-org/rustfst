@@ -271,7 +271,7 @@ pub trait Fst<W: Semiring>:
     /// # use rustfst::fst_traits::Fst;
     /// let mut fst : VectorFst<_> = transducer(&[1, 2, 3], &[4, 5], TropicalWeight::one());
     ///
-    /// let paths : Vec<_> = fst.paths_iter().unwrap().collect();
+    /// let paths : Vec<_> = fst.paths_iter().collect();
     /// assert_eq!(paths.len(), 1);
     /// assert_eq!(paths[0].ilabels(), &[1, 2, 3]);
     /// assert_eq!(paths[0].olabels(), &[4, 5]);
