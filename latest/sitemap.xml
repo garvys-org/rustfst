@@ -21,6 +21,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/ffi_utils/</loc>
+         <lastmod>2022-06-07</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/iterators/</loc>
          <lastmod>2022-06-07</lastmod>
          <changefreq>daily</changefreq>
@@ -37,11 +42,6 @@
     </url>
     <url>
          <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/trs/</loc>
-         <lastmod>2022-06-07</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://github.com/Garvys/rustfst/latest/reference/rustfst/utils/</loc>
          <lastmod>2022-06-07</lastmod>
          <changefreq>daily</changefreq>
     </url>

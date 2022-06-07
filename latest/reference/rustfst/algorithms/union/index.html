@@ -598,6 +598,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.union.union_list" class="md-nav__link">
+    union_list()
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -638,11 +645,25 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../ffi_utils/" class="md-nav__link">
+        ffi_utils
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
     
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_1_3" type="checkbox" id="__nav_2_1_3" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_1_4" type="checkbox" id="__nav_2_1_4" >
       
       
       
@@ -652,14 +673,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../../fst/">fst</a>
           
-            <label for="__nav_2_1_3">
+            <label for="__nav_2_1_4">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="fst" data-md-level="3">
-        <label class="md-nav__title" for="__nav_2_1_3">
+        <label class="md-nav__title" for="__nav_2_1_4">
           <span class="md-nav__icon md-icon"></span>
           fst
         </label>
@@ -762,20 +783,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../utils/" class="md-nav__link">
-        utils
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../weight/" class="md-nav__link">
         weight
       </a>
@@ -853,6 +860,13 @@
           <li class="md-nav__item">
   <a href="#rustfst.algorithms.union.union" class="md-nav__link">
     union()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.union.union_list" class="md-nav__link">
+    union_list()
   </a>
   
 </li>
@@ -985,10 +999,7 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
 
         <details class="quote">
           <summary>Source code in <code>rustfst/algorithms/union.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">13</span>
 <span class="normal">14</span>
 <span class="normal">15</span>
 <span class="normal">16</span>
@@ -1016,7 +1027,10 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
 <span class="normal">38</span>
 <span class="normal">39</span>
 <span class="normal">40</span>
-<span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">other_fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">other_fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Performs the union of two wFSTs. If A transduces string `x` to `y` with weight `a`</span>
 <span class="sd">    and `B` transduces string `w` to `v` with weight `b`, then their union transduces `x` to `y`</span>
@@ -1048,6 +1062,108 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fst</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h4 class="doc doc-heading" id="rustfst.algorithms.union.union_list">
+<code class="highlight language-python"><span class="n">union_list</span><span class="p">(</span><span class="n">fsts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">VectorFst</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
+
+
+</h4>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Computes the union of a list of Fsts.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fsts</code></td>
+          <td>
+                <code><span title="typing.List">List</span>[<a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a>]</code>
+          </td>
+          <td><p>The list of Fsts to produce the union.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>The resulting Fst.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+        <details class="quote">
+          <summary>Source code in <code>rustfst/algorithms/union.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">union_list</span><span class="p">(</span><span class="n">fsts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">VectorFst</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the union of a list of Fsts.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fsts: The list of Fsts to produce the union.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The resulting Fst.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fsts</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;fsts must be at least of len 1&quot;</span><span class="p">)</span>
+    <span class="n">fsts</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fsts</span><span class="p">]</span>
+    <span class="n">res_fst</span> <span class="o">=</span> <span class="n">fsts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fsts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">res_fst</span> <span class="o">=</span> <span class="n">union</span><span class="p">(</span><span class="n">res_fst</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res_fst</span>
 </code></pre></div></td></tr></table></div>
         </details>
     </div>

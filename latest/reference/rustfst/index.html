@@ -565,11 +565,25 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="ffi_utils/" class="md-nav__link">
+        ffi_utils
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
     
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_1_3" type="checkbox" id="__nav_2_1_3" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_1_4" type="checkbox" id="__nav_2_1_4" >
       
       
       
@@ -579,14 +593,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="fst/">fst</a>
           
-            <label for="__nav_2_1_3">
+            <label for="__nav_2_1_4">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="fst" data-md-level="3">
-        <label class="md-nav__title" for="__nav_2_1_3">
+        <label class="md-nav__title" for="__nav_2_1_4">
           <span class="md-nav__icon md-icon"></span>
           fst
         </label>
@@ -677,20 +691,6 @@
     <li class="md-nav__item">
       <a href="trs/" class="md-nav__link">
         trs
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="utils/" class="md-nav__link">
-        utils
       </a>
     </li>
   
@@ -4123,6 +4123,7 @@ left-to-right?</p></td>
 
 
 
+
   <div class="doc doc-object doc-module">
 
 
@@ -5910,7 +5911,6 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 
 
 
-
   <div class="doc doc-object doc-module">
 
 
@@ -7218,10 +7218,7 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
 
         <details class="quote">
           <summary>Source code in <code>rustfst/algorithms/union.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">13</span>
 <span class="normal">14</span>
 <span class="normal">15</span>
 <span class="normal">16</span>
@@ -7249,7 +7246,10 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
 <span class="normal">38</span>
 <span class="normal">39</span>
 <span class="normal">40</span>
-<span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">other_fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">other_fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Performs the union of two wFSTs. If A transduces string `x` to `y` with weight `a`</span>
 <span class="sd">    and `B` transduces string `w` to `v` with weight `b`, then their union transduces `x` to `y`</span>
@@ -7281,6 +7281,108 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fst</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h8 class="doc doc-heading" id="rustfst.algorithms.union.union_list">
+<code class="highlight language-python"><span class="n">union_list</span><span class="p">(</span><span class="n">fsts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">VectorFst</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
+
+
+</h8>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Computes the union of a list of Fsts.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fsts</code></td>
+          <td>
+                <code><span title="typing.List">List</span>[<a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a>]</code>
+          </td>
+          <td><p>The list of Fsts to produce the union.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>The resulting Fst.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+        <details class="quote">
+          <summary>Source code in <code>rustfst/algorithms/union.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">union_list</span><span class="p">(</span><span class="n">fsts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">VectorFst</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes the union of a list of Fsts.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fsts: The list of Fsts to produce the union.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The resulting Fst.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fsts</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;fsts must be at least of len 1&quot;</span><span class="p">)</span>
+    <span class="n">fsts</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fsts</span><span class="p">]</span>
+    <span class="n">res_fst</span> <span class="o">=</span> <span class="n">fsts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fsts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">res_fst</span> <span class="o">=</span> <span class="n">union</span><span class="p">(</span><span class="n">res_fst</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res_fst</span>
 </code></pre></div></td></tr></table></div>
         </details>
     </div>
@@ -9380,7 +9482,7 @@ current time and process ID is used.</p></td>
 
     <div class="doc doc-contents ">
 
-      <p>Compute the concatenation of two FSTs.</p>
+      <p>Compute the concatenation of two Fsts.</p>
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -9436,10 +9538,7 @@ current time and process ID is used.</p></td>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/algorithms/concat.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">13</span>
 <span class="normal">14</span>
 <span class="normal">15</span>
 <span class="normal">16</span>
@@ -9450,9 +9549,12 @@ current time and process ID is used.</p></td>
 <span class="normal">21</span>
 <span class="normal">22</span>
 <span class="normal">23</span>
-<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">concat</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">other_fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">concat</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">other_fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compute the concatenation of two FSTs.</span>
+<span class="sd">    Compute the concatenation of two Fsts.</span>
 <span class="sd">    Args:</span>
 <span class="sd">        fst: Left fst.</span>
 <span class="sd">        other_fst: Right fst.</span>
@@ -9465,6 +9567,104 @@ current time and process ID is used.</p></td>
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">fst</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h8 class="doc doc-heading" id="rustfst.algorithms.concat.concat_list">
+<code class="highlight language-python"><span class="n">concat_list</span><span class="p">(</span><span class="n">fsts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">VectorFst</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
+
+
+</h8>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Compute the concatenation of a list of Fsts.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fsts</code></td>
+          <td>
+                <code><span title="typing.List">List</span>[<a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a>]</code>
+          </td>
+          <td><p>List of Fsts to concatenated</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>The resulting concatenated Fst.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+        <details class="quote">
+          <summary>Source code in <code>rustfst/algorithms/concat.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">concat_list</span><span class="p">(</span><span class="n">fsts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">VectorFst</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the concatenation of a list of Fsts.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        fsts: List of Fsts to concatenated</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The resulting concatenated Fst.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fsts</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;fsts must be at least of len 1&quot;</span><span class="p">)</span>
+    <span class="n">fsts</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fsts</span><span class="p">]</span>
+    <span class="n">concatenated</span> <span class="o">=</span> <span class="n">fsts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fsts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">concatenated</span> <span class="o">=</span> <span class="n">concatenated</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">concatenated</span>
 </code></pre></div></td></tr></table></div>
         </details>
     </div>
