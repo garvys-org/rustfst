@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import List
 import ctypes
-from rustfst.utils import (
+from rustfst.ffi_utils import (
     lib,
     check_ffi_error,
 )
