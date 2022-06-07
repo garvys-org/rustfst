@@ -3,6 +3,10 @@ import ctypes
 from typing import Optional
 from rustfst.ffi_utils import lib, check_ffi_error
 from rustfst.tr import Tr
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from rustfst import Fst
 
 
 class TrsIterator:

@@ -1,4 +1,4 @@
-from rustfst.utils import lib, check_ffi_error
+from rustfst.ffi_utils import lib, check_ffi_error
 import ctypes
 
 
