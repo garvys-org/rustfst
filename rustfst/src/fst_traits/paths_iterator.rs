@@ -6,26 +6,6 @@ use crate::semirings::Semiring;
 use crate::trs::Trs;
 use crate::StateId;
 
-/// Trait to iterate over the paths accepted by an FST.
-pub trait PathsIterator<'a, W>
-where
-    W: Semiring,
-{
-    type Iter: Iterator<Item = FstPath<W>>;
-    fn paths_iter(&'a self) -> Self::Iter;
-}
-
-impl<'a, W, F> PathsIterator<'a, W> for F
-where
-    W: Semiring,
-    F: 'a + Fst<W>,
-{
-    type Iter = StructPathsIterator<'a, W, F>;
-    fn paths_iter(&'a self) -> Self::Iter {
-        StructPathsIterator::new(&self)
-    }
-}
-
 pub struct StructPathsIterator<'a, W, F>
 where
     W: Semiring,

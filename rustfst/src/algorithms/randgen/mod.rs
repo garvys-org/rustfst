@@ -63,7 +63,6 @@ pub fn randgen<W: Semiring<Type = f32>, FI: Fst<W>, FO: MutableFst<W>>(ifst: &FI
 mod tests {
     use super::*;
     use crate::algorithms::union::union;
-    use crate::fst_traits::PathsIterator;
     use crate::semirings::TropicalWeight;
     use crate::utils::acceptor;
 

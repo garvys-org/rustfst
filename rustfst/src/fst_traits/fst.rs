@@ -5,7 +5,9 @@ use std::sync::Arc;
 use anyhow::Result;
 
 use crate::fst_properties::FstProperties;
+use crate::fst_traits::final_states_iterator::FinalStatesIterator;
 use crate::fst_traits::iterators::StateIterator;
+use crate::fst_traits::paths_iterator::StructPathsIterator;
 use crate::fst_traits::FstIterator;
 use crate::semirings::Semiring;
 use crate::trs::Trs;
@@ -254,34 +256,11 @@ pub trait Fst<W: Semiring>:
             w: PhantomData,
         }
     }
-}
 
-pub struct FinalStatesIterator<'a, W, F>
-where
-    W: Semiring,
-    F: Fst<W>,
-{
-    fst: &'a F,
-    state_iter: <F as StateIterator<'a>>::Iter,
-    w: PhantomData<W>,
-}
-
-impl<'a, W, F> Iterator for FinalStatesIterator<'a, W, F>
-where
-    W: Semiring,
-    F: Fst<W>,
-{
-    type Item = StateId;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            if let Some(s) = self.state_iter.next() {
-                if unsafe { self.fst.is_final_unchecked(s) } {
-                    return Some(s);
-                }
-            } else {
-                return None;
-            }
-        }
+    fn paths_iter(&self) -> StructPathsIterator<W, Self>
+    where
+        Self: std::marker::Sized,
+    {
+        StructPathsIterator::new(&self)
     }
 }

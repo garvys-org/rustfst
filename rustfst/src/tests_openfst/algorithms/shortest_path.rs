@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::algorithms::{shortest_path_with_config, ShortestPathConfig};
 use crate::fst_path::check_path_in_fst;
-use crate::fst_traits::{MutableFst, PathsIterator, SerializableFst};
+use crate::fst_traits::{MutableFst, SerializableFst};
 use crate::semirings::WeaklyDivisibleSemiring;
 use crate::semirings::WeightQuantize;
 use crate::semirings::{Semiring, SerializableSemiring};

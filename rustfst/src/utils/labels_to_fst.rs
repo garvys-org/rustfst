@@ -142,7 +142,7 @@ pub fn acceptor<W: Semiring, F: MutableFst<W>>(labels: &[Label], weight: W) -> F
 /// ```
 /// # #[macro_use] extern crate rustfst; fn main() {
 /// # use rustfst::utils;
-/// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, PathsIterator};
+/// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, Fst};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::semirings::{ProbabilityWeight, Semiring};
 /// # use rustfst::utils::acceptor;
@@ -161,7 +161,7 @@ pub fn acceptor<W: Semiring, F: MutableFst<W>>(labels: &[Label], weight: W) -> F
 /// ```
 /// # #[macro_use] extern crate rustfst; fn main() {
 /// # use rustfst::utils;
-/// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, PathsIterator};
+/// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, Fst};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::semirings::{ProbabilityWeight, Semiring};
 /// # use rustfst::utils::transducer;
@@ -180,7 +180,7 @@ pub fn acceptor<W: Semiring, F: MutableFst<W>>(labels: &[Label], weight: W) -> F
 /// ```
 /// # #[macro_use] extern crate rustfst; fn main() {
 /// # use rustfst::utils;
-/// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, PathsIterator};
+/// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, Fst};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::semirings::{ProbabilityWeight, Semiring};
 /// # use rustfst::utils::acceptor;
@@ -199,7 +199,7 @@ pub fn acceptor<W: Semiring, F: MutableFst<W>>(labels: &[Label], weight: W) -> F
 /// ```
 /// # #[macro_use] extern crate rustfst; fn main() {
 /// # use rustfst::utils;
-/// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, PathsIterator};
+/// # use rustfst::fst_traits::{CoreFst, MutableFst, ExpandedFst, Fst};
 /// # use rustfst::fst_impls::VectorFst;
 /// # use rustfst::semirings::{ProbabilityWeight, Semiring};
 /// # use rustfst::utils::transducer;
