@@ -6,7 +6,8 @@ use crate::semirings::Semiring;
 use crate::trs::Trs;
 use crate::StateId;
 
-pub struct StructPathsIterator<'a, W, F>
+/// Iterator on the paths recognized by an Fst.
+pub struct PathsIterator<'a, W, F>
 where
     W: Semiring,
     F: 'a + Fst<W>,
@@ -15,7 +16,7 @@ where
     queue: VecDeque<(StateId, FstPath<W>)>,
 }
 
-impl<'a, W, F> StructPathsIterator<'a, W, F>
+impl<'a, W, F> PathsIterator<'a, W, F>
 where
     W: Semiring,
     F: 'a + Fst<W>,
@@ -27,11 +28,11 @@ where
             queue.push_back((state_start, FstPath::default()));
         }
 
-        StructPathsIterator { fst, queue }
+        PathsIterator { fst, queue }
     }
 }
 
-impl<'a, W, F> Iterator for StructPathsIterator<'a, W, F>
+impl<'a, W, F> Iterator for PathsIterator<'a, W, F>
 where
     W: Semiring,
     F: 'a + Fst<W>,
