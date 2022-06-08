@@ -34,7 +34,7 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
                 }
                 NomCustomError::SymbolTableError(e) => format_err!(
                     "Error while parsing symbolTable from binary VectorFst : {}",
-                    e.to_owned()
+                    e
                 ),
             })
         })?;

@@ -110,22 +110,18 @@ where
         } else {
             minimize(fst)?;
         }
-    } else {
-        if !fst.properties().contains(FstProperties::I_DETERMINISTIC) {
-            if !fst.properties().intersects(
-                FstProperties::ACYCLIC
-                    | FstProperties::UNWEIGHTED
-                    | FstProperties::UNWEIGHTED_CYCLES,
-            ) {
-                encode_deter_mini_decode(fst, EncodeWeights)?;
-                tr_sum(fst)
-            } else {
-                determinize(fst)?;
-                minimize(fst)?;
-            }
+    } else if !fst.properties().contains(FstProperties::I_DETERMINISTIC) {
+        if !fst.properties().intersects(
+            FstProperties::ACYCLIC | FstProperties::UNWEIGHTED | FstProperties::UNWEIGHTED_CYCLES,
+        ) {
+            encode_deter_mini_decode(fst, EncodeWeights)?;
+            tr_sum(fst)
         } else {
+            determinize(fst)?;
             minimize(fst)?;
         }
+    } else {
+        minimize(fst)?;
     }
     Ok(())
 }

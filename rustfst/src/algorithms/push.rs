@@ -120,7 +120,7 @@ where
             .start()
             .and_then(|start| dist.get(start as usize))
             .cloned()
-            .unwrap_or_else(|| W::zero()))
+            .unwrap_or_else(W::zero))
     } else {
         let mut sum = W::zero();
         for (s, dist_s) in dist.iter().enumerate() {

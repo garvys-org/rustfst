@@ -88,7 +88,7 @@ impl<W: WeightQuantize, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FstOp<W>
                 None => elt.weight,
                 Some(s) => elt
                     .weight
-                    .times(self.fst.borrow().final_weight(s)?.unwrap_or_else(|| one))
+                    .times(self.fst.borrow().final_weight(s)?.unwrap_or(one))
                     .unwrap(),
             };
             let mut ilabel = self.opts.final_ilabel;
@@ -119,7 +119,7 @@ impl<W: WeightQuantize, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FstOp<W>
             None => elt.weight,
             Some(s) => elt
                 .weight
-                .times(self.fst.borrow().final_weight(s)?.unwrap_or_else(|| zero))
+                .times(self.fst.borrow().final_weight(s)?.unwrap_or(zero))
                 .unwrap(),
         };
         let factor_iterator = FI::new(weight.clone());

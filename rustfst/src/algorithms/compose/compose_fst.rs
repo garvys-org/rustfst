@@ -20,9 +20,12 @@ use crate::semirings::{Semiring, SerializableSemiring};
 use crate::{StateId, SymbolTable, TrsVec};
 use std::sync::Arc;
 
+type InnerLazyFst<W, F1, F2, B1, B2, M1, M2, CFB, Cache> =
+    LazyFst<W, ComposeFstOp<W, F1, F2, B1, B2, M1, M2, CFB>, Cache>;
+
 #[derive(Debug)]
 pub struct ComposeFst<W, F1, F2, B1, B2, M1, M2, CFB, Cache = SimpleVecCache<W>>(
-    LazyFst<W, ComposeFstOp<W, F1, F2, B1, B2, M1, M2, CFB>, Cache>,
+    InnerLazyFst<W, F1, F2, B1, B2, M1, M2, CFB, Cache>,
 )
 where
     W: Semiring,
@@ -285,8 +288,7 @@ where
     CFB: ComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2> + 'a,
     Cache: FstCache<W> + 'a,
 {
-    type Iter =
-        <LazyFst<W, ComposeFstOp<W, F1, F2, B1, B2, M1, M2, CFB>, Cache> as StateIterator<'a>>::Iter;
+    type Iter = <InnerLazyFst<W, F1, F2, B1, B2, M1, M2, CFB, Cache> as StateIterator<'a>>::Iter;
 
     fn states_iter(&'a self) -> Self::Iter {
         self.0.states_iter()
@@ -307,7 +309,7 @@ where
     Cache: FstCache<W> + 'a,
 {
     type FstIter =
-        <LazyFst<W, ComposeFstOp<W, F1, F2, B1, B2, M1, M2, CFB>, Cache> as FstIterator<'a, W>>::FstIter;
+        <InnerLazyFst<W, F1, F2, B1, B2, M1, M2, CFB, Cache> as FstIterator<'a, W>>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
         self.0.fst_iter()

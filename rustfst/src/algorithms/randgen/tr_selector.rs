@@ -21,6 +21,12 @@ pub struct UniformTrSelector {
     rng: ChaCha8Rng,
 }
 
+impl Default for UniformTrSelector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl UniformTrSelector {
     pub fn new() -> Self {
         Self {

@@ -119,13 +119,11 @@ where
             } else {
                 res
             }
+        } else if self.done {
+            None
         } else {
-            if self.done {
-                None
-            } else {
-                self.done = true;
-                Some(IterItemMatcher::EpsLoop)
-            }
+            self.done = true;
+            Some(IterItemMatcher::EpsLoop)
         }
     }
 }

@@ -1,9 +1,9 @@
 pub use self::add_on::FstAddOn;
-pub use self::compose::{compose, compose_with_config, ComposeConfig, ComposeFilterEnum};
 pub use self::compose_fst::ComposeFst;
 pub use self::compose_fst_op::{ComposeFstOp, ComposeFstOpState};
 pub use self::compose_fst_op_options::ComposeFstOpOptions;
 pub use self::compose_state_tuple::ComposeStateTuple;
+pub use self::compose_static::{compose, compose_with_config, ComposeConfig, ComposeFilterEnum};
 pub use self::interval_reach_visitor::IntervalReachVisitor;
 pub use self::interval_set::{IntInterval, IntervalSet};
 pub use self::label_reachable::{LabelReachable, LabelReachableData};
@@ -18,10 +18,10 @@ pub mod lookahead_matchers;
 pub mod matchers;
 
 mod add_on;
-mod compose;
 mod compose_fst;
 mod compose_fst_op;
 mod compose_state_tuple;
+mod compose_static;
 mod interval_reach_visitor;
 mod interval_set;
 mod label_reachable;

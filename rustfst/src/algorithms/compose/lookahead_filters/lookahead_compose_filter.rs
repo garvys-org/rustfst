@@ -81,9 +81,9 @@ where
     fn clone(&self) -> Self {
         LookAheadComposeFilterBuilder {
             filter_builder: self.filter_builder.clone(),
-            lookahead_type: self.lookahead_type.clone(),
-            flags: self.flags.clone(),
-            selector: self.selector.clone(),
+            lookahead_type: self.lookahead_type,
+            flags: self.flags,
+            selector: self.selector,
             ghost: PhantomData,
         }
     }
@@ -321,10 +321,8 @@ where
             true
         } else if SMT::match_type() == MatchType::MatchInput {
             false
-        } else if self.lookahead_type == MatchType::MatchOutput {
-            true
         } else {
-            false
+            self.lookahead_type == MatchType::MatchOutput
         }
     }
 
