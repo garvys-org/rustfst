@@ -20,7 +20,7 @@ class Tr:
     Attributes:
         ilabel: The input label.
         olabel: The output label.
-        weight: The arc weight.
+        weight: The transition weight.
         nextstate: The destination state for the arc.
     """
 
