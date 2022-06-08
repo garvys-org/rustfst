@@ -69,6 +69,7 @@ pub extern "C" fn rustfst_ffi_get_last_error(
     })
 }
 
+#[allow(clippy::missing_safety_doc)]
 #[no_mangle]
 pub unsafe extern "C" fn rustfst_destroy_string(string: *mut libc::c_char) -> RUSTFST_FFI_RESULT {
     wrap(|| {

@@ -82,7 +82,7 @@ impl FstHeader {
         })(i)?;
         let (i, version) = verify(parse_bin_i32, |v: &i32| *v >= min_file_version)(i)?;
         let (i, flags) = map_res(parse_bin_u32, |v: u32| {
-            FstFlags::from_bits(v).ok_or_else(|| "Could not parse Fst Flags")
+            FstFlags::from_bits(v).ok_or("Could not parse Fst Flags")
         })(i)?;
         let (i, properties) = parse_bin_u64(i)?;
         let (i, start) = parse_bin_i64(i)?;

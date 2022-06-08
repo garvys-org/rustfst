@@ -120,7 +120,7 @@ where
             .start()
             .and_then(|start| dist.get(start as usize))
             .cloned()
-            .unwrap_or(W::zero()))
+            .unwrap_or_else(|| W::zero()))
     } else {
         let mut sum = W::zero();
         for (s, dist_s) in dist.iter().enumerate() {
@@ -240,7 +240,7 @@ impl PushConfig {
     }
 
     pub fn with_delta(self, delta: f32) -> Self {
-        Self { delta, ..self }
+        Self { delta }
     }
 }
 

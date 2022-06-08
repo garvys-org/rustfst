@@ -48,7 +48,7 @@ pub extern "C" fn trs_iterator_new(
         fst.fst_get_trs(state_id)
             .map(|trs| {
                 let raw_ptr = {
-                    let trs_iterator = TrsIterator { trs: trs, index: 0 };
+                    let trs_iterator = TrsIterator { trs, index: 0 };
                     CTrsIterator(trs_iterator).into_raw_pointer()
                 };
 

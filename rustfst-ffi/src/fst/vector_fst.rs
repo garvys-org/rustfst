@@ -92,6 +92,7 @@ pub fn vec_fst_write_file(fst: *const CFst, path: *const libc::c_char) -> RUSTFS
     })
 }
 
+#[allow(clippy::too_many_arguments)]
 #[no_mangle]
 pub fn vec_fst_draw(
     fst_ptr: *mut CFst,
@@ -125,7 +126,7 @@ pub fn vec_fst_draw(
         }
 
         let drawing_config = DrawingConfig {
-            vertical: if vertical > 0 { true } else { false },
+            vertical: vertical > 0,
             size: if width >= 0.0 && height >= 0.0 {
                 Some((width, height))
             } else {

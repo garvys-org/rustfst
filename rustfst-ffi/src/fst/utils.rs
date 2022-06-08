@@ -18,11 +18,10 @@ pub extern "C" fn utils_string_to_acceptor(
         let astring: String = unsafe { CStr::from_ptr(astring) }.as_rust()?;
         let symt = get_mut!(CSymbolTable, symbol_table);
         let labels = astring
-            .split(" ")
+            .split(' ')
             .map(|sym| -> Result<Label> {
-                Ok(symt.get_label(sym).with_context(|| {
-                    anyhow!("Could not retrieve symbol {:?} in symbol table", sym)
-                })?)
+                symt.get_label(sym)
+                    .with_context(|| anyhow!("Could not retrieve symbol {:?} in symbol table", sym))
             })
             .collect::<Result<Vec<Label>>>()?;
         let acceptor_fst: VectorFst<TropicalWeight> =
@@ -47,19 +46,19 @@ pub extern "C" fn utils_string_to_transducer(
         let isymt = get_mut!(CSymbolTable, isymt);
         let osymt = get_mut!(CSymbolTable, osymt);
         let ilabels = istring
-            .split(" ")
+            .split(' ')
             .map(|sym| -> Result<Label> {
-                Ok(isymt.get_label(sym).with_context(|| {
-                    anyhow!("Could not retrieve symbol {:?} in symbol table", sym)
-                })?)
+                isymt
+                    .get_label(sym)
+                    .with_context(|| anyhow!("Could not retrieve symbol {:?} in symbol table", sym))
             })
             .collect::<Result<Vec<Label>>>()?;
         let olabels = ostring
-            .split(" ")
+            .split(' ')
             .map(|sym| -> Result<Label> {
-                Ok(osymt.get_label(sym).with_context(|| {
-                    anyhow!("Could not retrieve symbol {:?} in symbol table", sym)
-                })?)
+                osymt
+                    .get_label(sym)
+                    .with_context(|| anyhow!("Could not retrieve symbol {:?} in symbol table", sym))
             })
             .collect::<Result<Vec<Label>>>()?;
         let transducer_fst: VectorFst<TropicalWeight> = transducer(

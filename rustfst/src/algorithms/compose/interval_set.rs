@@ -69,6 +69,10 @@ impl VectorIntervalStore {
         self.intervals.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.intervals.is_empty()
+    }
+
     pub fn push(&mut self, interval: IntInterval) {
         self.intervals.push(interval)
     }
@@ -103,6 +107,10 @@ pub struct IntervalSet {
 impl IntervalSet {
     pub fn len(&self) -> usize {
         self.intervals.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.intervals.is_empty()
     }
 
     pub fn push(&mut self, interval: IntInterval) {

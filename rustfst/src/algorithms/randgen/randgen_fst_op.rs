@@ -165,7 +165,7 @@ where
             }
         }
 
-        return Ok((TrsVec(Arc::new(output_trs)), output_final_weight));
+        Ok((TrsVec(Arc::new(output_trs)), output_final_weight))
     }
 
     fn properties(&self) -> FstProperties {

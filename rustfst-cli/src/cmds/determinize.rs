@@ -24,12 +24,9 @@ impl UnaryFstAlgorithm for DeterminizeAlgorithm {
         "determinize".to_string()
     }
 
-    fn run_algorithm(
-        &self,
-        mut fst: VectorFst<TropicalWeight>,
-    ) -> Result<VectorFst<TropicalWeight>> {
+    fn run_algorithm(&self, fst: VectorFst<TropicalWeight>) -> Result<VectorFst<TropicalWeight>> {
         let det_config = DeterminizeConfig::default().with_det_type(self.det_type);
-        let fst = determinize::determinize_with_config(&mut fst, det_config)?;
+        let fst = determinize::determinize_with_config(&fst, det_config)?;
         Ok(fst)
     }
 }
