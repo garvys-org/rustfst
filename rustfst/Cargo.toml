@@ -30,7 +30,7 @@ getrandom = { version = "0.2", features = ["js"] }
 itertools = '0.9'
 nom = '6'
 num-traits = '0.2'
-ordered-float = '1'
+ordered-float = '3.0'
 rand = '0.8'
 rand_chacha = '0.3'
 serde = { version = '1', features = ['derive'] }
