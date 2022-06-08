@@ -13,7 +13,7 @@ from rustfst.drawing_config import DrawingConfig
 from rustfst.iterators import MutableTrsIterator, StateIterator
 from rustfst.tr import Tr
 from rustfst.weight import weight_one
-from typing import Optional
+from typing import Optional, Union
 from pathlib import Path
 
 from typing import List
@@ -230,7 +230,7 @@ class VectorFst(Fst):
         check_ffi_error(ret_code, err_msg)
 
     @classmethod
-    def read(cls, filename: Path) -> Fst:
+    def read(cls, filename: Union[str, Path]) -> Fst:
         """
         Read a Fst at a given path.
         Args:
@@ -249,7 +249,7 @@ class VectorFst(Fst):
 
         return cls(ptr=fst)
 
-    def write(self, filename: Path):
+    def write(self, filename: Union[str, Path]):
         """
         Serializes FST to a file.
         This method writes the FST to a file in vector binary format.
