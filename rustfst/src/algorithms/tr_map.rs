@@ -155,24 +155,23 @@ where
                     }
                 }
                 MapFinalAction::MapRequireSuperfinal => {
-                    if Some(state) != superfinal {
-                        if final_tr.ilabel != EPS_LABEL
+                    if Some(state) != superfinal
+                        && (final_tr.ilabel != EPS_LABEL
                             || final_tr.olabel != EPS_LABEL
-                            || !final_tr.weight.is_zero()
-                        {
-                            unsafe {
-                                // checked
-                                ifst.add_tr_unchecked(
-                                    state,
-                                    Tr::new(
-                                        final_tr.ilabel,
-                                        final_tr.olabel,
-                                        final_tr.weight,
-                                        superfinal.unwrap(),
-                                    ),
-                                );
-                                ifst.delete_final_weight_unchecked(state);
-                            }
+                            || !final_tr.weight.is_zero())
+                    {
+                        unsafe {
+                            // checked
+                            ifst.add_tr_unchecked(
+                                state,
+                                Tr::new(
+                                    final_tr.ilabel,
+                                    final_tr.olabel,
+                                    final_tr.weight,
+                                    superfinal.unwrap(),
+                                ),
+                            );
+                            ifst.delete_final_weight_unchecked(state);
                         }
                     }
                 }
