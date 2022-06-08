@@ -97,6 +97,7 @@ extern crate serde_json;
 
 pub use crate::drawing_config::DrawingConfig;
 pub use crate::fst_path::{check_path_in_fst, FstPath};
+pub use crate::string_path::StringPath;
 pub use crate::symbol_table::SymbolTable;
 
 pub use self::tr::Tr;
@@ -158,6 +159,7 @@ mod drawing_config;
 /// Implementation of a successful path inside a wFST.
 mod fst_path;
 mod parsers;
+mod string_path;
 
 pub use crate::parsers::nom_utils::NomCustomError;
 

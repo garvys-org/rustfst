@@ -1,5 +1,7 @@
 from __future__ import annotations
 import ctypes
+
+from rustfst.string_paths_iterator import StringPathsIterator
 from rustfst.ffi_utils import (
     lib,
     check_ffi_error,
@@ -443,3 +445,6 @@ class VectorFst(Fst):
         check_ffi_error(ret_code, err_msg)
 
         return ctypes.string_at(s).decode("utf8")
+
+    def string_paths(self) -> StringPathsIterator:
+        return StringPathsIterator(self)

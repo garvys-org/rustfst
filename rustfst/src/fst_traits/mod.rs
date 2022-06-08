@@ -5,6 +5,7 @@ pub use self::iterators::{FstIntoIterator, FstIterData, FstIterator, StateIterat
 pub use self::mutable_fst::MutableFst;
 pub use self::paths_iterator::PathsIterator;
 pub use self::serializable_fst::SerializableFst;
+pub use self::string_paths_iterator::StringPathsIterator;
 
 #[macro_use]
 mod macros;
@@ -16,3 +17,4 @@ mod iterators;
 mod mutable_fst;
 mod paths_iterator;
 mod serializable_fst;
+mod string_paths_iterator;

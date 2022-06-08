@@ -1,6 +1,8 @@
 pub mod algorithms;
 pub mod fst;
 pub mod iterators;
+pub mod string_path;
+pub mod string_paths_iterator;
 pub mod symbol_table;
 pub mod tr;
 pub mod trs;

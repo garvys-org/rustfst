@@ -16,7 +16,7 @@ use crate::{StateId, Tr, Trs, EPS_LABEL};
 /// # use rustfst::utils::transducer;
 /// # use rustfst::semirings::{Semiring, IntegerWeight};
 /// # use rustfst::fst_impls::VectorFst;
-/// # use rustfst::fst_traits::PathsIterator;
+/// # use rustfst::fst_traits::Fst;
 /// # use rustfst::FstPath;
 /// # use rustfst::algorithms::concat::concat;
 /// # use anyhow::Result;

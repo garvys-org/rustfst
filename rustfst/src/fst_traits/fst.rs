@@ -5,7 +5,10 @@ use std::sync::Arc;
 use anyhow::Result;
 
 use crate::fst_properties::FstProperties;
+use crate::fst_traits::final_states_iterator::FinalStatesIterator;
 use crate::fst_traits::iterators::StateIterator;
+use crate::fst_traits::paths_iterator::PathsIterator;
+use crate::fst_traits::string_paths_iterator::StringPathsIterator;
 use crate::fst_traits::FstIterator;
 use crate::semirings::Semiring;
 use crate::trs::Trs;
@@ -244,6 +247,7 @@ pub trait Fst<W: Semiring>:
     /// Removes the output symbol table from the Fst and retrieves it.
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>>;
 
+    /// Returns an Iterator on the final states along with their weight.
     fn final_states_iter(&self) -> FinalStatesIterator<W, Self>
     where
         Self: std::marker::Sized,
@@ -254,34 +258,61 @@ pub trait Fst<W: Semiring>:
             w: PhantomData,
         }
     }
-}
 
-pub struct FinalStatesIterator<'a, W, F>
-where
-    W: Semiring,
-    F: Fst<W>,
-{
-    fst: &'a F,
-    state_iter: <F as StateIterator<'a>>::Iter,
-    w: PhantomData<W>,
-}
+    /// Returns an Iterator on the paths accepted by the Fst.
+    ///
+    /// # Example :
+    /// ```
+    /// # use std::sync::Arc;
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::TropicalWeight;
+    /// # use rustfst::{Semiring, SymbolTable, symt};
+    /// # use rustfst::utils::transducer;
+    /// # use rustfst::fst_traits::Fst;
+    /// let mut fst : VectorFst<_> = transducer(&[1, 2, 3], &[4, 5], TropicalWeight::one());
+    ///
+    /// let paths : Vec<_> = fst.paths_iter().collect();
+    /// assert_eq!(paths.len(), 1);
+    /// assert_eq!(paths[0].ilabels.as_slice(), &[1, 2, 3]);
+    /// assert_eq!(paths[0].olabels.as_slice(), &[4, 5]);
+    /// assert_eq!(&paths[0].weight, &TropicalWeight::one());
+    /// ```
+    fn paths_iter(&self) -> PathsIterator<W, Self>
+    where
+        Self: std::marker::Sized,
+    {
+        PathsIterator::new(&self)
+    }
 
-impl<'a, W, F> Iterator for FinalStatesIterator<'a, W, F>
-where
-    W: Semiring,
-    F: Fst<W>,
-{
-    type Item = StateId;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            if let Some(s) = self.state_iter.next() {
-                if unsafe { self.fst.is_final_unchecked(s) } {
-                    return Some(s);
-                }
-            } else {
-                return None;
-            }
-        }
+    /// Returns an Iterator on the paths accepted by the Fst. Plus, handles the SymbolTable
+    /// allowing to retrieve the strings instead of only the sequence of labels.
+    ///
+    /// # Example :
+    /// ```
+    /// # use std::sync::Arc;
+    /// # use rustfst::fst_impls::VectorFst;
+    /// # use rustfst::semirings::TropicalWeight;
+    /// # use rustfst::{Semiring, SymbolTable, symt};
+    /// # use rustfst::utils::transducer;
+    /// # use rustfst::fst_traits::Fst;
+    /// let mut fst : VectorFst<_> = transducer(&[1, 2, 3], &[4, 5], TropicalWeight::one());
+    /// let symt = symt!["a", "b", "c", "d", "e"];
+    /// let symt = Arc::new(symt);
+    /// fst.set_input_symbols(Arc::clone(&symt));
+    /// fst.set_output_symbols(Arc::clone(&symt));
+    ///
+    /// let paths : Vec<_> = fst.string_paths_iter().unwrap().collect();
+    /// assert_eq!(paths.len(), 1);
+    /// assert_eq!(paths[0].ilabels(), &[1, 2, 3]);
+    /// assert_eq!(paths[0].olabels(), &[4, 5]);
+    /// assert_eq!(paths[0].weight(), &TropicalWeight::one());
+    /// assert_eq!(paths[0].istring().unwrap(), "a b c".to_string());
+    /// assert_eq!(paths[0].ostring().unwrap(), "d e".to_string());
+    /// ```
+    fn string_paths_iter(&self) -> Result<StringPathsIterator<W, Self>>
+    where
+        Self: std::marker::Sized,
+    {
+        StringPathsIterator::new(&self)
     }
 }

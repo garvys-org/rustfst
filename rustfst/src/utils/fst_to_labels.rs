@@ -1,7 +1,7 @@
 use anyhow::{bail, Result};
 
 use crate::fst_path::FstPath;
-use crate::fst_traits::{Fst, PathsIterator};
+use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 
 /// Decode a linear FST to retrieves the only path recognized by it. A path is composed of the

@@ -3,6 +3,10 @@ import ctypes
 from typing import Optional
 from rustfst.ffi_utils import lib, check_ffi_error
 from rustfst.tr import Tr
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from rustfst import Fst
 
 
 class TrsIterator:
@@ -11,7 +15,7 @@ class TrsIterator:
       This class is used for iterating over the trs leaving some state of a FST.
     """
 
-    def __init__(self, fst: Fst, state: int) -> TrsIterator:
+    def __init__(self, fst: Fst, state: int):
         self.ptr = fst  # reference fst to prolong its lifetime (prevent early gc)
         state = ctypes.c_size_t(state)
         iter_ptr = ctypes.pointer(ctypes.c_void_p())
@@ -108,7 +112,7 @@ class MutableTrsIterator:
 
     def __next__(self):
         """
-        Advances the internal tr iteractor.
+        Advances the internal tr iterator.
         :return: None
         """
         ret_code = lib.mut_trs_iterator_next(self._ptr)
