@@ -7,6 +7,7 @@ class StringPath:
     Struct representing a Path recognized by an Fst allowing to retrieve the input string,
     the output string and the weight of the Path.
     """
+
     def __init__(self, ptr):
         self.ptr = ptr
 

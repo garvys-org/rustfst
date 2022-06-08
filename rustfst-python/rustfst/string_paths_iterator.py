@@ -31,15 +31,11 @@ class StringPathsIterator:
         self.ptr = iter_ptr
 
     def __iter__(self):
-        """
-
-        """
+        """ """
         return self
 
     def __next__(self) -> StringPath:
-        """
-
-        """
+        """ """
         string_path_ptr = ctypes.pointer(ctypes.c_void_p())
         ret_code = lib.string_paths_iterator_next(
             self.ptr, ctypes.byref(string_path_ptr)
