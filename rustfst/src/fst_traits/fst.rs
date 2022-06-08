@@ -273,9 +273,9 @@ pub trait Fst<W: Semiring>:
     ///
     /// let paths : Vec<_> = fst.paths_iter().collect();
     /// assert_eq!(paths.len(), 1);
-    /// assert_eq!(paths[0].ilabels(), &[1, 2, 3]);
-    /// assert_eq!(paths[0].olabels(), &[4, 5]);
-    /// assert_eq!(paths[0].weight(), &TropicalWeight::one());
+    /// assert_eq!(paths[0].ilabels.as_slice(), &[1, 2, 3]);
+    /// assert_eq!(paths[0].olabels.as_slice(), &[4, 5]);
+    /// assert_eq!(&paths[0].weight, &TropicalWeight::one());
     /// ```
     fn paths_iter(&self) -> PathsIterator<W, Self>
     where
