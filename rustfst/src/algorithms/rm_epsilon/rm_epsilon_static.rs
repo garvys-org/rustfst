@@ -126,11 +126,10 @@ pub(crate) fn rm_epsilon_with_internal_config<W: Semiring, F: MutableFst<W>, Q: 
             first[scc[i] as usize] = Some(i);
         }
 
-        for i in 0..first.len() {
-            let mut opt_j = first[i];
+        for mut opt_j in &first {
             while let Some(j) = opt_j {
-                states.push(j as StateId);
-                opt_j = next[j];
+                states.push(*j as StateId);
+                opt_j = &next[*j];
             }
         }
     }

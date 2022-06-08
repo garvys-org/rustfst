@@ -55,6 +55,7 @@ where
     SMT: MatchTypeTrait,
 {
     filter_builder: CFB,
+    #[allow(clippy::type_complexity)]
     ghost: PhantomData<(W, F1, F2, B1, B2, M1, M2, SMT)>,
 }
 

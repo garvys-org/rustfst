@@ -492,6 +492,7 @@ pub fn relabel_properties(inprops: FstProperties) -> FstProperties {
     outprops & inprops
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn replace_properties(
     inprops: &[FstProperties],
     root: Label,

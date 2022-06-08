@@ -40,6 +40,7 @@ where
     lookahead_tr: bool,
     selector: Selector,
     la_matcher_data: Option<LookAheadMatcherData<W>>,
+    #[allow(clippy::type_complexity)]
     ghost: PhantomData<(W, F1, F2, B1, B2, M1, M2, SMT)>,
 }
 
@@ -61,6 +62,7 @@ where
     lookahead_type: MatchType,
     flags: MatcherFlags,
     selector: Selector,
+    #[allow(clippy::type_complexity)]
     ghost: PhantomData<(W, F1, F2, B1, B2, M1, M2, SMT)>,
 }
 

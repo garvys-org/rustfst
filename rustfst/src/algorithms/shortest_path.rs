@@ -251,10 +251,8 @@ where
             let mut tr = ifst.get_trs(state)?.trs()[pos].clone();
             tr.nextstate = d_p.unwrap();
             ofst.add_tr(s_p.unwrap(), tr)?;
-        } else {
-            if let Some(final_weight) = ifst.final_weight(f_parent.unwrap())? {
-                ofst.set_final(s_p.unwrap(), final_weight.clone())?;
-            }
+        } else if let Some(final_weight) = ifst.final_weight(f_parent.unwrap())? {
+            ofst.set_final(s_p.unwrap(), final_weight.clone())?;
         }
 
         // Next iteration

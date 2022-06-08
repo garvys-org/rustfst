@@ -11,6 +11,9 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
+type InnerLazyFst<W, F, CD, B, BT> =
+    LazyFst<W, DeterminizeFsaOp<W, F, CD, B, BT>, SimpleHashMapCache<W>>;
+
 #[derive(Debug)]
 pub struct DeterminizeFsa<
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
@@ -18,10 +21,7 @@ pub struct DeterminizeFsa<
     CD: CommonDivisor<W>,
     B: Borrow<F> + Debug,
     BT: Borrow<[W]> + Debug + PartialEq,
->(
-    LazyFst<W, DeterminizeFsaOp<W, F, CD, B, BT>, SimpleHashMapCache<W>>,
-    PhantomData<F>,
-);
+>(InnerLazyFst<W, F, CD, B, BT>, PhantomData<F>);
 
 impl<W, F, CD, B, BT> CoreFst<W> for DeterminizeFsa<W, F, CD, B, BT>
 where
@@ -82,10 +82,7 @@ where
     B: Borrow<F> + Debug + 'a,
     BT: Borrow<[W]> + Debug + PartialEq + 'a,
 {
-    type Iter =
-        <LazyFst<W, DeterminizeFsaOp<W, F, CD, B, BT>, SimpleHashMapCache<W>> as StateIterator<
-            'a,
-        >>::Iter;
+    type Iter = <InnerLazyFst<W, F, CD, B, BT> as StateIterator<'a>>::Iter;
 
     fn states_iter(&'a self) -> Self::Iter {
         self.0.states_iter()
@@ -100,11 +97,7 @@ where
     B: Borrow<F> + Debug + 'a,
     BT: Borrow<[W]> + Debug + PartialEq + 'a,
 {
-    type FstIter =
-        <LazyFst<W, DeterminizeFsaOp<W, F, CD, B, BT>, SimpleHashMapCache<W>> as FstIterator<
-            'a,
-            W,
-        >>::FstIter;
+    type FstIter = <InnerLazyFst<W, F, CD, B, BT> as FstIterator<'a, W>>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
         self.0.fst_iter()

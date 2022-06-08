@@ -184,12 +184,7 @@ where
         determinize_fst(fst_in, det_type, delta)?
     };
 
-    let distinct_psubsequential_labels = if det_type == DeterminizeType::DeterminizeNonFunctional {
-        // increment_subsequential_label
-        false
-    } else {
-        true
-    };
+    let distinct_psubsequential_labels = !(det_type == DeterminizeType::DeterminizeNonFunctional);
     fst_res.set_properties(determinize_properties(
         iprops,
         false,
