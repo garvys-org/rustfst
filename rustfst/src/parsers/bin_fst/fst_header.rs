@@ -161,8 +161,8 @@ impl OpenFstString {
     }
 }
 
-impl Into<String> for OpenFstString {
-    fn into(self) -> String {
-        self.s
+impl From<OpenFstString> for String {
+    fn from(os: OpenFstString) -> Self {
+        os.s
     }
 }

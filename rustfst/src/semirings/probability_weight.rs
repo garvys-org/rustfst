@@ -145,8 +145,8 @@ test_semiring_serializable!(
     ProbabilityWeight::one() ProbabilityWeight::zero() ProbabilityWeight::new(0.3) ProbabilityWeight::new(0.5) ProbabilityWeight::new(0.0) ProbabilityWeight::new(1.0)
 );
 
-impl Into<ProbabilityWeight> for f32 {
-    fn into(self) -> ProbabilityWeight {
-        ProbabilityWeight::new(self)
+impl From<f32> for ProbabilityWeight {
+    fn from(f: f32) -> Self {
+        Self::new(f)
     }
 }

@@ -1,5 +1,6 @@
 use crate::algorithms::{Queue, QueueType};
 use crate::StateId;
+use std::cmp::Ordering;
 
 #[derive(Debug)]
 pub struct SccQueue {
@@ -52,12 +53,10 @@ impl Queue for SccQueue {
     }
 
     fn is_empty(&self) -> bool {
-        if self.front < self.back {
-            false
-        } else if self.front > self.back {
-            true
-        } else {
-            self.queues[self.front as usize].is_empty()
+        match self.front.cmp(&self.back) {
+            Ordering::Less => false,
+            Ordering::Greater => true,
+            Ordering::Equal => self.queues[self.front as usize].is_empty(),
         }
     }
 

@@ -88,8 +88,8 @@ impl StarSemiring for IntegerWeight {
     }
 }
 
-impl Into<IntegerWeight> for i32 {
-    fn into(self) -> IntegerWeight {
-        IntegerWeight::new(self)
+impl From<i32> for IntegerWeight {
+    fn from(i: i32) -> Self {
+        Self::new(i)
     }
 }

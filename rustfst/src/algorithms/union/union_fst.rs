@@ -40,10 +40,7 @@ where
         unsafe { rfst.add_tr_unchecked(0, Tr::new(EPS_LABEL, NO_LABEL, W::one(), 1)) };
         unsafe { rfst.add_tr_unchecked(0, Tr::new(EPS_LABEL, NO_LABEL - 1, W::one(), 1)) };
 
-        let mut fst_tuples = Vec::with_capacity(3);
-        fst_tuples.push((0, rfst));
-        fst_tuples.push((NO_LABEL, fst1));
-        fst_tuples.push((NO_LABEL - 1, fst2));
+        let fst_tuples = vec![(0, rfst), (NO_LABEL, fst1), (NO_LABEL - 1, fst2)];
 
         Ok(UnionFst(
             ReplaceFst::new(fst_tuples, 0, false)?,

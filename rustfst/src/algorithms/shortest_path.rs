@@ -318,14 +318,13 @@ impl<'a, 'b, W: Semiring + WeightQuantize> ShortestPathCompare<'a, 'b, W> {
         let py = &b[y as usize];
         let wx = self.pweight(&px.0).times(&px.1).unwrap();
         let wy = self.pweight(&py.0).times(&py.1).unwrap();
-        let res = if px.0.is_none() && py.0.is_some() {
+        if px.0.is_none() && py.0.is_some() {
             natural_less(&wy, &wx).unwrap() || wx.approx_equal(&wy, self.delta)
         } else if px.0.is_some() && py.0.is_none() {
             natural_less(&wy, &wx).unwrap() && !wx.approx_equal(&wy, self.delta)
         } else {
             natural_less(&wy, &wx).unwrap()
-        };
-        res
+        }
     }
 }
 
