@@ -15,7 +15,7 @@ with readme_path.open() as f:
 
 PACKAGE_NAME = "rustfst-python"
 RUST_EXTENSION_NAME = "rustfst.dylib.dylib"
-VERSION = "0.10.0"
+VERSION = "0.11.0"
 REPO_ROOT_PATH = Path(__file__).resolve().parents[1]
 CARGO_ROOT_PATH = REPO_ROOT_PATH / "rustfst-ffi"
 CARGO_FILE_PATH = CARGO_ROOT_PATH / "Cargo.toml"
