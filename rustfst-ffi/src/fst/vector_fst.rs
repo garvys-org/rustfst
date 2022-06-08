@@ -132,13 +132,13 @@ pub fn vec_fst_draw(
                 None
             },
             title: unsafe { CStr::from_ptr(title).as_rust()? },
-            portrait: if portrait > 0 { true } else { false },
+            portrait: portrait > 0,
             ranksep: if ranksep >= 0.0 { Some(ranksep) } else { None },
             nodesep: if nodesep >= 0.0 { Some(nodesep) } else { None },
             fontsize: fontsize as u32,
-            acceptor: if acceptor > 0 { true } else { false },
-            show_weight_one: if show_weight_one > 0 { true } else { false },
-            print_weight: if print_weight > 0 { true } else { false },
+            acceptor: acceptor > 0,
+            show_weight_one: show_weight_one > 0,
+            print_weight: print_weight > 0,
         };
 
         vec_fst.draw(unsafe { CStr::from_ptr(fname).as_rust()? }, &drawing_config)?;

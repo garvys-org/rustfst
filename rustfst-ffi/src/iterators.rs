@@ -28,7 +28,7 @@ impl TrsIterator {
 impl Iterator for TrsIterator {
     type Item = Tr<TropicalWeight>;
     fn next(&mut self) -> Option<Self::Item> {
-        let item = self.trs.get(self.index).map(|it| it.clone());
+        let item = self.trs.get(self.index).cloned();
         self.index += 1;
         item
     }
@@ -70,7 +70,7 @@ pub extern "C" fn trs_iterator_next(
         trs_iter
             .next()
             .map(|tr| {
-                let ctr = Box::into_raw(Box::new(CTr::c_repr_of(tr.clone())?));
+                let ctr = Box::into_raw(Box::new(CTr::c_repr_of(tr)?));
                 unsafe { *tr_ptr = ctr };
                 Ok(())
             })
@@ -134,7 +134,7 @@ impl<'a> MutTrsIterator<'a> {
     }
 
     pub fn value(&self) -> Option<Tr<TropicalWeight>> {
-        self.trs.get(self.index).map(|it| it.clone())
+        self.trs.get(self.index).cloned()
     }
 
     pub fn set_value(&mut self, tr: Tr<TropicalWeight>) -> Result<()> {
@@ -219,7 +219,7 @@ pub extern "C" fn mut_trs_iterator_value(
         trs_iter
             .value()
             .map(|tr| {
-                let ctr = Box::into_raw(Box::new(CTr::c_repr_of(tr.clone())?));
+                let ctr = Box::into_raw(Box::new(CTr::c_repr_of(tr)?));
                 unsafe { *tr_ptr = ctr };
                 Ok(())
             })
@@ -319,7 +319,7 @@ pub extern "C" fn state_iterator_done(
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let trs_iter = get_mut!(CStateIterator, iter_ptr);
-        let res = !trs_iter.peek().is_some();
+        let res = trs_iter.peek().is_none();
         unsafe { *done = res as libc::size_t };
         Ok(())
     })

@@ -89,7 +89,7 @@ pub extern "C" fn string_paths_iterator_done(
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let string_paths_iter = get_mut!(CStringPathsIterator, iter_ptr);
-        let res = !string_paths_iter.peek().is_some();
+        let res = string_paths_iter.peek().is_none();
         unsafe { *done = res as libc::size_t };
         Ok(())
     })
