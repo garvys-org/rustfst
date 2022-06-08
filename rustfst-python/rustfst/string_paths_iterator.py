@@ -10,7 +10,17 @@ if TYPE_CHECKING:
 
 
 class StringPathsIterator:
+    """
+    Iterator allowing to loop through all the paths recognized by an Fst.
+    """
+
     def __init__(self, fst: VectorFst):
+        """
+        Constructor of the Iterator.
+
+        Args:
+            fst: Fst on which we want to loop though the valid paths.
+        """
         self._fst = fst  # reference fst to prolong its lifetime (prevent early gc)
 
         iter_ptr = ctypes.pointer(ctypes.c_void_p())
@@ -21,9 +31,15 @@ class StringPathsIterator:
         self.ptr = iter_ptr
 
     def __iter__(self):
+        """
+
+        """
         return self
 
     def __next__(self) -> StringPath:
+        """
+
+        """
         string_path_ptr = ctypes.pointer(ctypes.c_void_p())
         ret_code = lib.string_paths_iterator_next(
             self.ptr, ctypes.byref(string_path_ptr)
@@ -37,6 +53,11 @@ class StringPathsIterator:
         return StringPath(string_path_ptr)
 
     def done(self) -> bool:
+        """
+        Returns whether we're at the end of the Iterator.
+        Returns:
+            True or False
+        """
         done = ctypes.c_size_t()
 
         ret_code = lib.string_paths_iterator_done(self.ptr, ctypes.byref(done))
