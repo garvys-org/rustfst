@@ -8,7 +8,7 @@ from rustfst.ffi_utils import (
 from rustfst.fst import Fst
 from rustfst.symbol_table import SymbolTable
 from rustfst.drawing_config import DrawingConfig
-from typing import Optional
+from typing import Optional, Union
 from pathlib import Path
 
 
@@ -90,7 +90,7 @@ class ConstFst(Fst):
         check_ffi_error(ret_code, err_msg)
 
     @classmethod
-    def read(cls, filename: Path) -> Fst:
+    def read(cls, filename: Union[str, Path]) -> Fst:
         """
         Read a Fst at a given path.
         Args:
@@ -109,7 +109,7 @@ class ConstFst(Fst):
 
         return cls(ptr=fst)
 
-    def write(self, filename: Path):
+    def write(self, filename: Union[str, Path]):
         """
         Serializes FST to a file.
         This method writes the FST to a file in binary format.
