@@ -32,6 +32,7 @@ pub use self::{
 mod add_super_final_state;
 mod all_pairs_shortest_distance;
 pub mod closure;
+#[allow(clippy::type_complexity)]
 pub mod compose;
 pub mod concat;
 mod condense;

@@ -3,6 +3,7 @@ use crate::algorithms::dfs_visit::Visitor;
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr};
+use std::cmp::Ordering;
 
 static UNASSIGNED: usize = std::usize::MAX;
 
@@ -97,11 +98,17 @@ impl<'a, W: Semiring, F: Fst<W>> Visitor<'a, W, F> for IntervalReachVisitor<'a, 
 // Perform the union of two IntervalSet stored in a vec. Utils to fix issue with borrow checker.
 fn union_vec_isets_unordered(isets: &mut Vec<IntervalSet>, i: usize, j: usize) {
     debug_assert_ne!(i, j);
-    if i < j {
-        let (v_0_isupm1, v_isup1_end) = isets.split_at_mut(j);
-        v_0_isupm1[i].union(v_isup1_end[0].clone());
-    } else if i > j {
-        let (v_0_jsupm1, v_jsup1_end) = isets.split_at_mut(i);
-        v_jsup1_end[0].union(v_0_jsupm1[j].clone());
+    match i.cmp(&j) {
+        Ordering::Less => {
+            let (v_0_isupm1, v_isup1_end) = isets.split_at_mut(j);
+            v_0_isupm1[i].union(v_isup1_end[0].clone());
+        }
+        Ordering::Greater => {
+            let (v_0_jsupm1, v_jsup1_end) = isets.split_at_mut(i);
+            v_jsup1_end[0].union(v_0_jsupm1[j].clone());
+        }
+        Ordering::Equal => {
+            panic!("Unreachable code")
+        }
     }
 }

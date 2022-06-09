@@ -144,16 +144,19 @@ where
     }
 }
 
+type ZipIter<'a, W, Op, Cache, SELF> =
+    Zip<<LazyFst<W, Op, Cache> as StateIterator<'a>>::Iter, Repeat<&'a SELF>>;
+type MapFunction<'a, W, SELF, TRS> = Box<dyn FnMut((StateId, &'a SELF)) -> FstIterData<W, TRS>>;
+type MapIter<'a, W, Op, Cache, SELF, TRS> =
+    Map<ZipIter<'a, W, Op, Cache, SELF>, MapFunction<'a, W, SELF, TRS>>;
+
 impl<'a, W, Op, Cache> FstIterator<'a, W> for LazyFst<W, Op, Cache>
 where
     W: Semiring,
     Op: FstOp<W> + 'a,
     Cache: FstCache<W> + 'a,
 {
-    type FstIter = Map<
-        Zip<<LazyFst<W, Op, Cache> as StateIterator<'a>>::Iter, Repeat<&'a Self>>,
-        Box<dyn FnMut((StateId, &'a Self)) -> FstIterData<W, Self::TRS>>,
-    >;
+    type FstIter = MapIter<'a, W, Op, Cache, Self, Self::TRS>;
 
     fn fst_iter(&'a self) -> Self::FstIter {
         let it = repeat(self);
