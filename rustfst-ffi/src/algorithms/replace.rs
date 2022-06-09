@@ -27,7 +27,7 @@ pub extern "C" fn fst_replace(
         let label_fst_pairs =
             unsafe { std::slice::from_raw_parts_mut(fst_list_ptr, fst_list_ptr_len as usize) };
         let fst_list = label_fst_pairs
-            .into_iter()
+            .iter_mut()
             .map(|pair| -> Result<(CLabel, &VectorFst<TropicalWeight>)> {
                 let fst_ptr = pair.fst;
                 let fst = get!(CFst, fst_ptr);

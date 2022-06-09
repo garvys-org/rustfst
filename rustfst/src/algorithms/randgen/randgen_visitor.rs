@@ -53,7 +53,7 @@ impl<'a, W: Semiring, FI: Fst<W>, FO: MutableFst<W>> Visitor<'a, W, FI>
     }
 
     fn init_state(&mut self, _s: StateId, _root: StateId) -> bool {
-        return true;
+        true
     }
 
     fn tree_tr(&mut self, _s: StateId, tr: &Tr<W>) -> bool {
@@ -62,7 +62,7 @@ impl<'a, W: Semiring, FI: Fst<W>, FO: MutableFst<W>> Visitor<'a, W, FI>
         } else {
             self.output_path().unwrap();
         }
-        return true;
+        true
     }
 
     fn back_tr(&mut self, _s: StateId, _tr: &Tr<W>) -> bool {
@@ -71,7 +71,7 @@ impl<'a, W: Semiring, FI: Fst<W>, FO: MutableFst<W>> Visitor<'a, W, FI>
 
     fn forward_or_cross_tr(&mut self, _s: StateId, _tr: &Tr<W>) -> bool {
         self.output_path().unwrap();
-        return true;
+        true
     }
 
     fn finish_state(&mut self, s: StateId, parent: Option<StateId>, _tr: Option<&Tr<W>>) {

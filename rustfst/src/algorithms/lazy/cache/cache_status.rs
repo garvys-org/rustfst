@@ -51,20 +51,12 @@ impl<T> CacheStatus<T> {
 
     /// Return true if `CachStatus` is computed.
     pub fn is_computed(&self) -> bool {
-        if let Self::Computed(_) = self {
-            true
-        } else {
-            false
-        }
+        matches!(self, Self::Computed(_))
     }
 
     /// Return true if `CachStatus` is not computed.
     pub fn is_not_computed(&self) -> bool {
-        if let Self::NotComputed = self {
-            true
-        } else {
-            false
-        }
+        matches!(self, Self::NotComputed)
     }
 
     /// If the value is already computed, self is returned otherwise `other` is returned.

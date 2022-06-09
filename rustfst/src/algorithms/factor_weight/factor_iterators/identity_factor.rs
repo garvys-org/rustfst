@@ -8,6 +8,12 @@ pub struct IdentityFactor<W> {
     ghost: PhantomData<W>,
 }
 
+impl<W> Default for IdentityFactor<W> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<W> IdentityFactor<W> {
     pub fn new() -> Self {
         Self { ghost: PhantomData }

@@ -130,13 +130,13 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
     }
 
     fn del_states<T: IntoIterator<Item = StateId>>(&mut self, dstates: T) -> Result<()> {
-        let mut new_id = vec![0 as i32; self.states.len()];
+        let mut new_id = vec![0_i32; self.states.len()];
 
         for s in dstates {
             new_id[s as usize] = -1;
         }
 
-        let mut nstates = 0 as usize;
+        let mut nstates = 0_usize;
 
         for (s, lol) in new_id.iter_mut().enumerate().take(self.states.len()) {
             if *lol != -1 {

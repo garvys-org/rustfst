@@ -166,8 +166,8 @@ test_semiring_serializable!(
     LogWeight::new(0.3) LogWeight::new(0.5) LogWeight::new(0.0) LogWeight::new(-1.2)
 );
 
-impl Into<LogWeight> for f32 {
-    fn into(self) -> LogWeight {
-        LogWeight::new(self)
+impl From<f32> for LogWeight {
+    fn from(f: f32) -> Self {
+        LogWeight::new(f)
     }
 }

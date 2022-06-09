@@ -77,9 +77,9 @@ impl StarSemiring for BooleanWeight {
     }
 }
 
-impl Into<BooleanWeight> for bool {
-    fn into(self) -> BooleanWeight {
-        BooleanWeight::new(self)
+impl From<bool> for BooleanWeight {
+    fn from(b: bool) -> Self {
+        Self::new(b)
     }
 }
 

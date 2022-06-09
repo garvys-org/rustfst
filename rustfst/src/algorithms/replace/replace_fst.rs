@@ -12,12 +12,12 @@ use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, Sta
 use crate::semirings::Semiring;
 use crate::{Label, StateId, SymbolTable, TrsVec};
 
+type InnerLazyFst<W, F, B> = LazyFst<W, ReplaceFstOp<W, F, B>, SimpleHashMapCache<W>>;
+
 /// ReplaceFst supports lazy replacement of trs in one FST with another FST.
 /// This replacement is recursive. ReplaceFst can be used to support a variety of
 /// delayed constructions such as recursive transition networks, union, or closure.
-pub struct ReplaceFst<W: Semiring, F: Fst<W>, B: Borrow<F>>(
-    LazyFst<W, ReplaceFstOp<W, F, B>, SimpleHashMapCache<W>>,
-);
+pub struct ReplaceFst<W: Semiring, F: Fst<W>, B: Borrow<F>>(InnerLazyFst<W, F, B>);
 
 impl<W, F, B> ReplaceFst<W, F, B>
 where
@@ -101,8 +101,7 @@ where
     F: Fst<W> + 'a,
     B: Borrow<F> + 'a,
 {
-    type Iter =
-        <LazyFst<W, ReplaceFstOp<W, F, B>, SimpleHashMapCache<W>> as StateIterator<'a>>::Iter;
+    type Iter = <InnerLazyFst<W, F, B> as StateIterator<'a>>::Iter;
 
     fn states_iter(&'a self) -> Self::Iter {
         self.0.states_iter()
@@ -115,8 +114,7 @@ where
     F: Fst<W> + 'a,
     B: Borrow<F> + 'a,
 {
-    type FstIter =
-        <LazyFst<W, ReplaceFstOp<W, F, B>, SimpleHashMapCache<W>> as FstIterator<'a, W>>::FstIter;
+    type FstIter = <InnerLazyFst<W, F, B> as FstIterator<'a, W>>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
         self.0.fst_iter()

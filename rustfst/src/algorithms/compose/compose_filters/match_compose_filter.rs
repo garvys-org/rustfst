@@ -171,12 +171,10 @@ where
                 } else {
                     Self::FS::new(1)
                 }
+            } else if self.fs == Self::FS::new(1) {
+                Self::FS::new(1)
             } else {
-                if self.fs == Self::FS::new(1) {
-                    Self::FS::new(1)
-                } else {
-                    Self::FS::new_no_state()
-                }
+                Self::FS::new_no_state()
             }
         } else if arc1.olabel == NO_LABEL {
             // Epsilon in FST2
@@ -188,12 +186,10 @@ where
                 } else {
                     Self::FS::new(2)
                 }
+            } else if self.fs == Self::FS::new(2) {
+                Self::FS::new(2)
             } else {
-                if self.fs == Self::FS::new(2) {
-                    Self::FS::new(2)
-                } else {
-                    Self::FS::new_no_state()
-                }
+                Self::FS::new_no_state()
             }
         } else if arc1.olabel == EPS_LABEL {
             // Epsilon in both

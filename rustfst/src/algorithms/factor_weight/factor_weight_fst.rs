@@ -12,13 +12,15 @@ use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, Sta
 use crate::semirings::WeightQuantize;
 use crate::{StateId, SymbolTable, TrsVec};
 
+type InnerLazyFst<W, F, B, FI> = LazyFst<W, FactorWeightOp<W, F, B, FI>, SimpleHashMapCache<W>>;
+
 /// The result of weight factoring is a transducer equivalent to the
 /// input whose path weights have been factored according to the FactorIterator.
 /// States and transitions will be added as necessary. The algorithm is a
 /// generalization to arbitrary weights of the second step of the input
 /// epsilon-normalization algorithm. This version is a Delayed FST.
 pub struct FactorWeightFst<W: WeightQuantize, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>>(
-    LazyFst<W, FactorWeightOp<W, F, B, FI>, SimpleHashMapCache<W>>,
+    InnerLazyFst<W, F, B, FI>,
 );
 
 impl<W, F, B, FI> CoreFst<W> for FactorWeightFst<W, F, B, FI>
@@ -78,8 +80,7 @@ where
     B: Borrow<F> + 'a,
     FI: FactorIterator<W> + 'a,
 {
-    type Iter =
-        <LazyFst<W, FactorWeightOp<W, F, B, FI>, SimpleHashMapCache<W>> as StateIterator<'a>>::Iter;
+    type Iter = <InnerLazyFst<W, F, B, FI> as StateIterator<'a>>::Iter;
 
     fn states_iter(&'a self) -> Self::Iter {
         self.0.states_iter()
@@ -93,8 +94,7 @@ where
     B: Borrow<F> + 'a,
     FI: FactorIterator<W> + 'a,
 {
-    type FstIter =
-    <LazyFst<W, FactorWeightOp<W, F, B, FI>, SimpleHashMapCache<W>> as FstIterator<'a, W>>::FstIter;
+    type FstIter = <InnerLazyFst<W, F, B, FI> as FstIterator<'a, W>>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
         self.0.fst_iter()

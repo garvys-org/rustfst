@@ -16,9 +16,11 @@ use crate::fst_traits::{
 use crate::semirings::Semiring;
 use crate::{StateId, SymbolTable};
 
+type InnerFstAddOn<F, T> = FstAddOn<F, (Option<Arc<T>>, Option<Arc<T>>)>;
+
 #[derive(Clone, PartialEq, Debug)]
 pub struct MatcherFst<W, F, B, M, T> {
-    fst_add_on: FstAddOn<F, (Option<Arc<T>>, Option<Arc<T>>)>,
+    fst_add_on: InnerFstAddOn<F, T>,
     matcher: PhantomData<M>,
     w: PhantomData<(W, B)>,
 }

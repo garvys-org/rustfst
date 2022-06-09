@@ -83,10 +83,9 @@ impl SymbolTable {
                 NomCustomError::Nom(_, k) => {
                     format_err!("Error while parsing binary SymbolTable. Error kind {:?}", k)
                 }
-                NomCustomError::SymbolTableError(e) => format_err!(
-                    "Error while parsing symbolTable from binary : {}",
-                    e.to_owned()
-                ),
+                NomCustomError::SymbolTableError(e) => {
+                    format_err!("Error while parsing symbolTable from binary : {}", e)
+                }
             })
         })?;
 

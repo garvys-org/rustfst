@@ -92,13 +92,14 @@ impl<W: SerializableSemiring> ParsedTextFst<W> {
     }
 
     fn from_vec_rows_parsed(v: Vec<RowParsed<W>>) -> Self {
-        let mut parsed_fst = ParsedTextFst::default();
-
-        parsed_fst.start_state = v.first().map(|v| match v {
-            RowParsed::Transition(t) => t.state,
-            RowParsed::FinalState(f) => f.state,
-            RowParsed::InfinityFinalState(g) => *g,
-        });
+        let mut parsed_fst = Self {
+            start_state: v.first().map(|v| match v {
+                RowParsed::Transition(t) => t.state,
+                RowParsed::FinalState(f) => f.state,
+                RowParsed::InfinityFinalState(g) => *g,
+            }),
+            ..Default::default()
+        };
 
         for row_parsed in v.into_iter() {
             match row_parsed {

@@ -162,12 +162,10 @@ where
             } else {
                 Self::FS::new(0)
             }
+        } else if arc1.olabel == EPS_LABEL {
+            Self::FS::new_no_state()
         } else {
-            if arc1.olabel == EPS_LABEL {
-                Self::FS::new_no_state()
-            } else {
-                Self::FS::new(0)
-            }
+            Self::FS::new(0)
         };
         Ok(res)
     }

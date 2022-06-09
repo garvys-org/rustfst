@@ -216,8 +216,12 @@ fn merge_states<W: Semiring, F: MutableFst<W>>(
 ) -> Result<()> {
     let mut state_map = vec![None; partition.borrow().num_classes()];
 
-    for i in 0..partition.borrow().num_classes() {
-        state_map[i] = partition.borrow().iter(i).next();
+    for (i, state_map_i) in state_map
+        .iter_mut()
+        .enumerate()
+        .take(partition.borrow().num_classes())
+    {
+        *state_map_i = partition.borrow().iter(i).next();
     }
 
     for c in 0..partition.borrow().num_classes() {

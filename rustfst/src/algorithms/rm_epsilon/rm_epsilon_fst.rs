@@ -1,16 +1,3 @@
-// /// Removes epsilon-transitions (when both the input and output label are an
-// /// epsilon) from a transducer. The result will be an equivalent FST that has no
-// /// such epsilon transitions. This version is a delayed FST.
-// pub type RmEpsilonFst<W, F, B> = LazyFst<RmEpsilonImpl<W, F, B>>;
-// // impl<W: Semiring, F: MutableFst<W>, B: Borrow<F>> RmEpsilonFst<W, F, B>
-// // {
-// //     pub fn new(fst: B) -> Self {
-// //         let isymt = fst.borrow().input_symbols().cloned();
-// //         let osymt = fst.borrow().output_symbols().cloned();
-// //         Self::from_impl(RmEpsilonImpl::new(fst), isymt, osymt)
-// //     }
-// // }
-
 use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::sync::Arc;
@@ -23,14 +10,14 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::{Semiring, StateId, SymbolTable, TrsVec};
 
+type InnerLazyFst<W, F, B> = LazyFst2<W, RmEpsilonOp<W, F, B>, SimpleHashMapCache<W>>;
+
 /// The result of weight factoring is a transducer equivalent to the
 /// input whose path weights have been factored according to the FactorIterator.
 /// States and transitions will be added as necessary. The algorithm is a
 /// generalization to arbitrary weights of the second step of the input
 /// epsilon-normalization algorithm. This version is a Delayed FST.
-pub struct RmEpsilonFst<W: Semiring, F: MutableFst<W>, B: Borrow<F>>(
-    LazyFst2<W, RmEpsilonOp<W, F, B>, SimpleHashMapCache<W>>,
-);
+pub struct RmEpsilonFst<W: Semiring, F: MutableFst<W>, B: Borrow<F>>(InnerLazyFst<W, F, B>);
 
 impl<W, F, B> CoreFst<W> for RmEpsilonFst<W, F, B>
 where
@@ -87,8 +74,7 @@ where
     F: MutableFst<W> + 'a,
     B: Borrow<F> + 'a,
 {
-    type Iter =
-        <LazyFst2<W, RmEpsilonOp<W, F, B>, SimpleHashMapCache<W>> as StateIterator<'a>>::Iter;
+    type Iter = <InnerLazyFst<W, F, B> as StateIterator<'a>>::Iter;
 
     fn states_iter(&'a self) -> Self::Iter {
         self.0.states_iter()
@@ -101,8 +87,7 @@ where
     F: MutableFst<W> + 'a,
     B: Borrow<F> + 'a,
 {
-    type FstIter =
-        <LazyFst2<W, RmEpsilonOp<W, F, B>, SimpleHashMapCache<W>> as FstIterator<'a, W>>::FstIter;
+    type FstIter = <InnerLazyFst<W, F, B> as FstIterator<'a, W>>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
         self.0.fst_iter()

@@ -29,19 +29,16 @@ impl PartialOrd for IntInterval {
 
 impl Ord for IntInterval {
     fn cmp(&self, other: &Self) -> Ordering {
-        if self.begin < other.begin {
-            Ordering::Less
-        } else if self.begin > other.begin {
-            Ordering::Greater
-        } else {
-            // self.begin == other.begin
-            if self.end < other.end {
-                Ordering::Greater
-            } else if self.end > other.end {
-                Ordering::Less
-            } else {
-                // self.end == other.end
-                Ordering::Equal
+        match self.begin.cmp(&other.begin) {
+            Ordering::Less => Ordering::Less,
+            Ordering::Greater => Ordering::Greater,
+            Ordering::Equal => {
+                // self.begin == other.begin
+                match self.end.cmp(&other.end) {
+                    Ordering::Less => Ordering::Greater,
+                    Ordering::Greater => Ordering::Less,
+                    Ordering::Equal => Ordering::Equal,
+                }
             }
         }
     }
@@ -67,6 +64,10 @@ impl Default for VectorIntervalStore {
 impl VectorIntervalStore {
     pub fn len(&self) -> usize {
         self.intervals.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.intervals.is_empty()
     }
 
     pub fn push(&mut self, interval: IntInterval) {
@@ -100,9 +101,22 @@ pub struct IntervalSet {
     pub(crate) intervals: VectorIntervalStore,
 }
 
+impl IntoIterator for IntervalSet {
+    type Item = IntInterval;
+    type IntoIter = IntoIterVec<IntInterval>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.intervals.into_iter()
+    }
+}
+
 impl IntervalSet {
     pub fn len(&self) -> usize {
         self.intervals.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.intervals.is_empty()
     }
 
     pub fn push(&mut self, interval: IntInterval) {
@@ -120,10 +134,6 @@ impl IntervalSet {
 
     pub fn iter(&self) -> IterSlice<IntInterval> {
         self.intervals.iter()
-    }
-
-    pub fn into_iter(self) -> IntoIterVec<IntInterval> {
-        self.intervals.into_iter()
     }
 
     // Adds an interval set to the set. The result may not be normalized.

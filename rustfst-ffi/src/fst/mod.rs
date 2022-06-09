@@ -65,10 +65,10 @@ impl<F: Fst<TropicalWeight> + 'static> BindableFst for F {
         self.get_trs(state_id).map(|it| it.to_trs_vec())
     }
     fn fst_input_symbols(&self) -> Option<Arc<SymbolTable>> {
-        self.input_symbols().map(|it| it.clone())
+        self.input_symbols().cloned()
     }
     fn fst_output_symbols(&self) -> Option<Arc<SymbolTable>> {
-        self.output_symbols().map(|it| it.clone())
+        self.output_symbols().cloned()
     }
     fn fst_set_input_symbols(&mut self, symt: Arc<SymbolTable>) {
         self.set_input_symbols(symt)
@@ -225,7 +225,7 @@ pub fn fst_input_symbols(
         let fst = get!(CFst, fst);
         fst.fst_input_symbols()
             .map(|it| {
-                let symt = CSymbolTable(it.clone()).into_raw_pointer();
+                let symt = CSymbolTable(it).into_raw_pointer();
                 unsafe { *input_symt = symt }
             })
             .unwrap_or_else(|| input_symt = std::ptr::null_mut());

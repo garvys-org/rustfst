@@ -314,13 +314,12 @@ pub fn shortest_distance_with_config<W: Semiring, F: ExpandedFst<W>>(
     config: ShortestDistanceConfig,
 ) -> Result<Vec<W>> {
     let delta = config.delta;
+    let tr_filter = AnyTrFilter {};
     if !reverse {
-        let tr_filter = AnyTrFilter {};
         let queue = AutoQueue::new(fst, None, &tr_filter)?;
         let config = ShortestDistanceInternalConfig::new_with_default(tr_filter, queue, delta);
         shortest_distance_with_internal_config(fst, config)
     } else {
-        let tr_filter = AnyTrFilter {};
         let rfst: VectorFst<_> = crate::algorithms::reverse(fst)?;
         let state_queue = AutoQueue::new(&rfst, None, &tr_filter)?;
         let ropts = ShortestDistanceInternalConfig::new_with_default(tr_filter, state_queue, delta);
@@ -349,10 +348,9 @@ where
         let distance =
             shortest_distance_with_config(fst, false, ShortestDistanceConfig::new(delta))?;
         let mut sum = W::zero();
-        for state in 0..distance.len() {
+        for (state, dist) in distance.iter().enumerate() {
             sum.plus_assign(
-                distance[state]
-                    .times(fst.final_weight(state as StateId)?.unwrap_or_else(W::zero))?,
+                dist.times(fst.final_weight(state as StateId)?.unwrap_or_else(W::zero))?,
             )?;
         }
         Ok(sum)

@@ -162,7 +162,7 @@ fn draw_single_fst_state<S: SerializableSemiring, F: SerializableFst<S>, W: Writ
     for tr in fst.get_trs(state_id).unwrap().trs() {
         write!(writer, "\t{} -> {}", state_id, tr.nextstate)?;
 
-        let ilabel = opt_isymt.clone().map_or_else(
+        let ilabel = opt_isymt.map_or_else(
             || Ok(format!("{}", tr.ilabel)),
             |symt| {
                 symt.get_symbol(tr.ilabel)
@@ -171,7 +171,7 @@ fn draw_single_fst_state<S: SerializableSemiring, F: SerializableFst<S>, W: Writ
             },
         )?;
 
-        let olabel = opt_osymt.clone().map_or_else(
+        let olabel = opt_osymt.map_or_else(
             || Ok(format!("{}", tr.olabel)),
             |symt| {
                 symt.get_symbol(tr.olabel)

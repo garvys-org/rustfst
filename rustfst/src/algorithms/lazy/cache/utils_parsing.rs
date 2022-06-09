@@ -10,9 +10,11 @@ use crate::parsers::nom_utils::NomCustomError;
 use crate::parsers::{parse_bin_i64, parse_bin_u64, parse_bin_u8};
 use crate::prelude::{SerializableSemiring, StateId, TrsVec};
 
+pub(crate) type IResultCustomError<A, B> = IResult<A, B, NomCustomError<A>>;
+
 pub(crate) fn parse_cache_start_state(
     i: &[u8],
-) -> IResult<&[u8], CacheStatus<StartState>, NomCustomError<&[u8]>> {
+) -> IResultCustomError<&[u8], CacheStatus<StartState>> {
     let (i, is_computed) = parse_bin_u8(i)?;
     if is_computed == 0 {
         Ok((i, CacheStatus::NotComputed))
@@ -24,7 +26,7 @@ pub(crate) fn parse_cache_start_state(
 
 pub(crate) fn parse_vec_cache_trs<W: SerializableSemiring>(
     i: &[u8],
-) -> IResult<&[u8], CacheStatus<CacheTrs<W>>, NomCustomError<&[u8]>> {
+) -> IResultCustomError<&[u8], CacheStatus<CacheTrs<W>>> {
     let (i, is_computed) = parse_bin_u8(i)?;
 
     if is_computed == 0 {
@@ -48,7 +50,7 @@ pub(crate) fn parse_vec_cache_trs<W: SerializableSemiring>(
 
 pub(crate) fn parse_hashmap_cache_trs<W: SerializableSemiring>(
     i: &[u8],
-) -> IResult<&[u8], (StateId, CacheTrs<W>), NomCustomError<&[u8]>> {
+) -> IResultCustomError<&[u8], (StateId, CacheTrs<W>)> {
     let (i, state) = parse_bin_i64(i)?;
     let (i, num_trs) = parse_bin_i64(i)?;
     let (i, trs) = count(parse_bin_fst_tr::<W>, num_trs as usize)(i)?;
@@ -70,7 +72,7 @@ pub(crate) fn parse_hashmap_cache_trs<W: SerializableSemiring>(
 
 pub(crate) fn parse_vec_cache_final_weight<W: SerializableSemiring>(
     i: &[u8],
-) -> IResult<&[u8], CacheStatus<FinalWeight<W>>, NomCustomError<&[u8]>> {
+) -> IResultCustomError<&[u8], CacheStatus<FinalWeight<W>>> {
     let (i, is_computed) = parse_bin_u8(i)?;
 
     if is_computed == 0 {
@@ -88,7 +90,7 @@ pub(crate) fn parse_vec_cache_final_weight<W: SerializableSemiring>(
 
 pub(crate) fn parse_hashmap_cache_final_weight<W: SerializableSemiring>(
     i: &[u8],
-) -> IResult<&[u8], (StateId, FinalWeight<W>), NomCustomError<&[u8]>> {
+) -> IResultCustomError<&[u8], (StateId, FinalWeight<W>)> {
     let (i, state) = parse_bin_i64(i)?;
     let (i, is_some) = parse_bin_u8(i)?;
     if is_some == 1 {

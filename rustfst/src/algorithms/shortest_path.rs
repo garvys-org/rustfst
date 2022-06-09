@@ -246,15 +246,13 @@ where
     while let Some(state) = nextstate {
         d_p = s_p;
         s_p = Some(ofst.add_state());
-        if d.is_none() {
-            if let Some(final_weight) = ifst.final_weight(f_parent.unwrap())? {
-                ofst.set_final(s_p.unwrap(), final_weight.clone())?;
-            }
-        } else {
-            let pos = parent[d.unwrap() as usize].unwrap().1;
+        if let Some(d_in) = d {
+            let pos = parent[d_in as usize].unwrap().1;
             let mut tr = ifst.get_trs(state)?.trs()[pos].clone();
             tr.nextstate = d_p.unwrap();
             ofst.add_tr(s_p.unwrap(), tr)?;
+        } else if let Some(final_weight) = ifst.final_weight(f_parent.unwrap())? {
+            ofst.set_final(s_p.unwrap(), final_weight.clone())?;
         }
 
         // Next iteration
@@ -318,14 +316,13 @@ impl<'a, 'b, W: Semiring + WeightQuantize> ShortestPathCompare<'a, 'b, W> {
         let py = &b[y as usize];
         let wx = self.pweight(&px.0).times(&px.1).unwrap();
         let wy = self.pweight(&py.0).times(&py.1).unwrap();
-        let res = if px.0.is_none() && py.0.is_some() {
+        if px.0.is_none() && py.0.is_some() {
             natural_less(&wy, &wx).unwrap() || wx.approx_equal(&wy, self.delta)
         } else if px.0.is_some() && py.0.is_none() {
             natural_less(&wy, &wx).unwrap() && !wx.approx_equal(&wy, self.delta)
         } else {
             natural_less(&wy, &wx).unwrap()
-        };
-        res
+        }
     }
 }
 

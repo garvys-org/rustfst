@@ -38,7 +38,7 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
             CacheStatus::NotComputed => {
                 // TODO: Need to return a Result
                 let start = self.op.compute_start().unwrap();
-                self.cache.insert_start(start.clone());
+                self.cache.insert_start(start);
                 start
             }
         }

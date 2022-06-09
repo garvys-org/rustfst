@@ -64,7 +64,7 @@ impl<W: SerializableSemiring> SerializableFst<W> for ConstFst<W> {
 
         let zero = W::zero();
         for const_state in &self.states {
-            let f_weight = const_state.final_weight.as_ref().unwrap_or_else(|| &zero);
+            let f_weight = const_state.final_weight.as_ref().unwrap_or(&zero);
             f_weight.write_binary(&mut output)?;
 
             write_bin_i32(&mut output, const_state.pos as i32)?;

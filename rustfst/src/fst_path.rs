@@ -142,12 +142,10 @@ pub fn check_path_in_fst<W: Semiring, F: Fst<W>>(fst: &F, fst_path: &FstPath<W>)
                         } else {
                             continue;
                         }
+                    } else if match_ilabel && match_olabel {
+                        (next_ilabel_idx + 1, next_olabel_idx + 1)
                     } else {
-                        if match_ilabel && match_olabel {
-                            (next_ilabel_idx + 1, next_olabel_idx + 1)
-                        } else {
-                            continue;
-                        }
+                        continue;
                     };
                 queue.push_back(BfsState {
                     state: tr.nextstate,

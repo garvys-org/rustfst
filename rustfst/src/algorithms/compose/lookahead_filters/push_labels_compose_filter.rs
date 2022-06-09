@@ -55,6 +55,7 @@ where
     SMT: MatchTypeTrait,
 {
     filter_builder: CFB,
+    #[allow(clippy::type_complexity)]
     ghost: PhantomData<(W, F1, F2, B1, B2, M1, M2, SMT)>,
 }
 
@@ -316,21 +317,19 @@ where
         } else if *labela == EPS_LABEL {
             if self.ntrsa == 1 {
                 self.fs.clone()
-            } else {
-                if match self.selector() {
-                    Selector::Fst1Matcher2 => {
-                        let matcher = self.filter.matcher2();
-                        matcher.lookahead_label(arca.nextstate, flabel)?
-                    }
-                    Selector::Fst2Matcher1 => {
-                        let matcher = self.filter.matcher1();
-                        matcher.lookahead_label(arca.nextstate, flabel)?
-                    }
-                } {
-                    self.fs.clone()
-                } else {
-                    FilterState::new_no_state()
+            } else if match self.selector() {
+                Selector::Fst1Matcher2 => {
+                    let matcher = self.filter.matcher2();
+                    matcher.lookahead_label(arca.nextstate, flabel)?
                 }
+                Selector::Fst2Matcher1 => {
+                    let matcher = self.filter.matcher1();
+                    matcher.lookahead_label(arca.nextstate, flabel)?
+                }
+            } {
+                self.fs.clone()
+            } else {
+                FilterState::new_no_state()
             }
         } else {
             FilterState::new_no_state()

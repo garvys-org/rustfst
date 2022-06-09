@@ -12,9 +12,11 @@ use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::prelude::randgen::TrSelector;
 use crate::{Semiring, StateId, SymbolTable, TrsVec};
 
+type InnerLazyFst<W, F, B, S> = LazyFst2<W, RandGenFstOp<W, F, B, S>, SimpleHashMapCache<W>>;
+
 /// Delayed Fst sampling Fst paths through the input Fst.
 pub struct RandGenFst<W: Semiring<Type = f32>, F: Fst<W>, B: Borrow<F>, S: TrSelector>(
-    LazyFst2<W, RandGenFstOp<W, F, B, S>, SimpleHashMapCache<W>>,
+    InnerLazyFst<W, F, B, S>,
 );
 
 impl<'a, W, F, B, S> CoreFst<W> for RandGenFst<W, F, B, S>
@@ -74,8 +76,7 @@ where
     B: Borrow<F> + 'a,
     S: TrSelector + 'a,
 {
-    type Iter =
-        <LazyFst2<W, RandGenFstOp<W, F, B, S>, SimpleHashMapCache<W>> as StateIterator<'a>>::Iter;
+    type Iter = <InnerLazyFst<W, F, B, S> as StateIterator<'a>>::Iter;
 
     fn states_iter(&'a self) -> Self::Iter {
         self.0.states_iter()
@@ -89,10 +90,7 @@ where
     B: Borrow<F> + 'a,
     S: TrSelector + 'a,
 {
-    type FstIter = <LazyFst2<W, RandGenFstOp<W, F, B, S>, SimpleHashMapCache<W>> as FstIterator<
-        'a,
-        W,
-    >>::FstIter;
+    type FstIter = <InnerLazyFst<W, F, B, S> as FstIterator<'a, W>>::FstIter;
 
     fn fst_iter(&'a self) -> Self::FstIter {
         self.0.fst_iter()

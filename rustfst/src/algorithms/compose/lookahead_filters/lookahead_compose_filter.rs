@@ -40,6 +40,7 @@ where
     lookahead_tr: bool,
     selector: Selector,
     la_matcher_data: Option<LookAheadMatcherData<W>>,
+    #[allow(clippy::type_complexity)]
     ghost: PhantomData<(W, F1, F2, B1, B2, M1, M2, SMT)>,
 }
 
@@ -61,6 +62,7 @@ where
     lookahead_type: MatchType,
     flags: MatcherFlags,
     selector: Selector,
+    #[allow(clippy::type_complexity)]
     ghost: PhantomData<(W, F1, F2, B1, B2, M1, M2, SMT)>,
 }
 
@@ -81,9 +83,9 @@ where
     fn clone(&self) -> Self {
         LookAheadComposeFilterBuilder {
             filter_builder: self.filter_builder.clone(),
-            lookahead_type: self.lookahead_type.clone(),
-            flags: self.flags.clone(),
-            selector: self.selector.clone(),
+            lookahead_type: self.lookahead_type,
+            flags: self.flags,
+            selector: self.selector,
             ghost: PhantomData,
         }
     }
@@ -321,10 +323,8 @@ where
             true
         } else if SMT::match_type() == MatchType::MatchInput {
             false
-        } else if self.lookahead_type == MatchType::MatchOutput {
-            true
         } else {
-            false
+            self.lookahead_type == MatchType::MatchOutput
         }
     }
 
