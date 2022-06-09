@@ -109,8 +109,9 @@ macro_rules! as_mut_fst {
             .ok_or_else(|| anyhow!("Could not downcast to {} FST", stringify!($typ)))?
     }};
 }
-
+#[allow(clippy::single_component_path_imports)]
 pub(crate) use as_fst;
+#[allow(clippy::single_component_path_imports)]
 pub(crate) use as_mut_fst;
 //macro_rules! as_const_fst {
 //    ($typ:ty,$opaque:ident) => {{

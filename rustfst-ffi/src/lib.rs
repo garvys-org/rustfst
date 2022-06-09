@@ -90,5 +90,7 @@ macro_rules! get {
     }};
 }
 
+#[allow(clippy::single_component_path_imports)]
 pub(crate) use get;
+#[allow(clippy::single_component_path_imports)]
 pub(crate) use get_mut;
