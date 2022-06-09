@@ -46,7 +46,7 @@ pub extern "C" fn symt_add_table(
         let other_symt = get!(CSymbolTable, other_symt);
         Arc::get_mut(symt)
             .ok_or_else(|| anyhow!("Could not get a mutable reference to the symbol table"))?
-            .add_table(&other_symt);
+            .add_table(other_symt);
         Ok(())
     })
 }

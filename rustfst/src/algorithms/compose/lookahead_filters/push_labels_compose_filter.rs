@@ -315,18 +315,18 @@ where
             *labela = EPS_LABEL;
             self.start()
         } else if *labela == EPS_LABEL {
-            if self.ntrsa == 1 {
-                self.fs.clone()
-            } else if match self.selector() {
-                Selector::Fst1Matcher2 => {
-                    let matcher = self.filter.matcher2();
-                    matcher.lookahead_label(arca.nextstate, flabel)?
+            if self.ntrsa == 1
+                || match self.selector() {
+                    Selector::Fst1Matcher2 => {
+                        let matcher = self.filter.matcher2();
+                        matcher.lookahead_label(arca.nextstate, flabel)?
+                    }
+                    Selector::Fst2Matcher1 => {
+                        let matcher = self.filter.matcher1();
+                        matcher.lookahead_label(arca.nextstate, flabel)?
+                    }
                 }
-                Selector::Fst2Matcher1 => {
-                    let matcher = self.filter.matcher1();
-                    matcher.lookahead_label(arca.nextstate, flabel)?
-                }
-            } {
+            {
                 self.fs.clone()
             } else {
                 FilterState::new_no_state()

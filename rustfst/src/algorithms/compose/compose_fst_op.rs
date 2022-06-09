@@ -101,8 +101,8 @@ where
         Self {
             compose_filter_builder: self.compose_filter_builder.clone(),
             compose_state: self.compose_state.clone(),
-            match_type: self.match_type.clone(),
-            properties: self.properties.clone(),
+            match_type: self.match_type,
+            properties: self.properties,
             fst1: self.fst1.clone(),
             fst2: self.fst2.clone(),
         }

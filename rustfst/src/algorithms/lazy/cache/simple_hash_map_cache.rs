@@ -183,7 +183,7 @@ impl<W: SerializableSemiring> SerializableCache for SimpleHashMapCache<W> {
         let mut file = BufWriter::new(File::create(path)?);
 
         // Serialize SimpleHashMapCache
-        write_simple_hashmap_cache(&mut file, &self)?;
+        write_simple_hashmap_cache(&mut file, self)?;
 
         Ok(())
     }

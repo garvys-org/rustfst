@@ -81,7 +81,7 @@ pub(crate) fn write_vec_cache_final_weight<F: Write, W: SerializableSemiring>(
         CacheStatus::Computed(final_weight) => {
             // Mark as Computed
             write_bin_u8(writter, 1)?;
-            write_final_weight(writter, &final_weight)?;
+            write_final_weight(writter, final_weight)?;
         }
         CacheStatus::NotComputed => {
             // Mark as NotComputed
@@ -99,6 +99,6 @@ pub(crate) fn write_hashmap_cache_final_weight<F: Write, W: SerializableSemiring
 ) -> Result<()> {
     // Write state
     write_bin_u64(writter, *state as u64)?;
-    write_final_weight(writter, &final_weight)?;
+    write_final_weight(writter, final_weight)?;
     Ok(())
 }

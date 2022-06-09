@@ -71,7 +71,7 @@ impl ReverseBack<IntegerWeight> for IntegerWeight {
 
 impl AsRef<IntegerWeight> for IntegerWeight {
     fn as_ref(&self) -> &IntegerWeight {
-        &self
+        self
     }
 }
 

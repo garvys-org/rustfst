@@ -43,7 +43,7 @@ where
     O: UnionWeightOption<W>,
 {
     fn as_ref(&self) -> &Self {
-        &self
+        self
     }
 }
 

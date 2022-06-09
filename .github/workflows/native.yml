@@ -141,6 +141,28 @@ jobs:
       - name: Cargo test
         run: cargo test ${{ matrix.cargo-args }}
 
+  rust-clippy:
+    name: rust-clippy
+    needs: openfst
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: [1.49.0, stable]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          default: true
+          components: clippy
+      - name: Cargo Clippy
+        run: cargo clippy -- -D warnings
+
   rust-doc:
     name: rust-doc
     needs: openfst
@@ -263,7 +285,7 @@ jobs:
 
   publish-python-doc:
     name: Publish rustfst-python's doc
-    needs: [ rust-doc, rust-tests, rustfst-python-bench, rustfst-python ]
+    needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python ]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/rustfst-v')
 
@@ -298,7 +320,7 @@ jobs:
 
   publish-rust-crate:
     name: Publish Rust Crate to Crates.io
-    needs: [ rust-doc, rust-tests, rustfst-python-bench, rustfst-python ]
+    needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python ]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/rustfst-v')
     steps:
@@ -317,7 +339,7 @@ jobs:
 
   publish-python-wheels:
     name: Publish Python Wheels to PyPI
-    needs: [ rust-doc, rust-tests, rustfst-python-bench, rustfst-python ]
+    needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python ]
     if: startsWith(github.ref, 'refs/tags/rustfst-v')
 
     strategy:

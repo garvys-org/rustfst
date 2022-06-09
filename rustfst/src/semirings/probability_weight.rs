@@ -90,7 +90,7 @@ impl ReverseBack<ProbabilityWeight> for ProbabilityWeight {
 
 impl AsRef<ProbabilityWeight> for ProbabilityWeight {
     fn as_ref(&self) -> &ProbabilityWeight {
-        &self
+        self
     }
 }
 

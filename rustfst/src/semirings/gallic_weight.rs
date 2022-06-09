@@ -46,6 +46,7 @@ fn natural_less<W: Semiring>(w1: &W, w2: &W) -> Result<bool> {
     Ok((&w1.plus(w2)? == w1) && (w1 != w2))
 }
 
+#[allow(clippy::enum_variant_names)]
 pub enum GallicType {
     GallicLeft,
     GallicRight,
@@ -342,7 +343,7 @@ where
     W: Semiring,
 {
     fn as_ref(&self) -> &Self {
-        &self
+        self
     }
 }
 

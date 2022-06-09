@@ -194,7 +194,7 @@ impl<W: SerializableSemiring> SerializableCache for SimpleVecCache<W> {
         let mut file = BufWriter::new(File::create(path)?);
 
         // Write SimpleVecCache
-        write_simple_vec_cache(&mut file, &self)?;
+        write_simple_vec_cache(&mut file, self)?;
 
         Ok(())
     }

@@ -107,7 +107,7 @@ impl AutoQueue {
         fst: &F,
         sccs: &[StateId],
         compare: Option<C>,
-        queue_types: &mut Vec<QueueType>,
+        queue_types: &mut [QueueType],
         all_trivial: &mut bool,
         unweighted: &mut bool,
         tr_filter: &A,
