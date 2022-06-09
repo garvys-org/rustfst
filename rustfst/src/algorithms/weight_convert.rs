@@ -130,6 +130,34 @@ where
         mapper.properties(iprops) | oprops,
         FstProperties::all_properties(),
     );
+    fst_out.set_symts_from_fst(fst_in);
 
     Ok(fst_out)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::algorithms::weight_converters::SimpleWeightConverter;
+    use crate::fst_traits::Fst;
+    use crate::prelude::{TropicalWeight, VectorFst};
+    use crate::SymbolTable;
+    use proptest::prelude::any;
+    use proptest::proptest;
+    use std::sync::Arc;
+
+    proptest! {
+        #[test]
+        fn test_proptest_weight_convert_keeps_symts(mut fst in any::<VectorFst::<TropicalWeight>>()) {
+            let symt = Arc::new(SymbolTable::new());
+            fst.set_input_symbols(Arc::clone(&symt));
+            fst.set_output_symbols(Arc::clone(&symt));
+
+            let mut weight_converter = SimpleWeightConverter{};
+            let fst : VectorFst<TropicalWeight> = weight_convert(&fst, &mut weight_converter).unwrap();
+
+            assert!(fst.input_symbols().is_some());
+            assert!(fst.output_symbols().is_some());
+        }
+    }
 }

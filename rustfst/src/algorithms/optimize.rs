@@ -125,3 +125,28 @@ where
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::fst_traits::Fst;
+    use crate::prelude::{TropicalWeight, VectorFst};
+    use crate::SymbolTable;
+    use proptest::prelude::any;
+    use proptest::proptest;
+    use std::sync::Arc;
+
+    proptest! {
+        #[test]
+        fn test_proptest_optimize_keeps_symts(mut fst in any::<VectorFst::<TropicalWeight>>()) {
+            let symt = Arc::new(SymbolTable::new());
+            fst.set_input_symbols(Arc::clone(&symt));
+            fst.set_output_symbols(Arc::clone(&symt));
+
+            optimize(&mut fst).unwrap();
+
+            assert!(fst.input_symbols().is_some());
+            assert!(fst.output_symbols().is_some());
+        }
+    }
+}

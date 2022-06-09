@@ -619,6 +619,7 @@ mod tests {
     use crate::prelude::*;
     use ::proptest::prelude::*;
     use algorithms::determinize::*;
+    use std::sync::Arc;
 
     #[test]
     fn test_minimize_issue_158() {
@@ -700,6 +701,20 @@ mod tests {
             let det_config = DeterminizeConfig::default().with_det_type(DeterminizeType::DeterminizeNonFunctional);
             let min_det:VectorFst<_> = determinize_with_config(&fst, det_config).unwrap();
             prop_assert!(isomorphic(&det, &min_det).unwrap())
+        }
+    }
+
+    proptest! {
+        #[test]
+        fn test_proptest_minimize_keeps_symts(mut fst in any::<VectorFst::<TropicalWeight>>()) {
+            let symt = Arc::new(SymbolTable::new());
+            fst.set_input_symbols(Arc::clone(&symt));
+            fst.set_output_symbols(Arc::clone(&symt));
+
+            minimize_with_config(&mut fst, MinimizeConfig::default().with_allow_nondet(true)).unwrap();
+
+            assert!(fst.input_symbols().is_some());
+            assert!(fst.output_symbols().is_some());
         }
     }
 }
