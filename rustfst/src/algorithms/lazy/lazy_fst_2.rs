@@ -249,6 +249,12 @@ where
             }
         }
         fst_out.set_properties(self.properties());
+        if let Some(isymt) = &self.isymt {
+            fst_out.set_input_symbols(Arc::clone(isymt));
+        }
+        if let Some(osymt) = &self.osymt {
+            fst_out.set_output_symbols(Arc::clone(osymt));
+        }
         Ok(fst_out)
     }
 }

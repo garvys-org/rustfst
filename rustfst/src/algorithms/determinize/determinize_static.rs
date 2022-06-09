@@ -200,6 +200,10 @@ mod tests {
     use crate::semirings::TropicalWeight;
     use crate::tr::Tr;
     use crate::Semiring;
+    use crate::SymbolTable;
+    use proptest::prelude::any;
+    use proptest::proptest;
+    use std::sync::Arc;
 
     use super::*;
 
@@ -263,5 +267,19 @@ mod tests {
 
         assert_eq!(determinized_fst, ref_fst);
         Ok(())
+    }
+
+    proptest! {
+        #[test]
+        fn test_proptest_determinize_keeps_symts(mut fst in any::<VectorFst::<TropicalWeight>>()) {
+            let symt = Arc::new(SymbolTable::new());
+            fst.set_input_symbols(Arc::clone(&symt));
+            fst.set_output_symbols(Arc::clone(&symt));
+
+            let fst : VectorFst<_> = determinize_with_config(&fst, DeterminizeConfig::default().with_det_type(DeterminizeType::DeterminizeNonFunctional)).unwrap();
+
+            assert!(fst.input_symbols().is_some());
+            assert!(fst.output_symbols().is_some());
+        }
     }
 }
