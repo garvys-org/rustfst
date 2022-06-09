@@ -111,7 +111,7 @@ impl ReverseBack<LogWeight> for LogWeight {
 
 impl AsRef<LogWeight> for LogWeight {
     fn as_ref(&self) -> &LogWeight {
-        &self
+        self
     }
 }
 

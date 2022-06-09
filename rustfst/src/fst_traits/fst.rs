@@ -281,7 +281,7 @@ pub trait Fst<W: Semiring>:
     where
         Self: std::marker::Sized,
     {
-        PathsIterator::new(&self)
+        PathsIterator::new(self)
     }
 
     /// Returns an Iterator on the paths accepted by the Fst. Plus, handles the SymbolTable
@@ -313,6 +313,6 @@ pub trait Fst<W: Semiring>:
     where
         Self: std::marker::Sized,
     {
-        StringPathsIterator::new(&self)
+        StringPathsIterator::new(self)
     }
 }

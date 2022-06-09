@@ -32,7 +32,7 @@ where
         Ok(Self {
             paths_iter,
             isymt: Arc::clone(isymt),
-            osymt: Arc::clone(&osymt),
+            osymt: Arc::clone(osymt),
         })
     }
 }

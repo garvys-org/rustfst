@@ -235,7 +235,7 @@ fn merge_states<W: Semiring, F: MutableFst<W>>(
                     unsafe { it_tr.set_nextstate_unchecked(idx_tr, nextstate as StateId) };
                 }
             } else {
-                let trs: Vec<_> = fst
+                for tr in fst
                     .get_trs(s as StateId)?
                     .trs()
                     .iter()
@@ -246,8 +246,7 @@ fn merge_states<W: Semiring, F: MutableFst<W>>(
                         .unwrap() as StateId;
                         tr
                     })
-                    .collect();
-                for tr in trs.into_iter() {
+                {
                     fst.add_tr(state_map[c].unwrap() as StateId, tr)?;
                 }
             }

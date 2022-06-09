@@ -96,7 +96,7 @@ impl<'a, W: Semiring, F: Fst<W>> Visitor<'a, W, F> for IntervalReachVisitor<'a, 
 }
 
 // Perform the union of two IntervalSet stored in a vec. Utils to fix issue with borrow checker.
-fn union_vec_isets_unordered(isets: &mut Vec<IntervalSet>, i: usize, j: usize) {
+fn union_vec_isets_unordered(isets: &mut [IntervalSet], i: usize, j: usize) {
     debug_assert_ne!(i, j);
     match i.cmp(&j) {
         Ordering::Less => {

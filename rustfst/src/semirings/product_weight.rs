@@ -30,7 +30,7 @@ where
     W2: Semiring,
 {
     fn as_ref(&self) -> &ProductWeight<W1, W2> {
-        &self
+        self
     }
 }
 

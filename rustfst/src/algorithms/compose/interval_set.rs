@@ -46,19 +46,10 @@ impl Ord for IntInterval {
 
 /// Stores IntIntervals in a vector. In addition, keeps the count of points in
 /// all intervals.
-#[derive(Clone, PartialOrd, PartialEq, Debug)]
+#[derive(Clone, PartialOrd, PartialEq, Debug, Default)]
 pub struct VectorIntervalStore {
     pub(crate) intervals: Vec<IntInterval>,
     count: Option<usize>,
-}
-
-impl Default for VectorIntervalStore {
-    fn default() -> Self {
-        Self {
-            intervals: Vec::new(),
-            count: None,
-        }
-    }
 }
 
 impl VectorIntervalStore {

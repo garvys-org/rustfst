@@ -276,7 +276,7 @@ impl<H: BuildHasher> SymbolTable<H> {
         let buffer = File::create(path_bin_symt.as_ref())?;
         let mut writer = BufWriter::new(LineWriter::new(buffer));
 
-        write_bin_symt(&mut writer, &self)?;
+        write_bin_symt(&mut writer, self)?;
 
         Ok(())
     }

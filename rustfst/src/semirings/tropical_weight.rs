@@ -103,7 +103,7 @@ impl ReverseBack<TropicalWeight> for TropicalWeight {
 
 impl AsRef<TropicalWeight> for TropicalWeight {
     fn as_ref(&self) -> &TropicalWeight {
-        &self
+        self
     }
 }
 

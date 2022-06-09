@@ -49,7 +49,7 @@ impl StringWeightVariant {
 
     pub fn iter(&self) -> impl Iterator<Item = StringWeightVariant> + '_ {
         StringWeightVariantIterator {
-            v: &self,
+            v: self,
             idx: 0,
             done: false,
         }

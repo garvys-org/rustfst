@@ -112,7 +112,7 @@ where
 
     fn states_iter(&'a self) -> Self::Iter {
         self.start();
-        StatesIteratorLazyFst { fst: &self, s: 0 }
+        StatesIteratorLazyFst { fst: self, s: 0 }
     }
 }
 

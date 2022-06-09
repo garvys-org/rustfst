@@ -27,7 +27,7 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
     }
 
     fn load(data: &[u8]) -> Result<Self> {
-        let (_, parsed_fst) = parse_vector_fst(&data).map_err(|e| {
+        let (_, parsed_fst) = parse_vector_fst(data).map_err(|e| {
             e.map(|e_inner| match e_inner {
                 NomCustomError::Nom(_, k) => {
                     format_err!("Error while parsing binary VectorFst. Error kind {:?}", k)

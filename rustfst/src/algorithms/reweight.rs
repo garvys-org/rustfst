@@ -71,7 +71,7 @@ where
                         (&tr.weight.times(d_ns)?).divide(d_s, DivideType::DivideLeft)?
                     }
                     ReweightType::ReweightToFinal => {
-                        (d_s.times(&tr.weight)?).divide(&d_ns, DivideType::DivideRight)?
+                        (d_s.times(&tr.weight)?).divide(d_ns, DivideType::DivideRight)?
                     }
                 };
 
@@ -114,7 +114,7 @@ where
                         let weight = match reweight_type {
                             ReweightType::ReweightToInitial => d_s.times(&tr.weight)?,
                             ReweightType::ReweightToFinal => (W::one()
-                                .divide(&d_s, DivideType::DivideRight)?)
+                                .divide(d_s, DivideType::DivideRight)?)
                             .times(&tr.weight)?,
                         };
                         it_tr.set_weight_unchecked(idx_tr, weight);
@@ -124,7 +124,7 @@ where
                     let new_weight = match reweight_type {
                         ReweightType::ReweightToInitial => d_s.times(final_weight)?,
                         ReweightType::ReweightToFinal => {
-                            (W::one().divide(&d_s, DivideType::DivideRight)?).times(final_weight)?
+                            (W::one().divide(d_s, DivideType::DivideRight)?).times(final_weight)?
                         }
                     };
 

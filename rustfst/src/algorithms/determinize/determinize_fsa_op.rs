@@ -180,7 +180,7 @@ where
     }
 
     fn find_state(&self, tuple: &DeterminizeStateTuple<W>) -> Result<StateId> {
-        self.state_table.find_id_from_ref(&tuple)
+        self.state_table.find_id_from_ref(tuple)
     }
 
     pub fn out_dist(self) -> Result<Vec<W>> {

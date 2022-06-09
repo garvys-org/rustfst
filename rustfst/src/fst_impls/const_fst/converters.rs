@@ -22,7 +22,7 @@ impl<W: Semiring> From<VectorFst<W>> for ConstFst<W> {
 
             pos += s.trs.len();
 
-            const_trs.extend(Arc::make_mut(&mut s.trs.0).drain(..));
+            const_trs.append(Arc::make_mut(&mut s.trs.0));
         }
 
         ConstFst {

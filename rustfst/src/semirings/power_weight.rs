@@ -92,7 +92,7 @@ where
     N: ArrayLength<W>,
 {
     fn as_ref(&self) -> &PowerWeight<W, N> {
-        &self
+        self
     }
 }
 

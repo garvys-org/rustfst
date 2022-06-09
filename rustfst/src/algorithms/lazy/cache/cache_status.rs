@@ -44,7 +44,7 @@ impl<T> CacheStatus<T> {
     /// Convert to an `Option`. `Some` if computed otherwise `None`.
     pub fn to_option(&self) -> Option<&T> {
         match self {
-            CacheStatus::Computed(e) => Some(&e),
+            CacheStatus::Computed(e) => Some(e),
             CacheStatus::NotComputed => None,
         }
     }
