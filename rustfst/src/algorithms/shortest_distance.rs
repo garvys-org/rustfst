@@ -348,10 +348,9 @@ where
         let distance =
             shortest_distance_with_config(fst, false, ShortestDistanceConfig::new(delta))?;
         let mut sum = W::zero();
-        for state in 0..distance.len() {
+        for (state, dist) in distance.iter().enumerate() {
             sum.plus_assign(
-                distance[state]
-                    .times(fst.final_weight(state as StateId)?.unwrap_or_else(W::zero))?,
+                dist.times(fst.final_weight(state as StateId)?.unwrap_or_else(W::zero))?,
             )?;
         }
         Ok(sum)

@@ -27,6 +27,12 @@ pub struct ComposeFstOpState<T: Hash + Eq + Clone> {
     state_table: StateTable<T>,
 }
 
+impl<T: Hash + Eq + Clone> Default for ComposeFstOpState<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T: Hash + Eq + Clone> ComposeFstOpState<T> {
     pub fn new() -> Self {
         ComposeFstOpState {
@@ -393,7 +399,7 @@ where
         }
         let s2 = s2.unwrap();
         let fs = compose_filter.start();
-        let tuple = ComposeStateTuple { s1, s2, fs };
+        let tuple = ComposeStateTuple { fs, s1, s2 };
         Ok(Some(self.compose_state.state_table.find_id(tuple)))
     }
 
@@ -404,12 +410,11 @@ where
 
         let mut compose_filter = self.compose_filter_builder.build()?;
         compose_filter.set_state(s1, s2, &tuple.fs)?;
-        let res = if self.match_input(s1, s2, &compose_filter)? {
+        if self.match_input(s1, s2, &compose_filter)? {
             self.ordered_expand(s2, s1, true, compose_filter, Selector::Fst1Matcher2)
         } else {
             self.ordered_expand(s1, s2, false, compose_filter, Selector::Fst2Matcher1)
-        };
-        res
+        }
     }
 
     fn compute_final_weight(&self, state: StateId) -> Result<Option<W>> {
