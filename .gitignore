@@ -53,3 +53,4 @@ rustfst-python/mkdocs/site
 rustfst-python/mkdocs/docs/reference
 site
 
+rustfst/proptest-regressions/

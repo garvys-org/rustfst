@@ -230,7 +230,7 @@ class VectorFst(Fst):
         check_ffi_error(ret_code, err_msg)
 
     @classmethod
-    def read(cls, filename: Union[str, Path]) -> Fst:
+    def read(cls, filename: Union[str, Path]) -> VectorFst:
         """
         Read a Fst at a given path.
         Args:
