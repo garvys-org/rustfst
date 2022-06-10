@@ -283,9 +283,6 @@ class VectorFst(Fst):
         class BytesArray(ctypes.Structure):
             _fields_ = [("data_ptr", ctypes.c_void_p), ("size", ctypes.c_size_t)]
 
-        #
-        # # c_bytes = BytesArray(data, len(data))
-
         bytes_ptr = ctypes.pointer(BytesArray())
 
         ret_code = lib.vec_fst_to_bytes(self.ptr, ctypes.byref(bytes_ptr))

@@ -211,18 +211,11 @@ pub extern "C" fn vec_fst_to_bytes(
     output_bytes: *mut *const CArray<u8>,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
-        println!("Carotte");
         let fst = get!(CFst, fst_ptr);
         let vec_fst: &VectorFst<_> = as_fst!(VectorFst<TropicalWeight>, fst);
 
-        println!("Toto");
-
         let mut bytes = vec![];
         vec_fst.store(&mut bytes)?;
-
-        println!("A");
-        println!("ARRAY OF BYTES RUST : {:?}", bytes.as_slice());
-        println!("ARRAY LEN : {:?}", bytes.len());
 
         let c_bytes = CArray::<u8>::c_repr_of(bytes)?;
         let raw_pointer = c_bytes.into_raw_pointer();
