@@ -1,5 +1,6 @@
 use super::*;
 use anyhow::anyhow;
+use ffi_convert::CArray;
 use rustfst::fst_traits::ExpandedFst;
 use rustfst::DrawingConfig;
 use std::ffi::CString;
@@ -200,6 +201,48 @@ pub extern "C" fn vec_fst_display(
         let vec_fst = as_fst!(VectorFst<TropicalWeight>, fst);
         let res = format!("{}", vec_fst);
         unsafe { *s = CString::c_repr_of(res)?.into_raw_pointer() as *const libc::c_char };
+        Ok(())
+    })
+}
+
+#[no_mangle]
+pub extern "C" fn vec_fst_to_bytes(
+    fst_ptr: *const CFst,
+    output_bytes: *mut *const CArray<u8>,
+) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        println!("Carotte");
+        let fst = get!(CFst, fst_ptr);
+        let vec_fst: &VectorFst<_> = as_fst!(VectorFst<TropicalWeight>, fst);
+
+        println!("Toto");
+
+        let mut bytes = vec![];
+        vec_fst.store(&mut bytes)?;
+
+        println!("A");
+        println!("ARRAY OF BYTES RUST : {:?}", bytes.as_slice());
+        println!("ARRAY LEN : {:?}", bytes.len());
+
+        let c_bytes = CArray::<u8>::c_repr_of(bytes)?;
+        let raw_pointer = c_bytes.into_raw_pointer();
+        unsafe { *output_bytes = raw_pointer };
+
+        Ok(())
+    })
+}
+
+#[no_mangle]
+pub extern "C" fn vec_fst_from_bytes(
+    bytes: *const CArray<u8>,
+    ptr: *mut *const CFst,
+) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let bytes = unsafe { CArray::raw_borrow(bytes)? };
+        let bytes = bytes.as_rust()?;
+        let fst = VectorFst::load(bytes.as_slice())?;
+        let raw_pointer = CFst(Box::new(fst)).into_raw_pointer();
+        unsafe { *ptr = raw_pointer };
         Ok(())
     })
 }

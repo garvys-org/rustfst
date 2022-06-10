@@ -1,5 +1,8 @@
+from pathlib import Path
+
 from rustfst import VectorFst, Tr, SymbolTable
 import pytest
+from tempfile import NamedTemporaryFile
 
 
 def test_small_fst():
@@ -225,3 +228,55 @@ def test_fst_print():
 
     # Check print is not crashing
     print(fst)
+
+
+def test_fst_to_bytes():
+    fst = VectorFst()
+
+    # States
+    s1 = fst.add_state()
+    s2 = fst.add_state()
+
+    fst.set_start(s1)
+    fst.set_final(s2)
+
+    bytes = fst.to_bytes()
+
+    with NamedTemporaryFile() as f:
+        Path(f.name).write_bytes(bytes)
+        fst_read = VectorFst.read(f.name)
+
+    assert fst == fst_read
+
+
+def test_fst_from_bytes():
+    fst = VectorFst()
+
+    # States
+    s1 = fst.add_state()
+    s2 = fst.add_state()
+
+    fst.set_start(s1)
+    fst.set_final(s2)
+
+    with NamedTemporaryFile() as f:
+        fst.write(f.name)
+        bytes = Path(f.name).read_bytes()
+        fst_loaded = VectorFst.from_bytes(bytes)
+
+    assert fst == fst_loaded
+
+
+def test_fst_io_bytes():
+    fst = VectorFst()
+
+    # States
+    s1 = fst.add_state()
+    s2 = fst.add_state()
+
+    fst.set_start(s1)
+    fst.set_final(s2)
+
+    fst_loaded = VectorFst.from_bytes(fst.to_bytes())
+
+    assert fst_loaded == fst

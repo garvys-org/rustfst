@@ -262,6 +262,43 @@ class VectorFst(Fst):
         err_msg = f"Write failed. file: {filename}"
         check_ffi_error(ret_code, err_msg)
 
+    @classmethod
+    def from_bytes(cls, data: bytes) -> VectorFst:
+        fst_ptr = ctypes.pointer(ctypes.c_void_p())
+
+        # Define a temporary struct to hold the bytes array
+        class BytesArray(ctypes.Structure):
+            _fields_ = [("data_ptr", ctypes.c_char_p), ("size", ctypes.c_size_t)]
+
+        c_bytes = BytesArray(data, len(data))
+
+        ret_code = lib.vec_fst_from_bytes(ctypes.byref(c_bytes), ctypes.byref(fst_ptr))
+        error_msg = "`from_bytes` failed"
+        check_ffi_error(ret_code, error_msg)
+
+        return VectorFst(ptr=fst_ptr)
+
+    def to_bytes(self) -> bytes:
+        # Define a temporary struct to hold the bytes array
+        class BytesArray(ctypes.Structure):
+            _fields_ = [("data_ptr", ctypes.c_void_p), ("size", ctypes.c_size_t)]
+
+        #
+        # # c_bytes = BytesArray(data, len(data))
+
+        bytes_ptr = ctypes.pointer(BytesArray())
+
+        ret_code = lib.vec_fst_to_bytes(self.ptr, ctypes.byref(bytes_ptr))
+        error_msg = "`to_bytes` failed"
+        check_ffi_error(ret_code, error_msg)
+
+        return bytes(
+            [
+                ctypes.c_ubyte.from_address(bytes_ptr.contents.data_ptr + i).value
+                for i in range(bytes_ptr.contents.size)
+            ]
+        )
+
     def equals(self, other: Fst) -> bool:
         """
         Check if this Fst is equal to the other.
