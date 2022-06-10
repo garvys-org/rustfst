@@ -12298,7 +12298,7 @@ Passing None as a value will delete the output symbol table.</p>
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read a Fst at a given path.</span>
 <span class="sd">        Args:</span>
@@ -12602,7 +12602,7 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
 
 <h10 class="doc doc-heading" id="rustfst.fst.const_fst.ConstFst.read">
-<code class="highlight language-python"><span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Fst</span></code>
+<code class="highlight language-python"><span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
@@ -12650,7 +12650,7 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
     <tbody>
         <tr>
           <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.fst.Fst" href="fst/#rustfst.fst.Fst">Fst</a></code>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.const_fst.ConstFst" href="fst/const_fst/#rustfst.fst.const_fst.ConstFst">ConstFst</a></code>
           </td>
           <td><p>An FST.</p></td>
         </tr>
@@ -12696,7 +12696,7 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read a Fst at a given path.</span>
 <span class="sd">    Args:</span>
@@ -13621,7 +13621,7 @@ This method writes the FST to a file in binary format.</p>
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read a Fst at a given path.</span>
 <span class="sd">        Args:</span>
@@ -14824,7 +14824,7 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
 
 <h10 class="doc doc-heading" id="rustfst.fst.vector_fst.VectorFst.read">
-<code class="highlight language-python"><span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Fst</span></code>
+<code class="highlight language-python"><span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
@@ -14872,7 +14872,7 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
     <tbody>
         <tr>
           <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.fst.Fst" href="fst/#rustfst.fst.Fst">Fst</a></code>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
           </td>
           <td><p>An Fst.</p></td>
         </tr>
@@ -14918,7 +14918,7 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Fst</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read a Fst at a given path.</span>
 <span class="sd">    Args:</span>
