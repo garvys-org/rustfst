@@ -10,7 +10,7 @@ pub trait Trs<W: Semiring>: std::ops::Deref<Target = [Tr<W>]> + Debug {
 }
 
 #[derive(Debug, PartialOrd, PartialEq, Eq)]
-pub struct TrsVec<W: Semiring>(pub(crate) Arc<Vec<Tr<W>>>);
+pub struct TrsVec<W: Semiring>(pub Arc<Vec<Tr<W>>>);
 
 impl<W: Semiring> Trs<W> for TrsVec<W> {
     fn trs(&self) -> &[Tr<W>] {
