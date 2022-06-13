@@ -264,6 +264,14 @@ class VectorFst(Fst):
 
     @classmethod
     def from_bytes(cls, data: bytes) -> VectorFst:
+        """
+        Load a `VectorFst` from a sequence of bytes.
+        Args:
+            data: Sequence of bytes.
+
+        Returns:
+            Loaded `VectorFst`.
+        """
         fst_ptr = ctypes.pointer(ctypes.c_void_p())
 
         # Define a temporary struct to hold the bytes array
@@ -279,6 +287,11 @@ class VectorFst(Fst):
         return VectorFst(ptr=fst_ptr)
 
     def to_bytes(self) -> bytes:
+        """
+        Turns the `VectorFst` into bytes.
+        Returns:
+            Sequence of bytes.
+        """
         # Define a temporary struct to hold the bytes array
         class BytesArray(ctypes.Structure):
             _fields_ = [("data_ptr", ctypes.c_void_p), ("size", ctypes.c_size_t)]
