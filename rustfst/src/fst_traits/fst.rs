@@ -115,8 +115,10 @@ pub trait CoreFst<W: Semiring> {
     /// ```
     #[inline]
     fn is_final(&self, state_id: StateId) -> Result<bool> {
-        let w = self.final_weight(state_id)?;
-        Ok(w.is_some())
+        Ok(self
+            .final_weight(state_id)?
+            .map(|final_weight| final_weight != W::zero())
+            .unwrap_or(false))
     }
 
     /// Returns whether or not the state with identifier passed as parameters is a final state.
@@ -314,5 +316,25 @@ pub trait Fst<W: Semiring>:
         Self: std::marker::Sized,
     {
         StringPathsIterator::new(self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::fst_traits::MutableFst;
+    use crate::prelude::TropicalWeight;
+    use crate::prelude::VectorFst;
+
+    #[test]
+    fn test_is_final() -> Result<()> {
+        let mut fst = VectorFst::<TropicalWeight>::new();
+        let s = fst.add_state();
+        assert!(!fst.is_final(s)?);
+        fst.set_final(s, TropicalWeight::zero())?;
+        assert!(!fst.is_final(s)?);
+        fst.set_final(s, TropicalWeight::one())?;
+        assert!(fst.is_final(s)?);
+        Ok(())
     }
 }
