@@ -74,7 +74,7 @@ mod tests {
             &acceptor::<_, VectorFst<_>>(&[4, 5], TropicalWeight::one()),
         )?;
 
-        let config = RandGenConfig::new(UniformTrSelector::new())
+        let config = RandGenConfig::new(UniformTrSelector::from_seed(2022))
             .with_npath(10)
             .with_weighted(true);
         let res: VectorFst<_> = randgen_with_config(&fst, config)?;
@@ -98,7 +98,7 @@ mod tests {
             &acceptor::<_, VectorFst<_>>(&[4, 5], TropicalWeight::one()),
         )?;
 
-        let config = RandGenConfig::new(UniformTrSelector::new())
+        let config = RandGenConfig::new(UniformTrSelector::from_seed(2022))
             .with_npath(10)
             .with_weighted(false);
         let res: VectorFst<_> = randgen_with_config(&fst, config)?;
