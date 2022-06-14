@@ -369,12 +369,11 @@ jobs:
           # wheel cannot be tested in this configuration.
           CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
           # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
-          CIBW_ARCHS_LINUX: "auto aarch64"
+          CIBW_ARCHS_LINUX: "auto"
         run: |
           python3.7 -m pip install twine cibuildwheel==2.5.0
           mkdir -p wheels
           python3.7 -m cibuildwheel --output-dir wheels rustfst-python
-          ls wheels/*
 
 
 
