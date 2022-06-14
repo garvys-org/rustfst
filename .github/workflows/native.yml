@@ -285,7 +285,7 @@ jobs:
 
   publish-python-doc:
     name: Publish rustfst-python's doc
-    needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python ]
+    needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python, python-doc ]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/rustfst-v')
 
@@ -320,7 +320,7 @@ jobs:
 
   publish-rust-crate:
     name: Publish Rust Crate to Crates.io
-    needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python ]
+    needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python, python-doc ]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/rustfst-v')
     steps:
@@ -339,7 +339,7 @@ jobs:
 
   publish-python-wheels:
     name: Publish Python Wheels to PyPI
-    needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python ]
+    needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python, python-doc ]
     if: startsWith(github.ref, 'refs/tags/rustfst-v')
 
     strategy:
@@ -362,10 +362,21 @@ jobs:
           CIBW_SKIP: cp*-musllinux_i686
           CIBW_ENVIRONMENT: PATH="$HOME/.cargo/bin:$PATH"
           CIBW_ENVIRONMENT_PASS_LINUX: PATH="$HOME/.cargo/bin:$PATH"
-          CIBW_BEFORE_BUILD: "which rustup || curl https://sh.rustup.rs -sSf | sh -s -- -y; . $HOME/.cargo/env; rustup toolchain add stable; rustup default stable; python -m pip install setuptools_rust"
+          CIBW_BEFORE_BUILD: "which rustup || curl https://sh.rustup.rs -sSf | sh -s -- -y;
+           . $HOME/.cargo/env; rustup toolchain add stable;
+           rustup default stable;"
+          CIBW_BEFORE_BUILD_MACOS: "rustup target add aarch64-apple-darwin;"
+          # Build `universal2` and `arm64` wheels on an Intel runner.
+          # Note that the `arm64` wheel and the `arm64` part of the `universal2`
+          # wheel cannot be tested in this configuration.
+          CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
+          # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
+          CIBW_ARCHS_LINUX: "auto"
         run: |
-          python3.7 -m pip install wheel twine setuptools_rust cibuildwheel==2.5.0
+          python3.7 -m pip install twine cibuildwheel==2.5.0
           mkdir -p wheels
           python3.7 -m cibuildwheel --output-dir wheels rustfst-python
           python3.7 -m twine upload -u "__token__" -p ${{ secrets.PYPI_PASSWORD }} -r pypi --verbose wheels/*
+
+
 

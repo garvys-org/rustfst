@@ -10,8 +10,10 @@ packages = [p for p in find_packages() if "tests" not in p]
 root = Path(__file__).resolve().parent.parent
 
 readme_path = root / "README.md"
-with readme_path.open() as f:
-    readme = f.read()
+readme = None
+if readme_path.exists():
+    with readme_path.open() as f:
+        readme = f.read()
 
 PACKAGE_NAME = "rustfst-python"
 RUST_EXTENSION_NAME = "rustfst.dylib.dylib"
