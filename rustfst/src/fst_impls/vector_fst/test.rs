@@ -147,7 +147,7 @@ mod tests {
 
         // Set those as final with a weight equals to its position in the vector
         final_states.iter().enumerate().for_each(|(idx, state_id)| {
-            fst.set_final(*state_id, ProbabilityWeight::new(idx as f32))
+            fst.set_final(*state_id, ProbabilityWeight::new(idx as f32 + 1_f32))
                 .unwrap()
         });
 
@@ -159,7 +159,7 @@ mod tests {
             .iter()
             .enumerate()
             .all(|(idx, state_id)| fst.final_weight(*state_id).unwrap()
-                == Some(ProbabilityWeight::new(idx as f32))));
+                == Some(ProbabilityWeight::new(idx as f32 + 1_f32))));
         Ok(())
     }
 
