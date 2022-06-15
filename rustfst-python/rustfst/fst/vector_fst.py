@@ -219,7 +219,7 @@ class VectorFst(Fst):
             ctypes.c_size_t(attach_new_isymbols),
             old_osymbols_ptr,
             new_osymbols.ptr,
-            attach_new_osymbols,
+            ctypes.c_size_t(attach_new_osymbols),
         )
         err_msg = "Relabel tables failed"
         check_ffi_error(ret_code, err_msg)
