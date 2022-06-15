@@ -280,3 +280,15 @@ def test_fst_io_bytes():
     fst_loaded = VectorFst.from_bytes(fst.to_bytes())
 
     assert fst_loaded == fst
+
+
+def test_fst_unset_final():
+    fst = VectorFst()
+
+    s = fst.add_state()
+
+    assert not fst.is_final(s)
+    fst.set_final(s)
+    assert fst.is_final(s)
+    fst.unset_final(s)
+    assert not fst.is_final(s)

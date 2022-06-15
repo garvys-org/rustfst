@@ -111,6 +111,19 @@ class VectorFst(Fst):
         err_msg = "Error setting final state"
         check_ffi_error(ret_code, err_msg)
 
+    def unset_final(self, state: int):
+        """
+        Unset the final weight of a state. As a result, the state is no longer final.
+        Args:
+            state: The integer index of a state
+        Raises:
+          ValueError: State index out of range.
+        """
+        state = ctypes.c_size_t(state)
+        ret_code = lib.vec_fst_del_final_weight(self.ptr, state)
+        err_msg = "Error unsetting final state"
+        check_ffi_error(ret_code, err_msg)
+
     def mutable_trs(self, state: int) -> MutableTrsIterator:
         """
         Returns a mutable iterator over trs leaving the specified state.
