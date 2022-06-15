@@ -1,5 +1,6 @@
 use super::*;
-use anyhow::anyhow;
+use crate::get_symt;
+use anyhow::{anyhow, format_err};
 use ffi_convert::CArray;
 use rustfst::fst_traits::ExpandedFst;
 use rustfst::DrawingConfig;
@@ -100,6 +101,43 @@ pub fn vec_fst_write_file(fst: *const CFst, path: *const libc::c_char) -> RUSTFS
         let path = unsafe { CStr::from_ptr(path) }.as_rust()?;
         let vec_fst = as_fst!(VectorFst<TropicalWeight>, fst);
         vec_fst.write(&path)?;
+        Ok(())
+    })
+}
+
+#[no_mangle]
+pub fn vec_fst_relabel_tables(
+    fst: *mut CFst,
+    old_isymbols: *const CSymbolTable,
+    new_isymbols: *const CSymbolTable,
+    attach_new_isymbols: libc::size_t,
+    old_osymbols: *const CSymbolTable,
+    new_osymbols: *const CSymbolTable,
+    attach_new_osymbols: libc::size_t,
+) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let fst = get_mut!(CFst, fst);
+        let vec_fst: &mut VectorFst<_> = as_mut_fst!(VectorFst<TropicalWeight>, fst);
+
+        let old_isymbols = get_symt(old_isymbols)?;
+        let new_isymbols =
+            get_symt(new_isymbols)?.ok_or_else(|| format_err!("New isymbols ptr is null"))?;
+        let old_osymbols = get_symt(old_osymbols)?;
+        let new_osymbols =
+            get_symt(new_osymbols)?.ok_or_else(|| format_err!("New osymbols ptr is null"))?;
+
+        let attach_new_isymbols = attach_new_isymbols > 0;
+        let attach_new_osymbols = attach_new_osymbols > 0;
+
+        vec_fst.relabel_tables(
+            old_isymbols,
+            new_isymbols,
+            attach_new_isymbols,
+            old_osymbols,
+            new_osymbols,
+            attach_new_osymbols,
+        )?;
+
         Ok(())
     })
 }

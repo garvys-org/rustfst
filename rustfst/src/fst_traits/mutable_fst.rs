@@ -459,6 +459,20 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
         }
     }
 
+    /// Destructively relabel the Fst with new Symbol Tables.
+    ///
+    /// Relabelling refers to the operation where all the labels of an Fst are mapped to the equivalent labels
+    /// of a new `SymbolTable`.
+    /// If the Fst has a label `1` corresponding to the symbol "alpha" in the current symbol table and "alpha"
+    /// is mapped to 4 in a new SymbolTable, then all the 1 are going to be mapped to 4.
+    ///
+    /// Parameters :
+    /// - old_isymbols: Input `SymbolTable` used to build the Fst. If `None`, uses the Input `SymbolTable` attached to the Fst.
+    /// - new_isymbols: New Input `SymbolTable` to use.
+    /// - attach_new_isymbols: Whether to attach the new Input `SymbolTable` to the Fst. If False, the resulting Fst won't contain any attached Input `SymbolTable`.
+    /// - old_osymbols: Output `SymbolTable` used to build the Fst. If `None`, uses the Output `SymbolTable` attached to the Fst
+    /// - new_osymbols: New Output `SymbolTable` to use.
+    /// - attach_new_osymbols: Whether to attach the new Output `SymbolTable` to the Fst. If False, the resulting Fst won't contain any attached Output `SymbolTable`.
     fn relabel_tables(
         &mut self,
         old_isymbols: Option<&Arc<SymbolTable>>,
@@ -580,17 +594,17 @@ mod tests {
         let mut fst_4 = fst.clone();
         fst_4.set_input_symbols(Arc::clone(&old_isymt));
         fst_4.set_output_symbols(Arc::clone(&old_osymt));
-        fst_4.relabel_tables(None, &new_isymt, false, None, &new_osymt, false)?;
+        fst_4.relabel_tables(None, &new_isymt, true, None, &new_osymt, false)?;
         assert_eq!(fst_4, fst_ref);
-        assert_eq!(fst_4.input_symbols(), None);
+        assert_eq!(fst_4.input_symbols(), Some(&new_isymt));
         assert_eq!(fst_4.output_symbols(), None);
 
         let mut fst_5 = fst.clone();
         fst_5.set_input_symbols(Arc::clone(&old_isymt));
         fst_5.set_output_symbols(Arc::clone(&old_osymt));
-        fst_5.relabel_tables(None, &new_isymt, true, None, &new_osymt, true)?;
+        fst_5.relabel_tables(None, &new_isymt, false, None, &new_osymt, true)?;
         assert_eq!(fst_5, fst_ref);
-        assert_eq!(fst_5.input_symbols(), Some(&new_isymt));
+        assert_eq!(fst_5.input_symbols(), None);
         assert_eq!(fst_5.output_symbols(), Some(&new_osymt));
 
         Ok(())
