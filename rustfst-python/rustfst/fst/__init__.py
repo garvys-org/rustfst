@@ -13,8 +13,6 @@ from typing import Optional
 class Fst:
     """
     This class is the base class for every Fst objects.
-    Args:
-      ptr: An optional pointer pointing to an existing Fst rust struct.
     """
 
     def __init__(self, ptr, isymt=None, osymt=None):
