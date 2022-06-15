@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Union
+from typing import Union, Tuple
 
 from rustfst.ffi_utils import lib, check_ffi_error
 import ctypes
@@ -255,6 +255,11 @@ class SymbolTable:
         return self.equals(other)
 
     def __iter__(self) -> SymbolTableIterator:
+        """
+        Returns an Iterator on the SymbolTable.
+        Returns:
+
+        """
         return SymbolTableIterator(self)
 
     def __del__(self):
@@ -262,12 +267,26 @@ class SymbolTable:
 
 
 class SymbolTableIterator:
+    """
+    Iterator on a SymbolTable. Allows retrieving all the symbols along with their corresponding labels.
+    """
+
     def __init__(self, symbol_table: SymbolTable):
+        """
+        Constructs an iterator from the `Symboltable`.
+        Args:
+            symbol_table:
+        """
         self._symt = symbol_table
         self._idx = 0
         self._len = self._symt.num_symbols()
 
-    def __next__(self):
+    def __next__(self) -> Tuple[int, str]:
+        """
+        Iterator over the symbols in the `SymbolTable`.
+        Returns:
+            A pair label (int) and symbol (str).
+        """
         if self._idx < self._len:
             output = (self._idx, self._symt.find(self._idx))
             self._idx += 1
