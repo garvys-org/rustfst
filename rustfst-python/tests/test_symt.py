@@ -71,6 +71,6 @@ def test_eq_table():
 def test_symt_iterator():
     symt = SymbolTable()
     symt.add_symbol("a")
+    symt.add_symbol("b")
 
-    for e in symt:
-        print(e)
+    assert list(symt) == [(0, "<eps>"), (1, "a"), (2, "b")]

@@ -5,7 +5,6 @@ from typing import Union
 from rustfst.ffi_utils import lib, check_ffi_error
 import ctypes
 from pathlib import Path
-from rustfst.symbol_table_iterator import SymbolTableIterator
 
 
 class SymbolTable:
@@ -260,3 +259,17 @@ class SymbolTable:
 
     def __del__(self):
         lib.symt_destroy(self.ptr)
+
+
+class SymbolTableIterator:
+    def __init__(self, symbol_table: SymbolTable):
+        self._symt = symbol_table
+        self._idx = 0
+        self._len = self._symt.num_symbols()
+
+    def __next__(self):
+        if self._idx < self._len:
+            output = (self._idx, self._symt.find(self._idx))
+            self._idx += 1
+            return output
+        raise StopIteration
