@@ -4420,50 +4420,21 @@ rm_epsilon an fst
 
     <div class="doc doc-contents ">
 
-      <p>Remove useless states in an Fst.</p>
+      <p>This operation trims an Fst, removing states and trs that are not on successful paths.</p>
+<p>Examples :</p>
+<ul>
+<li>Input :</li>
+</ul>
+<p><img alt="connect_in" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/connect_in.svg?sanitize=true" /></p>
+<ul>
+<li>Output :</li>
+</ul>
+<p><img alt="connect_out" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/connect_out.svg?sanitize=true" /></p>
 
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>fst</code></td>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
-          </td>
-          <td><p>Fst to trim.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
-          </td>
-          <td><p>Fst where the useless states have been removed.</p></td>
-        </tr>
-    </tbody>
-  </table>
-
+<details class="returns-">
+  <summary>Returns</summary>
+  <p>self</p>
+</details>
         <details class="quote">
           <summary>Source code in <code>rustfst/algorithms/connect.py</code></summary>
           <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">11</span>
@@ -4480,13 +4451,33 @@ rm_epsilon an fst
 <span class="normal">22</span>
 <span class="normal">23</span>
 <span class="normal">24</span>
-<span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Remove useless states in an Fst.</span>
-<span class="sd">    Args:</span>
-<span class="sd">        fst: Fst to trim.</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        Fst where the useless states have been removed.</span>
+<span class="sd">    This operation trims an Fst, removing states and trs that are not on successful paths.</span>
+
+<span class="sd">    Examples :</span>
+
+<span class="sd">    - Input :</span>
+
+<span class="sd">    ![connect_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/connect_in.svg?sanitize=true)</span>
+
+<span class="sd">    - Output :</span>
+
+<span class="sd">    ![connect_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/connect_out.svg?sanitize=true)</span>
+
+<span class="sd">    Returns :</span>
+<span class="sd">        self</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">connectd_fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">()</span>

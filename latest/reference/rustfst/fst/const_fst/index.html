@@ -1209,10 +1209,7 @@
 <span class="normal">152</span>
 <span class="normal">153</span>
 <span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ConstFst</span><span class="p">(</span><span class="n">Fst</span><span class="p">):</span>
+<span class="normal">155</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ConstFst</span><span class="p">(</span><span class="n">Fst</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">ptr</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">ptr</span>
@@ -1230,10 +1227,6 @@
         <span class="n">drawing_config</span><span class="p">:</span> <span class="n">DrawingConfig</span> <span class="o">=</span> <span class="n">DrawingConfig</span><span class="p">(),</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        draw(self, filename, isymbols=None, osymbols=None, ssymbols=None,</span>
-<span class="sd">             acceptor=False, title=&quot;&quot;, width=8.5, height=11, portrait=False,</span>
-<span class="sd">             vertical=False, ranksep=0.4, nodesep=0.25, fontsize=14,</span>
-<span class="sd">             precision=5, show_weight_one=False, print_weight=True):</span>
 <span class="sd">        Writes out the FST in Graphviz text format.</span>
 <span class="sd">        This method writes out the FST in the dot graph description language. The</span>
 <span class="sd">        graph can be rendered using the `dot` executable provided by Graphviz.</span>
@@ -1324,10 +1317,11 @@
 
     <span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Fst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        equals(self, other)</span>
-<span class="sd">            Check if this Fst is equal to the other</span>
-<span class="sd">        :param other: Fst instance</span>
-<span class="sd">        :return: bool</span>
+<span class="sd">        Check if this Fst is equal to the other</span>
+<span class="sd">        Args :</span>
+<span class="sd">            other: Fst instance</span>
+<span class="sd">        Returns:</span>
+<span class="sd">             bool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">is_equal</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
 
@@ -1339,8 +1333,8 @@
 
     <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        copy fst(self, other)</span>
-<span class="sd">        :return: Fst</span>
+<span class="sd">        Returns :</span>
+<span class="sd">            Deepcopy of the Fst.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cloned_fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">cloned_fst</span><span class="p">))</span>
@@ -1385,11 +1379,7 @@
 
     <div class="doc doc-contents ">
 
-      <p>draw(self, filename, isymbols=None, osymbols=None, ssymbols=None,
-     acceptor=False, title="", width=8.5, height=11, portrait=False,
-     vertical=False, ranksep=0.4, nodesep=0.25, fontsize=14,
-     precision=5, show_weight_one=False, print_weight=True):
-Writes out the FST in Graphviz text format.
+      <p>Writes out the FST in Graphviz text format.
 This method writes out the FST in the dot graph description language. The
 graph can be rendered using the <code>dot</code> executable provided by Graphviz.</p>
 
@@ -1511,11 +1501,7 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal">83</span>
 <span class="normal">84</span>
 <span class="normal">85</span>
-<span class="normal">86</span>
-<span class="normal">87</span>
-<span class="normal">88</span>
-<span class="normal">89</span>
-<span class="normal">90</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">draw</span><span class="p">(</span>
+<span class="normal">86</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">draw</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">isymbols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1523,10 +1509,6 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
     <span class="n">drawing_config</span><span class="p">:</span> <span class="n">DrawingConfig</span> <span class="o">=</span> <span class="n">DrawingConfig</span><span class="p">(),</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    draw(self, filename, isymbols=None, osymbols=None, ssymbols=None,</span>
-<span class="sd">         acceptor=False, title=&quot;&quot;, width=8.5, height=11, portrait=False,</span>
-<span class="sd">         vertical=False, ranksep=0.4, nodesep=0.25, fontsize=14,</span>
-<span class="sd">         precision=5, show_weight_one=False, print_weight=True):</span>
 <span class="sd">    Writes out the FST in Graphviz text format.</span>
 <span class="sd">    This method writes out the FST in the dot graph description language. The</span>
 <span class="sd">    graph can be rendered using the `dot` executable provided by Graphviz.</span>
@@ -1669,7 +1651,11 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 92</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
 <span class="normal"> 93</span>
 <span class="normal"> 94</span>
 <span class="normal"> 95</span>
@@ -1683,11 +1669,7 @@ graph can be rendered using the <code>dot</code> executable provided by Graphviz
 <span class="normal">103</span>
 <span class="normal">104</span>
 <span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">106</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read a Fst at a given path.</span>
@@ -1774,18 +1756,18 @@ This method writes the FST to a file in binary format.</p>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">112</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
 <span class="normal">113</span>
 <span class="normal">114</span>
 <span class="normal">115</span>
 <span class="normal">116</span>
 <span class="normal">117</span>
 <span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
+<span class="normal">119</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Serializes FST to a file.</span>
 <span class="sd">    This method writes the FST to a file in binary format.</span>
@@ -1818,14 +1800,37 @@ This method writes the FST to a file in binary format.</p>
 
     <div class="doc doc-contents ">
 
-      <p>equals(self, other)
-    Check if this Fst is equal to the other
-:param other: Fst instance
-:return: bool</p>
+      <p>Check if this Fst is equal to the other</p>
+
+<details class="args-">
+  <summary>Args</summary>
+  <p>other: Fst instance</p>
+</details>
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>bool</p></td>
+        </tr>
+    </tbody>
+  </table>
 
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">125</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
 <span class="normal">126</span>
 <span class="normal">127</span>
 <span class="normal">128</span>
@@ -1835,15 +1840,13 @@ This method writes the FST to a file in binary format.</p>
 <span class="normal">132</span>
 <span class="normal">133</span>
 <span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Fst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal">135</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Fst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    equals(self, other)</span>
-<span class="sd">        Check if this Fst is equal to the other</span>
-<span class="sd">    :param other: Fst instance</span>
-<span class="sd">    :return: bool</span>
+<span class="sd">    Check if this Fst is equal to the other</span>
+<span class="sd">    Args :</span>
+<span class="sd">        other: Fst instance</span>
+<span class="sd">    Returns:</span>
+<span class="sd">         bool</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">is_equal</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
 
@@ -1873,25 +1876,27 @@ This method writes the FST to a file in binary format.</p>
 
     <div class="doc doc-contents ">
 
-      <p>copy fst(self, other)
-:return: Fst</p>
 
+<details class="returns-">
+  <summary>Returns</summary>
+  <p>Deepcopy of the Fst.</p>
+</details>
         <details class="quote">
           <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">140</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
 <span class="normal">141</span>
 <span class="normal">142</span>
 <span class="normal">143</span>
 <span class="normal">144</span>
 <span class="normal">145</span>
 <span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
+<span class="normal">147</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    copy fst(self, other)</span>
-<span class="sd">    :return: Fst</span>
+<span class="sd">    Returns :</span>
+<span class="sd">        Deepcopy of the Fst.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">cloned_fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">cloned_fst</span><span class="p">))</span>
