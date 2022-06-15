@@ -72,6 +72,17 @@ pub fn vec_fst_add_tr(fst: *mut CFst, state: CStateId, tr: *const CTr) -> RUSTFS
 }
 
 #[no_mangle]
+pub fn vec_fst_del_final_weight(fst: *mut CFst, state: CStateId) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let fst = get_mut!(CFst, fst);
+        let vec_fst = as_mut_fst!(VectorFst<TropicalWeight>, fst);
+        vec_fst.delete_final_weight(state)?;
+
+        Ok(())
+    })
+}
+
+#[no_mangle]
 pub fn vec_fst_from_path(ptr: *mut *const CFst, path: *const libc::c_char) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let path = unsafe { CStr::from_ptr(path) }.as_rust()?;

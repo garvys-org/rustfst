@@ -30,10 +30,6 @@ class ConstFst(Fst):
         drawing_config: DrawingConfig = DrawingConfig(),
     ):
         """
-        draw(self, filename, isymbols=None, osymbols=None, ssymbols=None,
-             acceptor=False, title="", width=8.5, height=11, portrait=False,
-             vertical=False, ranksep=0.4, nodesep=0.25, fontsize=14,
-             precision=5, show_weight_one=False, print_weight=True):
         Writes out the FST in Graphviz text format.
         This method writes out the FST in the dot graph description language. The
         graph can be rendered using the `dot` executable provided by Graphviz.
@@ -124,10 +120,11 @@ class ConstFst(Fst):
 
     def equals(self, other: Fst) -> bool:
         """
-        equals(self, other)
-            Check if this Fst is equal to the other
-        :param other: Fst instance
-        :return: bool
+        Check if this Fst is equal to the other
+        Args :
+            other: Fst instance
+        Returns:
+             bool
         """
         is_equal = ctypes.c_size_t()
 
@@ -139,8 +136,8 @@ class ConstFst(Fst):
 
     def copy(self) -> ConstFst:
         """
-        copy fst(self, other)
-        :return: Fst
+        Returns :
+            Deepcopy of the Fst.
         """
         cloned_fst = ctypes.c_size_t()
         ret_code = lib.const_fst_copy(self.ptr, ctypes.byref(cloned_fst))

@@ -12,10 +12,7 @@ from typing import Optional
 
 class Fst:
     """
-    Fst(ptr=None)
-      This class wraps a mutable FST and exposes all methods.
-      Args:
-        ptr: An optional pointer pointing to an existing Fst rust struct.
+    This class is the base class for every Fst objects.
     """
 
     def __init__(self, ptr, isymt=None, osymt=None):
@@ -25,8 +22,9 @@ class Fst:
 
     def start(self) -> Optional[int]:
         """
-        start(self)
-            Returns the start state.
+        Returns the start state.
+        Returns :
+            The start state or None.
         """
         start = ctypes.c_size_t()
         ret_code = lib.fst_start(self.ptr, ctypes.byref(start))
@@ -39,14 +37,13 @@ class Fst:
 
     def final(self, state: int) -> Optional[float]:
         """
-        final(self, state)
-            Returns the final weight of a state.
-            Args:
-              state: The integer index of a state.
-            Returns:
-              The final Weight of that state.
-            Raises:
-              Exception: If State index out of range.
+        Returns the final weight of a state.
+        Args:
+          state: The integer index of a state.
+        Returns:
+          The final Weight of that state.
+        Raises:
+          Exception: If State index out of range.
         """
         state = ctypes.c_size_t(state)
         weight = ctypes.c_float()
@@ -62,15 +59,14 @@ class Fst:
 
     def num_trs(self, state: int) -> int:
         """
-        num_trs(self, state)
-            Returns the number of trs leaving a state.
-            Args:
-              state: The integer index of a state.
-            Returns:
-              The number of trs leaving that state.
-            Raises:
-              Exception: If State index out of range.
-            See also: `num_states`.
+        Returns the number of trs leaving a state.
+        Args:
+          state: The integer index of a state.
+        Returns:
+          The number of trs leaving that state.
+        Raises:
+          Exception: If State index out of range.
+        See also: `num_states`.
         """
         num_trs = ctypes.c_size_t()
         state = ctypes.c_size_t(state)
@@ -93,10 +89,11 @@ class Fst:
 
     def is_final(self, state_id: int) -> bool:
         """
-        is_final(state)
         Check if a state is final
-        :param state_id:
-        :return: bool
+        Args :
+            state_id:
+        Returns :
+            bool
         """
         state = ctypes.c_size_t(state_id)
         is_final = ctypes.c_size_t()
@@ -109,10 +106,11 @@ class Fst:
 
     def is_start(self, state_id: int) -> bool:
         """
-        is_start(state)
-        Check if a state is a start
-        :param state_id:
-        :return: bool
+        Check if a state is a start state.
+        Args :
+            state_id: Integer index of the state.
+        Returns :
+            bool
         """
         state = ctypes.c_size_t(state_id)
         is_start = ctypes.c_size_t()
@@ -125,9 +123,10 @@ class Fst:
 
     def input_symbols(self) -> Optional[SymbolTable]:
         """
-        input_symbols(self)
-            Returns the FST's input symbol table, or None if none is present.
-            See also: `output_symbols`.
+        Returns the Fst's input symbol table, or None if none is present.
+        Returns :
+            The Fst's input symbol table, or None if none is present.
+        See also: `output_symbols`.
         """
         if self._input_symbols:
             return self._input_symbols
@@ -143,9 +142,10 @@ class Fst:
 
     def output_symbols(self) -> Optional[SymbolTable]:
         """
-        output_symbols(self)
-            Returns the FST's output symbol table, or None if none is present.
-            See also: `input_symbols`.
+        Returns the Fst's output symbol table, or None if none is present.
+        Returns :
+            The Fst's output symbol table, or None if none is present.
+        See also: `input_symbols`.
         """
         if self._output_symbols:
             return self._output_symbols
@@ -219,11 +219,10 @@ class Fst:
 
     def remove_input_symbols(self, symbols: list[int]) -> Fst:
         """
-        remove_input_symbols(self, symbols)
-            Args:
-              symbols: List[int]
-            Returns:
-              self.
+        Args:
+          symbols: List[int]
+        Returns:
+          self.
         """
         symbols_ptr = (ctypes.c_int * len(symbols))(*symbols)
         symbols_len = ctypes.c_size_t(len(symbols))
@@ -235,11 +234,10 @@ class Fst:
 
     def remove_output_symbols(self, symbols: list[int]) -> Fst:
         """
-        remove_output_symbols(self, symbols)
-            Args:
-              symbols: List[int]
-            Returns:
-              self.
+        Args:
+          symbols: List[int]
+        Returns:
+          self.
         """
         symbols_ptr = (ctypes.c_int * len(symbols))(*symbols)
         symbols_len = ctypes.c_size_t(len(symbols))

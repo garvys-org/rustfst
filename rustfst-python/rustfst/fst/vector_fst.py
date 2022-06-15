@@ -111,6 +111,19 @@ class VectorFst(Fst):
         err_msg = "Error setting final state"
         check_ffi_error(ret_code, err_msg)
 
+    def unset_final(self, state: int):
+        """
+        Unset the final weight of a state. As a result, the state is no longer final.
+        Args:
+            state: The integer index of a state
+        Raises:
+          ValueError: State index out of range.
+        """
+        state = ctypes.c_size_t(state)
+        ret_code = lib.vec_fst_del_final_weight(self.ptr, state)
+        err_msg = "Error unsetting final state"
+        check_ffi_error(ret_code, err_msg)
+
     def mutable_trs(self, state: int) -> MutableTrsIterator:
         """
         Returns a mutable iterator over trs leaving the specified state.
@@ -345,11 +358,36 @@ class VectorFst(Fst):
         return compose(self, other)
 
     def concat(self, other: VectorFst) -> VectorFst:
+        """
+        Compute Fst Concatenation of this Fst with another Fst. Returning the resulting Fst.
+        Args:
+            other: Fst to concatenate with.
+
+        Returns:
+            The concatenated Fst.
+
+        """
         from rustfst.algorithms.concat import concat
 
         return concat(self, other)
 
     def connect(self) -> VectorFst:
+        """
+        This operation trims an Fst, removing states and trs that are not on successful paths.
+
+        Examples :
+
+        - Input
+
+        ![connect_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/connect_in.svg?sanitize=true)
+
+        - Output
+
+        ![connect_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/connect_out.svg?sanitize=true)
+
+        Returns:
+            self
+        """
         from rustfst.algorithms.connect import connect
 
         return connect(self)
