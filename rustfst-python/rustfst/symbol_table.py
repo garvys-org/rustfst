@@ -256,9 +256,9 @@ class SymbolTable:
 
     def __iter__(self) -> SymbolTableIterator:
         """
-        Returns an Iterator on the SymbolTable.
+        Returns an Iterator over the SymbolTable.
         Returns:
-
+            An iterator over the SymbolTable.
         """
         return SymbolTableIterator(self)
 
