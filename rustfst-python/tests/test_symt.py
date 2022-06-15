@@ -66,3 +66,11 @@ def test_eq_table():
     symt2.add_symbol("b")
 
     assert symt1 == symt2
+
+
+def test_symt_iterator():
+    symt = SymbolTable()
+    symt.add_symbol("a")
+
+    for e in symt:
+        print(e)
