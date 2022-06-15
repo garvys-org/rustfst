@@ -854,6 +854,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#rustfst.symbol_table.SymbolTable.from_symbols" class="md-nav__link">
+    from_symbols()
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1096,6 +1103,13 @@
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.__eq__" class="md-nav__link">
     __eq__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.symbol_table.SymbolTable.from_symbols" class="md-nav__link">
+    from_symbols()
   </a>
   
 </li>
@@ -1426,7 +1440,25 @@
 <span class="normal">255</span>
 <span class="normal">256</span>
 <span class="normal">257</span>
-<span class="normal">258</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SymbolTable</span><span class="p">:</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SymbolTable</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `SymbolTable` class. This class wraps the `SymbolTable` struct.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1672,6 +1704,24 @@
 <span class="sd">             bool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_symbols</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">symbols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs a SymbolTable from list of strings.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            symbols: List of symbols</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A new `SymbolTable`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">symt</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">symbols</span><span class="p">:</span>
+            <span class="n">symt</span><span class="o">.</span><span class="n">add_symbol</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">symt</span>
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">lib</span><span class="o">.</span><span class="n">symt_destroy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
@@ -2891,6 +2941,109 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="sd">         bool</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.from_symbols">
+<code class="highlight language-python"><span class="n">from_symbols</span><span class="p">(</span><span class="n">symbols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h6>
+
+
+    <div class="doc doc-contents ">
+
+      <p>Constructs a SymbolTable from list of strings.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>symbols</code></td>
+          <td>
+                <code><span title="typing.List">List</span>[str]</code>
+          </td>
+          <td><p>List of symbols</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
+          </td>
+          <td><p>A new <code>SymbolTable</code>.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+        <details class="quote">
+          <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">from_symbols</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">symbols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constructs a SymbolTable from list of strings.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        symbols: List of symbols</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A new `SymbolTable`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">symt</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">symbols</span><span class="p">:</span>
+        <span class="n">symt</span><span class="o">.</span><span class="n">add_symbol</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">symt</span>
 </code></pre></div></td></tr></table></div>
         </details>
     </div>
