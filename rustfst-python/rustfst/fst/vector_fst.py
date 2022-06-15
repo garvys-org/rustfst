@@ -358,11 +358,36 @@ class VectorFst(Fst):
         return compose(self, other)
 
     def concat(self, other: VectorFst) -> VectorFst:
+        """
+        Compute Fst Concatenation of this Fst with another Fst. Returning the resulting Fst.
+        Args:
+            other: Fst to concatenate with.
+
+        Returns:
+            The concatenated Fst.
+
+        """
         from rustfst.algorithms.concat import concat
 
         return concat(self, other)
 
     def connect(self) -> VectorFst:
+        """
+        This operation trims an Fst, removing states and trs that are not on successful paths.
+
+        Examples :
+
+        - Input
+
+        ![connect_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/connect_in.svg?sanitize=true)
+
+        - Output
+
+        ![connect_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/connect_out.svg?sanitize=true)
+
+        Returns:
+            self
+        """
         from rustfst.algorithms.connect import connect
 
         return connect(self)
