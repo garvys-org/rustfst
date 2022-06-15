@@ -179,6 +179,64 @@ class VectorFst(Fst):
         """
         return StateIterator(self)
 
+    def relabel_tables(
+        self,
+        *,
+        old_isymbols: Optional[SymbolTable] = None,
+        new_isymbols: SymbolTable,
+        attach_new_isymbols: bool = True,
+        old_osymbols: Optional[SymbolTable] = None,
+        new_osymbols: SymbolTable,
+        attach_new_osymbols: bool = True,
+    ) -> VectorFst:
+        """
+        Destructively relabel the Fst with new Symbol Tables.
+
+        Relabelling refers to the operation where all the labels of an Fst are mapped to the equivalent labels
+        of a new `SymbolTable`.
+        If the Fst has a label `1` corresponding to the symbol "alpha" in the current symbol table and "alpha"
+        is mapped to 4 in a new SymbolTable, then all the 1 are going to be mapped to 4.
+
+        Args:
+            old_isymbols: Input `SymbolTable` used to build the Fst. If `None`, uses the Input `SymbolTable` attached to the Fst.
+            new_isymbols: New Input `SymbolTable` to use.
+            attach_new_isymbols: Whether to attach the new Input `SymbolTable` to the Fst. If False, the resulting Fst won't contain any attached Input `SymbolTable`.
+            old_osymbols: Output `SymbolTable` used to build the Fst. If `None`, uses the Output `SymbolTable` attached to the Fst
+            new_osymbols: New Output `SymbolTable` to use.
+            attach_new_osymbols: Whether to attach the new Output `SymbolTable` to the Fst. If False, the resulting Fst won't contain any attached Output `SymbolTable`.
+
+        Returns:
+            self
+
+        """
+        old_isymbols_ptr = old_isymbols.ptr if old_isymbols is not None else None
+        old_osymbols_ptr = old_osymbols.ptr if old_osymbols is not None else None
+
+        ret_code = lib.vec_fst_relabel_tables(
+            self.ptr,
+            old_isymbols_ptr,
+            new_isymbols.ptr,
+            ctypes.c_size_t(attach_new_isymbols),
+            old_osymbols_ptr,
+            new_osymbols.ptr,
+            ctypes.c_size_t(attach_new_osymbols),
+        )
+        err_msg = "Relabel tables failed"
+        check_ffi_error(ret_code, err_msg)
+
+        # Necessary because the symts are cached on the python side.
+        if attach_new_isymbols:
+            self._input_symbols = new_isymbols
+        else:
+            self._input_symbols = None
+
+        if attach_new_osymbols:
+            self._output_symbols = new_osymbols
+        else:
+            self._output_symbols = None
+
+        return self
+
     def draw(
         self,
         filename: str,

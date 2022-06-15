@@ -11,6 +11,7 @@ pub mod trs;
 
 use std::cell::RefCell;
 use std::ffi::CString;
+use std::sync::Arc;
 
 use anyhow::Result;
 use ffi_convert::{CReprOf, RawPointerConverter};
@@ -92,5 +93,14 @@ macro_rules! get {
     }};
 }
 
+use crate::symbol_table::CSymbolTable;
 pub(crate) use get;
 pub(crate) use get_mut;
+use rustfst::SymbolTable;
+
+pub(crate) fn get_symt(symt: *const CSymbolTable) -> Result<Option<&'static Arc<SymbolTable>>> {
+    if symt.is_null() {
+        return Ok(None);
+    }
+    Ok(Some(get!(CSymbolTable, symt)))
+}

@@ -4,6 +4,8 @@ from rustfst import VectorFst, Tr, SymbolTable
 import pytest
 from tempfile import NamedTemporaryFile
 
+from rustfst.weight import weight_one
+
 
 def test_small_fst():
     fst = VectorFst()
@@ -292,3 +294,62 @@ def test_fst_unset_final():
     assert fst.is_final(s)
     fst.unset_final(s)
     assert not fst.is_final(s)
+
+
+def test_fst_relabel_tables():
+    fst = VectorFst()
+    s1 = fst.add_state()
+    s2 = fst.add_state()
+    fst.add_tr(s1, Tr(1, 2, weight_one(), s2))
+    fst.set_start(s1)
+    fst.set_final(s2)
+
+    old_isymt = SymbolTable.from_symbols(["a", "b"])
+    new_isymt = SymbolTable.from_symbols(["b", "a"])
+
+    old_osymt = SymbolTable.from_symbols(["aa", "bb"])
+    new_osymt = SymbolTable.from_symbols(["bb", "aa"])
+
+    fst_ref = VectorFst()
+    s1 = fst_ref.add_state()
+    s2 = fst_ref.add_state()
+    fst_ref.add_tr(s1, Tr(2, 1, weight_one(), s2))
+    fst_ref.set_start(s1)
+    fst_ref.set_final(s2)
+
+    fst_1 = fst.copy()
+    fst_1.relabel_tables(
+        old_isymbols=old_isymt,
+        new_isymbols=new_isymt,
+        attach_new_isymbols=True,
+        old_osymbols=old_osymt,
+        new_osymbols=new_osymt,
+        attach_new_osymbols=True,
+    )
+    assert fst_1 == fst_ref
+    assert fst_1.input_symbols() == new_isymt
+    assert fst_1.output_symbols() == new_osymt
+
+    fst_2 = fst.copy()
+    fst_2.relabel_tables(
+        old_isymbols=old_isymt,
+        new_isymbols=new_isymt,
+        attach_new_isymbols=False,
+        old_osymbols=old_osymt,
+        new_osymbols=new_osymt,
+        attach_new_osymbols=False,
+    )
+    assert fst_2 == fst_ref
+    assert fst_2.input_symbols() is None
+    assert fst_2.output_symbols() is None
+
+    fst_3 = fst.copy()
+    fst_3.set_input_symbols(old_isymt)
+    fst_3.set_output_symbols(old_osymt)
+    fst_3.relabel_tables(
+        new_isymbols=new_isymt,
+        new_osymbols=new_osymt,
+    )
+    assert fst_3 == fst_ref
+    assert fst_3.input_symbols() == new_isymt
+    assert fst_3.output_symbols() == new_osymt
