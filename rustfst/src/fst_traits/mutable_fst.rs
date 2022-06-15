@@ -9,7 +9,7 @@ use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::trs_iter_mut::TrsIterMut;
-use crate::{Label, StateId};
+use crate::{Label, StateId, SymbolTable};
 
 /// Trait defining the methods to modify a wFST.
 pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
@@ -457,5 +457,142 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
         } else {
             self.take_output_symbols();
         }
+    }
+
+    fn relabel_tables(
+        &mut self,
+        old_isymbols: Option<&Arc<SymbolTable>>,
+        new_isymbols: &Arc<SymbolTable>,
+        attach_new_isymbols: bool,
+        old_osymbols: Option<&Arc<SymbolTable>>,
+        new_osymbols: &Arc<SymbolTable>,
+        attach_new_osymbols: bool,
+    ) -> Result<()> {
+        let old_isymbols = if let Some(s) = old_isymbols {
+            s
+        } else {
+            self.input_symbols()
+                .ok_or_else(|| format_err!("No input SymbolTable found"))?
+        };
+        let old_isymbols = Arc::clone(old_isymbols);
+
+        let old_osymbols = if let Some(s) = old_osymbols {
+            s
+        } else {
+            self.output_symbols()
+                .ok_or_else(|| format_err!("No output SymbolTable found"))?
+        };
+        let old_osymbols = Arc::clone(old_osymbols);
+
+        for s in 0..self.num_states() {
+            let mut trs = self.tr_iter_mut(s as StateId)?;
+            for i in 0..trs.len() {
+                let tr = trs.get(i).unwrap();
+
+                let old_ilabel = tr.ilabel;
+                let isymbol = old_isymbols.get_symbol(old_ilabel).ok_or_else(|| {
+                    format_err!("Old Input SymbolTable doesn't contain label {}", old_ilabel)
+                })?;
+                let new_ilabel = new_isymbols.get_label(isymbol).ok_or_else(|| {
+                    format_err!("New Input SymbolTable doesn't contain symbol {:?}", isymbol)
+                })?;
+
+                let old_olabel = tr.olabel;
+                let osymbol = old_osymbols.get_symbol(old_olabel).ok_or_else(|| {
+                    format_err!(
+                        "Old Output SymbolTable doesn't contain label {}",
+                        old_olabel
+                    )
+                })?;
+                let new_olabel = new_osymbols.get_label(osymbol).ok_or_else(|| {
+                    format_err!(
+                        "New Output SymbolTable doesn't contain symbol {:?}",
+                        osymbol
+                    )
+                })?;
+
+                trs.set_ilabel(i, new_ilabel)?;
+                trs.set_olabel(i, new_olabel)?;
+            }
+        }
+
+        self.take_input_symbols();
+        self.take_output_symbols();
+
+        if attach_new_isymbols {
+            self.set_input_symbols(Arc::clone(new_isymbols));
+        }
+
+        if attach_new_osymbols {
+            self.set_output_symbols(Arc::clone(new_osymbols));
+        }
+
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::fst;
+    use crate::prelude::{TropicalWeight, VectorFst};
+    use crate::symt;
+    use crate::utils::transducer;
+
+    #[test]
+    fn test_relabel_tables() -> Result<()> {
+        let fst: VectorFst<TropicalWeight> = fst![1, 2, 3 => 3, 1, 1; 0.1];
+
+        let old_isymt = Arc::new(symt!["a", "b", "c"]);
+        let new_isymt = Arc::new(symt!["b", "c", "a"]);
+
+        let old_osymt = Arc::new(symt!["aa", "bb", "cc"]);
+        let new_osymt = Arc::new(symt!["cc", "bb", "aa"]);
+
+        let fst_ref: VectorFst<TropicalWeight> = fst![3, 1, 2 => 1, 3, 3; 0.1];
+
+        let mut fst_2 = fst.clone();
+        fst_2.relabel_tables(
+            Some(&old_isymt),
+            &new_isymt,
+            true,
+            Some(&old_osymt),
+            &new_osymt,
+            true,
+        )?;
+        assert_eq!(fst_2, fst_ref);
+        assert_eq!(fst_2.input_symbols(), Some(&new_isymt));
+        assert_eq!(fst_2.output_symbols(), Some(&new_osymt));
+
+        let mut fst_3 = fst.clone();
+        fst_3.relabel_tables(
+            Some(&old_isymt),
+            &new_isymt,
+            false,
+            Some(&old_osymt),
+            &new_osymt,
+            false,
+        )?;
+        assert_eq!(fst_3, fst_ref);
+        assert_eq!(fst_3.input_symbols(), None);
+        assert_eq!(fst_3.output_symbols(), None);
+
+        let mut fst_4 = fst.clone();
+        fst_4.set_input_symbols(Arc::clone(&old_isymt));
+        fst_4.set_output_symbols(Arc::clone(&old_osymt));
+        fst_4.relabel_tables(None, &new_isymt, false, None, &new_osymt, false)?;
+        assert_eq!(fst_4, fst_ref);
+        assert_eq!(fst_4.input_symbols(), None);
+        assert_eq!(fst_4.output_symbols(), None);
+
+        let mut fst_5 = fst.clone();
+        fst_5.set_input_symbols(Arc::clone(&old_isymt));
+        fst_5.set_output_symbols(Arc::clone(&old_osymt));
+        fst_5.relabel_tables(None, &new_isymt, true, None, &new_osymt, true)?;
+        assert_eq!(fst_5, fst_ref);
+        assert_eq!(fst_5.input_symbols(), Some(&new_isymt));
+        assert_eq!(fst_5.output_symbols(), Some(&new_osymt));
+
+        Ok(())
     }
 }
