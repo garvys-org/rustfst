@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Union, Tuple
+from typing import Union, Tuple, List
 
 from rustfst.ffi_utils import lib, check_ffi_error
 import ctypes
@@ -261,6 +261,24 @@ class SymbolTable:
 
         """
         return SymbolTableIterator(self)
+
+    @classmethod
+    def from_symbols(cls, symbols: List[str]) -> SymbolTable:
+        """
+        Constructs a SymbolTable from list of strings.
+
+        Args:
+            symbols: List of symbols
+
+        Returns:
+            A new `SymbolTable`.
+        """
+        symt = cls()
+
+        for symbol in symbols:
+            symt.add_symbol(symbol)
+
+        return symt
 
     def __del__(self):
         lib.symt_destroy(self.ptr)
