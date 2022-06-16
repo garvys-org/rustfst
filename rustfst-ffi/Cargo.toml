@@ -1,6 +1,6 @@
 [package]
 name = "rustfst-ffi"
-version = "0.11.3"
+version = "0.11.4"
 authors = ["Emrick Sinitambirivoutin <emrick.sinitambirivoutin@sonos.com>"]
 edition = "2018"
 
