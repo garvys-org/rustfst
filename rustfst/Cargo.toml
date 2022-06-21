@@ -1,6 +1,6 @@
 [package]
 name = 'rustfst'
-version = "0.11.4"
+version = "0.11.5"
 authors = ['Alexandre Caulier<alexandre.caulier@protonmail.com>']
 description = 'Library for constructing, combining, optimizing, and searching weighted finite-state transducers (FSTs).'
 documentation = 'https://docs.rs/rustfst'
