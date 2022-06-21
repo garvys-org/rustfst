@@ -28,9 +28,7 @@ pub extern "C" fn symt_add_symbol(
     wrap(|| {
         let symt = get_mut!(CSymbolTable, symt);
         let symbol: String = unsafe { CStr::from_ptr(symbol) }.as_rust()?;
-        let res = Arc::get_mut(symt)
-            .ok_or_else(|| anyhow!("Could not get a mutable reference to the symbol table"))?
-            .add_symbol(&symbol);
+        let res = Arc::make_mut(symt).add_symbol(&symbol);
         unsafe { *integer_key = res as libc::size_t };
         Ok(())
     })
@@ -44,9 +42,7 @@ pub extern "C" fn symt_add_table(
     wrap(|| {
         let symt = get_mut!(CSymbolTable, symt);
         let other_symt = get!(CSymbolTable, other_symt);
-        Arc::get_mut(symt)
-            .ok_or_else(|| anyhow!("Could not get a mutable reference to the symbol table"))?
-            .add_table(other_symt);
+        Arc::make_mut(symt).add_table(other_symt);
         Ok(())
     })
 }

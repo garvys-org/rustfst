@@ -74,3 +74,10 @@ def test_symt_iterator():
     symt.add_symbol("b")
 
     assert list(symt) == [(0, "<eps>"), (1, "a"), (2, "b")]
+
+
+def test_symt_copy_add():
+    symt = SymbolTable.from_symbols(["a", "b"])
+    symt2 = symt.copy()
+    symt2.add_symbol("c")
+    assert symt2.num_symbols() == symt.num_symbols() + 1
