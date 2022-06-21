@@ -1,5 +1,5 @@
 use std::borrow::Borrow;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fmt::{Debug, Formatter};
 use std::marker::PhantomData;
 
@@ -18,7 +18,7 @@ pub struct TrSampler<W: Semiring, F: Fst<W>, B: Borrow<F>, S: TrSelector> {
     max_length: usize,
     selector: S,
     fst: B,
-    sample_map: HashMap<usize, usize>,
+    sample_map: BTreeMap<usize, usize>,
     ghost: PhantomData<(W, F)>,
 }
 
@@ -53,7 +53,7 @@ where
             fst,
             selector,
             max_length,
-            sample_map: HashMap::new(),
+            sample_map: BTreeMap::new(),
             ghost: PhantomData,
         }
     }
@@ -83,7 +83,7 @@ where
         Ok(true)
     }
 
-    pub fn iter(&self) -> std::collections::hash_map::Iter<usize, usize> {
+    pub fn iter(&self) -> std::collections::btree_map::Iter<usize, usize> {
         self.sample_map.iter()
     }
 }
