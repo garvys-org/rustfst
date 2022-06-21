@@ -175,7 +175,7 @@ pub extern "C" fn symt_copy(
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let symt = get!(CSymbolTable, symt);
-        let clone = symt.clone();
+        let clone = Arc::new(SymbolTable::clone(symt));
         let raw_ptr = CSymbolTable(clone).into_raw_pointer();
         unsafe { *cloned_symt = raw_ptr };
         Ok(())
