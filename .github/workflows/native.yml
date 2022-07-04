@@ -147,17 +147,12 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: false
-      matrix:
-        rust: [1.49.0, stable]
-
     steps:
       - uses: actions/checkout@v3
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.rust }}
+          toolchain: 1.61.0
           default: true
           components: clippy
       - name: Cargo Clippy
@@ -336,6 +331,7 @@ jobs:
         run: |
           cd rustfst
           cargo publish
+          sleep 30
           cd ..
       - name: Publish rustfst-ffi
         env:
