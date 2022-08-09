@@ -112,7 +112,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [1.49.0, stable]
+        rust: [1.51.0, stable]
         os: [ubuntu-latest, macos-latest]
         cargo-args:
           - --all --benches --examples --bins --tests
