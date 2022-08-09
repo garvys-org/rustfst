@@ -8,7 +8,7 @@
 
 
 #### Rust
-![rustc >= 1.49.0](https://img.shields.io/badge/rustc-%3E%3D1.49.0-brightgreen)
+![rustc >= 1.51.0](https://img.shields.io/badge/rustc-%3E%3D1.51.0-brightgreen)
 [![Native Linux test status](https://github.com/Garvys/rustfst/workflows/Native/badge.svg)](https://github.com/Garvys/rustfst/actions)
 [![Documentation](https://docs.rs/rustfst/badge.svg)](https://docs.rs/rustfst)
 [![](https://tokei.rs/b1/github/Garvys/rustfst)](https://github.com/Garvys/rustfst)
