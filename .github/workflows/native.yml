@@ -39,17 +39,12 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: false
-      matrix:
-        rust: [1.49.0, stable]
-
     steps:
       - uses: actions/checkout@v3
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.rust }}
+          toolchain: 1.61.0
           default: true
           components: rustfmt
       - name: Cargo fmt check
@@ -117,7 +112,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [1.49.0, stable]
+        rust: [1.51.0, stable]
         os: [ubuntu-latest, macos-latest]
         cargo-args:
           - --all --benches --examples --bins --tests
@@ -164,17 +159,12 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: false
-      matrix:
-        rust: [1.49.0, stable]
-
     steps:
       - uses: actions/checkout@v3
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.rust }}
+          toolchain: 1.61.0
           default: true
       - name: Cargo doc
         run: cargo doc --all --no-deps
@@ -183,12 +173,7 @@ jobs:
     name: rustfst-python-bench
     needs: openfst
 
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest ]
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
