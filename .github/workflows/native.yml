@@ -285,7 +285,7 @@ jobs:
       - run: git config user.name ${{ env.GIT_COMMITTER_NAME }}
       - run: git config user.email ${{ env.GIT_COMMITTER_EMAIL }}
       - run: git fetch origin gh-pages --depth=1
-      - run: mkdocs build -s
+      - run: mkdocs build
       - name: Deploy Doc to latest
         if: github.ref == 'refs/heads/main'
         run: mike deploy --push latest
