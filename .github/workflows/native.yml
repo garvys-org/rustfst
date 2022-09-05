@@ -261,12 +261,12 @@ jobs:
       - name: Install mkdocs
         run: pip install -r requirements-mkdocs.txt
       - name: Test doc generation
-        run: mkdocs build -s
+        run: mkdocs build
 
   publish-python-doc:
     name: Publish rustfst-python's doc
-#    needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python, python-doc ]
-    runs-on: macos-latest
+    needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python, python-doc ]
+    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/rustfst-v')
 
     steps:
