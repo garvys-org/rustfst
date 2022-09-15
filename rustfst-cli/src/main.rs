@@ -214,9 +214,10 @@ fn handle(matches: clap::ArgMatches) -> Result<()> {
         )
         .run_cli_or_bench(m),
         ("optimize", Some(m)) => OptimizeAlgorithm::new(
-                        m.value_of("in.fst").unwrap(),
+            m.value_of("in.fst").unwrap(),
             m.value_of("out.fst").unwrap(),
-        ).run_cli_or_bench(m),
+        )
+        .run_cli_or_bench(m),
         ("project", Some(m)) => ProjectFstAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.is_present("project_output"),
