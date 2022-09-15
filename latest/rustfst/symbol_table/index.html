@@ -1643,7 +1643,7 @@
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_symbols</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reads symbol table from binary file.</span>
 <span class="sd">        This class method creates a new SymbolTable from a symbol table binary file.</span>
@@ -1664,7 +1664,7 @@
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">symt</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">read_text</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">read_text</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reads symbol table from text file.</span>
 <span class="sd">        This class method creates a new SymbolTable from a symbol table text file.</span>
@@ -1685,7 +1685,7 @@
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">symt</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Serializes symbol table to a file.</span>
 <span class="sd">        This methods writes the SymbolTable to a file in binary format.</span>
@@ -1701,7 +1701,7 @@
         <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed for bin file : </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">write_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">write_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Writes symbol table to text file.</span>
 <span class="sd">        This method writes the SymbolTable to a file in human-readable format.</span>
@@ -2377,7 +2377,7 @@ better to simply call the find method, catching the KeyError.</p>
 
 
 <h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.read">
-<code class="highlight language-python"><span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span></code>
+<code class="highlight language-python"><span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
@@ -2405,7 +2405,7 @@ This class method creates a new SymbolTable from a symbol table binary file.</p>
         <tr>
           <td><code>filename</code></td>
           <td>
-                <code><span title="pathlib.Path">Path</span></code>
+                <code><span title="typing.Union">Union</span>[str, <span title="pathlib.Path">Path</span>]</code>
           </td>
           <td><p>The string location of the input binary file.</p></td>
           <td>
@@ -2456,7 +2456,7 @@ This class method creates a new SymbolTable from a symbol table binary file.</p>
 <span class="normal">171</span>
 <span class="normal">172</span>
 <span class="normal">173</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reads symbol table from binary file.</span>
 <span class="sd">    This class method creates a new SymbolTable from a symbol table binary file.</span>
@@ -2486,7 +2486,7 @@ This class method creates a new SymbolTable from a symbol table binary file.</p>
 
 
 <h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.read_text">
-<code class="highlight language-python"><span class="n">read_text</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span></code>
+<code class="highlight language-python"><span class="n">read_text</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
@@ -2514,7 +2514,7 @@ This class method creates a new SymbolTable from a symbol table text file.</p>
         <tr>
           <td><code>filename</code></td>
           <td>
-                <code><span title="pathlib.Path">Path</span></code>
+                <code><span title="typing.Union">Union</span>[str, <span title="pathlib.Path">Path</span>]</code>
           </td>
           <td><p>The string location of the input text file.</p></td>
           <td>
@@ -2566,7 +2566,7 @@ This class method creates a new SymbolTable from a symbol table text file.</p>
 <span class="normal">193</span>
 <span class="normal">194</span>
 <span class="normal">195</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">read_text</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">read_text</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reads symbol table from text file.</span>
 <span class="sd">    This class method creates a new SymbolTable from a symbol table text file.</span>
@@ -2597,7 +2597,7 @@ This class method creates a new SymbolTable from a symbol table text file.</p>
 
 
 <h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.write">
-<code class="highlight language-python"><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span></code>
 
 </h6>
 
@@ -2621,7 +2621,7 @@ This methods writes the SymbolTable to a file in binary format.</p>
         <tr>
           <td><code>filename</code></td>
           <td>
-                <code><span title="pathlib.Path">Path</span></code>
+                <code><span title="typing.Union">Union</span>[str, <span title="pathlib.Path">Path</span>]</code>
           </td>
           <td><p>The string location of the output file.</p></td>
           <td>
@@ -2665,7 +2665,7 @@ This methods writes the SymbolTable to a file in binary format.</p>
 <span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span>
-<span class="normal">211</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="normal">211</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Serializes symbol table to a file.</span>
 <span class="sd">    This methods writes the SymbolTable to a file in binary format.</span>
@@ -2691,7 +2691,7 @@ This methods writes the SymbolTable to a file in binary format.</p>
 
 
 <h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.write_text">
-<code class="highlight language-python"><span class="n">write_text</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">write_text</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span></code>
 
 </h6>
 
@@ -2715,7 +2715,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
         <tr>
           <td><code>filename</code></td>
           <td>
-                <code><span title="pathlib.Path">Path</span></code>
+                <code><span title="typing.Union">Union</span>[str, <span title="pathlib.Path">Path</span>]</code>
           </td>
           <td><p>The string location of the output file.</p></td>
           <td>
@@ -2759,7 +2759,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">224</span>
 <span class="normal">225</span>
 <span class="normal">226</span>
-<span class="normal">227</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">write_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="normal">227</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">write_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Writes symbol table to text file.</span>
 <span class="sd">    This method writes the SymbolTable to a file in human-readable format.</span>
