@@ -1,42 +1,92 @@
-site_name: rustfst-python
-site_url: https://github.com/Garvys/rustfst
-nav:
-    - Home: index.md
-    - Code Reference: reference/
-
-theme: material
-repo_url: https://github.com/Garvys/rustfst
-repo_name: rustfst
-plugins:
-  - macros
-  - mike:
-      version_selector: true
-  - search
-  - gen-files:
-      scripts:
-      - docs/gen_ref_pages.py
-  - literate-nav:
-      nav_file: SUMMARY.md
-  - section-index
-  - mkdocstrings:
-      watch:
-        - docs/gen_ref_pages.py
-        - rustfst-python/rustfst
-      default_handler: python
-      handlers:
-        python:
-          rendering:
-            enable_inventory: true
-            heading_level: 3
-            separate_signature: false
-            show_signature_annotations: true
-            show_if_no_docstring: false
-            show_category_heading: true
-            show_object_full_path: false
-            show_submodules: yes
-            members_order: source
 extra:
   version:
     default: latest
     provider: mike
-
+nav:
+- Home: index.md
+- Code Reference:
+    rustfst:
+    - weight:
+      - rustfst/weight/index.md
+    - string_path:
+      - rustfst/string_path/index.md
+    - drawing_config:
+      - rustfst/drawing_config/index.md
+    - trs:
+      - rustfst/trs/index.md
+    - algorithms:
+      - rustfst/algorithms/index.md
+      - shortest_path:
+        - rustfst/algorithms/shortest_path/index.md
+      - concat:
+        - rustfst/algorithms/concat/index.md
+      - optimize:
+        - rustfst/algorithms/optimize/index.md
+      - determinize:
+        - rustfst/algorithms/determinize/index.md
+      - tr_unique:
+        - rustfst/algorithms/tr_unique/index.md
+      - isomorphic:
+        - rustfst/algorithms/isomorphic/index.md
+      - top_sort:
+        - rustfst/algorithms/top_sort/index.md
+      - compose:
+        - rustfst/algorithms/compose/index.md
+      - rm_epsilon:
+        - rustfst/algorithms/rm_epsilon/index.md
+      - reverse:
+        - rustfst/algorithms/reverse/index.md
+      - project:
+        - rustfst/algorithms/project/index.md
+      - randgen:
+        - rustfst/algorithms/randgen/index.md
+      - union:
+        - rustfst/algorithms/union/index.md
+      - replace:
+        - rustfst/algorithms/replace/index.md
+      - tr_sort:
+        - rustfst/algorithms/tr_sort/index.md
+      - connect:
+        - rustfst/algorithms/connect/index.md
+    - symbol_table:
+      - rustfst/symbol_table/index.md
+    - string_paths_iterator:
+      - rustfst/string_paths_iterator/index.md
+    - fst:
+      - rustfst/fst/index.md
+      - vector_fst:
+        - rustfst/fst/vector_fst/index.md
+      - const_fst:
+        - rustfst/fst/const_fst/index.md
+    - tr:
+      - rustfst/tr/index.md
+    - iterators:
+      - rustfst/iterators/index.md
+plugins:
+- macros
+- mike:
+    version_selector: true
+- search
+- section-index
+- mkdocstrings:
+    default_handler: python
+    handlers:
+      python:
+        rendering:
+          enable_inventory: true
+          heading_level: 3
+          members_order: source
+          separate_signature: false
+          show_category_heading: true
+          show_if_no_docstring: false
+          show_object_full_path: false
+          show_signature_annotations: true
+          show_submodules: true
+    watch:
+    - rustfst-python/rustfst
+    - docs
+repo_name: rustfst
+repo_url: https://github.com/Garvys/rustfst
+site_name: rustfst-python
+site_url: https://github.com/Garvys/rustfst
+theme: material

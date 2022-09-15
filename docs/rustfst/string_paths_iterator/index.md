@@ -1,0 +1,1 @@
+::: rustfst.string_paths_iterator
