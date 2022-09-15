@@ -47,9 +47,9 @@ def generate_yaml(docs_path: Path, parent_path: Path):
 def main():
     path_root = Path(__file__).resolve().parents[1].resolve()
     path_py_package = path_root / "rustfst-python" / "rustfst"
-    path_mkdocs_yml = path_root / "mkdocs.yml"
+    path_mkdocs_yml = path_root / "rustfst-python" / "mkdocs.yml"
 
-    output_root = path_root / "docs" / "rustfst"
+    output_root = path_root / "rustfst-python" / "docs" / "rustfst"
     if output_root.exists():
         shutil.rmtree(output_root)
     output_root.mkdir()
@@ -60,7 +60,11 @@ def main():
     # Reference md files in the mkdocs.yml
     data = [
         {"Home": "index.md"},
-        {"Code Reference": [generate_yaml(path_root / "docs", output_root)]},
+        {
+            "Code Reference": [
+                generate_yaml(path_root / "rustfst-python" / "docs", output_root)
+            ]
+        },
     ]
 
     with path_mkdocs_yml.open() as f:

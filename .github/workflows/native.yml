@@ -241,7 +241,7 @@ jobs:
 
   python-doc:
     name: python-doc
-#    needs: openfst
+    needs: openfst
     runs-on: ubuntu-latest
     
     steps:
@@ -263,12 +263,8 @@ jobs:
         run: pip install -r requirements-mkdocs.txt
       - name: Test doc generation
         run: |
-          pip list
-          pwd
-          which python
-          ls
           cd rustfst-python
-          mkdocs build -s -vvvvv
+          mkdocs build -s
 
   publish-python-doc:
     name: Publish rustfst-python's doc
@@ -288,21 +284,21 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: pip install -r rustfst-python/requirements-setup.txt
       - run: pip install -e rustfst-python
-      - run: pip install -r requirements-mkdocs.txt
+      - run: pip install -r rustfst-python/requirements-mkdocs.txt
       - run: git config user.name ${{ env.GIT_COMMITTER_NAME }}
       - run: git config user.email ${{ env.GIT_COMMITTER_EMAIL }}
       - run: git fetch origin gh-pages --depth=1
-      - run: mkdocs build -s
+      - run: cd rustfst-python && mkdocs build -s
       - name: Deploy Doc to latest
         if: github.ref == 'refs/heads/main'
-        run: mike deploy --push latest
+        run: cd rustfst-python && mike deploy --push latest
       - name: Retrieve tag
         uses: olegtarasov/get-tag@v2.1
         id: tagName
         if: startsWith(github.ref, 'refs/tags/rustfst-v')
       - name: Deploy Doc to tag
         if: startsWith(github.ref, 'refs/tags/rustfst-v')
-        run: mike deploy --push $GIT_TAG_NAME
+        run: cd rustfst-python && mike deploy --push $GIT_TAG_NAME
 
 
   publish-rust-crate:
