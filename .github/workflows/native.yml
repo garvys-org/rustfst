@@ -241,7 +241,7 @@ jobs:
 
   python-doc:
     name: python-doc
-    needs: openfst
+#    needs: openfst
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
