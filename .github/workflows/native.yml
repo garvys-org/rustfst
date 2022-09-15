@@ -260,7 +260,7 @@ jobs:
           pip install -r rustfst-python/requirements-setup.txt
           pip install -e rustfst-python
       - name: Install mkdocs
-        run: pip install -r requirements-mkdocs.txt
+        run: pip install -r rustfst-python/requirements-mkdocs.txt
       - name: Test doc generation
         run: |
           cd rustfst-python
