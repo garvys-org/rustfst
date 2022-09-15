@@ -11,6 +11,7 @@ use crate::cmds::determinize::DeterminizeAlgorithm;
 use crate::cmds::invert::InvertAlgorithm;
 use crate::cmds::map::MapAlgorithm;
 use crate::cmds::minimize::MinimizeAlgorithm;
+use crate::cmds::optimize::OptimizeAlgorithm;
 use crate::cmds::project::ProjectFstAlgorithm;
 use crate::cmds::push::PushAlgorithm;
 use crate::cmds::reverse::ReverseAlgorithm;
@@ -87,6 +88,10 @@ fn main() {
     // Topsort
     let topsort_cmd = SubCommand::with_name("topsort").about("Topsort algorithm.");
     app = app.subcommand(one_in_one_out_options(topsort_cmd));
+
+    // Optimize
+    let optimize_cmd = SubCommand::with_name("optimize").about("Optimize algorithm.");
+    app = app.subcommand(one_in_one_out_options(optimize_cmd));
 
     // Reverse
     let reverse_cmd = SubCommand::with_name("reverse").about("Reverse algorithm.");
@@ -208,6 +213,10 @@ fn handle(matches: clap::ArgMatches) -> Result<()> {
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
+        ("optimize", Some(m)) => OptimizeAlgorithm::new(
+                        m.value_of("in.fst").unwrap(),
+            m.value_of("out.fst").unwrap(),
+        ).run_cli_or_bench(m),
         ("project", Some(m)) => ProjectFstAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.is_present("project_output"),
