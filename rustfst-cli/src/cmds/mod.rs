@@ -4,6 +4,7 @@ pub mod determinize;
 pub mod invert;
 pub mod map;
 pub mod minimize;
+pub mod optimize;
 pub mod project;
 pub mod push;
 pub mod reverse;
