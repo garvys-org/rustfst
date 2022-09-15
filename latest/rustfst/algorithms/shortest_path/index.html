@@ -8,21 +8,21 @@
       
       
       
-        <link rel="canonical" href="https://github.com/Garvys/rustfst/latest/">
+        <link rel="canonical" href="https://github.com/Garvys/rustfst/latest/rustfst/algorithms/shortest_path/">
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="../../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.14">
     
     
       
-        <title>rustfst-python</title>
+        <title>shortest_path - rustfst-python</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.3de6f41f.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.3de6f41f.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.cc9b2e1e.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.cc9b2e1e.min.css">
         
       
     
@@ -37,9 +37,9 @@
       
     
     
-      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL(".",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -63,7 +63,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#rustfst-python" class="md-skip">
+        <a href="#rustfst.algorithms.shortest_path" class="md-skip">
           Skip to content
         </a>
       
@@ -83,7 +83,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="rustfst-python" class="md-header__button md-logo" aria-label="rustfst-python" data-md-component="logo">
+    <a href="../../.." title="rustfst-python" class="md-header__button md-logo" aria-label="rustfst-python" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -102,7 +102,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              shortest_path
             
           </span>
         </div>
@@ -181,7 +181,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="rustfst-python" class="md-nav__button md-logo" aria-label="rustfst-python" data-md-component="logo">
+    <a href="../../.." title="rustfst-python" class="md-nav__button md-logo" aria-label="rustfst-python" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -210,66 +210,11 @@
 
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Home
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="." class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
         Home
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#introduction" class="md-nav__link">
-    Introduction
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#naming" class="md-nav__link">
-    Naming
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
-    References
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -280,12 +225,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
       
       
       
@@ -306,12 +253,14 @@
               
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_1" type="checkbox" id="__nav_2_1" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_1" type="checkbox" id="__nav_2_1" checked>
       
       
       
@@ -334,7 +283,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/weight/" class="md-nav__link">
+      <a href="../../weight/" class="md-nav__link">
         weight
       </a>
     </li>
@@ -348,7 +297,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/string_path/" class="md-nav__link">
+      <a href="../../string_path/" class="md-nav__link">
         string_path
       </a>
     </li>
@@ -362,7 +311,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/drawing_config/" class="md-nav__link">
+      <a href="../../drawing_config/" class="md-nav__link">
         drawing_config
       </a>
     </li>
@@ -376,7 +325,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/trs/" class="md-nav__link">
+      <a href="../../trs/" class="md-nav__link">
         trs
       </a>
     </li>
@@ -388,12 +337,14 @@
               
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_1_5" type="checkbox" id="__nav_2_1_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_1_5" type="checkbox" id="__nav_2_1_5" checked>
       
       
       
@@ -401,7 +352,7 @@
         
         
         <div class="md-nav__link md-nav__link--index ">
-          <a href="rustfst/algorithms/">algorithms</a>
+          <a href="../">algorithms</a>
           
             <label for="__nav_2_1_5">
               <span class="md-nav__icon md-icon"></span>
@@ -420,11 +371,82 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="rustfst/algorithms/shortest_path/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          shortest_path
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         shortest_path
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#rustfst.algorithms.shortest_path" class="md-nav__link">
+    rustfst.algorithms.shortest_path
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rustfst.algorithms.shortest_path-classes" class="md-nav__link">
+    Classes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rustfst.algorithms.shortest_path-functions" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.shortest_path.shortestpath" class="md-nav__link">
+    shortestpath()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.shortest_path.shortestpath_with_config" class="md-nav__link">
+    shortestpath_with_config()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -436,7 +458,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/algorithms/concat/" class="md-nav__link">
+      <a href="../concat/" class="md-nav__link">
         concat
       </a>
     </li>
@@ -450,7 +472,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/algorithms/optimize/" class="md-nav__link">
+      <a href="../optimize/" class="md-nav__link">
         optimize
       </a>
     </li>
@@ -464,7 +486,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/algorithms/determinize/" class="md-nav__link">
+      <a href="../determinize/" class="md-nav__link">
         determinize
       </a>
     </li>
@@ -478,7 +500,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/algorithms/tr_unique/" class="md-nav__link">
+      <a href="../tr_unique/" class="md-nav__link">
         tr_unique
       </a>
     </li>
@@ -492,7 +514,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/algorithms/isomorphic/" class="md-nav__link">
+      <a href="../isomorphic/" class="md-nav__link">
         isomorphic
       </a>
     </li>
@@ -506,7 +528,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/algorithms/top_sort/" class="md-nav__link">
+      <a href="../top_sort/" class="md-nav__link">
         top_sort
       </a>
     </li>
@@ -520,7 +542,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/algorithms/compose/" class="md-nav__link">
+      <a href="../compose/" class="md-nav__link">
         compose
       </a>
     </li>
@@ -534,7 +556,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/algorithms/rm_epsilon/" class="md-nav__link">
+      <a href="../rm_epsilon/" class="md-nav__link">
         rm_epsilon
       </a>
     </li>
@@ -548,7 +570,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/algorithms/reverse/" class="md-nav__link">
+      <a href="../reverse/" class="md-nav__link">
         reverse
       </a>
     </li>
@@ -562,7 +584,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/algorithms/project/" class="md-nav__link">
+      <a href="../project/" class="md-nav__link">
         project
       </a>
     </li>
@@ -576,7 +598,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/algorithms/randgen/" class="md-nav__link">
+      <a href="../randgen/" class="md-nav__link">
         randgen
       </a>
     </li>
@@ -590,7 +612,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/algorithms/union/" class="md-nav__link">
+      <a href="../union/" class="md-nav__link">
         union
       </a>
     </li>
@@ -604,7 +626,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/algorithms/replace/" class="md-nav__link">
+      <a href="../replace/" class="md-nav__link">
         replace
       </a>
     </li>
@@ -618,7 +640,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/algorithms/tr_sort/" class="md-nav__link">
+      <a href="../tr_sort/" class="md-nav__link">
         tr_sort
       </a>
     </li>
@@ -632,7 +654,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/algorithms/connect/" class="md-nav__link">
+      <a href="../connect/" class="md-nav__link">
         connect
       </a>
     </li>
@@ -653,7 +675,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/symbol_table/" class="md-nav__link">
+      <a href="../../symbol_table/" class="md-nav__link">
         symbol_table
       </a>
     </li>
@@ -667,7 +689,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/string_paths_iterator/" class="md-nav__link">
+      <a href="../../string_paths_iterator/" class="md-nav__link">
         string_paths_iterator
       </a>
     </li>
@@ -692,7 +714,7 @@
         
         
         <div class="md-nav__link md-nav__link--index ">
-          <a href="rustfst/fst/">fst</a>
+          <a href="../../fst/">fst</a>
           
             <label for="__nav_2_1_8">
               <span class="md-nav__icon md-icon"></span>
@@ -713,7 +735,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/fst/vector_fst/" class="md-nav__link">
+      <a href="../../fst/vector_fst/" class="md-nav__link">
         vector_fst
       </a>
     </li>
@@ -727,7 +749,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/fst/const_fst/" class="md-nav__link">
+      <a href="../../fst/const_fst/" class="md-nav__link">
         const_fst
       </a>
     </li>
@@ -748,7 +770,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/tr/" class="md-nav__link">
+      <a href="../../tr/" class="md-nav__link">
         tr
       </a>
     </li>
@@ -762,7 +784,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rustfst/iterators/" class="md-nav__link">
+      <a href="../../iterators/" class="md-nav__link">
         iterators
       </a>
     </li>
@@ -800,8 +822,6 @@
   
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -810,23 +830,43 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#introduction" class="md-nav__link">
-    Introduction
+  <a href="#rustfst.algorithms.shortest_path" class="md-nav__link">
+    rustfst.algorithms.shortest_path
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#naming" class="md-nav__link">
-    Naming
+  <a href="#rustfst.algorithms.shortest_path-classes" class="md-nav__link">
+    Classes
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
-    References
+  <a href="#rustfst.algorithms.shortest_path-functions" class="md-nav__link">
+    Functions
   </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.shortest_path.shortestpath" class="md-nav__link">
+    shortestpath()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.shortest_path.shortestpath_with_config" class="md-nav__link">
+    shortestpath_with_config()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -842,45 +882,152 @@
             <article class="md-content__inner md-typeset">
               
                 
-  <a href="https://github.com/Garvys/rustfst/edit/master/docs/index.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/Garvys/rustfst/edit/master/docs/rustfst/algorithms/shortest_path/index.md" title="Edit this page" class="md-content__button md-icon">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
 
-<h1 id="rustfst-python">rustfst-python</h1>
-<h2 id="introduction">Introduction</h2>
-<p>Rust implementation of Weighted Finite States Transducers.</p>
-<p><em>Rustfst</em> is a library for constructing, combining, optimizing, and searching weighted
-finite-state transducers (FSTs). Weighted finite-state transducers are automata where
-each transition has an input label, an output label, and a weight.
-The more familiar finite-state acceptor is represented as a transducer
-with each transition's input and output label equal. Finite-state acceptors
-are used to represent sets of strings (specifically, regular or rational sets);
-finite-state transducers are used to represent binary relations between pairs of
-strings (specifically, rational transductions). The weights can be used to represent
-the cost of taking a particular transition.</p>
-<p>FSTs have key applications in speech recognition and synthesis, machine translation,
-optical character recognition, pattern matching, string processing, machine learning,
-information extraction and retrieval among others. Often a weighted transducer is used to
-represent a probabilistic model (e.g., an n-gram model, pronunciation model). FSTs can be
-optimized by determinization and minimization, models can be applied to hypothesis sets
-(also represented as automata) or cascaded by finite-state composition, and the best
-results can be selected by shortest-path algorithms.</p>
-<p><img alt="fst" src="https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/project_in.svg?sanitize=true" /></p>
-<h2 id="naming">Naming</h2>
-<ul>
-<li><code>rustfst</code> is the Rust re-implementation of <code>Openfst</code>.</li>
-<li><code>rusfst-python</code> is a python biding on top of <code>rustfst</code>.</li>
-</ul>
-<h2 id="references">References</h2>
-<p>Implementation heavily inspired from Mehryar Mohri's, Cyril Allauzen's and Michael Riley's work :</p>
-<ul>
-<li><a href="https://cs.nyu.edu/~mohri/pub/hwa.pdf">Weighted automata algorithms</a></li>
-<li><a href="https://core.ac.uk/download/pdf/82101846.pdf">The design principles of a weighted finite-state transducer library</a></li>
-<li><a href="https://link.springer.com/chapter/10.1007%2F978-3-540-76336-9_3">OpenFst: A general and efficient weighted finite-state transducer library</a></li>
-<li><a href="https://repository.upenn.edu/cgi/viewcontent.cgi?article=1010&amp;context=cis_papers">Weighted finite-state transducers in speech recognition</a></li>
-</ul>
+  <h1>shortest_path</h1>
+
+<div class="doc doc-object doc-module">
+
+
+<a id="rustfst.algorithms.shortest_path"></a>
+  <div class="doc doc-contents first">
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+<h3 id="rustfst.algorithms.shortest_path-classes">Classes</h3>
+<h3 id="rustfst.algorithms.shortest_path-functions">Functions</h3>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h4 class="doc doc-heading" id="rustfst.algorithms.shortest_path.shortestpath">
+<code class="highlight language-python"><span class="n">shortestpath</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
+
+</h4>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>shortestpath(fst)
+construct a FST containing the shortest path of the input FST
+:param fst: Fst
+:return: Fst</p>
+
+      <details class="quote">
+        <summary>Source code in <code>rustfst/algorithms/shortest_path.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">shortestpath</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    shortestpath(fst)</span>
+<span class="sd">    construct a FST containing the shortest path of the input FST</span>
+<span class="sd">    :param fst: Fst</span>
+<span class="sd">    :return: Fst</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">shortest_path</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">()</span>
+    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_shortest_path</span><span class="p">(</span><span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">shortest_path</span><span class="p">))</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error computing shortest path&quot;</span>
+    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">VectorFst</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">shortest_path</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h4 class="doc doc-heading" id="rustfst.algorithms.shortest_path.shortestpath_with_config">
+<code class="highlight language-python"><span class="n">shortestpath_with_config</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ShortestPathConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
+
+</h4>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>shortestpath(fst,config)
+construct a FST containing the n-shortest path(s) in the input FST
+:param fst: Fst
+:param config: ShortestPathConfig
+:return: Fst</p>
+
+      <details class="quote">
+        <summary>Source code in <code>rustfst/algorithms/shortest_path.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">shortestpath_with_config</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ShortestPathConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    shortestpath(fst,config)</span>
+<span class="sd">    construct a FST containing the n-shortest path(s) in the input FST</span>
+<span class="sd">    :param fst: Fst</span>
+<span class="sd">    :param config: ShortestPathConfig</span>
+<span class="sd">    :return: Fst</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">shortest_path</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">()</span>
+
+    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_shortest_path_with_config</span><span class="p">(</span>
+        <span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">shortest_path</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error computing shortest path&quot;</span>
+    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">VectorFst</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">shortest_path</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
 
               
             </article>
@@ -893,15 +1040,30 @@ results can be selected by shortest-path algorithms.</p>
   
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
+        
+        <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: algorithms" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              algorithms
+            </div>
+          </div>
+        </a>
+      
       
         
-        <a href="rustfst/weight/" class="md-footer__link md-footer__link--next" aria-label="Next: weight" rel="next">
+        <a href="../concat/" class="md-footer__link md-footer__link--next" aria-label="Next: concat" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              weight
+              concat
             </div>
           </div>
           <div class="md-footer__button md-icon">
@@ -931,10 +1093,10 @@ results can be selected by shortest-path algorithms.</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": ".", "features": [], "search": "assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="assets/javascripts/bundle.c2e1ee47.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.c2e1ee47.min.js"></script>
       
     
   </body>
