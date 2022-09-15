@@ -11,15 +11,23 @@ def rec(parent_path: Path, parent_package: str, output_path: Path) -> bool:
     contains_py_files = False
 
     for p in parent_path.iterdir():
-        if p.is_file() and str(p).endswith(".py") and p.name not in FILES_FORBIDDEN_LIST:
+        if (
+            p.is_file()
+            and str(p).endswith(".py")
+            and p.name not in FILES_FORBIDDEN_LIST
+        ):
             dir_path = output_path / p.stem
             dir_path.mkdir(parents=True)
             (dir_path / "index.md").write_text(f"::: {parent_package}.{p.stem}")
             contains_py_files = True
         elif p.is_dir() and p.name not in DIR_FORBIDDEN_LIST:
-            contains_py_files_curr = rec(p, f"{parent_package}.{p.stem}", output_path / p.stem)
+            contains_py_files_curr = rec(
+                p, f"{parent_package}.{p.stem}", output_path / p.stem
+            )
             if contains_py_files_curr:
-                (output_path / p.stem / "index.md").write_text(f"::: {parent_package}.{p.stem}")
+                (output_path / p.stem / "index.md").write_text(
+                    f"::: {parent_package}.{p.stem}"
+                )
             contains_py_files |= contains_py_files_curr
 
     return contains_py_files
@@ -51,9 +59,9 @@ def main():
 
     # Reference md files in the mkdocs.yml
     data = [
-            {"Home": "index.md"},
-            {"Code Reference": generate_yaml(path_root/"docs", output_root)}
-        ]
+        {"Home": "index.md"},
+        {"Code Reference": generate_yaml(path_root / "docs", output_root)},
+    ]
 
     with path_mkdocs_yml.open() as f:
         mkdocs_yaml = yaml.full_load(f)

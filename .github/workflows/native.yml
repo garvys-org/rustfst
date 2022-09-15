@@ -242,14 +242,14 @@ jobs:
   python-doc:
     name: python-doc
 #    needs: openfst
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     
     steps:
       - uses: actions/checkout@v3
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.62.1
+          toolchain: stable
           default: true
       - uses: actions/setup-python@v3
         with:
@@ -262,7 +262,7 @@ jobs:
       - name: Install mkdocs
         run: pip install -r requirements-mkdocs.txt
       - name: Test doc generation
-        run: mkdocs build
+        run: mkdocs build -s
 
   publish-python-doc:
     name: Publish rustfst-python's doc
@@ -286,7 +286,7 @@ jobs:
       - run: git config user.name ${{ env.GIT_COMMITTER_NAME }}
       - run: git config user.email ${{ env.GIT_COMMITTER_EMAIL }}
       - run: git fetch origin gh-pages --depth=1
-      - run: mkdocs build
+      - run: mkdocs build -s
       - name: Deploy Doc to latest
         if: github.ref == 'refs/heads/main'
         run: mike deploy --push latest
