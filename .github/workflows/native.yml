@@ -266,7 +266,8 @@ jobs:
           pip list
           pwd
           which python
-          mkdocs build -s
+          ls
+          mkdocs build -s -vvvvv
 
   publish-python-doc:
     name: Publish rustfst-python's doc
