@@ -60,7 +60,7 @@ def main():
     # Reference md files in the mkdocs.yml
     data = [
         {"Home": "index.md"},
-        {"Code Reference": generate_yaml(path_root / "docs", output_root)},
+        {"Code Reference": [generate_yaml(path_root / "docs", output_root)]},
     ]
 
     with path_mkdocs_yml.open() as f:

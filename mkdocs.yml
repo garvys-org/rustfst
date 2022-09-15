@@ -5,7 +5,7 @@ extra:
 nav:
 - Home: index.md
 - Code Reference:
-    rustfst:
+  - rustfst:
     - weight:
       - rustfst/weight/index.md
     - string_path:

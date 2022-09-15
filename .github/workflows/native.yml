@@ -262,7 +262,11 @@ jobs:
       - name: Install mkdocs
         run: pip install -r requirements-mkdocs.txt
       - name: Test doc generation
-        run: mkdocs build -s
+        run: |
+          pip list
+          pwd
+          which python
+          mkdocs build -s
 
   publish-python-doc:
     name: Publish rustfst-python's doc
