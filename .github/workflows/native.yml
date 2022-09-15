@@ -248,7 +248,7 @@ jobs:
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: 1.62.1
           default: true
       - uses: actions/setup-python@v3
         with:
