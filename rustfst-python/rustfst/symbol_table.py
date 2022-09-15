@@ -152,7 +152,7 @@ class SymbolTable:
         return int(num_symbols.value)
 
     @classmethod
-    def read(cls, filename: Path) -> SymbolTable:
+    def read(cls, filename: Union[str, Path]) -> SymbolTable:
         """
         Reads symbol table from binary file.
         This class method creates a new SymbolTable from a symbol table binary file.
@@ -173,7 +173,7 @@ class SymbolTable:
         return cls(ptr=symt)
 
     @classmethod
-    def read_text(cls, filename: Path) -> SymbolTable:
+    def read_text(cls, filename: Union[str, Path]) -> SymbolTable:
         """
         Reads symbol table from text file.
         This class method creates a new SymbolTable from a symbol table text file.
@@ -194,7 +194,7 @@ class SymbolTable:
 
         return cls(ptr=symt)
 
-    def write(self, filename: Path):
+    def write(self, filename: Union[str, Path]):
         """
         Serializes symbol table to a file.
         This methods writes the SymbolTable to a file in binary format.
@@ -210,7 +210,7 @@ class SymbolTable:
         err_msg = f"Write failed for bin file : {filename}"
         check_ffi_error(ret_code, err_msg)
 
-    def write_text(self, filename: Path):
+    def write_text(self, filename: Union[str, Path]):
         """
         Writes symbol table to text file.
         This method writes the SymbolTable to a file in human-readable format.
