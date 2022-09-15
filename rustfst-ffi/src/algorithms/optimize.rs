@@ -1,11 +1,15 @@
 use anyhow::anyhow;
 
 use crate::fst::CFst;
-use crate::{get_mut, wrap, RUSTFST_FFI_RESULT};
+use crate::{get_mut, wrap, RUSTFST_FFI_RESULT, get};
 
-use rustfst::algorithms::optimize;
+use rustfst::algorithms::{optimize, weight_convert};
 use rustfst::fst_impls::VectorFst;
 use rustfst::semirings::TropicalWeight;
+use rustfst::semirings::LogWeight;
+use rustfst::algorithms::weight_converters::SimpleWeightConverter;
+
+
 
 #[no_mangle]
 pub extern "C" fn fst_optimize(ptr: *mut CFst) -> RUSTFST_FFI_RESULT {
@@ -15,6 +19,27 @@ pub extern "C" fn fst_optimize(ptr: *mut CFst) -> RUSTFST_FFI_RESULT {
             .downcast_mut()
             .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
         optimize(vec_fst)?;
+        Ok(())
+    })
+}
+
+use ffi_convert::RawPointerConverter;
+#[no_mangle]
+pub extern "C" fn fst_log_optimize(ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        let lol = unsafe{*ptr};
+
+        let fst = get!(CFst, lol);
+        let vec_fst: &VectorFst<TropicalWeight> = fst
+            .downcast_ref()
+            .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
+
+        let mut converter = SimpleWeightConverter{};
+        let mut vec_log_fst : VectorFst<LogWeight> = weight_convert(vec_fst, &mut converter)?;
+        optimize(&mut vec_log_fst)?;
+        let res_fst : VectorFst<TropicalWeight> = weight_convert(&vec_log_fst, &mut converter)?;
+        let res_ptr = CFst(Box::new(res_fst)).into_raw_pointer();
+        unsafe { *ptr = res_ptr };
         Ok(())
     })
 }
