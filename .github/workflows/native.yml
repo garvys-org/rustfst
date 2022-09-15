@@ -267,6 +267,7 @@ jobs:
           pwd
           which python
           ls
+          cd rustfst-python
           mkdocs build -s -vvvvv
 
   publish-python-doc:
