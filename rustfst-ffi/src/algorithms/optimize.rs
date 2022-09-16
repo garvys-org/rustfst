@@ -8,6 +8,8 @@ use rustfst::algorithms::{optimize, weight_convert};
 use rustfst::fst_impls::VectorFst;
 use rustfst::semirings::LogWeight;
 use rustfst::semirings::TropicalWeight;
+use ffi_convert::RawPointerConverter;
+
 
 #[no_mangle]
 pub extern "C" fn fst_optimize(ptr: *mut CFst) -> RUSTFST_FFI_RESULT {
@@ -21,9 +23,8 @@ pub extern "C" fn fst_optimize(ptr: *mut CFst) -> RUSTFST_FFI_RESULT {
     })
 }
 
-use ffi_convert::RawPointerConverter;
 #[no_mangle]
-pub extern "C" fn fst_log_optimize(ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
+pub extern "C" fn fst_optimize_in_log(ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let lol = unsafe { *ptr };
 

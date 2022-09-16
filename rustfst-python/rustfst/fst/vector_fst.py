@@ -528,6 +528,11 @@ class VectorFst(Fst):
 
         optimize(self)
 
+    def optimize_in_log(self):
+        from rustfst.algorithms.optimize import optimize_in_log
+
+        optimize_in_log(self)
+
     def tr_sort(self, ilabel_cmp: bool = True):
         from rustfst.algorithms.tr_sort import tr_sort
 

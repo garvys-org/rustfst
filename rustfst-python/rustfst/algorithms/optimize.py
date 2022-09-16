@@ -21,12 +21,12 @@ def optimize(fst: VectorFst):
     check_ffi_error(ret_code, err_msg)
 
 
-def log_optimize(fst: VectorFst):
+def optimize_in_log(fst: VectorFst):
     """
     Optimize an fst in the log semiring.
     Args:
         fst: Fst to optimize.
     """
-    ret_code = lib.fst_log_optimize(ctypes.byref(fst.ptr))
+    ret_code = lib.fst_optimize_in_log(ctypes.byref(fst.ptr))
     err_msg = "Error during optimize"
     check_ffi_error(ret_code, err_msg)

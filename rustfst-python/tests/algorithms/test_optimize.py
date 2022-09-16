@@ -84,6 +84,6 @@ def test_log_optimize_fst():
     tr1_5 = Tr(7, 8, 5.0, s4)
     fst1.add_tr(s3, tr1_5)
 
-    fst1.optimize()
+    fst1.optimize_in_log()
 
     assert fst1.num_states() == 4
