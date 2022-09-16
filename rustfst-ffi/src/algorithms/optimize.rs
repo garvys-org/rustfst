@@ -3,13 +3,12 @@ use anyhow::anyhow;
 use crate::fst::CFst;
 use crate::{get, get_mut, wrap, RUSTFST_FFI_RESULT};
 
+use ffi_convert::RawPointerConverter;
 use rustfst::algorithms::weight_converters::SimpleWeightConverter;
 use rustfst::algorithms::{optimize, weight_convert};
 use rustfst::fst_impls::VectorFst;
 use rustfst::semirings::LogWeight;
 use rustfst::semirings::TropicalWeight;
-use ffi_convert::RawPointerConverter;
-
 
 #[no_mangle]
 pub extern "C" fn fst_optimize(ptr: *mut CFst) -> RUSTFST_FFI_RESULT {
