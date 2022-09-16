@@ -25,9 +25,9 @@ pub extern "C" fn fst_optimize(ptr: *mut CFst) -> RUSTFST_FFI_RESULT {
 #[no_mangle]
 pub extern "C" fn fst_optimize_in_log(ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
     wrap(|| {
-        let lol = unsafe { *ptr };
+        let fst_ptr = unsafe { *ptr };
 
-        let fst = get!(CFst, lol);
+        let fst = get!(CFst, fst_ptr);
         let vec_fst: &VectorFst<TropicalWeight> = fst
             .downcast_ref()
             .ok_or_else(|| anyhow!("Could not downcast to vector FST"))?;
