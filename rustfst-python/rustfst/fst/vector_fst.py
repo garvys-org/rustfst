@@ -528,7 +528,7 @@ class VectorFst(Fst):
 
         return optimize(self)
 
-    def optimize_in_log(self)-> VectorFst:
+    def optimize_in_log(self) -> VectorFst:
         from rustfst.algorithms.optimize import optimize_in_log
 
         return optimize_in_log(self)

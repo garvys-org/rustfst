@@ -38,4 +38,3 @@ def optimize_in_log(fst: VectorFst) -> VectorFst:
     check_ffi_error(ret_code, err_msg)
 
     return VectorFst(ptr=fst.ptr)
-
