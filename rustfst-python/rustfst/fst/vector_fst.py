@@ -523,10 +523,17 @@ class VectorFst(Fst):
 
         return union(self, other_fst)
 
-    def optimize(self):
+    def optimize(self) -> VectorFst:
         from rustfst.algorithms.optimize import optimize
 
         optimize(self)
+        return self
+
+    def optimize_in_log(self) -> VectorFst:
+        from rustfst.algorithms.optimize import optimize_in_log
+
+        optimize_in_log(self)
+        return self
 
     def tr_sort(self, ilabel_cmp: bool = True):
         from rustfst.algorithms.tr_sort import tr_sort
