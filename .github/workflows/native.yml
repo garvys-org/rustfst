@@ -339,8 +339,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-18.04
-          - macos-10.15
+          - ubuntu-latest
+          - macos-latest
 
     runs-on: ${{ matrix.os }}
 
