@@ -1,4 +1,5 @@
 use std::fmt::Debug;
+use std::iter::Peekable;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
@@ -158,7 +159,7 @@ where
     /// Iterator should be done when set to True
     find_empty: bool,
     sigma_match: Option<Label>,
-    matcher_iterator: M::Iter,
+    matcher_iterator: Peekable<M::Iter>,
     has_sigma: bool,
     rewrite_both: bool,
     w: PhantomData<(W, F, B)>,
@@ -179,34 +180,31 @@ where
         matcher: Arc<M>,
         rewrite_both: bool,
     ) -> Result<Self> {
-        println!("\nState : {:?}", state);
-        println!("Match label : {:?}", match_label);
-        println!("Sigma label : {:?}", sigma_label);
         if match_label == sigma_label && sigma_label != NO_LABEL {
             bail!("SigmaMatcher::Find: bad label (sigma)")
         }
 
         let mut find_empty = false;
         let has_sigma = has_sigma(state, &matcher, sigma_label)?;
-        println!("Has sigma : {}", has_sigma);
 
-        // TODO: Move to peekable iterators
-        let (sigma_match, matcher_iterator) = if matcher.iter(state, match_label)?.next().is_some()
-        {
-            (Some(NO_LABEL), matcher.iter(state, match_label)?)
-        } else if has_sigma
-            && match_label != EPS_LABEL
-            && match_label != NO_LABEL
-            && matcher.iter(state, sigma_label)?.next().is_some()
-        {
-            (Some(match_label), matcher.iter(state, sigma_label)?)
+        let mut matcher_itetor_match_label = matcher.iter(state, match_label)?.peekable();
+        let (sigma_match, matcher_iterator) = if matcher_itetor_match_label.peek().is_some() {
+            (Some(NO_LABEL), matcher_itetor_match_label)
         } else {
-            find_empty = true;
-            // FIXME
-            (None, matcher.iter(state, sigma_label)?)
-        };
+            let mut matcher_itetor_sigma_label = matcher.iter(state, sigma_label)?.peekable();
+            if has_sigma
+                && match_label != EPS_LABEL
+                && match_label != NO_LABEL
+                && matcher_itetor_sigma_label.peek().is_some()
+            {
+                (Some(match_label), matcher_itetor_sigma_label)
+            } else {
+                find_empty = true;
 
-        println!("Sigma match : {:?}", sigma_match);
+                // The iterator here should be empty. Trick to avoid adding an Option.
+                (None, matcher_itetor_sigma_label)
+            }
+        };
 
         Ok(Self {
             state,
@@ -234,19 +232,19 @@ where
     type Item = IterItemMatcher<W>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        println!("Next");
         if self.find_empty {
             return None;
         }
-        dbg!(self.sigma_match);
 
         let v = if let Some(v_iterator) = self.matcher_iterator.next() {
-            println!("A");
             v_iterator
         } else if self.has_sigma && self.sigma_match.unwrap() == NO_LABEL && self.match_label > 0 {
-            println!("B");
             // TODO : Move to FallibleIterator
-            self.matcher_iterator = self.matcher.iter(self.state, self.sigma_label).unwrap();
+            self.matcher_iterator = self
+                .matcher
+                .iter(self.state, self.sigma_label)
+                .unwrap()
+                .peekable();
             self.sigma_match = Some(self.match_label);
             if let Some(v_iterator) = self.matcher_iterator.next() {
                 v_iterator
@@ -254,12 +252,10 @@ where
                 return None;
             }
         } else {
-            println!("C");
             return None;
         };
 
         if self.sigma_match.unwrap() == NO_LABEL {
-            println!("Out : {:?}", &v);
             Some(v)
         } else {
             let mut sigma_arc: Tr<_> = v.into_tr(self.state, self.match_type).unwrap();
@@ -276,7 +272,6 @@ where
             } else {
                 sigma_arc.olabel = self.sigma_match.unwrap();
             }
-            println!("Out2 : {:?}", sigma_arc);
             Some(IterItemMatcher::Tr(sigma_arc))
         }
     }
