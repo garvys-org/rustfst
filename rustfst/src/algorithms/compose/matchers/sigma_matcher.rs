@@ -340,8 +340,7 @@ mod tests {
         fst
     }
 
-    fn xp_loop(symt: &Arc<SymbolTable>, q_fst: VectorFst<TropicalWeight>) {
-        println!("Loop");
+    fn xp_loop(symt: &Arc<SymbolTable>, q_fst: VectorFst<TropicalWeight>) -> VectorFst<TropicalWeight> {
         let mut g_fst = grammar_fst_loop(symt);
         tr_sort(&mut g_fst, ILabelCompare {});
 
@@ -361,7 +360,7 @@ mod tests {
         compose_vec.set_input_symbols(Arc::clone(symt));
         compose_vec.set_output_symbols(Arc::clone(symt));
 
-        println!("Compose fst : \n{}", compose_vec);
+        compose_vec
     }
 
     fn grammar_fst_sigma(symt: &Arc<SymbolTable>) -> VectorFst<TropicalWeight> {
@@ -388,8 +387,7 @@ mod tests {
         fst
     }
 
-    fn xp_sigma(symt: &Arc<SymbolTable>, q_fst: VectorFst<TropicalWeight>) {
-        println!("Sigma");
+    fn xp_sigma(symt: &Arc<SymbolTable>, q_fst: VectorFst<TropicalWeight>) -> VectorFst<TropicalWeight> {
         let mut g_fst = grammar_fst_sigma(symt);
         tr_sort(&mut g_fst, ILabelCompare {});
 
@@ -422,7 +420,7 @@ mod tests {
         compose_vec.set_input_symbols(Arc::clone(symt));
         compose_vec.set_output_symbols(Arc::clone(symt));
 
-        println!("Compose fst : \n{}", compose_vec);
+        compose_vec
     }
 
     #[test]
@@ -432,8 +430,10 @@ mod tests {
         let mut q_fst = query_fst(&symt);
         tr_sort(&mut q_fst, OLabelCompare {});
 
-        xp_loop(&symt, q_fst.clone());
-        xp_sigma(&symt, q_fst);
+        let composed_fst_loop = xp_loop(&symt, q_fst.clone());
+        let composed_fst_sigma = xp_sigma(&symt, q_fst);
+
+        assert_eq!(composed_fst_loop, composed_fst_sigma);
 
         Ok(())
     }
