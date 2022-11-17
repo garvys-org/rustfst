@@ -5,12 +5,12 @@ use std::sync::Arc;
 use anyhow::Result;
 use bitflags::_core::borrow::Borrow;
 
-use crate::{EPS_LABEL, Label, NO_LABEL, Semiring, StateId, Tr};
 use crate::algorithms::compose::matchers::{
-    IterItemMatcher, Matcher, MatcherFlags, MatcherRewriteMode, MatchType, REQUIRE_PRIORITY,
+    IterItemMatcher, MatchType, Matcher, MatcherFlags, MatcherRewriteMode, REQUIRE_PRIORITY,
 };
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
+use crate::{Label, Semiring, StateId, Tr, EPS_LABEL, NO_LABEL};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SigmaMatcher<W, F, B, M>
@@ -106,7 +106,7 @@ where
             self.sigma_label,
             self.match_type,
             Arc::clone(&self.matcher),
-            self.rewrite_both
+            self.rewrite_both,
         )
     }
 
@@ -179,27 +179,35 @@ where
         matcher: Arc<M>,
         rewrite_both: bool,
     ) -> Result<Self> {
+        println!("\nState : {:?}", state);
+        println!("Match label : {:?}", match_label);
+        println!("Sigma label : {:?}", sigma_label);
         if match_label == sigma_label && sigma_label != NO_LABEL {
             bail!("SigmaMatcher::Find: bad label (sigma)")
         }
 
         let mut find_empty = false;
         let has_sigma = has_sigma(state, &matcher, sigma_label)?;
+        println!("Has sigma : {}", has_sigma);
 
-        let sigma_match = if matcher.iter(state, match_label)?.next().is_some() {
-            Some(NO_LABEL)
+        // TODO: Move to peekable iterators
+        let (sigma_match, matcher_iterator) = if matcher.iter(state, match_label)?.next().is_some()
+        {
+            (Some(NO_LABEL), matcher.iter(state, match_label)?)
         } else if has_sigma
             && match_label != EPS_LABEL
             && match_label != NO_LABEL
             && matcher.iter(state, sigma_label)?.next().is_some()
         {
-            Some(match_label)
+            (Some(match_label), matcher.iter(state, sigma_label)?)
         } else {
             find_empty = true;
-            None
+            // FIXME
+            (None, matcher.iter(state, sigma_label)?)
         };
 
-        let matcher_iterator = matcher.iter(state, match_label)?;
+        println!("Sigma match : {:?}", sigma_match);
+
         Ok(Self {
             state,
             match_label,
@@ -226,13 +234,17 @@ where
     type Item = IterItemMatcher<W>;
 
     fn next(&mut self) -> Option<Self::Item> {
+        println!("Next");
         if self.find_empty {
             return None;
         }
+        dbg!(self.sigma_match);
 
         let v = if let Some(v_iterator) = self.matcher_iterator.next() {
+            println!("A");
             v_iterator
         } else if self.has_sigma && self.sigma_match.unwrap() == NO_LABEL && self.match_label > 0 {
+            println!("B");
             // TODO : Move to FallibleIterator
             self.matcher_iterator = self.matcher.iter(self.state, self.sigma_label).unwrap();
             self.sigma_match = Some(self.match_label);
@@ -242,13 +254,15 @@ where
                 return None;
             }
         } else {
+            println!("C");
             return None;
         };
 
         if self.sigma_match.unwrap() == NO_LABEL {
+            println!("Out : {:?}", &v);
             Some(v)
         } else {
-            let mut sigma_arc : Tr<_> = v.into_tr(self.state, self.match_type).unwrap();
+            let mut sigma_arc: Tr<_> = v.into_tr(self.state, self.match_type).unwrap();
 
             if self.rewrite_both {
                 if sigma_arc.ilabel == self.sigma_label {
@@ -262,7 +276,170 @@ where
             } else {
                 sigma_arc.olabel = self.sigma_match.unwrap();
             }
+            println!("Out2 : {:?}", sigma_arc);
             Some(IterItemMatcher::Tr(sigma_arc))
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::algorithms::compose::matchers::SortedMatcher;
+    use crate::algorithms::compose::{ComposeFst, ComposeFstOpOptions};
+    use crate::fst_traits::MutableFst;
+    use crate::prelude::compose::compose_filters::SequenceComposeFilterBuilder;
+    use crate::prelude::{tr_sort, ILabelCompare, OLabelCompare, VectorFst};
+    use crate::semirings::TropicalWeight;
+    use crate::utils::acceptor;
+    use crate::SymbolTable;
+
+    use super::*;
+
+    fn create_symt() -> SymbolTable {
+        let mut symt = SymbolTable::new();
+        symt.add_symbol("<sigma>"); // 1
+        symt.add_symbol("play"); // 2
+        symt.add_symbol("bowie"); // 3
+        symt.add_symbol("queen"); // 4
+        symt.add_symbol("please"); // 5
+
+        symt
+    }
+
+    fn query_fst(symt: &Arc<SymbolTable>) -> VectorFst<TropicalWeight> {
+        let labels = vec![
+            symt.get_label("play").unwrap(),
+            symt.get_label("bowie").unwrap(),
+            symt.get_label("please").unwrap(),
+        ];
+        let mut f: VectorFst<_> = acceptor(labels.as_slice(), TropicalWeight::one());
+        f.set_input_symbols(Arc::clone(symt));
+        f.set_output_symbols(Arc::clone(symt));
+        f
+    }
+
+    fn grammar_fst_loop(symt: &Arc<SymbolTable>) -> VectorFst<TropicalWeight> {
+        let mut fst = VectorFst::new();
+        fst.add_states(4);
+
+        let label_play = symt.get_label("play").unwrap();
+        let label_bowie = symt.get_label("bowie").unwrap();
+        let label_queen = symt.get_label("queen").unwrap();
+        let label_please = symt.get_label("please").unwrap();
+
+        fst.emplace_tr(0, label_play, label_play, TropicalWeight::one(), 1)
+            .unwrap();
+        fst.emplace_tr(1, label_bowie, label_bowie, TropicalWeight::one(), 2)
+            .unwrap();
+        fst.emplace_tr(1, label_queen, label_queen, TropicalWeight::one(), 2)
+            .unwrap();
+        fst.emplace_tr(2, label_please, label_please, TropicalWeight::one(), 3)
+            .unwrap();
+
+        fst.set_start(0).unwrap();
+        fst.set_final(3, TropicalWeight::one()).unwrap();
+
+        fst.set_input_symbols(Arc::clone(symt));
+        fst.set_output_symbols(Arc::clone(symt));
+
+        fst
+    }
+
+    fn xp_loop(symt: &Arc<SymbolTable>, q_fst: VectorFst<TropicalWeight>) {
+        println!("Loop");
+        let mut g_fst = grammar_fst_loop(symt);
+        tr_sort(&mut g_fst, ILabelCompare {});
+
+        let compose_lazy = ComposeFst::<
+            _,                                                 // W
+            _,                                                 // F1
+            _,                                                 // F2
+            _,                                                 // B1
+            _,                                                 // B2
+            SortedMatcher<_, _, _>,                            // M1
+            SortedMatcher<_, _, _>,                            // M2
+            SequenceComposeFilterBuilder<_, _, _, _, _, _, _>, // CFB
+        >::new(q_fst, g_fst)
+        .unwrap();
+        let mut compose_vec: VectorFst<_> = compose_lazy.compute().unwrap();
+
+        compose_vec.set_input_symbols(Arc::clone(symt));
+        compose_vec.set_output_symbols(Arc::clone(symt));
+
+        println!("Compose fst : \n{}", compose_vec);
+    }
+
+    fn grammar_fst_sigma(symt: &Arc<SymbolTable>) -> VectorFst<TropicalWeight> {
+        let mut fst = VectorFst::new();
+        fst.add_states(4);
+
+        let label_play = symt.get_label("play").unwrap();
+        let label_sigma = symt.get_label("<sigma>").unwrap();
+        let label_please = symt.get_label("please").unwrap();
+
+        fst.emplace_tr(0, label_play, label_play, TropicalWeight::one(), 1)
+            .unwrap();
+        fst.emplace_tr(1, label_sigma, label_sigma, TropicalWeight::one(), 2)
+            .unwrap();
+        fst.emplace_tr(2, label_please, label_please, TropicalWeight::one(), 3)
+            .unwrap();
+
+        fst.set_start(0).unwrap();
+        fst.set_final(3, TropicalWeight::one()).unwrap();
+
+        fst.set_input_symbols(Arc::clone(symt));
+        fst.set_output_symbols(Arc::clone(symt));
+
+        fst
+    }
+
+    fn xp_sigma(symt: &Arc<SymbolTable>, q_fst: VectorFst<TropicalWeight>) {
+        println!("Sigma");
+        let mut g_fst = grammar_fst_sigma(symt);
+        tr_sort(&mut g_fst, ILabelCompare {});
+
+        let compose_fst_op_opts = ComposeFstOpOptions::new(
+            None,
+            SigmaMatcher::new(
+                g_fst.clone(),
+                MatchType::MatchInput,
+                symt.get_label("<sigma>").unwrap(),
+                MatcherRewriteMode::MatcherRewriteAuto,
+                Arc::new(SortedMatcher::new(g_fst.clone(), MatchType::MatchInput).unwrap()),
+            )
+            .unwrap(),
+            None,
+            None,
+        );
+        let compose_lazy = ComposeFst::<
+            _,                                                 // W
+            _,                                                 // F1
+            _,                                                 // F2
+            _,                                                 // B1
+            _,                                                 // B2
+            SortedMatcher<_, _, _>,                            // M1
+            SigmaMatcher<_, _, _, SortedMatcher<_, _, _>>,     // M2
+            SequenceComposeFilterBuilder<_, _, _, _, _, _, _>, // CFB
+        >::new_with_options(q_fst, g_fst, compose_fst_op_opts)
+        .unwrap();
+        let mut compose_vec: VectorFst<_> = compose_lazy.compute().unwrap();
+
+        compose_vec.set_input_symbols(Arc::clone(symt));
+        compose_vec.set_output_symbols(Arc::clone(symt));
+
+        println!("Compose fst : \n{}", compose_vec);
+    }
+
+    #[test]
+    fn test_sigma_matcher() -> Result<()> {
+        let symt = Arc::new(create_symt());
+
+        let mut q_fst = query_fst(&symt);
+        tr_sort(&mut q_fst, OLabelCompare {});
+
+        xp_loop(&symt, q_fst.clone());
+        xp_sigma(&symt, q_fst);
+
+        Ok(())
     }
 }

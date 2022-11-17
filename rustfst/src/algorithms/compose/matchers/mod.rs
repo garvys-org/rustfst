@@ -79,7 +79,7 @@ pub enum MatcherRewriteMode {
 }
 
 // Use this to avoid autoref
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum IterItemMatcher<W: Semiring> {
     Tr(Tr<W>),
     EpsLoop,
