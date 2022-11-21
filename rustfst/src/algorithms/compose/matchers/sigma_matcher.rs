@@ -340,7 +340,10 @@ mod tests {
         fst
     }
 
-    fn xp_loop(symt: &Arc<SymbolTable>, q_fst: VectorFst<TropicalWeight>) -> VectorFst<TropicalWeight> {
+    fn xp_loop(
+        symt: &Arc<SymbolTable>,
+        q_fst: VectorFst<TropicalWeight>,
+    ) -> VectorFst<TropicalWeight> {
         let mut g_fst = grammar_fst_loop(symt);
         tr_sort(&mut g_fst, ILabelCompare {});
 
@@ -387,7 +390,10 @@ mod tests {
         fst
     }
 
-    fn xp_sigma(symt: &Arc<SymbolTable>, q_fst: VectorFst<TropicalWeight>) -> VectorFst<TropicalWeight> {
+    fn xp_sigma(
+        symt: &Arc<SymbolTable>,
+        q_fst: VectorFst<TropicalWeight>,
+    ) -> VectorFst<TropicalWeight> {
         let mut g_fst = grammar_fst_sigma(symt);
         tr_sort(&mut g_fst, ILabelCompare {});
 
