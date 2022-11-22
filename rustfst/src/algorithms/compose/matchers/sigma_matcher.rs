@@ -21,9 +21,8 @@ where
     B: Borrow<F>,
     M: Matcher<W, F, B>,
 {
-    fst: B,
     match_type: MatchType,
-    w: PhantomData<(W, F)>,
+    w: PhantomData<(W, F, B)>,
     sigma_label: Label,
     matcher: Arc<M>,
     rewrite_both: bool,
@@ -51,7 +50,6 @@ where
     M: Matcher<W, F, B>,
 {
     pub fn new(
-        fst: B,
         match_type: MatchType,
         sigma_label: Label,
         rewrite_mode: MatcherRewriteMode,
@@ -65,13 +63,12 @@ where
         }
         let rewrite_both = match rewrite_mode {
             MatcherRewriteMode::MatcherRewriteAuto => {
-                fst.borrow().properties().contains(FstProperties::ACCEPTOR)
+                matcher.fst().borrow().properties().contains(FstProperties::ACCEPTOR)
             }
             MatcherRewriteMode::MatcherRewriteAlways => true,
             MatcherRewriteMode::MatcherRewriteNever => false,
         };
         Ok(Self {
-            fst,
             match_type,
             rewrite_both,
             sigma_label,
