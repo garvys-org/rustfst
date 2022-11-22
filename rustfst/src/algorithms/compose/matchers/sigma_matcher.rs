@@ -62,9 +62,11 @@ where
             bail!("SigmaMatcher: {} cannot be used as sigma_label", EPS_LABEL)
         }
         let rewrite_both = match rewrite_mode {
-            MatcherRewriteMode::MatcherRewriteAuto => {
-                matcher.fst().borrow().properties().contains(FstProperties::ACCEPTOR)
-            }
+            MatcherRewriteMode::MatcherRewriteAuto => matcher
+                .fst()
+                .borrow()
+                .properties()
+                .contains(FstProperties::ACCEPTOR),
             MatcherRewriteMode::MatcherRewriteAlways => true,
             MatcherRewriteMode::MatcherRewriteNever => false,
         };
@@ -397,7 +399,6 @@ mod tests {
         let compose_fst_op_opts = ComposeFstOpOptions::new(
             None,
             SigmaMatcher::new(
-                g_fst.clone(),
                 MatchType::MatchInput,
                 symt.get_label("<sigma>").unwrap(),
                 MatcherRewriteMode::MatcherRewriteAuto,
