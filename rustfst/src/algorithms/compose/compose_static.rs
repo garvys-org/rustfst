@@ -12,6 +12,7 @@ use crate::algorithms::compose::matchers::{Matcher, SigmaMatcher, SortedMatcher}
 use crate::algorithms::compose::ComposeFst;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::prelude::compose::matchers::{MatchType, MatcherRewriteMode};
+use crate::prelude::compose::ComposeFstOpOptions;
 use crate::semirings::Semiring;
 use crate::Label;
 
@@ -62,8 +63,25 @@ impl Default for ComposeConfig {
     }
 }
 
-macro_rules! macro_compose {
-    ($fst1: expr, $fst2: expr, $lol: tt) => {
+macro_rules! run_compose {
+    ($fst1: expr, $fst2: expr, $builder: tt) => {
+        run_compose!(
+            $fst1, $fst2, $builder,
+            None, SortedMatcher<_,_,_>,
+            None, SortedMatcher<_,_,_>
+        )
+    };
+    (
+        $fst1: expr, $fst2: expr, $builder: tt,
+        $matcher1: expr, $matcher1_ty: ty,
+        $matcher2: expr, $matcher2_ty: ty
+    ) => {{
+        let compose_fst_op_opts = ComposeFstOpOptions::new(
+            $matcher1,
+            $matcher2,
+            None,
+            None,
+        );
         ComposeFst::<
             _,
             _,
@@ -72,9 +90,38 @@ macro_rules! macro_compose {
             _,
             _,
             _,
-            $lol<_, _, _, _, _, SortedMatcher<_, _, _>, SortedMatcher<_, _, _>>,
-        >::new($fst1, $fst2)?
+            $builder<_, _, _, _, _, $matcher1_ty, $matcher2_ty>,
+        >::new_with_options($fst1, $fst2, compose_fst_op_opts)?
         .compute()?
+    }};
+}
+
+macro_rules! compose_generate_matchers {
+    ($fst1: expr, $fst2: expr, $fst1_ty: ty, $fst2_ty: ty, $builder: tt, $config: expr) => {
+        {
+            if $config.sigma_matcher_config.is_none() {
+                let matcher1 = SortedMatcher::new($fst1.borrow(), MatchType::MatchOutput)?;
+
+                run_compose!(
+                    $fst1.borrow(), $fst2, $builder, Some(matcher1), SortedMatcher<_, $fst1_ty, _>, None, SortedMatcher<_,_,_>
+                )
+
+            } else {
+                let sigma_config = $config.sigma_matcher_config.unwrap();
+                let matcher1 = SortedMatcher::new($fst1.borrow(), MatchType::MatchOutput)?;
+                let matcher1 = SigmaMatcher::new(
+                    $fst1.borrow(), MatchType::MatchOutput,
+                    sigma_config.sigma_label, sigma_config.rewrite_mode,
+                    Arc::new(matcher1)
+                )?;
+
+                run_compose!(
+                    $fst1.borrow(), $fst2, $builder,
+                    Some(matcher1), SigmaMatcher<_,$fst1_ty,_,SortedMatcher<_, $fst1_ty,_>>,
+                    None, SortedMatcher<_,_,_>
+                )
+            }
+        }
     };
 }
 
@@ -90,26 +137,26 @@ pub fn compose_with_config<
     fst2: B2,
     config: ComposeConfig,
 ) -> Result<F3> {
-    // let matcher2 = SortedMatcher::new(fst2.borrow(), MatchType::MatchInput)?;
-    // if let Some(sigma_config) = config.matcher2_config.sigma_matcher_config {
-    //     let matcher2 = SigmaMatcher::new(
-    //         fst2.borrow(), MatchType::MatchInput,
-    //         sigma_config.sigma_label, sigma_config.rewrite_mode,
-    //         Arc::new(matcher2)
-    //     )?;
-    // }
     let mut ofst: F3 = match config.compose_filter {
         ComposeFilterEnum::AutoFilter => ComposeFst::new_auto(fst1, fst2)?.compute()?,
-        ComposeFilterEnum::NullFilter => macro_compose!(fst1, fst2, NullComposeFilterBuilder),
+        ComposeFilterEnum::NullFilter => {
+            compose_generate_matchers!(fst1, fst2, F1, F2, NullComposeFilterBuilder, config.matcher1_config)
+        }
         ComposeFilterEnum::SequenceFilter => {
-            macro_compose!(fst1, fst2, SequenceComposeFilterBuilder)
+            compose_generate_matchers!(fst1, fst2, F1, F2, SequenceComposeFilterBuilder, config.matcher1_config)
         }
         ComposeFilterEnum::AltSequenceFilter => {
-            macro_compose!(fst1, fst2, AltSequenceComposeFilterBuilder)
+            compose_generate_matchers!(fst1, fst2, F1, F2, AltSequenceComposeFilterBuilder, config.matcher1_config)
         }
-        ComposeFilterEnum::MatchFilter => macro_compose!(fst1, fst2, MatchComposeFilterBuilder),
-        ComposeFilterEnum::NoMatchFilter => macro_compose!(fst1, fst2, NoMatchComposeFilterBuilder),
-        ComposeFilterEnum::TrivialFilter => macro_compose!(fst1, fst2, TrivialComposeFilterBuilder),
+        ComposeFilterEnum::MatchFilter => {
+            compose_generate_matchers!(fst1, fst2, F1, F2, MatchComposeFilterBuilder, config.matcher1_config)
+        }
+        ComposeFilterEnum::NoMatchFilter => {
+            compose_generate_matchers!(fst1, fst2, F1, F2, NoMatchComposeFilterBuilder, config.matcher1_config)
+        }
+        ComposeFilterEnum::TrivialFilter => {
+            compose_generate_matchers!(fst1, fst2, F1, F2, TrivialComposeFilterBuilder, config.matcher1_config)
+        }
     };
 
     if config.connect {
