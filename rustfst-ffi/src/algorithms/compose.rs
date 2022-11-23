@@ -119,7 +119,11 @@ impl AsRust<MatcherConfig> for CMatcherConfig {
 
 impl CDrop for CMatcherConfig {
     fn do_drop(&mut self) -> Result<(), CDropError> {
-        todo!()
+        self.sigma_matcher_config
+            .as_mut()
+            .map(|v| v.do_drop())
+            .transpose()?;
+        Ok(())
     }
 }
 
