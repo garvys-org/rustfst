@@ -35,7 +35,13 @@ pub struct SigmaMatcherConfig {
 
 #[derive(Default, PartialEq, PartialOrd, Debug, Clone, Copy)]
 pub struct MatcherConfig {
-    sigma_matcher_config: Option<SigmaMatcherConfig>,
+    pub sigma_matcher_config: Option<SigmaMatcherConfig>,
+}
+
+impl MatcherConfig {
+    pub fn empty(&self) -> bool {
+        self.sigma_matcher_config.is_none()
+    }
 }
 
 #[derive(PartialOrd, PartialEq, Debug, Clone, Copy)]
@@ -173,7 +179,13 @@ pub fn compose_with_config<
         .create_matcher(fst2.borrow(), MatchType::MatchInput)?;
 
     let mut ofst: F3 = match config.compose_filter {
-        ComposeFilterEnum::AutoFilter => ComposeFst::new_auto(fst1, fst2)?.compute()?,
+        ComposeFilterEnum::AutoFilter => {
+            if config.matcher1_config.empty() && config.matcher2_config.empty() {
+                ComposeFst::new_auto(fst1, fst2)?.compute()?
+            } else {
+                bail!("Custom MatcherConfig not supported with AutoFilter")
+            }
+        }
         ComposeFilterEnum::NullFilter => {
             compose_generate_matchers!(
                 fst1,

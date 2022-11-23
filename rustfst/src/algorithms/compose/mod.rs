@@ -3,7 +3,10 @@ pub use self::compose_fst::ComposeFst;
 pub use self::compose_fst_op::{ComposeFstOp, ComposeFstOpState};
 pub use self::compose_fst_op_options::ComposeFstOpOptions;
 pub use self::compose_state_tuple::ComposeStateTuple;
-pub use self::compose_static::{compose, compose_with_config, ComposeConfig, ComposeFilterEnum};
+pub use self::compose_static::{
+    compose, compose_with_config, ComposeConfig, ComposeFilterEnum, MatcherConfig,
+    SigmaMatcherConfig,
+};
 pub use self::interval_reach_visitor::IntervalReachVisitor;
 pub use self::interval_set::{IntInterval, IntervalSet};
 pub use self::label_reachable::{LabelReachable, LabelReachableData};
