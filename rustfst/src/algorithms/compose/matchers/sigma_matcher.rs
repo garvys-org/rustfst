@@ -245,11 +245,7 @@ where
                 .unwrap()
                 .peekable();
             self.sigma_match = Some(self.match_label);
-            if let Some(v_iterator) = self.matcher_iterator.next() {
-                v_iterator
-            } else {
-                return None;
-            }
+            self.matcher_iterator.next()?
         } else {
             return None;
         };
