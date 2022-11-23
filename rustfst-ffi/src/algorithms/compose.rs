@@ -90,17 +90,9 @@ pub struct CSigmaMatcherConfig {
     pub rewrite_mode: CMatcherRewriteMode,
 }
 
-#[derive(RawPointerConverter, Debug, Clone)]
+#[derive(RawPointerConverter, Debug, Clone, Default)]
 pub struct CMatcherConfig {
     pub sigma_matcher_config: Option<CSigmaMatcherConfig>,
-}
-
-impl Default for CMatcherConfig {
-    fn default() -> Self {
-        Self {
-            sigma_matcher_config: None,
-        }
-    }
 }
 
 impl AsRust<MatcherConfig> for CMatcherConfig {
@@ -201,8 +193,8 @@ pub extern "C" fn fst_compose_config_new(
         };
 
         let compose_config = CComposeConfig {
-            matcher1_config: matcher1_config.clone(),
-            matcher2_config: matcher2_config.clone(),
+            matcher1_config,
+            matcher2_config,
             compose_filter: CComposeFilterEnum(compose_filter as usize),
             connect,
         };
