@@ -1,5 +1,11 @@
 from rustfst import VectorFst, Tr
-from rustfst.algorithms.compose import ComposeFilter, ComposeConfig, MatcherConfig, MatcherRewriteMode, compose_with_config
+from rustfst.algorithms.compose import (
+    ComposeFilter,
+    ComposeConfig,
+    MatcherConfig,
+    MatcherRewriteMode,
+    compose_with_config,
+)
 from rustfst.symbol_table import SymbolTable
 from rustfst.algorithms import acceptor
 
@@ -149,29 +155,23 @@ def test_compose_config():
 
 
 def test_sigma_compose():
-    symt = SymbolTable.from_symbols(["<eps>", "play", "david", "queen", "please", "<sigma>"])
+    symt = SymbolTable.from_symbols(
+        ["<eps>", "play", "david", "queen", "please", "<sigma>"]
+    )
 
     query_fst = acceptor("play queen please", symt)
     sigma_fst = acceptor("play <sigma> please", symt)
 
     matcher_config_right = MatcherConfig(
-        sigma_label=symt.find("<sigma>"),
-        rewrite_mode=MatcherRewriteMode.AUTO
+        sigma_label=symt.find("<sigma>"), rewrite_mode=MatcherRewriteMode.AUTO
     )
 
     compose_config = ComposeConfig(
         compose_filter=ComposeFilter.SEQUENCEFILTER,
         connect=True,
-        matcher2_config=matcher_config_right
+        matcher2_config=matcher_config_right,
     )
 
-    res = compose_with_config(
-        query_fst,
-        sigma_fst,
-        compose_config
-    )
+    res = compose_with_config(query_fst, sigma_fst, compose_config)
 
     assert res == query_fst
-
-
-

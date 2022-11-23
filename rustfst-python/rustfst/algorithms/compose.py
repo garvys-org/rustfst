@@ -25,7 +25,7 @@ class MatcherConfig:
         ret_code = lib.fst_matcher_config_new(
             ctypes.c_size_t(sigma_label),
             ctypes.c_size_t(rewrite_mode.value),
-            ctypes.byref(config)
+            ctypes.byref(config),
         )
         err_msg = "Error creating MatcherConfig"
         check_ffi_error(ret_code, err_msg)
