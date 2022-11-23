@@ -69,7 +69,7 @@ pub trait SerializableFst<W: SerializableSemiring>: ExpandedFst<W> {
     fn write_text<P: AsRef<Path>>(&self, path_output: P) -> Result<()> {
         let buffer = File::create(path_output.as_ref())?;
         let mut line_writer = LineWriter::new(buffer);
-        write_fst!(self, line_writer, true);
+        write_fst!(self, line_writer, true, false);
         Ok(())
     }
 
@@ -77,7 +77,7 @@ pub trait SerializableFst<W: SerializableSemiring>: ExpandedFst<W> {
     fn text(&self) -> Result<String> {
         let buffer = Vec::<u8>::new();
         let mut line_writer = LineWriter::new(buffer);
-        write_fst!(self, line_writer, true);
+        write_fst!(self, line_writer, true, false);
         Ok(String::from_utf8(line_writer.into_inner()?)?)
     }
 

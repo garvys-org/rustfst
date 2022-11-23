@@ -5,6 +5,7 @@ use anyhow::Result;
 use bitflags::bitflags;
 pub use generic_matcher::GenericMatcher;
 pub use multi_eps_matcher::{MultiEpsMatcher, MultiEpsMatcherFlags};
+pub use sigma_matcher::SigmaMatcher;
 pub use sorted_matcher::SortedMatcher;
 
 use crate::fst_traits::Fst;
@@ -15,6 +16,7 @@ use std::borrow::Borrow;
 
 mod generic_matcher;
 mod multi_eps_matcher;
+mod sigma_matcher;
 mod sorted_matcher;
 
 bitflags! {
@@ -67,8 +69,17 @@ pub enum MatchType {
     MatchUnknown,
 }
 
+#[derive(Copy, Debug, PartialOrd, PartialEq, Clone)]
+/// Specifies whether we rewrite both the input and output sides during matching.
+pub enum MatcherRewriteMode {
+    /// Rewrites both sides iff acceptor.
+    MatcherRewriteAuto,
+    MatcherRewriteAlways,
+    MatcherRewriteNever,
+}
+
 // Use this to avoid autoref
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum IterItemMatcher<W: Semiring> {
     Tr(Tr<W>),
     EpsLoop,
