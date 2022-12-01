@@ -27,7 +27,7 @@ where
     sigma_label: Label,
     matcher: Arc<M>,
     rewrite_both: bool,
-    sigma_allowed_matches: Option<HashSet<Label>>
+    sigma_allowed_matches: Option<HashSet<Label>>,
 }
 
 fn has_sigma<W, F, B, M>(state: StateId, matcher: &Arc<M>, sigma_label: Label) -> Result<bool>
@@ -56,7 +56,7 @@ where
         sigma_label: Label,
         rewrite_mode: MatcherRewriteMode,
         matcher: Arc<M>,
-        sigma_allowed_matches: Option<HashSet<Label>>
+        sigma_allowed_matches: Option<HashSet<Label>>,
     ) -> Result<Self> {
         if match_type == MatchType::MatchBoth {
             bail!("SigmaMatcher: Bad match type")
@@ -79,7 +79,7 @@ where
             sigma_label,
             matcher,
             w: PhantomData,
-            sigma_allowed_matches
+            sigma_allowed_matches,
         })
     }
     pub fn sigma_label(&self) -> Label {
@@ -111,7 +111,7 @@ where
             self.match_type,
             Arc::clone(&self.matcher),
             self.rewrite_both,
-            &self.sigma_allowed_matches
+            &self.sigma_allowed_matches,
         )
     }
 
@@ -169,7 +169,10 @@ where
     w: PhantomData<(W, F, B)>,
 }
 
-fn is_match_label_allowed(sigma_allowed_matches: &Option<HashSet<Label>>, match_label: Label) -> bool {
+fn is_match_label_allowed(
+    sigma_allowed_matches: &Option<HashSet<Label>>,
+    match_label: Label,
+) -> bool {
     if let Some(allowed_matches) = sigma_allowed_matches {
         allowed_matches.contains(&match_label)
     } else {
@@ -191,7 +194,7 @@ where
         match_type: MatchType,
         matcher: Arc<M>,
         rewrite_both: bool,
-        sigma_allowed_matches: &Option<HashSet<Label>>
+        sigma_allowed_matches: &Option<HashSet<Label>>,
     ) -> Result<Self> {
         if match_label == sigma_label && sigma_label != NO_LABEL {
             bail!("SigmaMatcher::Find: bad label (sigma)")
@@ -351,8 +354,14 @@ mod tests {
             .unwrap();
         fst.emplace_tr(1, label_queen, label_queen, TropicalWeight::one(), 2)
             .unwrap();
-        fst.emplace_tr(1, label_radiohead, label_radiohead, TropicalWeight::one(), 2)
-            .unwrap();
+        fst.emplace_tr(
+            1,
+            label_radiohead,
+            label_radiohead,
+            TropicalWeight::one(),
+            2,
+        )
+        .unwrap();
         fst.emplace_tr(2, label_please, label_please, TropicalWeight::one(), 3)
             .unwrap();
 
@@ -418,7 +427,7 @@ mod tests {
     fn xp_sigma(
         symt: &Arc<SymbolTable>,
         q_fst: VectorFst<TropicalWeight>,
-        sigma_allowed_matches: Option<Vec<String>>
+        sigma_allowed_matches: Option<Vec<String>>,
     ) -> VectorFst<TropicalWeight> {
         let mut g_fst = grammar_fst_sigma(symt);
         tr_sort(&mut g_fst, ILabelCompare {});
@@ -430,7 +439,8 @@ mod tests {
                 symt.get_label("<sigma>").unwrap(),
                 MatcherRewriteMode::MatcherRewriteAuto,
                 Arc::new(SortedMatcher::new(g_fst.clone(), MatchType::MatchInput).unwrap()),
-                sigma_allowed_matches.map(|e| e.iter().map(|s| symt.get_label(s).unwrap()).collect())
+                sigma_allowed_matches
+                    .map(|e| e.iter().map(|s| symt.get_label(s).unwrap()).collect()),
             )
             .unwrap(),
             None,
@@ -485,7 +495,10 @@ mod tests {
 
             println!("{}", composed_fst_sigma.clone());
 
-            assert_eq!(composed_fst_loop, composed_fst_sigma, "Radiohead should match");
+            assert_eq!(
+                composed_fst_loop, composed_fst_sigma,
+                "Radiohead should match"
+            );
         }
 
         // Queen should work
@@ -510,7 +523,10 @@ mod tests {
             let composed_fst_sigma = xp_sigma(&symt, q_fst, allowed_sigma_match.clone());
             println!("{}", composed_fst_sigma.clone());
 
-            assert_ne!(composed_fst_loop, composed_fst_sigma, "Bowie should NOT match");
+            assert_ne!(
+                composed_fst_loop, composed_fst_sigma,
+                "Bowie should NOT match"
+            );
         }
 
         Ok(())

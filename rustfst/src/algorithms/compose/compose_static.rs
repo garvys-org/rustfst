@@ -31,7 +31,7 @@ pub enum ComposeFilterEnum {
 pub struct SigmaMatcherConfig {
     pub sigma_label: Label,
     pub rewrite_mode: MatcherRewriteMode,
-    pub sigma_allowed_matches: Option<Vec<Label>>
+    pub sigma_allowed_matches: Option<Vec<Label>>,
 }
 
 #[derive(Default, PartialEq, PartialOrd, Debug, Clone)]
@@ -98,7 +98,9 @@ impl MatcherConfig {
                 sigma_config.sigma_label,
                 sigma_config.rewrite_mode,
                 Arc::new(matcher),
-                sigma_config.sigma_allowed_matches.map(|e| e.iter().cloned().collect())
+                sigma_config
+                    .sigma_allowed_matches
+                    .map(|e| e.iter().cloned().collect()),
             )?;
 
             Ok(MatcherEnum::SigmaMatcher(matcher))

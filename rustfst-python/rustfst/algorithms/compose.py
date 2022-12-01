@@ -1,6 +1,6 @@
 from __future__ import annotations
 import ctypes
-from typing import Optional
+from typing import Optional, List
 
 from rustfst.ffi_utils import (
     lib,
@@ -19,17 +19,38 @@ class MatcherRewriteMode(Enum):
     NEVER = 2
 
 
+class CIntArray(ctypes.Structure):
+    _fields_ = [("data", ctypes.POINTER(ctypes.c_uint32)), ("size", ctypes.c_uint32)]
+
+
 class MatcherConfig:
-    def __init__(self, sigma_label: int, rewrite_mode: MatcherRewriteMode):
+    def __init__(
+        self,
+        sigma_label: int,
+        rewrite_mode: MatcherRewriteMode,
+        sigma_allowed_matches: Optional[List[int]] = None,
+    ):
+        array = []
+        if sigma_allowed_matches is not None:
+            array = sigma_allowed_matches
+
+        arr = CIntArray()
+        arr.size = ctypes.c_uint32(len(array))
+        arr.data = (ctypes.c_uint32 * len(array))(*array)
+
         config = ctypes.pointer(ctypes.c_void_p())
         ret_code = lib.fst_matcher_config_new(
             ctypes.c_size_t(sigma_label),
             ctypes.c_size_t(rewrite_mode.value),
+            arr,
             ctypes.byref(config),
         )
         err_msg = "Error creating MatcherConfig"
         check_ffi_error(ret_code, err_msg)
         self.ptr = config
+
+    def __del__(self):
+        lib.fst_matcher_config_destroy(self.ptr)
 
 
 class ComposeFilter(Enum):
@@ -70,6 +91,9 @@ class ComposeConfig:
         err_msg = "Error creating ComposeConfig"
         check_ffi_error(ret_code, err_msg)
         self.ptr = config
+
+    def __del__(self):
+        lib.fst_compose_config_destroy(self.ptr)
 
 
 def compose(fst: VectorFst, other_fst: VectorFst) -> VectorFst:
