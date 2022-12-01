@@ -27,7 +27,7 @@ class MatcherConfig:
     def __init__(
         self,
         sigma_label: int,
-        rewrite_mode: MatcherRewriteMode,
+        rewrite_mode: MatcherRewriteMode = MatcherRewriteMode.AUTO,
         sigma_allowed_matches: Optional[List[int]] = None,
     ):
         array = []

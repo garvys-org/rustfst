@@ -200,7 +200,6 @@ def test_sigma_compose_with_allowlist():
         connect=True,
         matcher2_config=matcher_config_right,
     )
-    print()
 
     # Queen should work
     res_queen = compose_with_config(query_fst_queen, sigma_fst, compose_config)

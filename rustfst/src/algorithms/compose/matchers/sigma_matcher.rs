@@ -493,8 +493,6 @@ mod tests {
             let composed_fst_loop = xp_loop(&symt, q_fst.clone());
             let composed_fst_sigma = xp_sigma(&symt, q_fst, allowed_sigma_match.clone());
 
-            println!("{}", composed_fst_sigma.clone());
-
             assert_eq!(
                 composed_fst_loop, composed_fst_sigma,
                 "Radiohead should match"
@@ -509,8 +507,6 @@ mod tests {
             let composed_fst_loop = xp_loop(&symt, q_fst.clone());
             let composed_fst_sigma = xp_sigma(&symt, q_fst, allowed_sigma_match.clone());
 
-            println!("{}", composed_fst_sigma.clone());
-
             assert_eq!(composed_fst_loop, composed_fst_sigma, "Queen should match");
         }
 
@@ -521,7 +517,6 @@ mod tests {
 
             let composed_fst_loop = xp_loop(&symt, q_fst.clone());
             let composed_fst_sigma = xp_sigma(&symt, q_fst, allowed_sigma_match.clone());
-            println!("{}", composed_fst_sigma.clone());
 
             assert_ne!(
                 composed_fst_loop, composed_fst_sigma,
