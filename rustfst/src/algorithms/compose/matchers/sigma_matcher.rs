@@ -12,6 +12,7 @@ use crate::algorithms::compose::matchers::{
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
 use crate::{Label, Semiring, StateId, Tr, EPS_LABEL, NO_LABEL};
+use std::collections::HashSet;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SigmaMatcher<W, F, B, M>
@@ -26,6 +27,7 @@ where
     sigma_label: Label,
     matcher: Arc<M>,
     rewrite_both: bool,
+    sigma_allowed_matches: Option<HashSet<Label>>,
 }
 
 fn has_sigma<W, F, B, M>(state: StateId, matcher: &Arc<M>, sigma_label: Label) -> Result<bool>
@@ -54,6 +56,7 @@ where
         sigma_label: Label,
         rewrite_mode: MatcherRewriteMode,
         matcher: Arc<M>,
+        sigma_allowed_matches: Option<HashSet<Label>>,
     ) -> Result<Self> {
         if match_type == MatchType::MatchBoth {
             bail!("SigmaMatcher: Bad match type")
@@ -76,6 +79,7 @@ where
             sigma_label,
             matcher,
             w: PhantomData,
+            sigma_allowed_matches,
         })
     }
     pub fn sigma_label(&self) -> Label {
@@ -107,6 +111,7 @@ where
             self.match_type,
             Arc::clone(&self.matcher),
             self.rewrite_both,
+            &self.sigma_allowed_matches,
         )
     }
 
@@ -164,6 +169,17 @@ where
     w: PhantomData<(W, F, B)>,
 }
 
+fn is_match_label_allowed(
+    sigma_allowed_matches: &Option<HashSet<Label>>,
+    match_label: Label,
+) -> bool {
+    if let Some(allowed_matches) = sigma_allowed_matches {
+        allowed_matches.contains(&match_label)
+    } else {
+        true
+    }
+}
+
 impl<W, F, B, M> IteratorSigmaMatcher<W, F, B, M>
 where
     W: Semiring,
@@ -178,6 +194,7 @@ where
         match_type: MatchType,
         matcher: Arc<M>,
         rewrite_both: bool,
+        sigma_allowed_matches: &Option<HashSet<Label>>,
     ) -> Result<Self> {
         if match_label == sigma_label && sigma_label != NO_LABEL {
             bail!("SigmaMatcher::Find: bad label (sigma)")
@@ -186,22 +203,23 @@ where
         let mut find_empty = false;
         let has_sigma = has_sigma(state, &matcher, sigma_label)?;
 
-        let mut matcher_itetor_match_label = matcher.iter(state, match_label)?.peekable();
-        let (sigma_match, matcher_iterator) = if matcher_itetor_match_label.peek().is_some() {
-            (Some(NO_LABEL), matcher_itetor_match_label)
+        let mut matcher_iterator_match_label = matcher.iter(state, match_label)?.peekable();
+        let (sigma_match, matcher_iterator) = if matcher_iterator_match_label.peek().is_some() {
+            (Some(NO_LABEL), matcher_iterator_match_label)
         } else {
-            let mut matcher_itetor_sigma_label = matcher.iter(state, sigma_label)?.peekable();
+            let mut matcher_iterator_sigma_label = matcher.iter(state, sigma_label)?.peekable();
             if has_sigma
                 && match_label != EPS_LABEL
                 && match_label != NO_LABEL
-                && matcher_itetor_sigma_label.peek().is_some()
+                && is_match_label_allowed(sigma_allowed_matches, match_label)
+                && matcher_iterator_sigma_label.peek().is_some()
             {
-                (Some(match_label), matcher_itetor_sigma_label)
+                (Some(match_label), matcher_iterator_sigma_label)
             } else {
                 find_empty = true;
 
                 // The iterator here should be empty. Trick to avoid adding an Option.
-                (None, matcher_itetor_sigma_label)
+                (None, matcher_iterator_sigma_label)
             }
         };
 
@@ -292,14 +310,26 @@ mod tests {
         symt.add_symbol("bowie"); // 3
         symt.add_symbol("queen"); // 4
         symt.add_symbol("please"); // 5
+        symt.add_symbol("radiohead");
 
         symt
     }
 
-    fn query_fst(symt: &Arc<SymbolTable>) -> VectorFst<TropicalWeight> {
+    fn query_fst_bowie(symt: &Arc<SymbolTable>) -> VectorFst<TropicalWeight> {
+        query_fst(symt, "bowie")
+    }
+
+    fn query_fst_queen(symt: &Arc<SymbolTable>) -> VectorFst<TropicalWeight> {
+        query_fst(symt, "queen")
+    }
+    fn query_fst_radiohead(symt: &Arc<SymbolTable>) -> VectorFst<TropicalWeight> {
+        query_fst(symt, "radiohead")
+    }
+
+    fn query_fst(symt: &Arc<SymbolTable>, artist_name: &str) -> VectorFst<TropicalWeight> {
         let labels = vec![
             symt.get_label("play").unwrap(),
-            symt.get_label("bowie").unwrap(),
+            symt.get_label(artist_name).unwrap(),
             symt.get_label("please").unwrap(),
         ];
         let mut f: VectorFst<_> = acceptor(labels.as_slice(), TropicalWeight::one());
@@ -315,6 +345,7 @@ mod tests {
         let label_play = symt.get_label("play").unwrap();
         let label_bowie = symt.get_label("bowie").unwrap();
         let label_queen = symt.get_label("queen").unwrap();
+        let label_radiohead = symt.get_label("radiohead").unwrap();
         let label_please = symt.get_label("please").unwrap();
 
         fst.emplace_tr(0, label_play, label_play, TropicalWeight::one(), 1)
@@ -323,6 +354,14 @@ mod tests {
             .unwrap();
         fst.emplace_tr(1, label_queen, label_queen, TropicalWeight::one(), 2)
             .unwrap();
+        fst.emplace_tr(
+            1,
+            label_radiohead,
+            label_radiohead,
+            TropicalWeight::one(),
+            2,
+        )
+        .unwrap();
         fst.emplace_tr(2, label_please, label_please, TropicalWeight::one(), 3)
             .unwrap();
 
@@ -388,6 +427,7 @@ mod tests {
     fn xp_sigma(
         symt: &Arc<SymbolTable>,
         q_fst: VectorFst<TropicalWeight>,
+        sigma_allowed_matches: Option<Vec<String>>,
     ) -> VectorFst<TropicalWeight> {
         let mut g_fst = grammar_fst_sigma(symt);
         tr_sort(&mut g_fst, ILabelCompare {});
@@ -399,6 +439,8 @@ mod tests {
                 symt.get_label("<sigma>").unwrap(),
                 MatcherRewriteMode::MatcherRewriteAuto,
                 Arc::new(SortedMatcher::new(g_fst.clone(), MatchType::MatchInput).unwrap()),
+                sigma_allowed_matches
+                    .map(|e| e.iter().map(|s| symt.get_label(s).unwrap()).collect()),
             )
             .unwrap(),
             None,
@@ -427,13 +469,60 @@ mod tests {
     fn test_sigma_matcher() -> Result<()> {
         let symt = Arc::new(create_symt());
 
-        let mut q_fst = query_fst(&symt);
+        let mut q_fst = query_fst_bowie(&symt);
         tr_sort(&mut q_fst, OLabelCompare {});
 
         let composed_fst_loop = xp_loop(&symt, q_fst.clone());
-        let composed_fst_sigma = xp_sigma(&symt, q_fst);
+        let composed_fst_sigma = xp_sigma(&symt, q_fst, None);
 
         assert_eq!(composed_fst_loop, composed_fst_sigma);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_sigma_matcher_with_limited_allowed_values() -> Result<()> {
+        let symt = Arc::new(create_symt());
+        let allowed_sigma_match = Some(vec!["radiohead".to_string(), "queen".to_string()]);
+
+        // Radiohead should work
+        {
+            let mut q_fst = query_fst_radiohead(&symt);
+            tr_sort(&mut q_fst, OLabelCompare {});
+
+            let composed_fst_loop = xp_loop(&symt, q_fst.clone());
+            let composed_fst_sigma = xp_sigma(&symt, q_fst, allowed_sigma_match.clone());
+
+            assert_eq!(
+                composed_fst_loop, composed_fst_sigma,
+                "Radiohead should match"
+            );
+        }
+
+        // Queen should work
+        {
+            let mut q_fst = query_fst_queen(&symt);
+            tr_sort(&mut q_fst, OLabelCompare {});
+
+            let composed_fst_loop = xp_loop(&symt, q_fst.clone());
+            let composed_fst_sigma = xp_sigma(&symt, q_fst, allowed_sigma_match.clone());
+
+            assert_eq!(composed_fst_loop, composed_fst_sigma, "Queen should match");
+        }
+
+        // Bowie should not work
+        {
+            let mut q_fst = query_fst_bowie(&symt);
+            tr_sort(&mut q_fst, OLabelCompare {});
+
+            let composed_fst_loop = xp_loop(&symt, q_fst.clone());
+            let composed_fst_sigma = xp_sigma(&symt, q_fst, allowed_sigma_match.clone());
+
+            assert_ne!(
+                composed_fst_loop, composed_fst_sigma,
+                "Bowie should NOT match"
+            );
+        }
 
         Ok(())
     }

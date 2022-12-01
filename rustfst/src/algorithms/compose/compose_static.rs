@@ -27,13 +27,14 @@ pub enum ComposeFilterEnum {
     NoMatchFilter,
 }
 
-#[derive(PartialEq, PartialOrd, Debug, Clone, Copy)]
+#[derive(PartialEq, PartialOrd, Debug, Clone)]
 pub struct SigmaMatcherConfig {
     pub sigma_label: Label,
     pub rewrite_mode: MatcherRewriteMode,
+    pub sigma_allowed_matches: Option<Vec<Label>>,
 }
 
-#[derive(Default, PartialEq, PartialOrd, Debug, Clone, Copy)]
+#[derive(Default, PartialEq, PartialOrd, Debug, Clone)]
 pub struct MatcherConfig {
     pub sigma_matcher_config: Option<SigmaMatcherConfig>,
 }
@@ -44,7 +45,7 @@ impl MatcherConfig {
     }
 }
 
-#[derive(PartialOrd, PartialEq, Debug, Clone, Copy)]
+#[derive(PartialOrd, PartialEq, Debug, Clone)]
 pub struct ComposeConfig {
     pub compose_filter: ComposeFilterEnum,
     pub matcher1_config: MatcherConfig,
@@ -90,13 +91,16 @@ impl MatcherConfig {
 
             Ok(MatcherEnum::SortedMatcher(matcher))
         } else {
-            let sigma_config = self.sigma_matcher_config.unwrap();
+            let sigma_config = self.sigma_matcher_config.clone().unwrap();
             let matcher = SortedMatcher::new(fst, match_type)?;
             let matcher = SigmaMatcher::new(
                 match_type,
                 sigma_config.sigma_label,
                 sigma_config.rewrite_mode,
                 Arc::new(matcher),
+                sigma_config
+                    .sigma_allowed_matches
+                    .map(|e| e.iter().cloned().collect()),
             )?;
 
             Ok(MatcherEnum::SigmaMatcher(matcher))

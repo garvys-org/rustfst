@@ -175,3 +175,40 @@ def test_sigma_compose():
     res = compose_with_config(query_fst, sigma_fst, compose_config)
 
     assert res == query_fst
+
+
+def test_sigma_compose_with_allowlist():
+    symt = SymbolTable.from_symbols(
+        ["<eps>", "play", "bowie", "queen", "radiohead", "please", "<sigma>"]
+    )
+
+    query_fst_queen = acceptor("play queen please", symt)
+    query_fst_bowie = acceptor("play bowie please", symt)
+    query_fst_radiohead = acceptor("play radiohead please", symt)
+
+    sigma_fst = acceptor("play <sigma> please", symt)
+    allowlist = [symt.find(w) for w in ["queen", "bowie"]]
+
+    matcher_config_right = MatcherConfig(
+        sigma_label=symt.find("<sigma>"),
+        rewrite_mode=MatcherRewriteMode.AUTO,
+        sigma_allowed_matches=allowlist,
+    )
+
+    compose_config = ComposeConfig(
+        compose_filter=ComposeFilter.SEQUENCEFILTER,
+        connect=True,
+        matcher2_config=matcher_config_right,
+    )
+
+    # Queen should work
+    res_queen = compose_with_config(query_fst_queen, sigma_fst, compose_config)
+    assert res_queen == query_fst_queen
+
+    # Bowie should work
+    res_bowie = compose_with_config(query_fst_bowie, sigma_fst, compose_config)
+    assert res_bowie == query_fst_bowie
+
+    # Radiohead should NOT work
+    res_radiohead = compose_with_config(query_fst_radiohead, sigma_fst, compose_config)
+    assert res_radiohead != query_fst_radiohead

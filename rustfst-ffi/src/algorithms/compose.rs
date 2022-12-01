@@ -12,6 +12,7 @@ use rustfst::algorithms::compose::{
 };
 use rustfst::fst_impls::VectorFst;
 use rustfst::semirings::TropicalWeight;
+use rustfst::Label;
 
 #[derive(RawPointerConverter, Debug)]
 pub struct CComposeFilterEnum(pub(crate) usize);
@@ -83,11 +84,37 @@ impl CReprOf<MatcherRewriteMode> for CMatcherRewriteMode {
     }
 }
 
-#[derive(AsRust, CReprOf, CDrop, RawPointerConverter, Debug, Clone)]
-#[target_type(SigmaMatcherConfig)]
+#[derive(RawPointerConverter, Debug, Clone)]
 pub struct CSigmaMatcherConfig {
     pub sigma_label: CLabel,
     pub rewrite_mode: CMatcherRewriteMode,
+    pub sigma_allowed_matches: Option<Vec<CLabel>>,
+}
+
+impl AsRust<SigmaMatcherConfig> for CSigmaMatcherConfig {
+    fn as_rust(&self) -> Result<SigmaMatcherConfig, AsRustError> {
+        Ok(SigmaMatcherConfig {
+            sigma_label: self.sigma_label.as_rust()?,
+            rewrite_mode: self.rewrite_mode.as_rust()?,
+            sigma_allowed_matches: self.sigma_allowed_matches.clone(),
+        })
+    }
+}
+
+impl CDrop for CSigmaMatcherConfig {
+    fn do_drop(&mut self) -> Result<(), CDropError> {
+        Ok(())
+    }
+}
+
+impl CReprOf<SigmaMatcherConfig> for CSigmaMatcherConfig {
+    fn c_repr_of(input: SigmaMatcherConfig) -> Result<Self, CReprOfError> {
+        Ok(CSigmaMatcherConfig {
+            sigma_label: <Label as CReprOf<_>>::c_repr_of(input.sigma_label)?,
+            rewrite_mode: CMatcherRewriteMode::c_repr_of(input.rewrite_mode)?,
+            sigma_allowed_matches: input.sigma_allowed_matches,
+        })
+    }
 }
 
 #[derive(RawPointerConverter, Debug, Clone, Default)]
@@ -142,17 +169,48 @@ pub struct CComposeConfig {
     pub matcher2_config: CMatcherConfig,
 }
 
+#[derive(Debug)]
+#[repr(C)]
+pub struct CIntArray {
+    pub data: *const u32,
+    pub size: usize,
+}
+
+impl<'a> From<&'a [u32]> for CIntArray {
+    fn from(array: &[u32]) -> Self {
+        Self {
+            size: array.len(),
+            data: array.as_ptr(),
+        }
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn fst_matcher_config_new(
     sigma_label: libc::size_t,
     rewrite_mode: libc::size_t,
+    sigma_allowed_matches: CIntArray,
     config: *mut *const CMatcherConfig,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
+        let sigma_allowed_matches = unsafe {
+            std::slice::from_raw_parts(sigma_allowed_matches.data, sigma_allowed_matches.size)
+                .to_vec()
+        };
+        let sigma_allowed_matches = sigma_allowed_matches
+            .iter()
+            .map(|v| *v as CLabel)
+            .collect::<Vec<_>>();
+        let sigma_allowed_matches = if sigma_allowed_matches.is_empty() {
+            None
+        } else {
+            Some(sigma_allowed_matches)
+        };
         let matcher_config = CMatcherConfig {
             sigma_matcher_config: Some(CSigmaMatcherConfig {
                 sigma_label: sigma_label as CLabel,
                 rewrite_mode: CMatcherRewriteMode(rewrite_mode as usize),
+                sigma_allowed_matches,
             }),
         };
 
@@ -199,6 +257,34 @@ pub extern "C" fn fst_compose_config_new(
             connect,
         };
         unsafe { *config = compose_config.into_raw_pointer() };
+        Ok(())
+    })
+}
+
+#[no_mangle]
+pub extern "C" fn fst_matcher_config_destroy(ptr: *mut CMatcherConfig) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        if ptr.is_null() {
+            return Ok(());
+        }
+
+        unsafe {
+            Box::from_raw(ptr);
+        }
+        Ok(())
+    })
+}
+
+#[no_mangle]
+pub extern "C" fn fst_compose_config_destroy(ptr: *mut CComposeConfig) -> RUSTFST_FFI_RESULT {
+    wrap(|| {
+        if ptr.is_null() {
+            return Ok(());
+        }
+
+        unsafe {
+            Box::from_raw(ptr);
+        }
         Ok(())
     })
 }
