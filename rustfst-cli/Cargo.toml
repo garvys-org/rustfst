@@ -1,6 +1,6 @@
 [package]
 name = "rustfst-cli"
-version = "0.12.0"
+version = "0.13.0"
 authors = ["Garvys <alexandre.caulier@orange.fr>"]
 edition = "2018"
 
