@@ -112,7 +112,7 @@ impl CReprOf<SigmaMatcherConfig> for CSigmaMatcherConfig {
         Ok(CSigmaMatcherConfig {
             sigma_label: <Label as CReprOf<_>>::c_repr_of(input.sigma_label)?,
             rewrite_mode: CMatcherRewriteMode::c_repr_of(input.rewrite_mode)?,
-            sigma_allowed_matches: input.sigma_allowed_matches.clone(),
+            sigma_allowed_matches: input.sigma_allowed_matches,
         })
     }
 }
