@@ -298,9 +298,7 @@ where
             return None;
         }
 
-        if self.matcher_iterator.peek().is_none() {
-            return None;
-        }
+        self.matcher_iterator.peek()?;
 
         let v = self.value_openfst();
         self.next_openfst();
