@@ -696,7 +696,7 @@ dependencies = [
 
 [[package]]
 name = "rustfst"
-version = "0.12.0"
+version = "0.13.0"
 dependencies = [
  "anyhow",
  "bimap",
@@ -726,7 +726,7 @@ dependencies = [
 
 [[package]]
 name = "rustfst-cli"
-version = "0.12.0"
+version = "0.13.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -740,7 +740,7 @@ dependencies = [
 
 [[package]]
 name = "rustfst-ffi"
-version = "0.12.0"
+version = "0.13.0"
 dependencies = [
  "anyhow",
  "downcast-rs",

@@ -237,6 +237,51 @@ where
             w: PhantomData,
         })
     }
+
+    // This assusmes, the iterator is not done
+    pub fn value_openfst(&mut self) -> IterItemMatcher<W> {
+        if self.sigma_match.unwrap() == NO_LABEL {
+            self.matcher_iterator.peek().unwrap().clone()
+        } else {
+            let mut sigma_arc: Tr<_> = self
+                .matcher_iterator
+                .peek()
+                .unwrap()
+                .clone()
+                .into_tr(self.state, self.match_type)
+                .unwrap();
+
+            if self.rewrite_both {
+                if sigma_arc.ilabel == self.sigma_label {
+                    sigma_arc.ilabel = self.sigma_match.unwrap();
+                }
+                if sigma_arc.olabel == self.sigma_label {
+                    sigma_arc.olabel = self.sigma_match.unwrap();
+                }
+            } else if self.match_type == MatchType::MatchInput {
+                sigma_arc.ilabel = self.sigma_match.unwrap();
+            } else {
+                sigma_arc.olabel = self.sigma_match.unwrap();
+            }
+            IterItemMatcher::Tr(sigma_arc)
+        }
+    }
+
+    pub fn next_openfst(&mut self) {
+        let r = self.matcher_iterator.next();
+        if r.is_none()
+            && self.has_sigma
+            && self.sigma_match.unwrap() == NO_LABEL
+            && self.match_label > 0
+        {
+            self.matcher_iterator = self
+                .matcher
+                .iter(self.state, self.sigma_label)
+                .unwrap()
+                .peekable();
+            self.sigma_match = Some(self.match_label);
+        }
+    }
 }
 
 impl<W, F, B, M> Iterator for IteratorSigmaMatcher<W, F, B, M>
@@ -253,40 +298,11 @@ where
             return None;
         }
 
-        let v = if let Some(v_iterator) = self.matcher_iterator.next() {
-            v_iterator
-        } else if self.has_sigma && self.sigma_match.unwrap() == NO_LABEL && self.match_label > 0 {
-            // TODO : Move to FallibleIterator
-            self.matcher_iterator = self
-                .matcher
-                .iter(self.state, self.sigma_label)
-                .unwrap()
-                .peekable();
-            self.sigma_match = Some(self.match_label);
-            self.matcher_iterator.next()?
-        } else {
-            return None;
-        };
+        self.matcher_iterator.peek()?;
 
-        if self.sigma_match.unwrap() == NO_LABEL {
-            Some(v)
-        } else {
-            let mut sigma_arc: Tr<_> = v.into_tr(self.state, self.match_type).unwrap();
-
-            if self.rewrite_both {
-                if sigma_arc.ilabel == self.sigma_label {
-                    sigma_arc.ilabel = self.sigma_match.unwrap();
-                }
-                if sigma_arc.olabel == self.sigma_label {
-                    sigma_arc.olabel = self.sigma_match.unwrap();
-                }
-            } else if self.match_type == MatchType::MatchInput {
-                sigma_arc.ilabel = self.sigma_match.unwrap();
-            } else {
-                sigma_arc.olabel = self.sigma_match.unwrap();
-            }
-            Some(IterItemMatcher::Tr(sigma_arc))
-        }
+        let v = self.value_openfst();
+        self.next_openfst();
+        Some(v)
     }
 }
 
@@ -294,12 +310,14 @@ where
 mod tests {
     use crate::algorithms::compose::matchers::SortedMatcher;
     use crate::algorithms::compose::{ComposeFst, ComposeFstOpOptions};
-    use crate::fst_traits::MutableFst;
+    use crate::fst_traits::{MutableFst, SerializableFst};
     use crate::prelude::compose::compose_filters::SequenceComposeFilterBuilder;
     use crate::prelude::{tr_sort, ILabelCompare, OLabelCompare, VectorFst};
     use crate::semirings::TropicalWeight;
     use crate::utils::acceptor;
     use crate::SymbolTable;
+    use path_abs::{PathAbs, PathMut, PathOps};
+    use std::path::PathBuf;
 
     use super::*;
 
@@ -523,6 +541,56 @@ mod tests {
                 "Bowie should NOT match"
             );
         }
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_sigma_matcher_2() -> Result<()> {
+        let mut path_folder =
+            PathAbs::new(PathBuf::from(env!("CARGO_MANIFEST_DIR")).parent().unwrap())?;
+        path_folder.append("rustfst-tests-data")?;
+        path_folder.append("sigma-matcher-2")?;
+
+        let mut left_fst = VectorFst::<TropicalWeight>::read(path_folder.join("left.fst"))?;
+        let mut right_fst = VectorFst::<TropicalWeight>::read(path_folder.join("right.fst"))?;
+        let symt = Arc::new(SymbolTable::read(path_folder.join("symt.bin"))?);
+
+        left_fst.set_input_symbols(symt.clone());
+        left_fst.set_output_symbols(symt.clone());
+        right_fst.set_input_symbols(symt.clone());
+        right_fst.set_output_symbols(symt.clone());
+
+        tr_sort(&mut left_fst, OLabelCompare {});
+        tr_sort(&mut right_fst, ILabelCompare {});
+
+        let compose_fst_op_opts = ComposeFstOpOptions::new(
+            None,
+            SigmaMatcher::new(
+                MatchType::MatchInput,
+                symt.get_label("<sigma>").unwrap(),
+                MatcherRewriteMode::MatcherRewriteAuto,
+                Arc::new(SortedMatcher::new(right_fst.clone(), MatchType::MatchInput).unwrap()),
+                None,
+            )
+            .unwrap(),
+            None,
+            None,
+        );
+        let compose_lazy = ComposeFst::<
+            _,                                                 // W
+            _,                                                 // F1
+            _,                                                 // F2
+            _,                                                 // B1
+            _,                                                 // B2
+            SortedMatcher<_, _, _>,                            // M1
+            SigmaMatcher<_, _, _, SortedMatcher<_, _, _>>,     // M2
+            SequenceComposeFilterBuilder<_, _, _, _, _, _, _>, // CFB
+        >::new_with_options(left_fst, right_fst, compose_fst_op_opts)
+        .unwrap();
+        let compose_vec: VectorFst<TropicalWeight> = compose_lazy.compute().unwrap();
+
+        assert_eq!(compose_vec.string_paths_iter()?.count(), 4);
 
         Ok(())
     }
