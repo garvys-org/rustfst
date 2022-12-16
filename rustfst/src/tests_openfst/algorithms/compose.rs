@@ -121,6 +121,7 @@ fn do_test_compose_lookahead<W>(
 where
     W: SerializableSemiring + WeightQuantize + WeaklyDivisibleSemiring,
 {
+    println!("Lookahead composition");
     type TLaFst<S, F> = MatcherFst<
         S,
         F,
