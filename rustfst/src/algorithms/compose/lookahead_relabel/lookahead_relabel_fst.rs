@@ -1,36 +1,35 @@
+use crate::algorithms::compose::lookahead_relabel::lookahead_relabel_fst_op::LookaheadRelabelFstOp;
 use crate::algorithms::lazy::{LazyFst, SimpleHashMapCache};
-use crate::algorithms::relabel::relabel_fst_op::RelabelFstOp;
-use crate::algorithms::relabel_pairs::iterator_to_hashmap;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
+use crate::prelude::compose::LabelReachableData;
 use crate::{Semiring, StateId, SymbolTable, TrsVec};
-use anyhow::{Context, Result};
+use anyhow::Result;
 use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::sync::Arc;
 
-type InnerLazyFst<W, F, B> = LazyFst<W, RelabelFstOp<W, F, B>, SimpleHashMapCache<W>>;
+type InnerLazyFst<W, F, B> = LazyFst<W, LookaheadRelabelFstOp<W, F, B>, SimpleHashMapCache<W>>;
 
-pub struct RelabelFst<W: Semiring, F: Fst<W>, B: Borrow<F>>(InnerLazyFst<W, F, B>);
+pub struct LookaheadRelabelFst<W: Semiring, F: Fst<W>, B: Borrow<F>>(InnerLazyFst<W, F, B>);
 
-impl<W: Semiring, F: Fst<W>, B: Borrow<F>> RelabelFst<W, F, B> {
-    pub fn new<I, J>(fst: B, ipairs: I, opairs: J) -> Result<Self>
-    where
-        I: IntoIterator<Item = (StateId, StateId)>,
-        J: IntoIterator<Item = (StateId, StateId)>,
-    {
-        let map_ilabels = iterator_to_hashmap(ipairs)
-            .with_context(|| format_err!("Error while creating the HashMap for ipairs"))?;
+impl<W: Semiring, F: Fst<W>, B: Borrow<F>> LookaheadRelabelFst<W, F, B> {
+    pub fn new(
+        fst: B,
+        label_reachable_data: LabelReachableData,
+        relabel_input: bool,
+    ) -> Result<Self> {
+        let mut isymt = fst.borrow().input_symbols().cloned();
+        let mut osymt = fst.borrow().output_symbols().cloned();
+        if relabel_input {
+            isymt = None;
+        } else {
+            osymt = None;
+        }
 
-        let map_olabels = iterator_to_hashmap(opairs)
-            .with_context(|| format_err!("Error while creating the HashMap for opairs"))?;
-
-        let isymt = fst.borrow().input_symbols().cloned();
-        let osymt = fst.borrow().output_symbols().cloned();
-
-        let fst_op = RelabelFstOp::new(fst, map_ilabels, map_olabels);
+        let fst_op = LookaheadRelabelFstOp::new(fst, label_reachable_data, relabel_input);
         let fst_cache = SimpleHashMapCache::default();
-        Ok(RelabelFst(LazyFst::from_op_and_cache(
+        Ok(LookaheadRelabelFst(LazyFst::from_op_and_cache(
             fst_op, fst_cache, isymt, osymt,
         )))
     }
@@ -40,7 +39,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> RelabelFst<W, F, B> {
     }
 }
 
-impl<W, F, B> CoreFst<W> for RelabelFst<W, F, B>
+impl<W, F, B> CoreFst<W> for LookaheadRelabelFst<W, F, B>
 where
     W: Semiring,
     F: Fst<W>,
@@ -89,7 +88,7 @@ where
     }
 }
 
-impl<'a, W, F, B> StateIterator<'a> for RelabelFst<W, F, B>
+impl<'a, W, F, B> StateIterator<'a> for LookaheadRelabelFst<W, F, B>
 where
     W: Semiring,
     F: Fst<W> + 'a,
@@ -102,7 +101,7 @@ where
     }
 }
 
-impl<'a, W, F, B> FstIterator<'a, W> for RelabelFst<W, F, B>
+impl<'a, W, F, B> FstIterator<'a, W> for LookaheadRelabelFst<W, F, B>
 where
     W: Semiring,
     F: Fst<W> + 'a,
@@ -115,7 +114,7 @@ where
     }
 }
 
-impl<W, F, B> Fst<W> for RelabelFst<W, F, B>
+impl<W, F, B> Fst<W> for LookaheadRelabelFst<W, F, B>
 where
     W: Semiring,
     F: Fst<W> + 'static,
@@ -146,7 +145,7 @@ where
     }
 }
 
-impl<W, F, B> Debug for RelabelFst<W, F, B>
+impl<W, F, B> Debug for LookaheadRelabelFst<W, F, B>
 where
     W: Semiring,
     F: Fst<W>,
@@ -165,8 +164,8 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_replace_fst_sync() {
+    fn test_lookahead_relabel_fst_sync() {
         fn is_sync<T: Sync>() {}
-        is_sync::<RelabelFst<TropicalWeight, VectorFst<_>, VectorFst<_>>>();
+        is_sync::<LookaheadRelabelFst<TropicalWeight, VectorFst<_>, VectorFst<_>>>();
     }
 }

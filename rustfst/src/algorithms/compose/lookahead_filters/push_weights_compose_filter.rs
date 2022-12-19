@@ -12,7 +12,7 @@ use crate::algorithms::compose::lookahead_filters::LookAheadComposeFilterTrait;
 use crate::algorithms::compose::lookahead_matchers::{LookAheadMatcherData, LookaheadMatcher};
 use crate::algorithms::compose::matchers::{MatchType, MatcherFlags};
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{ExpandedFst, Fst};
+use crate::fst_traits::Fst;
 use crate::semirings::{
     DivideType, Semiring, SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
@@ -80,8 +80,8 @@ impl<W, F1, F2, B1, B2, M1, M2, CFB, SMT> ComposeFilterBuilder<W, F1, F2, B1, B2
     for PushWeightsComposeFilterBuilder<W, F1, F2, B1, B2, M1, M2, CFB, SMT>
 where
     W: SerializableSemiring + WeaklyDivisibleSemiring + WeightQuantize,
-    F1: ExpandedFst<W>,
-    F2: ExpandedFst<W>,
+    F1: Fst<W>,
+    F2: Fst<W>,
     B1: Borrow<F1> + Debug,
     B2: Borrow<F2> + Debug,
     M1: LookaheadMatcher<W, F1, B1>,

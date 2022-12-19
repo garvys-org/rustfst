@@ -28,5 +28,8 @@ mod compose_static;
 mod interval_reach_visitor;
 mod interval_set;
 mod label_reachable;
+mod lookahead_relabel;
 mod matcher_fst;
 mod state_reachable;
+
+pub use self::lookahead_relabel::LookaheadRelabelFst;

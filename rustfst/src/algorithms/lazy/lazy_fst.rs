@@ -61,9 +61,11 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
     }
 
     fn num_trs(&self, s: StateId) -> Result<usize> {
-        self.cache
-            .num_trs(s)
-            .ok_or_else(|| format_err!("State {:?} doesn't exist", s))
+        let trs = self.get_trs(s)?;
+        Ok(trs.trs().len())
+        // self.cache
+        //     .num_trs(s)
+        //     .ok_or_else(|| format_err!("NT State {:?} doesn't exist", s))
     }
 
     unsafe fn num_trs_unchecked(&self, s: StateId) -> usize {
@@ -92,13 +94,13 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
     fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
         self.cache
             .num_input_epsilons(state)
-            .ok_or_else(|| format_err!("State {:?} doesn't exist", state))
+            .ok_or_else(|| format_err!("NI State {:?} doesn't exist", state))
     }
 
     fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
         self.cache
             .num_output_epsilons(state)
-            .ok_or_else(|| format_err!("State {:?} doesn't exist", state))
+            .ok_or_else(|| format_err!("NO State {:?} doesn't exist", state))
     }
 }
 

@@ -93,29 +93,32 @@ where
         })
     }
 
-    // // Construct a new Matcher Fst intended for LookAhead composition and relabel fst2 wrt to the first fst.
-    // pub fn new_with_relabeling_2<F2: Fst<W>>(
-    //     mut fst: F,
-    //     fst2: &F2,
-    //     relabel_input: bool,
-    // ) -> Result<Self> {
-    //     let imatcher_data = M::create_data::<F, _>(&fst, MatchType::MatchInput)?;
-    //     let omatcher_data = M::create_data::<F, _>(&fst, MatchType::MatchOutput)?;
-    //
-    //     let mut add_on = (imatcher_data, omatcher_data);
-    //
-    //     LabelLookAheadRelabeler::init(&mut fst, &mut add_on)?;
-    //     LabelLookAheadRelabeler::relabel(fst2, &mut add_on, relabel_input)?;
-    //
-    //     let add_on = (add_on.0.map(Arc::new), add_on.1.map(Arc::new));
-    //
-    //     let fst_add_on = FstAddOn::new(fst, add_on);
-    //     Ok(Self {
-    //         fst_add_on,
-    //         matcher: PhantomData,
-    //         w: PhantomData,
-    //     })
-    // }
+    // Construct a new Matcher Fst intended for LookAhead composition and relabel fst2 wrt to the first fst.
+    pub fn new_with_relabeling_lazy_right<F2: Fst<W> + 'static>(
+        mut fst: F,
+        fst2: Arc<F2>,
+        relabel_input: bool,
+    ) -> Result<(Self, impl Fst<W>)> {
+        let imatcher_data = M::create_data::<F, _>(&fst, MatchType::MatchInput)?;
+        let omatcher_data = M::create_data::<F, _>(&fst, MatchType::MatchOutput)?;
+
+        let mut add_on = (imatcher_data, omatcher_data);
+
+        LabelLookAheadRelabeler::init(&mut fst, &mut add_on)?;
+        let la_fst2 = LabelLookAheadRelabeler::relabel_lazy(fst2, &mut add_on, relabel_input)?;
+
+        let add_on = (add_on.0.map(Arc::new), add_on.1.map(Arc::new));
+
+        let fst_add_on = FstAddOn::new(fst, add_on);
+        Ok((
+            Self {
+                fst_add_on,
+                matcher: PhantomData,
+                w: PhantomData,
+            },
+            la_fst2,
+        ))
+    }
 }
 
 impl<W: Semiring, F: CoreFst<W>, B: Borrow<F>, M, T> CoreFst<W> for MatcherFst<W, F, B, M, T> {

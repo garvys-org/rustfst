@@ -10,6 +10,7 @@ use crate::algorithms::{fst_convert_from_ref, tr_sort};
 use crate::fst_impls::VectorFst;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst};
+use crate::prelude::compose::LookaheadRelabelFst;
 use crate::semirings::Semiring;
 use crate::{Label, StateId, Tr, Trs, EPS_LABEL, NO_LABEL, UNASSIGNED};
 
@@ -60,6 +61,19 @@ impl LabelReachableData {
             .or_insert_with(|| n as Label + 1)
     }
 
+    pub fn relabel_unmut(&self, label: Label) -> Result<Label> {
+        if label == EPS_LABEL {
+            return Ok(EPS_LABEL);
+        }
+        Ok(*self.label2index.get(&label).ok_or_else(|| {
+            format_err!(
+                "Missing label {:?} from relabelling table {:?}",
+                label,
+                self.label2index
+            )
+        })?)
+    }
+
     pub fn relabel_fst<W: Semiring, F: MutableFst<W>>(
         &mut self,
         fst: &mut F,
@@ -90,6 +104,34 @@ impl LabelReachableData {
         }
 
         Ok(())
+    }
+
+    pub fn relabel_fst_lazy<W: Semiring, F: Fst<W> + 'static>(
+        &mut self,
+        fst: Arc<F>,
+        relabel_input: bool,
+    ) -> Result<impl Fst<W>> {
+        // 1. Retrieve the relevant SymbolTable
+        let symt = if relabel_input {
+            fst.input_symbols()
+                .ok_or_else(|| format_err!("Input SymbolTable not attached to the fst which is mandatory for the relabel fst lazy to work"))?
+        } else {
+            fst.output_symbols()
+                .ok_or_else(|| format_err!("Output SymbolTable not attached to the fst which is mandatory for the relabel fst lazy to work"))?
+        };
+
+        // 2. Use the SymbolTable as a proxy to retrieve all the labels that are going to be ralabelled.
+        // By calling `relabel` on each of those we guarantee we won't see other labels at inference.
+        for (label, _) in symt.iter() {
+            self.relabel(label);
+        }
+
+        // 3. Create a custom Lazy Fst that will take as input the current LabelReachableData object
+        // with the whole relabeling mapping.
+        // This Lazy fst, will 1. use the mapping to relabel 2. sort the transitions
+        let la_relabel_fst = LookaheadRelabelFst::<W, F, _>::new(fst, self.clone(), relabel_input)?;
+
+        Ok(la_relabel_fst)
     }
 
     // Returns relabeling pairs (cf. relabel.h::Relabel()). If avoid_collisions is

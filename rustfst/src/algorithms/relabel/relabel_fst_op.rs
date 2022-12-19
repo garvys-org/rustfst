@@ -6,9 +6,9 @@ use anyhow::Result;
 use crate::algorithms::lazy::FstOp;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::Fst;
-use crate::{Semiring, TrsVec, StateId, Trs};
-use std::fmt::{Debug, Formatter};
+use crate::{Semiring, StateId, Trs, TrsVec};
 use std::collections::HashMap;
+use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
 
 pub struct RelabelFstOp<W: Semiring, F: Fst<W>, B: Borrow<F>> {
@@ -19,16 +19,29 @@ pub struct RelabelFstOp<W: Semiring, F: Fst<W>, B: Borrow<F>> {
 }
 
 impl<W: Semiring, F: Fst<W>, B: Borrow<F>> RelabelFstOp<W, F, B> {
-    pub fn new(fst: B, map_ilabels: HashMap<StateId, StateId>, map_olabels: HashMap<StateId, StateId>) -> Self {
+    pub fn new(
+        fst: B,
+        map_ilabels: HashMap<StateId, StateId>,
+        map_olabels: HashMap<StateId, StateId>,
+    ) -> Self {
         Self {
-            fst, map_ilabels, map_olabels, ghost: PhantomData
+            fst,
+            map_ilabels,
+            map_olabels,
+            ghost: PhantomData,
         }
     }
 }
 
 impl<W: Semiring, F: Fst<W>, B: Borrow<F>> Debug for RelabelFstOp<W, F, B> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        unimplemented!()
+        write!(
+            f,
+            "RelabelFstOp {{ fst: {:?}, map_ilabels: {:?}, map_olabels: {:?} }}",
+            self.fst.borrow(),
+            self.map_ilabels,
+            self.map_olabels
+        )
     }
 }
 
@@ -48,6 +61,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> FstOp<W> for RelabelFstOp<W, F, B> {
             if let Some(new_olabel) = self.map_olabels.get(&tr.olabel) {
                 new_tr.olabel = *new_olabel;
             }
+            trs.push(new_tr);
         }
         Ok(TrsVec(Arc::new(trs)))
     }
