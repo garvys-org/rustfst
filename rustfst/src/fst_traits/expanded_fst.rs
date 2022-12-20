@@ -60,10 +60,12 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
                     || tr1.olabel != tr2.olabel
                     || tr1.nextstate != tr2.nextstate
                 {
+                    println!("State {} Ilabel {} {} Olabel {} {} Nextstate {} {}", state, tr1.ilabel, tr2.ilabel, tr1.olabel, tr2.olabel, tr1.nextstate, tr2.nextstate);
                     return false;
                 }
 
                 if !tr1.weight.approx_equal(&tr2.weight, delta) {
+                    println!("Not the same weight : {:?} != {:?}", tr1.weight, tr2.weight);
                     return false;
                 }
             }
@@ -79,6 +81,7 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
             };
 
             if !fw_equal {
+                println!("Pouet");
                 return false;
             }
         }

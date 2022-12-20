@@ -14,7 +14,7 @@ use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
 
 pub struct LookaheadRelabelFstOp<W: Semiring, F: Fst<W>, B: Borrow<F>> {
-    fst: B,
+    pub(crate) fst: B,
     label_reachable_data: LabelReachableData,
     relabel_input: bool,
     ghost: PhantomData<(W, F)>,

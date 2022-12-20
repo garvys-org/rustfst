@@ -29,6 +29,7 @@ use crate::tests_openfst::utils::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 use crate::{StateId, SymbolTable, Trs};
 use std::cmp::max;
+use crate::prelude::lazy::SerializableLazyFst;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ComposeOperationResult {
@@ -391,6 +392,9 @@ where
     // Check clonability
     fn is_clone<T: Clone>(_v: &T) {}
     is_clone(&dyn_fst);
+
+    fn is_serializable<T: SerializableLazyFst>(_v: &T) {}
+    is_serializable(&dyn_fst);
 
     let mut static_fst: VectorFst<_> = dyn_fst.compute()?;
     // TODO: This is a hotfix that should be removed.

@@ -61,11 +61,11 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
     }
 
     fn num_trs(&self, s: StateId) -> Result<usize> {
-        let trs = self.get_trs(s)?;
-        Ok(trs.trs().len())
-        // self.cache
-        //     .num_trs(s)
-        //     .ok_or_else(|| format_err!("NT State {:?} doesn't exist", s))
+        // let trs = self.get_trs(s)?;
+        // Ok(trs.trs().len())
+        self.cache
+            .num_trs(s)
+            .ok_or_else(|| format_err!("NT State {:?} doesn't exist", s))
     }
 
     unsafe fn num_trs_unchecked(&self, s: StateId) -> usize {
@@ -270,6 +270,34 @@ where
         }
         Ok(fst_out)
     }
+}
+
+/// Turns the Lazy FST into a static one.
+pub fn iterate_lazy<W: Semiring, F: Fst<W>>(fst: &F) -> Result<()> {
+    let start_state = fst.start();
+    let start_state = match start_state {
+        Some(s) => s,
+        None => return Ok(()),
+    };
+    let mut queue = VecDeque::new();
+    let mut visited_states = vec![];
+    visited_states.resize(start_state as usize + 1, false);
+    visited_states[start_state as usize] = true;
+    queue.push_back(start_state);
+    while let Some(s) = queue.pop_front() {
+        let trs_owner = fst.get_trs(s)?;
+        for tr in trs_owner.trs() {
+            if (tr.nextstate as usize) >= visited_states.len() {
+                visited_states.resize(tr.nextstate as usize + 1, false);
+            }
+            if !visited_states[tr.nextstate as usize] {
+                queue.push_back(tr.nextstate);
+                visited_states[tr.nextstate as usize] = true;
+            }
+        }
+        fst.final_weight(s)?;
+    }
+    Ok(())
 }
 
 impl<W, Op, Cache> SerializableLazyFst for LazyFst<W, Op, Cache>
