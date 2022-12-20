@@ -82,8 +82,8 @@ where
     >,
     match_type: MatchType,
     properties: FstProperties,
-    fst1: B1,
-    fst2: B2,
+    pub(crate) fst1: B1,
+    pub(crate) fst2: B2,
 }
 
 impl<W, F1, F2, B1, B2, M1, M2, CFB> Clone for ComposeFstOp<W, F1, F2, B1, B2, M1, M2, CFB>

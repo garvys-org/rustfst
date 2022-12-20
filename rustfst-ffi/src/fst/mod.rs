@@ -327,7 +327,7 @@ pub fn fst_destroy(fst_ptr: *mut CFst) -> RUSTFST_FFI_RESULT {
         }
 
         unsafe {
-            Box::from_raw(fst_ptr);
+            drop(Box::from_raw(fst_ptr));
         }
         Ok(())
     })

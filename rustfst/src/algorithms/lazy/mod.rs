@@ -1,7 +1,7 @@
 pub use self::cache::*;
 pub use fst_op::{AccessibleOpState, FstOp, SerializableOpState};
 pub use fst_op_2::FstOp2;
-pub use lazy_fst::{LazyFst, SerializableLazyFst, iterate_lazy};
+pub use lazy_fst::{iterate_lazy, LazyFst, SerializableLazyFst};
 pub use lazy_fst_2::LazyFst2;
 pub use state_table::StateTable;
 

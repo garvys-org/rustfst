@@ -52,8 +52,8 @@ impl<'a, W: Semiring, FI: Fst<W>, FO: MutableFst<W>> Visitor<'a, W, FI>
         self.path.clear();
     }
 
-    fn init_state(&mut self, _s: StateId, _root: StateId) -> bool {
-        true
+    fn init_state(&mut self, _s: StateId, _root: StateId) -> Result<bool> {
+        Ok(true)
     }
 
     fn tree_tr(&mut self, _s: StateId, tr: &Tr<W>) -> bool {

@@ -27,7 +27,7 @@ impl StateReachable {
         let props = fst.properties_check(FstProperties::ACYCLIC)?;
         let acyclic = props.contains(FstProperties::ACYCLIC);
         if acyclic {
-            Ok(Self::new_acyclic(fst))
+            Ok(Self::new_acyclic(fst)?)
         } else {
             Self::new_cyclic(fst)
         }
@@ -35,7 +35,7 @@ impl StateReachable {
 
     pub fn new_cyclic<W: Semiring, F: ExpandedFst<W>>(fst: &F) -> Result<Self> {
         let (scc, cfst): (_, VectorFst<_>) = condense(fst).unwrap();
-        let reachable = StateReachable::new_acyclic(&cfst);
+        let reachable = StateReachable::new_acyclic(&cfst)?;
         let mut nscc = vec![];
 
         // Gets the number of states per SCC.
@@ -66,13 +66,13 @@ impl StateReachable {
         Ok(Self { isets, state2index })
     }
 
-    pub fn new_acyclic<W: Semiring, F: ExpandedFst<W>>(fst: &F) -> Self {
+    pub fn new_acyclic<W: Semiring, F: ExpandedFst<W>>(fst: &F) -> Result<Self> {
         let mut reach_visitor = IntervalReachVisitor::new(fst);
-        dfs_visit(fst, &mut reach_visitor, &AnyTrFilter {}, false);
-        Self {
+        dfs_visit(fst, &mut reach_visitor, &AnyTrFilter {}, false)?;
+        Ok(Self {
             isets: reach_visitor.isets,
             state2index: reach_visitor.state2index,
-        }
+        })
     }
 
     #[allow(unused)]

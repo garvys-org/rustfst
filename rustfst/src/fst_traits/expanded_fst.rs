@@ -60,7 +60,16 @@ pub trait ExpandedFst<W: Semiring>: Fst<W> + Clone + PartialEq + FstIntoIterator
                     || tr1.olabel != tr2.olabel
                     || tr1.nextstate != tr2.nextstate
                 {
-                    println!("State {} Ilabel {} {} Olabel {} {} Nextstate {} {}", state, tr1.ilabel, tr2.ilabel, tr1.olabel, tr2.olabel, tr1.nextstate, tr2.nextstate);
+                    println!(
+                        "State {} Ilabel {} {} Olabel {} {} Nextstate {} {}",
+                        state,
+                        tr1.ilabel,
+                        tr2.ilabel,
+                        tr1.olabel,
+                        tr2.olabel,
+                        tr1.nextstate,
+                        tr2.nextstate
+                    );
                     return false;
                 }
 

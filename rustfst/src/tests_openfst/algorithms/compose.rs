@@ -24,12 +24,12 @@ use crate::algorithms::lazy::SimpleHashMapCache;
 use crate::algorithms::{tr_compares::ILabelCompare, tr_sort};
 use crate::fst_impls::VectorFst;
 use crate::fst_traits::{CoreFst, ExpandedFst, Fst, MutableFst, SerializableFst};
+use crate::prelude::lazy::SerializableLazyFst;
 use crate::semirings::{SerializableSemiring, WeaklyDivisibleSemiring, WeightQuantize};
 use crate::tests_openfst::utils::test_eq_fst;
 use crate::tests_openfst::FstTestData;
 use crate::{StateId, SymbolTable, Trs};
 use std::cmp::max;
-use crate::prelude::lazy::SerializableLazyFst;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ComposeOperationResult {

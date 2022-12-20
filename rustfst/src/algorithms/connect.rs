@@ -51,7 +51,7 @@ use crate::NO_STATE_ID;
 ///
 pub fn connect<W: Semiring, F: ExpandedFst<W> + MutableFst<W>>(fst: &mut F) -> Result<()> {
     let mut visitor = ConnectVisitor::new(fst);
-    dfs_visit(fst, &mut visitor, &AnyTrFilter {}, false);
+    dfs_visit(fst, &mut visitor, &AnyTrFilter {}, false)?;
     let mut dstates = Vec::with_capacity(visitor.access.len());
     for s in 0..visitor.access.len() {
         if !visitor.access[s] || !visitor.coaccess[s] {
@@ -100,7 +100,7 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> ConnectVisitor<'a, W, F> {
 impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for ConnectVisitor<'a, W, F> {
     fn init_visit(&mut self, _fst: &'a F) {}
 
-    fn init_state(&mut self, s: StateId, root: StateId) -> bool {
+    fn init_state(&mut self, s: StateId, root: StateId) -> Result<bool> {
         self.scc_stack.push(s);
         let s = s as usize;
         self.dfnumber[s] = self.nstates as i32;
@@ -108,7 +108,7 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for ConnectVisit
         self.onstack[s] = true;
         self.access[s] = root == self.start;
         self.nstates += 1;
-        true
+        Ok(true)
     }
 
     fn tree_tr(&mut self, _s: StateId, _tr: &Tr<W>) -> bool {

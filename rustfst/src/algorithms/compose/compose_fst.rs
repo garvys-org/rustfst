@@ -1,7 +1,9 @@
-use anyhow::Result;
 use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::path::Path;
+use std::sync::Arc;
+
+use anyhow::Result;
 
 use crate::algorithms::compose::compose_filters::{
     ComposeFilter, ComposeFilterBuilder, SequenceComposeFilterBuilder,
@@ -10,6 +12,7 @@ use crate::algorithms::compose::matchers::{GenericMatcher, Matcher};
 use crate::algorithms::compose::{
     ComposeFstOp, ComposeFstOpOptions, ComposeFstOpState, ComposeStateTuple,
 };
+use crate::algorithms::lazy::iterate_lazy;
 use crate::algorithms::lazy::{
     FstCache, LazyFst, SerializableCache, SerializableLazyFst, SimpleVecCache,
 };
@@ -18,7 +21,6 @@ use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, Sta
 use crate::parsers::SerializeBinary;
 use crate::semirings::{Semiring, SerializableSemiring};
 use crate::{StateId, SymbolTable, TrsVec};
-use std::sync::Arc;
 
 type InnerLazyFst<W, F1, F2, B1, B2, M1, M2, CFB, Cache> =
     LazyFst<W, ComposeFstOp<W, F1, F2, B1, B2, M1, M2, CFB>, Cache>;
@@ -160,6 +162,9 @@ where
 
     /// Turns the Lazy FST into a static one.
     pub fn compute<F: MutableFst<W> + AllocableFst<W>>(&self) -> Result<F> {
+        // Small trick to make sure that both FSTs are fully expanded.
+        iterate_lazy(self.0.op.fst1.borrow())?;
+        iterate_lazy(self.0.op.fst2.borrow())?;
         self.0.compute()
     }
 }
@@ -356,10 +361,11 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use crate::algorithms::compose::matchers::SortedMatcher;
     use crate::fst_impls::VectorFst;
     use crate::semirings::TropicalWeight;
+
+    use super::*;
 
     #[test]
     fn test_compose_fst_sync() {

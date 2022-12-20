@@ -18,7 +18,7 @@ where
     F: MutableFst<W>,
 {
     let mut visitors = SccVisitor::new(ifst, false, true);
-    dfs_visit(ifst, &mut visitors, &AnyTrFilter {}, false);
+    dfs_visit(ifst, &mut visitors, &AnyTrFilter {}, false)?;
 
     let mut finals = HashSet::new();
 

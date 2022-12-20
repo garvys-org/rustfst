@@ -43,7 +43,7 @@ pub fn compute_fst_properties<W: Semiring, F: ExpandedFst<W>>(
         .intersects(dfs_props | FstProperties::WEIGHTED_CYCLES | FstProperties::UNWEIGHTED_CYCLES)
     {
         let mut visitor = SccVisitor::new(fst, true, true);
-        dfs_visit(fst, &mut visitor, &AnyTrFilter {}, false);
+        dfs_visit(fst, &mut visitor, &AnyTrFilter {}, false)?;
 
         // Retrieves props computed in the DFS.
         comp_props |= dfs_props & visitor.props;

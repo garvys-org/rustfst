@@ -269,7 +269,7 @@ pub extern "C" fn fst_matcher_config_destroy(ptr: *mut CMatcherConfig) -> RUSTFS
         }
 
         unsafe {
-            Box::from_raw(ptr);
+            drop(Box::from_raw(ptr));
         }
         Ok(())
     })
@@ -283,7 +283,7 @@ pub extern "C" fn fst_compose_config_destroy(ptr: *mut CComposeConfig) -> RUSTFS
         }
 
         unsafe {
-            Box::from_raw(ptr);
+            drop(Box::from_raw(ptr));
         }
         Ok(())
     })

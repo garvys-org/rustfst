@@ -150,7 +150,7 @@ pub extern "C" fn tr_delete(tr_ptr: *mut CTr) -> RUSTFST_FFI_RESULT {
         }
 
         unsafe {
-            Box::from_raw(tr_ptr);
+            drop(Box::from_raw(tr_ptr));
         }
         Ok(())
     })

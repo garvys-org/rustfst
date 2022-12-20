@@ -104,7 +104,7 @@ pub(crate) fn rm_epsilon_with_internal_config<W: Semiring, F: MutableFst<W>, Q: 
         states = fst.states_iter().collect();
     } else if fst_props.contains(FstProperties::ACYCLIC) {
         let mut visitor = TopOrderVisitor::new();
-        dfs_visit(fst, &mut visitor, &EpsilonTrFilter {}, false);
+        dfs_visit(fst, &mut visitor, &EpsilonTrFilter {}, false)?;
 
         states.resize(visitor.order.len(), 0);
         for i in 0..visitor.order.len() {
@@ -112,7 +112,7 @@ pub(crate) fn rm_epsilon_with_internal_config<W: Semiring, F: MutableFst<W>, Q: 
         }
     } else {
         let mut visitor = SccVisitor::new(fst, true, false);
-        dfs_visit(fst, &mut visitor, &EpsilonTrFilter {}, false);
+        dfs_visit(fst, &mut visitor, &EpsilonTrFilter {}, false)?;
 
         let scc = visitor.scc.as_ref().unwrap();
 

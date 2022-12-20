@@ -32,14 +32,14 @@ impl AutoQueue {
         if props.contains(FstProperties::TOP_SORTED) || fst.start().is_none() {
             queue = Box::new(StateOrderQueue::default());
         } else if props.contains(FstProperties::ACYCLIC) {
-            queue = Box::new(TopOrderQueue::new(fst, tr_filter));
+            queue = Box::new(TopOrderQueue::new(fst, tr_filter)?);
         } else if props.contains(FstProperties::UNWEIGHTED)
             && W::properties().contains(SemiringProperties::IDEMPOTENT)
         {
             queue = Box::new(LifoQueue::default());
         } else {
             let mut scc_visitor = SccVisitor::new(fst, true, false);
-            dfs_visit(fst, &mut scc_visitor, tr_filter, false);
+            dfs_visit(fst, &mut scc_visitor, tr_filter, false)?;
             let sccs: Vec<_> = scc_visitor
                 .scc
                 .unwrap()
