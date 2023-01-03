@@ -37,7 +37,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> LookaheadRelabelFst<W, F, B> {
     pub fn compute<F2: MutableFst<W> + AllocableFst<W>>(&self) -> Result<F2> {
         let underneath_fst = self.0.op.fst.borrow();
         // Trick to compute the underneath lazy fst
-        iterate_lazy(underneath_fst)?;
+        // iterate_lazy(underneath_fst)?;
         self.0.compute()
     }
 }

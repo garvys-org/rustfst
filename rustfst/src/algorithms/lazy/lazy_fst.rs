@@ -8,7 +8,6 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use itertools::izip;
-use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::lazy::cache::CacheStatus;
 use crate::algorithms::lazy::fst_op::{AccessibleOpState, FstOp, SerializableOpState};
@@ -57,7 +56,15 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
     }
 
     unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<W> {
-        self.final_weight(state_id).unsafe_unwrap()
+        match self.final_weight(state_id) {
+            Result::Err(e) => panic!(
+                "`final_weight_unchecked` failed for state {} which should never happen. \
+                Most likely an issue in the implementation of the corresponding LazyFst. \
+                Underneath Error is {:?}\
+                ", state_id, e
+            ),
+            Ok(v) => v
+        }
     }
 
     fn num_trs(&self, s: StateId) -> Result<usize> {
@@ -69,7 +76,14 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
     }
 
     unsafe fn num_trs_unchecked(&self, s: StateId) -> usize {
-        self.cache.num_trs(s).unsafe_unwrap()
+        match self.cache.num_trs(s) {
+            None => panic!(
+                "`num_trs_unchecked` failed which should never happen. \
+                `self.cache.num_trs` returned None indicating that the state {} doesn't exist.
+                ", s
+            ),
+            Some(v) => v
+        }
     }
 
     fn get_trs(&self, state_id: StateId) -> Result<Self::TRS> {
@@ -84,7 +98,15 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
     }
 
     unsafe fn get_trs_unchecked(&self, state_id: StateId) -> Self::TRS {
-        self.get_trs(state_id).unsafe_unwrap()
+        match self.get_trs(state_id) {
+            Result::Err(e) => panic!(
+                "`get_trs_unchecked` failed for state {} which should never happen. \
+                Most likely an issue in the implementation of the corresponding LazyFst. \
+                Underneath Error is {:?}\
+                ", state_id, e
+            ),
+            Result::Ok(v) => v
+        }
     }
 
     fn properties(&self) -> FstProperties {

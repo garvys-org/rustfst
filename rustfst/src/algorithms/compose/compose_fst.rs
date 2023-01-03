@@ -163,8 +163,8 @@ where
     /// Turns the Lazy FST into a static one.
     pub fn compute<F: MutableFst<W> + AllocableFst<W>>(&self) -> Result<F> {
         // Small trick to make sure that both FSTs are fully expanded.
-        iterate_lazy(self.0.op.fst1.borrow())?;
-        iterate_lazy(self.0.op.fst2.borrow())?;
+        // iterate_lazy(self.0.op.fst1.borrow())?;
+        // iterate_lazy(self.0.op.fst2.borrow())?;
         self.0.compute()
     }
 }
