@@ -1,5 +1,5 @@
 use crate::algorithms::compose::lookahead_relabel::lookahead_relabel_fst_op::LookaheadRelabelFstOp;
-use crate::algorithms::lazy::{LazyFst, SimpleHashMapCache, iterate_lazy};
+use crate::algorithms::lazy::{iterate_lazy, LazyFst, SimpleHashMapCache};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::prelude::compose::LabelReachableData;

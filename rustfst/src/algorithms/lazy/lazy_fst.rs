@@ -61,9 +61,10 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
                 "`final_weight_unchecked` failed for state {} which should never happen. \
                 Most likely an issue in the implementation of the corresponding LazyFst. \
                 Underneath Error is {:?}\
-                ", state_id, e
+                ",
+                state_id, e
             ),
-            Ok(v) => v
+            Ok(v) => v,
         }
     }
 
@@ -80,9 +81,10 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
             None => panic!(
                 "`num_trs_unchecked` failed which should never happen. \
                 `self.cache.num_trs` returned None indicating that the state {} doesn't exist.
-                ", s
+                ",
+                s
             ),
-            Some(v) => v
+            Some(v) => v,
         }
     }
 
@@ -103,9 +105,10 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
                 "`get_trs_unchecked` failed for state {} which should never happen. \
                 Most likely an issue in the implementation of the corresponding LazyFst. \
                 Underneath Error is {:?}\
-                ", state_id, e
+                ",
+                state_id, e
             ),
-            Result::Ok(v) => v
+            Result::Ok(v) => v,
         }
     }
 
