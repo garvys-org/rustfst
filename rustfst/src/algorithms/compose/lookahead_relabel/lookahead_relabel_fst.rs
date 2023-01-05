@@ -1,5 +1,5 @@
 use crate::algorithms::compose::lookahead_relabel::lookahead_relabel_fst_op::LookaheadRelabelFstOp;
-use crate::algorithms::lazy::{iterate_lazy, LazyFst, SimpleHashMapCache};
+use crate::algorithms::lazy::{LazyFst, SimpleHashMapCache};
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
 use crate::prelude::compose::LabelReachableData;
@@ -35,7 +35,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> LookaheadRelabelFst<W, F, B> {
     }
 
     pub fn compute<F2: MutableFst<W> + AllocableFst<W>>(&self) -> Result<F2> {
-        let underneath_fst = self.0.op.fst.borrow();
+        // let underneath_fst = self.0.op.fst.borrow();
         // Trick to compute the underneath lazy fst
         // iterate_lazy(underneath_fst)?;
         self.0.compute()

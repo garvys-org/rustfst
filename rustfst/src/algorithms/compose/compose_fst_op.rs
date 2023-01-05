@@ -389,11 +389,12 @@ where
     fn compute_start(&self) -> Result<Option<StateId>> {
         let compose_filter = self.compose_filter_builder.build()?;
         let s1 = self.fst1.borrow().start();
+        // Let's put it here to force the fst2 to have its start state computed in the case of a Lazy Fst.
+        let s2 = self.fst2.borrow().start();
         if s1.is_none() {
             return Ok(None);
         }
         let s1 = s1.unwrap();
-        let s2 = self.fst2.borrow().start();
         if s2.is_none() {
             return Ok(None);
         }

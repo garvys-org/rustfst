@@ -12,7 +12,6 @@ use crate::algorithms::compose::matchers::{GenericMatcher, Matcher};
 use crate::algorithms::compose::{
     ComposeFstOp, ComposeFstOpOptions, ComposeFstOpState, ComposeStateTuple,
 };
-use crate::algorithms::lazy::iterate_lazy;
 use crate::algorithms::lazy::{
     FstCache, LazyFst, SerializableCache, SerializableLazyFst, SimpleVecCache,
 };
