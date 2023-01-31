@@ -157,3 +157,17 @@ where
         self.0.compute()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::fst_impls::VectorFst;
+    use crate::semirings::TropicalWeight;
+
+    use super::*;
+
+    #[test]
+    fn test_rmepsilon_fst_sync() {
+        fn is_sync<T: Sync>() {}
+        is_sync::<RmEpsilonFst<TropicalWeight, VectorFst<_>, VectorFst<_>>>();
+    }
+}
