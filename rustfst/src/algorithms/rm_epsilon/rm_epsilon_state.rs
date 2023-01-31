@@ -8,45 +8,48 @@ use crate::algorithms::rm_epsilon::{Element, RmEpsilonInternalConfig};
 use crate::algorithms::shortest_distance::ShortestDistanceState;
 use crate::algorithms::tr_filters::{EpsilonTrFilter, TrFilter};
 use crate::algorithms::Queue;
-use crate::fst_traits::ExpandedFst;
+use crate::prelude::Fst;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, Trs};
+use std::marker::PhantomData;
 
 #[derive(Clone)]
-pub(crate) struct RmEpsilonState<W: Semiring, Q: Queue> {
+pub(crate) struct RmEpsilonState<W: Semiring, Q: Queue, F: Fst<W>, B: Borrow<F>> {
     pub visited: Vec<bool>,
     pub visited_states: Vec<StateId>,
     pub element_map: HashMap<Element, (StateId, usize)>,
     pub expand_id: StateId,
-    pub sd_state: ShortestDistanceState<W, Q, EpsilonTrFilter>,
+    pub sd_state: ShortestDistanceState<W, Q, EpsilonTrFilter, F, B>,
+    ghost: PhantomData<F>,
 }
 
-impl<W: Semiring, Q: Queue> std::fmt::Debug for RmEpsilonState<W, Q> {
+impl<W: Semiring, Q: Queue, F: Fst<W>, B: Borrow<F>> std::fmt::Debug
+    for RmEpsilonState<W, Q, F, B>
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "RmEpsilonState {{ visited : {:?}, visited_states : {:?}, element_map : {:?}, expand_id : {:?}, sd_state : {:?} }}",
                self.visited, self.visited_states, self.element_map, self.expand_id, self.sd_state)
     }
 }
 
-impl<W: Semiring, Q: Queue> RmEpsilonState<W, Q> {
-    pub fn new(fst_num_states: usize, opts: RmEpsilonInternalConfig<W, Q>) -> Self {
+impl<W: Semiring, Q: Queue, F: Fst<W>, B: Borrow<F>> RmEpsilonState<W, Q, F, B> {
+    pub fn new(fst: B, opts: RmEpsilonInternalConfig<W, Q>) -> Self {
         Self {
-            sd_state: ShortestDistanceState::new_from_config(fst_num_states, opts.sd_opts, true),
+            sd_state: ShortestDistanceState::new_from_config(opts.sd_opts, true, fst),
             visited: vec![],
             visited_states: vec![],
             element_map: HashMap::new(),
             expand_id: 0,
+            ghost: PhantomData,
         }
     }
 
-    pub fn expand<F: ExpandedFst<W>, B: Borrow<F>>(
-        &mut self,
-        source: StateId,
-        fst: B,
-    ) -> Result<(Vec<Tr<W>>, W)> {
-        let distance = self
-            .sd_state
-            .shortest_distance::<F, _>(Some(source), fst.borrow())?;
+    pub fn fst(&self) -> &F {
+        self.sd_state.fst()
+    }
+
+    pub fn expand(&mut self, source: StateId) -> Result<(Vec<Tr<W>>, W)> {
+        let distance = self.sd_state.shortest_distance(Some(source))?;
 
         let tr_filter = EpsilonTrFilter {};
 
@@ -63,7 +66,7 @@ impl<W: Semiring, Q: Queue> RmEpsilonState<W, Q> {
             }
             self.visited[state as usize] = true;
             self.visited_states.push(state);
-            for tr in fst.borrow().get_trs(state)?.trs() {
+            for tr in self.sd_state.fst().get_trs(state)?.trs() {
                 // TODO: Remove this clone
                 let mut tr = tr.clone();
                 tr.weight = distance[state as usize].times(&tr.weight)?;
@@ -104,8 +107,12 @@ impl<W: Semiring, Q: Queue> RmEpsilonState<W, Q> {
                 }
             }
             final_weight.plus_assign(
-                distance[state as usize]
-                    .times(fst.borrow().final_weight(state)?.unwrap_or_else(W::zero))?,
+                distance[state as usize].times(
+                    self.sd_state
+                        .fst()
+                        .final_weight(state)?
+                        .unwrap_or_else(W::zero),
+                )?,
             )?;
         }
 

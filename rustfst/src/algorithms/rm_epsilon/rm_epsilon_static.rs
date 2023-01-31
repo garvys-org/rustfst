@@ -134,7 +134,7 @@ pub(crate) fn rm_epsilon_with_internal_config<W: Semiring, F: MutableFst<W>, Q: 
         }
     }
 
-    let mut rmeps_state = RmEpsilonState::new(fst.num_states(), opts);
+    let mut rmeps_state: RmEpsilonState<_, _, F, _> = RmEpsilonState::new(&mut *fst, opts);
     let zero = W::zero();
 
     for state in states.into_iter().rev() {
@@ -143,15 +143,24 @@ pub(crate) fn rm_epsilon_with_internal_config<W: Semiring, F: MutableFst<W>, Q: 
         {
             continue;
         }
-        let (trs, final_weight) = rmeps_state.expand::<F, _>(state, &*fst)?;
+        let (trs, final_weight) = rmeps_state.expand(state)?;
 
         unsafe {
-            fst.pop_trs_unchecked(state);
-            fst.set_trs_unchecked(state, trs.into_iter().rev().collect());
+            rmeps_state.sd_state.fst.pop_trs_unchecked(state);
+            rmeps_state
+                .sd_state
+                .fst
+                .set_trs_unchecked(state, trs.into_iter().rev().collect());
             if final_weight != zero {
-                fst.set_final_unchecked(state, final_weight);
+                rmeps_state
+                    .sd_state
+                    .fst
+                    .set_final_unchecked(state, final_weight);
             } else {
-                fst.delete_final_weight_unchecked(state);
+                rmeps_state
+                    .sd_state
+                    .fst
+                    .delete_final_weight_unchecked(state);
             }
         }
     }

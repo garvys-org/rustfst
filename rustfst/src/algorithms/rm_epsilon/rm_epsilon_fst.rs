@@ -7,7 +7,8 @@ use anyhow::Result;
 use crate::algorithms::lazy::{LazyFst2, SimpleHashMapCache};
 use crate::algorithms::rm_epsilon::rm_epsilon_op::RmEpsilonOp;
 use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, Fst, FstIterator, MutableFst, StateIterator};
+use crate::fst_traits::{CoreFst, Fst, FstIterator, StateIterator};
+use crate::prelude::MutableFst;
 use crate::{Semiring, StateId, SymbolTable, TrsVec};
 
 type InnerLazyFst<W, F, B> = LazyFst2<W, RmEpsilonOp<W, F, B>, SimpleHashMapCache<W>>;
@@ -17,12 +18,12 @@ type InnerLazyFst<W, F, B> = LazyFst2<W, RmEpsilonOp<W, F, B>, SimpleHashMapCach
 /// States and transitions will be added as necessary. The algorithm is a
 /// generalization to arbitrary weights of the second step of the input
 /// epsilon-normalization algorithm. This version is a Delayed FST.
-pub struct RmEpsilonFst<W: Semiring, F: MutableFst<W>, B: Borrow<F>>(InnerLazyFst<W, F, B>);
+pub struct RmEpsilonFst<W: Semiring, F: Fst<W>, B: Borrow<F>>(InnerLazyFst<W, F, B>);
 
 impl<W, F, B> CoreFst<W> for RmEpsilonFst<W, F, B>
 where
     W: Semiring,
-    F: MutableFst<W>,
+    F: Fst<W>,
     B: Borrow<F>,
 {
     type TRS = TrsVec<W>;
@@ -71,7 +72,7 @@ where
 impl<'a, W, F, B> StateIterator<'a> for RmEpsilonFst<W, F, B>
 where
     W: Semiring,
-    F: MutableFst<W> + 'a,
+    F: Fst<W> + 'a,
     B: Borrow<F> + 'a,
 {
     type Iter = <InnerLazyFst<W, F, B> as StateIterator<'a>>::Iter;
@@ -84,7 +85,7 @@ where
 impl<'a, W, F, B> FstIterator<'a, W> for RmEpsilonFst<W, F, B>
 where
     W: Semiring,
-    F: MutableFst<W> + 'a,
+    F: Fst<W> + 'a,
     B: Borrow<F> + 'a,
 {
     type FstIter = <InnerLazyFst<W, F, B> as FstIterator<'a, W>>::FstIter;
@@ -97,7 +98,7 @@ where
 impl<W, F, B> Fst<W> for RmEpsilonFst<W, F, B>
 where
     W: Semiring,
-    F: MutableFst<W> + 'static,
+    F: Fst<W> + 'static,
     B: Borrow<F> + 'static,
 {
     fn input_symbols(&self) -> Option<&Arc<SymbolTable>> {
@@ -128,7 +129,7 @@ where
 impl<W, F, B> Debug for RmEpsilonFst<W, F, B>
 where
     W: Semiring,
-    F: MutableFst<W>,
+    F: Fst<W>,
     B: Borrow<F>,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -139,7 +140,7 @@ where
 impl<'a, W, F, B> RmEpsilonFst<W, F, B>
 where
     W: Semiring,
-    F: MutableFst<W>,
+    F: Fst<W>,
     B: Borrow<F>,
 {
     pub fn new(fst: B) -> Result<Self> {
