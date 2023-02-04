@@ -58,6 +58,7 @@ setup(
         "License :: OSI Approved :: Apache Software License",
     ],
     packages=packages,
+    package_data={"rustfst": ["py.typed"]},
     include_package_data=True,
     rust_extensions=[
         RustExtension(
