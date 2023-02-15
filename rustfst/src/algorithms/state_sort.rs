@@ -7,7 +7,7 @@ use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::{StateId, Trs};
 
-/// Sorts the input states of an FST. order[i] gives the the state ID after
+/// Sorts the input states of an FST. order\[i\] gives the the state ID after
 /// sorting that corresponds to the state ID i before sorting; it must
 /// therefore be a permutation of the input FST's states ID sequence.
 pub fn state_sort<W, F>(fst: &mut F, order: &[StateId]) -> Result<()>
