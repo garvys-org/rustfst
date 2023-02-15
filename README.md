@@ -183,17 +183,17 @@ differs from OpenFST:
   uses it (`std::sync::Arc`, that is) to reference-count symbol
   tables.  All associated functions also use `tr`.
 - Final states are not indicated by a final weight of `zero`.  You
-  can test for finality using [`fst_traits::CoreFst::is_final`], and
-  [`fst_traits::CoreFst::final_weight`] returns an [`Option`].  This
+  can test for finality using [`is_final`](fst_traits::CoreFst::is_final), and
+  [`final_weight`](fst_traits::CoreFst::final_weight) returns an [`Option`].  This
   requires some care when converting OpenFST code.
 - Transitions can be accessed directly as a slice rather than requiring
   an iterator.
 - Semiring operations are expressed as plain old methods rather
   than strange C++ things.  So write `w1.plus(w2)` rather than
   `Plus(w1, w2)`, for instance.
-- Weights have in-place operations for `+`
-  ([`plus_assign`](Semiring::plus_assign) and `*`
-  ([`times_assign`](Semiring::times_assign).
+- Weights have in-place operations for ⊕
+  ([`plus_assign`](Semiring::plus_assign)) and ⊗
+  ([`times_assign`](Semiring::times_assign)).
 - Most of the type aliases (which would be trait aliases in Rust) such
   as `StdArc`, `StdFst`, and so forth, are missing, but type inference
   allows us to avoid explicit type arguments in most cases, such as
