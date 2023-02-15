@@ -60,7 +60,7 @@
 //! [`shortest_path`](algorithms::shortest_path) (for a single path)
 //! or
 //! [`shortest_path_with_config`](algorithms::shortest_path_with_config)
-//! (for N-shortest paths.
+//! (for N-shortest paths).
 //!
 //! For the complete list of algorithms, see the [`algorithms`] module.
 //!
@@ -178,13 +178,13 @@
 //!   as `StdArc`, `StdFst`, and so forth, are missing, but type inference
 //!   allows us to avoid explicit type arguments in most cases, such as
 //!   when calling [`Tr::new`], for instance.
-//! - State IDs are unsigned, with [`NO_STATE_ID`] used as a flag value.
+//! - State IDs are unsigned, with [`NO_STATE_ID`] used for a missing value.
 //!   They are also 32 bits by default (presumably, 4 billion states
 //!   is enough for most applications).  This means you must take care to
 //!   cast them to [`usize`] when using them as indices, and vice-versa,
 //!   preferably checking for overflows
 //! - Symbol IDs are also unsigned and 32-bits, with [`NO_LABEL`] used
-//!   as a flag value.
+//!   for a missing value.
 
 #[warn(missing_docs)]
 #[cfg(test)]
