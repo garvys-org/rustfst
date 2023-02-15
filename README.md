@@ -20,8 +20,7 @@
 
 <!-- cargo-sync-readme start -->
 
-This repo contains a **Rust** implementation of Weighted Finite States Transducers.
-Along with a **Python** binding.
+Rust implementation of Weighted Finite States Transducers.
 
 Rustfst is a library for constructing, combining, optimizing, and searching weighted
 finite-state transducers (FSTs). Weighted finite-state transducers are automata where
@@ -50,6 +49,10 @@ Implementation heavily inspired from Mehryar Mohri's, Cyril Allauzen's and Micha
 - [The design principles of a weighted finite-state transducer library](https://core.ac.uk/download/pdf/82101846.pdf)
 - [OpenFst: A general and efficient weighted finite-state transducer library](https://link.springer.com/chapter/10.1007%2F978-3-540-76336-9_3)
 - [Weighted finite-state transducers in speech recognition](https://repository.upenn.edu/cgi/viewcontent.cgi?article=1010&context=cis_papers)
+
+The API closely resembles that of OpenFST, with some
+simplifications and changes to make it more idiomatic in Rust, notably
+the use of `Tr` instead of `Arc`.  See [Differences fromOpenFST](#differences-from-openfst) for more information.
 
 ## Example
 
@@ -107,6 +110,32 @@ fn main() -> Result<()> {
     Ok(())
 }
 ```
+
+## Differences from OpenFST
+
+Here is a non-exhaustive list of ways in which Rustfst's API
+differs from OpenFST (aside from the really obvious ones, of
+course):
+
+- The default epsilon symbol is `<eps>` and not `<epsilon>`.
+- Functions and methods follow Rust naming conventions,
+  e.g. `add_state` rather than `AddState`, but are otherwise mostly
+  equivalent, except that:
+- Transitions are called `Tr` and not `Arc`, because `Arc` has a
+  rather different and well-established meaning in Rust, and rustfst
+  uses it (`std::sync::Arc`, that is) to reference-count symbol
+  tables.  All associated functions also use `tr`.
+- Final states are not indicated by a final weight of `zero`.  You
+  can test for finality using [`fst_traits::CoreFst::is_final`], and
+  [`fst_traits::CoreFst::final_weight`] returns an [`Option`].  This
+  requires some care when converting OpenFST code.
+- Transitions can be accessed directly as a slice rather than requiring
+  an iterator.
+- Semiring operations are expressed as plain old methods rather
+  than strange C++ things.  So write `w1.plus(w2)` rather than
+  `Plus(w1, w2)`, for instance.
+- Weights have in-place operations for `+`
+  [`Semiring::plus_assign`] and `*` [`Semiring::times_assign`].
 
 <!-- cargo-sync-readme end -->
 
