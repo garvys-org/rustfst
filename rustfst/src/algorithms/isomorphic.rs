@@ -158,6 +158,7 @@ impl<'a, W: Semiring, F1: ExpandedFst<W>, F2: ExpandedFst<W>> Isomorphism<'a, W,
     }
 }
 
+/// Configuration for isomorphic comparison.
 pub struct IsomorphicConfig {
     delta: f32,
 }
@@ -174,7 +175,7 @@ impl IsomorphicConfig {
     }
 }
 
-/// This operation determines if two transducers with a certain required determinism
+/// Determine if two transducers with a certain required determinism
 /// have the same states, irrespective of numbering, and the same transitions with
 /// the same labels and weights, irrespective of ordering.
 ///
@@ -189,9 +190,10 @@ where
     isomorphic_with_config(fst_1, fst_2, IsomorphicConfig::default())
 }
 
-/// This operation determines if two transducers with a certain required determinism
-/// have the same states, irrespective of numbering, and the same transitions with
-/// the same labels and weights, irrespective of ordering.
+/// Determine, with configurable comparison delta, if two transducers with a
+/// certain required determinism have the same states, irrespective of
+/// numbering, and the same transitions with the same labels and
+/// weights, irrespective of ordering.
 ///
 /// In other words, Isomorphic(A, B) is true if and only if the states of A can
 /// be renumbered and the transitions leaving each state reordered so that Equal(A, B) is true.

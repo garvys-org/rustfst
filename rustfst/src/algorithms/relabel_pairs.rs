@@ -23,7 +23,7 @@ where
     Ok(map_labels)
 }
 
-/// Replaces input and/or output labels using pairs of labels.
+/// Replace input and/or output labels using pairs of labels.
 ///
 /// This operation destructively relabels the input and/or output labels of the
 /// FST using pairs of the form (old_ID, new_ID); omitted indices are

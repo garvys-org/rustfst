@@ -15,7 +15,8 @@ pub enum ReweightType {
     ReweightToFinal,
 }
 
-/// Reweights an FST according to a vector of potentials in a given direction.
+/// Reweight an FST according to a vector of potentials in a given direction.
+///
 /// The weight must be left distributive when reweighting towards the initial
 /// state and right distributive when reweighting towards the final states.
 ///

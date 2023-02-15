@@ -30,6 +30,7 @@ bitflags! {
     }
 }
 
+/// Configuration for [`push_weights_with_config`].
 #[derive(Clone, Debug, Copy, PartialOrd, PartialEq)]
 pub struct PushWeightsConfig {
     delta: f32,
@@ -65,6 +66,12 @@ impl PushWeightsConfig {
     }
 }
 
+/// Push the weights in an FST.
+///
+/// If pushing towards the initial state, the sum of the weight of the
+/// outgoing transitions and final weight at a non-initial state is
+/// equal to One() in the resulting machine. If pushing towards the
+/// final state, the same property holds on the reverse machine.
 pub fn push_weights<W, F>(fst: &mut F, reweight_type: ReweightType) -> Result<()>
 where
     F: MutableFst<W>,
@@ -73,8 +80,9 @@ where
     push_weights_with_config(fst, reweight_type, PushWeightsConfig::default())
 }
 
-/// Pushes the weights in FST in the direction defined by TYPE. If
-/// pushing towards the initial state, the sum of the weight of the
+/// Push the weights in an FST, optionally removing the total weight.
+///
+/// If pushing towards the initial state, the sum of the weight of the
 /// outgoing transitions and final weight at a non-initial state is
 /// equal to One() in the resulting machine. If pushing towards the
 /// final state, the same property holds on the reverse machine.
@@ -223,6 +231,7 @@ macro_rules! m_labels_pushing {
     }};
 }
 
+/// Configuration for [`push_with_config`].
 #[derive(Clone, Copy, Debug, PartialOrd, PartialEq)]
 pub struct PushConfig {
     delta: f32,
@@ -244,6 +253,8 @@ impl PushConfig {
     }
 }
 
+/// Push the weights and/or labels of the input FST into the output
+/// mutable FST by pushing weights and/or labels towards the initial state or final states.
 pub fn push<W, F1, F2>(ifst: &F1, reweight_type: ReweightType, push_type: PushType) -> Result<F2>
 where
     F1: ExpandedFst<W>,
@@ -254,7 +265,7 @@ where
     push_with_config(ifst, reweight_type, push_type, PushConfig::default())
 }
 
-/// Pushes the weights and/or labels of the input FST into the output
+/// Push the weights and/or labels of the input FST into the output
 /// mutable FST by pushing weights and/or labels towards the initial state or final states.
 pub fn push_with_config<W, F1, F2>(
     ifst: &F1,

@@ -7,9 +7,11 @@ use crate::fst_traits::{ExpandedFst, Fst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{StateId, Trs};
 
-// Returns an acyclic FST where each SCC in the input FST has been condensed to
-// a single state with transitions between SCCs retained and within SCCs
-// dropped. Also populates 'scc' with a mapping from input to output states.
+/// Return an acyclic FST where each SCC in the input FST has been condensed to
+/// a single state with transitions between SCCs retained and within SCCs
+/// dropped.
+///
+/// Also populates 'scc' with a mapping from input to output states.
 pub fn condense<W: Semiring, FI: Fst<W> + ExpandedFst<W>, FO: MutableFst<W>>(
     ifst: &FI,
 ) -> Result<(Vec<i32>, FO)> {

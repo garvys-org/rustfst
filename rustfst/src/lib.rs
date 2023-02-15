@@ -20,15 +20,64 @@
 //!
 //! ![fst](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/project_in.svg?sanitize=true)
 //!
-//! ## Quick Start
+//! ## Overview
 //!
-//! For a basic [example](#example) see the section below.  To
-//! construct an FST you will likely use the [fst_impls::VectorFst]
-//! type, which will be imported in the [prelude] along with most
-//! everything else you need.  `VectorFst<TropicalWeight>` corresponds
+//! For a basic [example](#example) see the section below.
+//!
+//! Some simple and commonly encountered types of FSTs can be easily
+//! created with the macro [`fst`] or the functions
+//! [`acceptor`](utils::acceptor) and
+//! [`transducer`](utils::transducer).
+//!
+//! For more complex cases you will likely start with the
+//! [`VectorFst`](fst_impls::VectorFst) type, which will be imported
+//! in the [`prelude`] along with most everything else you need.
+//! [`VectorFst<TropicalWeight>`](fst_impls::VectorFst) corresponds
 //! directly to the OpenFST `StdVectorFst`, and can be used to load
-//! its files using [`fst_traits::SerializableFst::read`] or
-//! [`fst_traits::SerializableFst::read_text`].
+//! its files using [`read`](fst_traits::SerializableFst::read) or
+//! [`read_text`](fst_traits::SerializableFst::read_text).
+//!
+//! Because "iteration" over an FST can mean many different things,
+//! there are a variety of different iterators.  To iterate over state
+//! IDs you may use
+//! [`states_iter`](fst_traits::StateIterator::states_iter), while to
+//! iterate over transitions out of a state, you may use
+//! [`get_trs`](fst_traits::CoreFst::get_trs).  Since it is common to
+//! iterate over both, this can be done using
+//! [`fst_iter`](fst_traits::FstIterator::fst_iter) or
+//! [`fst_into_iter`](fst_traits::FstIntoIterator::fst_into_iter).  It
+//! is also very common to iterate over paths accepted by an FST,
+//! which can be done with
+//! [`paths_iter`](fst_traits::Fst::paths_iter), and as a convenience
+//! for generating text,
+//! [`string_paths_iter`](fst_traits::Fst::string_paths_iter).
+//! Alternately, in the case of a linear FST, you may retrieve the
+//! only possible path with
+//! [`decode_linear_fst`](utils::decode_linear_fst).
+//!
+//! Note that iterating over paths is not the same thing as finding
+//! the *shortest* path or paths, which is done with
+//! [`shortest_path`](algorithms::shortest_path) (for a single path)
+//! or
+//! [`shortest_path_with_config`](algorithms::shortest_path_with_config)
+//! (for N-shortest paths.
+//!
+//! For the complete list of algorithms, see the [`algorithms`] module.
+//!
+//! You may now be wondering, especially if you have previously used
+//! such linguist-friendly tools as
+//! [pyfoma](https://github.com/mhulden/pyfoma), "what if I just want
+//! to *transduce some text*???"  The unfriendly answer is that
+//! rustfst is a somewhat lower-level library, designed for
+//! implementing things like speech recognizers.  The somewhat more
+//! helpful answer is that you would do this by constructing an
+//! [`acceptor`](utils::acceptor) for your input, which you will
+//! [`compose`](algorithms::compose) with a
+//! [`transducer`](utils::transducer), then
+//! [`project`](algorithms::project) the result [to its
+//! output](algorithms::ProjectType::ProjectOutput), and finally
+//! [iterate over the paths](fst_traits::Fst::string_paths_iter) in
+//! the resulting FST.
 //!
 //! ## References
 //!
@@ -123,17 +172,18 @@
 //!   than strange C++ things.  So write `w1.plus(w2)` rather than
 //!   `Plus(w1, w2)`, for instance.
 //! - Weights have in-place operations for `+`
-//!   [`Semiring::plus_assign`] and `*` [`Semiring::times_assign`].
+//!   ([`plus_assign`](Semiring::plus_assign) and `*`
+//!   ([`times_assign`](Semiring::times_assign).
 //! - Most of the type aliases (which would be trait aliases in Rust) such
 //!   as `StdArc`, `StdFst`, and so forth, are missing, but type inference
 //!   allows us to avoid explicit type arguments in most cases, such as
-//!   when calling [Tr::new], for instance.
-//! - State IDs are unsigned, with [NO_STATE_ID] used as a flag value.
+//!   when calling [`Tr::new`], for instance.
+//! - State IDs are unsigned, with [`NO_STATE_ID`] used as a flag value.
 //!   They are also 32 bits by default (presumably, 4 billion states
 //!   is enough for most applications).  This means you must take care to
-//!   cast them to [usize] when using them as indices, and vice-versa,
+//!   cast them to [`usize`] when using them as indices, and vice-versa,
 //!   preferably checking for overflows
-//! - Symbol IDs are also unsigned and 32-bits, with [NO_LABEL] used
+//! - Symbol IDs are also unsigned and 32-bits, with [`NO_LABEL`] used
 //!   as a flag value.
 
 #[warn(missing_docs)]
@@ -216,6 +266,7 @@ pub use crate::parsers::nom_utils::NomCustomError;
 
 /// A representable float near .001. (Used in Quantize)
 pub const KDELTA: f32 = 1.0f32 / 1024.0f32;
+/// Default tolerance value used in floating-point comparisons.
 pub const KSHORTESTDELTA: f32 = 1e-6;
 
 /// Module re-exporting most of the objects from this crate.

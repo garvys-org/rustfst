@@ -252,6 +252,7 @@ pub(crate) fn shortest_distance_with_internal_config<
     sd_state.shortest_distance::<F, _>(source, fst)
 }
 
+/// Configuration for shortest distance computation
 #[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
 pub struct ShortestDistanceConfig {
     delta: f32,
@@ -271,11 +272,7 @@ impl ShortestDistanceConfig {
     }
 }
 
-pub fn shortest_distance<W: Semiring, F: ExpandedFst<W>>(fst: &F, reverse: bool) -> Result<Vec<W>> {
-    shortest_distance_with_config(fst, reverse, ShortestDistanceConfig::default())
-}
-
-/// This operation computes the shortest distance from the initial state to every state.
+/// Compute the shortest distance from the initial state to every state.
 /// The shortest distance from `p` to `q` is the ⊕-sum of the weights
 /// of all the paths between `p` and `q`.
 ///
@@ -308,6 +305,12 @@ pub fn shortest_distance<W: Semiring, F: ExpandedFst<W>>(fst: &F, reverse: bool)
 /// # Ok(())
 /// # }
 /// ```
+pub fn shortest_distance<W: Semiring, F: ExpandedFst<W>>(fst: &F, reverse: bool) -> Result<Vec<W>> {
+    shortest_distance_with_config(fst, reverse, ShortestDistanceConfig::default())
+}
+
+/// Compute the shortest distance from the initial state to every
+/// state, with configurable delta for comparison.
 pub fn shortest_distance_with_config<W: Semiring, F: ExpandedFst<W>>(
     fst: &F,
     reverse: bool,
