@@ -42,6 +42,16 @@ results can be selected by shortest-path algorithms.
 
 ![fst](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/project_in.svg?sanitize=true)
 
+## Quick Start
+
+For a basic [example](#example) see the section below.  To
+construct an FST you will likely use the [fst_impls::VectorFst]
+type, which will be imported in the [prelude] along with most
+everything else you need.  `VectorFst<TropicalWeight>` corresponds
+directly to the OpenFST `StdVectorFst`, and can be used to load
+its files using [`fst_traits::SerializableFst::read`] or
+[`fst_traits::SerializableFst::read_text`].
+
 ## References
 
 Implementation heavily inspired from Mehryar Mohri's, Cyril Allauzen's and Michael Riley's work :
