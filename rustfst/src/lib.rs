@@ -185,6 +185,7 @@
 //!   preferably checking for overflows
 //! - Symbol IDs are also unsigned and 32-bits, with [`NO_LABEL`] used
 //!   for a missing value.
+//! - Floating-point weights are not generic, so are always single-precision.
 
 #[warn(missing_docs)]
 #[cfg(test)]
