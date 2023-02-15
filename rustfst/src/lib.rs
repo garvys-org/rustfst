@@ -93,8 +93,7 @@
 //! ## Differences from OpenFST
 //!
 //! Here is a non-exhaustive list of ways in which Rustfst's API
-//! differs from OpenFST (aside from the really obvious ones, of
-//! course):
+//! differs from OpenFST:
 //!
 //! - The default epsilon symbol is `<eps>` and not `<epsilon>`.
 //! - Functions and methods follow Rust naming conventions,
@@ -115,6 +114,17 @@
 //!   `Plus(w1, w2)`, for instance.
 //! - Weights have in-place operations for `+`
 //!   [`Semiring::plus_assign`] and `*` [`Semiring::times_assign`].
+//! - Most of the type aliases (which would be trait aliases in Rust) such
+//!   as `StdArc`, `StdFst`, and so forth, are missing, but type inference
+//!   allows us to avoid explicit type arguments in most cases, such as
+//!   when calling [Tr::new], for instance.
+//! - State IDs are unsigned, with [NO_STATE_ID] used as a flag value.
+//!   They are also 32 bits by default (presumably, 4 billion states
+//!   is enough for most applications).  This means you must take care to
+//!   cast them to [usize] when using them as indices, and vice-versa,
+//!   preferably checking for overflows
+//! - Symbol IDs are also unsigned and 32-bits, with [NO_LABEL] used
+//!   as a flag value.
 
 #[warn(missing_docs)]
 #[cfg(test)]
