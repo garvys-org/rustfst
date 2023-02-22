@@ -7,7 +7,7 @@ use crate::semirings::{SemiringProperties, WeaklyDivisibleSemiring, WeightQuanti
 use crate::Semiring;
 use anyhow::Result;
 
-/// General optimization (determinization and minimiaztion) of a WFST
+/// General optimization (determinization and minimization) of a WFST
 pub fn optimize<
     W: Semiring + WeaklyDivisibleSemiring + WeightQuantize,
     F: MutableFst<W> + AllocableFst<W>,
