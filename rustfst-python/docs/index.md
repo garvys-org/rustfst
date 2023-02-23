@@ -27,7 +27,7 @@ results can be selected by shortest-path algorithms.
 ## Naming
 
 - `rustfst` is the Rust re-implementation of `Openfst`.
-- `rusfst-python` is a python biding on top of `rustfst`.
+- `rustfst-python` is a python biding on top of `rustfst`.
 
 ## References
 
