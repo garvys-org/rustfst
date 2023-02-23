@@ -5,7 +5,7 @@ use crate::fst_traits::Fst;
 use crate::semirings::StarSemiring;
 use crate::Trs;
 
-/// This operation computes the shortest distance from each state to every other states.
+/// Compute the shortest distance from each state to every other states.
 /// The shortest distance from `p` to `q` is the ⊕-sum of the weights
 /// of all the paths between `p` and `q`.
 ///

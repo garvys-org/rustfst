@@ -60,7 +60,7 @@ impl<'a, W: Semiring, F: 'a + Fst<W>> Visitor<'a, W, F> for TopOrderVisitor {
     }
 }
 
-/// This operation topologically sorts its input. When sorted, all transitions are from
+/// Topologically sort an FST. When sorted, all transitions are from
 /// lower to higher state IDs.
 ///
 /// # Example

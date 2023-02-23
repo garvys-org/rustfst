@@ -3,7 +3,7 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 
-/// This operation inverts the transduction corresponding to an FST
+/// Invert the transduction corresponding to an FST
 /// by exchanging the FST's input and output labels.
 ///
 /// # Example 1

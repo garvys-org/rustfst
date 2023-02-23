@@ -39,6 +39,7 @@ use itertools::Itertools;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+/// Configuration for minimization.
 #[derive(Clone, Copy, PartialOrd, PartialEq)]
 pub struct MinimizeConfig {
     delta: f32,

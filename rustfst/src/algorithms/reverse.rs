@@ -7,7 +7,9 @@ use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::{StateId, Trs, EPS_LABEL};
 
-/// Reverses an FST. The reversed result is written to an output mutable FST.
+/// Reverse an FST.
+///
+/// The reversed result is written to an output mutable FST.
 /// If A transduces string x to y with weight a, then the reverse of A
 /// transduces the reverse of x to the reverse of y with weight a.Reverse().
 ///

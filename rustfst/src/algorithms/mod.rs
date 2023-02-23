@@ -31,15 +31,21 @@ pub use self::{
 
 mod add_super_final_state;
 mod all_pairs_shortest_distance;
+/// Functions to compute Kleene closure (star or plus) of an FST.
 pub mod closure;
 #[allow(clippy::type_complexity)]
+/// Functions to compose FSTs.
 pub mod compose;
+/// Functions to concatenate FSTs.
 pub mod concat;
 mod condense;
 mod connect;
+/// Functions to determinize FSTs.
 pub mod determinize;
 pub(crate) mod dfs_visit;
+/// Functions to encode FSTs as FSAs and vice versa.
 pub mod encode;
+/// Functions to factor various weight types.
 pub mod factor_weight;
 mod fst_convert;
 mod inversion;
@@ -51,14 +57,15 @@ mod projection;
 mod push;
 mod queue;
 
-/// Module providing functions to randomly generate paths through an Fst. A static and a delayed version are available.
+/// Functions to randomly generate paths through an Fst. A static and a delayed version are available.
 pub mod randgen;
 mod relabel_pairs;
+/// Functions for lazy replacing transitions in an FST.
 pub mod replace;
 mod reverse;
 mod reweight;
 
-/// Module providing functions to remove epsilon transitions from an Fst. A static and a delayed version are available.
+/// Functions to remove epsilon transitions from an Fst. A static and a delayed version are available.
 pub mod rm_epsilon;
 mod rm_final_epsilon;
 mod shortest_distance;
@@ -69,6 +76,7 @@ mod tr_map;
 mod tr_sort;
 mod tr_sum;
 pub(crate) mod tr_unique;
+/// Functions to compute the union of FSTs.
 pub mod union;
 mod weight_convert;
 

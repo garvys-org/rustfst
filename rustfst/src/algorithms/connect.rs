@@ -13,7 +13,7 @@ use crate::StateId;
 use crate::Tr;
 use crate::NO_STATE_ID;
 
-/// This operation trims an Fst, removing states and trs that are not on successful paths.
+/// Trim an Fst, removing states and trs that are not on successful paths.
 ///
 /// # Example 1
 /// ```

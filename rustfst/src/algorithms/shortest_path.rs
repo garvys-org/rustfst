@@ -21,6 +21,7 @@ use crate::{StateId, Trs, KSHORTESTDELTA};
 use bitflags::_core::fmt::Formatter;
 use std::fmt::Debug;
 
+/// Configuration for N-shortest path computation
 #[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
 pub struct ShortestPathConfig {
     pub delta: f32,
@@ -60,6 +61,20 @@ impl ShortestPathConfig {
     }
 }
 
+/// Create an FST containing the single shortest path in the input
+/// FST. The shortest path is the lowest weight paths w.r.t. the
+/// natural semiring order.
+///
+/// # Example
+///
+/// ## Input
+///
+/// ![shortestpath_in](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/shortestpath_in.svg?sanitize=true)
+///
+/// ## Output
+///
+/// ![shortestpath_out_n_1](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/shortestpath_out_n_1.svg?sanitize=true)
+///
 pub fn shortest_path<W, FI, FO>(ifst: &FI) -> Result<FO>
 where
     FI: ExpandedFst<W>,
@@ -73,8 +88,9 @@ where
     shortest_path_with_config(ifst, ShortestPathConfig::default())
 }
 
-/// Creates an FST containing the n-shortest paths in the input FST. The n-shortest paths are the
-/// n-lowest weight paths w.r.t. the natural semiring order.
+/// Create an FST containing the n-shortest paths in the input
+/// FST. The n-shortest paths are the n-lowest weight paths w.r.t. the
+/// natural semiring order.
 ///
 /// # Example
 ///
