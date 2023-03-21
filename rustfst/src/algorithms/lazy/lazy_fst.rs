@@ -8,7 +8,6 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use itertools::izip;
-use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::lazy::cache::CacheStatus;
 use crate::algorithms::lazy::fst_op::{AccessibleOpState, FstOp, SerializableOpState};
@@ -57,17 +56,36 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
     }
 
     unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<W> {
-        self.final_weight(state_id).unsafe_unwrap()
+        match self.final_weight(state_id) {
+            Result::Err(e) => panic!(
+                "`final_weight_unchecked` failed for state {} which should never happen. \
+                Most likely an issue in the implementation of the corresponding LazyFst. \
+                Underneath Error is {:?}\
+                ",
+                state_id, e
+            ),
+            Ok(v) => v,
+        }
     }
 
     fn num_trs(&self, s: StateId) -> Result<usize> {
-        self.cache
-            .num_trs(s)
-            .ok_or_else(|| format_err!("State {:?} doesn't exist", s))
+        let trs = self.get_trs(s)?;
+        Ok(trs.trs().len())
+        // self.cache
+        //     .num_trs(s)
+        //     .ok_or_else(|| format_err!("`num_trs` failed -> State {:?} doesn't exist", s))
     }
 
     unsafe fn num_trs_unchecked(&self, s: StateId) -> usize {
-        self.cache.num_trs(s).unsafe_unwrap()
+        match self.cache.num_trs(s) {
+            None => panic!(
+                "`num_trs_unchecked` failed which should never happen. \
+                `self.cache.num_trs` returned None indicating that the state {} doesn't exist.
+                ",
+                s
+            ),
+            Some(v) => v,
+        }
     }
 
     fn get_trs(&self, state_id: StateId) -> Result<Self::TRS> {
@@ -82,7 +100,16 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
     }
 
     unsafe fn get_trs_unchecked(&self, state_id: StateId) -> Self::TRS {
-        self.get_trs(state_id).unsafe_unwrap()
+        match self.get_trs(state_id) {
+            Result::Err(e) => panic!(
+                "`get_trs_unchecked` failed for state {} which should never happen. \
+                Most likely an issue in the implementation of the corresponding LazyFst. \
+                Underneath Error is {:?}\
+                ",
+                state_id, e
+            ),
+            Result::Ok(v) => v,
+        }
     }
 
     fn properties(&self) -> FstProperties {
@@ -92,13 +119,13 @@ impl<W: Semiring, Op: FstOp<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst<W, Op
     fn num_input_epsilons(&self, state: StateId) -> Result<usize> {
         self.cache
             .num_input_epsilons(state)
-            .ok_or_else(|| format_err!("State {:?} doesn't exist", state))
+            .ok_or_else(|| format_err!("NI State {:?} doesn't exist", state))
     }
 
     fn num_output_epsilons(&self, state: StateId) -> Result<usize> {
         self.cache
             .num_output_epsilons(state)
-            .ok_or_else(|| format_err!("State {:?} doesn't exist", state))
+            .ok_or_else(|| format_err!("NO State {:?} doesn't exist", state))
     }
 }
 
@@ -269,6 +296,34 @@ where
         Ok(fst_out)
     }
 }
+
+/// Turns the Lazy FST into a static one.
+// pub fn iterate_lazy<W: Semiring, F: Fst<W>>(fst: &F) -> Result<()> {
+//     let start_state = fst.start();
+//     let start_state = match start_state {
+//         Some(s) => s,
+//         None => return Ok(()),
+//     };
+//     let mut queue = VecDeque::new();
+//     let mut visited_states = vec![];
+//     visited_states.resize(start_state as usize + 1, false);
+//     visited_states[start_state as usize] = true;
+//     queue.push_back(start_state);
+//     while let Some(s) = queue.pop_front() {
+//         let trs_owner = fst.get_trs(s)?;
+//         for tr in trs_owner.trs() {
+//             if (tr.nextstate as usize) >= visited_states.len() {
+//                 visited_states.resize(tr.nextstate as usize + 1, false);
+//             }
+//             if !visited_states[tr.nextstate as usize] {
+//                 queue.push_back(tr.nextstate);
+//                 visited_states[tr.nextstate as usize] = true;
+//             }
+//         }
+//         fst.final_weight(s)?;
+//     }
+//     Ok(())
+// }
 
 impl<W, Op, Cache> SerializableLazyFst for LazyFst<W, Op, Cache>
 where

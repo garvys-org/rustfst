@@ -1,9 +1,12 @@
+use std::cmp::Ordering;
+
+use anyhow::Result;
+
 use crate::algorithms::compose::{IntInterval, IntervalSet};
 use crate::algorithms::dfs_visit::Visitor;
 use crate::fst_traits::Fst;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr};
-use std::cmp::Ordering;
 
 static UNASSIGNED: usize = std::usize::MAX;
 
@@ -30,18 +33,18 @@ impl<'a, W: Semiring, F: Fst<W>> Visitor<'a, W, F> for IntervalReachVisitor<'a, 
     fn init_visit(&mut self, _fst: &'a F) {}
 
     /// Invoked when state discovered (2nd arg is DFS tree root).
-    fn init_state(&mut self, s: StateId, _root: StateId) -> bool {
+    fn init_state(&mut self, s: StateId, _root: StateId) -> Result<bool> {
         while self.isets.len() <= (s as usize) {
             self.isets.push(IntervalSet::default());
         }
         while self.state2index.len() <= (s as usize) {
             self.state2index.push(UNASSIGNED);
         }
-        if let Some(final_weight) = self.fst.final_weight(s).unwrap() {
+        if let Some(final_weight) = self.fst.final_weight(s)? {
             if !final_weight.is_zero() {
                 let interval_set = &mut self.isets[s as usize];
                 if self.index == UNASSIGNED {
-                    if self.fst.num_trs(s).unwrap() > 0 {
+                    if self.fst.num_trs(s)? > 0 {
                         panic!("IntervalReachVisitor: state2index map must be empty for this FST")
                     }
                     let index = self.state2index[s as usize];
@@ -56,7 +59,7 @@ impl<'a, W: Semiring, F: Fst<W>> Visitor<'a, W, F> for IntervalReachVisitor<'a, 
                 }
             }
         }
-        true
+        Ok(true)
     }
 
     /// Invoked when tree transition to white/undiscovered state examined.

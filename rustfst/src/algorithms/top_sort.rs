@@ -28,8 +28,8 @@ impl TopOrderVisitor {
 impl<'a, W: Semiring, F: 'a + Fst<W>> Visitor<'a, W, F> for TopOrderVisitor {
     fn init_visit(&mut self, _fst: &'a F) {}
 
-    fn init_state(&mut self, _s: StateId, _root: StateId) -> bool {
-        true
+    fn init_state(&mut self, _s: StateId, _root: StateId) -> Result<bool> {
+        Ok(true)
     }
 
     fn tree_tr(&mut self, _s: StateId, _tr: &Tr<W>) -> bool {
@@ -79,7 +79,7 @@ where
     F: MutableFst<W>,
 {
     let mut visitor = TopOrderVisitor::new();
-    dfs_visit(fst, &mut visitor, &AnyTrFilter {}, false);
+    dfs_visit(fst, &mut visitor, &AnyTrFilter {}, false)?;
     if visitor.acyclic {
         state_sort(fst, &visitor.order)?;
         let props =

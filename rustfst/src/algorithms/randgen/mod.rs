@@ -46,7 +46,7 @@ pub fn randgen_with_config<
         // TODO: No need to do that if dfs_visit supports NOT expanded FST.
         let randgen_fst_static: VectorFst<_> = randgen_fst.compute()?;
         let mut visitor = RandGenVisitor::new();
-        dfs_visit(&randgen_fst_static, &mut visitor, &AnyTrFilter {}, false);
+        dfs_visit(&randgen_fst_static, &mut visitor, &AnyTrFilter {}, false)?;
         Ok(visitor.into_output_fst())
     }
 }

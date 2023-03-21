@@ -7,7 +7,7 @@ use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::StateId;
 
-fn iterator_to_hashmap<I>(pairs: I) -> Result<HashMap<StateId, StateId>>
+pub fn iterator_to_hashmap<I>(pairs: I) -> Result<HashMap<StateId, StateId>>
 where
     I: IntoIterator<Item = (StateId, StateId)>,
 {

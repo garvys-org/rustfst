@@ -5,6 +5,7 @@ use crate::algorithms::{Queue, QueueType};
 use crate::fst_traits::ExpandedFst;
 use crate::semirings::Semiring;
 use crate::StateId;
+use anyhow::{bail, Result};
 
 /// Topological-order queue discipline, templated on the StateId. States are
 /// ordered in the queue topologically. The FST must be acyclic.
@@ -17,13 +18,16 @@ pub struct TopOrderQueue {
 }
 
 impl TopOrderQueue {
-    pub fn new<W: Semiring, F: ExpandedFst<W>, A: TrFilter<W>>(fst: &F, tr_filter: &A) -> Self {
+    pub fn new<W: Semiring, F: ExpandedFst<W>, A: TrFilter<W>>(
+        fst: &F,
+        tr_filter: &A,
+    ) -> Result<Self> {
         let mut visitor = TopOrderVisitor::new();
-        dfs_visit(fst, &mut visitor, tr_filter, false);
+        dfs_visit(fst, &mut visitor, tr_filter, false)?;
         if !visitor.acyclic {
-            panic!("Unexpectted Acyclic FST for TopOprerQueue");
+            bail!("Unexpectted Acyclic FST for TopOprerQueue");
         }
-        Self::from_precomputed_order(visitor.order)
+        Ok(Self::from_precomputed_order(visitor.order))
     }
 
     pub fn from_precomputed_order(order: Vec<StateId>) -> Self {

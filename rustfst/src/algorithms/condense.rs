@@ -16,7 +16,7 @@ pub fn condense<W: Semiring, FI: Fst<W> + ExpandedFst<W>, FO: MutableFst<W>>(
     ifst: &FI,
 ) -> Result<(Vec<i32>, FO)> {
     let mut visitor = SccVisitor::new(ifst, true, false);
-    dfs_visit(ifst, &mut visitor, &AnyTrFilter {}, false);
+    dfs_visit(ifst, &mut visitor, &AnyTrFilter {}, false)?;
     let scc = visitor.scc.unwrap();
     let mut ofst = FO::new();
     if let Some(max) = scc.iter().max() {

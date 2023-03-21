@@ -56,6 +56,7 @@ mod partition;
 mod projection;
 mod push;
 mod queue;
+pub mod relabel;
 
 /// Functions to randomly generate paths through an Fst. A static and a delayed version are available.
 pub mod randgen;

@@ -1,11 +1,13 @@
+use std::marker::PhantomData;
+
+use anyhow::Result;
+use unsafe_unwrap::UnsafeUnwrap;
+
+use crate::algorithms::tr_filters::TrFilter;
 use crate::fst_traits::{ExpandedFst, Fst};
 use crate::semirings::Semiring;
 use crate::tr::Tr;
 use crate::{StateId, Trs};
-
-use crate::algorithms::tr_filters::TrFilter;
-use std::marker::PhantomData;
-use unsafe_unwrap::UnsafeUnwrap;
 
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
 enum DfsStateColor {
@@ -22,7 +24,7 @@ pub trait Visitor<'a, W: Semiring, F: Fst<W>> {
     fn init_visit(&mut self, fst: &'a F);
 
     /// Invoked when state discovered (2nd arg is DFS tree root).
-    fn init_state(&mut self, s: StateId, root: StateId) -> bool;
+    fn init_state(&mut self, s: StateId, root: StateId) -> Result<bool>;
 
     /// Invoked when tree transition to white/undiscovered state examined.
     fn tree_tr(&mut self, s: StateId, tr: &Tr<W>) -> bool;
@@ -100,12 +102,12 @@ pub fn dfs_visit<'a, W: Semiring, F: ExpandedFst<W>, V: Visitor<'a, W, F>, A: Tr
     visitor: &mut V,
     tr_filter: &A,
     access_only: bool,
-) {
+) -> Result<()> {
     visitor.init_visit(fst);
     let start = match fst.start() {
         None => {
             visitor.finish_visit();
-            return;
+            return Ok(());
         }
         Some(s) => s,
     };
@@ -123,7 +125,7 @@ pub fn dfs_visit<'a, W: Semiring, F: ExpandedFst<W>, V: Visitor<'a, W, F>, A: Tr
         }
         state_color[root as usize] = DfsStateColor::Grey;
         state_stack.push(DfsState::new(fst, root));
-        dfs = visitor.init_state(root, root);
+        dfs = visitor.init_state(root, root)?;
         let mut state_stack_next = None;
         while !state_stack.is_empty() {
             let dfs_state = unsafe { state_stack.last_mut().unsafe_unwrap() };
@@ -156,7 +158,7 @@ pub fn dfs_visit<'a, W: Semiring, F: ExpandedFst<W>, V: Visitor<'a, W, F>, A: Tr
                     }
                     state_color[tr.nextstate as usize] = DfsStateColor::Grey;
                     state_stack_next = Some(DfsState::new(fst, tr.nextstate));
-                    dfs = visitor.init_state(tr.nextstate, root);
+                    dfs = visitor.init_state(tr.nextstate, root)?;
                 }
                 DfsStateColor::Grey => {
                     dfs = visitor.back_tr(s, tr);
@@ -185,4 +187,5 @@ pub fn dfs_visit<'a, W: Semiring, F: ExpandedFst<W>, V: Visitor<'a, W, F>, A: Tr
         }
     }
     visitor.finish_visit();
+    Ok(())
 }

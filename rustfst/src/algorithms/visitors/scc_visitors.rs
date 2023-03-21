@@ -1,5 +1,6 @@
 use std::marker::PhantomData;
 
+use anyhow::Result;
 use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::dfs_visit::Visitor;
@@ -62,7 +63,7 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> SccVisitor<'a, W, F> {
 impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for SccVisitor<'a, W, F> {
     fn init_visit(&mut self, _fst: &'a F) {}
 
-    fn init_state(&mut self, s: StateId, root: StateId) -> bool {
+    fn init_state(&mut self, s: StateId, root: StateId) -> Result<bool> {
         self.scc_stack.push(s);
         let s = s as usize;
         self.dfnumber[s] = self.nstates as i32;
@@ -80,7 +81,7 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for SccVisitor<'
             self.props &= !FstProperties::ACCESSIBLE;
         }
         self.nstates += 1;
-        true
+        Ok(true)
     }
 
     fn tree_tr(&mut self, _s: StateId, _tr: &Tr<W>) -> bool {

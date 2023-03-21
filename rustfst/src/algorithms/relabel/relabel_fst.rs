@@ -1,26 +1,46 @@
+use crate::algorithms::lazy::{LazyFst, SimpleHashMapCache};
+use crate::algorithms::relabel::relabel_fst_op::RelabelFstOp;
+use crate::algorithms::relabel_pairs::iterator_to_hashmap;
+use crate::fst_properties::FstProperties;
+use crate::fst_traits::{AllocableFst, CoreFst, Fst, FstIterator, MutableFst, StateIterator};
+use crate::{Semiring, StateId, SymbolTable, TrsVec};
+use anyhow::{Context, Result};
 use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::sync::Arc;
 
-use anyhow::Result;
+type InnerLazyFst<W, F, B> = LazyFst<W, RelabelFstOp<W, F, B>, SimpleHashMapCache<W>>;
 
-use crate::algorithms::lazy::{LazyFst2, SimpleHashMapCache};
-use crate::algorithms::rm_epsilon::rm_epsilon_op::RmEpsilonOp;
-use crate::fst_properties::FstProperties;
-use crate::fst_traits::{CoreFst, Fst, FstIterator, StateIterator};
-use crate::prelude::MutableFst;
-use crate::{Semiring, StateId, SymbolTable, TrsVec};
+pub struct RelabelFst<W: Semiring, F: Fst<W>, B: Borrow<F>>(InnerLazyFst<W, F, B>);
 
-type InnerLazyFst<W, F, B> = LazyFst2<W, RmEpsilonOp<W, F, B>, SimpleHashMapCache<W>>;
+impl<W: Semiring, F: Fst<W>, B: Borrow<F>> RelabelFst<W, F, B> {
+    pub fn new<I, J>(fst: B, ipairs: I, opairs: J) -> Result<Self>
+    where
+        I: IntoIterator<Item = (StateId, StateId)>,
+        J: IntoIterator<Item = (StateId, StateId)>,
+    {
+        let map_ilabels = iterator_to_hashmap(ipairs)
+            .with_context(|| format_err!("Error while creating the HashMap for ipairs"))?;
 
-/// The result of weight factoring is a transducer equivalent to the
-/// input whose path weights have been factored according to the FactorIterator.
-/// States and transitions will be added as necessary. The algorithm is a
-/// generalization to arbitrary weights of the second step of the input
-/// epsilon-normalization algorithm. This version is a Delayed FST.
-pub struct RmEpsilonFst<W: Semiring, F: Fst<W>, B: Borrow<F>>(InnerLazyFst<W, F, B>);
+        let map_olabels = iterator_to_hashmap(opairs)
+            .with_context(|| format_err!("Error while creating the HashMap for opairs"))?;
 
-impl<W, F, B> CoreFst<W> for RmEpsilonFst<W, F, B>
+        let isymt = fst.borrow().input_symbols().cloned();
+        let osymt = fst.borrow().output_symbols().cloned();
+
+        let fst_op = RelabelFstOp::new(fst, map_ilabels, map_olabels);
+        let fst_cache = SimpleHashMapCache::default();
+        Ok(RelabelFst(LazyFst::from_op_and_cache(
+            fst_op, fst_cache, isymt, osymt,
+        )))
+    }
+
+    pub fn compute<F2: MutableFst<W> + AllocableFst<W>>(&self) -> Result<F2> {
+        self.0.compute()
+    }
+}
+
+impl<W, F, B> CoreFst<W> for RelabelFst<W, F, B>
 where
     W: Semiring,
     F: Fst<W>,
@@ -69,7 +89,7 @@ where
     }
 }
 
-impl<'a, W, F, B> StateIterator<'a> for RmEpsilonFst<W, F, B>
+impl<'a, W, F, B> StateIterator<'a> for RelabelFst<W, F, B>
 where
     W: Semiring,
     F: Fst<W> + 'a,
@@ -82,7 +102,7 @@ where
     }
 }
 
-impl<'a, W, F, B> FstIterator<'a, W> for RmEpsilonFst<W, F, B>
+impl<'a, W, F, B> FstIterator<'a, W> for RelabelFst<W, F, B>
 where
     W: Semiring,
     F: Fst<W> + 'a,
@@ -95,7 +115,7 @@ where
     }
 }
 
-impl<W, F, B> Fst<W> for RmEpsilonFst<W, F, B>
+impl<W, F, B> Fst<W> for RelabelFst<W, F, B>
 where
     W: Semiring,
     F: Fst<W> + 'static,
@@ -126,7 +146,7 @@ where
     }
 }
 
-impl<W, F, B> Debug for RmEpsilonFst<W, F, B>
+impl<W, F, B> Debug for RelabelFst<W, F, B>
 where
     W: Semiring,
     F: Fst<W>,
@@ -134,27 +154,6 @@ where
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.0.fmt(f)
-    }
-}
-
-impl<'a, W, F, B> RmEpsilonFst<W, F, B>
-where
-    W: Semiring,
-    F: Fst<W>,
-    B: Borrow<F>,
-{
-    pub fn new(fst: B) -> Result<Self> {
-        let isymt = fst.borrow().input_symbols().cloned();
-        let osymt = fst.borrow().output_symbols().cloned();
-        let fst_op = RmEpsilonOp::new(fst);
-        let fst_cache = SimpleHashMapCache::default();
-        let lazy_fst = LazyFst2::from_op_and_cache(fst_op, fst_cache, isymt, osymt);
-        Ok(RmEpsilonFst(lazy_fst))
-    }
-
-    /// Turns the Lazy FST into a static one.
-    pub fn compute<F2: MutableFst<W>>(&self) -> Result<F2> {
-        self.0.compute()
     }
 }
 
@@ -166,8 +165,8 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_rmepsilon_fst_sync() {
+    fn test_replace_fst_sync() {
         fn is_sync<T: Sync>() {}
-        is_sync::<RmEpsilonFst<TropicalWeight, VectorFst<_>, VectorFst<_>>>();
+        is_sync::<RelabelFst<TropicalWeight, VectorFst<_>, VectorFst<_>>>();
     }
 }
