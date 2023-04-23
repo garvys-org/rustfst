@@ -29,7 +29,7 @@ pub enum QueueType {
 pub trait Queue: Debug {
     fn head(&mut self) -> Option<StateId>;
     fn enqueue(&mut self, state: StateId);
-    fn dequeue(&mut self);
+    fn dequeue(&mut self) -> Option<StateId>;
     fn update(&mut self, state: StateId);
     fn is_empty(&self) -> bool;
     fn clear(&mut self);

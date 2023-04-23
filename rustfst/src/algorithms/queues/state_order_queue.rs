@@ -30,13 +30,18 @@ impl Queue for StateOrderQueue {
         self.enqueued[state] = true;
     }
 
-    fn dequeue(&mut self) {
+    fn dequeue(&mut self) -> Option<StateId> {
+        if self.is_empty() {
+            return None;
+        }
+        let old_head = self.head();
         self.enqueued[self.front] = false;
         if let Some(back_) = self.back {
             while self.front <= back_ && !self.enqueued[self.front] {
                 self.front += 1;
             }
         }
+        old_head
     }
 
     fn update(&mut self, _state: StateId) {}

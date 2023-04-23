@@ -532,9 +532,7 @@ fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<Rc<RefC
     });
 
     // Compute
-    while let Some(c) = queue.head() {
-        queue.dequeue();
-
+    while let Some(c) = queue.dequeue() {
         // Split
         for s in partition.borrow().iter(c as usize) {
             if tr.num_trs(s as StateId + 1)? > 0 {

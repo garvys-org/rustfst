@@ -18,8 +18,8 @@ impl Queue for TrivialQueue {
         self.state = Some(state);
     }
 
-    fn dequeue(&mut self) {
-        self.state = None;
+    fn dequeue(&mut self) -> Option<StateId> {
+        self.state.take()
     }
 
     fn update(&mut self, _state: StateId) {}

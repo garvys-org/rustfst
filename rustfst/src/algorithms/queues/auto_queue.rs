@@ -166,7 +166,7 @@ impl Queue for AutoQueue {
         self.queue.enqueue(state)
     }
 
-    fn dequeue(&mut self) {
+    fn dequeue(&mut self) -> Option<StateId> {
         self.queue.dequeue()
     }
 

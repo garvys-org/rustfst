@@ -57,8 +57,8 @@ impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> Queue for ShortestFirstQu
         self.heap.push(state);
     }
 
-    fn dequeue(&mut self) {
-        self.heap.pop();
+    fn dequeue(&mut self) -> Option<StateId> {
+        self.heap.pop()
     }
 
     fn update(&mut self, _state: StateId) {
@@ -108,7 +108,7 @@ impl Queue for NaturalShortestFirstQueue {
         self.queue.enqueue(state)
     }
 
-    fn dequeue(&mut self) {
+    fn dequeue(&mut self) -> Option<StateId> {
         self.queue.dequeue()
     }
 

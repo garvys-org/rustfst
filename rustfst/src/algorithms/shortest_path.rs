@@ -209,10 +209,7 @@ where
 
     queue.enqueue(source);
 
-    while !queue.is_empty() {
-        // Safe because non empty
-        let s = unsafe { queue.head().unsafe_unwrap() };
-        queue.dequeue();
+    while let Some(s) = queue.dequeue() {
         enqueued[s as usize] = false;
         let sd = distance[s as usize].clone();
 
