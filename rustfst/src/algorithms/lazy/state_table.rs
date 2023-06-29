@@ -132,7 +132,7 @@ impl<T: SerializeBinary + Hash + Eq + Clone> SerializeBinary for StateTable<T> {
             tuple_to_id_len as usize,
             tuple_to_id_len as usize,
             parse_tuple_to_id,
-            HashMap::<T, StateId>::new(),
+            HashMap::<T, StateId>::new,
             |mut acc, item| {
                 acc.insert(item.0, item.1);
                 acc

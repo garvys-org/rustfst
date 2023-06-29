@@ -4,6 +4,9 @@ use std::hash::{Hash, Hasher};
 use std::io::Write;
 
 use anyhow::Result;
+use nom::branch::alt;
+use nom::bytes::complete::tag_no_case;
+use nom::combinator::map;
 use nom::number::complete::float;
 use nom::IResult;
 use ordered_float::OrderedFloat;
@@ -155,7 +158,9 @@ impl SerializableSemiring for LogWeight {
     }
 
     fn parse_text(i: &str) -> IResult<&str, Self> {
-        let (i, f) = float(i)?;
+        // FIXME: nom 7 does not fully parse "infinity", therefore it is done manually here until
+        // the PR https://github.com/rust-bakery/nom/pull/1673 is merged.
+        let (i, f) = alt((map(tag_no_case("infinity"), |_| f32::INFINITY), float))(i)?;
         Ok((i, Self::new(f)))
     }
 }
