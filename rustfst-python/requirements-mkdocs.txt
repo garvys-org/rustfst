@@ -69,7 +69,7 @@ packaging==21.3
     # via mkdocs
 pygments==2.15.0
     # via mkdocs-material
-pymdown-extensions==9.4
+pymdown-extensions==10.0
     # via
     #   mkdocs-material
     #   mkdocstrings
@@ -84,6 +84,7 @@ pyyaml==6.0
     #   mike
     #   mkdocs
     #   mkdocs-macros-plugin
+    #   pymdown-extensions
     #   pyyaml-env-tag
 pyyaml-env-tag==0.1
     # via mkdocs
