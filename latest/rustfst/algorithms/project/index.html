@@ -1019,16 +1019,16 @@
 <span class="normal">22</span>
 <span class="normal">23</span>
 <span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ProjectType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Different types of labels projection in a Fst.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">PROJECT_INPUT</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Input projection : output labels are replaced with input ones.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">PROJECT_OUTPUT</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Output projection : input labels are replaced with output ones.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
@@ -1187,7 +1187,7 @@
 <span class="normal">46</span>
 <span class="normal">47</span>
 <span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">proj_type</span><span class="p">:</span> <span class="n">ProjectType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a Fst to an acceptor using input or output labels.</span>
 <span class="sd">    Args:</span>
 <span class="sd">        fst: Fst on which to apply the algorithm.</span>

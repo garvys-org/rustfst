@@ -1018,12 +1018,12 @@
 <span class="normal">65</span>
 <span class="normal">66</span>
 <span class="normal">67</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">StringPathsIterator</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Iterator allowing to loop through all the paths recognized by an Fst.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructor of the Iterator.</span>
 
 <span class="sd">        Args:</span>
@@ -1039,11 +1039,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">iter_ptr</span>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StringPath</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
         <span class="n">string_path_ptr</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">string_paths_iterator_next</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">string_path_ptr</span><span class="p">)</span>
@@ -1057,7 +1057,7 @@
         <span class="k">return</span> <span class="n">StringPath</span><span class="p">(</span><span class="n">string_path_ptr</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">done</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns whether we&#39;re at the end of the Iterator.</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            True or False</span>
@@ -1143,7 +1143,7 @@
 <span class="normal">29</span>
 <span class="normal">30</span>
 <span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructor of the Iterator.</span>
 
 <span class="sd">    Args:</span>
@@ -1210,7 +1210,7 @@
 <span class="normal">61</span>
 <span class="normal">62</span>
 <span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">done</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns whether we&#39;re at the end of the Iterator.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        True or False</span>

@@ -1329,7 +1329,7 @@
 <span class="normal">75</span>
 <span class="normal">76</span>
 <span class="normal">77</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">TrsIterator</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    TrsIterator(fst, state)</span>
 <span class="sd">      This class is used for iterating over the trs leaving some state of a FST.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1346,7 +1346,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_ptr</span> <span class="o">=</span> <span class="n">iter_ptr</span>
 
     <span class="k">def</span> <span class="nf">done</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        done(self)</span>
 <span class="sd">            Indicates whether the iterator is exhausted or not.</span>
 <span class="sd">            Returns:</span>
@@ -1361,7 +1361,7 @@
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">done</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tr</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;x.next() -&gt; the next value, or raise StopIteration&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;x.next() -&gt; the next value, or raise StopIteration&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">StopIteration</span>
 
@@ -1376,7 +1376,7 @@
         <span class="k">return</span> <span class="n">Tr</span><span class="p">(</span><span class="n">tr_ptr</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        reset(self)</span>
 <span class="sd">            Resets the iterator to the initial position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1385,11 +1385,11 @@
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TrsIterator</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;x.__iter__() &lt;==&gt; iter(x)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;x.__iter__() &lt;==&gt; iter(x)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;TrsIterator at 0x</span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1442,7 +1442,7 @@
 <span class="normal">40</span>
 <span class="normal">41</span>
 <span class="normal">42</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">done</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    done(self)</span>
 <span class="sd">        Indicates whether the iterator is exhausted or not.</span>
 <span class="sd">        Returns:</span>
@@ -1491,7 +1491,7 @@
 <span class="normal">55</span>
 <span class="normal">56</span>
 <span class="normal">57</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tr</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;x.next() -&gt; the next value, or raise StopIteration&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;x.next() -&gt; the next value, or raise StopIteration&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>
         <span class="k">raise</span> <span class="ne">StopIteration</span>
 
@@ -1535,7 +1535,7 @@
 <span class="normal">64</span>
 <span class="normal">65</span>
 <span class="normal">66</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    reset(self)</span>
 <span class="sd">        Resets the iterator to the initial position.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1567,7 +1567,7 @@
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">68</span>
 <span class="normal">69</span>
 <span class="normal">70</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TrsIterator</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;x.__iter__() &lt;==&gt; iter(x)&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;x.__iter__() &lt;==&gt; iter(x)&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -1594,7 +1594,7 @@
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">72</span>
 <span class="normal">73</span>
 <span class="normal">74</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;TrsIterator at 0x</span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -1718,7 +1718,7 @@
 <span class="normal">164</span>
 <span class="normal">165</span>
 <span class="normal">166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">MutableTrsIterator</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    MutableTrsIterator(ifst, state)</span>
 <span class="sd">      This class is used for iterating over the trs leaving some state of a FST,</span>
 <span class="sd">      also permitting mutation of the current tr.</span>
@@ -1736,7 +1736,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_ptr</span> <span class="o">=</span> <span class="n">iter_ptr</span>
 
     <span class="k">def</span> <span class="nf">done</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        done(self)</span>
 <span class="sd">            Indicates whether the iterator is exhausted or not.</span>
 <span class="sd">            Returns:</span>
@@ -1751,7 +1751,7 @@
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">done</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Advances the internal tr iterator.</span>
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1760,7 +1760,7 @@
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        reset(self)</span>
 <span class="sd">            Resets the iterator to the initial position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1769,7 +1769,7 @@
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">set_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tr</span><span class="p">:</span> <span class="n">Tr</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        set_value(self, tr)</span>
 <span class="sd">            Replace the current tr with a new tr.</span>
 <span class="sd">            Args:</span>
@@ -1780,7 +1780,7 @@
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tr</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        value(self)</span>
 <span class="sd">            Returns the current tr.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1795,11 +1795,11 @@
         <span class="k">return</span> <span class="n">Tr</span><span class="p">(</span><span class="n">tr_ptr</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MutableTrsIterator</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;x.__iter__() &lt;==&gt; iter(x)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;x.__iter__() &lt;==&gt; iter(x)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;MutableTrsIterator at 0x</span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1852,7 +1852,7 @@
 <span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">done</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    done(self)</span>
 <span class="sd">        Indicates whether the iterator is exhausted or not.</span>
 <span class="sd">        Returns:</span>
@@ -1896,7 +1896,7 @@
 <span class="normal">118</span>
 <span class="normal">119</span>
 <span class="normal">120</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Advances the internal tr iterator.</span>
 <span class="sd">    :return: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1934,7 +1934,7 @@
 <span class="normal">127</span>
 <span class="normal">128</span>
 <span class="normal">129</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    reset(self)</span>
 <span class="sd">        Resets the iterator to the initial position.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1976,7 +1976,7 @@
 <span class="normal">138</span>
 <span class="normal">139</span>
 <span class="normal">140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">set_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tr</span><span class="p">:</span> <span class="n">Tr</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    set_value(self, tr)</span>
 <span class="sd">        Replace the current tr with a new tr.</span>
 <span class="sd">        Args:</span>
@@ -2022,7 +2022,7 @@
 <span class="normal">153</span>
 <span class="normal">154</span>
 <span class="normal">155</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tr</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    value(self)</span>
 <span class="sd">        Returns the current tr.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2060,7 +2060,7 @@
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">157</span>
 <span class="normal">158</span>
 <span class="normal">159</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MutableTrsIterator</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;x.__iter__() &lt;==&gt; iter(x)&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;x.__iter__() &lt;==&gt; iter(x)&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -2087,7 +2087,7 @@
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">161</span>
 <span class="normal">162</span>
 <span class="normal">163</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;MutableTrsIterator at 0x</span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -2178,7 +2178,7 @@
 <span class="normal">221</span>
 <span class="normal">222</span>
 <span class="normal">223</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">StateIterator</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    StateIterator(fst)</span>
 <span class="sd">      This class is used for iterating over the states in a FST.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2194,7 +2194,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_ptr</span> <span class="o">=</span> <span class="n">iter_ptr</span>
 
     <span class="k">def</span> <span class="nf">done</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        done(self)</span>
 <span class="sd">            Indicates whether the iterator is exhausted or not.</span>
 <span class="sd">            Returns:</span>
@@ -2209,7 +2209,7 @@
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">done</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;x.next() -&gt; the next value, or raise StopIteration&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;x.next() -&gt; the next value, or raise StopIteration&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">StopIteration</span>
 
@@ -2223,11 +2223,11 @@
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">next_state</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StateIterator</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;x.__iter__() &lt;==&gt; iter(x)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;x.__iter__() &lt;==&gt; iter(x)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;StateIterator at 0x</span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -2280,7 +2280,7 @@
 <span class="normal">196</span>
 <span class="normal">197</span>
 <span class="normal">198</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">done</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    done(self)</span>
 <span class="sd">        Indicates whether the iterator is exhausted or not.</span>
 <span class="sd">        Returns:</span>
@@ -2328,7 +2328,7 @@
 <span class="normal">210</span>
 <span class="normal">211</span>
 <span class="normal">212</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;x.next() -&gt; the next value, or raise StopIteration&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;x.next() -&gt; the next value, or raise StopIteration&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>
         <span class="k">raise</span> <span class="ne">StopIteration</span>
 
@@ -2365,7 +2365,7 @@
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">214</span>
 <span class="normal">215</span>
 <span class="normal">216</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StateIterator</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;x.__iter__() &lt;==&gt; iter(x)&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;x.__iter__() &lt;==&gt; iter(x)&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -2392,7 +2392,7 @@
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">218</span>
 <span class="normal">219</span>
 <span class="normal">220</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;x.__repr__() &lt;==&gt; repr(x)&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;StateIterator at 0x</span><span class="si">{</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
 </code></pre></div></td></tr></table></div>
       </details>

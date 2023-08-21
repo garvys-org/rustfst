@@ -1118,20 +1118,20 @@
 <span class="normal">31</span>
 <span class="normal">32</span>
 <span class="normal">33</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DeterminizeType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Enumeration defining the type of the determinization to perform.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">DETERMINIZE_FUNCTIONAL</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Input transducer is known to be functional (or error).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">DETERMINIZE_NON_FUNCTIONAL</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Input transducer is NOT known to be functional.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">DETERMINIZE_DISAMBIGUATE</span> <span class="o">=</span> <span class="mi">2</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Input transducer is not known to be functional but only keep the min of</span>
 <span class="sd">    of ambiguous outputs.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1265,12 +1265,12 @@ of ambiguous outputs.</p>
 <span class="normal">57</span>
 <span class="normal">58</span>
 <span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DeterminizeConfig</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Struct containing the parameters controlling the determinization algorithm.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">det_type</span><span class="p">:</span> <span class="n">DeterminizeType</span><span class="p">,</span> <span class="n">delta</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the configuration object.</span>
 <span class="sd">        Args:</span>
 <span class="sd">            det_type: Type of determinization to perform.</span>
@@ -1372,7 +1372,7 @@ of ambiguous outputs.</p>
 <span class="normal">57</span>
 <span class="normal">58</span>
 <span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">det_type</span><span class="p">:</span> <span class="n">DeterminizeType</span><span class="p">,</span> <span class="n">delta</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates the configuration object.</span>
 <span class="sd">    Args:</span>
 <span class="sd">        det_type: Type of determinization to perform.</span>
@@ -1477,7 +1477,7 @@ of ambiguous outputs.</p>
 <span class="normal">73</span>
 <span class="normal">74</span>
 <span class="normal">75</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">determinize</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Make an Fst deterministic</span>
 <span class="sd">    Args:</span>
 <span class="sd">        fst: The Fst to make deterministic.</span>
@@ -1581,7 +1581,7 @@ of ambiguous outputs.</p>
 <span class="normal">92</span>
 <span class="normal">93</span>
 <span class="normal">94</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">determinize_with_config</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">DeterminizeConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Make an Fst deterministic</span>
 <span class="sd">    Args:</span>
 <span class="sd">        fst: The Fst to make deterministic.</span>

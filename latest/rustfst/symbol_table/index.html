@@ -1499,12 +1499,12 @@
 <span class="normal">282</span>
 <span class="normal">283</span>
 <span class="normal">284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SymbolTable</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `SymbolTable` class. This class wraps the `SymbolTable` struct.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates an empty `SymbolTable`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">ptr</span><span class="p">:</span>
@@ -1518,7 +1518,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">symt_ptr</span>
 
     <span class="k">def</span> <span class="nf">add_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a symbol to the table and returns the index.</span>
 
 <span class="sd">        Args:</span>
@@ -1539,7 +1539,7 @@
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">integer_key</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">add_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syms</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method merges another symbol table into the current table. All key</span>
 <span class="sd">        values will be offset by the current available key.</span>
 <span class="sd">        Args:</span>
@@ -1550,7 +1550,7 @@
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            A mutable copy of the `SymbolTable`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1563,7 +1563,7 @@
         <span class="k">return</span> <span class="n">SymbolTable</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">clone</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Given a symbol or index, finds the other one.</span>
 <span class="sd">        This method returns the index associated with a symbol key, or the symbol</span>
 <span class="sd">        associated with a index key.</span>
@@ -1600,7 +1600,7 @@
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">member</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Given a symbol or index, returns whether it is found in the table.</span>
 <span class="sd">        This method returns a boolean indicating whether the given symbol or index</span>
 <span class="sd">        is present in the table. If one intends to perform subsequent lookup, it is</span>
@@ -1631,7 +1631,7 @@
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">is_present</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">num_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            The number of symbols in the symbol table.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1644,7 +1644,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reads symbol table from binary file.</span>
 <span class="sd">        This class method creates a new SymbolTable from a symbol table binary file.</span>
 <span class="sd">        Args:</span>
@@ -1665,7 +1665,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">read_text</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reads symbol table from text file.</span>
 <span class="sd">        This class method creates a new SymbolTable from a symbol table text file.</span>
 <span class="sd">        Args:</span>
@@ -1686,7 +1686,7 @@
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">symt</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Serializes symbol table to a file.</span>
 <span class="sd">        This methods writes the SymbolTable to a file in binary format.</span>
 <span class="sd">        Args:</span>
@@ -1702,7 +1702,7 @@
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">write_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Writes symbol table to text file.</span>
 <span class="sd">        This method writes the SymbolTable to a file in human-readable format.</span>
 <span class="sd">        Args:</span>
@@ -1718,7 +1718,7 @@
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if this SymbolTable is equal to the other</span>
 
 <span class="sd">        Params:</span>
@@ -1735,7 +1735,7 @@
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">is_equal</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if this `SymbolTable` is equal to the other</span>
 
 <span class="sd">        Params:</span>
@@ -1746,7 +1746,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTableIterator</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns an Iterator over the SymbolTable.</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            An iterator over the SymbolTable.</span>
@@ -1755,7 +1755,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_symbols</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">symbols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructs a SymbolTable from list of strings.</span>
 
 <span class="sd">        Args:</span>
@@ -1817,7 +1817,7 @@
 <span class="normal">25</span>
 <span class="normal">26</span>
 <span class="normal">27</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates an empty `SymbolTable`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">ptr</span><span class="p">:</span>
@@ -1913,7 +1913,7 @@
 <span class="normal">46</span>
 <span class="normal">47</span>
 <span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">add_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a symbol to the table and returns the index.</span>
 
 <span class="sd">    Args:</span>
@@ -1989,7 +1989,7 @@ values will be offset by the current available key.</p>
 <span class="normal">57</span>
 <span class="normal">58</span>
 <span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">add_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syms</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This method merges another symbol table into the current table. All key</span>
 <span class="sd">    values will be offset by the current available key.</span>
 <span class="sd">    Args:</span>
@@ -2049,7 +2049,7 @@ values will be offset by the current available key.</p>
 <span class="normal">70</span>
 <span class="normal">71</span>
 <span class="normal">72</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        A mutable copy of the `SymbolTable`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2163,7 +2163,7 @@ associated with a index key.</p>
 <span class="normal">89</span>
 <span class="normal">90</span>
 <span class="normal">91</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a symbol or index, finds the other one.</span>
 <span class="sd">    This method returns the index associated with a symbol key, or the symbol</span>
 <span class="sd">    associated with a index key.</span>
@@ -2277,7 +2277,7 @@ better to simply call the find method, catching the KeyError.</p>
 <span class="normal">138</span>
 <span class="normal">139</span>
 <span class="normal">140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">member</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a symbol or index, returns whether it is found in the table.</span>
 <span class="sd">    This method returns a boolean indicating whether the given symbol or index</span>
 <span class="sd">    is present in the table. If one intends to perform subsequent lookup, it is</span>
@@ -2356,7 +2356,7 @@ better to simply call the find method, catching the KeyError.</p>
 <span class="normal">150</span>
 <span class="normal">151</span>
 <span class="normal">152</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">num_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        The number of symbols in the symbol table.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2457,7 +2457,7 @@ This class method creates a new SymbolTable from a symbol table binary file.</p>
 <span class="normal">172</span>
 <span class="normal">173</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reads symbol table from binary file.</span>
 <span class="sd">    This class method creates a new SymbolTable from a symbol table binary file.</span>
 <span class="sd">    Args:</span>
@@ -2567,7 +2567,7 @@ This class method creates a new SymbolTable from a symbol table text file.</p>
 <span class="normal">194</span>
 <span class="normal">195</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">read_text</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reads symbol table from text file.</span>
 <span class="sd">    This class method creates a new SymbolTable from a symbol table text file.</span>
 <span class="sd">    Args:</span>
@@ -2666,7 +2666,7 @@ This methods writes the SymbolTable to a file in binary format.</p>
 <span class="normal">209</span>
 <span class="normal">210</span>
 <span class="normal">211</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Serializes symbol table to a file.</span>
 <span class="sd">    This methods writes the SymbolTable to a file in binary format.</span>
 <span class="sd">    Args:</span>
@@ -2760,7 +2760,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">225</span>
 <span class="normal">226</span>
 <span class="normal">227</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">write_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Writes symbol table to text file.</span>
 <span class="sd">    This method writes the SymbolTable to a file in human-readable format.</span>
 <span class="sd">    Args:</span>
@@ -2854,7 +2854,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">242</span>
 <span class="normal">243</span>
 <span class="normal">244</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if this SymbolTable is equal to the other</span>
 
 <span class="sd">    Params:</span>
@@ -2943,7 +2943,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">253</span>
 <span class="normal">254</span>
 <span class="normal">255</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if this `SymbolTable` is equal to the other</span>
 
 <span class="sd">    Params:</span>
@@ -2999,7 +2999,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">261</span>
 <span class="normal">262</span>
 <span class="normal">263</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTableIterator</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns an Iterator over the SymbolTable.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        An iterator over the SymbolTable.</span>
@@ -3091,7 +3091,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">280</span>
 <span class="normal">281</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">from_symbols</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">symbols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructs a SymbolTable from list of strings.</span>
 
 <span class="sd">    Args:</span>
@@ -3165,12 +3165,12 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">310</span>
 <span class="normal">311</span>
 <span class="normal">312</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SymbolTableIterator</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Iterator on a SymbolTable. Allows retrieving all the symbols along with their corresponding labels.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol_table</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructs an iterator from the `Symboltable`.</span>
 <span class="sd">        Args:</span>
 <span class="sd">            symbol_table:</span>
@@ -3180,7 +3180,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symt</span><span class="o">.</span><span class="n">num_symbols</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Iterator over the symbols in the `SymbolTable`.</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            A pair label (int) and symbol (str).</span>
@@ -3254,7 +3254,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">298</span>
 <span class="normal">299</span>
 <span class="normal">300</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol_table</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructs an iterator from the `Symboltable`.</span>
 <span class="sd">    Args:</span>
 <span class="sd">        symbol_table:</span>
@@ -3313,7 +3313,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">310</span>
 <span class="normal">311</span>
 <span class="normal">312</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Iterator over the symbols in the `SymbolTable`.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        A pair label (int) and symbol (str).</span>
