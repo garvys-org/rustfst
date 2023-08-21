@@ -112,9 +112,7 @@ pub extern "C" fn trs_iterator_destroy(iter_ptr: *mut CTrsIterator) -> RUSTFST_F
             return Ok(());
         }
 
-        unsafe {
-            Box::from_raw(iter_ptr);
-        }
+        unsafe { drop(Box::from_raw(iter_ptr)) }
         Ok(())
     })
 }
@@ -273,9 +271,7 @@ pub extern "C" fn mut_trs_iterator_destroy(iter_ptr: *mut CMutTrsIterator) -> RU
             return Ok(());
         }
 
-        unsafe {
-            Box::from_raw(iter_ptr);
-        }
+        unsafe { drop(Box::from_raw(iter_ptr)) }
         Ok(())
     })
 }
@@ -332,9 +328,7 @@ pub extern "C" fn state_iterator_destroy(iter_ptr: *mut CStateIterator) -> RUSTF
             return Ok(());
         }
 
-        unsafe {
-            Box::from_raw(iter_ptr);
-        }
+        unsafe { drop(Box::from_raw(iter_ptr)) }
         Ok(())
     })
 }

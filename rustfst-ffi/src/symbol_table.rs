@@ -205,9 +205,7 @@ pub extern "C" fn symt_destroy(symt_ptr: *mut CSymbolTable) -> RUSTFST_FFI_RESUL
             return Ok(());
         }
 
-        unsafe {
-            Box::from_raw(symt_ptr);
-        }
+        unsafe { drop(Box::from_raw(symt_ptr)) }
         Ok(())
     })
 }
