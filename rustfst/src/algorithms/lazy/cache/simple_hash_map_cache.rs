@@ -279,7 +279,7 @@ pub fn parse_simple_hashmap_cache<W: SerializableSemiring>(
         num_computed_states as usize,
         num_computed_states as usize,
         parse_hashmap_cache_trs::<W>,
-        HashMap::<StateId, CacheTrs<W>>::new(),
+        HashMap::<StateId, CacheTrs<W>>::new,
         |mut acc: HashMap<StateId, CacheTrs<W>>,
          item: (StateId, CacheTrs<W>)|
          -> HashMap<StateId, CacheTrs<W>> {
@@ -295,7 +295,7 @@ pub fn parse_simple_hashmap_cache<W: SerializableSemiring>(
         num_computed_final_weights as usize,
         num_computed_final_weights as usize,
         parse_hashmap_cache_final_weight::<W>,
-        HashMap::<StateId, Option<W>>::new(),
+        HashMap::<StateId, Option<W>>::new,
         |mut acc: HashMap<StateId, Option<W>>,
          item: (StateId, Option<W>)|
          -> HashMap<StateId, Option<W>> {
