@@ -1576,7 +1576,7 @@
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.acceptor">
+<h4 id="rustfst.algorithms.acceptor" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">acceptor</span><span class="p">(</span><span class="n">astring</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">symbol_table</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h4>
@@ -1718,7 +1718,7 @@ omitted or null, the path weight is set to semiring One.</p></td>
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.transducer">
+<h4 id="rustfst.algorithms.transducer" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">transducer</span><span class="p">(</span><span class="n">istring</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ostring</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">isymt</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">,</span> <span class="n">osymt</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h4>
@@ -1897,7 +1897,7 @@ the second with a fixed weight (defaulting to semiring One).</p>
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.epsilon_machine">
+<h4 id="rustfst.algorithms.epsilon_machine" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">epsilon_machine</span><span class="p">(</span><span class="n">weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h4>
@@ -1999,7 +1999,7 @@ initial and final.</p>
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.shortest_path">
+<h4 id="rustfst.algorithms.shortest_path" class="doc doc-heading">
           <code>shortest_path</code>
 
 
@@ -2023,7 +2023,7 @@ initial and final.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.shortest_path.shortestpath">
+<h6 id="rustfst.algorithms.shortest_path.shortestpath" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">shortestpath</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
@@ -2075,7 +2075,7 @@ construct a FST containing the shortest path of the input FST
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.shortest_path.shortestpath_with_config">
+<h6 id="rustfst.algorithms.shortest_path.shortestpath_with_config" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">shortestpath_with_config</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ShortestPathConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
@@ -2144,7 +2144,7 @@ construct a FST containing the n-shortest path(s) in the input FST
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.top_sort">
+<h4 id="rustfst.algorithms.top_sort" class="doc doc-heading">
           <code>top_sort</code>
 
 
@@ -2168,7 +2168,7 @@ construct a FST containing the n-shortest path(s) in the input FST
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.top_sort.top_sort">
+<h6 id="rustfst.algorithms.top_sort.top_sort" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">top_sort</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
@@ -2300,7 +2300,7 @@ construct a FST containing the n-shortest path(s) in the input FST
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.union">
+<h4 id="rustfst.algorithms.union" class="doc doc-heading">
           <code>union</code>
 
 
@@ -2324,7 +2324,7 @@ construct a FST containing the n-shortest path(s) in the input FST
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.union.union">
+<h6 id="rustfst.algorithms.union.union" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">union</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">other_fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
@@ -2478,7 +2478,7 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.union.union_list">
+<h6 id="rustfst.algorithms.union.union_list" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">union_list</span><span class="p">(</span><span class="n">fsts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">VectorFst</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
@@ -2585,7 +2585,7 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.reverse">
+<h4 id="rustfst.algorithms.reverse" class="doc doc-heading">
           <code>reverse</code>
 
 
@@ -2609,7 +2609,7 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.reverse.reverse">
+<h6 id="rustfst.algorithms.reverse.reverse" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">reverse</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span></code>
 
 </h6>
@@ -2669,7 +2669,7 @@ reverse an fst
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.tr_sort">
+<h4 id="rustfst.algorithms.tr_sort" class="doc doc-heading">
           <code>tr_sort</code>
 
 
@@ -2693,7 +2693,7 @@ reverse an fst
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.tr_sort.tr_sort">
+<h6 id="rustfst.algorithms.tr_sort.tr_sort" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">tr_sort</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">ilabel_cmp</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span></code>
 
 </h6>
@@ -2747,7 +2747,7 @@ sort fst trs according to their ilabel or olabel
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.compose">
+<h4 id="rustfst.algorithms.compose" class="doc doc-heading">
           <code>compose</code>
 
 
@@ -2771,7 +2771,7 @@ sort fst trs according to their ilabel or olabel
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.compose.compose">
+<h6 id="rustfst.algorithms.compose.compose" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">compose</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">other_fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
@@ -2876,7 +2876,7 @@ sort fst trs according to their ilabel or olabel
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.compose.compose_with_config">
+<h6 id="rustfst.algorithms.compose.compose_with_config" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">compose_with_config</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">other_fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ComposeConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
@@ -3009,7 +3009,7 @@ sort fst trs according to their ilabel or olabel
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.project">
+<h4 id="rustfst.algorithms.project" class="doc doc-heading">
           <code>project</code>
 
 
@@ -3032,7 +3032,7 @@ sort fst trs according to their ilabel or olabel
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.project.ProjectType">
+<h6 id="rustfst.algorithms.project.ProjectType" class="doc doc-heading">
         <code>ProjectType</code>
 
 
@@ -3091,7 +3091,7 @@ sort fst trs according to their ilabel or olabel
 
 
 
-<h8 class="doc doc-heading" id="rustfst.algorithms.project.ProjectType.PROJECT_INPUT">
+<h8 id="rustfst.algorithms.project.ProjectType.PROJECT_INPUT" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">PROJECT_INPUT</span> <span class="o">=</span> <span class="mi">0</span></code>
   
   <span class="doc doc-labels">
@@ -3112,7 +3112,7 @@ sort fst trs according to their ilabel or olabel
 
 
 
-<h8 class="doc doc-heading" id="rustfst.algorithms.project.ProjectType.PROJECT_OUTPUT">
+<h8 id="rustfst.algorithms.project.ProjectType.PROJECT_OUTPUT" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">PROJECT_OUTPUT</span> <span class="o">=</span> <span class="mi">1</span></code>
   
   <span class="doc doc-labels">
@@ -3144,7 +3144,7 @@ sort fst trs according to their ilabel or olabel
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.project.project">
+<h6 id="rustfst.algorithms.project.project" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">project</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">proj_type</span><span class="p">:</span> <span class="n">ProjectType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
@@ -3269,7 +3269,7 @@ sort fst trs according to their ilabel or olabel
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.tr_unique">
+<h4 id="rustfst.algorithms.tr_unique" class="doc doc-heading">
           <code>tr_unique</code>
 
 
@@ -3293,7 +3293,7 @@ sort fst trs according to their ilabel or olabel
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.tr_unique.tr_unique">
+<h6 id="rustfst.algorithms.tr_unique.tr_unique" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">tr_unique</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span></code>
 
 </h6>
@@ -3369,7 +3369,7 @@ with the same input labels, output labels and weight.</p>
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.randgen">
+<h4 id="rustfst.algorithms.randgen" class="doc doc-heading">
           <code>randgen</code>
 
 
@@ -3393,7 +3393,7 @@ with the same input labels, output labels and weight.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.randgen.randgen">
+<h6 id="rustfst.algorithms.randgen.randgen" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">randgen</span><span class="p">(</span><span class="n">ifst</span><span class="p">:</span> <span class="n">Fst</span><span class="p">,</span> <span class="n">npath</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">select</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;uniform&#39;</span><span class="p">,</span> <span class="n">max_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2147483647</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">remove_total_weight</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
@@ -3678,7 +3678,7 @@ current time and process ID is used.</p></td>
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.determinize">
+<h4 id="rustfst.algorithms.determinize" class="doc doc-heading">
           <code>determinize</code>
 
 
@@ -3701,7 +3701,7 @@ current time and process ID is used.</p></td>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.determinize.DeterminizeType">
+<h6 id="rustfst.algorithms.determinize.DeterminizeType" class="doc doc-heading">
         <code>DeterminizeType</code>
 
 
@@ -3770,7 +3770,7 @@ current time and process ID is used.</p></td>
 
 
 
-<h8 class="doc doc-heading" id="rustfst.algorithms.determinize.DeterminizeType.DETERMINIZE_FUNCTIONAL">
+<h8 id="rustfst.algorithms.determinize.DeterminizeType.DETERMINIZE_FUNCTIONAL" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">DETERMINIZE_FUNCTIONAL</span> <span class="o">=</span> <span class="mi">0</span></code>
   
   <span class="doc doc-labels">
@@ -3791,7 +3791,7 @@ current time and process ID is used.</p></td>
 
 
 
-<h8 class="doc doc-heading" id="rustfst.algorithms.determinize.DeterminizeType.DETERMINIZE_NON_FUNCTIONAL">
+<h8 id="rustfst.algorithms.determinize.DeterminizeType.DETERMINIZE_NON_FUNCTIONAL" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">DETERMINIZE_NON_FUNCTIONAL</span> <span class="o">=</span> <span class="mi">1</span></code>
   
   <span class="doc doc-labels">
@@ -3812,7 +3812,7 @@ current time and process ID is used.</p></td>
 
 
 
-<h8 class="doc doc-heading" id="rustfst.algorithms.determinize.DeterminizeType.DETERMINIZE_DISAMBIGUATE">
+<h8 id="rustfst.algorithms.determinize.DeterminizeType.DETERMINIZE_DISAMBIGUATE" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">DETERMINIZE_DISAMBIGUATE</span> <span class="o">=</span> <span class="mi">2</span></code>
   
   <span class="doc doc-labels">
@@ -3844,7 +3844,7 @@ of ambiguous outputs.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.determinize.DeterminizeConfig">
+<h6 id="rustfst.algorithms.determinize.DeterminizeConfig" class="doc doc-heading">
         <code>DeterminizeConfig</code>
 
 
@@ -3925,7 +3925,7 @@ of ambiguous outputs.</p>
 
 
 
-<h8 class="doc doc-heading" id="rustfst.algorithms.determinize.DeterminizeConfig.__init__">
+<h8 id="rustfst.algorithms.determinize.DeterminizeConfig.__init__" class="doc doc-heading">
 <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">det_type</span><span class="p">:</span> <span class="n">DeterminizeType</span><span class="p">,</span> <span class="n">delta</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
 
 </h8>
@@ -4027,7 +4027,7 @@ of ambiguous outputs.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.determinize.determinize">
+<h6 id="rustfst.algorithms.determinize.determinize" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">determinize</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
@@ -4118,7 +4118,7 @@ of ambiguous outputs.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.determinize.determinize_with_config">
+<h6 id="rustfst.algorithms.determinize.determinize_with_config" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">determinize_with_config</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">DeterminizeConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
@@ -4233,7 +4233,7 @@ of ambiguous outputs.</p>
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.replace">
+<h4 id="rustfst.algorithms.replace" class="doc doc-heading">
           <code>replace</code>
 
 
@@ -4257,7 +4257,7 @@ of ambiguous outputs.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.replace.replace">
+<h6 id="rustfst.algorithms.replace.replace" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">replace</span><span class="p">(</span><span class="n">root_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fst_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">VectorFst</span><span class="p">],</span> <span class="n">epsilon_on_replace</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
@@ -4504,7 +4504,7 @@ of non-terminal Label and corresponding FST.</p>
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.optimize">
+<h4 id="rustfst.algorithms.optimize" class="doc doc-heading">
           <code>optimize</code>
 
 
@@ -4528,7 +4528,7 @@ of non-terminal Label and corresponding FST.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.optimize.optimize">
+<h6 id="rustfst.algorithms.optimize.optimize" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">optimize</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span></code>
 
 </h6>
@@ -4591,7 +4591,7 @@ of non-terminal Label and corresponding FST.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.optimize.optimize_in_log">
+<h6 id="rustfst.algorithms.optimize.optimize_in_log" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">optimize_in_log</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span></code>
 
 </h6>
@@ -4662,7 +4662,7 @@ of non-terminal Label and corresponding FST.</p>
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.concat">
+<h4 id="rustfst.algorithms.concat" class="doc doc-heading">
           <code>concat</code>
 
 
@@ -4686,7 +4686,7 @@ of non-terminal Label and corresponding FST.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.concat.concat">
+<h6 id="rustfst.algorithms.concat.concat" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">concat</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">other_fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
@@ -4789,7 +4789,7 @@ of non-terminal Label and corresponding FST.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.concat.concat_list">
+<h6 id="rustfst.algorithms.concat.concat_list" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">concat_list</span><span class="p">(</span><span class="n">fsts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">VectorFst</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
@@ -4892,7 +4892,7 @@ of non-terminal Label and corresponding FST.</p>
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.isomorphic">
+<h4 id="rustfst.algorithms.isomorphic" class="doc doc-heading">
           <code>isomorphic</code>
 
 
@@ -4916,7 +4916,7 @@ of non-terminal Label and corresponding FST.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.isomorphic.isomorphic">
+<h6 id="rustfst.algorithms.isomorphic.isomorphic" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">isomorphic</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">other_fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
 
 </h6>
@@ -5029,7 +5029,7 @@ of non-terminal Label and corresponding FST.</p>
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.connect">
+<h4 id="rustfst.algorithms.connect" class="doc doc-heading">
           <code>connect</code>
 
 
@@ -5053,7 +5053,7 @@ of non-terminal Label and corresponding FST.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.connect.connect">
+<h6 id="rustfst.algorithms.connect.connect" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">connect</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
@@ -5145,7 +5145,7 @@ of non-terminal Label and corresponding FST.</p>
 
 
 
-<h4 class="doc doc-heading" id="rustfst.algorithms.rm_epsilon">
+<h4 id="rustfst.algorithms.rm_epsilon" class="doc doc-heading">
           <code>rm_epsilon</code>
 
 
@@ -5169,7 +5169,7 @@ of non-terminal Label and corresponding FST.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.algorithms.rm_epsilon.rm_epsilon">
+<h6 id="rustfst.algorithms.rm_epsilon.rm_epsilon" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">rm_epsilon</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span></code>
 
 </h6>

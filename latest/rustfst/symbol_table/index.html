@@ -1209,7 +1209,7 @@
 
 
 
-<h4 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable">
+<h4 id="rustfst.symbol_table.SymbolTable" class="doc doc-heading">
         <code>SymbolTable</code>
 
 
@@ -1792,7 +1792,7 @@
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.__init__">
+<h6 id="rustfst.symbol_table.SymbolTable.__init__" class="doc doc-heading">
 <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">ptr</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
 
 </h6>
@@ -1839,7 +1839,7 @@
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.add_symbol">
+<h6 id="rustfst.symbol_table.SymbolTable.add_symbol" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">add_symbol</span><span class="p">(</span><span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span></code>
 
 </h6>
@@ -1942,7 +1942,7 @@
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.add_table">
+<h6 id="rustfst.symbol_table.SymbolTable.add_table" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">add_table</span><span class="p">(</span><span class="n">syms</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span></code>
 
 </h6>
@@ -2008,7 +2008,7 @@ values will be offset by the current available key.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.copy">
+<h6 id="rustfst.symbol_table.SymbolTable.copy" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">copy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span></code>
 
 </h6>
@@ -2070,7 +2070,7 @@ values will be offset by the current available key.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.find">
+<h6 id="rustfst.symbol_table.SymbolTable.find" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">find</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span></code>
 
 </h6>
@@ -2190,7 +2190,7 @@ associated with a index key.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.member">
+<h6 id="rustfst.symbol_table.SymbolTable.member" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">member</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
 
 </h6>
@@ -2316,7 +2316,7 @@ better to simply call the find method, catching the KeyError.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.num_symbols">
+<h6 id="rustfst.symbol_table.SymbolTable.num_symbols" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">num_symbols</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">int</span></code>
 
 </h6>
@@ -2376,7 +2376,7 @@ better to simply call the find method, catching the KeyError.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.read">
+<h6 id="rustfst.symbol_table.SymbolTable.read" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span></code>
   
   <span class="doc doc-labels">
@@ -2485,7 +2485,7 @@ This class method creates a new SymbolTable from a symbol table binary file.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.read_text">
+<h6 id="rustfst.symbol_table.SymbolTable.read_text" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">read_text</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span></code>
   
   <span class="doc doc-labels">
@@ -2596,7 +2596,7 @@ This class method creates a new SymbolTable from a symbol table text file.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.write">
+<h6 id="rustfst.symbol_table.SymbolTable.write" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span></code>
 
 </h6>
@@ -2690,7 +2690,7 @@ This methods writes the SymbolTable to a file in binary format.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.write_text">
+<h6 id="rustfst.symbol_table.SymbolTable.write_text" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">write_text</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span></code>
 
 </h6>
@@ -2784,7 +2784,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.equals">
+<h6 id="rustfst.symbol_table.SymbolTable.equals" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">equals</span><span class="p">(</span><span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
 
 </h6>
@@ -2879,7 +2879,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.__eq__">
+<h6 id="rustfst.symbol_table.SymbolTable.__eq__" class="doc doc-heading">
 <code class="highlight language-python"><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
 
 </h6>
@@ -2962,7 +2962,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.__iter__">
+<h6 id="rustfst.symbol_table.SymbolTable.__iter__" class="doc doc-heading">
 <code class="highlight language-python"><span class="fm">__iter__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">SymbolTableIterator</span></code>
 
 </h6>
@@ -3015,7 +3015,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTable.from_symbols">
+<h6 id="rustfst.symbol_table.SymbolTable.from_symbols" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">from_symbols</span><span class="p">(</span><span class="n">symbols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span></code>
   
   <span class="doc doc-labels">
@@ -3124,7 +3124,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 
 
 
-<h4 class="doc doc-heading" id="rustfst.symbol_table.SymbolTableIterator">
+<h4 id="rustfst.symbol_table.SymbolTableIterator" class="doc doc-heading">
         <code>SymbolTableIterator</code>
 
 
@@ -3209,7 +3209,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTableIterator.__init__">
+<h6 id="rustfst.symbol_table.SymbolTableIterator.__init__" class="doc doc-heading">
 <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">symbol_table</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span></code>
 
 </h6>
@@ -3272,7 +3272,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 
 
 
-<h6 class="doc doc-heading" id="rustfst.symbol_table.SymbolTableIterator.__next__">
+<h6 id="rustfst.symbol_table.SymbolTableIterator.__next__" class="doc doc-heading">
 <code class="highlight language-python"><span class="fm">__next__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span></code>
 
 </h6>
