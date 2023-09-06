@@ -55,13 +55,17 @@ impl Queue for TopOrderQueue {
         self.state[self.order[u_state] as usize] = Some(state);
     }
 
-    fn dequeue(&mut self) {
-        self.state[self.front as usize] = None;
+    fn dequeue(&mut self) -> Option<StateId> {
+        if self.is_empty() {
+            return None;
+        }
+        let old_head = self.state[self.front as usize].take();
         if self.back.is_some() {
             while self.front <= self.back.unwrap() && self.state[self.front as usize].is_none() {
                 self.front += 1;
             }
         }
+        old_head
     }
 
     fn update(&mut self, _state: StateId) {}

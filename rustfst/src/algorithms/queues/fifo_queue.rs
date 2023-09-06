@@ -16,8 +16,8 @@ impl Queue for FifoQueue {
         self.0.push_back(state)
     }
 
-    fn dequeue(&mut self) {
-        self.0.pop_front();
+    fn dequeue(&mut self) -> Option<StateId> {
+        self.0.pop_front()
     }
 
     fn update(&mut self, _state: StateId) {}

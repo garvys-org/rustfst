@@ -14,8 +14,8 @@ impl Queue for LifoQueue {
         self.0.push(state)
     }
 
-    fn dequeue(&mut self) {
-        self.0.pop();
+    fn dequeue(&mut self) -> Option<StateId> {
+        self.0.pop()
     }
 
     fn update(&mut self, _state: StateId) {}

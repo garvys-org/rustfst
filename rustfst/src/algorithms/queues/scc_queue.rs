@@ -21,13 +21,17 @@ impl SccQueue {
             sccs,
         }
     }
+
+    fn update_front(&mut self) {
+        while self.front <= self.back && self.queues[self.front as usize].is_empty() {
+            self.front += 1;
+        }
+    }
 }
 
 impl Queue for SccQueue {
     fn head(&mut self) -> Option<StateId> {
-        while self.front <= self.back && self.queues[self.front as usize].is_empty() {
-            self.front += 1;
-        }
+        self.update_front();
         self.queues[self.front as usize].head()
     }
 
@@ -44,8 +48,13 @@ impl Queue for SccQueue {
         self.queues[self.sccs[u_state] as usize].enqueue(state);
     }
 
-    fn dequeue(&mut self) {
-        self.queues[self.front as usize].dequeue()
+    fn dequeue(&mut self) -> Option<StateId> {
+        if self.is_empty() {
+            None
+        } else {
+            self.update_front();
+            self.queues[self.front as usize].dequeue()
+        }
     }
 
     fn update(&mut self, state: StateId) {

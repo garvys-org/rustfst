@@ -185,9 +185,8 @@ impl<W: Semiring, Q: Queue, A: TrFilter<W>> ShortestDistanceState<W, Q, A> {
         self.radder[source] = W::one();
         self.enqueued[source] = true;
         self.state_queue.enqueue(source as StateId);
-        while !self.state_queue.is_empty() {
-            let state = self.state_queue.head().unwrap() as usize;
-            self.state_queue.dequeue();
+        while let Some(state) = self.state_queue.dequeue() {
+            let state = state as usize;
             //            self.ensure_distance_index_is_valid(state);
             if self.first_path && fst.borrow().is_final(state as StateId)? {
                 break;
