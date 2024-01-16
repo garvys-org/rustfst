@@ -85,16 +85,16 @@ impl<F: Fst<TropicalWeight> + 'static> BindableFst for F {
 }
 
 #[derive(RawPointerConverter)]
-pub struct CFst(pub(crate) Box<dyn BindableFst>);
+pub struct CFst(pub Box<dyn BindableFst>);
 
 #[derive(RawPointerConverter)]
-pub struct CVecFst(pub(crate) Box<VectorFst<TropicalWeight>>);
+pub struct CVecFst(pub Box<VectorFst<TropicalWeight>>);
 
 #[derive(RawPointerConverter)]
-pub struct CConstFst(pub(crate) Box<ConstFst<TropicalWeight>>);
+pub struct CConstFst(pub Box<ConstFst<TropicalWeight>>);
 
 #[derive(RawPointerConverter)]
-pub struct CConcatFst(pub(crate) Box<ConcatFst<TropicalWeight, VectorFst<TropicalWeight>>>);
+pub struct CConcatFst(pub Box<ConcatFst<TropicalWeight, VectorFst<TropicalWeight>>>);
 
 macro_rules! as_fst {
     ($typ:ty,$fst:ident) => {{
