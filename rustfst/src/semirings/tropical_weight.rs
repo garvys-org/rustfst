@@ -150,8 +150,9 @@ impl SerializableSemiring for TropicalWeight {
     }
 
     fn parse_text(i: &str) -> IResult<&str, Self> {
-        // FIXME: nom 7 does not fully parse "infinity", therefore it is done manually here until
-        // the PR https://github.com/rust-bakery/nom/pull/1673 is merged.
+        // FIXME: nom 7 does not fully parse "infinity", therefore it is done manually
+        // even after https://github.com/rust-bakery/nom/pull/1673 wass merged this issue persisted
+        // https://github.com/Garvys/rustfst/pull/253#discussion_r1494208294
         let (i, f) = alt((map(tag_no_case("infinity"), |_| f32::INFINITY), float))(i)?;
         Ok((i, Self::new(f)))
     }
