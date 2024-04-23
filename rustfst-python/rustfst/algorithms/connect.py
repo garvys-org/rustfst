@@ -1,5 +1,4 @@
 from __future__ import annotations
-import ctypes
 from rustfst.ffi_utils import (
     lib,
     check_ffi_error,
@@ -27,9 +26,8 @@ def connect(fst: VectorFst) -> VectorFst:
 
     """
 
-    connectd_fst = ctypes.c_void_p()
-    ret_code = lib.fst_connect(fst.ptr, ctypes.byref(connectd_fst))
+    ret_code = lib.fst_connect(fst.ptr)
     err_msg = "Error during connect"
     check_ffi_error(ret_code, err_msg)
 
-    return VectorFst(ptr=connectd_fst)
+    return VectorFst(ptr=fst.ptr)
