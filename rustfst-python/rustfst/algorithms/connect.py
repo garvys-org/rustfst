@@ -30,4 +30,4 @@ def connect(fst: VectorFst) -> VectorFst:
     err_msg = "Error during connect"
     check_ffi_error(ret_code, err_msg)
 
-    return VectorFst(ptr=fst.ptr)
+    return fst
