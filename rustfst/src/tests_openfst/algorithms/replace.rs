@@ -1,8 +1,8 @@
-use std::marker::PhantomData;
 use crate::Label;
 use crate::StateId;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
+use std::marker::PhantomData;
 
 use crate::algorithms::replace::{replace, ReplaceFst};
 use crate::fst_impls::VectorFst;
