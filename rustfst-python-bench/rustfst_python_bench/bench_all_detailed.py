@@ -102,7 +102,7 @@ def bench(compilation_mode: str, path_in_fst: str, path_report_md: str, warmup, 
                     with io.open(report_path_temp, mode="r") as f:
 
                         if len(params) > 1:
-                            report_f.write(f"### CLI parameters : ` {param.get_cli_args()}`\n")
+                            report_f.write(f"### CLI parameters : ` {param.get_rustfst_cli_args()}`\n")
                         report_f.write('| Command | Parsing [s] | Algo [s] | Serialization [s] | All [s] | \n')
                         report_f.write('|:---|' + '---:|'*4 + '\n')
                         report_f.write(f.read())
