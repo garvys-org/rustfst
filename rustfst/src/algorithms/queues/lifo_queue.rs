@@ -53,11 +53,11 @@ mod test {
 
         queue.enqueue(2);
         queue.enqueue(3);
-        assert_eq!(queue.is_empty(), false);
+        assert!(!queue.is_empty());
         assert_eq!(queue.head(), Some(3));
         queue.clear();
         assert_eq!(queue.head(), None);
-        assert_eq!(queue.is_empty(), true);
+        assert!(queue.is_empty());
 
         Ok(())
     }

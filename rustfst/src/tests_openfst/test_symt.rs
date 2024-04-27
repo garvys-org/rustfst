@@ -71,15 +71,15 @@ fn run_test_openfst_symt(test_name: &str) -> Result<()> {
 
 #[test]
 fn test_openfst_symt_000() -> Result<()> {
-    run_test_openfst_symt("symt_000").map_err(|v| v.into())
+    run_test_openfst_symt("symt_000")
 }
 
 #[test]
 fn test_openfst_symt_001() -> Result<()> {
-    run_test_openfst_symt("symt_001").map_err(|v| v.into())
+    run_test_openfst_symt("symt_001")
 }
 
 #[test]
 fn test_openfst_symt_002() -> Result<()> {
-    run_test_openfst_symt("symt_002").map_err(|v| v.into())
+    run_test_openfst_symt("symt_002")
 }

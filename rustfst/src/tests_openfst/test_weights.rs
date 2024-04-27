@@ -163,60 +163,60 @@ fn run_test_openfst_weight(test_name: &str) -> Result<()> {
 
 #[test]
 fn test_openfst_weight_001() -> Result<()> {
-    run_test_openfst_weight("weight_001").map_err(|v| v.into())
+    run_test_openfst_weight("weight_001")
 }
 
 #[test]
 fn test_openfst_weight_002() -> Result<()> {
-    run_test_openfst_weight("weight_002").map_err(|v| v.into())
+    run_test_openfst_weight("weight_002")
 }
 
 #[test]
 fn test_openfst_weight_003() -> Result<()> {
-    run_test_openfst_weight("weight_003").map_err(|v| v.into())
+    run_test_openfst_weight("weight_003")
 }
 
 #[test]
 fn test_openfst_weight_004() -> Result<()> {
-    run_test_openfst_weight("weight_004").map_err(|v| v.into())
+    run_test_openfst_weight("weight_004")
 }
 
 #[test]
 fn test_openfst_weight_005() -> Result<()> {
-    run_test_openfst_weight("weight_005").map_err(|v| v.into())
+    run_test_openfst_weight("weight_005")
 }
 
 #[test]
 fn test_openfst_weight_006() -> Result<()> {
-    run_test_openfst_weight("weight_006").map_err(|v| v.into())
+    run_test_openfst_weight("weight_006")
 }
 
 #[test]
 fn test_openfst_weight_007() -> Result<()> {
-    run_test_openfst_weight("weight_007").map_err(|v| v.into())
+    run_test_openfst_weight("weight_007")
 }
 
 #[test]
 fn test_openfst_weight_008() -> Result<()> {
-    run_test_openfst_weight("weight_008").map_err(|v| v.into())
+    run_test_openfst_weight("weight_008")
 }
 
 #[test]
 fn test_openfst_weight_009() -> Result<()> {
-    run_test_openfst_weight("weight_009").map_err(|v| v.into())
+    run_test_openfst_weight("weight_009")
 }
 
 #[test]
 fn test_openfst_weight_010() -> Result<()> {
-    run_test_openfst_weight("weight_010").map_err(|v| v.into())
+    run_test_openfst_weight("weight_010")
 }
 
 #[test]
 fn test_openfst_weight_011() -> Result<()> {
-    run_test_openfst_weight("weight_011").map_err(|v| v.into())
+    run_test_openfst_weight("weight_011")
 }
 
 #[test]
 fn test_openfst_weight_012() -> Result<()> {
-    run_test_openfst_weight("weight_012").map_err(|v| v.into())
+    run_test_openfst_weight("weight_012")
 }

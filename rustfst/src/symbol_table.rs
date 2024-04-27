@@ -412,25 +412,25 @@ mod tests {
 
         assert_eq!(symt.len(), 3);
 
-        assert_eq!(symt.is_empty(), false);
+        assert!(!symt.is_empty());
 
         assert_eq!(symt.get_label(EPS_SYMBOL), Some(0));
         assert_eq!(symt.get_label("a"), Some(1));
         assert_eq!(symt.get_label("b"), Some(2));
 
-        assert_eq!(symt.contains_symbol(EPS_SYMBOL), true);
-        assert_eq!(symt.contains_symbol("a"), true);
-        assert_eq!(symt.contains_symbol("b"), true);
-        assert_eq!(symt.contains_symbol("c"), false);
+        assert!(symt.contains_symbol(EPS_SYMBOL));
+        assert!(symt.contains_symbol("a"));
+        assert!(symt.contains_symbol("b"));
+        assert!(!symt.contains_symbol("c"));
 
         assert_eq!(symt.get_symbol(0), Some(EPS_SYMBOL));
         assert_eq!(symt.get_symbol(1), Some("a"));
         assert_eq!(symt.get_symbol(2), Some("b"));
 
-        assert_eq!(symt.contains_label(0), true);
-        assert_eq!(symt.contains_label(1), true);
-        assert_eq!(symt.contains_label(2), true);
-        assert_eq!(symt.contains_label(3), false);
+        assert!(symt.contains_label(0));
+        assert!(symt.contains_label(1));
+        assert!(symt.contains_label(2));
+        assert!(!symt.contains_label(3));
     }
 
     #[test]
