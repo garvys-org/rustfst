@@ -1,11 +1,11 @@
-pub(self) use determinize_fsa::DeterminizeFsa;
-pub(self) use determinize_fsa_op::DeterminizeFsaOp;
+use determinize_fsa::DeterminizeFsa;
+use determinize_fsa_op::DeterminizeFsaOp;
 pub use determinize_static::{
     determinize, determinize_with_config, determinize_with_distance, DeterminizeConfig,
 };
-pub(self) use divisors::{DefaultCommonDivisor, GallicCommonDivisor};
-pub(self) use element::{DeterminizeElement, DeterminizeStateTuple, DeterminizeTr, WeightedSubset};
-pub(self) use state_table::DeterminizeStateTable;
+use divisors::{DefaultCommonDivisor, GallicCommonDivisor};
+use element::{DeterminizeElement, DeterminizeStateTuple, DeterminizeTr, WeightedSubset};
+use state_table::DeterminizeStateTable;
 
 mod determinize_fsa;
 mod determinize_fsa_op;

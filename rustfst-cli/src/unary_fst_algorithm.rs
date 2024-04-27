@@ -38,12 +38,12 @@ pub trait UnaryFstAlgorithm {
     }
 
     fn run_cli_or_bench(&self, m: &ArgMatches) -> Result<()> {
-        if m.is_present("bench") {
+        if m.contains_id("bench") {
             // Run bench
             self.run_bench(
-                m.value_of("n_warm_ups").unwrap().parse().unwrap(),
-                m.value_of("n_iters").unwrap().parse().unwrap(),
-                m.value_of("export-markdown"),
+                m.get_one::<String>("n_warm_ups").unwrap().parse().unwrap(),
+                m.get_one::<String>("n_iters").unwrap().parse().unwrap(),
+                m.get_one::<String>("export-markdown").map(|s| s.as_str()),
             )
         } else {
             // Run cli

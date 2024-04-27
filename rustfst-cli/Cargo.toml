@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 anyhow = '1.0'
-clap = "3.2"
+clap = "4.5"
 colored = "2.1"
 env_logger = "0.10"
 exitcode = "1.1"

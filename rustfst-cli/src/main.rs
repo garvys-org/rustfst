@@ -1,7 +1,8 @@
 use std::process;
 
 use anyhow::{format_err, Result};
-use clap::{App, Arg, SubCommand};
+use clap::parser::ValueSource;
+use clap::{Arg, ArgAction, Command};
 use log::error;
 
 use crate::binary_fst_algorithm::BinaryFstAlgorithm;
@@ -26,84 +27,84 @@ pub mod cmds;
 pub mod unary_fst_algorithm;
 
 fn main() {
-    let mut app = App::new("rustfst")
+    let mut app = Command::new("rustfst")
         .version("1.0")
         .author("Alexandre Caulier <alexandre.caulier@protonmail.com>")
         .about("Rustfst CLI");
 
     // Determinize
-    let determinize_cmd = SubCommand::with_name("determinize")
+    let determinize_cmd = Command::new("determinize")
         .about("Determinize algorithm.")
         .arg(
-            Arg::with_name("det_type")
+            Arg::new("det_type")
                 .long("det_type")
-                .possible_values(["functional", "nonfunctional", "disambiguate"])
-                .takes_value(true)
-                .default_value("functional"),
+                .value_parser(["functional", "nonfunctional", "disambiguate"])
+                .default_value("functional")
+                .action(ArgAction::Set),
         );
     app = app.subcommand(one_in_one_out_options(determinize_cmd));
 
     // Minimization
-    let minimize_cmd = SubCommand::with_name("minimize")
+    let minimize_cmd = Command::new("minimize")
         .about("Minimization algorithm.")
         .arg(
-            Arg::with_name("allow-nondet")
+            Arg::new("allow-nondet")
                 .help("Minimize non-deterministic FSTs ?")
-                .long("allow-nondet"),
+                .long("allow-nondet")
+                .action(ArgAction::SetTrue),
         );
     app = app.subcommand(one_in_one_out_options(minimize_cmd));
 
     // Connect
-    let connect_cmd = SubCommand::with_name("connect").about("Connect algorithm.");
+    let connect_cmd = Command::new("connect").about("Connect algorithm.");
     app = app.subcommand(one_in_one_out_options(connect_cmd));
 
     // Trsort
-    let tr_sort_cmd = SubCommand::with_name("tr_sort")
+    let tr_sort_cmd = Command::new("tr_sort")
         .about("Trsort algorithm.")
         .alias("arcsort")
         .arg(
-            Arg::with_name("sort_type")
+            Arg::new("sort_type")
                 .help("Comparison method.")
                 .long("sort_type")
-                .takes_value(true)
-                .possible_values(["ilabel", "olabel"])
-                .default_value("ilabel"),
+                .value_parser(["ilabel", "olabel"])
+                .default_value("ilabel")
+                .action(ArgAction::Set),
         );
     app = app.subcommand(one_in_one_out_options(tr_sort_cmd));
 
     // Project
-    let project_cmd = SubCommand::with_name("project")
-        .about("Project algorithm.")
-        .arg(
-            Arg::with_name("project-output")
-                .help("Project output (vs. input)")
-                .long("project-output"),
-        );
+    let project_cmd = Command::new("project").about("Project algorithm.").arg(
+        Arg::new("project-output")
+            .help("Project output (vs. input)")
+            .long("project-output")
+            .action(ArgAction::SetTrue),
+    );
     app = app.subcommand(one_in_one_out_options(project_cmd));
 
     // Invert
-    let invert_cmd = SubCommand::with_name("invert").about("Invert algorithm.");
+    let invert_cmd = Command::new("invert").about("Invert algorithm.");
     app = app.subcommand(one_in_one_out_options(invert_cmd));
 
     // Topsort
-    let topsort_cmd = SubCommand::with_name("topsort").about("Topsort algorithm.");
+    let topsort_cmd = Command::new("topsort").about("Topsort algorithm.");
     app = app.subcommand(one_in_one_out_options(topsort_cmd));
 
     // Optimize
-    let optimize_cmd = SubCommand::with_name("optimize").about("Optimize algorithm.");
+    let optimize_cmd = Command::new("optimize").about("Optimize algorithm.");
     app = app.subcommand(one_in_one_out_options(optimize_cmd));
 
     // Reverse
-    let reverse_cmd = SubCommand::with_name("reverse").about("Reverse algorithm.");
+    let reverse_cmd = Command::new("reverse").about("Reverse algorithm.");
     app = app.subcommand(one_in_one_out_options(reverse_cmd));
 
     // Map
-    let map_cmd = SubCommand::with_name("map")
+    let map_cmd = Command::new("map")
         .about("Applies an operation to each tr of an FST.")
         .arg(
-            Arg::with_name("map_type")
+            Arg::new("map_type")
                 .long("map_type")
-                .possible_values([
+                .value_parser([
                     "arc_sum",
                     "arc_unique",
                     "tr_sum",
@@ -117,60 +118,78 @@ fn main() {
                     "rmweight",
                     "times",
                 ])
-                .takes_value(true)
                 .default_value("identity")
-                .help("Map operation."),
+                .help("Map operation.")
+                .action(ArgAction::Set),
         )
         .arg(
-            Arg::with_name("weight")
+            Arg::new("weight")
                 .long("weight")
-                .takes_value(true)
-                .required_ifs(&[("map_type", "plus"), ("map_type", "times")]),
+                .required_if_eq_any([("map_type", "plus"), ("map_type", "times")])
+                .action(ArgAction::Set),
         );
     app = app.subcommand(one_in_one_out_options(map_cmd));
 
     // Shortest Path
-    let shortest_path_cmd = SubCommand::with_name("shortestpath")
+    let shortest_path_cmd = Command::new("shortestpath")
         .about("Shortest Path algorithm.")
         .arg(
-            Arg::with_name("nshortest")
+            Arg::new("nshortest")
                 .long("nshortest")
-                .takes_value(true)
                 .default_value("1")
-                .help("Return N-shortest paths"),
+                .help("Return N-shortest paths")
+                .action(ArgAction::Set),
         )
         .arg(
-            Arg::with_name("unique")
+            Arg::new("unique")
                 .long("unique")
-                .help("Return unique strings"),
+                .help("Return unique strings")
+                .action(ArgAction::SetTrue),
         );
     app = app.subcommand(one_in_one_out_options(shortest_path_cmd));
 
     // Rm Final Epsilon
-    let rm_final_epsilon_cmd =
-        SubCommand::with_name("rmfinalepsilon").about("RmFinalEpsilon algorithm.");
+    let rm_final_epsilon_cmd = Command::new("rmfinalepsilon").about("RmFinalEpsilon algorithm.");
     app = app.subcommand(one_in_one_out_options(rm_final_epsilon_cmd));
 
     // Push
-    let push_cmd = SubCommand::with_name("push")
+    let push_cmd = Command::new("push")
         .about("Push Weights/Labels algorithm")
-        .arg(Arg::with_name("to_final").long("to_final"))
-        .arg(Arg::with_name("push_weights").long("push_weights"))
-        .arg(Arg::with_name("push_labels").long("push_labels"))
-        .arg(Arg::with_name("remove_total_weight").long("remove_total_weight"))
-        .arg(Arg::with_name("remove_common_affix").long("remove_common_affix"));
+        .arg(
+            Arg::new("to_final")
+                .long("to_final")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::new("push_weights")
+                .long("push_weights")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::new("push_labels")
+                .long("push_labels")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::new("remove_total_weight")
+                .long("remove_total_weight")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::new("remove_common_affix")
+                .long("remove_common_affix")
+                .action(ArgAction::SetTrue),
+        );
     app = app.subcommand(one_in_one_out_options(push_cmd));
 
     // Compose
-    let compose_cmd = SubCommand::with_name("compose")
-        .about("Compose algorithm")
-        .arg(
-            Arg::with_name("compose_type")
-                .long("compose_type")
-                .possible_values(["default", "lookahead"])
-                .takes_value(true)
-                .default_value("default"),
-        );
+    let compose_cmd = Command::new("compose").about("Compose algorithm").arg(
+        Arg::new("compose_type")
+            .long("compose_type")
+            .value_parser(["default", "lookahead"])
+            .default_value("default")
+            .action(ArgAction::Set),
+    );
     app = app.subcommand(two_in_one_out_options(compose_cmd));
 
     let matches = app.get_matches();
@@ -191,88 +210,88 @@ fn main() {
 fn handle(matches: clap::ArgMatches) -> Result<()> {
     match matches.subcommand() {
         Some(("minimize", m)) => MinimizeAlgorithm::new(
-            m.value_of("in.fst").unwrap(),
-            m.is_present("allow-nondet"),
-            m.value_of("out.fst").unwrap(),
+            m.get_one::<String>("in.fst").unwrap(),
+            m.value_source("allow-nondet") == Some(ValueSource::CommandLine),
+            m.get_one::<String>("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
         Some(("determinize", m)) => DeterminizeAlgorithm::new(
-            m.value_of("in.fst").unwrap(),
-            m.value_of("out.fst").unwrap(),
-            m.value_of("det_type").unwrap(),
+            m.get_one::<String>("in.fst").unwrap(),
+            m.get_one::<String>("out.fst").unwrap(),
+            m.get_one::<String>("det_type").unwrap(),
         )
         .run_cli_or_bench(m),
         Some(("connect", m)) => ConnectAlgorithm::new(
-            m.value_of("in.fst").unwrap(),
-            m.value_of("out.fst").unwrap(),
+            m.get_one::<String>("in.fst").unwrap(),
+            m.get_one::<String>("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
         Some(("tr_sort", m)) => TrsortAlgorithm::new(
-            m.value_of("in.fst").unwrap(),
-            m.value_of("sort_type").unwrap(),
-            m.value_of("out.fst").unwrap(),
+            m.get_one::<String>("in.fst").unwrap(),
+            m.get_one::<String>("sort_type").unwrap(),
+            m.get_one::<String>("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
         Some(("optimize", m)) => OptimizeAlgorithm::new(
-            m.value_of("in.fst").unwrap(),
-            m.value_of("out.fst").unwrap(),
+            m.get_one::<String>("in.fst").unwrap(),
+            m.get_one::<String>("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
         Some(("project", m)) => ProjectFstAlgorithm::new(
-            m.value_of("in.fst").unwrap(),
-            m.is_present("project-output"),
-            m.value_of("out.fst").unwrap(),
+            m.get_one::<String>("in.fst").unwrap(),
+            m.value_source("project-output") == Some(ValueSource::CommandLine),
+            m.get_one::<String>("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
         Some(("invert", m)) => InvertAlgorithm::new(
-            m.value_of("in.fst").unwrap(),
-            m.value_of("out.fst").unwrap(),
+            m.get_one::<String>("in.fst").unwrap(),
+            m.get_one::<String>("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
         Some(("topsort", m)) => TopsortAlgorithm::new(
-            m.value_of("in.fst").unwrap(),
-            m.value_of("out.fst").unwrap(),
+            m.get_one::<String>("in.fst").unwrap(),
+            m.get_one::<String>("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
         Some(("reverse", m)) => ReverseAlgorithm::new(
-            m.value_of("in.fst").unwrap(),
-            m.value_of("out.fst").unwrap(),
+            m.get_one::<String>("in.fst").unwrap(),
+            m.get_one::<String>("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
         Some(("map", m)) => MapAlgorithm::new(
-            m.value_of("in.fst").unwrap(),
-            m.value_of("map_type").unwrap(),
-            m.value_of("weight"),
-            m.value_of("out.fst").unwrap(),
+            m.get_one::<String>("in.fst").unwrap(),
+            m.get_one::<String>("map_type").unwrap(),
+            m.get_one::<String>("weight").map(|s| s.as_str()),
+            m.get_one::<String>("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
         Some(("shortestpath", m)) => ShortestPathAlgorithm::new(
-            m.value_of("in.fst").unwrap(),
-            m.is_present("unique"),
-            m.value_of("nshortest").unwrap().parse().unwrap(),
-            m.value_of("out.fst").unwrap(),
+            m.get_one::<String>("in.fst").unwrap(),
+            m.value_source("unique") == Some(ValueSource::CommandLine),
+            m.get_one::<String>("nshortest").unwrap().parse().unwrap(),
+            m.get_one::<String>("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
         Some(("rmfinalepsilon", m)) => RmFinalEpsilonAlgorithm::new(
-            m.value_of("in.fst").unwrap(),
-            m.value_of("out.fst").unwrap(),
+            m.get_one::<String>("in.fst").unwrap(),
+            m.get_one::<String>("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
         Some(("push", m)) => PushAlgorithm::new(
-            m.value_of("in.fst").unwrap(),
-            m.value_of("out.fst").unwrap(),
-            m.is_present("to_final"),
-            m.is_present("push_weights"),
-            m.is_present("push_labels"),
-            m.is_present("remove_total_weight"),
-            m.is_present("remove_common_affix"),
+            m.get_one::<String>("in.fst").unwrap(),
+            m.get_one::<String>("out.fst").unwrap(),
+            m.value_source("to_final") == Some(ValueSource::CommandLine),
+            m.value_source("push_weights") == Some(ValueSource::CommandLine),
+            m.value_source("push_labels") == Some(ValueSource::CommandLine),
+            m.value_source("remove_total_weight") == Some(ValueSource::CommandLine),
+            m.value_source("remove_common_affix") == Some(ValueSource::CommandLine),
         )
         .run_cli_or_bench(m),
         Some(("compose", m)) => ComposeAlgorithm::new(
-            m.value_of("in_1.fst").unwrap(),
-            m.value_of("in_2.fst").unwrap(),
-            m.value_of("out.fst").unwrap(),
-            m.value_of("compose_type").unwrap(),
+            m.get_one::<String>("in_1.fst").unwrap(),
+            m.get_one::<String>("in_2.fst").unwrap(),
+            m.get_one::<String>("out.fst").unwrap(),
+            m.get_one::<String>("compose_type").unwrap(),
         )
         .run_cli_or_bench(m),
         Some((s, _)) => Err(format_err!("Unknown subcommand {}.", s)),
@@ -280,75 +299,87 @@ fn handle(matches: clap::ArgMatches) -> Result<()> {
     }
 }
 
-fn one_in_one_out_options(command: clap::App) -> clap::App {
+fn one_in_one_out_options(command: Command) -> Command {
     command
         .version("1.0")
         .author("Alexandre Caulier <alexandre.caulier@protonmail.com>")
         .arg(
-            Arg::with_name("in.fst")
+            Arg::new("in.fst")
                 .help("Path to input fst file.")
-                .required(true),
+                .required(true)
+                .action(ArgAction::Set),
         )
         .arg(
-            Arg::with_name("out.fst")
+            Arg::new("out.fst")
                 .help("Path to output fst file.")
-                .required(true),
+                .required(true)
+                .action(ArgAction::Set),
         ).arg(
-            Arg::with_name("bench")
+            Arg::new("bench")
                 .long("bench")
                 .help("Whether to run multiple times the algorithm in order to have a reliable time measurement.")
+                .action(ArgAction::SetTrue)
         ).arg(
-            Arg::with_name("n_iters")
+            Arg::new("n_iters")
                 .long("n_iters")
                 .default_value("10")
                 .help("Number of iterations to run for the benchmark.")
+                .action(ArgAction::Set)
         ).arg(
-            Arg::with_name("n_warm_ups")
+            Arg::new("n_warm_ups")
                 .long("n_warm_ups")
                 .default_value("3")
                 .help("Number of warm ups run before the actual benchmark.")
+                .action(ArgAction::Set)
         ).arg(
-        Arg::with_name("export-markdown")
+        Arg::new("export-markdown")
             .long("export-markdown")
-            .takes_value(true)
+            .action(ArgAction::Set)
     )
 }
 
-fn two_in_one_out_options(command: clap::App) -> clap::App {
+fn two_in_one_out_options(command: Command) -> clap::Command {
     command
         .version("1.0")
         .author("Alexandre Caulier <alexandre.caulier@protonmail.com>")
         .arg(
-            Arg::with_name("in_1.fst")
+            Arg::new("in_1.fst")
                 .help("Path to the first input fst file.")
-                .required(true),
+                .required(true)
+                .action(ArgAction::Set),
+
         )
         .arg(
-            Arg::with_name("in_2.fst")
+            Arg::new("in_2.fst")
                 .help("Path to the second input fst file.")
-                .required(true),
+                .required(true)
+                .action(ArgAction::Set),
         )
         .arg(
-            Arg::with_name("out.fst")
+            Arg::new("out.fst")
                 .help("Path to output fst file.")
-                .required(true),
+                .required(true)
+                .action(ArgAction::Set),
         ).arg(
-        Arg::with_name("bench")
+        Arg::new("bench")
             .long("bench")
             .help("Whether to run multiple times the algorithm in order to have a reliable time measurement.")
+            .action(ArgAction::Set)
     ).arg(
-        Arg::with_name("n_iters")
+        Arg::new("n_iters")
             .long("n_iters")
             .default_value("10")
             .help("Number of iterations to run for the benchmark.")
+            .action(ArgAction::Set)
     ).arg(
-        Arg::with_name("n_warm_ups")
+        Arg::new("n_warm_ups")
             .long("n_warm_ups")
             .default_value("3")
             .help("Number of warm ups run before the actual benchmark.")
+            .action(ArgAction::Set)
     ).arg(
-        Arg::with_name("export-markdown")
+        Arg::new("export-markdown")
             .long("export-markdown")
-            .takes_value(true)
+            .action(ArgAction::Set)
     )
 }

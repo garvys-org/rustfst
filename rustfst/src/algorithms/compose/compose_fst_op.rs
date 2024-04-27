@@ -158,7 +158,7 @@ where
 
         Ok(Self {
             compose_filter_builder,
-            compose_state: opts.op_state.unwrap_or_else(ComposeFstOpState::new),
+            compose_state: opts.op_state.unwrap_or_default(),
             match_type,
             properties,
             fst1,
