@@ -38,7 +38,6 @@ fn main() {
             Arg::new("det_type")
                 .long("det_type")
                 .value_parser(["functional", "nonfunctional", "disambiguate"])
-                .takes_value(true)
                 .default_value("functional")
                 .action(ArgAction::Set),
         );
@@ -67,7 +66,6 @@ fn main() {
             Arg::new("sort_type")
                 .help("Comparison method.")
                 .long("sort_type")
-                .takes_value(true)
                 .value_parser(["ilabel", "olabel"])
                 .default_value("ilabel")
                 .action(ArgAction::Set),
@@ -119,7 +117,6 @@ fn main() {
                     "rmweight",
                     "times",
                 ])
-                .takes_value(true)
                 .default_value("identity")
                 .help("Map operation.")
                 .action(ArgAction::Set),
@@ -127,8 +124,7 @@ fn main() {
         .arg(
             Arg::new("weight")
                 .long("weight")
-                .takes_value(true)
-                .required_if_eq_any(&[("map_type", "plus"), ("map_type", "times")])
+                .required_if_eq_any([("map_type", "plus"), ("map_type", "times")])
                 .action(ArgAction::Set),
         );
     app = app.subcommand(one_in_one_out_options(map_cmd));
@@ -139,7 +135,6 @@ fn main() {
         .arg(
             Arg::new("nshortest")
                 .long("nshortest")
-                .takes_value(true)
                 .default_value("1")
                 .help("Return N-shortest paths")
                 .action(ArgAction::Set),
@@ -191,7 +186,6 @@ fn main() {
         Arg::new("compose_type")
             .long("compose_type")
             .value_parser(["default", "lookahead"])
-            .takes_value(true)
             .default_value("default")
             .action(ArgAction::Set),
     );
@@ -339,7 +333,6 @@ fn one_in_one_out_options(command: Command) -> Command {
         ).arg(
         Arg::new("export-markdown")
             .long("export-markdown")
-            .takes_value(true)
             .action(ArgAction::Set)
     )
 }
@@ -386,7 +379,6 @@ fn two_in_one_out_options(command: Command) -> clap::Command {
     ).arg(
         Arg::new("export-markdown")
             .long("export-markdown")
-            .takes_value(true)
             .action(ArgAction::Set)
     )
 }
