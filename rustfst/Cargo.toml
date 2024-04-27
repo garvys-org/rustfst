@@ -27,7 +27,7 @@ binary-heap-plus = '0.1'
 bitflags = '1'
 generic-array = '0.12'
 getrandom = { version = "0.2", features = ["js"] }
-itertools = '0.9'
+itertools = '0.12'
 nom = '7'
 num-traits = '0.2'
 ordered-float = '3.0'
