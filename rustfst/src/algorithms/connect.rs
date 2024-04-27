@@ -169,14 +169,13 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for ConnectVisit
                 }
                 self.onstack[t] = false;
                 self.scc_stack.pop();
-                if s == (t as usize) {
+                if s == t {
                     break;
                 }
             }
         }
         if let Some(_p) = parent {
             let _p = _p as usize;
-            let s = s as usize;
             if self.coaccess[s] {
                 self.coaccess[_p] = true;
             }

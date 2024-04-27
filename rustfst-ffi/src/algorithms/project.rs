@@ -38,20 +38,29 @@ impl CReprOf<ProjectType> for CProjectType {
     }
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_project_type_new(
+pub unsafe extern "C" fn fst_project_type_new(
     project_type: libc::size_t,
     ptr: *mut *const CProjectType,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
-        let project_type = CProjectType(project_type as usize);
+        let project_type = CProjectType(project_type);
         unsafe { *ptr = project_type.into_raw_pointer() };
         Ok(())
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_project(ptr: *mut CFst, config: *const CProjectType) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn fst_project(
+    ptr: *mut CFst,
+    config: *const CProjectType,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, ptr);
         let vec_fst: &mut VectorFst<TropicalWeight> = fst

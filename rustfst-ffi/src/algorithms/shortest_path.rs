@@ -16,8 +16,11 @@ pub struct CShortestPathConfig {
     unique: bool,
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_shortest_path_config_new(
+pub unsafe extern "C" fn fst_shortest_path_config_new(
     delta: libc::c_float,
     nshortest: libc::size_t,
     unique: bool,
@@ -34,8 +37,11 @@ pub extern "C" fn fst_shortest_path_config_new(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_shortest_path(
+pub unsafe extern "C" fn fst_shortest_path(
     ptr: *const CFst,
     res_fst: *mut *const CFst,
 ) -> RUSTFST_FFI_RESULT {
@@ -50,8 +56,11 @@ pub extern "C" fn fst_shortest_path(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_shortest_path_with_config(
+pub unsafe extern "C" fn fst_shortest_path_with_config(
     ptr: *const CFst,
     config: *const CShortestPathConfig,
     res_fst: *mut *const CFst,

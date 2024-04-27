@@ -8,8 +8,14 @@ use rustfst::algorithms::reverse;
 use rustfst::fst_impls::VectorFst;
 use rustfst::semirings::TropicalWeight;
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_reverse(ptr: *const CFst, res_ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn fst_reverse(
+    ptr: *const CFst,
+    res_ptr: *mut *const CFst,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, ptr);
         let vec_fst: &VectorFst<TropicalWeight> = fst

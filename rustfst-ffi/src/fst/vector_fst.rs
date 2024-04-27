@@ -6,8 +6,11 @@ use rustfst::fst_traits::ExpandedFst;
 use rustfst::DrawingConfig;
 use std::ffi::CString;
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn vec_fst_new(ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
+pub unsafe fn vec_fst_new(ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = Box::new(VectorFst::new());
         let raw_pointer = CFst(fst).into_raw_pointer();
@@ -16,8 +19,11 @@ pub fn vec_fst_new(ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn vec_fst_set_start(fst: *mut CFst, state: CStateId) -> RUSTFST_FFI_RESULT {
+pub unsafe fn vec_fst_set_start(fst: *mut CFst, state: CStateId) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let c_fst = get_mut!(CFst, fst);
         let vec_fst = as_mut_fst!(VectorFst<TropicalWeight>, c_fst);
@@ -26,8 +32,11 @@ pub fn vec_fst_set_start(fst: *mut CFst, state: CStateId) -> RUSTFST_FFI_RESULT 
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn vec_fst_set_final(
+pub unsafe fn vec_fst_set_final(
     fst: *mut CFst,
     state: CStateId,
     weight: libc::c_float,
@@ -35,13 +44,16 @@ pub fn vec_fst_set_final(
     wrap(|| {
         let fst = get_mut!(CFst, fst);
         let vec_fst = as_mut_fst!(VectorFst<TropicalWeight>, fst);
-        vec_fst.set_final(state, TropicalWeight::new(weight as f32))?;
+        vec_fst.set_final(state, TropicalWeight::new(weight))?;
         Ok(())
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn vec_fst_add_state(fst: *mut CFst, state: *mut CStateId) -> RUSTFST_FFI_RESULT {
+pub unsafe fn vec_fst_add_state(fst: *mut CFst, state: *mut CStateId) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, fst);
         let vec_fst = as_mut_fst!(VectorFst<TropicalWeight>, fst);
@@ -51,8 +63,11 @@ pub fn vec_fst_add_state(fst: *mut CFst, state: *mut CStateId) -> RUSTFST_FFI_RE
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn vec_fst_delete_states(fst: *mut CFst) -> RUSTFST_FFI_RESULT {
+pub unsafe fn vec_fst_delete_states(fst: *mut CFst) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, fst);
         let vec_fst = as_mut_fst!(VectorFst<TropicalWeight>, fst);
@@ -61,8 +76,15 @@ pub fn vec_fst_delete_states(fst: *mut CFst) -> RUSTFST_FFI_RESULT {
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn vec_fst_add_tr(fst: *mut CFst, state: CStateId, tr: *const CTr) -> RUSTFST_FFI_RESULT {
+pub unsafe fn vec_fst_add_tr(
+    fst: *mut CFst,
+    state: CStateId,
+    tr: *const CTr,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, fst);
         let tr = unsafe { <CTr as ffi_convert::RawBorrow<CTr>>::raw_borrow(tr)? }.as_rust()?;
@@ -72,8 +94,11 @@ pub fn vec_fst_add_tr(fst: *mut CFst, state: CStateId, tr: *const CTr) -> RUSTFS
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn vec_fst_del_final_weight(fst: *mut CFst, state: CStateId) -> RUSTFST_FFI_RESULT {
+pub unsafe fn vec_fst_del_final_weight(fst: *mut CFst, state: CStateId) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, fst);
         let vec_fst = as_mut_fst!(VectorFst<TropicalWeight>, fst);
@@ -83,30 +108,45 @@ pub fn vec_fst_del_final_weight(fst: *mut CFst, state: CStateId) -> RUSTFST_FFI_
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn vec_fst_from_path(ptr: *mut *const CFst, path: *const libc::c_char) -> RUSTFST_FFI_RESULT {
+pub unsafe fn vec_fst_from_path(
+    ptr: *mut *const CFst,
+    path: *const libc::c_char,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let path = unsafe { CStr::from_ptr(path) }.as_rust()?;
-        let fst = Box::new(VectorFst::<TropicalWeight>::read(&path)?);
+        let fst = Box::new(VectorFst::<TropicalWeight>::read(path)?);
         let raw_pointer = CFst(fst).into_raw_pointer();
         unsafe { *ptr = raw_pointer };
         Ok(())
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn vec_fst_write_file(fst: *const CFst, path: *const libc::c_char) -> RUSTFST_FFI_RESULT {
+pub unsafe fn vec_fst_write_file(
+    fst: *const CFst,
+    path: *const libc::c_char,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
         let path = unsafe { CStr::from_ptr(path) }.as_rust()?;
         let vec_fst = as_fst!(VectorFst<TropicalWeight>, fst);
-        vec_fst.write(&path)?;
+        vec_fst.write(path)?;
         Ok(())
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn vec_fst_relabel_tables(
+pub unsafe fn vec_fst_relabel_tables(
     fst: *mut CFst,
     old_isymbols: *const CSymbolTable,
     new_isymbols: *const CSymbolTable,
@@ -142,9 +182,12 @@ pub fn vec_fst_relabel_tables(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[allow(clippy::too_many_arguments)]
 #[no_mangle]
-pub fn vec_fst_draw(
+pub unsafe fn vec_fst_draw(
     fst_ptr: *mut CFst,
     isyms: *const CSymbolTable,
     osyms: *const CSymbolTable,
@@ -198,8 +241,14 @@ pub fn vec_fst_draw(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn vec_fst_num_states(fst: *const CFst, num_states: *mut libc::size_t) -> RUSTFST_FFI_RESULT {
+pub unsafe fn vec_fst_num_states(
+    fst: *const CFst,
+    num_states: *mut libc::size_t,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
         let vec_fst = as_fst!(VectorFst<TropicalWeight>, fst);
@@ -209,8 +258,11 @@ pub fn vec_fst_num_states(fst: *const CFst, num_states: *mut libc::size_t) -> RU
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn vec_fst_equals(
+pub unsafe fn vec_fst_equals(
     fst: *const CFst,
     other_fst: *const CFst,
     is_equal: *mut libc::size_t,
@@ -226,8 +278,11 @@ pub fn vec_fst_equals(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn vec_fst_copy(
+pub unsafe extern "C" fn vec_fst_copy(
     fst_ptr: *const CFst,
     clone_ptr: *mut *const CFst,
 ) -> RUSTFST_FFI_RESULT {
@@ -240,8 +295,11 @@ pub extern "C" fn vec_fst_copy(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn vec_fst_display(
+pub unsafe extern "C" fn vec_fst_display(
     fst_ptr: *const CFst,
     s: *mut *const libc::c_char,
 ) -> RUSTFST_FFI_RESULT {
@@ -254,8 +312,11 @@ pub extern "C" fn vec_fst_display(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn vec_fst_to_bytes(
+pub unsafe extern "C" fn vec_fst_to_bytes(
     fst_ptr: *const CFst,
     output_bytes: *mut *const CArray<u8>,
 ) -> RUSTFST_FFI_RESULT {
@@ -274,8 +335,11 @@ pub extern "C" fn vec_fst_to_bytes(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn vec_fst_from_bytes(
+pub unsafe extern "C" fn vec_fst_from_bytes(
     bytes: *const CArray<u8>,
     ptr: *mut *const CFst,
 ) -> RUSTFST_FFI_RESULT {

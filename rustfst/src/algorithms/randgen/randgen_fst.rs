@@ -19,7 +19,7 @@ pub struct RandGenFst<W: Semiring<Type = f32>, F: Fst<W>, B: Borrow<F>, S: TrSel
     InnerLazyFst<W, F, B, S>,
 );
 
-impl<'a, W, F, B, S> CoreFst<W> for RandGenFst<W, F, B, S>
+impl<W, F, B, S> CoreFst<W> for RandGenFst<W, F, B, S>
 where
     W: Semiring<Type = f32>,
     F: Fst<W>,

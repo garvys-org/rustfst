@@ -15,8 +15,11 @@ pub struct CLabelFstPair {
     pub fst: *const CFst,
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_replace(
+pub unsafe extern "C" fn fst_replace(
     root: CLabel,
     fst_list_ptr: *mut CLabelFstPair,
     fst_list_ptr_len: libc::size_t,
@@ -25,7 +28,7 @@ pub extern "C" fn fst_replace(
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let label_fst_pairs =
-            unsafe { std::slice::from_raw_parts_mut(fst_list_ptr, fst_list_ptr_len as usize) };
+            unsafe { std::slice::from_raw_parts_mut(fst_list_ptr, fst_list_ptr_len) };
         let fst_list = label_fst_pairs
             .iter_mut()
             .map(|pair| -> Result<(CLabel, &VectorFst<TropicalWeight>)> {

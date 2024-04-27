@@ -69,7 +69,7 @@ where
 
                 let weight = match reweight_type {
                     ReweightType::ReweightToInitial => {
-                        (&tr.weight.times(d_ns)?).divide(d_s, DivideType::DivideLeft)?
+                        tr.weight.times(d_ns)?.divide(d_s, DivideType::DivideLeft)?
                     }
                     ReweightType::ReweightToFinal => {
                         (d_s.times(&tr.weight)?).divide(d_ns, DivideType::DivideRight)?

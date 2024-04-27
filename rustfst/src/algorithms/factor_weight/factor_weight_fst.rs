@@ -145,7 +145,7 @@ where
     }
 }
 
-impl<'a, W, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FactorWeightFst<W, F, B, FI>
+impl<W, F: Fst<W>, B: Borrow<F>, FI: FactorIterator<W>> FactorWeightFst<W, F, B, FI>
 where
     W: WeightQuantize,
 {

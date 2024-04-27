@@ -41,8 +41,11 @@ impl AsRust<TropicalWeight> for CTropicalWeight {
     }
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn tr_new(
+pub unsafe extern "C" fn tr_new(
     ilabel: CLabel,
     olabel: CLabel,
     weight: libc::c_float,
@@ -62,8 +65,11 @@ pub extern "C" fn tr_new(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn tr_ilabel(tr: *const CTr, ilabel: *mut CLabel) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn tr_ilabel(tr: *const CTr, ilabel: *mut CLabel) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let tr = unsafe { <CTr as ffi_convert::RawBorrow<CTr>>::raw_borrow(tr)? };
         let ilabel_val = tr.ilabel;
@@ -72,8 +78,11 @@ pub extern "C" fn tr_ilabel(tr: *const CTr, ilabel: *mut CLabel) -> RUSTFST_FFI_
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn tr_set_ilabel(tr: *mut CTr, ilabel: *const CLabel) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn tr_set_ilabel(tr: *mut CTr, ilabel: *const CLabel) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let tr = &mut unsafe { <CTr as ffi_convert::RawBorrowMut<CTr>>::raw_borrow_mut(tr)? };
         tr.ilabel = ilabel as CLabel;
@@ -81,8 +90,11 @@ pub extern "C" fn tr_set_ilabel(tr: *mut CTr, ilabel: *const CLabel) -> RUSTFST_
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn tr_olabel(tr: *const CTr, olabel: *mut CLabel) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn tr_olabel(tr: *const CTr, olabel: *mut CLabel) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let tr = unsafe { <CTr as ffi_convert::RawBorrow<CTr>>::raw_borrow(tr)? };
         let olabel_val = tr.olabel;
@@ -91,8 +103,11 @@ pub extern "C" fn tr_olabel(tr: *const CTr, olabel: *mut CLabel) -> RUSTFST_FFI_
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn tr_set_olabel(tr: *mut CTr, olabel: *const CLabel) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn tr_set_olabel(tr: *mut CTr, olabel: *const CLabel) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let tr = &mut unsafe { <CTr as ffi_convert::RawBorrowMut<CTr>>::raw_borrow_mut(tr)? };
         tr.olabel = olabel as CLabel;
@@ -100,8 +115,14 @@ pub extern "C" fn tr_set_olabel(tr: *mut CTr, olabel: *const CLabel) -> RUSTFST_
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn tr_weight(tr: *const CTr, weight: *mut libc::c_float) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn tr_weight(
+    tr: *const CTr,
+    weight: *mut libc::c_float,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let tr = unsafe { <CTr as ffi_convert::RawBorrow<CTr>>::raw_borrow(tr)? };
         let weight_val = *tr.weight.as_rust()?.value();
@@ -110,18 +131,27 @@ pub extern "C" fn tr_weight(tr: *const CTr, weight: *mut libc::c_float) -> RUSTF
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn tr_set_weight(tr: *mut CTr, weight: libc::c_float) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn tr_set_weight(tr: *mut CTr, weight: libc::c_float) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let tr = &mut unsafe { <CTr as ffi_convert::RawBorrowMut<CTr>>::raw_borrow_mut(tr)? };
-        let tropical_weight = TropicalWeight::new(weight as f32);
+        let tropical_weight = TropicalWeight::new(weight);
         tr.weight = CTropicalWeight::c_repr_of(tropical_weight)?;
         Ok(())
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn tr_next_state(tr: *const CTr, next_state: *mut CStateId) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn tr_next_state(
+    tr: *const CTr,
+    next_state: *mut CStateId,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let tr = unsafe { <CTr as ffi_convert::RawBorrow<CTr>>::raw_borrow(tr)? };
         let next_state_val = tr.nextstate;
@@ -130,8 +160,11 @@ pub extern "C" fn tr_next_state(tr: *const CTr, next_state: *mut CStateId) -> RU
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn tr_set_next_state(
+pub unsafe extern "C" fn tr_set_next_state(
     tr: *mut CTr,
     next_state: *const CStateId,
 ) -> RUSTFST_FFI_RESULT {
@@ -142,8 +175,11 @@ pub extern "C" fn tr_set_next_state(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn tr_delete(tr_ptr: *mut CTr) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn tr_delete(tr_ptr: *mut CTr) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         if tr_ptr.is_null() {
             return Ok(());

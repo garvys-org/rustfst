@@ -139,7 +139,7 @@ pub(crate) fn rm_epsilon_with_internal_config<W: Semiring, F: MutableFst<W>, Q: 
 
     for state in states.into_iter().rev() {
         if !noneps_in[state as usize]
-            && (connect || weight_threshold != W::zero() || state_threshold != None)
+            && (connect || weight_threshold != W::zero() || state_threshold.is_some())
         {
             continue;
         }
@@ -156,7 +156,7 @@ pub(crate) fn rm_epsilon_with_internal_config<W: Semiring, F: MutableFst<W>, Q: 
         }
     }
 
-    if connect || weight_threshold != W::zero() || state_threshold != None {
+    if connect || weight_threshold != W::zero() || state_threshold.is_some() {
         for s in 0..(fst.num_states() as StateId) {
             if !noneps_in[s as usize] {
                 fst.delete_trs(s)?;
@@ -166,11 +166,11 @@ pub(crate) fn rm_epsilon_with_internal_config<W: Semiring, F: MutableFst<W>, Q: 
 
     fst.set_properties(rmepsilon_properties(fst.properties(), false));
 
-    if weight_threshold != W::zero() || state_threshold != None {
+    if weight_threshold != W::zero() || state_threshold.is_some() {
         todo!("Implement Prune!")
     }
 
-    if connect && weight_threshold == W::zero() && state_threshold == None {
+    if connect && weight_threshold == W::zero() && state_threshold.is_none() {
         crate::algorithms::connect(fst)?;
     }
     Ok(())

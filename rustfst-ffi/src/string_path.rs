@@ -9,8 +9,11 @@ use crate::{get, wrap, RUSTFST_FFI_RESULT};
 #[derive(RawPointerConverter)]
 pub struct CStringPath(pub(crate) StringPath<TropicalWeight>);
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn string_path_destroy(iter_ptr: *mut CStringPath) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn string_path_destroy(iter_ptr: *mut CStringPath) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         if iter_ptr.is_null() {
             return Ok(());
@@ -21,8 +24,11 @@ pub extern "C" fn string_path_destroy(iter_ptr: *mut CStringPath) -> RUSTFST_FFI
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn string_path_weight(
+pub unsafe extern "C" fn string_path_weight(
     c_string_path: *const CStringPath,
     weight: *mut libc::c_float,
 ) -> RUSTFST_FFI_RESULT {
@@ -34,8 +40,11 @@ pub extern "C" fn string_path_weight(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn string_path_istring(
+pub unsafe extern "C" fn string_path_istring(
     c_string_path: *const CStringPath,
     c_istring: *mut *const libc::c_char,
 ) -> RUSTFST_FFI_RESULT {
@@ -50,8 +59,11 @@ pub extern "C" fn string_path_istring(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn string_path_ostring(
+pub unsafe extern "C" fn string_path_ostring(
     c_string_path: *const CStringPath,
     c_ostring: *mut *const libc::c_char,
 ) -> RUSTFST_FFI_RESULT {

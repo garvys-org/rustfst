@@ -11,8 +11,11 @@ use rustfst::Trs;
 #[derive(RawPointerConverter)]
 pub struct CTrs(pub(crate) TrsVec<TropicalWeight>);
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn trs_vec_new(new_struct: *mut *const CTrs) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn trs_vec_new(new_struct: *mut *const CTrs) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let trs: TrsVec<TropicalWeight> = TrsVec::default();
         let raw_pointer = CTrs(trs).into_raw_pointer();
@@ -21,8 +24,11 @@ pub extern "C" fn trs_vec_new(new_struct: *mut *const CTrs) -> RUSTFST_FFI_RESUL
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn trs_vec_remove(
+pub unsafe extern "C" fn trs_vec_remove(
     trs: *mut CTrs,
     index: libc::size_t,
     removed_tr_ptr: *mut *const CTr,
@@ -36,8 +42,11 @@ pub extern "C" fn trs_vec_remove(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn trs_vec_push(trs: *mut CTrs, new_tr: *const CTr) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn trs_vec_push(trs: *mut CTrs, new_tr: *const CTr) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let trs = get_mut!(CTrs, trs);
         let tr = unsafe { <CTr as ffi_convert::RawBorrow<CTr>>::raw_borrow(new_tr)? };
@@ -46,8 +55,11 @@ pub extern "C" fn trs_vec_push(trs: *mut CTrs, new_tr: *const CTr) -> RUSTFST_FF
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn trs_vec_shallow_clone(
+pub unsafe extern "C" fn trs_vec_shallow_clone(
     trs: *const CTrs,
     cloned_trs_ptr: *mut *const CTrs,
 ) -> RUSTFST_FFI_RESULT {
@@ -60,8 +72,14 @@ pub extern "C" fn trs_vec_shallow_clone(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn trs_vec_len(trs: *const CTrs, num_trs: *mut libc::size_t) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn trs_vec_len(
+    trs: *const CTrs,
+    num_trs: *mut libc::size_t,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let trs = get!(CTrs, trs);
         unsafe { *num_trs = trs.len() as libc::size_t };
@@ -69,8 +87,11 @@ pub extern "C" fn trs_vec_len(trs: *const CTrs, num_trs: *mut libc::size_t) -> R
     })
 }
 
+/// # Safety
+///
+/// `trs` pointer should be valid.
 #[no_mangle]
-pub extern "C" fn trs_vec_display(
+pub unsafe extern "C" fn trs_vec_display(
     trs: *const CTrs,
     string: *mut *const libc::c_char,
 ) -> RUSTFST_FFI_RESULT {
@@ -84,8 +105,11 @@ pub extern "C" fn trs_vec_display(
     })
 }
 
+/// # Safety
+///
+/// Should never happen.
 #[no_mangle]
-pub extern "C" fn trs_vec_delete(trs_ptr: *mut CTrs) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn trs_vec_delete(trs_ptr: *mut CTrs) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         if trs_ptr.is_null() {
             return Ok(());

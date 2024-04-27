@@ -30,13 +30,13 @@ impl AutoQueue {
         let queue: Box<dyn Queue>;
 
         if props.contains(FstProperties::TOP_SORTED) || fst.start().is_none() {
-            queue = Box::new(StateOrderQueue::default());
+            queue = Box::<StateOrderQueue>::default();
         } else if props.contains(FstProperties::ACYCLIC) {
             queue = Box::new(TopOrderQueue::new(fst, tr_filter));
         } else if props.contains(FstProperties::UNWEIGHTED)
             && W::properties().contains(SemiringProperties::IDEMPOTENT)
         {
-            queue = Box::new(LifoQueue::default());
+            queue = Box::<LifoQueue>::default();
         } else {
             let mut scc_visitor = SccVisitor::new(fst, true, false);
             dfs_visit(fst, &mut scc_visitor, tr_filter, false);
@@ -73,7 +73,7 @@ impl AutoQueue {
 
             if unweighted {
                 // If unweighted and semiring is idempotent, uses LIFO queue.
-                queue = Box::new(LifoQueue::default());
+                queue = Box::<LifoQueue>::default();
             } else if all_trivial {
                 // If all the SCC are trivial, the FST is acyclic and the scc number gives
                 // the topological order.
@@ -83,12 +83,12 @@ impl AutoQueue {
                 let mut queues: Vec<Box<dyn Queue>> = Vec::with_capacity(n_sccs);
                 for queue_type in queue_types.iter().take(n_sccs) {
                     match queue_type {
-                        QueueType::TrivialQueue => queues.push(Box::new(TrivialQueue::default())),
+                        QueueType::TrivialQueue => queues.push(Box::<TrivialQueue>::default()),
                         QueueType::ShortestFirstQueue => queues.push(Box::new(
                             NaturalShortestFirstQueue::new(distance.unwrap().clone()),
                         )),
-                        QueueType::LifoQueue => queues.push(Box::new(LifoQueue::default())),
-                        _ => queues.push(Box::new(FifoQueue::default())),
+                        QueueType::LifoQueue => queues.push(Box::<LifoQueue>::default()),
+                        _ => queues.push(Box::<FifoQueue>::default()),
                     }
                 }
                 queue = Box::new(SccQueue::new(queues, sccs));
