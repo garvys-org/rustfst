@@ -75,9 +75,9 @@ fn main() {
     let project_cmd = SubCommand::with_name("project")
         .about("Project algorithm.")
         .arg(
-            Arg::with_name("project_output")
+            Arg::with_name("project-output")
                 .help("Project output (vs. input)")
-                .long("project_output"),
+                .long("project-output"),
         );
     app = app.subcommand(one_in_one_out_options(project_cmd));
 
