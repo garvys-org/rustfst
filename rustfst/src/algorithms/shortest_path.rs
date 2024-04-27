@@ -444,7 +444,6 @@ where
     heap.push(final_state);
 
     let weight_threshold = W::zero();
-    let state_threshold: Option<StateId> = None;
     let limit = distance[istart as usize].times(weight_threshold)?;
 
     let mut r = vec![];
@@ -464,10 +463,7 @@ where
         } else {
             W::one()
         };
-        #[allow(clippy::unnecessary_literal_unwrap)]
-        if natural_less(&limit, &d.times(&p.1)?)?
-            || (state_threshold.is_some() && ofst.num_states() >= state_threshold.unwrap() as usize)
-        {
+        if natural_less(&limit, &d.times(&p.1)?)? {
             continue;
         }
 

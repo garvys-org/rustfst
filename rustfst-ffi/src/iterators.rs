@@ -127,7 +127,7 @@ pub unsafe extern "C" fn trs_iterator_destroy(iter_ptr: *mut CTrsIterator) -> RU
             return Ok(());
         }
 
-        unsafe { drop(Box::from_raw(iter_ptr)) }
+        drop(unsafe { Box::from_raw(iter_ptr) });
         Ok(())
     })
 }
@@ -313,7 +313,7 @@ pub unsafe extern "C" fn mut_trs_iterator_destroy(
             return Ok(());
         }
 
-        unsafe { drop(Box::from_raw(iter_ptr)) }
+        drop(unsafe { Box::from_raw(iter_ptr) });
         Ok(())
     })
 }
@@ -384,7 +384,7 @@ pub unsafe extern "C" fn state_iterator_destroy(
             return Ok(());
         }
 
-        unsafe { drop(Box::from_raw(iter_ptr)) }
+        drop(unsafe { Box::from_raw(iter_ptr) });
         Ok(())
     })
 }

@@ -602,10 +602,7 @@ impl TrIterCompare {
         &self,
         x: &TrsIterCollected<W, T>,
         y: &TrsIterCollected<W, T>,
-    ) -> bool
-    where
-        W: Semiring,
-    {
+    ) -> bool {
         let xarc = x.value().unwrap();
         let yarc = y.value().unwrap();
         xarc.ilabel > yarc.ilabel

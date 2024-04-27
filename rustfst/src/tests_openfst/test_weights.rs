@@ -87,8 +87,7 @@ fn do_run_test_openfst_weight<W: SerializableSemiring + WeightQuantize>(
 }
 
 fn run_test_openfst_weight(test_name: &str) -> Result<()> {
-    let absolute_path_folder = get_path_folder("weights")?;
-    let mut path_metadata = absolute_path_folder.clone();
+    let mut path_metadata = get_path_folder("weights")?;
     path_metadata.push(format!("{}.json", test_name));
 
     let string = read_to_string(&path_metadata)

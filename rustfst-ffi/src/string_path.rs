@@ -19,7 +19,7 @@ pub unsafe extern "C" fn string_path_destroy(iter_ptr: *mut CStringPath) -> RUST
             return Ok(());
         }
 
-        unsafe { drop(Box::from_raw(iter_ptr)) }
+        drop(unsafe { Box::from_raw(iter_ptr) });
         Ok(())
     })
 }

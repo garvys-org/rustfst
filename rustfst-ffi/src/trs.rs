@@ -115,7 +115,7 @@ pub unsafe extern "C" fn trs_vec_delete(trs_ptr: *mut CTrs) -> RUSTFST_FFI_RESUL
             return Ok(());
         }
 
-        unsafe { drop(Box::from_raw(trs_ptr)) }
+        drop(unsafe { Box::from_raw(trs_ptr) });
         Ok(())
     })
 }
