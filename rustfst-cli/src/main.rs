@@ -220,7 +220,7 @@ fn handle(matches: clap::ArgMatches) -> Result<()> {
         .run_cli_or_bench(m),
         Some(("project", m)) => ProjectFstAlgorithm::new(
             m.value_of("in.fst").unwrap(),
-            m.is_present("project_output"),
+            m.is_present("project-output"),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),

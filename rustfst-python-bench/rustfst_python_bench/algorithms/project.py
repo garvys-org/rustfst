@@ -21,7 +21,7 @@ class ProjectAlgorithm:
 
     def get_cli_args(self):
         if self.project_output:
-            return "--project_output=true"
+            return "--project-output"
         else:
             return ""
 
