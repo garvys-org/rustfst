@@ -1,7 +1,7 @@
 use std::process;
 
 use anyhow::{format_err, Result};
-use clap::{App, Arg, SubCommand};
+use clap::{App, Arg, ArgAction, SubCommand};
 use log::error;
 
 use crate::binary_fst_algorithm::BinaryFstAlgorithm;
@@ -39,7 +39,8 @@ fn main() {
                 .long("det_type")
                 .possible_values(["functional", "nonfunctional", "disambiguate"])
                 .takes_value(true)
-                .default_value("functional"),
+                .default_value("functional")
+                .action(ArgAction::Set),
         );
     app = app.subcommand(one_in_one_out_options(determinize_cmd));
 
@@ -49,7 +50,8 @@ fn main() {
         .arg(
             Arg::with_name("allow-nondet")
                 .help("Minimize non-deterministic FSTs ?")
-                .long("allow-nondet"),
+                .long("allow-nondet")
+                .action(ArgAction::SetTrue),
         );
     app = app.subcommand(one_in_one_out_options(minimize_cmd));
 
@@ -67,7 +69,8 @@ fn main() {
                 .long("sort_type")
                 .takes_value(true)
                 .possible_values(["ilabel", "olabel"])
-                .default_value("ilabel"),
+                .default_value("ilabel")
+                .action(ArgAction::Set),
         );
     app = app.subcommand(one_in_one_out_options(tr_sort_cmd));
 
@@ -77,7 +80,8 @@ fn main() {
         .arg(
             Arg::with_name("project-output")
                 .help("Project output (vs. input)")
-                .long("project-output"),
+                .long("project-output")
+                .action(ArgAction::SetTrue),
         );
     app = app.subcommand(one_in_one_out_options(project_cmd));
 
@@ -119,13 +123,15 @@ fn main() {
                 ])
                 .takes_value(true)
                 .default_value("identity")
-                .help("Map operation."),
+                .help("Map operation.")
+                .action(ArgAction::Set),
         )
         .arg(
             Arg::with_name("weight")
                 .long("weight")
                 .takes_value(true)
-                .required_ifs(&[("map_type", "plus"), ("map_type", "times")]),
+                .required_ifs(&[("map_type", "plus"), ("map_type", "times")])
+                .action(ArgAction::Set),
         );
     app = app.subcommand(one_in_one_out_options(map_cmd));
 
@@ -137,12 +143,14 @@ fn main() {
                 .long("nshortest")
                 .takes_value(true)
                 .default_value("1")
-                .help("Return N-shortest paths"),
+                .help("Return N-shortest paths")
+                .action(ArgAction::Set),
         )
         .arg(
             Arg::with_name("unique")
                 .long("unique")
-                .help("Return unique strings"),
+                .help("Return unique strings")
+                .action(ArgAction::SetTrue),
         );
     app = app.subcommand(one_in_one_out_options(shortest_path_cmd));
 
@@ -154,11 +162,31 @@ fn main() {
     // Push
     let push_cmd = SubCommand::with_name("push")
         .about("Push Weights/Labels algorithm")
-        .arg(Arg::with_name("to_final").long("to_final"))
-        .arg(Arg::with_name("push_weights").long("push_weights"))
-        .arg(Arg::with_name("push_labels").long("push_labels"))
-        .arg(Arg::with_name("remove_total_weight").long("remove_total_weight"))
-        .arg(Arg::with_name("remove_common_affix").long("remove_common_affix"));
+        .arg(
+            Arg::with_name("to_final")
+                .long("to_final")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::with_name("push_weights")
+                .long("push_weights")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::with_name("push_labels")
+                .long("push_labels")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::with_name("remove_total_weight")
+                .long("remove_total_weight")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::with_name("remove_common_affix")
+                .long("remove_common_affix")
+                .action(ArgAction::SetTrue),
+        );
     app = app.subcommand(one_in_one_out_options(push_cmd));
 
     // Compose
@@ -169,7 +197,8 @@ fn main() {
                 .long("compose_type")
                 .possible_values(["default", "lookahead"])
                 .takes_value(true)
-                .default_value("default"),
+                .default_value("default")
+                .action(ArgAction::Set),
         );
     app = app.subcommand(two_in_one_out_options(compose_cmd));
 
@@ -287,30 +316,36 @@ fn one_in_one_out_options(command: clap::App) -> clap::App {
         .arg(
             Arg::with_name("in.fst")
                 .help("Path to input fst file.")
-                .required(true),
+                .required(true)
+                .action(ArgAction::Set),
         )
         .arg(
             Arg::with_name("out.fst")
                 .help("Path to output fst file.")
-                .required(true),
+                .required(true)
+                .action(ArgAction::Set),
         ).arg(
             Arg::with_name("bench")
                 .long("bench")
                 .help("Whether to run multiple times the algorithm in order to have a reliable time measurement.")
+                .action(ArgAction::SetTrue)
         ).arg(
             Arg::with_name("n_iters")
                 .long("n_iters")
                 .default_value("10")
                 .help("Number of iterations to run for the benchmark.")
+                .action(ArgAction::Set)
         ).arg(
             Arg::with_name("n_warm_ups")
                 .long("n_warm_ups")
                 .default_value("3")
                 .help("Number of warm ups run before the actual benchmark.")
+                .action(ArgAction::Set)
         ).arg(
         Arg::with_name("export-markdown")
             .long("export-markdown")
             .takes_value(true)
+            .action(ArgAction::Set)
     )
 }
 
@@ -321,34 +356,42 @@ fn two_in_one_out_options(command: clap::App) -> clap::App {
         .arg(
             Arg::with_name("in_1.fst")
                 .help("Path to the first input fst file.")
-                .required(true),
+                .required(true)
+                .action(ArgAction::Set),
+
         )
         .arg(
             Arg::with_name("in_2.fst")
                 .help("Path to the second input fst file.")
-                .required(true),
+                .required(true)
+                .action(ArgAction::Set),
         )
         .arg(
             Arg::with_name("out.fst")
                 .help("Path to output fst file.")
-                .required(true),
+                .required(true)
+                .action(ArgAction::Set),
         ).arg(
         Arg::with_name("bench")
             .long("bench")
             .help("Whether to run multiple times the algorithm in order to have a reliable time measurement.")
+            .action(ArgAction::Set)
     ).arg(
         Arg::with_name("n_iters")
             .long("n_iters")
             .default_value("10")
             .help("Number of iterations to run for the benchmark.")
+            .action(ArgAction::Set)
     ).arg(
         Arg::with_name("n_warm_ups")
             .long("n_warm_ups")
             .default_value("3")
             .help("Number of warm ups run before the actual benchmark.")
+            .action(ArgAction::Set)
     ).arg(
         Arg::with_name("export-markdown")
             .long("export-markdown")
             .takes_value(true)
+            .action(ArgAction::Set)
     )
 }
