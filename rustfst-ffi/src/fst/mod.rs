@@ -122,8 +122,11 @@ pub(crate) use as_mut_fst;
 /// As defined in fst_traits
 
 /// Returns the ID of the start state of the wFST if it exists else none
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn fst_start(fst: *const CFst, mut state: *mut CStateId) -> RUSTFST_FFI_RESULT {
+pub unsafe fn fst_start(fst: *const CFst, mut state: *mut CStateId) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
         fst.fst_start()
@@ -134,8 +137,11 @@ pub fn fst_start(fst: *const CFst, mut state: *mut CStateId) -> RUSTFST_FFI_RESU
 }
 
 /// Retrieves the final weight of a state (if the state is a final one).
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn fst_final_weight(
+pub unsafe fn fst_final_weight(
     fst: *const CFst,
     state_id: CStateId,
     mut final_weight: *mut libc::c_float,
@@ -150,8 +156,11 @@ pub fn fst_final_weight(
 }
 
 /// Number of trs leaving a specific state in the wFST.
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn fst_num_trs(
+pub unsafe fn fst_num_trs(
     fst: *const CFst,
     state: CStateId,
     num_trs: *mut libc::size_t,
@@ -164,8 +173,15 @@ pub fn fst_num_trs(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn fst_get_trs(fst: *const CFst, state: CStateId, trs: *mut *const CTrs) -> RUSTFST_FFI_RESULT {
+pub unsafe fn fst_get_trs(
+    fst: *const CFst,
+    state: CStateId,
+    trs: *mut *const CTrs,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
         let res = fst.fst_get_trs(state)?;
@@ -176,8 +192,11 @@ pub fn fst_get_trs(fst: *const CFst, state: CStateId, trs: *mut *const CTrs) -> 
 }
 
 /// Returns whether or not the state with identifier passed as parameters is a final state.
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn fst_is_final(
+pub unsafe fn fst_is_final(
     fst: *const CFst,
     state: CStateId,
     is_final: *mut libc::size_t,
@@ -191,8 +210,11 @@ pub fn fst_is_final(
 }
 
 /// Returns whether or not the state with identifier passed as parameters is a final state.
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn fst_is_start(
+pub unsafe fn fst_is_start(
     fst: *const CFst,
     state: CStateId,
     is_start: *mut libc::size_t,
@@ -216,8 +238,11 @@ pub fn fst_is_start(
 
 /// Retrieves the input `SymbolTable` associated to the Fst.
 /// If no SymbolTable has been previously attached then a null pointer is returned.
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn fst_input_symbols(
+pub unsafe fn fst_input_symbols(
     fst: *const CFst,
     mut input_symt: *mut *const CSymbolTable,
 ) -> RUSTFST_FFI_RESULT {
@@ -235,8 +260,11 @@ pub fn fst_input_symbols(
 
 /// Retrieves the output `SymbolTable` associated to the Fst.
 /// If no SymbolTable has been previously attached then a null pointer is returned.
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn fst_output_symbols(
+pub unsafe fn fst_output_symbols(
     fst: *const CFst,
     mut output_symt: *mut *const CSymbolTable,
 ) -> RUSTFST_FFI_RESULT {
@@ -254,8 +282,14 @@ pub fn fst_output_symbols(
 
 /// Attaches an input `SymbolTable` to the Fst.
 /// The `SymbolTable` is not duplicated with the use of Arc.
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn fst_set_input_symbols(fst: *mut CFst, symt: *const CSymbolTable) -> RUSTFST_FFI_RESULT {
+pub unsafe fn fst_set_input_symbols(
+    fst: *mut CFst,
+    symt: *const CSymbolTable,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, fst);
         let symt = get!(CSymbolTable, symt);
@@ -266,8 +300,14 @@ pub fn fst_set_input_symbols(fst: *mut CFst, symt: *const CSymbolTable) -> RUSTF
 
 /// Attaches an output `SymbolTable` to the Fst.
 /// The `SymbolTable` is not duplicated with the use of Arc.
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn fst_set_output_symbols(fst: *mut CFst, symt: *const CSymbolTable) -> RUSTFST_FFI_RESULT {
+pub unsafe fn fst_set_output_symbols(
+    fst: *mut CFst,
+    symt: *const CSymbolTable,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, fst);
         let symt = get!(CSymbolTable, symt);
@@ -277,8 +317,11 @@ pub fn fst_set_output_symbols(fst: *mut CFst, symt: *const CSymbolTable) -> RUST
 }
 
 /// Removes the input symbol table from the Fst and retrieves it.
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn fst_unset_input_symbols(fst: *mut CFst) -> RUSTFST_FFI_RESULT {
+pub unsafe fn fst_unset_input_symbols(fst: *mut CFst) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, fst);
         fst.fst_take_input_symbols();
@@ -287,8 +330,11 @@ pub fn fst_unset_input_symbols(fst: *mut CFst) -> RUSTFST_FFI_RESULT {
 }
 
 /// Removes the output symbol table from the Fst and retrieves it.
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn fst_unset_output_symbols(fst: *mut CFst) -> RUSTFST_FFI_RESULT {
+pub unsafe fn fst_unset_output_symbols(fst: *mut CFst) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, fst);
         fst.fst_take_output_symbols();
@@ -300,8 +346,11 @@ pub fn fst_unset_output_symbols(fst: *mut CFst) -> RUSTFST_FFI_RESULT {
 //- fn set_symts_from_fst<W2: Semiring, OF: Fst<W2>>(&mut self, other_fst: &OF);
 //- fn final_states_iter(&self) -> FinalStatesIterator<W, Self>;
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_weight_one(weight_one: *mut libc::c_float) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn fst_weight_one(weight_one: *mut libc::c_float) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let weight = TropicalWeight::one();
         unsafe { *weight_one = *weight.value() };
@@ -309,8 +358,11 @@ pub extern "C" fn fst_weight_one(weight_one: *mut libc::c_float) -> RUSTFST_FFI_
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_weight_zero(weight_zero: *mut libc::c_float) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn fst_weight_zero(weight_zero: *mut libc::c_float) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let weight = TropicalWeight::zero();
         unsafe { *weight_zero = *weight.value() };
@@ -319,8 +371,11 @@ pub extern "C" fn fst_weight_zero(weight_zero: *mut libc::c_float) -> RUSTFST_FF
 }
 
 /// drop impl
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn fst_destroy(fst_ptr: *mut CFst) -> RUSTFST_FFI_RESULT {
+pub unsafe fn fst_destroy(fst_ptr: *mut CFst) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         if fst_ptr.is_null() {
             return Ok(());

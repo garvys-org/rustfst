@@ -71,7 +71,7 @@ impl<W: Semiring, Q: Queue> RmEpsilonState<W, Q> {
                     while self.visited.len() <= (tr.nextstate as usize) {
                         self.visited.push(false);
                     }
-                    if !self.visited[(tr.nextstate as usize)] {
+                    if !self.visited[tr.nextstate as usize] {
                         eps_queue.push(tr.nextstate);
                     }
                 } else {

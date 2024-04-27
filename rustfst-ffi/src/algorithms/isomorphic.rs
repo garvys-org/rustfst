@@ -7,8 +7,11 @@ use rustfst::algorithms::isomorphic;
 use rustfst::fst_impls::VectorFst;
 use rustfst::semirings::TropicalWeight;
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn fst_isomorphic(
+pub unsafe fn fst_isomorphic(
     fst: *const CFst,
     other_fst: *const CFst,
     is_isomorphic: *mut libc::size_t,

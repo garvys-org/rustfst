@@ -9,8 +9,11 @@ use crate::fst::CFst;
 use crate::get;
 use crate::{wrap, RUSTFST_FFI_RESULT};
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_randgen(
+pub unsafe extern "C" fn fst_randgen(
     ptr: *const CFst,
     npath: libc::size_t,
     seed: libc::size_t,

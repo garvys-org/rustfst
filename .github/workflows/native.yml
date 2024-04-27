@@ -44,7 +44,7 @@ jobs:
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.61.0
+          toolchain: 1.70.0
           default: true
           components: rustfmt
       - name: Cargo fmt check
@@ -112,7 +112,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [1.54.0, stable]
+        rust: [1.70.0, stable]
         os: [ubuntu-latest, macos-13]
         cargo-args:
           - --all --benches --examples --bins --tests
@@ -147,7 +147,7 @@ jobs:
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.61.0
+          toolchain: 1.70.0
           default: true
           components: clippy
       - name: Cargo Clippy
@@ -164,7 +164,7 @@ jobs:
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.61.0
+          toolchain: 1.70.0
           default: true
       - name: Cargo doc
         run: cargo doc --all --no-deps

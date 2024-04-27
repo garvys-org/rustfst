@@ -3,30 +3,45 @@ use anyhow::anyhow;
 use rustfst::DrawingConfig;
 use std::ffi::CString;
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn const_fst_from_path(ptr: *mut *const CFst, path: *const libc::c_char) -> RUSTFST_FFI_RESULT {
+pub unsafe fn const_fst_from_path(
+    ptr: *mut *const CFst,
+    path: *const libc::c_char,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let path = unsafe { CStr::from_ptr(path) }.as_rust()?;
-        let fst = Box::new(ConstFst::<TropicalWeight>::read(&path)?);
+        let fst = Box::new(ConstFst::<TropicalWeight>::read(path)?);
         let raw_pointer = CFst(fst).into_raw_pointer();
         unsafe { *ptr = raw_pointer };
         Ok(())
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn const_fst_write_file(fst: *const CFst, path: *const libc::c_char) -> RUSTFST_FFI_RESULT {
+pub unsafe fn const_fst_write_file(
+    fst: *const CFst,
+    path: *const libc::c_char,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
         let path = unsafe { CStr::from_ptr(path) }.as_rust()?;
         let const_fst = as_fst!(ConstFst<TropicalWeight>, fst);
-        const_fst.write(&path)?;
+        const_fst.write(path)?;
         Ok(())
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn const_fst_equals(
+pub unsafe fn const_fst_equals(
     fst: *const CFst,
     other_fst: *const CFst,
     is_equal: *mut libc::size_t,
@@ -42,8 +57,11 @@ pub fn const_fst_equals(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn const_fst_copy(
+pub unsafe extern "C" fn const_fst_copy(
     fst_ptr: *const CFst,
     clone_ptr: *mut *const CFst,
 ) -> RUSTFST_FFI_RESULT {
@@ -56,9 +74,12 @@ pub extern "C" fn const_fst_copy(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[allow(clippy::too_many_arguments)]
 #[no_mangle]
-pub fn const_fst_draw(
+pub unsafe fn const_fst_draw(
     fst_ptr: *mut CFst,
     isyms: *const CSymbolTable,
     osyms: *const CSymbolTable,
@@ -112,8 +133,11 @@ pub fn const_fst_draw(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn const_fst_display(
+pub unsafe extern "C" fn const_fst_display(
     fst_ptr: *const CFst,
     s: *mut *const libc::c_char,
 ) -> RUSTFST_FFI_RESULT {

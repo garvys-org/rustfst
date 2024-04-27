@@ -72,7 +72,7 @@ impl Partition {
         if elt_prev_elt >= 0 {
             self.elements[elt_prev_elt as usize].next_element = elt_next_elt;
         } else {
-            old_class.no_head = elt_next_elt as i32;
+            old_class.no_head = elt_next_elt;
         }
 
         if elt_next_elt >= 0 {

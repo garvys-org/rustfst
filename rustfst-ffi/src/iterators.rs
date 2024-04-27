@@ -37,8 +37,11 @@ impl Iterator for TrsIterator {
 #[derive(RawPointerConverter)]
 pub struct CTrsIterator(pub(crate) TrsIterator);
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn trs_iterator_new(
+pub unsafe extern "C" fn trs_iterator_new(
     fst_ptr: *mut CFst,
     state_id: CStateId,
     mut iter_ptr: *mut *const CTrsIterator,
@@ -60,8 +63,11 @@ pub extern "C" fn trs_iterator_new(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn trs_iterator_next(
+pub unsafe extern "C" fn trs_iterator_next(
     iter_ptr: *mut CTrsIterator,
     mut tr_ptr: *mut *const CTr,
 ) -> RUSTFST_FFI_RESULT {
@@ -83,8 +89,11 @@ pub extern "C" fn trs_iterator_next(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn trs_iterator_done(
+pub unsafe extern "C" fn trs_iterator_done(
     iter_ptr: *const CTrsIterator,
     done: *mut libc::size_t,
 ) -> RUSTFST_FFI_RESULT {
@@ -96,8 +105,11 @@ pub extern "C" fn trs_iterator_done(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn trs_iterator_reset(iter_ptr: *mut CTrsIterator) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn trs_iterator_reset(iter_ptr: *mut CTrsIterator) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let trs_iter = get_mut!(CTrsIterator, iter_ptr);
         trs_iter.reset();
@@ -105,8 +117,11 @@ pub extern "C" fn trs_iterator_reset(iter_ptr: *mut CTrsIterator) -> RUSTFST_FFI
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn trs_iterator_destroy(iter_ptr: *mut CTrsIterator) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn trs_iterator_destroy(iter_ptr: *mut CTrsIterator) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         if iter_ptr.is_null() {
             return Ok(());
@@ -175,8 +190,11 @@ impl<'a> RawPointerConverter<CMutTrsIterator<'a>> for CMutTrsIterator<'a> {
     }
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn mut_trs_iterator_new(
+pub unsafe extern "C" fn mut_trs_iterator_new(
     fst_ptr: *mut CVecFst,
     state_id: CStateId,
     mut iter_ptr: *mut *const CMutTrsIterator,
@@ -198,8 +216,13 @@ pub extern "C" fn mut_trs_iterator_new(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn mut_trs_iterator_next(iter_ptr: *mut CMutTrsIterator) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn mut_trs_iterator_next(
+    iter_ptr: *mut CMutTrsIterator,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let trs_iter = get_mut!(CMutTrsIterator, iter_ptr);
         trs_iter.next();
@@ -207,8 +230,11 @@ pub extern "C" fn mut_trs_iterator_next(iter_ptr: *mut CMutTrsIterator) -> RUSTF
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn mut_trs_iterator_value(
+pub unsafe extern "C" fn mut_trs_iterator_value(
     iter_ptr: *mut CMutTrsIterator,
     mut tr_ptr: *mut *const CTr,
 ) -> RUSTFST_FFI_RESULT {
@@ -229,8 +255,11 @@ pub extern "C" fn mut_trs_iterator_value(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn mut_trs_iterator_set_value(
+pub unsafe extern "C" fn mut_trs_iterator_set_value(
     iter_ptr: *mut CMutTrsIterator,
     tr_ptr: *const CTr,
 ) -> RUSTFST_FFI_RESULT {
@@ -242,8 +271,11 @@ pub extern "C" fn mut_trs_iterator_set_value(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn mut_trs_iterator_done(
+pub unsafe extern "C" fn mut_trs_iterator_done(
     iter_ptr: *const CMutTrsIterator,
     done: *mut libc::size_t,
 ) -> RUSTFST_FFI_RESULT {
@@ -255,8 +287,13 @@ pub extern "C" fn mut_trs_iterator_done(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn mut_trs_iterator_reset(iter_ptr: *mut CMutTrsIterator) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn mut_trs_iterator_reset(
+    iter_ptr: *mut CMutTrsIterator,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let trs_iter = get_mut!(CMutTrsIterator, iter_ptr);
         trs_iter.reset();
@@ -264,8 +301,13 @@ pub extern "C" fn mut_trs_iterator_reset(iter_ptr: *mut CMutTrsIterator) -> RUST
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn mut_trs_iterator_destroy(iter_ptr: *mut CMutTrsIterator) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn mut_trs_iterator_destroy(
+    iter_ptr: *mut CMutTrsIterator,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         if iter_ptr.is_null() {
             return Ok(());
@@ -279,8 +321,11 @@ pub extern "C" fn mut_trs_iterator_destroy(iter_ptr: *mut CMutTrsIterator) -> RU
 #[derive(RawPointerConverter)]
 pub struct CStateIterator(pub(crate) Peekable<Range<CStateId>>);
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn state_iterator_new(
+pub unsafe extern "C" fn state_iterator_new(
     fst_ptr: *mut CVecFst,
     iter_ptr: *mut *const CStateIterator,
 ) -> RUSTFST_FFI_RESULT {
@@ -293,8 +338,11 @@ pub extern "C" fn state_iterator_new(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn state_iterator_next(
+pub unsafe extern "C" fn state_iterator_next(
     iter_ptr: *mut CStateIterator,
     mut state: *mut CStateId,
 ) -> RUSTFST_FFI_RESULT {
@@ -308,8 +356,11 @@ pub extern "C" fn state_iterator_next(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn state_iterator_done(
+pub unsafe extern "C" fn state_iterator_done(
     iter_ptr: *mut CStateIterator,
     done: *mut libc::size_t,
 ) -> RUSTFST_FFI_RESULT {
@@ -321,8 +372,13 @@ pub extern "C" fn state_iterator_done(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn state_iterator_destroy(iter_ptr: *mut CStateIterator) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn state_iterator_destroy(
+    iter_ptr: *mut CStateIterator,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         if iter_ptr.is_null() {
             return Ok(());
