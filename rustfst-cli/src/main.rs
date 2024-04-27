@@ -37,7 +37,7 @@ fn main() {
         .arg(
             Arg::with_name("det_type")
                 .long("det_type")
-                .possible_values(&["functional", "nonfunctional", "disambiguate"])
+                .possible_values(["functional", "nonfunctional", "disambiguate"])
                 .takes_value(true)
                 .default_value("functional"),
         );
@@ -66,7 +66,7 @@ fn main() {
                 .help("Comparison method.")
                 .long("sort_type")
                 .takes_value(true)
-                .possible_values(&["ilabel", "olabel"])
+                .possible_values(["ilabel", "olabel"])
                 .default_value("ilabel"),
         );
     app = app.subcommand(one_in_one_out_options(tr_sort_cmd));
@@ -103,7 +103,7 @@ fn main() {
         .arg(
             Arg::with_name("map_type")
                 .long("map_type")
-                .possible_values(&[
+                .possible_values([
                     "arc_sum",
                     "arc_unique",
                     "tr_sum",
@@ -167,7 +167,7 @@ fn main() {
         .arg(
             Arg::with_name("compose_type")
                 .long("compose_type")
-                .possible_values(&["default", "lookahead"])
+                .possible_values(["default", "lookahead"])
                 .takes_value(true)
                 .default_value("default"),
         );
@@ -190,75 +190,75 @@ fn main() {
 /// Handles the command-line input.
 fn handle(matches: clap::ArgMatches) -> Result<()> {
     match matches.subcommand() {
-        ("minimize", Some(m)) => MinimizeAlgorithm::new(
+        Some(("minimize", m)) => MinimizeAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.is_present("allow_nondet"),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
-        ("determinize", Some(m)) => DeterminizeAlgorithm::new(
+        Some(("determinize", m)) => DeterminizeAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("out.fst").unwrap(),
             m.value_of("det_type").unwrap(),
         )
         .run_cli_or_bench(m),
-        ("connect", Some(m)) => ConnectAlgorithm::new(
+        Some(("connect", m)) => ConnectAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
-        ("tr_sort", Some(m)) => TrsortAlgorithm::new(
+        Some(("tr_sort", m)) => TrsortAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("sort_type").unwrap(),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
-        ("optimize", Some(m)) => OptimizeAlgorithm::new(
+        Some(("optimize", m)) => OptimizeAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
-        ("project", Some(m)) => ProjectFstAlgorithm::new(
+        Some(("project", m)) => ProjectFstAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.is_present("project_output"),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
-        ("invert", Some(m)) => InvertAlgorithm::new(
+        Some(("invert", m)) => InvertAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
-        ("topsort", Some(m)) => TopsortAlgorithm::new(
+        Some(("topsort", m)) => TopsortAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
-        ("reverse", Some(m)) => ReverseAlgorithm::new(
+        Some(("reverse", m)) => ReverseAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
-        ("map", Some(m)) => MapAlgorithm::new(
+        Some(("map", m)) => MapAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("map_type").unwrap(),
             m.value_of("weight"),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
-        ("shortestpath", Some(m)) => ShortestPathAlgorithm::new(
+        Some(("shortestpath", m)) => ShortestPathAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.is_present("unique"),
             m.value_of("nshortest").unwrap().parse().unwrap(),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
-        ("rmfinalepsilon", Some(m)) => RmFinalEpsilonAlgorithm::new(
+        Some(("rmfinalepsilon", m)) => RmFinalEpsilonAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
-        ("push", Some(m)) => PushAlgorithm::new(
+        Some(("push", m)) => PushAlgorithm::new(
             m.value_of("in.fst").unwrap(),
             m.value_of("out.fst").unwrap(),
             m.is_present("to_final"),
@@ -268,18 +268,19 @@ fn handle(matches: clap::ArgMatches) -> Result<()> {
             m.is_present("remove_common_affix"),
         )
         .run_cli_or_bench(m),
-        ("compose", Some(m)) => ComposeAlgorithm::new(
+        Some(("compose", m)) => ComposeAlgorithm::new(
             m.value_of("in_1.fst").unwrap(),
             m.value_of("in_2.fst").unwrap(),
             m.value_of("out.fst").unwrap(),
             m.value_of("compose_type").unwrap(),
         )
         .run_cli_or_bench(m),
-        (s, _) => Err(format_err!("Unknown subcommand {}.", s)),
+        Some((s, _)) => Err(format_err!("Unknown subcommand {}.", s)),
+        None => Err(format_err!("Unknown None")),
     }
 }
 
-fn one_in_one_out_options<'a, 'b>(command: clap::App<'a, 'b>) -> clap::App<'a, 'b> {
+fn one_in_one_out_options(command: clap::App) -> clap::App {
     command
         .version("1.0")
         .author("Alexandre Caulier <alexandre.caulier@protonmail.com>")
@@ -313,7 +314,7 @@ fn one_in_one_out_options<'a, 'b>(command: clap::App<'a, 'b>) -> clap::App<'a, '
     )
 }
 
-fn two_in_one_out_options<'a, 'b>(command: clap::App<'a, 'b>) -> clap::App<'a, 'b> {
+fn two_in_one_out_options(command: clap::App) -> clap::App {
     command
         .version("1.0")
         .author("Alexandre Caulier <alexandre.caulier@protonmail.com>")
