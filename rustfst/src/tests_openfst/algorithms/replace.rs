@@ -1,3 +1,4 @@
+use std::marker::PhantomData;
 use crate::Label;
 use crate::StateId;
 use anyhow::Result;
@@ -11,7 +12,6 @@ use crate::tests_openfst::FstTestData;
 
 use crate::algorithms::fst_convert_from_ref;
 use crate::tests_openfst::utils::test_eq_fst;
-use bitflags::_core::marker::PhantomData;
 use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug)]
