@@ -18,8 +18,7 @@ use crate::semirings::{
 };
 use crate::Tr;
 use crate::{StateId, Trs, KSHORTESTDELTA};
-use bitflags::_core::fmt::Formatter;
-use std::fmt::Debug;
+use std::fmt::{Debug, Formatter};
 
 /// Configuration for N-shortest path computation
 #[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]

@@ -1,6 +1,7 @@
 use nom::combinator::verify;
 use nom::multi::count;
 use nom::IResult;
+use std::hash::BuildHasher;
 
 use crate::parsers::bin_fst::fst_header::OpenFstString;
 use crate::parsers::nom_utils::NomCustomError;
@@ -8,7 +9,6 @@ use crate::parsers::{parse_bin_i32, parse_bin_i64};
 use crate::parsers::{write_bin_i32, write_bin_i64};
 use crate::{Label, SymbolTable};
 use anyhow::Result;
-use bitflags::_core::hash::BuildHasher;
 use std::io::Write;
 
 static SYMBOL_TABLE_MAGIC_NUMBER: i32 = 2_125_658_996;

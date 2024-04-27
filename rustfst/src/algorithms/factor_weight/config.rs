@@ -4,6 +4,7 @@ use crate::{Label, KDELTA};
 
 bitflags! {
     /// What kind of weight should be factored ? Tr weight ? Final weights ?
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct FactorWeightType: u32 {
         /// Factor weights located on the Trs.
         const FACTOR_FINAL_WEIGHTS = 0b01;

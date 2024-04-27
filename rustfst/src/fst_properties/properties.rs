@@ -16,6 +16,7 @@ bitflags! {
     /// property has unknown value. Both should never be simultaneously set. The
     /// individual positive and negative bit pairs should be adjacent with the
     /// positive bit at an odd and lower position.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct FstProperties: u64 {
         /// ilabel == olabel for each transition.
         const ACCEPTOR = 0x0000_0000_0001_0000;

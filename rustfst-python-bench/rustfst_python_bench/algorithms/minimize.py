@@ -17,9 +17,15 @@ class MinimizeAlgorithm:
         else:
             return "bench_minimize", ["0"]
 
-    def get_cli_args(self):
+    def get_rustfst_cli_args(self):
         if self.allow_nondet:
             return "--allow_nondet=true"
+        else:
+            return ""
+
+    def get_openfst_cli_args(self):
+        if self.allow_nondet:
+            return "--allow-nondet"
         else:
             return ""
 

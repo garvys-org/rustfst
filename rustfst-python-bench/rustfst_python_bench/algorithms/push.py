@@ -21,7 +21,7 @@ class PushAlgorithm:
     def get_openfst_bench_cli(self):
         raise NotImplementedError
 
-    def get_cli_args(self):
+    def get_rustfst_cli_args(self):
         r = []
         if self.push_weights:
             r.append("--push_weights")
@@ -34,6 +34,9 @@ class PushAlgorithm:
         if self.reweight_to_final:
             r.append("--to_final")
         return " ".join(r)
+
+    def get_openfst_cli_args(self):
+        return self.get_rustfst_cli_args()
 
     @classmethod
     def get_parameters(cls):
