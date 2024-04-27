@@ -18,6 +18,7 @@ use std::sync::Arc;
 pub(crate) static FST_MAGIC_NUMBER: i32 = 2_125_659_606;
 
 bitflags! {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct FstFlags: u32 {
         const HAS_ISYMBOLS = 0b1;
         const HAS_OSYMBOLS = 0b1 << 1;

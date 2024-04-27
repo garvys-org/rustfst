@@ -22,6 +22,7 @@ use crate::{StateId, KDELTA};
 
 bitflags! {
     /// Configuration to control the behaviour of the pushing algorithm.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct PushType: u32 {
         const PUSH_WEIGHTS = 0b01;
         const PUSH_LABELS = 0b10;

@@ -720,7 +720,7 @@ dependencies = [
  "anyhow",
  "bimap",
  "binary-heap-plus",
- "bitflags 1.3.2",
+ "bitflags 2.5.0",
  "counter",
  "doc-comment",
  "generic-array",

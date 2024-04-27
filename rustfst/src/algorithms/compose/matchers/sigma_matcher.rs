@@ -1,10 +1,10 @@
+use std::borrow::Borrow;
 use std::fmt::Debug;
 use std::iter::Peekable;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
 use anyhow::Result;
-use bitflags::_core::borrow::Borrow;
 
 use crate::algorithms::compose::matchers::{
     IterItemMatcher, MatchType, Matcher, MatcherFlags, MatcherRewriteMode, REQUIRE_PRIORITY,

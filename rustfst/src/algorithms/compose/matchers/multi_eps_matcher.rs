@@ -16,6 +16,7 @@ use crate::semirings::Semiring;
 use crate::{Label, StateId, EPS_LABEL, NO_LABEL};
 
 bitflags! {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct MultiEpsMatcherFlags: u32 {
         const MULTI_EPS_LOOP =  1u32;
         const MULTI_EPS_LIST =  2u32;

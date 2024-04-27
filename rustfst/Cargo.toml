@@ -24,7 +24,7 @@ state-label-u32 = []
 anyhow = '1'
 bimap = '0.6'
 binary-heap-plus = '0.1'
-bitflags = '1'
+bitflags = '2.5'
 generic-array = '0.12'
 getrandom = { version = "0.2", features = ["js"] }
 itertools = '0.12'

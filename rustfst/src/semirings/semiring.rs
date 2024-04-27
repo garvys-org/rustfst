@@ -23,7 +23,7 @@ bitflags! {
         const IDEMPOTENT =     0b01000;
         /// For all a, b: Plus(a, b) = a or Plus(a, b) = b.
         const PATH =           0b10000;
-        const SEMIRING = Self::LEFT_SEMIRING.bits | Self::RIGHT_SEMIRING.bits;
+        const SEMIRING = Self::LEFT_SEMIRING.bits() | Self::RIGHT_SEMIRING.bits();
     }
 }
 

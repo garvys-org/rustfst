@@ -20,6 +20,7 @@ mod sigma_matcher;
 mod sorted_matcher;
 
 bitflags! {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct MatcherFlags: u32 {
         const REQUIRE_MATCH =  1u32;
         const INPUT_LOOKAHEAD_MATCHER =  1u32 << 4;
@@ -30,25 +31,25 @@ bitflags! {
         const LOOKAHEAD_EPSILONS =  1u32 << 9;
         const LOOKAHEAD_NON_EPSILON_PREFIX =  1u32 << 10;
 
-        const LOOKAHEAD_FLAGS = Self::INPUT_LOOKAHEAD_MATCHER.bits |
-            Self::OUTPUT_LOOKAHEAD_MATCHER.bits |
-            Self::LOOKAHEAD_WEIGHT.bits |
-            Self::LOOKAHEAD_PREFIX.bits |
-            Self::LOOKAHEAD_NON_EPSILONS.bits |
-            Self::LOOKAHEAD_EPSILONS.bits |
-            Self::LOOKAHEAD_NON_EPSILON_PREFIX.bits;
+        const LOOKAHEAD_FLAGS = Self::INPUT_LOOKAHEAD_MATCHER.bits() |
+            Self::OUTPUT_LOOKAHEAD_MATCHER.bits() |
+            Self::LOOKAHEAD_WEIGHT.bits() |
+            Self::LOOKAHEAD_PREFIX.bits() |
+            Self::LOOKAHEAD_NON_EPSILONS.bits() |
+            Self::LOOKAHEAD_EPSILONS.bits() |
+            Self::LOOKAHEAD_NON_EPSILON_PREFIX.bits();
 
-        const ILABEL_LOOKAHEAD_FLAGS = Self::INPUT_LOOKAHEAD_MATCHER.bits |
-            Self::LOOKAHEAD_WEIGHT.bits |
-            Self::LOOKAHEAD_PREFIX.bits |
-            Self::LOOKAHEAD_EPSILONS.bits |
-            Self::LOOKAHEAD_NON_EPSILON_PREFIX.bits;
+        const ILABEL_LOOKAHEAD_FLAGS = Self::INPUT_LOOKAHEAD_MATCHER.bits() |
+            Self::LOOKAHEAD_WEIGHT.bits() |
+            Self::LOOKAHEAD_PREFIX.bits() |
+            Self::LOOKAHEAD_EPSILONS.bits() |
+            Self::LOOKAHEAD_NON_EPSILON_PREFIX.bits();
 
-        const OLABEL_LOOKAHEAD_FLAGS = Self::OUTPUT_LOOKAHEAD_MATCHER.bits |
-            Self::LOOKAHEAD_WEIGHT.bits |
-            Self::LOOKAHEAD_PREFIX.bits |
-            Self::LOOKAHEAD_EPSILONS.bits |
-            Self::LOOKAHEAD_NON_EPSILON_PREFIX.bits;
+        const OLABEL_LOOKAHEAD_FLAGS = Self::OUTPUT_LOOKAHEAD_MATCHER.bits() |
+            Self::LOOKAHEAD_WEIGHT.bits() |
+            Self::LOOKAHEAD_PREFIX.bits() |
+            Self::LOOKAHEAD_EPSILONS.bits() |
+            Self::LOOKAHEAD_NON_EPSILON_PREFIX.bits();
     }
 }
 
