@@ -10,6 +10,13 @@ on:
   schedule:
     - cron:  '0 9 * * *'
 
+# This codes allows to stop the CI when a new commit has been pushed on the same PR or branch.
+# It doesn't apply to branches.
+# Ref https://docs.github.com/en/enterprise-cloud@latest/actions/using-jobs/using-concurrency#example-using-a-fallback-value
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 env:
   PYTHON_VERSION: 3.9
   GIT_COMMITTER_NAME: garvys-ci-bot
