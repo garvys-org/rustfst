@@ -22,7 +22,7 @@ state-label-u32 = []
 
 [dependencies]
 anyhow = '1'
-bimap = '0.3'
+bimap = '0.6'
 binary-heap-plus = '0.1'
 bitflags = '1'
 generic-array = '0.12'
