@@ -7,7 +7,7 @@ use crate::semirings::{
 use crate::{Label, Tr, EPS_LABEL};
 use anyhow::Result;
 
-/// Mapper from GallicWeight<W> to W.
+/// Mapper from `GallicWeight<W>` to `W`.
 pub struct FromGallicConverter {
     pub superfinal_label: Label,
 }
