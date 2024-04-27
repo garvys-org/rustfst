@@ -19,12 +19,15 @@ class ShortestPathAlgorithm:
         unique_s = "1" if self.unique else "0"
         return "bench_shortestpath", [str(self.nshortest), unique_s]
 
-    def get_cli_args(self):
+    def get_rustfst_cli_args(self):
         r = []
         if self.unique:
             r.append("--unique")
         r.append(f"--nshortest={self.nshortest}")
         return " ".join(r)
+
+    def get_openfst_cli_args(self):
+        return self.get_rustfst_cli_args()
 
     @classmethod
     def get_parameters(cls):

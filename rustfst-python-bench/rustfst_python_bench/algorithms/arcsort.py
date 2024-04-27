@@ -20,11 +20,14 @@ class ArcSortAlgorithm:
         else:
             return "bench_arcsort", ["0"]
 
-    def get_cli_args(self):
+    def get_rustfst_cli_args(self):
         if self.sort_olabel:
             return "--sort_type=olabel"
         else:
             return "--sort_type=ilabel"
+
+    def get_openfst_cli_args(self):
+        return self.get_rustfst_cli_args()
 
     @classmethod
     def get_parameters(cls):

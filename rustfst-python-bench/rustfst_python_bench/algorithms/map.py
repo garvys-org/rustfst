@@ -32,8 +32,11 @@ class MapAlgorithm:
         else:
             raise RuntimeError(f"Unknown map_type={self.map_type}")
 
-    def get_cli_args(self):
+    def get_rustfst_cli_args(self):
         return f"--map_type={self.map_type}"
+
+    def get_openfst_cli_args(self):
+        return self.get_rustfst_cli_args()
 
     @classmethod
     def get_parameters(cls):

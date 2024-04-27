@@ -57,7 +57,7 @@ def bench_algo(algo_name, path_in_fst, results_dir, path_report_md, warmup, runs
 
     rustfst_cli = get_rusftfst_cli_dir(compilation_mode)
 
-    cmd_rustfst = f"{rustfst_cli} {algo.rustfst_subcommand()} {algo.get_cli_args()} {path_in_fst} {path_out_rustfst} " \
+    cmd_rustfst = f"{rustfst_cli} {algo.rustfst_subcommand()} {algo.get_rustfst_cli_args()} {path_in_fst} {path_out_rustfst} " \
                   f"--bench --export-markdown {path_report_md} --n_iters {runs} --n_warm_ups {warmup}"
 
     subprocess.check_call([cmd_rustfst], shell=True)

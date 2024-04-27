@@ -47,9 +47,9 @@ fn main() {
     let minimize_cmd = SubCommand::with_name("minimize")
         .about("Minimization algorithm.")
         .arg(
-            Arg::with_name("allow_nondet")
+            Arg::with_name("allow-nondet")
                 .help("Minimize non-deterministic FSTs ?")
-                .long("allow_nondet"),
+                .long("allow-nondet"),
         );
     app = app.subcommand(one_in_one_out_options(minimize_cmd));
 
@@ -192,7 +192,7 @@ fn handle(matches: clap::ArgMatches) -> Result<()> {
     match matches.subcommand() {
         Some(("minimize", m)) => MinimizeAlgorithm::new(
             m.value_of("in.fst").unwrap(),
-            m.is_present("allow_nondet"),
+            m.is_present("allow-nondet"),
             m.value_of("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),

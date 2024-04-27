@@ -19,9 +19,15 @@ class ProjectAlgorithm:
         else:
             return "bench_project", ["0"]
 
-    def get_cli_args(self):
+    def get_rust_cli_args(self):
         if self.project_output:
             return "--project-output"
+        else:
+            return ""
+
+    def get_openfst_cli_args(self):
+        if self.project_output:
+            return "--project_output=true"
         else:
             return ""
 

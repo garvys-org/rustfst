@@ -67,7 +67,7 @@ def bench(path_in_fst_1, path_in_fst_2, path_report_md, warmup, runs, compose_ty
 
         path_out_rustfst = os.path.join(tmpdirname, f'{algo_name}_rustfst.fst')
 
-        cmd_rustfst = f"{RUSTFST_CLI} {algo.rustfst_subcommand()} {algo.get_cli_args()} {path_in_fst_1} {path_in_fst_2} {path_out_rustfst} " \
+        cmd_rustfst = f"{RUSTFST_CLI} {algo.rustfst_subcommand()} {algo.get_rustfst_cli_args()} {path_in_fst_1} {path_in_fst_2} {path_out_rustfst} " \
                   f"--bench --export-markdown {path_report_md} --n_iters {runs} --n_warm_ups {warmup}"
 
         subprocess.check_call([cmd_rustfst], shell=True)
