@@ -7,8 +7,11 @@ use rustfst::algorithms::concat::concat;
 use rustfst::fst_impls::VectorFst;
 use rustfst::semirings::TropicalWeight;
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_concat(fst_1: *mut CFst, fst_2: *const CFst) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn fst_concat(fst_1: *mut CFst, fst_2: *const CFst) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst_1 = get_mut!(CFst, fst_1);
         let vec_fst1: &mut VectorFst<TropicalWeight> = fst_1

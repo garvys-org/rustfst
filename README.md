@@ -2,8 +2,6 @@
 
 [![License: MIT/Apache-2.0](https://img.shields.io/crates/l/rustfst.svg)](#license)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
-[![macOS](https://svgshare.com/i/ZjP.svg)](https://svgshare.com/i/ZjP.svg)
-[![Linux](https://svgshare.com/i/Zhy.svg)](https://svgshare.com/i/Zhy.svg)
 [![Github tag](https://badgen.net/github/tag/garvys/rustfst)](https://github.com/garvys/rustfst/tags/)
 
 

@@ -7,8 +7,11 @@ use rustfst::prelude::{Label, Semiring, TropicalWeight, VectorFst};
 use rustfst::utils::{acceptor, transducer};
 use std::ffi::CStr;
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn utils_string_to_acceptor(
+pub unsafe extern "C" fn utils_string_to_acceptor(
     astring: *const libc::c_char,
     symbol_table: *mut CSymbolTable,
     weight: libc::c_float,
@@ -25,14 +28,17 @@ pub extern "C" fn utils_string_to_acceptor(
             })
             .collect::<Result<Vec<Label>>>()?;
         let acceptor_fst: VectorFst<TropicalWeight> =
-            acceptor(labels.as_slice(), TropicalWeight::new(weight as f32));
+            acceptor(labels.as_slice(), TropicalWeight::new(weight));
         unsafe { *fst_ptr = CFst(Box::new(acceptor_fst)).into_raw_pointer() }
         Ok(())
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn utils_string_to_transducer(
+pub unsafe extern "C" fn utils_string_to_transducer(
     istring: *const libc::c_char,
     ostring: *const libc::c_char,
     isymt: *mut CSymbolTable,
@@ -64,7 +70,7 @@ pub extern "C" fn utils_string_to_transducer(
         let transducer_fst: VectorFst<TropicalWeight> = transducer(
             ilabels.as_slice(),
             olabels.as_slice(),
-            TropicalWeight::new(weight as f32),
+            TropicalWeight::new(weight),
         );
         unsafe { *fst_ptr = CFst(Box::new(transducer_fst)).into_raw_pointer() }
         Ok(())

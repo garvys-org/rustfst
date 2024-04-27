@@ -1,9 +1,16 @@
-use std::borrow::Borrow;
-use std::i32;
+use nom::character::complete::i32;
+use std::{borrow::Borrow, io::Write};
 
 use anyhow::Result;
+use nom::IResult;
 
-use crate::semirings::{CompleteSemiring, ReverseBack, Semiring, SemiringProperties, StarSemiring};
+use crate::{
+    parsers::{parse_bin_i32, write_bin_i32},
+    semirings::{CompleteSemiring, ReverseBack, Semiring, SemiringProperties, StarSemiring},
+    NomCustomError,
+};
+
+use super::SerializableSemiring;
 
 /// Probability semiring: (x, +, 0.0, 1.0).
 #[derive(Clone, Debug, PartialEq, PartialOrd, Default, Hash, Eq, Copy)]
@@ -93,3 +100,29 @@ impl From<i32> for IntegerWeight {
         Self::new(i)
     }
 }
+
+impl SerializableSemiring for IntegerWeight {
+    fn weight_type() -> String {
+        "integer".to_string()
+    }
+
+    fn parse_binary(i: &[u8]) -> IResult<&[u8], Self, NomCustomError<&[u8]>> {
+        let (i, weight) = parse_bin_i32(i)?;
+        Ok((i, Self::new(weight)))
+    }
+
+    fn write_binary<F: Write>(&self, file: &mut F) -> Result<()> {
+        write_bin_i32(file, *self.value())
+    }
+
+    fn parse_text(i: &str) -> IResult<&str, Self> {
+        let (i, f) = i32(i)?;
+        Ok((i, Self::new(f)))
+    }
+}
+
+test_semiring_serializable!(
+    tests_integer_weight_serializable,
+    IntegerWeight,
+    IntegerWeight::one() IntegerWeight::zero() IntegerWeight::new(3) IntegerWeight::new(5) IntegerWeight::new(10) IntegerWeight::new(100)
+);

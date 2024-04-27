@@ -54,8 +54,11 @@ pub fn wrap<F: FnOnce() -> Result<()>>(func: F) -> RUSTFST_FFI_RESULT {
     }
 }
 
+/// # Safety
+///
+/// Should never happen
 #[no_mangle]
-pub extern "C" fn rustfst_ffi_get_last_error(
+pub unsafe extern "C" fn rustfst_ffi_get_last_error(
     error: *mut *mut ::libc::c_char,
 ) -> RUSTFST_FFI_RESULT {
     wrap(move || {

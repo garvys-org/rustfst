@@ -3,8 +3,11 @@ use anyhow::anyhow;
 use rustfst::algorithms::concat::ConcatFst;
 use rustfst::prelude::{TropicalWeight, VectorFst};
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn concat_fst_new(
+pub unsafe extern "C" fn concat_fst_new(
     ptr: *mut *const CFst,
     fst1: *const CFst,
     fst2: *const CFst,
@@ -29,8 +32,11 @@ pub extern "C" fn concat_fst_new(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn concat_fst_compute(fst: *mut *const CFst) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn concat_fst_compute(fst: *mut *const CFst) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let c_fst = unsafe { *fst };
         let c_fst = get!(CFst, c_fst);

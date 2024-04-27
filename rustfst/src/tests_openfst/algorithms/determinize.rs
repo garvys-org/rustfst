@@ -1,8 +1,8 @@
 use std::fmt::Display;
+use std::marker::PhantomData;
 use std::path::Path;
 
 use anyhow::{format_err, Result};
-use bitflags::_core::marker::PhantomData;
 use serde::{Deserialize, Serialize};
 
 use crate::algorithms::determinize::{determinize_with_config, DeterminizeConfig, DeterminizeType};

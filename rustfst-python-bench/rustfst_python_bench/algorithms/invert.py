@@ -17,8 +17,11 @@ class InvertAlgorithm:
     def get_openfst_bench_cli(self):
         return "bench_invert", []
 
-    def get_cli_args(self):
+    def get_rustfst_cli_args(self):
         return ""
+
+    def get_openfst_cli_args(self):
+        return self.get_rustfst_cli_args()
 
     @classmethod
     def get_parameters(cls):

@@ -10,8 +10,11 @@ use rustfst::fst_impls::VectorFst;
 use rustfst::semirings::LogWeight;
 use rustfst::semirings::TropicalWeight;
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_optimize(ptr: *mut CFst) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn fst_optimize(ptr: *mut CFst) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, ptr);
         let vec_fst: &mut VectorFst<TropicalWeight> = fst
@@ -22,8 +25,11 @@ pub extern "C" fn fst_optimize(ptr: *mut CFst) -> RUSTFST_FFI_RESULT {
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_optimize_in_log(ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn fst_optimize_in_log(ptr: *mut *const CFst) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst_ptr = unsafe { *ptr };
 

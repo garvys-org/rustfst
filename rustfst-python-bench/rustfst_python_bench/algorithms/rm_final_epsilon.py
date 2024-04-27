@@ -17,8 +17,11 @@ class RmFinalEpsilonAlgorithm:
     def get_openfst_bench_cli(self):
         return "bench_rm_final_epsilon", []
 
-    def get_cli_args(self):
+    def get_rustfst_cli_args(self):
         return ""
+
+    def get_openfst_cli_args(self):
+        return self.get_rustfst_cli_args()
 
     @classmethod
     def get_parameters(cls):

@@ -18,8 +18,7 @@ use crate::semirings::{
 };
 use crate::Tr;
 use crate::{StateId, Trs, KSHORTESTDELTA};
-use bitflags::_core::fmt::Formatter;
-use std::fmt::Debug;
+use std::fmt::{Debug, Formatter};
 
 /// Configuration for N-shortest path computation
 #[derive(Debug, Clone, Copy, PartialOrd, PartialEq)]
@@ -465,6 +464,7 @@ where
         } else {
             W::one()
         };
+        #[allow(clippy::unnecessary_literal_unwrap)]
         if natural_less(&limit, &d.times(&p.1)?)?
             || (state_threshold.is_some() && ofst.num_states() >= state_threshold.unwrap() as usize)
         {

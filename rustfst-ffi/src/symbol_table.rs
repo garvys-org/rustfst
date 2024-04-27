@@ -9,8 +9,11 @@ use rustfst::SymbolTable;
 #[derive(RawPointerConverter)]
 pub struct CSymbolTable(pub(crate) Arc<SymbolTable>);
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn symt_new(new_struct: *mut *const CSymbolTable) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn symt_new(new_struct: *mut *const CSymbolTable) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let table = Arc::new(SymbolTable::new());
         let raw_ptr = CSymbolTable(table).into_raw_pointer();
@@ -19,8 +22,11 @@ pub extern "C" fn symt_new(new_struct: *mut *const CSymbolTable) -> RUSTFST_FFI_
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn symt_add_symbol(
+pub unsafe extern "C" fn symt_add_symbol(
     symt: *mut CSymbolTable,
     symbol: *const libc::c_char,
     integer_key: *mut libc::size_t,
@@ -36,8 +42,11 @@ pub extern "C" fn symt_add_symbol(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn symt_add_table(
+pub unsafe extern "C" fn symt_add_table(
     symt: *mut CSymbolTable,
     other_symt: *const CSymbolTable,
 ) -> RUSTFST_FFI_RESULT {
@@ -51,8 +60,11 @@ pub extern "C" fn symt_add_table(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn symt_find_index(
+pub unsafe extern "C" fn symt_find_index(
     symt: *const CSymbolTable,
     key: CStateId,
     symbol: *mut *const libc::c_char,
@@ -70,8 +82,11 @@ pub extern "C" fn symt_find_index(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn symt_find_symbol(
+pub unsafe extern "C" fn symt_find_symbol(
     symt: *const CSymbolTable,
     symbol: *const libc::c_char,
     key: *mut libc::size_t,
@@ -87,8 +102,11 @@ pub extern "C" fn symt_find_symbol(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn symt_from_path(
+pub unsafe extern "C" fn symt_from_path(
     table_ptr: *mut *const CSymbolTable,
     path_ptr: *const libc::c_char,
     binary: *const libc::size_t,
@@ -107,8 +125,11 @@ pub extern "C" fn symt_from_path(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn symt_write_file(
+pub unsafe extern "C" fn symt_write_file(
     symt: *const CSymbolTable,
     path_ptr: *const libc::c_char,
     binary: *const libc::size_t,
@@ -127,8 +148,11 @@ pub extern "C" fn symt_write_file(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn symt_member_index(
+pub unsafe extern "C" fn symt_member_index(
     symt: *const CSymbolTable,
     key: CStateId,
     is_present: *mut libc::size_t,
@@ -141,8 +165,11 @@ pub extern "C" fn symt_member_index(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn symt_member_symbol(
+pub unsafe extern "C" fn symt_member_symbol(
     symt: *const CSymbolTable,
     symbol: *const libc::c_char,
     is_present: *mut libc::size_t,
@@ -150,14 +177,17 @@ pub extern "C" fn symt_member_symbol(
     wrap(|| {
         let symt = get!(CSymbolTable, symt);
         let symbol = unsafe { CStr::from_ptr(symbol) }.as_rust()?;
-        let res = symt.contains_symbol(&symbol);
+        let res = symt.contains_symbol(symbol);
         unsafe { *is_present = res as libc::size_t };
         Ok(())
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn symt_num_symbols(
+pub unsafe extern "C" fn symt_num_symbols(
     symt: *const CSymbolTable,
     num_symbols: *mut libc::size_t,
 ) -> RUSTFST_FFI_RESULT {
@@ -168,8 +198,11 @@ pub extern "C" fn symt_num_symbols(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn symt_copy(
+pub unsafe extern "C" fn symt_copy(
     symt: *const CSymbolTable,
     cloned_symt: *mut *const CSymbolTable,
 ) -> RUSTFST_FFI_RESULT {
@@ -182,8 +215,11 @@ pub extern "C" fn symt_copy(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub fn symt_equals(
+pub unsafe fn symt_equals(
     symt: *const CSymbolTable,
     other_symt: *const CSymbolTable,
     is_equal: *mut libc::size_t,
@@ -198,8 +234,11 @@ pub fn symt_equals(
 }
 
 /// drop impl
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn symt_destroy(symt_ptr: *mut CSymbolTable) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn symt_destroy(symt_ptr: *mut CSymbolTable) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         if symt_ptr.is_null() {
             return Ok(());

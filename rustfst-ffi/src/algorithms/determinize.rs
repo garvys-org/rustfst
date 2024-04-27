@@ -49,24 +49,30 @@ pub struct CDeterminizeConfig {
     det_type: CDeterminizeType,
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_determinize_config_new(
+pub unsafe extern "C" fn fst_determinize_config_new(
     delta: libc::c_float,
     det_type: libc::size_t,
     config: *mut *const CDeterminizeConfig,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let determinize_config = CDeterminizeConfig {
-            delta: delta as f32,
-            det_type: CDeterminizeType(det_type as usize),
+            delta,
+            det_type: CDeterminizeType(det_type),
         };
         unsafe { *config = determinize_config.into_raw_pointer() };
         Ok(())
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_determinize(
+pub unsafe extern "C" fn fst_determinize(
     ptr: *const CFst,
     det_fst: *mut *const CFst,
 ) -> RUSTFST_FFI_RESULT {
@@ -82,8 +88,11 @@ pub extern "C" fn fst_determinize(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_determinize_with_config(
+pub unsafe extern "C" fn fst_determinize_with_config(
     ptr: *const CFst,
     config: *const CDeterminizeConfig,
     det_fst: *mut *const CFst,

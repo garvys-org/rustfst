@@ -136,7 +136,7 @@ where
     }
 }
 
-impl<'a, W, F, B> RmEpsilonFst<W, F, B>
+impl<W, F, B> RmEpsilonFst<W, F, B>
 where
     W: Semiring,
     F: MutableFst<W>,

@@ -323,7 +323,7 @@ impl<W: Semiring, F: Fst<W>, B: Borrow<F>> ReplaceFstOp<W, F, B> {
     fn compute_tr(&self, tuple: &ReplaceStateTuple, tr: &Tr<W>) -> Option<Tr<W>> {
         if tr.olabel == EPS_LABEL
             || tr.olabel < *self.nonterminal_set.iter().next().unwrap()
-            || tr.olabel > *self.nonterminal_set.iter().rev().next().unwrap()
+            || tr.olabel > *self.nonterminal_set.iter().next_back().unwrap()
         {
             let state_tuple =
                 ReplaceStateTuple::new(tuple.prefix_id, tuple.fst_id, Some(tr.nextstate));

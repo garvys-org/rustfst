@@ -185,8 +185,11 @@ impl<'a> From<&'a [u32]> for CIntArray {
     }
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_matcher_config_new(
+pub unsafe extern "C" fn fst_matcher_config_new(
     sigma_label: libc::size_t,
     rewrite_mode: libc::size_t,
     sigma_allowed_matches: CIntArray,
@@ -209,7 +212,7 @@ pub extern "C" fn fst_matcher_config_new(
         let matcher_config = CMatcherConfig {
             sigma_matcher_config: Some(CSigmaMatcherConfig {
                 sigma_label: sigma_label as CLabel,
-                rewrite_mode: CMatcherRewriteMode(rewrite_mode as usize),
+                rewrite_mode: CMatcherRewriteMode(rewrite_mode),
                 sigma_allowed_matches,
             }),
         };
@@ -219,8 +222,11 @@ pub extern "C" fn fst_matcher_config_new(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_compose_config_new(
+pub unsafe extern "C" fn fst_compose_config_new(
     compose_filter: libc::size_t,
     connect: bool,
     matcher1_config: *const CMatcherConfig,
@@ -253,7 +259,7 @@ pub extern "C" fn fst_compose_config_new(
         let compose_config = CComposeConfig {
             matcher1_config,
             matcher2_config,
-            compose_filter: CComposeFilterEnum(compose_filter as usize),
+            compose_filter: CComposeFilterEnum(compose_filter),
             connect,
         };
         unsafe { *config = compose_config.into_raw_pointer() };
@@ -261,8 +267,13 @@ pub extern "C" fn fst_compose_config_new(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_matcher_config_destroy(ptr: *mut CMatcherConfig) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn fst_matcher_config_destroy(
+    ptr: *mut CMatcherConfig,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         if ptr.is_null() {
             return Ok(());
@@ -273,8 +284,13 @@ pub extern "C" fn fst_matcher_config_destroy(ptr: *mut CMatcherConfig) -> RUSTFS
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_compose_config_destroy(ptr: *mut CComposeConfig) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn fst_compose_config_destroy(
+    ptr: *mut CComposeConfig,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         if ptr.is_null() {
             return Ok(());
@@ -285,8 +301,11 @@ pub extern "C" fn fst_compose_config_destroy(ptr: *mut CComposeConfig) -> RUSTFS
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_compose(
+pub unsafe extern "C" fn fst_compose(
     fst_1: *const CFst,
     fst_2: *const CFst,
     composition_ptr: *mut *const CFst,
@@ -314,8 +333,11 @@ pub extern "C" fn fst_compose(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_compose_with_config(
+pub unsafe extern "C" fn fst_compose_with_config(
     fst_1: *const CFst,
     fst_2: *const CFst,
     config: *const CComposeConfig,

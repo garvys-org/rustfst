@@ -7,8 +7,11 @@ use rustfst::algorithms::tr_unique;
 use rustfst::fst_impls::VectorFst;
 use rustfst::semirings::TropicalWeight;
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn fst_tr_unique(ptr: *mut CFst) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn fst_tr_unique(ptr: *mut CFst) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, ptr);
         let vec_fst: &mut VectorFst<TropicalWeight> = fst

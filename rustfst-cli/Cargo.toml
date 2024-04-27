@@ -1,14 +1,14 @@
 [package]
 name = "rustfst-cli"
-version = "0.13.5"
+version = "1.0.0"
 authors = ["Garvys <alexandre.caulier@orange.fr>"]
 edition = "2018"
 
 [dependencies]
 anyhow = '1.0'
-clap = "2.33"
-colored = "1.8"
-env_logger = "0.6"
+clap = "4.5"
+colored = "2.1"
+env_logger = "0.10"
 exitcode = "1.1"
 log = "0.4"
 rustfst = {path = "../rustfst"}

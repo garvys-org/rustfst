@@ -45,8 +45,11 @@ impl<'a> RawPointerConverter<CStringPathsIterator<'a>> for CStringPathsIterator<
     }
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn string_paths_iterator_new(
+pub unsafe extern "C" fn string_paths_iterator_new(
     fst: *const CFst,
     res_iterator: *mut *const CStringPathsIterator,
 ) -> RUSTFST_FFI_RESULT {
@@ -60,8 +63,11 @@ pub extern "C" fn string_paths_iterator_new(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn string_paths_iterator_next(
+pub unsafe extern "C" fn string_paths_iterator_next(
     iter_ptr: *mut CStringPathsIterator,
     string_path_ptr: *mut *const CStringPath,
 ) -> RUSTFST_FFI_RESULT {
@@ -82,8 +88,11 @@ pub extern "C" fn string_paths_iterator_next(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn string_paths_iterator_done(
+pub unsafe extern "C" fn string_paths_iterator_done(
     iter_ptr: *mut CStringPathsIterator,
     done: *mut libc::size_t,
 ) -> RUSTFST_FFI_RESULT {
@@ -95,8 +104,11 @@ pub extern "C" fn string_paths_iterator_done(
     })
 }
 
+/// # Safety
+///
+/// The pointers should be valid.
 #[no_mangle]
-pub extern "C" fn string_paths_iterator_destroy(
+pub unsafe extern "C" fn string_paths_iterator_destroy(
     iter_ptr: *mut CStringPathsIterator,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {

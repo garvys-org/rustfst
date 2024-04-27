@@ -257,8 +257,8 @@ fn merge_states<W: Semiring, F: MutableFst<W>>(
     fst.set_start(
         state_map[partition
             .borrow()
-            .get_class_id(fst.start().unwrap() as usize) as usize]
-            .unwrap() as StateId,
+            .get_class_id(fst.start().unwrap() as usize)]
+        .unwrap() as StateId,
     )?;
 
     connect(fst)?;

@@ -48,6 +48,7 @@ def test_connect():
     tr_3 = Tr(7, 8, 5.0, s1)
     expected_fst.add_tr(s3, tr_3)
 
-    fst1.connect()
+    res = fst1.connect()
 
     assert expected_fst == fst1
+    assert expected_fst == res

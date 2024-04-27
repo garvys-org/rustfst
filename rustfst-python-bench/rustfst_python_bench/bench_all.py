@@ -60,8 +60,8 @@ def bench_algo(algo_name, path_in_fst, results_dir, path_report_md, warmup, runs
     path_out_openfst = os.path.join(results_dir, f'{algo_name}_openfst.fst')
     path_out_rustfst = os.path.join(results_dir, f'{algo_name}_rustfst.fst')
 
-    cmd_openfst = f"{openfst_cli} {algo.get_cli_args()} {path_in_fst} {path_out_openfst}"
-    cmd_rustfst = f"{rustfst_cli} {algo.rustfst_subcommand()} {algo.get_cli_args()} {path_in_fst} {path_out_rustfst}"
+    cmd_openfst = f"{openfst_cli} {algo.get_openfst_cli_args()} {path_in_fst} {path_out_openfst}"
+    cmd_rustfst = f"{rustfst_cli} {algo.rustfst_subcommand()} {algo.get_rustfst_cli_args()} {path_in_fst} {path_out_rustfst}"
 
     cmd = f"hyperfine -w {warmup} -r {runs} '{cmd_openfst}' '{cmd_rustfst}'" \
           f" --export-markdown {path_report_md} --show-output"
@@ -88,7 +88,7 @@ def bench(path_in_fst, path_report_md, warmup, runs, compilation_mode):
                         with io.open(report_path_temp, mode="r") as f:
 
                             if len(params) > 1:
-                                report_f.write(f"### CLI parameters : ` {param.get_cli_args()}`\n")
+                                report_f.write(f"### CLI parameters : ` {param.get_rustfst_cli_args()}`\n")
                             data = f.read()
                             data = re.sub(r'`\./openfst.*`', f'`{algo.openfst_cli()}`', data)
                             data = re.sub(r'`\./target.*`', f'`rustfst-cli {algo.rustfst_subcommand()}`', data)

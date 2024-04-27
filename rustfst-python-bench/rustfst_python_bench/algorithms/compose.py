@@ -22,8 +22,11 @@ class ComposeAlgorithm:
         else:
             raise RuntimeError(f"Unknown compose_type={self.compose_type}")
 
-    def get_cli_args(self):
+    def get_rustfst_cli_args(self):
         return f"--compose_type={self.compose_type}"
+
+    def get_openfst_cli_args(self):
+        return self.get_rustfst_cli_args()
 
     @classmethod
     def get_parameters(cls):

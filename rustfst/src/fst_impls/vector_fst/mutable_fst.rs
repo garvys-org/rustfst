@@ -126,7 +126,7 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         );
         self.properties = delete_states_properties(self.properties);
         let v = vec![state_to_remove];
-        self.del_states(v.into_iter())
+        self.del_states(v)
     }
 
     fn del_states<T: IntoIterator<Item = StateId>>(&mut self, dstates: T) -> Result<()> {
