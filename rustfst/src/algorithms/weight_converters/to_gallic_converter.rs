@@ -10,7 +10,7 @@ use crate::semirings::{
 };
 use crate::{Tr, EPS_LABEL};
 
-/// Mapper from W to GallicTr<W>.
+/// Mapper from `W` to `GallicTr<W>`.
 pub struct ToGallicConverter {}
 
 macro_rules! impl_to_gallic_converter {
