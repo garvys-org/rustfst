@@ -134,7 +134,7 @@ macro_rules! impl_quantize_f32 {
         impl WeightQuantize for $semiring {
             fn quantize_assign(&mut self, delta: f32) -> Result<()> {
                 let v = *self.value();
-                if v == f32::INFINITY || v == f32::NEG_INFINITY {
+                if v.is_infinite() {
                     return Ok(());
                 }
                 self.set_value(((v / delta) + 0.5).floor() * delta);

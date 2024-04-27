@@ -129,7 +129,7 @@ impl IntervalSet {
 
     // Adds an interval set to the set. The result may not be normalized.
     pub fn union(&mut self, iset: Self) {
-        self.intervals.intervals.extend(iset.into_iter())
+        self.intervals.intervals.extend(iset)
     }
 
     // Requires intervals be normalized.

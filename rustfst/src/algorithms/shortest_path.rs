@@ -464,6 +464,7 @@ where
         } else {
             W::one()
         };
+        #[allow(clippy::unnecessary_literal_unwrap)]
         if natural_less(&limit, &d.times(&p.1)?)?
             || (state_threshold.is_some() && ofst.num_states() >= state_threshold.unwrap() as usize)
         {
