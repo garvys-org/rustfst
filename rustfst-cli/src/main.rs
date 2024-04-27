@@ -1,6 +1,7 @@
 use std::process;
 
 use anyhow::{format_err, Result};
+use clap::parser::ValueSource;
 use clap::{Arg, ArgAction, Command};
 use log::error;
 
@@ -210,7 +211,7 @@ fn handle(matches: clap::ArgMatches) -> Result<()> {
     match matches.subcommand() {
         Some(("minimize", m)) => MinimizeAlgorithm::new(
             m.get_one::<String>("in.fst").unwrap(),
-            m.contains_id("allow-nondet"),
+            m.value_source("allow-nondet") == Some(ValueSource::CommandLine),
             m.get_one::<String>("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
@@ -238,7 +239,7 @@ fn handle(matches: clap::ArgMatches) -> Result<()> {
         .run_cli_or_bench(m),
         Some(("project", m)) => ProjectFstAlgorithm::new(
             m.get_one::<String>("in.fst").unwrap(),
-            m.contains_id("project-output"),
+            m.value_source("project-output") == Some(ValueSource::CommandLine),
             m.get_one::<String>("out.fst").unwrap(),
         )
         .run_cli_or_bench(m),
@@ -266,7 +267,7 @@ fn handle(matches: clap::ArgMatches) -> Result<()> {
         .run_cli_or_bench(m),
         Some(("shortestpath", m)) => ShortestPathAlgorithm::new(
             m.get_one::<String>("in.fst").unwrap(),
-            m.contains_id("unique"),
+            m.value_source("unique") == Some(ValueSource::CommandLine),
             m.get_one::<String>("nshortest").unwrap().parse().unwrap(),
             m.get_one::<String>("out.fst").unwrap(),
         )
@@ -279,11 +280,11 @@ fn handle(matches: clap::ArgMatches) -> Result<()> {
         Some(("push", m)) => PushAlgorithm::new(
             m.get_one::<String>("in.fst").unwrap(),
             m.get_one::<String>("out.fst").unwrap(),
-            m.contains_id("to_final"),
-            m.contains_id("push_weights"),
-            m.contains_id("push_labels"),
-            m.contains_id("remove_total_weight"),
-            m.contains_id("remove_common_affix"),
+            m.value_source("to_final") == Some(ValueSource::CommandLine),
+            m.value_source("push_weights") == Some(ValueSource::CommandLine),
+            m.value_source("push_labels") == Some(ValueSource::CommandLine),
+            m.value_source("remove_total_weight") == Some(ValueSource::CommandLine),
+            m.value_source("remove_common_affix") == Some(ValueSource::CommandLine),
         )
         .run_cli_or_bench(m),
         Some(("compose", m)) => ComposeAlgorithm::new(
