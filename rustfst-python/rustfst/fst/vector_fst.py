@@ -479,6 +479,13 @@ class VectorFst(Fst):
             return determinize_with_config(self, config)
         return determinize(self)
 
+    def minimize(self, config=None) -> VectorFst:
+        from rustfst.algorithms.minimize import minimize, minimize_with_config
+
+        if config:
+            return minimize_with_config(self, config)
+        return minimize(self)
+
     def project(self, proj_type=None) -> VectorFst:
         from rustfst.algorithms.project import project, ProjectType
 

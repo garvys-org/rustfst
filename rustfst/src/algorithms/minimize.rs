@@ -42,8 +42,8 @@ use std::rc::Rc;
 /// Configuration for minimization.
 #[derive(Clone, Copy, PartialOrd, PartialEq)]
 pub struct MinimizeConfig {
-    delta: f32,
-    allow_nondet: bool,
+    pub delta: f32,
+    pub allow_nondet: bool,
 }
 
 impl MinimizeConfig {

@@ -3,6 +3,7 @@ pub mod concat;
 pub mod connect;
 pub mod determinize;
 pub mod isomorphic;
+mod minimize;
 pub mod optimize;
 pub mod project;
 pub mod randgen;
