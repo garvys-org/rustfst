@@ -15,7 +15,7 @@ class MinimizeConfig:
         if delta is None:
             delta = KSHORTESTDELTA
         config = ctypes.pointer(ctypes.c_void_p())
-        ret_code = lib.fst_shortest_path_config_new(
+        ret_code = lib.fst_minimize_config_new(
             ctypes.c_float(delta),
             ctypes.c_bool(allow_nondet),
             ctypes.byref(config),
