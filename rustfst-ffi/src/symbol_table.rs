@@ -244,7 +244,7 @@ pub unsafe extern "C" fn symt_destroy(symt_ptr: *mut CSymbolTable) -> RUSTFST_FF
             return Ok(());
         }
 
-        unsafe { drop(Box::from_raw(symt_ptr)) }
+        drop(unsafe { Box::from_raw(symt_ptr) });
         Ok(())
     })
 }

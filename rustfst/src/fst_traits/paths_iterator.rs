@@ -190,11 +190,7 @@ mod tests {
 
         let mut paths_ref = Counter::new();
         paths_ref.update(vec![FstPath::new(vec![], vec![], IntegerWeight::new(38))]);
-        paths_ref.update(vec![FstPath::new(
-            vec![1],
-            vec![1],
-            IntegerWeight::new(1 * 41),
-        )]);
+        paths_ref.update(vec![FstPath::new(vec![1], vec![1], IntegerWeight::new(41))]);
         paths_ref.update(vec![FstPath::new(
             vec![2],
             vec![2],

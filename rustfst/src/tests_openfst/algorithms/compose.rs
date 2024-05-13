@@ -189,7 +189,7 @@ where
 
     type TComposeFilter<S, F1, F2> = TPushLabelsFilter<S, F1, F2>;
 
-    let fst1: VectorFst<_> = fst_raw.clone().into();
+    let fst1: VectorFst<_> = fst_raw.clone();
     let mut fst2: VectorFst<_> = compose_test_data.fst_2.clone();
 
     let graph1look = Arc::new(TLaFst::new_with_relabeling(fst1, &mut fst2, true)?);
@@ -246,7 +246,7 @@ where
     test_eq_fst(
         &compose_test_data.result,
         &static_fst,
-        format!("Compose failed : filter_name = lookahead"),
+        "Compose failed : filter_name = lookahead".to_string(),
     );
 
     Ok(())

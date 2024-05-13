@@ -12,6 +12,7 @@ use crate::{StateId, Trs};
 /// `order[i]` gives the the state ID after sorting that corresponds
 /// to the state ID i before sorting; it must therefore be a
 /// permutation of the input FST's states ID sequence.
+#[allow(clippy::assigning_clones)]
 pub fn state_sort<W, F>(fst: &mut F, order: &[StateId]) -> Result<()>
 where
     W: Semiring,

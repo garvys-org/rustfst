@@ -174,13 +174,13 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for ConnectVisit
                 }
             }
         }
-        if let Some(_p) = parent {
-            let _p = _p as usize;
+        if let Some(p) = parent {
+            let p = p as usize;
             if self.coaccess[s] {
-                self.coaccess[_p] = true;
+                self.coaccess[p] = true;
             }
-            if self.lowlink[s] < self.lowlink[_p] {
-                self.lowlink[_p] = self.lowlink[s];
+            if self.lowlink[s] < self.lowlink[p] {
+                self.lowlink[p] = self.lowlink[s];
             }
         }
     }
