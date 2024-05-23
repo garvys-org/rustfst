@@ -116,7 +116,7 @@ pub unsafe extern "C" fn string_paths_iterator_destroy(
             return Ok(());
         }
 
-        unsafe { drop(Box::from_raw(iter_ptr)) }
+        drop(unsafe { Box::from_raw(iter_ptr) });
         Ok(())
     })
 }

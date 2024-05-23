@@ -279,7 +279,7 @@ pub unsafe extern "C" fn fst_matcher_config_destroy(
             return Ok(());
         }
 
-        unsafe { drop(Box::from_raw(ptr)) }
+        drop(unsafe { Box::from_raw(ptr) });
         Ok(())
     })
 }
@@ -296,7 +296,7 @@ pub unsafe extern "C" fn fst_compose_config_destroy(
             return Ok(());
         }
 
-        unsafe { drop(Box::from_raw(ptr)) }
+        drop(unsafe { Box::from_raw(ptr) });
         Ok(())
     })
 }

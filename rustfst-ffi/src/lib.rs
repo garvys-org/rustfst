@@ -37,7 +37,7 @@ pub enum RUSTFST_FFI_RESULT {
 }
 
 thread_local! {
-    pub(crate) static LAST_ERROR: RefCell<Option<String>> = RefCell::new(None);
+    pub(crate) static LAST_ERROR: RefCell<Option<String>> = const { RefCell::new(None) };
 }
 
 pub fn wrap<F: FnOnce() -> Result<()>>(func: F) -> RUSTFST_FFI_RESULT {

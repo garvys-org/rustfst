@@ -126,14 +126,6 @@ impl<W: SerializableSemiring> SerializableFst<W> for VectorFst<W> {
 
 static VECTOR_MIN_FILE_VERSION: i32 = 2;
 
-#[derive(Debug, PartialEq)]
-struct Transition {
-    ilabel: i32,
-    olabel: i32,
-    weight: f32,
-    nextstate: i32,
-}
-
 fn parse_vector_fst_state<W: SerializableSemiring>(
     i: &[u8],
 ) -> IResult<&[u8], VectorFstState<W>, NomCustomError<&[u8]>> {
