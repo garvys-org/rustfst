@@ -119,7 +119,7 @@ class ConstFst(Fst):
         """
         const_fst = ctypes.pointer(ctypes.c_void_p())
         ret_code = lib.const_fst_from_vec_fst(fst.ptr, ctypes.byref(const_fst))
-        err_msg = f"Failed to convert VectorFST to ConstFST"
+        err_msg = "Failed to convert VectorFST to ConstFST"
         check_ffi_error(ret_code, err_msg)
 
         return cls(ptr=const_fst)
