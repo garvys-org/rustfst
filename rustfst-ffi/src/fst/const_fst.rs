@@ -154,15 +154,15 @@ pub unsafe extern "C" fn const_fst_display(
 ///
 /// The pointers should be valid.
 #[no_mangle]
-pub unsafe fn const_fst_from_vec_fst(
+pub unsafe extern "C" fn const_fst_from_vec_fst(
     vec_fst_prt: *const CFst,
     const_fst_ptr: *mut *const CFst,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, vec_fst_prt);
         let vec_fst = as_fst!(VectorFst<TropicalWeight>, fst);
-        let const_fst = ConstFst::<TropicalWeight>::from(vec_fst);
-        let raw_pointer = CFst(const_fst).into_raw_pointer();
+        let const_fst = ConstFst::from(vec_fst.clone());
+        let raw_pointer = CFst(Box::new(const_fst)).into_raw_pointer();
         unsafe { *const_fst_ptr = raw_pointer };
         Ok(())
     })
