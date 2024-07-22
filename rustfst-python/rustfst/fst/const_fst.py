@@ -6,6 +6,7 @@ from rustfst.ffi_utils import (
 )
 
 from rustfst.fst import Fst
+from rustfst.fst.vector_fst import VectorFst
 from rustfst.symbol_table import SymbolTable
 from rustfst.drawing_config import DrawingConfig
 from typing import Optional, Union
@@ -104,6 +105,24 @@ class ConstFst(Fst):
         check_ffi_error(ret_code, err_msg)
 
         return cls(ptr=fst)
+
+    @classmethod
+    def from_vector_fst(cls, fst: VectorFst) -> ConstFst:
+        """
+        Converts a given `VectorFst` to `ConstFst`
+        Args:
+          fst: The `VectorFst` that should be converted
+        Returns:
+          A `ConstFst`
+        Raises:
+          ValueError: Conversion failed
+        """
+        const_fst = ctypes.pointer(ctypes.c_void_p())
+        ret_code = lib.const_fst_from_vec_fst(fst.ptr, ctypes.byref(const_fst))
+        err_msg = f"Failed to convert VectorFST to ConstFST"
+        check_ffi_error(ret_code, err_msg)
+
+        return cls(ptr=const_fst)
 
     def write(self, filename: Union[str, Path]):
         """
