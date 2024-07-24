@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from rustfst import VectorFst, Tr, SymbolTable
+from rustfst import VectorFst, Tr, SymbolTable, ConstFst
 import pytest
 from tempfile import NamedTemporaryFile
 
@@ -353,3 +353,16 @@ def test_fst_relabel_tables():
     assert fst_3 == fst_ref
     assert fst_3.input_symbols() == new_isymt
     assert fst_3.output_symbols() == new_osymt
+
+
+def test_const_fst_from_vector_fst():
+    fst = VectorFst()
+    s1 = fst.add_state()
+    s2 = fst.add_state()
+    fst.add_tr(s1, Tr(1, 2, weight_one(), s2))
+    fst.set_start(s1)
+    fst.set_final(s2)
+
+    const_fst = ConstFst.from_vector_fst(fst)
+
+    assert const_fst.num_trs(const_fst.start()) == 1
