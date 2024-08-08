@@ -273,10 +273,20 @@ jobs:
     # if: github.event_name != 'schedule' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/rustfst-v'))
 
     permissions:
+      actions: write
+      attestations: write
+      checks: write
+      contents: write
       deployments: write
-      pages: write
       id-token: write
+      issues: write
+      discussions: write
       packages: write
+      pages: write
+      pull-requests: write
+      repository-projects: write
+      security-events: write
+      statuses: write
 
     steps:
       - uses: actions/checkout@v4
