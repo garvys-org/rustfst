@@ -298,7 +298,7 @@ jobs:
       - run: git fetch origin gh-pages --depth=1
       - run: cd rustfst-python && mkdocs build -s
       - name: Deploy Doc to latest
-        # if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main'
         run: cd rustfst-python && mike deploy --push latest
       - name: Retrieve tag
         uses: olegtarasov/get-tag@v2.1
