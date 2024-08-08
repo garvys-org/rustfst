@@ -330,8 +330,8 @@ jobs:
 
   publish-python-wheels:
     name: Publish Python Wheels to PyPI
-    needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python, python-doc ]
-    if: startsWith(github.ref, 'refs/tags/rustfst-v')
+    # needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python, python-doc ]
+    # if: startsWith(github.ref, 'refs/tags/rustfst-v')
 
     strategy:
       fail-fast: false
@@ -367,7 +367,7 @@ jobs:
           python3.9 -m pip install twine cibuildwheel==2.13.1
           mkdir -p wheels
           python3.9 -m cibuildwheel --output-dir wheels rustfst-python
-          python3.9 -m twine upload -u "__token__" -p ${{ secrets.PYPI_PASSWORD }} -r pypi --verbose wheels/*
+          # python3.9 -m twine upload -u "__token__" -p ${{ secrets.PYPI_PASSWORD }} -r pypi --verbose wheels/*
 
 
 
