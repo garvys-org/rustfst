@@ -272,8 +272,7 @@ jobs:
     runs-on: ubuntu-latest
     # if: github.event_name != 'schedule' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/rustfst-v'))
 
-    permissions:
-      pages: write
+    permissions: write-all
 
     steps:
       - uses: actions/checkout@v4
