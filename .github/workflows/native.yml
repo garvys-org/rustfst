@@ -360,7 +360,7 @@ jobs:
           # Build `universal2` and `arm64` wheels on an Intel runner.
           # Note that the `arm64` wheel and the `arm64` part of the `universal2`
           # wheel cannot be tested in this configuration.
-          CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
+          CIBW_ARCHS_MACOS: "x86_64 arm64"
           # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
           CIBW_ARCHS_LINUX: "auto"
         run: |
