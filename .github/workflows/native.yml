@@ -268,9 +268,9 @@ jobs:
 
   publish-python-doc:
     name: Publish rustfst-python's doc
-    needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python, python-doc ]
+    # needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python, python-doc ]
     runs-on: ubuntu-latest
-    if: github.event_name != 'schedule' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/rustfst-v'))
+    # if: github.event_name != 'schedule' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/rustfst-v'))
 
     permissions:
       pages: write
@@ -292,7 +292,7 @@ jobs:
       - run: git fetch origin gh-pages --depth=1
       - run: cd rustfst-python && mkdocs build -s
       - name: Deploy Doc to latest
-        if: github.ref == 'refs/heads/main'
+        # if: github.ref == 'refs/heads/main'
         run: cd rustfst-python && mike deploy --push latest
       - name: Retrieve tag
         uses: olegtarasov/get-tag@v2.1
