@@ -275,6 +275,8 @@ jobs:
     permissions:
       deployments: write
       pages: write
+      id-token: write
+      packages: write
 
     steps:
       - uses: actions/checkout@v4
