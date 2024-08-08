@@ -268,9 +268,9 @@ jobs:
 
   publish-python-doc:
     name: Publish rustfst-python's doc
-    # needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python, python-doc ]
+    needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python, python-doc ]
     runs-on: ubuntu-latest
-    # if: github.event_name != 'schedule' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/rustfst-v'))
+    if: github.event_name != 'schedule' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/rustfst-v'))
 
     permissions:
       actions: write

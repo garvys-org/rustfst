@@ -244,7 +244,7 @@ This repository contains two main projects:
   - Documentation available on docs.rs [here](https://docs.rs/rustfst/latest/rustfst/)
 - `rustfst-python` is the python binding of `rustfst`.
   - Package available on Pypi [here](https://pypi.org/project/rustfst-python/)
-  - Documentation available on Github Pages [here](https://garvys.github.io/rustfst)
+  - Documentation available on Github Pages [here](https://garvys-org.github.io/rustfst/)
 
 ## License
    
