@@ -330,8 +330,8 @@ jobs:
 
   publish-python-wheels:
     name: Publish Python Wheels to PyPI
-    # needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python, python-doc ]
-    # if: startsWith(github.ref, 'refs/tags/rustfst-v')
+    needs: [ rust-clippy, rust-doc, rust-tests, rustfst-python-bench, rustfst-python, python-doc ]
+    if: startsWith(github.ref, 'refs/tags/rustfst-v')
 
     strategy:
       fail-fast: false
