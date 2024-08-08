@@ -275,18 +275,18 @@ jobs:
     permissions:
       actions: write
       attestations: write
-      checks: write
+      checks: none
       contents: write
       deployments: write
       id-token: write
-      issues: write
-      discussions: write
+      issues: none
+      discussions: none
       packages: write
       pages: write
       pull-requests: write
       repository-projects: write
-      security-events: write
-      statuses: write
+      security-events: none
+      statuses: none
 
     steps:
       - uses: actions/checkout@v4
