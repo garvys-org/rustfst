@@ -69,13 +69,13 @@ setup(
         )
     ],
     zip_safe=False,
-    url="https://github.com/Garvys/rustfst",
+    url="https://github.com/garvys-org/rustfst",
     author="Alexandre Caulier, Emrick Sinitambirivoutin",
     author_email="alexandre.caulier.a@gmail.com, emrick.sinitambirivoutin@sonos.com",
     keywords="fst openfst graph transducer acceptor shortest-path minimize determinize wfst",
     project_urls={
-        "Documentation": "https://garvys.github.io/rustfst/",
-        "Source": "https://github.com/Garvys/rustfst",
+        "Documentation": "https://garvys-org.github.io/rustfst/",
+        "Source": "https://github.com/garvys-org/rustfst",
     },
     python_requires=">=3.7",
     license="Apache License, Version 2.0",

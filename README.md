@@ -2,14 +2,14 @@
 
 [![License: MIT/Apache-2.0](https://img.shields.io/crates/l/rustfst.svg)](#license)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
-[![Github tag](https://badgen.net/github/tag/garvys/rustfst)](https://github.com/garvys/rustfst/tags/)
+[![Github tag](https://badgen.net/github/tag/garvys/rustfst)](https://github.com/garvys-org/rustfst/tags/)
 
 
 #### Rust
 ![rustc >= 1.51.0](https://img.shields.io/badge/rustc-%3E%3D1.51.0-brightgreen)
-[![Native Linux test status](https://github.com/Garvys/rustfst/workflows/Native/badge.svg)](https://github.com/Garvys/rustfst/actions)
+[![Native Linux test status](https://github.com/garvys-org/rustfst/workflows/Native/badge.svg)](https://github.com/Garvys/rustfst/actions)
 [![Documentation](https://docs.rs/rustfst/badge.svg)](https://docs.rs/rustfst)
-[![](https://tokei.rs/b1/github/Garvys/rustfst)](https://github.com/Garvys/rustfst)
+[![](https://tokei.rs/b1/github/garvys-org/rustfst)](https://github.com/garvys-org/rustfst)
 #### Python
 [![PyPI version](https://badge.fury.io/py/rustfst-python.svg)](https://badge.fury.io/py/rustfst-python)
 [![PyPI download month](https://img.shields.io/pypi/dm/rustfst-python.svg)](https://pypi.python.org/pypi/rustfst-python/)
@@ -38,7 +38,7 @@ optimized by determinization and minimization, models can be applied to hypothes
 (also represented as automata) or cascaded by finite-state composition, and the best
 results can be selected by shortest-path algorithms.
 
-![fst](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/project_in.svg?sanitize=true)
+![fst](https://raw.githubusercontent.com/garvys-org/rustfst-images-doc/master/images/project_in.svg?sanitize=true)
 
 ## Overview
 
@@ -211,8 +211,8 @@ differs from OpenFST:
 
 I did a benchmark some time ago on almost every linear fst algorithm and compared the results with `OpenFst`. You can find the results here :
 
-- [Benchmark at the C++ level](https://github.com/Garvys/rustfst/blob/master/bench_results/bench_funct_80.md)
-- [Benchmark at the CLI level](https://github.com/Garvys/rustfst/blob/master/bench_results/bench_cli_80.md)
+- [Benchmark at the C++ level](https://github.com/garvys-org/rustfst/blob/master/bench_results/bench_funct_80.md)
+- [Benchmark at the CLI level](https://github.com/garvys-org/rustfst/blob/master/bench_results/bench_cli_80.md)
 
 Spoiler alert: `Rustfst` is faster on all those algorithms 😅
 
