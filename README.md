@@ -2,12 +2,12 @@
 
 [![License: MIT/Apache-2.0](https://img.shields.io/crates/l/rustfst.svg)](#license)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
-[![Github tag](https://badgen.net/github/tag/garvys/rustfst)](https://github.com/garvys-org/rustfst/tags/)
+[![Github tag](https://badgen.net/github/tag/garvys-org/rustfst)](https://github.com/garvys-org/rustfst/tags/)
 
 
 #### Rust
 ![rustc >= 1.51.0](https://img.shields.io/badge/rustc-%3E%3D1.51.0-brightgreen)
-[![Native Linux test status](https://github.com/garvys-org/rustfst/workflows/Native/badge.svg)](https://github.com/Garvys/rustfst/actions)
+[![Native Linux test status](https://github.com/garvys-org/rustfst/workflows/Native/badge.svg)](https://github.com/garvys-org/rustfst/actions)
 [![Documentation](https://docs.rs/rustfst/badge.svg)](https://docs.rs/rustfst)
 [![](https://tokei.rs/b1/github/garvys-org/rustfst)](https://github.com/garvys-org/rustfst)
 #### Python
