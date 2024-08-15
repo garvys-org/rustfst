@@ -13,12 +13,12 @@ from rustfst.drawing_config import DrawingConfig
 from rustfst.iterators import MutableTrsIterator, StateIterator
 from rustfst.tr import Tr
 from rustfst.weight import weight_one
-from typing import Optional, Union
+from typing import Optional, Union, TYPE_CHECKING
 from pathlib import Path
 
-from typing import List
+from typing import List, Tuple
 
-if False:  # noqa: W0125
+if TYPE_CHECKING:
     from rustfst.algorithms.compose import ComposeConfig
     from rustfst.algorithms.determinize import DeterminizeConfig
     from rustfst.algorithms.minimize import MinimizeConfig
@@ -97,7 +97,7 @@ class VectorFst(Fst):
 
         return state_id.value
 
-    def set_final(self, state: int, weight: float = None):
+    def set_final(self, state: int, weight: Union[float, None] = None):
         """
         Sets the final weight for a state.
         Args:
@@ -111,10 +111,10 @@ class VectorFst(Fst):
         if weight is None:
             weight = weight_one()
 
-        state = ctypes.c_size_t(state)
-        weight = ctypes.c_float(weight)
+        cstate = ctypes.c_size_t(state)
+        cweight = ctypes.c_float(weight)
 
-        ret_code = lib.vec_fst_set_final(self.ptr, state, weight)
+        ret_code = lib.vec_fst_set_final(self.ptr, cstate, cweight)
         err_msg = "Error setting final state"
         check_ffi_error(ret_code, err_msg)
 
@@ -126,8 +126,8 @@ class VectorFst(Fst):
         Raises:
           ValueError: State index out of range.
         """
-        state = ctypes.c_size_t(state)
-        ret_code = lib.vec_fst_del_final_weight(self.ptr, state)
+        cstate = ctypes.c_size_t(state)
+        ret_code = lib.vec_fst_del_final_weight(self.ptr, cstate)
         err_msg = "Error unsetting final state"
         check_ffi_error(ret_code, err_msg)
 
@@ -539,7 +539,7 @@ class VectorFst(Fst):
     def replace(
         self,
         root_label: int,
-        fst_list: List[(int, VectorFst)],
+        fst_list: List[Tuple[int, VectorFst]],
         epsilon_on_replace: bool = False,
     ) -> VectorFst:
         """Recursively replaces trs in the root FSTs with other FSTs.
@@ -615,7 +615,7 @@ class VectorFst(Fst):
         """
         from rustfst.algorithms.rm_epsilon import rm_epsilon
 
-        rm_epsilon(self)
+        return rm_epsilon(self)
 
     def shortest_path(
         self, config: Union[ShortestPathConfig, None] = None
