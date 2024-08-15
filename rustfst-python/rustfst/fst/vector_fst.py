@@ -18,7 +18,7 @@ from pathlib import Path
 
 from typing import List
 
-if False:
+if False:  # noqa: W0125
     from rustfst.algorithms.compose import ComposeConfig
     from rustfst.algorithms.determinize import DeterminizeConfig
     from rustfst.algorithms.minimize import MinimizeConfig
@@ -529,7 +529,7 @@ class VectorFst(Fst):
         Returns:
             self
         """
-        from rustfst.algorithms.project import project, ProjectType
+        from rustfst.algorithms.project import project, ProjectType  # noqa: W0621
 
         if proj_type:
             return project(self, proj_type)
