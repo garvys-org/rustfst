@@ -8,7 +8,7 @@ from rustfst.ffi_utils import (
 from rustfst.fst.vector_fst import VectorFst
 
 
-def tr_sort(fst: VectorFst, ilabel_cmp: bool):
+def tr_sort(fst: VectorFst, ilabel_cmp: bool) -> VectorFst:
     """
     tr_sort(fst)
     sort fst trs according to their ilabel or olabel
@@ -19,3 +19,4 @@ def tr_sort(fst: VectorFst, ilabel_cmp: bool):
     ret_code = lib.fst_tr_sort(fst.ptr, ctypes.c_bool(ilabel_cmp))
     err_msg = "Error during tr_sort"
     check_ffi_error(ret_code, err_msg)
+    return fst
