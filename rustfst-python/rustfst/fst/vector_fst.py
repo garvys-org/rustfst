@@ -724,6 +724,13 @@ class VectorFst(Fst):
         return isomorphic(self, other)
 
     def invert(self) -> VectorFst:
+        """
+        Invert the transduction corresponding to an FST by exchanging the
+        FST's input and output labels in-place.
+
+        Returns:
+           self
+        """
         from rustfst.algorithms.inversion import invert
 
         return invert(self)

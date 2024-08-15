@@ -24,7 +24,7 @@ def test_invert():
     tr1_4 = Tr(3, 5, 1.0, s3)
     fst1.add_tr(s2, tr1_4)
 
-    fst1.invert()
+    fst1 = fst1.invert()
 
     # Expected FST
     expected_fst = VectorFst()
