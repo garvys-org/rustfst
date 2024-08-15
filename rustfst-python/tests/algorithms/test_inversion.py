@@ -25,7 +25,6 @@ def test_invert():
     fst1.add_tr(s2, tr1_4)
 
     fst1.invert()
-    fst1.draw("wtf.dot")
 
     # Expected FST
     expected_fst = VectorFst()
@@ -49,5 +48,4 @@ def test_invert():
     tr1_4 = Tr(5, 3, 1.0, s3)
     expected_fst.add_tr(s2, tr1_4)
 
-    expected_fst.draw("omg.dot")
     assert expected_fst == fst1
