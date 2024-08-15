@@ -11,6 +11,9 @@ KSHORTESTDELTA = 1e-6
 
 
 class MinimizeConfig:
+    """
+    Configuration for the minimization operation.
+    """
     def __init__(self, delta=None, allow_nondet=False):
         if delta is None:
             delta = KSHORTESTDELTA
@@ -27,10 +30,11 @@ class MinimizeConfig:
 
 def minimize(fst: VectorFst) -> VectorFst:
     """
-    minimize(fst)
-    Minimize a FST in place
-    :param fst: Fst
-    :return: Fst
+    Minimize an FST in-place
+    Params:
+      fst: Fst
+    Returns:
+      fst
     """
     ret_code = lib.fst_minimize(fst.ptr)
     err_msg = "Error while minimizing FST"
@@ -41,11 +45,12 @@ def minimize(fst: VectorFst) -> VectorFst:
 
 def minimize_with_config(fst: VectorFst, config: MinimizeConfig) -> VectorFst:
     """
-    minimize(fst, config)
-    Minimize a FST in place
-    :param fst: Fst
-    :param config: MinimizeConfig
-    :return: Fst
+    Minimize an FST in-place
+    Params:
+      fst: Fst
+      config: Configuration
+    Returns:
+      fst
     """
     ret_code = lib.fst_minimize_with_config(fst.ptr, config.ptr)
     err_msg = "Error while minimizing FST"

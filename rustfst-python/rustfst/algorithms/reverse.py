@@ -8,12 +8,17 @@ from rustfst.ffi_utils import (
 from rustfst.fst.vector_fst import VectorFst
 
 
-def reverse(fst: VectorFst):
+def reverse(fst: VectorFst) -> VectorFst:
     """
-    reverse(fst)
-    reverse an fst
-    :param fst: Fst
-    :return: Fst
+    Reverse an Fst, returning a new Fst which accepts
+    the same language in reverse order.
+
+    Not to be confused with `inverse`, which does something
+    totally different!
+    Args:
+      fst: Fst to reverse
+    Returns:
+      Newly created, reversed Fst.
     """
 
     reversed_fst = ctypes.c_void_p()

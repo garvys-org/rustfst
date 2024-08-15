@@ -8,12 +8,13 @@ from rustfst.ffi_utils import (
 from rustfst.fst.vector_fst import VectorFst
 
 
-def rm_epsilon(fst: VectorFst):
+def rm_epsilon(fst: VectorFst) -> VectorFst:
     """
-    rm_epsilon(fst)
-    rm_epsilon an fst
-    :param fst: Fst
-    :return: Fst
+    Return an equivalent FST with epsilon transitions removed.
+    Args:
+      fst: Fst
+    Returns:
+      Newly created FST with epsilon transitions removed.
     """
 
     rm_epsilon_fst = ctypes.c_void_p()

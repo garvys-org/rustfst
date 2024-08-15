@@ -64,6 +64,16 @@ class ComposeFilter(Enum):
 
 
 class ComposeConfig:
+    """
+    Configuration for compose operation.
+
+    Args:
+      compose_filter: Filter which determines allowable matches during
+                      composition operation.
+      connect: Connect the resulting FST after composition.
+      matcher1_config: Matcher configuration for left-hand FST.
+      matcher2_config: Matcher configuration for right-hand FST.
+    """
     def __init__(
         self,
         compose_filter: ComposeFilter = ComposeFilter.AUTOFILTER,

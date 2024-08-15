@@ -9,7 +9,8 @@ from rustfst.fst.vector_fst import VectorFst
 
 def connect(fst: VectorFst) -> VectorFst:
     """
-    This operation trims an Fst, removing states and trs that are not on successful paths.
+    This operation trims an Fst in-place, removing states and trs that are not on
+    successful paths.
 
     Examples :
 
@@ -22,8 +23,7 @@ def connect(fst: VectorFst) -> VectorFst:
     ![connect_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/connect_out.svg?sanitize=true)
 
     Returns :
-        self
-
+        fst
     """
 
     ret_code = lib.fst_connect(fst.ptr)
