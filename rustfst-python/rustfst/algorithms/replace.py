@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List
+from typing import List, Tuple
 import ctypes
 from rustfst.ffi_utils import (
     lib,
@@ -17,7 +17,7 @@ class LabelFstPair(ctypes.Structure):
 
 
 def replace(
-    root_idx: int, fst_list: List[(int, VectorFst)], epsilon_on_replace: bool
+    root_idx: int, fst_list: List[Tuple[int, VectorFst]], epsilon_on_replace: bool
 ) -> VectorFst:
     """
     Recursively replaces trs in the root FSTs with other FSTs.
