@@ -9,11 +9,18 @@ from rustfst.fst.vector_fst import VectorFst
 
 
 def tr_sort(fst: VectorFst, ilabel_cmp: bool) -> VectorFst:
-    """
-    tr_sort(fst)
-    sort fst trs according to their ilabel or olabel
-    :param fst: Fst
-    :param ilabel_cmp: bool
+    """Sort trs for an FST in-place according to their input or
+    output label.
+
+    This is often necessary for composition to work properly.  It
+    corresponds to `ArcSort` in OpenFST.
+
+    Args:
+      fst: FST to be tr-sorted in-place.
+      ilabel_cmp: Sort on input labels if `True`, output labels
+                 if `False`.
+    Returns:
+      fst: Same FST that was modified in-place.
     """
 
     ret_code = lib.fst_tr_sort(fst.ptr, ctypes.c_bool(ilabel_cmp))
