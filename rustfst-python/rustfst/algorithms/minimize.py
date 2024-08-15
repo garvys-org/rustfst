@@ -14,6 +14,7 @@ class MinimizeConfig:
     """
     Configuration for the minimization operation.
     """
+
     def __init__(self, delta=None, allow_nondet=False):
         if delta is None:
             delta = KSHORTESTDELTA

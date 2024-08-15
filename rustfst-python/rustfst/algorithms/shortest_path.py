@@ -20,8 +20,10 @@ class ShortestPathConfig:
       unique: Return only unique label sequences
       delta: Difference in weights considered significant
     """
-    def __init__(self, nshortest: int = 1, unique: bool = False,
-                 delta: Union[float, None] = None):
+
+    def __init__(
+        self, nshortest: int = 1, unique: bool = False, delta: Union[float, None] = None
+    ):
         if delta is None:
             delta = KSHORTESTDELTA
         config = ctypes.pointer(ctypes.c_void_p())

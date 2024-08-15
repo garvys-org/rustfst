@@ -415,8 +415,9 @@ class VectorFst(Fst):
 
         return VectorFst(cloned_fst)
 
-    def compose(self, other: VectorFst,
-                config: Union[ComposeConfig, None] = None) -> VectorFst:
+    def compose(
+        self, other: VectorFst, config: Union[ComposeConfig, None] = None
+    ) -> VectorFst:
         """
         Compute composition of this Fst with another Fst, returning
         the resulting Fst.
@@ -616,7 +617,9 @@ class VectorFst(Fst):
 
         rm_epsilon(self)
 
-    def shortest_path(self, config: Union[ShortestPathConfig, None] = None) -> VectorFst:
+    def shortest_path(
+        self, config: Union[ShortestPathConfig, None] = None
+    ) -> VectorFst:
         """
         Construct a FST containing the shortest path of the input FST
         Args:

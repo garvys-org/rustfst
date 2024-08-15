@@ -74,6 +74,7 @@ class ComposeConfig:
       matcher1_config: Matcher configuration for left-hand FST.
       matcher2_config: Matcher configuration for right-hand FST.
     """
+
     def __init__(
         self,
         compose_filter: ComposeFilter = ComposeFilter.AUTOFILTER,
