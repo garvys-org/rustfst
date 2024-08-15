@@ -2,6 +2,7 @@ pub mod compose;
 pub mod concat;
 pub mod connect;
 pub mod determinize;
+pub mod inversion;
 pub mod isomorphic;
 mod minimize;
 pub mod optimize;

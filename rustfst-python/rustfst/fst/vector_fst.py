@@ -723,6 +723,11 @@ class VectorFst(Fst):
 
         return isomorphic(self, other)
 
+    def invert(self) -> VectorFst:
+        from rustfst.algorithms.inversion import invert
+
+        return invert(self)
+
     def __add__(self, other: VectorFst) -> VectorFst:
         """
         `fst_1 + fst_2` is a shortcut to perform the concatenation of `fst_1` and `fst_2`.
