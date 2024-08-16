@@ -13,10 +13,17 @@ from rustfst.drawing_config import DrawingConfig
 from rustfst.iterators import MutableTrsIterator, StateIterator
 from rustfst.tr import Tr
 from rustfst.weight import weight_one
-from typing import Optional, Union
+from typing import Optional, Union, TYPE_CHECKING
 from pathlib import Path
 
-from typing import List
+from typing import List, Tuple
+
+if TYPE_CHECKING:
+    from rustfst.algorithms.compose import ComposeConfig
+    from rustfst.algorithms.determinize import DeterminizeConfig
+    from rustfst.algorithms.minimize import MinimizeConfig
+    from rustfst.algorithms.project import ProjectType
+    from rustfst.algorithms.shortest_path import ShortestPathConfig
 
 
 class VectorFst(Fst):
@@ -90,7 +97,7 @@ class VectorFst(Fst):
 
         return state_id.value
 
-    def set_final(self, state: int, weight: float = None):
+    def set_final(self, state: int, weight: Union[float, None] = None):
         """
         Sets the final weight for a state.
         Args:
@@ -104,10 +111,10 @@ class VectorFst(Fst):
         if weight is None:
             weight = weight_one()
 
-        state = ctypes.c_size_t(state)
-        weight = ctypes.c_float(weight)
+        cstate = ctypes.c_size_t(state)
+        cweight = ctypes.c_float(weight)
 
-        ret_code = lib.vec_fst_set_final(self.ptr, state, weight)
+        ret_code = lib.vec_fst_set_final(self.ptr, cstate, cweight)
         err_msg = "Error setting final state"
         check_ffi_error(ret_code, err_msg)
 
@@ -119,8 +126,8 @@ class VectorFst(Fst):
         Raises:
           ValueError: State index out of range.
         """
-        state = ctypes.c_size_t(state)
-        ret_code = lib.vec_fst_del_final_weight(self.ptr, state)
+        cstate = ctypes.c_size_t(state)
+        ret_code = lib.vec_fst_del_final_weight(self.ptr, cstate)
         err_msg = "Error unsetting final state"
         check_ffi_error(ret_code, err_msg)
 
@@ -408,7 +415,19 @@ class VectorFst(Fst):
 
         return VectorFst(cloned_fst)
 
-    def compose(self, other: VectorFst, config=None) -> VectorFst:
+    def compose(
+        self, other: VectorFst, config: Union[ComposeConfig, None] = None
+    ) -> VectorFst:
+        """
+        Compute composition of this Fst with another Fst, returning
+        the resulting Fst.
+        Args:
+            other: Fst to compose with.
+            config: Config parameters of the composition.
+        Returns:
+            The composed Fst.
+        """
+
         from rustfst.algorithms.compose import compose, compose_with_config
 
         if config:
@@ -417,7 +436,8 @@ class VectorFst(Fst):
 
     def concat(self, other: VectorFst) -> VectorFst:
         """
-        Compute Fst Concatenation of this Fst with another Fst. Returning the resulting Fst.
+        Compute Fst Concatenation of this Fst with another Fst, returning the
+        resulting Fst.
         Args:
             other: Fst to concatenate with.
 
@@ -431,7 +451,8 @@ class VectorFst(Fst):
 
     def connect(self) -> VectorFst:
         """
-        This operation trims an Fst, removing states and trs that are not on successful paths.
+        This operation trims an Fst in-place, removing states and trs that are
+        not on successful paths.
 
         Examples :
 
@@ -472,22 +493,43 @@ class VectorFst(Fst):
 
         return top_sort(self)
 
-    def determinize(self, config=None) -> VectorFst:
+    def determinize(self, config: Union[DeterminizeConfig, None] = None) -> VectorFst:
+        """
+        Make an Fst deterministic
+        Args:
+            config: Configuration for the determinization operation.
+        Returns:
+            The resulting Fst.
+        """
         from rustfst.algorithms.determinize import determinize, determinize_with_config
 
         if config:
             return determinize_with_config(self, config)
         return determinize(self)
 
-    def minimize(self, config=None) -> VectorFst:
+    def minimize(self, config: Union[MinimizeConfig, None] = None) -> VectorFst:
+        """
+        Minimize an FST in place
+        Args:
+          config: Configuration for the minimization operation.
+        Returns:
+          self
+        """
         from rustfst.algorithms.minimize import minimize, minimize_with_config
 
         if config:
             return minimize_with_config(self, config)
         return minimize(self)
 
-    def project(self, proj_type=None) -> VectorFst:
-        from rustfst.algorithms.project import project, ProjectType
+    def project(self, proj_type: Union[ProjectType, None] = None) -> VectorFst:
+        """
+        Convert a Fst to an acceptor using input or output labels.
+        Args:
+            proj_type: Whether to replace input labels or output labels.
+        Returns:
+            self
+        """
+        from rustfst.algorithms.project import project, ProjectType  # noqa: W0621
 
         if proj_type:
             return project(self, proj_type)
@@ -497,25 +539,94 @@ class VectorFst(Fst):
     def replace(
         self,
         root_label: int,
-        fst_list: List[(int, VectorFst)],
+        fst_list: List[Tuple[int, VectorFst]],
         epsilon_on_replace: bool = False,
     ) -> VectorFst:
+        """Recursively replaces trs in the root FSTs with other FSTs.
+
+        Replace supports replacement of trs in one Fst with another
+        FST. This replacement is recursive. Replace takes an array of
+        FST(s). The FST on which this method is called represents the
+        root (or topology) machine. The root FST refers to other FSTs
+        by recursively replacing trs labeled as non-terminals with the
+        matching non-terminal FST. Currently Replace uses the output
+        symbols of the trs to determine whether the transition is a
+        non-terminal transition or not. A non-terminal can be any
+        label that is not a non-zero terminal label in the output
+        alphabet.
+
+        Note that input argument is a vector of pairs. These
+        correspond to the tuple of non-terminal Label and
+        corresponding FST.
+
+        Examples:
+
+        - Root Fst :
+
+        ![replace_in_1](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_1.svg?sanitize=true)
+
+        - Fst for non-terminal #NAME :
+
+        ![replace_in_2](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_2.svg?sanitize=true)
+
+        - Fst for non-terminal #FIRSTNAME :
+
+        ![replace_in_3](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_3.svg?sanitize=true)
+
+        - Fst for non-terminal #LASTNAME :
+
+        ![replace_in_4](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_in_4.svg?sanitize=true)
+
+        - Output :
+
+        ![replace_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/replace_out.svg?sanitize=true)
+
+        Args:
+            root_label: Label for self
+            fst_list: Other FSTs
+            epsilon_on_replace:
+
+        Returns:
+            The resulting Fst.
+
+        """
         from rustfst.algorithms.replace import replace
 
         complete_fst_list = [(root_label, self)] + fst_list
         return replace(root_label, complete_fst_list, epsilon_on_replace)
 
     def reverse(self) -> VectorFst:
+        """
+        Reverse an Fst, returning a new Fst which accepts
+        the same language in reverse order.
+
+        Returns:
+          Newly created, reversed Fst.
+        """
         from rustfst.algorithms.reverse import reverse
 
         return reverse(self)
 
-    def rm_epsilon(self):
+    def rm_epsilon(self) -> VectorFst:
+        """
+        Return an equivalent FST with epsilon transitions removed.
+        Returns:
+          Newly created FST with epsilon transitions removed.
+        """
         from rustfst.algorithms.rm_epsilon import rm_epsilon
 
-        rm_epsilon(self)
+        return rm_epsilon(self)
 
-    def shortest_path(self, config=None) -> VectorFst:
+    def shortest_path(
+        self, config: Union[ShortestPathConfig, None] = None
+    ) -> VectorFst:
+        """
+        Construct a FST containing the shortest path of the input FST
+        Args:
+          config: Configuration for shortest-path operation.
+        Returns:
+          Newly-created FST containing only the shortest path of the input FST.
+        """
         from rustfst.algorithms.shortest_path import (
             shortestpath,
             shortestpath_with_config,
@@ -526,33 +637,88 @@ class VectorFst(Fst):
         return shortestpath(self)
 
     def union(self, other_fst: VectorFst) -> VectorFst:
+        """
+        Performs the union of two wFSTs. If A transduces string `x` to `y` with weight `a`
+        and `B` transduces string `w` to `v` with weight `b`, then their union transduces `x` to `y`
+        with weight `a` and `w` to `v` with weight `b`.
+
+        Examples:
+        - Input Fst 1:
+
+        ![union_in_1](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/union_in_1.svg?sanitize=true)
+
+        - Input Fst 2:
+
+        ![union_in_2](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/union_in_2.svg?sanitize=true)
+
+        - Union:
+
+        ![union_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/union_out.svg?sanitize=true)
+
+        Args:
+            other_fst: Fst to perform union with this one.
+        Returns:
+             The resulting newly-created Fst.
+
+        """
         from rustfst.algorithms.union import union
 
         return union(self, other_fst)
 
     def optimize(self) -> VectorFst:
+        """
+        Optimize an FST in-place.
+        Returns:
+          self
+        """
         from rustfst.algorithms.optimize import optimize
 
         optimize(self)
         return self
 
     def optimize_in_log(self) -> VectorFst:
+        """
+        Optimize an fst in-place in the log semiring.
+        Returns:
+          self
+        """
         from rustfst.algorithms.optimize import optimize_in_log
 
         optimize_in_log(self)
         return self
 
     def tr_sort(self, ilabel_cmp: bool = True):
+        """Sort trs for an FST in-place according to their input or
+        output label.
+
+        This is often necessary for composition to work properly.  It
+        corresponds to `ArcSort` in OpenFST.
+
+        Args:
+          ilabel_cmp: Sort on input labels if `True`, output labels
+                      if `False`.
+        """
         from rustfst.algorithms.tr_sort import tr_sort
 
         tr_sort(self, ilabel_cmp)
 
     def tr_unique(self):
+        """Modify an FST in-place, keeping a single instance of trs
+        leaving the same state, going to the same state and with the
+        same input labels, output labels and weight.
+        """
         from rustfst.algorithms.tr_unique import tr_unique
 
         tr_unique(self)
 
     def isomorphic(self, other: VectorFst) -> bool:
+        """
+        Check if this Fst is isomorphic with another
+        Args:
+            other: Other Fst.
+        Returns:
+            Whether both Fsts are equal.
+        """
         from rustfst.algorithms.isomorphic import isomorphic
 
         return isomorphic(self, other)
@@ -604,4 +770,14 @@ class VectorFst(Fst):
         return ctypes.string_at(s).decode("utf8")
 
     def string_paths(self) -> StringPathsIterator:
+        """Return an iterator over input/output label sequences in
+        this FST, *in no particular order*.
+
+        Note that this does not return the best path first.  If you
+        want to do this, you will have to first apply
+        `shortest_path`.
+
+        Returns:
+          A iterator over the paths through this FST.
+        """
         return StringPathsIterator(self)

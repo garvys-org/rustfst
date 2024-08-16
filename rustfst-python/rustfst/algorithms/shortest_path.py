@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Union
 import ctypes
 from rustfst.ffi_utils import (
     lib,
@@ -11,7 +12,18 @@ KSHORTESTDELTA = 1e-6
 
 
 class ShortestPathConfig:
-    def __init__(self, nshortest: int = 1, unique: bool = False, delta=None):
+    """
+    Configuration for shortest-path operation.
+
+    Args:
+      nshortest: Number of shortest paths to return
+      unique: Return only unique label sequences
+      delta: Difference in weights considered significant
+    """
+
+    def __init__(
+        self, nshortest: int = 1, unique: bool = False, delta: Union[float, None] = None
+    ):
         if delta is None:
             delta = KSHORTESTDELTA
         config = ctypes.pointer(ctypes.c_void_p())
@@ -28,10 +40,11 @@ class ShortestPathConfig:
 
 def shortestpath(fst: VectorFst) -> VectorFst:
     """
-    shortestpath(fst)
-    construct a FST containing the shortest path of the input FST
-    :param fst: Fst
-    :return: Fst
+    Construct a FST containing the shortest path of the input FST
+    Args:
+      fst: Fst
+    Returns:
+      Newly-created FST containing only the shortest path of the input FST.
     """
 
     shortest_path = ctypes.c_void_p()
@@ -44,11 +57,12 @@ def shortestpath(fst: VectorFst) -> VectorFst:
 
 def shortestpath_with_config(fst: VectorFst, config: ShortestPathConfig) -> VectorFst:
     """
-    shortestpath(fst,config)
-    construct a FST containing the n-shortest path(s) in the input FST
-    :param fst: Fst
-    :param config: ShortestPathConfig
-    :return: Fst
+    Construct a FST containing the shortest path of the input FST
+    Args:
+      fst: Fst
+      config: Configuration for shortest-path operation.
+    Returns:
+      Newly-created FST containing only the shortest path of the input FST.
     """
 
     shortest_path = ctypes.c_void_p()
