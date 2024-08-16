@@ -30,7 +30,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-tests = [ "pytest>=6,<7", "pylint" ]
+tests = [ "pytest", "pylint" ]
 docs = [
      "mike",
      "mkdocstrings[python]",
@@ -52,3 +52,19 @@ package-dir = {"rustfst" = "rustfst-python/rustfst"}
 target = "rustfst.dylib.dylib"
 path = "rustfst-ffi/Cargo.toml"
 binding = "NoBinding"
+
+[tool.pytest.ini_options]
+markers = ["rustfst"]
+
+[tool.pylint.main]
+ignore = ["scripts"]
+persistent = true
+py-version = "3.8"
+
+[tool.pylint."messages control"]
+enable = ["indexing-exception", "old-raise-syntax"]
+disable = ["design","similarities","no-self-use","attribute-defined-outside-init","locally-disabled","star-args","pointless-except","bad-option-value","global-statement","fixme","suppressed-message","useless-suppression","locally-enabled","no-member","no-name-in-module","import-error","unsubscriptable-object","unbalanced-tuple-unpacking","undefined-variable","not-context-manager","missing-docstring","cyclic-import","redefined-builtin","ungrouped-imports","wrong-import-order","bad-continuation","import-outside-toplevel","line-too-long"]
+
+[tool.pylint.reports]
+output-format = "text"
+reports = "no"
