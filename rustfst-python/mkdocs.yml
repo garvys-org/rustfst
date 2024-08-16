@@ -36,6 +36,8 @@ nav:
         - rustfst/algorithms/rm_epsilon/index.md
       - reverse:
         - rustfst/algorithms/reverse/index.md
+      - inversion:
+        - rustfst/algorithms/inversion/index.md
       - project:
         - rustfst/algorithms/project/index.md
       - randgen:
