@@ -77,7 +77,7 @@ impl<W: Semiring> Trs<W> for TrsConst<W> {
     }
 
     fn to_trs_vec(&self) -> TrsVec<W> {
-        TrsVec(Arc::clone(&self.trs))
+        TrsVec(Arc::new(self.trs().to_vec()))
     }
 
     // Doesn't clone the data, only the Arc
@@ -113,6 +113,34 @@ impl<W: Semiring> Default for TrsConst<W> {
             trs: Arc::new(vec![]),
             pos: 0,
             n: 0,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    mod test_trs_const {
+        use super::*;
+        use crate::prelude::TropicalWeight;
+        use anyhow::Result;
+
+        #[test]
+        fn test_to_trs_vec() -> Result<()> {
+            let trs = TrsConst {
+                trs: Arc::new(vec![
+                    Tr::<TropicalWeight>::new(1, 1, TropicalWeight::one(), 0),
+                    Tr::<TropicalWeight>::new(1, 1, TropicalWeight::one(), 0),
+                ]),
+                pos: 1,
+                n: 1,
+            };
+
+            let tr_vec = trs.to_trs_vec();
+            assert_eq!(tr_vec.len(), 1);
+
+            Ok(())
         }
     }
 }
