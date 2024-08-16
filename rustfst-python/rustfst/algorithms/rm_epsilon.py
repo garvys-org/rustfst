@@ -11,8 +11,10 @@ from rustfst.fst.vector_fst import VectorFst
 def rm_epsilon(fst: VectorFst) -> VectorFst:
     """
     Return an equivalent FST with epsilon transitions removed.
+
     Args:
       fst: Fst
+
     Returns:
       Newly created FST with epsilon transitions removed.
     """

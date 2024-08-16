@@ -24,6 +24,7 @@ def top_sort(fst: VectorFst) -> VectorFst:
 
     Args:
         fst: Fst to top_sort.
+
     Returns:
         Equivalent top sorted Fst. Modification also happens in-place.
     """

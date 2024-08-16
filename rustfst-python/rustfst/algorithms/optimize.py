@@ -13,6 +13,7 @@ from rustfst.fst.vector_fst import VectorFst
 def optimize(fst: VectorFst):
     """
     Optimize an fst in-place
+
     Args:
         fst: Fst to optimize.
     """
@@ -24,6 +25,7 @@ def optimize(fst: VectorFst):
 def optimize_in_log(fst: VectorFst):
     """
     Optimize an fst in-place in the log semiring.
+
     Args:
         fst: Fst to optimize.
     """

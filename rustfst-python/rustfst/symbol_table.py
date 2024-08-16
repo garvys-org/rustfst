@@ -32,6 +32,7 @@ class SymbolTable:
 
         Args:
           symbol: A symbol unicode string.
+
         Returns:
           The integer key of the new symbol.
         """
@@ -51,6 +52,7 @@ class SymbolTable:
         """
         This method merges another symbol table into the current table. All key
         values will be offset by the current available key.
+
         Args:
           syms: A `SymbolTable` to be merged with the current table.
         """
@@ -74,13 +76,17 @@ class SymbolTable:
     def find(self, key: Union[int, str]) -> Union[int, str]:
         """
         Given a symbol or index, finds the other one.
+
         This method returns the index associated with a symbol key, or the symbol
         associated with a index key.
+
         Args:
           key: Either a string or an index.
+
         Returns:
           If key is a string, the associated index; if key is an integer, the
               associated symbol.
+
         Raises:
           KeyError: Key not found.
         """
@@ -114,8 +120,10 @@ class SymbolTable:
         This method returns a boolean indicating whether the given symbol or index
         is present in the table. If one intends to perform subsequent lookup, it is
         better to simply call the find method, catching the KeyError.
+
         Args:
           key: Either a string or an index.
+
         Returns:
           Whether or not the key is present (as a string or a index) in the table.
         """
@@ -156,10 +164,13 @@ class SymbolTable:
         """
         Reads symbol table from binary file.
         This class method creates a new SymbolTable from a symbol table binary file.
+
         Args:
           filename: The string location of the input binary file.
+
         Returns:
           A new SymbolTable instance.
+
         See also: `SymbolTable.read_fst`, `SymbolTable.read_text`.
         """
         symt = ctypes.pointer(ctypes.c_void_p())
@@ -176,12 +187,15 @@ class SymbolTable:
     def read_text(cls, filename: Union[str, Path]) -> SymbolTable:
         """
         Reads symbol table from text file.
+
         This class method creates a new SymbolTable from a symbol table text file.
+
         Args:
           filename: The string location of the input text file.
 
         Returns:
           A new SymbolTable instance.
+
         See also: `SymbolTable.read`, `SymbolTable.read_fst`.
         """
         symt = ctypes.pointer(ctypes.c_void_p())
@@ -197,9 +211,12 @@ class SymbolTable:
     def write(self, filename: Union[str, Path]):
         """
         Serializes symbol table to a file.
+
         This methods writes the SymbolTable to a file in binary format.
+
         Args:
           filename: The string location of the output file.
+
         Raises:
           FstIOError: Write failed.
         """
@@ -213,9 +230,12 @@ class SymbolTable:
     def write_text(self, filename: Union[str, Path]):
         """
         Writes symbol table to text file.
+
         This method writes the SymbolTable to a file in human-readable format.
+
         Args:
           filename: The string location of the output file.
+
         Raises:
           FstIOError: Write failed.
         """
@@ -232,6 +252,7 @@ class SymbolTable:
 
         Params:
             other: SymbolTable instance
+
         Returns:
              bool
         """
@@ -249,6 +270,7 @@ class SymbolTable:
 
         Params:
             other: SymbolTable instance
+
         Returns:
              bool
         """
@@ -257,6 +279,7 @@ class SymbolTable:
     def __iter__(self) -> SymbolTableIterator:
         """
         Returns an Iterator over the SymbolTable.
+
         Returns:
             An iterator over the SymbolTable.
         """
@@ -292,6 +315,7 @@ class SymbolTableIterator:
     def __init__(self, symbol_table: SymbolTable):
         """
         Constructs an iterator from the `Symboltable`.
+
         Args:
             symbol_table:
         """
@@ -302,6 +326,7 @@ class SymbolTableIterator:
     def __next__(self) -> Tuple[int, str]:
         """
         Iterator over the symbols in the `SymbolTable`.
+
         Returns:
             A pair label (int) and symbol (str).
         """
