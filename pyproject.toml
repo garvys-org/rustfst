@@ -31,6 +31,16 @@ classifiers = [
 
 [project.optional-dependencies]
 tests = [ "pytest>=6,<7", "pylint" ]
+docs = [
+     "mike",
+     "mkdocstrings[python]",
+     "mkdocs-material",
+     "mkdocs-literate-nav",
+     "mkdocs-gen-files",
+     "mkdocs-section-index",
+     "mkdocs-macros-plugin",
+]
+
 
 # This was in setup.py but is no longer relevant (it's not for Mac OS X)
 #    options={"bdist_wheel": {"universal": True}},
