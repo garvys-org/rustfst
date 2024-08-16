@@ -86,7 +86,7 @@ plugins:
     - rustfst-python/rustfst
     - docs
 repo_name: rustfst
-repo_url: https://github.com/Garvys/rustfst
+repo_url: https://github.com/garvys-org/rustfst
 site_name: rustfst-python
-site_url: https://github.com/Garvys/rustfst
+site_url: https://github.com/garvys-org/rustfst
 theme: material
