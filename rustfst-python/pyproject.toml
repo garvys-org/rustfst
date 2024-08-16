@@ -1,6 +1,44 @@
 [build-system]
-requires = [
-    "setuptools>=62.1,<63",
-    "setuptools_rust>=1.3,<1.4",
-    "wheel>=0.34,<0.35",
+requires = ["setuptools", "setuptools-rust"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rustfst-python"
+version = "1.1.1"
+authors = [
+    { name = "Alexandre Caulier", email = "alexandre.caulier.a@gmail.com" },
+    { name = "Emrick Sinitambirivoutin", email = "emrick.sinitambirivoutin@sonos.com" },
 ]
+description = "Library for constructing, combining, optimizing, and searching weighted finite-state transducers (FSTs). Re-implementation of OpenFst in Rust."
+# readme = "../README.md"
+requires-python = ">=3.8"
+keywords = ["fst", "openfst", "graph", "transducer", "acceptor",
+            "shortest-path", "minimize", "determinize", "wfst"]
+license = { text="Apache License, Version 2.0" }
+classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Rust",
+        "Topic :: Scientific/Engineering :: Mathematics",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "Topic :: Text Processing",
+        "License :: OSI Approved :: Apache Software License",
+]
+
+[project.optional-dependencies]
+tests = [ "pytest>=6,<7", "pylint" ]
+
+# Not sure about this one...
+#    options={"bdist_wheel": {"universal": True}},
+
+[tool.setuptools.packages.find]
+include = ["rustfst"]
+
+[[tool.setuptools-rust.ext-modules]]
+target = "rustfst.dylib.dylib"
+path = "../rustfst-ffi/Cargo.toml"
+binding = "NoBinding"
