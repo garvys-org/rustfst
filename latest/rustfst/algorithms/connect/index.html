@@ -906,7 +906,8 @@
 
   <div class="doc doc-contents ">
   
-      <p>This operation trims an Fst, removing states and trs that are not on successful paths.</p>
+      <p>This operation trims an Fst in-place, removing states and trs that are not on
+successful paths.</p>
 <p>Examples :</p>
 <ul>
 <li>Input :</li>
@@ -919,7 +920,7 @@
 
 <details class="returns-">
   <summary>Returns</summary>
-  <p>self</p>
+  <p>fst</p>
 </details>
       <details class="quote">
         <summary>Source code in <code>rustfst/algorithms/connect.py</code></summary>
@@ -948,7 +949,8 @@
 <span class="normal">32</span>
 <span class="normal">33</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This operation trims an Fst, removing states and trs that are not on successful paths.</span>
+<span class="sd">    This operation trims an Fst in-place, removing states and trs that are not on</span>
+<span class="sd">    successful paths.</span>
 
 <span class="sd">    Examples :</span>
 
@@ -961,8 +963,7 @@
 <span class="sd">    ![connect_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/connect_out.svg?sanitize=true)</span>
 
 <span class="sd">    Returns :</span>
-<span class="sd">        self</span>
-
+<span class="sd">        fst</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_connect</span><span class="p">(</span><span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>

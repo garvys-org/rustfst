@@ -827,6 +827,19 @@
     Classes
   </a>
   
+    <nav class="md-nav" aria-label="Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.shortest_path.ShortestPathConfig" class="md-nav__link">
+    ShortestPathConfig
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -920,6 +933,19 @@
   <a href="#rustfst.algorithms.compose-classes" class="md-nav__link">
     Classes
   </a>
+  
+    <nav class="md-nav" aria-label="Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.compose.ComposeConfig" class="md-nav__link">
+    ComposeConfig
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1381,6 +1407,19 @@
   <a href="#rustfst.algorithms.minimize-classes" class="md-nav__link">
     Classes
   </a>
+  
+    <nav class="md-nav" aria-label="Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.minimize.MinimizeConfig" class="md-nav__link">
+    MinimizeConfig
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -2064,6 +2103,141 @@ initial and final.</p>
 
 
 <h5 id="rustfst.algorithms.shortest_path-classes">Classes</h5>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h6 id="rustfst.algorithms.shortest_path.ShortestPathConfig" class="doc doc-heading">
+        <code>ShortestPathConfig</code>
+
+
+</h6>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Configuration for shortest-path operation.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>nshortest</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td><p>Number of shortest paths to return</p></td>
+          <td>
+                <code>1</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>unique</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Return only unique label sequences</p></td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>delta</code></td>
+          <td>
+                <code><span title="typing.Union">Union</span>[float, None]</code>
+          </td>
+          <td><p>Difference in weights considered significant</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+        <details class="quote">
+          <summary>Source code in <code>rustfst/algorithms/shortest_path.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ShortestPathConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Configuration for shortest-path operation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      nshortest: Number of shortest paths to return</span>
+<span class="sd">      unique: Return only unique label sequences</span>
+<span class="sd">      delta: Difference in weights considered significant</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">nshortest</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">unique</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">delta</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">delta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="n">KSHORTESTDELTA</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
+        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_shortest_path_config_new</span><span class="p">(</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">delta</span><span class="p">),</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">nshortest</span><span class="p">),</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_bool</span><span class="p">(</span><span class="n">unique</span><span class="p">),</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">config</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error creating ShortestPathConfig&quot;</span>
+        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">config</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
 <h5 id="rustfst.algorithms.shortest_path-functions">Functions</h5>
 
 <div class="doc doc-object doc-function">
@@ -2078,32 +2252,73 @@ initial and final.</p>
 
   <div class="doc doc-contents ">
   
-      <p>shortestpath(fst)
-construct a FST containing the shortest path of the input FST
-:param fst: Fst
-:return: Fst</p>
+      <p>Construct a FST containing the shortest path of the input FST</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fst</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Fst</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Newly-created FST containing only the shortest path of the input FST.</p></td>
+        </tr>
+    </tbody>
+  </table>
 
       <details class="quote">
         <summary>Source code in <code>rustfst/algorithms/shortest_path.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">shortestpath</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">shortestpath</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    shortestpath(fst)</span>
-<span class="sd">    construct a FST containing the shortest path of the input FST</span>
-<span class="sd">    :param fst: Fst</span>
-<span class="sd">    :return: Fst</span>
+<span class="sd">    Construct a FST containing the shortest path of the input FST</span>
+<span class="sd">    Args:</span>
+<span class="sd">      fst: Fst</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      Newly-created FST containing only the shortest path of the input FST.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">shortest_path</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">()</span>
@@ -2130,38 +2345,88 @@ construct a FST containing the shortest path of the input FST
 
   <div class="doc doc-contents ">
   
-      <p>shortestpath(fst,config)
-construct a FST containing the n-shortest path(s) in the input FST
-:param fst: Fst
-:param config: ShortestPathConfig
-:return: Fst</p>
+      <p>Construct a FST containing the shortest path of the input FST</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fst</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Fst</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>config</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.algorithms.shortest_path.ShortestPathConfig" href="shortest_path/#rustfst.algorithms.shortest_path.ShortestPathConfig">ShortestPathConfig</a></code>
+          </td>
+          <td><p>Configuration for shortest-path operation.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Newly-created FST containing only the shortest path of the input FST.</p></td>
+        </tr>
+    </tbody>
+  </table>
 
       <details class="quote">
         <summary>Source code in <code>rustfst/algorithms/shortest_path.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">58</span>
 <span class="normal">59</span>
 <span class="normal">60</span>
 <span class="normal">61</span>
-<span class="normal">62</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">shortestpath_with_config</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ShortestPathConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">shortestpath_with_config</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ShortestPathConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    shortestpath(fst,config)</span>
-<span class="sd">    construct a FST containing the n-shortest path(s) in the input FST</span>
-<span class="sd">    :param fst: Fst</span>
-<span class="sd">    :param config: ShortestPathConfig</span>
-<span class="sd">    :return: Fst</span>
+<span class="sd">    Construct a FST containing the shortest path of the input FST</span>
+<span class="sd">    Args:</span>
+<span class="sd">      fst: Fst</span>
+<span class="sd">      config: Configuration for shortest-path operation.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      Newly-created FST containing only the shortest path of the input FST.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">shortest_path</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">()</span>
@@ -2494,6 +2759,186 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
 
 
 <h5 id="rustfst.algorithms.compose-classes">Classes</h5>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h6 id="rustfst.algorithms.compose.ComposeConfig" class="doc doc-heading">
+        <code>ComposeConfig</code>
+
+
+</h6>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Configuration for compose operation.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>compose_filter</code></td>
+          <td>
+                <code><span title="rustfst.algorithms.compose.ComposeFilter">ComposeFilter</span></code>
+          </td>
+          <td><p>Filter which determines allowable matches during
+              composition operation.</p></td>
+          <td>
+                <code>ComposeFilter.AUTOFILTER</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>connect</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Connect the resulting FST after composition.</p></td>
+          <td>
+                <code>True</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>matcher1_config</code></td>
+          <td>
+                <code><span title="typing.Optional">Optional</span>[<span title="rustfst.algorithms.compose.MatcherConfig">MatcherConfig</span>]</code>
+          </td>
+          <td><p>Matcher configuration for left-hand FST.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>matcher2_config</code></td>
+          <td>
+                <code><span title="typing.Optional">Optional</span>[<span title="rustfst.algorithms.compose.MatcherConfig">MatcherConfig</span>]</code>
+          </td>
+          <td><p>Matcher configuration for right-hand FST.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+        <details class="quote">
+          <summary>Source code in <code>rustfst/algorithms/compose.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ComposeConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Configuration for compose operation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      compose_filter: Filter which determines allowable matches during</span>
+<span class="sd">                      composition operation.</span>
+<span class="sd">      connect: Connect the resulting FST after composition.</span>
+<span class="sd">      matcher1_config: Matcher configuration for left-hand FST.</span>
+<span class="sd">      matcher2_config: Matcher configuration for right-hand FST.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">compose_filter</span><span class="p">:</span> <span class="n">ComposeFilter</span> <span class="o">=</span> <span class="n">ComposeFilter</span><span class="o">.</span><span class="n">AUTOFILTER</span><span class="p">,</span>
+        <span class="n">connect</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">matcher1_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">MatcherConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">matcher2_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">MatcherConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
+
+        <span class="n">m1_ptr</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">matcher1_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">m1_ptr</span> <span class="o">=</span> <span class="n">matcher1_config</span><span class="o">.</span><span class="n">ptr</span>
+        <span class="n">m2_ptr</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">matcher2_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">m2_ptr</span> <span class="o">=</span> <span class="n">matcher2_config</span><span class="o">.</span><span class="n">ptr</span>
+
+        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_compose_config_new</span><span class="p">(</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">compose_filter</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_bool</span><span class="p">(</span><span class="n">connect</span><span class="p">),</span>
+            <span class="n">m1_ptr</span><span class="p">,</span>
+            <span class="n">m2_ptr</span><span class="p">,</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">config</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error creating ComposeConfig&quot;</span>
+        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">config</span>
+
+    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">lib</span><span class="o">.</span><span class="n">fst_compose_config_destroy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
 <h5 id="rustfst.algorithms.compose-functions">Functions</h5>
 
 <div class="doc doc-object doc-function">
@@ -2564,22 +3009,22 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
 
       <details class="quote">
         <summary>Source code in <code>rustfst/algorithms/compose.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">110</span>
 <span class="normal">111</span>
 <span class="normal">112</span>
 <span class="normal">113</span>
-<span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compose</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">other_fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compose</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">other_fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the composition of two FSTs.</span>
 <span class="sd">    Args:</span>
@@ -2649,7 +3094,7 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
         <tr>
           <td><code>config</code></td>
           <td>
-                <code><span title="rustfst.algorithms.compose.ComposeConfig">ComposeConfig</span></code>
+                <code><a class="autorefs autorefs-internal" title="rustfst.algorithms.compose.ComposeConfig" href="compose/#rustfst.algorithms.compose.ComposeConfig">ComposeConfig</a></code>
           </td>
           <td><p>Config parameters of the composition.</p></td>
           <td>
@@ -2679,18 +3124,7 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
 
       <details class="quote">
         <summary>Source code in <code>rustfst/algorithms/compose.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">128</span>
 <span class="normal">129</span>
 <span class="normal">130</span>
 <span class="normal">131</span>
@@ -2699,7 +3133,18 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
 <span class="normal">134</span>
 <span class="normal">135</span>
 <span class="normal">136</span>
-<span class="normal">137</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compose_with_config</span><span class="p">(</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compose_with_config</span><span class="p">(</span>
     <span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">other_fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ComposeConfig</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -3209,7 +3654,7 @@ current time and process ID is used.</p></td>
 
 
 <h6 id="rustfst.algorithms.replace.replace" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">replace</span><span class="p">(</span><span class="n">root_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fst_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">VectorFst</span><span class="p">],</span> <span class="n">epsilon_on_replace</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
+<code class="highlight language-python"><span class="n">replace</span><span class="p">(</span><span class="n">root_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fst_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">VectorFst</span><span class="p">]],</span> <span class="n">epsilon_on_replace</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
 
@@ -3274,7 +3719,7 @@ of non-terminal Label and corresponding FST.</p>
         <tr>
           <td><code>fst_list</code></td>
           <td>
-                <code><span title="typing.List">List</span>[int, <a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a>]</code>
+                <code><span title="typing.List">List</span>[<span title="typing.Tuple">Tuple</span>[int, <a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a>]]</code>
           </td>
           <td></td>
           <td>
@@ -3376,7 +3821,7 @@ of non-terminal Label and corresponding FST.</p>
 <span class="normal">78</span>
 <span class="normal">79</span>
 <span class="normal">80</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">replace</span><span class="p">(</span>
-    <span class="n">root_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fst_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[(</span><span class="nb">int</span><span class="p">,</span> <span class="n">VectorFst</span><span class="p">)],</span> <span class="n">epsilon_on_replace</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">root_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fst_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">VectorFst</span><span class="p">]],</span> <span class="n">epsilon_on_replace</span><span class="p">:</span> <span class="nb">bool</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Recursively replaces trs in the root FSTs with other FSTs.</span>
@@ -3480,17 +3925,56 @@ of non-terminal Label and corresponding FST.</p>
 
 
 <h6 id="rustfst.algorithms.rm_epsilon.rm_epsilon" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">rm_epsilon</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">rm_epsilon</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
 
 
   <div class="doc doc-contents ">
   
-      <p>rm_epsilon(fst)
-rm_epsilon an fst
-:param fst: Fst
-:return: Fst</p>
+      <p>Return an equivalent FST with epsilon transitions removed.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fst</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Fst</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Newly created FST with epsilon transitions removed.</p></td>
+        </tr>
+    </tbody>
+  </table>
 
       <details class="quote">
         <summary>Source code in <code>rustfst/algorithms/rm_epsilon.py</code></summary>
@@ -3507,12 +3991,14 @@ rm_epsilon an fst
 <span class="normal">21</span>
 <span class="normal">22</span>
 <span class="normal">23</span>
-<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">rm_epsilon</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">):</span>
+<span class="normal">24</span>
+<span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">rm_epsilon</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    rm_epsilon(fst)</span>
-<span class="sd">    rm_epsilon an fst</span>
-<span class="sd">    :param fst: Fst</span>
-<span class="sd">    :return: Fst</span>
+<span class="sd">    Return an equivalent FST with epsilon transitions removed.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      fst: Fst</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      Newly created FST with epsilon transitions removed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">rm_epsilon_fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">()</span>
@@ -3642,17 +4128,59 @@ sort fst trs according to their ilabel or olabel
 
 
 <h6 id="rustfst.algorithms.reverse.reverse" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">reverse</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">reverse</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
 
 
   <div class="doc doc-contents ">
   
-      <p>reverse(fst)
-reverse an fst
-:param fst: Fst
-:return: Fst</p>
+      <p>Reverse an Fst, returning a new Fst which accepts
+the same language in reverse order.</p>
+<p>Not to be confused with <code>inverse</code>, which does something
+totally different!</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fst</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Fst to reverse</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Newly created, reversed Fst.</p></td>
+        </tr>
+    </tbody>
+  </table>
 
       <details class="quote">
         <summary>Source code in <code>rustfst/algorithms/reverse.py</code></summary>
@@ -3669,12 +4197,22 @@ reverse an fst
 <span class="normal">21</span>
 <span class="normal">22</span>
 <span class="normal">23</span>
-<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">):</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    reverse(fst)</span>
-<span class="sd">    reverse an fst</span>
-<span class="sd">    :param fst: Fst</span>
-<span class="sd">    :return: Fst</span>
+<span class="sd">    Reverse an Fst, returning a new Fst which accepts</span>
+<span class="sd">    the same language in reverse order.</span>
+
+<span class="sd">    Not to be confused with `inverse`, which does something</span>
+<span class="sd">    totally different!</span>
+<span class="sd">    Args:</span>
+<span class="sd">      fst: Fst to reverse</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      Newly created, reversed Fst.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">reversed_fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">()</span>
@@ -3733,7 +4271,7 @@ reverse an fst
 
   <div class="doc doc-contents ">
   
-      <p>Optimize an fst.</p>
+      <p>Optimize an fst in-place</p>
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -3771,7 +4309,7 @@ reverse an fst
 <span class="normal">20</span>
 <span class="normal">21</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Optimize an fst.</span>
+<span class="sd">    Optimize an fst in-place</span>
 <span class="sd">    Args:</span>
 <span class="sd">        fst: Fst to optimize.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -3796,7 +4334,7 @@ reverse an fst
 
   <div class="doc doc-contents ">
   
-      <p>Optimize an fst in the log semiring.</p>
+      <p>Optimize an fst in-place in the log semiring.</p>
 
   <p><strong>Parameters:</strong></p>
   <table>
@@ -3834,7 +4372,7 @@ reverse an fst
 <span class="normal">31</span>
 <span class="normal">32</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">optimize_in_log</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Optimize an fst in the log semiring.</span>
+<span class="sd">    Optimize an fst in-place in the log semiring.</span>
 <span class="sd">    Args:</span>
 <span class="sd">        fst: Fst to optimize.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -4363,6 +4901,81 @@ with the same input labels, output labels and weight.</p>
 
 
 <h5 id="rustfst.algorithms.minimize-classes">Classes</h5>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h6 id="rustfst.algorithms.minimize.MinimizeConfig" class="doc doc-heading">
+        <code>MinimizeConfig</code>
+
+
+</h6>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Configuration for the minimization operation.</p>
+
+
+        <details class="quote">
+          <summary>Source code in <code>rustfst/algorithms/minimize.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">MinimizeConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Configuration for the minimization operation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_nondet</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">delta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="n">KSHORTESTDELTA</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
+        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_minimize_config_new</span><span class="p">(</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">delta</span><span class="p">),</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_bool</span><span class="p">(</span><span class="n">allow_nondet</span><span class="p">),</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">config</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error creating MinimizeConfig&quot;</span>
+        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">config</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
 <h5 id="rustfst.algorithms.minimize-functions">Functions</h5>
 
 <div class="doc doc-object doc-function">
@@ -4377,30 +4990,71 @@ with the same input labels, output labels and weight.</p>
 
   <div class="doc doc-contents ">
   
-      <p>minimize(fst)
-Minimize a FST in place
-:param fst: Fst
-:return: Fst</p>
+      <p>Minimize an FST in-place</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fst</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Fst</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>fst</p></td>
+        </tr>
+    </tbody>
+  </table>
 
       <details class="quote">
         <summary>Source code in <code>rustfst/algorithms/minimize.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">32</span>
 <span class="normal">33</span>
 <span class="normal">34</span>
 <span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span>
-<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">minimize</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    minimize(fst)</span>
-<span class="sd">    Minimize a FST in place</span>
-<span class="sd">    :param fst: Fst</span>
-<span class="sd">    :return: Fst</span>
+<span class="sd">    Minimize an FST in-place</span>
+<span class="sd">    Params:</span>
+<span class="sd">      fst: Fst</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      fst</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_minimize</span><span class="p">(</span><span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
     <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error while minimizing FST&quot;</span>
@@ -4425,33 +5079,83 @@ Minimize a FST in place
 
   <div class="doc doc-contents ">
   
-      <p>minimize(fst, config)
-Minimize a FST in place
-:param fst: Fst
-:param config: MinimizeConfig
-:return: Fst</p>
+      <p>Minimize an FST in-place</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fst</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Fst</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>config</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.algorithms.minimize.MinimizeConfig" href="#rustfst.algorithms.minimize.MinimizeConfig">MinimizeConfig</a></code>
+          </td>
+          <td><p>Configuration</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>fst</p></td>
+        </tr>
+    </tbody>
+  </table>
 
       <details class="quote">
         <summary>Source code in <code>rustfst/algorithms/minimize.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">47</span>
 <span class="normal">48</span>
 <span class="normal">49</span>
 <span class="normal">50</span>
 <span class="normal">51</span>
 <span class="normal">52</span>
 <span class="normal">53</span>
-<span class="normal">54</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">minimize_with_config</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">MinimizeConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">minimize_with_config</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">MinimizeConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    minimize(fst, config)</span>
-<span class="sd">    Minimize a FST in place</span>
-<span class="sd">    :param fst: Fst</span>
-<span class="sd">    :param config: MinimizeConfig</span>
-<span class="sd">    :return: Fst</span>
+<span class="sd">    Minimize an FST in-place</span>
+<span class="sd">    Params:</span>
+<span class="sd">      fst: Fst</span>
+<span class="sd">      config: Configuration</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      fst</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_minimize_with_config</span><span class="p">(</span><span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
     <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error while minimizing FST&quot;</span>
@@ -5323,7 +6027,8 @@ of ambiguous outputs.</p>
 
   <div class="doc doc-contents ">
   
-      <p>This operation trims an Fst, removing states and trs that are not on successful paths.</p>
+      <p>This operation trims an Fst in-place, removing states and trs that are not on
+successful paths.</p>
 <p>Examples :</p>
 <ul>
 <li>Input :</li>
@@ -5336,7 +6041,7 @@ of ambiguous outputs.</p>
 
 <details class="returns-">
   <summary>Returns</summary>
-  <p>self</p>
+  <p>fst</p>
 </details>
       <details class="quote">
         <summary>Source code in <code>rustfst/algorithms/connect.py</code></summary>
@@ -5365,7 +6070,8 @@ of ambiguous outputs.</p>
 <span class="normal">32</span>
 <span class="normal">33</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This operation trims an Fst, removing states and trs that are not on successful paths.</span>
+<span class="sd">    This operation trims an Fst in-place, removing states and trs that are not on</span>
+<span class="sd">    successful paths.</span>
 
 <span class="sd">    Examples :</span>
 
@@ -5378,8 +6084,7 @@ of ambiguous outputs.</p>
 <span class="sd">    ![connect_out](https://raw.githubusercontent.com/Garvys/rustfst-images-doc/master/images/connect_out.svg?sanitize=true)</span>
 
 <span class="sd">    Returns :</span>
-<span class="sd">        self</span>
-
+<span class="sd">        fst</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_connect</span><span class="p">(</span><span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
