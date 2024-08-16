@@ -609,9 +609,9 @@ class VectorFst(Fst):
 
     def rm_epsilon(self) -> VectorFst:
         """
-        Return an equivalent FST with epsilon transitions removed.
+        Remove epsilon transitions in-place.
         Returns:
-          Newly created FST with epsilon transitions removed.
+          self: Same FST, modified in place
         """
         from rustfst.algorithms.rm_epsilon import rm_epsilon
 
