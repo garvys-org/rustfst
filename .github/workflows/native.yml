@@ -352,12 +352,11 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }} # Version range or exact version of a Python version to use, using SemVer's version range syntax
-          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
-      - name: Build and publish
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.20.0
         env:
           CIBW_SKIP: cp*-musllinux_i686
           CIBW_ENVIRONMENT: PATH="$HOME/.cargo/bin:$PATH"
@@ -372,11 +371,11 @@ jobs:
           CIBW_ARCHS_MACOS: "x86_64 arm64"
           # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
           CIBW_ARCHS_LINUX: "auto"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+
+      - name: Upload
         run: |
-          python3.9 -m pip install twine cibuildwheel==2.13.1
-          mkdir -p wheels
-          python3.9 -m cibuildwheel --output-dir wheels rustfst-python
-          python3.9 -m twine upload -u "__token__" -p ${{ secrets.PYPI_PASSWORD }} -r pypi --verbose wheels/*
-
-
-
+          python -m pip install twine
+          python -m twine upload -u "__token__" -p ${{ secrets.PYPI_PASSWORD }} -r pypi --verbose wheelhouse/*
