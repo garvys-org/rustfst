@@ -10,7 +10,7 @@ authors = [
     { name = "Emrick Sinitambirivoutin", email = "emrick.sinitambirivoutin@sonos.com" },
 ]
 description = "Library for constructing, combining, optimizing, and searching weighted finite-state transducers (FSTs). Re-implementation of OpenFst in Rust."
-# readme = "../README.md"
+readme = "README.md"
 requires-python = ">=3.8"
 keywords = ["fst", "openfst", "graph", "transducer", "acceptor",
             "shortest-path", "minimize", "determinize", "wfst"]
@@ -32,13 +32,13 @@ classifiers = [
 [project.optional-dependencies]
 tests = [ "pytest>=6,<7", "pylint" ]
 
-# Not sure about this one...
+# This was in setup.py but is no longer relevant (it's not for Mac OS X)
 #    options={"bdist_wheel": {"universal": True}},
 
-[tool.setuptools.packages.find]
-include = ["rustfst"]
+[tool.setuptools]
+package-dir = {"rustfst" = "rustfst-python/rustfst"}
 
 [[tool.setuptools-rust.ext-modules]]
 target = "rustfst.dylib.dylib"
-path = "../rustfst-ffi/Cargo.toml"
+path = "rustfst-ffi/Cargo.toml"
 binding = "NoBinding"
