@@ -7,14 +7,19 @@ from rustfst.ffi_utils import (
 from rustfst.fst.vector_fst import VectorFst
 
 
-def tr_unique(fst: VectorFst):
+def tr_unique(fst: VectorFst) -> VectorFst:
     """
-    Keep a single instance of trs leaving the same state, going to the same state and
-    with the same input labels, output labels and weight.
+    Modify an FST in-place, keeping a single instance of trs
+    leaving the same state, going to the same state and with the same
+    input labels, output labels and weight.
+
     Args:
         fst: Fst to modify
+    Returns:
+        fst: Same FST, modified in-place
     """
 
     ret_code = lib.fst_tr_unique(fst.ptr)
     err_msg = "Error during tr_unique"
     check_ffi_error(ret_code, err_msg)
+    return fst
