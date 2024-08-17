@@ -13,9 +13,11 @@ from rustfst.fst.vector_fst import VectorFst
 def concat(fst: VectorFst, other_fst: VectorFst) -> VectorFst:
     """
     Compute the concatenation of two Fsts.
+
     Args:
         fst: Left fst.
         other_fst: Right fst.
+
     Returns:
         Resulting fst.
     """
@@ -30,6 +32,7 @@ def concat(fst: VectorFst, other_fst: VectorFst) -> VectorFst:
 def concat_list(fsts: List[VectorFst]) -> VectorFst:
     """
     Compute the concatenation of a list of Fsts.
+
     Args:
         fsts: List of Fsts to concatenated
 

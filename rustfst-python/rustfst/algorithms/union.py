@@ -12,7 +12,9 @@ from rustfst.fst.vector_fst import VectorFst
 
 def union(fst: VectorFst, other_fst: VectorFst) -> VectorFst:
     """
-    Performs the union of two wFSTs. If A transduces string `x` to `y` with weight `a`
+    Performs the union of two wFSTs.
+
+    If A transduces string `x` to `y` with weight `a`
     and `B` transduces string `w` to `v` with weight `b`, then their union transduces `x` to `y`
     with weight `a` and `w` to `v` with weight `b`.
 
@@ -32,6 +34,7 @@ def union(fst: VectorFst, other_fst: VectorFst) -> VectorFst:
     Args:
         fst:
         other_fst:
+
     Returns:
          The resulting Fst.
 

@@ -82,9 +82,9 @@ plugins:
           show_object_full_path: false
           show_signature_annotations: true
           show_submodules: true
-    watch:
-    - rustfst
-    - docs
+watch:
+  - rustfst
+  - docs
 repo_name: rustfst
 repo_url: https://github.com/garvys-org/rustfst
 site_name: rustfst-python

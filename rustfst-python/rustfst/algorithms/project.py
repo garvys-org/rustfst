@@ -27,9 +27,11 @@ class ProjectType(Enum):
 def project(fst: VectorFst, proj_type: ProjectType) -> VectorFst:
     """
     Convert a Fst to an acceptor using input or output labels.
+
     Args:
         fst: Fst on which to apply the algorithm.
         proj_type: Whether to replace input labels or output labels.
+
     Returns:
         The resulting Fst.
     """

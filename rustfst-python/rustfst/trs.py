@@ -26,6 +26,7 @@ class Trs:
     def push(self, tr: Tr):
         """
         Add a new transition to the list.
+
         Args:
             tr: The transition to add.
         """
@@ -45,6 +46,7 @@ class Trs:
     def len(self) -> int:
         """
         Compute the number of transitions in the list.
+
         Returns:
             The number of transitions.
 

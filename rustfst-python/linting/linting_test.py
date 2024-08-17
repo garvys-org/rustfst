@@ -1,16 +1,14 @@
 import os
 from pathlib import Path
 
-import pytest
 from pylint.lint import Run
 
-ROOT_PATH = Path(__file__).parents[1]
+ROOT_PATH = Path(__file__).parent.parent
 RCFILEPATH = ROOT_PATH / "linting" / "pylintrc"
 
 
 def run_linting_test(package):
-    args = ["--rcfile", str(RCFILEPATH)]
-    args += all_python_files(package)
+    args = all_python_files(package)
 
     run = Run(args, exit=False)
     assert run.linter.msg_status == 0
