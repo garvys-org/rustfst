@@ -259,7 +259,7 @@ jobs:
       - name: Test doc generation
         run: |
           cd rustfst-python
-          mkdocs build
+          mkdocs build -s
 
   publish-python-doc:
     name: Publish rustfst-python's doc
@@ -289,7 +289,7 @@ jobs:
       - run: git config user.name ${{ env.GIT_COMMITTER_NAME }}
       - run: git config user.email ${{ env.GIT_COMMITTER_EMAIL }}
       - run: git fetch origin gh-pages --depth=1
-      - run: cd rustfst-python && mkdocs build
+      - run: cd rustfst-python && mkdocs build -s
       - name: Deploy Doc to latest
         if: github.ref == 'refs/heads/main'
         run: cd rustfst-python && mike deploy --push latest
