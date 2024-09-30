@@ -2,6 +2,8 @@ use anyhow::Result;
 
 use crate::semirings::{CompleteSemiring, ReverseBack, Semiring, SemiringProperties, StarSemiring};
 use std::borrow::Borrow;
+
+use super::{DivideType, WeaklyDivisibleSemiring};
 /// Boolean semiring: (&, |, false, true).
 #[derive(Clone, Debug, PartialEq, PartialOrd, Default, Eq, Copy, Hash)]
 pub struct BooleanWeight {
@@ -74,6 +76,15 @@ impl CompleteSemiring for BooleanWeight {}
 impl StarSemiring for BooleanWeight {
     fn closure(&self) -> Self {
         Self::new(true)
+    }
+}
+
+impl WeaklyDivisibleSemiring for BooleanWeight {
+    fn divide_assign(&mut self, rhs: &Self, _divide_type: DivideType) -> Result<()> {
+        if !rhs.value {
+            bail!("Division by 0")
+        }
+        Ok(()) // x / true == true
     }
 }
 
