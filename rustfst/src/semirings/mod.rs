@@ -13,6 +13,7 @@ mod probability_weight;
 mod product_weight;
 mod string_variant;
 mod string_weight;
+mod trivial_weight;
 mod tropical_weight;
 mod union_weight;
 pub(crate) mod utils_float;
@@ -33,5 +34,6 @@ pub(crate) use self::string_variant::StringWeightVariant;
 pub use self::string_weight::{
     StringType, StringWeightLeft, StringWeightRestrict, StringWeightRight,
 };
+pub use self::trivial_weight::TrivialWeight;
 pub use self::tropical_weight::TropicalWeight;
 pub use self::union_weight::{UnionWeight, UnionWeightOption};
