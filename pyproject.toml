@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rustfst-python"
-version = "1.1.1"
+version = "1.1.2"
 authors = [
     { name = "Alexandre Caulier", email = "alexandre.caulier.a@gmail.com" },
     { name = "Emrick Sinitambirivoutin", email = "emrick.sinitambirivoutin@sonos.com" },
