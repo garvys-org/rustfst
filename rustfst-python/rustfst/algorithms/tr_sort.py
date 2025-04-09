@@ -9,7 +9,7 @@ from rustfst.fst.vector_fst import VectorFst
 
 
 def tr_sort(fst: VectorFst, ilabel_cmp: bool) -> VectorFst:
-    """Sort trs for an FST in-place according to their input or
+    """Sort fst trs in place according to their input or output label.
     output label.
 
     This is often necessary for composition to work properly.  It
