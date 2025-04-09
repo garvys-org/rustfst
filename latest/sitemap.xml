@@ -31,6 +31,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://github.com/garvys-org/rustfst/latest/rustfst/algorithms/inversion/</loc>
+         <lastmod>2025-04-09</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://github.com/garvys-org/rustfst/latest/rustfst/algorithms/isomorphic/</loc>
          <lastmod>2025-04-09</lastmod>
          <changefreq>daily</changefreq>

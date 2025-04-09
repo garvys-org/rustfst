@@ -513,6 +513,20 @@
   
   
     <li class="md-nav__item">
+      <a href="inversion/" class="md-nav__link">
+        inversion
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="project/" class="md-nav__link">
         project
       </a>
@@ -1576,6 +1590,46 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#rustfst.algorithms.inversion" class="md-nav__link">
+    inversion
+  </a>
+  
+    <nav class="md-nav" aria-label="inversion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.inversion-classes" class="md-nav__link">
+    Classes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.inversion-functions" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.algorithms.inversion.invert" class="md-nav__link">
+    invert()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#rustfst.algorithms.randgen" class="md-nav__link">
     randgen
   </a>
@@ -2546,10 +2600,44 @@ successful paths.</p>
 
   <div class="doc doc-contents ">
   
-      <p>tr_sort(fst)
-sort fst trs according to their ilabel or olabel
-:param fst: Fst
-:param ilabel_cmp: bool</p>
+      <p>Sort fst trs in place according to their input or output label.</p>
+<p>This is often necessary for composition to work properly.  It
+corresponds to <code>ArcSort</code> in OpenFST.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fst</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>FST to be tr-sorted</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>ilabel_cmp</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>Sort on input labels if <code>True</code>, output labels
+          if <code>False</code>.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
 
       <details class="quote">
         <summary>Source code in <code>rustfst/algorithms/tr_sort.py</code></summary>
@@ -2563,12 +2651,20 @@ sort fst trs according to their ilabel or olabel
 <span class="normal">18</span>
 <span class="normal">19</span>
 <span class="normal">20</span>
-<span class="normal">21</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">tr_sort</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">ilabel_cmp</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    tr_sort(fst)</span>
-<span class="sd">    sort fst trs according to their ilabel or olabel</span>
-<span class="sd">    :param fst: Fst</span>
-<span class="sd">    :param ilabel_cmp: bool</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">tr_sort</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">ilabel_cmp</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sort fst trs in place according to their input or output label.</span>
+
+<span class="sd">    This is often necessary for composition to work properly.  It</span>
+<span class="sd">    corresponds to `ArcSort` in OpenFST.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      fst: FST to be tr-sorted</span>
+<span class="sd">      ilabel_cmp: Sort on input labels if `True`, output labels</span>
+<span class="sd">                  if `False`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_tr_sort</span><span class="p">(</span><span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_bool</span><span class="p">(</span><span class="n">ilabel_cmp</span><span class="p">))</span>
@@ -5783,6 +5879,134 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">VectorFst</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">shortest_path</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="rustfst.algorithms.inversion" class="doc doc-heading">
+          <code>inversion</code>
+
+
+</h4>
+
+  <div class="doc doc-contents ">
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+<h5 id="rustfst.algorithms.inversion-classes">Classes</h5>
+<h5 id="rustfst.algorithms.inversion-functions">Functions</h5>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h6 id="rustfst.algorithms.inversion.invert" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">invert</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
+
+</h6>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Invert the transduction corresponding to an FST by exchanging the
+FST's input and output labels in-place.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fst</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>FST to be inverted.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>self</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+      <details class="quote">
+        <summary>Source code in <code>rustfst/algorithms/inversion.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">invert</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Invert the transduction corresponding to an FST by exchanging the</span>
+<span class="sd">    FST&#39;s input and output labels in-place.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">       fst: FST to be inverted.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">       self</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_invert</span><span class="p">(</span><span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error during invert&quot;</span>
+    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fst</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
