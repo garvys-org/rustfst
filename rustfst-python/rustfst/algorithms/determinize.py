@@ -41,6 +41,7 @@ class DeterminizeConfig:
     def __init__(self, det_type: DeterminizeType, delta: Optional[float] = None):
         """
         Creates the configuration object.
+
         Args:
             det_type: Type of determinization to perform.
             delta:
@@ -62,8 +63,10 @@ class DeterminizeConfig:
 def determinize(fst: VectorFst) -> VectorFst:
     """
     Make an Fst deterministic
+
     Args:
         fst: The Fst to make deterministic.
+
     Returns:
         The resulting Fst.
     """
@@ -78,9 +81,11 @@ def determinize(fst: VectorFst) -> VectorFst:
 def determinize_with_config(fst: VectorFst, config: DeterminizeConfig) -> VectorFst:
     """
     Make an Fst deterministic
+
     Args:
         fst: The Fst to make deterministic.
         config: Configuration of the determinization algorithm to use.
+
     Returns:
         The resulting Fst.
     """

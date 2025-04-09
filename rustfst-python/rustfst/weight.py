@@ -8,6 +8,7 @@ from rustfst.ffi_utils import (
 def weight_one() -> float:
     """
     Compute One() in the Tropical Semiring.
+
     Returns:
         Float value corresponding to One() in the Tropical Semiring.
     """
@@ -21,6 +22,7 @@ def weight_one() -> float:
 def weight_zero() -> float:
     """
     Compute Zero() in the Tropical Semiring.
+
     Returns:
         Float value corresponding to Zero() in the Tropical Semiring.
     """

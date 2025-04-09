@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools", "setuptools-rust"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rustfst-python"
+version = "1.1.2"
+authors = [
+    { name = "Alexandre Caulier", email = "alexandre.caulier.a@gmail.com" },
+    { name = "Emrick Sinitambirivoutin", email = "emrick.sinitambirivoutin@sonos.com" },
+]
+description = "Library for constructing, combining, optimizing, and searching weighted finite-state transducers (FSTs). Re-implementation of OpenFst in Rust."
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = ["fst", "openfst", "graph", "transducer", "acceptor",
+            "shortest-path", "minimize", "determinize", "wfst"]
+license = { text="Apache License, Version 2.0" }
+classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Rust",
+        "Topic :: Scientific/Engineering :: Mathematics",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "Topic :: Text Processing",
+        "License :: OSI Approved :: Apache Software License",
+]
+
+[project.optional-dependencies]
+tests = [ "pytest", "pylint" ]
+docs = [
+     "mike",
+     "mkdocstrings[python]",
+     "mkdocs-material",
+     "mkdocs-literate-nav",
+     "mkdocs-gen-files",
+     "mkdocs-section-index",
+     "mkdocs-macros-plugin",
+]
+
+
+# This was in setup.py but is no longer relevant (it's not for Mac OS X)
+#    options={"bdist_wheel": {"universal": True}},
+
+[tool.setuptools]
+package-dir = {"rustfst" = "rustfst-python/rustfst"}
+
+[[tool.setuptools-rust.ext-modules]]
+target = "rustfst.dylib.dylib"
+path = "rustfst-ffi/Cargo.toml"
+binding = "NoBinding"
+
+[tool.pytest.ini_options]
+markers = ["rustfst"]
+
+[tool.pylint.main]
+ignore = ["scripts"]
+persistent = true
+py-version = "3.8"
+
+[tool.pylint."messages control"]
+enable = ["indexing-exception", "old-raise-syntax"]
+disable = ["design","similarities","no-self-use","attribute-defined-outside-init","locally-disabled","star-args","pointless-except","bad-option-value","global-statement","fixme","suppressed-message","useless-suppression","locally-enabled","no-member","no-name-in-module","import-error","unsubscriptable-object","unbalanced-tuple-unpacking","undefined-variable","not-context-manager","missing-docstring","cyclic-import","redefined-builtin","ungrouped-imports","wrong-import-order","bad-continuation","import-outside-toplevel","line-too-long"]
+
+[tool.pylint.reports]
+output-format = "text"
+reports = "no"

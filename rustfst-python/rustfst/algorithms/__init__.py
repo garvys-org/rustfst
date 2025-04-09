@@ -18,13 +18,16 @@ def acceptor(
 ) -> VectorFst:
     """
     Creates an acceptor from a string.
+
     This function creates a FST which accepts its input with a fixed weight
     (defaulting to semiring One).
+
     Args:
       astring: The input string.
       weight: A Weight or weight string indicating the desired path weight. If
         omitted or null, the path weight is set to semiring One.
       symbol_table: SymbolTable to be used to encode the string.
+
     Returns:
       An FST acceptor.
     """
@@ -52,14 +55,17 @@ def transducer(
 ) -> VectorFst:
     """
     Creates a transducer from a pair of strings or acceptor FSTs.
+
     This function creates a FST which transduces from the first string to
     the second with a fixed weight (defaulting to semiring One).
+
     Args:
       istring: The input string
       ostring: The output string
       weight: A Weight as float.
       isymt: SymbolTable to be used to encode the string.
       osymt: SymbolTable to be used to encode the string.
+
     Returns:
       An FST transducer.
     """
@@ -85,10 +91,13 @@ def transducer(
 def epsilon_machine(weight: Optional[float] = None) -> VectorFst:
     """
     Constructs a single-state, no-arc FST accepting epsilon.
+
     This function creates an unweighted FST with a single state which is both
     initial and final.
+
     Args:
       weight: A Weight. Default semiring One.
+
     Returns:
       An FST.
     """

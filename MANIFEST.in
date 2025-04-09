@@ -1,0 +1,4 @@
+include Cargo.toml
+recursive-include rustfst *.toml *.rs
+recursive-include rustfst-cli *.toml *.rs
+recursive-include rustfst-ffi *.toml *.rs
