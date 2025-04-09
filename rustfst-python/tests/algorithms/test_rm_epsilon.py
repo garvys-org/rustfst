@@ -47,6 +47,7 @@ def test_rm_epsilon():
     tr1_2 = Tr(1, 0, 3.0, s2)
     expected_fst.add_tr(s1, tr1_2)
 
-    fst1.rm_epsilon()
+    rv = fst1.rm_epsilon()
+    assert rv == fst1
 
     assert expected_fst == fst1
