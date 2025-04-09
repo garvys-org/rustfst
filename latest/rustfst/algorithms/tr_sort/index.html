@@ -913,14 +913,15 @@
 
 
 <h4 id="rustfst.algorithms.tr_sort.tr_sort" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">tr_sort</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">ilabel_cmp</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">tr_sort</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">ilabel_cmp</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h4>
 
 
   <div class="doc doc-contents ">
   
-      <p>Sort fst trs in place according to their input or output label.</p>
+      <p>Sort fst trs in place according to their input or output label.
+output label.</p>
 <p>This is often necessary for composition to work properly.  It
 corresponds to <code>ArcSort</code> in OpenFST.</p>
 
@@ -940,7 +941,7 @@ corresponds to <code>ArcSort</code> in OpenFST.</p>
           <td>
                 <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
           </td>
-          <td><p>FST to be tr-sorted</p></td>
+          <td><p>FST to be tr-sorted in-place.</p></td>
           <td>
               <em>required</em>
           </td>
@@ -951,10 +952,28 @@ corresponds to <code>ArcSort</code> in OpenFST.</p>
                 <code>bool</code>
           </td>
           <td><p>Sort on input labels if <code>True</code>, output labels
-          if <code>False</code>.</p></td>
+         if <code>False</code>.</p></td>
           <td>
               <em>required</em>
           </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>fst</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="../../fst/vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>Same FST that was modified in-place.</p></td>
         </tr>
     </tbody>
   </table>
@@ -975,21 +994,29 @@ corresponds to <code>ArcSort</code> in OpenFST.</p>
 <span class="normal">22</span>
 <span class="normal">23</span>
 <span class="normal">24</span>
-<span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">tr_sort</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">ilabel_cmp</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">tr_sort</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">,</span> <span class="n">ilabel_cmp</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sort fst trs in place according to their input or output label.</span>
+<span class="sd">    output label.</span>
 
 <span class="sd">    This is often necessary for composition to work properly.  It</span>
 <span class="sd">    corresponds to `ArcSort` in OpenFST.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">      fst: FST to be tr-sorted</span>
+<span class="sd">      fst: FST to be tr-sorted in-place.</span>
 <span class="sd">      ilabel_cmp: Sort on input labels if `True`, output labels</span>
-<span class="sd">                  if `False`.</span>
+<span class="sd">                 if `False`.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      fst: Same FST that was modified in-place.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">fst_tr_sort</span><span class="p">(</span><span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_bool</span><span class="p">(</span><span class="n">ilabel_cmp</span><span class="p">))</span>
     <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error during tr_sort&quot;</span>
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">fst</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>

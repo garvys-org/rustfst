@@ -2290,7 +2290,10 @@
 <span class="normal">792</span>
 <span class="normal">793</span>
 <span class="normal">794</span>
-<span class="normal">795</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">VectorFst</span><span class="p">(</span><span class="n">Fst</span><span class="p">):</span>
+<span class="normal">795</span>
+<span class="normal">796</span>
+<span class="normal">797</span>
+<span class="normal">798</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">VectorFst</span><span class="p">(</span><span class="n">Fst</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates an empty VectorFst.</span>
@@ -2873,9 +2876,9 @@
 
     <span class="k">def</span> <span class="nf">rm_epsilon</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return an equivalent FST with epsilon transitions removed.</span>
+<span class="sd">        Remove epsilon transitions in-place.</span>
 <span class="sd">        Returns:</span>
-<span class="sd">          Newly created FST with epsilon transitions removed.</span>
+<span class="sd">          self: Same FST, modified in place</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">rustfst.algorithms.rm_epsilon</span> <span class="kn">import</span> <span class="n">rm_epsilon</span>
 
@@ -2937,8 +2940,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">rustfst.algorithms.optimize</span> <span class="kn">import</span> <span class="n">optimize</span>
 
-        <span class="n">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="n">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">optimize_in_log</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2948,10 +2950,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">rustfst.algorithms.optimize</span> <span class="kn">import</span> <span class="n">optimize_in_log</span>
 
-        <span class="n">optimize_in_log</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="n">optimize_in_log</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">tr_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ilabel_cmp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">tr_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ilabel_cmp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sort trs for an FST in-place according to their input or</span>
 <span class="sd">        output label.</span>
 
@@ -2961,19 +2962,24 @@
 <span class="sd">        Args:</span>
 <span class="sd">          ilabel_cmp: Sort on input labels if `True`, output labels</span>
 <span class="sd">                      if `False`.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          self</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">rustfst.algorithms.tr_sort</span> <span class="kn">import</span> <span class="n">tr_sort</span>
 
-        <span class="n">tr_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ilabel_cmp</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tr_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ilabel_cmp</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">tr_unique</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">tr_unique</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Modify an FST in-place, keeping a single instance of trs</span>
 <span class="sd">        leaving the same state, going to the same state and with the</span>
 <span class="sd">        same input labels, output labels and weight.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">          self</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">rustfst.algorithms.tr_unique</span> <span class="kn">import</span> <span class="n">tr_unique</span>
 
-        <span class="n">tr_unique</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tr_unique</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">isomorphic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -5845,22 +5851,22 @@ the same language in reverse order.</p>
 
   <div class="doc doc-contents ">
   
-      <p>Return an equivalent FST with epsilon transitions removed.</p>
+      <p>Remove epsilon transitions in-place.</p>
 
   <p><strong>Returns:</strong></p>
   <table>
     <thead>
       <tr>
-        <th>Type</th>
+<th>Name</th>        <th>Type</th>
         <th>Description</th>
       </tr>
     </thead>
     <tbody>
         <tr>
-          <td>
+<td><code>self</code></td>          <td>
                 <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
           </td>
-          <td><p>Newly created FST with epsilon transitions removed.</p></td>
+          <td><p>Same FST, modified in place</p></td>
         </tr>
     </tbody>
   </table>
@@ -5877,9 +5883,9 @@ the same language in reverse order.</p>
 <span class="normal">617</span>
 <span class="normal">618</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">rm_epsilon</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Return an equivalent FST with epsilon transitions removed.</span>
+<span class="sd">    Remove epsilon transitions in-place.</span>
 <span class="sd">    Returns:</span>
-<span class="sd">      Newly created FST with epsilon transitions removed.</span>
+<span class="sd">      self: Same FST, modified in place</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">rustfst.algorithms.rm_epsilon</span> <span class="kn">import</span> <span class="n">rm_epsilon</span>
 
@@ -6167,8 +6173,7 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
 <span class="normal">673</span>
 <span class="normal">674</span>
 <span class="normal">675</span>
-<span class="normal">676</span>
-<span class="normal">677</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+<span class="normal">676</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Optimize an FST in-place.</span>
 <span class="sd">    Returns:</span>
@@ -6176,8 +6181,7 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">rustfst.algorithms.optimize</span> <span class="kn">import</span> <span class="n">optimize</span>
 
-    <span class="n">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span>
+    <span class="k">return</span> <span class="n">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -6218,16 +6222,15 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
 
       <details class="quote">
         <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">679</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">678</span>
+<span class="normal">679</span>
 <span class="normal">680</span>
 <span class="normal">681</span>
 <span class="normal">682</span>
 <span class="normal">683</span>
 <span class="normal">684</span>
 <span class="normal">685</span>
-<span class="normal">686</span>
-<span class="normal">687</span>
-<span class="normal">688</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">optimize_in_log</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+<span class="normal">686</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">optimize_in_log</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Optimize an fst in-place in the log semiring.</span>
 <span class="sd">    Returns:</span>
@@ -6235,8 +6238,7 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">rustfst.algorithms.optimize</span> <span class="kn">import</span> <span class="n">optimize_in_log</span>
 
-    <span class="n">optimize_in_log</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span>
+    <span class="k">return</span> <span class="n">optimize_in_log</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -6248,7 +6250,7 @@ with weight <code>a</code> and <code>w</code> to <code>v</code> with weight <cod
 
 
 <h6 id="rustfst.fst.vector_fst.VectorFst.tr_sort" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">tr_sort</span><span class="p">(</span><span class="n">ilabel_cmp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">tr_sort</span><span class="p">(</span><span class="n">ilabel_cmp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
 
@@ -6285,9 +6287,29 @@ corresponds to <code>ArcSort</code> in OpenFST.</p>
     </tbody>
   </table>
 
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>self</p></td>
+        </tr>
+    </tbody>
+  </table>
+
       <details class="quote">
         <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">690</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">688</span>
+<span class="normal">689</span>
+<span class="normal">690</span>
 <span class="normal">691</span>
 <span class="normal">692</span>
 <span class="normal">693</span>
@@ -6300,7 +6322,7 @@ corresponds to <code>ArcSort</code> in OpenFST.</p>
 <span class="normal">700</span>
 <span class="normal">701</span>
 <span class="normal">702</span>
-<span class="normal">703</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">tr_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ilabel_cmp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="normal">703</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">tr_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ilabel_cmp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sort trs for an FST in-place according to their input or</span>
 <span class="sd">    output label.</span>
 
@@ -6310,10 +6332,12 @@ corresponds to <code>ArcSort</code> in OpenFST.</p>
 <span class="sd">    Args:</span>
 <span class="sd">      ilabel_cmp: Sort on input labels if `True`, output labels</span>
 <span class="sd">                  if `False`.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      self</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">rustfst.algorithms.tr_sort</span> <span class="kn">import</span> <span class="n">tr_sort</span>
 
-    <span class="n">tr_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ilabel_cmp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tr_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ilabel_cmp</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -6325,7 +6349,7 @@ corresponds to <code>ArcSort</code> in OpenFST.</p>
 
 
 <h6 id="rustfst.fst.vector_fst.VectorFst.tr_unique" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">tr_unique</span><span class="p">()</span></code>
+<code class="highlight language-python"><span class="n">tr_unique</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span></code>
 
 </h6>
 
@@ -6336,6 +6360,24 @@ corresponds to <code>ArcSort</code> in OpenFST.</p>
 leaving the same state, going to the same state and with the
 same input labels, output labels and weight.</p>
 
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>self</p></td>
+        </tr>
+    </tbody>
+  </table>
+
       <details class="quote">
         <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">705</span>
@@ -6345,14 +6387,20 @@ same input labels, output labels and weight.</p>
 <span class="normal">709</span>
 <span class="normal">710</span>
 <span class="normal">711</span>
-<span class="normal">712</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">tr_unique</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">tr_unique</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Modify an FST in-place, keeping a single instance of trs</span>
 <span class="sd">    leaving the same state, going to the same state and with the</span>
 <span class="sd">    same input labels, output labels and weight.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      self</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">rustfst.algorithms.tr_unique</span> <span class="kn">import</span> <span class="n">tr_unique</span>
 
-    <span class="n">tr_unique</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tr_unique</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -6417,17 +6465,17 @@ same input labels, output labels and weight.</p>
 
       <details class="quote">
         <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">714</span>
-<span class="normal">715</span>
-<span class="normal">716</span>
-<span class="normal">717</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">717</span>
 <span class="normal">718</span>
 <span class="normal">719</span>
 <span class="normal">720</span>
 <span class="normal">721</span>
 <span class="normal">722</span>
 <span class="normal">723</span>
-<span class="normal">724</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">isomorphic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal">724</span>
+<span class="normal">725</span>
+<span class="normal">726</span>
+<span class="normal">727</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">isomorphic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if this Fst is isomorphic with another</span>
 <span class="sd">    Args:</span>
@@ -6479,17 +6527,17 @@ FST's input and output labels in-place.</p>
 
       <details class="quote">
         <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">726</span>
-<span class="normal">727</span>
-<span class="normal">728</span>
-<span class="normal">729</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">729</span>
 <span class="normal">730</span>
 <span class="normal">731</span>
 <span class="normal">732</span>
 <span class="normal">733</span>
 <span class="normal">734</span>
 <span class="normal">735</span>
-<span class="normal">736</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">invert</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+<span class="normal">736</span>
+<span class="normal">737</span>
+<span class="normal">738</span>
+<span class="normal">739</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">invert</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Invert the transduction corresponding to an FST by exchanging the</span>
 <span class="sd">    FST&#39;s input and output labels in-place.</span>
@@ -6564,10 +6612,7 @@ FST's input and output labels in-place.</p>
 
       <details class="quote">
         <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">738</span>
-<span class="normal">739</span>
-<span class="normal">740</span>
-<span class="normal">741</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">741</span>
 <span class="normal">742</span>
 <span class="normal">743</span>
 <span class="normal">744</span>
@@ -6575,7 +6620,10 @@ FST's input and output labels in-place.</p>
 <span class="normal">746</span>
 <span class="normal">747</span>
 <span class="normal">748</span>
-<span class="normal">749</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `fst_1 + fst_2` is a shortcut to perform the concatenation of `fst_1` and `fst_2`.</span>
 <span class="sd">    Args:</span>
@@ -6651,17 +6699,17 @@ FST's input and output labels in-place.</p>
 
       <details class="quote">
         <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">751</span>
-<span class="normal">752</span>
-<span class="normal">753</span>
-<span class="normal">754</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">754</span>
 <span class="normal">755</span>
 <span class="normal">756</span>
 <span class="normal">757</span>
 <span class="normal">758</span>
 <span class="normal">759</span>
 <span class="normal">760</span>
-<span class="normal">761</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+<span class="normal">761</span>
+<span class="normal">762</span>
+<span class="normal">763</span>
+<span class="normal">764</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `fst_1 * fst_2` is a shortcut to perform the composition of `fst_1` and `fst_2`.</span>
 <span class="sd">    Args:</span>
@@ -6736,10 +6784,7 @@ FST's input and output labels in-place.</p>
 
       <details class="quote">
         <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">763</span>
-<span class="normal">764</span>
-<span class="normal">765</span>
-<span class="normal">766</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">766</span>
 <span class="normal">767</span>
 <span class="normal">768</span>
 <span class="normal">769</span>
@@ -6747,7 +6792,10 @@ FST's input and output labels in-place.</p>
 <span class="normal">771</span>
 <span class="normal">772</span>
 <span class="normal">773</span>
-<span class="normal">774</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
+<span class="normal">774</span>
+<span class="normal">775</span>
+<span class="normal">776</span>
+<span class="normal">777</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VectorFst</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `fst_1 | fst_2` is a shortcut to perform the union of `fst_1` and `fst_2`.</span>
 <span class="sd">    Args:</span>
@@ -6803,10 +6851,7 @@ want to do this, you will have to first apply
 
       <details class="quote">
         <summary>Source code in <code>rustfst/fst/vector_fst.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">784</span>
-<span class="normal">785</span>
-<span class="normal">786</span>
-<span class="normal">787</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">787</span>
 <span class="normal">788</span>
 <span class="normal">789</span>
 <span class="normal">790</span>
@@ -6814,7 +6859,10 @@ want to do this, you will have to first apply
 <span class="normal">792</span>
 <span class="normal">793</span>
 <span class="normal">794</span>
-<span class="normal">795</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">string_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StringPathsIterator</span><span class="p">:</span>
+<span class="normal">795</span>
+<span class="normal">796</span>
+<span class="normal">797</span>
+<span class="normal">798</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">string_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StringPathsIterator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return an iterator over input/output label sequences in</span>
 <span class="sd">    this FST, *in no particular order*.</span>
 
