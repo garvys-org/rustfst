@@ -235,7 +235,8 @@ jobs:
       - name: Build rustfst-python
         run: |
           pip install -r rustfst-python/requirements-setup.txt
-          pip install -e ".[tests]"
+          pip install -r rustfst-python/requirements-tests.txt
+          pip install -e .
       - name: Test rustfst-python
         run: python -m pytest -s --cache-clear --disable-warnings rustfst-python
 

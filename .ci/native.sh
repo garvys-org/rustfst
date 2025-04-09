@@ -46,7 +46,8 @@ $PYTHON_VERSION --version
 
 ($PYTHON_VERSION -m pip freeze | grep black 1>/dev/null 2>&1) || $PYTHON_VERSION -m pip install black==21.7b0
 $PYTHON_VERSION -m pip install -r rustfst-python/requirements-setup.txt
-$PYTHON_VERSION -m pip install -e '.[tests]'
+$PYTHON_VERSION -m pip install -r rustfst-python/requirements-tests.txt
+$PYTHON_VERSION -m pip install -e .
 
 cd rustfst-python
 
