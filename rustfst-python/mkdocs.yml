@@ -74,16 +74,17 @@ plugins:
     default_handler: python
     handlers:
       python:
-        rendering:
-          enable_inventory: true
-          heading_level: 3
-          members_order: source
-          separate_signature: false
-          show_category_heading: true
-          show_if_no_docstring: false
-          show_object_full_path: false
-          show_signature_annotations: true
-          show_submodules: true
+        options:
+          extra:
+            enable_inventory: true
+            heading_level: 3
+            members_order: source
+            separate_signature: false
+            show_category_heading: true
+            show_if_no_docstring: false
+            show_object_full_path: false
+            show_signature_annotations: true
+            show_submodules: true
 watch:
   - rustfst
   - docs
@@ -91,4 +92,5 @@ repo_name: rustfst
 repo_url: https://github.com/garvys-org/rustfst
 site_name: rustfst-python
 site_url: https://github.com/garvys-org/rustfst
-theme: material
+theme:
+  name: material
