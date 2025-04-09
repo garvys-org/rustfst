@@ -651,10 +651,9 @@ class VectorFst(Fst):
 
     def rm_epsilon(self) -> VectorFst:
         """
-        Return an equivalent FST with epsilon transitions removed.
-
+        Remove epsilon transitions in-place.
         Returns:
-          Newly created FST with epsilon transitions removed.
+          self: Same FST, modified in place
         """
         from rustfst.algorithms.rm_epsilon import rm_epsilon
 
@@ -720,8 +719,7 @@ class VectorFst(Fst):
         """
         from rustfst.algorithms.optimize import optimize
 
-        optimize(self)
-        return self
+        return optimize(self)
 
     def optimize_in_log(self) -> VectorFst:
         """
@@ -732,10 +730,9 @@ class VectorFst(Fst):
         """
         from rustfst.algorithms.optimize import optimize_in_log
 
-        optimize_in_log(self)
-        return self
+        return optimize_in_log(self)
 
-    def tr_sort(self, ilabel_cmp: bool = True):
+    def tr_sort(self, ilabel_cmp: bool = True) -> VectorFst:
         """Sort trs for an FST in-place according to their input or
         output label.
 
@@ -745,19 +742,24 @@ class VectorFst(Fst):
         Args:
           ilabel_cmp: Sort on input labels if `True`, output labels
                       if `False`.
+        Returns:
+          self
         """
         from rustfst.algorithms.tr_sort import tr_sort
 
-        tr_sort(self, ilabel_cmp)
+        return tr_sort(self, ilabel_cmp)
 
-    def tr_unique(self):
+    def tr_unique(self) -> VectorFst:
         """Modify an FST in-place, keeping a single instance of trs
         leaving the same state, going to the same state and with the
         same input labels, output labels and weight.
+
+        Returns:
+          self
         """
         from rustfst.algorithms.tr_unique import tr_unique
 
-        tr_unique(self)
+        return tr_unique(self)
 
     def isomorphic(self, other: VectorFst) -> bool:
         """
@@ -772,6 +774,18 @@ class VectorFst(Fst):
         from rustfst.algorithms.isomorphic import isomorphic
 
         return isomorphic(self, other)
+
+    def invert(self) -> VectorFst:
+        """
+        Invert the transduction corresponding to an FST by exchanging the
+        FST's input and output labels in-place.
+
+        Returns:
+           self
+        """
+        from rustfst.algorithms.inversion import invert
+
+        return invert(self)
 
     def __add__(self, other: VectorFst) -> VectorFst:
         """
