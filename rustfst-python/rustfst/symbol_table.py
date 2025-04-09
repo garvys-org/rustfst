@@ -89,12 +89,13 @@ class SymbolTable:
 
         Raises:
           KeyError: Key not found.
+          TypeError: Key is not a string or integer.
         """
         if isinstance(key, int):
             return self._find_index(key)
         if isinstance(key, str):
             return self._find_symbol(key)
-        raise f"key can only be a string or integer. Not {type(key)}"
+        raise TypeError(f"key can only be a string or integer. Not {type(key)}")
 
     def _find_index(self, key: int) -> str:
         key = ctypes.c_size_t(key)
@@ -126,6 +127,9 @@ class SymbolTable:
 
         Returns:
           Whether or not the key is present (as a string or a index) in the table.
+
+        Raises:
+          TypeError: Key is not a string or integer.
         """
         is_present = ctypes.c_size_t()
 
@@ -140,7 +144,7 @@ class SymbolTable:
                 self.ptr, symbol, ctypes.byref(is_present)
             )
         else:
-            raise f"key can only be a string or integer. Not {type(key)}"
+            raise TypeError(f"key can only be a string or integer. Not {type(key)}")
 
         err_msg = "`member` failed"
         check_ffi_error(ret_code, err_msg)
