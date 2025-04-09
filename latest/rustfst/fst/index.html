@@ -904,6 +904,39 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#rustfst.fst.const_fst" class="md-nav__link">
+    const_fst
+  </a>
+  
+    <nav class="md-nav" aria-label="const_fst">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.fst.const_fst-classes" class="md-nav__link">
+    Classes
+  </a>
+  
+    <nav class="md-nav" aria-label="Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rustfst.fst.const_fst.ConstFst" class="md-nav__link">
+    ConstFst
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#rustfst.fst.vector_fst" class="md-nav__link">
     vector_fst
   </a>
@@ -935,39 +968,6 @@
   <a href="#rustfst.fst.vector_fst-functions" class="md-nav__link">
     Functions
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rustfst.fst.const_fst" class="md-nav__link">
-    const_fst
-  </a>
-  
-    <nav class="md-nav" aria-label="const_fst">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#rustfst.fst.const_fst-classes" class="md-nav__link">
-    Classes
-  </a>
-  
-    <nav class="md-nav" aria-label="Classes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#rustfst.fst.const_fst.ConstFst" class="md-nav__link">
-    ConstFst
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
         
@@ -2625,6 +2625,1048 @@ Passing None as a value will delete the output symbol table.</p>
 </div>
 
 <h3 id="rustfst.fst-modules">Modules</h3>
+
+<div class="doc doc-object doc-module">
+
+
+
+<h4 id="rustfst.fst.const_fst" class="doc doc-heading">
+          <code>const_fst</code>
+
+
+</h4>
+
+  <div class="doc doc-contents ">
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+<h5 id="rustfst.fst.const_fst-classes">Classes</h5>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h6 id="rustfst.fst.const_fst.ConstFst" class="doc doc-heading">
+        <code>ConstFst</code>
+
+
+</h6>
+
+
+  <div class="doc doc-contents ">
+      <p class="doc doc-class-bases">
+        Bases: <code><a class="autorefs autorefs-internal" title="rustfst.fst.Fst" href="#rustfst.fst.Fst">Fst</a></code></p>
+
+
+
+        <details class="quote">
+          <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ConstFst</span><span class="p">(</span><span class="n">Fst</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ptr</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">ptr</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Const fst should be init with a pointer or loaded from a file&quot;</span>
+            <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">draw</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">isymbols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">osymbols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">drawing_config</span><span class="p">:</span> <span class="n">DrawingConfig</span> <span class="o">=</span> <span class="n">DrawingConfig</span><span class="p">(),</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Writes out the FST in Graphviz text format.</span>
+<span class="sd">        This method writes out the FST in the dot graph description language. The</span>
+<span class="sd">        graph can be rendered using the `dot` executable provided by Graphviz.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          filename: The string location of the output dot/Graphviz file.</span>
+<span class="sd">          isymbols: An optional symbol table used to label input symbols.</span>
+<span class="sd">          osymbols: An optional symbol table used to label output symbols.</span>
+<span class="sd">          drawing_config: Drawing configuration to use.</span>
+<span class="sd">        See also: `text`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">isymbols_ptr</span> <span class="o">=</span> <span class="n">isymbols</span><span class="o">.</span><span class="n">ptr</span> <span class="k">if</span> <span class="n">isymbols</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">osymbols_ptr</span> <span class="o">=</span> <span class="n">osymbols</span><span class="o">.</span><span class="n">ptr</span> <span class="k">if</span> <span class="n">osymbols</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">drawing_config</span><span class="o">.</span><span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">drawing_config</span><span class="o">.</span><span class="n">height</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">height</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">height</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">drawing_config</span><span class="o">.</span><span class="n">ranksep</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ranksep</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ranksep</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">ranksep</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">drawing_config</span><span class="o">.</span><span class="n">nodesep</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">nodesep</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nodesep</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">nodesep</span><span class="p">)</span>
+
+        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_draw</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span>
+            <span class="n">isymbols_ptr</span><span class="p">,</span>
+            <span class="n">osymbols_ptr</span><span class="p">,</span>
+            <span class="n">filename</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
+            <span class="n">drawing_config</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">acceptor</span><span class="p">),</span>
+            <span class="n">width</span><span class="p">,</span>
+            <span class="n">height</span><span class="p">,</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">portrait</span><span class="p">),</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">vertical</span><span class="p">),</span>
+            <span class="n">ranksep</span><span class="p">,</span>
+            <span class="n">nodesep</span><span class="p">,</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">fontsize</span><span class="p">),</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">show_weight_one</span><span class="p">),</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">print_weight</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;fst draw failed&quot;</span>
+        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read a Fst at a given path.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          filename: The string location of the input file.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          An FST.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">          ValueError: Read failed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
+        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_from_path</span><span class="p">(</span>
+            <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">fst</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Read failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">fst</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_vector_fst</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts a given `VectorFst` to `ConstFst`</span>
+<span class="sd">        Args:</span>
+<span class="sd">          fst: The `VectorFst` that should be converted</span>
+<span class="sd">        Returns:</span>
+<span class="sd">          A `ConstFst`</span>
+<span class="sd">        Raises:</span>
+<span class="sd">          ValueError: Conversion failed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">const_fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
+        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_from_vec_fst</span><span class="p">(</span><span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">const_fst</span><span class="p">))</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Failed to convert VectorFST to ConstFST&quot;</span>
+        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">const_fst</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Serializes FST to a file.</span>
+<span class="sd">        This method writes the FST to a file in binary format.</span>
+<span class="sd">        Args:</span>
+<span class="sd">          filename: The string location of the output file.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">          ValueError: Write failed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Fst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if this Fst is equal to the other</span>
+<span class="sd">        Args :</span>
+<span class="sd">            other: Fst instance</span>
+<span class="sd">        Returns:</span>
+<span class="sd">             bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_equal</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
+
+        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_equals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">is_equal</span><span class="p">))</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error checking equality&quot;</span>
+        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">is_equal</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns :</span>
+<span class="sd">            Deepcopy of the Fst.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cloned_fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
+        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">cloned_fst</span><span class="p">))</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error copying fst&quot;</span>
+        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ConstFst</span><span class="p">(</span><span class="n">cloned_fst</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">()</span>
+        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error displaying ConstFst&quot;</span>
+        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">string_at</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<h7 id="rustfst.fst.const_fst.ConstFst-functions">Functions</h7>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h8 id="rustfst.fst.const_fst.ConstFst.draw" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">draw</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">isymbols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">osymbols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">drawing_config</span><span class="p">:</span> <span class="n">DrawingConfig</span> <span class="o">=</span> <span class="n">DrawingConfig</span><span class="p">())</span></code>
+
+</h8>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Writes out the FST in Graphviz text format.
+This method writes out the FST in the dot graph description language. The
+graph can be rendered using the <code>dot</code> executable provided by Graphviz.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>filename</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td><p>The string location of the output dot/Graphviz file.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>isymbols</code></td>
+          <td>
+                <code><span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="../symbol_table/#rustfst.symbol_table.SymbolTable">SymbolTable</a>]</code>
+          </td>
+          <td><p>An optional symbol table used to label input symbols.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>osymbols</code></td>
+          <td>
+                <code><span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="../symbol_table/#rustfst.symbol_table.SymbolTable">SymbolTable</a>]</code>
+          </td>
+          <td><p>An optional symbol table used to label output symbols.</p></td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>drawing_config</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.drawing_config.DrawingConfig" href="../drawing_config/#rustfst.drawing_config.DrawingConfig">DrawingConfig</a></code>
+          </td>
+          <td><p>Drawing configuration to use.</p></td>
+          <td>
+                <code>DrawingConfig()</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+      <p>See also: <code>text</code>.</p>
+
+      <details class="quote">
+        <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">draw</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">isymbols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">osymbols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">drawing_config</span><span class="p">:</span> <span class="n">DrawingConfig</span> <span class="o">=</span> <span class="n">DrawingConfig</span><span class="p">(),</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Writes out the FST in Graphviz text format.</span>
+<span class="sd">    This method writes out the FST in the dot graph description language. The</span>
+<span class="sd">    graph can be rendered using the `dot` executable provided by Graphviz.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      filename: The string location of the output dot/Graphviz file.</span>
+<span class="sd">      isymbols: An optional symbol table used to label input symbols.</span>
+<span class="sd">      osymbols: An optional symbol table used to label output symbols.</span>
+<span class="sd">      drawing_config: Drawing configuration to use.</span>
+<span class="sd">    See also: `text`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">isymbols_ptr</span> <span class="o">=</span> <span class="n">isymbols</span><span class="o">.</span><span class="n">ptr</span> <span class="k">if</span> <span class="n">isymbols</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">osymbols_ptr</span> <span class="o">=</span> <span class="n">osymbols</span><span class="o">.</span><span class="n">ptr</span> <span class="k">if</span> <span class="n">osymbols</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">drawing_config</span><span class="o">.</span><span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">drawing_config</span><span class="o">.</span><span class="n">height</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">drawing_config</span><span class="o">.</span><span class="n">ranksep</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ranksep</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ranksep</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">ranksep</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">drawing_config</span><span class="o">.</span><span class="n">nodesep</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">nodesep</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">nodesep</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">nodesep</span><span class="p">)</span>
+
+    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_draw</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span>
+        <span class="n">isymbols_ptr</span><span class="p">,</span>
+        <span class="n">osymbols_ptr</span><span class="p">,</span>
+        <span class="n">filename</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
+        <span class="n">drawing_config</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">acceptor</span><span class="p">),</span>
+        <span class="n">width</span><span class="p">,</span>
+        <span class="n">height</span><span class="p">,</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">portrait</span><span class="p">),</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">vertical</span><span class="p">),</span>
+        <span class="n">ranksep</span><span class="p">,</span>
+        <span class="n">nodesep</span><span class="p">,</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">fontsize</span><span class="p">),</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">show_weight_one</span><span class="p">),</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">print_weight</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;fst draw failed&quot;</span>
+    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h8 id="rustfst.fst.const_fst.ConstFst.read" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h8>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Read a Fst at a given path.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>filename</code></td>
+          <td>
+                <code><span title="typing.Union">Union</span>[str, <span title="pathlib.Path">Path</span>]</code>
+          </td>
+          <td><p>The string location of the input file.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.const_fst.ConstFst" href="const_fst/#rustfst.fst.const_fst.ConstFst">ConstFst</a></code>
+          </td>
+          <td><p>An FST.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>ValueError</code>
+          </td>
+          <td><p>Read failed.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+      <details class="quote">
+        <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read a Fst at a given path.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      filename: The string location of the input file.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      An FST.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: Read failed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
+    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_from_path</span><span class="p">(</span>
+        <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">fst</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Read failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">fst</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h8 id="rustfst.fst.const_fst.ConstFst.from_vector_fst" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">from_vector_fst</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h8>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Converts a given <code>VectorFst</code> to <code>ConstFst</code></p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>fst</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
+          </td>
+          <td><p>The <code>VectorFst</code> that should be converted</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="rustfst.fst.const_fst.ConstFst" href="const_fst/#rustfst.fst.const_fst.ConstFst">ConstFst</a></code>
+          </td>
+          <td><p>A <code>ConstFst</code></p></td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>ValueError</code>
+          </td>
+          <td><p>Conversion failed</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+      <details class="quote">
+        <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">from_vector_fst</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a given `VectorFst` to `ConstFst`</span>
+<span class="sd">    Args:</span>
+<span class="sd">      fst: The `VectorFst` that should be converted</span>
+<span class="sd">    Returns:</span>
+<span class="sd">      A `ConstFst`</span>
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: Conversion failed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">const_fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
+    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_from_vec_fst</span><span class="p">(</span><span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">const_fst</span><span class="p">))</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Failed to convert VectorFST to ConstFST&quot;</span>
+    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">const_fst</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h8 id="rustfst.fst.const_fst.ConstFst.write" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span></code>
+
+</h8>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Serializes FST to a file.
+This method writes the FST to a file in binary format.</p>
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>filename</code></td>
+          <td>
+                <code><span title="typing.Union">Union</span>[str, <span title="pathlib.Path">Path</span>]</code>
+          </td>
+          <td><p>The string location of the output file.</p></td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>ValueError</code>
+          </td>
+          <td><p>Write failed.</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+      <details class="quote">
+        <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializes FST to a file.</span>
+<span class="sd">    This method writes the FST to a file in binary format.</span>
+<span class="sd">    Args:</span>
+<span class="sd">      filename: The string location of the output file.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: Write failed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h8 id="rustfst.fst.const_fst.ConstFst.equals" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">equals</span><span class="p">(</span><span class="n">other</span><span class="p">:</span> <span class="n">Fst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
+
+</h8>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Check if this Fst is equal to the other</p>
+
+<details class="args-">
+  <summary>Args</summary>
+  <p>other: Fst instance</p>
+</details>
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>bool</code>
+          </td>
+          <td><p>bool</p></td>
+        </tr>
+    </tbody>
+  </table>
+
+      <details class="quote">
+        <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Fst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if this Fst is equal to the other</span>
+<span class="sd">    Args :</span>
+<span class="sd">        other: Fst instance</span>
+<span class="sd">    Returns:</span>
+<span class="sd">         bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">is_equal</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
+
+    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_equals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">is_equal</span><span class="p">))</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error checking equality&quot;</span>
+    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">is_equal</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<h8 id="rustfst.fst.const_fst.ConstFst.copy" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">copy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span></code>
+
+</h8>
+
+
+  <div class="doc doc-contents ">
+  
+
+<details class="returns-">
+  <summary>Returns</summary>
+  <p>Deepcopy of the Fst.</p>
+</details>
+      <details class="quote">
+        <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns :</span>
+<span class="sd">        Deepcopy of the Fst.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cloned_fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
+    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">cloned_fst</span><span class="p">))</span>
+    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error copying fst&quot;</span>
+    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ConstFst</span><span class="p">(</span><span class="n">cloned_fst</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
 
 <div class="doc doc-object doc-module">
 
@@ -7898,1048 +8940,6 @@ want to do this, you will have to first apply
 
 </div>
 <h5 id="rustfst.fst.vector_fst-functions">Functions</h5>
-
-
-
-  </div>
-
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-module">
-
-
-
-<h4 id="rustfst.fst.const_fst" class="doc doc-heading">
-          <code>const_fst</code>
-
-
-</h4>
-
-  <div class="doc doc-contents ">
-
-  
-
-  <div class="doc doc-children">
-
-
-
-
-
-
-<h5 id="rustfst.fst.const_fst-classes">Classes</h5>
-
-<div class="doc doc-object doc-class">
-
-
-
-<h6 id="rustfst.fst.const_fst.ConstFst" class="doc doc-heading">
-        <code>ConstFst</code>
-
-
-</h6>
-
-
-  <div class="doc doc-contents ">
-      <p class="doc doc-class-bases">
-        Bases: <code><a class="autorefs autorefs-internal" title="rustfst.fst.Fst" href="#rustfst.fst.Fst">Fst</a></code></p>
-
-
-
-        <details class="quote">
-          <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 16</span>
-<span class="normal"> 17</span>
-<span class="normal"> 18</span>
-<span class="normal"> 19</span>
-<span class="normal"> 20</span>
-<span class="normal"> 21</span>
-<span class="normal"> 22</span>
-<span class="normal"> 23</span>
-<span class="normal"> 24</span>
-<span class="normal"> 25</span>
-<span class="normal"> 26</span>
-<span class="normal"> 27</span>
-<span class="normal"> 28</span>
-<span class="normal"> 29</span>
-<span class="normal"> 30</span>
-<span class="normal"> 31</span>
-<span class="normal"> 32</span>
-<span class="normal"> 33</span>
-<span class="normal"> 34</span>
-<span class="normal"> 35</span>
-<span class="normal"> 36</span>
-<span class="normal"> 37</span>
-<span class="normal"> 38</span>
-<span class="normal"> 39</span>
-<span class="normal"> 40</span>
-<span class="normal"> 41</span>
-<span class="normal"> 42</span>
-<span class="normal"> 43</span>
-<span class="normal"> 44</span>
-<span class="normal"> 45</span>
-<span class="normal"> 46</span>
-<span class="normal"> 47</span>
-<span class="normal"> 48</span>
-<span class="normal"> 49</span>
-<span class="normal"> 50</span>
-<span class="normal"> 51</span>
-<span class="normal"> 52</span>
-<span class="normal"> 53</span>
-<span class="normal"> 54</span>
-<span class="normal"> 55</span>
-<span class="normal"> 56</span>
-<span class="normal"> 57</span>
-<span class="normal"> 58</span>
-<span class="normal"> 59</span>
-<span class="normal"> 60</span>
-<span class="normal"> 61</span>
-<span class="normal"> 62</span>
-<span class="normal"> 63</span>
-<span class="normal"> 64</span>
-<span class="normal"> 65</span>
-<span class="normal"> 66</span>
-<span class="normal"> 67</span>
-<span class="normal"> 68</span>
-<span class="normal"> 69</span>
-<span class="normal"> 70</span>
-<span class="normal"> 71</span>
-<span class="normal"> 72</span>
-<span class="normal"> 73</span>
-<span class="normal"> 74</span>
-<span class="normal"> 75</span>
-<span class="normal"> 76</span>
-<span class="normal"> 77</span>
-<span class="normal"> 78</span>
-<span class="normal"> 79</span>
-<span class="normal"> 80</span>
-<span class="normal"> 81</span>
-<span class="normal"> 82</span>
-<span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ConstFst</span><span class="p">(</span><span class="n">Fst</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">ptr</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">ptr</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Const fst should be init with a pointer or loaded from a file&quot;</span>
-            <span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">draw</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">isymbols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">osymbols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">drawing_config</span><span class="p">:</span> <span class="n">DrawingConfig</span> <span class="o">=</span> <span class="n">DrawingConfig</span><span class="p">(),</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Writes out the FST in Graphviz text format.</span>
-<span class="sd">        This method writes out the FST in the dot graph description language. The</span>
-<span class="sd">        graph can be rendered using the `dot` executable provided by Graphviz.</span>
-<span class="sd">        Args:</span>
-<span class="sd">          filename: The string location of the output dot/Graphviz file.</span>
-<span class="sd">          isymbols: An optional symbol table used to label input symbols.</span>
-<span class="sd">          osymbols: An optional symbol table used to label output symbols.</span>
-<span class="sd">          drawing_config: Drawing configuration to use.</span>
-<span class="sd">        See also: `text`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">isymbols_ptr</span> <span class="o">=</span> <span class="n">isymbols</span><span class="o">.</span><span class="n">ptr</span> <span class="k">if</span> <span class="n">isymbols</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="n">osymbols_ptr</span> <span class="o">=</span> <span class="n">osymbols</span><span class="o">.</span><span class="n">ptr</span> <span class="k">if</span> <span class="n">osymbols</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
-
-        <span class="k">if</span> <span class="n">drawing_config</span><span class="o">.</span><span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">width</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">width</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">drawing_config</span><span class="o">.</span><span class="n">height</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">height</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">height</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">drawing_config</span><span class="o">.</span><span class="n">ranksep</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">ranksep</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">ranksep</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">ranksep</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">drawing_config</span><span class="o">.</span><span class="n">nodesep</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">nodesep</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">nodesep</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">nodesep</span><span class="p">)</span>
-
-        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_draw</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span>
-            <span class="n">isymbols_ptr</span><span class="p">,</span>
-            <span class="n">osymbols_ptr</span><span class="p">,</span>
-            <span class="n">filename</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
-            <span class="n">drawing_config</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
-            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">acceptor</span><span class="p">),</span>
-            <span class="n">width</span><span class="p">,</span>
-            <span class="n">height</span><span class="p">,</span>
-            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">portrait</span><span class="p">),</span>
-            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">vertical</span><span class="p">),</span>
-            <span class="n">ranksep</span><span class="p">,</span>
-            <span class="n">nodesep</span><span class="p">,</span>
-            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">fontsize</span><span class="p">),</span>
-            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">show_weight_one</span><span class="p">),</span>
-            <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">print_weight</span><span class="p">),</span>
-        <span class="p">)</span>
-
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;fst draw failed&quot;</span>
-        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
-
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Read a Fst at a given path.</span>
-<span class="sd">        Args:</span>
-<span class="sd">          filename: The string location of the input file.</span>
-<span class="sd">        Returns:</span>
-<span class="sd">          An FST.</span>
-<span class="sd">        Raises:</span>
-<span class="sd">          ValueError: Read failed.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
-        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_from_path</span><span class="p">(</span>
-            <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">fst</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
-        <span class="p">)</span>
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Read failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">fst</span><span class="p">)</span>
-
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_vector_fst</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Converts a given `VectorFst` to `ConstFst`</span>
-<span class="sd">        Args:</span>
-<span class="sd">          fst: The `VectorFst` that should be converted</span>
-<span class="sd">        Returns:</span>
-<span class="sd">          A `ConstFst`</span>
-<span class="sd">        Raises:</span>
-<span class="sd">          ValueError: Conversion failed</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">const_fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
-        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_from_vec_fst</span><span class="p">(</span><span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">const_fst</span><span class="p">))</span>
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Failed to convert VectorFST to ConstFST&quot;</span>
-        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">const_fst</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Serializes FST to a file.</span>
-<span class="sd">        This method writes the FST to a file in binary format.</span>
-<span class="sd">        Args:</span>
-<span class="sd">          filename: The string location of the output file.</span>
-<span class="sd">        Raises:</span>
-<span class="sd">          ValueError: Write failed.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Fst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Check if this Fst is equal to the other</span>
-<span class="sd">        Args :</span>
-<span class="sd">            other: Fst instance</span>
-<span class="sd">        Returns:</span>
-<span class="sd">             bool</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">is_equal</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
-
-        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_equals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">is_equal</span><span class="p">))</span>
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error checking equality&quot;</span>
-        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">is_equal</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns :</span>
-<span class="sd">            Deepcopy of the Fst.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">cloned_fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
-        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">cloned_fst</span><span class="p">))</span>
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error copying fst&quot;</span>
-        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">ConstFst</span><span class="p">(</span><span class="n">cloned_fst</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">()</span>
-        <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_display</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
-        <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error displaying ConstFst&quot;</span>
-        <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">string_at</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-        </details>
-
-  
-
-  <div class="doc doc-children">
-
-
-
-
-
-
-
-<h7 id="rustfst.fst.const_fst.ConstFst-functions">Functions</h7>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h8 id="rustfst.fst.const_fst.ConstFst.draw" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">draw</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">isymbols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">osymbols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">drawing_config</span><span class="p">:</span> <span class="n">DrawingConfig</span> <span class="o">=</span> <span class="n">DrawingConfig</span><span class="p">())</span></code>
-
-</h8>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Writes out the FST in Graphviz text format.
-This method writes out the FST in the dot graph description language. The
-graph can be rendered using the <code>dot</code> executable provided by Graphviz.</p>
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>filename</code></td>
-          <td>
-                <code>str</code>
-          </td>
-          <td><p>The string location of the output dot/Graphviz file.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-        <tr>
-          <td><code>isymbols</code></td>
-          <td>
-                <code><span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="../symbol_table/#rustfst.symbol_table.SymbolTable">SymbolTable</a>]</code>
-          </td>
-          <td><p>An optional symbol table used to label input symbols.</p></td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>osymbols</code></td>
-          <td>
-                <code><span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="../symbol_table/#rustfst.symbol_table.SymbolTable">SymbolTable</a>]</code>
-          </td>
-          <td><p>An optional symbol table used to label output symbols.</p></td>
-          <td>
-                <code>None</code>
-          </td>
-        </tr>
-        <tr>
-          <td><code>drawing_config</code></td>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.drawing_config.DrawingConfig" href="../drawing_config/#rustfst.drawing_config.DrawingConfig">DrawingConfig</a></code>
-          </td>
-          <td><p>Drawing configuration to use.</p></td>
-          <td>
-                <code>DrawingConfig()</code>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-      <p>See also: <code>text</code>.</p>
-
-      <details class="quote">
-        <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span>
-<span class="normal">86</span>
-<span class="normal">87</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">draw</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">isymbols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">osymbols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SymbolTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">drawing_config</span><span class="p">:</span> <span class="n">DrawingConfig</span> <span class="o">=</span> <span class="n">DrawingConfig</span><span class="p">(),</span>
-<span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Writes out the FST in Graphviz text format.</span>
-<span class="sd">    This method writes out the FST in the dot graph description language. The</span>
-<span class="sd">    graph can be rendered using the `dot` executable provided by Graphviz.</span>
-<span class="sd">    Args:</span>
-<span class="sd">      filename: The string location of the output dot/Graphviz file.</span>
-<span class="sd">      isymbols: An optional symbol table used to label input symbols.</span>
-<span class="sd">      osymbols: An optional symbol table used to label output symbols.</span>
-<span class="sd">      drawing_config: Drawing configuration to use.</span>
-<span class="sd">    See also: `text`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">isymbols_ptr</span> <span class="o">=</span> <span class="n">isymbols</span><span class="o">.</span><span class="n">ptr</span> <span class="k">if</span> <span class="n">isymbols</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
-    <span class="n">osymbols_ptr</span> <span class="o">=</span> <span class="n">osymbols</span><span class="o">.</span><span class="n">ptr</span> <span class="k">if</span> <span class="n">osymbols</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
-
-    <span class="k">if</span> <span class="n">drawing_config</span><span class="o">.</span><span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">width</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">width</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">drawing_config</span><span class="o">.</span><span class="n">height</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">height</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">height</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">drawing_config</span><span class="o">.</span><span class="n">ranksep</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ranksep</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">ranksep</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">ranksep</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">drawing_config</span><span class="o">.</span><span class="n">nodesep</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">nodesep</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">nodesep</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">nodesep</span><span class="p">)</span>
-
-    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_draw</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span>
-        <span class="n">isymbols_ptr</span><span class="p">,</span>
-        <span class="n">osymbols_ptr</span><span class="p">,</span>
-        <span class="n">filename</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
-        <span class="n">drawing_config</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">),</span>
-        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">acceptor</span><span class="p">),</span>
-        <span class="n">width</span><span class="p">,</span>
-        <span class="n">height</span><span class="p">,</span>
-        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">portrait</span><span class="p">),</span>
-        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">vertical</span><span class="p">),</span>
-        <span class="n">ranksep</span><span class="p">,</span>
-        <span class="n">nodesep</span><span class="p">,</span>
-        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">fontsize</span><span class="p">),</span>
-        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">show_weight_one</span><span class="p">),</span>
-        <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">drawing_config</span><span class="o">.</span><span class="n">print_weight</span><span class="p">),</span>
-    <span class="p">)</span>
-
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;fst draw failed&quot;</span>
-    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h8 id="rustfst.fst.const_fst.ConstFst.read" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
-  </span>
-
-</h8>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Read a Fst at a given path.</p>
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>filename</code></td>
-          <td>
-                <code><span title="typing.Union">Union</span>[str, <span title="pathlib.Path">Path</span>]</code>
-          </td>
-          <td><p>The string location of the input file.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.fst.const_fst.ConstFst" href="const_fst/#rustfst.fst.const_fst.ConstFst">ConstFst</a></code>
-          </td>
-          <td><p>An FST.</p></td>
-        </tr>
-    </tbody>
-  </table>
-
-  <p><strong>Raises:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>ValueError</code>
-          </td>
-          <td><p>Read failed.</p></td>
-        </tr>
-    </tbody>
-  </table>
-
-      <details class="quote">
-        <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Read a Fst at a given path.</span>
-<span class="sd">    Args:</span>
-<span class="sd">      filename: The string location of the input file.</span>
-<span class="sd">    Returns:</span>
-<span class="sd">      An FST.</span>
-<span class="sd">    Raises:</span>
-<span class="sd">      ValueError: Read failed.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
-    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_from_path</span><span class="p">(</span>
-        <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">fst</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
-    <span class="p">)</span>
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Read failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">fst</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h8 id="rustfst.fst.const_fst.ConstFst.from_vector_fst" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">from_vector_fst</span><span class="p">(</span><span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
-  </span>
-
-</h8>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Converts a given <code>VectorFst</code> to <code>ConstFst</code></p>
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>fst</code></td>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.fst.vector_fst.VectorFst" href="vector_fst/#rustfst.fst.vector_fst.VectorFst">VectorFst</a></code>
-          </td>
-          <td><p>The <code>VectorFst</code> that should be converted</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.fst.const_fst.ConstFst" href="const_fst/#rustfst.fst.const_fst.ConstFst">ConstFst</a></code>
-          </td>
-          <td><p>A <code>ConstFst</code></p></td>
-        </tr>
-    </tbody>
-  </table>
-
-  <p><strong>Raises:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>ValueError</code>
-          </td>
-          <td><p>Conversion failed</p></td>
-        </tr>
-    </tbody>
-  </table>
-
-      <details class="quote">
-        <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">from_vector_fst</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fst</span><span class="p">:</span> <span class="n">VectorFst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts a given `VectorFst` to `ConstFst`</span>
-<span class="sd">    Args:</span>
-<span class="sd">      fst: The `VectorFst` that should be converted</span>
-<span class="sd">    Returns:</span>
-<span class="sd">      A `ConstFst`</span>
-<span class="sd">    Raises:</span>
-<span class="sd">      ValueError: Conversion failed</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">const_fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">pointer</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">())</span>
-    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_from_vec_fst</span><span class="p">(</span><span class="n">fst</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">const_fst</span><span class="p">))</span>
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Failed to convert VectorFST to ConstFST&quot;</span>
-    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">const_fst</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h8 id="rustfst.fst.const_fst.ConstFst.write" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span></code>
-
-</h8>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Serializes FST to a file.
-This method writes the FST to a file in binary format.</p>
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>filename</code></td>
-          <td>
-                <code><span title="typing.Union">Union</span>[str, <span title="pathlib.Path">Path</span>]</code>
-          </td>
-          <td><p>The string location of the output file.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-  <p><strong>Raises:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>ValueError</code>
-          </td>
-          <td><p>Write failed.</p></td>
-        </tr>
-    </tbody>
-  </table>
-
-      <details class="quote">
-        <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Serializes FST to a file.</span>
-<span class="sd">    This method writes the FST to a file in binary format.</span>
-<span class="sd">    Args:</span>
-<span class="sd">      filename: The string location of the output file.</span>
-<span class="sd">    Raises:</span>
-<span class="sd">      ValueError: Write failed.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_write_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed. file: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h8 id="rustfst.fst.const_fst.ConstFst.equals" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">equals</span><span class="p">(</span><span class="n">other</span><span class="p">:</span> <span class="n">Fst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
-
-</h8>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Check if this Fst is equal to the other</p>
-
-<details class="args-">
-  <summary>Args</summary>
-  <p>other: Fst instance</p>
-</details>
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>bool</code>
-          </td>
-          <td><p>bool</p></td>
-        </tr>
-    </tbody>
-  </table>
-
-      <details class="quote">
-        <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Fst</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Check if this Fst is equal to the other</span>
-<span class="sd">    Args :</span>
-<span class="sd">        other: Fst instance</span>
-<span class="sd">    Returns:</span>
-<span class="sd">         bool</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">is_equal</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
-
-    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_equals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">is_equal</span><span class="p">))</span>
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error checking equality&quot;</span>
-    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">is_equal</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h8 id="rustfst.fst.const_fst.ConstFst.copy" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">copy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span></code>
-
-</h8>
-
-
-  <div class="doc doc-contents ">
-  
-
-<details class="returns-">
-  <summary>Returns</summary>
-  <p>Deepcopy of the Fst.</p>
-</details>
-      <details class="quote">
-        <summary>Source code in <code>rustfst/fst/const_fst.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConstFst</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns :</span>
-<span class="sd">        Deepcopy of the Fst.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">cloned_fst</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
-    <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">const_fst_copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">cloned_fst</span><span class="p">))</span>
-    <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;Error copying fst&quot;</span>
-    <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">ConstFst</span><span class="p">(</span><span class="n">cloned_fst</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-
-
-  </div>
-
-  </div>
-
-</div>
-
 
 
 
