@@ -3,7 +3,6 @@ from rustfst import VectorFst, Tr
 
 
 def test_string_paths_iterator():
-
     fst = VectorFst()
     s1 = fst.add_state()
     s2 = fst.add_state()

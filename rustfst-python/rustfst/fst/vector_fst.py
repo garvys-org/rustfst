@@ -370,6 +370,7 @@ class VectorFst(Fst):
         Returns:
             Sequence of bytes.
         """
+
         # Define a temporary struct to hold the bytes array
         class BytesArray(ctypes.Structure):
             _fields_ = [("data_ptr", ctypes.c_void_p), ("size", ctypes.c_size_t)]

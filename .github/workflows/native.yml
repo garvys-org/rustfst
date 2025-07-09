@@ -8,7 +8,7 @@ on:
     tags:
       - 'rustfst-v**'
   schedule:
-    - cron:  '0 9 * * *'
+    - cron: '0 9 * * *'
 
 # This codes allows to stop the CI when a new commit has been pushed on the same PR or branch.
 # It doesn't apply to branches.
@@ -18,9 +18,11 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PYTHON_VERSION: 3.9
+  PYTHON_VERSION: 3.13
   GIT_COMMITTER_NAME: garvys-ci-bot
   GIT_COMMITTER_EMAIL: alexandre.caulier.a@gmail.com
+  UV_VERSION: "0.5.4"
+  RUFF_VERSION: "0.7.0"
 
 jobs:
 
@@ -31,14 +33,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "rustfst-python/uv.lock"
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }} # Version range or exact version of a Python version to use, using SemVer's version range syntax
           architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
       - name: Check formatting
         run: |
-          pip install black==22.3.0
-          python -m black --check . || fail "Format your code by running black ." 1
+          uv tool install ruff=="${RUFF_VERSION}" && uv tool run ruff check . || fail "Format your code by running 'uv tool run ruff check .' " 1
 
 
   rust-fmt:
@@ -58,12 +64,12 @@ jobs:
 
   openfst:
     name: Fetch or Build OpenFST
-    needs: [python-fmt, rust-fmt]
+    needs: [ python-fmt, rust-fmt ]
 
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-13]
+        os: [ ubuntu-latest, macos-13 ]
 
     runs-on: ${{ matrix.os }}
 
@@ -88,29 +94,6 @@ jobs:
             openfst-1.7.2/lib/
           if-no-files-found: error
 
-
-#  generate-openfst-output:
-#    name: Generate OpenFST outputs on the Test Suite
-#    needs: openfst
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v3
-#      - uses: actions/download-artifact@v3
-#        with:
-#          name: openfst-${{ runner.os }}
-#          path: openfst-1.7.2
-#      - name: Generate outputs
-#        run: ./run_openfst.sh
-#      - uses: actions/upload-artifact@v3
-#        with:
-#          name: openfst-test-data
-#          path: |
-#            rustfst-tests-data/fst_*/*
-#            !rustfst-tests-data/fst_*/*.h
-#            rustfst-tests-data/symt_*/*
-#            !rustfst-tests-data/symt_*/*.h
-#            rustfst-tests-data/weights/*.json
-
   rust-tests:
     name: rust-tests
     needs: openfst
@@ -118,8 +101,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [1.74.0, stable]
-        os: [ubuntu-latest, macos-13]
+        rust: [ 1.74.0, stable ]
+        os: [ ubuntu-latest, macos-13 ]
         cargo-args:
           - --all --benches --examples --bins --tests
           - --manifest-path rustfst/Cargo.toml --features "state-label-u32"
@@ -184,6 +167,11 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "rustfst-python/uv.lock"
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }} # Version range or exact version of a Python version to use, using SemVer's version range syntax
@@ -207,9 +195,9 @@ jobs:
       - name: Test benchmark
         run: |
           chmod +x openfst-1.7.2/bin/fst*
-          python -m pip install -e rustfst-python-bench
-          python rustfst-python-bench/rustfst_python_bench/bench_all.py -w 1 -r 2 debug rustfst-tests-data/fst_003/raw_vector.fst report.md
-          python rustfst-python-bench/rustfst_python_bench/bench_all_detailed.py -w 1 -r 2 debug rustfst-tests-data/fst_003/raw_vector.fst report2.md
+          uv pip install -e rustfst-python-bench
+          uv run python rustfst-python-bench/rustfst_python_bench/bench_all.py -w 1 -r 2 debug rustfst-tests-data/fst_003/raw_vector.fst report.md
+          uv run python rustfst-python-bench/rustfst_python_bench/bench_all_detailed.py -w 1 -r 2 debug rustfst-tests-data/fst_003/raw_vector.fst report2.md
 
   rustfst-python:
     name: rustfst-python
@@ -218,7 +206,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-13]
+        os: [ ubuntu-latest, macos-13 ]
 
     runs-on: ${{ matrix.os }}
 
@@ -228,17 +216,23 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "rustfst-python/uv.lock"
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }} # Version range or exact version of a Python version to use, using SemVer's version range syntax
           architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
       - name: Build rustfst-python
         run: |
-          pip install pylint==2.6.0 pytest==6.2.5
-          pip install -r rustfst-python/requirements-setup.txt
-          pip install -e rustfst-python
+          cd rustfst-python
+          uv sync --extra dev
       - name: Test rustfst-python
-        run: python -m pytest -s --cache-clear --disable-warnings rustfst-python
+        run: |
+          cd rustfst-python
+          uv run pytest -s --cache-clear --disable-warnings
 
   python-doc:
     name: python-doc
@@ -251,20 +245,23 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "rustfst-python/uv.lock"
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }} # Version range or exact version of a Python version to use, using SemVer's version range syntax
           architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
       - name: Build rustfst-python
         run: |
-          pip install -r rustfst-python/requirements-setup.txt
-          pip install -e rustfst-python
-      - name: Install mkdocs
-        run: pip install -r rustfst-python/requirements-mkdocs.txt
+          cd rustfst-python
+          uv sync --extra docs
       - name: Test doc generation
         run: |
           cd rustfst-python
-          mkdocs build -s
+          uv run mkdocs build -s
 
   publish-python-doc:
     name: Publish rustfst-python's doc
@@ -287,26 +284,27 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: stable
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "rustfst-python/uv.lock"
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - run: pip install -r rustfst-python/requirements-setup.txt
-      - run: pip install -e rustfst-python
-      - run: pip install -r rustfst-python/requirements-mkdocs.txt
+      - run: |
+          cd rustfst-python
+          uv sync --extra docs
       - run: git config user.name ${{ env.GIT_COMMITTER_NAME }}
       - run: git config user.email ${{ env.GIT_COMMITTER_EMAIL }}
       - run: git fetch origin gh-pages --depth=1
-      - run: cd rustfst-python && mkdocs build -s
+      - run: cd rustfst-python && uv run mkdocs build -s
       - name: Deploy Doc to latest
         if: github.ref == 'refs/heads/main'
-        run: cd rustfst-python && mike deploy --push latest
-      - name: Retrieve tag
-        uses: olegtarasov/get-tag@v2.1
-        id: tagName
-        if: startsWith(github.ref, 'refs/tags/rustfst-v')
+        run: cd rustfst-python && uv run mike deploy --push latest
       - name: Deploy Doc to tag
         if: startsWith(github.ref, 'refs/tags/rustfst-v')
-        run: cd rustfst-python && mike deploy --push $GIT_TAG_NAME
+        run: cd rustfst-python && uv run mike deploy --push $GIT_TAG_NAME
 
 
   publish-rust-crate:
@@ -353,6 +351,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "rustfst-python/uv.lock"
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }} # Version range or exact version of a Python version to use, using SemVer's version range syntax
@@ -373,10 +376,7 @@ jobs:
           # On an Linux Intel runner with qemu installed, build Intel and ARM wheels
           CIBW_ARCHS_LINUX: "auto"
         run: |
-          python3.9 -m pip install twine cibuildwheel==2.13.1
+          uv pip install twine cibuildwheel==2.13.1
           mkdir -p wheels
-          python3.9 -m cibuildwheel --output-dir wheels rustfst-python
-          python3.9 -m twine upload -u "__token__" -p ${{ secrets.PYPI_PASSWORD }} -r pypi --verbose wheels/*
-
-
-
+          uv run cibuildwheel --output-dir wheels rustfst-python
+          uv run twine upload -u "__token__" -p ${{ secrets.PYPI_PASSWORD }} -r pypi --verbose wheels/*
