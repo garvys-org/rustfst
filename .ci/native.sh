@@ -42,16 +42,15 @@ cargo doc --all --no-deps
 
 ./build_bench.sh
 cd rustfst-python
-uv pip install -e . --no-build-isolation
 
 # Check format
 uv tool run ruff check . || fail "Format your code by running 'uv tool run ruff check .' " 1
 
 # Run rustfst python binding tests
-uv run pytest -vv -s --cache-clear --disable-warnings ./tests
+uv sync --extra dev && uv run pytest -vv -s --cache-clear --disable-warnings ./tests
 
 # Run benches on a small FST to check that the script is working fine.
 cd ..
-uv pip install -e rustfst-python-bench
+uv sync
 uv run rustfst-python-bench/rustfst_python_bench/bench_all.py rustfst-tests-data/fst_003/raw_vector.fst report.md
 uv run rustfst-python-bench/rustfst_python_bench/bench_all_detailed.py rustfst-tests-data/fst_003/raw_vector.fst report2.md

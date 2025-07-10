@@ -1,0 +1,14 @@
+[project]
+name = "rustfst_python_bench"
+version = "0.1.0"
+description = "Python package to benchmark openfst CLI against rustfst CLI"
+authors = [
+  { name = "Alexandre Caulier", email = "alexandre.caulier@protonmail.com" }
+]
+license = { text = "All rights reserved" }
+dependencies = []
+requires-python = ">=3.13"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
