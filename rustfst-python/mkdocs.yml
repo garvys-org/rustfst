@@ -69,6 +69,8 @@ plugins:
   - mike:
       version_selector: true
   - search
+  - autorefs:
+      strict: false
   - section-index
   - mkdocstrings:
       default_handler: python
