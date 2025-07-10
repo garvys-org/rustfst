@@ -195,7 +195,7 @@ jobs:
       - name: Test benchmark
         run: |
           chmod +x openfst-1.7.2/bin/fst*
-          uv sync
+          uv --directory rustfst-python-bench sync
           uv run python rustfst-python-bench/rustfst_python_bench/bench_all.py -w 1 -r 2 debug rustfst-tests-data/fst_003/raw_vector.fst report.md
           uv run python rustfst-python-bench/rustfst_python_bench/bench_all_detailed.py -w 1 -r 2 debug rustfst-tests-data/fst_003/raw_vector.fst report2.md
 
