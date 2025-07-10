@@ -182,6 +182,8 @@ jobs:
           path: openfst-1.7.2
       - name: Generate outputs
         run: ./run_openfst.sh
+      - name: Make OpenFST binaries executable
+        run: find openfst-1.7.2/bin -type f -name 'fst*' -exec chmod +x {}
       - name: Install Hyperfine MacOS
         if: runner.os == 'macOS'
         run: brew install hyperfine
