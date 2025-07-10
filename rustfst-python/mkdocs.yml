@@ -75,8 +75,13 @@ plugins:
       handlers:
         python:
           options:
-            show_source: true
-            show_root_heading: true
+            enable_inventory: true
+            heading_level: 3
+            members_order: source
+            separate_signature: false
+            show_category_heading: true
+            show_if_no_docstring: false
+            show_object_full_path: false
             show_signature_annotations: true
             show_submodules: true
 repo_name: rustfst
