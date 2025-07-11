@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rustfst-python"
-version = "1.2.5"
+version = "1.2.6"
 description = "Python bindings for RustFST"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
@@ -44,8 +44,11 @@ docs = [
 ]
 
 [tool.setuptools]
-packages = ["rustfst"]
 include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["rustfst*"]
 
 [tool.setuptools.package-data]
 rustfst = ["py.typed"]
