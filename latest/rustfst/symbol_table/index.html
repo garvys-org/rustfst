@@ -10,8 +10,15 @@
       
         <link rel="canonical" href="https://github.com/garvys-org/rustfst/latest/rustfst/symbol_table/">
       
+      
+        <link rel="prev" href="../algorithms/connect/">
+      
+      
+        <link rel="next" href="../string_paths_iterator/">
+      
+      
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.2.14">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.15">
     
     
       
@@ -19,13 +26,14 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.3de6f41f.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
       
-        
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.cc9b2e1e.min.css">
-        
       
+
+
     
+    
+      
     
     
       
@@ -39,23 +47,18 @@
     
       <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
     
     
+    
   </head>
   
   
-    
-    
-    
-    
-    
-    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+    <body dir="ltr">
   
-    
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -72,25 +75,26 @@
       
     </div>
     
-      <div data-md-component="outdated" hidden>
-        <aside class="md-banner md-banner--warning">
-          
-        </aside>
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
       </div>
     
     
       
 
-<header class="md-header" data-md-component="header">
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../.." title="rustfst-python" class="md-header__button md-logo" aria-label="rustfst-python" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -110,46 +114,56 @@
     </div>
     
     
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
-      <label class="md-header__button md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
-      </label>
-      <div class="md-search" data-md-component="search" role="dialog">
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
       <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
       <nav class="md-search__options" aria-label="Search">
         
-        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
       </nav>
       
     </form>
     <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
             Initializing search
           </div>
-          <ol class="md-search-result__list"></ol>
+          <ol class="md-search-result__list" role="presentation"></ol>
         </div>
       </div>
     </div>
   </div>
 </div>
+      
     
     
       <div class="md-header__source">
         <a href="https://github.com/garvys-org/rustfst" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
   </div>
   <div class="md-source__repository">
     rustfst
@@ -179,12 +193,13 @@
                     
 
 
+
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href="../.." title="rustfst-python" class="md-nav__button md-logo" aria-label="rustfst-python" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
     rustfst-python
@@ -194,7 +209,7 @@
       <a href="https://github.com/garvys-org/rustfst" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
   </div>
   <div class="md-source__repository">
     rustfst
@@ -206,14 +221,21 @@
     
       
       
-      
-
+  
   
   
   
     <li class="md-nav__item">
       <a href="../.." class="md-nav__link">
-        Home
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
       </a>
     </li>
   
@@ -221,415 +243,657 @@
     
       
       
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Code Reference
+    
+  </span>
+  
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Code Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
     
   
   
+  
+    
+    
+    
+    
     
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2">
-          Code Reference
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Code Reference" data-md-level="1">
-        <label class="md-nav__title" for="__nav_2">
-          <span class="md-nav__icon md-icon"></span>
-          Code Reference
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" checked>
+        
           
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    rustfst
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            rustfst
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
+                
   
-  
-    
-  
-  
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_1" type="checkbox" id="__nav_2_1" checked>
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2_1">
-          rustfst
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="rustfst" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_1">
-          <span class="md-nav__icon md-icon"></span>
-          rustfst
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
   
   
   
     <li class="md-nav__item">
       <a href="../weight/" class="md-nav__link">
-        weight
+        
+  
+  
+  <span class="md-ellipsis">
+    weight
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../string_path/" class="md-nav__link">
-        string_path
+        
+  
+  
+  <span class="md-ellipsis">
+    string_path
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../drawing_config/" class="md-nav__link">
-        drawing_config
+        
+  
+  
+  <span class="md-ellipsis">
+    drawing_config
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../trs/" class="md-nav__link">
-        trs
+        
+  
+  
+  <span class="md-ellipsis">
+    trs
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     
+    
+    
+    
+    
     <li class="md-nav__item md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_1_5" type="checkbox" id="__nav_2_1_5" >
-      
-      
-      
-      
         
         
-        <div class="md-nav__link md-nav__link--index ">
-          <a href="../algorithms/">algorithms</a>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1_5" >
+        
           
-            <label for="__nav_2_1_5">
-              <span class="md-nav__icon md-icon"></span>
-            </label>
-          
-        </div>
-      
-      <nav class="md-nav" aria-label="algorithms" data-md-level="3">
-        <label class="md-nav__title" for="__nav_2_1_5">
-          <span class="md-nav__icon md-icon"></span>
-          algorithms
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
+          <div class="md-nav__link md-nav__container">
+            <a href="../algorithms/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    algorithms
+    
+  </span>
+  
+
+            </a>
             
               
+              <label class="md-nav__link " for="__nav_2_1_5" id="__nav_2_1_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_1_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1_5">
+            <span class="md-nav__icon md-icon"></span>
+            algorithms
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../algorithms/shortest_path/" class="md-nav__link">
-        shortest_path
+        
+  
+  
+  <span class="md-ellipsis">
+    shortest_path
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../algorithms/concat/" class="md-nav__link">
-        concat
+        
+  
+  
+  <span class="md-ellipsis">
+    concat
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../algorithms/optimize/" class="md-nav__link">
-        optimize
+        
+  
+  
+  <span class="md-ellipsis">
+    optimize
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../algorithms/determinize/" class="md-nav__link">
-        determinize
+        
+  
+  
+  <span class="md-ellipsis">
+    determinize
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../algorithms/tr_unique/" class="md-nav__link">
-        tr_unique
+        
+  
+  
+  <span class="md-ellipsis">
+    tr_unique
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../algorithms/isomorphic/" class="md-nav__link">
-        isomorphic
+        
+  
+  
+  <span class="md-ellipsis">
+    isomorphic
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../algorithms/top_sort/" class="md-nav__link">
-        top_sort
+        
+  
+  
+  <span class="md-ellipsis">
+    top_sort
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../algorithms/compose/" class="md-nav__link">
-        compose
+        
+  
+  
+  <span class="md-ellipsis">
+    compose
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../algorithms/rm_epsilon/" class="md-nav__link">
-        rm_epsilon
+        
+  
+  
+  <span class="md-ellipsis">
+    rm_epsilon
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../algorithms/reverse/" class="md-nav__link">
-        reverse
+        
+  
+  
+  <span class="md-ellipsis">
+    reverse
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../algorithms/inversion/" class="md-nav__link">
-        inversion
+        
+  
+  
+  <span class="md-ellipsis">
+    inversion
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../algorithms/project/" class="md-nav__link">
-        project
+        
+  
+  
+  <span class="md-ellipsis">
+    project
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../algorithms/randgen/" class="md-nav__link">
-        randgen
+        
+  
+  
+  <span class="md-ellipsis">
+    randgen
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../algorithms/union/" class="md-nav__link">
-        union
+        
+  
+  
+  <span class="md-ellipsis">
+    union
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../algorithms/replace/" class="md-nav__link">
-        replace
+        
+  
+  
+  <span class="md-ellipsis">
+    replace
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../algorithms/tr_sort/" class="md-nav__link">
-        tr_sort
+        
+  
+  
+  <span class="md-ellipsis">
+    tr_sort
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../algorithms/connect/" class="md-nav__link">
-        connect
+        
+  
+  
+  <span class="md-ellipsis">
+    connect
+    
+  </span>
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
-            
-          
+              
             
               
+                
   
   
     
   
   
+  
     <li class="md-nav__item md-nav__item--active">
       
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          symbol_table
+          
+  
+  
+  <span class="md-ellipsis">
+    symbol_table
+    
+  </span>
+  
+
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        symbol_table
+        
+  
+  
+  <span class="md-ellipsis">
+    symbol_table
+    
+  </span>
+  
+
       </a>
       
         
@@ -647,14 +911,18 @@
       
         <li class="md-nav__item">
   <a href="#rustfst.symbol_table" class="md-nav__link">
-    rustfst.symbol_table
+    <span class="md-ellipsis">
+      symbol_table
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#rustfst.symbol_table-classes" class="md-nav__link">
-    Classes
+    <span class="md-ellipsis">
+      Classes
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Classes">
@@ -662,7 +930,9 @@
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable" class="md-nav__link">
-    SymbolTable
+    <span class="md-ellipsis">
+      SymbolTable
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="SymbolTable">
@@ -670,7 +940,9 @@
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable-functions" class="md-nav__link">
-    Functions
+    <span class="md-ellipsis">
+      Functions
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Functions">
@@ -678,105 +950,135 @@
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.__init__" class="md-nav__link">
-    __init__()
+    <span class="md-ellipsis">
+      __init__
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.add_symbol" class="md-nav__link">
-    add_symbol()
+    <span class="md-ellipsis">
+      add_symbol
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.add_table" class="md-nav__link">
-    add_table()
+    <span class="md-ellipsis">
+      add_table
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.copy" class="md-nav__link">
-    copy()
+    <span class="md-ellipsis">
+      copy
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.find" class="md-nav__link">
-    find()
+    <span class="md-ellipsis">
+      find
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.member" class="md-nav__link">
-    member()
+    <span class="md-ellipsis">
+      member
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.num_symbols" class="md-nav__link">
-    num_symbols()
+    <span class="md-ellipsis">
+      num_symbols
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.read" class="md-nav__link">
-    read()
+    <span class="md-ellipsis">
+      read
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.read_text" class="md-nav__link">
-    read_text()
+    <span class="md-ellipsis">
+      read_text
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.write" class="md-nav__link">
-    write()
+    <span class="md-ellipsis">
+      write
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.write_text" class="md-nav__link">
-    write_text()
+    <span class="md-ellipsis">
+      write_text
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.equals" class="md-nav__link">
-    equals()
+    <span class="md-ellipsis">
+      equals
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.__eq__" class="md-nav__link">
-    __eq__()
+    <span class="md-ellipsis">
+      __eq__
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.__iter__" class="md-nav__link">
-    __iter__()
+    <span class="md-ellipsis">
+      __iter__
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.from_symbols" class="md-nav__link">
-    from_symbols()
+    <span class="md-ellipsis">
+      from_symbols
+    </span>
   </a>
   
 </li>
@@ -793,7 +1095,9 @@
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTableIterator" class="md-nav__link">
-    SymbolTableIterator
+    <span class="md-ellipsis">
+      SymbolTableIterator
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="SymbolTableIterator">
@@ -801,7 +1105,9 @@
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTableIterator-functions" class="md-nav__link">
-    Functions
+    <span class="md-ellipsis">
+      Functions
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Functions">
@@ -809,14 +1115,18 @@
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTableIterator.__init__" class="md-nav__link">
-    __init__()
+    <span class="md-ellipsis">
+      __init__
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTableIterator.__next__" class="md-nav__link">
-    __next__()
+    <span class="md-ellipsis">
+      __next__
+    </span>
   </a>
   
 </li>
@@ -843,126 +1153,187 @@
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../string_paths_iterator/" class="md-nav__link">
-        string_paths_iterator
+        
+  
+  
+  <span class="md-ellipsis">
+    string_paths_iterator
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     
+    
+    
+    
+    
     <li class="md-nav__item md-nav__item--nested">
       
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_1_8" type="checkbox" id="__nav_2_1_8" >
-      
-      
-      
-      
         
         
-        <div class="md-nav__link md-nav__link--index ">
-          <a href="../fst/">fst</a>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1_8" >
+        
           
-            <label for="__nav_2_1_8">
-              <span class="md-nav__icon md-icon"></span>
-            </label>
-          
-        </div>
-      
-      <nav class="md-nav" aria-label="fst" data-md-level="3">
-        <label class="md-nav__title" for="__nav_2_1_8">
-          <span class="md-nav__icon md-icon"></span>
-          fst
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
+          <div class="md-nav__link md-nav__container">
+            <a href="../fst/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    fst
+    
+  </span>
+  
+
+            </a>
             
               
+              <label class="md-nav__link " for="__nav_2_1_8" id="__nav_2_1_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_1_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1_8">
+            <span class="md-nav__icon md-icon"></span>
+            fst
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../fst/vector_fst/" class="md-nav__link">
-        vector_fst
+        
+  
+  
+  <span class="md-ellipsis">
+    vector_fst
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../fst/const_fst/" class="md-nav__link">
-        const_fst
+        
+  
+  
+  <span class="md-ellipsis">
+    const_fst
+    
+  </span>
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../tr/" class="md-nav__link">
-        tr
+        
+  
+  
+  <span class="md-ellipsis">
+    tr
+    
+  </span>
+  
+
       </a>
     </li>
   
 
-            
-          
+              
             
               
+                
+  
   
   
   
     <li class="md-nav__item">
       <a href="../iterators/" class="md-nav__link">
-        iterators
+        
+  
+  
+  <span class="md-ellipsis">
+    iterators
+    
+  </span>
+  
+
       </a>
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
+              
             
-          
-        </ul>
-      </nav>
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -993,14 +1364,18 @@
       
         <li class="md-nav__item">
   <a href="#rustfst.symbol_table" class="md-nav__link">
-    rustfst.symbol_table
+    <span class="md-ellipsis">
+      symbol_table
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#rustfst.symbol_table-classes" class="md-nav__link">
-    Classes
+    <span class="md-ellipsis">
+      Classes
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Classes">
@@ -1008,7 +1383,9 @@
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable" class="md-nav__link">
-    SymbolTable
+    <span class="md-ellipsis">
+      SymbolTable
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="SymbolTable">
@@ -1016,7 +1393,9 @@
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable-functions" class="md-nav__link">
-    Functions
+    <span class="md-ellipsis">
+      Functions
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Functions">
@@ -1024,105 +1403,135 @@
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.__init__" class="md-nav__link">
-    __init__()
+    <span class="md-ellipsis">
+      __init__
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.add_symbol" class="md-nav__link">
-    add_symbol()
+    <span class="md-ellipsis">
+      add_symbol
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.add_table" class="md-nav__link">
-    add_table()
+    <span class="md-ellipsis">
+      add_table
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.copy" class="md-nav__link">
-    copy()
+    <span class="md-ellipsis">
+      copy
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.find" class="md-nav__link">
-    find()
+    <span class="md-ellipsis">
+      find
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.member" class="md-nav__link">
-    member()
+    <span class="md-ellipsis">
+      member
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.num_symbols" class="md-nav__link">
-    num_symbols()
+    <span class="md-ellipsis">
+      num_symbols
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.read" class="md-nav__link">
-    read()
+    <span class="md-ellipsis">
+      read
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.read_text" class="md-nav__link">
-    read_text()
+    <span class="md-ellipsis">
+      read_text
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.write" class="md-nav__link">
-    write()
+    <span class="md-ellipsis">
+      write
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.write_text" class="md-nav__link">
-    write_text()
+    <span class="md-ellipsis">
+      write_text
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.equals" class="md-nav__link">
-    equals()
+    <span class="md-ellipsis">
+      equals
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.__eq__" class="md-nav__link">
-    __eq__()
+    <span class="md-ellipsis">
+      __eq__
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.__iter__" class="md-nav__link">
-    __iter__()
+    <span class="md-ellipsis">
+      __iter__
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTable.from_symbols" class="md-nav__link">
-    from_symbols()
+    <span class="md-ellipsis">
+      from_symbols
+    </span>
   </a>
   
 </li>
@@ -1139,7 +1548,9 @@
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTableIterator" class="md-nav__link">
-    SymbolTableIterator
+    <span class="md-ellipsis">
+      SymbolTableIterator
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="SymbolTableIterator">
@@ -1147,7 +1558,9 @@
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTableIterator-functions" class="md-nav__link">
-    Functions
+    <span class="md-ellipsis">
+      Functions
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Functions">
@@ -1155,14 +1568,18 @@
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTableIterator.__init__" class="md-nav__link">
-    __init__()
+    <span class="md-ellipsis">
+      __init__
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#rustfst.symbol_table.SymbolTableIterator.__next__" class="md-nav__link">
-    __next__()
+    <span class="md-ellipsis">
+      __next__
+    </span>
   </a>
   
 </li>
@@ -1190,14 +1607,15 @@
               </div>
             
           
-          <div class="md-content" data-md-component="content">
-            <article class="md-content__inner md-typeset">
-              
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
                 
-  <a href="https://github.com/garvys-org/rustfst/edit/master/docs/rustfst/symbol_table/index.md" title="Edit this page" class="md-content__button md-icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
-  </a>
+                  
 
+
+  
+  
 
 
   <h1>symbol_table</h1>
@@ -1205,10 +1623,17 @@
 <div class="doc doc-object doc-module">
 
 
-<a id="rustfst.symbol_table"></a>
-  <div class="doc doc-contents first">
 
-  
+<a id="rustfst.symbol_table"></a>
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
 
   <div class="doc doc-children">
 
@@ -1224,21 +1649,26 @@
 
 
 <h4 id="rustfst.symbol_table.SymbolTable" class="doc doc-heading">
-        <code>SymbolTable</code>
+            <code>SymbolTable</code>
 
 
 </h4>
 
 
-  <div class="doc doc-contents ">
-
-  
-      <p><code>SymbolTable</code> class. This class wraps the <code>SymbolTable</code> struct.</p>
+    <div class="doc doc-contents ">
 
 
-        <details class="quote">
-          <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 10</span>
+        <p><code>SymbolTable</code> class. This class wraps the <code>SymbolTable</code> struct.</p>
+
+
+
+
+
+
+
+              <details class="quote">
+                <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 10</span>
 <span class="normal"> 11</span>
 <span class="normal"> 12</span>
 <span class="normal"> 13</span>
@@ -1512,12 +1942,12 @@
 <span class="normal">281</span>
 <span class="normal">282</span>
 <span class="normal">283</span>
-<span class="normal">284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SymbolTable</span><span class="p">:</span>
+<span class="normal">284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SymbolTable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `SymbolTable` class. This class wraps the `SymbolTable` struct.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates an empty `SymbolTable`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1531,7 +1961,7 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">symt_ptr</span>
 
-    <span class="k">def</span> <span class="nf">add_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a symbol to the table and returns the index.</span>
 
@@ -1552,7 +1982,7 @@
 
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">integer_key</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">add_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syms</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syms</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method merges another symbol table into the current table. All key</span>
 <span class="sd">        values will be offset by the current available key.</span>
@@ -1563,7 +1993,7 @@
         <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;`add_table` failed&quot;</span>
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            A mutable copy of the `SymbolTable`.</span>
@@ -1576,7 +2006,7 @@
 
         <span class="k">return</span> <span class="n">SymbolTable</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">clone</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Given a symbol or index, finds the other one.</span>
 <span class="sd">        This method returns the index associated with a symbol key, or the symbol</span>
@@ -1595,7 +2025,7 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_symbol</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">raise</span> <span class="sa">f</span><span class="s2">&quot;key can only be a string or integer. Not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
 
-    <span class="k">def</span> <span class="nf">_find_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_find_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">key</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="n">symbol</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">()</span>
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">symt_find_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">symbol</span><span class="p">))</span>
@@ -1604,7 +2034,7 @@
 
         <span class="k">return</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">string_at</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_find_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_find_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="n">symbol</span> <span class="o">=</span> <span class="n">symbol</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">()</span>
         <span class="n">ret_code</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">symt_find_symbol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
@@ -1613,7 +2043,7 @@
 
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">member</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">member</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Given a symbol or index, returns whether it is found in the table.</span>
 <span class="sd">        This method returns a boolean indicating whether the given symbol or index</span>
@@ -1644,7 +2074,7 @@
 
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">is_present</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">num_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            The number of symbols in the symbol table.</span>
@@ -1657,7 +2087,7 @@
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_symbols</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reads symbol table from binary file.</span>
 <span class="sd">        This class method creates a new SymbolTable from a symbol table binary file.</span>
@@ -1678,7 +2108,7 @@
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">symt</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">read_text</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_text</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reads symbol table from text file.</span>
 <span class="sd">        This class method creates a new SymbolTable from a symbol table text file.</span>
@@ -1699,7 +2129,7 @@
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">symt</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Serializes symbol table to a file.</span>
 <span class="sd">        This methods writes the SymbolTable to a file in binary format.</span>
@@ -1715,7 +2145,7 @@
         <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed for bin file : </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">write_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Writes symbol table to text file.</span>
 <span class="sd">        This method writes the SymbolTable to a file in human-readable format.</span>
@@ -1731,7 +2161,7 @@
         <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed for text file : </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if this SymbolTable is equal to the other</span>
 
@@ -1748,7 +2178,7 @@
 
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">is_equal</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if this `SymbolTable` is equal to the other</span>
 
@@ -1759,7 +2189,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTableIterator</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTableIterator</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns an Iterator over the SymbolTable.</span>
 <span class="sd">        Returns:</span>
@@ -1768,7 +2198,7 @@
         <span class="k">return</span> <span class="n">SymbolTableIterator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_symbols</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">symbols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_symbols</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">symbols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructs a SymbolTable from list of strings.</span>
 
@@ -1785,12 +2215,12 @@
 
         <span class="k">return</span> <span class="n">symt</span>
 
-    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">lib</span><span class="o">.</span><span class="n">symt_destroy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+              </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1805,20 +2235,20 @@
 <div class="doc doc-object doc-function">
 
 
-
 <h6 id="rustfst.symbol_table.SymbolTable.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">ptr</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h6>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>Creates an empty <code>SymbolTable</code>.</p>
+    <div class="doc doc-contents ">
 
-      <details class="quote">
-        <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">15</span>
+        <p>Creates an empty <code>SymbolTable</code>.</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">15</span>
 <span class="normal">16</span>
 <span class="normal">17</span>
 <span class="normal">18</span>
@@ -1830,7 +2260,7 @@
 <span class="normal">24</span>
 <span class="normal">25</span>
 <span class="normal">26</span>
-<span class="normal">27</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">27</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ptr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates an empty `SymbolTable`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1844,70 +2274,61 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">symt_ptr</span>
 </code></pre></div></td></tr></table></div>
-      </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
 <div class="doc doc-object doc-function">
 
 
-
 <h6 id="rustfst.symbol_table.SymbolTable.add_symbol" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">add_symbol</span><span class="p">(</span><span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span></code>
+            <code class="highlight language-python"><span class="n">add_symbol</span><span class="p">(</span><span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span></code>
 
 </h6>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>Adds a symbol to the table and returns the index.</p>
+    <div class="doc doc-contents ">
 
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
+        <p>Adds a symbol to the table and returns the index.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
         <tr>
-          <td><code>symbol</code></td>
-          <td>
-                <code>str</code>
-          </td>
-          <td><p>A symbol unicode string.</p></td>
-          <td>
-              <em>required</em>
-          </td>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
         </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>symbol</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A symbol unicode string.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Returns:
+  The integer key of the new symbol.</p>
 
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>int</code>
-          </td>
-          <td><p>The integer key of the new symbol.</p></td>
-        </tr>
-    </tbody>
-  </table>
 
-      <details class="quote">
-        <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">29</span>
+            <details class="quote">
+              <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">29</span>
 <span class="normal">30</span>
 <span class="normal">31</span>
 <span class="normal">32</span>
@@ -1926,7 +2347,7 @@
 <span class="normal">45</span>
 <span class="normal">46</span>
 <span class="normal">47</span>
-<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">add_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a symbol to the table and returns the index.</span>
 
@@ -1947,53 +2368,31 @@
 
     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">integer_key</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
 <div class="doc doc-object doc-function">
 
 
-
 <h6 id="rustfst.symbol_table.SymbolTable.add_table" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">add_table</span><span class="p">(</span><span class="n">syms</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">add_table</span><span class="p">(</span><span class="n">syms</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span></code>
 
 </h6>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>This method merges another symbol table into the current table. All key
-values will be offset by the current available key.</p>
+    <div class="doc doc-contents ">
 
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>syms</code></td>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
-          </td>
-          <td><p>A <code>SymbolTable</code> to be merged with the current table.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
+        <p>This method merges another symbol table into the current table. All key
+values will be offset by the current available key.
+Args:
+  syms: A <code>SymbolTable</code> to be merged with the current table.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">50</span>
+
+            <details class="quote">
+              <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">50</span>
 <span class="normal">51</span>
 <span class="normal">52</span>
 <span class="normal">53</span>
@@ -2002,7 +2401,7 @@ values will be offset by the current available key.</p>
 <span class="normal">56</span>
 <span class="normal">57</span>
 <span class="normal">58</span>
-<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">add_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syms</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">):</span>
+<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syms</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This method merges another symbol table into the current table. All key</span>
 <span class="sd">    values will be offset by the current available key.</span>
@@ -2013,45 +2412,50 @@ values will be offset by the current available key.</p>
     <span class="n">err_msg</span> <span class="o">=</span> <span class="s2">&quot;`add_table` failed&quot;</span>
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
 <div class="doc doc-object doc-function">
 
 
-
 <h6 id="rustfst.symbol_table.SymbolTable.copy" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">copy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span></code>
+            <code class="highlight language-python"><span class="n">copy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span></code>
 
 </h6>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
 
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
         <tr>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
-          </td>
-          <td><p>A mutable copy of the <code>SymbolTable</code>.</p></td>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="SymbolTable (rustfst.symbol_table.SymbolTable)" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A mutable copy of the <code>SymbolTable</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
-      <details class="quote">
-        <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">61</span>
+
+            <details class="quote">
+              <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">61</span>
 <span class="normal">62</span>
 <span class="normal">63</span>
 <span class="normal">64</span>
@@ -2062,7 +2466,7 @@ values will be offset by the current available key.</p>
 <span class="normal">69</span>
 <span class="normal">70</span>
 <span class="normal">71</span>
-<span class="normal">72</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
+<span class="normal">72</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        A mutable copy of the `SymbolTable`.</span>
@@ -2075,91 +2479,37 @@ values will be offset by the current available key.</p>
 
     <span class="k">return</span> <span class="n">SymbolTable</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">clone</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
 <div class="doc doc-object doc-function">
 
 
-
 <h6 id="rustfst.symbol_table.SymbolTable.find" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">find</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">find</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span></code>
 
 </h6>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>Given a symbol or index, finds the other one.
+    <div class="doc doc-contents ">
+
+        <p>Given a symbol or index, finds the other one.
 This method returns the index associated with a symbol key, or the symbol
-associated with a index key.</p>
+associated with a index key.
+Args:
+  key: Either a string or an index.
+Returns:
+  If key is a string, the associated index; if key is an integer, the
+      associated symbol.
+Raises:
+  KeyError: Key not found.</p>
 
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>key</code></td>
-          <td>
-                <code><span title="typing.Union">Union</span>[int, str]</code>
-          </td>
-          <td><p>Either a string or an index.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
 
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code><span title="typing.Union">Union</span>[int, str]</code>
-          </td>
-          <td><p>If key is a string, the associated index; if key is an integer, the
-  associated symbol.</p></td>
-        </tr>
-    </tbody>
-  </table>
-
-  <p><strong>Raises:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>KeyError</code>
-          </td>
-          <td><p>Key not found.</p></td>
-        </tr>
-    </tbody>
-  </table>
-
-      <details class="quote">
-        <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">74</span>
+            <details class="quote">
+              <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">74</span>
 <span class="normal">75</span>
 <span class="normal">76</span>
 <span class="normal">77</span>
@@ -2176,7 +2526,7 @@ associated with a index key.</p>
 <span class="normal">88</span>
 <span class="normal">89</span>
 <span class="normal">90</span>
-<span class="normal">91</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="normal">91</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a symbol or index, finds the other one.</span>
 <span class="sd">    This method returns the index associated with a symbol key, or the symbol</span>
@@ -2195,73 +2545,35 @@ associated with a index key.</p>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_symbol</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
     <span class="k">raise</span> <span class="sa">f</span><span class="s2">&quot;key can only be a string or integer. Not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
 </code></pre></div></td></tr></table></div>
-      </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
 <div class="doc doc-object doc-function">
 
 
-
 <h6 id="rustfst.symbol_table.SymbolTable.member" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">member</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
+            <code class="highlight language-python"><span class="n">member</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
 
 </h6>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>Given a symbol or index, returns whether it is found in the table.
+    <div class="doc doc-contents ">
+
+        <p>Given a symbol or index, returns whether it is found in the table.
 This method returns a boolean indicating whether the given symbol or index
 is present in the table. If one intends to perform subsequent lookup, it is
-better to simply call the find method, catching the KeyError.</p>
+better to simply call the find method, catching the KeyError.
+Args:
+  key: Either a string or an index.
+Returns:
+  Whether or not the key is present (as a string or a index) in the table.</p>
 
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>key</code></td>
-          <td>
-                <code><span title="typing.Union">Union</span>[int, str]</code>
-          </td>
-          <td><p>Either a string or an index.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
 
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>bool</code>
-          </td>
-          <td><p>Whether or not the key is present (as a string or a index) in the table.</p></td>
-        </tr>
-    </tbody>
-  </table>
-
-      <details class="quote">
-        <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">111</span>
+            <details class="quote">
+              <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">111</span>
 <span class="normal">112</span>
 <span class="normal">113</span>
 <span class="normal">114</span>
@@ -2290,7 +2602,7 @@ better to simply call the find method, catching the KeyError.</p>
 <span class="normal">137</span>
 <span class="normal">138</span>
 <span class="normal">139</span>
-<span class="normal">140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">member</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal">140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">member</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a symbol or index, returns whether it is found in the table.</span>
 <span class="sd">    This method returns a boolean indicating whether the given symbol or index</span>
@@ -2321,45 +2633,50 @@ better to simply call the find method, catching the KeyError.</p>
 
     <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">is_present</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
 <div class="doc doc-object doc-function">
 
 
-
 <h6 id="rustfst.symbol_table.SymbolTable.num_symbols" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">num_symbols</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">int</span></code>
+            <code class="highlight language-python"><span class="n">num_symbols</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">int</span></code>
 
 </h6>
 
 
-  <div class="doc doc-contents ">
-  
+    <div class="doc doc-contents ">
 
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
         <tr>
-          <td>
-                <code>int</code>
-          </td>
-          <td><p>The number of symbols in the symbol table.</p></td>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The number of symbols in the symbol table.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
-      <details class="quote">
-        <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">142</span>
+
+            <details class="quote">
+              <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">142</span>
 <span class="normal">143</span>
 <span class="normal">144</span>
 <span class="normal">145</span>
@@ -2369,7 +2686,7 @@ better to simply call the find method, catching the KeyError.</p>
 <span class="normal">149</span>
 <span class="normal">150</span>
 <span class="normal">151</span>
-<span class="normal">152</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">num_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="normal">152</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">num_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        The number of symbols in the symbol table.</span>
@@ -2381,18 +2698,17 @@ better to simply call the find method, catching the KeyError.</p>
 
     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_symbols</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
 <div class="doc doc-object doc-function">
 
 
-
 <h6 id="rustfst.symbol_table.SymbolTable.read" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span></code>
-  
+            <code class="highlight language-python"><span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span></code>
+
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
   </span>
@@ -2400,57 +2716,20 @@ better to simply call the find method, catching the KeyError.</p>
 </h6>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>Reads symbol table from binary file.
-This class method creates a new SymbolTable from a symbol table binary file.</p>
+    <div class="doc doc-contents ">
 
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>filename</code></td>
-          <td>
-                <code><span title="typing.Union">Union</span>[str, <span title="pathlib.Path">Path</span>]</code>
-          </td>
-          <td><p>The string location of the input binary file.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
+        <p>Reads symbol table from binary file.
+This class method creates a new SymbolTable from a symbol table binary file.
+Args:
+  filename: The string location of the input binary file.
+Returns:
+  A new SymbolTable instance.
+See also: <code>SymbolTable.read_fst</code>, <code>SymbolTable.read_text</code>.</p>
 
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
-          </td>
-          <td><p>A new SymbolTable instance.</p></td>
-        </tr>
-    </tbody>
-  </table>
-      <p>See also: <code>SymbolTable.read_fst</code>, <code>SymbolTable.read_text</code>.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">154</span>
+            <details class="quote">
+              <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">154</span>
 <span class="normal">155</span>
 <span class="normal">156</span>
 <span class="normal">157</span>
@@ -2470,7 +2749,7 @@ This class method creates a new SymbolTable from a symbol table binary file.</p>
 <span class="normal">171</span>
 <span class="normal">172</span>
 <span class="normal">173</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reads symbol table from binary file.</span>
 <span class="sd">    This class method creates a new SymbolTable from a symbol table binary file.</span>
@@ -2490,18 +2769,17 @@ This class method creates a new SymbolTable from a symbol table binary file.</p>
 
     <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">symt</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
 <div class="doc doc-object doc-function">
 
 
-
 <h6 id="rustfst.symbol_table.SymbolTable.read_text" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">read_text</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span></code>
-  
+            <code class="highlight language-python"><span class="n">read_text</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span></code>
+
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
   </span>
@@ -2509,57 +2787,41 @@ This class method creates a new SymbolTable from a symbol table binary file.</p>
 </h6>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>Reads symbol table from text file.
-This class method creates a new SymbolTable from a symbol table text file.</p>
+    <div class="doc doc-contents ">
 
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
+        <p>Reads symbol table from text file.
+This class method creates a new SymbolTable from a symbol table text file.
+Args:
+  filename: The string location of the input text file.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
         <tr>
-          <td><code>filename</code></td>
-          <td>
-                <code><span title="typing.Union">Union</span>[str, <span title="pathlib.Path">Path</span>]</code>
-          </td>
-          <td><p>The string location of the input text file.</p></td>
-          <td>
-              <em>required</em>
-          </td>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="SymbolTable (rustfst.symbol_table.SymbolTable)" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new SymbolTable instance.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>See also: <code>SymbolTable.read</code>, <code>SymbolTable.read_fst</code>.</p>
 
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
-          </td>
-          <td><p>A new SymbolTable instance.</p></td>
-        </tr>
-    </tbody>
-  </table>
-      <p>See also: <code>SymbolTable.read</code>, <code>SymbolTable.read_fst</code>.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">175</span>
+            <details class="quote">
+              <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">175</span>
 <span class="normal">176</span>
 <span class="normal">177</span>
 <span class="normal">178</span>
@@ -2580,7 +2842,7 @@ This class method creates a new SymbolTable from a symbol table text file.</p>
 <span class="normal">193</span>
 <span class="normal">194</span>
 <span class="normal">195</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">read_text</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_text</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reads symbol table from text file.</span>
 <span class="sd">    This class method creates a new SymbolTable from a symbol table text file.</span>
@@ -2601,71 +2863,33 @@ This class method creates a new SymbolTable from a symbol table text file.</p>
 
     <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ptr</span><span class="o">=</span><span class="n">symt</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
 <div class="doc doc-object doc-function">
 
 
-
 <h6 id="rustfst.symbol_table.SymbolTable.write" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span></code>
+            <code class="highlight language-python"><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span></code>
 
 </h6>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>Serializes symbol table to a file.
-This methods writes the SymbolTable to a file in binary format.</p>
+    <div class="doc doc-contents ">
 
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>filename</code></td>
-          <td>
-                <code><span title="typing.Union">Union</span>[str, <span title="pathlib.Path">Path</span>]</code>
-          </td>
-          <td><p>The string location of the output file.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
+        <p>Serializes symbol table to a file.
+This methods writes the SymbolTable to a file in binary format.
+Args:
+  filename: The string location of the output file.
+Raises:
+  FstIOError: Write failed.</p>
 
-  <p><strong>Raises:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>FstIOError</code>
-          </td>
-          <td><p>Write failed.</p></td>
-        </tr>
-    </tbody>
-  </table>
 
-      <details class="quote">
-        <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">197</span>
+            <details class="quote">
+              <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">197</span>
 <span class="normal">198</span>
 <span class="normal">199</span>
 <span class="normal">200</span>
@@ -2679,7 +2903,7 @@ This methods writes the SymbolTable to a file in binary format.</p>
 <span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span>
-<span class="normal">211</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
+<span class="normal">211</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Serializes symbol table to a file.</span>
 <span class="sd">    This methods writes the SymbolTable to a file in binary format.</span>
@@ -2695,71 +2919,33 @@ This methods writes the SymbolTable to a file in binary format.</p>
     <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed for bin file : </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
 <div class="doc doc-object doc-function">
 
 
-
 <h6 id="rustfst.symbol_table.SymbolTable.write_text" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">write_text</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span></code>
+            <code class="highlight language-python"><span class="n">write_text</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span></code>
 
 </h6>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>Writes symbol table to text file.
-This method writes the SymbolTable to a file in human-readable format.</p>
+    <div class="doc doc-contents ">
 
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>filename</code></td>
-          <td>
-                <code><span title="typing.Union">Union</span>[str, <span title="pathlib.Path">Path</span>]</code>
-          </td>
-          <td><p>The string location of the output file.</p></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
+        <p>Writes symbol table to text file.
+This method writes the SymbolTable to a file in human-readable format.
+Args:
+  filename: The string location of the output file.
+Raises:
+  FstIOError: Write failed.</p>
 
-  <p><strong>Raises:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>FstIOError</code>
-          </td>
-          <td><p>Write failed.</p></td>
-        </tr>
-    </tbody>
-  </table>
 
-      <details class="quote">
-        <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">213</span>
+            <details class="quote">
+              <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">213</span>
 <span class="normal">214</span>
 <span class="normal">215</span>
 <span class="normal">216</span>
@@ -2773,7 +2959,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">224</span>
 <span class="normal">225</span>
 <span class="normal">226</span>
-<span class="normal">227</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">write_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
+<span class="normal">227</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Writes symbol table to text file.</span>
 <span class="sd">    This method writes the SymbolTable to a file in human-readable format.</span>
@@ -2789,70 +2975,61 @@ This method writes the SymbolTable to a file in human-readable format.</p>
     <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Write failed for text file : </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="n">check_ffi_error</span><span class="p">(</span><span class="n">ret_code</span><span class="p">,</span> <span class="n">err_msg</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
 <div class="doc doc-object doc-function">
 
 
-
 <h6 id="rustfst.symbol_table.SymbolTable.equals" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">equals</span><span class="p">(</span><span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
+            <code class="highlight language-python"><span class="n">equals</span><span class="p">(</span><span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
 
 </h6>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>Check if this SymbolTable is equal to the other</p>
+    <div class="doc doc-contents ">
 
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
+        <p>Check if this SymbolTable is equal to the other</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
         <tr>
-          <td><code>other</code></td>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
-          </td>
-          <td><p>SymbolTable instance</p></td>
-          <td>
-              <em>required</em>
-          </td>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
         </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>other</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="SymbolTable (rustfst.symbol_table.SymbolTable)" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>SymbolTable instance</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Returns:
+     bool</p>
 
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>bool</code>
-          </td>
-          <td><p>bool</p></td>
-        </tr>
-    </tbody>
-  </table>
 
-      <details class="quote">
-        <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">229</span>
+            <details class="quote">
+              <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">229</span>
 <span class="normal">230</span>
 <span class="normal">231</span>
 <span class="normal">232</span>
@@ -2867,7 +3044,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">241</span>
 <span class="normal">242</span>
 <span class="normal">243</span>
-<span class="normal">244</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal">244</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if this SymbolTable is equal to the other</span>
 
@@ -2884,70 +3061,61 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 
     <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">is_equal</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
 <div class="doc doc-object doc-function">
 
 
-
 <h6 id="rustfst.symbol_table.SymbolTable.__eq__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
+            <code class="highlight language-python"><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
 
 </h6>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>Check if this <code>SymbolTable</code> is equal to the other</p>
+    <div class="doc doc-contents ">
 
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
+        <p>Check if this <code>SymbolTable</code> is equal to the other</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
         <tr>
-          <td><code>other</code></td>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
-          </td>
-          <td><p>SymbolTable instance</p></td>
-          <td>
-              <em>required</em>
-          </td>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
         </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>other</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="SymbolTable (rustfst.symbol_table.SymbolTable)" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>SymbolTable instance</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Returns:
+     bool</p>
 
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code>bool</code>
-          </td>
-          <td><p>bool</p></td>
-        </tr>
-    </tbody>
-  </table>
 
-      <details class="quote">
-        <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">246</span>
+            <details class="quote">
+              <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">246</span>
 <span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
@@ -2956,7 +3124,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">252</span>
 <span class="normal">253</span>
 <span class="normal">254</span>
-<span class="normal">255</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal">255</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check if this `SymbolTable` is equal to the other</span>
 
@@ -2967,52 +3135,36 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
 <div class="doc doc-object doc-function">
 
 
-
 <h6 id="rustfst.symbol_table.SymbolTable.__iter__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__iter__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">SymbolTableIterator</span></code>
+            <code class="highlight language-python"><span class="fm">__iter__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">SymbolTableIterator</span></code>
 
 </h6>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>Returns an Iterator over the SymbolTable.</p>
+    <div class="doc doc-contents ">
 
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTableIterator" href="#rustfst.symbol_table.SymbolTableIterator">SymbolTableIterator</a></code>
-          </td>
-          <td><p>An iterator over the SymbolTable.</p></td>
-        </tr>
-    </tbody>
-  </table>
+        <p>Returns an Iterator over the SymbolTable.
+Returns:
+    An iterator over the SymbolTable.</p>
 
-      <details class="quote">
-        <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">257</span>
+
+            <details class="quote">
+              <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">257</span>
 <span class="normal">258</span>
 <span class="normal">259</span>
 <span class="normal">260</span>
 <span class="normal">261</span>
 <span class="normal">262</span>
-<span class="normal">263</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTableIterator</span><span class="p">:</span>
+<span class="normal">263</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SymbolTableIterator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns an Iterator over the SymbolTable.</span>
 <span class="sd">    Returns:</span>
@@ -3020,18 +3172,17 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">SymbolTableIterator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-      </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
 <div class="doc doc-object doc-function">
 
 
-
 <h6 id="rustfst.symbol_table.SymbolTable.from_symbols" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">from_symbols</span><span class="p">(</span><span class="n">symbols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span></code>
-  
+            <code class="highlight language-python"><span class="n">from_symbols</span><span class="p">(</span><span class="n">symbols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span></code>
+
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
   </span>
@@ -3039,55 +3190,68 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 </h6>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>Constructs a SymbolTable from list of strings.</p>
+    <div class="doc doc-contents ">
 
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
+        <p>Constructs a SymbolTable from list of strings.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
         <tr>
-          <td><code>symbols</code></td>
-          <td>
-                <code><span title="typing.List">List</span>[str]</code>
-          </td>
-          <td><p>List of symbols</p></td>
-          <td>
-              <em>required</em>
-          </td>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
         </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>symbols</code>
+            </td>
+            <td>
+                  <code><span title="typing.List">List</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of symbols</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
         <tr>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
-          </td>
-          <td><p>A new <code>SymbolTable</code>.</p></td>
+          <th>Type</th>
+          <th>Description</th>
         </tr>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="SymbolTable (rustfst.symbol_table.SymbolTable)" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new <code>SymbolTable</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
-      <details class="quote">
-        <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">265</span>
+
+            <details class="quote">
+              <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">265</span>
 <span class="normal">266</span>
 <span class="normal">267</span>
 <span class="normal">268</span>
@@ -3104,7 +3268,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">279</span>
 <span class="normal">280</span>
 <span class="normal">281</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">from_symbols</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">symbols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">from_symbols</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">symbols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SymbolTable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructs a SymbolTable from list of strings.</span>
 
@@ -3121,8 +3285,8 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 
     <span class="k">return</span> <span class="n">symt</span>
 </code></pre></div></td></tr></table></div>
-      </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
@@ -3130,7 +3294,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 
   </div>
 
-  </div>
+    </div>
 
 </div>
 
@@ -3139,21 +3303,26 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 
 
 <h4 id="rustfst.symbol_table.SymbolTableIterator" class="doc doc-heading">
-        <code>SymbolTableIterator</code>
+            <code>SymbolTableIterator</code>
 
 
 </h4>
 
 
-  <div class="doc doc-contents ">
-
-  
-      <p>Iterator on a SymbolTable. Allows retrieving all the symbols along with their corresponding labels.</p>
+    <div class="doc doc-contents ">
 
 
-        <details class="quote">
-          <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">287</span>
+        <p>Iterator on a SymbolTable. Allows retrieving all the symbols along with their corresponding labels.</p>
+
+
+
+
+
+
+
+              <details class="quote">
+                <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">287</span>
 <span class="normal">288</span>
 <span class="normal">289</span>
 <span class="normal">290</span>
@@ -3178,12 +3347,12 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">309</span>
 <span class="normal">310</span>
 <span class="normal">311</span>
-<span class="normal">312</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SymbolTableIterator</span><span class="p">:</span>
+<span class="normal">312</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SymbolTableIterator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Iterator on a SymbolTable. Allows retrieving all the symbols along with their corresponding labels.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol_table</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol_table</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructs an iterator from the `Symboltable`.</span>
 <span class="sd">        Args:</span>
@@ -3193,7 +3362,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symt</span><span class="o">.</span><span class="n">num_symbols</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Iterator over the symbols in the `SymbolTable`.</span>
 <span class="sd">        Returns:</span>
@@ -3205,9 +3374,9 @@ This method writes the SymbolTable to a file in human-readable format.</p>
             <span class="k">return</span> <span class="n">output</span>
         <span class="k">raise</span> <span class="ne">StopIteration</span>
 </code></pre></div></td></tr></table></div>
-        </details>
+              </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -3222,44 +3391,22 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <div class="doc doc-object doc-function">
 
 
-
 <h6 id="rustfst.symbol_table.SymbolTableIterator.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">symbol_table</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">symbol_table</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">)</span></code>
 
 </h6>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>Constructs an iterator from the <code>Symboltable</code>.</p>
+    <div class="doc doc-contents ">
 
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>symbol_table</code></td>
-          <td>
-                <code><a class="autorefs autorefs-internal" title="rustfst.symbol_table.SymbolTable" href="#rustfst.symbol_table.SymbolTable">SymbolTable</a></code>
-          </td>
-          <td></td>
-          <td>
-              <em>required</em>
-          </td>
-        </tr>
-    </tbody>
-  </table>
+        <p>Constructs an iterator from the <code>Symboltable</code>.
+Args:
+    symbol_table:</p>
 
-      <details class="quote">
-        <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">292</span>
+
+            <details class="quote">
+              <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">292</span>
 <span class="normal">293</span>
 <span class="normal">294</span>
 <span class="normal">295</span>
@@ -3267,7 +3414,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">297</span>
 <span class="normal">298</span>
 <span class="normal">299</span>
-<span class="normal">300</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol_table</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">):</span>
+<span class="normal">300</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol_table</span><span class="p">:</span> <span class="n">SymbolTable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Constructs an iterator from the `Symboltable`.</span>
 <span class="sd">    Args:</span>
@@ -3277,46 +3424,30 @@ This method writes the SymbolTable to a file in human-readable format.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">_idx</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symt</span><span class="o">.</span><span class="n">num_symbols</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
-      </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
 <div class="doc doc-object doc-function">
 
 
-
 <h6 id="rustfst.symbol_table.SymbolTableIterator.__next__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__next__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="fm">__next__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span></code>
 
 </h6>
 
 
-  <div class="doc doc-contents ">
-  
-      <p>Iterator over the symbols in the <code>SymbolTable</code>.</p>
+    <div class="doc doc-contents ">
 
-  <p><strong>Returns:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Type</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td>
-                <code><span title="typing.Tuple">Tuple</span>[int, str]</code>
-          </td>
-          <td><p>A pair label (int) and symbol (str).</p></td>
-        </tr>
-    </tbody>
-  </table>
+        <p>Iterator over the symbols in the <code>SymbolTable</code>.
+Returns:
+    A pair label (int) and symbol (str).</p>
 
-      <details class="quote">
-        <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">302</span>
+
+            <details class="quote">
+              <summary>Source code in <code>rustfst/symbol_table.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">302</span>
 <span class="normal">303</span>
 <span class="normal">304</span>
 <span class="normal">305</span>
@@ -3326,7 +3457,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 <span class="normal">309</span>
 <span class="normal">310</span>
 <span class="normal">311</span>
-<span class="normal">312</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="normal">312</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Iterator over the symbols in the `SymbolTable`.</span>
 <span class="sd">    Returns:</span>
@@ -3338,8 +3469,8 @@ This method writes the SymbolTable to a file in human-readable format.</p>
         <span class="k">return</span> <span class="n">output</span>
     <span class="k">raise</span> <span class="ne">StopIteration</span>
 </code></pre></div></td></tr></table></div>
-      </details>
-  </div>
+            </details>
+    </div>
 
 </div>
 
@@ -3347,7 +3478,7 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 
   </div>
 
-  </div>
+    </div>
 
 </div>
 
@@ -3356,53 +3487,32 @@ This method writes the SymbolTable to a file in human-readable format.</p>
 
   </div>
 
-  </div>
+    </div>
 
 </div>
 
-              
-            </article>
-          </div>
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
       </main>
       
         <footer class="md-footer">
-  
-    <nav class="md-footer__inner md-grid" aria-label="Footer">
-      
-        
-        <a href="../algorithms/connect/" class="md-footer__link md-footer__link--prev" aria-label="Previous: connect" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              connect
-            </div>
-          </div>
-        </a>
-      
-      
-        
-        <a href="../string_paths_iterator/" class="md-footer__link md-footer__link--next" aria-label="Next: string_paths_iterator" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              string_paths_iterator
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -3424,10 +3534,14 @@ This method writes the SymbolTable to a file in human-readable format.</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.c2e1ee47.min.js"></script>
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.56ea9cef.min.js"></script>
       
     
   </body>
