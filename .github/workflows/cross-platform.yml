@@ -1,14 +1,14 @@
 name: Embedded targets
 
 on:
-  pull_request:
-  push:
-    branches:
-      - 'main'
-    tags:
-      - 'rustfst-v**'
-  schedule:
-    - cron:  '0 5 * * *'
+#  pull_request:
+#  push:
+#    branches:
+#      - 'main'
+#    tags:
+#      - 'rustfst-v**'
+#  schedule:
+#    - cron:  '0 5 * * *'
 
 jobs:
   linux:
