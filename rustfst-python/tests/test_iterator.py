@@ -3,7 +3,6 @@ import pytest
 
 
 def test_trs_iterator():
-
     fst = VectorFst()
     s1 = fst.add_state()
     s2 = fst.add_state()
@@ -31,7 +30,6 @@ def test_trs_iterator():
 
 
 def test_mut_trs_iterator():
-
     fst = VectorFst()
     s1 = fst.add_state()
     s2 = fst.add_state()
@@ -63,7 +61,6 @@ def test_mut_trs_iterator():
 
 
 def test_state_iterator():
-
     fst = VectorFst()
     s1 = fst.add_state()
     s2 = fst.add_state()

@@ -41,28 +41,16 @@ cargo check --benches --all # running benches on travis is useless
 cargo doc --all --no-deps
 
 ./build_bench.sh
-echo $PYTHON_VERSION
-$PYTHON_VERSION --version
-
-($PYTHON_VERSION -m pip freeze | grep black 1>/dev/null 2>&1) || $PYTHON_VERSION -m pip install black==21.7b0
-$PYTHON_VERSION -m pip install pylint==2.6.0 pytest==6.2.5
-$PYTHON_VERSION -m pip install -r rustfst-python/requirements-setup.txt
-
 cd rustfst-python
-$PYTHON_VERSION -m setup.py develop
 
 # Check format
-$PYTHON_VERSION -m black --check . || fail "Format your code by running black ." 1
-
-# Run linting check
-export ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
-$PYTHON_VERSION -m pytest -vv -s --cache-clear --disable-warnings "$ROOT_DIR/linting/linting_test.py"
+uv tool run ruff check . || fail "Format your code by running 'uv tool run ruff check .' " 1
 
 # Run rustfst python binding tests
-$PYTHON_VERSION -m pytest -vv -s --cache-clear --disable-warnings ./tests
+uv sync --extra dev && uv run pytest -vv -s --cache-clear --disable-warnings ./tests
 
 # Run benches on a small FST to check that the script is working fine.
 cd ..
-$PYTHON_VERSION -m pip install -e rustfst-python-bench
-$PYTHON_VERSION rustfst-python-bench/rustfst_python_bench/bench_all.py rustfst-tests-data/fst_003/raw_vector.fst report.md
-$PYTHON_VERSION rustfst-python-bench/rustfst_python_bench/bench_all_detailed.py rustfst-tests-data/fst_003/raw_vector.fst report2.md
+uv sync
+uv run rustfst-python-bench/rustfst_python_bench/bench_all.py rustfst-tests-data/fst_003/raw_vector.fst report.md
+uv run rustfst-python-bench/rustfst_python_bench/bench_all_detailed.py rustfst-tests-data/fst_003/raw_vector.fst report2.md

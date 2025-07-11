@@ -13,8 +13,11 @@ from ctypes import (
 from pathlib import Path
 from typing import Union
 
-dylib_dir = Path(__file__).parent / "dylib"
-dylib_path = list(dylib_dir.glob("*.so"))[0]
+dylib_dir = Path(__file__).parent
+dylib_files = list(dylib_dir.glob("*.so")) or list(dylib_dir.glob("*.cpython-*.so"))
+if not dylib_files:
+    raise ImportError(f"Could not find compiled library in {dylib_dir}")
+dylib_path = dylib_files[0]
 lib = cdll.LoadLibrary(str(dylib_path))
 
 PathOrStr = Union[Path, str]

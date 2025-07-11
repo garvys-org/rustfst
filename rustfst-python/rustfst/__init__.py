@@ -6,3 +6,16 @@ from .fst.vector_fst import VectorFst
 from .fst.const_fst import ConstFst
 from .iterators import TrsIterator, MutableTrsIterator, StateIterator
 from .drawing_config import DrawingConfig
+
+__all__ = [
+    "Tr",
+    "Trs",
+    "SymbolTable",
+    "Fst",
+    "VectorFst",
+    "ConstFst",
+    "TrsIterator",
+    "MutableTrsIterator",
+    "StateIterator",
+    "DrawingConfig",
+]

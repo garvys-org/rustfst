@@ -65,28 +65,25 @@ nav:
     - iterators:
       - rustfst/iterators/index.md
 plugins:
-- macros
-- mike:
-    version_selector: true
-- search
-- section-index
-- mkdocstrings:
-    default_handler: python
-    handlers:
-      python:
-        rendering:
-          enable_inventory: true
-          heading_level: 3
-          members_order: source
-          separate_signature: false
-          show_category_heading: true
-          show_if_no_docstring: false
-          show_object_full_path: false
-          show_signature_annotations: true
-          show_submodules: true
-    watch:
-    - rustfst
-    - docs
+  - macros
+  - mike:
+      version_selector: true
+  - search
+  - section-index
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            enable_inventory: true
+            heading_level: 3
+            members_order: source
+            separate_signature: false
+            show_category_heading: true
+            show_if_no_docstring: false
+            show_object_full_path: false
+            show_signature_annotations: true
+            show_submodules: true
 repo_name: rustfst
 repo_url: https://github.com/garvys-org/rustfst
 site_name: rustfst-python
