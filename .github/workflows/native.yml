@@ -368,7 +368,7 @@ jobs:
           CIBW_SKIP: cp*-musllinux_i686
           CIBW_ENVIRONMENT: PATH="$HOME/.cargo/bin:$PATH"
           CIBW_ENVIRONMENT_PASS_LINUX: PATH="$HOME/.cargo/bin:$PATH"
-          CIBW_BEFORE_BUILD_LINUX: "if command -v yum >/dev/null 2>&1; then yum install -y gcc-atomic; elif command -v apt-get >/dev/null 2>&1; then apt-get update && apt-get install -y libatomic1; fi;
+          CIBW_BEFORE_BUILD_LINUX: "if command -v yum >/dev/null 2>&1; then yum install -y libatomic; elif command -v apt-get >/dev/null 2>&1; then apt-get update && apt-get install -y libatomic1; fi;
            which rustup || curl https://sh.rustup.rs -sSf | sh -s -- -y;
            . $HOME/.cargo/env; rustup toolchain add stable;
            rustup default stable;"
