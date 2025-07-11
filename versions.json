@@ -1,5 +1,10 @@
 [
   {
+    "version": "rustfst-v1.2.1",
+    "title": "rustfst-v1.2.1",
+    "aliases": []
+  },
+  {
     "version": "rustfst-v1.1.2",
     "title": "rustfst-v1.1.2",
     "aliases": []
