@@ -380,7 +380,7 @@ jobs:
           CIBW_ARCHS_LINUX: "auto"
         run: |
           uv venv --python ${{ env.PYTHON_VERSION }}
-          uv pip install twine cibuildwheel==2.13.1
+          uv pip install twine cibuildwheel==2.21.2
           mkdir -p wheels
           uv run cibuildwheel --output-dir wheels rustfst-python
           uv run twine upload -u "__token__" -p ${{ secrets.PYPI_PASSWORD }} -r pypi --verbose wheels/*
