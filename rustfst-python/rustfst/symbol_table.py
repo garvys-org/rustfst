@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import Union, Tuple, List
+from typing import Union, Tuple, List, Iterable, Iterator, overload
 
 from rustfst.ffi_utils import lib, check_ffi_error
 import ctypes
 from pathlib import Path
 
 
-class SymbolTable:
+class SymbolTable(Iterable[tuple[int, str]]):
     """
     `SymbolTable` class. This class wraps the `SymbolTable` struct.
     """
@@ -35,13 +35,8 @@ class SymbolTable:
         Returns:
           The integer key of the new symbol.
         """
-        try:
-            symbol = symbol.encode("utf-8")
-        except UnicodeDecodeError:
-            symbol = ctypes.c_char_p(symbol)
-
         integer_key = ctypes.c_size_t()
-        ret_code = lib.symt_add_symbol(self.ptr, symbol, ctypes.byref(integer_key))
+        ret_code = lib.symt_add_symbol(self.ptr, symbol.encode("utf-8"), ctypes.byref(integer_key))
         err_msg = "`add_symbol` failed"
         check_ffi_error(ret_code, err_msg)
 
@@ -71,6 +66,12 @@ class SymbolTable:
 
         return SymbolTable(ptr=clone)
 
+    @overload
+    def find(self, key: int) -> str: ...
+
+    @overload
+    def find(self, key: str) -> int: ...
+
     def find(self, key: Union[int, str]) -> Union[int, str]:
         """
         Given a symbol or index, finds the other one.
@@ -91,18 +92,16 @@ class SymbolTable:
         raise f"key can only be a string or integer. Not {type(key)}"
 
     def _find_index(self, key: int) -> str:
-        key = ctypes.c_size_t(key)
         symbol = ctypes.c_void_p()
-        ret_code = lib.symt_find_index(self.ptr, key, ctypes.byref(symbol))
+        ret_code = lib.symt_find_index(self.ptr, ctypes.c_size_t(key), ctypes.byref(symbol))
         err_msg = "`find` failed"
         check_ffi_error(ret_code, err_msg)
 
         return ctypes.string_at(symbol).decode("utf8")
 
     def _find_symbol(self, symbol: str) -> int:
-        symbol = symbol.encode("utf-8")
         index = ctypes.c_size_t()
-        ret_code = lib.symt_find_symbol(self.ptr, symbol, ctypes.byref(index))
+        ret_code = lib.symt_find_symbol(self.ptr, symbol.encode("utf-8"), ctypes.byref(index))
         err_msg = "`find` failed"
         check_ffi_error(ret_code, err_msg)
 
@@ -243,7 +242,7 @@ class SymbolTable:
 
         return bool(is_equal.value)
 
-    def __eq__(self, other: SymbolTable) -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Check if this `SymbolTable` is equal to the other
 
@@ -252,6 +251,8 @@ class SymbolTable:
         Returns:
              bool
         """
+        if not isinstance(other, SymbolTable):
+            return NotImplemented
         return self.equals(other)
 
     def __iter__(self) -> SymbolTableIterator:
@@ -284,7 +285,7 @@ class SymbolTable:
         lib.symt_destroy(self.ptr)
 
 
-class SymbolTableIterator:
+class SymbolTableIterator(Iterator[tuple[int, str]]):
     """
     Iterator on a SymbolTable. Allows retrieving all the symbols along with their corresponding labels.
     """
@@ -298,6 +299,9 @@ class SymbolTableIterator:
         self._symt = symbol_table
         self._idx = 0
         self._len = self._symt.num_symbols()
+
+    def __iter__(self) -> SymbolTableIterator:
+        return self
 
     def __next__(self) -> Tuple[int, str]:
         """
