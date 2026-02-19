@@ -1,4 +1,3 @@
-from __future__ import annotations
 from typing import Union
 import ctypes
 from rustfst.ffi_utils import (
@@ -26,7 +25,7 @@ class ShortestPathConfig:
     ):
         if delta is None:
             delta = KSHORTESTDELTA
-        config = ctypes.pointer(ctypes.c_void_p())
+        config = ctypes.c_void_p()
         ret_code = lib.fst_shortest_path_config_new(
             ctypes.c_float(delta),
             ctypes.c_size_t(nshortest),

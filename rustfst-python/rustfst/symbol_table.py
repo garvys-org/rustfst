@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Union, Tuple, List, Iterable, Iterator, overload
 
 from rustfst.ffi_utils import lib, check_ffi_error
@@ -12,14 +10,14 @@ class SymbolTable(Iterable[tuple[int, str]]):
     `SymbolTable` class. This class wraps the `SymbolTable` struct.
     """
 
-    def __init__(self, ptr=None):
+    def __init__(self, ptr: Union[ctypes.c_void_p, None] = None) -> None:
         """
         Creates an empty `SymbolTable`.
         """
         if ptr:
             self.ptr = ptr
         else:
-            symt_ptr = ctypes.pointer(ctypes.c_void_p())
+            symt_ptr = ctypes.c_void_p()
             ret_code = lib.symt_new(ctypes.byref(symt_ptr))
             err_msg = "__init__ failed"
             check_ffi_error(ret_code, err_msg)
@@ -36,13 +34,15 @@ class SymbolTable(Iterable[tuple[int, str]]):
           The integer key of the new symbol.
         """
         integer_key = ctypes.c_size_t()
-        ret_code = lib.symt_add_symbol(self.ptr, symbol.encode("utf-8"), ctypes.byref(integer_key))
+        ret_code = lib.symt_add_symbol(
+            self.ptr, symbol.encode("utf-8"), ctypes.byref(integer_key)
+        )
         err_msg = "`add_symbol` failed"
         check_ffi_error(ret_code, err_msg)
 
         return int(integer_key.value)
 
-    def add_table(self, syms: SymbolTable):
+    def add_table(self, syms: "SymbolTable") -> None:
         """
         This method merges another symbol table into the current table. All key
         values will be offset by the current available key.
@@ -53,12 +53,12 @@ class SymbolTable(Iterable[tuple[int, str]]):
         err_msg = "`add_table` failed"
         check_ffi_error(ret_code, err_msg)
 
-    def copy(self) -> SymbolTable:
+    def copy(self) -> "SymbolTable":
         """
         Returns:
             A mutable copy of the `SymbolTable`.
         """
-        clone = ctypes.pointer(ctypes.c_void_p())
+        clone = ctypes.c_void_p()
 
         ret_code = lib.symt_copy(self.ptr, ctypes.byref(clone))
         err_msg = "`copy` failed."
@@ -93,7 +93,9 @@ class SymbolTable(Iterable[tuple[int, str]]):
 
     def _find_index(self, key: int) -> str:
         symbol = ctypes.c_void_p()
-        ret_code = lib.symt_find_index(self.ptr, ctypes.c_size_t(key), ctypes.byref(symbol))
+        ret_code = lib.symt_find_index(
+            self.ptr, ctypes.c_size_t(key), ctypes.byref(symbol)
+        )
         err_msg = "`find` failed"
         check_ffi_error(ret_code, err_msg)
 
@@ -101,7 +103,9 @@ class SymbolTable(Iterable[tuple[int, str]]):
 
     def _find_symbol(self, symbol: str) -> int:
         index = ctypes.c_size_t()
-        ret_code = lib.symt_find_symbol(self.ptr, symbol.encode("utf-8"), ctypes.byref(index))
+        ret_code = lib.symt_find_symbol(
+            self.ptr, symbol.encode("utf-8"), ctypes.byref(index)
+        )
         err_msg = "`find` failed"
         check_ffi_error(ret_code, err_msg)
 
@@ -151,7 +155,7 @@ class SymbolTable(Iterable[tuple[int, str]]):
         return int(num_symbols.value)
 
     @classmethod
-    def read(cls, filename: Union[str, Path]) -> SymbolTable:
+    def read(cls, filename: Union[str, Path]) -> "SymbolTable":
         """
         Reads symbol table from binary file.
         This class method creates a new SymbolTable from a symbol table binary file.
@@ -161,7 +165,7 @@ class SymbolTable(Iterable[tuple[int, str]]):
           A new SymbolTable instance.
         See also: `SymbolTable.read_fst`, `SymbolTable.read_text`.
         """
-        symt = ctypes.pointer(ctypes.c_void_p())
+        symt = ctypes.c_void_p()
         ret_code = lib.symt_from_path(
             ctypes.byref(symt), str(filename).encode("utf-8"), ctypes.c_size_t(1)
         )
@@ -172,7 +176,7 @@ class SymbolTable(Iterable[tuple[int, str]]):
         return cls(ptr=symt)
 
     @classmethod
-    def read_text(cls, filename: Union[str, Path]) -> SymbolTable:
+    def read_text(cls, filename: Union[str, Path]) -> "SymbolTable":
         """
         Reads symbol table from text file.
         This class method creates a new SymbolTable from a symbol table text file.
@@ -183,7 +187,7 @@ class SymbolTable(Iterable[tuple[int, str]]):
           A new SymbolTable instance.
         See also: `SymbolTable.read`, `SymbolTable.read_fst`.
         """
-        symt = ctypes.pointer(ctypes.c_void_p())
+        symt = ctypes.c_void_p()
         ret_code = lib.symt_from_path(
             ctypes.byref(symt), str(filename).encode("utf-8"), ctypes.c_size_t(0)
         )
@@ -193,7 +197,7 @@ class SymbolTable(Iterable[tuple[int, str]]):
 
         return cls(ptr=symt)
 
-    def write(self, filename: Union[str, Path]):
+    def write(self, filename: Union[str, Path]) -> None:
         """
         Serializes symbol table to a file.
         This methods writes the SymbolTable to a file in binary format.
@@ -209,7 +213,7 @@ class SymbolTable(Iterable[tuple[int, str]]):
         err_msg = f"Write failed for bin file : {filename}"
         check_ffi_error(ret_code, err_msg)
 
-    def write_text(self, filename: Union[str, Path]):
+    def write_text(self, filename: Union[str, Path]) -> None:
         """
         Writes symbol table to text file.
         This method writes the SymbolTable to a file in human-readable format.
@@ -225,7 +229,7 @@ class SymbolTable(Iterable[tuple[int, str]]):
         err_msg = f"Write failed for text file : {filename}"
         check_ffi_error(ret_code, err_msg)
 
-    def equals(self, other: SymbolTable) -> bool:
+    def equals(self, other: "SymbolTable") -> bool:
         """
         Check if this SymbolTable is equal to the other
 
@@ -255,7 +259,7 @@ class SymbolTable(Iterable[tuple[int, str]]):
             return NotImplemented
         return self.equals(other)
 
-    def __iter__(self) -> SymbolTableIterator:
+    def __iter__(self) -> "SymbolTableIterator":
         """
         Returns an Iterator over the SymbolTable.
         Returns:
@@ -264,7 +268,7 @@ class SymbolTable(Iterable[tuple[int, str]]):
         return SymbolTableIterator(self)
 
     @classmethod
-    def from_symbols(cls, symbols: List[str]) -> SymbolTable:
+    def from_symbols(cls, symbols: List[str]) -> "SymbolTable":
         """
         Constructs a SymbolTable from list of strings.
 
@@ -281,7 +285,7 @@ class SymbolTable(Iterable[tuple[int, str]]):
 
         return symt
 
-    def __del__(self):
+    def __del__(self) -> None:
         lib.symt_destroy(self.ptr)
 
 
@@ -290,7 +294,7 @@ class SymbolTableIterator(Iterator[tuple[int, str]]):
     Iterator on a SymbolTable. Allows retrieving all the symbols along with their corresponding labels.
     """
 
-    def __init__(self, symbol_table: SymbolTable):
+    def __init__(self, symbol_table: "SymbolTable"):
         """
         Constructs an iterator from the `Symboltable`.
         Args:
@@ -300,7 +304,7 @@ class SymbolTableIterator(Iterator[tuple[int, str]]):
         self._idx = 0
         self._len = self._symt.num_symbols()
 
-    def __iter__(self) -> SymbolTableIterator:
+    def __iter__(self) -> "SymbolTableIterator":
         return self
 
     def __next__(self) -> Tuple[int, str]:

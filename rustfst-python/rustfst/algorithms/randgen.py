@@ -1,6 +1,7 @@
 import ctypes
 
-from rustfst.fst.vector_fst import Fst, VectorFst
+from rustfst.fst import Fst
+from rustfst.fst.vector_fst import VectorFst
 from rustfst.ffi_utils import (
     lib,
     check_ffi_error,

@@ -8,7 +8,7 @@ class StringPath:
     the output string and the weight of the Path.
     """
 
-    def __init__(self, ptr):
+    def __init__(self, ptr: ctypes.c_void_p) -> None:
         self.ptr = ptr
 
     def weight(self) -> float:
@@ -53,5 +53,5 @@ class StringPath:
 
         return ctypes.string_at(ostring).decode("utf8")
 
-    def __del__(self):
+    def __del__(self) -> None:
         lib.string_path_destroy(self.ptr)

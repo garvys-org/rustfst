@@ -1,4 +1,3 @@
-from __future__ import annotations
 from rustfst.ffi_utils import (
     lib,
     check_ffi_error,

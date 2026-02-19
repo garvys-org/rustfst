@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Optional
 
 from rustfst.weight import weight_one
@@ -31,7 +29,7 @@ def acceptor(
     if weight is None:
         weight = weight_one()
 
-    acceptor_fst_ptr = ctypes.pointer(ctypes.c_void_p())
+    acceptor_fst_ptr = ctypes.c_void_p()
     ret_code = lib.utils_string_to_acceptor(
         astring.encode("utf-8"),
         symbol_table.ptr,

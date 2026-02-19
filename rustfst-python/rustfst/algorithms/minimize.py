@@ -1,5 +1,5 @@
-from __future__ import annotations
 import ctypes
+from typing import Optional
 from rustfst.ffi_utils import (
     lib,
     check_ffi_error,
@@ -15,10 +15,12 @@ class MinimizeConfig:
     Configuration for the minimization operation.
     """
 
-    def __init__(self, delta=None, allow_nondet=False):
+    def __init__(
+        self, delta: Optional[float] = None, allow_nondet: bool = False
+    ) -> None:
         if delta is None:
             delta = KSHORTESTDELTA
-        config = ctypes.pointer(ctypes.c_void_p())
+        config = ctypes.c_void_p()
         ret_code = lib.fst_minimize_config_new(
             ctypes.c_float(delta),
             ctypes.c_bool(allow_nondet),

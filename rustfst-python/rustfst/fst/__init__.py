@@ -1,4 +1,3 @@
-from __future__ import annotations
 from abc import abstractmethod
 import ctypes
 from rustfst.ffi_utils import (
@@ -16,7 +15,12 @@ class Fst:
     This class is the base class for every Fst objects.
     """
 
-    def __init__(self, ptr, isymt=None, osymt=None):
+    def __init__(
+        self,
+        ptr: ctypes.c_void_p,
+        isymt: Optional[SymbolTable] = None,
+        osymt: Optional[SymbolTable] = None,
+    ) -> None:
         self.ptr = ptr
         self._input_symbols = isymt
         self._output_symbols = osymt
@@ -48,7 +52,9 @@ class Fst:
         """
         weight = ctypes.c_float()
 
-        ret_code = lib.fst_final_weight(self.ptr, ctypes.c_size_t(state), ctypes.byref(weight))
+        ret_code = lib.fst_final_weight(
+            self.ptr, ctypes.c_size_t(state), ctypes.byref(weight)
+        )
         err_msg = "Error getting final weight"
         check_ffi_error(ret_code, err_msg)
 
@@ -69,7 +75,9 @@ class Fst:
         See also: `num_states`.
         """
         num_trs = ctypes.c_size_t()
-        ret_code = lib.fst_num_trs(self.ptr, ctypes.c_size_t(state), ctypes.byref(num_trs))
+        ret_code = lib.fst_num_trs(
+            self.ptr, ctypes.c_size_t(state), ctypes.byref(num_trs)
+        )
         err_msg = "Error getting number of trs"
         check_ffi_error(ret_code, err_msg)
 
@@ -130,12 +138,12 @@ class Fst:
         if self._input_symbols:
             return self._input_symbols
 
-        table = ctypes.pointer(ctypes.c_void_p())
+        table = ctypes.c_void_p()
         ret_code = lib.fst_input_symbols(self.ptr, ctypes.byref(table))
         err_msg = "Error getting input symbols"
         check_ffi_error(ret_code, err_msg)
 
-        if table.contents:
+        if table:
             return SymbolTable(ptr=table)
         return None
 
@@ -149,17 +157,17 @@ class Fst:
         if self._output_symbols:
             return self._output_symbols
 
-        table = ctypes.pointer(ctypes.c_void_p())
+        table = ctypes.c_void_p()
 
         ret_code = lib.fst_output_symbols(self.ptr, ctypes.byref(table))
         err_msg = "Error getting output symbols"
         check_ffi_error(ret_code, err_msg)
 
-        if table.contents:
+        if table:
             return SymbolTable(ptr=table)
         return None
 
-    def set_input_symbols(self, syms: Optional[SymbolTable]) -> Fst:
+    def set_input_symbols(self, syms: Optional[SymbolTable]) -> "Fst":
         """
         Sets the input symbol table.
         Passing None as a value will delete the input symbol table.
@@ -187,7 +195,7 @@ class Fst:
 
         return self
 
-    def set_output_symbols(self, syms: Optional[SymbolTable]) -> Fst:
+    def set_output_symbols(self, syms: Optional[SymbolTable]) -> "Fst":
         """
         Sets the output symbol table.
         Passing None as a value will delete the output symbol table.
@@ -216,7 +224,7 @@ class Fst:
 
         return self
 
-    def remove_input_symbols(self, symbols: list[int]) -> Fst:
+    def remove_input_symbols(self, symbols: list[int]) -> "Fst":
         """
         Args:
           symbols: List[int]
@@ -231,7 +239,7 @@ class Fst:
 
         return self
 
-    def remove_output_symbols(self, symbols: list[int]) -> Fst:
+    def remove_output_symbols(self, symbols: list[int]) -> "Fst":
         """
         Args:
           symbols: List[int]
@@ -247,7 +255,7 @@ class Fst:
         return self
 
     @abstractmethod
-    def equals(self, other: Fst) -> bool:
+    def equals(self, other: "Fst") -> bool:
         """Check if this Fst is equal to another"""
 
     def __eq__(self, y: object) -> bool:
@@ -256,8 +264,8 @@ class Fst:
             return NotImplemented
         return self.equals(y)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<rustfst.fst.Fst at {id(self)}>"
 
-    def __del__(self):
+    def __del__(self) -> None:
         lib.fst_destroy(self.ptr)

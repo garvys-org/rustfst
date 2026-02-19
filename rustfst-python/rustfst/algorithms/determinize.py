@@ -1,4 +1,3 @@
-from __future__ import annotations
 import ctypes
 from typing import Optional
 
@@ -48,7 +47,7 @@ class DeterminizeConfig:
         if delta is None:
             delta = KDELTA
 
-        config = ctypes.pointer(ctypes.c_void_p())
+        config = ctypes.c_void_p()
         ret_code = lib.fst_determinize_config_new(
             ctypes.c_float(delta),
             ctypes.c_size_t(det_type.value),
@@ -67,7 +66,7 @@ def determinize(fst: VectorFst) -> VectorFst:
     Returns:
         The resulting Fst.
     """
-    det_fst = ctypes.pointer(ctypes.c_void_p())
+    det_fst = ctypes.c_void_p()
     ret_code = lib.fst_determinize(fst.ptr, ctypes.byref(det_fst))
     err_msg = "Error during determinization"
     check_ffi_error(ret_code, err_msg)
@@ -84,7 +83,7 @@ def determinize_with_config(fst: VectorFst, config: DeterminizeConfig) -> Vector
     Returns:
         The resulting Fst.
     """
-    det_fst = ctypes.pointer(ctypes.c_void_p())
+    det_fst = ctypes.c_void_p()
     ret_code = lib.fst_determinize_with_config(
         fst.ptr, config.ptr, ctypes.byref(det_fst)
     )

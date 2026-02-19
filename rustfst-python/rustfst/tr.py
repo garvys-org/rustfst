@@ -1,4 +1,3 @@
-from __future__ import annotations
 from ctypes import (
     c_size_t,
     byref,
@@ -28,7 +27,9 @@ class Tr:
     def __init__(self, ilabel: c_void_p) -> None: ...
 
     @overload
-    def __init__(self, ilabel: int, olabel: int, weight: Optional[float], nextstate: int) -> None: ...
+    def __init__(
+        self, ilabel: int, olabel: int, weight: Optional[float], nextstate: int
+    ) -> None: ...
 
     def __init__(
         self,
@@ -78,7 +79,7 @@ class Tr:
         return int(ilabel.value)
 
     @ilabel.setter
-    def ilabel(self, value: int):
+    def ilabel(self, value: int) -> None:
         ilabel = c_size_t(value)
         exit_code = lib.tr_set_ilabel(self._ptr, ilabel)
         err_msg = "Something went wrong when setting Tr ilabel value"
@@ -93,7 +94,7 @@ class Tr:
         return int(olabel.value)
 
     @olabel.setter
-    def olabel(self, value: int):
+    def olabel(self, value: int) -> None:
         olabel = c_size_t(value)
         exit_code = lib.tr_set_olabel(self._ptr, olabel)
         err_msg = "Something went wrong when setting Tr olabel value"
@@ -108,7 +109,7 @@ class Tr:
         return weight.value
 
     @weight.setter
-    def weight(self, value: float):
+    def weight(self, value: float) -> None:
         weight = c_float(value)
         exit_code = lib.tr_set_weight(self._ptr, weight)
         err_msg = "Something went wrong when setting Tr weight value"
@@ -123,12 +124,12 @@ class Tr:
         return int(next_state.value)
 
     @next_state.setter
-    def next_state(self, next_state: int):
+    def next_state(self, next_state: int) -> None:
         exit_code = lib.tr_set_next_state(self._ptr, c_size_t(next_state))
         err_msg = "Something went wrong when setting Tr next_state value"
         check_ffi_error(exit_code, err_msg)
 
-    def __eq__(self, other: object):
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Tr):
             return NotImplemented
         return (
@@ -138,9 +139,9 @@ class Tr:
             and self.next_state == other.next_state
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """x.__repr__() <==> repr(x)"""
         return f"<Tr ilabel={self.ilabel}, olabel={self.olabel}, weight={self.weight}, next_state={self.next_state}>"
 
-    def __del__(self):
+    def __del__(self) -> None:
         lib.tr_delete(self._ptr)

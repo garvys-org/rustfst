@@ -1,4 +1,3 @@
-from __future__ import annotations
 import ctypes
 from rustfst.ffi_utils import (
     lib,
@@ -33,7 +32,7 @@ def project(fst: VectorFst, proj_type: ProjectType) -> VectorFst:
     Returns:
         The resulting Fst.
     """
-    config = ctypes.pointer(ctypes.c_void_p())
+    config = ctypes.c_void_p()
     ret_code = lib.fst_project_type_new(
         ctypes.c_size_t(proj_type.value),
         ctypes.byref(config),
