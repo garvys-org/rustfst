@@ -11,7 +11,7 @@ from rustfst.tr import Tr
 class Trs:
     """Structure representing list of transitions."""
 
-    def __init__(self, ptr=None) -> Trs:
+    def __init__(self, ptr=None) -> None:
         """
         Create an empty list of transitions.
         """

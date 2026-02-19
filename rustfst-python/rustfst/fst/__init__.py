@@ -1,4 +1,5 @@
 from __future__ import annotations
+from abc import abstractmethod
 import ctypes
 from rustfst.ffi_utils import (
     lib,
@@ -45,10 +46,9 @@ class Fst:
         Raises:
           Exception: If State index out of range.
         """
-        state = ctypes.c_size_t(state)
         weight = ctypes.c_float()
 
-        ret_code = lib.fst_final_weight(self.ptr, state, ctypes.byref(weight))
+        ret_code = lib.fst_final_weight(self.ptr, ctypes.c_size_t(state), ctypes.byref(weight))
         err_msg = "Error getting final weight"
         check_ffi_error(ret_code, err_msg)
 
@@ -69,8 +69,7 @@ class Fst:
         See also: `num_states`.
         """
         num_trs = ctypes.c_size_t()
-        state = ctypes.c_size_t(state)
-        ret_code = lib.fst_num_trs(self.ptr, state, ctypes.byref(num_trs))
+        ret_code = lib.fst_num_trs(self.ptr, ctypes.c_size_t(state), ctypes.byref(num_trs))
         err_msg = "Error getting number of trs"
         check_ffi_error(ret_code, err_msg)
 
@@ -247,8 +246,14 @@ class Fst:
 
         return self
 
-    def __eq__(self, y: Fst):
+    @abstractmethod
+    def equals(self, other: Fst) -> bool:
+        """Check if this Fst is equal to another"""
+
+    def __eq__(self, y: object) -> bool:
         """x.__eq__(y) <==> x==y"""
+        if not isinstance(y, Fst):
+            return NotImplemented
         return self.equals(y)
 
     def __repr__(self):

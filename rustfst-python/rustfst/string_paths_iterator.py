@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterator
 
 from rustfst.ffi_utils import lib, check_ffi_error
 from rustfst.string_path import StringPath
@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from rustfst.fst.vector_fst import VectorFst
 
 
-class StringPathsIterator:
+class StringPathsIterator(Iterator[StringPath]):
     """
     Iterator allowing to loop through all the paths recognized by an Fst.
     """
