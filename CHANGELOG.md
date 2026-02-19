@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changed
 - Correct implementation of `SymbolTableIterator` in Python
+- Correct type annotations for Python module
 
 ## [0.8.0] - 2020-16-10
 
