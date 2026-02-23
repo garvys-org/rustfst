@@ -5,7 +5,7 @@ import ctypes
 from pathlib import Path
 
 
-class SymbolTable(Iterable[tuple[int, str]]):
+class SymbolTable(Iterable[Tuple[int, str]]):
     """
     `SymbolTable` class. This class wraps the `SymbolTable` struct.
     """
@@ -289,7 +289,7 @@ class SymbolTable(Iterable[tuple[int, str]]):
         lib.symt_destroy(self.ptr)
 
 
-class SymbolTableIterator(Iterator[tuple[int, str]]):
+class SymbolTableIterator(Iterator[Tuple[int, str]]):
     """
     Iterator on a SymbolTable. Allows retrieving all the symbols along with their corresponding labels.
     """

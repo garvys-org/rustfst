@@ -7,7 +7,7 @@ from rustfst.ffi_utils import (
 
 from rustfst.symbol_table import SymbolTable
 from rustfst.iterators import TrsIterator
-from typing import Optional
+from typing import List, Optional
 
 
 class Fst:
@@ -224,7 +224,7 @@ class Fst:
 
         return self
 
-    def remove_input_symbols(self, symbols: list[int]) -> "Fst":
+    def remove_input_symbols(self, symbols: List[int]) -> "Fst":
         """
         Args:
           symbols: List[int]
@@ -239,7 +239,7 @@ class Fst:
 
         return self
 
-    def remove_output_symbols(self, symbols: list[int]) -> "Fst":
+    def remove_output_symbols(self, symbols: List[int]) -> "Fst":
         """
         Args:
           symbols: List[int]
