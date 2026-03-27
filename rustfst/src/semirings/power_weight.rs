@@ -19,7 +19,7 @@ use crate::semirings::{
 pub struct PowerWeight<W, N>
 where
     W: Semiring,
-    N: ArrayLength<W>,
+    N: ArrayLength,
 {
     weights: GenericArray<W, N>,
 }
@@ -27,7 +27,7 @@ where
 impl<W, N> fmt::Display for PowerWeight<W, N>
 where
     W: Semiring,
-    N: ArrayLength<W>,
+    N: ArrayLength,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.weights.as_slice().fmt(f)
@@ -37,7 +37,7 @@ where
 impl<W, N> fmt::Debug for PowerWeight<W, N>
 where
     W: Semiring,
-    N: ArrayLength<W>,
+    N: ArrayLength,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.weights.as_slice().fmt(f)
@@ -47,7 +47,7 @@ where
 impl<W, N> Hash for PowerWeight<W, N>
 where
     W: Semiring,
-    N: ArrayLength<W>,
+    N: ArrayLength,
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.weights.as_slice().hash(state);
@@ -57,7 +57,7 @@ where
 impl<W, N> Clone for PowerWeight<W, N>
 where
     W: Semiring,
-    N: ArrayLength<W>,
+    N: ArrayLength,
 {
     fn clone(&self) -> Self {
         PowerWeight {
@@ -69,7 +69,7 @@ where
 impl<W, N> PartialOrd for PowerWeight<W, N>
 where
     W: Semiring,
-    N: ArrayLength<W>,
+    N: ArrayLength,
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.weights.partial_cmp(&other.weights)
@@ -79,7 +79,7 @@ where
 impl<W, N> PartialEq for PowerWeight<W, N>
 where
     W: Semiring,
-    N: ArrayLength<W>,
+    N: ArrayLength,
 {
     fn eq(&self, other: &Self) -> bool {
         self.weights.eq(&other.weights)
@@ -89,7 +89,7 @@ where
 impl<W, N> AsRef<Self> for PowerWeight<W, N>
 where
     W: Semiring,
-    N: ArrayLength<W>,
+    N: ArrayLength,
 {
     fn as_ref(&self) -> &PowerWeight<W, N> {
         self
@@ -99,14 +99,14 @@ where
 impl<W, N> Eq for PowerWeight<W, N>
 where
     W: Semiring,
-    N: ArrayLength<W>,
+    N: ArrayLength,
 {
 }
 
 //impl<W, N> Semiring for PowerWeight<W, N>
 //where
 //    W: Semiring,
-//    N: ArrayLength<W>,
+//    N: ArrayLength,
 //{
 //    type Type = GenericArray<W, N>;
 //    type ReverseSemiring<P> = PowerWeight<W::ReverseSemiring, P>;
@@ -169,7 +169,7 @@ where
 //impl<W, N> WeaklyDivisibleSemiring for PowerWeight<W, N>
 //where
 //    W: WeaklyDivisibleSemiring,
-//    N: ArrayLength<W>,
+//    N: ArrayLength,
 //{
 //    fn divide(&self, rhs: &Self, divide_type: DivideType) -> Result<Self> {
 //        let mut mul = self.clone();
@@ -183,7 +183,7 @@ where
 //impl<W, N> WeightQuantize for PowerWeight<W, N>
 //where
 //    W: WeightQuantize,
-//    N: ArrayLength<W>,
+//    N: ArrayLength,
 //{
 //    fn quantize_assign(&mut self, delta: f32) -> Result<()> {
 //        for i in 0..self.weights.len() {

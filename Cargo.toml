@@ -8,6 +8,3 @@ members = [
 [profile.release]
 lto = true
 panic = "abort"
-
-[patch.crates-io]
-ordered_iter = { git = "https://github.com/contain-rs/ordered_iter" }

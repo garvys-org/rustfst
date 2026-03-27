@@ -23,28 +23,26 @@ state-label-u32 = []
 [dependencies]
 anyhow = '1'
 bimap = '0.6'
-binary-heap-plus = '0.1'
+binary-heap-plus = '0.5'
 bitflags = '2.5'
-generic-array = '0.12'
-getrandom = { version = "0.2", features = ["js"] }
-itertools = '0.12'
+generic-array = '1'
+itertools = '0.14'
 nom = '7'
 num-traits = '0.2'
-ordered-float = '4.0'
-rand = '0.8'
-rand_chacha = '0.3'
+ordered-float = '5'
+rand = '0.9'
+rand_chacha = '0.9'
 serde = { version = '1', features = ['derive'] }
-superslice ='1'
-typenum = '1.10'
+superslice = '1'
 
 [dev-dependencies]
-counter = '0.4'
+counter = '0.7'
 criterion = { version = "0.5", features = ["html_reports"] }
 serde_json = '1.0'
 tempfile = '3.0'
 path_abs = '0.5'
-pretty_assertions = "0.6.1"
-proptest = "0.9.4"
+pretty_assertions = '1'
+proptest = '1'
 doc-comment = "0.3.1"
 
 [[bench]]
