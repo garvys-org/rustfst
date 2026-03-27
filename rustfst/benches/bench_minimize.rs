@@ -4,56 +4,121 @@ use rustfst::fst_impls::VectorFst;
 use rustfst::fst_traits::{MutableFst, SerializableFst};
 use rustfst::semirings::TropicalWeight;
 
-/// Build a linear-chain acceptor with `n` states and deterministic transitions.
-fn build_linear_fst(n: usize) -> VectorFst<TropicalWeight> {
+/// N identical chains from start to a shared final state.
+/// All states at the same depth across chains are equivalent,
+/// so `refine` must sort a large partition class and merge them into 1 group.
+/// This stresses: sort on many-equal elements + partition merging.
+fn build_parallel_chains(num_chains: usize, chain_len: usize) -> VectorFst<TropicalWeight> {
+    let mut fst = VectorFst::<TropicalWeight>::new();
+    let start = fst.add_state();
+    fst.set_start(start).unwrap();
+    let final_state = fst.add_state();
+    fst.set_final(final_state, TropicalWeight::from(0.0))
+        .unwrap();
+
+    for _ in 0..num_chains {
+        let mut prev = start;
+        for d in 0..chain_len {
+            let s = fst.add_state();
+            let label = (d % 5 + 1) as u32;
+            fst.emplace_tr(prev, label, label, 0.0, s).unwrap();
+            prev = s;
+        }
+        fst.emplace_tr(prev, 1, 1, 0.0, final_state).unwrap();
+    }
+    fst
+}
+
+/// Trie-like FST where each branch has unique labels.
+/// States at the same depth are all DISTINCT (different outgoing labels),
+/// so `refine` must sort a large partition class and split it into N groups.
+/// This stresses: sort on all-distinct elements + many class allocations.
+fn build_branching_trie(branching: usize, depth: usize) -> VectorFst<TropicalWeight> {
+    let mut fst = VectorFst::<TropicalWeight>::new();
+    let start = fst.add_state();
+    fst.set_start(start).unwrap();
+
+    let mut current_layer = vec![start];
+    for d in 0..depth {
+        let mut next_layer = Vec::new();
+        for (i, &src) in current_layer.iter().enumerate() {
+            for b in 0..branching {
+                let dst = fst.add_state();
+                // Unique label per (parent_index, branch) so siblings are distinct
+                let label = (i * branching + b + d * 1000 + 1) as u32;
+                fst.emplace_tr(src, label, label, 0.0, dst).unwrap();
+                next_layer.push(dst);
+            }
+        }
+        current_layer = next_layer;
+    }
+
+    // All leaves go to a shared final state
+    let final_state = fst.add_state();
+    fst.set_final(final_state, TropicalWeight::from(0.0))
+        .unwrap();
+    for &leaf in &current_layer {
+        fst.emplace_tr(leaf, 1, 1, 0.0, final_state).unwrap();
+    }
+    fst
+}
+
+/// Mix of equivalent and distinct states at each depth level.
+/// `group_size` chains share the same labels (equivalent),
+/// `num_groups` groups have different labels (distinct).
+/// This stresses: sort with mixed equality + realistic group splitting.
+fn build_mixed_equivalence(
+    num_groups: usize,
+    group_size: usize,
+    depth: usize,
+) -> VectorFst<TropicalWeight> {
+    let mut fst = VectorFst::<TropicalWeight>::new();
+    let start = fst.add_state();
+    fst.set_start(start).unwrap();
+    let final_state = fst.add_state();
+    fst.set_final(final_state, TropicalWeight::from(0.0))
+        .unwrap();
+
+    for g in 0..num_groups {
+        for _ in 0..group_size {
+            let mut prev = start;
+            for d in 0..depth {
+                let s = fst.add_state();
+                // Same label within a group, different across groups
+                let label = (g * depth + d + 1) as u32;
+                fst.emplace_tr(prev, label, label, 0.0, s).unwrap();
+                prev = s;
+            }
+            fst.emplace_tr(prev, 1, 1, 0.0, final_state).unwrap();
+        }
+    }
+    fst
+}
+
+/// Cyclic FST: a ring of states with self-loops and cross-edges.
+/// Tests the Hopcroft-style cyclic minimization path (not the acyclic refine).
+fn build_cyclic_fst(n: usize) -> VectorFst<TropicalWeight> {
     let mut fst = VectorFst::<TropicalWeight>::new();
     for _ in 0..n {
         fst.add_state();
     }
     fst.set_start(0).unwrap();
-    for i in 0..(n - 1) {
-        fst.emplace_tr(i as u32, (i % 5 + 1) as u32, (i % 5 + 1) as u32, 0.0, (i + 1) as u32)
-            .unwrap();
-    }
     fst.set_final((n - 1) as u32, TropicalWeight::from(0.0))
         .unwrap();
+    for i in 0..n {
+        let next = ((i + 1) % n) as u32;
+        fst.emplace_tr(i as u32, (i % 5 + 1) as u32, (i % 5 + 1) as u32, 0.0, next)
+            .unwrap();
+        // Cross-edge to create non-trivial SCCs
+        if i + 2 < n {
+            fst.emplace_tr(i as u32, (i % 3 + 6) as u32, (i % 3 + 6) as u32, 0.0, (i + 2) as u32)
+                .unwrap();
+        }
+    }
     fst
 }
 
-/// Build an FST shaped like a tree that converges back, creating many
-/// equivalent states suitable for minimization.
-fn build_diamond_fst(depth: usize, width: usize) -> VectorFst<TropicalWeight> {
-    let mut fst = VectorFst::<TropicalWeight>::new();
-    let start = fst.add_state();
-    fst.set_start(start).unwrap();
-
-    let mut prev_layer = vec![start];
-    for d in 0..depth {
-        let mut next_layer = Vec::new();
-        for _ in 0..width {
-            next_layer.push(fst.add_state());
-        }
-        for &src in &prev_layer {
-            for (j, &dst) in next_layer.iter().enumerate() {
-                let label = (d * width + j) % 10 + 1;
-                fst.emplace_tr(src, label as u32, label as u32, 0.0, dst)
-                    .unwrap();
-            }
-        }
-        prev_layer = next_layer;
-    }
-
-    let final_state = fst.add_state();
-    fst.set_final(final_state, TropicalWeight::from(0.0))
-        .unwrap();
-    for &src in &prev_layer {
-        fst.emplace_tr(src, 1, 1, 0.0, final_state).unwrap();
-    }
-
-    fst
-}
-
-/// Build an FST from the issue #158 test case (realistic workload).
+/// Real-world FST from issue #158.
 fn build_issue_158_fst() -> VectorFst<TropicalWeight> {
     let text_fst = r#"0	5	101	101	0
 0	4	100	100	0
@@ -112,29 +177,19 @@ fn build_issue_158_fst() -> VectorFst<TropicalWeight> {
 fn bench_minimize(c: &mut Criterion) {
     let mut group = c.benchmark_group("minimize");
 
-    // Linear FSTs of increasing size
-    for &n in &[50, 200, 1000] {
-        group.bench_with_input(BenchmarkId::new("linear", n), &n, |b, &n| {
-            b.iter_batched(
-                || build_linear_fst(n),
-                |mut fst| {
-                    let config = MinimizeConfig::default().with_allow_nondet(true);
-                    minimize_with_config(&mut fst, config).unwrap();
-                    fst
-                },
-                criterion::BatchSize::SmallInput,
-            );
-        });
-    }
-
-    // Diamond FSTs (many equivalent states)
-    for &(depth, width) in &[(5, 4), (8, 4), (5, 8)] {
+    // === Acyclic path: parallel equivalent chains ===
+    // Exercises: sort on equal elements, partition merging
+    for &(chains, len) in &[(10, 10), (50, 10), (100, 5), (20, 20)] {
+        let total = chains * len;
         group.bench_with_input(
-            BenchmarkId::new("diamond", format!("d{}_w{}", depth, width)),
-            &(depth, width),
-            |b, &(depth, width)| {
+            BenchmarkId::new(
+                "parallel_chains",
+                format!("{}chains_x_{}deep_{}states", chains, len, total),
+            ),
+            &(chains, len),
+            |b, &(chains, len)| {
                 b.iter_batched(
-                    || build_diamond_fst(depth, width),
+                    || build_parallel_chains(chains, len),
                     |mut fst| {
                         let config = MinimizeConfig::default().with_allow_nondet(true);
                         minimize_with_config(&mut fst, config).unwrap();
@@ -146,7 +201,70 @@ fn bench_minimize(c: &mut Criterion) {
         );
     }
 
-    // Real-world FST from issue #158
+    // === Acyclic path: branching trie with all-distinct states ===
+    // Exercises: sort on distinct elements, many class allocations
+    for &(branching, depth) in &[(3usize, 4usize), (2, 7), (4, 3)] {
+        let approx_states: usize = (0..=depth).map(|d| branching.pow(d as u32)).sum();
+        group.bench_with_input(
+            BenchmarkId::new(
+                "branching_trie",
+                format!("b{}_d{}_~{}states", branching, depth, approx_states),
+            ),
+            &(branching, depth),
+            |b, &(branching, depth)| {
+                b.iter_batched(
+                    || build_branching_trie(branching, depth),
+                    |mut fst| {
+                        let config = MinimizeConfig::default().with_allow_nondet(true);
+                        minimize_with_config(&mut fst, config).unwrap();
+                        fst
+                    },
+                    criterion::BatchSize::SmallInput,
+                );
+            },
+        );
+    }
+
+    // === Acyclic path: mixed equivalent + distinct states ===
+    // Exercises: realistic refine with both merging and splitting
+    for &(groups, size, depth) in &[(5, 10, 8), (10, 10, 5), (20, 5, 5)] {
+        let total = groups * size * depth;
+        group.bench_with_input(
+            BenchmarkId::new(
+                "mixed_equiv",
+                format!("{}g_x_{}copies_x_{}deep_{}states", groups, size, depth, total),
+            ),
+            &(groups, size, depth),
+            |b, &(groups, size, depth)| {
+                b.iter_batched(
+                    || build_mixed_equivalence(groups, size, depth),
+                    |mut fst| {
+                        let config = MinimizeConfig::default().with_allow_nondet(true);
+                        minimize_with_config(&mut fst, config).unwrap();
+                        fst
+                    },
+                    criterion::BatchSize::SmallInput,
+                );
+            },
+        );
+    }
+
+    // === Cyclic minimization path (Hopcroft) ===
+    for &n in &[50, 200, 500] {
+        group.bench_with_input(BenchmarkId::new("cyclic", n), &n, |b, &n| {
+            b.iter_batched(
+                || build_cyclic_fst(n),
+                |mut fst| {
+                    let config = MinimizeConfig::default().with_allow_nondet(true);
+                    minimize_with_config(&mut fst, config).unwrap();
+                    fst
+                },
+                criterion::BatchSize::SmallInput,
+            );
+        });
+    }
+
+    // === Real-world regression test ===
     group.bench_function("issue_158", |b| {
         b.iter_batched(
             build_issue_158_fst,
