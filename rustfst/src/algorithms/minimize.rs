@@ -352,8 +352,9 @@ impl AcyclicMinimizer {
 
             let first_state = states[0];
 
-            // Sort in place (no clone needed)
-            states.sort_by(|a, b| {
+            // Sort in place; unstable sort avoids stability overhead
+            // (order among equal elements is irrelevant here)
+            states.sort_unstable_by(|a, b| {
                 state_cmp
                     .compare(*a as StateId, *b as StateId)
                     .unwrap()
@@ -416,70 +417,47 @@ struct StateComparator<'a, W: Semiring, F: MutableFst<W>> {
 }
 
 impl<'a, W: Semiring, F: MutableFst<W>> StateComparator<'a, W, F> {
-    fn do_compare(&self, x: StateId, y: StateId) -> Result<bool> {
-        let xfinal = self.fst.final_weight(x)?.unwrap_or_else(W::zero);
-        let yfinal = self.fst.final_weight(y)?.unwrap_or_else(W::zero);
-
-        if xfinal < yfinal {
-            return Ok(true);
-        } else if xfinal > yfinal {
-            return Ok(false);
-        }
-
-        if self.fst.num_trs(x)? < self.fst.num_trs(y)? {
-            return Ok(true);
-        }
-        if self.fst.num_trs(x)? > self.fst.num_trs(y)? {
-            return Ok(false);
-        }
-
-        let it_x_owner = self.fst.get_trs(x)?;
-        let it_x = it_x_owner.trs().iter();
-        let it_y_owner = self.fst.get_trs(y)?;
-        let it_y = it_y_owner.trs().iter();
-
-        for (arc1, arc2) in it_x.zip(it_y) {
-            if arc1.ilabel < arc2.ilabel {
-                return Ok(true);
-            }
-            if arc1.ilabel > arc2.ilabel {
-                return Ok(false);
-            }
-            let id_1 = self
-                .partition
-                .borrow()
-                .get_class_id(arc1.nextstate as usize);
-            let id_2 = self
-                .partition
-                .borrow()
-                .get_class_id(arc2.nextstate as usize);
-            if id_1 < id_2 {
-                return Ok(true);
-            }
-            if id_1 > id_2 {
-                return Ok(false);
-            }
-        }
-        Ok(false)
-    }
-
     pub fn compare(&self, x: StateId, y: StateId) -> Result<Ordering> {
         if x == y {
             return Ok(Ordering::Equal);
         }
 
-        let x_y = self.do_compare(x, y).unwrap();
-        let y_x = self.do_compare(y, x).unwrap();
+        let xfinal = self.fst.final_weight(x)?.unwrap_or_else(W::zero);
+        let yfinal = self.fst.final_weight(y)?.unwrap_or_else(W::zero);
 
-        if !(x_y) && !(y_x) {
-            return Ok(Ordering::Equal);
+        if xfinal < yfinal {
+            return Ok(Ordering::Less);
+        } else if yfinal < xfinal {
+            return Ok(Ordering::Greater);
         }
 
-        if x_y {
-            Ok(Ordering::Less)
-        } else {
-            Ok(Ordering::Greater)
+        let x_num = self.fst.num_trs(x)?;
+        let y_num = self.fst.num_trs(y)?;
+        match x_num.cmp(&y_num) {
+            Ordering::Less => return Ok(Ordering::Less),
+            Ordering::Greater => return Ok(Ordering::Greater),
+            Ordering::Equal => {}
         }
+
+        let it_x_owner = self.fst.get_trs(x)?;
+        let it_y_owner = self.fst.get_trs(y)?;
+
+        let partition = self.partition.borrow();
+        for (arc1, arc2) in it_x_owner.trs().iter().zip(it_y_owner.trs().iter()) {
+            match arc1.ilabel.cmp(&arc2.ilabel) {
+                Ordering::Less => return Ok(Ordering::Less),
+                Ordering::Greater => return Ok(Ordering::Greater),
+                Ordering::Equal => {}
+            }
+            let id_1 = partition.get_class_id(arc1.nextstate as usize);
+            let id_2 = partition.get_class_id(arc2.nextstate as usize);
+            match id_1.cmp(&id_2) {
+                Ordering::Less => return Ok(Ordering::Less),
+                Ordering::Greater => return Ok(Ordering::Greater),
+                Ordering::Equal => {}
+            }
+        }
+        Ok(Ordering::Equal)
     }
 }
 
