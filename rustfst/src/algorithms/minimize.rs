@@ -345,57 +345,56 @@ impl AcyclicMinimizer {
 
         let height = self.partition.borrow().num_classes();
         for h in 0..height {
-            let it_partition: Vec<_> = self.partition.borrow().iter(h).collect();
-            if it_partition.len() <= 1 {
+            let mut states: Vec<_> = self.partition.borrow().iter(h).collect();
+            if states.len() <= 1 {
                 continue;
             }
 
-            let first_state = it_partition[0];
+            let first_state = states[0];
 
-            // Sort states by the comparator so equivalent states are adjacent
-            let mut sorted = it_partition.clone();
-            sorted.sort_by(|a, b| {
+            // Sort in place (no clone needed)
+            states.sort_by(|a, b| {
                 state_cmp
                     .compare(*a as StateId, *b as StateId)
                     .unwrap()
             });
 
-            // Assign class IDs to equivalence groups
-            let mut state_to_class = HashMap::new();
-            let mut current_class = None;
+            // Single pass: assign sequential group IDs and find first_state's group
+            // by identity check (avoids an extra compare() call per group boundary)
+            let mut group_ids: Vec<usize> = Vec::with_capacity(states.len());
+            let mut current_group = 0usize;
+            let mut first_state_group = 0usize;
 
-            for i in 0..sorted.len() {
-                let is_new_group = if i == 0 {
-                    true
-                } else {
-                    state_cmp
-                        .compare(sorted[i - 1] as StateId, sorted[i] as StateId)
+            for i in 0..states.len() {
+                if i > 0
+                    && state_cmp
+                        .compare(states[i - 1] as StateId, states[i] as StateId)
                         .unwrap()
                         != Ordering::Equal
-                };
-
-                if is_new_group {
-                    // The group containing first_state keeps class h
-                    current_class = Some(
-                        if state_cmp
-                            .compare(sorted[i] as StateId, first_state as StateId)
-                            .unwrap()
-                            == Ordering::Equal
-                        {
-                            h as StateId
-                        } else {
-                            self.partition.borrow_mut().add_class() as StateId
-                        },
-                    );
+                {
+                    current_group += 1;
                 }
-
-                state_to_class.insert(sorted[i], current_class.unwrap());
+                group_ids.push(current_group);
+                if states[i] == first_state {
+                    first_state_group = current_group;
+                }
             }
 
-            for s in it_partition {
-                let old_class = self.partition.borrow().get_class_id(s);
-                let new_class = *state_to_class.get(&s).unwrap();
+            // Allocate real partition class IDs for each group
+            let num_groups = current_group + 1;
+            let mut group_to_class: Vec<StateId> = Vec::with_capacity(num_groups);
+            for g in 0..num_groups {
+                group_to_class.push(if g == first_state_group {
+                    h as StateId
+                } else {
+                    self.partition.borrow_mut().add_class() as StateId
+                });
+            }
 
+            // Move states to their new classes
+            for (i, &s) in states.iter().enumerate() {
+                let new_class = group_to_class[group_ids[i]];
+                let old_class = self.partition.borrow().get_class_id(s);
                 if old_class != (new_class as usize) {
                     self.partition
                         .borrow_mut()
