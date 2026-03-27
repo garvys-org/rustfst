@@ -95,7 +95,7 @@ fn build_mixed_equivalence(
     fst
 }
 
-/// Cyclic FST: a ring of states with self-loops and cross-edges.
+/// Cyclic FST: a ring of states with forward and cross-edges.
 /// Tests the Hopcroft-style cyclic minimization path (not the acyclic refine).
 fn build_cyclic_fst(n: usize) -> VectorFst<TropicalWeight> {
     let mut fst = VectorFst::<TropicalWeight>::new();
@@ -106,12 +106,15 @@ fn build_cyclic_fst(n: usize) -> VectorFst<TropicalWeight> {
     fst.set_final((n - 1) as u32, TropicalWeight::from(0.0))
         .unwrap();
     for i in 0..n {
+        let src = i as u32;
         let next = ((i + 1) % n) as u32;
-        fst.emplace_tr(i as u32, (i % 5 + 1) as u32, (i % 5 + 1) as u32, 0.0, next)
-            .unwrap();
+        let label = (i % 5 + 1) as u32;
+        fst.emplace_tr(src, label, label, 0.0, next).unwrap();
         // Cross-edge to create non-trivial SCCs
         if i + 2 < n {
-            fst.emplace_tr(i as u32, (i % 3 + 6) as u32, (i % 3 + 6) as u32, 0.0, (i + 2) as u32)
+            let cross_label = (i % 3 + 6) as u32;
+            let cross_dst = (i + 2) as u32;
+            fst.emplace_tr(src, cross_label, cross_label, 0.0, cross_dst)
                 .unwrap();
         }
     }

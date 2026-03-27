@@ -363,8 +363,8 @@ impl AcyclicMinimizer {
             // Single pass: assign sequential group IDs and find first_state's group
             // by identity check (avoids an extra compare() call per group boundary)
             let mut group_ids: Vec<usize> = Vec::with_capacity(states.len());
-            let mut current_group = 0usize;
-            let mut first_state_group = 0usize;
+            let mut current_group: usize = 0;
+            let mut first_state_group: usize = 0;
 
             for i in 0..states.len() {
                 if i > 0
@@ -427,7 +427,7 @@ impl<'a, W: Semiring, F: MutableFst<W>> StateComparator<'a, W, F> {
 
         if xfinal < yfinal {
             return Ok(Ordering::Less);
-        } else if yfinal < xfinal {
+        } else if xfinal > yfinal {
             return Ok(Ordering::Greater);
         }
 
