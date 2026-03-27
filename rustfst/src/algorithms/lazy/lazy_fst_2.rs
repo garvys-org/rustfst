@@ -4,7 +4,6 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use itertools::izip;
-use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::lazy::fst_op_2::FstOp2;
 use crate::algorithms::lazy::{CacheStatus, FstCache};
@@ -52,7 +51,7 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
     }
 
     unsafe fn final_weight_unchecked(&self, state_id: StateId) -> Option<W> {
-        self.final_weight(state_id).unsafe_unwrap()
+        self.final_weight(state_id).unwrap_unchecked()
     }
 
     fn num_trs(&self, s: StateId) -> Result<usize> {
@@ -62,7 +61,7 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
     }
 
     unsafe fn num_trs_unchecked(&self, s: StateId) -> usize {
-        self.cache.num_trs(s).unsafe_unwrap()
+        self.cache.num_trs(s).unwrap_unchecked()
     }
 
     fn get_trs(&self, state_id: StateId) -> Result<Self::TRS> {
@@ -78,7 +77,7 @@ impl<W: Semiring, Op: FstOp2<W>, Cache: FstCache<W>> CoreFst<W> for LazyFst2<W, 
     }
 
     unsafe fn get_trs_unchecked(&self, state_id: StateId) -> Self::TRS {
-        self.get_trs(state_id).unsafe_unwrap()
+        self.get_trs(state_id).unwrap_unchecked()
     }
 
     fn properties(&self) -> FstProperties {

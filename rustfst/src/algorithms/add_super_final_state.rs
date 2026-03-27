@@ -1,5 +1,3 @@
-use unsafe_unwrap::UnsafeUnwrap;
-
 use crate::fst_traits::MutableFst;
 use crate::semirings::Semiring;
 use crate::{StateId, Tr, EPS_LABEL};
@@ -38,7 +36,7 @@ pub fn add_super_final_state<W: Semiring, F: MutableFst<W>>(ifst: &mut F) -> Sta
     for final_state in final_states {
         let weight = unsafe {
             ifst.take_final_weight_unchecked(final_state)
-                .unsafe_unwrap()
+                .unwrap_unchecked()
         };
         unsafe {
             ifst.add_tr_unchecked(

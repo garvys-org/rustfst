@@ -7,8 +7,6 @@ use std::marker::PhantomData;
 
 use anyhow::Result;
 use binary_heap_plus::BinaryHeap;
-use stable_bst::TreeMap;
-
 use crate::algorithms::encode::EncodeType;
 use crate::algorithms::factor_weight::factor_iterators::GallicFactorLeft;
 use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, FactorWeightType};
@@ -347,26 +345,56 @@ impl AcyclicMinimizer {
 
         let height = self.partition.borrow().num_classes();
         for h in 0..height {
-            // We need here a binary search tree in order to order the states id and create a partition.
-            // For now uses the crate `stable_bst` which is quite old but seems to do the job
-            // TODO: Bench the performances of the implementation. Maybe re-write it.
-            let mut equiv_classes =
-                TreeMap::<StateId, StateId, _>::with_comparator(|a: &StateId, b: &StateId| {
-                    state_cmp.compare(*a, *b).unwrap()
-                });
-
             let it_partition: Vec<_> = self.partition.borrow().iter(h).collect();
-            equiv_classes.insert(it_partition[0] as StateId, h as StateId);
+            if it_partition.len() <= 1 {
+                continue;
+            }
 
-            for e in it_partition.iter().skip(1) {
-                equiv_classes.get_or_insert(*e as StateId, || {
-                    self.partition.borrow_mut().add_class() as StateId
-                });
+            let first_state = it_partition[0];
+
+            // Sort states by the comparator so equivalent states are adjacent
+            let mut sorted = it_partition.clone();
+            sorted.sort_by(|a, b| {
+                state_cmp
+                    .compare(*a as StateId, *b as StateId)
+                    .unwrap()
+            });
+
+            // Assign class IDs to equivalence groups
+            let mut state_to_class = HashMap::new();
+            let mut current_class = None;
+
+            for i in 0..sorted.len() {
+                let is_new_group = if i == 0 {
+                    true
+                } else {
+                    state_cmp
+                        .compare(sorted[i - 1] as StateId, sorted[i] as StateId)
+                        .unwrap()
+                        != Ordering::Equal
+                };
+
+                if is_new_group {
+                    // The group containing first_state keeps class h
+                    current_class = Some(
+                        if state_cmp
+                            .compare(sorted[i] as StateId, first_state as StateId)
+                            .unwrap()
+                            == Ordering::Equal
+                        {
+                            h as StateId
+                        } else {
+                            self.partition.borrow_mut().add_class() as StateId
+                        },
+                    );
+                }
+
+                state_to_class.insert(sorted[i], current_class.unwrap());
             }
 
             for s in it_partition {
                 let old_class = self.partition.borrow().get_class_id(s);
-                let new_class = *equiv_classes.get(&(s as StateId)).unwrap();
+                let new_class = *state_to_class.get(&s).unwrap();
 
                 if old_class != (new_class as usize) {
                     self.partition

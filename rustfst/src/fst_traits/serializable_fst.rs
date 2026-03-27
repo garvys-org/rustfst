@@ -3,7 +3,6 @@ use std::io::{BufWriter, LineWriter, Write};
 use std::path::Path;
 
 use anyhow::{Context, Result};
-use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::fst_traits::ExpandedFst;
 use crate::parsers::text_fst::ParsedTextFst;

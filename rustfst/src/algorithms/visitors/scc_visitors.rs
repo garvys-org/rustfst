@@ -1,6 +1,5 @@
 use std::marker::PhantomData;
 
-use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::dfs_visit::Visitor;
 use crate::fst_properties::FstProperties;
@@ -141,7 +140,7 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for SccVisitor<'
                 }
             }
             loop {
-                t = unsafe { *self.scc_stack.last().unsafe_unwrap() } as usize;
+                t = unsafe { *self.scc_stack.last().unwrap_unchecked() } as usize;
                 if let Some(ref mut scc) = self.scc {
                     scc[t] = self.nscc;
                 }

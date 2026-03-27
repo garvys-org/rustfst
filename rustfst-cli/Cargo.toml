@@ -12,4 +12,3 @@ env_logger = "0.10"
 exitcode = "1.1"
 log = "0.4"
 rustfst = {path = "../rustfst"}
-unsafe_unwrap = "0.1"

@@ -1,7 +1,6 @@
 use std::collections::HashSet;
 
 use anyhow::Result;
-use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::dfs_visit::dfs_visit;
 use crate::algorithms::tr_filters::AnyTrFilter;
@@ -48,7 +47,7 @@ pub fn compute_fst_properties<W: Semiring, F: ExpandedFst<W>>(
         // Retrieves props computed in the DFS.
         comp_props |= dfs_props & visitor.props;
 
-        unsafe { visitor.scc.unsafe_unwrap() }
+        unsafe { visitor.scc.unwrap_unchecked() }
     } else {
         vec![]
     };
@@ -184,7 +183,7 @@ pub fn compute_fst_properties<W: Semiring, F: ExpandedFst<W>>(
                 comp_props &= !FstProperties::STRING;
             }
             if fst.is_final(state)? {
-                let final_weight = unsafe { fst.final_weight_unchecked(state).unsafe_unwrap() };
+                let final_weight = unsafe { fst.final_weight_unchecked(state).unwrap_unchecked() };
                 if !final_weight.is_one() {
                     comp_props |= FstProperties::WEIGHTED;
                     comp_props &= !FstProperties::UNWEIGHTED;

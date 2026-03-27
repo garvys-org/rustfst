@@ -1,7 +1,6 @@
 use std::collections::HashSet;
 
 use anyhow::Result;
-use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::connect;
 use crate::algorithms::dfs_visit::dfs_visit;
@@ -53,7 +52,7 @@ where
                         })
                         .plus_assign(
                             ifst.final_weight_unchecked(tr.nextstate)
-                                .unsafe_unwrap()
+                                .unwrap_unchecked()
                                 .times(&tr.weight)?,
                         )?
                 };
@@ -62,7 +61,7 @@ where
         }
 
         if !trs_to_del.is_empty() {
-            let w = unsafe { weight.unsafe_unwrap() };
+            let w = unsafe { weight.unwrap_unchecked() };
             if !w.is_zero() {
                 unsafe { ifst.set_final_unchecked(state, w) };
             }
