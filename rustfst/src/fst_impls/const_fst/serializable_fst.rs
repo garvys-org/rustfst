@@ -211,14 +211,14 @@ fn parse_const_fst<W: SerializableSemiring>(
     let pos = stream_len - i.len();
 
     // Align input
-    if aligned && hdr.num_states > 0 && pos % CONST_ARCH_ALIGNMENT != 0 {
+    if aligned && hdr.num_states > 0 && !pos.is_multiple_of(CONST_ARCH_ALIGNMENT) {
         i = take(CONST_ARCH_ALIGNMENT - (pos % CONST_ARCH_ALIGNMENT))(i)?.0;
     }
     let (mut i, const_states) = count(parse_const_state, hdr.num_states as usize)(i)?;
     let pos = stream_len - i.len();
 
     // Align input
-    if aligned && hdr.num_trs > 0 && pos % CONST_ARCH_ALIGNMENT != 0 {
+    if aligned && hdr.num_trs > 0 && !pos.is_multiple_of(CONST_ARCH_ALIGNMENT) {
         i = take(CONST_ARCH_ALIGNMENT - (pos % CONST_ARCH_ALIGNMENT))(i)?.0;
     }
     let (i, const_trs) = count(parse_bin_fst_tr, hdr.num_trs as usize)(i)?;
