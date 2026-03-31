@@ -62,12 +62,11 @@ impl<W: Semiring> FactorWeightStateTable<W> {
 
     pub fn find_state(&self, elt: &Element<W>) -> StateId {
         let mut inner_state_table = self.inner_state_table.lock().unwrap();
-        if !self.factor_tr_weights && elt.weight.is_one() && elt.state.is_some() {
-            let old_state = elt.state.unwrap();
-            if !inner_state_table
-                .unfactored
-                .contains_key(&elt.state.unwrap())
-            {
+        if let Some(old_state) = elt
+            .state
+            .filter(|_| !self.factor_tr_weights && elt.weight.is_one())
+        {
+            if !inner_state_table.unfactored.contains_key(&old_state) {
                 let new_state = inner_state_table.insert_bimap(elt.clone());
                 inner_state_table.unfactored.insert(old_state, new_state);
             }

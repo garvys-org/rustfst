@@ -11,7 +11,7 @@ use crate::fst_properties::FstProperties;
 use crate::semirings::Semiring;
 use anyhow::Result;
 
-static UNASSIGNED: usize = std::usize::MAX;
+static UNASSIGNED: usize = usize::MAX;
 
 // Tests reachability of final states from a given state. To test for
 // reachability from a state s, first do SetState(s). Then a final state f can

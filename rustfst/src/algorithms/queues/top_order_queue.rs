@@ -60,8 +60,8 @@ impl Queue for TopOrderQueue {
             return None;
         }
         let old_head = self.state[self.front as usize].take();
-        if self.back.is_some() {
-            while self.front <= self.back.unwrap() && self.state[self.front as usize].is_none() {
+        if let Some(back_val) = self.back {
+            while self.front <= back_val && self.state[self.front as usize].is_none() {
                 self.front += 1;
             }
         }

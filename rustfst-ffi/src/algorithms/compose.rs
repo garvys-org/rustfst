@@ -176,7 +176,7 @@ pub struct CIntArray {
     pub size: usize,
 }
 
-impl<'a> From<&'a [u32]> for CIntArray {
+impl From<&[u32]> for CIntArray {
     fn from(array: &[u32]) -> Self {
         Self {
             size: array.len(),

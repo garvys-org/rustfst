@@ -289,17 +289,17 @@ pub mod proptest_fst;
 
 /// Used to indicate a transition with no label.
 #[cfg(feature = "state-label-u32")]
-pub static NO_LABEL: Label = std::u32::MAX;
+pub static NO_LABEL: Label = u32::MAX;
 #[cfg(not(feature = "state-label-u32"))]
-pub static NO_LABEL: Label = std::usize::MAX;
+pub static NO_LABEL: Label = usize::MAX;
 
 /// Used to indicate a missing state ID.
 #[cfg(feature = "state-label-u32")]
-pub static NO_STATE_ID: StateId = std::u32::MAX;
+pub static NO_STATE_ID: StateId = u32::MAX;
 #[cfg(not(feature = "state-label-u32"))]
-pub static NO_STATE_ID: StateId = std::usize::MAX;
+pub static NO_STATE_ID: StateId = usize::MAX;
 
-pub(crate) static UNASSIGNED: usize = std::usize::MAX;
+pub(crate) static UNASSIGNED: usize = usize::MAX;
 
 /// Provides a trait used to access transitions from a state.
 pub mod trs;

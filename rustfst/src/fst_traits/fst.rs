@@ -250,7 +250,7 @@ pub trait Fst<W: Semiring>:
     fn take_output_symbols(&mut self) -> Option<Arc<SymbolTable>>;
 
     /// Returns an Iterator on the final states along with their weight.
-    fn final_states_iter(&self) -> FinalStatesIterator<W, Self>
+    fn final_states_iter(&self) -> FinalStatesIterator<'_, W, Self>
     where
         Self: std::marker::Sized,
     {
@@ -279,7 +279,7 @@ pub trait Fst<W: Semiring>:
     /// assert_eq!(paths[0].olabels.as_slice(), &[4, 5]);
     /// assert_eq!(&paths[0].weight, &TropicalWeight::one());
     /// ```
-    fn paths_iter(&self) -> PathsIterator<W, Self>
+    fn paths_iter(&self) -> PathsIterator<'_, W, Self>
     where
         Self: std::marker::Sized,
     {
@@ -311,7 +311,7 @@ pub trait Fst<W: Semiring>:
     /// assert_eq!(paths[0].istring().unwrap(), "a b c".to_string());
     /// assert_eq!(paths[0].ostring().unwrap(), "d e".to_string());
     /// ```
-    fn string_paths_iter(&self) -> Result<StringPathsIterator<W, Self>>
+    fn string_paths_iter(&self) -> Result<StringPathsIterator<'_, W, Self>>
     where
         Self: std::marker::Sized,
     {

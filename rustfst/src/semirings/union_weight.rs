@@ -328,6 +328,16 @@ impl<W: Semiring, O: UnionWeightOption<W>> ReverseBack<UnionWeight<W, O>>
     fn reverse_back(&self) -> Result<UnionWeight<W, O>> {
         let res = self.reverse()?;
         // TODO: Find a way to avoid this transmute. For the moment, it is necessary because of the compare function.
-        unsafe { Ok(std::mem::transmute(res)) }
+        unsafe {
+            Ok(std::mem::transmute::<
+                UnionWeight<
+                    <<W as Semiring>::ReverseWeight as Semiring>::ReverseWeight,
+                    <<O as UnionWeightOption<W>>::ReverseOptions as UnionWeightOption<
+                        <W as Semiring>::ReverseWeight,
+                    >>::ReverseOptions,
+                >,
+                UnionWeight<W, O>,
+            >(res))
+        }
     }
 }
