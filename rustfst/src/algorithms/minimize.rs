@@ -618,6 +618,175 @@ mod tests {
     use algorithms::determinize::*;
     use std::sync::Arc;
 
+    /// Two identical chains (start→A→B→final) should minimize to a single chain.
+    /// This directly tests that refine() correctly groups equivalent states.
+    #[test]
+    fn test_minimize_parallel_chains_merged() {
+        let mut fst = VectorFst::<TropicalWeight>::new();
+        let s0 = fst.add_state();
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+        let s3 = fst.add_state();
+        let s4 = fst.add_state();
+        let s_final = fst.add_state();
+        fst.set_start(s0).unwrap();
+        fst.set_final(s_final, TropicalWeight::one()).unwrap();
+        // Chain 1: s0 -1-> s1 -2-> s2 -3-> s_final
+        fst.emplace_tr(s0, 1, 1, 0.0, s1).unwrap();
+        fst.emplace_tr(s1, 2, 2, 0.0, s2).unwrap();
+        fst.emplace_tr(s2, 3, 3, 0.0, s_final).unwrap();
+        // Chain 2: s0 -1-> s3 -2-> s4 -3-> s_final (identical labels)
+        fst.emplace_tr(s0, 1, 1, 0.0, s3).unwrap();
+        fst.emplace_tr(s3, 2, 2, 0.0, s4).unwrap();
+        fst.emplace_tr(s4, 3, 3, 0.0, s_final).unwrap();
+
+        let states_before = fst.num_states();
+        // Check path acceptance before
+        let path = fst_path![1, 2, 3];
+        assert!(check_path_in_fst(&fst, &path));
+
+        let config = MinimizeConfig::default().with_allow_nondet(true);
+        minimize_with_config(&mut fst, config).unwrap();
+
+        // States should be reduced (equivalent states merged)
+        assert!(
+            fst.num_states() < states_before,
+            "Expected fewer states after minimizing parallel chains: {} >= {}",
+            fst.num_states(),
+            states_before
+        );
+        // The accepted language must be preserved
+        assert!(check_path_in_fst(&fst, &path));
+    }
+
+    /// An already-minimal linear chain should not change.
+    /// Tests that refine() doesn't incorrectly merge distinct states.
+    #[test]
+    fn test_minimize_already_minimal() {
+        let mut fst = VectorFst::<TropicalWeight>::new();
+        let s0 = fst.add_state();
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+        fst.set_start(s0).unwrap();
+        fst.set_final(s2, TropicalWeight::one()).unwrap();
+        fst.emplace_tr(s0, 1, 1, 0.0, s1).unwrap();
+        fst.emplace_tr(s1, 2, 2, 0.0, s2).unwrap();
+
+        let states_before = fst.num_states();
+        minimize(&mut fst).unwrap();
+
+        // Already minimal — state count should not increase
+        assert_eq!(fst.num_states(), states_before);
+    }
+
+    /// Multiple groups of equivalent states at the same depth.
+    /// Tests that refine() correctly splits into multiple equivalence classes.
+    #[test]
+    fn test_minimize_multiple_equivalence_groups() {
+        let mut fst = VectorFst::<TropicalWeight>::new();
+        let s0 = fst.add_state();
+        let s_final = fst.add_state();
+        fst.set_start(s0).unwrap();
+        fst.set_final(s_final, TropicalWeight::one()).unwrap();
+
+        // Group A: two chains with label sequence [1, 10]
+        for _ in 0..2 {
+            let mid = fst.add_state();
+            fst.emplace_tr(s0, 1, 1, 0.0, mid).unwrap();
+            fst.emplace_tr(mid, 10, 10, 0.0, s_final).unwrap();
+        }
+        // Group B: two chains with label sequence [2, 20]
+        for _ in 0..2 {
+            let mid = fst.add_state();
+            fst.emplace_tr(s0, 2, 2, 0.0, mid).unwrap();
+            fst.emplace_tr(mid, 20, 20, 0.0, s_final).unwrap();
+        }
+
+        let paths_before: std::collections::HashSet<_> = fst.paths_iter().collect();
+        let config = MinimizeConfig::default().with_allow_nondet(true);
+        minimize_with_config(&mut fst, config).unwrap();
+        let paths_after: std::collections::HashSet<_> = fst.paths_iter().collect();
+
+        // Should merge each group's intermediate states: 6 states → 4
+        assert!(
+            fst.num_states() <= 4,
+            "Expected at most 4 states, got {}",
+            fst.num_states()
+        );
+        assert_eq!(paths_before, paths_after, "Paths must be preserved");
+    }
+
+    /// Single-state FST (start = final). Edge case for refine().
+    #[test]
+    fn test_minimize_single_state() {
+        let mut fst = VectorFst::<TropicalWeight>::new();
+        let s0 = fst.add_state();
+        fst.set_start(s0).unwrap();
+        fst.set_final(s0, TropicalWeight::one()).unwrap();
+
+        minimize(&mut fst).unwrap();
+        assert_eq!(fst.num_states(), 1);
+        assert!(fst.is_final(0).unwrap());
+    }
+
+    /// Empty FST (no states). Edge case.
+    #[test]
+    fn test_minimize_empty_fst() {
+        let mut fst = VectorFst::<TropicalWeight>::new();
+        let config = MinimizeConfig::default().with_allow_nondet(true);
+        minimize_with_config(&mut fst, config).unwrap();
+        assert_eq!(fst.num_states(), 0);
+    }
+
+    /// Weighted acceptor — tests the weighted acceptor path in minimize_with_config
+    /// (push_weights + encode + minimize + decode).
+    #[test]
+    fn test_minimize_weighted_acceptor() {
+        let mut fst = VectorFst::<TropicalWeight>::new();
+        let s0 = fst.add_state();
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+        let s3 = fst.add_state();
+        let s4 = fst.add_state();
+        fst.set_start(s0).unwrap();
+        fst.set_final(s4, TropicalWeight::one()).unwrap();
+        // Two paths with weights: both go through different intermediate states
+        // but with same labels and weights → equivalent after push+encode
+        fst.emplace_tr(s0, 1, 1, 1.0, s1).unwrap();
+        fst.emplace_tr(s0, 1, 1, 1.0, s2).unwrap();
+        fst.emplace_tr(s1, 2, 2, 2.0, s3).unwrap();
+        fst.emplace_tr(s2, 2, 2, 2.0, s3).unwrap();
+        fst.emplace_tr(s3, 3, 3, 0.0, s4).unwrap();
+
+        let config = MinimizeConfig::default().with_allow_nondet(true);
+        minimize_with_config(&mut fst, config).unwrap();
+
+        // Should still have valid paths
+        assert!(fst.start().is_some());
+        assert!(fst.num_states() > 0);
+    }
+
+    /// Cyclic FST — tests the Hopcroft cyclic_minimize path (not refine).
+    #[test]
+    fn test_minimize_cyclic() {
+        let mut fst = VectorFst::<TropicalWeight>::new();
+        let s0 = fst.add_state();
+        let s1 = fst.add_state();
+        let s2 = fst.add_state();
+        fst.set_start(s0).unwrap();
+        fst.set_final(s2, TropicalWeight::one()).unwrap();
+        fst.emplace_tr(s0, 1, 1, 0.0, s1).unwrap();
+        fst.emplace_tr(s1, 2, 2, 0.0, s2).unwrap();
+        fst.emplace_tr(s2, 1, 1, 0.0, s1).unwrap(); // cycle
+
+        let paths_before: Vec<_> = fst.paths_iter().take(10).collect();
+        let config = MinimizeConfig::default().with_allow_nondet(true);
+        minimize_with_config(&mut fst, config).unwrap();
+        let paths_after: Vec<_> = fst.paths_iter().take(10).collect();
+
+        assert_eq!(paths_before, paths_after, "Cyclic paths must be preserved");
+    }
+
     #[test]
     fn test_minimize_issue_158() {
         let text_fst = r#"0	5	101	101	0
@@ -678,6 +847,91 @@ mod tests {
         let accept2 = check_path_in_fst(&fst, &path);
 
         assert_eq!(accept1, accept2);
+    }
+
+    /// Regression test: verify our output matches the original stable_bst implementation.
+    /// Values were captured from running identical inputs on origin/main.
+    #[test]
+    fn test_minimize_matches_original_implementation() {
+        // Test 1: Parallel chains — original produced 4 states, path accepted
+        {
+            let mut fst = VectorFst::<TropicalWeight>::new();
+            let s0 = fst.add_state();
+            let s1 = fst.add_state();
+            let s2 = fst.add_state();
+            let s3 = fst.add_state();
+            let s4 = fst.add_state();
+            let s_final = fst.add_state();
+            fst.set_start(s0).unwrap();
+            fst.set_final(s_final, TropicalWeight::one()).unwrap();
+            fst.emplace_tr(s0, 1, 1, 0.0, s1).unwrap();
+            fst.emplace_tr(s1, 2, 2, 0.0, s2).unwrap();
+            fst.emplace_tr(s2, 3, 3, 0.0, s_final).unwrap();
+            fst.emplace_tr(s0, 1, 1, 0.0, s3).unwrap();
+            fst.emplace_tr(s3, 2, 2, 0.0, s4).unwrap();
+            fst.emplace_tr(s4, 3, 3, 0.0, s_final).unwrap();
+            let config = MinimizeConfig::default().with_allow_nondet(true);
+            minimize_with_config(&mut fst, config).unwrap();
+            assert_eq!(
+                fst.num_states(),
+                4,
+                "parallel chains: state count mismatch with original"
+            );
+            assert!(check_path_in_fst(&fst, &fst_path![1, 2, 3]));
+        }
+        // Test 2: Already minimal — original produced 3 states
+        {
+            let mut fst = VectorFst::<TropicalWeight>::new();
+            let s0 = fst.add_state();
+            let s1 = fst.add_state();
+            let s2 = fst.add_state();
+            fst.set_start(s0).unwrap();
+            fst.set_final(s2, TropicalWeight::one()).unwrap();
+            fst.emplace_tr(s0, 1, 1, 0.0, s1).unwrap();
+            fst.emplace_tr(s1, 2, 2, 0.0, s2).unwrap();
+            minimize(&mut fst).unwrap();
+            assert_eq!(
+                fst.num_states(),
+                3,
+                "already minimal: state count mismatch with original"
+            );
+        }
+        // Test 3: Multiple equivalence groups — original produced 4 states
+        {
+            let mut fst = VectorFst::<TropicalWeight>::new();
+            let s0 = fst.add_state();
+            let s_final = fst.add_state();
+            fst.set_start(s0).unwrap();
+            fst.set_final(s_final, TropicalWeight::one()).unwrap();
+            for _ in 0..2 {
+                let mid = fst.add_state();
+                fst.emplace_tr(s0, 1, 1, 0.0, mid).unwrap();
+                fst.emplace_tr(mid, 10, 10, 0.0, s_final).unwrap();
+            }
+            for _ in 0..2 {
+                let mid = fst.add_state();
+                fst.emplace_tr(s0, 2, 2, 0.0, mid).unwrap();
+                fst.emplace_tr(mid, 20, 20, 0.0, s_final).unwrap();
+            }
+            let config = MinimizeConfig::default().with_allow_nondet(true);
+            minimize_with_config(&mut fst, config).unwrap();
+            assert_eq!(
+                fst.num_states(),
+                4,
+                "multi groups: state count mismatch with original"
+            );
+        }
+        // Test 4: Issue 158 — original produced 19 states
+        {
+            let text_fst = "0\t5\t101\t101\t0\n0\t4\t100\t100\t0\n0\t3\t99\t99\t0\n0\t2\t98\t98\t0\n0\t1\t97\t97\t0\n1\t10\t101\t101\t0\n1\t9\t100\t100\t0\n1\t8\t99\t99\t0\n1\t7\t98\t98\t0\n1\t6\t97\t97\t0\n2\t11\t101\t101\t0\n2\t10\t100\t100\t0\n2\t9\t99\t99\t0\n2\t8\t98\t98\t0\n2\t7\t97\t97\t0\n3\t11\t100\t100\t0\n3\t10\t99\t99\t0\n3\t9\t98\t98\t0\n3\t8\t97\t97\t0\n4\t11\t99\t99\t0\n4\t10\t98\t98\t0\n4\t9\t97\t97\t0\n5\t11\t98\t98\t0\n5\t10\t97\t97\t0\n6\t15\t101\t101\t0\n6\t14\t100\t100\t0\n6\t13\t99\t99\t0\n6\t12\t98\t98\t0\n7\t16\t101\t101\t0\n7\t15\t100\t100\t0\n7\t14\t99\t99\t0\n7\t13\t98\t98\t0\n7\t12\t97\t97\t0\n8\t16\t100\t100\t0\n8\t15\t99\t99\t0\n8\t14\t98\t98\t0\n8\t13\t97\t97\t0\n9\t16\t99\t99\t0\n9\t15\t98\t98\t0\n9\t14\t97\t97\t0\n10\t16\t98\t98\t0\n10\t15\t97\t97\t0\n11\t16\t97\t97\t0\n12\t17\t101\t101\t0\n13\t17\t100\t100\t0\n14\t17\t99\t99\t0\n15\t17\t98\t98\t0\n16\t17\t97\t97\t0\n17\t18\t32\t32\t0\n18\t0\n";
+            let mut fst: VectorFst<TropicalWeight> = VectorFst::from_text_string(text_fst).unwrap();
+            minimize(&mut fst).unwrap();
+            assert_eq!(
+                fst.num_states(),
+                19,
+                "issue 158: state count mismatch with original"
+            );
+        }
     }
 
     proptest! {
