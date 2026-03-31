@@ -61,10 +61,9 @@ impl<W: Semiring> FactorWeightStateTable<W> {
             .filter(|_| !self.factor_tr_weights && elt.weight.is_one())
         {
             let InnerStateTable { bimap, unfactored } = &mut *inner_state_table;
-            let elt = elt.clone();
             *unfactored.entry(old_state).or_insert_with(|| {
                 let n = bimap.len() as StateId;
-                bimap.insert(n, elt);
+                bimap.insert(n, elt.clone());
                 n
             })
         } else {
