@@ -1,6 +1,5 @@
 use std::marker::PhantomData;
 
-
 use crate::algorithms::dfs_visit::Visitor;
 use crate::fst_properties::FstProperties;
 use crate::fst_traits::{ExpandedFst, Fst};

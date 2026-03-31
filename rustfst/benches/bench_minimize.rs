@@ -235,7 +235,10 @@ fn bench_minimize(c: &mut Criterion) {
         group.bench_with_input(
             BenchmarkId::new(
                 "mixed_equiv",
-                format!("{}g_x_{}copies_x_{}deep_{}states", groups, size, depth, total),
+                format!(
+                    "{}g_x_{}copies_x_{}deep_{}states",
+                    groups, size, depth, total
+                ),
             ),
             &(groups, size, depth),
             |b, &(groups, size, depth)| {

@@ -31,7 +31,11 @@ where
     if let Some(start_state) = fst.start() {
         let final_states_id: Vec<_> = fst
             .final_states_iter()
-            .map(|s| (s, unsafe { fst.final_weight_unchecked(s).unwrap_unchecked() }))
+            .map(|s| {
+                (s, unsafe {
+                    fst.final_weight_unchecked(s).unwrap_unchecked()
+                })
+            })
             .collect();
         for (final_state_id, final_weight) in final_states_id {
             unsafe {

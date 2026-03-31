@@ -5,8 +5,6 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::marker::PhantomData;
 
-use anyhow::Result;
-use binary_heap_plus::BinaryHeap;
 use crate::algorithms::encode::EncodeType;
 use crate::algorithms::factor_weight::factor_iterators::GallicFactorLeft;
 use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, FactorWeightType};
@@ -33,6 +31,8 @@ use crate::EPS_LABEL;
 use crate::KDELTA;
 use crate::{Label, StateId, Trs};
 use crate::{Tr, KSHORTESTDELTA};
+use anyhow::Result;
+use binary_heap_plus::BinaryHeap;
 use itertools::Itertools;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -354,11 +354,8 @@ impl AcyclicMinimizer {
 
             // Sort in place; unstable sort avoids stability overhead
             // (order among equal elements is irrelevant here)
-            states.sort_unstable_by(|a, b| {
-                state_cmp
-                    .compare(*a as StateId, *b as StateId)
-                    .unwrap()
-            });
+            states
+                .sort_unstable_by(|a, b| state_cmp.compare(*a as StateId, *b as StateId).unwrap());
 
             // Single pass: assign sequential group IDs and find first_state's group
             // by identity check (avoids an extra compare() call per group boundary)

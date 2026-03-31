@@ -75,7 +75,8 @@ impl UnaryFstAlgorithm for MapAlgorithm {
             }
             "times" => {
                 // Safe because there is a check at parsing time.
-                let mapper = tr_mappers::TimesMapper::new(unsafe { self.weight.unwrap_unchecked() });
+                let mapper =
+                    tr_mappers::TimesMapper::new(unsafe { self.weight.unwrap_unchecked() });
                 tr_map(&mut fst, &mapper)?;
                 Ok(fst)
             }
