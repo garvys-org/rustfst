@@ -121,7 +121,7 @@ pub struct StatesIteratorLazyFst<'a, T> {
     pub(crate) s: StateId,
 }
 
-impl<'a, W, Op, Cache> Iterator for StatesIteratorLazyFst<'a, LazyFst<W, Op, Cache>>
+impl<W, Op, Cache> Iterator for StatesIteratorLazyFst<'_, LazyFst<W, Op, Cache>>
 where
     W: Semiring,
     Op: FstOp<W>,

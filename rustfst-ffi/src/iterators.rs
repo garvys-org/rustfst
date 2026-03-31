@@ -137,7 +137,7 @@ pub struct MutTrsIterator<'a> {
     index: usize,
 }
 
-impl<'a> MutTrsIterator<'a> {
+impl MutTrsIterator<'_> {
     pub fn done(&self) -> bool {
         self.trs.len() == self.index
     }

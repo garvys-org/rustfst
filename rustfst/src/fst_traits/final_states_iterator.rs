@@ -12,7 +12,7 @@ where
     pub(crate) w: PhantomData<W>,
 }
 
-impl<'a, W, F> Iterator for FinalStatesIterator<'a, W, F>
+impl<W, F> Iterator for FinalStatesIterator<'_, W, F>
 where
     W: Semiring,
     F: Fst<W>,

@@ -12,7 +12,7 @@ pub struct TrsIterMut<'a, W: Semiring> {
     noepsilons: &'a mut usize,
 }
 
-impl<'a, W: Semiring> Index<usize> for TrsIterMut<'a, W> {
+impl<W: Semiring> Index<usize> for TrsIterMut<'_, W> {
     type Output = Tr<W>;
 
     fn index(&self, index: usize) -> &Self::Output {

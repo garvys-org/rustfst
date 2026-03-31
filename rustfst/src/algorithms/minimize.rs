@@ -413,7 +413,7 @@ struct StateComparator<'a, W: Semiring, F: MutableFst<W>> {
     w: PhantomData<W>,
 }
 
-impl<'a, W: Semiring, F: MutableFst<W>> StateComparator<'a, W, F> {
+impl<W: Semiring, F: MutableFst<W>> StateComparator<'_, W, F> {
     pub fn compare(&self, x: StateId, y: StateId) -> Result<Ordering> {
         if x == y {
             return Ok(Ordering::Equal);
