@@ -90,7 +90,7 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         self.properties = add_state_properties(self.properties);
     }
 
-    fn tr_iter_mut(&mut self, state_id: StateId) -> Result<TrsIterMut<W>> {
+    fn tr_iter_mut(&mut self, state_id: StateId) -> Result<TrsIterMut<'_, W>> {
         let state = self
             .states
             .get_mut(state_id as usize)
@@ -104,7 +104,7 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
         ))
     }
 
-    unsafe fn tr_iter_unchecked_mut(&mut self, state_id: StateId) -> TrsIterMut<W> {
+    unsafe fn tr_iter_unchecked_mut(&mut self, state_id: StateId) -> TrsIterMut<'_, W> {
         let state = self.states.get_unchecked_mut(state_id as usize);
         let trs = Arc::make_mut(&mut state.trs.0);
         TrsIterMut::new(

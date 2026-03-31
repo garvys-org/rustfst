@@ -188,7 +188,7 @@ impl Partition {
         self.classes.len()
     }
 
-    pub fn iter(&self, class_id: usize) -> PartitionIterator {
+    pub fn iter(&self, class_id: usize) -> PartitionIterator<'_> {
         PartitionIterator::new(self, class_id)
     }
 }

@@ -322,7 +322,7 @@ impl<K: Copy + Ord> CompactSet<K> {
         self.max_key = self.no_key;
     }
 
-    pub fn iter(&self) -> std::collections::btree_set::Iter<K> {
+    pub fn iter(&self) -> std::collections::btree_set::Iter<'_, K> {
         self.set.iter()
     }
 
