@@ -101,7 +101,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [ 1.74.0, stable ]
+        rust: [ 1.85.0, stable ]
         os: [ ubuntu-latest, macos-15-intel ]
         cargo-args:
           - --all --benches --examples --bins --tests
