@@ -78,7 +78,7 @@ impl VectorIntervalStore {
         self.count = Some(count);
     }
 
-    pub fn iter(&self) -> IterSlice<IntInterval> {
+    pub fn iter(&self) -> IterSlice<'_, IntInterval> {
         self.intervals.iter()
     }
 
@@ -123,7 +123,7 @@ impl IntervalSet {
         self.intervals.clear()
     }
 
-    pub fn iter(&self) -> IterSlice<IntInterval> {
+    pub fn iter(&self) -> IterSlice<'_, IntInterval> {
         self.intervals.iter()
     }
 

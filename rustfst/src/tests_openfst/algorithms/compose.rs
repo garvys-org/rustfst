@@ -106,6 +106,7 @@ impl MatcherFlagsTrait for DefaultLabelLookAheadMatcherFlags {
 }
 
 #[derive(Debug, Clone, PartialOrd, PartialEq)]
+#[allow(dead_code)]
 pub struct OLabelLookAheadFlags {}
 
 impl MatcherFlagsTrait for OLabelLookAheadFlags {

@@ -83,7 +83,7 @@ where
         Ok(true)
     }
 
-    pub fn iter(&self) -> std::collections::btree_map::Iter<usize, usize> {
+    pub fn iter(&self) -> std::collections::btree_map::Iter<'_, usize, usize> {
         self.sample_map.iter()
     }
 }

@@ -106,14 +106,14 @@ pub trait MutableFst<W: Semiring>: ExpandedFst<W> {
     fn add_states(&mut self, n: usize);
 
     /// Return a mutable iterator on the `Tr`s of the state `state`.
-    fn tr_iter_mut(&mut self, state: StateId) -> Result<TrsIterMut<W>>;
+    fn tr_iter_mut(&mut self, state: StateId) -> Result<TrsIterMut<'_, W>>;
     /// Return a mutable iterator on the `Tr`s of the state `state`.
     ///
     /// # Safety
     ///
     /// Unsafe behaviour if `state` is not present in Fst.
     ///
-    unsafe fn tr_iter_unchecked_mut(&mut self, state_id: StateId) -> TrsIterMut<W>;
+    unsafe fn tr_iter_unchecked_mut(&mut self, state_id: StateId) -> TrsIterMut<'_, W>;
 
     /// Removes a state from an FST. It also removes all the trs starting from another state and
     /// reaching this state. An error is raised if the state `state_id` doesn't exist.
