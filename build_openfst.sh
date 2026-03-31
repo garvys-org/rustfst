@@ -11,6 +11,9 @@ if [[ ! -d openfst-1.7.2 || ! -d openfst-1.7.2/src ]]; then
 
     # Default sort in c++ is unstable. This is to align with rust.
     perl -pi -e 's/std::sort/std::stable_sort/g' $(find openfst-1.7.2 -name "*.h" -o -name "*.cc")
+
+    # Fix compilation error: 's_' member was renamed to 'selector_' (unique_ptr)
+    perl -pi -e 's/\btable\.s_\b/*table.selector_/g' $(find openfst-1.7.2 -name "bi-table.h")
 fi
 
 cd openfst-1.7.2
