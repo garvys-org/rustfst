@@ -2,7 +2,11 @@
 set -e
 
 if [[ ! -d openfst-1.7.2 || ! -d openfst-1.7.2/src ]]; then
-    wget http://www.openfst.org/twiki/pub/FST/FstDownload/openfst-1.7.2.tar.gz
+    curl -fL -o openfst-1.7.2.tar.gz \
+        -A "Mozilla/5.0" \
+        "http://www.openfst.org/twiki/pub/FST/FstDownload/openfst-1.7.2.tar.gz" \
+    || curl -fL -o openfst-1.7.2.tar.gz \
+        "https://github.com/mjansche/openfst/archive/refs/tags/1.7.2.tar.gz"
     tar -zxvf openfst-1.7.2.tar.gz
 
     # Default sort in c++ is unstable. This is to align with rust.
