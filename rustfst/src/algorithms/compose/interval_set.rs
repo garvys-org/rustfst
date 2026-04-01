@@ -4,7 +4,6 @@ use std::collections::HashSet;
 use std::slice::Iter as IterSlice;
 use std::vec::IntoIter as IntoIterVec;
 use superslice::Ext;
-use unsafe_unwrap::UnsafeUnwrap;
 
 /// Half-open integral interval [a, b) of signed integers of type T.
 #[derive(PartialEq, Clone, Eq, Debug, Serialize, Deserialize)]
@@ -146,7 +145,7 @@ impl IntervalSet {
         if self.len() != 1 {
             return false;
         }
-        let elt = unsafe { self.intervals.iter().next().unsafe_unwrap() };
+        let elt = unsafe { self.intervals.iter().next().unwrap_unchecked() };
         elt.begin + 1 == elt.end
     }
 

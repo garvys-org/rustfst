@@ -210,7 +210,7 @@ impl<W: Semiring> MutableFst<W> for VectorFst<W> {
             }
             state.trs.remove(*i);
         }
-        if state.trs.len() == 0 {
+        if state.trs.is_empty() {
             // All Trs are removed
             self.properties = delete_trs_properties(self.properties);
         } else {

@@ -4,7 +4,6 @@ use std::marker::PhantomData;
 use std::sync::Arc;
 
 use anyhow::Result;
-use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::compose::lookahead_matchers::{
     LookAheadMatcherData, LookaheadMatcher, MatcherFlagsTrait,
@@ -139,11 +138,11 @@ where
                         .fst
                         .borrow()
                         .final_weight_unchecked(matcher_state)
-                        .unsafe_unwrap();
+                        .unwrap_unchecked();
                     let fw_lfst_state = lfst
                         .borrow()
                         .final_weight_unchecked(lfst_state)
-                        .unsafe_unwrap();
+                        .unwrap_unchecked();
                     la_matcher_data
                         .lookahead_weight
                         .plus_assign(fw_matcher_state.times(fw_lfst_state)?)?;

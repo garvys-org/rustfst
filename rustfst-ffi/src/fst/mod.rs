@@ -120,7 +120,6 @@ pub(crate) use as_mut_fst;
 
 /// Core FST methods
 /// As defined in fst_traits
-
 /// Returns the ID of the start state of the wFST if it exists else none
 /// # Safety
 ///
@@ -235,7 +234,6 @@ pub unsafe fn fst_is_start(
 
 /// Fst methods
 /// As described in fst_traits
-
 /// Retrieves the input `SymbolTable` associated to the Fst.
 /// If no SymbolTable has been previously attached then a null pointer is returned.
 /// # Safety

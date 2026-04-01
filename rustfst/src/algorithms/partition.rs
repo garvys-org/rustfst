@@ -247,7 +247,7 @@ impl<'a> PartitionIterator<'a> {
     }
 }
 
-impl<'a> Iterator for PartitionIterator<'a> {
+impl Iterator for PartitionIterator<'_> {
     type Item = usize;
 
     fn next(&mut self) -> Option<Self::Item> {

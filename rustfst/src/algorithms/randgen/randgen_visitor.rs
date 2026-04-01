@@ -10,13 +10,13 @@ pub struct RandGenVisitor<'a, W: Semiring, FI: Fst<W>, FO: MutableFst<W>> {
     path: Vec<Tr<W>>,
 }
 
-impl<'a, W: Semiring, FI: Fst<W>, FO: MutableFst<W>> RandGenVisitor<'a, W, FI, FO> {
+impl<W: Semiring, FI: Fst<W>, FO: MutableFst<W>> RandGenVisitor<'_, W, FI, FO> {
     pub fn into_output_fst(self) -> FO {
         self.ofst
     }
 }
 
-impl<'a, W: Semiring, FI: Fst<W>, FO: MutableFst<W>> RandGenVisitor<'a, W, FI, FO> {
+impl<W: Semiring, FI: Fst<W>, FO: MutableFst<W>> RandGenVisitor<'_, W, FI, FO> {
     pub fn new() -> Self {
         Self {
             ifst: None,

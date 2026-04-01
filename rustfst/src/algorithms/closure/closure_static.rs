@@ -1,5 +1,3 @@
-use unsafe_unwrap::UnsafeUnwrap;
-
 use crate::algorithms::closure::ClosureType;
 use crate::fst_properties::mutable_properties::closure_properties;
 use crate::fst_properties::FstProperties;
@@ -33,7 +31,11 @@ where
     if let Some(start_state) = fst.start() {
         let final_states_id: Vec<_> = fst
             .final_states_iter()
-            .map(|s| (s, unsafe { fst.final_weight_unchecked(s).unsafe_unwrap() }))
+            .map(|s| {
+                (s, unsafe {
+                    fst.final_weight_unchecked(s).unwrap_unchecked()
+                })
+            })
             .collect();
         for (final_state_id, final_weight) in final_states_id {
             unsafe {

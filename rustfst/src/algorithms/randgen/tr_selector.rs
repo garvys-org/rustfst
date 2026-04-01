@@ -1,8 +1,8 @@
 use crate::prelude::Fst;
 use crate::{Semiring, StateId};
 use anyhow::Result;
-use rand::distributions::{Distribution, Uniform};
-use rand_chacha::rand_core::SeedableRng;
+use rand::Rng;
+use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
 use std::fmt::Debug;
 
@@ -30,7 +30,7 @@ impl Default for UniformTrSelector {
 impl UniformTrSelector {
     pub fn new() -> Self {
         Self {
-            rng: ChaCha8Rng::from_entropy(),
+            rng: ChaCha8Rng::from_os_rng(),
         }
     }
     pub fn from_seed(seed: u64) -> Self {
@@ -46,8 +46,6 @@ impl TrSelector for UniformTrSelector {
         if fst.is_final(state)? {
             n += 1;
         }
-        let uniform = Uniform::new_inclusive(0, n - 1);
-        let res = uniform.sample(&mut self.rng);
-        Ok(res)
+        Ok(self.rng.random_range(0..=n - 1))
     }
 }

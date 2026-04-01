@@ -30,17 +30,17 @@ pub fn natural_less<W: Semiring>(w1: &W, w2: &W) -> Result<bool> {
 }
 
 #[derive(Clone)]
-pub struct ShortestFirstQueue<C: Clone + FnMut(&StateId, &StateId) -> Ordering> {
+pub struct ShortestFirstQueue<C: Clone + Fn(&StateId, &StateId) -> Ordering> {
     heap: BinaryHeap<StateId, FnComparator<C>>,
 }
 
-impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> Debug for ShortestFirstQueue<C> {
+impl<C: Clone + Fn(&StateId, &StateId) -> Ordering> Debug for ShortestFirstQueue<C> {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         f.write_str(format!("ShortestFirstQueue {{ heap: {:?} }}", self.heap).as_str())
     }
 }
 
-impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> ShortestFirstQueue<C> {
+impl<C: Clone + Fn(&StateId, &StateId) -> Ordering> ShortestFirstQueue<C> {
     pub fn new(c: C) -> Self {
         Self {
             heap: BinaryHeap::new_by(c),
@@ -48,7 +48,7 @@ impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> ShortestFirstQueue<C> {
     }
 }
 
-impl<C: Clone + FnMut(&StateId, &StateId) -> Ordering> Queue for ShortestFirstQueue<C> {
+impl<C: Clone + Fn(&StateId, &StateId) -> Ordering> Queue for ShortestFirstQueue<C> {
     fn head(&mut self) -> Option<StateId> {
         self.heap.peek().cloned()
     }

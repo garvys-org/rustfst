@@ -5,7 +5,7 @@ use crate::semirings::Semiring;
 use crate::{StateId, Tr};
 use std::cmp::Ordering;
 
-static UNASSIGNED: usize = std::usize::MAX;
+static UNASSIGNED: usize = usize::MAX;
 
 pub struct IntervalReachVisitor<'a, F> {
     fst: &'a F,

@@ -1,5 +1,4 @@
 use anyhow::Result;
-use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::fst_properties::mutable_properties::union_properties;
 use crate::fst_properties::FstProperties;
@@ -69,7 +68,7 @@ where
     if start2.is_none() {
         return Ok(());
     }
-    let start2 = unsafe { start2.unsafe_unwrap() };
+    let start2 = unsafe { start2.unwrap_unchecked() };
     fst_1.reserve_states(fst_2.num_states() + if initial_acyclic_1 { 1 } else { 0 });
 
     for s2 in 0..(fst_2.num_states() as StateId) {
@@ -91,7 +90,7 @@ where
         fst_1.set_properties_with_mask(props2, FstProperties::copy_properties());
         return Ok(());
     }
-    let start1 = unsafe { start1.unsafe_unwrap() };
+    let start1 = unsafe { start1.unwrap_unchecked() };
 
     if initial_acyclic_1 {
         unsafe {

@@ -33,12 +33,6 @@ impl<W: Semiring> InnerStateTable<W> {
         }
         *self.bimap.get_by_right(elt).unwrap()
     }
-
-    pub fn insert_bimap(&mut self, tuple: Element<W>) -> StateId {
-        let n = self.bimap.len() as StateId;
-        self.bimap.insert(n, tuple);
-        n
-    }
 }
 
 #[derive(Debug)]
@@ -62,16 +56,16 @@ impl<W: Semiring> FactorWeightStateTable<W> {
 
     pub fn find_state(&self, elt: &Element<W>) -> StateId {
         let mut inner_state_table = self.inner_state_table.lock().unwrap();
-        if !self.factor_tr_weights && elt.weight.is_one() && elt.state.is_some() {
-            let old_state = elt.state.unwrap();
-            if !inner_state_table
-                .unfactored
-                .contains_key(&elt.state.unwrap())
-            {
-                let new_state = inner_state_table.insert_bimap(elt.clone());
-                inner_state_table.unfactored.insert(old_state, new_state);
-            }
-            inner_state_table.unfactored[&old_state]
+        if let Some(old_state) = elt
+            .state
+            .filter(|_| !self.factor_tr_weights && elt.weight.is_one())
+        {
+            let InnerStateTable { bimap, unfactored } = &mut *inner_state_table;
+            *unfactored.entry(old_state).or_insert_with(|| {
+                let n = bimap.len() as StateId;
+                bimap.insert(n, elt.clone());
+                n
+            })
         } else {
             inner_state_table.find_id_or_insert_bimap(elt)
         }

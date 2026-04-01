@@ -1,7 +1,6 @@
 use std::marker::PhantomData;
 
 use anyhow::Result;
-use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::dfs_visit::{dfs_visit, Visitor};
 use crate::algorithms::tr_filters::AnyTrFilter;
@@ -163,7 +162,7 @@ impl<'a, W: Semiring, F: 'a + ExpandedFst<W>> Visitor<'a, W, F> for ConnectVisit
                 }
             }
             loop {
-                t = unsafe { *self.scc_stack.last().unsafe_unwrap() } as usize;
+                t = unsafe { *self.scc_stack.last().unwrap_unchecked() } as usize;
                 if scc_coaccess {
                     self.coaccess[t] = true;
                 }

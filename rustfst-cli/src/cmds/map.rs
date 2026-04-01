@@ -1,6 +1,4 @@
 use anyhow::{bail, Result};
-use unsafe_unwrap::UnsafeUnwrap;
-
 use rustfst::prelude::*;
 
 use crate::unary_fst_algorithm::UnaryFstAlgorithm;
@@ -60,7 +58,7 @@ impl UnaryFstAlgorithm for MapAlgorithm {
             }
             "plus" => {
                 // Safe because there is a check at parsing time.
-                let mapper = tr_mappers::PlusMapper::new(unsafe { self.weight.unsafe_unwrap() });
+                let mapper = tr_mappers::PlusMapper::new(unsafe { self.weight.unwrap_unchecked() });
                 tr_map(&mut fst, &mapper)?;
                 Ok(fst)
             }
@@ -77,7 +75,8 @@ impl UnaryFstAlgorithm for MapAlgorithm {
             }
             "times" => {
                 // Safe because there is a check at parsing time.
-                let mapper = tr_mappers::TimesMapper::new(unsafe { self.weight.unsafe_unwrap() });
+                let mapper =
+                    tr_mappers::TimesMapper::new(unsafe { self.weight.unwrap_unchecked() });
                 tr_map(&mut fst, &mapper)?;
                 Ok(fst)
             }

@@ -85,7 +85,7 @@ struct StringWeightVariantIterator<'a> {
     done: bool,
 }
 
-impl<'a> Iterator for StringWeightVariantIterator<'a> {
+impl Iterator for StringWeightVariantIterator<'_> {
     type Item = StringWeightVariant;
 
     fn next(&mut self) -> Option<Self::Item> {

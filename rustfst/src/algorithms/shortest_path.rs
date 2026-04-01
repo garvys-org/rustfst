@@ -1,7 +1,6 @@
 use std::cell::RefCell;
 
 use anyhow::Result;
-use unsafe_unwrap::UnsafeUnwrap;
 
 use crate::algorithms::determinize::determinize_with_distance;
 use crate::algorithms::queues::AutoQueue;
@@ -189,7 +188,7 @@ where
     }
     let mut enqueued = vec![];
     let mut queue = AutoQueue::new(ifst, None, &AnyTrFilter {})?;
-    let source = unsafe { start.unsafe_unwrap() };
+    let source = unsafe { start.unwrap_unchecked() };
     let mut f_distance = W::zero();
     distance.clear();
     queue.clear();

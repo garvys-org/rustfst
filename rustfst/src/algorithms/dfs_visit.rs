@@ -5,7 +5,6 @@ use crate::{StateId, Trs};
 
 use crate::algorithms::tr_filters::TrFilter;
 use std::marker::PhantomData;
-use unsafe_unwrap::UnsafeUnwrap;
 
 #[derive(PartialOrd, PartialEq, Copy, Clone)]
 enum DfsStateColor {
@@ -126,14 +125,14 @@ pub fn dfs_visit<'a, W: Semiring, F: ExpandedFst<W>, V: Visitor<'a, W, F>, A: Tr
         dfs = visitor.init_state(root, root);
         let mut state_stack_next = None;
         while !state_stack.is_empty() {
-            let dfs_state = unsafe { state_stack.last_mut().unsafe_unwrap() };
+            let dfs_state = unsafe { state_stack.last_mut().unwrap_unchecked() };
             let s = dfs_state.state_id;
             let aiter = &mut dfs_state.tr_iter;
             if !dfs || aiter.done() {
                 state_color[s as usize] = DfsStateColor::Black;
                 state_stack.pop();
                 if !state_stack.is_empty() {
-                    let parent_state = unsafe { state_stack.last_mut().unsafe_unwrap() };
+                    let parent_state = unsafe { state_stack.last_mut().unwrap_unchecked() };
                     let piter = &mut parent_state.tr_iter;
                     visitor.finish_state(s, Some(parent_state.state_id), Some(piter.value()));
                     piter.next();

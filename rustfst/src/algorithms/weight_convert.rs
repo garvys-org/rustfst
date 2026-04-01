@@ -5,7 +5,6 @@ use crate::fst_properties::FstProperties;
 use crate::fst_traits::{AllocableFst, ExpandedFst, MutableFst};
 use crate::semirings::Semiring;
 use crate::{Tr, Trs, EPS_LABEL};
-use unsafe_unwrap::UnsafeUnwrap;
 
 /// The WeightConverter interfaces defines how a weight should be turned into another one.
 /// Useful for changing the semiring of an FST.
@@ -93,7 +92,7 @@ where
                                 mapped_final_tr.ilabel,
                                 mapped_final_tr.olabel,
                                 mapped_final_tr.weight,
-                                unsafe { superfinal.unsafe_unwrap() },
+                                unsafe { superfinal.unwrap_unchecked() },
                             ),
                         )?;
 

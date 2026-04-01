@@ -91,7 +91,7 @@ impl StarSemiring for IntegerWeight {
         if self.value == 0 {
             return Self::new(1);
         }
-        Self::new(i32::max_value())
+        Self::new(i32::MAX)
     }
 }
 
