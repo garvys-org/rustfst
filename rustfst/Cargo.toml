@@ -33,18 +33,14 @@ ordered-float = '5'
 rand = '0.9'
 rand_chacha = '0.9'
 serde = { version = '1', features = ['derive'] }
+stable_bst = '0.2'
 superslice = '1'
 
 [dev-dependencies]
 counter = '0.7'
-criterion = { version = "0.5", features = ["html_reports"] }
 serde_json = '1.0'
 tempfile = '3.0'
 path_abs = '0.5'
 pretty_assertions = '1'
 proptest = '1'
 doc-comment = "0.3.1"
-
-[[bench]]
-name = "bench_minimize"
-harness = false
