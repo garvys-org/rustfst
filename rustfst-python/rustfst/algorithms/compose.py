@@ -1,4 +1,3 @@
-from __future__ import annotations
 import ctypes
 from typing import Optional, List
 
@@ -38,7 +37,7 @@ class MatcherConfig:
         arr.size = ctypes.c_uint32(len(array))
         arr.data = (ctypes.c_uint32 * len(array))(*array)
 
-        config = ctypes.pointer(ctypes.c_void_p())
+        config = ctypes.c_void_p()
         ret_code = lib.fst_matcher_config_new(
             ctypes.c_size_t(sigma_label),
             ctypes.c_size_t(rewrite_mode.value),
@@ -49,7 +48,7 @@ class MatcherConfig:
         check_ffi_error(ret_code, err_msg)
         self.ptr = config
 
-    def __del__(self):
+    def __del__(self) -> None:
         lib.fst_matcher_config_destroy(self.ptr)
 
 
@@ -82,7 +81,7 @@ class ComposeConfig:
         matcher1_config: Optional[MatcherConfig] = None,
         matcher2_config: Optional[MatcherConfig] = None,
     ):
-        config = ctypes.pointer(ctypes.c_void_p())
+        config = ctypes.c_void_p()
 
         m1_ptr = None
         if matcher1_config is not None:
@@ -103,7 +102,7 @@ class ComposeConfig:
         check_ffi_error(ret_code, err_msg)
         self.ptr = config
 
-    def __del__(self):
+    def __del__(self) -> None:
         lib.fst_compose_config_destroy(self.ptr)
 
 
@@ -117,7 +116,7 @@ def compose(fst: VectorFst, other_fst: VectorFst) -> VectorFst:
         Resulting fst.
     """
 
-    composition = ctypes.pointer(ctypes.c_void_p())
+    composition = ctypes.c_void_p()
     ret_code = lib.fst_compose(fst.ptr, other_fst.ptr, ctypes.byref(composition))
     err_msg = "Error Composing FSTs"
     check_ffi_error(ret_code, err_msg)
@@ -138,7 +137,7 @@ def compose_with_config(
         Resulting fst.
     """
 
-    composition = ctypes.pointer(ctypes.c_void_p())
+    composition = ctypes.c_void_p()
     ret_code = lib.fst_compose_with_config(
         fst.ptr, other_fst.ptr, config.ptr, ctypes.byref(composition)
     )

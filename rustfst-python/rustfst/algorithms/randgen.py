@@ -1,6 +1,7 @@
 import ctypes
 
-from rustfst.fst.vector_fst import Fst, VectorFst
+from rustfst.fst import Fst
+from rustfst.fst.vector_fst import VectorFst
 from rustfst.ffi_utils import (
     lib,
     check_ffi_error,
@@ -50,20 +51,15 @@ def randgen(
             f"Only the uniform distribution is supported for now. Found {select}"
         )
 
-    npath = ctypes.c_size_t(npath)
-    seed = ctypes.c_size_t(seed)
-    max_length = ctypes.c_size_t(max_length)
-    weight = ctypes.c_bool(weight)
-    remove_total_weight = ctypes.c_bool(remove_total_weight)
-    randgen_fst = ctypes.pointer(ctypes.c_void_p())
+    randgen_fst = ctypes.c_void_p()
 
     ret_code = lib.fst_randgen(
         ifst.ptr,
-        npath,
-        seed,
-        max_length,
-        weight,
-        remove_total_weight,
+        ctypes.c_size_t(npath),
+        ctypes.c_size_t(seed),
+        ctypes.c_size_t(max_length),
+        ctypes.c_bool(weight),
+        ctypes.c_bool(remove_total_weight),
         ctypes.byref(randgen_fst),
     )
     err_msg = "Error during randgen"

@@ -1,5 +1,5 @@
-from __future__ import annotations
 from ctypes import byref, c_void_p, c_size_t, string_at
+from typing import Union
 from rustfst.ffi_utils import (
     lib,
     check_ffi_error,
@@ -11,7 +11,7 @@ from rustfst.tr import Tr
 class Trs:
     """Structure representing list of transitions."""
 
-    def __init__(self, ptr=None) -> Trs:
+    def __init__(self, ptr: Union[c_void_p, None] = None) -> None:
         """
         Create an empty list of transitions.
         """
@@ -23,7 +23,7 @@ class Trs:
         else:
             self._ptr = ptr
 
-    def push(self, tr: Tr):
+    def push(self, tr: Tr) -> None:
         """
         Add a new transition to the list.
         Args:
@@ -55,7 +55,7 @@ class Trs:
         check_ffi_error(ret_code, err_msg)
         return int(num_trs.value)
 
-    def shallow_clone(self) -> Trs:
+    def shallow_clone(self) -> "Trs":
         new_trs_ptr = c_void_p()
         exit_code = lib.trs_vec_shallow_clone(self._ptr, new_trs_ptr)
         err_msg = "Something went wrong when cloning Trs"
@@ -70,5 +70,5 @@ class Trs:
         check_ffi_error(exit_code, err_msg)
         return string_at(string).decode("utf8")
 
-    def __del__(self):
+    def __del__(self) -> None:
         lib.trs_vec_delete(self._ptr)

@@ -11,7 +11,7 @@ from ctypes import (
 )
 
 from pathlib import Path
-from typing import Union
+from typing import Iterator, List, Union
 
 dylib_dir = Path(__file__).parent
 dylib_files = list(dylib_dir.glob("*.so")) or list(dylib_dir.glob("*.cpython-*.so"))
@@ -26,7 +26,7 @@ PathOrStr = Union[Path, str]
 class CStringArray(Structure):
     _fields_ = [("data", POINTER(c_char_p)), ("size", c_int32)]
 
-    def to_pylist(self):
+    def to_pylist(self) -> List[str]:
         return [self.data[i].decode("utf8") for i in range(self.size)]
 
 
@@ -35,14 +35,14 @@ class CBuffer(Structure):
 
 
 @contextmanager
-def string_pointer(ptr):
+def string_pointer(ptr: c_char_p) -> Iterator[c_char_p]:
     try:
         yield ptr
     finally:
         lib.rustfst_destroy_string(ptr)
 
 
-def check_ffi_error(exit_code, error_context_msg):
+def check_ffi_error(exit_code: int, error_context_msg: str) -> None:
     if exit_code != 0:
         with string_pointer(c_char_p()) as ptr:
             if lib.rustfst_ffi_get_last_error(byref(ptr)) == 0:

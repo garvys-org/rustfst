@@ -1,4 +1,3 @@
-from __future__ import annotations
 import ctypes
 
 from rustfst.string_paths_iterator import StringPathsIterator
@@ -27,7 +26,7 @@ if TYPE_CHECKING:
 
 
 class VectorFst(Fst):
-    def __init__(self, ptr=None):
+    def __init__(self, ptr: Optional[ctypes.c_void_p] = None) -> None:
         """
         Creates an empty VectorFst.
         """
@@ -38,23 +37,23 @@ class VectorFst(Fst):
             self.ptr = ptr
 
             # Check if isymt inside
-            isymt = ctypes.pointer(ctypes.c_void_p())
+            isymt = ctypes.c_void_p()
             ret_code = lib.fst_input_symbols(self.ptr, ctypes.byref(isymt))
             err_msg = "Error getting input symbols"
             check_ffi_error(ret_code, err_msg)
-            if isymt.contents:
+            if isymt:
                 self._input_symbols = SymbolTable(ptr=isymt)
 
             # Check if osymt inside
-            osymt = ctypes.pointer(ctypes.c_void_p())
+            osymt = ctypes.c_void_p()
             ret_code = lib.fst_output_symbols(self.ptr, ctypes.byref(osymt))
             err_msg = "Error getting input symbols"
             check_ffi_error(ret_code, err_msg)
-            if osymt.contents:
+            if osymt:
                 self._output_symbols = SymbolTable(ptr=osymt)
 
         else:
-            fst_ptr = ctypes.pointer(ctypes.c_void_p())
+            fst_ptr = ctypes.c_void_p()
             ret_code = lib.vec_fst_new(ctypes.byref(fst_ptr))
 
             err_msg = "Something went wrong when creating the Fst struct"
@@ -97,7 +96,7 @@ class VectorFst(Fst):
 
         return state_id.value
 
-    def set_final(self, state: int, weight: Union[float, None] = None):
+    def set_final(self, state: int, weight: Union[float, None] = None) -> None:
         """
         Sets the final weight for a state.
         Args:
@@ -118,7 +117,7 @@ class VectorFst(Fst):
         err_msg = "Error setting final state"
         check_ffi_error(ret_code, err_msg)
 
-    def unset_final(self, state: int):
+    def unset_final(self, state: int) -> None:
         """
         Unset the final weight of a state. As a result, the state is no longer final.
         Args:
@@ -142,7 +141,7 @@ class VectorFst(Fst):
         """
         return MutableTrsIterator(self, state)
 
-    def delete_states(self):
+    def delete_states(self) -> None:
         """
         Delete all the states
         """
@@ -163,7 +162,7 @@ class VectorFst(Fst):
 
         return int(num_states.value)
 
-    def set_start(self, state: int):
+    def set_start(self, state: int) -> None:
         """
         Sets a state to be the initial state state.
         Args:
@@ -195,7 +194,7 @@ class VectorFst(Fst):
         old_osymbols: Optional[SymbolTable] = None,
         new_osymbols: SymbolTable,
         attach_new_osymbols: bool = True,
-    ) -> VectorFst:
+    ) -> "VectorFst":
         """
         Destructively relabel the Fst with new Symbol Tables.
 
@@ -250,7 +249,7 @@ class VectorFst(Fst):
         isymbols: Optional[SymbolTable] = None,
         osymbols: Optional[SymbolTable] = None,
         drawing_config: DrawingConfig = DrawingConfig(),
-    ):
+    ) -> None:
         """
         Writes out the FST in Graphviz text format.
         This method writes out the FST in the dot graph description language. The
@@ -308,7 +307,7 @@ class VectorFst(Fst):
         check_ffi_error(ret_code, err_msg)
 
     @classmethod
-    def read(cls, filename: Union[str, Path]) -> VectorFst:
+    def read(cls, filename: Union[str, Path]) -> "VectorFst":
         """
         Read a Fst at a given path.
         Args:
@@ -318,7 +317,7 @@ class VectorFst(Fst):
         Raises:
           ValueError: Read failed.
         """
-        fst = ctypes.pointer(ctypes.c_void_p())
+        fst = ctypes.c_void_p()
         ret_code = lib.vec_fst_from_path(
             ctypes.byref(fst), str(filename).encode("utf-8")
         )
@@ -327,7 +326,7 @@ class VectorFst(Fst):
 
         return cls(ptr=fst)
 
-    def write(self, filename: Union[str, Path]):
+    def write(self, filename: Union[str, Path]) -> None:
         """
         Serializes FST to a file.
         This method writes the FST to a file in vector binary format.
@@ -341,7 +340,7 @@ class VectorFst(Fst):
         check_ffi_error(ret_code, err_msg)
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> VectorFst:
+    def from_bytes(cls, data: bytes) -> "VectorFst":
         """
         Load a `VectorFst` from a sequence of bytes.
         Args:
@@ -350,14 +349,14 @@ class VectorFst(Fst):
         Returns:
             Loaded `VectorFst`.
         """
-        fst_ptr = ctypes.pointer(ctypes.c_void_p())
+        fst_ptr = ctypes.c_void_p()
 
         # Define a temporary struct to hold the bytes array
         class BytesArray(ctypes.Structure):
             _fields_ = [("data_ptr", ctypes.c_char_p), ("size", ctypes.c_size_t)]
 
+        # This can be passed by reference
         c_bytes = BytesArray(data, len(data))
-
         ret_code = lib.vec_fst_from_bytes(ctypes.byref(c_bytes), ctypes.byref(fst_ptr))
         error_msg = "`from_bytes` failed"
         check_ffi_error(ret_code, error_msg)
@@ -375,6 +374,8 @@ class VectorFst(Fst):
         class BytesArray(ctypes.Structure):
             _fields_ = [("data_ptr", ctypes.c_void_p), ("size", ctypes.c_size_t)]
 
+        # This must actually be a pointer, as it gets replaced with an
+        # entirely different BytesArray structure
         bytes_ptr = ctypes.pointer(BytesArray())
 
         ret_code = lib.vec_fst_to_bytes(self.ptr, ctypes.byref(bytes_ptr))
@@ -404,12 +405,12 @@ class VectorFst(Fst):
 
         return bool(is_equal.value)
 
-    def copy(self) -> VectorFst:
+    def copy(self) -> "VectorFst":
         """
         Returns:
             A copy of the Fst.
         """
-        cloned_fst = ctypes.pointer(ctypes.c_void_p())
+        cloned_fst = ctypes.c_void_p()
         ret_code = lib.vec_fst_copy(self.ptr, ctypes.byref(cloned_fst))
         err_msg = "Error copying fst"
         check_ffi_error(ret_code, err_msg)
@@ -417,8 +418,8 @@ class VectorFst(Fst):
         return VectorFst(cloned_fst)
 
     def compose(
-        self, other: VectorFst, config: Union[ComposeConfig, None] = None
-    ) -> VectorFst:
+        self, other: "VectorFst", config: Union["ComposeConfig", None] = None
+    ) -> "VectorFst":
         """
         Compute composition of this Fst with another Fst, returning
         the resulting Fst.
@@ -435,7 +436,7 @@ class VectorFst(Fst):
             return compose_with_config(self, other, config)
         return compose(self, other)
 
-    def concat(self, other: VectorFst) -> VectorFst:
+    def concat(self, other: "VectorFst") -> "VectorFst":
         """
         Compute Fst Concatenation of this Fst with another Fst, returning the
         resulting Fst.
@@ -450,7 +451,7 @@ class VectorFst(Fst):
 
         return concat(self, other)
 
-    def connect(self) -> VectorFst:
+    def connect(self) -> "VectorFst":
         """
         This operation trims an Fst in-place, removing states and trs that are
         not on successful paths.
@@ -472,7 +473,7 @@ class VectorFst(Fst):
 
         return connect(self)
 
-    def top_sort(self) -> VectorFst:
+    def top_sort(self) -> "VectorFst":
         """
         This operation topologically sorts its input. When sorted, all transitions are from
         lower to higher state IDs.
@@ -494,7 +495,9 @@ class VectorFst(Fst):
 
         return top_sort(self)
 
-    def determinize(self, config: Union[DeterminizeConfig, None] = None) -> VectorFst:
+    def determinize(
+        self, config: Union["DeterminizeConfig", None] = None
+    ) -> "VectorFst":
         """
         Make an Fst deterministic
         Args:
@@ -508,7 +511,7 @@ class VectorFst(Fst):
             return determinize_with_config(self, config)
         return determinize(self)
 
-    def minimize(self, config: Union[MinimizeConfig, None] = None) -> VectorFst:
+    def minimize(self, config: Union["MinimizeConfig", None] = None) -> "VectorFst":
         """
         Minimize an FST in place
         Args:
@@ -522,7 +525,7 @@ class VectorFst(Fst):
             return minimize_with_config(self, config)
         return minimize(self)
 
-    def project(self, proj_type: Union[ProjectType, None] = None) -> VectorFst:
+    def project(self, proj_type: Union["ProjectType", None] = None) -> "VectorFst":
         """
         Convert a Fst to an acceptor using input or output labels.
         Args:
@@ -540,9 +543,9 @@ class VectorFst(Fst):
     def replace(
         self,
         root_label: int,
-        fst_list: List[Tuple[int, VectorFst]],
+        fst_list: List[Tuple[int, "VectorFst"]],
         epsilon_on_replace: bool = False,
-    ) -> VectorFst:
+    ) -> "VectorFst":
         """Recursively replaces trs in the root FSTs with other FSTs.
 
         Replace supports replacement of trs in one Fst with another
@@ -596,7 +599,7 @@ class VectorFst(Fst):
         complete_fst_list = [(root_label, self)] + fst_list
         return replace(root_label, complete_fst_list, epsilon_on_replace)
 
-    def reverse(self) -> VectorFst:
+    def reverse(self) -> "VectorFst":
         """
         Reverse an Fst, returning a new Fst which accepts
         the same language in reverse order.
@@ -608,7 +611,7 @@ class VectorFst(Fst):
 
         return reverse(self)
 
-    def rm_epsilon(self) -> VectorFst:
+    def rm_epsilon(self) -> "VectorFst":
         """
         Remove epsilon transitions in-place.
         Returns:
@@ -619,8 +622,8 @@ class VectorFst(Fst):
         return rm_epsilon(self)
 
     def shortest_path(
-        self, config: Union[ShortestPathConfig, None] = None
-    ) -> VectorFst:
+        self, config: Union["ShortestPathConfig", None] = None
+    ) -> "VectorFst":
         """
         Construct a FST containing the shortest path of the input FST
         Args:
@@ -637,7 +640,7 @@ class VectorFst(Fst):
             return shortestpath_with_config(self, config)
         return shortestpath(self)
 
-    def union(self, other_fst: VectorFst) -> VectorFst:
+    def union(self, other_fst: "VectorFst") -> "VectorFst":
         """
         Performs the union of two wFSTs. If A transduces string `x` to `y` with weight `a`
         and `B` transduces string `w` to `v` with weight `b`, then their union transduces `x` to `y`
@@ -666,7 +669,7 @@ class VectorFst(Fst):
 
         return union(self, other_fst)
 
-    def optimize(self) -> VectorFst:
+    def optimize(self) -> "VectorFst":
         """
         Optimize an FST in-place.
         Returns:
@@ -676,7 +679,7 @@ class VectorFst(Fst):
 
         return optimize(self)
 
-    def optimize_in_log(self) -> VectorFst:
+    def optimize_in_log(self) -> "VectorFst":
         """
         Optimize an fst in-place in the log semiring.
         Returns:
@@ -686,7 +689,7 @@ class VectorFst(Fst):
 
         return optimize_in_log(self)
 
-    def tr_sort(self, ilabel_cmp: bool = True) -> VectorFst:
+    def tr_sort(self, ilabel_cmp: bool = True) -> "VectorFst":
         """Sort trs for an FST in-place according to their input or
         output label.
 
@@ -703,7 +706,7 @@ class VectorFst(Fst):
 
         return tr_sort(self, ilabel_cmp)
 
-    def tr_unique(self) -> VectorFst:
+    def tr_unique(self) -> "VectorFst":
         """Modify an FST in-place, keeping a single instance of trs
         leaving the same state, going to the same state and with the
         same input labels, output labels and weight.
@@ -715,7 +718,7 @@ class VectorFst(Fst):
 
         return tr_unique(self)
 
-    def isomorphic(self, other: VectorFst) -> bool:
+    def isomorphic(self, other: "VectorFst") -> bool:
         """
         Check if this Fst is isomorphic with another
         Args:
@@ -727,7 +730,7 @@ class VectorFst(Fst):
 
         return isomorphic(self, other)
 
-    def invert(self) -> VectorFst:
+    def invert(self) -> "VectorFst":
         """
         Invert the transduction corresponding to an FST by exchanging the
         FST's input and output labels in-place.
@@ -739,7 +742,7 @@ class VectorFst(Fst):
 
         return invert(self)
 
-    def __add__(self, other: VectorFst) -> VectorFst:
+    def __add__(self, other: "VectorFst") -> "VectorFst":
         """
         `fst_1 + fst_2` is a shortcut to perform the concatenation of `fst_1` and `fst_2`.
         Args:
@@ -752,7 +755,7 @@ class VectorFst(Fst):
 
         return x.concat(other)
 
-    def __mul__(self, other: VectorFst) -> VectorFst:
+    def __mul__(self, other: "VectorFst") -> "VectorFst":
         """
         `fst_1 * fst_2` is a shortcut to perform the composition of `fst_1` and `fst_2`.
         Args:
@@ -764,7 +767,7 @@ class VectorFst(Fst):
         """
         return self.compose(other)
 
-    def __or__(self, other: VectorFst) -> VectorFst:
+    def __or__(self, other: "VectorFst") -> "VectorFst":
         """
         `fst_1 | fst_2` is a shortcut to perform the union of `fst_1` and `fst_2`.
         Args:
@@ -777,7 +780,7 @@ class VectorFst(Fst):
 
         return x.union(other)
 
-    def __str__(self):
+    def __str__(self) -> str:
         s = ctypes.c_void_p()
         ret_code = lib.vec_fst_display(self.ptr, ctypes.byref(s))
         err_msg = "Error displaying VectorFst"

@@ -1,4 +1,3 @@
-from __future__ import annotations
 from ctypes import (
     c_size_t,
     byref,
@@ -11,7 +10,7 @@ from rustfst.ffi_utils import (
     check_ffi_error,
 )
 
-from typing import Optional
+from typing import Optional, Union, overload
 
 
 class Tr:
@@ -24,13 +23,21 @@ class Tr:
         nextstate: The destination state for the arc.
     """
 
+    @overload
+    def __init__(self, ilabel: c_void_p) -> None: ...
+
+    @overload
+    def __init__(
+        self, ilabel: int, olabel: int, weight: Optional[float], nextstate: int
+    ) -> None: ...
+
     def __init__(
         self,
-        ilabel: Optional[int] = None,
+        ilabel: Union[c_void_p, int],
         olabel: Optional[int] = None,
         weight: Optional[float] = None,
         nextstate: Optional[int] = None,
-    ):
+    ) -> None:
         """
         Create a new transition.
 
@@ -40,27 +47,27 @@ class Tr:
             weight: The transition's weight
             nextstate: The destination state for the transition.
         """
-        if ilabel and olabel is None and weight is None and nextstate is None:
+        if isinstance(ilabel, c_void_p):
             self._ptr = ilabel
         else:
             if weight is None:
                 weight = weight_one()
+            if ilabel is None or olabel is None or nextstate is None:
+                raise TypeError("ilabel olabel, and nextstate must not be None")
 
-            ptr = c_void_p()
+            self._ptr = c_void_p()
             exit_code = lib.tr_new(
                 c_size_t(ilabel),
                 c_size_t(olabel),
                 c_float(weight),
                 c_size_t(nextstate),
-                byref(ptr),
+                byref(self._ptr),
             )
             err_msg = "Something went wrong when creating the Tr struct"
             check_ffi_error(exit_code, err_msg)
 
-            self._ptr = ptr
-
     @property
-    def ptr(self):
+    def ptr(self) -> c_void_p:
         return self._ptr
 
     @property
@@ -72,7 +79,7 @@ class Tr:
         return int(ilabel.value)
 
     @ilabel.setter
-    def ilabel(self, value: int):
+    def ilabel(self, value: int) -> None:
         ilabel = c_size_t(value)
         exit_code = lib.tr_set_ilabel(self._ptr, ilabel)
         err_msg = "Something went wrong when setting Tr ilabel value"
@@ -87,7 +94,7 @@ class Tr:
         return int(olabel.value)
 
     @olabel.setter
-    def olabel(self, value: int):
+    def olabel(self, value: int) -> None:
         olabel = c_size_t(value)
         exit_code = lib.tr_set_olabel(self._ptr, olabel)
         err_msg = "Something went wrong when setting Tr olabel value"
@@ -102,7 +109,7 @@ class Tr:
         return weight.value
 
     @weight.setter
-    def weight(self, value: float):
+    def weight(self, value: float) -> None:
         weight = c_float(value)
         exit_code = lib.tr_set_weight(self._ptr, weight)
         err_msg = "Something went wrong when setting Tr weight value"
@@ -117,13 +124,14 @@ class Tr:
         return int(next_state.value)
 
     @next_state.setter
-    def next_state(self, next_state: int):
-        next_state = c_size_t(next_state)
-        exit_code = lib.tr_set_next_state(self._ptr, next_state)
+    def next_state(self, next_state: int) -> None:
+        exit_code = lib.tr_set_next_state(self._ptr, c_size_t(next_state))
         err_msg = "Something went wrong when setting Tr next_state value"
         check_ffi_error(exit_code, err_msg)
 
-    def __eq__(self, other: Tr):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Tr):
+            return NotImplemented
         return (
             self.ilabel == other.ilabel
             and self.olabel == other.olabel
@@ -131,9 +139,9 @@ class Tr:
             and self.next_state == other.next_state
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """x.__repr__() <==> repr(x)"""
         return f"<Tr ilabel={self.ilabel}, olabel={self.olabel}, weight={self.weight}, next_state={self.next_state}>"
 
-    def __del__(self):
+    def __del__(self) -> None:
         lib.tr_delete(self._ptr)

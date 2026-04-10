@@ -1,4 +1,3 @@
-from __future__ import annotations
 from typing import List, Tuple
 import ctypes
 from rustfst.ffi_utils import (
@@ -12,7 +11,7 @@ from rustfst.fst.vector_fst import VectorFst
 class LabelFstPair(ctypes.Structure):
     _fields_ = [
         ("label", ctypes.c_size_t),
-        ("fst", ctypes.POINTER(ctypes.c_void_p)),
+        ("fst", ctypes.c_void_p),
     ]
 
 
@@ -66,7 +65,7 @@ def replace(
     """
     pairs = [LabelFstPair(label, fst.ptr) for (label, fst) in fst_list]
     pairs_array = (LabelFstPair * len(pairs))(*pairs)
-    res_fst = ctypes.pointer(ctypes.c_void_p())
+    res_fst = ctypes.c_void_p()
     ret_code = lib.fst_replace(
         ctypes.c_size_t(root_idx),
         ctypes.byref(pairs_array),

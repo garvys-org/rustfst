@@ -1,5 +1,4 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterator
 
 from rustfst.ffi_utils import lib, check_ffi_error
 from rustfst.string_path import StringPath
@@ -9,12 +8,12 @@ if TYPE_CHECKING:
     from rustfst.fst.vector_fst import VectorFst
 
 
-class StringPathsIterator:
+class StringPathsIterator(Iterator[StringPath]):
     """
     Iterator allowing to loop through all the paths recognized by an Fst.
     """
 
-    def __init__(self, fst: VectorFst):
+    def __init__(self, fst: "VectorFst"):
         """
         Constructor of the Iterator.
 
@@ -23,20 +22,20 @@ class StringPathsIterator:
         """
         self._fst = fst  # reference fst to prolong its lifetime (prevent early gc)
 
-        iter_ptr = ctypes.pointer(ctypes.c_void_p())
+        iter_ptr = ctypes.c_void_p()
         ret_code = lib.string_paths_iterator_new(fst.ptr, ctypes.byref(iter_ptr))
         error_msg = "Something went wrong when creating a StringPathsIterator"
         check_ffi_error(ret_code, error_msg)
 
         self.ptr = iter_ptr
 
-    def __iter__(self):
+    def __iter__(self) -> "StringPathsIterator":
         """ """
         return self
 
     def __next__(self) -> StringPath:
         """ """
-        string_path_ptr = ctypes.pointer(ctypes.c_void_p())
+        string_path_ptr = ctypes.c_void_p()
         ret_code = lib.string_paths_iterator_next(
             self.ptr, ctypes.byref(string_path_ptr)
         )
@@ -62,6 +61,6 @@ class StringPathsIterator:
 
         return bool(done)
 
-    def __del__(self):
+    def __del__(self) -> None:
         if hasattr(self, "ptr"):
             lib.string_paths_iterator_destroy(self.ptr)

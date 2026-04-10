@@ -1,4 +1,3 @@
-from __future__ import annotations
 import ctypes
 from rustfst.ffi_utils import (
     lib,
@@ -14,8 +13,8 @@ from pathlib import Path
 
 
 class ConstFst(Fst):
-    def __init__(self, ptr=None):
-        if ptr:
+    def __init__(self, ptr: Optional[ctypes.c_void_p] = None) -> None:
+        if ptr is not None:
             self.ptr = ptr
         else:
             raise ValueError(
@@ -29,7 +28,7 @@ class ConstFst(Fst):
         isymbols: Optional[SymbolTable] = None,
         osymbols: Optional[SymbolTable] = None,
         drawing_config: DrawingConfig = DrawingConfig(),
-    ):
+    ) -> None:
         """
         Writes out the FST in Graphviz text format.
         This method writes out the FST in the dot graph description language. The
@@ -87,7 +86,7 @@ class ConstFst(Fst):
         check_ffi_error(ret_code, err_msg)
 
     @classmethod
-    def read(cls, filename: Union[str, Path]) -> ConstFst:
+    def read(cls, filename: Union[str, Path]) -> "ConstFst":
         """
         Read a Fst at a given path.
         Args:
@@ -97,7 +96,7 @@ class ConstFst(Fst):
         Raises:
           ValueError: Read failed.
         """
-        fst = ctypes.pointer(ctypes.c_void_p())
+        fst = ctypes.c_void_p()
         ret_code = lib.const_fst_from_path(
             ctypes.byref(fst), str(filename).encode("utf-8")
         )
@@ -107,7 +106,7 @@ class ConstFst(Fst):
         return cls(ptr=fst)
 
     @classmethod
-    def from_vector_fst(cls, fst: VectorFst) -> ConstFst:
+    def from_vector_fst(cls, fst: VectorFst) -> "ConstFst":
         """
         Converts a given `VectorFst` to `ConstFst`
         Args:
@@ -117,14 +116,14 @@ class ConstFst(Fst):
         Raises:
           ValueError: Conversion failed
         """
-        const_fst = ctypes.pointer(ctypes.c_void_p())
+        const_fst = ctypes.c_void_p()
         ret_code = lib.const_fst_from_vec_fst(fst.ptr, ctypes.byref(const_fst))
         err_msg = "Failed to convert VectorFST to ConstFST"
         check_ffi_error(ret_code, err_msg)
 
         return cls(ptr=const_fst)
 
-    def write(self, filename: Union[str, Path]):
+    def write(self, filename: Union[str, Path]) -> None:
         """
         Serializes FST to a file.
         This method writes the FST to a file in binary format.
@@ -153,19 +152,19 @@ class ConstFst(Fst):
 
         return bool(is_equal.value)
 
-    def copy(self) -> ConstFst:
+    def copy(self) -> "ConstFst":
         """
         Returns :
             Deepcopy of the Fst.
         """
-        cloned_fst = ctypes.c_size_t()
+        cloned_fst = ctypes.c_void_p()
         ret_code = lib.const_fst_copy(self.ptr, ctypes.byref(cloned_fst))
         err_msg = "Error copying fst"
         check_ffi_error(ret_code, err_msg)
 
         return ConstFst(cloned_fst)
 
-    def __str__(self):
+    def __str__(self) -> str:
         s = ctypes.c_void_p()
         ret_code = lib.const_fst_display(self.ptr, ctypes.byref(s))
         err_msg = "Error displaying ConstFst"
