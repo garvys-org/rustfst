@@ -5,9 +5,9 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::marker::PhantomData;
 
-use crate::algorithms::cmp_collections::{CmpHeap, CmpTreeMap};
 use anyhow::Result;
 
+use crate::algorithms::cmp_collections::{CmpHeap, CmpTreeMap};
 use crate::algorithms::encode::EncodeType;
 use crate::algorithms::factor_weight::factor_iterators::GallicFactorLeft;
 use crate::algorithms::factor_weight::{factor_weight, FactorWeightOptions, FactorWeightType};

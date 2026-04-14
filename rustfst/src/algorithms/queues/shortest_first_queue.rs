@@ -2,9 +2,9 @@ use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::fmt::Formatter;
 
-use crate::algorithms::cmp_collections::CmpHeap;
 use anyhow::Result;
 
+use crate::algorithms::cmp_collections::CmpHeap;
 use crate::algorithms::{Queue, QueueType};
 use crate::semirings::Semiring;
 use crate::StateId;
