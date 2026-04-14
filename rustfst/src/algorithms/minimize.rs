@@ -5,9 +5,8 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::marker::PhantomData;
 
+use crate::algorithms::cmp_collections::{CmpHeap, CmpTreeMap};
 use anyhow::Result;
-use binary_heap_plus::BinaryHeap;
-use stable_bst::TreeMap;
 
 use crate::algorithms::encode::EncodeType;
 use crate::algorithms::factor_weight::factor_iterators::GallicFactorLeft;
@@ -348,10 +347,8 @@ impl AcyclicMinimizer {
         let height = self.partition.borrow().num_classes();
         for h in 0..height {
             // We need here a binary search tree in order to order the states id and create a partition.
-            // For now uses the crate `stable_bst` which is quite old but seems to do the job
-            // TODO: Bench the performances of the implementation. Maybe re-write it.
             let mut equiv_classes =
-                TreeMap::<StateId, StateId, _>::with_comparator(|a: &StateId, b: &StateId| {
+                CmpTreeMap::<StateId, StateId, _>::with_comparator(|a: &StateId, b: &StateId| {
                     state_cmp.compare(*a, *b).unwrap()
                 });
 
@@ -523,7 +520,7 @@ fn cyclic_minimize<W: Semiring, F: MutableFst<W>>(fst: &mut F) -> Result<Rc<RefC
 
     let comp = TrIterCompare {};
 
-    let mut aiter_queue = BinaryHeap::new_by(|v1, v2| {
+    let mut aiter_queue = CmpHeap::new_by(|v1, v2| {
         if comp.compare(v1, v2) {
             Ordering::Less
         } else {
