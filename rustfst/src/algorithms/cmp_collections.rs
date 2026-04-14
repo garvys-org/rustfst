@@ -73,10 +73,6 @@ impl<T, F: Fn(&T, &T) -> Ordering> CmpHeap<T, F> {
         self.heap.is_empty()
     }
 
-    pub(crate) fn len(&self) -> usize {
-        self.heap.len()
-    }
-
     pub(crate) fn clear(&mut self) {
         self.heap.clear();
     }
@@ -189,7 +185,6 @@ mod tests {
         for v in [3, 1, 4, 1, 5, 9, 2, 6] {
             heap.push(v);
         }
-        assert_eq!(heap.len(), 8);
         assert!(!heap.is_empty());
         assert_eq!(heap.peek(), Some(&1));
 
@@ -199,7 +194,6 @@ mod tests {
         }
         assert_eq!(popped, vec![1, 1, 2, 3, 4, 5, 6, 9]);
         assert!(heap.is_empty());
-        assert_eq!(heap.len(), 0);
     }
 
     #[test]
@@ -209,7 +203,6 @@ mod tests {
         heap.push(20);
         heap.clear();
         assert!(heap.is_empty());
-        assert_eq!(heap.len(), 0);
         assert_eq!(heap.pop(), None);
     }
 
@@ -223,10 +216,9 @@ mod tests {
 
         // Mutating the clone must not affect the original.
         cloned.pop();
-        assert_eq!(original.len(), 5);
-        assert_eq!(cloned.len(), 4);
 
-        // Both heaps should still drain in min-order.
+        // Both heaps drain in min-order; the original still has all 5,
+        // the clone has 4.
         let mut from_orig = Vec::new();
         while let Some(v) = original.pop() {
             from_orig.push(v);
