@@ -33,6 +33,7 @@ mod add_super_final_state;
 mod all_pairs_shortest_distance;
 /// Functions to compute Kleene closure (star or plus) of an FST.
 pub mod closure;
+pub(crate) mod cmp_collections;
 #[allow(clippy::type_complexity)]
 /// Functions to compose FSTs.
 pub mod compose;
