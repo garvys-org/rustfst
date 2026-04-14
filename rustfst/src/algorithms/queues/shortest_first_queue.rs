@@ -2,8 +2,8 @@ use std::cmp::Ordering;
 use std::fmt::Debug;
 use std::fmt::Formatter;
 
+use crate::algorithms::cmp_collections::CmpHeap;
 use anyhow::Result;
-use binary_heap_plus::{BinaryHeap, FnComparator};
 
 use crate::algorithms::{Queue, QueueType};
 use crate::semirings::Semiring;
@@ -31,7 +31,7 @@ pub fn natural_less<W: Semiring>(w1: &W, w2: &W) -> Result<bool> {
 
 #[derive(Clone)]
 pub struct ShortestFirstQueue<C: Clone + Fn(&StateId, &StateId) -> Ordering> {
-    heap: BinaryHeap<StateId, FnComparator<C>>,
+    heap: CmpHeap<StateId, C>,
 }
 
 impl<C: Clone + Fn(&StateId, &StateId) -> Ordering> Debug for ShortestFirstQueue<C> {
@@ -43,7 +43,7 @@ impl<C: Clone + Fn(&StateId, &StateId) -> Ordering> Debug for ShortestFirstQueue
 impl<C: Clone + Fn(&StateId, &StateId) -> Ordering> ShortestFirstQueue<C> {
     pub fn new(c: C) -> Self {
         Self {
-            heap: BinaryHeap::new_by(c),
+            heap: CmpHeap::new_by(c),
         }
     }
 }
