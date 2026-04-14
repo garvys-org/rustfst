@@ -7,7 +7,7 @@
 //! Single-threaded only (uses `Rc`).
 
 use std::cmp::Ordering;
-use std::collections::BinaryHeap;
+use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt;
 use std::rc::Rc;
 
@@ -78,9 +78,9 @@ impl<T, F: Fn(&T, &T) -> Ordering> CmpHeap<T, F> {
     }
 }
 
-impl<T: Clone, F: Fn(&T, &T) -> Ordering + Clone> Clone for CmpHeap<T, F> {
+impl<T: Clone, F: Fn(&T, &T) -> Ordering> Clone for CmpHeap<T, F> {
     fn clone(&self) -> Self {
-        let cmp = Rc::new((*self.cmp).clone());
+        let cmp = Rc::clone(&self.cmp);
         let heap = self
             .heap
             .iter()
@@ -107,7 +107,7 @@ impl<T: fmt::Debug, F: Fn(&T, &T) -> Ordering> fmt::Debug for CmpHeap<T, F> {
 /// for the operations rustfst uses (`insert`, `get`, `get_or_insert`).
 /// Two keys that compare `Equal` under the closure share one entry.
 pub(crate) struct CmpTreeMap<K, V, F: Fn(&K, &K) -> Ordering> {
-    map: std::collections::BTreeMap<KeyedKey<K, F>, V>,
+    map: BTreeMap<KeyedKey<K, F>, V>,
     cmp: Rc<F>,
 }
 
@@ -136,10 +136,10 @@ impl<K, F: Fn(&K, &K) -> Ordering> PartialOrd for KeyedKey<K, F> {
     }
 }
 
-impl<K: Clone, V, F: Fn(&K, &K) -> Ordering> CmpTreeMap<K, V, F> {
+impl<K, V, F: Fn(&K, &K) -> Ordering> CmpTreeMap<K, V, F> {
     pub(crate) fn with_comparator(cmp: F) -> Self {
         Self {
-            map: std::collections::BTreeMap::new(),
+            map: BTreeMap::new(),
             cmp: Rc::new(cmp),
         }
     }
@@ -154,14 +154,6 @@ impl<K: Clone, V, F: Fn(&K, &K) -> Ordering> CmpTreeMap<K, V, F> {
         )
     }
 
-    pub(crate) fn get(&self, key: &K) -> Option<&V> {
-        let probe = KeyedKey {
-            key: key.clone(),
-            cmp: Rc::clone(&self.cmp),
-        };
-        self.map.get(&probe)
-    }
-
     pub(crate) fn get_or_insert<G: FnOnce() -> V>(&mut self, key: K, default: G) -> &mut V {
         self.map
             .entry(KeyedKey {
@@ -169,6 +161,16 @@ impl<K: Clone, V, F: Fn(&K, &K) -> Ordering> CmpTreeMap<K, V, F> {
                 cmp: Rc::clone(&self.cmp),
             })
             .or_insert_with(default)
+    }
+}
+
+impl<K: Clone, V, F: Fn(&K, &K) -> Ordering> CmpTreeMap<K, V, F> {
+    pub(crate) fn get(&self, key: &K) -> Option<&V> {
+        let probe = KeyedKey {
+            key: key.clone(),
+            cmp: Rc::clone(&self.cmp),
+        };
+        self.map.get(&probe)
     }
 }
 
