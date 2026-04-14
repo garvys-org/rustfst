@@ -75,6 +75,7 @@ def test_symt_iterator():
     symt.add_symbol("b")
 
     assert list(symt) == [(0, "<eps>"), (1, "a"), (2, "b")]
+    assert list(symt) == [(idx, sym) for idx, sym in symt]
 
 
 def test_symt_copy_add():
