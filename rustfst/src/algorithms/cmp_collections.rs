@@ -105,6 +105,77 @@ impl<T: fmt::Debug, F: Fn(&T, &T) -> Ordering> fmt::Debug for CmpHeap<T, F> {
     }
 }
 
+/// Stdlib-backed B-tree map whose key ordering is supplied by a closure.
+///
+/// Behaviourally equivalent to `stable_bst::TreeMap::with_comparator`
+/// for the operations rustfst uses (`insert`, `get`, `get_or_insert`).
+/// Two keys that compare `Equal` under the closure share one entry.
+pub(crate) struct CmpTreeMap<K, V, F: Fn(&K, &K) -> Ordering> {
+    map: std::collections::BTreeMap<KeyedKey<K, F>, V>,
+    cmp: Rc<F>,
+}
+
+struct KeyedKey<K, F: Fn(&K, &K) -> Ordering> {
+    key: K,
+    cmp: Rc<F>,
+}
+
+impl<K, F: Fn(&K, &K) -> Ordering> PartialEq for KeyedKey<K, F> {
+    fn eq(&self, other: &Self) -> bool {
+        (self.cmp)(&self.key, &other.key) == Ordering::Equal
+    }
+}
+
+impl<K, F: Fn(&K, &K) -> Ordering> Eq for KeyedKey<K, F> {}
+
+impl<K, F: Fn(&K, &K) -> Ordering> Ord for KeyedKey<K, F> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        (self.cmp)(&self.key, &other.key)
+    }
+}
+
+impl<K, F: Fn(&K, &K) -> Ordering> PartialOrd for KeyedKey<K, F> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl<K: Clone, V, F: Fn(&K, &K) -> Ordering> CmpTreeMap<K, V, F> {
+    pub(crate) fn with_comparator(cmp: F) -> Self {
+        Self {
+            map: std::collections::BTreeMap::new(),
+            cmp: Rc::new(cmp),
+        }
+    }
+
+    pub(crate) fn insert(&mut self, key: K, value: V) -> Option<V> {
+        self.map.insert(
+            KeyedKey {
+                key,
+                cmp: Rc::clone(&self.cmp),
+            },
+            value,
+        )
+    }
+
+    pub(crate) fn get(&self, key: &K) -> Option<&V> {
+        let probe = KeyedKey {
+            key: key.clone(),
+            cmp: Rc::clone(&self.cmp),
+        };
+        self.map.get(&probe)
+    }
+
+    pub(crate) fn get_or_insert<G: FnOnce() -> V>(&mut self, key: K, default: G) -> &mut V {
+        self.map
+            .entry(KeyedKey {
+                key,
+                cmp: Rc::clone(&self.cmp),
+            })
+            .or_insert_with(default)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -166,5 +237,61 @@ mod tests {
         }
         assert_eq!(from_orig, vec![1, 1, 3, 4, 5]);
         assert_eq!(from_clone, vec![1, 3, 4, 5]);
+    }
+
+    #[test]
+    fn cmp_tree_map_basic_insert_get() {
+        let mut map: CmpTreeMap<i32, &'static str, _> =
+            CmpTreeMap::with_comparator(|a: &i32, b: &i32| a.cmp(b));
+        assert_eq!(map.insert(1, "one"), None);
+        assert_eq!(map.insert(2, "two"), None);
+        // Re-inserting the same key returns the previous value.
+        assert_eq!(map.insert(1, "uno"), Some("one"));
+        assert_eq!(map.get(&1), Some(&"uno"));
+        assert_eq!(map.get(&2), Some(&"two"));
+        assert_eq!(map.get(&3), None);
+    }
+
+    #[test]
+    fn cmp_tree_map_get_or_insert_only_runs_default_when_vacant() {
+        let mut map: CmpTreeMap<i32, i32, _> =
+            CmpTreeMap::with_comparator(|a: &i32, b: &i32| a.cmp(b));
+
+        let mut counter = 0;
+        // Vacant: closure runs.
+        let v = map.get_or_insert(7, || {
+            counter += 1;
+            100
+        });
+        assert_eq!(*v, 100);
+        assert_eq!(counter, 1);
+
+        // Occupied: closure must NOT run.
+        let v = map.get_or_insert(7, || {
+            counter += 1;
+            200
+        });
+        assert_eq!(*v, 100);
+        assert_eq!(counter, 1);
+    }
+
+    #[test]
+    fn cmp_tree_map_collapses_equivalence_classes() {
+        // Custom comparator: two keys are "equal" when their parity matches.
+        let mut map: CmpTreeMap<i32, &'static str, _> =
+            CmpTreeMap::with_comparator(|a: &i32, b: &i32| (a % 2).cmp(&(b % 2)));
+
+        map.insert(1, "odd-first");
+        // 3 is "equal" to 1 under the comparator → overwrites the entry.
+        assert_eq!(map.insert(3, "odd-second"), Some("odd-first"));
+
+        // Any odd key now retrieves the same entry.
+        assert_eq!(map.get(&5), Some(&"odd-second"));
+        assert_eq!(map.get(&7), Some(&"odd-second"));
+
+        // Even keys form a separate equivalence class.
+        map.insert(2, "even");
+        assert_eq!(map.get(&4), Some(&"even"));
+        assert_eq!(map.get(&6), Some(&"even"));
     }
 }
