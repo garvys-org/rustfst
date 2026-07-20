@@ -30,7 +30,7 @@ pub unsafe extern "C" fn string_path_destroy(iter_ptr: *mut CStringPath) -> RUST
 #[no_mangle]
 pub unsafe extern "C" fn string_path_weight(
     c_string_path: *const CStringPath,
-    weight: *mut libc::c_float,
+    weight: *mut core::ffi::c_float,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let string_path = get!(CStringPath, c_string_path);
@@ -46,13 +46,13 @@ pub unsafe extern "C" fn string_path_weight(
 #[no_mangle]
 pub unsafe extern "C" fn string_path_istring(
     c_string_path: *const CStringPath,
-    c_istring: *mut *const libc::c_char,
+    c_istring: *mut *const core::ffi::c_char,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let string_path = get!(CStringPath, c_string_path);
         let istring = string_path.istring()?;
         unsafe {
-            *c_istring = CString::c_repr_of(istring)?.into_raw_pointer() as *const libc::c_char
+            *c_istring = CString::c_repr_of(istring)?.into_raw_pointer() as *const core::ffi::c_char
         }
 
         Ok(())
@@ -65,13 +65,13 @@ pub unsafe extern "C" fn string_path_istring(
 #[no_mangle]
 pub unsafe extern "C" fn string_path_ostring(
     c_string_path: *const CStringPath,
-    c_ostring: *mut *const libc::c_char,
+    c_ostring: *mut *const core::ffi::c_char,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let string_path = get!(CStringPath, c_string_path);
         let ostring = string_path.ostring()?;
         unsafe {
-            *c_ostring = CString::c_repr_of(ostring)?.into_raw_pointer() as *const libc::c_char
+            *c_ostring = CString::c_repr_of(ostring)?.into_raw_pointer() as *const core::ffi::c_char
         }
 
         Ok(())

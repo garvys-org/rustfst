@@ -24,7 +24,7 @@ pub struct CTr {
 #[repr(C)]
 #[derive(CDrop, RawPointerConverter)]
 pub struct CTropicalWeight {
-    value: libc::c_float,
+    value: core::ffi::c_float,
 }
 
 impl CReprOf<TropicalWeight> for CTropicalWeight {
@@ -48,7 +48,7 @@ impl AsRust<TropicalWeight> for CTropicalWeight {
 pub unsafe extern "C" fn tr_new(
     ilabel: CLabel,
     olabel: CLabel,
-    weight: libc::c_float,
+    weight: core::ffi::c_float,
     nextstate: CStateId,
     new_struct: *mut *const CTr,
 ) -> RUSTFST_FFI_RESULT {
@@ -121,7 +121,7 @@ pub unsafe extern "C" fn tr_set_olabel(tr: *mut CTr, olabel: *const CLabel) -> R
 #[no_mangle]
 pub unsafe extern "C" fn tr_weight(
     tr: *const CTr,
-    weight: *mut libc::c_float,
+    weight: *mut core::ffi::c_float,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let tr = unsafe { <CTr as ffi_convert::RawBorrow<CTr>>::raw_borrow(tr)? };
@@ -135,7 +135,7 @@ pub unsafe extern "C" fn tr_weight(
 ///
 /// The pointers should be valid.
 #[no_mangle]
-pub unsafe extern "C" fn tr_set_weight(tr: *mut CTr, weight: libc::c_float) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn tr_set_weight(tr: *mut CTr, weight: core::ffi::c_float) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let tr = &mut unsafe { <CTr as ffi_convert::RawBorrowMut<CTr>>::raw_borrow_mut(tr)? };
         let tropical_weight = TropicalWeight::new(weight);

@@ -17,14 +17,14 @@ use anyhow::Result;
 use ffi_convert::{CReprOf, RawPointerConverter};
 
 #[cfg(feature = "rustfst-state-label-u32")]
-pub type CLabel = libc::c_uint;
+pub type CLabel = core::ffi::c_uint;
 #[cfg(not(feature = "rustfst-state-label-u32"))]
-pub type CLabel = libc::size_t;
+pub type CLabel = core::ffi::size_t;
 
 #[cfg(feature = "rustfst-state-label-u32")]
-pub type CStateId = libc::c_uint;
+pub type CStateId = core::ffi::c_uint;
 #[cfg(not(feature = "rustfst-state-label-u32"))]
-pub type CStateId = libc::size_t;
+pub type CStateId = core::ffi::size_t;
 
 #[repr(C)]
 #[allow(non_camel_case_types)]
@@ -61,7 +61,7 @@ pub fn wrap<F: FnOnce() -> Result<()>>(func: F) -> RUSTFST_FFI_RESULT {
 /// Should never happen
 #[no_mangle]
 pub unsafe extern "C" fn rustfst_ffi_get_last_error(
-    error: *mut *mut ::libc::c_char,
+    error: *mut *mut ::core::ffi::c_char,
 ) -> RUSTFST_FFI_RESULT {
     wrap(move || {
         LAST_ERROR.with(|msg| {
@@ -69,7 +69,7 @@ pub unsafe extern "C" fn rustfst_ffi_get_last_error(
                 .borrow_mut()
                 .take()
                 .unwrap_or_else(|| "No error message".to_string());
-            let result: *const ::libc::c_char =
+            let result: *const ::core::ffi::c_char =
                 std::ffi::CString::c_repr_of(string)?.into_raw_pointer();
             unsafe { *error = result as _ }
             Ok(())
@@ -79,7 +79,7 @@ pub unsafe extern "C" fn rustfst_ffi_get_last_error(
 
 #[allow(clippy::missing_safety_doc)]
 #[no_mangle]
-pub unsafe extern "C" fn rustfst_destroy_string(string: *mut libc::c_char) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn rustfst_destroy_string(string: *mut core::ffi::c_char) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         CString::drop_raw_pointer(string)?;
         Ok(())

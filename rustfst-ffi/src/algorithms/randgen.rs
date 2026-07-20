@@ -15,9 +15,9 @@ use crate::{wrap, RUSTFST_FFI_RESULT};
 #[no_mangle]
 pub unsafe extern "C" fn fst_randgen(
     ptr: *const CFst,
-    npath: libc::size_t,
-    seed: libc::size_t,
-    max_length: libc::size_t,
+    npath: usize,
+    seed: usize,
+    max_length: usize,
     weight: bool,
     remove_total_weight: bool,
     res_fst: *mut *const CFst,

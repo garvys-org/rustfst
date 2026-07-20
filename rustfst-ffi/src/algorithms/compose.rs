@@ -190,8 +190,8 @@ impl From<&[u32]> for CIntArray {
 /// The pointers should be valid.
 #[no_mangle]
 pub unsafe extern "C" fn fst_matcher_config_new(
-    sigma_label: libc::size_t,
-    rewrite_mode: libc::size_t,
+    sigma_label: usize,
+    rewrite_mode: usize,
     sigma_allowed_matches: CIntArray,
     config: *mut *const CMatcherConfig,
 ) -> RUSTFST_FFI_RESULT {
@@ -227,7 +227,7 @@ pub unsafe extern "C" fn fst_matcher_config_new(
 /// The pointers should be valid.
 #[no_mangle]
 pub unsafe extern "C" fn fst_compose_config_new(
-    compose_filter: libc::size_t,
+    compose_filter: usize,
     connect: bool,
     matcher1_config: *const CMatcherConfig,
     matcher2_config: *const CMatcherConfig,

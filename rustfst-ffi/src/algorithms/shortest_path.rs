@@ -21,8 +21,8 @@ pub struct CShortestPathConfig {
 /// The pointers should be valid.
 #[no_mangle]
 pub unsafe extern "C" fn fst_shortest_path_config_new(
-    delta: libc::c_float,
-    nshortest: libc::size_t,
+    delta: core::ffi::c_float,
+    nshortest: usize,
     unique: bool,
     ptr: *mut *const CShortestPathConfig,
 ) -> RUSTFST_FFI_RESULT {

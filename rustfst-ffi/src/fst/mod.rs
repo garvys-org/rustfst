@@ -143,7 +143,7 @@ pub unsafe fn fst_start(fst: *const CFst, mut state: *mut CStateId) -> RUSTFST_F
 pub unsafe fn fst_final_weight(
     fst: *const CFst,
     state_id: CStateId,
-    mut final_weight: *mut libc::c_float,
+    mut final_weight: *mut core::ffi::c_float,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
@@ -162,7 +162,7 @@ pub unsafe fn fst_final_weight(
 pub unsafe fn fst_num_trs(
     fst: *const CFst,
     state: CStateId,
-    num_trs: *mut libc::size_t,
+    num_trs: *mut usize,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
@@ -198,7 +198,7 @@ pub unsafe fn fst_get_trs(
 pub unsafe fn fst_is_final(
     fst: *const CFst,
     state: CStateId,
-    is_final: *mut libc::size_t,
+    is_final: *mut usize,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
@@ -216,7 +216,7 @@ pub unsafe fn fst_is_final(
 pub unsafe fn fst_is_start(
     fst: *const CFst,
     state: CStateId,
-    is_start: *mut libc::size_t,
+    is_start: *mut usize,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
@@ -348,7 +348,7 @@ pub unsafe fn fst_unset_output_symbols(fst: *mut CFst) -> RUSTFST_FFI_RESULT {
 ///
 /// The pointers should be valid.
 #[no_mangle]
-pub unsafe extern "C" fn fst_weight_one(weight_one: *mut libc::c_float) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn fst_weight_one(weight_one: *mut core::ffi::c_float) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let weight = TropicalWeight::one();
         unsafe { *weight_one = *weight.value() };
@@ -360,7 +360,7 @@ pub unsafe extern "C" fn fst_weight_one(weight_one: *mut libc::c_float) -> RUSTF
 ///
 /// The pointers should be valid.
 #[no_mangle]
-pub unsafe extern "C" fn fst_weight_zero(weight_zero: *mut libc::c_float) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn fst_weight_zero(weight_zero: *mut core::ffi::c_float) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let weight = TropicalWeight::zero();
         unsafe { *weight_zero = *weight.value() };

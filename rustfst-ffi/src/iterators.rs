@@ -95,12 +95,12 @@ pub unsafe extern "C" fn trs_iterator_next(
 #[no_mangle]
 pub unsafe extern "C" fn trs_iterator_done(
     iter_ptr: *const CTrsIterator,
-    done: *mut libc::size_t,
+    done: *mut usize,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let trs_iter = get!(CTrsIterator, iter_ptr);
         let res = trs_iter.done();
-        unsafe { *done = res as libc::size_t };
+        unsafe { *done = res as usize };
         Ok(())
     })
 }
@@ -277,12 +277,12 @@ pub unsafe extern "C" fn mut_trs_iterator_set_value(
 #[no_mangle]
 pub unsafe extern "C" fn mut_trs_iterator_done(
     iter_ptr: *const CMutTrsIterator,
-    done: *mut libc::size_t,
+    done: *mut usize,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let trs_iter = get!(CMutTrsIterator, iter_ptr);
         let res = trs_iter.done();
-        unsafe { *done = res as libc::size_t };
+        unsafe { *done = res as usize };
         Ok(())
     })
 }
@@ -362,12 +362,12 @@ pub unsafe extern "C" fn state_iterator_next(
 #[no_mangle]
 pub unsafe extern "C" fn state_iterator_done(
     iter_ptr: *mut CStateIterator,
-    done: *mut libc::size_t,
+    done: *mut usize,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let trs_iter = get_mut!(CStateIterator, iter_ptr);
         let res = trs_iter.peek().is_none();
-        unsafe { *done = res as libc::size_t };
+        unsafe { *done = res as usize };
         Ok(())
     })
 }

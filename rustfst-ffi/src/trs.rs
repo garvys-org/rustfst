@@ -30,7 +30,7 @@ pub unsafe extern "C" fn trs_vec_new(new_struct: *mut *const CTrs) -> RUSTFST_FF
 #[no_mangle]
 pub unsafe extern "C" fn trs_vec_remove(
     trs: *mut CTrs,
-    index: libc::size_t,
+    index: usize,
     removed_tr_ptr: *mut *const CTr,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
@@ -78,11 +78,11 @@ pub unsafe extern "C" fn trs_vec_shallow_clone(
 #[no_mangle]
 pub unsafe extern "C" fn trs_vec_len(
     trs: *const CTrs,
-    num_trs: *mut libc::size_t,
+    num_trs: *mut usize,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let trs = get!(CTrs, trs);
-        unsafe { *num_trs = trs.len() as libc::size_t };
+        unsafe { *num_trs = trs.len() as usize };
         Ok(())
     })
 }
@@ -93,13 +93,13 @@ pub unsafe extern "C" fn trs_vec_len(
 #[no_mangle]
 pub unsafe extern "C" fn trs_vec_display(
     trs: *const CTrs,
-    string: *mut *const libc::c_char,
+    string: *mut *const core::ffi::c_char,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let trs = get!(CTrs, trs);
         let trs_display = format!("{:?}", trs);
         unsafe {
-            *string = CString::c_repr_of(trs_display)?.into_raw_pointer() as *const libc::c_char
+            *string = CString::c_repr_of(trs_display)?.into_raw_pointer() as *const core::ffi::c_char
         };
         Ok(())
     })
