@@ -45,8 +45,10 @@ pub fn wrap<F: FnOnce() -> Result<()>>(func: F) -> RUSTFST_FFI_RESULT {
         Ok(_) => RUSTFST_FFI_RESULT::RUSTFST_FFI_RESULT_OK,
         Err(e) => {
             let msg = format!("{:#?}", e);
-            if std::env::var("AMSTRAM_FFI_ERROR_STDERR").is_ok() {
-                eprintln!("{}", msg);
+            if cfg!(feature = "std") {
+                if std::env::var("AMSTRAM_FFI_ERROR_STDERR").is_ok() {
+                    eprintln!("{}", msg);
+                }
             }
             LAST_ERROR.with(|p| *p.borrow_mut() = Some(msg));
             RUSTFST_FFI_RESULT::RUSTFST_FFI_RESULT_KO

@@ -22,8 +22,9 @@ keywords = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["rustfst-state-label-u32"]
-rustfst-state-label-u32 = ["rustfst/state-label-u32"]
+default = ["state-label-u32"]
+state-label-u32 = ["rustfst/state-label-u32"]
+std = ["rustfst/std"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]

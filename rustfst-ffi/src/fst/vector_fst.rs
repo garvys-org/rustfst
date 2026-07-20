@@ -111,6 +111,7 @@ pub unsafe fn vec_fst_del_final_weight(fst: *mut CFst, state: CStateId) -> RUSTF
 /// # Safety
 ///
 /// The pointers should be valid.
+#[cfg(feature = "std")]
 #[no_mangle]
 pub unsafe fn vec_fst_from_path(
     ptr: *mut *const CFst,
@@ -128,6 +129,7 @@ pub unsafe fn vec_fst_from_path(
 /// # Safety
 ///
 /// The pointers should be valid.
+#[cfg(feature = "std")]
 #[no_mangle]
 pub unsafe fn vec_fst_write_file(
     fst: *const CFst,

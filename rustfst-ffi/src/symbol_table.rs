@@ -105,6 +105,7 @@ pub unsafe extern "C" fn symt_find_symbol(
 /// # Safety
 ///
 /// The pointers should be valid.
+#[cfg(feature = "std")]
 #[no_mangle]
 pub unsafe extern "C" fn symt_from_path(
     table_ptr: *mut *const CSymbolTable,
@@ -128,6 +129,7 @@ pub unsafe extern "C" fn symt_from_path(
 /// # Safety
 ///
 /// The pointers should be valid.
+#[cfg(feature = "std")]
 #[no_mangle]
 pub unsafe extern "C" fn symt_write_file(
     symt: *const CSymbolTable,

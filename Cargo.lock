@@ -454,9 +454,9 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
 name = "ordered-float"
-version = "5.2.0"
+version = "5.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0218004a4aae742209bee9c3cef05672f6b2708be36a50add8eb613b1f2a4008"
+checksum = "b7d950ca161dc355eaf28f82b11345ed76c6e1f6eb1f4f4479e0323b9e2fbd0e"
 dependencies = [
  "num-traits",
 ]
@@ -641,7 +641,7 @@ checksum = "dc897dd8d9e8bd1ed8cdad82b5966c3e0ecae09fb1907d58efaa013543185d0a"
 
 [[package]]
 name = "rustfst"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "anyhow",
  "bimap",
@@ -651,7 +651,6 @@ dependencies = [
  "generic-array",
  "itertools",
  "nom",
- "num-traits",
  "ordered-float",
  "path_abs",
  "pretty_assertions",
@@ -666,7 +665,7 @@ dependencies = [
 
 [[package]]
 name = "rustfst-cli"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -679,7 +678,7 @@ dependencies = [
 
 [[package]]
 name = "rustfst-ffi"
-version = "1.3.0"
+version = "1.3.1"
 dependencies = [
  "anyhow",
  "downcast-rs",

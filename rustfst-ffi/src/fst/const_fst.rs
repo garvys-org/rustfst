@@ -6,6 +6,7 @@ use std::ffi::CString;
 /// # Safety
 ///
 /// The pointers should be valid.
+#[cfg(feature = "std")]
 #[no_mangle]
 pub unsafe fn const_fst_from_path(
     ptr: *mut *const CFst,
@@ -23,6 +24,7 @@ pub unsafe fn const_fst_from_path(
 /// # Safety
 ///
 /// The pointers should be valid.
+#[cfg(feature = "std")]
 #[no_mangle]
 pub unsafe fn const_fst_write_file(
     fst: *const CFst,
