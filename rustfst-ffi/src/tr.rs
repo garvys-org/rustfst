@@ -135,7 +135,10 @@ pub unsafe extern "C" fn tr_weight(
 ///
 /// The pointers should be valid.
 #[no_mangle]
-pub unsafe extern "C" fn tr_set_weight(tr: *mut CTr, weight: core::ffi::c_float) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn tr_set_weight(
+    tr: *mut CTr,
+    weight: core::ffi::c_float,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let tr = &mut unsafe { <CTr as ffi_convert::RawBorrowMut<CTr>>::raw_borrow_mut(tr)? };
         let tropical_weight = TropicalWeight::new(weight);

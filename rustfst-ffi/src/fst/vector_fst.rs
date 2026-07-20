@@ -246,10 +246,7 @@ pub unsafe fn vec_fst_draw(
 ///
 /// The pointers should be valid.
 #[no_mangle]
-pub unsafe fn vec_fst_num_states(
-    fst: *const CFst,
-    num_states: *mut usize,
-) -> RUSTFST_FFI_RESULT {
+pub unsafe fn vec_fst_num_states(fst: *const CFst, num_states: *mut usize) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
         let vec_fst = as_fst!(VectorFst<TropicalWeight>, fst);

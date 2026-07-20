@@ -360,7 +360,9 @@ pub unsafe extern "C" fn fst_weight_one(weight_one: *mut core::ffi::c_float) -> 
 ///
 /// The pointers should be valid.
 #[no_mangle]
-pub unsafe extern "C" fn fst_weight_zero(weight_zero: *mut core::ffi::c_float) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn fst_weight_zero(
+    weight_zero: *mut core::ffi::c_float,
+) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let weight = TropicalWeight::zero();
         unsafe { *weight_zero = *weight.value() };

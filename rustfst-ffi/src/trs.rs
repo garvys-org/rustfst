@@ -76,10 +76,7 @@ pub unsafe extern "C" fn trs_vec_shallow_clone(
 ///
 /// The pointers should be valid.
 #[no_mangle]
-pub unsafe extern "C" fn trs_vec_len(
-    trs: *const CTrs,
-    num_trs: *mut usize,
-) -> RUSTFST_FFI_RESULT {
+pub unsafe extern "C" fn trs_vec_len(trs: *const CTrs, num_trs: *mut usize) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let trs = get!(CTrs, trs);
         unsafe { *num_trs = trs.len() as usize };
@@ -99,7 +96,8 @@ pub unsafe extern "C" fn trs_vec_display(
         let trs = get!(CTrs, trs);
         let trs_display = format!("{:?}", trs);
         unsafe {
-            *string = CString::c_repr_of(trs_display)?.into_raw_pointer() as *const core::ffi::c_char
+            *string =
+                CString::c_repr_of(trs_display)?.into_raw_pointer() as *const core::ffi::c_char
         };
         Ok(())
     })
