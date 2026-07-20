@@ -1,8 +1,11 @@
 [workspace]
+resolver = "2"
 members = [
     "rustfst",
     "rustfst-cli",
     "rustfst-ffi",
+    "ffi-convert",
+    "ffi-convert-derive",
 ]
 
 [profile.release]

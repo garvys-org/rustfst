@@ -17,7 +17,7 @@ repository = 'https://github.com/Garvys/rustfst'
 edition = '2018'
 
 [features]
-default = ["state-label-u32"]
+default = ["std", "state-label-u32"]
 std = ["rand", "rand_chacha"]
 state-label-u32 = []
 

@@ -234,20 +234,26 @@ checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
 
 [[package]]
 name = "ffi-convert"
-version = "0.6.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88d96fa39640e119d4bc9898672ab63d9c575810dbad8806683a993fa8de0a8b"
+version = "0.7.0"
 dependencies = [
- "ffi-convert-derive",
- "libc",
+ "ffi-convert-derive 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "thiserror",
 ]
 
 [[package]]
 name = "ffi-convert-derive"
-version = "0.6.2"
+version = "0.7.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "ffi-convert-derive"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "480d55e4c9442832b168701bcc7f2e3282608f841791224ea1ed6ae35d450175"
+checksum = "6137314991d3d201a27d9805429094fc51a11bb41c4f259498b0cc656d538da8"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -683,7 +689,6 @@ dependencies = [
  "anyhow",
  "downcast-rs",
  "ffi-convert",
- "libc",
  "rustfst",
 ]
 
