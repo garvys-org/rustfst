@@ -7,7 +7,6 @@ pub mod isomorphic;
 mod minimize;
 pub mod optimize;
 pub mod project;
-#[cfg(feature = "std")]
 pub mod randgen;
 pub mod replace;
 pub mod reverse;

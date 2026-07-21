@@ -18,7 +18,7 @@ edition = '2018'
 
 [features]
 default = ["std", "state-label-u32"]
-std = ["rand", "rand_chacha"]
+std = ["rand_chacha/os_rng"]
 state-label-u32 = []
 
 [dependencies]
@@ -30,8 +30,8 @@ itertools = '0.14'
 nom = '7'
 superslice = '1'
 ordered-float = { version = "5.0", default-features = false }
-rand = { version = '0.9', optional = true }
-rand_chacha = { version = '0.9', optional = true }
+rand = { version = '0.9', default-features = false }
+rand_chacha = { version = '0.9', default-features = false }
 
 [dev-dependencies]
 counter = '0.7'

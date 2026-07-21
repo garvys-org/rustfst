@@ -59,7 +59,6 @@ mod push;
 mod queue;
 
 /// Functions to randomly generate paths through an Fst. A static and a delayed version are available.
-#[cfg(feature = "std")]
 pub mod randgen;
 mod relabel_pairs;
 /// Functions for lazy replacing transitions in an FST.
