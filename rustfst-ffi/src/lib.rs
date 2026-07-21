@@ -19,12 +19,12 @@ use ffi_convert::{CReprOf, RawPointerConverter};
 #[cfg(feature = "rustfst-state-label-u32")]
 pub type CLabel = core::ffi::c_uint;
 #[cfg(not(feature = "rustfst-state-label-u32"))]
-pub type CLabel = core::ffi::size_t;
+pub type CLabel = usize;
 
 #[cfg(feature = "rustfst-state-label-u32")]
 pub type CStateId = core::ffi::c_uint;
 #[cfg(not(feature = "rustfst-state-label-u32"))]
-pub type CStateId = core::ffi::size_t;
+pub type CStateId = usize;
 
 #[repr(C)]
 #[allow(non_camel_case_types)]
