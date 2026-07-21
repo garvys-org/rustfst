@@ -94,12 +94,12 @@ pub unsafe extern "C" fn string_paths_iterator_next(
 #[no_mangle]
 pub unsafe extern "C" fn string_paths_iterator_done(
     iter_ptr: *mut CStringPathsIterator,
-    done: *mut libc::size_t,
+    done: *mut usize,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let string_paths_iter = get_mut!(CStringPathsIterator, iter_ptr);
         let res = string_paths_iter.peek().is_none();
-        unsafe { *done = res as libc::size_t };
+        unsafe { *done = res as usize };
         Ok(())
     })
 }

@@ -28,9 +28,16 @@ impl Default for UniformTrSelector {
 }
 
 impl UniformTrSelector {
+    #[cfg(feature = "std")]
     pub fn new() -> Self {
         Self {
             rng: ChaCha8Rng::from_os_rng(),
+        }
+    }
+    #[cfg(not(feature = "std"))]
+    pub fn new() -> Self {
+        Self {
+            rng: ChaCha8Rng::seed_from_u64(12345),
         }
     }
     pub fn from_seed(seed: u64) -> Self {

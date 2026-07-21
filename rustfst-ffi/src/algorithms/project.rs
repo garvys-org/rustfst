@@ -43,7 +43,7 @@ impl CReprOf<ProjectType> for CProjectType {
 /// The pointers should be valid.
 #[no_mangle]
 pub unsafe extern "C" fn fst_project_type_new(
-    project_type: libc::size_t,
+    project_type: usize,
     ptr: *mut *const CProjectType,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {

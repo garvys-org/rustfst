@@ -6,10 +6,11 @@ use std::ffi::CString;
 /// # Safety
 ///
 /// The pointers should be valid.
+#[cfg(feature = "std")]
 #[no_mangle]
 pub unsafe fn const_fst_from_path(
     ptr: *mut *const CFst,
-    path: *const libc::c_char,
+    path: *const core::ffi::c_char,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let path = unsafe { CStr::from_ptr(path) }.as_rust()?;
@@ -23,10 +24,11 @@ pub unsafe fn const_fst_from_path(
 /// # Safety
 ///
 /// The pointers should be valid.
+#[cfg(feature = "std")]
 #[no_mangle]
 pub unsafe fn const_fst_write_file(
     fst: *const CFst,
-    path: *const libc::c_char,
+    path: *const core::ffi::c_char,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
@@ -44,7 +46,7 @@ pub unsafe fn const_fst_write_file(
 pub unsafe fn const_fst_equals(
     fst: *const CFst,
     other_fst: *const CFst,
-    is_equal: *mut libc::size_t,
+    is_equal: *mut usize,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);
@@ -83,18 +85,18 @@ pub unsafe fn const_fst_draw(
     fst_ptr: *mut CFst,
     isyms: *const CSymbolTable,
     osyms: *const CSymbolTable,
-    fname: *const libc::c_char,
-    title: *const libc::c_char,
-    acceptor: libc::size_t,
-    width: libc::c_float,
-    height: libc::c_float,
-    portrait: libc::size_t,
-    vertical: libc::size_t,
-    ranksep: libc::c_float,
-    nodesep: libc::c_float,
-    fontsize: libc::size_t,
-    show_weight_one: libc::size_t,
-    print_weight: libc::size_t,
+    fname: *const core::ffi::c_char,
+    title: *const core::ffi::c_char,
+    acceptor: usize,
+    width: core::ffi::c_float,
+    height: core::ffi::c_float,
+    portrait: usize,
+    vertical: usize,
+    ranksep: core::ffi::c_float,
+    nodesep: core::ffi::c_float,
+    fontsize: usize,
+    show_weight_one: usize,
+    print_weight: usize,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get_mut!(CFst, fst_ptr);
@@ -139,13 +141,13 @@ pub unsafe fn const_fst_draw(
 #[no_mangle]
 pub unsafe extern "C" fn const_fst_display(
     fst_ptr: *const CFst,
-    s: *mut *const libc::c_char,
+    s: *mut *const core::ffi::c_char,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst_ptr);
         let vec_fst = as_fst!(ConstFst<TropicalWeight>, fst);
         let res = format!("{}", vec_fst);
-        unsafe { *s = CString::c_repr_of(res)?.into_raw_pointer() as *const libc::c_char };
+        unsafe { *s = CString::c_repr_of(res)?.into_raw_pointer() as *const core::ffi::c_char };
         Ok(())
     })
 }

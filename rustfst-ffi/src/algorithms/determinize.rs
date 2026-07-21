@@ -54,8 +54,8 @@ pub struct CDeterminizeConfig {
 /// The pointers should be valid.
 #[no_mangle]
 pub unsafe extern "C" fn fst_determinize_config_new(
-    delta: libc::c_float,
-    det_type: libc::size_t,
+    delta: core::ffi::c_float,
+    det_type: usize,
     config: *mut *const CDeterminizeConfig,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {

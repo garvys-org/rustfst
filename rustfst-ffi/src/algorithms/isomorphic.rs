@@ -14,7 +14,7 @@ use rustfst::semirings::TropicalWeight;
 pub unsafe fn fst_isomorphic(
     fst: *const CFst,
     other_fst: *const CFst,
-    is_isomorphic: *mut libc::size_t,
+    is_isomorphic: *mut usize,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
         let fst = get!(CFst, fst);

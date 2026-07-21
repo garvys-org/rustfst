@@ -12,9 +12,9 @@ use std::ffi::CStr;
 /// The pointers should be valid.
 #[no_mangle]
 pub unsafe extern "C" fn utils_string_to_acceptor(
-    astring: *const libc::c_char,
+    astring: *const core::ffi::c_char,
     symbol_table: *mut CSymbolTable,
-    weight: libc::c_float,
+    weight: core::ffi::c_float,
     fst_ptr: *mut *const CFst,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {
@@ -39,11 +39,11 @@ pub unsafe extern "C" fn utils_string_to_acceptor(
 /// The pointers should be valid.
 #[no_mangle]
 pub unsafe extern "C" fn utils_string_to_transducer(
-    istring: *const libc::c_char,
-    ostring: *const libc::c_char,
+    istring: *const core::ffi::c_char,
+    ostring: *const core::ffi::c_char,
     isymt: *mut CSymbolTable,
     osymt: *mut CSymbolTable,
-    weight: libc::c_float,
+    weight: core::ffi::c_float,
     fst_ptr: *mut *const CFst,
 ) -> RUSTFST_FFI_RESULT {
     wrap(|| {

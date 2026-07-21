@@ -21,7 +21,7 @@ pub struct CMinimizeConfig {
 /// The pointers should be valid.
 #[no_mangle]
 pub unsafe extern "C" fn fst_minimize_config_new(
-    delta: libc::c_float,
+    delta: core::ffi::c_float,
     allow_nondet: bool,
     ptr: *mut *const CMinimizeConfig,
 ) -> RUSTFST_FFI_RESULT {

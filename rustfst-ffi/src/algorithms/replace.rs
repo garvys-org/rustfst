@@ -22,7 +22,7 @@ pub struct CLabelFstPair {
 pub unsafe extern "C" fn fst_replace(
     root: CLabel,
     fst_list_ptr: *mut CLabelFstPair,
-    fst_list_ptr_len: libc::size_t,
+    fst_list_ptr_len: usize,
     epsilon_on_replace: bool,
     replaced_fst: *mut *const CFst,
 ) -> RUSTFST_FFI_RESULT {
