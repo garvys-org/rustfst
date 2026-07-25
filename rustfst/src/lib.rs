@@ -211,7 +211,7 @@ use doc_comment::doc_comment;
 
 // When running `cargo test`, rustdoc will check this file as well.
 #[cfg(test)]
-doc_comment!(include_str!("../../README.md"));
+doc_comment!(include_str!("../README.md"));
 
 #[cfg(test)]
 mod tests_openfst;
