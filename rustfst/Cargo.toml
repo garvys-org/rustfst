@@ -4,7 +4,7 @@ version = "1.3.1"
 authors = ['Alexandre Caulier<alexandre.caulier@protonmail.com>']
 description = 'Library for constructing, combining, optimizing, and searching weighted finite-state transducers (FSTs).'
 documentation = 'https://docs.rs/rustfst'
-readme = '../README.md'
+readme = 'README.md'
 keywords = [
     'FST',
     'graph',
