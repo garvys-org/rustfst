@@ -5,7 +5,7 @@ use std::sync::Arc;
 use anyhow::Result;
 
 pub use label_lookahead_matcher::LabelLookAheadMatcher;
-pub(super) use label_lookahead_relabeler::LabelLookAheadRelabeler;
+pub use label_lookahead_relabeler::LabelLookAheadRelabeler;
 pub use tr_lookahead_matcher::TrLookAheadMatcher;
 pub use trivial_lookahead_matcher::TrivialLookAheadMatcher;
 
