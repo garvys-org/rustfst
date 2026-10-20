@@ -24,9 +24,9 @@ pub fn tr_sum<W: Semiring, F: MutableFst<W>>(ifst: &mut F) {
 #[cfg(test)]
 mod test {
     use crate::fst_impls::VectorFst;
-    use crate::fst_traits::MutableFst;
+    use crate::fst_traits::{ExpandedFst, MutableFst};
     use crate::semirings::{ProbabilityWeight, Semiring};
-    use crate::Tr;
+    use crate::{Tr, KDELTA};
     use anyhow::Result;
 
     use super::*;
@@ -61,7 +61,8 @@ mod test {
 
         tr_sum(&mut fst_in);
 
-        assert_eq!(fst_in, fst_out);
+        // 0.3 + 0.3 + 0.1 is 0.70000005 in f32.
+        assert!(fst_in.approx_equal(&fst_out, KDELTA));
 
         Ok(())
     }

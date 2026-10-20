@@ -158,12 +158,14 @@ macro_rules! display_semiring {
 
 macro_rules! partial_eq_and_hash_f32 {
     ($semiring:tt) => {
+        // Exact, as OpenFst's `operator==` for float weights, so that equal weights hash alike.
+        // Equality within `KDELTA` is not transitive, so no hash can agree with it, and a
+        // `HashMap` keyed on weights (`EncodeTable`, the determinize and factor-weight state
+        // tables) then merged two close weights only when their hashes happened to meet.
+        // `Semiring::approx_equal` compares within a tolerance.
         impl PartialEq for $semiring {
             fn eq(&self, other: &Self) -> bool {
-                // self.value() == other.value()
-                let w1 = *self.value();
-                let w2 = *other.value();
-                w1 <= (w2 + KDELTA) && w2 <= (w1 + KDELTA)
+                self.value == other.value
             }
         }
 

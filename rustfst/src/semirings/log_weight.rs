@@ -19,7 +19,6 @@ use crate::semirings::{
     CompleteSemiring, DivideType, ReverseBack, Semiring, SemiringProperties, SerializableSemiring,
     StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::KDELTA;
 
 /// Log semiring: (log(e^-x + e^-y), +, inf, 0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]

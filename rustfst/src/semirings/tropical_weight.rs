@@ -20,7 +20,6 @@ use crate::semirings::{
     CompleteSemiring, DivideType, ReverseBack, Semiring, SemiringProperties, StarSemiring,
     WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::KDELTA;
 
 /// Tropical semiring: (min, +, inf, 0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
@@ -167,5 +166,47 @@ test_semiring_serializable!(
 impl From<f32> for TropicalWeight {
     fn from(f: f32) -> Self {
         Self::new(f)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashSet;
+    use std::hash::BuildHasherDefault;
+
+    use super::*;
+    use crate::semirings::{LogWeight, ProbabilityWeight};
+    use crate::KDELTA;
+
+    /// Sends every key to one bucket, so a set tells its keys apart by `==` alone.
+    #[derive(Default)]
+    struct OneBucket;
+
+    impl Hasher for OneBucket {
+        fn finish(&self) -> u64 {
+            0
+        }
+        fn write(&mut self, _: &[u8]) {}
+    }
+
+    /// Two weights closer than `KDELTA` are two keys however the set hashes them.
+    fn close_weights_are_two_keys<W: Semiring<Type = f32>>() {
+        let (a, b) = (W::new(1.0), W::new(1.0 + 1.0 / 4096.0));
+        assert!(a.approx_equal(&b, KDELTA));
+        let mut hashed: HashSet<W> = HashSet::new();
+        hashed.insert(a.clone());
+        hashed.insert(b.clone());
+        let mut one_bucket: HashSet<W, BuildHasherDefault<OneBucket>> = HashSet::default();
+        one_bucket.insert(a);
+        one_bucket.insert(b);
+        assert_eq!(hashed.len(), 2);
+        assert_eq!(one_bucket.len(), 2);
+    }
+
+    #[test]
+    fn test_close_float_weights_are_two_keys() {
+        close_weights_are_two_keys::<TropicalWeight>();
+        close_weights_are_two_keys::<LogWeight>();
+        close_weights_are_two_keys::<ProbabilityWeight>();
     }
 }
