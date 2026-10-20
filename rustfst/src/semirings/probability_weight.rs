@@ -16,7 +16,6 @@ use crate::semirings::{
     CompleteSemiring, DivideType, ReverseBack, Semiring, SemiringProperties, SerializableSemiring,
     StarSemiring, WeaklyDivisibleSemiring, WeightQuantize,
 };
-use crate::KDELTA;
 
 /// Probability semiring: (x, +, 0.0, 1.0).
 #[derive(Clone, Debug, PartialOrd, Default, Copy, Eq)]
